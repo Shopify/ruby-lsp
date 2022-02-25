@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+echo "Linting gem..."
+bin/rubocop
+
+echo
+echo "Linting extension..."
+cd features/vscode_extension || exit
+yarn run lint
+cd ../..

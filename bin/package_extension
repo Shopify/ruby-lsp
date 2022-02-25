@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+cd features/vscode_extension || exit
+yarn run vscode:prepublish
+yarn run package
