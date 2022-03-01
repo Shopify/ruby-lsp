@@ -3,4 +3,4 @@
 
 require_relative "../lib/ruby/lsp"
 
-Ruby::LSP::Cli.start(ARGV)
+Ruby::Lsp::Cli.start(ARGV)

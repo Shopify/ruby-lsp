@@ -3,7 +3,7 @@
 require "language_server-protocol"
 
 module Ruby
-  module LSP
+  module Lsp
     module Cli
       def self.start(_argv)
         writer = LanguageServer::Protocol::Transport::Stdio::Writer.new
