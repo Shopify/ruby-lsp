@@ -5,6 +5,7 @@ Gem::Specification.new do |s|
   s.version = File.read("VERSION").strip
   s.authors = ["Shopify"]
   s.email = ["ruby@shopify.com"]
+  s.metadata["allowed_push_host"] = "https://rubygems.org"
 
   s.summary = "A simple language server for ruby"
   s.description = "A simple language server for ruby"
