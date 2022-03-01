@@ -16,4 +16,6 @@ Gem::Specification.new do |s|
   s.bindir = "exe"
   s.executables = s.files.grep(/\Aexe/) { |f| File.basename(f) }
   s.require_paths = ["lib"]
+
+  s.add_dependency "language_server-protocol"
 end
