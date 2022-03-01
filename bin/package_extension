@@ -2,4 +2,4 @@
 
 cd features/vscode_extension || exit
 yarn run vscode:prepublish
-yarn run package
+yarn run package -o ../.. # drop the extension in the main directory
