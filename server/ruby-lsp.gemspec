@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = "ruby-lsp"
-  s.version = File.read("VERSION").strip
+  s.version = File.read("../VERSION").strip
   s.authors = ["Shopify"]
   s.email = ["ruby@shopify.com"]
   s.metadata["allowed_push_host"] = "https://rubygems.org"
@@ -18,5 +18,5 @@ Gem::Specification.new do |s|
   s.executables = s.files.grep(/\Aexe/) { |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_dependency "language_server-protocol"
+  s.add_dependency("language_server-protocol")
 end

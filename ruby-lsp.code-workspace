@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "./"
+		},
+		{
+			"path": "server"
+		},
+		{
+			"path": "client"
+		}
+	],
+	"settings": {
+		"terminal.integrated.cwd": "./"
+	}
+}

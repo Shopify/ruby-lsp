@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -e
+
+echo "Testing server..."
+cd server || exit
+bin/test
+cd ..
+echo
+echo "Testing client..."
+cd client || exit
+yarn test
+cd ..
