@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.summary = "A simple language server for ruby"
   s.description = "A simple language server for ruby"
   s.homepage = "https://github.com/Shopify/ruby-lsp"
+  s.license = "MIT"
 
   s.files = Dir.chdir(File.expand_path(__dir__)) do
     %x(git ls-files -z).split("\x0").reject { |f| f.match(%r{\A(?:test|spec|features)/}) }

@@ -10,5 +10,5 @@ code of conduct.
 
 ## License
 
-This extension is available as open source under the terms of the
+The gem is available as open source under the terms of the
 [MIT License](https://github.com/Shopify/ruby-lsp/blob/main/LICENSE.txt).
