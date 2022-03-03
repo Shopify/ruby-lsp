@@ -27,8 +27,9 @@
 		]
 	},
 	"scripts": {
-		"vscode:prepublish": "yarn run compile",
-		"package": "vsce package",
+		"vscode:prepublish": "yarn run esbuild-base --minify",
+		"package": "vsce package --out ruby-lsp.vsix",
+		"esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
 		"compile": "tsc -p ./",
 		"watch": "tsc -watch -p ./",
 		"pretest": "yarn run compile && yarn run lint",
@@ -43,6 +44,7 @@
 		"@typescript-eslint/eslint-plugin": "^5.12.1",
 		"@typescript-eslint/parser": "^5.12.1",
 		"@vscode/test-electron": "^2.1.2",
+		"esbuild": "^0.14.24",
 		"eslint": "^8.9.0",
 		"glob": "^7.2.0",
 		"mocha": "^9.2.1",
