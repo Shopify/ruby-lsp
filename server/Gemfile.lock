@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruby-lsp (0.0.1)
+    ruby-lsp (0.1.0)
       language_server-protocol
 
 GEM

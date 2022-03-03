@@ -3,6 +3,5 @@
 set -e
 
 cd client || exit
-yarn run vscode:prepublish
 yarn run package -o .. # drop the extension in the main directory
 cd ..

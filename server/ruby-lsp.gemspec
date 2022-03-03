@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = "ruby-lsp"
-  s.version = File.read("../VERSION").strip
+  s.version = File.read("VERSION").strip
   s.authors = ["Shopify"]
   s.email = ["ruby@shopify.com"]
   s.metadata["allowed_push_host"] = "https://rubygems.org"

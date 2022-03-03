@@ -14,7 +14,7 @@ up:
 commands:
   server: scripts/start_server
   style: scripts/lint
-  extension: scripts/package_extension
+  package: scripts/package_extension
   test:
     syntax:
       argument: file

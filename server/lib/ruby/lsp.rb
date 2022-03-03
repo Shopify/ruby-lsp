@@ -1,3 +1,4 @@
 # frozen_string_literal: true
 
-require_relative "lsp/cli"
+require_relative "cli"
+require_relative "version"
