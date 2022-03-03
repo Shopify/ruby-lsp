@@ -4,17 +4,19 @@ type: ruby
 
 up:
   - ruby: 3.1.1
-  - bundler
+  - bundler:
+      gemfile: server/Gemfile
   - node:
       yarn: 1.22.17
       version: v16.14.0
-      packages: ["./features/vscode_extension"]
+      packages: ["./client"]
 
 commands:
-  style: bin/style
-  extension: bin/package_extension
+  server: scripts/start_server
+  style: scripts/lint
+  package: scripts/package_extension
   test:
     syntax:
       argument: file
       optional: args...
-    run: bin/test
+    run: scripts/test

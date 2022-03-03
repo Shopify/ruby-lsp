@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+
+cd client || exit
+yarn run package -o .. # drop the extension in the main directory
+cd ..
