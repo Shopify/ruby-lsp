@@ -1,7 +1,5 @@
 # ruby-lsp
 
-Future home of monorepo for `ruby-lsp` Gem and VSCode extension
-
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/Shopify/ruby-lsp.
