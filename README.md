@@ -1,3 +1,5 @@
+[![Build status](https://badge.buildkite.com/621ba8e6f3daaf292e04b6b72120fe79f2c623d6a8492d1658.svg)](https://buildkite.com/shopify/vscode-ruby-lsp)
+
 # vscode-ruby-lsp
 
 VS Code extension for the `ruby-lsp` gem.
