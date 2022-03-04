@@ -1,0 +1,30 @@
+name: Release
+
+on: [release]
+
+jobs:
+  release:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v2
+        name: Checkout
+
+      - uses: actions/setup-node@v2
+        name: Use Node.js 17.x
+        with:
+          node-version: "17"
+          cache: "yarn"
+
+      - name: 📦 Install dependencies
+        run: yarn --frozen-lockfile
+
+      - name: 🔨 Package
+        run: yarn vsce package
+
+      - name: Upload assets to release
+        uses: Shopify/upload-to-release@master
+        with:
+          name: vscode-ruby-lsp.vsix
+          path: vscode-ruby-lsp.vsix
+          repo-token: ${{secrets.GITHUB_TOKEN }}
