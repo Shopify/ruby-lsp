@@ -5,18 +5,13 @@ type: ruby
 up:
   - ruby: 3.1.1
   - bundler:
-      gemfile: server/Gemfile
-  - node:
-      yarn: 1.22.17
-      version: v16.14.0
-      packages: ["./client"]
+      gemfile: Gemfile
 
 commands:
-  server: scripts/start_server
-  style: scripts/lint
-  package: scripts/package_extension
+  server: exe/ruby-lsp
+  style: bundle exec rubocop
   test:
     syntax:
       argument: file
       optional: args...
-    run: scripts/test
+    run: bundle exec rake
