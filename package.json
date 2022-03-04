@@ -45,7 +45,7 @@
     "glob": "^7.2.0",
     "mocha": "^9.2.1",
     "prettier": "^2.5.1",
-    "typescript": "^4.5.5",
+    "typescript": "^4.6.2",
     "vsce": "^2.6.7"
   }
 }
