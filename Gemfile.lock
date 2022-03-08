@@ -39,8 +39,8 @@ GEM
       rubocop (>= 0.90, < 2.0)
     rubocop-rake (0.6.0)
       rubocop (~> 1.0)
-    rubocop-shopify (2.4.0)
-      rubocop (~> 1.24)
+    rubocop-shopify (2.5.0)
+      rubocop (~> 1.25)
     ruby-progressbar (1.11.0)
     unicode-display_width (2.1.0)
 
@@ -55,7 +55,7 @@ DEPENDENCIES
   rubocop (~> 1.25)
   rubocop-minitest (~> 0.17.2)
   rubocop-rake (~> 0.6.0)
-  rubocop-shopify (~> 2.4)
+  rubocop-shopify (~> 2.5)
   ruby-lsp!
 
 BUNDLED WITH
