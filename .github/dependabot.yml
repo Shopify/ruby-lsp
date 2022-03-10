@@ -3,6 +3,9 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: weekly
+      day: tuesday
+      time: "10:00"
+      timezone: America/New_York
     reviewers:
       - "Shopify/sorbet"
