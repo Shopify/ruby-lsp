@@ -33,7 +33,7 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@babel/core": "^7.17.5",
+    "@babel/core": "^7.17.7",
     "@shopify/eslint-plugin": "^41.2.0",
     "@shopify/prettier-config": "^1.1.2",
     "@types/glob": "^7.2.0",
