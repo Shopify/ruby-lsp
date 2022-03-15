@@ -3852,10 +3852,10 @@ value-or-promise@1.0.6:
   resolved "https://registry.npmjs.org/value-or-promise/-/value-or-promise-1.0.6.tgz"
   integrity sha512-9r0wQsWD8z/BxPOvnwbPf05ZvFngXyouE9EKB+5GbYix+BYnAwrIChCUyFIinfbf2FL/U71z+CPpbnmTdxrwBg==
 
-vsce@^2.6.7:
-  version "2.6.7"
-  resolved "https://registry.npmjs.org/vsce/-/vsce-2.6.7.tgz"
-  integrity sha512-5dEtdi/yzWQbOU7JDUSOs8lmSzzkewBR5P122BUkmXE6A/DEdFsKNsg2773NGXJTwwF1MfsOgUR6QVF3cLLJNQ==
+vsce@^2.7.0:
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/vsce/-/vsce-2.7.0.tgz#7be8deebd1e673b996238d608e7f7324c98744ed"
+  integrity sha512-CKU34wrQlbKDeJCRBkd1a8iwF9EvNxcYMg9hAUH6AxFGR6Wo2IKWwt3cJIcusHxx6XdjDHWlfAS/fJN30uvVnA==
   dependencies:
     azure-devops-node-api "^11.0.1"
     chalk "^2.4.2"
