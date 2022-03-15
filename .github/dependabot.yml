@@ -9,3 +9,5 @@ updates:
       timezone: America/New_York
     reviewers:
       - "Shopify/sorbet"
+    ignore:
+      - dependency-name: "@types/vscode"
