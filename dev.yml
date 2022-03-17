@@ -9,9 +9,9 @@ up:
 
 commands:
   server: exe/ruby-lsp
-  style: bundle exec rubocop
+  style: bin/rubocop
   test:
     syntax:
       argument: file
       optional: args...
-    run: bundle exec rake
+    run: bin/test
