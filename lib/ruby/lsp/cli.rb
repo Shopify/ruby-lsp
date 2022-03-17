@@ -11,14 +11,8 @@ module Ruby
         handler = Ruby::Lsp::Handler.new
 
         handler.config do
-          on("initialize") do
-            respond_with_capabilities
-            nil
-          end
-
-          on("shutdown") do
-            nil
-          end
+          on("initialize") { respond_with_capabilities }
+          on("shutdown") { shutdown }
         end
 
         handler.start
