@@ -3,8 +3,6 @@
 module Ruby
   module Lsp
     class Handler
-      attr_reader :writer, :reader, :handlers
-
       Interface = LanguageServer::Protocol::Interface
       Constant = LanguageServer::Protocol::Constant
       Transport = LanguageServer::Protocol::Transport
@@ -13,11 +11,13 @@ module Ruby
         @writer = Transport::Stdio::Writer.new
         @reader = Transport::Stdio::Reader.new
         @handlers = {}
+        @running = true
       end
 
       def start
-        puts "Starting server..."
-        reader.read do |request|
+        $stderr.puts "Starting Ruby LSP..."
+        @reader.read do |request|
+          break unless @running
           handle(request)
         end
       end
@@ -33,8 +33,13 @@ module Ruby
       end
 
       def handle(request)
-        result = subscribers[request[:method].to_sym].call
-        writer.write(request[:id], result)
+        result = @handlers[request[:method]]&.call(request)
+        @writer.write(id: request[:id], result: result) if result
+      end
+
+      def shutdown
+        $stderr.puts "Shutting down Ruby LSP..."
+        @running = false
       end
 
       def respond_with_capabilities
