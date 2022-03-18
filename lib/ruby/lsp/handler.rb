@@ -38,6 +38,7 @@ module Ruby
       end
 
       def shutdown
+        $stderr.puts "Shutting down Ruby LSP..."
         @running = false
       end
 
