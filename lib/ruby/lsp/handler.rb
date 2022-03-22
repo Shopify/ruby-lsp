@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
-require "cgi"
-require "uri"
 require_relative "requests"
+require_relative "store"
 
 module Ruby
   module Lsp
@@ -18,9 +17,7 @@ module Ruby
         @reader = Transport::Stdio::Reader.new
         @handlers = {}
         @running = true
-        @store = Hash.new do |hash, uri|
-          hash[uri] = File.binread(CGI.unescape(URI.parse(uri).path))
-        end
+        @store = Store.new
       end
 
       def start

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative "../lib/ruby/lsp"
+require "ruby-lsp"
 
 Ruby::Lsp::Cli.start(ARGV)
