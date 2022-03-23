@@ -18,6 +18,7 @@ module Ruby
         $stderr.puts "Starting Ruby LSP..."
         @reader.read do |request|
           break unless @running
+
           handle(request)
         end
       end
