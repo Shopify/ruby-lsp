@@ -71,6 +71,37 @@ module RubyLsp
         @stack.pop
       end
 
+      def visit_def(node)
+        name = node.name.value
+
+        create_document_symbol(
+          name: name,
+          kind: name == "initialize" ? :constructor : :method,
+          range_node: node,
+          selection_range_node: node.name
+        )
+      end
+
+      def visit_def_endless(node)
+        name = node.name.value
+
+        create_document_symbol(
+          name: name,
+          kind: name == "initialize" ? :constructor : :method,
+          range_node: node,
+          selection_range_node: node.name
+        )
+      end
+
+      def visit_defs(node)
+        create_document_symbol(
+          name: "self.#{node.name.value}",
+          kind: :method,
+          range_node: node,
+          selection_range_node: node.name
+        )
+      end
+
       def visit_module_declaration(node)
         symbol = create_document_symbol(
           name: node.constant.constant.value,

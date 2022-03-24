@@ -27,6 +27,50 @@ class DocumentSymbolsTest < Minitest::Test
     RUBY
   end
 
+  def test_method
+    symbols = [
+      {
+        name: "foo",
+        kind: :method,
+        range: "0:0-0:12",
+        selectionRange: "0:4-0:7",
+      },
+      {
+        name: "initialize",
+        kind: :constructor,
+        range: "1:0-1:19",
+        selectionRange: "1:4-1:14",
+      },
+      {
+        name: "self.bar",
+        kind: :method,
+        range: "2:0-2:17",
+        selectionRange: "2:9-2:12",
+      },
+    ]
+    assert_symbols(<<~RUBY, symbols)
+      def foo; end
+      def initialize; end
+      def self.bar; end
+    RUBY
+  end
+
+  def test_method_endless
+    skip if RUBY_VERSION < "3.1.0"
+
+    symbols = [
+      {
+        name: "baz",
+        kind: :method,
+        range: "0:0-0:13",
+        selectionRange: "0:4-0:7",
+      },
+    ]
+    assert_symbols(<<~RUBY, symbols)
+      def baz = 10
+    RUBY
+  end
+
   def test_module_declaration
     symbols = [
       {
