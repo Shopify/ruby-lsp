@@ -83,32 +83,44 @@ module RubyLsp
       def visit_def(node)
         name = node.name.value
 
-        create_document_symbol(
+        symbol = create_document_symbol(
           name: name,
           kind: name == "initialize" ? :constructor : :method,
           range_node: node,
           selection_range_node: node.name
         )
+
+        @stack << symbol
+        visit(node.bodystmt)
+        @stack.pop
       end
 
       def visit_def_endless(node)
         name = node.name.value
 
-        create_document_symbol(
+        symbol = create_document_symbol(
           name: name,
           kind: name == "initialize" ? :constructor : :method,
           range_node: node,
           selection_range_node: node.name
         )
+
+        @stack << symbol
+        visit(node.statement)
+        @stack.pop
       end
 
       def visit_defs(node)
-        create_document_symbol(
+        symbol = create_document_symbol(
           name: "self.#{node.name.value}",
           kind: :method,
           range_node: node,
           selection_range_node: node.name
         )
+
+        @stack << symbol
+        visit(node.bodystmt)
+        @stack.pop
       end
 
       def visit_module_declaration(node)
@@ -134,11 +146,18 @@ module RubyLsp
       end
 
       def visit_var_field(node)
-        return unless node.value.is_a?(SyntaxTree::Const)
+        kind = case node.value
+        when SyntaxTree::Const
+          :constant
+        when SyntaxTree::CVar, SyntaxTree::IVar
+          :variable
+        else
+          return
+        end
 
         create_document_symbol(
           name: node.value.value,
-          kind: :constant,
+          kind: kind,
           range_node: node,
           selection_range_node: node.value
         )

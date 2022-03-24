@@ -62,6 +62,77 @@ class DocumentSymbolsTest < Minitest::Test
     RUBY
   end
 
+  def test_i_vars
+    symbols = [
+      {
+        name: "@a",
+        kind: :variable,
+        range: "0:0-0:2",
+        selectionRange: "0:0-0:2",
+      },
+      {
+        name: "@aa",
+        kind: :variable,
+        range: "1:0-1:3",
+        selectionRange: "1:0-1:3",
+      },
+      {
+        name: "Foo",
+        kind: :class,
+        range: "3:0-11:3",
+        selectionRange: "3:6-3:9",
+        children: [
+          {
+            name: "@b",
+            kind: :variable,
+            range: "4:2-4:4",
+            selectionRange: "4:2-4:4",
+          },
+          {
+            name: "@bb",
+            kind: :variable,
+            range: "5:2-5:5",
+            selectionRange: "5:2-5:5",
+          },
+          {
+            name: "initialize",
+            kind: :constructor,
+            range: "7:2-10:5",
+            selectionRange: "7:6-7:16",
+            children: [
+              {
+                name: "@c",
+                kind: :variable,
+                range: "8:4-8:6",
+                selectionRange: "8:4-8:6",
+              },
+              {
+                name: "@cc",
+                kind: :variable,
+                range: "9:4-9:7",
+                selectionRange: "9:4-9:7",
+              },
+            ],
+          },
+        ],
+      },
+    ]
+    assert_symbols(<<~RUBY, symbols)
+      @a = 42
+      @aa = 42
+
+      class Foo
+        @b = 42
+        @bb = 42
+
+        def initialize
+          @c = 42
+          @cc = 42
+        end
+      end
+    RUBY
+  end
+
   def test_method
     symbols = [
       {
