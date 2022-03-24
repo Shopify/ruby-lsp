@@ -27,6 +27,41 @@ class DocumentSymbolsTest < Minitest::Test
     RUBY
   end
 
+  def test_constant
+    symbols = [
+      {
+        name: "C1",
+        kind: :constant,
+        range: "0:0-0:2",
+        selectionRange: "0:0-0:2",
+      },
+      {
+        name: "C2",
+        kind: :constant,
+        range: "1:0-1:4",
+        selectionRange: "1:2-1:4",
+      },
+      {
+        name: "C3",
+        kind: :constant,
+        range: "2:0-2:7",
+        selectionRange: "2:5-2:7",
+      },
+      {
+        name: "C4",
+        kind: :constant,
+        range: "3:0-3:9",
+        selectionRange: "3:7-3:9",
+      },
+    ]
+    assert_symbols(<<~RUBY, symbols)
+      C1 = 42
+      ::C2 = 42
+      Foo::C3 = 42
+      ::Foo::C4 = 42
+    RUBY
+  end
+
   def test_method
     symbols = [
       {

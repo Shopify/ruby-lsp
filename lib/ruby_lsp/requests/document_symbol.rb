@@ -71,6 +71,15 @@ module RubyLsp
         @stack.pop
       end
 
+      def visit_const_path_field(node)
+        create_document_symbol(
+          name: node.constant.value,
+          kind: :constant,
+          range_node: node,
+          selection_range_node: node.constant
+        )
+      end
+
       def visit_def(node)
         name = node.name.value
 
@@ -113,6 +122,26 @@ module RubyLsp
         @stack << symbol
         visit(node.bodystmt)
         @stack.pop
+      end
+
+      def visit_top_const_field(node)
+        create_document_symbol(
+          name: node.constant.value,
+          kind: :constant,
+          range_node: node,
+          selection_range_node: node.constant
+        )
+      end
+
+      def visit_var_field(node)
+        return unless node.value.is_a?(SyntaxTree::Const)
+
+        create_document_symbol(
+          name: node.value.value,
+          kind: :constant,
+          range_node: node,
+          selection_range_node: node.value
+        )
       end
 
       private
