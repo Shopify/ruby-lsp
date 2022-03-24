@@ -36,7 +36,7 @@ GEM
       unicode-display_width (>= 1.4.0, < 3.0)
     rubocop-ast (1.16.0)
       parser (>= 3.1.1.0)
-    rubocop-minitest (0.17.2)
+    rubocop-minitest (0.18.0)
       rubocop (>= 0.90, < 2.0)
     rubocop-rake (0.6.0)
       rubocop (~> 1.0)
@@ -55,7 +55,7 @@ DEPENDENCIES
   minitest-reporters (~> 1.5)
   rake (~> 13.0)
   rubocop (~> 1.26)
-  rubocop-minitest (~> 0.17.2)
+  rubocop-minitest (~> 0.18.0)
   rubocop-rake (~> 0.6.0)
   rubocop-shopify (~> 2.5)
   ruby-lsp!
