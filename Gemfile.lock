@@ -3,6 +3,7 @@ PATH
   specs:
     ruby-lsp (0.1.0)
       language_server-protocol
+      syntax_tree
 
 GEM
   remote: https://rubygems.org/
@@ -42,6 +43,7 @@ GEM
     rubocop-shopify (2.5.0)
       rubocop (~> 1.25)
     ruby-progressbar (1.11.0)
+    syntax_tree (1.2.0)
     unicode-display_width (2.1.0)
 
 PLATFORMS

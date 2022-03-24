@@ -1,8 +1,13 @@
 # frozen_string_literal: true
 
+require_relative "requests"
+require_relative "store"
+
 module Ruby
   module Lsp
     class Handler
+      attr_reader :store
+
       Interface = LanguageServer::Protocol::Interface
       Constant = LanguageServer::Protocol::Constant
       Transport = LanguageServer::Protocol::Transport
@@ -12,6 +17,7 @@ module Ruby
         @reader = Transport::Stdio::Reader.new
         @handlers = {}
         @running = true
+        @store = Store.new
       end
 
       def start
@@ -40,6 +46,7 @@ module Ruby
 
       def shutdown
         $stderr.puts "Shutting down Ruby LSP..."
+        store.clear
         @running = false
       end
 
@@ -49,8 +56,15 @@ module Ruby
             text_document_sync: Interface::TextDocumentSyncOptions.new(
               change: Constant::TextDocumentSyncKind::FULL
             ),
+            folding_range_provider: Interface::FoldingRangeClientCapabilities.new(
+              line_folding_only: true
+            )
           )
         )
+      end
+
+      def respond_with_folding_ranges(uri)
+        Ruby::Lsp::Requests::FoldingRanges.run(store[uri])
       end
     end
   end

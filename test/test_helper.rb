@@ -2,11 +2,12 @@
 
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 
-require "ruby/lsp"
+require "ruby-lsp"
 require "minitest/autorun"
 require "minitest/reporters"
+require "tempfile"
 
-Minitest::Reporters.use(Minitest::Reporters::SpecReporter.new(color: true))
+Minitest::Reporters.use!(Minitest::Reporters::SpecReporter.new(color: true))
 
 module Minitest
   class Test

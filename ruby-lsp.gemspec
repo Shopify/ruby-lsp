@@ -20,4 +20,5 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency("language_server-protocol")
+  s.add_dependency("syntax_tree")
 end
