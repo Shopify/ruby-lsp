@@ -27,6 +27,30 @@ class DocumentSymbolsTest < Minitest::Test
     RUBY
   end
 
+  def test_module_declaration
+    symbols = [
+      {
+        name: "Foo",
+        kind: :module,
+        range: "0:0-2:3",
+        selectionRange: "0:7-0:10",
+        children: [
+          {
+            name: "Bar",
+            kind: :module,
+            range: "1:2-1:17",
+            selectionRange: "1:9-1:12",
+          },
+        ],
+      },
+    ]
+    assert_symbols(<<~RUBY, symbols)
+      module Foo
+        module Bar; end
+      end
+    RUBY
+  end
+
   private
 
   def assert_symbols(source, expected_symbols, print_result: false)

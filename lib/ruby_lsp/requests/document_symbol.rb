@@ -71,6 +71,19 @@ module RubyLsp
         @stack.pop
       end
 
+      def visit_module_declaration(node)
+        symbol = create_document_symbol(
+          name: node.constant.constant.value,
+          kind: :module,
+          range_node: node,
+          selection_range_node: node.constant
+        )
+
+        @stack << symbol
+        visit(node.bodystmt)
+        @stack.pop
+      end
+
       private
 
       def create_document_symbol(name:, kind:, range_node:, selection_range_node:)
