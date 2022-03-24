@@ -7,7 +7,7 @@ class StoreTest < Minitest::Test
     store = Ruby::Lsp::Store.new
     store["/foo/bar.rb"] = "def foo; end"
 
-    assert_equal(Ruby::Lsp::Store::Item.new("def foo; end"), store["/foo/bar.rb"])
+    assert_equal(Ruby::Lsp::Store::ParsedTree.new("def foo; end"), store["/foo/bar.rb"])
   end
 
   def test_reads_from_file_if_missing_in_store
@@ -17,7 +17,7 @@ class StoreTest < Minitest::Test
     file.write("def great_code; end")
     file.rewind
 
-    assert_equal(Ruby::Lsp::Store::Item.new("def great_code; end"), store[file.path])
+    assert_equal(Ruby::Lsp::Store::ParsedTree.new("def great_code; end"), store[file.path])
   ensure
     file.close
     file.unlink
@@ -28,7 +28,7 @@ class StoreTest < Minitest::Test
     store["/foo/bar.rb"] = "def foo; end"
     store["/foo/bar.rb"] = "def bar; end; end"
 
-    assert_equal(Ruby::Lsp::Store::Item.new("def foo; end"), store["/foo/bar.rb"])
+    assert_equal(Ruby::Lsp::Store::ParsedTree.new("def foo; end"), store["/foo/bar.rb"])
   end
 
   def test_clear

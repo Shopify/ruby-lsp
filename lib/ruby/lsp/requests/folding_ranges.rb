@@ -4,12 +4,12 @@ module Ruby
   module Lsp
     module Requests
       class FoldingRanges
-        def self.run(item)
-          new(item).run
+        def self.run(parsed_tree)
+          new(parsed_tree).run
         end
 
-        def initialize(item)
-          @queue = [item.tree]
+        def initialize(parsed_tree)
+          @queue = [parsed_tree.tree]
           @ranges = []
         end
 

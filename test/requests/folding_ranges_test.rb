@@ -16,8 +16,8 @@ class FoldingRangesTest < Minitest::Test
   private
 
   def assert_ranges(source, expected_ranges)
-    item = Ruby::Lsp::Store::Item.new(source)
-    actual = Ruby::Lsp::Requests::FoldingRanges.run(item)
+    parsed_tree = Ruby::Lsp::Store::ParsedTree.new(source)
+    actual = Ruby::Lsp::Requests::FoldingRanges.run(parsed_tree)
     assert_equal(expected_ranges, JSON.parse(actual.to_json, symbolize_names: true))
   end
 end

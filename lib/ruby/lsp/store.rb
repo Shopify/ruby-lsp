@@ -11,15 +11,15 @@ module Ruby
       end
 
       def [](uri)
-        item = @state[uri]
-        return item unless item.nil?
+        parsed_tree = @state[uri]
+        return parsed_tree unless parsed_tree.nil?
 
         self[uri] = File.binread(CGI.unescape(URI.parse(uri).path))
         @state[uri]
       end
 
       def []=(uri, content)
-        @state[uri] = Item.new(content)
+        @state[uri] = ParsedTree.new(content)
       rescue SyntaxTree::ParseError
         # Do not update the store if there are syntax errors
       end
@@ -32,7 +32,7 @@ module Ruby
         @state.delete(uri)
       end
 
-      class Item
+      class ParsedTree
         attr_reader :tree, :parser, :source
 
         def initialize(source)
