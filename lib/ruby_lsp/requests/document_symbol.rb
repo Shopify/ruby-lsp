@@ -34,6 +34,8 @@ module RubyLsp
         typeparameter: 26,
       }.freeze
 
+      ATTR_ACCESSORS = ["attr_reader", "attr_writer", "attr_accessor"].freeze
+
       class SymbolHierarchyRoot
         attr_reader :children
 
@@ -69,6 +71,21 @@ module RubyLsp
         @stack << symbol
         visit(node.bodystmt)
         @stack.pop
+      end
+
+      def visit_command(node)
+        return unless ATTR_ACCESSORS.include?(node.message.value)
+
+        node.arguments.parts.each do |argument|
+          next unless argument.is_a?(SyntaxTree::SymbolLiteral)
+
+          create_document_symbol(
+            name: argument.value.value,
+            kind: :field,
+            range_node: argument,
+            selection_range_node: argument.value
+          )
+        end
       end
 
       def visit_const_path_field(node)

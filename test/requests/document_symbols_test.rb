@@ -3,6 +3,40 @@
 require "test_helper"
 
 class DocumentSymbolsTest < Minitest::Test
+  def test_attr_accessor
+    symbols = [
+      {
+        name: "a",
+        kind: :field,
+        range: "0:12-0:14",
+        selectionRange: "0:13-0:14",
+      },
+      {
+        name: "b",
+        kind: :field,
+        range: "1:12-1:14",
+        selectionRange: "1:13-1:14",
+      },
+      {
+        name: "c",
+        kind: :field,
+        range: "1:16-1:18",
+        selectionRange: "1:17-1:18",
+      },
+      {
+        name: "d",
+        kind: :field,
+        range: "2:14-2:16",
+        selectionRange: "2:15-2:16",
+      },
+    ]
+    assert_symbols(<<~RUBY, symbols)
+      attr_reader :a
+      attr_writer :b, :c
+      attr_accessor :d
+    RUBY
+  end
+
   def test_class_declaration
     symbols = [
       {
