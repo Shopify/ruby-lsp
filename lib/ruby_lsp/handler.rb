@@ -51,11 +51,21 @@ module RubyLsp
           text_document_sync: Interface::TextDocumentSyncOptions.new(
             change: Constant::TextDocumentSyncKind::FULL
           ),
+          document_symbol_provider: Interface::DocumentSymbolClientCapabilities.new(
+            hierarchical_document_symbol_support: true,
+            symbol_kind: {
+              value_set: Requests::DocumentSymbol::SYMBOL_KIND.values,
+            }
+          ),
           folding_range_provider: Interface::FoldingRangeClientCapabilities.new(
             line_folding_only: true
           )
         )
       )
+    end
+
+    def respond_with_document_symbol(uri)
+      RubyLsp::Requests::DocumentSymbol.run(store[uri])
     end
 
     def respond_with_folding_ranges(uri)
