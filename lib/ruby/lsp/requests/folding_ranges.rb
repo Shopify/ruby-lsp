@@ -4,6 +4,26 @@ module Ruby
   module Lsp
     module Requests
       class FoldingRanges < Visitor
+        SIMPLE_FOLDABLES = [
+          SyntaxTree::Def,
+          SyntaxTree::Defs,
+          SyntaxTree::SClass,
+          SyntaxTree::ClassDeclaration,
+          SyntaxTree::ModuleDeclaration,
+          SyntaxTree::DoBlock,
+          SyntaxTree::BraceBlock,
+          SyntaxTree::ArrayLiteral,
+          SyntaxTree::HashLiteral,
+          SyntaxTree::If,
+          SyntaxTree::Unless,
+          SyntaxTree::Case,
+          SyntaxTree::While,
+          SyntaxTree::Until,
+          SyntaxTree::For,
+          SyntaxTree::ArgParen,
+          SyntaxTree::Heredoc,
+        ].freeze
+
         def self.run(parsed_tree)
           new(parsed_tree).run
         end
@@ -20,14 +40,23 @@ module Ruby
           @ranges
         end
 
-        def visit_def(node)
-          location = node.location
+        # For nodes that are simple to fold, we just re-use the same method body
+        SIMPLE_FOLDABLES.each do |node_class|
+          class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
+            def visit_#{class_to_visit_method(node_class.name)}(node)
+              location = node.location
 
-          @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
-            start_line: location.start_line - 1,
-            end_line: location.end_line - 1,
-            kind: "region"
-          )
+              if location.start_line < location.end_line
+                @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
+                  start_line: location.start_line - 1,
+                  end_line: location.end_line - 1,
+                  kind: "region"
+                )
+              end
+
+              super
+            end
+          RUBY
         end
       end
     end
