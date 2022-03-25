@@ -44,6 +44,7 @@ export default class Client {
 
     this.context = context;
     this.registerCommands();
+    this.registerAutoRestarts();
   }
 
   async start() {
@@ -129,5 +130,24 @@ export default class Client {
     });
 
     return result.stdout;
+  }
+
+  private registerAutoRestarts() {
+    if (this.context.extensionMode === vscode.ExtensionMode.Development) {
+      this.createRestartWatcher("**/*.rb");
+    }
+
+    this.createRestartWatcher("Gemfile.lock");
+  }
+
+  private createRestartWatcher(pattern: string) {
+    const watcher = vscode.workspace.createFileSystemWatcher(
+      new vscode.RelativePattern(this.workingFolder, pattern)
+    );
+    this.context.subscriptions.push(watcher);
+
+    watcher.onDidChange(() => this.restart());
+    watcher.onDidCreate(() => this.restart());
+    watcher.onDidDelete(() => this.restart());
   }
 }
