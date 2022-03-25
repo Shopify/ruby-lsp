@@ -16,15 +16,12 @@ module Ruby
         @writer = Transport::Stdio::Writer.new
         @reader = Transport::Stdio::Reader.new
         @handlers = {}
-        @running = true
         @store = Store.new
       end
 
       def start
         $stderr.puts "Starting Ruby LSP..."
         @reader.read do |request|
-          break unless @running
-
           handle(request)
         end
       end
@@ -47,7 +44,6 @@ module Ruby
       def shutdown
         $stderr.puts "Shutting down Ruby LSP..."
         store.clear
-        @running = false
       end
 
       def respond_with_capabilities
