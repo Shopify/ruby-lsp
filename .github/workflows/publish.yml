@@ -10,17 +10,19 @@ jobs:
       - uses: actions/checkout@v2
         name: Checkout
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         name: Use Node.js 17.x
         with:
           node-version: "17"
-          cache: "yarn"
+
+      - name: Setup yarn
+        run: npm install -g yarn
 
       - name: 📦 Install dependencies
         run: yarn --frozen-lockfile
 
       - name: 🔨 Package
-        run: yarn vsce package
+        run: yarn run package
 
       - name: Upload assets to release
         uses: Shopify/upload-to-release@master
