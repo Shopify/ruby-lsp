@@ -58,7 +58,34 @@ module RubyLsp
         @root.children
       end
 
+      def visit_class_declaration(node)
+        symbol = create_document_symbol(
+          name: node.constant.constant.value,
+          kind: :class,
+          range_node: node,
+          selection_range_node: node.constant
+        )
+
+        @stack << symbol
+        visit(node.bodystmt)
+        @stack.pop
+      end
+
       private
+
+      def create_document_symbol(name:, kind:, range_node:, selection_range_node:)
+        symbol = LanguageServer::Protocol::Interface::DocumentSymbol.new(
+          name: name,
+          kind: SYMBOL_KIND[kind],
+          range: range_from_syntax_tree_node(range_node),
+          selection_range: range_from_syntax_tree_node(selection_range_node),
+          children: [],
+        )
+
+        @stack.last.children << symbol
+
+        symbol
+      end
 
       # TODO: clean this once SyntaxTree provides the relative positions
       def range_from_syntax_tree_node(node)

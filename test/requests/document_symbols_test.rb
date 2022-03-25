@@ -3,6 +3,30 @@
 require "test_helper"
 
 class DocumentSymbolsTest < Minitest::Test
+  def test_class_declaration
+    symbols = [
+      {
+        name: "Foo",
+        kind: :class,
+        range: "0:0-2:3",
+        selectionRange: "0:6-0:9",
+        children: [
+          {
+            name: "Bar",
+            kind: :class,
+            range: "1:2-1:16",
+            selectionRange: "1:8-1:11",
+          },
+        ],
+      },
+    ]
+    assert_symbols(<<~RUBY, symbols)
+      class Foo
+        class Bar; end
+      end
+    RUBY
+  end
+
   private
 
   def assert_symbols(source, expected_symbols, print_result: false)
