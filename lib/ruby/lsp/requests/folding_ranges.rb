@@ -58,6 +58,42 @@ module Ruby
             end
           RUBY
         end
+
+        def visit_else(node)
+          unless node.statements.empty?
+            @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
+              start_line: node.location.start_line - 1,
+              end_line: node.statements.location.end_line - 1,
+              kind: "region"
+            )
+          end
+
+          super
+        end
+
+        def visit_elsif(node)
+          unless node.statements.empty?
+            @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
+              start_line: node.location.start_line - 1,
+              end_line: node.statements.location.end_line - 1,
+              kind: "region"
+            )
+          end
+
+          super
+        end
+
+        def visit_when(node)
+          unless node.statements.empty?
+            @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
+              start_line: node.location.start_line - 1,
+              end_line: node.statements.location.end_line - 1,
+              kind: "region"
+            )
+          end
+
+          super
+        end
       end
     end
   end

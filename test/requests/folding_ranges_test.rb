@@ -256,6 +256,51 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
+  def test_folding_multiline_if_else_statements
+    ranges = [
+      { startLine: 0, endLine: 6, kind: "region" },
+      { startLine: 2, endLine: 3, kind: "region" },
+      { startLine: 4, endLine: 5, kind: "region" },
+    ]
+    assert_ranges(<<~RUBY, ranges)
+      if true
+        puts "Yes!"
+      elsif false
+        puts "Maybe?"
+      else
+        puts "No"
+      end
+    RUBY
+  end
+
+  def test_folding_multiline_if_else_empty_statements
+    ranges = [
+      { startLine: 0, endLine: 3, kind: "region" },
+    ]
+    assert_ranges(<<~RUBY, ranges)
+      if true
+      elsif false
+      else
+      end
+    RUBY
+  end
+
+  def test_folding_case_when
+    ranges = [
+      { startLine: 0, endLine: 5, kind: "region" },
+      { startLine: 1, endLine: 2, kind: "region" },
+      { startLine: 3, endLine: 4, kind: "region" },
+    ]
+    assert_ranges(<<~RUBY, ranges)
+      case node
+      when CaseNode
+        puts "case"
+      else
+        puts "else"
+      end
+    RUBY
+  end
+
   private
 
   def assert_no_folding(source)
