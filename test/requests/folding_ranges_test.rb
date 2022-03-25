@@ -367,6 +367,34 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
+  def test_folding_comments
+    ranges = [
+      { startLine: 0, endLine: 2, kind: "comment" },
+      { startLine: 5, endLine: 6, kind: "comment" },
+    ]
+    assert_ranges(<<~RUBY, ranges)
+      # First
+      # Second
+      # Third
+      def foo; end
+
+      # Nothing after
+      # This one
+    RUBY
+  end
+
+  def test_folding_requires
+    ranges = [
+      { startLine: 0, endLine: 3, kind: "imports" },
+    ]
+    assert_ranges(<<~RUBY, ranges)
+      require "foo"
+      require_relative "bar"
+
+      require "baz"
+    RUBY
+  end
+
   private
 
   def assert_no_folding(source)

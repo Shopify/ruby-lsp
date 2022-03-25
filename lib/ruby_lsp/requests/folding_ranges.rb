@@ -27,12 +27,14 @@ module RubyLsp
       def initialize(parsed_tree)
         @parsed_tree = parsed_tree
         @ranges = []
+        @partial_range = nil
 
         super()
       end
 
       def run
         visit(@parsed_tree.tree)
+        emit_partial_range
         @ranges
       end
 
@@ -46,6 +48,10 @@ module RubyLsp
             super
           end
         RUBY
+      end
+
+      def visit(node)
+        super if handle_partial_range(node)
       end
 
       def visit_arg_paren(node)
@@ -90,6 +96,52 @@ module RubyLsp
       alias_method :visit_when, :visit_statement_node
       alias_method :visit_ensure, :visit_statement_node
       alias_method :visit_rescue, :visit_statement_node
+
+      def handle_partial_range(node)
+        kind = case node
+        when SyntaxTree::Comment
+          "comment"
+        when SyntaxTree::Command
+          if node.message.value == "require" || node.message.value == "require_relative"
+            "imports"
+          end
+        end
+
+        if kind.nil?
+          emit_partial_range
+          return true
+        end
+
+        @partial_range = if @partial_range.nil?
+          LanguageServer::Protocol::Interface::FoldingRange.new(
+            start_line: node.location.start_line - 1,
+            end_line: node.location.end_line - 1,
+            kind: kind
+          )
+        elsif @partial_range.kind != kind
+          emit_partial_range
+          LanguageServer::Protocol::Interface::FoldingRange.new(
+            start_line: node.location.start_line - 1,
+            end_line: node.location.end_line - 1,
+            kind: kind
+          )
+        else
+          LanguageServer::Protocol::Interface::FoldingRange.new(
+            start_line: @partial_range.start_line,
+            end_line: node.location.end_line - 1,
+            kind: @partial_range.kind
+          )
+        end
+
+        false
+      end
+
+      def emit_partial_range
+        return if @partial_range.nil?
+
+        @ranges << @partial_range
+        @partial_range = nil
+      end
 
       def add_simple_range(node)
         location = node.location
