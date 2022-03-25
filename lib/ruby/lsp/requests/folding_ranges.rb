@@ -44,46 +44,42 @@ module Ruby
         SIMPLE_FOLDABLES.each do |node_class|
           class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
             def visit_#{class_to_visit_method(node_class.name)}(node)
-              location = node.location
-
-              if location.start_line < location.end_line
-                @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
-                  start_line: location.start_line - 1,
-                  end_line: location.end_line - 1,
-                  kind: "region"
-                )
-              end
-
+              add_simple_range(node)
               super
             end
           RUBY
         end
 
         def visit_else(node)
-          unless node.statements.empty?
-            @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
-              start_line: node.location.start_line - 1,
-              end_line: node.statements.location.end_line - 1,
-              kind: "region"
-            )
-          end
-
+          add_statements_range(node)
           super
         end
 
         def visit_elsif(node)
-          unless node.statements.empty?
-            @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
-              start_line: node.location.start_line - 1,
-              end_line: node.statements.location.end_line - 1,
-              kind: "region"
-            )
-          end
-
+          add_statements_range(node)
           super
         end
 
         def visit_when(node)
+          add_statements_range(node)
+          super
+        end
+
+        private
+
+        def add_simple_range(node)
+          location = node.location
+
+          if location.start_line < location.end_line
+            @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
+              start_line: location.start_line - 1,
+              end_line: location.end_line - 1,
+              kind: "region"
+            )
+          end
+        end
+
+        def add_statements_range(node)
           unless node.statements.empty?
             @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
               start_line: node.location.start_line - 1,
@@ -91,8 +87,6 @@ module Ruby
               kind: "region"
             )
           end
-
-          super
         end
       end
     end
