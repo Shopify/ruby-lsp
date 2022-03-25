@@ -6,21 +6,24 @@ import {
   LanguageClientOptions,
   LanguageClient,
   ServerOptions,
+  Executable,
 } from "vscode-languageclient/node";
 
 const asyncExec = promisify(exec);
 const LSP_NAME = "Ruby LSP";
 
 export default class Client {
-  private client: LanguageClient;
+  private client: LanguageClient | undefined;
   private context: vscode.ExtensionContext;
   private workingFolder: string;
+  private serverOptions: ServerOptions;
+  private clientOptions: LanguageClientOptions;
 
   constructor(context: vscode.ExtensionContext) {
     const outputChannel = vscode.window.createOutputChannel(LSP_NAME);
     this.workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
 
-    const executable = {
+    const executable: Executable = {
       command: "bundle",
       args: ["exec", "ruby-lsp"],
       options: {
@@ -28,19 +31,19 @@ export default class Client {
       },
     };
 
-    const serverOptions: ServerOptions = {
+    this.serverOptions = {
       run: executable,
       debug: executable,
     };
 
-    const clientOptions: LanguageClientOptions = {
+    this.clientOptions = {
       documentSelector: [{ scheme: "file", language: "ruby" }],
       diagnosticCollectionName: LSP_NAME,
       outputChannel,
     };
 
-    this.client = new LanguageClient(LSP_NAME, serverOptions, clientOptions);
     this.context = context;
+    this.registerCommands();
   }
 
   async start() {
@@ -48,12 +51,33 @@ export default class Client {
       return;
     }
 
+    this.client = new LanguageClient(
+      LSP_NAME,
+      this.serverOptions,
+      this.clientOptions
+    );
+
     this.context.subscriptions.push(this.client.start());
     await this.client.onReady();
   }
 
   async stop() {
-    await this.client.stop();
+    if (this.client) {
+      await this.client.stop();
+    }
+  }
+
+  async restart() {
+    await this.stop();
+    await this.start();
+  }
+
+  private registerCommands() {
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand("ruby-lsp.start", () => this.start()),
+      vscode.commands.registerCommand("ruby-lsp.restart", () => this.restart()),
+      vscode.commands.registerCommand("ruby-lsp.stop", () => this.stop())
+    );
   }
 
   private async gemMissing(): Promise<boolean> {

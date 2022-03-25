@@ -20,7 +20,22 @@
     "workspaceContains:Gemfile.lock"
   ],
   "main": "./out/extension.js",
-  "contributes": {},
+  "contributes": {
+    "commands": [
+      {
+        "command": "ruby-lsp.start",
+        "title": "Ruby LSP: Start"
+      },
+      {
+        "command": "ruby-lsp.restart",
+        "title": "Ruby LSP: Restart"
+      },
+      {
+        "command": "ruby-lsp.stop",
+        "title": "Ruby LSP: Stop"
+      }
+    ]
+  },
   "scripts": {
     "vscode:prepublish": "yarn run esbuild-base --minify",
     "package": "vsce package --out vscode-ruby-lsp.vsix",
