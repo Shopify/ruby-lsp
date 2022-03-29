@@ -36,6 +36,8 @@ module RubyLsp
         @ranges
       end
 
+      private
+
       # For nodes that are simple to fold, we just re-use the same method body
       SIMPLE_FOLDABLES.each do |node_class|
         class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
@@ -89,8 +91,6 @@ module RubyLsp
       alias_method :visit_when, :visit_statement_node
       alias_method :visit_ensure, :visit_statement_node
       alias_method :visit_rescue, :visit_statement_node
-
-      private
 
       def add_simple_range(node)
         location = node.location
