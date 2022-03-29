@@ -370,7 +370,7 @@ class FoldingRangesTest < Minitest::Test
   def test_folding_comments
     ranges = [
       { startLine: 0, endLine: 2, kind: "comment" },
-      { startLine: 5, endLine: 6, kind: "comment" },
+      { startLine: 5, endLine: 7, kind: "comment" },
     ]
     assert_ranges(<<~RUBY, ranges)
       # First
@@ -379,6 +379,7 @@ class FoldingRangesTest < Minitest::Test
       def foo; end
 
       # Nothing after
+
       # This one
     RUBY
   end

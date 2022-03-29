@@ -98,14 +98,7 @@ module RubyLsp
       alias_method :visit_rescue, :visit_statement_node
 
       def handle_partial_range(node)
-        kind = case node
-        when SyntaxTree::Comment
-          "comment"
-        when SyntaxTree::Command
-          if node.message.value == "require" || node.message.value == "require_relative"
-            "imports"
-          end
-        end
+        kind = partial_range_kind(node)
 
         if kind.nil?
           emit_partial_range
@@ -134,6 +127,17 @@ module RubyLsp
         end
 
         false
+      end
+
+      def partial_range_kind(node)
+        case node
+        when SyntaxTree::Comment
+          "comment"
+        when SyntaxTree::Command
+          if node.message.value == "require" || node.message.value == "require_relative"
+            "imports"
+          end
+        end
       end
 
       def emit_partial_range
