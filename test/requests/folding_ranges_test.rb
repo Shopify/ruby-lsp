@@ -49,6 +49,14 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
+  def test_no_folding_for_single_line_method_definitions
+    assert_no_folding(<<~RUBY)
+      def foo; end
+      def bar; end
+      def baz; end
+    RUBY
+  end
+
   def test_folding_classes
     ranges = [
       { startLine: 0, endLine: 4, kind: "region" },
