@@ -77,14 +77,15 @@ module RubyLsp
       end
       alias_method :visit_defs, :visit_def
 
-      def visit_else(node)
+      def visit_statement_node(node)
         add_statements_range(node)
-        super
+        visit_all(node.child_nodes)
       end
-      alias_method :visit_elsif, :visit_else
-      alias_method :visit_when, :visit_else
-      alias_method :visit_ensure, :visit_else
-      alias_method :visit_rescue, :visit_else
+      alias_method :visit_else, :visit_statement_node
+      alias_method :visit_elsif, :visit_statement_node
+      alias_method :visit_when, :visit_statement_node
+      alias_method :visit_ensure, :visit_statement_node
+      alias_method :visit_rescue, :visit_statement_node
 
       private
 
