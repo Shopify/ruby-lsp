@@ -335,6 +335,38 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
+  def test_folding_begin_rescue_ensure
+    ranges = [
+      { startLine: 0, endLine: 1, kind: "region" },
+      { startLine: 2, endLine: 3, kind: "region" },
+      { startLine: 4, endLine: 5, kind: "region" },
+      { startLine: 6, endLine: 7, kind: "region" },
+    ]
+    assert_ranges(<<~RUBY, ranges)
+      begin
+        puts "begin"
+      rescue StandardError => e
+        puts "stderror"
+      rescue Exception => e
+        puts "exception"
+      ensure
+        puts "ensure"
+      end
+    RUBY
+  end
+
+  def test_folding_multiline_invocations_no_parenthesis
+    ranges = [
+      { startLine: 0, endLine: 3, kind: "region" },
+    ]
+    assert_ranges(<<~RUBY, ranges)
+      has_many :something,
+        class_name: "Something",
+        foreign_key: :something_id,
+        inverse_of: :something_else
+    RUBY
+  end
+
   private
 
   def assert_no_folding(source)

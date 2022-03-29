@@ -9,7 +9,6 @@ module RubyLsp
         SyntaxTree::ModuleDeclaration,
         SyntaxTree::DoBlock,
         SyntaxTree::BraceBlock,
-        SyntaxTree::ArrayLiteral,
         SyntaxTree::HashLiteral,
         SyntaxTree::If,
         SyntaxTree::Unless,
@@ -17,7 +16,7 @@ module RubyLsp
         SyntaxTree::While,
         SyntaxTree::Until,
         SyntaxTree::For,
-        SyntaxTree::ArgParen,
+        SyntaxTree::Args,
         SyntaxTree::Heredoc,
       ].freeze
 
@@ -47,6 +46,24 @@ module RubyLsp
         RUBY
       end
 
+      def visit_arg_paren(node)
+        add_simple_range(node)
+      end
+
+      def visit_array_literal(node)
+        add_simple_range(node)
+
+        visit_all(node.contents.parts) if node.contents
+      end
+
+      def visit_begin(node)
+        unless node.bodystmt.statements.empty?
+          add_range(node.location.start_line - 1, node.bodystmt.statements.location.end_line - 1)
+        end
+
+        super
+      end
+
       def visit_def(node)
         params_location = node.params.location
 
@@ -66,6 +83,8 @@ module RubyLsp
       end
       alias_method :visit_elsif, :visit_else
       alias_method :visit_when, :visit_else
+      alias_method :visit_ensure, :visit_else
+      alias_method :visit_rescue, :visit_else
 
       private
 
