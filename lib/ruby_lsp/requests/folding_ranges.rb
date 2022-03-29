@@ -51,11 +51,7 @@ module RubyLsp
         params_location = node.params.location
 
         if params_location.start_line < params_location.end_line
-          @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
-            start_line: params_location.end_line - 1,
-            end_line: node.location.end_line - 1,
-            kind: "region"
-          )
+          add_range(params_location.end_line - 1, node.location.end_line - 1)
         else
           add_simple_range(node)
         end
@@ -77,22 +73,22 @@ module RubyLsp
         location = node.location
 
         if location.start_line < location.end_line
-          @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
-            start_line: location.start_line - 1,
-            end_line: location.end_line - 1,
-            kind: "region"
-          )
+          add_range(location.start_line - 1, location.end_line - 1)
         end
       end
 
       def add_statements_range(node)
         unless node.statements.empty?
-          @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
-            start_line: node.location.start_line - 1,
-            end_line: node.statements.location.end_line - 1,
-            kind: "region"
-          )
+          add_range(node.location.start_line - 1, node.statements.location.end_line - 1)
         end
+      end
+
+      def add_range(start_line, end_line)
+        @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
+          start_line: start_line,
+          end_line: end_line,
+          kind: "region"
+        )
       end
     end
   end
