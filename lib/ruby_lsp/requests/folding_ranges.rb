@@ -78,7 +78,10 @@ module RubyLsp
       alias_method :visit_defs, :visit_def
 
       def visit_statement_node(node)
-        add_statements_range(node)
+        unless node.statements.empty?
+          add_range(node.location.start_line - 1, node.statements.location.end_line - 1)
+        end
+
         visit_all(node.child_nodes)
       end
       alias_method :visit_else, :visit_statement_node
@@ -94,12 +97,6 @@ module RubyLsp
 
         if location.start_line < location.end_line
           add_range(location.start_line - 1, location.end_line - 1)
-        end
-      end
-
-      def add_statements_range(node)
-        unless node.statements.empty?
-          add_range(node.location.start_line - 1, node.statements.location.end_line - 1)
         end
       end
 
