@@ -7,6 +7,7 @@ import {
   LanguageClient,
   ServerOptions,
   Executable,
+  RevealOutputChannelOn,
 } from "vscode-languageclient/node";
 
 const asyncExec = promisify(exec);
@@ -40,6 +41,7 @@ export default class Client {
       documentSelector: [{ scheme: "file", language: "ruby" }],
       diagnosticCollectionName: LSP_NAME,
       outputChannel,
+      revealOutputChannelOn: RevealOutputChannelOn.Never,
     };
 
     this.context = context;
