@@ -80,10 +80,9 @@ module RubyLsp
       alias_method :visit_defs, :visit_def
 
       def visit_statement_node(node)
-        unless node.statements.empty?
-          add_range(node.location.start_line - 1, node.statements.location.end_line - 1)
-        end
+        return if node.statements.empty?
 
+        add_range(node.location.start_line - 1, node.statements.location.end_line - 1)
         visit_all(node.child_nodes)
       end
       alias_method :visit_else, :visit_statement_node
