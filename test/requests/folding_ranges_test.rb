@@ -304,14 +304,14 @@ class FoldingRangesTest < Minitest::Test
   private
 
   def assert_no_folding(source)
-    parsed_tree = Ruby::Lsp::Store::ParsedTree.new(source)
-    actual = Ruby::Lsp::Requests::FoldingRanges.run(parsed_tree)
+    parsed_tree = RubyLsp::Store::ParsedTree.new(source)
+    actual = RubyLsp::Requests::FoldingRanges.run(parsed_tree)
     assert_empty(JSON.parse(actual.to_json, symbolize_names: true))
   end
 
   def assert_ranges(source, expected_ranges)
-    parsed_tree = Ruby::Lsp::Store::ParsedTree.new(source)
-    actual = Ruby::Lsp::Requests::FoldingRanges.run(parsed_tree)
+    parsed_tree = RubyLsp::Store::ParsedTree.new(source)
+    actual = RubyLsp::Requests::FoldingRanges.run(parsed_tree)
     assert_equal(expected_ranges, JSON.parse(actual.to_json, symbolize_names: true))
   end
 end

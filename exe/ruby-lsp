@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "ruby-lsp"
+require "syntax_tree"
+require "ruby_lsp/cli"
+require "ruby_lsp/visitor"
 
-Ruby::Lsp::Cli.start(ARGV)
+RubyLsp::Cli.start(ARGV)

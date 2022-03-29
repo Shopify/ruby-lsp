@@ -4,35 +4,35 @@ require "test_helper"
 
 class StoreTest < Minitest::Test
   def test_hash_accessors
-    store = Ruby::Lsp::Store.new
+    store = RubyLsp::Store.new
     store["/foo/bar.rb"] = "def foo; end"
 
-    assert_equal(Ruby::Lsp::Store::ParsedTree.new("def foo; end"), store["/foo/bar.rb"])
+    assert_equal(RubyLsp::Store::ParsedTree.new("def foo; end"), store["/foo/bar.rb"])
   end
 
   def test_reads_from_file_if_missing_in_store
-    store = Ruby::Lsp::Store.new
+    store = RubyLsp::Store.new
 
     file = Tempfile.new("foo.rb")
     file.write("def great_code; end")
     file.rewind
 
-    assert_equal(Ruby::Lsp::Store::ParsedTree.new("def great_code; end"), store[file.path])
+    assert_equal(RubyLsp::Store::ParsedTree.new("def great_code; end"), store[file.path])
   ensure
     file.close
     file.unlink
   end
 
   def test_store_ignores_syntax_errors
-    store = Ruby::Lsp::Store.new
+    store = RubyLsp::Store.new
     store["/foo/bar.rb"] = "def foo; end"
     store["/foo/bar.rb"] = "def bar; end; end"
 
-    assert_equal(Ruby::Lsp::Store::ParsedTree.new("def foo; end"), store["/foo/bar.rb"])
+    assert_equal(RubyLsp::Store::ParsedTree.new("def foo; end"), store["/foo/bar.rb"])
   end
 
   def test_clear
-    store = Ruby::Lsp::Store.new
+    store = RubyLsp::Store.new
     store["/foo/bar.rb"] = "def foo; end"
     store.clear
 
@@ -40,7 +40,7 @@ class StoreTest < Minitest::Test
   end
 
   def test_delete
-    store = Ruby::Lsp::Store.new
+    store = RubyLsp::Store.new
     store["/foo/bar.rb"] = "def foo; end"
     store.delete("/foo/bar.rb")
 
