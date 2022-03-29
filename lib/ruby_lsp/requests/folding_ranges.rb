@@ -4,8 +4,6 @@ module RubyLsp
   module Requests
     class FoldingRanges < Visitor
       SIMPLE_FOLDABLES = [
-        SyntaxTree::Def,
-        SyntaxTree::Defs,
         SyntaxTree::SClass,
         SyntaxTree::ClassDeclaration,
         SyntaxTree::ModuleDeclaration,
@@ -49,20 +47,29 @@ module RubyLsp
         RUBY
       end
 
+      def visit_def(node)
+        params_location = node.params.location
+
+        if params_location.start_line < params_location.end_line
+          @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
+            start_line: params_location.end_line - 1,
+            end_line: node.location.end_line - 1,
+            kind: "region"
+          )
+        else
+          add_simple_range(node)
+        end
+
+        visit(node.bodystmt.statements)
+      end
+      alias_method :visit_defs, :visit_def
+
       def visit_else(node)
         add_statements_range(node)
         super
       end
-
-      def visit_elsif(node)
-        add_statements_range(node)
-        super
-      end
-
-      def visit_when(node)
-        add_statements_range(node)
-        super
-      end
+      alias_method :visit_elsif, :visit_else
+      alias_method :visit_when, :visit_else
 
       private
 

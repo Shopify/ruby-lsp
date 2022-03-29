@@ -13,10 +13,36 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
+  def test_folding_long_params_method_definitions
+    ranges = [{ startLine: 3, endLine: 6, kind: "region" }]
+    assert_ranges(<<~RUBY, ranges)
+      def foo(
+        a,
+        b
+      )
+        a = 2
+        puts "a"
+      end
+    RUBY
+  end
+
   def test_folding_singleton_method_definitions
     ranges = [{ startLine: 0, endLine: 3, kind: "region" }]
     assert_ranges(<<~RUBY, ranges)
       def self.foo
+        a = 2
+        puts "a"
+      end
+    RUBY
+  end
+
+  def test_folding_long_params_singleton_method_definitions
+    ranges = [{ startLine: 3, endLine: 6, kind: "region" }]
+    assert_ranges(<<~RUBY, ranges)
+      def self.foo(
+        a,
+        b
+      )
         a = 2
         puts "a"
       end
