@@ -96,6 +96,7 @@ module RubyLsp
       alias_method :visit_when, :visit_statement_node
       alias_method :visit_ensure, :visit_statement_node
       alias_method :visit_rescue, :visit_statement_node
+      alias_method :visit_in, :visit_statement_node
 
       def visit_string_concat(node)
         end_line = node.right.location.end_line - 1
