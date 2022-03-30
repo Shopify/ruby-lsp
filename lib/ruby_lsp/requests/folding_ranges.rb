@@ -4,20 +4,20 @@ module RubyLsp
   module Requests
     class FoldingRanges < Visitor
       SIMPLE_FOLDABLES = [
-        SyntaxTree::SClass,
-        SyntaxTree::ClassDeclaration,
-        SyntaxTree::ModuleDeclaration,
-        SyntaxTree::DoBlock,
-        SyntaxTree::BraceBlock,
-        SyntaxTree::HashLiteral,
-        SyntaxTree::If,
-        SyntaxTree::Unless,
-        SyntaxTree::Case,
-        SyntaxTree::While,
-        SyntaxTree::Until,
-        SyntaxTree::For,
         SyntaxTree::Args,
+        SyntaxTree::BraceBlock,
+        SyntaxTree::Case,
+        SyntaxTree::ClassDeclaration,
+        SyntaxTree::DoBlock,
+        SyntaxTree::For,
+        SyntaxTree::HashLiteral,
         SyntaxTree::Heredoc,
+        SyntaxTree::If,
+        SyntaxTree::ModuleDeclaration,
+        SyntaxTree::SClass,
+        SyntaxTree::Unless,
+        SyntaxTree::Until,
+        SyntaxTree::While,
       ].freeze
 
       def self.run(parsed_tree)
