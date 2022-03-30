@@ -47,6 +47,16 @@ module RubyLsp
              SyntaxTree::FCall,
              SyntaxTree::StringConcat
           add_node_range(node)
+        when SyntaxTree::Begin
+          add_statements_range(node, node.bodystmt.statements)
+          visit_all(node.child_nodes)
+        when SyntaxTree::Else,
+             SyntaxTree::Elsif,
+             SyntaxTree::Ensure,
+             SyntaxTree::Rescue,
+             SyntaxTree::When
+          add_statements_range(node, node.statements)
+          visit_all(node.child_nodes)
         else
           super if handle_partial_range(node)
         end
@@ -56,14 +66,6 @@ module RubyLsp
         add_node_range(node)
 
         visit_all(node.contents.parts) if node.contents
-      end
-
-      def visit_begin(node)
-        unless node.bodystmt.statements.empty?
-          add_lines_range(node.location.start_line, node.bodystmt.statements.location.end_line)
-        end
-
-        super
       end
 
       def visit_def(node)
@@ -78,18 +80,6 @@ module RubyLsp
         visit(node.bodystmt.statements)
       end
       alias_method :visit_defs, :visit_def
-
-      def visit_statement_node(node)
-        return if node.statements.empty?
-
-        add_lines_range(node.location.start_line, node.statements.location.end_line)
-        visit_all(node.child_nodes)
-      end
-      alias_method :visit_else, :visit_statement_node
-      alias_method :visit_elsif, :visit_statement_node
-      alias_method :visit_when, :visit_statement_node
-      alias_method :visit_ensure, :visit_statement_node
-      alias_method :visit_rescue, :visit_statement_node
 
       class PartialRange
         attr_reader :kind, :end_line
@@ -158,6 +148,12 @@ module RubyLsp
 
         @ranges << @partial_range.to_range
         @partial_range = nil
+      end
+
+      def add_statements_range(node, statements)
+        return if statements.empty?
+
+        add_lines_range(node.location.start_line, statements.location.end_line)
       end
 
       def add_node_range(node)
