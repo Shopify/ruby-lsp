@@ -56,6 +56,8 @@ module RubyLsp
 
       def visit_arg_paren(node)
         add_simple_range(node)
+
+        visit_all(node.arguments.parts) if node.arguments
       end
 
       def visit_array_literal(node)
