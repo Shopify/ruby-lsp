@@ -178,13 +178,12 @@ module RubyLsp
 
       def add_simple_range(node)
         location = node.location
-
-        if location.start_line < location.end_line
-          add_range(location.start_line, location.end_line)
-        end
+        add_range(location.start_line, location.end_line)
       end
 
       def add_range(start_line, end_line)
+        return if end_line <= start_line
+
         @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
           start_line: start_line - 1,
           end_line: end_line - 1,
