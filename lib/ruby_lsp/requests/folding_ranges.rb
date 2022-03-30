@@ -18,7 +18,7 @@ module RubyLsp
       def run
         visit(@parsed_tree.tree)
         emit_partial_range
-        @ranges
+        @ranges.filter! { |range| range.end_line > range.start_line } || @ranges
       end
 
       private
@@ -64,6 +64,8 @@ module RubyLsp
         when SyntaxTree::Command
           add_node_range(node)
           visit_all(node.child_nodes) if handle_partial_range(node)
+        when SyntaxTree::Comment
+          add_comment_range(node)
         else
           super if handle_partial_range(node)
         end
@@ -122,8 +124,6 @@ module RubyLsp
 
       def partial_range_kind(node)
         case node
-        when SyntaxTree::Comment
-          "comment"
         when SyntaxTree::Command
           if node.message.value == "require" || node.message.value == "require_relative"
             "imports"
@@ -154,21 +154,39 @@ module RubyLsp
         end
       end
 
-      def add_node_range(node)
-        add_location_range(node.location)
+      def add_comment_range(node)
+        last_range = @ranges.last
+        if last_range&.kind == "comment" && last_range&.end_line == node.location.start_line - 2
+          extend_last_range_to_location(node.location)
+        else
+          add_node_range(node, kind: "comment")
+        end
       end
 
-      def add_location_range(location)
-        add_lines_range(location.start_line, location.end_line)
+      def add_node_range(node, kind: "region")
+        add_location_range(node.location, kind: kind)
       end
 
-      def add_lines_range(start_line, end_line)
-        return if end_line <= start_line
+      def add_location_range(location, kind: "region")
+        add_lines_range(location.start_line, location.end_line, kind: kind)
+      end
 
+      def add_lines_range(start_line, end_line, kind: "region")
         @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
           start_line: start_line - 1,
           end_line: end_line - 1,
-          kind: "region"
+          kind: kind
+        )
+      end
+
+      def extend_last_range_to_location(location)
+        return if @ranges.empty?
+
+        last_range = @ranges.last
+        @ranges[-1] = LanguageServer::Protocol::Interface::FoldingRange.new(
+          start_line: last_range.start_line,
+          end_line: location.end_line - 1,
+          kind: last_range.kind
         )
       end
     end
