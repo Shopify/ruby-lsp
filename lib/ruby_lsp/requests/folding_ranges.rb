@@ -43,13 +43,13 @@ module RubyLsp
              SyntaxTree::While
           add_node_range(node)
           visit_all(node.child_nodes)
+        when SyntaxTree::Call,
+             SyntaxTree::FCall,
+             SyntaxTree::StringConcat
+          add_node_range(node)
         else
           super if handle_partial_range(node)
         end
-      end
-
-      def visit_arg_paren(node)
-        add_node_range(node)
       end
 
       def visit_array_literal(node)
@@ -90,10 +90,6 @@ module RubyLsp
       alias_method :visit_when, :visit_statement_node
       alias_method :visit_ensure, :visit_statement_node
       alias_method :visit_rescue, :visit_statement_node
-
-      def visit_string_concat(node)
-        add_node_range(node)
-      end
 
       class PartialRange
         attr_reader :kind, :end_line
