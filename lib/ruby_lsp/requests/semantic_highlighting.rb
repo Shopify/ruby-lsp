@@ -77,6 +77,11 @@ module RubyLsp
         line = @parser.line_counts[location.start_line - 1]
         column = location.start_char - line.start
 
+        if row < @current_row
+          raise InvalidTokenRowError, "Invalid token row detected: "\
+            "Ensure tokens are added in the expected order."
+        end
+
         delta_line = row - @current_row
         delta_column = @current_row == row ? column - @current_column : column
 
@@ -84,6 +89,8 @@ module RubyLsp
         @current_row = row
         @current_column = column
       end
+
+      class InvalidTokenRowError < StandardError; end
     end
   end
 end
