@@ -27,7 +27,8 @@ module RubyLsp
         return unless node
 
         case node
-        when SyntaxTree::Args,
+        when SyntaxTree::ArgParen,
+             SyntaxTree::ArrayLiteral,
              SyntaxTree::BraceBlock,
              SyntaxTree::Case,
              SyntaxTree::ClassDeclaration,
@@ -60,15 +61,12 @@ module RubyLsp
         when SyntaxTree::Def, SyntaxTree::Defs
           add_def_range(node)
           visit(node.bodystmt)
+        when SyntaxTree::Command
+          add_node_range(node)
+          visit_all(node.child_nodes) if handle_partial_range(node)
         else
           super if handle_partial_range(node)
         end
-      end
-
-      def visit_array_literal(node)
-        add_node_range(node)
-
-        visit_all(node.contents.parts) if node.contents
       end
 
       class PartialRange
