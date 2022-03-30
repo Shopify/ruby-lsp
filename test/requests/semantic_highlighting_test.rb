@@ -9,7 +9,7 @@ class SemanticHighlightingTest < Minitest::Test
       { delta_line: 1, delta_start_char: 2, length: 3, token_type: 0, token_modifiers: 0 },
     ]
 
-    assert_tokens(inline_tokens(tokens), <<~RUBY)
+    assert_tokens(tokens, <<~RUBY)
       def my_method
         var = 1
         var
@@ -25,7 +25,7 @@ class SemanticHighlightingTest < Minitest::Test
       { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
     ]
 
-    assert_tokens(inline_tokens(tokens), <<~RUBY)
+    assert_tokens(tokens, <<~RUBY)
       def my_method
         a, b = [1, 2]
         a
@@ -39,7 +39,7 @@ class SemanticHighlightingTest < Minitest::Test
       { delta_line: 0, delta_start_char: 0, length: 4, token_type: 1, token_modifiers: 0 },
     ]
 
-    assert_tokens(inline_tokens(tokens), <<~RUBY)
+    assert_tokens(tokens, <<~RUBY)
       puts "Hello"
     RUBY
   end
@@ -49,7 +49,7 @@ class SemanticHighlightingTest < Minitest::Test
       { delta_line: 0, delta_start_char: 8, length: 6, token_type: 1, token_modifiers: 0 },
     ]
 
-    assert_tokens(inline_tokens(tokens), <<~RUBY)
+    assert_tokens(tokens, <<~RUBY)
       "Hello".upcase
     RUBY
   end
@@ -59,7 +59,7 @@ class SemanticHighlightingTest < Minitest::Test
       { delta_line: 1, delta_start_char: 2, length: 10, token_type: 1, token_modifiers: 0 },
     ]
 
-    assert_tokens(inline_tokens(tokens), <<~RUBY)
+    assert_tokens(tokens, <<~RUBY)
       def some_method
         invocation
       end
@@ -71,7 +71,7 @@ class SemanticHighlightingTest < Minitest::Test
       { delta_line: 1, delta_start_char: 2, length: 10, token_type: 1, token_modifiers: 0 },
     ]
 
-    assert_tokens(inline_tokens(tokens), <<~RUBY)
+    assert_tokens(tokens, <<~RUBY)
       def some_method
         invocation(1, 2, 3)
       end
@@ -83,7 +83,7 @@ class SemanticHighlightingTest < Minitest::Test
   def assert_tokens(expected, source_code)
     parsed_tree = RubyLsp::Store::ParsedTree.new(source_code)
     assert_equal(
-      expected,
+      inline_tokens(expected),
       RubyLsp::Requests::SemanticHighlighting.run(parsed_tree).data
     )
   end
