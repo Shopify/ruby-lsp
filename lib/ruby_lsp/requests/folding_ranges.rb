@@ -68,14 +68,14 @@ module RubyLsp
 
       def visit_begin(node)
         unless node.bodystmt.statements.empty?
-          add_range(node.location.start_line - 1, node.bodystmt.statements.location.end_line - 1)
+          add_range(node.location.start_line, node.bodystmt.statements.location.end_line)
         end
 
         super
       end
 
       def visit_call(node)
-        end_line = node.location.end_line - 1
+        end_line = node.location.end_line
         receiver = node.receiver
 
         visit_all(node.arguments.arguments.parts) if node.arguments
@@ -90,7 +90,7 @@ module RubyLsp
           end
         end
 
-        start_line = receiver.location.start_line - 1
+        start_line = receiver.location.start_line
         add_range(start_line, end_line) if start_line < end_line
       end
 
@@ -98,7 +98,7 @@ module RubyLsp
         params_location = node.params.location
 
         if params_location.start_line < params_location.end_line
-          add_range(params_location.end_line - 1, node.location.end_line - 1)
+          add_range(params_location.end_line, node.location.end_line)
         else
           add_simple_range(node)
         end
@@ -110,7 +110,7 @@ module RubyLsp
       def visit_statement_node(node)
         return if node.statements.empty?
 
-        add_range(node.location.start_line - 1, node.statements.location.end_line - 1)
+        add_range(node.location.start_line, node.statements.location.end_line)
         visit_all(node.child_nodes)
       end
       alias_method :visit_else, :visit_statement_node
@@ -121,11 +121,11 @@ module RubyLsp
       alias_method :visit_in, :visit_statement_node
 
       def visit_string_concat(node)
-        end_line = node.right.location.end_line - 1
+        end_line = node.right.location.end_line
         left = node.left
 
         left = left.left while left.is_a?(SyntaxTree::StringConcat)
-        start_line = left.location.start_line - 1
+        start_line = left.location.start_line
 
         add_range(start_line, end_line)
       end
@@ -203,14 +203,14 @@ module RubyLsp
         location = node.location
 
         if location.start_line < location.end_line
-          add_range(location.start_line - 1, location.end_line - 1)
+          add_range(location.start_line, location.end_line)
         end
       end
 
       def add_range(start_line, end_line)
         @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
-          start_line: start_line,
-          end_line: end_line,
+          start_line: start_line - 1,
+          end_line: end_line - 1,
           kind: "region"
         )
       end
