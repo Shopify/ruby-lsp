@@ -57,6 +57,9 @@ module RubyLsp
              SyntaxTree::When
           add_statements_range(node, node.statements)
           visit_all(node.child_nodes)
+        when SyntaxTree::Def, SyntaxTree::Defs
+          add_def_range(node)
+          visit(node.bodystmt)
         else
           super if handle_partial_range(node)
         end
@@ -67,19 +70,6 @@ module RubyLsp
 
         visit_all(node.contents.parts) if node.contents
       end
-
-      def visit_def(node)
-        params_location = node.params.location
-
-        if params_location.start_line < params_location.end_line
-          add_lines_range(params_location.end_line, node.location.end_line)
-        else
-          add_node_range(node)
-        end
-
-        visit(node.bodystmt.statements)
-      end
-      alias_method :visit_defs, :visit_def
 
       class PartialRange
         attr_reader :kind, :end_line
@@ -154,6 +144,16 @@ module RubyLsp
         return if statements.empty?
 
         add_lines_range(node.location.start_line, statements.location.end_line)
+      end
+
+      def add_def_range(node)
+        params_location = node.params.location
+
+        if params_location.start_line < params_location.end_line
+          add_lines_range(params_location.end_line, node.location.end_line)
+        else
+          add_node_range(node)
+        end
       end
 
       def add_node_range(node)
