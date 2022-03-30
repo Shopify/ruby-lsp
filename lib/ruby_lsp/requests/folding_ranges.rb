@@ -97,6 +97,33 @@ module RubyLsp
       alias_method :visit_ensure, :visit_statement_node
       alias_method :visit_rescue, :visit_statement_node
 
+      class PartialRange
+        attr_reader :kind
+
+        def self.from(node, kind)
+          new(node.location.start_line - 1, node.location.end_line - 1, kind)
+        end
+
+        def initialize(start_line, end_line, kind)
+          @start_line = start_line
+          @end_line = end_line
+          @kind = kind
+        end
+
+        def extend_to(node)
+          @end_line = node.location.end_line - 1
+          self
+        end
+
+        def to_range
+          LanguageServer::Protocol::Interface::FoldingRange.new(
+            start_line: @start_line,
+            end_line: @end_line,
+            kind: @kind
+          )
+        end
+      end
+
       def handle_partial_range(node)
         kind = partial_range_kind(node)
 
@@ -106,24 +133,12 @@ module RubyLsp
         end
 
         @partial_range = if @partial_range.nil?
-          LanguageServer::Protocol::Interface::FoldingRange.new(
-            start_line: node.location.start_line - 1,
-            end_line: node.location.end_line - 1,
-            kind: kind
-          )
+          PartialRange.from(node, kind)
         elsif @partial_range.kind != kind
           emit_partial_range
-          LanguageServer::Protocol::Interface::FoldingRange.new(
-            start_line: node.location.start_line - 1,
-            end_line: node.location.end_line - 1,
-            kind: kind
-          )
+          PartialRange.from(node, kind)
         else
-          LanguageServer::Protocol::Interface::FoldingRange.new(
-            start_line: @partial_range.start_line,
-            end_line: node.location.end_line - 1,
-            kind: @partial_range.kind
-          )
+          @partial_range.extend_to(node)
         end
 
         false
@@ -143,7 +158,7 @@ module RubyLsp
       def emit_partial_range
         return if @partial_range.nil?
 
-        @ranges << @partial_range
+        @ranges << @partial_range.to_range
         @partial_range = nil
       end
 
