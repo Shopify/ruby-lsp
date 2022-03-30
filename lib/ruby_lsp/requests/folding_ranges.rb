@@ -177,7 +177,10 @@ module RubyLsp
       end
 
       def add_simple_range(node)
-        location = node.location
+        add_location_range(node.location)
+      end
+
+      def add_location_range(location)
         add_lines_range(location.start_line, location.end_line)
       end
 
