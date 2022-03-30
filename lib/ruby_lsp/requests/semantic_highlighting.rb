@@ -28,6 +28,8 @@ module RubyLsp
         LanguageServer::Protocol::Interface::SemanticTokens.new(data: @tokens)
       end
 
+      private
+
       def visit_assign(node)
         case node.target
         when SyntaxTree::ARefField
@@ -67,8 +69,6 @@ module RubyLsp
       def visit_v_call(node)
         add_token(node.value.location, :method_call)
       end
-
-      private
 
       def add_token(location, classification)
         length = location.end_char - location.start_char
