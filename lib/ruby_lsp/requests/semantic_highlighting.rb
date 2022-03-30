@@ -31,12 +31,7 @@ module RubyLsp
       private
 
       def visit_assign(node)
-        case node.target
-        when SyntaxTree::ARefField
-          add_token(node.target.collection.value.location, :local_variable)
-        else
-          add_token(node.target.value.location, :local_variable)
-        end
+        super
       end
 
       def visit_m_assign(node)
@@ -51,6 +46,10 @@ module RubyLsp
 
       def visit_var_ref(node)
         add_token(node.value.location, :local_variable)
+      end
+
+      def visit_a_ref_field(node)
+        add_token(node.target.collection.value.location, :local_variable)
       end
 
       def visit_call(node)
