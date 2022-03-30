@@ -72,6 +72,24 @@ module RubyLsp
         super
       end
 
+      def visit_call(node)
+        end_line = node.location.end_line - 1
+        receiver = node.receiver
+
+        while receiver.is_a?(SyntaxTree::Call) || receiver.is_a?(SyntaxTree::MethodAddBlock)
+          if receiver.is_a?(SyntaxTree::Call)
+            visit(receiver.arguments) if receiver.arguments
+            receiver = receiver.receiver
+          else
+            visit(receiver.block)
+            receiver = receiver.call.receiver
+          end
+        end
+
+        start_line = receiver.location.start_line - 1
+        add_range(start_line, end_line) if start_line < end_line
+      end
+
       def visit_def(node)
         params_location = node.params.location
 
