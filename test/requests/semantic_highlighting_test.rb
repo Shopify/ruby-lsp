@@ -5,11 +5,11 @@ require "test_helper"
 class SemanticHighlightingTest < Minitest::Test
   def test_local_variables
     tokens = [
-      1, 2, 3, 0, 0,
-      1, 2, 3, 0, 0,
+      { delta_line: 1, delta_start_char: 2, length: 3, token_type: 0, token_modifiers: 0 },
+      { delta_line: 1, delta_start_char: 2, length: 3, token_type: 0, token_modifiers: 0 },
     ]
 
-    assert_tokens(tokens, <<~RUBY)
+    assert_tokens(inline_tokens(tokens), <<~RUBY)
       def my_method
         var = 1
         var
@@ -19,13 +19,13 @@ class SemanticHighlightingTest < Minitest::Test
 
   def test_multi_assignment
     tokens = [
-      1, 2, 1, 0, 0,
-      0, 3, 1, 0, 0,
-      1, 2, 1, 0, 0,
-      1, 2, 1, 0, 0,
+      { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
+      { delta_line: 0, delta_start_char: 3, length: 1, token_type: 0, token_modifiers: 0 },
+      { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
+      { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
     ]
 
-    assert_tokens(tokens, <<~RUBY)
+    assert_tokens(inline_tokens(tokens), <<~RUBY)
       def my_method
         a, b = [1, 2]
         a
@@ -36,30 +36,30 @@ class SemanticHighlightingTest < Minitest::Test
 
   def test_command_invocation
     tokens = [
-      0, 0, 4, 1, 0,
+      { delta_line: 0, delta_start_char: 0, length: 4, token_type: 1, token_modifiers: 0 },
     ]
 
-    assert_tokens(tokens, <<~RUBY)
+    assert_tokens(inline_tokens(tokens), <<~RUBY)
       puts "Hello"
     RUBY
   end
 
   def test_call_invocation
     tokens = [
-      0, 8, 6, 1, 0,
+      { delta_line: 0, delta_start_char: 8, length: 6, token_type: 1, token_modifiers: 0 },
     ]
 
-    assert_tokens(tokens, <<~RUBY)
+    assert_tokens(inline_tokens(tokens), <<~RUBY)
       "Hello".upcase
     RUBY
   end
 
   def test_vcall_invocation
     tokens = [
-      1, 2, 10, 1, 0,
+      { delta_line: 1, delta_start_char: 2, length: 10, token_type: 1, token_modifiers: 0 },
     ]
 
-    assert_tokens(tokens, <<~RUBY)
+    assert_tokens(inline_tokens(tokens), <<~RUBY)
       def some_method
         invocation
       end
@@ -68,10 +68,10 @@ class SemanticHighlightingTest < Minitest::Test
 
   def test_fcall_invocation
     tokens = [
-      1, 2, 10, 1, 0,
+      { delta_line: 1, delta_start_char: 2, length: 10, token_type: 1, token_modifiers: 0 },
     ]
 
-    assert_tokens(tokens, <<~RUBY)
+    assert_tokens(inline_tokens(tokens), <<~RUBY)
       def some_method
         invocation(1, 2, 3)
       end
@@ -86,5 +86,11 @@ class SemanticHighlightingTest < Minitest::Test
       expected,
       RubyLsp::Requests::SemanticHighlighting.run(parsed_tree).data
     )
+  end
+
+  def inline_tokens(tokens)
+    tokens.flat_map do |token|
+      [token[:delta_line], token[:delta_start_char], token[:length], token[:token_type], token[:token_modifiers]]
+    end
   end
 end
