@@ -104,7 +104,7 @@ module RubyLsp
         left = left.left while left.is_a?(SyntaxTree::StringConcat)
         start_line = left.location.start_line - 1
 
-        add_range(start_line, end_line) if start_line < end_line
+        add_range(start_line, end_line)
       end
 
       class PartialRange
