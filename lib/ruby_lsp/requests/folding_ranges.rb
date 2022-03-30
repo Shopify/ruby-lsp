@@ -98,7 +98,7 @@ module RubyLsp
       alias_method :visit_rescue, :visit_statement_node
 
       class PartialRange
-        attr_reader :kind
+        attr_reader :kind, :end_line
 
         def self.from(node, kind)
           new(node.location.start_line - 1, node.location.end_line - 1, kind)
@@ -134,7 +134,7 @@ module RubyLsp
 
         @partial_range = if @partial_range.nil?
           PartialRange.from(node, kind)
-        elsif @partial_range.kind != kind
+        elsif @partial_range.kind != kind || new_comment_section?(node)
           emit_partial_range
           PartialRange.from(node, kind)
         else
@@ -142,6 +142,10 @@ module RubyLsp
         end
 
         false
+      end
+
+      def new_comment_section?(node)
+        node.is_a?(SyntaxTree::Comment) && @partial_range.end_line + 1 != node.location.start_line - 1
       end
 
       def partial_range_kind(node)
