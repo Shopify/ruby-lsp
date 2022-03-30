@@ -396,6 +396,17 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
+  def test_folding_multiline_strings
+    ranges = [
+      { startLine: 0, endLine: 2, kind: "region" },
+    ]
+    assert_ranges(<<~RUBY, ranges)
+      "foo" \\
+        "bar" \\
+        "baz"
+    RUBY
+  end
+
   private
 
   def assert_no_folding(source)
