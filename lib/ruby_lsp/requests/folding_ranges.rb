@@ -3,23 +3,6 @@
 module RubyLsp
   module Requests
     class FoldingRanges < Visitor
-      SIMPLE_FOLDABLES = [
-        SyntaxTree::Args,
-        SyntaxTree::BraceBlock,
-        SyntaxTree::Case,
-        SyntaxTree::ClassDeclaration,
-        SyntaxTree::DoBlock,
-        SyntaxTree::For,
-        SyntaxTree::HashLiteral,
-        SyntaxTree::Heredoc,
-        SyntaxTree::If,
-        SyntaxTree::ModuleDeclaration,
-        SyntaxTree::SClass,
-        SyntaxTree::Unless,
-        SyntaxTree::Until,
-        SyntaxTree::While,
-      ].freeze
-
       def self.run(parsed_tree)
         new(parsed_tree).run
       end
@@ -40,18 +23,29 @@ module RubyLsp
 
       private
 
-      # For nodes that are simple to fold, we just re-use the same method body
-      SIMPLE_FOLDABLES.each do |node_class|
-        class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
-          def visit_#{class_to_visit_method(node_class.name)}(node)
-            add_node_range(node)
-            super
-          end
-        RUBY
-      end
-
       def visit(node)
-        super if handle_partial_range(node)
+        return unless node
+
+        case node
+        when SyntaxTree::Args,
+             SyntaxTree::BraceBlock,
+             SyntaxTree::Case,
+             SyntaxTree::ClassDeclaration,
+             SyntaxTree::DoBlock,
+             SyntaxTree::For,
+             SyntaxTree::HashLiteral,
+             SyntaxTree::Heredoc,
+             SyntaxTree::If,
+             SyntaxTree::ModuleDeclaration,
+             SyntaxTree::SClass,
+             SyntaxTree::Unless,
+             SyntaxTree::Until,
+             SyntaxTree::While
+          add_node_range(node)
+          visit_all(node.child_nodes)
+        else
+          super if handle_partial_range(node)
+        end
       end
 
       def visit_arg_paren(node)
