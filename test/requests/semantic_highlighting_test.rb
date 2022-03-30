@@ -54,6 +54,21 @@ class SemanticHighlightingTest < Minitest::Test
     RUBY
   end
 
+  def test_variable_receiver_in_call_invocation
+    tokens = [
+      { delta_line: 1, delta_start_char: 2, length: 3, token_type: 0, token_modifiers: 0 },
+      { delta_line: 1, delta_start_char: 2, length: 3, token_type: 0, token_modifiers: 0 },
+      { delta_line: 0, delta_start_char: 4, length: 6, token_type: 1, token_modifiers: 0 },
+    ]
+
+    assert_tokens(tokens, <<~RUBY)
+      def some_method
+        var = "Hello"
+        var.upcase
+      end
+    RUBY
+  end
+
   def test_vcall_invocation
     tokens = [
       { delta_line: 1, delta_start_char: 2, length: 10, token_type: 1, token_modifiers: 0 },

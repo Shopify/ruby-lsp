@@ -52,6 +52,7 @@ module RubyLsp
       end
 
       def visit_call(node)
+        super
         add_token(node.message.location, :method_call)
       end
 
