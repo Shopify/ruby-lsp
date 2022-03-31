@@ -53,6 +53,7 @@ module RubyLsp
         when SyntaxTree::Else,
              SyntaxTree::Elsif,
              SyntaxTree::Ensure,
+             SyntaxTree::In,
              SyntaxTree::Rescue,
              SyntaxTree::When
           add_statements_range(node, node.statements)
