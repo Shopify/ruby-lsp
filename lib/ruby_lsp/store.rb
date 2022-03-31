@@ -19,7 +19,7 @@ module RubyLsp
 
     def []=(uri, content)
       @state[uri] = ParsedTree.new(content)
-    rescue SyntaxTree::ParseError
+    rescue SyntaxTree::Parser::ParseError
       # Do not update the store if there are syntax errors
     end
 
@@ -36,7 +36,7 @@ module RubyLsp
 
       def initialize(source)
         @source = source
-        @parser = SyntaxTree.new(source)
+        @parser = SyntaxTree::Parser.new(source)
         @tree = @parser.parse
       end
 
