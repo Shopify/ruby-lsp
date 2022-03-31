@@ -59,7 +59,18 @@ module RubyLsp
           ),
           folding_range_provider: Interface::FoldingRangeClientCapabilities.new(
             line_folding_only: true
-          )
+          ),
+          semantic_tokens_provider: Interface::SemanticTokensRegistrationOptions.new(
+            document_selector: { scheme: "file", language: "ruby" },
+            legend: Interface::SemanticTokensLegend.new(
+              token_types: Requests::SemanticHighlighting::TOKEN_TYPES,
+              token_modifiers: Requests::SemanticHighlighting::TOKEN_MODIFIERS
+            ),
+            range: false,
+            full: {
+              delta: true,
+            }
+          ),
         )
       )
     end
@@ -70,6 +81,10 @@ module RubyLsp
 
     def respond_with_folding_ranges(uri)
       Requests::FoldingRanges.run(store[uri])
+    end
+
+    def respond_with_semantic_highlighting(uri)
+      Requests::SemanticHighlighting.run(store[uri])
     end
   end
 end
