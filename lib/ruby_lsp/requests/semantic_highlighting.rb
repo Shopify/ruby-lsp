@@ -77,6 +77,15 @@ module RubyLsp
         end
       end
 
+      # The delta array is computed according to the LSP specification:
+      # > The protocol for the token format relative uses relative
+      # > positions, because most tokens remain stable relative to
+      # > each other when edits are made in a file. This simplifies
+      # > the computation of a delta if a server supports it. So each
+      # > token is represented using 5 integers.
+
+      # For more information on how each number is calculated, read:
+      # https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_semanticTokens
       def compute_delta(location)
         row = location.start_line - 1
 
