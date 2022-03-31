@@ -26,12 +26,12 @@ module RubyLsp
         return unless node
 
         case node
-        when SyntaxTree::ArgParen,
-             SyntaxTree::ArrayLiteral,
+        when SyntaxTree::ArrayLiteral,
              SyntaxTree::BraceBlock,
              SyntaxTree::Case,
              SyntaxTree::ClassDeclaration,
              SyntaxTree::DoBlock,
+             SyntaxTree::FCall,
              SyntaxTree::For,
              SyntaxTree::HashLiteral,
              SyntaxTree::Heredoc,
@@ -43,9 +43,9 @@ module RubyLsp
              SyntaxTree::While
           add_node_range(node)
           visit_all(node.child_nodes)
-        when SyntaxTree::Call,
-             SyntaxTree::FCall,
-             SyntaxTree::StringConcat
+        when SyntaxTree::Call
+          add_call_range(node)
+        when SyntaxTree::StringConcat
           add_node_range(node)
         when SyntaxTree::Begin
           add_statements_range(node, node.bodystmt.statements)
@@ -68,6 +68,23 @@ module RubyLsp
         else
           visit_all(node.child_nodes)
         end
+      end
+
+      def add_call_range(node)
+        receiver = node
+        while receiver
+          case receiver
+          when SyntaxTree::Call
+            visit(receiver.arguments)
+            receiver = receiver.receiver
+          when SyntaxTree::MethodAddBlock
+            visit(receiver.block)
+            receiver = receiver.call.receiver
+          else
+            break
+          end
+        end
+        add_lines_range(receiver.location.start_line, node.location.end_line)
       end
 
       def add_statements_range(node, statements)
