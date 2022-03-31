@@ -108,7 +108,7 @@ module RubyLsp
       end
 
       class PartialRange
-        attr_reader :kind
+        attr_reader :kind, :end_line
 
         def self.from(node, kind)
           new(node.location.start_line - 1, node.location.end_line - 1, kind)
@@ -123,6 +123,10 @@ module RubyLsp
         def extend_to(node)
           @end_line = node.location.end_line - 1
           self
+        end
+
+        def new_section?(node)
+          node.is_a?(SyntaxTree::Comment) && @end_line + 1 != node.location.start_line - 1
         end
 
         def to_range
@@ -144,7 +148,7 @@ module RubyLsp
 
         @partial_range = if @partial_range.nil?
           PartialRange.from(node, kind)
-        elsif @partial_range.kind != kind
+        elsif @partial_range.kind != kind || @partial_range.new_section?(node)
           emit_partial_range
           PartialRange.from(node, kind)
         else
