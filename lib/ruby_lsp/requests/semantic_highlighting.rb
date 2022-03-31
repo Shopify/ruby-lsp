@@ -71,20 +71,30 @@ module RubyLsp
 
       def add_token(location, classification)
         length = location.end_char - location.start_char
+
+        compute_delta(location) do |delta_line, delta_column|
+          @tokens.push(delta_line, delta_column, length, TOKEN_TYPES.index(classification), 0)
+        end
+      end
+
+      def compute_delta(location)
         row = location.start_line - 1
 
         line = @parser.line_counts[location.start_line - 1]
         column = location.start_char - line.start
 
         if row < @current_row
-          raise InvalidTokenRowError, "Invalid token row detected: "\
+          raise InvalidTokenRowError, "Invalid token row detected: " \
             "Ensure tokens are added in the expected order."
         end
 
         delta_line = row - @current_row
-        delta_column = @current_row == row ? column - @current_column : column
 
-        @tokens.push(delta_line, delta_column, length, TOKEN_TYPES.index(classification), 0)
+        delta_column = column
+        delta_column -= @current_column if delta_line == 0
+
+        yield delta_line, delta_column
+
         @current_row = row
         @current_column = column
       end
