@@ -78,6 +78,8 @@ module RubyLsp
         end_line = node.location.end_line - 1
         receiver = node.receiver
 
+        visit_all(node.arguments.arguments.parts) if node.arguments
+
         while receiver.is_a?(SyntaxTree::Call) || receiver.is_a?(SyntaxTree::MethodAddBlock)
           if receiver.is_a?(SyntaxTree::Call)
             visit(receiver.arguments) if receiver.arguments

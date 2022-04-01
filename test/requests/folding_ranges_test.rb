@@ -275,8 +275,8 @@ class FoldingRangesTest < Minitest::Test
 
   def test_folding_nested_multiline_method_invocation
     ranges = [
-      { startLine: 0, endLine: 5, kind: "region" },
       { startLine: 1, endLine: 4, kind: "region" },
+      { startLine: 0, endLine: 5, kind: "region" },
     ]
     assert_ranges(<<~RUBY, ranges)
       foo.invocation(
@@ -284,6 +284,19 @@ class FoldingRangesTest < Minitest::Test
           1,
           2
         )
+      )
+    RUBY
+  end
+
+  def test_folding_nested_multiline_invocation_no_parenthesis
+    ranges = [
+      { startLine: 1, endLine: 2, kind: "region" },
+      { startLine: 0, endLine: 3, kind: "region" },
+    ]
+    assert_ranges(<<~RUBY, ranges)
+      foo.invocation(
+        another_invocation 1,
+          2
       )
     RUBY
   end
