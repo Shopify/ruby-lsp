@@ -37,7 +37,7 @@ module RubyLsp
 
     def handle(request)
       result = @handlers[request[:method]]&.call(request)
-      @writer.write(id: request[:id], result: result) if result
+      @writer.write(id: request[:id], result: result)
     end
 
     def shutdown
@@ -72,6 +72,7 @@ module RubyLsp
               delta: true,
             }
           ),
+          document_formatting_provider: true
         )
       )
     end
@@ -86,6 +87,10 @@ module RubyLsp
 
     def respond_with_semantic_highlighting(uri)
       Requests::SemanticHighlighting.run(store[uri])
+    end
+
+    def respond_with_formatting(uri)
+      Requests::Formatting.run(uri, store[uri])
     end
   end
 end
