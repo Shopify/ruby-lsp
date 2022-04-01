@@ -426,6 +426,44 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
+  def test_folding_pattern_matching
+    ranges = [
+      { startLine: 0, endLine: 5, kind: "region" },
+      { startLine: 1, endLine: 2, kind: "region" },
+      { startLine: 3, endLine: 4, kind: "region" },
+    ]
+    assert_ranges(<<~RUBY, ranges)
+      case foo
+      in { a: 1 }
+        puts "a"
+      else
+        puts "nothing"
+      end
+    RUBY
+  end
+
+  def test_folding_chained_invocations
+    ranges = [
+      { startLine: 1, endLine: 7, kind: "region" },
+      { startLine: 2, endLine: 6, kind: "region" },
+      { startLine: 4, endLine: 5, kind: "region" },
+      { startLine: 0, endLine: 10, kind: "region" },
+    ]
+    assert_ranges(<<~RUBY, ranges)
+      []
+        .select do |x|
+          if x.odd?
+            x + 2
+          else
+            x + 1
+          end
+        end
+        .map { |x| x }
+        .drop(1)
+        .sort
+    RUBY
+  end
+
   private
 
   def assert_no_folding(source)
