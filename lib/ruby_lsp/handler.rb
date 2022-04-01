@@ -37,7 +37,7 @@ module RubyLsp
 
     def handle(request)
       result = @handlers[request[:method]]&.call(request)
-      @writer.write(id: request[:id], result: result) if result
+      @writer.write(id: request[:id], result: result)
     end
 
     def shutdown
