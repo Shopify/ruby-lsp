@@ -1,3 +1,4 @@
 {
   "ruby lsp.trace.server": "verbose",
+  "editor.defaultFormatter": "Shopify.ruby-lsp"
 }

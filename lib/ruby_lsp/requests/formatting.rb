@@ -9,7 +9,7 @@ module RubyLsp
       RUBOCOP_FLAGS = [
         "--stderr", # Print any output to stderr so that our stdout does not get polluted
         "--format",
-        "RuboCop::Formatter::BaseFormatter", # Supress any progress output by setting the formatter to `quiet`
+        "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
         "--auto-correct", # Apply the autocorrects on the supplied buffer
       ]
 
