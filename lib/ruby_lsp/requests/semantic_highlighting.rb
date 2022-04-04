@@ -49,7 +49,7 @@ module RubyLsp
       end
 
       def visit_a_ref_field(node)
-        add_token(node.target.collection.value.location, :local_variable)
+        add_token(node.collection.value.location, :local_variable)
       end
 
       def visit_call(node)
