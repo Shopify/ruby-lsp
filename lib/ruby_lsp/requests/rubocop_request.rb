@@ -18,13 +18,27 @@ module RubyLsp
         @formatted_text = nil
 
         super(
-          ::RuboCop::Options.new.parse(self.class::RUBOCOP_FLAGS).first,
+          ::RuboCop::Options.new.parse(rubocop_flags).first,
           ::RuboCop::ConfigStore.new
         )
       end
 
-      def run(file_paths)
-        super
+      def run
+        # We communicate with Rubocop via stdin
+        @options[:stdin] = text
+
+        # Invoke the actual run method with just this file in `paths`
+        super([file])
+      end
+
+      private
+
+      def rubocop_flags
+        [
+          "--stderr", # Print any output to stderr so that our stdout does not get polluted
+          "--format",
+          "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
+        ]
       end
     end
   end
