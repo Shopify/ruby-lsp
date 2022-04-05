@@ -1,11 +1,8 @@
 # frozen_string_literal: true
 
-require "rubocop"
-require "cgi"
-
 module RubyLsp
   module Requests
-    class Diagnostics < RuboCop::Runner
+    class Diagnostics < RuboCopRequest
       RUBOCOP_FLAGS = [
         "--stderr", # Print any output to stderr so that our stdout does not get polluted
         "--format",
@@ -20,22 +17,6 @@ module RubyLsp
         error: LanguageServer::Protocol::Constant::DiagnosticSeverity::ERROR,
         fatal: LanguageServer::Protocol::Constant::DiagnosticSeverity::ERROR,
       }.freeze
-
-      attr_reader :uri, :file, :text
-
-      def self.run(uri, parsed_tree)
-        new(uri, parsed_tree).run
-      end
-
-      def initialize(uri, parsed_tree)
-        @file = CGI.unescape(URI.parse(uri).path)
-        @text = parsed_tree.source
-
-        super(
-          ::RuboCop::Options.new.parse(RUBOCOP_FLAGS).first,
-          ::RuboCop::ConfigStore.new
-        )
-      end
 
       def run
         # We communicate with Rubocop via stdin
