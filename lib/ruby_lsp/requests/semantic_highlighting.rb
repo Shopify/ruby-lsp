@@ -41,11 +41,17 @@ module RubyLsp
       end
 
       def visit_var_field(node)
-        add_token(node.value.location, :local_variable)
+        case node.value
+        when SyntaxTree::Ident
+          add_token(node.value.location, :local_variable)
+        end
       end
 
       def visit_var_ref(node)
-        add_token(node.value.location, :local_variable)
+        case node.value
+        when SyntaxTree::Ident
+          add_token(node.value.location, :local_variable)
+        end
       end
 
       def visit_a_ref_field(node)

@@ -62,6 +62,45 @@ class SemanticHighlightingTest < Minitest::Test
     RUBY
   end
 
+  def test_var_aref_variable
+    tokens = [
+      { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
+    ]
+
+    assert_tokens(tokens, <<~RUBY)
+      def my_method
+        a = :hello # local variable arefs should match
+        @my_ivar = true # ivar arefs should not match
+        $global_var = 1  # global arefs should not match
+        @@class_var = "hello" # cvar refs should not match
+      end
+      Foo = 3.14 # constant refs should not match
+    RUBY
+  end
+
+  def test_var_field_variable
+    tokens = [
+      { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
+      { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
+      { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
+      { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
+      { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
+      { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
+      { delta_line: 0, delta_start_char: 4, length: 1, token_type: 0, token_modifiers: 0 },
+    ]
+
+    assert_tokens(tokens, <<~RUBY)
+      def my_method
+        b = Foo # constant refs should not match
+        a = true # keyword refs should not match
+        a = @my_ivar # ivar refs should not match
+        a = $global_var # global refs should not match
+        a = @@class_var # cvar refs should not match
+        a = b # local variable refs should match
+      end
+    RUBY
+  end
+
   def test_command_invocation
     tokens = [
       { delta_line: 0, delta_start_char: 0, length: 4, token_type: 1, token_modifiers: 0 },
