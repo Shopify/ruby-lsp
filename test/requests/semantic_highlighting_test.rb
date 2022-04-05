@@ -48,6 +48,20 @@ class SemanticHighlightingTest < Minitest::Test
     RUBY
   end
 
+  def test_aref_field
+    tokens = [
+      { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
+      { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
+    ]
+
+    assert_tokens(tokens, <<~RUBY)
+      def my_method
+        a = []
+        a[1] = "foo"
+      end
+    RUBY
+  end
+
   def test_command_invocation
     tokens = [
       { delta_line: 0, delta_start_char: 0, length: 4, token_type: 1, token_modifiers: 0 },
