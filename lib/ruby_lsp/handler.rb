@@ -82,7 +82,7 @@ module RubyLsp
     end
 
     def respond_with_folding_ranges(uri)
-      Requests::FoldingRanges.run(store[uri])
+      Requests::FoldingRanges.run(uri, store)
     end
 
     def respond_with_semantic_highlighting(uri)
