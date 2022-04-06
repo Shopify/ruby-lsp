@@ -40,18 +40,15 @@ module RubyLsp
 
       private
 
-      # For nodes that are simple to fold, we just re-use the same method body
-      SIMPLE_FOLDABLES.each do |node_class|
-        class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
-          def visit_#{class_to_visit_method(node_class.name)}(node)
-            add_node_range(node)
-            super
-          end
-        RUBY
-      end
-
       def visit(node)
-        super if handle_partial_range(node)
+        return unless handle_partial_range(node)
+
+        case node
+        when *SIMPLE_FOLDABLES
+          add_node_range(node)
+        end
+
+        super
       end
 
       def visit_arg_paren(node)
