@@ -78,7 +78,7 @@ module RubyLsp
     end
 
     def respond_with_document_symbol(uri)
-      RubyLsp::Requests::DocumentSymbol.run(store[uri])
+      RubyLsp::Requests::DocumentSymbol.run(uri, store)
     end
 
     def respond_with_folding_ranges(uri)
