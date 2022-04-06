@@ -78,9 +78,8 @@ module RubyLsp
       end
 
       def visit_begin(node)
-        unless node.bodystmt.statements.empty?
-          add_lines_range(node.location.start_line, node.bodystmt.statements.location.end_line)
-        end
+        stmts = node.bodystmt.statements
+        add_lines_range(node.location.start_line, stmts.location.end_line) unless stmts.empty?
 
         super
       end
