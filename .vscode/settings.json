@@ -1,4 +1,5 @@
 {
-  "ruby lsp.trace.server": "verbose",
-  "editor.defaultFormatter": "Shopify.ruby-lsp"
+  // Set this value to `verbose` to see the full JSON content of LSP requests and responses
+  "ruby lsp.trace.server": "messages",
+  "editor.defaultFormatter": "Shopify.ruby-lsp",
 }
