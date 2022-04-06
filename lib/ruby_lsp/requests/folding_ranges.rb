@@ -56,7 +56,9 @@ module RubyLsp
         when *SIMPLE_FOLDABLES
           add_node_range(node)
         when *NODES_WITH_STATEMENTS
-          add_lines_range(node.location.start_line, node.statements.location.end_line) unless node.statements.empty?
+          add_statements_range(node, node.statements)
+        when SyntaxTree::Begin
+          add_statements_range(node, node.bodystmt.statements)
         when SyntaxTree::Def, SyntaxTree::Defs
           add_def_range(node)
           return
@@ -75,13 +77,6 @@ module RubyLsp
         add_node_range(node)
 
         visit_all(node.contents.parts) if node.contents
-      end
-
-      def visit_begin(node)
-        stmts = node.bodystmt.statements
-        add_lines_range(node.location.start_line, stmts.location.end_line) unless stmts.empty?
-
-        super
       end
 
       def visit_call(node)
@@ -191,6 +186,10 @@ module RubyLsp
         end
 
         visit(node.bodystmt.statements)
+      end
+
+      def add_statements_range(node, statements)
+        add_lines_range(node.location.start_line, statements.location.end_line) unless statements.empty?
       end
 
       def add_node_range(node)
