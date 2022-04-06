@@ -121,7 +121,7 @@ class SemanticHighlightingTest < Minitest::Test
     RUBY
   end
 
-  def test_variable_receiver_in_call_invocation
+  def test_call_invocation_with_variable_receiver
     tokens = [
       { delta_line: 1, delta_start_char: 2, length: 3, token_type: 0, token_modifiers: 0 },
       { delta_line: 1, delta_start_char: 2, length: 3, token_type: 0, token_modifiers: 0 },
