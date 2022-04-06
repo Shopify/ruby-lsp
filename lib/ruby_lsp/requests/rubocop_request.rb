@@ -14,13 +14,15 @@ module RubyLsp
 
       attr_reader :uri, :file, :text
 
-      def self.run(uri, parsed_tree)
-        new(uri, parsed_tree).run
+      def self.run(uri, store)
+        store[uri].cache_fetch(self) do
+          new(uri, store).run
+        end
       end
 
-      def initialize(uri, parsed_tree)
+      def initialize(uri, store)
         @file = CGI.unescape(URI.parse(uri).path)
-        @text = parsed_tree.source
+        @text = store[uri].source
 
         super(
           ::RuboCop::Options.new.parse(rubocop_flags).first,

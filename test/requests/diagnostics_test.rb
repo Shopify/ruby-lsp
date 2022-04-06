@@ -24,11 +24,12 @@ class DiagnosticsTest < Minitest::Test
   private
 
   def assert_diagnostics(source, diagnostics)
-    parsed_tree = RubyLsp::Store::ParsedTree.new(source)
+    store = RubyLsp::Store.new
+    store["file://#{__FILE__}"] = source
     result = nil
 
     stdout, _ = capture_io do
-      result = RubyLsp::Requests::Diagnostics.run("file://#{__FILE__}", parsed_tree)
+      result = RubyLsp::Requests::Diagnostics.run("file://#{__FILE__}", store)
     end
 
     assert_empty(stdout)

@@ -90,11 +90,11 @@ module RubyLsp
     end
 
     def respond_with_formatting(uri)
-      Requests::Formatting.run(uri, store[uri])
+      Requests::Formatting.run(uri, store)
     end
 
     def send_diagnostics(uri)
-      response = Requests::Diagnostics.run(uri, store[uri])
+      response = Requests::Diagnostics.run(uri, store)
 
       @writer.write(
         method: "textDocument/publishDiagnostics",
