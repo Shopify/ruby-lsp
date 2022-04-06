@@ -3,6 +3,8 @@
 module RubyLsp
   module Requests
     class Formatting < RuboCopRequest
+      RUBOCOP_FLAGS = (COMMON_RUBOCOP_FLAGS + ["--auto-correct"]).freeze
+
       def initialize(uri, parsed_tree)
         super
         @formatted_text = nil
@@ -31,7 +33,7 @@ module RubyLsp
       private
 
       def rubocop_flags
-        super << "--auto-correct"
+        RUBOCOP_FLAGS
       end
     end
   end

@@ -6,6 +6,12 @@ require "cgi"
 module RubyLsp
   module Requests
     class RuboCopRequest < RuboCop::Runner
+      COMMON_RUBOCOP_FLAGS = [
+        "--stderr", # Print any output to stderr so that our stdout does not get polluted
+        "--format",
+        "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
+      ].freeze
+
       attr_reader :uri, :file, :text
 
       def self.run(uri, parsed_tree)
@@ -33,11 +39,7 @@ module RubyLsp
       private
 
       def rubocop_flags
-        [
-          "--stderr", # Print any output to stderr so that our stdout does not get polluted
-          "--format",
-          "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
-        ]
+        COMMON_RUBOCOP_FLAGS
       end
     end
   end
