@@ -38,10 +38,20 @@ module RubyLsp
         @source = source
         @parser = SyntaxTree::Parser.new(source)
         @tree = @parser.parse
+        @cache = {}
       end
 
       def ==(other)
         @source == other.source
+      end
+
+      def cache_fetch(request_class)
+        cached = @cache[request_class]
+        return cached unless cached.nil?
+
+        result = yield
+        @cache[request_class] = result
+        result
       end
     end
   end
