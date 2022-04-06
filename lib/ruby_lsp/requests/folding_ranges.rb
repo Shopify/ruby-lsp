@@ -107,13 +107,10 @@ module RubyLsp
       end
 
       def visit_string_concat(node)
-        end_line = node.right.location.end_line
         left = node.left
-
         left = left.left while left.is_a?(SyntaxTree::StringConcat)
-        start_line = left.location.start_line
 
-        add_lines_range(start_line, end_line)
+        add_lines_range(left.location.start_line, node.right.location.end_line)
       end
 
       class PartialRange
