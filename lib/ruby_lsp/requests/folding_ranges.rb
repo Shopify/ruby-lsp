@@ -86,23 +86,24 @@ module RubyLsp
       end
 
       def visit_call(node)
-        end_line = node.location.end_line
         receiver = node.receiver
-
-        visit_all(node.arguments.arguments.parts) if node.arguments
-
-        while receiver.is_a?(SyntaxTree::Call) || receiver.is_a?(SyntaxTree::MethodAddBlock)
-          if receiver.is_a?(SyntaxTree::Call)
-            visit(receiver.arguments) if receiver.arguments
+        loop do
+          case receiver
+          when SyntaxTree::Call
+            visit(receiver.arguments)
             receiver = receiver.receiver
-          else
+          when SyntaxTree::MethodAddBlock
             visit(receiver.block)
             receiver = receiver.call.receiver
+          else
+            break
           end
         end
 
-        start_line = receiver.location.start_line
-        add_lines_range(start_line, end_line) if start_line < end_line
+        add_lines_range(receiver.location.start_line, node.location.end_line)
+
+        parts = node.arguments&.arguments&.parts
+        visit_all(parts) unless parts.nil? || parts.empty?
       end
 
       def visit_string_concat(node)
