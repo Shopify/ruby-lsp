@@ -50,6 +50,10 @@ module RubyLsp
           respond_with_semantic_highlighting(request.dig(:params, :textDocument, :uri))
         end
 
+        on("textDocument/formatting") do |request|
+          respond_with_formatting(request.dig(:params, :textDocument, :uri))
+        end
+
         on("shutdown") { shutdown }
       end
 
