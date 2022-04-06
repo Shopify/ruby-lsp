@@ -3,6 +3,11 @@
 module RubyLsp
   module Requests
     class Formatting < RuboCopRequest
+      def initialize(uri, parsed_tree)
+        super
+        @formatted_text = nil
+      end
+
       def run
         super
 

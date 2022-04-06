@@ -15,7 +15,6 @@ module RubyLsp
       def initialize(uri, parsed_tree)
         @file = CGI.unescape(URI.parse(uri).path)
         @text = parsed_tree.source
-        @formatted_text = nil
 
         super(
           ::RuboCop::Options.new.parse(rubocop_flags).first,
