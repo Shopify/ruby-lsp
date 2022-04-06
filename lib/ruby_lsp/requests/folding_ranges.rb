@@ -66,17 +66,12 @@ module RubyLsp
           return
         when SyntaxTree::Def, SyntaxTree::Defs
           add_def_range(node)
+        when SyntaxTree::StringConcat
+          add_string_concat(node)
           return
         end
 
         super
-      end
-
-      def visit_string_concat(node)
-        left = node.left
-        left = left.left while left.is_a?(SyntaxTree::StringConcat)
-
-        add_lines_range(left.location.start_line, node.right.location.end_line)
       end
 
       class PartialRange
@@ -182,6 +177,13 @@ module RubyLsp
 
       def add_statements_range(node, statements)
         add_lines_range(node.location.start_line, statements.location.end_line) unless statements.empty?
+      end
+
+      def add_string_concat(node)
+        left = node.left
+        left = left.left while left.is_a?(SyntaxTree::StringConcat)
+
+        add_lines_range(left.location.start_line, node.right.location.end_line)
       end
 
       def add_node_range(node)
