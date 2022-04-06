@@ -124,6 +124,20 @@ class SemanticHighlightingTest < Minitest::Test
     RUBY
   end
 
+  def test_command_call
+    tokens = [
+      { delta_line: 0, delta_start_char: 0, length: 3, token_type: 0, token_modifiers: 0 },
+      { delta_line: 1, delta_start_char: 0, length: 6, token_type: 1, token_modifiers: 0 },
+      { delta_line: 0, delta_start_char: 7, length: 10, token_type: 1, token_modifiers: 0 },
+      { delta_line: 0, delta_start_char: 11, length: 3, token_type: 0, token_modifiers: 0 },
+    ]
+
+    assert_tokens(tokens, <<~RUBY)
+      var = "Hello"
+      object.invocation var
+    RUBY
+  end
+
   def test_call_invocation
     tokens = [
       { delta_line: 0, delta_start_char: 8, length: 6, token_type: 1, token_modifiers: 0 },
