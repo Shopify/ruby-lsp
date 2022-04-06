@@ -26,12 +26,7 @@ module RubyLsp
       private
 
       def rubocop_flags
-        [
-          "--stderr", # Print any output to stderr so that our stdout does not get polluted
-          "--format",
-          "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
-          "--auto-correct", # Apply the autocorrects on the supplied buffer
-        ]
+        super << "--auto-correct"
       end
     end
   end
