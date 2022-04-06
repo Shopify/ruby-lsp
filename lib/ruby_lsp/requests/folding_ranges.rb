@@ -61,32 +61,15 @@ module RubyLsp
           add_statements_range(node, node.statements)
         when SyntaxTree::Begin
           add_statements_range(node, node.bodystmt.statements)
+        when SyntaxTree::Call, SyntaxTree::CommandCall
+          add_call_range(node)
+          return
         when SyntaxTree::Def, SyntaxTree::Defs
           add_def_range(node)
           return
         end
 
         super
-      end
-
-      def visit_call(node)
-        receiver = node.receiver
-        loop do
-          case receiver
-          when SyntaxTree::Call
-            visit(receiver.arguments)
-            receiver = receiver.receiver
-          when SyntaxTree::MethodAddBlock
-            visit(receiver.block)
-            receiver = receiver.call.receiver
-          else
-            break
-          end
-        end
-
-        add_lines_range(receiver.location.start_line, node.location.end_line)
-
-        visit(node.arguments)
       end
 
       def visit_string_concat(node)
@@ -163,6 +146,26 @@ module RubyLsp
 
         @ranges << @partial_range.to_range
         @partial_range = nil
+      end
+
+      def add_call_range(node)
+        receiver = node.receiver
+        loop do
+          case receiver
+          when SyntaxTree::Call
+            visit(receiver.arguments)
+            receiver = receiver.receiver
+          when SyntaxTree::MethodAddBlock
+            visit(receiver.block)
+            receiver = receiver.call.receiver
+          else
+            break
+          end
+        end
+
+        add_lines_range(receiver.location.start_line, node.location.end_line)
+
+        visit(node.arguments)
       end
 
       def add_def_range(node)

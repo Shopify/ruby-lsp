@@ -169,6 +169,31 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
+  def test_folding_command_call
+    ranges = [
+      { startLine: 0, endLine: 2, kind: "region" },
+    ]
+    assert_ranges(<<~RUBY, ranges)
+      self.foo a,
+        b,
+        c
+    RUBY
+  end
+
+  def test_folding_command_call_chained
+    ranges = [
+      { startLine: 0, endLine: 3, kind: "region" },
+      { startLine: 1, endLine: 3, kind: "region" },
+      { startLine: 2, endLine: 3, kind: "region" },
+    ]
+    assert_ranges(<<~RUBY, ranges)
+      self
+        .foo a
+        .bar b
+        .baz z
+    RUBY
+  end
+
   def test_folding_command_for_require
     ranges = [
       { startLine: 0, endLine: 3, kind: "imports" },
