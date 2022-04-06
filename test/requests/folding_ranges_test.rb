@@ -3,7 +3,7 @@
 require "test_helper"
 
 class FoldingRangesTest < Minitest::Test
-  def test_folding_method_definitions
+  def test_folding_def
     ranges = [{ startLine: 0, endLine: 3, kind: "region" }]
     assert_ranges(<<~RUBY, ranges)
       def foo
@@ -13,7 +13,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_long_params_method_definitions
+  def test_folding_def_with_multline_params
     ranges = [{ startLine: 3, endLine: 6, kind: "region" }]
     assert_ranges(<<~RUBY, ranges)
       def foo(
@@ -26,7 +26,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_singleton_method_definitions
+  def test_folding_defs
     ranges = [{ startLine: 0, endLine: 3, kind: "region" }]
     assert_ranges(<<~RUBY, ranges)
       def self.foo
@@ -36,7 +36,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_long_params_singleton_method_definitions
+  def test_folding_defs_with_multiline_params
     ranges = [{ startLine: 3, endLine: 6, kind: "region" }]
     assert_ranges(<<~RUBY, ranges)
       def self.foo(
@@ -49,15 +49,15 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_no_folding_for_single_line_method_definitions
+  def test_no_folding_def_and_defs_oneline
     assert_no_folding(<<~RUBY)
       def foo; end
       def bar; end
-      def baz; end
+      def self.baz; end
     RUBY
   end
 
-  def test_folding_classes
+  def test_folding_class_declaration
     ranges = [
       { startLine: 0, endLine: 4, kind: "region" },
       { startLine: 1, endLine: 3, kind: "region" },
@@ -71,7 +71,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_singleton_classes
+  def test_folding_sclass
     ranges = [
       { startLine: 0, endLine: 3, kind: "region" },
       { startLine: 1, endLine: 2, kind: "region" },
@@ -84,7 +84,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_modules
+  def test_folding_module_declaration
     ranges = [
       { startLine: 0, endLine: 6, kind: "region" },
       { startLine: 1, endLine: 2, kind: "region" },
@@ -101,7 +101,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_do_blocks
+  def test_folding_do_block
     ranges = [
       { startLine: 0, endLine: 2, kind: "region" },
     ]
@@ -112,7 +112,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_multiline_block
+  def test_folding_brace_block
     ranges = [
       { startLine: 0, endLine: 2, kind: "region" },
     ]
@@ -123,30 +123,19 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_lambdas
-    ranges = [
-      { startLine: 0, endLine: 2, kind: "region" },
-    ]
-    assert_ranges(<<~RUBY, ranges)
-      lambda { |item|
-        puts item
-      }
-    RUBY
-  end
-
-  def test_no_folding_for_single_line_lambdas
+  def test_no_folding_brace_block_oneline
     assert_no_folding(<<~RUBY)
       lambda { |item| puts item }
     RUBY
   end
 
-  def test_no_folding_for_single_line_arrays
+  def test_no_folding_array_literal_oneline
     assert_no_folding(<<~RUBY)
       a = [1, 2]
     RUBY
   end
 
-  def test_folding_multiline_arrays
+  def test_folding_array_literal
     ranges = [
       { startLine: 0, endLine: 3, kind: "region" },
     ]
@@ -158,13 +147,13 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_no_folding_for_single_line_hashes
+  def test_no_folding_hash_literal_oneline
     assert_no_folding(<<~RUBY)
       a = { b: 1, c: 2 }
     RUBY
   end
 
-  def test_folding_multiline_hashes
+  def test_folding_hash_literal
     ranges = [
       { startLine: 0, endLine: 3, kind: "region" },
     ]
@@ -176,7 +165,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_multiline_if_statements
+  def test_folding_if
     ranges = [
       { startLine: 0, endLine: 2, kind: "region" },
     ]
@@ -187,13 +176,13 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_no_folding_if_guard
+  def test_no_folding_if_mod
     assert_no_folding(<<~RUBY)
       puts "Hello!" if true
     RUBY
   end
 
-  def test_folding_multiline_unless_statements
+  def test_folding_unless
     ranges = [
       { startLine: 0, endLine: 2, kind: "region" },
     ]
@@ -215,7 +204,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_no_folding_for_single_line_while
+  def test_no_folding_while_mod
     assert_no_folding(<<~RUBY)
       puts "loop!" while true
     RUBY
@@ -232,13 +221,13 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_no_folding_for_single_line_until
+  def test_no_folding_until_mod
     assert_no_folding(<<~RUBY)
       puts "loop!" until false
     RUBY
   end
 
-  def test_folding_for_loop
+  def test_folding_for
     ranges = [
       { startLine: 0, endLine: 2, kind: "region" },
     ]
@@ -249,7 +238,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_multiline_function_invocation
+  def test_folding_fcall_with_arguments
     ranges = [
       { startLine: 0, endLine: 3, kind: "region" },
     ]
@@ -261,7 +250,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_multiline_method_invocation
+  def test_folding_call_with_arguments
     ranges = [
       { startLine: 0, endLine: 3, kind: "region" },
     ]
@@ -273,7 +262,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_nested_multiline_method_invocation
+  def test_folding_call_and_nested_fcall
     ranges = [
       { startLine: 0, endLine: 5, kind: "region" },
       { startLine: 1, endLine: 4, kind: "region" },
@@ -288,7 +277,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_nested_multiline_invocation_no_parenthesis
+  def test_folding_call_and_nested_command
     ranges = [
       { startLine: 0, endLine: 3, kind: "region" },
       { startLine: 1, endLine: 2, kind: "region" },
@@ -318,7 +307,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_multiline_if_else_statements
+  def test_folding_if_elsif_else
     ranges = [
       { startLine: 0, endLine: 6, kind: "region" },
       { startLine: 2, endLine: 3, kind: "region" },
@@ -335,7 +324,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_multiline_if_else_empty_statements
+  def test_folding_if_elsif_else_with_empty_statements
     ranges = [
       { startLine: 0, endLine: 3, kind: "region" },
     ]
@@ -383,7 +372,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_multiline_invocations_no_parenthesis
+  def test_folding_command
     ranges = [
       { startLine: 0, endLine: 3, kind: "region" },
     ]
@@ -395,7 +384,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_comments
+  def test_folding_comment
     ranges = [
       { startLine: 0, endLine: 2, kind: "comment" },
       { startLine: 4, endLine: 6, kind: "comment" },
@@ -416,7 +405,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_requires
+  def test_folding_command_for_require
     ranges = [
       { startLine: 0, endLine: 3, kind: "imports" },
     ]
@@ -428,7 +417,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_multiline_strings
+  def test_folding_string_concat
     ranges = [
       { startLine: 0, endLine: 2, kind: "region" },
     ]
@@ -439,7 +428,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_pattern_matching
+  def test_folding_case_in_else
     ranges = [
       { startLine: 0, endLine: 5, kind: "region" },
       { startLine: 1, endLine: 2, kind: "region" },
@@ -455,7 +444,7 @@ class FoldingRangesTest < Minitest::Test
     RUBY
   end
 
-  def test_folding_chained_invocations
+  def test_folding_call_chained
     ranges = [
       { startLine: 1, endLine: 7, kind: "region" },
       { startLine: 2, endLine: 6, kind: "region" },
