@@ -20,6 +20,15 @@ module RubyLsp
         SyntaxTree::While,
       ].freeze
 
+      NODES_WITH_STATEMENTS = [
+        SyntaxTree::Else,
+        SyntaxTree::Elsif,
+        SyntaxTree::Ensure,
+        SyntaxTree::In,
+        SyntaxTree::Rescue,
+        SyntaxTree::When,
+      ].freeze
+
       def self.run(parsed_tree)
         new(parsed_tree).run
       end
@@ -46,6 +55,8 @@ module RubyLsp
         case node
         when *SIMPLE_FOLDABLES
           add_node_range(node)
+        when *NODES_WITH_STATEMENTS
+          add_lines_range(node.location.start_line, node.statements.location.end_line) unless node.statements.empty?
         end
 
         super
@@ -103,19 +114,6 @@ module RubyLsp
         visit(node.bodystmt.statements)
       end
       alias_method :visit_defs, :visit_def
-
-      def visit_statement_node(node)
-        return if node.statements.empty?
-
-        add_lines_range(node.location.start_line, node.statements.location.end_line)
-        visit_all(node.child_nodes)
-      end
-      alias_method :visit_else, :visit_statement_node
-      alias_method :visit_elsif, :visit_statement_node
-      alias_method :visit_when, :visit_statement_node
-      alias_method :visit_ensure, :visit_statement_node
-      alias_method :visit_rescue, :visit_statement_node
-      alias_method :visit_in, :visit_statement_node
 
       def visit_string_concat(node)
         end_line = node.right.location.end_line
