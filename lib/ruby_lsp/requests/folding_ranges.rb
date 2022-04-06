@@ -68,7 +68,7 @@ module RubyLsp
 
       def visit_begin(node)
         unless node.bodystmt.statements.empty?
-          add_range(node.location.start_line, node.bodystmt.statements.location.end_line)
+          add_lines_range(node.location.start_line, node.bodystmt.statements.location.end_line)
         end
 
         super
@@ -91,14 +91,14 @@ module RubyLsp
         end
 
         start_line = receiver.location.start_line
-        add_range(start_line, end_line) if start_line < end_line
+        add_lines_range(start_line, end_line) if start_line < end_line
       end
 
       def visit_def(node)
         params_location = node.params.location
 
         if params_location.start_line < params_location.end_line
-          add_range(params_location.end_line, node.location.end_line)
+          add_lines_range(params_location.end_line, node.location.end_line)
         else
           add_simple_range(node)
         end
@@ -110,7 +110,7 @@ module RubyLsp
       def visit_statement_node(node)
         return if node.statements.empty?
 
-        add_range(node.location.start_line, node.statements.location.end_line)
+        add_lines_range(node.location.start_line, node.statements.location.end_line)
         visit_all(node.child_nodes)
       end
       alias_method :visit_else, :visit_statement_node
@@ -127,7 +127,7 @@ module RubyLsp
         left = left.left while left.is_a?(SyntaxTree::StringConcat)
         start_line = left.location.start_line
 
-        add_range(start_line, end_line)
+        add_lines_range(start_line, end_line)
       end
 
       class PartialRange
@@ -203,11 +203,11 @@ module RubyLsp
         location = node.location
 
         if location.start_line < location.end_line
-          add_range(location.start_line, location.end_line)
+          add_lines_range(location.start_line, location.end_line)
         end
       end
 
-      def add_range(start_line, end_line)
+      def add_lines_range(start_line, end_line)
         @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
           start_line: start_line - 1,
           end_line: end_line - 1,
