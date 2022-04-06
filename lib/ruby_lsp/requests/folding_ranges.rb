@@ -4,11 +4,13 @@ module RubyLsp
   module Requests
     class FoldingRanges < Visitor
       SIMPLE_FOLDABLES = [
-        SyntaxTree::Args,
+        SyntaxTree::ArrayLiteral,
         SyntaxTree::BraceBlock,
         SyntaxTree::Case,
         SyntaxTree::ClassDeclaration,
+        SyntaxTree::Command,
         SyntaxTree::DoBlock,
+        SyntaxTree::FCall,
         SyntaxTree::For,
         SyntaxTree::HashLiteral,
         SyntaxTree::Heredoc,
@@ -67,18 +69,6 @@ module RubyLsp
         super
       end
 
-      def visit_arg_paren(node)
-        add_node_range(node)
-
-        visit_all(node.arguments.parts) if node.arguments
-      end
-
-      def visit_array_literal(node)
-        add_node_range(node)
-
-        visit_all(node.contents.parts) if node.contents
-      end
-
       def visit_call(node)
         receiver = node.receiver
         loop do
@@ -96,8 +86,7 @@ module RubyLsp
 
         add_lines_range(receiver.location.start_line, node.location.end_line)
 
-        parts = node.arguments&.arguments&.parts
-        visit_all(parts) unless parts.nil? || parts.empty?
+        visit(node.arguments)
       end
 
       def visit_string_concat(node)
