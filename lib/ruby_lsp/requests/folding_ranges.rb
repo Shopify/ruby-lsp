@@ -44,7 +44,7 @@ module RubyLsp
       SIMPLE_FOLDABLES.each do |node_class|
         class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
           def visit_#{class_to_visit_method(node_class.name)}(node)
-            add_simple_range(node)
+            add_node_range(node)
             super
           end
         RUBY
@@ -55,13 +55,13 @@ module RubyLsp
       end
 
       def visit_arg_paren(node)
-        add_simple_range(node)
+        add_node_range(node)
 
         visit_all(node.arguments.parts) if node.arguments
       end
 
       def visit_array_literal(node)
-        add_simple_range(node)
+        add_node_range(node)
 
         visit_all(node.contents.parts) if node.contents
       end
@@ -100,7 +100,7 @@ module RubyLsp
         if params_location.start_line < params_location.end_line
           add_lines_range(params_location.end_line, node.location.end_line)
         else
-          add_simple_range(node)
+          add_node_range(node)
         end
 
         visit(node.bodystmt.statements)
@@ -199,7 +199,7 @@ module RubyLsp
         @partial_range = nil
       end
 
-      def add_simple_range(node)
+      def add_node_range(node)
         add_location_range(node.location)
       end
 
