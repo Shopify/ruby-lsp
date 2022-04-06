@@ -7,7 +7,7 @@ class DiagnosticsTest < Minitest::Test
     diagnostics = [
       start: { line: 3, character: 0 },
       end: { line: 3, character: 0 },
-      severity: LanguageServer::Protocol::Constant::DiagnosticSeverity::INFORMATION,
+      severity: :info,
       code: "Layout/IndentationWidth",
       message: "Layout/IndentationWidth: Use 2 (not 0) spaces for indentation.",
     ]
@@ -41,7 +41,7 @@ class DiagnosticsTest < Minitest::Test
         message: diagnostic[:message],
         source: "RuboCop",
         code: diagnostic[:code],
-        severity: diagnostic[:severity],
+        severity: RubyLsp::Requests::Diagnostics::RUBOCOP_TO_LSP_SEVERITY[diagnostic[:severity]],
         range: LanguageServer::Protocol::Interface::Range.new(
           start: LanguageServer::Protocol::Interface::Position.new(
             line: diagnostic[:start][:line],
