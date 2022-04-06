@@ -57,6 +57,9 @@ module RubyLsp
           add_node_range(node)
         when *NODES_WITH_STATEMENTS
           add_lines_range(node.location.start_line, node.statements.location.end_line) unless node.statements.empty?
+        when SyntaxTree::Def, SyntaxTree::Defs
+          add_def_range(node)
+          return
         end
 
         super
@@ -101,19 +104,6 @@ module RubyLsp
         start_line = receiver.location.start_line
         add_lines_range(start_line, end_line) if start_line < end_line
       end
-
-      def visit_def(node)
-        params_location = node.params.location
-
-        if params_location.start_line < params_location.end_line
-          add_lines_range(params_location.end_line, node.location.end_line)
-        else
-          add_node_range(node)
-        end
-
-        visit(node.bodystmt.statements)
-      end
-      alias_method :visit_defs, :visit_def
 
       def visit_string_concat(node)
         end_line = node.right.location.end_line
@@ -192,6 +182,18 @@ module RubyLsp
 
         @ranges << @partial_range.to_range
         @partial_range = nil
+      end
+
+      def add_def_range(node)
+        params_location = node.params.location
+
+        if params_location.start_line < params_location.end_line
+          add_lines_range(params_location.end_line, node.location.end_line)
+        else
+          add_node_range(node)
+        end
+
+        visit(node.bodystmt.statements)
       end
 
       def add_node_range(node)
