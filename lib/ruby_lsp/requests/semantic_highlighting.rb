@@ -66,6 +66,7 @@ module RubyLsp
 
       def visit_command(node)
         add_token(node.message.location, :method_call)
+        visit(node.arguments)
       end
 
       def visit_f_call(node)
