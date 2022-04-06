@@ -222,10 +222,11 @@ class SemanticHighlightingTest < Minitest::Test
   private
 
   def assert_tokens(expected, source_code)
-    parsed_tree = RubyLsp::Store::ParsedTree.new(source_code)
+    store = RubyLsp::Store.new
+    store["foo.rb"] = source_code
     assert_equal(
       inline_tokens(expected),
-      RubyLsp::Requests::SemanticHighlighting.run(parsed_tree).data
+      RubyLsp::Requests::SemanticHighlighting.run("foo.rb", store).data
     )
   end
 

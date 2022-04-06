@@ -86,7 +86,7 @@ module RubyLsp
     end
 
     def respond_with_semantic_highlighting(uri)
-      Requests::SemanticHighlighting.run(store[uri])
+      Requests::SemanticHighlighting.run(uri, store)
     end
 
     def respond_with_formatting(uri)

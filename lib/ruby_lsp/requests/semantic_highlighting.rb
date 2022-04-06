@@ -2,25 +2,21 @@
 
 module RubyLsp
   module Requests
-    class SemanticHighlighting < Visitor
+    class SemanticHighlighting < BaseRequest
       TOKEN_TYPES = [
         :local_variable,
         :method_call,
       ].freeze
       TOKEN_MODIFIERS = [].freeze
 
-      def self.run(parsed_tree)
-        new(parsed_tree).run
-      end
+      def initialize(uri, store)
+        super
 
-      def initialize(parsed_tree)
         @tokens = []
-        @parser = parsed_tree.parser
-        @tree = parsed_tree.tree
+        @parser = @parsed_tree.parser
+        @tree = @parsed_tree.tree
         @current_row = 0
         @current_column = 0
-
-        super()
       end
 
       def run
