@@ -160,6 +160,21 @@ class SemanticHighlightingTest < Minitest::Test
     RUBY
   end
 
+  def test_fcall_invocation_variable_arguments
+    tokens = [
+      { delta_line: 1, delta_start_char: 2, length: 3, token_type: 0, token_modifiers: 0 },
+      { delta_line: 1, delta_start_char: 2, length: 10, token_type: 1, token_modifiers: 0 },
+      { delta_line: 0, delta_start_char: 11, length: 3, token_type: 0, token_modifiers: 0 },
+    ]
+
+    assert_tokens(tokens, <<~RUBY)
+      def some_method
+        var = 1
+        invocation(var)
+      end
+    RUBY
+  end
+
   private
 
   def assert_tokens(expected, source_code)
