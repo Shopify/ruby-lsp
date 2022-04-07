@@ -48,7 +48,7 @@ class SemanticHighlightingTest < Minitest::Test
     RUBY
   end
 
-  def test_aref_field
+  def test_a_ref_field
     tokens = [
       { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
       { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
