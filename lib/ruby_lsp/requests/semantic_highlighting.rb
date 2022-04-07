@@ -59,10 +59,6 @@ module RubyLsp
         end
       end
 
-      def visit_a_ref_field(node)
-        add_token(node.collection.value.location, :local_variable)
-      end
-
       def visit_call(node)
         visit(node.receiver)
         add_token(node.message.location, :method_call)

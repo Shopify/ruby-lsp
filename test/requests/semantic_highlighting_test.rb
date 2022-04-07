@@ -52,12 +52,16 @@ class SemanticHighlightingTest < Minitest::Test
     tokens = [
       { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
       { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
+      { delta_line: 1, delta_start_char: 2, length: 8, token_type: 2, token_modifiers: 0 },
     ]
 
     assert_tokens(tokens, <<~RUBY)
       def my_method
         a = []
-        a[1] = "foo"
+        a[1] = "foo" # local variable aref_field should match
+        @my_ivar[1] = "foo" # ivar aref_field should match
+        $global_var[1] = 1  # global arefs should not match
+        @@class_var[1] = "hello" # cvar refs should not match
       end
     RUBY
   end
