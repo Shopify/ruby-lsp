@@ -6,6 +6,7 @@ module RubyLsp
       TOKEN_TYPES = [
         :local_variable,
         :method_call,
+        :instance_variable,
       ].freeze
       TOKEN_MODIFIERS = [].freeze
 
