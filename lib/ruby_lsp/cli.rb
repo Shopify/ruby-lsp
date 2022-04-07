@@ -20,6 +20,7 @@ module RubyLsp
           text = request.dig(:params, :contentChanges, 0, :text)
           store[uri] = text
 
+          send_diagnostics(uri)
           nil
         end
 
@@ -28,6 +29,7 @@ module RubyLsp
           text = request.dig(:params, :textDocument, :text)
           store[uri] = text
 
+          send_diagnostics(uri)
           nil
         end
 

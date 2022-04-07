@@ -92,5 +92,17 @@ module RubyLsp
     def respond_with_formatting(uri)
       Requests::Formatting.run(uri, store[uri])
     end
+
+    def send_diagnostics(uri)
+      response = Requests::Diagnostics.run(uri, store[uri])
+
+      @writer.write(
+        method: "textDocument/publishDiagnostics",
+        params: Interface::PublishDiagnosticsParams.new(
+          uri: uri,
+          diagnostics: response
+        )
+      )
+    end
   end
 end
