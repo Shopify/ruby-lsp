@@ -45,6 +45,8 @@ module RubyLsp
         case node.value
         when SyntaxTree::Ident
           add_token(node.value.location, :local_variable)
+        when SyntaxTree::IVar
+          add_token(node.value.location, :instance_variable)
         end
       end
 
