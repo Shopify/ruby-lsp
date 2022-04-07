@@ -66,6 +66,23 @@ class SemanticHighlightingTest < Minitest::Test
     RUBY
   end
 
+  def test_var_field
+    tokens = [
+      { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
+      { delta_line: 1, delta_start_char: 2, length: 8, token_type: 2, token_modifiers: 0 },
+    ]
+
+    assert_tokens(tokens, <<~RUBY)
+      def my_method
+        a = :hello # local variable fields should match
+        @my_ivar = true # ivar fields should match
+        $global_var = 1  # global fields should not match
+        @@class_var = "hello" # cvar fields should not match
+      end
+      Foo = 3.14 # constant fields should not match
+    RUBY
+  end
+
   def test_var_ref_plain
     tokens = [
       { delta_line: 1, delta_start_char: 2, length: 1, token_type: 0, token_modifiers: 0 },
