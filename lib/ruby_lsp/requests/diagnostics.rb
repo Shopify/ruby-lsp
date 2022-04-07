@@ -2,6 +2,11 @@
 
 module RubyLsp
   module Requests
+    # # Diagnostics
+    #
+    # [Specification doc](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_publishDiagnostics)
+    #
+    # Publishes RuboCop diagnostics for the selected file.
     class Diagnostics < RuboCopRequest
       RUBOCOP_TO_LSP_SEVERITY = {
         convention: LanguageServer::Protocol::Constant::DiagnosticSeverity::INFORMATION,

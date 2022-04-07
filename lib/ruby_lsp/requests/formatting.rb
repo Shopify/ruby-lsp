@@ -2,6 +2,11 @@
 
 module RubyLsp
   module Requests
+    # # Formatting
+    #
+    # [Specification doc](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_formatting)
+    #
+    # Auto-formats the document according to RuboCop configuration.
     class Formatting < RuboCopRequest
       RUBOCOP_FLAGS = (COMMON_RUBOCOP_FLAGS + ["--auto-correct"]).freeze
 
