@@ -239,7 +239,7 @@ class DocumentSymbolsTest < Minitest::Test
 
   def assert_symbols(source, expected_symbols, print_result: false)
     store = RubyLsp::Store.new
-    store["foo.rb"] = source
+    store.set("foo.rb", source)
     actual = RubyLsp::Requests::DocumentSymbol.run("foo.rb", store)
     actual_json = JSON.parse(actual.to_json, symbolize_names: true)
     simplified_symbol = simplified_symbols(actual_json)

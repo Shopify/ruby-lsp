@@ -223,7 +223,7 @@ class SemanticHighlightingTest < Minitest::Test
 
   def assert_tokens(expected, source_code)
     store = RubyLsp::Store.new
-    store["foo.rb"] = source_code
+    store.set("foo.rb", source_code)
     assert_equal(
       inline_tokens(expected),
       RubyLsp::Requests::SemanticHighlighting.run("foo.rb", store).data

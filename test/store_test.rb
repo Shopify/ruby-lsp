@@ -5,7 +5,7 @@ require "test_helper"
 class StoreTest < Minitest::Test
   def setup
     @store = RubyLsp::Store.new
-    @store["/foo/bar.rb"] = "def foo; end"
+    @store.set("/foo/bar.rb", "def foo; end")
   end
 
   def test_hash_accessors
@@ -24,7 +24,7 @@ class StoreTest < Minitest::Test
   end
 
   def test_store_ignores_syntax_errors
-    @store["/foo/bar.rb"] = "def bar; end; end"
+    @store.set("/foo/bar.rb", "def bar; end; end")
 
     assert_equal(RubyLsp::Store::ParsedTree.new("def foo; end"), @store["/foo/bar.rb"])
   end
@@ -54,7 +54,7 @@ class StoreTest < Minitest::Test
     assert_equal(1, counter)
 
     # After the entry in the storage is updated, the cache is invalidated
-    @store["/foo/bar.rb"] = "def bar; end"
+    @store.set("/foo/bar.rb", "def bar; end")
     5.times do
       @store["/foo/bar.rb"].cache_fetch(RubyLsp::Requests::FoldingRanges) do
         counter += 1

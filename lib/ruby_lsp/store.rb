@@ -13,11 +13,11 @@ module RubyLsp
       parsed_tree = @state[uri]
       return parsed_tree unless parsed_tree.nil?
 
-      self[uri] = File.binread(CGI.unescape(URI.parse(uri).path))
+      set(uri, File.binread(CGI.unescape(URI.parse(uri).path)))
       @state[uri]
     end
 
-    def []=(uri, content)
+    def set(uri, content)
       @state[uri] = ParsedTree.new(content)
     rescue SyntaxTree::Parser::ParseError
       # Do not update the store if there are syntax errors

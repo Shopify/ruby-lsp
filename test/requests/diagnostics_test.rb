@@ -25,7 +25,7 @@ class DiagnosticsTest < Minitest::Test
 
   def assert_diagnostics(source, diagnostics)
     store = RubyLsp::Store.new
-    store["file://#{__FILE__}"] = source
+    store.set("file://#{__FILE__}", source)
     result = nil
 
     stdout, _ = capture_io do

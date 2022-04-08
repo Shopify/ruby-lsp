@@ -500,14 +500,14 @@ class FoldingRangesTest < Minitest::Test
 
   def assert_no_folding(source)
     store = RubyLsp::Store.new
-    store["foo.rb"] = source
+    store.set("foo.rb", source)
     actual = RubyLsp::Requests::FoldingRanges.run("foo.rb", store)
     assert_empty(JSON.parse(actual.to_json, symbolize_names: true))
   end
 
   def assert_ranges(source, expected_ranges)
     store = RubyLsp::Store.new
-    store["foo.rb"] = source
+    store.set("foo.rb", source)
     actual = RubyLsp::Requests::FoldingRanges.run("foo.rb", store)
     assert_equal(expected_ranges, JSON.parse(actual.to_json, symbolize_names: true))
   end

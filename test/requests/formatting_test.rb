@@ -25,7 +25,7 @@ class FormattingTest < Minitest::Test
 
   def assert_formatted(original, formatted)
     store = RubyLsp::Store.new
-    store["file://#{__FILE__}"] = original
+    store.set("file://#{__FILE__}", original)
     result = nil
 
     stdout, _ = capture_io do
