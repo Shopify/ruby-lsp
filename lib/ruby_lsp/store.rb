@@ -9,7 +9,7 @@ module RubyLsp
       @state = {}
     end
 
-    def [](uri)
+    def get(uri)
       parsed_tree = @state[uri]
       return parsed_tree unless parsed_tree.nil?
 
@@ -29,6 +29,10 @@ module RubyLsp
 
     def delete(uri)
       @state.delete(uri)
+    end
+
+    def cache_fetch(uri, request_class, &block)
+      get(uri).cache_fetch(request_class, &block)
     end
 
     class ParsedTree

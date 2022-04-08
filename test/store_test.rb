@@ -8,8 +8,8 @@ class StoreTest < Minitest::Test
     @store.set("/foo/bar.rb", "def foo; end")
   end
 
-  def test_hash_accessors
-    assert_equal(RubyLsp::Store::ParsedTree.new("def foo; end"), @store["/foo/bar.rb"])
+  def test_get
+    assert_equal(RubyLsp::Store::ParsedTree.new("def foo; end"), @store.get("/foo/bar.rb"))
   end
 
   def test_reads_from_file_if_missing_in_store
@@ -17,7 +17,7 @@ class StoreTest < Minitest::Test
     file.write("def great_code; end")
     file.rewind
 
-    assert_equal(RubyLsp::Store::ParsedTree.new("def great_code; end"), @store[file.path])
+    assert_equal(RubyLsp::Store::ParsedTree.new("def great_code; end"), @store.get(file.path))
   ensure
     file.close
     file.unlink
@@ -26,7 +26,7 @@ class StoreTest < Minitest::Test
   def test_store_ignores_syntax_errors
     @store.set("/foo/bar.rb", "def bar; end; end")
 
-    assert_equal(RubyLsp::Store::ParsedTree.new("def foo; end"), @store["/foo/bar.rb"])
+    assert_equal(RubyLsp::Store::ParsedTree.new("def foo; end"), @store.get("/foo/bar.rb"))
   end
 
   def test_clear
@@ -46,7 +46,7 @@ class StoreTest < Minitest::Test
     counter = 0
 
     5.times do
-      @store["/foo/bar.rb"].cache_fetch(RubyLsp::Requests::FoldingRanges) do
+      @store.cache_fetch("/foo/bar.rb", RubyLsp::Requests::FoldingRanges) do
         counter += 1
       end
     end
@@ -56,7 +56,7 @@ class StoreTest < Minitest::Test
     # After the entry in the storage is updated, the cache is invalidated
     @store.set("/foo/bar.rb", "def bar; end")
     5.times do
-      @store["/foo/bar.rb"].cache_fetch(RubyLsp::Requests::FoldingRanges) do
+      @store.cache_fetch("/foo/bar.rb", RubyLsp::Requests::FoldingRanges) do
         counter += 1
       end
     end
