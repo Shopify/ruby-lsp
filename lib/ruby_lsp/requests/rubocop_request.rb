@@ -12,7 +12,7 @@ module RubyLsp
         "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
       ].freeze
 
-      attr_reader :uri, :file, :text
+      attr_reader :file, :text
 
       def self.run(uri, parsed_tree)
         new(uri, parsed_tree).run
@@ -21,6 +21,7 @@ module RubyLsp
       def initialize(uri, parsed_tree)
         @file = CGI.unescape(URI.parse(uri).path)
         @text = parsed_tree.source
+        @uri = uri
 
         super(
           ::RuboCop::Options.new.parse(rubocop_flags).first,

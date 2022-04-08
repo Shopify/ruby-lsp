@@ -32,7 +32,7 @@ class DiagnosticsTest < Minitest::Test
     end
 
     assert_empty(stdout)
-    assert_equal(map_diagnostics(diagnostics).to_json, result.to_json)
+    assert_equal(map_diagnostics(diagnostics).to_json, result.map(&:to_lsp_diagnostic).to_json)
   end
 
   def map_diagnostics(diagnostics)
