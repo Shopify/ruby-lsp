@@ -84,6 +84,10 @@ export default class Client {
   }
 
   private async gemMissing(): Promise<boolean> {
+    if (this.context.workspaceState.get("ruby-lsp.cancelledBundleAdd")) {
+      return true;
+    }
+
     const bundledGems = await this.execInPath("bundle list");
 
     if (bundledGems.includes("ruby-lsp")) {
@@ -102,6 +106,7 @@ export default class Client {
       return false;
     }
 
+    this.context.workspaceState.update("ruby-lsp.cancelledBundleAdd", true);
     return true;
   }
 
