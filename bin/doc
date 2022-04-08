@@ -7,9 +7,6 @@ require "pathname"
 require "ruby_lsp/documentation_visitor"
 
 DOCS_BASE_PATH = "#{__dir__}/../docs"
-IGNORED_FILES = [
-  "rubocop_request.rb",
-].freeze
 
 outdated_docs = []
 command = ARGV.shift
@@ -21,12 +18,11 @@ end
 
 requests = Dir["#{__dir__}/../lib/ruby_lsp/requests/*.rb"].map { |f| Pathname.new(f) }
 requests.each do |file|
-  next if IGNORED_FILES.include?(file.basename.to_s)
-
   # Visit the parsed request file to gather the class documentation
   tree = SyntaxTree.parse(file.read)
   visitor = RubyLsp::DocumentationVisitor.new
   visitor.visit(tree)
+  next if visitor.documentation_skipped?
 
   # Read existing documentation
   documentation_path = Pathname.new("#{DOCS_BASE_PATH}/#{file.basename.to_s.gsub(".rb", ".md")}")
@@ -50,7 +46,7 @@ else
 
       #{outdated_docs.map(&:basename).join("\n  ")}
 
-    Run `bin/documentation generate` to update them
+    Run `bin/doc generate` to update them
   MESSAGE
 
   exit(1)

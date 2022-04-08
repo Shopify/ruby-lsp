@@ -18,7 +18,7 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
       - name: Check if documentation is up to date
-        run: bin/documentation check
+        run: bin/doc check
       - name: Lint Ruby files
         run: bin/rubocop
       - name: Run tests
