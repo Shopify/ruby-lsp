@@ -13,6 +13,10 @@ module RubyLsp
       super
     end
 
+    def documentation_skipped?
+      @documentation.any? { |doc| doc.strip == ":nodoc:" }
+    end
+
     private
 
     def visit_module_declaration(node)
@@ -30,10 +34,7 @@ module RubyLsp
     def visit_comment(node)
       return unless @above_class
 
-      content = node.value.delete_prefix("#")
-      content.delete_prefix!(" ")
-
-      @documentation << content
+      @documentation << node.value.gsub(/^# ?/, "")
       super
     end
   end

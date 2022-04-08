@@ -61,6 +61,22 @@ class DocumentationVisitorTest < Minitest::Test
     assert_empty(visitor.documentation)
   end
 
+  def test_skipped_documentation
+    visitor = visit_documentation(<<~RUBY)
+      # frozen_string_literal: true
+
+      module RubyLsp
+        module Requests
+          # :nodoc:
+          class FakeRequest < Visitor
+          end
+        end
+      end
+    RUBY
+
+    assert_predicate(visitor, :documentation_skipped?)
+  end
+
   private
 
   def visit_documentation(source)
