@@ -4,20 +4,31 @@ module RubyLsp
   module Requests
     class FoldingRanges < Visitor
       SIMPLE_FOLDABLES = [
-        SyntaxTree::SClass,
-        SyntaxTree::ClassDeclaration,
-        SyntaxTree::ModuleDeclaration,
-        SyntaxTree::DoBlock,
+        SyntaxTree::ArrayLiteral,
         SyntaxTree::BraceBlock,
-        SyntaxTree::HashLiteral,
-        SyntaxTree::If,
-        SyntaxTree::Unless,
         SyntaxTree::Case,
-        SyntaxTree::While,
-        SyntaxTree::Until,
+        SyntaxTree::ClassDeclaration,
+        SyntaxTree::Command,
+        SyntaxTree::DoBlock,
+        SyntaxTree::FCall,
         SyntaxTree::For,
-        SyntaxTree::Args,
+        SyntaxTree::HashLiteral,
         SyntaxTree::Heredoc,
+        SyntaxTree::If,
+        SyntaxTree::ModuleDeclaration,
+        SyntaxTree::SClass,
+        SyntaxTree::Unless,
+        SyntaxTree::Until,
+        SyntaxTree::While,
+      ].freeze
+
+      NODES_WITH_STATEMENTS = [
+        SyntaxTree::Else,
+        SyntaxTree::Elsif,
+        SyntaxTree::Ensure,
+        SyntaxTree::In,
+        SyntaxTree::Rescue,
+        SyntaxTree::When,
       ].freeze
 
       def self.run(parsed_tree)
@@ -40,94 +51,27 @@ module RubyLsp
 
       private
 
-      # For nodes that are simple to fold, we just re-use the same method body
-      SIMPLE_FOLDABLES.each do |node_class|
-        class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
-          def visit_#{class_to_visit_method(node_class.name)}(node)
-            add_simple_range(node)
-            super
-          end
-        RUBY
-      end
-
       def visit(node)
-        super if handle_partial_range(node)
-      end
+        return unless handle_partial_range(node)
 
-      def visit_arg_paren(node)
-        add_simple_range(node)
-
-        visit_all(node.arguments.parts) if node.arguments
-      end
-
-      def visit_array_literal(node)
-        add_simple_range(node)
-
-        visit_all(node.contents.parts) if node.contents
-      end
-
-      def visit_begin(node)
-        unless node.bodystmt.statements.empty?
-          add_range(node.location.start_line - 1, node.bodystmt.statements.location.end_line - 1)
+        case node
+        when *SIMPLE_FOLDABLES
+          add_node_range(node)
+        when *NODES_WITH_STATEMENTS
+          add_statements_range(node, node.statements)
+        when SyntaxTree::Begin
+          add_statements_range(node, node.bodystmt.statements)
+        when SyntaxTree::Call, SyntaxTree::CommandCall
+          add_call_range(node)
+          return
+        when SyntaxTree::Def, SyntaxTree::Defs
+          add_def_range(node)
+        when SyntaxTree::StringConcat
+          add_string_concat(node)
+          return
         end
 
         super
-      end
-
-      def visit_call(node)
-        end_line = node.location.end_line - 1
-        receiver = node.receiver
-
-        visit_all(node.arguments.arguments.parts) if node.arguments
-
-        while receiver.is_a?(SyntaxTree::Call) || receiver.is_a?(SyntaxTree::MethodAddBlock)
-          if receiver.is_a?(SyntaxTree::Call)
-            visit(receiver.arguments) if receiver.arguments
-            receiver = receiver.receiver
-          else
-            visit(receiver.block)
-            receiver = receiver.call.receiver
-          end
-        end
-
-        start_line = receiver.location.start_line - 1
-        add_range(start_line, end_line) if start_line < end_line
-      end
-
-      def visit_def(node)
-        params_location = node.params.location
-
-        if params_location.start_line < params_location.end_line
-          add_range(params_location.end_line - 1, node.location.end_line - 1)
-        else
-          add_simple_range(node)
-        end
-
-        visit(node.bodystmt.statements)
-      end
-      alias_method :visit_defs, :visit_def
-
-      def visit_statement_node(node)
-        return if node.statements.empty?
-
-        add_range(node.location.start_line - 1, node.statements.location.end_line - 1)
-        visit_all(node.child_nodes)
-      end
-      alias_method :visit_else, :visit_statement_node
-      alias_method :visit_elsif, :visit_statement_node
-      alias_method :visit_when, :visit_statement_node
-      alias_method :visit_ensure, :visit_statement_node
-      alias_method :visit_rescue, :visit_statement_node
-      alias_method :visit_in, :visit_statement_node
-
-      def visit_string_concat(node)
-        end_line = node.right.location.end_line - 1
-        left = node.left
-
-        left = left.left while left.is_a?(SyntaxTree::StringConcat)
-        start_line = left.location.start_line - 1
-
-        add_range(start_line, end_line)
       end
 
       class PartialRange
@@ -199,18 +143,63 @@ module RubyLsp
         @partial_range = nil
       end
 
-      def add_simple_range(node)
-        location = node.location
-
-        if location.start_line < location.end_line
-          add_range(location.start_line - 1, location.end_line - 1)
+      def add_call_range(node)
+        receiver = node.receiver
+        loop do
+          case receiver
+          when SyntaxTree::Call
+            visit(receiver.arguments)
+            receiver = receiver.receiver
+          when SyntaxTree::MethodAddBlock
+            visit(receiver.block)
+            receiver = receiver.call.receiver
+          else
+            break
+          end
         end
+
+        add_lines_range(receiver.location.start_line, node.location.end_line)
+
+        visit(node.arguments)
       end
 
-      def add_range(start_line, end_line)
+      def add_def_range(node)
+        params_location = node.params.location
+
+        if params_location.start_line < params_location.end_line
+          add_lines_range(params_location.end_line, node.location.end_line)
+        else
+          add_node_range(node)
+        end
+
+        visit(node.bodystmt.statements)
+      end
+
+      def add_statements_range(node, statements)
+        add_lines_range(node.location.start_line, statements.location.end_line) unless statements.empty?
+      end
+
+      def add_string_concat(node)
+        left = node.left
+        left = left.left while left.is_a?(SyntaxTree::StringConcat)
+
+        add_lines_range(left.location.start_line, node.right.location.end_line)
+      end
+
+      def add_node_range(node)
+        add_location_range(node.location)
+      end
+
+      def add_location_range(location)
+        add_lines_range(location.start_line, location.end_line)
+      end
+
+      def add_lines_range(start_line, end_line)
+        return if start_line >= end_line
+
         @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
-          start_line: start_line,
-          end_line: end_line,
+          start_line: start_line - 1,
+          end_line: end_line - 1,
           kind: "region"
         )
       end
