@@ -31,8 +31,8 @@ module RubyLsp
       @state.delete(uri)
     end
 
-    def cache_fetch(uri, request_class, &block)
-      get(uri).cache_fetch(request_class, &block)
+    def cache_fetch(uri, request_name, &block)
+      get(uri).cache_fetch(request_name, &block)
     end
 
     class ParsedTree
@@ -49,12 +49,12 @@ module RubyLsp
         @source == other.source
       end
 
-      def cache_fetch(request_class)
-        cached = @cache[request_class]
+      def cache_fetch(request_name)
+        cached = @cache[request_name]
         return cached unless cached.nil?
 
         result = yield
-        @cache[request_class] = result
+        @cache[request_name] = result
         result
       end
     end

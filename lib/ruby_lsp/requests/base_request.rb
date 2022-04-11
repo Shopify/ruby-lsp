@@ -4,9 +4,7 @@ module RubyLsp
   module Requests
     class BaseRequest < Visitor
       def self.run(uri, store)
-        store.cache_fetch(uri, self) do
-          new(uri, store).run
-        end
+        new(uri, store).run
       end
 
       def initialize(uri, store)
