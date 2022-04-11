@@ -51,9 +51,9 @@ module RubyLsp
 
       def cache_fetch(request_name)
         cached = @cache[request_name]
-        return cached unless cached.nil?
+        return cached if cached
 
-        result = yield
+        result = yield(self)
         @cache[request_name] = result
         result
       end

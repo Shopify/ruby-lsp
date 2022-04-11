@@ -31,7 +31,7 @@ module RubyLsp
         SyntaxTree::When,
       ].freeze
 
-      def initialize(uri, store)
+      def initialize(parsed_tree)
         super
 
         @ranges = []

@@ -78,20 +78,20 @@ module RubyLsp
     end
 
     def respond_with_document_symbol(uri)
-      store.cache_fetch(uri, :document_symbol) do
-        RubyLsp::Requests::DocumentSymbol.run(uri, store)
+      store.cache_fetch(uri, :document_symbol) do |parsed_tree|
+        RubyLsp::Requests::DocumentSymbol.run(parsed_tree)
       end
     end
 
     def respond_with_folding_ranges(uri)
-      store.cache_fetch(uri, :folding_ranges) do
-        Requests::FoldingRanges.run(uri, store)
+      store.cache_fetch(uri, :folding_ranges) do |parsed_tree|
+        Requests::FoldingRanges.run(parsed_tree)
       end
     end
 
     def respond_with_semantic_highlighting(uri)
-      store.cache_fetch(uri, :semantic_highlighting) do
-        Requests::SemanticHighlighting.run(uri, store)
+      store.cache_fetch(uri, :semantic_highlighting) do |parsed_tree|
+        Requests::SemanticHighlighting.run(parsed_tree)
       end
     end
 

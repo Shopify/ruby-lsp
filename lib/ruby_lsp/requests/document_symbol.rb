@@ -42,7 +42,7 @@ module RubyLsp
         end
       end
 
-      def initialize(uri, store)
+      def initialize(parsed_tree)
         super
 
         @root = SymbolHierarchyRoot.new

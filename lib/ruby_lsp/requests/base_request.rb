@@ -3,14 +3,12 @@
 module RubyLsp
   module Requests
     class BaseRequest < Visitor
-      def self.run(uri, store)
-        new(uri, store).run
+      def self.run(parsed_tree)
+        new(parsed_tree).run
       end
 
-      def initialize(uri, store)
-        @store = store
-        @uri = uri
-        @parsed_tree = store.get(uri)
+      def initialize(parsed_tree)
+        @parsed_tree = parsed_tree
 
         super()
       end
