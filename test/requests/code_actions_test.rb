@@ -29,11 +29,11 @@ class CodeActionsTest < Minitest::Test
   private
 
   def assert_code_actions(source, code_actions, range)
-    parsed_tree = RubyLsp::Store::ParsedTree.new(source)
+    document = RubyLsp::Document.new(source)
     result = nil
 
     stdout, _ = capture_io do
-      result = RubyLsp::Requests::CodeActions.run("file://#{__FILE__}", parsed_tree, range)
+      result = RubyLsp::Requests::CodeActions.run("file://#{__FILE__}", document, range)
     end
 
     assert_empty(stdout)

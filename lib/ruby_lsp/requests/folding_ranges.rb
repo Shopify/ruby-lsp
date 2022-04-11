@@ -31,7 +31,7 @@ module RubyLsp
         SyntaxTree::When,
       ].freeze
 
-      def initialize(parsed_tree)
+      def initialize(document)
         super
 
         @ranges = []
@@ -39,7 +39,7 @@ module RubyLsp
       end
 
       def run
-        visit(@parsed_tree.tree)
+        visit(@document.tree)
         emit_partial_range
         @ranges
       end

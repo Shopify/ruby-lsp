@@ -9,11 +9,11 @@ module RubyLsp
       ].freeze
       TOKEN_MODIFIERS = [].freeze
 
-      def initialize(parsed_tree)
+      def initialize(document)
         super
 
         @tokens = []
-        @tree = parsed_tree.tree
+        @tree = document.tree
         @current_row = 0
         @current_column = 0
       end

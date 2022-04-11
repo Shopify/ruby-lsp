@@ -3,12 +3,12 @@
 module RubyLsp
   module Requests
     class BaseRequest < SyntaxTree::Visitor
-      def self.run(parsed_tree)
-        new(parsed_tree).run
+      def self.run(document)
+        new(document).run
       end
 
-      def initialize(parsed_tree)
-        @parsed_tree = parsed_tree
+      def initialize(document)
+        @document = document
 
         super()
       end

@@ -14,13 +14,13 @@ module RubyLsp
 
       attr_reader :file, :text
 
-      def self.run(uri, parsed_tree)
-        new(uri, parsed_tree).run
+      def self.run(uri, document)
+        new(uri, document).run
       end
 
-      def initialize(uri, parsed_tree)
+      def initialize(uri, document)
         @file = CGI.unescape(URI.parse(uri).path)
-        @text = parsed_tree.source
+        @text = document.source
         @uri = uri
 
         super(

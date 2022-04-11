@@ -238,8 +238,8 @@ class DocumentSymbolsTest < Minitest::Test
   private
 
   def assert_symbols(source, expected_symbols, print_result: false)
-    parsed_tree = RubyLsp::Store::ParsedTree.new(source)
-    actual = RubyLsp::Requests::DocumentSymbol.run(parsed_tree)
+    document = RubyLsp::Document.new(source)
+    actual = RubyLsp::Requests::DocumentSymbol.run(document)
     actual_json = JSON.parse(actual.to_json, symbolize_names: true)
     simplified_symbol = simplified_symbols(actual_json)
 
