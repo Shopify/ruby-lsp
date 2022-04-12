@@ -96,12 +96,12 @@ module RubyLsp
     end
 
     def respond_with_formatting(uri)
-      Requests::Formatting.run(uri, store)
+      Requests::Formatting.run(uri, store[uri])
     end
 
     def send_diagnostics(uri)
-      response = store.cache_fetch(uri, :diagnostics) do
-        Requests::Diagnostics.run(uri, store)
+      response = store.cache_fetch(uri, :diagnostics) do |parsed_tree|
+        Requests::Diagnostics.run(uri, parsed_tree)
       end
 
       @writer.write(

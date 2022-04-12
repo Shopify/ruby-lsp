@@ -5,7 +5,7 @@ module RubyLsp
     class Formatting < RuboCopRequest
       RUBOCOP_FLAGS = (COMMON_RUBOCOP_FLAGS + ["--auto-correct"]).freeze
 
-      def initialize(uri, store)
+      def initialize(uri, parsed_tree)
         super
         @formatted_text = nil
       end
