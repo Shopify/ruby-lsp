@@ -54,7 +54,7 @@ module RubyLsp
         @root.children
       end
 
-      def visit_class_declaration(node)
+      def visit_class(node)
         symbol = create_document_symbol(
           name: node.constant.constant.value,
           kind: :class,
@@ -134,7 +134,7 @@ module RubyLsp
         @stack.pop
       end
 
-      def visit_module_declaration(node)
+      def visit_module(node)
         symbol = create_document_symbol(
           name: node.constant.constant.value,
           kind: :module,

@@ -24,12 +24,6 @@ module RubyLsp
         LanguageServer::Protocol::Interface::SemanticTokens.new(data: @tokens)
       end
 
-      private
-
-      def visit_assign(node)
-        super
-      end
-
       def visit_m_assign(node)
         node.target.parts.each do |var_ref|
           add_token(var_ref.value.location, :local_variable)
@@ -71,12 +65,12 @@ module RubyLsp
         visit(node.arguments)
       end
 
-      def visit_f_call(node)
+      def visit_fcall(node)
         add_token(node.value.location, :method_call)
         visit(node.arguments)
       end
 
-      def visit_v_call(node)
+      def visit_vcall(node)
         add_token(node.value.location, :method_call)
       end
 
