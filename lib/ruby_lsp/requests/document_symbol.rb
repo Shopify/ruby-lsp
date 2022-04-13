@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
-require_relative "../visitor"
-
 module RubyLsp
   module Requests
-    class DocumentSymbol < Visitor
+    class DocumentSymbol < BaseRequest
       SYMBOL_KIND = {
         file: 1,
         module: 2,
@@ -44,13 +42,9 @@ module RubyLsp
         end
       end
 
-      def self.run(parsed_tree)
-        new(parsed_tree).run
-      end
-
       def initialize(parsed_tree)
-        super()
-        @parsed_tree = parsed_tree
+        super
+
         @root = SymbolHierarchyRoot.new
         @stack = [@root]
       end

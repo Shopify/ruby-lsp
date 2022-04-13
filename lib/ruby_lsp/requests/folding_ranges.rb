@@ -2,7 +2,7 @@
 
 module RubyLsp
   module Requests
-    class FoldingRanges < Visitor
+    class FoldingRanges < BaseRequest
       SIMPLE_FOLDABLES = [
         SyntaxTree::ArrayLiteral,
         SyntaxTree::BraceBlock,
@@ -31,16 +31,11 @@ module RubyLsp
         SyntaxTree::When,
       ].freeze
 
-      def self.run(parsed_tree)
-        new(parsed_tree).run
-      end
-
       def initialize(parsed_tree)
-        @parsed_tree = parsed_tree
+        super
+
         @ranges = []
         @partial_range = nil
-
-        super()
       end
 
       def run

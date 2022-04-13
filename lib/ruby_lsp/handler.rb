@@ -78,15 +78,21 @@ module RubyLsp
     end
 
     def respond_with_document_symbol(uri)
-      RubyLsp::Requests::DocumentSymbol.run(store[uri])
+      store.cache_fetch(uri, :document_symbol) do |parsed_tree|
+        RubyLsp::Requests::DocumentSymbol.run(parsed_tree)
+      end
     end
 
     def respond_with_folding_ranges(uri)
-      Requests::FoldingRanges.run(store[uri])
+      store.cache_fetch(uri, :folding_ranges) do |parsed_tree|
+        Requests::FoldingRanges.run(parsed_tree)
+      end
     end
 
     def respond_with_semantic_highlighting(uri)
-      Requests::SemanticHighlighting.run(store[uri])
+      store.cache_fetch(uri, :semantic_highlighting) do |parsed_tree|
+        Requests::SemanticHighlighting.run(parsed_tree)
+      end
     end
 
     def respond_with_formatting(uri)
@@ -94,7 +100,9 @@ module RubyLsp
     end
 
     def send_diagnostics(uri)
-      response = Requests::Diagnostics.run(uri, store[uri])
+      response = store.cache_fetch(uri, :diagnostics) do |parsed_tree|
+        Requests::Diagnostics.run(uri, parsed_tree)
+      end
 
       @writer.write(
         method: "textDocument/publishDiagnostics",

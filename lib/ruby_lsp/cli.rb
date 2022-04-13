@@ -18,7 +18,7 @@ module RubyLsp
         on("textDocument/didChange") do |request|
           uri = request.dig(:params, :textDocument, :uri)
           text = request.dig(:params, :contentChanges, 0, :text)
-          store[uri] = text
+          store.set(uri, text)
 
           send_diagnostics(uri)
           nil
@@ -27,7 +27,7 @@ module RubyLsp
         on("textDocument/didOpen") do |request|
           uri = request.dig(:params, :textDocument, :uri)
           text = request.dig(:params, :textDocument, :text)
-          store[uri] = text
+          store.set(uri, text)
 
           send_diagnostics(uri)
           nil
