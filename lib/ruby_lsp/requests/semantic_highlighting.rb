@@ -4,8 +4,8 @@ module RubyLsp
   module Requests
     class SemanticHighlighting < BaseRequest
       TOKEN_TYPES = [
-        :local_variable,
-        :method_call,
+        :variable,
+        :method,
       ].freeze
       TOKEN_MODIFIERS = [].freeze
 
@@ -25,52 +25,52 @@ module RubyLsp
 
       def visit_m_assign(node)
         node.target.parts.each do |var_ref|
-          add_token(var_ref.value.location, :local_variable)
+          add_token(var_ref.value.location, :variable)
         end
       end
 
       def visit_var_field(node)
         case node.value
         when SyntaxTree::Ident
-          add_token(node.value.location, :local_variable)
+          add_token(node.value.location, :variable)
         end
       end
 
       def visit_var_ref(node)
         case node.value
         when SyntaxTree::Ident
-          add_token(node.value.location, :local_variable)
+          add_token(node.value.location, :variable)
         end
       end
 
       def visit_a_ref_field(node)
-        add_token(node.collection.value.location, :local_variable)
+        add_token(node.collection.value.location, :variable)
       end
 
       def visit_call(node)
         visit(node.receiver)
-        add_token(node.message.location, :method_call)
+        add_token(node.message.location, :method)
         visit(node.arguments)
       end
 
       def visit_command(node)
-        add_token(node.message.location, :method_call)
+        add_token(node.message.location, :method)
         visit(node.arguments)
       end
 
       def visit_command_call(node)
         visit(node.receiver)
-        add_token(node.message.location, :method_call)
+        add_token(node.message.location, :method)
         visit(node.arguments)
       end
 
       def visit_fcall(node)
-        add_token(node.value.location, :method_call)
+        add_token(node.value.location, :method)
         visit(node.arguments)
       end
 
       def visit_vcall(node)
-        add_token(node.value.location, :method_call)
+        add_token(node.value.location, :method)
       end
 
       def add_token(location, classification)
