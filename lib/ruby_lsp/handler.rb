@@ -97,7 +97,7 @@ module RubyLsp
     end
 
     def respond_with_formatting(uri)
-      Requests::Formatting.run(uri, store[uri])
+      Requests::Formatting.run(uri, store.get(uri))
     end
 
     def send_diagnostics(uri)
