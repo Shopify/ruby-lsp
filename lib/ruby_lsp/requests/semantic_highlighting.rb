@@ -13,7 +13,6 @@ module RubyLsp
         super
 
         @tokens = []
-        @parser = parsed_tree.parser
         @tree = parsed_tree.tree
         @current_row = 0
         @current_column = 0
@@ -93,9 +92,7 @@ module RubyLsp
       # https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_semanticTokens
       def compute_delta(location)
         row = location.start_line - 1
-
-        line = @parser.line_counts[location.start_line - 1]
-        column = location.start_char - line.start
+        column = location.start_column
 
         if row < @current_row
           raise InvalidTokenRowError, "Invalid token row detected: " \

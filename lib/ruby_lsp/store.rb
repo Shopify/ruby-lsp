@@ -36,12 +36,11 @@ module RubyLsp
     end
 
     class ParsedTree
-      attr_reader :tree, :parser, :source
+      attr_reader :tree, :source
 
       def initialize(source)
         @source = source
-        @parser = SyntaxTree::Parser.new(source)
-        @tree = @parser.parse
+        @tree = SyntaxTree.parse(source)
         @cache = {}
       end
 
