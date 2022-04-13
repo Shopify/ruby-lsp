@@ -13,7 +13,6 @@ module RubyLsp
         super
 
         @tokens = []
-        @parser = parsed_tree.parser
         @tree = parsed_tree.tree
         @current_row = 0
         @current_column = 0
@@ -22,12 +21,6 @@ module RubyLsp
       def run
         visit(@tree)
         LanguageServer::Protocol::Interface::SemanticTokens.new(data: @tokens)
-      end
-
-      private
-
-      def visit_assign(node)
-        super
       end
 
       def visit_m_assign(node)
@@ -71,12 +64,12 @@ module RubyLsp
         visit(node.arguments)
       end
 
-      def visit_f_call(node)
+      def visit_fcall(node)
         add_token(node.value.location, :method_call)
         visit(node.arguments)
       end
 
-      def visit_v_call(node)
+      def visit_vcall(node)
         add_token(node.value.location, :method_call)
       end
 
@@ -99,9 +92,7 @@ module RubyLsp
       # https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_semanticTokens
       def compute_delta(location)
         row = location.start_line - 1
-
-        line = @parser.line_counts[location.start_line - 1]
-        column = location.start_char - line.start
+        column = location.start_column
 
         if row < @current_row
           raise InvalidTokenRowError, "Invalid token row detected: " \

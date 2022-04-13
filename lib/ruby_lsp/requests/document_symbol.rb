@@ -54,7 +54,7 @@ module RubyLsp
         @root.children
       end
 
-      def visit_class_declaration(node)
+      def visit_class(node)
         symbol = create_document_symbol(
           name: node.constant.constant.value,
           kind: :class,
@@ -134,7 +134,7 @@ module RubyLsp
         @stack.pop
       end
 
-      def visit_module_declaration(node)
+      def visit_module(node)
         symbol = create_document_symbol(
           name: node.constant.constant.value,
           kind: :module,
@@ -190,20 +190,13 @@ module RubyLsp
         symbol
       end
 
-      # TODO: clean this once SyntaxTree provides the relative positions
       def range_from_syntax_tree_node(node)
-        parser = @parsed_tree.parser
         loc = node.location
 
-        start_line = parser.line_counts[loc.start_line - 1]
-        start_column = loc.start_char - start_line.start
-
-        end_line = parser.line_counts[loc.end_line - 1]
-        end_column = loc.end_char - end_line.start
-
         LanguageServer::Protocol::Interface::Range.new(
-          start: LanguageServer::Protocol::Interface::Position.new(line: loc.start_line - 1, character: start_column),
-          end: LanguageServer::Protocol::Interface::Position.new(line: loc.end_line - 1, character: end_column),
+          start: LanguageServer::Protocol::Interface::Position.new(line: loc.start_line - 1,
+            character: loc.start_column),
+          end: LanguageServer::Protocol::Interface::Position.new(line: loc.end_line - 1, character: loc.end_column),
         )
       end
     end

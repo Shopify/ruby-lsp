@@ -2,7 +2,7 @@
 
 module RubyLsp
   module Requests
-    class BaseRequest < Visitor
+    class BaseRequest < SyntaxTree::Visitor
       def self.run(parsed_tree)
         new(parsed_tree).run
       end

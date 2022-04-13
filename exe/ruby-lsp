@@ -3,6 +3,5 @@
 
 require "syntax_tree"
 require "ruby_lsp/cli"
-require "ruby_lsp/visitor"
 
 RubyLsp::Cli.start(ARGV)
