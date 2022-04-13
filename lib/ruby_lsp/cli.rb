@@ -56,6 +56,13 @@ module RubyLsp
           respond_with_formatting(request.dig(:params, :textDocument, :uri))
         end
 
+        on("textDocument/codeAction") do |request|
+          range = request.dig(:params, :range)
+          start_line = range.dig(:start, :line)
+          end_line = range.dig(:end, :line)
+          respond_with_code_actions(request.dig(:params, :textDocument, :uri), (start_line..end_line))
+        end
+
         on("shutdown") { shutdown }
       end
 

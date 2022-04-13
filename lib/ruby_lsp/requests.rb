@@ -9,5 +9,6 @@ module RubyLsp
     autoload :RuboCopRequest, "ruby_lsp/requests/rubocop_request"
     autoload :Formatting, "ruby_lsp/requests/formatting"
     autoload :Diagnostics, "ruby_lsp/requests/diagnostics"
+    autoload :CodeActions, "ruby_lsp/requests/code_actions"
   end
 end

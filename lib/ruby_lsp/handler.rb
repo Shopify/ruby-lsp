@@ -72,7 +72,8 @@ module RubyLsp
               delta: true,
             }
           ),
-          document_formatting_provider: true
+          document_formatting_provider: true,
+          code_action_provider: true
         )
       )
     end
@@ -108,9 +109,15 @@ module RubyLsp
         method: "textDocument/publishDiagnostics",
         params: Interface::PublishDiagnosticsParams.new(
           uri: uri,
-          diagnostics: response
+          diagnostics: response.map(&:to_lsp_diagnostic)
         )
       )
+    end
+
+    def respond_with_code_actions(uri, range)
+      store.cache_fetch(uri, :code_actions) do |parsed_tree|
+        Requests::CodeActions.run(uri, parsed_tree, range)
+      end
     end
   end
 end
