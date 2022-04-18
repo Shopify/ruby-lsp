@@ -24,11 +24,11 @@ class FormattingTest < Minitest::Test
   private
 
   def assert_formatted(original, formatted)
-    parsed_tree = RubyLsp::Store::ParsedTree.new(original)
+    document = RubyLsp::Document.new(original)
     result = nil
 
     stdout, _ = capture_io do
-      result = RubyLsp::Requests::Formatting.run("file://#{__FILE__}", parsed_tree).first.new_text
+      result = RubyLsp::Requests::Formatting.run("file://#{__FILE__}", document).first.new_text
     end
 
     assert_empty(stdout)

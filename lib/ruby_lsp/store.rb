@@ -2,6 +2,7 @@
 
 require "cgi"
 require "uri"
+require "ruby_lsp/document"
 
 module RubyLsp
   class Store
@@ -10,15 +11,15 @@ module RubyLsp
     end
 
     def get(uri)
-      parsed_tree = @state[uri]
-      return parsed_tree unless parsed_tree.nil?
+      document = @state[uri]
+      return document unless document.nil?
 
       set(uri, File.binread(CGI.unescape(URI.parse(uri).path)))
       @state[uri]
     end
 
     def set(uri, content)
-      @state[uri] = ParsedTree.new(content)
+      @state[uri] = Document.new(content)
     rescue SyntaxTree::Parser::ParseError
       # Do not update the store if there are syntax errors
     end
@@ -33,29 +34,6 @@ module RubyLsp
 
     def cache_fetch(uri, request_name, &block)
       get(uri).cache_fetch(request_name, &block)
-    end
-
-    class ParsedTree
-      attr_reader :tree, :source
-
-      def initialize(source)
-        @source = source
-        @tree = SyntaxTree.parse(source)
-        @cache = {}
-      end
-
-      def ==(other)
-        @source == other.source
-      end
-
-      def cache_fetch(request_name)
-        cached = @cache[request_name]
-        return cached if cached
-
-        result = yield(self)
-        @cache[request_name] = result
-        result
-      end
     end
   end
 end

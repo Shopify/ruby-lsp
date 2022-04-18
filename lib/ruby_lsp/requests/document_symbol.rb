@@ -42,7 +42,7 @@ module RubyLsp
         end
       end
 
-      def initialize(parsed_tree)
+      def initialize(document)
         super
 
         @root = SymbolHierarchyRoot.new
@@ -50,7 +50,7 @@ module RubyLsp
       end
 
       def run
-        visit(@parsed_tree.tree)
+        visit(@document.tree)
         @root.children
       end
 
