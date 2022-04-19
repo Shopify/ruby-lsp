@@ -3,18 +3,18 @@
 module RubyLsp
   module Requests
     class CodeActions
-      def self.run(uri, parsed_tree, range)
-        new(uri, parsed_tree, range).run
+      def self.run(uri, document, range)
+        new(uri, document, range).run
       end
 
-      def initialize(uri, parsed_tree, range)
-        @parsed_tree = parsed_tree
+      def initialize(uri, document, range)
+        @document = document
         @uri = uri
         @range = range
       end
 
       def run
-        diagnostics = Diagnostics.run(@uri, @parsed_tree)
+        diagnostics = Diagnostics.run(@uri, @document)
         corrections = diagnostics.select { |diagnostic| diagnostic.correctable? && diagnostic.in_range?(@range) }
         return if corrections.empty?
 
