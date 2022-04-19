@@ -79,20 +79,20 @@ module RubyLsp
     end
 
     def respond_with_document_symbol(uri)
-      store.cache_fetch(uri, :document_symbol) do |parsed_tree|
-        RubyLsp::Requests::DocumentSymbol.run(parsed_tree)
+      store.cache_fetch(uri, :document_symbol) do |document|
+        RubyLsp::Requests::DocumentSymbol.run(document)
       end
     end
 
     def respond_with_folding_ranges(uri)
-      store.cache_fetch(uri, :folding_ranges) do |parsed_tree|
-        Requests::FoldingRanges.run(parsed_tree)
+      store.cache_fetch(uri, :folding_ranges) do |document|
+        Requests::FoldingRanges.run(document)
       end
     end
 
     def respond_with_semantic_highlighting(uri)
-      store.cache_fetch(uri, :semantic_highlighting) do |parsed_tree|
-        Requests::SemanticHighlighting.run(parsed_tree)
+      store.cache_fetch(uri, :semantic_highlighting) do |document|
+        Requests::SemanticHighlighting.run(document)
       end
     end
 
@@ -101,8 +101,8 @@ module RubyLsp
     end
 
     def send_diagnostics(uri)
-      response = store.cache_fetch(uri, :diagnostics) do |parsed_tree|
-        Requests::Diagnostics.run(uri, parsed_tree)
+      response = store.cache_fetch(uri, :diagnostics) do |document|
+        Requests::Diagnostics.run(uri, document)
       end
 
       @writer.write(
@@ -115,8 +115,8 @@ module RubyLsp
     end
 
     def respond_with_code_actions(uri, range)
-      store.cache_fetch(uri, :code_actions) do |parsed_tree|
-        Requests::CodeActions.run(uri, parsed_tree, range)
+      store.cache_fetch(uri, :code_actions) do |document|
+        Requests::CodeActions.run(uri, document, range)
       end
     end
   end
