@@ -34,7 +34,56 @@
         "command": "ruby-lsp.stop",
         "title": "Ruby LSP: Stop"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Ruby LSP",
+      "properties": {
+        "rubyLsp.enabledFeatures": {
+          "description": "List of enabled LSP features",
+          "type": "object",
+          "properties": {
+            "documentSymbols": {
+              "description": "Enable document symbols, which populates the file outline and breadcrumbs",
+              "type": "boolean",
+              "default": true
+            },
+            "foldingRanges": {
+              "description": "Enable folding ranges, which populates the places where code can be folded",
+              "type": "boolean",
+              "default": true
+            },
+            "semanticHighlighting": {
+              "description": "Enable semantic highlighting, which highlights code based on Ruby's understanding of it",
+              "type": "boolean",
+              "default": true
+            },
+            "formatting": {
+              "description": "Enable formatting",
+              "type": "boolean",
+              "default": true
+            },
+            "diagnostics": {
+              "description": "Enable diagnostics, like RuboCop violations",
+              "type": "boolean",
+              "default": true
+            },
+            "codeActions": {
+              "description": "Enable code actions, like RuboCop quick fixes",
+              "type": "boolean",
+              "default": true
+            }
+          },
+          "default": {
+            "documentSymbols": true,
+            "foldingRanges": true,
+            "semanticHighlighting": true,
+            "formatting": true,
+            "diagnostics": true,
+            "codeActions": true
+          }
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "yarn run esbuild-base --minify",

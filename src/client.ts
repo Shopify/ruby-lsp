@@ -13,6 +13,16 @@ import {
 const asyncExec = promisify(exec);
 const LSP_NAME = "Ruby LSP";
 
+interface EnabledFeatures {
+  [key: string]: boolean;
+  documentSymbols: boolean;
+  foldingRanges: boolean;
+  semanticHighlighting: boolean;
+  formatting: boolean;
+  diagnostics: boolean;
+  codeActions: boolean;
+}
+
 export default class Client {
   private client: LanguageClient | undefined;
   private context: vscode.ExtensionContext;
@@ -42,6 +52,9 @@ export default class Client {
       diagnosticCollectionName: LSP_NAME,
       outputChannel,
       revealOutputChannelOn: RevealOutputChannelOn.Never,
+      initializationOptions: {
+        enabledFeatures: this.listOfEnabledFeatures(),
+      },
     };
 
     this.context = context;
@@ -145,6 +158,17 @@ export default class Client {
     }
 
     this.createRestartWatcher("Gemfile.lock");
+
+    // If a configuration that affects the Ruby LSP has changed, update the client options using the latest
+    // configuration and restart the server
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration("rubyLsp")) {
+        this.clientOptions.initializationOptions.enabledFeatures =
+          this.listOfEnabledFeatures();
+
+        this.restart();
+      }
+    });
   }
 
   private createRestartWatcher(pattern: string) {
@@ -156,5 +180,13 @@ export default class Client {
     watcher.onDidChange(() => this.restart());
     watcher.onDidCreate(() => this.restart());
     watcher.onDidDelete(() => this.restart());
+  }
+
+  private listOfEnabledFeatures(): string[] {
+    const features: EnabledFeatures = vscode.workspace
+      .getConfiguration("rubyLsp")
+      .get("enabledFeatures")!;
+
+    return Object.keys(features).filter((key) => features[key]);
   }
 }
