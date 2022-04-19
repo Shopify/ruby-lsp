@@ -2,6 +2,15 @@
 
 module RubyLsp
   module Requests
+    # The diagnostics request informs the editor of RuboCop offenses for a given file.
+    #
+    # {Spec}[https://microsoft.github.io/language-server-protocol/specification#textDocument_publishDiagnostics]
+    #
+    # = Example
+    #
+    #   def say_hello
+    #   puts "Hello" # --> diagnostics: incorrect indentantion
+    #   end
     class Diagnostics < RuboCopRequest
       RUBOCOP_TO_LSP_SEVERITY = {
         convention: LanguageServer::Protocol::Constant::DiagnosticSeverity::INFORMATION,

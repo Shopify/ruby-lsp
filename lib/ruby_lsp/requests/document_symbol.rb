@@ -2,6 +2,25 @@
 
 module RubyLsp
   module Requests
+    # The document symbol request informs the editor of all the important symbols defined in a file. With this
+    # information, the editor can populate breadcrumbs, file outline and allow for fuzzy symbol searches.
+    #
+    # In VS Code, fuzzy symbol search can be accessed by opened the command palette and inserting an `@` symbol.
+    #
+    # {Spec}[https://microsoft.github.io/language-server-protocol/specification#textDocument_documentSymbol]
+    #
+    # = Example
+    #
+    #   class Person # --> document symbol: class
+    #     attr_reader :age # --> document symbol: field
+    #
+    #     def initialize
+    #       @age = 0 # --> document symbol: variable
+    #     end
+    #
+    #     def age # --> document symbol: method
+    #     end
+    #   end
     class DocumentSymbol < BaseRequest
       SYMBOL_KIND = {
         file: 1,
