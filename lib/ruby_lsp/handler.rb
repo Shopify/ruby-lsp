@@ -45,35 +45,45 @@ module RubyLsp
       store.clear
     end
 
-    def respond_with_capabilities
+    def respond_with_capabilities(enabled_features)
+      document_symbol_provider = if enabled_features.include?("documentSymbols")
+        Interface::DocumentSymbolClientCapabilities.new(
+          hierarchical_document_symbol_support: true,
+          symbol_kind: {
+            value_set: Requests::DocumentSymbol::SYMBOL_KIND.values,
+          }
+        )
+      end
+
+      folding_ranges_provider = if enabled_features.include?("foldingRanges")
+        Interface::FoldingRangeClientCapabilities.new(line_folding_only: true)
+      end
+
+      semantic_tokens_provider = if enabled_features.include?("semanticHighlighting")
+        Interface::SemanticTokensRegistrationOptions.new(
+          document_selector: { scheme: "file", language: "ruby" },
+          legend: Interface::SemanticTokensLegend.new(
+            token_types: Requests::SemanticHighlighting::TOKEN_TYPES,
+            token_modifiers: Requests::SemanticHighlighting::TOKEN_MODIFIERS
+          ),
+          range: false,
+          full: {
+            delta: true,
+          }
+        )
+      end
+
       Interface::InitializeResult.new(
         capabilities: Interface::ServerCapabilities.new(
           text_document_sync: Interface::TextDocumentSyncOptions.new(
             change: Constant::TextDocumentSyncKind::FULL,
             open_close: true,
           ),
-          document_symbol_provider: Interface::DocumentSymbolClientCapabilities.new(
-            hierarchical_document_symbol_support: true,
-            symbol_kind: {
-              value_set: Requests::DocumentSymbol::SYMBOL_KIND.values,
-            }
-          ),
-          folding_range_provider: Interface::FoldingRangeClientCapabilities.new(
-            line_folding_only: true
-          ),
-          semantic_tokens_provider: Interface::SemanticTokensRegistrationOptions.new(
-            document_selector: { scheme: "file", language: "ruby" },
-            legend: Interface::SemanticTokensLegend.new(
-              token_types: Requests::SemanticHighlighting::TOKEN_TYPES,
-              token_modifiers: Requests::SemanticHighlighting::TOKEN_MODIFIERS
-            ),
-            range: false,
-            full: {
-              delta: true,
-            }
-          ),
-          document_formatting_provider: true,
-          code_action_provider: true
+          document_symbol_provider: document_symbol_provider,
+          folding_range_provider: folding_ranges_provider,
+          semantic_tokens_provider: semantic_tokens_provider,
+          document_formatting_provider: enabled_features.include?("formatting"),
+          code_action_provider: enabled_features.include?("codeActions")
         )
       )
     end
