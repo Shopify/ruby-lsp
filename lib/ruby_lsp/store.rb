@@ -24,6 +24,10 @@ module RubyLsp
       # Do not update the store if there are syntax errors
     end
 
+    def push_edits(uri, edits)
+      @state[uri].push_edits(edits)
+    end
+
     def clear
       @state.clear
     end
