@@ -153,10 +153,6 @@ export default class Client {
   }
 
   private registerAutoRestarts() {
-    if (this.context.extensionMode === vscode.ExtensionMode.Development) {
-      this.createRestartWatcher("**/*.rb");
-    }
-
     this.createRestartWatcher("Gemfile.lock");
 
     // If a configuration that affects the Ruby LSP has changed, update the client options using the latest
