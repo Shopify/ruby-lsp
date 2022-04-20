@@ -2,6 +2,8 @@ inherit_gem:
   rubocop-shopify: rubocop.yml
 
 AllCops:
+  NewCops: disable
+  SuggestExtensions: false
   TargetRubyVersion: 2.7
   Exclude:
   - "vendor/**/*"
