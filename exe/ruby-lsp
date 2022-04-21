@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "syntax_tree"
+require "ruby-lsp"
 require "ruby_lsp/cli"
 
 RubyLsp::Cli.start(ARGV)

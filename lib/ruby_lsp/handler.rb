@@ -2,9 +2,15 @@
 
 require "ruby_lsp/requests"
 require "ruby_lsp/store"
+require "benchmark"
 
 module RubyLsp
   class Handler
+    IGNORED_FOR_TELEMETRY = [
+      "initialized",
+      "$/cancelRequest",
+    ].freeze
+
     attr_reader :store
 
     Interface = LanguageServer::Protocol::Interface
@@ -21,7 +27,11 @@ module RubyLsp
     def start
       $stderr.puts "Starting Ruby LSP..."
       @reader.read do |request|
-        handle(request)
+        if @telemetry_enabled && !IGNORED_FOR_TELEMETRY.include?(request[:method])
+          with_telemetry(request) { handle(request) }
+        else
+          handle(request)
+        end
       end
     end
 
@@ -128,6 +138,29 @@ module RubyLsp
       store.cache_fetch(uri, :code_actions) do |document|
         Requests::CodeActions.run(uri, document, range)
       end
+    end
+
+    def configure_options(initialization_options)
+      @telemetry_enabled = initialization_options.fetch(:telemetryEnabled, false)
+    end
+
+    def with_telemetry(request)
+      result = nil
+      request_time = Benchmark.realtime do
+        result = yield
+      end
+
+      params = {
+        request: request[:method],
+        requestTime: request_time,
+        lspVersion: RubyLsp::VERSION,
+      }
+
+      uri = request.dig(:params, :textDocument, :uri)
+      params[:uri] = uri if uri
+
+      @writer.write(method: "telemetry/event", params: params)
+      result
     end
   end
 end
