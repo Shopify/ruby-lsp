@@ -4,7 +4,7 @@ PATH
     ruby-lsp (0.1.0)
       language_server-protocol
       rubocop (>= 1.0)
-      syntax_tree (>= 2.1)
+      syntax_tree (>= 2.3)
 
 GEM
   remote: https://rubygems.org/
