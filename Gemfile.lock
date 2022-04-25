@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruby-lsp (0.1.0)
+    ruby-lsp (0.0.2)
       language_server-protocol
       rubocop (>= 1.0)
       syntax_tree (>= 2.3)
