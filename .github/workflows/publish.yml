@@ -1,6 +1,8 @@
 name: Release
 
-on: [release]
+on:
+  release:
+    types: [created]
 
 jobs:
   release:
@@ -29,4 +31,4 @@ jobs:
         with:
           name: vscode-ruby-lsp.vsix
           path: vscode-ruby-lsp.vsix
-          repo-token: ${{secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
