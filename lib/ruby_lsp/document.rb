@@ -46,7 +46,7 @@ module RubyLsp
       edits.each do |edit|
         next if edit[:text].empty? # skip deletions, since they may have caused the syntax error
 
-        apply_edit(@parsable_source, edit[:range], edit[:text].gsub(/[^\n]/, " "))
+        apply_edit(@parsable_source, edit[:range], edit[:text].gsub(/[^\r\n]/, " "))
       end
 
       @tree = SyntaxTree.parse(@parsable_source)
@@ -69,13 +69,12 @@ module RubyLsp
         @source = source
         @scanner = StringScanner.new(source)
         @current_line = 0
-        @line_break = Regexp.new("\n")
       end
 
       def find_position(position)
         # Move the string scanner counting line breaks until we reach the right line
         until @current_line == position[:line]
-          @scanner.scan_until(@line_break)
+          @scanner.scan_until(/\R/)
           @current_line += 1
         end
 
