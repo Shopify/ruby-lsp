@@ -16,28 +16,6 @@ class IntegrationTest < Minitest::Test
   def setup
     # Start a new Ruby LSP server in a separate process and set the IOs to binary mode
     @stdin, @stdout, @stderr, @wait_thr = Open3.popen3("bundle exec ruby-lsp")
-    @stdin.binmode
-    @stdout.binmode
-    @stderr.binmode
-
-    # Initialize the LSP
-    make_request(
-      "initialize",
-      {
-        initializationOptions: {
-          enabledFeatures: [
-            "documentSymbols",
-            "foldingRanges",
-            "semanticHighlighting",
-            "formatting",
-            "codeActions",
-          ],
-        },
-      }
-    )
-
-    # Open a document to serve as based for all requests
-    make_request("textDocument/didOpen", { textDocument: { uri: "file://#{__FILE__}", text: "class Foo\nend" } })
   end
 
   def teardown
@@ -54,6 +32,8 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_document_symbol
+    initialize_lsp(["documentSymbols"])
+
     response = make_request("textDocument/documentSymbol", { textDocument: { uri: "file://#{__FILE__}" } })
     symbol = response.first
     assert_equal("Foo", symbol[:name])
@@ -61,11 +41,15 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_semantic_highlighting
+    initialize_lsp(["semanticHighlighting"])
+
     response = make_request("textDocument/semanticTokens/full", { textDocument: { uri: "file://#{__FILE__}" } })
     assert_empty(response[:data])
   end
 
   def test_formatting
+    initialize_lsp(["formatting"])
+
     response = make_request("textDocument/formatting", { textDocument: { uri: "file://#{__FILE__}" } })
     assert_equal(<<~FORMATTED, response.first[:newText])
       # frozen_string_literal: true
@@ -76,6 +60,8 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_code_actions
+    initialize_lsp(["codeActions"])
+
     response = make_request("textDocument/codeAction",
       { textDocument: { uri: "file://#{__FILE__}" }, range: { start: { line: 0 }, end: { line: 1 } } })
     quickfix = response.first
@@ -84,10 +70,12 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_document_did_close
+    initialize_lsp([])
     assert(send_request("textDocument/didClose", { textDocument: { uri: "file://#{__FILE__}" } }))
   end
 
   def test_document_did_change
+    initialize_lsp([])
     assert(send_request(
       "textDocument/didChange",
       {
@@ -98,6 +86,8 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_folding_ranges
+    initialize_lsp(["foldingRanges"])
+
     response = make_request("textDocument/foldingRange", { textDocument: { uri: "file://#{__FILE__}" } })
     assert_equal({ startLine: 0, endLine: 1, kind: "region" }, response.first)
   end
@@ -116,8 +106,28 @@ class IntegrationTest < Minitest::Test
   end
 
   def send_request(request, params = nil)
-    params = params ? ",\"params\":#{params.to_json}" : ""
-    json = "{\"jsonrpc\":\"2.0\",\"id\":#{rand(100)},\"method\":\"#{request}\"#{params}}"
+    hash = {
+      jsonrpc: "2.0",
+      id: rand(100),
+      method: request,
+    }
+
+    hash[:params] = params if params
+    json = hash.to_json
     @stdin.write("Content-Length: #{json.length}\r\n\r\n#{json}")
+  end
+
+  def initialize_lsp(enabled_features)
+    make_request(
+      "initialize",
+      {
+        initializationOptions: {
+          enabledFeatures: enabled_features,
+        },
+      }
+    )
+
+    # Open a document to serve as a base for all requests
+    make_request("textDocument/didOpen", { textDocument: { uri: "file://#{__FILE__}", text: "class Foo\nend" } })
   end
 end
