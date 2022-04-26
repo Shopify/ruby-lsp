@@ -20,6 +20,7 @@ module RubyLsp
 
       def initialize(uri, document)
         @file = CGI.unescape(URI.parse(uri).path)
+        @document = document
         @text = document.source
         @uri = uri
 
