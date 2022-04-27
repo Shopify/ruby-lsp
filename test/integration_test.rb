@@ -2,6 +2,7 @@
 
 require "test_helper"
 require "open3"
+require "timeout"
 
 # Important integration test notes
 #
@@ -97,12 +98,15 @@ class IntegrationTest < Minitest::Test
   def make_request(request, params = nil)
     send_request(request, params)
 
-    # Read headers until line breaks
-    headers = @stdout.gets("\r\n\r\n")
-
-    # Read the response content based on the length received in the headers
-    raw_response = @stdout.read(headers[/Content-Length: (\d+)/i, 1].to_i)
-    JSON.parse(raw_response, symbolize_names: true)[:result]
+    Timeout.timeout(5) do
+      # Read headers until line breaks
+      headers = @stdout.gets("\r\n\r\n")
+      # Read the response content based on the length received in the headers
+      raw_response = @stdout.read(headers[/Content-Length: (\d+)/i, 1].to_i)
+      JSON.parse(raw_response, symbolize_names: true)[:result]
+    end
+  rescue Timeout::Error
+    raise "Request #{request} timed out. Is the request returning a response?"
   end
 
   def send_request(request, params = nil)
