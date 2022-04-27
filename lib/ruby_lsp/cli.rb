@@ -17,8 +17,7 @@ module RubyLsp
 
         on("textDocument/didChange") do |request|
           uri = request.dig(:params, :textDocument, :uri)
-          text = request.dig(:params, :contentChanges, 0, :text)
-          store.set(uri, text)
+          store.push_edits(uri, request.dig(:params, :contentChanges))
 
           send_diagnostics(uri)
           nil

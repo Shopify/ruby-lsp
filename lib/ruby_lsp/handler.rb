@@ -76,7 +76,7 @@ module RubyLsp
       Interface::InitializeResult.new(
         capabilities: Interface::ServerCapabilities.new(
           text_document_sync: Interface::TextDocumentSyncOptions.new(
-            change: Constant::TextDocumentSyncKind::FULL,
+            change: Constant::TextDocumentSyncKind::INCREMENTAL,
             open_close: true,
           ),
           document_symbol_provider: document_symbol_provider,

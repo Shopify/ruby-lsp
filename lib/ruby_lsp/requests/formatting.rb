@@ -16,6 +16,8 @@ module RubyLsp
         @formatted_text = @options[:stdin] # Rubocop applies the corrections on stdin
         return unless @formatted_text
 
+        @document.reset(@formatted_text)
+
         [
           LanguageServer::Protocol::Interface::TextEdit.new(
             range: LanguageServer::Protocol::Interface::Range.new(
