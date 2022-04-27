@@ -6,11 +6,9 @@ require "timeout"
 
 # Important integration test notes
 #
-# 1. If the request returns `nil`, use `send_request` and do not try to read the response or else we hang reading from
-# stdout
+# 1. If the request returns `nil`, use `send_request` and do not try to read the response or else it times out
 # 2. Make sure the request name is exactly the expected in CLI (e.g.: textDocument/foldingRange instead of
-# textDocument/foldingRanges). If the name is incorrect, the LSP won't return anything and the test will hang trying to
-# read from stdout
+# textDocument/foldingRanges). If the name is incorrect, the LSP won't return anything reading the response will timeout
 # 3. The goal is to verify that all parts are working together. Don't create extensive tests with long code examples -
 # those are meant for unit tests
 class IntegrationTest < Minitest::Test
