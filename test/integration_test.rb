@@ -42,6 +42,7 @@ class IntegrationTest < Minitest::Test
 
   def test_document_symbol
     initialize_lsp(["documentSymbols"])
+    open_file_with("class Foo\nend")
 
     response = make_request("textDocument/documentSymbol", { textDocument: { uri: "file://#{__FILE__}" } })
     symbol = response.first
@@ -51,6 +52,7 @@ class IntegrationTest < Minitest::Test
 
   def test_semantic_highlighting
     initialize_lsp(["semanticHighlighting"])
+    open_file_with("class Foo\nend")
 
     response = make_request("textDocument/semanticTokens/full", { textDocument: { uri: "file://#{__FILE__}" } })
     assert_empty(response[:data])
@@ -58,6 +60,7 @@ class IntegrationTest < Minitest::Test
 
   def test_formatting
     initialize_lsp(["formatting"])
+    open_file_with("class Foo\nend")
 
     response = make_request("textDocument/formatting", { textDocument: { uri: "file://#{__FILE__}" } })
     assert_equal(<<~FORMATTED, response.first[:newText])
@@ -70,6 +73,7 @@ class IntegrationTest < Minitest::Test
 
   def test_code_actions
     initialize_lsp(["codeActions"])
+    open_file_with("class Foo\nend")
 
     response = make_request("textDocument/codeAction",
       { textDocument: { uri: "file://#{__FILE__}" }, range: { start: { line: 0 }, end: { line: 1 } } })
@@ -80,11 +84,14 @@ class IntegrationTest < Minitest::Test
 
   def test_document_did_close
     initialize_lsp([])
+    open_file_with("class Foo\nend")
     assert(send_request("textDocument/didClose", { textDocument: { uri: "file://#{__FILE__}" } }))
   end
 
   def test_document_did_change
     initialize_lsp([])
+    open_file_with("class Foo\nend")
+
     assert(send_request(
       "textDocument/didChange",
       {
@@ -99,6 +106,7 @@ class IntegrationTest < Minitest::Test
 
   def test_folding_ranges
     initialize_lsp(["foldingRanges"])
+    open_file_with("class Foo\nend")
 
     response = make_request("textDocument/foldingRange", { textDocument: { uri: "file://#{__FILE__}" } })
     assert_equal({ startLine: 0, endLine: 1, kind: "region" }, response.first)
@@ -154,8 +162,9 @@ class IntegrationTest < Minitest::Test
 
     enabled_providers = enabled_features.map { |feature| FEATURE_TO_PROVIDER[feature] }
     assert_equal([:textDocumentSync, *enabled_providers], response[:capabilities].keys)
+  end
 
-    # Open a document to serve as a base for all requests
-    make_request("textDocument/didOpen", { textDocument: { uri: "file://#{__FILE__}", text: "class Foo\nend" } })
+  def open_file_with(content)
+    make_request("textDocument/didOpen", { textDocument: { uri: "file://#{__FILE__}", text: content } })
   end
 end
