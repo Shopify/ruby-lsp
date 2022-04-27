@@ -1,4 +1,21 @@
-# ruby-lsp
+![Build Status](https://github.com/Shopify/ruby-lsp/workflows/CI/badge.svg)
+
+# Ruby LSP
+
+This gem is an implementation of the language server protocol specification for Ruby, used to improve editor features.
+
+## Usage
+
+Install the gem. There's no need to require it, since the server is used as a standalone executable.
+
+```ruby
+group :development do
+  gem "ruby-lsp", require: false
+end
+```
+
+If using VS Code, install the [Ruby LSP plugin](https://github.com/Shopify/vscode-ruby-lsp) to get the extra features in
+the editor.
 
 ## Contributing
 
