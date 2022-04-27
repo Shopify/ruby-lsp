@@ -14,6 +14,14 @@ require "timeout"
 # 3. The goal is to verify that all parts are working together. Don't create extensive tests with long code examples -
 # those are meant for unit tests
 class IntegrationTest < Minitest::Test
+  FEATURE_TO_PROVIDER = {
+    "documentSymbols" => :documentSymbolProvider,
+    "foldingRanges" => :foldingRangeProvider,
+    "semanticHighlighting" => :semanticTokensProvider,
+    "formatting" => :documentFormattingProvider,
+    "codeActions" => :codeActionProvider,
+  }.freeze
+
   def setup
     # Start a new Ruby LSP server in a separate process and set the IOs to binary mode
     @stdin, @stdout, @stderr, @wait_thr = Open3.popen3("bundle exec ruby-lsp")
@@ -81,7 +89,10 @@ class IntegrationTest < Minitest::Test
       "textDocument/didChange",
       {
         textDocument: { uri: "file://#{__FILE__}" },
-        contentChanges: [{ text: "class Foo\ndef bar\nend\nend" }],
+        contentChanges: [{
+          text: "class Foo\ndef bar\nend\nend",
+          range: { start: { line: 0, character: 0 }, end: { line: 1, character: 3 } },
+        }],
       }
     ))
   end
@@ -122,7 +133,7 @@ class IntegrationTest < Minitest::Test
   end
 
   def initialize_lsp(enabled_features)
-    make_request(
+    response = make_request(
       "initialize",
       {
         initializationOptions: {
@@ -130,6 +141,19 @@ class IntegrationTest < Minitest::Test
         },
       }
     )
+
+    assert(true, response.dig(:capabilities, :textDocumentSync, :openClose))
+    assert(
+      LanguageServer::Protocol::Constant::TextDocumentSyncKind::INCREMENTAL,
+      response.dig(:capabilities, :textDocumentSync, :openClose)
+    )
+
+    enabled_features.each do |feature|
+      assert(response.dig(:capabilities, FEATURE_TO_PROVIDER[feature]))
+    end
+
+    enabled_providers = enabled_features.map { |feature| FEATURE_TO_PROVIDER[feature] }
+    assert_equal([:textDocumentSync, *enabled_providers], response[:capabilities].keys)
 
     # Open a document to serve as a base for all requests
     make_request("textDocument/didOpen", { textDocument: { uri: "file://#{__FILE__}", text: "class Foo\nend" } })
