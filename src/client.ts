@@ -97,14 +97,14 @@ export default class Client {
   }
 
   private async gemMissing(): Promise<boolean> {
-    if (this.context.workspaceState.get("ruby-lsp.cancelledBundleAdd")) {
-      return true;
-    }
-
     const bundledGems = await this.execInPath("bundle list");
 
     if (bundledGems.includes("ruby-lsp")) {
       return false;
+    }
+
+    if (this.context.workspaceState.get("ruby-lsp.cancelledBundleAdd")) {
+      return true;
     }
 
     const response = await vscode.window.showErrorMessage(
