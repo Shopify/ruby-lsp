@@ -17,9 +17,14 @@ module RubyLsp
 
         on("textDocument/didChange") do |request|
           uri = request.dig(:params, :textDocument, :uri)
-          store.push_edits(uri, request.dig(:params, :contentChanges))
+          syntax_errors_diagnostics = store.push_edits(uri, request.dig(:params, :contentChanges))
 
-          send_diagnostics(uri)
+          if syntax_errors_diagnostics.nil?
+            respond_with_diagnostics(uri)
+          else
+            push_diagnostics(uri, syntax_errors_diagnostics)
+          end
+
           nil
         end
 
@@ -28,7 +33,7 @@ module RubyLsp
           text = request.dig(:params, :textDocument, :text)
           store.set(uri, text)
 
-          send_diagnostics(uri)
+          respond_with_diagnostics(uri)
           nil
         end
 

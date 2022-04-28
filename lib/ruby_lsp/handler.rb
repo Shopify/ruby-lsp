@@ -110,16 +110,20 @@ module RubyLsp
       Requests::Formatting.run(uri, store.get(uri))
     end
 
-    def send_diagnostics(uri)
+    def respond_with_diagnostics(uri)
       response = store.cache_fetch(uri, :diagnostics) do |document|
         Requests::Diagnostics.run(uri, document)
       end
 
+      push_diagnostics(uri, response.map(&:to_lsp_diagnostic))
+    end
+
+    def push_diagnostics(uri, diagnostics)
       @writer.write(
         method: "textDocument/publishDiagnostics",
         params: Interface::PublishDiagnosticsParams.new(
           uri: uri,
-          diagnostics: response.map(&:to_lsp_diagnostic)
+          diagnostics: diagnostics
         )
       )
     end
