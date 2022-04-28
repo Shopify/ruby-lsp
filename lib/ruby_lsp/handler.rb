@@ -108,8 +108,18 @@ module RubyLsp
     end
 
     def respond_with_selection_ranges(uri, positions)
-      store.cache_fetch(uri, :selection_ranges) do |document|
-        Requests::SelectionRanges.run(document, positions)
+      ranges = store.cache_fetch(uri, :selection_ranges) do |document|
+        Requests::SelectionRanges.run(document)
+      end
+
+      # Per the selection range request spec (https://microsoft.github.io/language-server-protocol/specification#textDocument_selectionRange),
+      # every position in the positions array should have an element at the same index in the response
+      # array. For positions without a valid selection range, the corresponding element in the response
+      # array will be nil.
+      positions.map do |position|
+        ranges.find do |range|
+          range.cover?(position)
+        end
       end
     end
 

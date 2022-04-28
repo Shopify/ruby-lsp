@@ -14,6 +14,7 @@ module RubyLsp
 
     module Support
       autoload :RuboCopDiagnostic, "ruby_lsp/requests/support/rubocop_diagnostic"
+      autoload :SelectionRange, "ruby_lsp/requests/support/selection_range"
       autoload :SyntaxErrorDiagnostic, "ruby_lsp/requests/support/syntax_error_diagnostic"
     end
   end

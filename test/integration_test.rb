@@ -155,7 +155,11 @@ class IntegrationTest < Minitest::Test
         positions: [{ line: 0, character: 0 }],
       }
     )
-    assert_equal({ response: "Hello, world!" }, response[:result].first)
+
+    assert_equal(
+      { range: { start: { line: 0, character: 0 }, end: { line: 1, character: 3 } } },
+      response[:result].first,
+    )
   end
 
   private
