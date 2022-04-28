@@ -50,6 +50,13 @@ module RubyLsp
           respond_with_folding_ranges(request.dig(:params, :textDocument, :uri))
         end
 
+        on("textDocument/selectionRange") do |request|
+          respond_with_selection_ranges(
+            request.dig(:params, :textDocument, :uri),
+            request.dig(:params, :positions),
+          )
+        end
+
         on("textDocument/semanticTokens/full") do |request|
           respond_with_semantic_highlighting(request.dig(:params, :textDocument, :uri))
         end
