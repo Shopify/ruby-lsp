@@ -2,10 +2,9 @@
 
 module RubyLsp
   module Requests
-    # The formatting request uses RuboCop to fix auto-correctable offenses in the document. This requires enabling
-    # format on save and registering the ruby-lsp as the Ruby formatter.
-    #
-    # [Spec](https://microsoft.github.io/language-server-protocol/specification#textDocument_formatting)
+    # The [formatting](https://microsoft.github.io/language-server-protocol/specification#textDocument_formatting)
+    # request uses RuboCop to fix auto-correctable offenses in the document. This requires enabling format on save and
+    # registering the ruby-lsp as the Ruby formatter.
     #
     # # Example
     #

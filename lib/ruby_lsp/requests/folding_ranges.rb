@@ -2,9 +2,8 @@
 
 module RubyLsp
   module Requests
-    # The folding ranges request informs the editor of the ranges where code can be folded.
-    #
-    # [Spec](https://microsoft.github.io/language-server-protocol/specification#textDocument_foldingRange)
+    # The [folding ranges](https://microsoft.github.io/language-server-protocol/specification#textDocument_foldingRange)
+    # request informs the editor of the ranges where code can be folded.
     #
     # # Example
     # ```ruby

@@ -2,9 +2,9 @@
 
 module RubyLsp
   module Requests
-    # The diagnostics request informs the editor of RuboCop offenses for a given file.
-    #
-    # [Spec](https://microsoft.github.io/language-server-protocol/specification#textDocument_publishDiagnostics)
+    # The
+    # [diagnostics](https://microsoft.github.io/language-server-protocol/specification#textDocument_publishDiagnostics)
+    # request informs the editor of RuboCop offenses for a given file.
     #
     # # Example
     #

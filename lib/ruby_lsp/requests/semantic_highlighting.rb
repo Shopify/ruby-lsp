@@ -2,10 +2,9 @@
 
 module RubyLsp
   module Requests
-    # The semantic highlighting request informs the editor of the correct token types to provide consistent and accurate
-    # highlighting for themes.
-    #
-    # [Spec](https://microsoft.github.io/language-server-protocol/specification#textDocument_semanticTokens)
+    # The [semantic
+    # highlighting](https://microsoft.github.io/language-server-protocol/specification#textDocument_semanticTokens)
+    # request informs the editor of the correct token types to provide consistent and accurate highlighting for themes.
     #
     # # Example
     #
