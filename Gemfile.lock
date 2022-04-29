@@ -54,6 +54,9 @@ GEM
     ruby-progressbar (1.11.0)
     syntax_tree (2.3.1)
     unicode-display_width (2.1.0)
+    webrick (1.7.0)
+    yard (0.9.27)
+      webrick (~> 1.7.0)
 
 PLATFORMS
   arm64-darwin-21
@@ -68,6 +71,7 @@ DEPENDENCIES
   rubocop-rake (~> 0.6.0)
   rubocop-shopify (~> 2.5)
   ruby-lsp!
+  yard (~> 0.9)
 
 BUNDLED WITH
    2.3.7

@@ -2,6 +2,17 @@
 
 module RubyLsp
   module Requests
+    # The [code actions](https://microsoft.github.io/language-server-protocol/specification#textDocument_codeAction)
+    # request informs the editor of RuboCop quick fixes that can be applied. These are accesible by hovering over a
+    # specific diagnostic.
+    #
+    # # Example
+    #
+    # ```ruby
+    # def say_hello
+    # puts "Hello" # --> code action: quick fix indentation
+    # end
+    # ```
     class CodeActions
       def self.run(uri, document, range)
         new(uri, document, range).run

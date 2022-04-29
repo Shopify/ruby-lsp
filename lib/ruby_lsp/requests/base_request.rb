@@ -2,6 +2,7 @@
 
 module RubyLsp
   module Requests
+    # :nodoc:
     class BaseRequest < SyntaxTree::Visitor
       def self.run(document)
         new(document).run
