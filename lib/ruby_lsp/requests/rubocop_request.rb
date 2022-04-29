@@ -5,7 +5,8 @@ require "cgi"
 
 module RubyLsp
   module Requests
-    class RuboCopRequest < RuboCop::Runner # :nodoc:
+    # :nodoc:
+    class RuboCopRequest < RuboCop::Runner
       COMMON_RUBOCOP_FLAGS = [
         "--stderr", # Print any output to stderr so that our stdout does not get polluted
         "--format",

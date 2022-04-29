@@ -2,7 +2,6 @@
 
 require "language_server-protocol"
 require "syntax_tree"
-require "yard"
 require "logger"
 require "ruby_lsp/requests/base_request"
 require "ruby_lsp/requests/rubocop_request"
@@ -14,18 +13,29 @@ task :check_docs do
     YARD.parse(file, [], Logger::Severity::FATAL)
   end
 
-  spec_matcher = %r{{Spec}\[https://microsoft.github.io/language-server-protocol/specification#.*\]}
+  spec_matcher = %r{\[Spec\]\(https://microsoft.github.io/language-server-protocol/specification#.*\)}
   error_messages = RubyLsp::Requests.constants.each_with_object(Hash.new { |h, k| h[k] = [] }) do |request, errors|
     full_name = "RubyLsp::Requests::#{request}"
     docs = YARD::Registry.at(full_name).docstring
     next if /:nodoc:/.match?(docs)
 
     if docs.empty?
-      errors[full_name] << "missing documentation"
+      errors[full_name] << "Missing documentation for request handler class"
     elsif !spec_matcher.match?(docs)
-      errors[full_name] << "missing spec link"
-    elsif !/\= Example/.match?(docs)
-      errors[full_name] << "missing example"
+      errors[full_name] << <<~MESSAGE
+        Documentation for request handler classes must link to the official LSP specification.
+
+        For example, if your request handles text document hover, you should add a link to
+        https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_hover.
+      MESSAGE
+    elsif !/# Example/.match?(docs)
+      errors[full_name] << <<~MESSAGE
+        Documentation for request handler class must contain an example.
+
+        = Example
+            def my_method # <-- something happens here
+            end
+      MESSAGE
     end
   end
 

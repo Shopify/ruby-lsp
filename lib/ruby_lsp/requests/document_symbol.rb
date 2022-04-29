@@ -8,20 +8,22 @@ module RubyLsp
     #
     # In VS Code, fuzzy symbol search can be accessed by opened the command palette and inserting an `@` symbol.
     #
-    # {Spec}[https://microsoft.github.io/language-server-protocol/specification#textDocument_documentSymbol]
+    # [Spec](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentSymbol)
     #
-    # = Example
+    # # Example
     #
-    #   class Person # --> document symbol: class
-    #     attr_reader :age # --> document symbol: field
+    # ```ruby
+    # class Person # --> document symbol: class
+    #   attr_reader :age # --> document symbol: field
     #
-    #     def initialize
-    #       @age = 0 # --> document symbol: variable
-    #     end
-    #
-    #     def age # --> document symbol: method
-    #     end
+    #   def initialize
+    #     @age = 0 # --> document symbol: variable
     #   end
+    #
+    #   def age # --> document symbol: method
+    #   end
+    # end
+    # ```
     class DocumentSymbol < BaseRequest
       SYMBOL_KIND = {
         file: 1,
