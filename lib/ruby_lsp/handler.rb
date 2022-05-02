@@ -90,6 +90,7 @@ module RubyLsp
           folding_range_provider: folding_ranges_provider,
           semantic_tokens_provider: semantic_tokens_provider,
           document_formatting_provider: enabled_features.include?("formatting"),
+          document_highlight_provider: enabled_features.include?("documentHighlights"),
           code_action_provider: enabled_features.include?("codeActions")
         )
       )
@@ -151,6 +152,10 @@ module RubyLsp
       store.cache_fetch(uri, :code_actions) do |document|
         Requests::CodeActions.run(uri, document, range)
       end
+    end
+
+    def respond_with_document_highlight(uri, position)
+      Requests::DocumentHighlight.run(store.get(uri), position)
     end
 
     def configure_options(initialization_options)
