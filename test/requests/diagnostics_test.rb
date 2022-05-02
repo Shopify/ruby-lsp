@@ -58,7 +58,7 @@ class DiagnosticsTest < Minitest::Test
         message: diagnostic[:message],
         source: "RuboCop",
         code: diagnostic[:code],
-        severity: RubyLsp::Requests::Diagnostics::RUBOCOP_TO_LSP_SEVERITY[diagnostic[:severity]],
+        severity: RubyLsp::Requests::Support::RuboCopDiagnostic::RUBOCOP_TO_LSP_SEVERITY[diagnostic[:severity]],
         range: LanguageServer::Protocol::Interface::Range.new(
           start: LanguageServer::Protocol::Interface::Position.new(
             line: diagnostic[:start][:line],
