@@ -45,6 +45,16 @@ module RubyLsp
       @parsable_source = @source.dup
       nil
     rescue SyntaxTree::Parser::ParseError
+      update_parsable_source(edits)
+    end
+
+    def syntax_errors?
+      @syntax_error_edits.any?
+    end
+
+    private
+
+    def update_parsable_source(edits)
       # If the new edits caused a syntax error, make all edits blank spaces and line breaks to adjust the line and
       # column numbers. This is attempt to make the document parsable while partial edits are being applied
       edits.each do |edit|
@@ -58,12 +68,6 @@ module RubyLsp
     rescue SyntaxTree::Parser::ParseError
       # If we can't parse the source even after emptying the edits, then just fallback to the previous source
     end
-
-    def syntax_errors?
-      @syntax_error_edits.any?
-    end
-
-    private
 
     def apply_edit(source, range, text)
       scanner = Scanner.new(source)
