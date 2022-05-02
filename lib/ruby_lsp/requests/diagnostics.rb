@@ -24,9 +24,7 @@ module RubyLsp
       }.freeze
 
       def run
-        if @document.syntax_error_edits.any?
-          return @document.syntax_error_edits.map { |e| SyntaxErrorDiagnostic.new(e) }
-        end
+        return syntax_error_diagnostics if @document.syntax_errors?
 
         super
 
@@ -35,6 +33,12 @@ module RubyLsp
 
       def file_finished(_file, offenses)
         @diagnostics = offenses.map { |offense| Diagnostic.new(offense, @uri) }
+      end
+
+      private
+
+      def syntax_error_diagnostics
+        @document.syntax_error_edits.map { |e| SyntaxErrorDiagnostic.new(e) }
       end
 
       class SyntaxErrorDiagnostic

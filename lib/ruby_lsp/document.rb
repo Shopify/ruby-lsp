@@ -59,6 +59,10 @@ module RubyLsp
       # If we can't parse the source even after emptying the edits, then just fallback to the previous source
     end
 
+    def syntax_errors?
+      @syntax_error_edits.any?
+    end
+
     private
 
     def apply_edit(source, range, text)

@@ -192,6 +192,7 @@ class DocumentTest < Minitest::Test
     ])
     document.push_edits([error_edit])
     assert_error_edit(document.syntax_error_edits, error_edit)
+    assert_predicate(document, :syntax_errors?)
 
     assert_equal(<<~RUBY, document.source)
       # frozen_string_literal: true
@@ -211,6 +212,7 @@ class DocumentTest < Minitest::Test
     error_edit = { range: { start: { line: 3, character: 2 }, end: { line: 3, character: 3 } }, text: "" }
     document.push_edits([error_edit])
     assert_error_edit(document.syntax_error_edits, error_edit)
+    assert_predicate(document, :syntax_errors?)
 
     assert_equal(<<~RUBY, document.source)
       # frozen_string_literal: true
