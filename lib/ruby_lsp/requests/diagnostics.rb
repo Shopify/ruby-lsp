@@ -24,6 +24,10 @@ module RubyLsp
       }.freeze
 
       def run
+        if @document.syntax_error_edits.any?
+          return @document.syntax_error_edits.map { |e| SyntaxErrorDiagnostic.new(e) }
+        end
+
         super
 
         @diagnostics
@@ -31,6 +35,25 @@ module RubyLsp
 
       def file_finished(_file, offenses)
         @diagnostics = offenses.map { |offense| Diagnostic.new(offense, @uri) }
+      end
+
+      class SyntaxErrorDiagnostic
+        def initialize(edit)
+          @edit = edit
+        end
+
+        def correctable?
+          false
+        end
+
+        def to_lsp_diagnostic
+          LanguageServer::Protocol::Interface::Diagnostic.new(
+            message: "Syntax error",
+            source: "SyntaxTree",
+            severity: LanguageServer::Protocol::Constant::DiagnosticSeverity::ERROR,
+            range: @edit[:range]
+          )
+        end
       end
 
       class Diagnostic

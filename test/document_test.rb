@@ -185,12 +185,13 @@ class DocumentTest < Minitest::Test
       a
     RUBY
 
-    error_range = { start: { line: 2, character: 2 }, end: { line: 2, character: 2 } }
+    error_edit = { range: { start: { line: 2, character: 2 }, end: { line: 2, character: 2 } }, text: "=" }
 
-    assert_nil(document.push_edits([
+    document.push_edits([
       { range: { start: { line: 2, character: 1 }, end: { line: 2, character: 1 } }, text: " " },
-    ]))
-    assert_error_diagnostic(document.push_edits([{ range: error_range, text: "=" }]), error_range)
+    ])
+    document.push_edits([error_edit])
+    assert_error_edit(document.syntax_error_edits, error_edit)
 
     assert_equal(<<~RUBY, document.source)
       # frozen_string_literal: true
@@ -207,8 +208,9 @@ class DocumentTest < Minitest::Test
       end
     RUBY
 
-    error_range = { start: { line: 3, character: 2 }, end: { line: 3, character: 3 } }
-    assert_error_diagnostic(document.push_edits([{ range: error_range, text: "" }]), error_range)
+    error_edit = { range: { start: { line: 3, character: 2 }, end: { line: 3, character: 3 } }, text: "" }
+    document.push_edits([error_edit])
+    assert_error_edit(document.syntax_error_edits, error_edit)
 
     assert_equal(<<~RUBY, document.source)
       # frozen_string_literal: true
@@ -220,17 +222,7 @@ class DocumentTest < Minitest::Test
 
   private
 
-  def assert_error_diagnostic(actual, error_range)
-    assert_equal([error_diagnostic(error_range)].to_json, actual.to_json)
-  end
-
-  def error_diagnostic(range)
-    LanguageServer::Protocol::Interface::Diagnostic.new(
-      message: "Syntax error",
-      source: "SyntaxTree",
-      code: "Syntax error",
-      severity: LanguageServer::Protocol::Constant::DiagnosticSeverity::ERROR,
-      range: range
-    )
+  def assert_error_edit(actual, error_range)
+    assert_equal([error_range].to_json, actual.to_json)
   end
 end

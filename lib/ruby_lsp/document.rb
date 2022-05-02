@@ -4,12 +4,12 @@ require "strscan"
 
 module RubyLsp
   class Document
-    attr_reader :tree, :source
+    attr_reader :tree, :source, :syntax_error_edits
 
     def initialize(source)
       @tree = SyntaxTree.parse(source)
       @cache = {}
-      @syntax_error_diagnostics = []
+      @syntax_error_edits = []
       @source = source
       @parsable_source = source.dup
     end
@@ -23,7 +23,7 @@ module RubyLsp
       @source = source
       @parsable_source = source.dup
       @cache.clear
-      @syntax_error_diagnostics.clear
+      @syntax_error_edits.clear
     end
 
     def cache_fetch(request_name)
@@ -39,38 +39,27 @@ module RubyLsp
       # Apply the edits on the real source
       edits.each { |edit| apply_edit(@source, edit[:range], edit[:text]) }
 
-      @tree = SyntaxTree.parse(@source)
       @cache.clear
-      @syntax_error_diagnostics.clear
+      @tree = SyntaxTree.parse(@source)
+      @syntax_error_edits.clear
       @parsable_source = @source.dup
       nil
     rescue SyntaxTree::Parser::ParseError
       # If the new edits caused a syntax error, make all edits blank spaces and line breaks to adjust the line and
       # column numbers. This is attempt to make the document parsable while partial edits are being applied
       edits.each do |edit|
-        add_syntax_error_diagnostic(edit)
+        @syntax_error_edits << edit
         next if edit[:text].empty? # skip deletions, since they may have caused the syntax error
 
         apply_edit(@parsable_source, edit[:range], edit[:text].gsub(/[^\r\n]/, " "))
       end
 
       @tree = SyntaxTree.parse(@parsable_source)
-      @syntax_error_diagnostics
     rescue SyntaxTree::Parser::ParseError
       # If we can't parse the source even after emptying the edits, then just fallback to the previous source
     end
 
     private
-
-    def add_syntax_error_diagnostic(edit)
-      @syntax_error_diagnostics << LanguageServer::Protocol::Interface::Diagnostic.new(
-        message: "Syntax error",
-        source: "SyntaxTree",
-        code: "Syntax error",
-        severity: LanguageServer::Protocol::Constant::DiagnosticSeverity::ERROR,
-        range: edit[:range]
-      )
-    end
 
     def apply_edit(source, range, text)
       scanner = Scanner.new(source)

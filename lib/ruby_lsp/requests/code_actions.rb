@@ -27,7 +27,7 @@ module RubyLsp
       def run
         diagnostics = Diagnostics.run(@uri, @document)
         corrections = diagnostics.select { |diagnostic| diagnostic.correctable? && diagnostic.in_range?(@range) }
-        return if corrections.empty?
+        return [] if corrections.empty?
 
         corrections.map!(&:to_lsp_code_action)
       end

@@ -128,7 +128,6 @@ class IntegrationTest < Minitest::Test
     assert_equal("textDocument/publishDiagnostics", response.dig(:method))
     assert_equal("file://#{__FILE__}", response.dig(:params, :uri))
     assert_equal(error_range, response.dig(:params, :diagnostics)[0][:range])
-    assert_equal("Syntax error", response.dig(:params, :diagnostics)[0][:code])
   end
 
   private
