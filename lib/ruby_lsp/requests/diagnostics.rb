@@ -32,7 +32,7 @@ module RubyLsp
       end
 
       def file_finished(_file, offenses)
-        @diagnostics = offenses.map { |offense| Diagnostic.new(offense, @uri) }
+        @diagnostics = offenses.map { |offense| RuboCopDiagnostic.new(offense, @uri) }
       end
 
       private
@@ -60,7 +60,7 @@ module RubyLsp
         end
       end
 
-      class Diagnostic
+      class RuboCopDiagnostic
         attr_reader :replacements
 
         def initialize(offense, uri)
