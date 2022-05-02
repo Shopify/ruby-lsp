@@ -1,26 +1,12 @@
-[![Build status](https://badge.buildkite.com/621ba8e6f3daaf292e04b6b72120fe79f2c623d6a8492d1658.svg)](https://buildkite.com/shopify/vscode-ruby-lsp)
+![Build Status](https://github.com/Shopify/vscode-ruby-lsp/workflows/CI/badge.svg)
 
 # vscode-ruby-lsp
 
-VS Code extension for the `ruby-lsp` gem.
+VS Code extension for the [Ruby LSP gem](https://github.com/Shopify/ruby-lsp).
 
 ## Usage
 
 Search for `vscode-ruby-lsp` in the extensions tab and click install.
-
-## Extension development
-
-### Auto format
-
-To automatically fix prettier and eslint errors on save, install the official eslint plugin and add the following configuration to your settings.json.
-
-```json
-"[typescript]": {
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true
-    },
-}
-```
 
 ### Debugging
 
