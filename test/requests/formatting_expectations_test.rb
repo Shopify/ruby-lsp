@@ -4,7 +4,7 @@ require "test_helper"
 require "expectations/expectations_test_runner"
 
 class FormattingExpectationsTest < ExpectationsTestRunner
-  expectations_tests RubyLsp::Requests::Formatting, File.basename(__dir__)
+  expectations_tests RubyLsp::Requests::Formatting, "formatting"
 
   def run_expectations(source)
     document = RubyLsp::Document.new(source)
