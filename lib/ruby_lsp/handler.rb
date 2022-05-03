@@ -27,11 +27,7 @@ module RubyLsp
     def start
       $stderr.puts "Starting Ruby LSP..."
       @reader.read do |request|
-        if @telemetry_enabled && !IGNORED_FOR_TELEMETRY.include?(request[:method])
-          with_telemetry(request) { handle(request) }
-        else
-          handle(request)
-        end
+        with_telemetry(request) { handle(request) }
       end
     end
 
@@ -145,6 +141,8 @@ module RubyLsp
     end
 
     def with_telemetry(request)
+      return yield unless @telemetry_enabled && !IGNORED_FOR_TELEMETRY.include?(request[:method])
+
       result = nil
       request_time = Benchmark.realtime do
         result = yield
