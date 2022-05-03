@@ -3,15 +3,14 @@
 class ExpectationsTestRunner < Minitest::Test
   TEST_DATA_DIR = "test/data"
   TEST_DATA_GLOB = File.join(TEST_DATA_DIR, "**", "*.rb")
-
   TEST_EXP_DIR = "test/expectations"
 
   def self.expectations_tests(handler_class, expectation_suffix)
     unless method_defined?(:run_expectations)
       class_eval(<<~RB)
         def run_expectations(source)
-          parsed_tree = RubyLsp::Store::ParsedTree.new(source)
-          #{handler_class}.run(parsed_tree)
+          document = RubyLsp::Document.new(source)
+          #{handler_class}.run(document)
         end
       RB
     end

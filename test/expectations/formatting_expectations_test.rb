@@ -5,8 +5,8 @@ require "expectations/expectations_test_runner"
 
 class FormattingExpectationsTest < ExpectationsTestRunner
   def run_expectations(source)
-    parsed_tree = RubyLsp::Store::ParsedTree.new(source)
-    RubyLsp::Requests::Formatting.run("file://#{__FILE__}", parsed_tree).first.new_text
+    document = RubyLsp::Document.new(source)
+    RubyLsp::Requests::Formatting.run("file://#{__FILE__}", document).first.new_text
   end
 
   def assert_expectations(source, expected)
