@@ -1,0 +1,66 @@
+[
+  {
+    "range": {
+      "start": {
+        "line": 0,
+        "character": 0
+      },
+      "end": {
+        "line": 0,
+        "character": 1
+      }
+    },
+    "severity": 3,
+    "code": "Style/FrozenStringLiteralComment",
+    "source": "RuboCop",
+    "message": "Style/FrozenStringLiteralComment: Missing frozen string literal comment."
+  },
+  {
+    "range": {
+      "start": {
+        "line": 1,
+        "character": 0
+      },
+      "end": {
+        "line": 2,
+        "character": 0
+      }
+    },
+    "severity": 3,
+    "code": "Layout/EmptyLinesAroundMethodBody",
+    "source": "RuboCop",
+    "message": "Layout/EmptyLinesAroundMethodBody: Extra empty line detected at method body beginning."
+  },
+  {
+    "range": {
+      "start": {
+        "line": 2,
+        "character": 0
+      },
+      "end": {
+        "line": 3,
+        "character": 0
+      }
+    },
+    "severity": 3,
+    "code": "Layout/EmptyLines",
+    "source": "RuboCop",
+    "message": "Layout/EmptyLines: Extra blank line detected."
+  },
+  {
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 0
+      },
+      "end": {
+        "line": 3,
+        "character": 0
+      }
+    },
+    "severity": 3,
+    "code": "Layout/IndentationWidth",
+    "source": "RuboCop",
+    "message": "Layout/IndentationWidth: Use 2 (not 0) spaces for indentation."
+  }
+]
