@@ -25,7 +25,12 @@ class ExpectationsTestRunner < Minitest::Test
     Dir.glob(TEST_FIXTURES_GLOB).each do |path|
       test_name = File.basename(path, ".rb")
 
-      expectation_path = File.join(TEST_EXP_DIR, expectation_suffix, "#{test_name}.exp")
+      expectations_dir = File.join(TEST_EXP_DIR, expectation_suffix)
+      unless File.directory?(expectations_dir)
+        raise "Expectations directory #{expectations_dir} does not exist"
+      end
+
+      expectation_path = File.join(expectations_dir, "#{test_name}.exp")
 
       if File.file?(expectation_path)
         class_eval(<<~RB)
