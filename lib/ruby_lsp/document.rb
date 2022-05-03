@@ -4,11 +4,12 @@ require "strscan"
 
 module RubyLsp
   class Document
-    attr_reader :tree, :source
+    attr_reader :tree, :source, :syntax_error_edits
 
     def initialize(source)
       @tree = SyntaxTree.parse(source)
       @cache = {}
+      @syntax_error_edits = []
       @source = source
       @parsable_source = source.dup
     end
@@ -22,6 +23,7 @@ module RubyLsp
       @source = source
       @parsable_source = source.dup
       @cache.clear
+      @syntax_error_edits.clear
     end
 
     def cache_fetch(request_name)
@@ -37,13 +39,26 @@ module RubyLsp
       # Apply the edits on the real source
       edits.each { |edit| apply_edit(@source, edit[:range], edit[:text]) }
 
-      @tree = SyntaxTree.parse(@source)
       @cache.clear
+      @tree = SyntaxTree.parse(@source)
+      @syntax_error_edits.clear
       @parsable_source = @source.dup
+      nil
     rescue SyntaxTree::Parser::ParseError
+      update_parsable_source(edits)
+    end
+
+    def syntax_errors?
+      @syntax_error_edits.any?
+    end
+
+    private
+
+    def update_parsable_source(edits)
       # If the new edits caused a syntax error, make all edits blank spaces and line breaks to adjust the line and
       # column numbers. This is attempt to make the document parsable while partial edits are being applied
       edits.each do |edit|
+        @syntax_error_edits << edit
         next if edit[:text].empty? # skip deletions, since they may have caused the syntax error
 
         apply_edit(@parsable_source, edit[:range], edit[:text].gsub(/[^\r\n]/, " "))
@@ -53,8 +68,6 @@ module RubyLsp
     rescue SyntaxTree::Parser::ParseError
       # If we can't parse the source even after emptying the edits, then just fallback to the previous source
     end
-
-    private
 
     def apply_edit(source, range, text)
       scanner = Scanner.new(source)

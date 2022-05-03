@@ -10,5 +10,10 @@ module RubyLsp
     autoload :Formatting, "ruby_lsp/requests/formatting"
     autoload :Diagnostics, "ruby_lsp/requests/diagnostics"
     autoload :CodeActions, "ruby_lsp/requests/code_actions"
+
+    module Support
+      autoload :RuboCopDiagnostic, "ruby_lsp/requests/support/rubocop_diagnostic"
+      autoload :SyntaxErrorDiagnostic, "ruby_lsp/requests/support/syntax_error_diagnostic"
+    end
   end
 end

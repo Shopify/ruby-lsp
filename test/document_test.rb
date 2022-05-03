@@ -177,4 +177,54 @@ class DocumentTest < Minitest::Test
       puts 'hello'
     RUBY
   end
+
+  def test_syntax_error_on_addition_returns_diagnostics
+    document = RubyLsp::Document.new(+<<~RUBY)
+      # frozen_string_literal: true
+
+      a
+    RUBY
+
+    error_edit = { range: { start: { line: 2, character: 2 }, end: { line: 2, character: 2 } }, text: "=" }
+
+    document.push_edits([
+      { range: { start: { line: 2, character: 1 }, end: { line: 2, character: 1 } }, text: " " },
+    ])
+    document.push_edits([error_edit])
+    assert_error_edit(document.syntax_error_edits, error_edit)
+    assert_predicate(document, :syntax_errors?)
+
+    assert_equal(<<~RUBY, document.source)
+      # frozen_string_literal: true
+
+      a =
+    RUBY
+  end
+
+  def test_syntax_error_on_removal_returns_diagnostics
+    document = RubyLsp::Document.new(+<<~RUBY)
+      # frozen_string_literal: true
+
+      class Foo
+      end
+    RUBY
+
+    error_edit = { range: { start: { line: 3, character: 2 }, end: { line: 3, character: 3 } }, text: "" }
+    document.push_edits([error_edit])
+    assert_error_edit(document.syntax_error_edits, error_edit)
+    assert_predicate(document, :syntax_errors?)
+
+    assert_equal(<<~RUBY, document.source)
+      # frozen_string_literal: true
+
+      class Foo
+      en
+    RUBY
+  end
+
+  private
+
+  def assert_error_edit(actual, error_range)
+    assert_equal([error_range].to_json, actual.to_json)
+  end
 end

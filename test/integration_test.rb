@@ -43,7 +43,7 @@ class IntegrationTest < Minitest::Test
     open_file_with("class Foo\nend")
 
     response = make_request("textDocument/documentSymbol", { textDocument: { uri: "file://#{__FILE__}" } })
-    symbol = response.first
+    symbol = response[:result].first
     assert_equal("Foo", symbol[:name])
     assert_equal(RubyLsp::Requests::DocumentSymbol::SYMBOL_KIND[:class], symbol[:kind])
   end
@@ -53,7 +53,7 @@ class IntegrationTest < Minitest::Test
     open_file_with("class Foo\nend")
 
     response = make_request("textDocument/semanticTokens/full", { textDocument: { uri: "file://#{__FILE__}" } })
-    assert_empty(response[:data])
+    assert_empty(response[:result][:data])
   end
 
   def test_formatting
@@ -61,7 +61,7 @@ class IntegrationTest < Minitest::Test
     open_file_with("class Foo\nend")
 
     response = make_request("textDocument/formatting", { textDocument: { uri: "file://#{__FILE__}" } })
-    assert_equal(<<~FORMATTED, response.first[:newText])
+    assert_equal(<<~FORMATTED, response[:result].first[:newText])
       # frozen_string_literal: true
 
       class Foo
@@ -75,7 +75,7 @@ class IntegrationTest < Minitest::Test
 
     response = make_request("textDocument/codeAction",
       { textDocument: { uri: "file://#{__FILE__}" }, range: { start: { line: 0 }, end: { line: 1 } } })
-    quickfix = response.first
+    quickfix = response[:result].first
     assert_equal("quickfix", quickfix[:kind])
     assert_match(%r{Autocorrect .*/.*}, quickfix[:title])
   end
@@ -107,20 +107,43 @@ class IntegrationTest < Minitest::Test
     open_file_with("class Foo\nend")
 
     response = make_request("textDocument/foldingRange", { textDocument: { uri: "file://#{__FILE__}" } })
-    assert_equal({ startLine: 0, endLine: 1, kind: "region" }, response.first)
+    assert_equal({ startLine: 0, endLine: 1, kind: "region" }, response[:result].first)
+  end
+
+  def test_syntax_error_diagnostics
+    initialize_lsp([])
+    open_file_with("class Foo\nend")
+
+    error_range = { start: { line: 1, character: 2 }, end: { line: 1, character: 3 } }
+
+    assert(send_request(
+      "textDocument/didChange",
+      {
+        textDocument: { uri: "file://#{__FILE__}" },
+        contentChanges: [{ text: "", range: error_range }],
+      }
+    ))
+    response = read_response("textDocument/publishDiagnostics")
+
+    assert_equal("textDocument/publishDiagnostics", response.dig(:method))
+    assert_equal("file://#{__FILE__}", response.dig(:params, :uri))
+    assert_equal(error_range, response.dig(:params, :diagnostics)[0][:range])
   end
 
   private
 
   def make_request(request, params = nil)
     send_request(request, params)
+    read_response(request)
+  end
 
+  def read_response(request)
     Timeout.timeout(5) do
       # Read headers until line breaks
       headers = @stdout.gets("\r\n\r\n")
       # Read the response content based on the length received in the headers
       raw_response = @stdout.read(headers[/Content-Length: (\d+)/i, 1].to_i)
-      JSON.parse(raw_response, symbolize_names: true)[:result]
+      JSON.parse(raw_response, symbolize_names: true)
     end
   rescue Timeout::Error
     raise "Request #{request} timed out. Is the request returning a response?"
@@ -146,7 +169,7 @@ class IntegrationTest < Minitest::Test
           enabledFeatures: enabled_features,
         },
       }
-    )
+    )[:result]
 
     assert(true, response.dig(:capabilities, :textDocumentSync, :openClose))
     assert(

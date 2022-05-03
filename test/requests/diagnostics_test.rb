@@ -21,6 +21,23 @@ class DiagnosticsTest < Minitest::Test
     RUBY
   end
 
+  def test_syntax_error_diagnostics
+    document = RubyLsp::Document.new(+<<~RUBY)
+      class Foo
+      end
+    RUBY
+
+    error_edit = {
+      range: { start: { line: 0, character: 10 }, end: { line: 0, character: 10 } },
+      text: "\n  end",
+    }
+
+    document.push_edits([error_edit])
+
+    result = RubyLsp::Requests::Diagnostics.run("file://#{__FILE__}", document)
+    assert_equal(syntax_error_diagnostics([error_edit]).to_json, result.map(&:to_lsp_diagnostic).to_json)
+  end
+
   private
 
   def assert_diagnostics(source, diagnostics)
@@ -41,7 +58,7 @@ class DiagnosticsTest < Minitest::Test
         message: diagnostic[:message],
         source: "RuboCop",
         code: diagnostic[:code],
-        severity: RubyLsp::Requests::Diagnostics::RUBOCOP_TO_LSP_SEVERITY[diagnostic[:severity]],
+        severity: RubyLsp::Requests::Support::RuboCopDiagnostic::RUBOCOP_TO_LSP_SEVERITY[diagnostic[:severity]],
         range: LanguageServer::Protocol::Interface::Range.new(
           start: LanguageServer::Protocol::Interface::Position.new(
             line: diagnostic[:start][:line],
@@ -52,6 +69,17 @@ class DiagnosticsTest < Minitest::Test
             character: diagnostic[:end][:character]
           )
         )
+      )
+    end
+  end
+
+  def syntax_error_diagnostics(edits)
+    edits.map do |edit|
+      LanguageServer::Protocol::Interface::Diagnostic.new(
+        message: "Syntax error",
+        source: "SyntaxTree",
+        severity: LanguageServer::Protocol::Constant::DiagnosticSeverity::ERROR,
+        range: edit[:range]
       )
     end
   end
