@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# TODO: how to pass arguments to the test runner? See for example `CodeActionsTest`
+
 class ExpectationsTestRunner < Minitest::Test
   TEST_EXP_DIR = "test/expectations"
   TEST_FIXTURES_DIR = "test/fixtures"
