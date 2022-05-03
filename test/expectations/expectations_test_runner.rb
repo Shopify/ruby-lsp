@@ -6,23 +6,21 @@ class ExpectationsTestRunner < Minitest::Test
   TEST_EXP_DIR = "test/expectations"
 
   def self.expectations_tests(handler_class, expectation_suffix)
-    unless method_defined?(:run_expectations)
-      class_eval(<<~RB)
+    class_eval(<<~RB)
+      module ExpectationsRunnerMethods
         def run_expectations(source)
           document = RubyLsp::Document.new(source)
           #{handler_class}.run(document)
         end
-      RB
-    end
 
-    unless method_defined?(:assert_expectations)
-      class_eval(<<~RB)
         def assert_expectations(source, expected)
           actual = run_expectations(source)
           assert_equal_or_pretty_display(expected, actual)
         end
-      RB
-    end
+      end
+
+      include ExpectationsRunnerMethods
+    RB
 
     Dir.glob(TEST_DATA_GLOB).each do |path|
       test_name = File.basename(path, ".rb")

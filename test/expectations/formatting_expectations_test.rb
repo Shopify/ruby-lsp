@@ -4,6 +4,8 @@ require "test_helper"
 require "expectations/expectations_test_runner"
 
 class FormattingExpectationsTest < ExpectationsTestRunner
+  expectations_tests RubyLsp::Requests::Formatting, File.basename(__dir__)
+
   def run_expectations(source)
     document = RubyLsp::Document.new(source)
     RubyLsp::Requests::Formatting.run("file://#{__FILE__}", document).first.new_text
@@ -19,6 +21,4 @@ class FormattingExpectationsTest < ExpectationsTestRunner
     assert_empty(stdout)
     assert_equal(expected, result)
   end
-
-  expectations_tests RubyLsp::Requests::Formatting, File.basename(__dir__)
 end
