@@ -66,7 +66,7 @@ class ExpectationsTestRunner < Minitest::Test
       actual_obj = JSON.parse(actual)
       $stderr.puts JSON.pretty_generate(actual_obj)
       $stderr.puts "##############################"
-    rescue JSON::ParseError, JSON::GeneratorError
+    rescue
       # Values are not JSON, skip the pretty printing
     end
 
