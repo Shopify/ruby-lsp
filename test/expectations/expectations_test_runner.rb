@@ -15,7 +15,7 @@ class ExpectationsTestRunner < Minitest::Test
 
         def assert_expectations(source, expected)
           actual = run_expectations(source)
-          assert_equal_or_pretty_display(expected, actual)
+          assert_equal(JSON.parse(expected), JSON.parse(actual.to_json))
         end
       end
 
@@ -48,12 +48,23 @@ class ExpectationsTestRunner < Minitest::Test
 
   private
 
-  def assert_equal_or_pretty_display(expected, actual)
-    assert_equal(JSON.parse(expected), JSON.parse(actual.to_json))
-  rescue Minitest::Assertion => e
-    $stderr.puts "## Expected Output #########"
-    $stderr.puts JSON.pretty_generate(actual)
-    $stderr.puts "############################"
-    raise e
+  def diff(expected, actual)
+    res = super
+    return unless res
+
+    begin
+      # If the values are JSON we want to pretty print them
+      expected_obj = JSON.parse(expected)
+      $stderr.puts "########## Expected ##########"
+      $stderr.puts JSON.pretty_generate(expected_obj)
+      $stderr.puts "##########  Actual  ##########"
+      actual_obj = JSON.parse(actual)
+      $stderr.puts JSON.pretty_generate(actual_obj)
+      $stderr.puts "##############################"
+    rescue JSON::ParseError, JSON::GeneratorError
+      # Values are not JSON, skip the pretty printing
+    end
+
+    res
   end
 end
