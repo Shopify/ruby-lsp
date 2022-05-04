@@ -123,7 +123,7 @@ export default class Client {
     );
 
     if (response === "Run bundle add and install") {
-      await this.execInPath("bundle add ruby-lsp");
+      await this.execInPath("bundle add ruby-lsp --group=development");
       await this.execInPath("bundle install");
       return false;
     }
