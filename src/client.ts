@@ -10,6 +10,8 @@ import {
   RevealOutputChannelOn,
 } from "vscode-languageclient/node";
 
+import { Telemetry } from "./telemetry";
+
 const asyncExec = promisify(exec);
 const LSP_NAME = "Ruby LSP";
 
@@ -29,10 +31,12 @@ export default class Client {
   private workingFolder: string;
   private serverOptions: ServerOptions;
   private clientOptions: LanguageClientOptions;
+  private telemetry: Telemetry;
 
-  constructor(context: vscode.ExtensionContext) {
+  constructor(context: vscode.ExtensionContext, telemetry: Telemetry) {
     const outputChannel = vscode.window.createOutputChannel(LSP_NAME);
     this.workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
+    this.telemetry = telemetry;
 
     const executable: Executable = {
       command: "bundle",
@@ -54,6 +58,7 @@ export default class Client {
       revealOutputChannelOn: RevealOutputChannelOn.Never,
       initializationOptions: {
         enabledFeatures: this.listOfEnabledFeatures(),
+        telemetryEnabled: telemetry.enabled(),
       },
     };
 
@@ -72,6 +77,10 @@ export default class Client {
       this.serverOptions,
       this.clientOptions
     );
+
+    if (this.telemetry.enabled()) {
+      this.client.onTelemetry(this.telemetry.sendEvent.bind(this.telemetry));
+    }
 
     this.context.subscriptions.push(this.client.start());
     await this.client.onReady();
