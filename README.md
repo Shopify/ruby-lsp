@@ -6,7 +6,7 @@ VS Code extension for the [Ruby LSP gem](https://github.com/Shopify/ruby-lsp).
 
 ## Usage
 
-Search for `vscode-ruby-lsp` in the extensions tab and click install.
+Search for `ruby-lsp` in the extensions tab and click install.
 
 ### Telemetry
 
