@@ -12,7 +12,10 @@ module RubyLsp
       handler.config do
         on("initialize") do |request|
           store.clear
-          respond_with_capabilities(request.dig(:params, :initializationOptions).fetch(:enabledFeatures, []))
+          initialization_options = request.dig(:params, :initializationOptions)
+
+          configure_options(initialization_options)
+          respond_with_capabilities(initialization_options.fetch(:enabledFeatures, []))
         end
 
         on("textDocument/didChange") do |request|

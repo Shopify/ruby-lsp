@@ -130,7 +130,29 @@ class IntegrationTest < Minitest::Test
     assert_equal(error_range, response.dig(:params, :diagnostics)[0][:range])
   end
 
+  def test_request_with_telemetry
+    initialize_lsp(["foldingRanges"], telemetry_enabled: true)
+    open_file_with("class Foo\nend")
+
+    send_request("textDocument/foldingRange", { textDocument: { uri: "file://#{__FILE__}" } })
+
+    assert_telemetry("textDocument/didOpen")
+
+    response = read_response("textDocument/foldingRange")
+    assert_equal({ startLine: 0, endLine: 1, kind: "region" }, response[:result].first)
+    assert_telemetry("textDocument/foldingRange")
+  end
+
   private
+
+  def assert_telemetry(request)
+    telemetry_response = read_response("telemetry/event")
+
+    assert_equal("file://#{__FILE__}", telemetry_response.dig(:params, :uri))
+    assert_equal(RubyLsp::VERSION, telemetry_response.dig(:params, :lspVersion))
+    assert_equal(request, telemetry_response.dig(:params, :request))
+    assert_in_delta(0.5, telemetry_response.dig(:params, :requestTime), 1)
+  end
 
   def make_request(request, params = nil)
     send_request(request, params)
@@ -161,12 +183,13 @@ class IntegrationTest < Minitest::Test
     @stdin.write("Content-Length: #{json.length}\r\n\r\n#{json}")
   end
 
-  def initialize_lsp(enabled_features)
+  def initialize_lsp(enabled_features, telemetry_enabled: false)
     response = make_request(
       "initialize",
       {
         initializationOptions: {
           enabledFeatures: enabled_features,
+          telemetryEnabled: telemetry_enabled,
         },
       }
     )[:result]
