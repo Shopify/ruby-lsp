@@ -85,6 +85,7 @@ module RubyLsp
             change: Constant::TextDocumentSyncKind::INCREMENTAL,
             open_close: true,
           ),
+          selection_range_provider: enabled_features.include?("selectionRanges"),
           document_symbol_provider: document_symbol_provider,
           folding_range_provider: folding_ranges_provider,
           semantic_tokens_provider: semantic_tokens_provider,
@@ -103,6 +104,22 @@ module RubyLsp
     def respond_with_folding_ranges(uri)
       store.cache_fetch(uri, :folding_ranges) do |document|
         Requests::FoldingRanges.run(document)
+      end
+    end
+
+    def respond_with_selection_ranges(uri, positions)
+      ranges = store.cache_fetch(uri, :selection_ranges) do |document|
+        Requests::SelectionRanges.run(document)
+      end
+
+      # Per the selection range request spec (https://microsoft.github.io/language-server-protocol/specification#textDocument_selectionRange),
+      # every position in the positions array should have an element at the same index in the response
+      # array. For positions without a valid selection range, the corresponding element in the response
+      # array will be nil.
+      positions.map do |position|
+        ranges.find do |range|
+          range.cover?(position)
+        end
       end
     end
 

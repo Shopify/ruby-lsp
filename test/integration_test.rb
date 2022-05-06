@@ -15,6 +15,7 @@ class IntegrationTest < Minitest::Test
   FEATURE_TO_PROVIDER = {
     "documentSymbols" => :documentSymbolProvider,
     "foldingRanges" => :foldingRangeProvider,
+    "selectionRanges" => :selectionRangeProvider,
     "semanticHighlighting" => :semanticTokensProvider,
     "formatting" => :documentFormattingProvider,
     "codeActions" => :codeActionProvider,
@@ -141,6 +142,24 @@ class IntegrationTest < Minitest::Test
     response = read_response("textDocument/foldingRange")
     assert_equal({ startLine: 0, endLine: 1, kind: "region" }, response[:result].first)
     assert_telemetry("textDocument/foldingRange")
+  end
+
+  def test_selection_ranges
+    initialize_lsp(["selectionRanges"])
+    open_file_with("class Foo\nend")
+
+    response = make_request(
+      "textDocument/selectionRange",
+      {
+        textDocument: { uri: "file://#{__FILE__}" },
+        positions: [{ line: 0, character: 0 }],
+      }
+    )
+
+    assert_equal(
+      { range: { start: { line: 0, character: 0 }, end: { line: 1, character: 3 } } },
+      response[:result].first,
+    )
   end
 
   private
