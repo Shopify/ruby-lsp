@@ -19,6 +19,7 @@ interface EnabledFeatures {
   [key: string]: boolean;
   documentSymbols: boolean;
   foldingRanges: boolean;
+  selectionRanges: boolean;
   semanticHighlighting: boolean;
   formatting: boolean;
   diagnostics: boolean;
