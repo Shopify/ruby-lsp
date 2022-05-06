@@ -68,7 +68,7 @@ export default class Client {
   }
 
   async start() {
-    if ((await this.gemMissing()) || (await this.gemNotInstalled())) {
+    if ((await this.gemNotInstalled()) || (await this.gemMissing())) {
       return;
     }
 
@@ -107,8 +107,20 @@ export default class Client {
 
   private async gemMissing(): Promise<boolean> {
     const bundledGems = await this.execInPath("bundle list");
+    const hasRubocopLsp = bundledGems.includes("rubocop-lsp");
+    const hasRubyLsp = bundledGems.includes("ruby-lsp");
 
-    if (bundledGems.includes("ruby-lsp")) {
+    if (hasRubocopLsp) {
+      await vscode.window.showErrorMessage(
+        "The rubocop-lsp gem has been replaced by the ruby-lsp.",
+        {
+          modal: true,
+          detail: "Please remove the rubocop-lsp from the Gemfile",
+        }
+      );
+    }
+
+    if (hasRubyLsp) {
       return false;
     }
 
