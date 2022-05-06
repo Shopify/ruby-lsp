@@ -52,6 +52,11 @@
               "type": "boolean",
               "default": true
             },
+            "selectionRanges": {
+              "description": "Enable selection ranges, which selects code based on the position of the cursor(s)",
+              "type": "boolean",
+              "default": true
+            },
             "semanticHighlighting": {
               "description": "Enable semantic highlighting, which highlights code based on Ruby's understanding of it",
               "type": "boolean",
@@ -76,6 +81,7 @@
           "default": {
             "documentSymbols": true,
             "foldingRanges": true,
+            "selectionRanges": true,
             "semanticHighlighting": true,
             "formatting": true,
             "diagnostics": true,
