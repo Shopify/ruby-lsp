@@ -52,7 +52,7 @@ GEM
     rubocop-shopify (2.5.0)
       rubocop (~> 1.25)
     ruby-progressbar (1.11.0)
-    syntax_tree (2.3.1)
+    syntax_tree (2.4.0)
     unicode-display_width (2.1.0)
     webrick (1.7.0)
     yard (0.9.27)
