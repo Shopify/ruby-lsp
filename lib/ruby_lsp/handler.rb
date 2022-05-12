@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "ruby_lsp/encoder/relative"
 require "ruby_lsp/requests"
 require "ruby_lsp/store"
 require "benchmark"
@@ -69,8 +70,8 @@ module RubyLsp
         Interface::SemanticTokensRegistrationOptions.new(
           document_selector: { scheme: "file", language: "ruby" },
           legend: Interface::SemanticTokensLegend.new(
-            token_types: Requests::SemanticHighlighting::TOKEN_TYPES,
-            token_modifiers: Requests::SemanticHighlighting::TOKEN_MODIFIERS
+            token_types: Encoder::Relative::TOKEN_TYPES,
+            token_modifiers: Encoder::Relative::TOKEN_MODIFIERS
           ),
           range: false,
           full: {
@@ -125,7 +126,7 @@ module RubyLsp
 
     def respond_with_semantic_highlighting(uri)
       store.cache_fetch(uri, :semantic_highlighting) do |document|
-        Requests::SemanticHighlighting.run(document)
+        Encoder::Relative.new(Requests::SemanticHighlighting.new(document)).run
       end
     end
 
