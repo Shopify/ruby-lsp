@@ -2,7 +2,7 @@
   "name": "ruby-lsp",
   "displayName": "ruby-lsp",
   "description": "VS Code plugin for connecting with the Ruby LSP",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "Shopify",
   "repository": {
     "type": "git",
