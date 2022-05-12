@@ -10,19 +10,19 @@ module RubyLsp
       TOKEN_MODIFIERS = [].freeze
 
       def initialize
-        @delta = []
         @current_row = 0
         @current_column = 0
       end
 
       def encode(tokens)
+        delta = []
         tokens.each do |token|
           compute_delta(token) do |delta_line, delta_column|
-            @delta.push(delta_line, delta_column, token.length, TOKEN_TYPES.index(token.classification), 0)
+            delta.push(delta_line, delta_column, token.length, TOKEN_TYPES.index(token.classification), 0)
           end
         end
 
-        LanguageServer::Protocol::Interface::SemanticTokens.new(data: @delta)
+        LanguageServer::Protocol::Interface::SemanticTokens.new(data: delta)
       end
 
       # The delta array is computed according to the LSP specification:
