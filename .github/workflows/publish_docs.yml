@@ -1,0 +1,39 @@
+name: Publish docs
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Publish documentation website
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.1.1
+          bundler-cache: true
+
+      - name: Configure git
+        run:
+          - git config user.name github-actions
+          - git config user.email github-actions@github.com
+
+      - name: Reset gh-pages branch
+        run:
+          - git switch gh-pages
+          - git reset --hard origin/main
+
+      - name: Generate documentation
+        run:
+          - bundle exec rake yard
+          - mv doc docs
+
+      - name: Commit to gh-pages
+        run:
+          - git add docs
+          - git commit -m "Publish website $(git log --format=format:%h -1)"
+          - git push origin +gh-pages
