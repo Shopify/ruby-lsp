@@ -60,7 +60,7 @@ class IntegrationTest < Minitest::Test
     )
 
     range = response[:result].first
-    assert_equal(RubyLsp::Requests::DocumentHighlight::HighlightVisitor::WRITE_KIND, range[:kind])
+    assert_equal(LanguageServer::Protocol::Constant::DocumentHighlightKind::WRITE, range[:kind])
   end
 
   def test_semantic_highlighting
