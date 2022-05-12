@@ -9,15 +9,14 @@ module RubyLsp
       ].freeze
       TOKEN_MODIFIERS = [].freeze
 
-      def initialize(request)
-        @tokens = request.run
+      def initialize
         @delta = []
         @current_row = 0
         @current_column = 0
       end
 
-      def run
-        @tokens.each do |token|
+      def encode(tokens)
+        tokens.each do |token|
           compute_delta(token) do |delta_line, delta_column|
             @delta.push(delta_line, delta_column, token.length, TOKEN_TYPES.index(token.classification), 0)
           end

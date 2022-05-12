@@ -18,16 +18,19 @@ module RubyLsp
     class SemanticHighlighting < BaseRequest
       SemanticToken = Struct.new(:location, :length, :classification)
 
-      def initialize(document)
-        super
+      def initialize(document, encoder: nil)
+        super(document)
 
+        @encoder = encoder.new if encoder
         @tokens = []
         @tree = document.tree
       end
 
       def run
         visit(@tree)
-        @tokens
+        return @tokens unless @encoder
+
+        @encoder.encode(@tokens)
       end
 
       def visit_m_assign(node)
