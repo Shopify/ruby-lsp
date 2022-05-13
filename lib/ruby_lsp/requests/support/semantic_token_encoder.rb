@@ -10,11 +10,13 @@ module RubyLsp
         end
 
         def encode(tokens)
-          tokens = sort(tokens)
-
-          delta = tokens.flat_map do |token|
-            compute_delta(token)
-          end
+          delta = tokens
+            .sort_by do |token|
+              [token.location.start_line, token.location.start_column]
+            end
+            .flat_map do |token|
+              compute_delta(token)
+            end
 
           LanguageServer::Protocol::Interface::SemanticTokens.new(data: delta)
         end
@@ -40,11 +42,6 @@ module RubyLsp
         ensure
           @current_row = row
           @current_column = column
-        end
-
-        def sort(tokens)
-          tokens.sort_by { |token| token.location.start_column }
-            .sort_by { |token| token.location.start_line }
         end
       end
     end
