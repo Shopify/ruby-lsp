@@ -18,14 +18,6 @@ module RubyLsp
       @source == other.source
     end
 
-    def reset(source)
-      @tree = SyntaxTree.parse(source)
-      @source = source
-      @parsable_source = source.dup
-      @cache.clear
-      @syntax_error_edits.clear
-    end
-
     def cache_fetch(request_name)
       cached = @cache[request_name]
       return cached if cached
