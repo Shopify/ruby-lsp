@@ -15,6 +15,8 @@ module RubyLsp
       end
 
       def encode(tokens)
+        tokens = sort(tokens)
+
         delta = []
         tokens.each do |token|
           compute_delta(token) do |delta_line, delta_column|
@@ -55,6 +57,11 @@ module RubyLsp
       end
 
       class InvalidTokenRowError < StandardError; end
+
+      def sort(tokens)
+        tokens.sort_by { |token| token.location.start_column }
+          .sort_by { |token| token.location.start_line }
+      end
     end
   end
 end
