@@ -18,21 +18,20 @@ jobs:
           bundler-cache: true
 
       - name: Configure git
-        run:
-          - git config user.name github-actions
-          - git config user.email github-actions@github.com
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
 
       - name: Reset gh-pages branch
-        run:
-          - git switch gh-pages
-          - git reset --hard origin/main
+        run: |
+          git switch gh-pages
+          git reset --hard origin/main
 
       - name: Generate documentation
-        run:
-          - bundle exec rake yard
+        run: bundle exec rake yard
 
       - name: Commit to gh-pages
-        run:
-          - git add docs
-          - git commit -m "Publish website $(git log --format=format:%h -1)"
-          - git push origin +gh-pages
+        run: |
+          git add docs
+          git commit -m "Publish website $(git log --format=format:%h -1)"
+          git push origin +gh-pages
