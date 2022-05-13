@@ -70,8 +70,8 @@ module RubyLsp
         Interface::SemanticTokensRegistrationOptions.new(
           document_selector: { scheme: "file", language: "ruby" },
           legend: Interface::SemanticTokensLegend.new(
-            token_types: Encoder::Relative::TOKEN_TYPES,
-            token_modifiers: Encoder::Relative::TOKEN_MODIFIERS
+            token_types: Requests::SemanticHighlighting::TOKEN_TYPES,
+            token_modifiers: Requests::SemanticHighlighting::TOKEN_MODIFIERS
           ),
           range: false,
           full: {

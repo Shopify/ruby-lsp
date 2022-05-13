@@ -16,7 +16,13 @@ module RubyLsp
     # end
     # ```
     class SemanticHighlighting < BaseRequest
-      SemanticToken = Struct.new(:location, :length, :classification)
+      TOKEN_TYPES = [
+        :variable,
+        :method,
+      ].freeze
+      TOKEN_MODIFIERS = [].freeze
+
+      SemanticToken = Struct.new(:location, :length, :type, :modifier)
 
       def initialize(document, encoder: nil)
         super(document)
@@ -83,9 +89,9 @@ module RubyLsp
         add_token(node.value.location, :method)
       end
 
-      def add_token(location, classification)
+      def add_token(location, type)
         length = location.end_char - location.start_char
-        @tokens.push(SemanticToken.new(location, length, classification))
+        @tokens.push(SemanticToken.new(location, length, TOKEN_TYPES.index(type), 0))
       end
     end
   end

@@ -3,12 +3,6 @@
 module RubyLsp
   module Encoder
     class Relative
-      TOKEN_TYPES = [
-        :variable,
-        :method,
-      ].freeze
-      TOKEN_MODIFIERS = [].freeze
-
       def initialize
         @current_row = 0
         @current_column = 0
@@ -36,13 +30,12 @@ module RubyLsp
       def compute_delta(token)
         row = token.location.start_line - 1
         column = token.location.start_column
-
         delta_line = row - @current_row
 
         delta_column = column
         delta_column -= @current_column if delta_line == 0
 
-        [delta_line, delta_column, token.length, TOKEN_TYPES.index(token.classification), 0]
+        [delta_line, delta_column, token.length, token.type, token.modifier]
       ensure
         @current_row = row
         @current_column = column
