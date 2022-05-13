@@ -151,6 +151,7 @@ class IntegrationTest < Minitest::Test
 
     send_request("textDocument/foldingRange", { textDocument: { uri: "file://#{__FILE__}" } })
 
+    read_response("textDocument/publishDiagnostics")
     assert_telemetry("textDocument/didOpen")
 
     response = read_response("textDocument/foldingRange")
