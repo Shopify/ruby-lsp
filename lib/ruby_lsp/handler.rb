@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "ruby_lsp/encoder/relative"
 require "ruby_lsp/requests"
 require "ruby_lsp/store"
 require "benchmark"
@@ -126,7 +125,7 @@ module RubyLsp
 
     def respond_with_semantic_highlighting(uri)
       store.cache_fetch(uri, :semantic_highlighting) do |document|
-        Requests::SemanticHighlighting.new(document, encoder: Encoder::Relative).run
+        Requests::SemanticHighlighting.new(document, encoder: Requests::Support::SemanticTokenEncoder).run
       end
     end
 

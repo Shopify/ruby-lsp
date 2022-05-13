@@ -223,7 +223,8 @@ class SemanticHighlightingTest < Minitest::Test
 
   def assert_tokens(expected, source_code)
     document = RubyLsp::Document.new(source_code)
-    tokens = RubyLsp::Requests::SemanticHighlighting.new(document, encoder: RubyLsp::Encoder::Relative).run
+    tokens = RubyLsp::Requests::SemanticHighlighting.new(document,
+      encoder: RubyLsp::Requests::Support::SemanticTokenEncoder).run
 
     assert_equal(
       inline_tokens(expected),
