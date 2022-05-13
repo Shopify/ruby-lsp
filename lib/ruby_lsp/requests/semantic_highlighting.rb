@@ -27,7 +27,7 @@ module RubyLsp
       def initialize(document, encoder: nil)
         super(document)
 
-        @encoder = encoder.new if encoder
+        @encoder = encoder
         @tokens = []
         @tree = document.tree
       end

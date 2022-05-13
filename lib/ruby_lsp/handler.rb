@@ -125,7 +125,7 @@ module RubyLsp
 
     def respond_with_semantic_highlighting(uri)
       store.cache_fetch(uri, :semantic_highlighting) do |document|
-        Requests::SemanticHighlighting.new(document, encoder: Requests::Support::SemanticTokenEncoder).run
+        Requests::SemanticHighlighting.new(document, encoder: Requests::Support::SemanticTokenEncoder.new).run
       end
     end
 
