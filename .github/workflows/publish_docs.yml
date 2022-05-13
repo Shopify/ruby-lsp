@@ -30,7 +30,6 @@ jobs:
       - name: Generate documentation
         run:
           - bundle exec rake yard
-          - mv doc docs
 
       - name: Commit to gh-pages
         run:
