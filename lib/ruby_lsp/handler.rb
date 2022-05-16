@@ -6,10 +6,6 @@ require "benchmark"
 
 module RubyLsp
   class Handler
-    IGNORED_FOR_TELEMETRY = [
-      "initialized",
-      "$/cancelRequest",
-    ].freeze
     VOID = Object.new.freeze
 
     attr_reader :store
@@ -162,10 +158,6 @@ module RubyLsp
       Requests::DocumentHighlight.run(store.get(uri), position)
     end
 
-    def configure_options(initialization_options)
-      @telemetry_enabled = initialization_options.fetch(:telemetryEnabled, false)
-    end
-
     def with_telemetry(request)
       params = { request: request[:method], lspVersion: RubyLsp::VERSION }
       result = nil
@@ -176,8 +168,6 @@ module RubyLsp
         params[:errorClass] = e.class.name
         params[:errorMessage] = e.message
       end
-
-      return result unless @telemetry_enabled && !IGNORED_FOR_TELEMETRY.include?(request[:method])
 
       uri = request.dig(:params, :textDocument, :uri)
       params[:uri] = uri if uri
