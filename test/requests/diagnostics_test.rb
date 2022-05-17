@@ -38,6 +38,31 @@ class DiagnosticsTest < Minitest::Test
     assert_equal(syntax_error_diagnostics([error_edit]).to_json, result.map(&:to_lsp_diagnostic).to_json)
   end
 
+  def test_if_inside_else_diagnostics
+    diagnostics = [
+      start: { line: 6, character: 4 },
+      end: { line: 6, character: 6 },
+      severity: :info,
+      code: "Style/IfInsideElse",
+      message: "Style/IfInsideElse: Convert `if` nested inside `else` to `elsif`.",
+    ]
+
+    assert_diagnostics(<<~RUBY, diagnostics)
+      # frozen_string_literal: true
+
+      def my_method
+        if a
+          do_thing_0
+        else
+          if b
+            do_thing_1
+            do_thing_2
+          end
+        end
+      end
+    RUBY
+  end
+
   private
 
   def assert_diagnostics(source, diagnostics)
