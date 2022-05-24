@@ -21,7 +21,19 @@ module RubyLsp
         :variable,
         :method,
       ].freeze
-      TOKEN_MODIFIERS = [].freeze
+
+      TOKEN_MODIFIERS = {
+        declaration: 0,
+        definition: 1,
+        readonly: 2,
+        static: 3,
+        deprecated: 4,
+        abstract: 5,
+        async: 6,
+        modification: 7,
+        documentation: 8,
+        default_library: 9,
+      }.freeze
 
       SemanticToken = Struct.new(:location, :length, :type, :modifier)
 
@@ -90,9 +102,10 @@ module RubyLsp
         add_token(node.value.location, :method)
       end
 
-      def add_token(location, type)
+      def add_token(location, type, modifiers = [])
         length = location.end_char - location.start_char
-        @tokens.push(SemanticToken.new(location, length, TOKEN_TYPES.index(type), 0))
+        modifiers_indices = modifiers.map { |modifier| TOKEN_MODIFIERS[modifier] }
+        @tokens.push(SemanticToken.new(location, length, TOKEN_TYPES.index(type), modifiers_indices))
       end
     end
   end

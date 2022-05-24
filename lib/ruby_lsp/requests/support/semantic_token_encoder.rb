@@ -39,10 +39,21 @@ module RubyLsp
           delta_column = column
           delta_column -= @current_column if delta_line == 0
 
-          [delta_line, delta_column, token.length, token.type, token.modifier]
+          [delta_line, delta_column, token.length, token.type, encode_modifiers(token.modifier)]
         ensure
           @current_row = row
           @current_column = column
+        end
+
+        # Encode an array of modifiers to positions onto a bit flag
+        # For example, [:default_library] will be encoded as
+        # 0b1000000000, as :default_library is the 10th bit according
+        # to the token modifiers index map.
+        def encode_modifiers(modifiers)
+          modifiers.inject(0) do |encoded_modifiers, modifier|
+            encoded_modifiers |= (1 << modifier)
+            encoded_modifiers
+          end
         end
       end
     end
