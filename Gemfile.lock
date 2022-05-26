@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruby-lsp (0.0.3)
+    ruby-lsp (0.0.2)
       language_server-protocol
       rubocop (>= 1.0)
       syntax_tree (>= 2.3)
@@ -28,7 +28,6 @@ GEM
     parallel (1.22.1)
     parser (3.1.2.0)
       ast (~> 2.4.1)
-    prettier_print (0.1.0)
     rainbow (3.1.1)
     rake (13.0.6)
     regexp_parser (2.4.0)
@@ -53,8 +52,7 @@ GEM
     rubocop-shopify (2.6.0)
       rubocop (~> 1.29)
     ruby-progressbar (1.11.0)
-    syntax_tree (2.7.1)
-      prettier_print
+    syntax_tree (2.3.1)
     unicode-display_width (2.1.0)
     webrick (1.7.0)
     yard (0.9.27)
