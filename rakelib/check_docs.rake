@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require "language_server-protocol"
-require "syntax_tree"
-require "logger"
-require "ruby_lsp/requests/base_request"
-require "ruby_lsp/requests/rubocop_request"
-
 desc "Check if all LSP requests are documented"
 task :check_docs do
+  require "language_server-protocol"
+  require "syntax_tree"
+  require "logger"
+  require "ruby_lsp/requests/base_request"
+  require "ruby_lsp/requests/rubocop_request"
+
   Dir["#{Dir.pwd}/lib/ruby_lsp/requests/*.rb"].each do |file|
     require(file)
     YARD.parse(file, [], Logger::Severity::FATAL)
