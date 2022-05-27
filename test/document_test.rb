@@ -10,7 +10,8 @@ class DocumentTest < Minitest::Test
     RUBY
 
     # Write puts 'a' in incremental edits
-    document.push_edits([{ range: { start: { line: 0, character: 7 }, end: { line: 0, character: 7 } }, text: "\n  " }])
+    document.push_edits([{ range: { start: { line: 0, character: 7 }, end: { line: 0, character: 7 } },
+                           text: "\n  ", }])
     document.push_edits([{ range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } }, text: "p" }])
     document.push_edits([{ range: { start: { line: 1, character: 3 }, end: { line: 1, character: 3 } }, text: "u" }])
     document.push_edits([{ range: { start: { line: 1, character: 4 }, end: { line: 1, character: 4 } }, text: "t" }])

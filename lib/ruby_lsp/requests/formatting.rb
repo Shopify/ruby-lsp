@@ -13,21 +13,27 @@ module RubyLsp
     # puts "Hello" # --> formatting: fixes the indentation on save
     # end
     # ```
-    class Formatting < RuboCopRequest
-      RUBOCOP_FLAGS = (COMMON_RUBOCOP_FLAGS + ["--auto-correct"]).freeze
+    class Formatting
+      def self.run(uri, document)
+        new(uri, document).run
+      end
 
       def initialize(uri, document)
-        super
-        @formatted_text = nil
+        @uri = uri
+        @document = document
+        if defined?(Support::RuboCopRunner)
+          @runner = Support::RuboCopRunner.new(uri, document, ["--auto-correct"])
+        end
       end
 
       def run
-        super
+        return [] if @document.syntax_errors? || !@runner
 
-        @formatted_text = @options[:stdin] # Rubocop applies the corrections on stdin
-        return unless @formatted_text
+        @runner.run
 
-        @document.reset(@formatted_text)
+        return unless formatted_text
+
+        @document.reset(formatted_text)
 
         [
           LanguageServer::Protocol::Interface::TextEdit.new(
@@ -38,15 +44,19 @@ module RubyLsp
                 character: text.size
               )
             ),
-            new_text: @formatted_text
+            new_text: formatted_text
           ),
         ]
       end
 
       private
 
-      def rubocop_flags
-        RUBOCOP_FLAGS
+      def text
+        @runner.text
+      end
+
+      def formatted_text
+        @runner.formatted_text
       end
     end
   end

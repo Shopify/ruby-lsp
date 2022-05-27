@@ -13,24 +13,29 @@ module RubyLsp
     # puts "Hello" # --> diagnostics: incorrect indentantion
     # end
     # ```
-    class Diagnostics < RuboCopRequest
-      def run
-        return syntax_error_diagnostics if @document.syntax_errors?
+    class Diagnostics
+      NOOP_MIDDLEWARE = ->(diagnostics) {}.freeze
+      @middlewares = []
 
-        super
-
-        @diagnostics
+      def self.run(uri, document)
+        [].tap do |diagnostics|
+          chain(uri, document).call(diagnostics)
+          $stderr.puts "Sending diagnostics #{diagnostics.to_json}"
+        end
       end
 
-      def file_finished(_file, offenses)
-        @diagnostics = offenses.map { |offense| Support::RuboCopDiagnostic.new(offense, @uri) }
+      def self.use(middleware)
+        @middlewares << middleware
       end
 
-      private
-
-      def syntax_error_diagnostics
-        @document.syntax_error_edits.map { |e| Support::SyntaxErrorDiagnostic.new(e) }
+      def self.chain(uri, document)
+        @middlewares.reverse.reduce(NOOP_MIDDLEWARE) do |chain, middleware|
+          middleware.new(chain, uri, document)
+        end
       end
+
+      use(Middleware::SyntaxError)
+      use(Middleware::RuboCop)
     end
   end
 end

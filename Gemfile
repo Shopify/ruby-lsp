@@ -12,3 +12,5 @@ gem "rubocop-shopify", "~> 2.5"
 gem "rubocop-minitest", "~> 0.19.1"
 gem "rubocop-rake", "~> 0.6.0"
 gem "yard", "~> 0.9"
+
+gem "pry-byebug", "~> 3.9"

@@ -4,7 +4,6 @@ require "language_server-protocol"
 require "syntax_tree"
 require "logger"
 require "ruby_lsp/requests/base_request"
-require "ruby_lsp/requests/rubocop_request"
 
 desc "Check if all LSP requests are documented"
 task :check_docs do
