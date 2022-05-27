@@ -1121,8 +1121,8 @@ class SelectionRangesTest < Minitest::Test
         },
         parent: {
           range: {
-            start: { line: 1, character: 5 },
-            end: { line: 1, character: 9 },
+            start: { line: 1, character: 3 },
+            end: { line: 1, character: 11 },
           },
           parent: {
             range: {
