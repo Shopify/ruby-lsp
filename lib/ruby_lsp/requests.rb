@@ -11,6 +11,7 @@ module RubyLsp
     autoload :Formatting, "ruby_lsp/requests/formatting"
     autoload :Diagnostics, "ruby_lsp/requests/diagnostics"
     autoload :CodeActions, "ruby_lsp/requests/code_actions"
+    autoload :DocumentHighlight, "ruby_lsp/requests/document_highlight"
 
     module Support
       autoload :RuboCopDiagnostic, "ruby_lsp/requests/support/rubocop_diagnostic"

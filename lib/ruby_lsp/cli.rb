@@ -65,6 +65,10 @@ module RubyLsp
           respond_with_formatting(request.dig(:params, :textDocument, :uri))
         end
 
+        on("textDocument/documentHighlight") do |request|
+          respond_with_document_highlight(request.dig(:params, :textDocument, :uri), request.dig(:params, :position))
+        end
+
         on("textDocument/codeAction") do |request|
           range = request.dig(:params, :range)
           start_line = range.dig(:start, :line)
