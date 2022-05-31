@@ -1,9 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "sorbet-runtime"
-require "syntax_tree"
-require "ruby-lsp"
-require "ruby_lsp/cli"
+require_relative "../lib/internal"
 
 RubyLsp::Cli.start(ARGV)
