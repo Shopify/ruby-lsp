@@ -10,6 +10,7 @@ module RubyLsp
       "initialized",
       "$/cancelRequest",
     ].freeze
+    VOID = Object.new.freeze
 
     attr_reader :store
 
@@ -42,8 +43,11 @@ module RubyLsp
     end
 
     def handle(request)
-      result = @handlers[request[:method]]&.call(request)
-      @writer.write(id: request[:id], result: result) unless result == false
+      handler = @handlers[request[:method]]
+      return unless handler
+
+      result = handler.call(request)
+      @writer.write(id: request[:id], result: result) unless result == VOID
     end
 
     def shutdown

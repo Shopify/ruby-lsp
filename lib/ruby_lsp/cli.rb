@@ -23,7 +23,7 @@ module RubyLsp
           store.push_edits(uri, request.dig(:params, :contentChanges))
 
           send_diagnostics(uri)
-          false
+          RubyLsp::Handler::VOID
         end
 
         on("textDocument/didOpen") do |request|
@@ -32,14 +32,14 @@ module RubyLsp
           store.set(uri, text)
 
           send_diagnostics(uri)
-          false
+          RubyLsp::Handler::VOID
         end
 
         on("textDocument/didClose") do |request|
           uri = request.dig(:params, :textDocument, :uri)
           store.delete(uri)
 
-          false
+          RubyLsp::Handler::VOID
         end
 
         on("textDocument/documentSymbol") do |request|
