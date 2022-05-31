@@ -4,7 +4,7 @@ PATH
     ruby-lsp (0.0.3)
       language_server-protocol
       rubocop (>= 1.0)
-      sorbet-static-and-runtime
+      sorbet-runtime
       syntax_tree (>= 2.3)
 
 GEM
@@ -116,6 +116,7 @@ DEPENDENCIES
   rubocop-shopify (~> 2.6)
   rubocop-sorbet (~> 0.6)
   ruby-lsp!
+  sorbet-static-and-runtime
   tapioca (~> 0.8)
   yard (~> 0.9)
 
