@@ -15,7 +15,9 @@ task :check_docs do
   end
 
   spec_matcher = %r{\(https://microsoft.github.io/language-server-protocol/specification#.*\)}
-  error_messages = RubyLsp::Requests.constants.each_with_object(Hash.new { |h, k| h[k] = [] }) do |request, errors|
+  error_messages = RubyLsp::Requests
+    .constants # rubocop:disable Sorbet/ConstantsFromStrings
+    .each_with_object(Hash.new { |h, k| h[k] = [] }) do |request, errors|
     full_name = "RubyLsp::Requests::#{request}"
     docs = YARD::Registry.at(full_name).docstring
     next if /:nodoc:/.match?(docs)
