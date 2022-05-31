@@ -1,3 +1,4 @@
+# typed: false
 # frozen_string_literal: true
 
 desc "Check if all LSP requests are documented"

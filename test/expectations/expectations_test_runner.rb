@@ -1,3 +1,4 @@
+# typed: false
 # frozen_string_literal: true
 
 # TODO: how to pass arguments to the test runner? See for example `CodeActionsTest`
