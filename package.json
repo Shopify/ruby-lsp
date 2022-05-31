@@ -47,6 +47,11 @@
               "type": "boolean",
               "default": true
             },
+            "documentHighlights": {
+              "description": "Enable document highlight, which highlights the occurrences of the entity at cursor position",
+              "type": "boolean",
+              "default": true
+            },
             "foldingRanges": {
               "description": "Enable folding ranges, which populates the places where code can be folded",
               "type": "boolean",
@@ -79,6 +84,7 @@
             }
           },
           "default": {
+            "documentHighlights": true,
             "documentSymbols": true,
             "foldingRanges": true,
             "selectionRanges": true,
