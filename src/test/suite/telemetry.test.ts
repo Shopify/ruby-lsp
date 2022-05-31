@@ -30,6 +30,8 @@ suite("Telemetry", () => {
       requestTime: 0.005,
       lspVersion: "1.0.0",
       uri: "file:///test.rb",
+      errorClass: "NoMethodError",
+      errorMessage: "undefined method `visit` for nil:NilClass",
     };
 
     await telemetry.sendEvent(event);
@@ -50,6 +52,8 @@ suite("Telemetry", () => {
       requestTime: 0.005,
       lspVersion: "1.0.0",
       uri: "file:///test.rb",
+      errorClass: "NoMethodError",
+      errorMessage: "undefined method `visit` for nil:NilClass",
     };
 
     await telemetry.initialize();
