@@ -10,6 +10,7 @@ module RubyLsp
       "initialized",
       "$/cancelRequest",
     ].freeze
+    VOID = Object.new.freeze
 
     attr_reader :store
 
@@ -42,8 +43,11 @@ module RubyLsp
     end
 
     def handle(request)
-      result = @handlers[request[:method]]&.call(request)
-      @writer.write(id: request[:id], result: result) if result
+      handler = @handlers[request[:method]]
+      return unless handler
+
+      result = handler.call(request)
+      @writer.write(id: request[:id], result: result) unless result == VOID
     end
 
     def shutdown
@@ -163,21 +167,21 @@ module RubyLsp
     end
 
     def with_telemetry(request)
-      return yield unless @telemetry_enabled && !IGNORED_FOR_TELEMETRY.include?(request[:method])
-
+      params = { request: request[:method], lspVersion: RubyLsp::VERSION }
       result = nil
+
       request_time = Benchmark.realtime do
         result = yield
+      rescue StandardError => e
+        params[:errorClass] = e.class.name
+        params[:errorMessage] = e.message
       end
 
-      params = {
-        request: request[:method],
-        requestTime: request_time,
-        lspVersion: RubyLsp::VERSION,
-      }
+      return result unless @telemetry_enabled && !IGNORED_FOR_TELEMETRY.include?(request[:method])
 
       uri = request.dig(:params, :textDocument, :uri)
       params[:uri] = uri if uri
+      params[:requestTime] = request_time
 
       @writer.write(method: "telemetry/event", params: params)
       result
