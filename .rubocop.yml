@@ -1,6 +1,11 @@
 inherit_gem:
   rubocop-shopify: rubocop.yml
 
+require:
+ - rubocop-sorbet
+ - rubocop-minitest
+ - rubocop-rake
+
 AllCops:
   NewCops: disable
   SuggestExtensions: false
