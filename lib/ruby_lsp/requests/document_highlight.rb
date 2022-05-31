@@ -18,7 +18,7 @@ module RubyLsp
     # def foo
     #   FOO # should be highlighted as "read"
     # end
-    # ````
+    # ```
     class DocumentHighlight < BaseRequest
       def self.run(document, position)
         new(document, position).run
