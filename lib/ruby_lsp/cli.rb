@@ -14,7 +14,6 @@ module RubyLsp
           store.clear
           initialization_options = request.dig(:params, :initializationOptions)
 
-          configure_options(initialization_options)
           respond_with_capabilities(initialization_options.fetch(:enabledFeatures, []))
         end
 

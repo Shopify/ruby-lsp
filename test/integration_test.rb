@@ -44,6 +44,9 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["documentSymbols"])
     open_file_with("class Foo\nend")
 
+    read_response("textDocument/publishDiagnostics")
+    assert_telemetry("textDocument/didOpen")
+
     response = make_request("textDocument/documentSymbol", { textDocument: { uri: "file://#{__FILE__}" } })
     symbol = response[:result].first
     assert_equal("Foo", symbol[:name])
@@ -53,6 +56,9 @@ class IntegrationTest < Minitest::Test
   def test_document_highlight
     initialize_lsp(["documentHighlights"])
     open_file_with("$foo = 1")
+
+    read_response("textDocument/publishDiagnostics")
+    assert_telemetry("textDocument/didOpen")
 
     response = make_request(
       "textDocument/documentHighlight",
@@ -67,6 +73,9 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["semanticHighlighting"])
     open_file_with("class Foo\nend")
 
+    read_response("textDocument/publishDiagnostics")
+    assert_telemetry("textDocument/didOpen")
+
     response = make_request("textDocument/semanticTokens/full", { textDocument: { uri: "file://#{__FILE__}" } })
     assert_empty(response[:result][:data])
   end
@@ -74,6 +83,9 @@ class IntegrationTest < Minitest::Test
   def test_formatting
     initialize_lsp(["formatting"])
     open_file_with("class Foo\nend")
+
+    read_response("textDocument/publishDiagnostics")
+    assert_telemetry("textDocument/didOpen")
 
     response = make_request("textDocument/formatting", { textDocument: { uri: "file://#{__FILE__}" } })
     assert_equal(<<~FORMATTED, response[:result].first[:newText])
@@ -87,6 +99,9 @@ class IntegrationTest < Minitest::Test
   def test_code_actions
     initialize_lsp(["codeActions"])
     open_file_with("class Foo\nend")
+
+    read_response("textDocument/publishDiagnostics")
+    assert_telemetry("textDocument/didOpen")
 
     response = make_request("textDocument/codeAction",
       { textDocument: { uri: "file://#{__FILE__}" }, range: { start: { line: 0 }, end: { line: 1 } } })
@@ -121,6 +136,9 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["foldingRanges"])
     open_file_with("class Foo\nend")
 
+    read_response("textDocument/publishDiagnostics")
+    assert_telemetry("textDocument/didOpen")
+
     response = make_request("textDocument/foldingRange", { textDocument: { uri: "file://#{__FILE__}" } })
     assert_equal({ startLine: 0, endLine: 1, kind: "region" }, response[:result].first)
   end
@@ -128,6 +146,9 @@ class IntegrationTest < Minitest::Test
   def test_syntax_error_diagnostics
     initialize_lsp([])
     open_file_with("class Foo\nend")
+
+    read_response("textDocument/publishDiagnostics")
+    assert_telemetry("textDocument/didOpen")
 
     error_range = { start: { line: 1, character: 2 }, end: { line: 1, character: 3 } }
 
@@ -162,6 +183,9 @@ class IntegrationTest < Minitest::Test
   def test_selection_ranges
     initialize_lsp(["selectionRanges"])
     open_file_with("class Foo\nend")
+
+    read_response("textDocument/publishDiagnostics")
+    assert_telemetry("textDocument/didOpen")
 
     response = make_request(
       "textDocument/selectionRange",

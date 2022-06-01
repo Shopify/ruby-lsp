@@ -6,10 +6,6 @@ require "benchmark"
 
 module RubyLsp
   class Handler
-    IGNORED_FOR_TELEMETRY = [
-      "initialized",
-      "$/cancelRequest",
-    ].freeze
     VOID = Object.new.freeze
 
     attr_reader :store
@@ -162,29 +158,36 @@ module RubyLsp
       Requests::DocumentHighlight.run(store.get(uri), position)
     end
 
-    def configure_options(initialization_options)
-      @telemetry_enabled = initialization_options.fetch(:telemetryEnabled, false)
-    end
-
     def with_telemetry(request)
-      params = { request: request[:method], lspVersion: RubyLsp::VERSION }
       result = nil
+      error = nil
 
       request_time = Benchmark.realtime do
         result = yield
       rescue StandardError => e
-        params[:errorClass] = e.class.name
-        params[:errorMessage] = e.message
+        error = e
       end
 
-      return result unless @telemetry_enabled && !IGNORED_FOR_TELEMETRY.include?(request[:method])
-
-      uri = request.dig(:params, :textDocument, :uri)
-      params[:uri] = uri if uri
-      params[:requestTime] = request_time
-
-      @writer.write(method: "telemetry/event", params: params)
+      @writer.write(method: "telemetry/event", params: telemetry_params(request, request_time, error))
       result
+    end
+
+    def telemetry_params(request, request_time, error)
+      uri = request.dig(:params, :textDocument, :uri)
+
+      params = {
+        request: request[:method],
+        lspVersion: RubyLsp::VERSION,
+        requestTime: request_time,
+      }
+
+      if error
+        params[:errorClass] = error.class.name
+        params[:errorMessage] = error.message
+      end
+
+      params[:uri] = uri if uri
+      params
     end
   end
 end
