@@ -222,6 +222,28 @@ class DocumentTest < Minitest::Test
     RUBY
   end
 
+  def test_pushing_edits_to_document_with_unicode
+    document = RubyLsp::Document.new(+<<~RUBY)
+      chars = ["億"]
+    RUBY
+
+    # Write puts 'a' in incremental edits
+    document.push_edits([{ range: { start: { line: 0, character: 13 }, end: { line: 0, character: 13 } }, text: "\n" }])
+    document.push_edits([{ range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } }, text: "p" }])
+    document.push_edits([{ range: { start: { line: 1, character: 1 }, end: { line: 1, character: 1 } }, text: "u" }])
+    document.push_edits([{ range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } }, text: "t" }])
+    document.push_edits([{ range: { start: { line: 1, character: 3 }, end: { line: 1, character: 3 } }, text: "s" }])
+    document.push_edits([{ range: { start: { line: 1, character: 4 }, end: { line: 1, character: 4 } }, text: " " }])
+    document.push_edits([{ range: { start: { line: 1, character: 5 }, end: { line: 1, character: 5 } }, text: "'" }])
+    document.push_edits([{ range: { start: { line: 1, character: 6 }, end: { line: 1, character: 6 } }, text: "a" }])
+    document.push_edits([{ range: { start: { line: 1, character: 7 }, end: { line: 1, character: 7 } }, text: "'" }])
+
+    assert_equal(<<~RUBY, document.source)
+      chars = ["億"]
+      puts 'a'
+    RUBY
+  end
+
   private
 
   def assert_error_edit(actual, error_range)
