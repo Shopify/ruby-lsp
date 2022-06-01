@@ -71,12 +71,12 @@ module RubyLsp
       def initialize(source)
         @current_line = 0
         @pos = 0
-        @chars = source.chars
+        @source = source
       end
 
       def find_position(position)
         until @current_line == position[:line]
-          @pos += 1 until /\R/.match?(@chars[@pos])
+          @pos += 1 until /\R/.match?(@source[@pos])
           @pos += 1
           @current_line += 1
         end
