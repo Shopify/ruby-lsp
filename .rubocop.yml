@@ -18,3 +18,13 @@ AllCops:
 Naming/FileName:
   Exclude:
   - "lib/ruby-lsp.rb"
+
+Sorbet/FalseSigil:
+  Enabled: false
+
+Sorbet/TrueSigil:
+  Enabled: true
+  Include:
+    - "**/*.rb"
+  Exclude:
+    - "**/*.rake"
