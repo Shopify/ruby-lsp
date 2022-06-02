@@ -16,7 +16,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
 
   def assert_expectations(source, expected)
     actual = run_expectations(source).data
-    assert_equal(JSON.parse(expected).to_json, decode_tokens(actual).to_json)
+    assert_equal(json_expectations(expected).to_json, decode_tokens(actual).to_json)
   end
 
   private

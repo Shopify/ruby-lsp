@@ -20,7 +20,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
 
     assert_empty(stdout)
 
-    diagnostics = JSON.parse(expected)
+    diagnostics = json_expectations(expected)
     assert_equal(map_diagnostics(diagnostics).to_json, result.map(&:to_lsp_diagnostic).to_json)
   end
 

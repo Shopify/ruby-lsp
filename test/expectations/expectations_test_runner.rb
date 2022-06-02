@@ -92,4 +92,10 @@ class ExpectationsTestRunner < Minitest::Test
 
     res
   end
+
+  def json_expectations(expected_json_string)
+    return {} if expected_json_string.empty?
+
+    JSON.parse(expected_json_string)
+  end
 end
