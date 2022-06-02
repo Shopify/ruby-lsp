@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 class ExpectationsTestRunner < Minitest::Test
-  TEST_DATA_DIR = "test/data"
-  TEST_DATA_GLOB = File.join(TEST_DATA_DIR, "**", "*.rb")
   TEST_EXP_DIR = "test/expectations"
+  TEST_FIXTURES_DIR = "test/fixtures"
+  TEST_FIXTURES_GLOB = File.join(TEST_FIXTURES_DIR, "**", "*.rb")
 
   def self.expectations_tests(handler_class, expectation_suffix)
     class_eval(<<~RB)
@@ -22,7 +22,7 @@ class ExpectationsTestRunner < Minitest::Test
       include ExpectationsRunnerMethods
     RB
 
-    Dir.glob(TEST_DATA_GLOB).each do |path|
+    Dir.glob(TEST_FIXTURES_GLOB).each do |path|
       test_name = File.basename(path, ".rb")
 
       expectation_path = File.join(TEST_EXP_DIR, expectation_suffix, "#{test_name}.exp")
