@@ -1,0 +1,8 @@
+inherit_gem:
+  rubocop-sorbet: config/rbi.yml
+
+Lint/EmptyFile:
+  Enabled: false
+
+Sorbet/TypeAliasName:
+  Enabled: false

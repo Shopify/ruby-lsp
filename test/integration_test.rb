@@ -1,3 +1,4 @@
+# typed: false
 # frozen_string_literal: true
 
 require "test_helper"
@@ -89,6 +90,7 @@ class IntegrationTest < Minitest::Test
 
     response = make_request("textDocument/formatting", { textDocument: { uri: "file://#{__FILE__}" } })
     assert_equal(<<~FORMATTED, response[:result].first[:newText])
+      # typed: false
       # frozen_string_literal: true
 
       class Foo
