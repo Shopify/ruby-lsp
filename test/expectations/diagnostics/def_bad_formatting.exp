@@ -11,9 +11,9 @@
       }
     },
     "severity": 3,
-    "code": "Sorbet/FalseSigil",
+    "code": "Sorbet/TrueSigil",
     "source": "RuboCop",
-    "message": "Sorbet/FalseSigil: No Sorbet sigil found in file. Try a `typed: false` to start (you can also use `rubocop -a` to automatically add this)."
+    "message": "Sorbet/TrueSigil: No Sorbet sigil found in file. Try a `typed: true` to start (you can also use `rubocop -a` to automatically add this)."
   },
   {
     "range": {

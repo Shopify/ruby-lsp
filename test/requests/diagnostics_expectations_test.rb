@@ -13,7 +13,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
   end
 
   def assert_expectations(source, expected)
-    result = nil
+    result = T.let(nil, T.nilable(T::Array[RubyLsp::Requests::Support::RuboCopDiagnostic]))
 
     stdout, _ = capture_io do
       result = run_expectations(source)
@@ -22,7 +22,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     assert_empty(stdout)
 
     diagnostics = json_expectations(expected)
-    assert_equal(map_diagnostics(diagnostics).to_json, result.map(&:to_lsp_diagnostic).to_json)
+    assert_equal(map_diagnostics(diagnostics).to_json, T.must(result).map(&:to_lsp_diagnostic).to_json)
   end
 
   def map_diagnostics(diagnostics)

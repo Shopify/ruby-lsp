@@ -66,7 +66,7 @@ class ExpectationsTestRunner < Minitest::Test
       File.read(fixture_path)
         .lines
         .first
-        .match(/^#\s*required_ruby_version:\s*(?<version>\d+\.\d+(\.\d+)?)$/)
+        &.match(/^#\s*required_ruby_version:\s*(?<version>\d+\.\d+(\.\d+)?)$/)
         &.named_captures
         &.fetch("version")
     end

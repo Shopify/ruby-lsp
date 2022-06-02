@@ -20,8 +20,8 @@ class StoreTest < Minitest::Test
 
     assert_equal(RubyLsp::Document.new("def great_code; end"), @store.get(file.path))
   ensure
-    file.close
-    file.unlink
+    T.must(file).close
+    T.must(file).unlink
   end
 
   def test_store_ignores_syntax_errors

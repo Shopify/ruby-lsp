@@ -149,7 +149,7 @@ module RubyLsp
       end
 
       def add_call_range(node)
-        receiver = node.receiver
+        receiver = T.let(node.receiver, SyntaxTree::Node)
         loop do
           case receiver
           when SyntaxTree::Call
@@ -185,7 +185,7 @@ module RubyLsp
       end
 
       def add_string_concat(node)
-        left = node.left
+        left = T.let(node.left, SyntaxTree::Node)
         left = left.left while left.is_a?(SyntaxTree::StringConcat)
 
         add_lines_range(left.location.start_line, node.right.location.end_line)
