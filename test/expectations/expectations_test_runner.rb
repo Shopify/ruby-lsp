@@ -87,7 +87,12 @@ class ExpectationsTestRunner < Minitest::Test
       $stderr.puts JSON.pretty_generate(actual_obj)
       $stderr.puts "##############################"
     rescue
-      # Values are not JSON, skip the pretty printing
+      # Values are not JSON, just print the raw values
+      $stderr.puts "########## Expected ##########"
+      $stderr.puts expected
+      $stderr.puts "##########  Actual  ##########"
+      $stderr.puts actual
+      $stderr.puts "##############################"
     end
 
     res
