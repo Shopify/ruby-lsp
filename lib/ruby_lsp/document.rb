@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "strscan"
-
 module RubyLsp
   class Document
     attr_reader :tree, :source, :syntax_error_edits
@@ -71,19 +69,19 @@ module RubyLsp
 
     class Scanner
       def initialize(source)
-        @source = source
-        @scanner = StringScanner.new(source)
         @current_line = 0
+        @pos = 0
+        @source = source
       end
 
       def find_position(position)
-        # Move the string scanner counting line breaks until we reach the right line
         until @current_line == position[:line]
-          @scanner.scan_until(/\R/)
+          @pos += 1 until /\R/.match?(@source[@pos])
+          @pos += 1
           @current_line += 1
         end
 
-        @scanner.pos + position[:character]
+        @pos + position[:character]
       end
     end
   end

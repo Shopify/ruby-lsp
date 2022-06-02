@@ -21,6 +21,24 @@ class FormattingTest < Minitest::Test
     RUBY
   end
 
+  def test_formatting_with_multibyte_characters
+    original = <<~RUBY
+      def foo
+
+
+      puts "億"
+      end
+    RUBY
+
+    assert_formatted(original, <<~RUBY)
+      # frozen_string_literal: true
+
+      def foo
+        puts "億"
+      end
+    RUBY
+  end
+
   private
 
   def assert_formatted(original, formatted)
