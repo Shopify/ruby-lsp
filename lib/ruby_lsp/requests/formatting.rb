@@ -14,7 +14,7 @@ module RubyLsp
     # end
     # ```
     class Formatting < RuboCopRequest
-      RUBOCOP_FLAGS = (COMMON_RUBOCOP_FLAGS + ["--auto-correct"]).freeze
+      RUBOCOP_FLAGS = (COMMON_RUBOCOP_FLAGS + ["--autocorrect"]).freeze
 
       def initialize(uri, document)
         super
