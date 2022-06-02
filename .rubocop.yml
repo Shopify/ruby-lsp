@@ -8,6 +8,7 @@ AllCops:
   Exclude:
   - "vendor/**/*"
   - "features/**/*"
+  - "test/fixtures/**/*"
 
 Naming/FileName:
   Exclude:

@@ -1,0 +1,2 @@
+var = "Hello"
+puts var

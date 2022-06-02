@@ -1,0 +1,18 @@
+[
+  {
+    "range": {
+      "start": {
+        "line": 6,
+        "character": 4
+      },
+      "end": {
+        "line": 6,
+        "character": 6
+      }
+    },
+    "severity": 3,
+    "code": "Style/IfInsideElse",
+    "source": "RuboCop",
+    "message": "Style/IfInsideElse: Convert `if` nested inside `else` to `elsif`."
+  }
+]

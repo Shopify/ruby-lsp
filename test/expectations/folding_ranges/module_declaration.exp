@@ -1,0 +1,17 @@
+[
+  {
+    "startLine": 0,
+    "endLine": 6,
+    "kind": "region"
+  },
+  {
+    "startLine": 1,
+    "endLine": 2,
+    "kind": "region"
+  },
+  {
+    "startLine": 4,
+    "endLine": 5,
+    "kind": "region"
+  }
+]

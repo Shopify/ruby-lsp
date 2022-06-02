@@ -1,0 +1,3 @@
+<<~HEREDOC
+  some text
+HEREDOC
