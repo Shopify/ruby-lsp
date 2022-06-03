@@ -128,7 +128,7 @@ module RubyLsp
     sig do
       params(
         uri: String,
-        positions: T::Array[{ line: Integer, character: Integer }]
+        positions: T::Array[Document::PositionShape]
       ).returns(T::Array[RubyLsp::Requests::Support::SelectionRange])
     end
     def respond_with_selection_ranges(uri, positions)
@@ -186,7 +186,7 @@ module RubyLsp
     sig do
       params(
         uri: String,
-        position: { line: Integer, character: Integer }
+        position: Document::PositionShape
       ).returns(T::Array[LanguageServer::Protocol::Interface::DocumentHighlight])
     end
     def respond_with_document_highlight(uri, position)

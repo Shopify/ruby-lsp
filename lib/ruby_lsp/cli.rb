@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 require "language_server-protocol"
@@ -7,7 +7,10 @@ require_relative "handler"
 
 module RubyLsp
   module Cli
-    def self.start(_argv)
+    extend T::Sig
+
+    sig { void }
+    def self.start
       handler = RubyLsp::Handler.new
 
       handler.config do
