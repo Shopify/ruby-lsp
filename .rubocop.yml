@@ -25,6 +25,15 @@ Sorbet/FalseSigil:
 Sorbet/TrueSigil:
   Enabled: true
   Include:
-    - "**/*.rb"
+    - "test/**/*.rb"
   Exclude:
     - "**/*.rake"
+    - "lib/**/*.rb"
+
+Sorbet/StrictSigil:
+  Enabled: true
+  Include:
+    - "lib/**/*.rb"
+  Exclude:
+    - "**/*.rake"
+    - "test/**/*.rb"

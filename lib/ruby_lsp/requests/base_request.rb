@@ -1,24 +1,31 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 module RubyLsp
   module Requests
     # :nodoc:
     class BaseRequest < SyntaxTree::Visitor
+      extend T::Sig
+      extend T::Helpers
+
+      abstract!
+
+      sig { overridable.params(document: Document).returns(T.untyped) }
       def self.run(document)
         new(document).run
       end
 
+      sig { params(document: Document).void }
       def initialize(document)
         @document = document
 
         super()
       end
 
-      def run
-        raise NotImplementedError, "#{self.class}#run must be implemented"
-      end
+      sig { abstract.returns(T.untyped) }
+      def run; end
 
+      sig { params(node: SyntaxTree::Node).returns(LanguageServer::Protocol::Interface::Range) }
       def range_from_syntax_tree_node(node)
         loc = node.location
 

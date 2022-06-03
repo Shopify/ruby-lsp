@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 module RubyLsp
@@ -13,7 +13,9 @@ module RubyLsp
     # end # <-- folding range end
     # ```
     class FoldingRanges < BaseRequest
-      SIMPLE_FOLDABLES = [
+      extend T::Sig
+
+      SIMPLE_FOLDABLES = T.let([
         SyntaxTree::ArrayLiteral,
         SyntaxTree::BraceBlock,
         SyntaxTree::Case,
@@ -30,24 +32,37 @@ module RubyLsp
         SyntaxTree::Unless,
         SyntaxTree::Until,
         SyntaxTree::While,
-      ].freeze
+      ].freeze, T::Array[T.class_of(SyntaxTree::Node)])
 
-      NODES_WITH_STATEMENTS = [
+      NODES_WITH_STATEMENTS = T.let([
         SyntaxTree::Else,
         SyntaxTree::Elsif,
         SyntaxTree::Ensure,
         SyntaxTree::In,
         SyntaxTree::Rescue,
         SyntaxTree::When,
-      ].freeze
+      ].freeze, T::Array[T.class_of(SyntaxTree::Node)])
 
+      StatementNode = T.type_alias do
+        T.any(
+          SyntaxTree::Else,
+          SyntaxTree::Elsif,
+          SyntaxTree::Ensure,
+          SyntaxTree::In,
+          SyntaxTree::Rescue,
+          SyntaxTree::When,
+        )
+      end
+
+      sig { params(document: Document).void }
       def initialize(document)
         super
 
-        @ranges = []
-        @partial_range = nil
+        @ranges = T.let([], T::Array[LanguageServer::Protocol::Interface::FoldingRange])
+        @partial_range = T.let(nil, T.nilable(PartialRange))
       end
 
+      sig { override.returns(T::Array[LanguageServer::Protocol::Interface::FoldingRange]) }
       def run
         visit(@document.tree)
         emit_partial_range
@@ -56,14 +71,15 @@ module RubyLsp
 
       private
 
+      sig { params(node: T.nilable(SyntaxTree::Node)).void }
       def visit(node)
         return unless handle_partial_range(node)
 
         case node
         when *SIMPLE_FOLDABLES
-          add_node_range(node)
+          add_node_range(T.must(node))
         when *NODES_WITH_STATEMENTS
-          add_statements_range(node, node.statements)
+          add_statements_range(T.must(node), T.cast(node, StatementNode).statements)
         when SyntaxTree::Begin
           add_statements_range(node, node.bodystmt.statements)
         when SyntaxTree::Call, SyntaxTree::CommandCall
@@ -80,27 +96,38 @@ module RubyLsp
       end
 
       class PartialRange
-        attr_reader :kind, :end_line
+        extend T::Sig
 
+        sig { returns(String) }
+        attr_reader :kind
+
+        sig { returns(Integer) }
+        attr_reader :end_line
+
+        sig { params(node: SyntaxTree::Node, kind: String).returns(PartialRange) }
         def self.from(node, kind)
           new(node.location.start_line - 1, node.location.end_line - 1, kind)
         end
 
+        sig { params(start_line: Integer, end_line: Integer, kind: String).void }
         def initialize(start_line, end_line, kind)
           @start_line = start_line
           @end_line = end_line
           @kind = kind
         end
 
+        sig { params(node: SyntaxTree::Node).returns(PartialRange) }
         def extend_to(node)
           @end_line = node.location.end_line - 1
           self
         end
 
+        sig { params(node: SyntaxTree::Node).returns(T::Boolean) }
         def new_section?(node)
           node.is_a?(SyntaxTree::Comment) && @end_line + 1 != node.location.start_line - 1
         end
 
+        sig { returns(LanguageServer::Protocol::Interface::FoldingRange) }
         def to_range
           LanguageServer::Protocol::Interface::FoldingRange.new(
             start_line: @start_line,
@@ -110,6 +137,7 @@ module RubyLsp
         end
       end
 
+      sig { params(node: T.nilable(SyntaxTree::Node)).returns(T::Boolean) }
       def handle_partial_range(node)
         kind = partial_range_kind(node)
 
@@ -118,18 +146,20 @@ module RubyLsp
           return true
         end
 
+        target_node = T.must(node)
         @partial_range = if @partial_range.nil?
-          PartialRange.from(node, kind)
-        elsif @partial_range.kind != kind || @partial_range.new_section?(node)
+          PartialRange.from(target_node, kind)
+        elsif @partial_range.kind != kind || @partial_range.new_section?(target_node)
           emit_partial_range
-          PartialRange.from(node, kind)
+          PartialRange.from(target_node, kind)
         else
-          @partial_range.extend_to(node)
+          @partial_range.extend_to(target_node)
         end
 
         false
       end
 
+      sig { params(node: T.nilable(SyntaxTree::Node)).returns(T.nilable(String)) }
       def partial_range_kind(node)
         case node
         when SyntaxTree::Comment
@@ -141,6 +171,7 @@ module RubyLsp
         end
       end
 
+      sig { void }
       def emit_partial_range
         return if @partial_range.nil?
 
@@ -148,6 +179,7 @@ module RubyLsp
         @partial_range = nil
       end
 
+      sig { params(node: T.any(SyntaxTree::Call, SyntaxTree::CommandCall)).void }
       def add_call_range(node)
         receiver = T.let(node.receiver, SyntaxTree::Node)
         loop do
@@ -168,6 +200,7 @@ module RubyLsp
         visit(node.arguments)
       end
 
+      sig { params(node: T.any(SyntaxTree::Def, SyntaxTree::Defs)).void }
       def add_def_range(node)
         params_location = node.params.location
 
@@ -180,10 +213,12 @@ module RubyLsp
         visit(node.bodystmt.statements)
       end
 
+      sig { params(node: SyntaxTree::Node, statements: SyntaxTree::Statements).void }
       def add_statements_range(node, statements)
         add_lines_range(node.location.start_line, statements.location.end_line) unless statements.empty?
       end
 
+      sig { params(node: SyntaxTree::StringConcat).void }
       def add_string_concat(node)
         left = T.let(node.left, SyntaxTree::Node)
         left = left.left while left.is_a?(SyntaxTree::StringConcat)
@@ -191,14 +226,13 @@ module RubyLsp
         add_lines_range(left.location.start_line, node.right.location.end_line)
       end
 
+      sig { params(node: SyntaxTree::Node).void }
       def add_node_range(node)
-        add_location_range(node.location)
-      end
-
-      def add_location_range(location)
+        location = node.location
         add_lines_range(location.start_line, location.end_line)
       end
 
+      sig { params(start_line: Integer, end_line: Integer).void }
       def add_lines_range(start_line, end_line)
         return if start_line >= end_line
 

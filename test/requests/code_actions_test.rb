@@ -31,7 +31,7 @@ class CodeActionsTest < Minitest::Test
 
   def assert_code_actions(source, code_actions, range)
     document = RubyLsp::Document.new(source)
-    result = T.let(nil, T.nilable(T::Array[LanguageServer::Protocol::Interface::Diagnostic]))
+    result = T.let(nil, T.nilable(T::Array[LanguageServer::Protocol::Interface::CodeAction]))
 
     stdout, _ = capture_io do
       result = RubyLsp::Requests::CodeActions.run("file://#{__FILE__}", document, range)

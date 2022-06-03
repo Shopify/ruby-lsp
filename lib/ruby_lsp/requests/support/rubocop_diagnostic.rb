@@ -1,35 +1,45 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 module RubyLsp
   module Requests
     module Support
       class RuboCopDiagnostic
-        RUBOCOP_TO_LSP_SEVERITY = {
+        extend T::Sig
+
+        RUBOCOP_TO_LSP_SEVERITY = T.let({
           convention: LanguageServer::Protocol::Constant::DiagnosticSeverity::INFORMATION,
           info: LanguageServer::Protocol::Constant::DiagnosticSeverity::INFORMATION,
           refactor: LanguageServer::Protocol::Constant::DiagnosticSeverity::INFORMATION,
           warning: LanguageServer::Protocol::Constant::DiagnosticSeverity::WARNING,
           error: LanguageServer::Protocol::Constant::DiagnosticSeverity::ERROR,
           fatal: LanguageServer::Protocol::Constant::DiagnosticSeverity::ERROR,
-        }.freeze
+        }.freeze, T::Hash[Symbol, Integer])
 
+        sig { returns(T::Array[LanguageServer::Protocol::Interface::TextEdit]) }
         attr_reader :replacements
 
+        sig { params(offense: RuboCop::Cop::Offense, uri: String).void }
         def initialize(offense, uri)
           @offense = offense
           @uri = uri
-          @replacements = offense.correctable? ? offense_replacements : []
+          @replacements = T.let(
+            offense.correctable? ? offense_replacements : [],
+            T::Array[LanguageServer::Protocol::Interface::TextEdit]
+          )
         end
 
+        sig { returns(T::Boolean) }
         def correctable?
           @offense.correctable?
         end
 
+        sig { params(range: T::Range[Integer]).returns(T::Boolean) }
         def in_range?(range)
           range.cover?(@offense.line - 1)
         end
 
+        sig { returns(LanguageServer::Protocol::Interface::CodeAction) }
         def to_lsp_code_action
           LanguageServer::Protocol::Interface::CodeAction.new(
             title: "Autocorrect #{@offense.cop_name}",
@@ -49,6 +59,7 @@ module RubyLsp
           )
         end
 
+        sig { returns(LanguageServer::Protocol::Interface::Diagnostic) }
         def to_lsp_diagnostic
           LanguageServer::Protocol::Interface::Diagnostic.new(
             message: @offense.message,
@@ -70,6 +81,7 @@ module RubyLsp
 
         private
 
+        sig { returns(T::Array[LanguageServer::Protocol::Interface::TextEdit]) }
         def offense_replacements
           @offense.corrector.as_replacements.map do |range, replacement|
             LanguageServer::Protocol::Interface::TextEdit.new(

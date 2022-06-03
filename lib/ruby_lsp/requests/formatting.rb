@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 module RubyLsp
@@ -15,13 +15,16 @@ module RubyLsp
     # end
     # ```
     class Formatting < RuboCopRequest
-      RUBOCOP_FLAGS = (COMMON_RUBOCOP_FLAGS + ["--autocorrect"]).freeze
+      extend T::Sig
+      RUBOCOP_FLAGS = T.let((COMMON_RUBOCOP_FLAGS + ["--autocorrect"]).freeze, T::Array[String])
 
+      sig { params(uri: String, document: Document).void }
       def initialize(uri, document)
         super
-        @formatted_text = nil
+        @formatted_text = T.let(nil, T.nilable(String))
       end
 
+      sig { override.returns(T.nilable(T::Array[LanguageServer::Protocol::Interface::TextEdit])) }
       def run
         super
 
@@ -44,6 +47,7 @@ module RubyLsp
 
       private
 
+      sig { returns(T::Array[String]) }
       def rubocop_flags
         RUBOCOP_FLAGS
       end

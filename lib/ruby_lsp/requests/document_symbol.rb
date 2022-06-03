@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 module RubyLsp
@@ -25,7 +25,9 @@ module RubyLsp
     # end
     # ```
     class DocumentSymbol < BaseRequest
-      SYMBOL_KIND = {
+      extend T::Sig
+
+      SYMBOL_KIND = T.let({
         file: 1,
         module: 2,
         namespace: 3,
@@ -52,30 +54,40 @@ module RubyLsp
         event: 24,
         operator: 25,
         typeparameter: 26,
-      }.freeze
+      }.freeze, T::Hash[Symbol, Integer])
 
-      ATTR_ACCESSORS = ["attr_reader", "attr_writer", "attr_accessor"].freeze
+      ATTR_ACCESSORS = T.let(["attr_reader", "attr_writer", "attr_accessor"].freeze, T::Array[String])
 
       class SymbolHierarchyRoot
+        extend T::Sig
+
+        sig { returns(T::Array[LanguageServer::Protocol::Interface::DocumentSymbol]) }
         attr_reader :children
 
+        sig { void }
         def initialize
-          @children = []
+          @children = T.let([], T::Array[LanguageServer::Protocol::Interface::DocumentSymbol])
         end
       end
 
+      sig { params(document: Document).void }
       def initialize(document)
         super
 
-        @root = SymbolHierarchyRoot.new
-        @stack = [@root]
+        @root = T.let(SymbolHierarchyRoot.new, SymbolHierarchyRoot)
+        @stack = T.let(
+          [@root],
+          T::Array[T.any(SymbolHierarchyRoot, LanguageServer::Protocol::Interface::DocumentSymbol)]
+        )
       end
 
+      sig { override.returns(T::Array[LanguageServer::Protocol::Interface::DocumentSymbol]) }
       def run
         visit(@document.tree)
         @root.children
       end
 
+      sig { params(node: SyntaxTree::ClassDeclaration).void }
       def visit_class(node)
         symbol = create_document_symbol(
           name: node.constant.constant.value,
@@ -89,6 +101,7 @@ module RubyLsp
         @stack.pop
       end
 
+      sig { params(node: SyntaxTree::Command).void }
       def visit_command(node)
         return unless ATTR_ACCESSORS.include?(node.message.value)
 
@@ -104,6 +117,7 @@ module RubyLsp
         end
       end
 
+      sig { params(node: SyntaxTree::ConstPathField).void }
       def visit_const_path_field(node)
         create_document_symbol(
           name: node.constant.value,
@@ -113,6 +127,7 @@ module RubyLsp
         )
       end
 
+      sig { params(node: SyntaxTree::Def).void }
       def visit_def(node)
         name = node.name.value
 
@@ -128,6 +143,7 @@ module RubyLsp
         @stack.pop
       end
 
+      sig { params(node: SyntaxTree::DefEndless).void }
       def visit_def_endless(node)
         name = node.name.value
 
@@ -143,6 +159,7 @@ module RubyLsp
         @stack.pop
       end
 
+      sig { params(node: SyntaxTree::Defs).void }
       def visit_defs(node)
         symbol = create_document_symbol(
           name: "self.#{node.name.value}",
@@ -156,6 +173,7 @@ module RubyLsp
         @stack.pop
       end
 
+      sig { params(node: SyntaxTree::ModuleDeclaration).void }
       def visit_module(node)
         symbol = create_document_symbol(
           name: node.constant.constant.value,
@@ -169,6 +187,7 @@ module RubyLsp
         @stack.pop
       end
 
+      sig { params(node: SyntaxTree::TopConstField).void }
       def visit_top_const_field(node)
         create_document_symbol(
           name: node.constant.value,
@@ -178,6 +197,7 @@ module RubyLsp
         )
       end
 
+      sig { params(node: SyntaxTree::VarField).void }
       def visit_var_field(node)
         kind = case node.value
         when SyntaxTree::Const
@@ -198,6 +218,14 @@ module RubyLsp
 
       private
 
+      sig do
+        params(
+          name: String,
+          kind: Symbol,
+          range_node: SyntaxTree::Node,
+          selection_range_node: SyntaxTree::Node
+        ).returns(LanguageServer::Protocol::Interface::DocumentSymbol)
+      end
       def create_document_symbol(name:, kind:, range_node:, selection_range_node:)
         symbol = LanguageServer::Protocol::Interface::DocumentSymbol.new(
           name: name,
@@ -207,7 +235,7 @@ module RubyLsp
           children: [],
         )
 
-        @stack.last.children << symbol
+        T.must(@stack.last).children << symbol
 
         symbol
       end
