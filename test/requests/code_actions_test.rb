@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 # frozen_string_literal: true
 
 require "test_helper"
@@ -31,14 +31,14 @@ class CodeActionsTest < Minitest::Test
 
   def assert_code_actions(source, code_actions, range)
     document = RubyLsp::Document.new(source)
-    result = nil
+    result = T.let(nil, T.nilable(T::Array[LanguageServer::Protocol::Interface::Diagnostic]))
 
     stdout, _ = capture_io do
       result = RubyLsp::Requests::CodeActions.run("file://#{__FILE__}", document, range)
     end
 
     assert_empty(stdout)
-    assert_equal(map_diagnostics(code_actions).to_json, result.to_json)
+    assert_equal(map_diagnostics(code_actions).to_json, T.must(result).to_json)
   end
 
   def map_diagnostics(diagnostics)

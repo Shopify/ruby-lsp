@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 # frozen_string_literal: true
 
 require "test_helper"
@@ -13,7 +13,7 @@ class FormattingExpectationsTest < ExpectationsTestRunner
   end
 
   def assert_expectations(source, expected)
-    result = nil
+    result = T.let(nil, T.nilable(T::Array[LanguageServer::Protocol::Interface::TextEdit]))
 
     stdout, _ = capture_io do
       result = run_expectations(source)

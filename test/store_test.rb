@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 # frozen_string_literal: true
 
 require "test_helper"
@@ -20,8 +20,8 @@ class StoreTest < Minitest::Test
 
     assert_equal(RubyLsp::Document.new("def great_code; end"), @store.get(file.path))
   ensure
-    file.close
-    file.unlink
+    file&.close
+    file&.unlink
   end
 
   def test_store_ignores_syntax_errors
@@ -47,7 +47,7 @@ class StoreTest < Minitest::Test
     counter = 0
 
     5.times do
-      @store.cache_fetch("/foo/bar.rb", RubyLsp::Requests::FoldingRanges) do
+      @store.cache_fetch("/foo/bar.rb", :folding_ranges) do
         counter += 1
       end
     end
@@ -57,7 +57,7 @@ class StoreTest < Minitest::Test
     # After the entry in the storage is updated, the cache is invalidated
     @store.set("/foo/bar.rb", "def bar; end")
     5.times do
-      @store.cache_fetch("/foo/bar.rb", RubyLsp::Requests::FoldingRanges) do
+      @store.cache_fetch("/foo/bar.rb", :folding_ranges) do
         counter += 1
       end
     end

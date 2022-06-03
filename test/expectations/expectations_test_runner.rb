@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 # frozen_string_literal: true
 
 # TODO: how to pass arguments to the test runner? See for example `CodeActionsTest`
@@ -66,7 +66,7 @@ class ExpectationsTestRunner < Minitest::Test
       File.read(fixture_path)
         .lines
         .first
-        .match(/^#\s*required_ruby_version:\s*(?<version>\d+\.\d+(\.\d+)?)$/)
+        &.match(/^#\s*required_ruby_version:\s*(?<version>\d+\.\d+(\.\d+)?)$/)
         &.named_captures
         &.fetch("version")
     end
