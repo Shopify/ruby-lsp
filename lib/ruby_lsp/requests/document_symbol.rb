@@ -26,6 +26,9 @@ module RubyLsp
     # ```
     class DocumentSymbol < BaseRequest
       extend T::Sig
+      extend T::Generic
+
+      Response = type_template { { fixed: T::Array[LanguageServer::Protocol::Interface::DocumentSymbol] } }
 
       SYMBOL_KIND = T.let({
         file: 1,

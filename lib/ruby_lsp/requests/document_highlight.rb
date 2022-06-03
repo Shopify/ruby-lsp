@@ -22,6 +22,9 @@ module RubyLsp
     # ```
     class DocumentHighlight < BaseRequest
       extend T::Sig
+      extend T::Generic
+
+      Response = type_template { { fixed: T::Array[LanguageServer::Protocol::Interface::DocumentHighlight] } }
 
       VarNodes = T.type_alias do
         T.any(
@@ -37,7 +40,7 @@ module RubyLsp
         override(allow_incompatible: true).params(
           document: Document,
           position: Document::PositionShape
-        ).returns(T::Array[LanguageServer::Protocol::Interface::DocumentHighlight])
+        ).returns(Response)
       end
       def self.run(document, position)
         new(document, position).run

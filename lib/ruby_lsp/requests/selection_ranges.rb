@@ -18,6 +18,10 @@ module RubyLsp
     # ```
     class SelectionRanges < BaseRequest
       extend T::Sig
+      extend T::Generic
+
+      Response = type_template { { fixed: T::Array[Support::SelectionRange] } }
+
       NODES_THAT_CAN_BE_PARENTS = T.let([
         SyntaxTree::Assign,
         SyntaxTree::ArrayLiteral,

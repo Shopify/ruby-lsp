@@ -18,6 +18,11 @@ module RubyLsp
     # ```
     class SemanticHighlighting < BaseRequest
       extend T::Sig
+      extend T::Generic
+
+      Response = type_template do
+        { fixed: T.any(LanguageServer::Protocol::Interface::SemanticTokens, T::Array[SemanticToken]) }
+      end
 
       TOKEN_TYPES = T.let([
         :variable,
