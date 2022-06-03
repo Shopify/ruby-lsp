@@ -44,10 +44,12 @@ module RubyLsp
       sig { returns(T::Array[LanguageServer::Protocol::Interface::CodeAction]) }
       def run
         diagnostics = Diagnostics.run(@uri, @document)
-        corrections = diagnostics.select { |diagnostic| diagnostic.correctable? && diagnostic.in_range?(@range) }
+        corrections = diagnostics.select do |diagnostic|
+          diagnostic.correctable? && T.cast(diagnostic, Support::RuboCopDiagnostic).in_range?(@range)
+        end
         return [] if corrections.empty?
 
-        corrections.map!(&:to_lsp_code_action)
+        T.cast(corrections, T::Array[Support::RuboCopDiagnostic]).map!(&:to_lsp_code_action)
       end
     end
   end

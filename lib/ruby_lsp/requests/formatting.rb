@@ -16,6 +16,10 @@ module RubyLsp
     # ```
     class Formatting < RuboCopRequest
       extend T::Sig
+      extend T::Generic
+
+      Response = type_template { { fixed: T.nilable(T::Array[LanguageServer::Protocol::Interface::TextEdit]) } }
+
       RUBOCOP_FLAGS = T.let((COMMON_RUBOCOP_FLAGS + ["--autocorrect"]).freeze, T::Array[String])
 
       sig { params(uri: String, document: Document).void }

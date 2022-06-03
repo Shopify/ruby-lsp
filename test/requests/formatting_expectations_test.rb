@@ -9,7 +9,7 @@ class FormattingExpectationsTest < ExpectationsTestRunner
 
   def run_expectations(source)
     document = RubyLsp::Document.new(source)
-    RubyLsp::Requests::Formatting.run("file://#{__FILE__}", document).first.new_text
+    RubyLsp::Requests::Formatting.run("file://#{__FILE__}", document)&.first&.new_text
   end
 
   def assert_expectations(source, expected)

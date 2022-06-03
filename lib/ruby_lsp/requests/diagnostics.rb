@@ -16,6 +16,16 @@ module RubyLsp
     # ```
     class Diagnostics < RuboCopRequest
       extend T::Sig
+      extend T::Generic
+
+      Response = type_template do
+        {
+          fixed: T.any(
+            T::Array[Support::RuboCopDiagnostic],
+            T::Array[Support::SyntaxErrorDiagnostic],
+          ),
+        }
+      end
 
       sig do
         override.returns(

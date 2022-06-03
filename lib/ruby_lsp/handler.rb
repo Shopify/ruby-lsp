@@ -154,7 +154,7 @@ module RubyLsp
       end
     end
 
-    sig { params(uri: String).returns(T::Array[LanguageServer::Protocol::Interface::TextEdit]) }
+    sig { params(uri: String).returns(T.nilable(T::Array[LanguageServer::Protocol::Interface::TextEdit])) }
     def respond_with_formatting(uri)
       Requests::Formatting.run(uri, store.get(uri))
     end
