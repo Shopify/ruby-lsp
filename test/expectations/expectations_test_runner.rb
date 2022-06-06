@@ -12,14 +12,23 @@ class ExpectationsTestRunner < Minitest::Test
     def expectations_tests(handler_class, expectation_suffix)
       class_eval(<<~RB)
         module ExpectationsRunnerMethods
-          def run_expectations(source)
+          def run_expectations(source, *args)
+            params = args.empty? ? default_args : args
             document = RubyLsp::Document.new(source)
-            #{handler_class}.new(document).run
+            #{handler_class}.new(document, *params).run
           end
 
           def assert_expectations(source, expected)
-            actual = run_expectations(source)
-            assert_equal(JSON.parse(expected), JSON.parse(actual.to_json))
+            expected = JSON.parse(expected)
+            params = expected["params"] || []
+            params.each { |param| param.transform_keys!(&:to_sym) if param.is_a?(Hash) }
+
+            actual = run_expectations(source, *params)
+            assert_equal(expected["result"], JSON.parse(actual.to_json))
+          end
+
+          def default_args
+            []
           end
         end
 
@@ -102,6 +111,6 @@ class ExpectationsTestRunner < Minitest::Test
   def json_expectations(expected_json_string)
     return {} if expected_json_string.empty?
 
-    JSON.parse(expected_json_string)
+    JSON.parse(expected_json_string)["result"]
   end
 end
