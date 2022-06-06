@@ -1,12 +1,14 @@
-[
-  {
-    "startLine": 0,
-    "endLine": 4,
-    "kind": "region"
-  },
-  {
-    "startLine": 1,
-    "endLine": 3,
-    "kind": "region"
-  }
-]
+{
+  "result": [
+    {
+      "startLine": 0,
+      "endLine": 4,
+      "kind": "region"
+    },
+    {
+      "startLine": 1,
+      "endLine": 3,
+      "kind": "region"
+    }
+  ]
+}

@@ -1,29 +1,31 @@
-[
-  {
-    "name": "baz",
-    "kind": 6,
-    "range": {
-      "start": {
-        "line": 2,
-        "character": 0
+{
+  "result": [
+    {
+      "name": "baz",
+      "kind": 6,
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 0
+        },
+        "end": {
+          "line": 2,
+          "character": 12
+        }
       },
-      "end": {
-        "line": 2,
-        "character": 12
-      }
-    },
-    "selectionRange": {
-      "start": {
-        "line": 2,
-        "character": 4
+      "selectionRange": {
+        "start": {
+          "line": 2,
+          "character": 4
+        },
+        "end": {
+          "line": 2,
+          "character": 7
+        }
       },
-      "end": {
-        "line": 2,
-        "character": 7
-      }
-    },
-    "children": [
+      "children": [
 
-    ]
-  }
-]
+      ]
+    }
+  ]
+}

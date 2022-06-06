@@ -1,9 +1,11 @@
-[
-  {
-    "delta_line": 0,
-    "delta_start_char": 0,
-    "length": 4,
-    "token_type": 1,
-    "token_modifiers": 0
-  }
-]
+{
+  "result": [
+    {
+      "delta_line": 0,
+      "delta_start_char": 0,
+      "length": 4,
+      "token_type": 1,
+      "token_modifiers": 0
+    }
+  ]
+}

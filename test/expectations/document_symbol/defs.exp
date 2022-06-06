@@ -1,29 +1,31 @@
-[
-  {
-    "name": "self.foo",
-    "kind": 6,
-    "range": {
-      "start": {
-        "line": 0,
-        "character": 0
+{
+  "result": [
+    {
+      "name": "self.foo",
+      "kind": 6,
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 0
+        },
+        "end": {
+          "line": 3,
+          "character": 3
+        }
       },
-      "end": {
-        "line": 3,
-        "character": 3
-      }
-    },
-    "selectionRange": {
-      "start": {
-        "line": 0,
-        "character": 9
+      "selectionRange": {
+        "start": {
+          "line": 0,
+          "character": 9
+        },
+        "end": {
+          "line": 0,
+          "character": 12
+        }
       },
-      "end": {
-        "line": 0,
-        "character": 12
-      }
-    },
-    "children": [
+      "children": [
 
-    ]
-  }
-]
+      ]
+    }
+  ]
+}
