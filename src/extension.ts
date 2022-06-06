@@ -9,8 +9,6 @@ export async function activate(context: vscode.ExtensionContext) {
   activateRuby();
 
   const telemetry = new Telemetry(context);
-  await telemetry.initialize();
-
   client = new Client(context, telemetry);
 
   // Adding this delay guarantees that shadowenv has enough time to load the right environment

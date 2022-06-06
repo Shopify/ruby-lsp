@@ -56,7 +56,6 @@ suite("Telemetry", () => {
       errorMessage: "undefined method `visit` for nil:NilClass",
     };
 
-    await telemetry.initialize();
     await telemetry.sendEvent(event);
     assert.strictEqual(api.sentEvents[0], event);
   });

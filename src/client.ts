@@ -59,7 +59,6 @@ export default class Client {
       revealOutputChannelOn: RevealOutputChannelOn.Never,
       initializationOptions: {
         enabledFeatures: this.listOfEnabledFeatures(),
-        telemetryEnabled: telemetry.enabled(),
       },
     };
 
@@ -79,10 +78,7 @@ export default class Client {
       this.clientOptions
     );
 
-    if (this.telemetry.enabled()) {
-      this.client.onTelemetry(this.telemetry.sendEvent.bind(this.telemetry));
-    }
-
+    this.client.onTelemetry(this.telemetry.sendEvent.bind(this.telemetry));
     this.context.subscriptions.push(this.client.start());
     await this.client.onReady();
   }
