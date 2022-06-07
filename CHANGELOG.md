@@ -6,6 +6,12 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.3]
+
+- Add new error telemetry fields (https://github.com/Shopify/vscode-ruby-lsp/pull/107)
+- Enable document highlight by default (https://github.com/Shopify/vscode-ruby-lsp/pull/76)
+- Remove plugin load order dependency for telemetry (https://github.com/Shopify/vscode-ruby-lsp/pull/85)
+
 ## [0.0.2]
 
 - Prompt users to remove rubocop-lsp gem if installed (https://github.com/Shopify/vscode-ruby-lsp/pull/79)
