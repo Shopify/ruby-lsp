@@ -51,8 +51,7 @@ module RubyLsp
         # to the token modifiers index map.
         def encode_modifiers(modifiers)
           modifiers.inject(0) do |encoded_modifiers, modifier|
-            encoded_modifiers |= (1 << modifier)
-            encoded_modifiers
+            encoded_modifiers | (1 << modifier)
           end
         end
       end
