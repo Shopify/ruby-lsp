@@ -58,6 +58,7 @@ module RubyLsp
         # For example, [:default_library] will be encoded as
         # 0b1000000000, as :default_library is the 10th bit according
         # to the token modifiers index map.
+        sig { params(modifiers: T::Array[Integer]).returns(Integer) }
         def encode_modifiers(modifiers)
           modifiers.inject(0) do |encoded_modifiers, modifier|
             encoded_modifiers | (1 << modifier)

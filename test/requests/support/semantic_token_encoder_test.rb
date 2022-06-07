@@ -6,10 +6,10 @@ require "test_helper"
 class SemanticTokenEncoderTest < Minitest::Test
   def test_tokens_encoded_to_relative_positioning
     tokens = [
-      stub_token(1, 2, 1, 0, 0),
-      stub_token(1, 4, 2, 9, 0),
-      stub_token(2, 2, 3, 0, 6),
-      stub_token(5, 6, 10, 4, 4),
+      stub_token(1, 2, 1, 0, [0]),
+      stub_token(1, 4, 2, 9, [0]),
+      stub_token(2, 2, 3, 0, [6]),
+      stub_token(5, 6, 10, 4, [4]),
     ]
 
     expected_encoding = [
@@ -25,10 +25,10 @@ class SemanticTokenEncoderTest < Minitest::Test
 
   def test_tokens_sorted_before_encoded
     tokens = [
-      stub_token(1, 2, 1, 0, 0),
-      stub_token(5, 6, 10, 4, 4),
-      stub_token(2, 2, 3, 0, 6),
-      stub_token(1, 4, 2, 9, 0),
+      stub_token(1, 2, 1, 0, [0]),
+      stub_token(5, 6, 10, 4, [4]),
+      stub_token(2, 2, 3, 0, [6]),
+      stub_token(1, 4, 2, 9, [0]),
     ]
 
     expected_encoding = [
