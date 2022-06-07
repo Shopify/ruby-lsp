@@ -104,7 +104,7 @@ module RubyLsp
 
       def add_token(location, type, modifiers = [])
         length = location.end_char - location.start_char
-        modifiers_indices = modifiers.map { |modifier| TOKEN_MODIFIERS[modifier] }
+        modifiers_indices = modifiers.filter_map { |modifier| TOKEN_MODIFIERS[modifier] }
         @tokens.push(SemanticToken.new(location, length, TOKEN_TYPES.index(type), modifiers_indices))
       end
     end
