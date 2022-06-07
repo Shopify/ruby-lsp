@@ -114,14 +114,14 @@ module RubyLsp
     sig { params(uri: String).returns(T::Array[LanguageServer::Protocol::Interface::DocumentSymbol]) }
     def respond_with_document_symbol(uri)
       store.cache_fetch(uri, :document_symbol) do |document|
-        RubyLsp::Requests::DocumentSymbol.run(document)
+        RubyLsp::Requests::DocumentSymbol.new(document).run
       end
     end
 
     sig { params(uri: String).returns(T::Array[LanguageServer::Protocol::Interface::FoldingRange]) }
     def respond_with_folding_ranges(uri)
       store.cache_fetch(uri, :folding_ranges) do |document|
-        Requests::FoldingRanges.run(document)
+        Requests::FoldingRanges.new(document).run
       end
     end
 
@@ -133,7 +133,7 @@ module RubyLsp
     end
     def respond_with_selection_ranges(uri, positions)
       ranges = store.cache_fetch(uri, :selection_ranges) do |document|
-        Requests::SelectionRanges.run(document)
+        Requests::SelectionRanges.new(document).run
       end
 
       # Per the selection range request spec (https://microsoft.github.io/language-server-protocol/specification#textDocument_selectionRange),
@@ -159,13 +159,13 @@ module RubyLsp
 
     sig { params(uri: String).returns(T.nilable(T::Array[LanguageServer::Protocol::Interface::TextEdit])) }
     def respond_with_formatting(uri)
-      Requests::Formatting.run(uri, store.get(uri))
+      Requests::Formatting.new(uri, store.get(uri)).run
     end
 
     sig { params(uri: String).void }
     def send_diagnostics(uri)
       response = store.cache_fetch(uri, :diagnostics) do |document|
-        Requests::Diagnostics.run(uri, document)
+        Requests::Diagnostics.new(uri, document).run
       end
 
       @writer.write(
@@ -182,7 +182,7 @@ module RubyLsp
     end
     def respond_with_code_actions(uri, range)
       store.cache_fetch(uri, :code_actions) do |document|
-        Requests::CodeActions.run(uri, document, range)
+        Requests::CodeActions.new(uri, document, range).run
       end
     end
 
@@ -193,7 +193,7 @@ module RubyLsp
       ).returns(T::Array[LanguageServer::Protocol::Interface::DocumentHighlight])
     end
     def respond_with_document_highlight(uri, position)
-      Requests::DocumentHighlight.run(store.get(uri), position)
+      Requests::DocumentHighlight.new(store.get(uri), position).run
     end
 
     sig do

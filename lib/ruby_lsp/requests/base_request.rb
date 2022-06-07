@@ -7,16 +7,8 @@ module RubyLsp
     class BaseRequest < SyntaxTree::Visitor
       extend T::Sig
       extend T::Helpers
-      extend T::Generic
-
-      Response = type_template { { upper: T.untyped } }
 
       abstract!
-
-      sig { overridable.params(document: Document).returns(Response) }
-      def self.run(document)
-        new(document).run
-      end
 
       sig { params(document: Document).void }
       def initialize(document)

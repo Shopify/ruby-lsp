@@ -1175,7 +1175,7 @@ class SelectionRangesTest < Minitest::Test
 
   def assert_ranges(source, positions, expected_ranges)
     document = RubyLsp::Document.new(source)
-    actual = RubyLsp::Requests::SelectionRanges.run(document)
+    actual = RubyLsp::Requests::SelectionRanges.new(document).run
     filtered = positions.map { |position| actual.find { |range| range.cover?(position) } }
 
     assert_equal(expected_ranges, JSON.parse(filtered.to_json, symbolize_names: true))

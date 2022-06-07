@@ -14,7 +14,7 @@ class ExpectationsTestRunner < Minitest::Test
         module ExpectationsRunnerMethods
           def run_expectations(source)
             document = RubyLsp::Document.new(source)
-            #{handler_class}.run(document)
+            #{handler_class}.new(document).run
           end
 
           def assert_expectations(source, expected)

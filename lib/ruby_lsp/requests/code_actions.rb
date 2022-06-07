@@ -22,17 +22,6 @@ module RubyLsp
           uri: String,
           document: Document,
           range: T::Range[Integer]
-        ).returns(T::Array[LanguageServer::Protocol::Interface::CodeAction])
-      end
-      def self.run(uri, document, range)
-        new(uri, document, range).run
-      end
-
-      sig do
-        params(
-          uri: String,
-          document: Document,
-          range: T::Range[Integer]
         ).void
       end
       def initialize(uri, document, range)
@@ -43,7 +32,7 @@ module RubyLsp
 
       sig { returns(T::Array[LanguageServer::Protocol::Interface::CodeAction]) }
       def run
-        diagnostics = Diagnostics.run(@uri, @document)
+        diagnostics = Diagnostics.new(@uri, @document).run
         corrections = diagnostics.select do |diagnostic|
           diagnostic.correctable? && T.cast(diagnostic, Support::RuboCopDiagnostic).in_range?(@range)
         end

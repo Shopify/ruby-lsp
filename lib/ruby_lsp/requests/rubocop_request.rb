@@ -10,9 +10,6 @@ module RubyLsp
     class RuboCopRequest < RuboCop::Runner
       extend T::Sig
       extend T::Helpers
-      extend T::Generic
-
-      Response = type_template { { upper: T.untyped } }
 
       abstract!
 
@@ -27,11 +24,6 @@ module RubyLsp
 
       sig { returns(String) }
       attr_reader :text
-
-      sig { overridable.params(uri: String, document: Document).returns(Response) }
-      def self.run(uri, document)
-        new(uri, document).run
-      end
 
       sig { params(uri: String, document: Document).void }
       def initialize(uri, document)
