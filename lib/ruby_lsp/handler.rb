@@ -85,7 +85,7 @@ module RubyLsp
           document_selector: { scheme: "file", language: "ruby" },
           legend: Interface::SemanticTokensLegend.new(
             token_types: Requests::SemanticHighlighting::TOKEN_TYPES,
-            token_modifiers: Requests::SemanticHighlighting::TOKEN_MODIFIERS
+            token_modifiers: Requests::SemanticHighlighting::TOKEN_MODIFIERS.keys
           ),
           range: false,
           full: {
