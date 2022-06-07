@@ -211,7 +211,7 @@ class IntegrationTest < Minitest::Test
     assert_equal("file://#{__FILE__}", telemetry_response.dig(:params, :uri))
     assert_equal(RubyLsp::VERSION, telemetry_response.dig(:params, :lspVersion))
     assert_equal(request, telemetry_response.dig(:params, :request))
-    assert_in_delta(0.5, telemetry_response.dig(:params, :requestTime), 1)
+    assert_in_delta(0.5, telemetry_response.dig(:params, :requestTime), 2)
   end
 
   def make_request(request, params = nil)
