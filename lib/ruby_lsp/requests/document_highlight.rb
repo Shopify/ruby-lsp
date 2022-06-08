@@ -42,7 +42,7 @@ module RubyLsp
         super(document)
       end
 
-      sig { override.returns(T::Array[LanguageServer::Protocol::Interface::DocumentHighlight]) }
+      sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::DocumentHighlight], Object)) }
       def run
         # no @target means the target is not highlightable
         return [] unless @target

@@ -81,7 +81,7 @@ module RubyLsp
         )
       end
 
-      sig { override.returns(T::Array[LanguageServer::Protocol::Interface::DocumentSymbol]) }
+      sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::DocumentSymbol], Object)) }
       def run
         visit(@document.tree)
         @root.children

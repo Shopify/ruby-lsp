@@ -17,7 +17,7 @@ module RubyLsp
         super()
       end
 
-      sig { abstract.returns(T.untyped) }
+      sig { abstract.returns(Object) }
       def run; end
 
       sig { params(node: SyntaxTree::Node).returns(LanguageServer::Protocol::Interface::Range) }

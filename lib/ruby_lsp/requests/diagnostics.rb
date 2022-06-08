@@ -20,8 +20,8 @@ module RubyLsp
       sig do
         override.returns(
           T.any(
-            T::Array[Support::RuboCopDiagnostic],
-            T::Array[Support::SyntaxErrorDiagnostic],
+            T.all(T::Array[Support::RuboCopDiagnostic], Object),
+            T.all(T::Array[Support::SyntaxErrorDiagnostic], Object),
           )
         )
       end

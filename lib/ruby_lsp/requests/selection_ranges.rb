@@ -66,7 +66,7 @@ module RubyLsp
         @stack = T.let([], T::Array[Support::SelectionRange])
       end
 
-      sig { override.returns(T::Array[Support::SelectionRange]) }
+      sig { override.returns(T.all(T::Array[Support::SelectionRange], Object)) }
       def run
         visit(@document.tree)
         @ranges.reverse!

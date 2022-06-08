@@ -62,7 +62,7 @@ module RubyLsp
         @partial_range = T.let(nil, T.nilable(PartialRange))
       end
 
-      sig { override.returns(T::Array[LanguageServer::Protocol::Interface::FoldingRange]) }
+      sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::FoldingRange], Object)) }
       def run
         visit(@document.tree)
         emit_partial_range

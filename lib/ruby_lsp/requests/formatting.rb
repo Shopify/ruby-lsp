@@ -25,7 +25,7 @@ module RubyLsp
         @formatted_text = T.let(nil, T.nilable(String))
       end
 
-      sig { override.returns(T.nilable(T::Array[LanguageServer::Protocol::Interface::TextEdit])) }
+      sig { override.returns(T.nilable(T.all(T::Array[LanguageServer::Protocol::Interface::TextEdit], Object))) }
       def run
         super
 

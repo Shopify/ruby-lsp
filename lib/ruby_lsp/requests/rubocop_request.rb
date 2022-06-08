@@ -40,7 +40,7 @@ module RubyLsp
         )
       end
 
-      sig { returns(T.untyped) }
+      sig { overridable.returns(Object) }
       def run
         # We communicate with Rubocop via stdin
         @options[:stdin] = text

@@ -53,7 +53,14 @@ module RubyLsp
         @tree = T.let(document.tree, SyntaxTree::Node)
       end
 
-      sig { override.returns(T.any(LanguageServer::Protocol::Interface::SemanticTokens, T::Array[SemanticToken])) }
+      sig do
+        override.returns(
+          T.any(
+            LanguageServer::Protocol::Interface::SemanticTokens,
+            T.all(T::Array[SemanticToken], Object),
+          )
+        )
+      end
       def run
         visit(@tree)
         return @tokens unless @encoder
