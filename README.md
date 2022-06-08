@@ -50,7 +50,7 @@ To add a new expectations test runner for a new request handler:
    require "expectations/expectations_test_runner"
 
    class $HANDLERExpectationsTest < ExpectationsTestRunner
-    expectations_tests RubyLsp::Requests::$HANDLER, "$EXPECTATIONS_DIR"
+     expectations_tests RubyLsp::Requests::$HANDLER, "$EXPECTATIONS_DIR"
    end
    ```
 
