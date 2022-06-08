@@ -52,6 +52,12 @@ module RubyLsp
         @encoder.encode(@tokens)
       end
 
+      def visit_def(node)
+        add_token(node.name.location, :method, [:declaration])
+        visit(node.params)
+        visit(node.bodystmt)
+      end
+
       def visit_m_assign(node)
         node.target.parts.each do |var_ref|
           add_token(var_ref.value.location, :variable)
