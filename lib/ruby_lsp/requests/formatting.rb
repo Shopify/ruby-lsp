@@ -14,44 +14,43 @@ module RubyLsp
     # puts "Hello" # --> formatting: fixes the indentation on save
     # end
     # ```
-    class Formatting < RuboCopRequest
+    class Formatting < BaseRequest
       extend T::Sig
-
-      RUBOCOP_FLAGS = T.let((COMMON_RUBOCOP_FLAGS + ["--auto-correct"]).freeze, T::Array[String])
+      include Support::RuboCopRunner::CallbackHandler
 
       sig { params(uri: String, document: Document).void }
       def initialize(uri, document)
-        super
-        @formatted_text = T.let(nil, T.nilable(String))
+        super(document)
+
+        @uri = uri
+        @runner = T.let(Support::RuboCopRunner.formatting_instance, Support::RuboCopRunner)
       end
 
       sig { override.returns(T.nilable(T.all(T::Array[LanguageServer::Protocol::Interface::TextEdit], Object))) }
       def run
-        super
+        @runner.run(@uri, @document, self)
 
-        @formatted_text = @options[:stdin] # Rubocop applies the corrections on stdin
-        return unless @formatted_text
+        formatted_text = @runner.stdin
+        return unless formatted_text
+
+        size = T.must(@runner.text).size
 
         [
           LanguageServer::Protocol::Interface::TextEdit.new(
             range: LanguageServer::Protocol::Interface::Range.new(
               start: LanguageServer::Protocol::Interface::Position.new(line: 0, character: 0),
               end: LanguageServer::Protocol::Interface::Position.new(
-                line: text.size,
-                character: text.size
+                line: size,
+                character: size
               )
             ),
-            new_text: @formatted_text
+            new_text: formatted_text
           ),
         ]
       end
 
-      private
-
-      sig { returns(T::Array[String]) }
-      def rubocop_flags
-        RUBOCOP_FLAGS
-      end
+      sig { override.params(offenses: T::Array[RuboCop::Cop::Offense]).void }
+      def callback(offenses); end
     end
   end
 end

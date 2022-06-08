@@ -8,7 +8,7 @@ task :check_docs do
   require "syntax_tree"
   require "logger"
   require "ruby_lsp/requests/base_request"
-  require "ruby_lsp/requests/rubocop_request"
+  require "ruby_lsp/requests/support/rubocop_runner"
 
   Dir["#{Dir.pwd}/lib/ruby_lsp/requests/*.rb"].each do |file|
     require(file)
@@ -19,6 +19,8 @@ task :check_docs do
   error_messages = RubyLsp::Requests
     .constants # rubocop:disable Sorbet/ConstantsFromStrings
     .each_with_object(Hash.new { |h, k| h[k] = [] }) do |request, errors|
+    next if request == :Support
+
     full_name = "RubyLsp::Requests::#{request}"
     docs = YARD::Registry.at(full_name).docstring
     next if /:nodoc:/.match?(docs)

@@ -14,8 +14,21 @@ module RubyLsp
     # puts "Hello" # --> diagnostics: incorrect indentantion
     # end
     # ```
-    class Diagnostics < RuboCopRequest
+    class Diagnostics < BaseRequest
       extend T::Sig
+      include Support::RuboCopRunner::CallbackHandler
+
+      sig { params(uri: String, document: Document).void }
+      def initialize(uri, document)
+        super(document)
+
+        @uri = uri
+        @diagnostics = T.let([], T.any(
+          T.all(T::Array[Support::RuboCopDiagnostic], Object),
+          T.all(T::Array[Support::SyntaxErrorDiagnostic], Object),
+        ))
+        @runner = T.let(Support::RuboCopRunner.diagnostics_instance, Support::RuboCopRunner)
+      end
 
       sig do
         override.returns(
@@ -26,23 +39,17 @@ module RubyLsp
         )
       end
       def run
-        return syntax_error_diagnostics if @document.syntax_errors?
+        if @document.syntax_errors?
+          return @document.syntax_error_edits.map { |e| Support::SyntaxErrorDiagnostic.new(e) }
+        end
 
-        super
-
+        @runner.run(@uri, @document, self)
         @diagnostics
       end
 
-      sig { params(_file: String, offenses: T::Array[RuboCop::Cop::Offense]).void }
-      def file_finished(_file, offenses)
+      sig { override.params(offenses: T::Array[RuboCop::Cop::Offense]).void }
+      def callback(offenses)
         @diagnostics = offenses.map { |offense| Support::RuboCopDiagnostic.new(offense, @uri) }
-      end
-
-      private
-
-      sig { returns(T::Array[Support::SyntaxErrorDiagnostic]) }
-      def syntax_error_diagnostics
-        @document.syntax_error_edits.map { |e| Support::SyntaxErrorDiagnostic.new(e) }
       end
     end
   end

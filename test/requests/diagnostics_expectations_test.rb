@@ -9,7 +9,6 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
 
   def run_expectations(source)
     document = RubyLsp::Document.new(source)
-    RubyLsp::Requests::Diagnostics.new("file://#{__FILE__}", document).run
     result = T.let(nil, T.nilable(T::Array[RubyLsp::Requests::Support::RuboCopDiagnostic]))
 
     stdout, _ = capture_io do
