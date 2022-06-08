@@ -58,6 +58,13 @@ module RubyLsp
         visit(node.bodystmt)
       end
 
+      def visit_def_endless(node)
+        add_token(node.name.location, :method, [:declaration])
+        visit(node.paren)
+        visit(node.operator)
+        visit(node.statement)
+      end
+
       def visit_m_assign(node)
         node.target.parts.each do |var_ref|
           add_token(var_ref.value.location, :variable)
