@@ -68,63 +68,6 @@ module RubyLsp
         @encoder.encode(@tokens)
       end
 
-      sig { params(node: SyntaxTree::Def).void }
-      def visit_def(node)
-        add_token(node.name.location, :method, [:declaration])
-        visit(node.params)
-        visit(node.bodystmt)
-      end
-
-      sig { params(node: SyntaxTree::DefEndless).void }
-      def visit_def_endless(node)
-        add_token(node.name.location, :method, [:declaration])
-        visit(node.paren)
-        visit(node.operator)
-        visit(node.statement)
-      end
-
-      sig { params(node: SyntaxTree::Kw).void }
-      def visit_kw(node)
-        case node.value
-        when "self"
-          add_token(node.location, :variable, [:default_library])
-        end
-      end
-
-      sig { params(node: SyntaxTree::Defs).void }
-      def visit_defs(node)
-        visit(node.target)
-        visit(node.operator)
-        add_token(node.name.location, :method, [:declaration])
-        visit(node.params)
-        visit(node.bodystmt)
-      end
-
-      sig { params(node: SyntaxTree::MAssign).void }
-      def visit_m_assign(node)
-        node.target.parts.each do |var_ref|
-          add_token(var_ref.value.location, :variable)
-        end
-      end
-
-      sig { params(node: SyntaxTree::VarField).void }
-      def visit_var_field(node)
-        case node.value
-        when SyntaxTree::Ident
-          add_token(node.value.location, :variable)
-        end
-      end
-
-      sig { params(node: SyntaxTree::VarRef).void }
-      def visit_var_ref(node)
-        case node.value
-        when SyntaxTree::Ident
-          add_token(node.value.location, :variable)
-        else
-          visit(node.value)
-        end
-      end
-
       sig { params(node: SyntaxTree::ARefField).void }
       def visit_a_ref_field(node)
         add_token(node.collection.value.location, :variable)
@@ -150,10 +93,67 @@ module RubyLsp
         visit(node.arguments)
       end
 
+      sig { params(node: SyntaxTree::Def).void }
+      def visit_def(node)
+        add_token(node.name.location, :method, [:declaration])
+        visit(node.params)
+        visit(node.bodystmt)
+      end
+
+      sig { params(node: SyntaxTree::DefEndless).void }
+      def visit_def_endless(node)
+        add_token(node.name.location, :method, [:declaration])
+        visit(node.paren)
+        visit(node.operator)
+        visit(node.statement)
+      end
+
+      sig { params(node: SyntaxTree::Defs).void }
+      def visit_defs(node)
+        visit(node.target)
+        visit(node.operator)
+        add_token(node.name.location, :method, [:declaration])
+        visit(node.params)
+        visit(node.bodystmt)
+      end
+
       sig { params(node: SyntaxTree::FCall).void }
       def visit_fcall(node)
         add_token(node.value.location, :method)
         visit(node.arguments)
+      end
+
+      sig { params(node: SyntaxTree::Kw).void }
+      def visit_kw(node)
+        case node.value
+        when "self"
+          add_token(node.location, :variable, [:default_library])
+        end
+      end
+
+      sig { params(node: SyntaxTree::MAssign).void }
+      def visit_m_assign(node)
+        node.target.parts.each do |var_ref|
+          add_token(var_ref.value.location, :variable)
+        end
+      end
+
+      sig { params(node: SyntaxTree::VarField).void }
+      def visit_var_field(node)
+        case node.value
+        when SyntaxTree::Ident
+          add_token(node.value.location, :variable)
+        end
+      end
+
+      sig { params(node: SyntaxTree::VarRef).void }
+      def visit_var_ref(node)
+        case node.value
+        when SyntaxTree::Ident
+          add_token(node.value.location, :variable)
+        else
+          visit(node.value)
+        end
       end
 
       sig { params(node: SyntaxTree::VCall).void }
