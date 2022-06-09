@@ -22,6 +22,7 @@ module RubyLsp
       TOKEN_TYPES = T.let([
         :variable,
         :method,
+        :namespace,
       ].freeze, T::Array[Symbol])
 
       TOKEN_MODIFIERS = T.let({
@@ -93,6 +94,11 @@ module RubyLsp
         visit(node.arguments)
       end
 
+      sig { params(node: SyntaxTree::Const).void }
+      def visit_const(node)
+        add_token(node.location, :namespace)
+      end
+
       sig { params(node: SyntaxTree::Def).void }
       def visit_def(node)
         add_token(node.name.location, :method, [:declaration])
@@ -143,6 +149,8 @@ module RubyLsp
         case node.value
         when SyntaxTree::Ident
           add_token(node.value.location, :variable)
+        else
+          visit(node.value)
         end
       end
 
