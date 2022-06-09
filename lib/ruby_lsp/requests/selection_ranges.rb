@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 module RubyLsp
@@ -17,7 +17,9 @@ module RubyLsp
     # end
     # ```
     class SelectionRanges < BaseRequest
-      NODES_THAT_CAN_BE_PARENTS = [
+      extend T::Sig
+
+      NODES_THAT_CAN_BE_PARENTS = T.let([
         SyntaxTree::Assign,
         SyntaxTree::ArrayLiteral,
         SyntaxTree::Begin,
@@ -54,15 +56,17 @@ module RubyLsp
         SyntaxTree::VCall,
         SyntaxTree::When,
         SyntaxTree::While,
-      ].freeze
+      ].freeze, T::Array[T.class_of(SyntaxTree::Node)])
 
+      sig { params(document: Document).void }
       def initialize(document)
         super(document)
 
-        @ranges = []
-        @stack = []
+        @ranges = T.let([], T::Array[Support::SelectionRange])
+        @stack = T.let([], T::Array[Support::SelectionRange])
       end
 
+      sig { override.returns(T.all(T::Array[Support::SelectionRange], Object)) }
       def run
         visit(@document.tree)
         @ranges.reverse!
@@ -70,6 +74,7 @@ module RubyLsp
 
       private
 
+      sig { params(node: T.nilable(SyntaxTree::Node)).void }
       def visit(node)
         return if node.nil?
 
@@ -83,6 +88,12 @@ module RubyLsp
         @stack.pop if NODES_THAT_CAN_BE_PARENTS.include?(node.class)
       end
 
+      sig do
+        params(
+          location: SyntaxTree::Location,
+          parent: T.nilable(Support::SelectionRange)
+        ).returns(Support::SelectionRange)
+      end
       def create_selection_range(location, parent = nil)
         RubyLsp::Requests::Support::SelectionRange.new(
           range: LanguageServer::Protocol::Interface::Range.new(

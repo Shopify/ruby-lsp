@@ -3,6 +3,7 @@
 
 desc "Check if all LSP requests are documented"
 task :check_docs do
+  require "sorbet-runtime"
   require "language_server-protocol"
   require "syntax_tree"
   require "logger"

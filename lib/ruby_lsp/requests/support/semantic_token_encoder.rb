@@ -1,15 +1,23 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 module RubyLsp
   module Requests
     module Support
       class SemanticTokenEncoder
+        extend T::Sig
+
+        sig { void }
         def initialize
-          @current_row = 0
-          @current_column = 0
+          @current_row = T.let(0, Integer)
+          @current_column = T.let(0, Integer)
         end
 
+        sig do
+          params(
+            tokens: T::Array[SemanticHighlighting::SemanticToken]
+          ).returns(LanguageServer::Protocol::Interface::SemanticTokens)
+        end
         def encode(tokens)
           delta = tokens
             .sort_by do |token|
@@ -31,6 +39,7 @@ module RubyLsp
 
         # For more information on how each number is calculated, read:
         # https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_semanticTokens
+        sig { params(token: SemanticHighlighting::SemanticToken).returns(T::Array[Integer]) }
         def compute_delta(token)
           row = token.location.start_line - 1
           column = token.location.start_column
@@ -49,6 +58,7 @@ module RubyLsp
         # For example, [:default_library] will be encoded as
         # 0b1000000000, as :default_library is the 10th bit according
         # to the token modifiers index map.
+        sig { params(modifiers: T::Array[Integer]).returns(Integer) }
         def encode_modifiers(modifiers)
           modifiers.inject(0) do |encoded_modifiers, modifier|
             encoded_modifiers | (1 << modifier)

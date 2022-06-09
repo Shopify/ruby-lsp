@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 module RubyLsp
@@ -21,18 +21,28 @@ module RubyLsp
     # end
     # ```
     class DocumentHighlight < BaseRequest
-      def self.run(document, position)
-        new(document, position).run
+      extend T::Sig
+
+      VarNodes = T.type_alias do
+        T.any(
+          SyntaxTree::GVar,
+          SyntaxTree::Ident,
+          SyntaxTree::IVar,
+          SyntaxTree::Const,
+          SyntaxTree::CVar
+        )
       end
 
+      sig { params(document: Document, position: Document::PositionShape).void }
       def initialize(document, position)
-        @highlights = []
+        @highlights = T.let([], T::Array[LanguageServer::Protocol::Interface::DocumentHighlight])
         position = Document::Scanner.new(document.source).find_position(position)
-        @target = find(document.tree, position)
+        @target = T.let(find(document.tree, position), T.nilable(VarNodes))
 
         super(document)
       end
 
+      sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::DocumentHighlight], Object)) }
       def run
         # no @target means the target is not highlightable
         return [] unless @target
@@ -41,6 +51,7 @@ module RubyLsp
         @highlights
       end
 
+      sig { params(node: SyntaxTree::VarField).void }
       def visit_var_field(node)
         if matches_target?(node.value)
           add_highlight(
@@ -52,6 +63,7 @@ module RubyLsp
         super
       end
 
+      sig { params(node: SyntaxTree::VarRef).void }
       def visit_var_ref(node)
         if matches_target?(node.value)
           add_highlight(
@@ -65,6 +77,7 @@ module RubyLsp
 
       private
 
+      sig { params(node: SyntaxTree::Node, position: Integer).returns(T.nilable(VarNodes)) }
       def find(node, position)
         matched =
           node.child_nodes.compact.bsearch do |child|
@@ -83,10 +96,12 @@ module RubyLsp
         end
       end
 
+      sig { params(node: SyntaxTree::Node).returns(T::Boolean) }
       def matches_target?(node)
-        node.is_a?(@target.class) && node.value == @target.value
+        node.is_a?(@target.class) && T.cast(node, VarNodes).value == T.must(@target).value
       end
 
+      sig { params(node: SyntaxTree::Node, kind: Integer).void }
       def add_highlight(node, kind)
         range = range_from_syntax_tree_node(node)
         @highlights << LanguageServer::Protocol::Interface::DocumentHighlight.new(range: range, kind: kind)

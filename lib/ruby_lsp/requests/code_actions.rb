@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 module RubyLsp
@@ -14,23 +14,32 @@ module RubyLsp
     # puts "Hello" # --> code action: quick fix indentation
     # end
     # ```
-    class CodeActions
-      def self.run(uri, document, range)
-        new(uri, document, range).run
-      end
+    class CodeActions < BaseRequest
+      extend T::Sig
 
+      sig do
+        params(
+          uri: String,
+          document: Document,
+          range: T::Range[Integer]
+        ).void
+      end
       def initialize(uri, document, range)
-        @document = document
+        super(document)
+
         @uri = uri
         @range = range
       end
 
+      sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::CodeAction], Object)) }
       def run
-        diagnostics = Diagnostics.run(@uri, @document)
-        corrections = diagnostics.select { |diagnostic| diagnostic.correctable? && diagnostic.in_range?(@range) }
+        diagnostics = Diagnostics.new(@uri, @document).run
+        corrections = diagnostics.select do |diagnostic|
+          diagnostic.correctable? && T.cast(diagnostic, Support::RuboCopDiagnostic).in_range?(@range)
+        end
         return [] if corrections.empty?
 
-        corrections.map!(&:to_lsp_code_action)
+        T.cast(corrections, T::Array[Support::RuboCopDiagnostic]).map!(&:to_lsp_code_action)
       end
     end
   end

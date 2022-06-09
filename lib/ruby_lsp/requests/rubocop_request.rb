@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 require "rubocop"
@@ -8,23 +8,31 @@ module RubyLsp
   module Requests
     # :nodoc:
     class RuboCopRequest < RuboCop::Runner
-      COMMON_RUBOCOP_FLAGS = [
+      extend T::Sig
+      extend T::Helpers
+
+      abstract!
+
+      COMMON_RUBOCOP_FLAGS = T.let([
         "--stderr", # Print any output to stderr so that our stdout does not get polluted
         "--format",
         "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
-      ].freeze
+      ].freeze, T::Array[String])
 
-      attr_reader :file, :text
+      sig { returns(String) }
+      attr_reader :file
 
-      def self.run(uri, document)
-        new(uri, document).run
-      end
+      sig { returns(String) }
+      attr_reader :text
 
+      sig { params(uri: String, document: Document).void }
       def initialize(uri, document)
-        @file = CGI.unescape(URI.parse(uri).path)
+        @file = T.let(CGI.unescape(URI.parse(uri).path), String)
         @document = document
-        @text = document.source
+        @text = T.let(document.source, String)
         @uri = uri
+        @options = T.let({}, T::Hash[Symbol, T.untyped])
+        @diagnostics = T.let([], T::Array[Support::RuboCopDiagnostic])
 
         super(
           ::RuboCop::Options.new.parse(rubocop_flags).first,
@@ -32,6 +40,7 @@ module RubyLsp
         )
       end
 
+      sig { overridable.returns(Object) }
       def run
         # We communicate with Rubocop via stdin
         @options[:stdin] = text
@@ -42,6 +51,7 @@ module RubyLsp
 
       private
 
+      sig { returns(T::Array[String]) }
       def rubocop_flags
         COMMON_RUBOCOP_FLAGS
       end

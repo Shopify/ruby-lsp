@@ -130,7 +130,7 @@ class DocumentHighlightTest < Minitest::Test
 
   def assert_highlight(source, position, expected)
     document = RubyLsp::Document.new(source)
-    actual = RubyLsp::Requests::DocumentHighlight.run(document, position)
+    actual = RubyLsp::Requests::DocumentHighlight.new(document, position).run
     ranges = JSON.parse(actual.to_json, symbolize_names: true)
 
     assert_equal(expected.count, ranges.count)

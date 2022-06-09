@@ -17,7 +17,7 @@ class DiagnosticsTest < Minitest::Test
 
     document.push_edits([error_edit])
 
-    result = RubyLsp::Requests::Diagnostics.run("file://#{__FILE__}", document)
+    result = RubyLsp::Requests::Diagnostics.new("file://#{__FILE__}", document).run
     assert_equal(syntax_error_diagnostics([error_edit]).to_json, result.map(&:to_lsp_diagnostic).to_json)
   end
 

@@ -32,7 +32,13 @@ module RubyLsp
       @source == other.source
     end
 
-    sig { params(request_name: Symbol, block: T.proc.params(document: Document).returns(T.untyped)).returns(T.untyped) }
+    sig do
+      type_parameters(:T)
+        .params(
+          request_name: Symbol,
+          block: T.proc.params(document: Document).returns(T.type_parameter(:T))
+        ).returns(T.type_parameter(:T))
+    end
     def cache_fetch(request_name, &block)
       cached = @cache[request_name]
       return cached if cached
