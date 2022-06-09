@@ -83,6 +83,14 @@ module RubyLsp
         visit(node.statement)
       end
 
+      sig { params(node: SyntaxTree::Kw).void }
+      def visit_kw(node)
+        case node.value
+        when "self"
+          add_token(node.location, :variable, [:default_library])
+        end
+      end
+
       sig { params(node: SyntaxTree::Defs).void }
       def visit_defs(node)
         visit(node.target)
@@ -112,6 +120,8 @@ module RubyLsp
         case node.value
         when SyntaxTree::Ident
           add_token(node.value.location, :variable)
+        else
+          visit(node.value)
         end
       end
 
