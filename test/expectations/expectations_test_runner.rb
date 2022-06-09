@@ -10,18 +10,18 @@ class ExpectationsTestRunner < Minitest::Test
     def expectations_tests(handler_class, expectation_suffix)
       class_eval(<<~RB)
         module ExpectationsRunnerMethods
-          def run_expectations(source, *args)
-            params = args.empty? ? default_args : args
+          def run_expectations(source)
+            params = @__params&.any? ? @__params : default_args
             document = RubyLsp::Document.new(source)
             #{handler_class}.new(document, *params).run
           end
 
           def assert_expectations(source, expected)
             expected = JSON.parse(expected)
-            params = expected["params"] || []
-            params.each { |param| param.transform_keys!(&:to_sym) if param.is_a?(Hash) }
+            @__params = expected["params"] || []
+            @__params.each { |param| param.transform_keys!(&:to_sym) if param.is_a?(Hash) }
 
-            actual = run_expectations(source, *params)
+            actual = run_expectations(source)
             assert_equal(expected["result"], JSON.parse(actual.to_json))
           end
 
@@ -87,11 +87,15 @@ class ExpectationsTestRunner < Minitest::Test
 
     begin
       # If the values are JSON we want to pretty print them
-      expected_obj = JSON.parse(expected)
+      expected_obj = { "result" => JSON.parse(expected) }
+      expected_obj["params"] = @__params if @__params
+
+      actual_obj = { "result" => JSON.parse(actual) }
+      actual_obj["params"] = @__params if @__params
+
       $stderr.puts "########## Expected ##########"
       $stderr.puts JSON.pretty_generate(expected_obj)
       $stderr.puts "##########  Actual  ##########"
-      actual_obj = JSON.parse(actual)
       $stderr.puts JSON.pretty_generate(actual_obj)
       $stderr.puts "##############################"
     rescue
