@@ -90,7 +90,7 @@ module RubyLsp
       sig { params(node: SyntaxTree::ClassDeclaration).void }
       def visit_class(node)
         symbol = create_document_symbol(
-          name: node.constant.constant.value,
+          name: fully_qualified_name(node),
           kind: :class,
           range_node: node,
           selection_range_node: node.constant
@@ -176,7 +176,7 @@ module RubyLsp
       sig { params(node: SyntaxTree::ModuleDeclaration).void }
       def visit_module(node)
         symbol = create_document_symbol(
-          name: node.constant.constant.value,
+          name: fully_qualified_name(node),
           kind: :module,
           range_node: node,
           selection_range_node: node.constant
@@ -238,6 +238,25 @@ module RubyLsp
         T.must(@stack.last).children << symbol
 
         symbol
+      end
+
+      sig { params(node: T.any(SyntaxTree::ClassDeclaration, SyntaxTree::ModuleDeclaration)).returns(String) }
+      def fully_qualified_name(node)
+        constant = T.let(node.constant, SyntaxTree::Node)
+        name = +node.constant.constant.value
+
+        while constant.is_a?(SyntaxTree::ConstPathRef)
+          constant = constant.parent
+
+          case constant
+          when SyntaxTree::ConstPathRef
+            name.prepend("#{constant.constant.value}::")
+          when SyntaxTree::VarRef
+            name.prepend("#{constant.value.value}::")
+          end
+        end
+
+        name
       end
     end
   end
