@@ -22,7 +22,7 @@ class ExpectationsTestRunner < Minitest::Test
             @__params.each { |param| param.transform_keys!(&:to_sym) if param.is_a?(Hash) }
 
             actual = run_expectations(source)
-            assert_equal(expected["result"], JSON.parse(actual.to_json))
+            assert_equal(map_result(expected["result"]), JSON.parse(actual.to_json))
           end
 
           def default_args
@@ -114,5 +114,9 @@ class ExpectationsTestRunner < Minitest::Test
     return {} if expected_json_string.empty?
 
     JSON.parse(expected_json_string)["result"]
+  end
+
+  def map_result(result)
+    result
   end
 end

@@ -1,0 +1,158 @@
+{
+    "params": {
+        "start": 3,
+        "end": 4
+    },
+    "result": [
+        {
+            "title": "Autocorrect Sorbet/TrueSigil",
+            "kind": "quickfix",
+            "isPreferred": true,
+            "edit": {
+                "documentChanges": [
+                    {
+                        "textDocument": {
+                            "uri": "file:///fake",
+                            "version": null
+                        },
+                        "edits": [
+                            {
+                                "range": {
+                                    "start": {
+                                        "line": 0,
+                                        "character": 0
+                                    },
+                                    "end": {
+                                        "line": 0,
+                                        "character": 0
+                                    }
+                                },
+                                "newText": "# typed: true\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "title": "Autocorrect Style/FrozenStringLiteralComment",
+            "kind": "quickfix",
+            "isPreferred": true,
+            "edit": {
+                "documentChanges": [
+                    {
+                        "textDocument": {
+                            "uri": "file:///fake",
+                            "version": null
+                        },
+                        "edits": [
+                            {
+                                "range": {
+                                    "start": {
+                                        "line": 0,
+                                        "character": 0
+                                    },
+                                    "end": {
+                                        "line": 0,
+                                        "character": 0
+                                    }
+                                },
+                                "newText": "# frozen_string_literal: true\n"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "title": "Autocorrect Layout/EmptyLinesAroundMethodBody",
+            "kind": "quickfix",
+            "isPreferred": true,
+            "edit": {
+                "documentChanges": [
+                    {
+                        "textDocument": {
+                            "uri": "file:///fake",
+                            "version": null
+                        },
+                        "edits": [
+                            {
+                                "range": {
+                                    "start": {
+                                        "line": 1,
+                                        "character": 0
+                                    },
+                                    "end": {
+                                        "line": 2,
+                                        "character": 0
+                                    }
+                                },
+                                "newText": ""
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "title": "Autocorrect Layout/EmptyLines",
+            "kind": "quickfix",
+            "isPreferred": true,
+            "edit": {
+                "documentChanges": [
+                    {
+                        "textDocument": {
+                            "uri": "file:///fake",
+                            "version": null
+                        },
+                        "edits": [
+                            {
+                                "range": {
+                                    "start": {
+                                        "line": 2,
+                                        "character": 0
+                                    },
+                                    "end": {
+                                        "line": 3,
+                                        "character": 0
+                                    }
+                                },
+                                "newText": ""
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "title": "Autocorrect Layout/IndentationWidth",
+            "kind": "quickfix",
+            "isPreferred": true,
+            "edit": {
+                "documentChanges": [
+                    {
+                        "textDocument": {
+                            "uri": "file:///fake",
+                            "version": null
+                        },
+                        "edits": [
+                            {
+                                "range": {
+                                    "start": {
+                                        "line": 3,
+                                        "character": 0
+                                    },
+                                    "end": {
+                                        "line": 3,
+                                        "character": 0
+                                    }
+                                },
+                                "newText": "  "
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}
