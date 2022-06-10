@@ -1,34 +1,36 @@
-[
-  {
-    "range": {
-      "start": {
-        "line": 0,
-        "character": 0
+{
+  "result": [
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 0
+        },
+        "end": {
+          "line": 0,
+          "character": 14
+        }
       },
-      "end": {
-        "line": 0,
-        "character": 14
-      }
+      "severity": 3,
+      "code": "Sorbet/TrueSigil",
+      "source": "RuboCop",
+      "message": "Sorbet/TrueSigil: Sorbet sigil should be at least `true` got `false`."
     },
-    "severity": 3,
-    "code": "Sorbet/TrueSigil",
-    "source": "RuboCop",
-    "message": "Sorbet/TrueSigil: Sorbet sigil should be at least `true` got `false`."
-  },
-  {
-    "range": {
-      "start": {
-        "line": 7,
-        "character": 4
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 4
+        },
+        "end": {
+          "line": 7,
+          "character": 6
+        }
       },
-      "end": {
-        "line": 7,
-        "character": 6
-      }
-    },
-    "severity": 3,
-    "code": "Style/IfInsideElse",
-    "source": "RuboCop",
-    "message": "Style/IfInsideElse: Convert `if` nested inside `else` to `elsif`."
-  }
-]
+      "severity": 3,
+      "code": "Style/IfInsideElse",
+      "source": "RuboCop",
+      "message": "Style/IfInsideElse: Convert `if` nested inside `else` to `elsif`."
+    }
+  ]
+}

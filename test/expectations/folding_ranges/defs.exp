@@ -1,7 +1,9 @@
-[
-  {
-    "startLine": 0,
-    "endLine": 3,
-    "kind": "region"
-  }
-]
+{
+  "result": [
+    {
+      "startLine": 0,
+      "endLine": 3,
+      "kind": "region"
+    }
+  ]
+}

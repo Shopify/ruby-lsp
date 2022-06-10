@@ -1,17 +1,19 @@
-[
-  {
-    "startLine": 0,
-    "endLine": 2,
-    "kind": "comment"
-  },
-  {
-    "startLine": 4,
-    "endLine": 6,
-    "kind": "comment"
-  },
-  {
-    "startLine": 9,
-    "endLine": 10,
-    "kind": "comment"
-  }
-]
+{
+  "result": [
+    {
+      "startLine": 0,
+      "endLine": 2,
+      "kind": "comment"
+    },
+    {
+      "startLine": 4,
+      "endLine": 6,
+      "kind": "comment"
+    },
+    {
+      "startLine": 9,
+      "endLine": 10,
+      "kind": "comment"
+    }
+  ]
+}

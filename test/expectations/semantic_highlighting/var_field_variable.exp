@@ -1,58 +1,60 @@
-[
-  {
-    "delta_line": 0,
-    "delta_start_char": 4,
-    "length": 9,
-    "token_type": 1,
-    "token_modifiers": 1
-  },
-  {
-    "delta_line": 1,
-    "delta_start_char": 2,
-    "length": 1,
-    "token_type": 0,
-    "token_modifiers": 0
-  },
-  {
-    "delta_line": 1,
-    "delta_start_char": 2,
-    "length": 1,
-    "token_type": 0,
-    "token_modifiers": 0
-  },
-  {
-    "delta_line": 1,
-    "delta_start_char": 2,
-    "length": 1,
-    "token_type": 0,
-    "token_modifiers": 0
-  },
-  {
-    "delta_line": 1,
-    "delta_start_char": 2,
-    "length": 1,
-    "token_type": 0,
-    "token_modifiers": 0
-  },
-  {
-    "delta_line": 1,
-    "delta_start_char": 2,
-    "length": 1,
-    "token_type": 0,
-    "token_modifiers": 0
-  },
-  {
-    "delta_line": 1,
-    "delta_start_char": 2,
-    "length": 1,
-    "token_type": 0,
-    "token_modifiers": 0
-  },
-  {
-    "delta_line": 0,
-    "delta_start_char": 4,
-    "length": 1,
-    "token_type": 0,
-    "token_modifiers": 0
-  }
-]
+{
+  "result": [
+    {
+      "delta_line": 0,
+      "delta_start_char": 4,
+      "length": 9,
+      "token_type": 1,
+      "token_modifiers": 1
+    },
+    {
+      "delta_line": 1,
+      "delta_start_char": 2,
+      "length": 1,
+      "token_type": 0,
+      "token_modifiers": 0
+    },
+    {
+      "delta_line": 1,
+      "delta_start_char": 2,
+      "length": 1,
+      "token_type": 0,
+      "token_modifiers": 0
+    },
+    {
+      "delta_line": 1,
+      "delta_start_char": 2,
+      "length": 1,
+      "token_type": 0,
+      "token_modifiers": 0
+    },
+    {
+      "delta_line": 1,
+      "delta_start_char": 2,
+      "length": 1,
+      "token_type": 0,
+      "token_modifiers": 0
+    },
+    {
+      "delta_line": 1,
+      "delta_start_char": 2,
+      "length": 1,
+      "token_type": 0,
+      "token_modifiers": 0
+    },
+    {
+      "delta_line": 1,
+      "delta_start_char": 2,
+      "length": 1,
+      "token_type": 0,
+      "token_modifiers": 0
+    },
+    {
+      "delta_line": 0,
+      "delta_start_char": 4,
+      "length": 1,
+      "token_type": 0,
+      "token_modifiers": 0
+    }
+  ]
+}
