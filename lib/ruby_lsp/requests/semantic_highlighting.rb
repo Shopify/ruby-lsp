@@ -144,6 +144,15 @@ module RubyLsp
         end
       end
 
+      sig { params(node: SyntaxTree::Params).void }
+      def visit_params(node)
+        node.keywords.each do |keyword,|
+          add_token(keyword.location, :variable)
+        end
+
+        add_token(node.keyword_rest.name.location, :variable) if node.keyword_rest
+      end
+
       sig { params(node: SyntaxTree::VarField).void }
       def visit_var_field(node)
         case node.value
