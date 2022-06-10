@@ -147,7 +147,20 @@ module RubyLsp
       sig { params(node: SyntaxTree::Params).void }
       def visit_params(node)
         node.keywords.each do |keyword,|
-          add_token(keyword.location, :variable)
+          location = keyword.location
+
+          # We exclude the ":" symbol from the keyword
+          # for consistency with the rest of the parameters
+          modified_location = SyntaxTree::Location.new(
+            start_line: location.start_line,
+            start_column: location.start_column,
+            start_char: location.start_char,
+            end_char: location.end_char - 1,
+            end_column: location.end_column - 1,
+            end_line: location.end_line,
+          )
+
+          add_token(modified_location, :variable)
         end
 
         add_token(node.keyword_rest.name.location, :variable) if node.keyword_rest
