@@ -3,7 +3,7 @@ PATH
   specs:
     ruby-lsp (0.0.4)
       language_server-protocol
-      rubocop (>= 1.0)
+      rubocop (>= 1.30)
       sorbet-runtime
       syntax_tree (>= 2.3)
 

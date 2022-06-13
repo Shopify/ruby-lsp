@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency("language_server-protocol")
-  s.add_dependency("rubocop", ">= 1.0")
+  s.add_dependency("rubocop", ">= 1.30")
   s.add_dependency("sorbet-runtime")
   s.add_dependency("syntax_tree", ">= 2.3")
 end
