@@ -9,7 +9,7 @@ gem "minitest", "~> 5.15"
 gem "minitest-reporters", "~> 1.5"
 gem "rake", "~> 13.0"
 gem "rubocop-shopify", "~> 2.7", require: false
-gem "rubocop-minitest", "~> 0.20.0", require: false
+gem "rubocop-minitest", "~> 0.20.1", require: false
 gem "rubocop-rake", "~> 0.6.0", require: false
 gem "rubocop-sorbet", "~> 0.6", require: false
 gem "sorbet-static-and-runtime"
