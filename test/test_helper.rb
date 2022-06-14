@@ -3,7 +3,7 @@
 
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 
-require_relative "../lib/internal"
+require_relative "../lib/ruby_lsp/internal"
 require "minitest/autorun"
 require "minitest/reporters"
 require "tempfile"
