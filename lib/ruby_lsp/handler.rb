@@ -28,9 +28,7 @@ module RubyLsp
     sig { void }
     def start
       $stderr.puts "Starting Ruby LSP..."
-      @reader.read do |request|
-        with_telemetry(request) { handle(request) }
-      end
+      @reader.read { |request| handle(request) }
     end
 
     sig { params(blk: T.proc.bind(Handler).params(arg0: T.untyped).void).void }
@@ -50,29 +48,25 @@ module RubyLsp
       @handlers[msg] = blk
     end
 
-    sig do
-      params(
-        request: T::Hash[Symbol, T.untyped]
-      ).returns(
-        T::Array[T.any(T.untyped, T.nilable(StandardError))]
-      )
-    end
+    sig { params(request: T::Hash[Symbol, T.untyped]).void }
     def handle(request)
       result = T.let(nil, T.untyped)
       error = T.let(nil, T.nilable(StandardError))
       handler = @handlers[request[:method]]
 
-      if handler
-        begin
-          result = handler.call(request)
-        rescue StandardError => e
-          error = e
-        end
+      request_time = Benchmark.realtime do
+        if handler
+          begin
+            result = handler.call(request)
+          rescue StandardError => e
+            error = e
+          end
 
-        @writer.write(id: request[:id], result: result) unless result == VOID
+          @writer.write(id: request[:id], result: result) unless result == VOID
+        end
       end
 
-      [result, error]
+      @writer.write(method: "telemetry/event", params: telemetry_params(request, request_time, error))
     end
 
     sig { void }
@@ -210,25 +204,6 @@ module RubyLsp
     end
     def respond_with_document_highlight(uri, position)
       Requests::DocumentHighlight.new(store.get(uri), position).run
-    end
-
-    sig do
-      type_parameters(:T)
-        .params(
-          request: T::Hash[Symbol, T.untyped],
-          block: T.proc.returns(T.type_parameter(:T))
-        ).returns(T.type_parameter(:T))
-    end
-    def with_telemetry(request, &block)
-      result = T.let(nil, T.untyped)
-      error = T.let(nil, T.nilable(StandardError))
-
-      request_time = Benchmark.realtime do
-        result, error = block.call
-      end
-
-      @writer.write(method: "telemetry/event", params: telemetry_params(request, request_time, error))
-      result
     end
 
     sig do
