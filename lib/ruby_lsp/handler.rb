@@ -50,13 +50,29 @@ module RubyLsp
       @handlers[msg] = blk
     end
 
-    sig { params(request: T::Hash[Symbol, T.untyped]).void }
+    sig do
+      params(
+        request: T::Hash[Symbol, T.untyped]
+      ).returns(
+        T::Array[T.any(T.untyped, T.nilable(StandardError))]
+      )
+    end
     def handle(request)
+      result = T.let(nil, T.untyped)
+      error = T.let(nil, T.nilable(StandardError))
       handler = @handlers[request[:method]]
-      return unless handler
 
-      result = handler.call(request)
-      @writer.write(id: request[:id], result: result) unless result == VOID
+      if handler
+        begin
+          result = handler.call(request)
+        rescue StandardError => e
+          error = e
+        end
+
+        @writer.write(id: request[:id], result: result) unless result == VOID
+      end
+
+      [result, error]
     end
 
     sig { void }
@@ -208,9 +224,7 @@ module RubyLsp
       error = T.let(nil, T.nilable(StandardError))
 
       request_time = Benchmark.realtime do
-        result = block.call
-      rescue StandardError => e
-        error = e
+        result, error = block.call
       end
 
       @writer.write(method: "telemetry/event", params: telemetry_params(request, request_time, error))
