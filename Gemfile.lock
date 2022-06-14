@@ -5,7 +5,7 @@ PATH
       language_server-protocol
       rubocop (>= 1.0)
       sorbet-runtime
-      syntax_tree (>= 2.3)
+      syntax_tree (>= 2.4)
 
 GEM
   remote: https://rubygems.org/
