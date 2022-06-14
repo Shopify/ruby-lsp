@@ -18,6 +18,6 @@ rescue
   nil
 end
 
-require_relative "../lib/internal"
+require_relative "../lib/ruby_lsp/internal"
 
 RubyLsp::Cli.start
