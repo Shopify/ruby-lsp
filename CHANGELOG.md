@@ -6,6 +6,16 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.1.0]
+
+- Implement token modifiers in SemanticTokenEncoder ([#112](https://github.com/Shopify/ruby-lsp/pull/112))
+- Add semantic token for name in a method definition ([#133](https://github.com/Shopify/ruby-lsp/pull/133))
+- Add semantic highighting for def endless and singleton method names ([#134](https://github.com/Shopify/ruby-lsp/pull/134))
+- Add semantic token for keyword self ([#137](https://github.com/Shopify/ruby-lsp/pull/137))
+- Add semantic token for constants ([#138](https://github.com/Shopify/ruby-lsp/pull/138))
+- Improve error handling + fix formatting hanging issue ([#149](https://github.com/Shopify/ruby-lsp/pull/149))
+- Set the minimum syntax_tree version to 2.4 ([#151](https://github.com/Shopify/ruby-lsp/pull/151))
+
 ## [0.0.4]
 
 - Add basic document highlight (https://github.com/Shopify/ruby-lsp/pull/91)
