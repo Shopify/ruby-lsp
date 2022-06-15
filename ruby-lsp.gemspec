@@ -7,8 +7,8 @@ Gem::Specification.new do |s|
   s.email = ["ruby@shopify.com"]
   s.metadata["allowed_push_host"] = "https://rubygems.org"
 
-  s.summary = "A simple language server for ruby"
-  s.description = "A simple language server for ruby"
+  s.summary = "An opinionated language server for Ruby"
+  s.description = "An opinionated language server for Ruby"
   s.homepage = "https://github.com/Shopify/ruby-lsp"
   s.license = "MIT"
 
