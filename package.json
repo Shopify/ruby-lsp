@@ -124,7 +124,7 @@
     "eslint-import-resolver-typescript": "^2.7.1",
     "glob": "^8.0.3",
     "mocha": "^10.0.0",
-    "prettier": "^2.6.2",
+    "prettier": "^2.7.0",
     "typescript": "^4.7.3",
     "vsce": "^2.9.1"
   },
