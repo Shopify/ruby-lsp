@@ -144,6 +144,16 @@ module RubyLsp
         end
       end
 
+      sig { params(node: SyntaxTree::Params).void }
+      def visit_params(node)
+        node.keywords.each do |keyword,|
+          location = keyword.location
+          add_token(location_without_colon(location), :variable)
+        end
+
+        add_token(node.keyword_rest.name.location, :variable) if node.keyword_rest
+      end
+
       sig { params(node: SyntaxTree::VarField).void }
       def visit_var_field(node)
         case node.value
@@ -180,6 +190,23 @@ module RubyLsp
             type: T.must(TOKEN_TYPES.index(type)),
             modifier: modifiers_indices
           )
+        )
+      end
+
+      private
+
+      # Exclude the ":" symbol at the end of a location
+      # We use it on keyword parameters to be consistent
+      # with the rest of the parameters
+      sig { params(location: T.untyped).returns(SyntaxTree::Location) }
+      def location_without_colon(location)
+        SyntaxTree::Location.new(
+          start_line: location.start_line,
+          start_column: location.start_column,
+          start_char: location.start_char,
+          end_char: location.end_char - 1,
+          end_column: location.end_column - 1,
+          end_line: location.end_line,
         )
       end
     end
