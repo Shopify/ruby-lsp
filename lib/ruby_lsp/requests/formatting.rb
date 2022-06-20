@@ -17,7 +17,7 @@ module RubyLsp
     class Formatting < RuboCopRequest
       extend T::Sig
 
-      RUBOCOP_FLAGS = T.let((COMMON_RUBOCOP_FLAGS + ["--auto-correct"]).freeze, T::Array[String])
+      RUBOCOP_FLAGS = T.let((COMMON_RUBOCOP_FLAGS + ["--autocorrect"]).freeze, T::Array[String])
 
       sig { params(uri: String, document: Document).void }
       def initialize(uri, document)
