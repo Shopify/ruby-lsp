@@ -129,6 +129,16 @@ module RubyLsp
         visit(node.arguments)
       end
 
+      sig { params(node: SyntaxTree::HeredocBeg).void }
+      def visit_heredoc_beg(node)
+        add_token(node.location, :variable, [:default_library])
+      end
+
+      sig { params(node: SyntaxTree::HeredocEnd).void }
+      def visit_heredoc_end(node)
+        add_token(node.location, :variable, [:default_library])
+      end
+
       sig { params(node: SyntaxTree::Kw).void }
       def visit_kw(node)
         case node.value
