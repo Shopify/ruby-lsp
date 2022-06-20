@@ -23,7 +23,7 @@ GEM
       reline (>= 0.3.0)
     language_server-protocol (3.16.0.3)
     method_source (1.0.0)
-    minitest (5.15.0)
+    minitest (5.16.0)
     minitest-reporters (1.5.0)
       ansi
       builder
@@ -108,7 +108,7 @@ PLATFORMS
 
 DEPENDENCIES
   debug (~> 1.5)
-  minitest (~> 5.15)
+  minitest (~> 5.16)
   minitest-reporters (~> 1.5)
   rake (~> 13.0)
   rubocop-minitest (~> 0.20.1)
