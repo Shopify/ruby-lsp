@@ -113,20 +113,20 @@ module RubyLsp
       sig { params(node: SyntaxTree::Call).void }
       def visit_call(node)
         visit(node.receiver)
-        add_token(node.message.location, :method)
+        add_token(node.message.location, :method) unless special_method?(node.message.value)
         visit(node.arguments)
       end
 
       sig { params(node: SyntaxTree::Command).void }
       def visit_command(node)
-        add_token(node.message.location, :method)
+        add_token(node.message.location, :method) unless special_method?(node.message.value)
         visit(node.arguments)
       end
 
       sig { params(node: SyntaxTree::CommandCall).void }
       def visit_command_call(node)
         visit(node.receiver)
-        add_token(node.message.location, :method)
+        add_token(node.message.location, :method) unless special_method?(node.message.value)
         visit(node.arguments)
       end
 
@@ -161,7 +161,7 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::FCall).void }
       def visit_fcall(node)
-        add_token(node.value.location, :method)
+        add_token(node.value.location, :method) unless special_method?(node.value.value)
         visit(node.arguments)
       end
 
@@ -212,7 +212,7 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::VCall).void }
       def visit_vcall(node)
-        add_token(node.value.location, :method)
+        add_token(node.value.location, :method) unless special_method?(node.value.value)
       end
 
       sig { params(location: SyntaxTree::Location, type: Symbol, modifiers: T::Array[Symbol]).void }
