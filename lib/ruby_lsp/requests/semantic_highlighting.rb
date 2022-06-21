@@ -245,6 +245,15 @@ module RubyLsp
           end_line: location.end_line,
         )
       end
+
+      # Textmate provides special highlighting for
+      # these special Ruby-specific methods.
+      # We want to utilize that highlighting, so we
+      # avoid making a semantic token for it.
+      sig { params(method_name: String).returns(T::Boolean) }
+      def special_method?(method_name)
+        SPECIAL_RUBY_METHODS.include?(method_name) || SPECIAL_GEMFILE_METHODS.include?(method_name)
+      end
     end
   end
 end
