@@ -38,6 +38,42 @@ module RubyLsp
         default_library: 9,
       }.freeze, T::Hash[Symbol, Integer])
 
+      SPECIAL_RUBY_METHODS = T.let([
+        "attr_accessor",
+        "attr_reader",
+        "attr_writer",
+        "attr",
+        "catch",
+        "extend",
+        "fail",
+        "include",
+        "initialize",
+        "loop",
+        "module_function",
+        "new",
+        "prepend",
+        "private_class_method",
+        "private",
+        "protected",
+        "public_class_method",
+        "public",
+        "raise",
+        "refine",
+        "require_relative",
+        "require",
+        "throw",
+        "using",
+      ].freeze, T::Array[String])
+
+      SPECIAL_GEMFILE_METHODS = T.let([
+        "gem",
+        "git",
+        "group",
+        "platforms",
+        "ruby",
+        "source",
+      ].freeze, T::Array[String])
+
       class SemanticToken < T::Struct
         const :location, SyntaxTree::Location
         const :length, Integer
