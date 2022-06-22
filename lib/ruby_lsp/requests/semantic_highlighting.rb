@@ -1,6 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "set"
+
 module RubyLsp
   module Requests
     # The [semantic
@@ -38,7 +40,7 @@ module RubyLsp
         default_library: 9,
       }.freeze, T::Hash[Symbol, Integer])
 
-      SPECIAL_RUBY_METHODS = T.let([
+      SPECIAL_RUBY_METHODS = T.let(Set[
         "attr_accessor",
         "attr_reader",
         "attr_writer",
@@ -63,16 +65,16 @@ module RubyLsp
         "require",
         "throw",
         "using",
-      ].freeze, T::Array[String])
+      ].freeze, T::Set[String])
 
-      SPECIAL_GEMFILE_METHODS = T.let([
+      SPECIAL_GEMFILE_METHODS = T.let(Set[
         "gem",
         "git",
         "group",
         "platforms",
         "ruby",
         "source",
-      ].freeze, T::Array[String])
+      ].freeze, T::Set[String])
 
       class SemanticToken < T::Struct
         const :location, SyntaxTree::Location
