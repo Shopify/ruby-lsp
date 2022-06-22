@@ -48,11 +48,15 @@ module RubyLsp
         "catch",
         "extend",
         "fail",
+        "gem",
+        "git",
+        "group",
         "include",
         "initialize",
         "loop",
         "module_function",
         "new",
+        "platforms",
         "prepend",
         "private_class_method",
         "private",
@@ -63,17 +67,10 @@ module RubyLsp
         "refine",
         "require_relative",
         "require",
-        "throw",
-        "using",
-      ].freeze, T::Set[String])
-
-      SPECIAL_GEMFILE_METHODS = T.let(Set[
-        "gem",
-        "git",
-        "group",
-        "platforms",
         "ruby",
         "source",
+        "throw",
+        "using",
       ].freeze, T::Set[String])
 
       class SemanticToken < T::Struct
@@ -254,7 +251,7 @@ module RubyLsp
       # avoid making a semantic token for it.
       sig { params(method_name: String).returns(T::Boolean) }
       def special_method?(method_name)
-        SPECIAL_RUBY_METHODS.include?(method_name) || SPECIAL_GEMFILE_METHODS.include?(method_name)
+        SPECIAL_RUBY_METHODS.include?(method_name)
       end
     end
   end
