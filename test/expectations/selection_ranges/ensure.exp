@@ -1,0 +1,58 @@
+{
+    "params": [
+        {
+            "line": 3,
+            "character": 4
+        }
+    ],
+    "result": [
+        {
+            "range": {
+                "start": {
+                    "line": 3,
+                    "character": 2
+                },
+                "end": {
+                    "line": 3,
+                    "character": 6
+                }
+            },
+            "parent": {
+                "range": {
+                    "start": {
+                        "line": 3,
+                        "character": 2
+                    },
+                    "end": {
+                        "line": 3,
+                        "character": 15
+                    }
+                },
+                "parent": {
+                    "range": {
+                        "start": {
+                            "line": 2,
+                            "character": 0
+                        },
+                        "end": {
+                            "line": 4,
+                            "character": 3
+                        }
+                    },
+                    "parent": {
+                        "range": {
+                            "start": {
+                                "line": 0,
+                                "character": 0
+                            },
+                            "end": {
+                                "line": 4,
+                                "character": 3
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
