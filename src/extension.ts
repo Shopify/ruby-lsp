@@ -26,8 +26,8 @@ function activateRuby() {
   vscode.extensions.getExtension("shopify.vscode-shadowenv")?.activate();
 }
 
-export async function deactivate() {
+export async function deactivate(): Promise<void> {
   if (client) {
-    await client.stop();
+    return client.stop();
   }
 }

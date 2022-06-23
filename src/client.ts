@@ -79,13 +79,12 @@ export default class Client {
     );
 
     this.client.onTelemetry(this.telemetry.sendEvent.bind(this.telemetry));
-    this.context.subscriptions.push(this.client.start());
-    await this.client.onReady();
+    await this.client.start();
   }
 
-  async stop() {
+  async stop(): Promise<void> {
     if (this.client) {
-      await this.client.stop();
+      return this.client.stop();
     }
   }
 
