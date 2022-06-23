@@ -23,9 +23,14 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     T.must(result).map(&:to_lsp_diagnostic).to_json
   end
 
+  def assert_expectations(source, expected)
+    actual = run_expectations(source)
+    assert_equal(map_diagnostics(json_expectations(expected)), JSON.parse(actual.to_json))
+  end
+
   private
 
-  def map_result(diagnostics)
+  def map_diagnostics(diagnostics)
     diagnostics.map do |diagnostic|
       LanguageServer::Protocol::Interface::Diagnostic.new(
         message: diagnostic["message"],

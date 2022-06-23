@@ -33,13 +33,18 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
     result
   end
 
+  def assert_expectations(source, expected)
+    actual = run_expectations(source)
+    assert_equal(map_actions(json_expectations(expected)), JSON.parse(actual.to_json))
+  end
+
   private
 
   def default_args
     { start: 0, end: 1 }
   end
 
-  def map_result(diagnostics)
+  def map_actions(diagnostics)
     response = diagnostics.map do |diagnostic|
       LanguageServer::Protocol::Interface::CodeAction.new(
         title: diagnostic["title"],
