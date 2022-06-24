@@ -2,6 +2,16 @@
 # frozen_string_literal: true
 
 module RubyLsp
+  # Supported features
+  #
+  # - {RubyLsp::Requests::DocumentSymbol}
+  # - {RubyLsp::Requests::FoldingRanges}
+  # - {RubyLsp::Requests::SelectionRanges}
+  # - {RubyLsp::Requests::SemanticHighlighting}
+  # - {RubyLsp::Requests::Formatting}
+  # - {RubyLsp::Requests::Diagnostics}
+  # - {RubyLsp::Requests::CodeActions}
+  # - {RubyLsp::Requests::DocumentHighlight}
   module Requests
     autoload :BaseRequest, "ruby_lsp/requests/base_request"
     autoload :DocumentSymbol, "ruby_lsp/requests/document_symbol"
@@ -14,6 +24,7 @@ module RubyLsp
     autoload :CodeActions, "ruby_lsp/requests/code_actions"
     autoload :DocumentHighlight, "ruby_lsp/requests/document_highlight"
 
+    # :nodoc:
     module Support
       autoload :RuboCopDiagnostic, "ruby_lsp/requests/support/rubocop_diagnostic"
       autoload :SelectionRange, "ruby_lsp/requests/support/selection_range"
