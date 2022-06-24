@@ -3,17 +3,11 @@
 
 module RubyLsp
   module Requests
+    # ![Diagnostics demo](../../misc/diagnostics.gif)
+    #
     # The
     # [diagnostics](https://microsoft.github.io/language-server-protocol/specification#textDocument_publishDiagnostics)
     # request informs the editor of RuboCop offenses for a given file.
-    #
-    # # Example
-    #
-    # ```ruby
-    # def say_hello
-    # puts "Hello" # --> diagnostics: incorrect indentantion
-    # end
-    # ```
     class Diagnostics < RuboCopRequest
       extend T::Sig
 

@@ -3,15 +3,10 @@
 
 module RubyLsp
   module Requests
-    # The [folding ranges](https://microsoft.github.io/language-server-protocol/specification#textDocument_foldingRange)
-    # request informs the editor of the ranges where code can be folded.
+    # ![Folding ranges demo](../../misc/folding_ranges.gif)
     #
-    # # Example
-    # ```ruby
-    # def say_hello # <-- folding range start
-    #   puts "Hello"
-    # end # <-- folding range end
-    # ```
+    # The [folding ranges](https://microsoft.github.io/language-server-protocol/specification#textDocument_foldingRange)
+    # request informs the editor of the ranges where and how code can be folded.
     class FoldingRanges < BaseRequest
       extend T::Sig
 

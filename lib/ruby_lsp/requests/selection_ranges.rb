@@ -3,19 +3,13 @@
 
 module RubyLsp
   module Requests
+    # ![Selection ranges demo](../../misc/selection_ranges.gif)
+    #
     # The [selection ranges](https://microsoft.github.io/language-server-protocol/specification#textDocument_selectionRange)
     # request informs the editor of ranges that the user may want to select based on the location(s)
     # of their cursor(s).
     #
     # Trigger this request with: Ctrl + Shift + -> or Ctrl + Shift + <-
-    #
-    # # Example
-    #
-    # ```ruby
-    # def foo # --> The next selection range encompasses the entire method definition.
-    #   puts "Hello, world!" # --> Cursor is on this line
-    # end
-    # ```
     class SelectionRanges < BaseRequest
       extend T::Sig
 
