@@ -23,14 +23,7 @@
     },
     {
       "delta_line": 1,
-      "delta_start_char": 2,
-      "length": 4,
-      "token_type": 1,
-      "token_modifiers": 0
-    },
-    {
-      "delta_line": 0,
-      "delta_start_char": 5,
+      "delta_start_char": 7,
       "length": 1,
       "token_type": 0,
       "token_modifiers": 0

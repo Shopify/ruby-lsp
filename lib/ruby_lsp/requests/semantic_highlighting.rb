@@ -40,39 +40,6 @@ module RubyLsp
         default_library: 9,
       }.freeze, T::Hash[Symbol, Integer])
 
-      SPECIAL_RUBY_METHODS = T.let(Set[
-        "attr_accessor",
-        "attr_reader",
-        "attr_writer",
-        "attr",
-        "catch",
-        "extend",
-        "fail",
-        "gem",
-        "git",
-        "group",
-        "include",
-        "initialize",
-        "loop",
-        "module_function",
-        "new",
-        "platforms",
-        "prepend",
-        "private_class_method",
-        "private",
-        "protected",
-        "public_class_method",
-        "public",
-        "raise",
-        "refine",
-        "require_relative",
-        "require",
-        "ruby",
-        "source",
-        "throw",
-        "using",
-      ].freeze, T::Set[String])
-
       class SemanticToken < T::Struct
         const :location, SyntaxTree::Location
         const :length, Integer
@@ -87,6 +54,7 @@ module RubyLsp
         @encoder = encoder
         @tokens = T.let([], T::Array[SemanticToken])
         @tree = T.let(document.tree, SyntaxTree::Node)
+        @special_methods = T.let(nil, T.nilable(T::Array[String]))
       end
 
       sig do
@@ -112,7 +80,7 @@ module RubyLsp
       sig { params(node: SyntaxTree::Call).void }
       def visit_call(node)
         visit(node.receiver)
-        add_token(node.message.location, :method) unless special_method?(node.message.value)
+        add_token(node.message.location, :method)
         visit(node.arguments)
       end
 
@@ -125,7 +93,7 @@ module RubyLsp
       sig { params(node: SyntaxTree::CommandCall).void }
       def visit_command_call(node)
         visit(node.receiver)
-        add_token(node.message.location, :method) unless special_method?(node.message.value)
+        add_token(node.message.location, :method)
         visit(node.arguments)
       end
 
@@ -245,13 +213,21 @@ module RubyLsp
         )
       end
 
-      # Textmate provides special highlighting for
-      # these special Ruby-specific methods.
+      # Textmate provides highlighting for a subset
+      # of these special Ruby-specific methods.
       # We want to utilize that highlighting, so we
       # avoid making a semantic token for it.
       sig { params(method_name: String).returns(T::Boolean) }
       def special_method?(method_name)
-        SPECIAL_RUBY_METHODS.include?(method_name)
+        special_methods.include?(method_name)
+      end
+
+      sig { returns(T::Array[String]) }
+      def special_methods
+        @special_methods ||= (Module.instance_methods(false) +
+          Kernel.methods(false) + Bundler::Dsl.instance_methods(false) +
+          Module.private_instance_methods(false))
+          .map(&:to_s)
       end
     end
   end

@@ -5,9 +5,11 @@ require "foo"
 
 class Bar
   include Baz
-  attr_accessor(:bar)
-  Kernel.extend Boz
-  Kernel.include(Biz)
+
+  attr_accessor :bar, :baz
+
+  extend Boz
+
   protected
 
   def foo
