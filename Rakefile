@@ -11,7 +11,14 @@ Rake::TestTask.new(:test) do |t|
 end
 
 YARD::Rake::YardocTask.new do |t|
-  t.options = ["--markup", "markdown", "--output-dir", "docs"]
+  t.options = [
+    "--markup",
+    "markdown",
+    "--output-dir",
+    "docs",
+    "--asset",
+    "misc",
+  ]
 end
 
 require "rubocop/rake_task"
