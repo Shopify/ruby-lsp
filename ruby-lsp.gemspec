@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.license = "MIT"
 
   s.files = Dir.chdir(File.expand_path(__dir__)) do
-    %x(git ls-files -z).split("\x0").reject { |f| f.match(%r{\A(?:test|spec|features)/}) }
+    %x(git ls-files -z).split("\x0").reject { |f| f.match(%r{\A(?:test|spec|features|misc)/}) }
   end
   s.bindir = "exe"
   s.executables = s.files.grep(/\Aexe/) { |f| File.basename(f) }
