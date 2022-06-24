@@ -10,7 +10,10 @@ task :check_docs do
   require "ruby_lsp/requests/base_request"
   require "ruby_lsp/requests/rubocop_request"
 
-  Dir["#{Dir.pwd}/lib/ruby_lsp/requests/*.rb"].each do |file|
+  request_doc_files = Dir["#{Dir.pwd}/lib/ruby_lsp/requests/*.rb"]
+  request_doc_files << "#{Dir.pwd}/lib/ruby_lsp/requests.rb"
+
+  request_doc_files.each do |file|
     require(file)
     YARD.parse(file, [], Logger::Severity::FATAL)
   end
@@ -41,6 +44,13 @@ task :check_docs do
         See the misc/ folder for examples.
       MESSAGE
     end
+
+    supported_features = YARD::Registry.at("RubyLsp::Requests").docstring
+    next if /- {#{full_name}}/.match?(supported_features)
+
+    errors[full_name] << <<~MESSAGE
+      Documentation for request handler class must be listed in the RubyLsp::Requests module documentation.
+    MESSAGE
   end
 
   formatted_errors = error_messages.map { |name, errors| "#{name}: #{errors.join(", ")}" }
