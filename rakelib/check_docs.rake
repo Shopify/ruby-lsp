@@ -32,13 +32,13 @@ task :check_docs do
         For example, if your request handles text document hover, you should add a link to
         https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_hover.
       MESSAGE
-    elsif !/# Example/.match?(docs)
+    elsif !%r{!\[.* demo\]\(\.\./\.\./misc/.*\.gif\)}.match?(docs)
       errors[full_name] << <<~MESSAGE
-        Documentation for request handler class must contain an example.
+        Documentation for request handler class must contain a demonstration GIF, in the following format:
 
-        = Example
-            def my_method # <-- something happens here
-            end
+        ![Request name demo](../../misc/request_name.gif)
+
+        See the misc/ folder for examples.
       MESSAGE
     end
   end
