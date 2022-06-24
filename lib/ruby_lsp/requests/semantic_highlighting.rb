@@ -40,6 +40,11 @@ module RubyLsp
         default_library: 9,
       }.freeze, T::Hash[Symbol, Integer])
 
+      SPECIAL_RUBY_METHODS = T.let((Module.instance_methods(false) +
+        Kernel.methods(false) + Bundler::Dsl.instance_methods(false) +
+        Module.private_instance_methods(false))
+        .map(&:to_s), T::Array[String])
+
       class SemanticToken < T::Struct
         const :location, SyntaxTree::Location
         const :length, Integer
@@ -219,15 +224,7 @@ module RubyLsp
       # avoid making a semantic token for it.
       sig { params(method_name: String).returns(T::Boolean) }
       def special_method?(method_name)
-        special_methods.include?(method_name)
-      end
-
-      sig { returns(T::Array[String]) }
-      def special_methods
-        @special_methods ||= (Module.instance_methods(false) +
-          Kernel.methods(false) + Bundler::Dsl.instance_methods(false) +
-          Module.private_instance_methods(false))
-          .map(&:to_s)
+        SPECIAL_RUBY_METHODS.include?(method_name)
       end
     end
   end
