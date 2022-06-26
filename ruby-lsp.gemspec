@@ -23,4 +23,6 @@ Gem::Specification.new do |s|
   s.add_dependency("rubocop", ">= 1.0")
   s.add_dependency("sorbet-runtime")
   s.add_dependency("syntax_tree", ">= 2.4")
+
+  s.required_ruby_version = ">= 2.7.3"
 end
