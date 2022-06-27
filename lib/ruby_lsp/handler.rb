@@ -236,7 +236,7 @@ module RubyLsp
         params[:errorMessage] = error.message
       end
 
-      params[:uri] = uri if uri
+      params[:uri] = uri.sub(%r{.*://#{Dir.home}}, "~") if uri
       params
     end
   end
