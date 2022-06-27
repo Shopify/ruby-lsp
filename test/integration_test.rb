@@ -207,8 +207,9 @@ class IntegrationTest < Minitest::Test
 
   def assert_telemetry(request)
     telemetry_response = read_response("telemetry/event")
+    expected_uri = __FILE__.sub(Dir.home, "~")
 
-    assert_equal("file://#{__FILE__}", telemetry_response.dig(:params, :uri))
+    assert_equal(expected_uri, telemetry_response.dig(:params, :uri))
     assert_equal(RubyLsp::VERSION, telemetry_response.dig(:params, :lspVersion))
     assert_equal(request, telemetry_response.dig(:params, :request))
     assert_in_delta(0.5, telemetry_response.dig(:params, :requestTime), 2)
