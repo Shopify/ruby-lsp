@@ -62,7 +62,16 @@ module RubyLsp
             error = e
           end
 
-          @writer.write(id: request[:id], result: result) unless result == VOID
+          if error
+            @writer.write(
+              {
+                id: request[:id],
+                error: { code: Constant::ErrorCodes::INTERNAL_ERROR, message: error.inspect, data: request.to_json },
+              }
+            )
+          elsif result != VOID
+            @writer.write(id: request[:id], result: result)
+          end
         end
       end
 
