@@ -38,6 +38,11 @@ module RubyLsp
         default_library: 9,
       }.freeze, T::Hash[Symbol, Integer])
 
+      SPECIAL_RUBY_METHODS = T.let((Module.instance_methods(false) +
+        Kernel.methods(false) + Bundler::Dsl.instance_methods(false) +
+        Module.private_instance_methods(false))
+        .map(&:to_s), T::Array[String])
+
       class SemanticToken < T::Struct
         const :location, SyntaxTree::Location
         const :length, Integer
@@ -52,6 +57,7 @@ module RubyLsp
         @encoder = encoder
         @tokens = T.let([], T::Array[SemanticToken])
         @tree = T.let(document.tree, SyntaxTree::Node)
+        @special_methods = T.let(nil, T.nilable(T::Array[String]))
       end
 
       sig do
@@ -83,7 +89,7 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::Command).void }
       def visit_command(node)
-        add_token(node.message.location, :method)
+        add_token(node.message.location, :method) unless special_method?(node.message.value)
         visit(node.arguments)
       end
 
@@ -125,7 +131,7 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::FCall).void }
       def visit_fcall(node)
-        add_token(node.value.location, :method)
+        add_token(node.value.location, :method) unless special_method?(node.value.value)
         visit(node.arguments)
       end
 
@@ -176,7 +182,7 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::VCall).void }
       def visit_vcall(node)
-        add_token(node.value.location, :method)
+        add_token(node.value.location, :method) unless special_method?(node.value.value)
       end
 
       sig { params(location: SyntaxTree::Location, type: Symbol, modifiers: T::Array[Symbol]).void }
@@ -208,6 +214,15 @@ module RubyLsp
           end_column: location.end_column - 1,
           end_line: location.end_line,
         )
+      end
+
+      # Textmate provides highlighting for a subset
+      # of these special Ruby-specific methods.
+      # We want to utilize that highlighting, so we
+      # avoid making a semantic token for it.
+      sig { params(method_name: String).returns(T::Boolean) }
+      def special_method?(method_name)
+        SPECIAL_RUBY_METHODS.include?(method_name)
       end
     end
   end
