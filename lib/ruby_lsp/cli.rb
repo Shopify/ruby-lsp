@@ -41,6 +41,7 @@ module RubyLsp
         on("textDocument/didClose") do |request|
           uri = request.dig(:params, :textDocument, :uri)
           store.delete(uri)
+          clear_diagnostics(uri)
 
           RubyLsp::Handler::VOID
         end

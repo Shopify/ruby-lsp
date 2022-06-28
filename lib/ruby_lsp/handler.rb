@@ -196,6 +196,14 @@ module RubyLsp
       )
     end
 
+    sig { params(uri: String).void }
+    def clear_diagnostics(uri)
+      @writer.write(
+        method: "textDocument/publishDiagnostics",
+        params: Interface::PublishDiagnosticsParams.new(uri: uri, diagnostics: [])
+      )
+    end
+
     sig do
       params(uri: String, range: T::Range[Integer]).returns(T::Array[LanguageServer::Protocol::Interface::CodeAction])
     end
