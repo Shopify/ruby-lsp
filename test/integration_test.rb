@@ -115,7 +115,14 @@ class IntegrationTest < Minitest::Test
   def test_document_did_close
     initialize_lsp([])
     open_file_with("class Foo\nend")
+
+    read_response("textDocument/publishDiagnostics")
+    assert_telemetry("textDocument/didOpen")
+
     assert(send_request("textDocument/didClose", { textDocument: { uri: "file://#{__FILE__}" } }))
+
+    diagnostics = read_response("textDocument/publishDiagnostics")
+    assert_empty(diagnostics.dig(:params, :diagnostics), "Did not clear diagnostics after closing file")
   end
 
   def test_document_did_change
