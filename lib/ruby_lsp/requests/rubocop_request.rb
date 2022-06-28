@@ -15,6 +15,7 @@ module RubyLsp
 
       COMMON_RUBOCOP_FLAGS = T.let([
         "--stderr", # Print any output to stderr so that our stdout does not get polluted
+        "--force-exclusion",
         "--format",
         "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
       ].freeze, T::Array[String])
