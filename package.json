@@ -108,6 +108,11 @@
     "lint": "eslint '**/*.ts' && prettier '**/*.{json,md,yaml,yml}' --check",
     "test": "node ./out/test/runTest.js"
   },
+  "resolutions": {
+    "node-fetch": ">= 2.6.7",
+    "cross-fetch": ">= 3.1.5",
+    "ws": ">= 7.4.6"
+  },
   "devDependencies": {
     "@babel/core": "^7.18.6",
     "@shopify/eslint-plugin": "^41.3.1",
