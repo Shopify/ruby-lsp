@@ -8,6 +8,14 @@ module RubyLsp
     # The [formatting](https://microsoft.github.io/language-server-protocol/specification#textDocument_formatting)
     # request uses RuboCop to fix auto-correctable offenses in the document. This requires enabling format on save and
     # registering the ruby-lsp as the Ruby formatter.
+    #
+    # # Example
+    #
+    # ```ruby
+    # def say_hello
+    # puts "Hello" # --> formatting: fixes the indentation on save
+    # end
+    # ```
     class Formatting < RuboCopRequest
       extend T::Sig
 

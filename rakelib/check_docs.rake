@@ -43,6 +43,17 @@ task :check_docs do
 
         See the misc/ folder for examples.
       MESSAGE
+    elsif !/# Example/.match?(docs)
+      errors[full_name] << <<~MESSAGE
+        Documentation for request handler class must contain an example.
+
+        # # Example
+        #
+        # ```ruby
+        # def my_method # <-- something happens here
+        # end
+        # ```
+      MESSAGE
     end
 
     supported_features = YARD::Registry.at("RubyLsp::Requests").docstring

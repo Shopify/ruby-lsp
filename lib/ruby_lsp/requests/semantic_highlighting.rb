@@ -8,6 +8,16 @@ module RubyLsp
     # The [semantic
     # highlighting](https://microsoft.github.io/language-server-protocol/specification#textDocument_semanticTokens)
     # request informs the editor of the correct token types to provide consistent and accurate highlighting for themes.
+    #
+    # # Example
+    #
+    # ```ruby
+    # def foo
+    #   var = 1 # --> semantic highlighting: local variable
+    #   some_invocation # --> semantic highlighting: method invocation
+    #   var # --> semantic highlighting: local variable
+    # end
+    # ```
     class SemanticHighlighting < BaseRequest
       extend T::Sig
 

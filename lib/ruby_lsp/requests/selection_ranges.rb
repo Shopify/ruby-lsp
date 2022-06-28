@@ -10,6 +10,14 @@ module RubyLsp
     # of their cursor(s).
     #
     # Trigger this request with: Ctrl + Shift + -> or Ctrl + Shift + <-
+    #
+    # # Example
+    #
+    # ```ruby
+    # def foo # --> The next selection range encompasses the entire method definition.
+    #   puts "Hello, world!" # --> Cursor is on this line
+    # end
+    # ```
     class SelectionRanges < BaseRequest
       extend T::Sig
 

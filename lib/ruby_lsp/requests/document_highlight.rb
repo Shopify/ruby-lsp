@@ -12,6 +12,16 @@ module RubyLsp
     #
     # For writable elements like constants or variables, their read/write occurrences should be highlighted differently.
     # This is achieved by sending different "kind" attributes to the editor (2 for read and 3 for write).
+    #
+    # # Example
+    #
+    # ```ruby
+    # FOO = 1 # should be highlighted as "write"
+    #
+    # def foo
+    #   FOO # should be highlighted as "read"
+    # end
+    # ```
     class DocumentHighlight < BaseRequest
       extend T::Sig
 
