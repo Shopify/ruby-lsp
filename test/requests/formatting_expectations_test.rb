@@ -22,4 +22,7 @@ class FormattingExpectationsTest < ExpectationsTestRunner
     assert_empty(stdout)
     assert_equal(expected, result)
   end
+
+  def initialize_params(_expected)
+  end
 end

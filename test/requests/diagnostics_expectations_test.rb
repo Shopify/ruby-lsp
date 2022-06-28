@@ -10,20 +10,25 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
   def run_expectations(source)
     document = RubyLsp::Document.new(source)
     RubyLsp::Requests::Diagnostics.new("file://#{__FILE__}", document).run
-  end
-
-  def assert_expectations(source, expected)
     result = T.let(nil, T.nilable(T::Array[RubyLsp::Requests::Support::RuboCopDiagnostic]))
 
     stdout, _ = capture_io do
-      result = run_expectations(source)
+      result = T.cast(
+        RubyLsp::Requests::Diagnostics.new("file://#{__FILE__}", document).run,
+        T::Array[RubyLsp::Requests::Support::RuboCopDiagnostic]
+      )
     end
 
     assert_empty(stdout)
-
-    diagnostics = json_expectations(expected)
-    assert_equal(map_diagnostics(diagnostics).to_json, T.must(result).map(&:to_lsp_diagnostic).to_json)
+    T.must(result).map(&:to_lsp_diagnostic).to_json
   end
+
+  def assert_expectations(source, expected)
+    actual = run_expectations(source)
+    assert_equal(map_diagnostics(json_expectations(expected)), JSON.parse(actual.to_json))
+  end
+
+  private
 
   def map_diagnostics(diagnostics)
     diagnostics.map do |diagnostic|
@@ -43,6 +48,6 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
           )
         )
       )
-    end
+    end.to_json
   end
 end
