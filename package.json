@@ -9,6 +9,7 @@
     "url": "https://github.com/Shopify/vscode-ruby-lsp.git"
   },
   "license": "MIT",
+  "icon": "icon.png",
   "engines": {
     "vscode": "^1.63.0"
   },

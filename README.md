@@ -1,3 +1,7 @@
+<p align="center">
+  <img alt="Ruby LSP logo" width="200" src="icon.png" />
+</p>
+
 ![Build Status](https://github.com/Shopify/vscode-ruby-lsp/workflows/CI/badge.svg)
 
 # vscode-ruby-lsp
