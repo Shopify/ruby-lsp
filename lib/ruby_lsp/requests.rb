@@ -18,7 +18,6 @@ module RubyLsp
     autoload :FoldingRanges, "ruby_lsp/requests/folding_ranges"
     autoload :SelectionRanges, "ruby_lsp/requests/selection_ranges"
     autoload :SemanticHighlighting, "ruby_lsp/requests/semantic_highlighting"
-    autoload :RuboCopRequest, "ruby_lsp/requests/rubocop_request"
     autoload :Formatting, "ruby_lsp/requests/formatting"
     autoload :Diagnostics, "ruby_lsp/requests/diagnostics"
     autoload :CodeActions, "ruby_lsp/requests/code_actions"
@@ -30,6 +29,8 @@ module RubyLsp
       autoload :SelectionRange, "ruby_lsp/requests/support/selection_range"
       autoload :SemanticTokenEncoder, "ruby_lsp/requests/support/semantic_token_encoder"
       autoload :SyntaxErrorDiagnostic, "ruby_lsp/requests/support/syntax_error_diagnostic"
+      autoload :RuboCopDiagnosticsRunner, "ruby_lsp/requests/support/rubocop_diagnostics_runner"
+      autoload :RuboCopFormattingRunner, "ruby_lsp/requests/support/rubocop_formatting_runner"
     end
   end
 end

@@ -16,8 +16,15 @@ module RubyLsp
     # puts "Hello" # --> diagnostics: incorrect indentantion
     # end
     # ```
-    class Diagnostics < RuboCopRequest
+    class Diagnostics < BaseRequest
       extend T::Sig
+
+      sig { params(uri: String, document: Document).void }
+      def initialize(uri, document)
+        super(document)
+
+        @uri = uri
+      end
 
       sig do
         override.returns(
@@ -30,14 +37,7 @@ module RubyLsp
       def run
         return syntax_error_diagnostics if @document.syntax_errors?
 
-        super
-
-        @diagnostics
-      end
-
-      sig { params(_file: String, offenses: T::Array[RuboCop::Cop::Offense]).void }
-      def file_finished(_file, offenses)
-        @diagnostics = offenses.map { |offense| Support::RuboCopDiagnostic.new(offense, @uri) }
+        Support::RuboCopDiagnosticsRunner.instance.run(@uri, @document)
       end
 
       private
