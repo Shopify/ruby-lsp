@@ -1,7 +1,12 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "rubocop"
+begin
+  require "rubocop"
+rescue LoadError
+  return
+end
+
 require "cgi"
 require "singleton"
 

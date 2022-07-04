@@ -1,6 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "ruby_lsp/requests/support/rubocop_formatting_runner"
+
 module RubyLsp
   module Requests
     # ![Formatting symbol demo](../../misc/formatting.gif)
@@ -28,7 +30,7 @@ module RubyLsp
 
       sig { override.returns(T.nilable(T.all(T::Array[LanguageServer::Protocol::Interface::TextEdit], Object))) }
       def run
-        formatted_text = Support::RuboCopFormattingRunner.instance.run(@uri, @document)
+        formatted_text = formatted_file
         return unless formatted_text
 
         size = @document.source.size
@@ -42,6 +44,17 @@ module RubyLsp
             new_text: formatted_text
           ),
         ]
+      end
+
+      private
+
+      sig { returns(T.nilable(String)) }
+      def formatted_file
+        if defined?(Support::RuboCopFormattingRunner)
+          Support::RuboCopFormattingRunner.instance.run(@uri, @document)
+        else
+          SyntaxTree.format(@document.source)
+        end
       end
     end
   end
