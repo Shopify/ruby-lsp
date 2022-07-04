@@ -38,7 +38,7 @@ GEM
       method_source (~> 1.0)
     rainbow (3.1.1)
     rake (13.0.6)
-    rbi (0.0.14)
+    rbi (0.0.15)
       ast
       parser (>= 2.6.4.0)
       sorbet-runtime (>= 0.5.9204)
@@ -81,7 +81,7 @@ GEM
       thor (>= 0.19.2)
     syntax_tree (2.8.0)
       prettier_print
-    tapioca (0.8.1)
+    tapioca (0.8.3)
       bundler (>= 1.17.3)
       parallel (>= 1.21.0)
       pry (>= 0.12.2)
