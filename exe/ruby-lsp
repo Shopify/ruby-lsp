@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+system("bundle check > /dev/null || bundle install > /dev/null")
+
+require "bundler/setup"
 require "sorbet-runtime"
 
 begin

@@ -15,3 +15,8 @@ gem "rubocop-sorbet", "~> 0.6", require: false
 gem "sorbet-static-and-runtime"
 gem "tapioca", "~> 0.8", require: false
 gem "yard", "~> 0.9", require: false
+
+# Evaluate the application's Gemfile
+if !Dir.pwd.end_with?("ruby-lsp") && File.exist?("#{Dir.pwd}/Gemfile") && !ENV["BUNDLE_GEMFILE"]
+  eval_gemfile("#{Dir.pwd}/Gemfile")
+end
