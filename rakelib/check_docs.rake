@@ -10,7 +10,10 @@ task :check_docs do
   require "ruby_lsp/requests/base_request"
   require "ruby_lsp/requests/rubocop_request"
 
-  Dir["#{Dir.pwd}/lib/ruby_lsp/requests/*.rb"].each do |file|
+  request_doc_files = Dir["#{Dir.pwd}/lib/ruby_lsp/requests/*.rb"]
+  request_doc_files << "#{Dir.pwd}/lib/ruby_lsp/requests.rb"
+
+  request_doc_files.each do |file|
     require(file)
     YARD.parse(file, [], Logger::Severity::FATAL)
   end
@@ -32,15 +35,33 @@ task :check_docs do
         For example, if your request handles text document hover, you should add a link to
         https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_hover.
       MESSAGE
+    elsif !%r{!\[.* demo\]\(\.\./\.\./misc/.*\.gif\)}.match?(docs)
+      errors[full_name] << <<~MESSAGE
+        Documentation for request handler class must contain a demonstration GIF, in the following format:
+
+        ![Request name demo](../../misc/request_name.gif)
+
+        See the misc/ folder for examples.
+      MESSAGE
     elsif !/# Example/.match?(docs)
       errors[full_name] << <<~MESSAGE
         Documentation for request handler class must contain an example.
 
-        = Example
-            def my_method # <-- something happens here
-            end
+        # # Example
+        #
+        # ```ruby
+        # def my_method # <-- something happens here
+        # end
+        # ```
       MESSAGE
     end
+
+    supported_features = YARD::Registry.at("RubyLsp::Requests").docstring
+    next if /- {#{full_name}}/.match?(supported_features)
+
+    errors[full_name] << <<~MESSAGE
+      Documentation for request handler class must be listed in the RubyLsp::Requests module documentation.
+    MESSAGE
   end
 
   formatted_errors = error_messages.map { |name, errors| "#{name}: #{errors.join(", ")}" }

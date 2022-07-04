@@ -3,6 +3,8 @@
 
 module RubyLsp
   module Requests
+    # ![Selection ranges demo](../../misc/selection_ranges.gif)
+    #
     # The [selection ranges](https://microsoft.github.io/language-server-protocol/specification#textDocument_selectionRange)
     # request informs the editor of ranges that the user may want to select based on the location(s)
     # of their cursor(s).

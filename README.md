@@ -17,7 +17,8 @@ end
 If using VS Code, install the [Ruby LSP plugin](https://github.com/Shopify/vscode-ruby-lsp) to get the extra features in
 the editor.
 
-See the [documentation](https://shopify.github.io/ruby-lsp) for supported features.
+See the [documentation](https://shopify.github.io/ruby-lsp) for
+[supported features](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html).
 
 ## Contributing
 

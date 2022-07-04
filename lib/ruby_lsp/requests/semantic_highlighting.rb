@@ -3,6 +3,8 @@
 
 module RubyLsp
   module Requests
+    # ![Semantic highlighting demo](../../misc/semantic_highlighting.gif)
+    #
     # The [semantic
     # highlighting](https://microsoft.github.io/language-server-protocol/specification#textDocument_semanticTokens)
     # request informs the editor of the correct token types to provide consistent and accurate highlighting for themes.
