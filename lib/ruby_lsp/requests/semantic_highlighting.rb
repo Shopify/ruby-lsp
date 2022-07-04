@@ -21,11 +21,31 @@ module RubyLsp
     class SemanticHighlighting < BaseRequest
       extend T::Sig
 
-      TOKEN_TYPES = T.let([
-        :variable,
-        :method,
-        :namespace,
-      ].freeze, T::Array[Symbol])
+      TOKEN_TYPES = T.let({
+        namespace: 0,
+        type: 1,
+        class: 2,
+        enum: 3,
+        interface: 4,
+        struct: 5,
+        typeParameter: 6,
+        parameter: 7,
+        variable: 8,
+        property: 9,
+        enumMember: 10,
+        event: 11,
+        function: 12,
+        method: 13,
+        macro: 14,
+        keyword: 15,
+        modifier: 16,
+        comment: 17,
+        string: 18,
+        number: 19,
+        regexp: 20,
+        operator: 21,
+        decorator: 22,
+      }.freeze, T::Hash[Symbol, Integer])
 
       TOKEN_MODIFIERS = T.let({
         declaration: 0,
@@ -195,7 +215,7 @@ module RubyLsp
           SemanticToken.new(
             location: location,
             length: length,
-            type: T.must(TOKEN_TYPES.index(type)),
+            type: T.must(TOKEN_TYPES[type]),
             modifier: modifiers_indices
           )
         )
