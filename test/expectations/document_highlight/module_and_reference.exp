@@ -1,0 +1,36 @@
+{
+    "params": [
+        {
+            "line": 3,
+            "character": 0
+        }
+    ],
+    "result": [
+        {
+            "range": {
+                "start": {
+                    "line": 0,
+                    "character": 7
+                },
+                "end": {
+                    "line": 0,
+                    "character": 10
+                }
+            },
+            "kind": 3
+        },
+        {
+            "range": {
+                "start": {
+                    "line": 3,
+                    "character": 0
+                },
+                "end": {
+                    "line": 3,
+                    "character": 3
+                }
+            },
+            "kind": 2
+        }
+    ]
+}
