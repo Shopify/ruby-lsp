@@ -138,6 +138,11 @@ module RubyLsp
             kind: @kind
           )
         end
+
+        sig { returns(T::Boolean) }
+        def multiline?
+          @end_line > @start_line
+        end
       end
 
       sig { params(node: T.nilable(SyntaxTree::Node)).returns(T::Boolean) }
@@ -178,7 +183,7 @@ module RubyLsp
       def emit_partial_range
         return if @partial_range.nil?
 
-        @ranges << @partial_range.to_range
+        @ranges << @partial_range.to_range if @partial_range.multiline?
         @partial_range = nil
       end
 
