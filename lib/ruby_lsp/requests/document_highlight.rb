@@ -53,34 +53,26 @@ module RubyLsp
         @highlights
       end
 
-      sig { params(node: SyntaxTree::VarField).void }
-      def visit_var_field(node)
-        if matches_target?(node.value)
-          add_highlight(
-            node.value,
-            LanguageServer::Protocol::Constant::DocumentHighlightKind::WRITE
-          )
-        end
+      sig { params(node: T.nilable(SyntaxTree::Node)).void }
+      def visit(node)
+        return if node.nil?
 
-        super
-      end
-
-      sig { params(node: SyntaxTree::VarRef).void }
-      def visit_var_ref(node)
-        if matches_target?(node.value)
-          add_highlight(
-            node.value,
-            LanguageServer::Protocol::Constant::DocumentHighlightKind::READ
-          )
-        end
+        type = T.must(@target).highlight_type(node)
+        add_highlight(node, type) if type
 
         super
       end
 
       private
 
-      sig { params(node: SyntaxTree::Node, position: Integer).returns(T.nilable(VarNodes)) }
-      def find(node, position)
+      sig do
+        params(
+          node: SyntaxTree::Node,
+          position: Integer,
+          parent: T.nilable(SyntaxTree::Node)
+        ).returns(T.nilable(Support::HighlightTarget))
+      end
+      def find(node, position, parent = nil)
         matched =
           node.child_nodes.compact.bsearch do |child|
             if (child.location.start_char...child.location.end_char).cover?(position)
@@ -91,16 +83,13 @@ module RubyLsp
           end
 
         case matched
-        when SyntaxTree::GVar, SyntaxTree::Ident, SyntaxTree::IVar, SyntaxTree::Const, SyntaxTree::CVar
-          matched
+        when SyntaxTree::GVar, SyntaxTree::IVar, SyntaxTree::Const, SyntaxTree::CVar, SyntaxTree::VarField
+          Support::HighlightTarget.new(matched)
+        when SyntaxTree::Ident
+          Support::HighlightTarget.new(T.must(parent))
         when SyntaxTree::Node
-          find(matched, position)
+          find(matched, position, node)
         end
-      end
-
-      sig { params(node: SyntaxTree::Node).returns(T::Boolean) }
-      def matches_target?(node)
-        node.is_a?(@target.class) && T.cast(node, VarNodes).value == T.must(@target).value
       end
 
       sig { params(node: SyntaxTree::Node, kind: Integer).void }
