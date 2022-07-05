@@ -2,12 +2,12 @@
   "result": [
     {
       "startLine": 1,
-      "endLine": 7,
+      "endLine": 6,
       "kind": "region"
     },
     {
       "startLine": 2,
-      "endLine": 6,
+      "endLine": 5,
       "kind": "region"
     },
     {
@@ -17,7 +17,7 @@
     },
     {
       "startLine": 0,
-      "endLine": 10,
+      "endLine": 9,
       "kind": "region"
     }
   ]
