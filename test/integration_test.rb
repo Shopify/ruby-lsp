@@ -78,7 +78,7 @@ class IntegrationTest < Minitest::Test
     assert_telemetry("textDocument/didOpen")
 
     response = make_request("textDocument/semanticTokens/full", { textDocument: { uri: "file://#{__FILE__}" } })
-    assert_equal([0, 6, 3, 2, 0], response[:result][:data])
+    assert_equal([0, 6, 3, 0, 0], response[:result][:data])
   end
 
   def test_formatting
