@@ -21,6 +21,14 @@ class DiagnosticsTest < Minitest::Test
     assert_equal(syntax_error_diagnostics([error_edit]).to_json, result.map(&:to_lsp_diagnostic).to_json)
   end
 
+  def test_empty_diagnostics_for_ignored_file
+    fixture_path = File.expand_path("../fixtures/def_multiline_params.rb", __dir__)
+    document = RubyLsp::Document.new(File.read(fixture_path))
+
+    result = RubyLsp::Requests::Diagnostics.new("file://#{fixture_path}", document).run
+    assert_empty(result)
+  end
+
   private
 
   def syntax_error_diagnostics(edits)
