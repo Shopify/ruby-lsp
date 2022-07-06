@@ -23,7 +23,7 @@ module RubyLsp
 
         sig { params(other: SyntaxTree::Node).returns(T.nilable(HighlightMatch)) }
         def highlight_type(other)
-          matched_highlight(other) if @value == value(other)
+          matched_highlight(other) if other.is_a?(SyntaxTree::Params) || @value == value(other)
         end
 
         private
@@ -42,7 +42,7 @@ module RubyLsp
               HighlightMatch.new(type: WRITE, node: other.name)
             end
           when SyntaxTree::GVar, SyntaxTree::IVar, SyntaxTree::Const, SyntaxTree::CVar, SyntaxTree::VarField,
-               SyntaxTree::VarRef
+               SyntaxTree::VarRef, SyntaxTree::Ident
             case other
             when SyntaxTree::VarField
               HighlightMatch.new(type: WRITE, node: other)
@@ -52,6 +52,10 @@ module RubyLsp
               HighlightMatch.new(type: WRITE, node: other.constant)
             when SyntaxTree::ConstPathRef
               HighlightMatch.new(type: READ, node: other.constant)
+            when SyntaxTree::Params
+              params = other.child_nodes.compact
+              match = params.find { |param| value(param) == @value }
+              HighlightMatch.new(type: WRITE, node: match) if match
             end
           end
         end
@@ -61,10 +65,12 @@ module RubyLsp
           case node
           when SyntaxTree::ConstPathRef, SyntaxTree::ConstPathField, SyntaxTree::TopConstField
             node.constant.value
-          when SyntaxTree::GVar, SyntaxTree::IVar, SyntaxTree::Const, SyntaxTree::CVar, SyntaxTree::Ident
+          when SyntaxTree::GVar, SyntaxTree::IVar, SyntaxTree::Const, SyntaxTree::CVar, SyntaxTree::Ident,
+               SyntaxTree::ArgsForward
             node.value
-          when SyntaxTree::Field, SyntaxTree::Def, SyntaxTree::Defs, SyntaxTree::DefEndless
-            node.name.value
+          when SyntaxTree::Field, SyntaxTree::Def, SyntaxTree::Defs, SyntaxTree::DefEndless, SyntaxTree::RestParam,
+               SyntaxTree::KwRestParam, SyntaxTree::BlockArg
+            node.name&.value
           when SyntaxTree::VarField, SyntaxTree::VarRef, SyntaxTree::VCall, SyntaxTree::FCall
             node.value&.value
           when SyntaxTree::Call, SyntaxTree::Command, SyntaxTree::CommandCall

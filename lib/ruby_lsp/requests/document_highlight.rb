@@ -79,7 +79,8 @@ module RubyLsp
              SyntaxTree::VarField
           Support::HighlightTarget.new(matched)
         when SyntaxTree::Ident
-          Support::HighlightTarget.new(node)
+          relevant_node = node.is_a?(SyntaxTree::Params) ? matched : node
+          Support::HighlightTarget.new(relevant_node)
         when SyntaxTree::Node
           find(matched, position)
         end
