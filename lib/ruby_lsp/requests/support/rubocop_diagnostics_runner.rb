@@ -32,6 +32,7 @@ module RubyLsp
 
         sig { params(uri: String, document: Document).returns(T::Array[Support::RuboCopDiagnostic]) }
         def run(uri, document)
+          @diagnostics.clear
           @uri = uri
 
           file = CGI.unescape(URI.parse(uri).path)
@@ -39,7 +40,7 @@ module RubyLsp
           @options[:stdin] = document.source
 
           # Invoke RuboCop with just this file in `paths`
-          process_file(file)
+          super([file])
           @diagnostics
         end
 

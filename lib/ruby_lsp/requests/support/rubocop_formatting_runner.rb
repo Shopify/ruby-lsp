@@ -36,7 +36,7 @@ module RubyLsp
           @options[:stdin] = document.source
 
           # Invoke RuboCop with just this file in `paths`
-          process_file(file)
+          super([file])
           @options[:stdin]
         end
       end
