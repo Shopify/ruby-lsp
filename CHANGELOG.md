@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.4]
+
+- Add extension logo (https://github.com/Shopify/vscode-ruby-lsp/pull/138)
+
 ## [0.0.3]
 
 - Add new error telemetry fields (https://github.com/Shopify/vscode-ruby-lsp/pull/107)
