@@ -6,6 +6,18 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.2.0]
+
+- Add semantic token for keyword and keyword rest params (https://github.com/Shopify/ruby-lsp/pull/142)
+- Return error responses on exceptions (https://github.com/Shopify/ruby-lsp/pull/160)
+- Sanitize home directory for telemetry (https://github.com/Shopify/ruby-lsp/pull/171)
+- Avoid adding semantic tokens for special methods (https://github.com/Shopify/ruby-lsp/pull/162)
+- Properly respect excluded files in RuboCop requests (https://github.com/Shopify/ruby-lsp/pull/173)
+- Clear diagnostics when closing files (https://github.com/Shopify/ruby-lsp/pull/174)
+- Avoid pushing ranges for single line partial ranges (https://github.com/Shopify/ruby-lsp/pull/185)
+- Change folding ranges to include closing tokens (https://github.com/Shopify/ruby-lsp/pull/181)
+- Remove RuboCop dependency and fallback to SyntaxTree formatting (https://github.com/Shopify/ruby-lsp/pull/184)
+
 ## [0.1.0]
 
 - Implement token modifiers in SemanticTokenEncoder ([#112](https://github.com/Shopify/ruby-lsp/pull/112))
