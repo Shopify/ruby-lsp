@@ -1,6 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "ruby_lsp/requests/support/rubocop_diagnostics_runner"
+
 module RubyLsp
   module Requests
     # ![Diagnostics demo](../../misc/diagnostics.gif)
@@ -36,6 +38,7 @@ module RubyLsp
       end
       def run
         return syntax_error_diagnostics if @document.syntax_errors?
+        return [] unless defined?(Support::RuboCopDiagnosticsRunner)
 
         Support::RuboCopDiagnosticsRunner.instance.run(@uri, @document)
       end
