@@ -35,12 +35,13 @@ module RubyLsp
         SyntaxTree::Unless,
         SyntaxTree::Until,
         SyntaxTree::While,
+        SyntaxTree::Else,
+        SyntaxTree::Ensure,
+        SyntaxTree::Begin,
       ].freeze, T::Array[T.class_of(SyntaxTree::Node)])
 
       NODES_WITH_STATEMENTS = T.let([
-        SyntaxTree::Else,
         SyntaxTree::Elsif,
-        SyntaxTree::Ensure,
         SyntaxTree::In,
         SyntaxTree::Rescue,
         SyntaxTree::When,
@@ -48,9 +49,7 @@ module RubyLsp
 
       StatementNode = T.type_alias do
         T.any(
-          SyntaxTree::Else,
           SyntaxTree::Elsif,
-          SyntaxTree::Ensure,
           SyntaxTree::In,
           SyntaxTree::Rescue,
           SyntaxTree::When,
@@ -80,11 +79,10 @@ module RubyLsp
 
         case node
         when *SIMPLE_FOLDABLES
-          add_node_range(T.must(node))
+          location = T.must(node).location
+          add_lines_range(location.start_line, location.end_line - 1)
         when *NODES_WITH_STATEMENTS
           add_statements_range(T.must(node), T.cast(node, StatementNode).statements)
-        when SyntaxTree::Begin
-          add_statements_range(node, node.bodystmt.statements)
         when SyntaxTree::Call, SyntaxTree::CommandCall
           add_call_range(node)
           return
@@ -203,7 +201,7 @@ module RubyLsp
           end
         end
 
-        add_lines_range(receiver.location.start_line, node.location.end_line)
+        add_lines_range(receiver.location.start_line, node.location.end_line - 1)
 
         visit(node.arguments)
       end
@@ -213,9 +211,10 @@ module RubyLsp
         params_location = node.params.location
 
         if params_location.start_line < params_location.end_line
-          add_lines_range(params_location.end_line, node.location.end_line)
+          add_lines_range(params_location.end_line, node.location.end_line - 1)
         else
-          add_node_range(node)
+          location = node.location
+          add_lines_range(location.start_line, location.end_line - 1)
         end
 
         visit(node.bodystmt.statements)
@@ -223,7 +222,7 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::Node, statements: SyntaxTree::Statements).void }
       def add_statements_range(node, statements)
-        add_lines_range(node.location.start_line, statements.location.end_line) unless statements.empty?
+        add_lines_range(node.location.start_line, statements.body.last.location.end_line) unless statements.empty?
       end
 
       sig { params(node: SyntaxTree::StringConcat).void }
@@ -231,13 +230,7 @@ module RubyLsp
         left = T.let(node.left, SyntaxTree::Node)
         left = left.left while left.is_a?(SyntaxTree::StringConcat)
 
-        add_lines_range(left.location.start_line, node.right.location.end_line)
-      end
-
-      sig { params(node: SyntaxTree::Node).void }
-      def add_node_range(node)
-        location = node.location
-        add_lines_range(location.start_line, location.end_line)
+        add_lines_range(left.location.start_line, node.right.location.end_line - 1)
       end
 
       sig { params(start_line: Integer, end_line: Integer).void }

@@ -2,11 +2,11 @@
   "result": [
     {
       "startLine": 0,
-      "endLine": 4,
+      "endLine": 3,
       "kind": "region"
     },
     {
-      "startLine": 1,
+      "startLine": 2,
       "endLine": 3,
       "kind": "region"
     }

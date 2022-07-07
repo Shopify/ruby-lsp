@@ -143,7 +143,7 @@ class IntegrationTest < Minitest::Test
 
   def test_folding_ranges
     initialize_lsp(["foldingRanges"])
-    open_file_with("class Foo\nend")
+    open_file_with("class Foo\n\nend")
 
     read_response("textDocument/publishDiagnostics")
     assert_telemetry("textDocument/didOpen")
@@ -177,7 +177,7 @@ class IntegrationTest < Minitest::Test
 
   def test_request_with_telemetry
     initialize_lsp(["foldingRanges"], telemetry_enabled: true)
-    open_file_with("class Foo\nend")
+    open_file_with("class Foo\n\nend")
 
     send_request("textDocument/foldingRange", { textDocument: { uri: "file://#{__FILE__}" } })
 

@@ -2,12 +2,12 @@
   "result": [
     {
       "startLine": 0,
-      "endLine": 4,
+      "endLine": 3,
       "kind": "region"
     },
     {
       "startLine": 1,
-      "endLine": 3,
+      "endLine": 2,
       "kind": "region"
     }
   ]
