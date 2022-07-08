@@ -76,5 +76,70 @@
     "prefix": ["begin"],
     "body": ["begin", "  $0", "rescue $1", "ensure", "end", ""],
     "description": "New Ruby begin block with rescue and ensure."
+  },
+  "While": {
+    "prefix": ["while"],
+    "body": ["while $1", "  $0", "end", ""],
+    "description": "New Ruby while loop."
+  },
+  "Until": {
+    "prefix": ["until"],
+    "body": ["until $1", "  $0", "end", ""],
+    "description": "New Ruby until loop."
+  },
+  "For": {
+    "prefix": ["for"],
+    "body": ["for $1 in $2", "  $0", "end", ""],
+    "description": "New Ruby for loop."
+  },
+  "Each inline": {
+    "prefix": ["each"],
+    "body": ["each { |$1| $0 }"],
+    "description": "New Ruby inline each loop."
+  },
+  "Each block": {
+    "prefix": ["each"],
+    "body": ["each do |$1|", "  $0", "end"],
+    "description": "New Ruby each loop."
+  },
+  "Map inline": {
+    "prefix": ["map"],
+    "body": ["map { |$1| $0 }"],
+    "description": "New Ruby inline map loop."
+  },
+  "Map block": {
+    "prefix": ["map"],
+    "body": ["map do |$1|", "  $0", "end"],
+    "description": "New Ruby map loop."
+  },
+  "Flat map inline": {
+    "prefix": ["flat_map"],
+    "body": ["flat_map { |$1| $0 }"],
+    "description": "New Ruby inline flat_map loop."
+  },
+  "Flat Map block": {
+    "prefix": ["flat_map"],
+    "body": ["flat_map do |$1|", "  $0", "end"],
+    "description": "New Ruby flat_map loop."
+  },
+  "Select inline": {
+    "prefix": ["select"],
+    "body": ["select { |$1| $0 }"],
+    "description": "New Ruby inline select loop."
+  },
+  "Select block": {
+    "prefix": ["select"],
+    "body": ["select do |$1|", "  $0", "end"],
+    "description": "New Ruby select loop."
+  },
+  "Find inline": {
+    "prefix": ["find"],
+    "body": ["find { |$1| $0 }"],
+    "description": "New Ruby inline find loop."
+  },
+  "Find block": {
+    "prefix": ["find"],
+    "body": ["find do |$1|", "  $0", "end"],
+    "description": "New Ruby find loop."
   }
 }
