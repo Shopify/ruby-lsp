@@ -141,5 +141,30 @@
     "prefix": ["find"],
     "body": ["find do |$1|", "  $0", "end"],
     "description": "New Ruby find loop."
+  },
+  "Define method": {
+    "prefix": ["def"],
+    "body": ["def $1", "  $0", "end"],
+    "description": "New method."
+  },
+  "Define singleton method": {
+    "prefix": ["def"],
+    "body": ["def self.$1", "  $0", "end"],
+    "description": "New singleton method."
+  },
+  "Define attribute accessor": {
+    "prefix": ["attr"],
+    "body": ["attr_accessor :$1"],
+    "description": "New attribute accessor."
+  },
+  "Define attribute reader": {
+    "prefix": ["attr"],
+    "body": ["attr_reader :$1"],
+    "description": "New attribute reader."
+  },
+  "Define attribute writer": {
+    "prefix": ["attr"],
+    "body": ["attr_writer :$1"],
+    "description": "New attribute writer."
   }
 }
