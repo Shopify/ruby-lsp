@@ -51,5 +51,15 @@
       ""
     ],
     "description": "New Minitest class using the spec syntax."
+  },
+  "New class": {
+    "prefix": ["class"],
+    "body": ["class $1", "  def initialize", "    $0", "  end", "end", ""],
+    "description": "New Ruby class."
+  },
+  "New module": {
+    "prefix": ["module"],
+    "body": ["module $1", "  def $2", "    $0", "  end", "end", ""],
+    "description": "New Ruby module."
   }
 }
