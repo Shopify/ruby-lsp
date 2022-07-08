@@ -12,6 +12,11 @@ VS Code extension for the [Ruby LSP gem](https://github.com/Shopify/ruby-lsp).
 
 Search for `ruby-lsp` in the extensions tab and click install.
 
+### Snippets
+
+The Ruby LSP provides convenience snippets for Ruby. Find the full list
+[here](https://github.com/Shopify/vscode-ruby-lsp/blob/main/snippets.json).
+
 ### Telemetry
 
 On its own, the Ruby LSP does not collect any telemetry by default, but it does support hooking up to a private metrics
@@ -47,10 +52,6 @@ vscode.commands.registerCommand(
 );
 ```
 
-### Debugging
-
-Interactive debugging works for both running the extension or tests. In the debug panel, select whether to run the extension in development mode or run tests, set up some breakpoints and start with F5.
-
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/Shopify/vscode-ruby-lsp.
@@ -58,6 +59,10 @@ This project is intended to be a safe, welcoming space for collaboration, and co
 are expected to adhere to the
 [Contributor Covenant](https://github.com/Shopify/vscode-ruby-lsp/blob/main/CODE_OF_CONDUCT.md)
 code of conduct.
+
+### Debugging
+
+Interactive debugging works for both running the extension or tests. In the debug panel, select whether to run the extension in development mode or run tests, set up some breakpoints and start with F5.
 
 ## License
 
