@@ -61,5 +61,20 @@
     "prefix": ["module"],
     "body": ["module $1", "  def $2", "    $0", "  end", "end", ""],
     "description": "New Ruby module."
+  },
+  "Begin block": {
+    "prefix": ["begin"],
+    "body": ["begin", "  $0", "end", ""],
+    "description": "New Ruby begin block."
+  },
+  "Begin rescue block": {
+    "prefix": ["begin"],
+    "body": ["begin", "  $0", "rescue $1", "end", ""],
+    "description": "New Ruby begin block with rescue."
+  },
+  "Begin rescue ensure": {
+    "prefix": ["begin"],
+    "body": ["begin", "  $0", "rescue $1", "ensure", "end", ""],
+    "description": "New Ruby begin block with rescue and ensure."
   }
 }
