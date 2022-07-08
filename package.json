@@ -14,7 +14,8 @@
     "vscode": "^1.63.0"
   },
   "categories": [
-    "Programming Languages"
+    "Programming Languages",
+    "Snippets"
   ],
   "activationEvents": [
     "onLanguage:ruby",
@@ -96,7 +97,13 @@
           }
         }
       }
-    }
+    },
+    "snippets": [
+      {
+        "language": "ruby",
+        "path": "./snippets.json"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "yarn run esbuild-base --minify",
