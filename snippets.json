@@ -166,5 +166,25 @@
     "prefix": ["attr"],
     "body": ["attr_writer :$1"],
     "description": "New attribute writer."
+  },
+  "If": {
+    "prefix": ["if"],
+    "body": ["if $1", "  $0", "end"],
+    "description": "New if statement."
+  },
+  "If else": {
+    "prefix": ["if"],
+    "body": ["if $1", "  $0", "else", "end"],
+    "description": "New if statement with else."
+  },
+  "If elsif": {
+    "prefix": ["if"],
+    "body": ["if $1", "  $0", "elsif $2", "  $0", "end"],
+    "description": "New if statement with elsif."
+  },
+  "Unless": {
+    "prefix": ["unless"],
+    "body": ["unless $1", "  $0", "end"],
+    "description": "New unless statement."
   }
 }
