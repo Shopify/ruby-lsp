@@ -4,7 +4,7 @@
 
 ![Build Status](https://github.com/Shopify/vscode-ruby-lsp/workflows/CI/badge.svg)
 
-# Ruby LSP
+# Ruby LSP (VS Code extension)
 
 Companion VS Code extension for the [Ruby LSP gem](https://github.com/Shopify/ruby-lsp).
 
