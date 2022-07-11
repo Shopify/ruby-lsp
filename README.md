@@ -14,7 +14,7 @@ Search for `ruby-lsp` in the extensions tab and click install.
 
 ### Snippets
 
-The Ruby LSP provides convenience snippets for Ruby. Find the full list
+This extension provides convenience snippets for Ruby. Find the full list
 [here](https://github.com/Shopify/vscode-ruby-lsp/blob/main/snippets.json).
 
 ### Telemetry
