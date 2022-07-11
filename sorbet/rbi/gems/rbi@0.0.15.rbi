@@ -2147,12 +2147,7 @@ class RBI::Tree < ::RBI::NodeWithComments
 
   sig { returns(T::Hash[::String, ::RBI::Node]) }
   def nodes_cache; end
-
-  sig { params(name: ::String).returns(T::Boolean) }
-  def valid_method_name?(name); end
 end
-
-RBI::Tree::SPECIAL_METHOD_NAMES = T.let(T.unsafe(nil), Array)
 
 class RBI::TreeBuilder < ::RBI::ASTVisitor
   sig do
@@ -2186,6 +2181,9 @@ class RBI::TreeBuilder < ::RBI::ASTVisitor
 
   sig { returns(T::Array[::RBI::Sig]) }
   def current_sigs; end
+
+  sig { returns(T::Array[::RBI::Comment]) }
+  def current_sigs_comments; end
 
   sig { params(node: ::AST::Node).returns(T::Array[::RBI::Comment]) }
   def node_comments(node); end

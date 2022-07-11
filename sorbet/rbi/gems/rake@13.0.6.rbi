@@ -13,9 +13,6 @@ FileList = Rake::FileList
 # This a FileUtils extension that defines several additional commands to be
 # added to the FileUtils utility functions.
 module FileUtils
-  include ::FileUtils::StreamUtils_
-  extend ::FileUtils::StreamUtils_
-
   # Run a Ruby interpreter with the given arguments.
   #
   # Example:
@@ -1839,8 +1836,6 @@ RakeFileUtils = Rake::FileUtilsExt
 # to_s.
 class String
   include ::Comparable
-  include ::JSON::Ext::Generator::GeneratorMethods::String
-  extend ::JSON::Ext::Generator::GeneratorMethods::String::Extend
 
   def ext(newext = T.unsafe(nil)); end
   def pathmap(spec = T.unsafe(nil), &block); end

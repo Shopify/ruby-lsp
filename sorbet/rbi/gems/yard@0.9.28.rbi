@@ -6,7 +6,6 @@
 
 class Array
   include ::Enumerable
-  include ::JSON::Ext::Generator::GeneratorMethods::Array
 
   # Places values before or after another object (by value) in
   # an array. This is used in tandem with the before and after
@@ -526,8 +525,6 @@ RUBY19 = T.let(T.unsafe(nil), TrueClass)
 # Extensions to the core String class
 class String
   include ::Comparable
-  include ::JSON::Ext::Generator::GeneratorMethods::String
-  extend ::JSON::Ext::Generator::GeneratorMethods::String::Extend
 
   # Splits text into tokens the way a shell would, handling quoted
   # text as a single token. Use '\"' and "\'" to escape quotes and
@@ -658,6 +655,9 @@ module YARD
 
     # @return [Boolean] whether YARD is being run in Ruby 2.0
     def ruby2?; end
+
+    # @return [Boolean] whether YARD is being run in Ruby 3.1
+    def ruby31?; end
 
     # @return [Boolean] whether YARD is being run in Ruby 3.0
     def ruby3?; end
@@ -4860,7 +4860,6 @@ end
 # Handles class declarations
 class YARD::Handlers::Ruby::ClassHandler < ::YARD::Handlers::Ruby::Base
   include ::YARD::Handlers::Ruby::StructHandlerMethods
-  include ::YARDSorbet::Handlers::StructClassHandler
 
   private
 
@@ -7436,6 +7435,7 @@ class YARD::Parser::Ruby::ModuleNode < ::YARD::Parser::Ruby::KeywordNode
 end
 
 class YARD::Parser::Ruby::ParameterNode < ::YARD::Parser::Ruby::AstNode
+  def args_forward; end
   def block_param; end
   def double_splat_param; end
   def named_params; end

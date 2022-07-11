@@ -22,6 +22,7 @@ module Minitest
 
     def backtrace_filter; end
     def backtrace_filter=(_arg0); end
+    def cattr_accessor(name); end
     def clock_time; end
     def extensions; end
     def extensions=(_arg0); end
@@ -54,6 +55,8 @@ module Minitest
     def run(args = T.unsafe(nil)); end
 
     def run_one_method(klass, method_name); end
+    def seed; end
+    def seed=(_arg0); end
   end
 end
 
@@ -431,8 +434,6 @@ class Minitest::CompositeReporter < ::Minitest::AbstractReporter
 
   def start; end
 end
-
-Minitest::ENCS = T.let(T.unsafe(nil), TrueClass)
 
 # Provides a simple set of guards that you can use in your tests
 # to skip execution if it is not applicable. These methods are
@@ -847,6 +848,8 @@ class Minitest::Test < ::Minitest::Runnable
   def capture_exceptions; end
 
   def class_name; end
+  def neuter_exception(e); end
+  def new_exception(klass, msg, bt, kill = T.unsafe(nil)); end
 
   # Runs a single test with setup/teardown hooks.
   def run; end

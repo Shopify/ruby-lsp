@@ -860,8 +860,3 @@ end
 Diff::LCS::SequenceCallbacks = Diff::LCS::DefaultCallbacks
 
 Diff::LCS::VERSION = T.let(T.unsafe(nil), String)
-
-# Enhance the Integer class with a XML escaped character conversion.
-class Integer < ::Numeric
-  include ::JSON::Ext::Generator::GeneratorMethods::Integer
-end

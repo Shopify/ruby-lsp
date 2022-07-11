@@ -123,7 +123,6 @@ end
 
 class Regexp::Expression::Base
   include ::Regexp::Expression::Shared
-  include ::RuboCop::Ext::RegexpParser::Expression::Base
   extend ::Regexp::Expression::Shared::ClassMethods
 
   # @return [Base] a new instance of Base
@@ -305,8 +304,6 @@ class Regexp::Expression::Base
 end
 
 class Regexp::Expression::CharacterSet < ::Regexp::Expression::Subexpression
-  include ::RuboCop::Ext::RegexpParser::Expression::CharacterSet
-
   # @return [CharacterSet] a new instance of CharacterSet
   def initialize(token, options = T.unsafe(nil)); end
 
