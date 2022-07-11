@@ -4,13 +4,48 @@
 
 ![Build Status](https://github.com/Shopify/vscode-ruby-lsp/workflows/CI/badge.svg)
 
-# vscode-ruby-lsp
+# Ruby LSP
 
-VS Code extension for the [Ruby LSP gem](https://github.com/Shopify/ruby-lsp).
+Companion VS Code extension for the [Ruby LSP gem](https://github.com/Shopify/ruby-lsp).
 
 ## Usage
 
 Search for `ruby-lsp` in the extensions tab and click install.
+
+**Note**
+
+For this extension to properly start the Ruby LSP server, the right Ruby version must be activated or else it can't find
+the right gems. Currently, auto activation is only supported for `shadowenv`, but support will be added for other Ruby
+version managers soon.
+
+### Configuration
+
+The Ruby LSP has all its features enabled by default, but disabling specific features is supported by changing the
+following configuration (definition of all available values can be found in the
+[package.json](https://github.com/Shopify/vscode-ruby-lsp/blob/main/package.json)).
+
+```jsonc
+"rubyLsp.enabledFeatures": {
+  "documentHighlights": true,
+  "documentSymbols": true,
+  "foldingRanges": true,
+  "selectionRanges": true,
+  "semanticHighlighting": true,
+  "formatting": true,
+  "diagnostics": true,
+  "codeActions": true
+}
+```
+
+### Commands
+
+Available commands are listed below and can always be found in the `Ruby LSP` prefix.
+
+| Command           | Description                 |
+| ----------------- | --------------------------- |
+| Ruby LSP: Start   | Start the Ruby LSP server   |
+| Ruby LSP: Restart | Restart the Ruby LSP server |
+| Ruby LSP: Stop    | Stop the Ruby LSP server    |
 
 ### Snippets
 
