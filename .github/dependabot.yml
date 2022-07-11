@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: "weekly"
     reviewers:
-      - "Shopify/sorbet"
+      - "Shopify/ruby-dev-exp"
     labels:
       - "dependencies"
       - "ruby"
