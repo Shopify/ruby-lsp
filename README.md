@@ -14,9 +14,9 @@ Search for `ruby-lsp` in the extensions tab and click install.
 
 **Note**
 
-For this extension to properly start the Ruby LSP server, the right Ruby version must be activated or else it can't find
-the right gems. Currently, auto activation is only supported for `shadowenv`, but support will be added for other Ruby
-version managers soon.
+For this extension to properly start the Ruby LSP server, the right Ruby version for the project being worked on must be
+activated or else it can't find the right gems. Currently, auto activation is only supported for `shadowenv`, but
+support will be added for other Ruby version managers soon.
 
 ### Configuration
 
