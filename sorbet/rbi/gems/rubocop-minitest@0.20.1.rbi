@@ -554,24 +554,6 @@ RuboCop::Cop::Minitest::DuplicateTestRun::MSG = T.let(T.unsafe(nil), String)
 # Checks for deprecated global expectations
 # and autocorrects them to use expect format.
 #
-# @example EnforcedStyle: _
-#   # bad
-#   musts.must_equal expected_musts
-#   wonts.wont_match expected_wonts
-#   musts.must_raise TypeError
-#
-#   expect(musts).must_equal expected_musts
-#   expect(wonts).wont_match expected_wonts
-#   expect { musts }.must_raise TypeError
-#
-#   value(musts).must_equal expected_musts
-#   value(wonts).wont_match expected_wonts
-#   value { musts }.must_raise TypeError
-#
-#   # good
-#   _(musts).must_equal expected_musts
-#   _(wonts).wont_match expected_wonts
-#   _ { musts }.must_raise TypeError
 # @example EnforcedStyle: any (default)
 #   # bad
 #   musts.must_equal expected_musts
@@ -590,6 +572,24 @@ RuboCop::Cop::Minitest::DuplicateTestRun::MSG = T.let(T.unsafe(nil), String)
 #   value(musts).must_equal expected_musts
 #   value(wonts).wont_match expected_wonts
 #   value { musts }.must_raise TypeError
+# @example EnforcedStyle: _
+#   # bad
+#   musts.must_equal expected_musts
+#   wonts.wont_match expected_wonts
+#   musts.must_raise TypeError
+#
+#   expect(musts).must_equal expected_musts
+#   expect(wonts).wont_match expected_wonts
+#   expect { musts }.must_raise TypeError
+#
+#   value(musts).must_equal expected_musts
+#   value(wonts).wont_match expected_wonts
+#   value { musts }.must_raise TypeError
+#
+#   # good
+#   _(musts).must_equal expected_musts
+#   _(wonts).wont_match expected_wonts
+#   _ { musts }.must_raise TypeError
 # @example EnforcedStyle: expect
 #   # bad
 #   musts.must_equal expected_musts
@@ -767,6 +767,9 @@ module RuboCop::Cop::Minitest::PredicateAssertionHandleable
   def new_arguments(arguments); end
   def offense_message(arguments); end
   def peel_redundant_parentheses_from(arguments); end
+
+  # @return [Boolean]
+  def predicate_method?(first_argument); end
 end
 
 RuboCop::Cop::Minitest::PredicateAssertionHandleable::MSG = T.let(T.unsafe(nil), String)
@@ -1223,6 +1226,7 @@ RuboCop::Cop::Minitest::SkipEnsure::MSG = T.let(T.unsafe(nil), String)
 #   end
 class RuboCop::Cop::Minitest::TestMethodName < ::RuboCop::Cop::Base
   include ::RuboCop::Cop::MinitestExplorationHelpers
+  include ::RuboCop::Cop::VisibilityHelp
   include ::RuboCop::Cop::DefNode
   extend ::RuboCop::Cop::AutoCorrector
 

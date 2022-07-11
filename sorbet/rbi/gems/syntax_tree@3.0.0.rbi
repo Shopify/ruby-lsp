@@ -668,8 +668,6 @@ end
 # This is raised when you use the Visitor.visit_method method and it fails.
 # It is correctable to through DidYouMean.
 class SyntaxTree::BasicVisitor::VisitMethodError < ::StandardError
-  include ::DidYouMean::Correctable
-
   # @return [VisitMethodError] a new instance of VisitMethodError
   def initialize(visit_method); end
 
@@ -2275,7 +2273,7 @@ class SyntaxTree::Heredoc < ::SyntaxTree::Node
   # [Integer] how far to dedent the heredoc
   def dedent; end
 
-  # [String] the ending of the heredoc
+  # [HeredocEnd] the ending of the heredoc
   def ending; end
 
   def format(q); end
@@ -2307,6 +2305,31 @@ class SyntaxTree::HeredocBeg < ::SyntaxTree::Node
   def format(q); end
 
   # [String] the opening declaration of the heredoc
+  def value; end
+end
+
+# HeredocEnd represents the closing declaration of a heredoc.
+#
+#     <<~DOC
+#       contents
+#     DOC
+#
+# In the example above the HeredocEnd node represents the closing DOC.
+class SyntaxTree::HeredocEnd < ::SyntaxTree::Node
+  # @return [HeredocEnd] a new instance of HeredocEnd
+  def initialize(value:, location:, comments: T.unsafe(nil)); end
+
+  def accept(visitor); end
+  def child_nodes; end
+
+  # [Array[ Comment | EmbDoc ]] the comments attached to this node
+  def comments; end
+
+  def deconstruct; end
+  def deconstruct_keys(_keys); end
+  def format(q); end
+
+  # [String] the closing declaration of the heredoc
   def value; end
 end
 
@@ -5924,6 +5947,9 @@ class SyntaxTree::Visitor < ::SyntaxTree::BasicVisitor
   # Visit a HeredocBeg node.
   def visit_heredoc_beg(node); end
 
+  # Visit a HeredocEnd node.
+  def visit_heredoc_end(node); end
+
   # Visit a HshPtn node.
   def visit_hshptn(node); end
 
@@ -6327,6 +6353,7 @@ class SyntaxTree::Visitor::FieldVisitor < ::SyntaxTree::BasicVisitor
   def visit_hash(node); end
   def visit_heredoc(node); end
   def visit_heredoc_beg(node); end
+  def visit_heredoc_end(node); end
   def visit_hshptn(node); end
   def visit_ident(node); end
   def visit_if(node); end

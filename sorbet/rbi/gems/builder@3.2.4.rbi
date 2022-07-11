@@ -408,11 +408,6 @@ class Builder::XmlMarkup < ::Builder::XmlBase
   def _text(text); end
 end
 
-# Enhance the Integer class with a XML escaped character conversion.
-class Integer < ::Numeric
-  include ::JSON::Ext::Generator::GeneratorMethods::Integer
-end
-
 class Symbol
   include ::Comparable
 end
