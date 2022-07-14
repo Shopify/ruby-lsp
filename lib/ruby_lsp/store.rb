@@ -40,6 +40,11 @@ module RubyLsp
       @state.clear
     end
 
+    sig { returns(T::Boolean) }
+    def empty?
+      @state.empty?
+    end
+
     sig { params(uri: String).void }
     def delete(uri)
       @state.delete(uri)

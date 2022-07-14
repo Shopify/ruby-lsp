@@ -81,6 +81,11 @@ module RubyLsp
         end
 
         on("shutdown") { shutdown }
+
+        on("exit") do
+          status = store.empty? ? 0 : 1
+          exit(status)
+        end
       end
 
       handler.start
