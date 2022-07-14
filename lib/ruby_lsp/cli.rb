@@ -50,6 +50,10 @@ module RubyLsp
           respond_with_document_symbol(request.dig(:params, :textDocument, :uri))
         end
 
+        on("textDocument/documentLink") do |request|
+          respond_with_document_link(request.dig(:params, :textDocument, :uri))
+        end
+
         on("textDocument/foldingRange") do |request|
           respond_with_folding_ranges(request.dig(:params, :textDocument, :uri))
         end
