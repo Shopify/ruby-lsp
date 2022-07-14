@@ -19,6 +19,10 @@ module RubyLsp
         )
       end
 
+      document_link_provider = if enabled_features.include?("documentLink")
+        Interface::DocumentLinkOptions.new(resolve_provider: false)
+      end
+
       folding_ranges_provider = if enabled_features.include?("foldingRanges")
         Interface::FoldingRangeClientCapabilities.new(line_folding_only: true)
       end
@@ -45,6 +49,7 @@ module RubyLsp
           ),
           selection_range_provider: enabled_features.include?("selectionRanges"),
           document_symbol_provider: document_symbol_provider,
+          document_link_provider: document_link_provider,
           folding_range_provider: folding_ranges_provider,
           semantic_tokens_provider: semantic_tokens_provider,
           document_formatting_provider: enabled_features.include?("formatting"),
@@ -82,6 +87,12 @@ module RubyLsp
     on("textDocument/documentSymbol") do |request|
       store.cache_fetch(request.dig(:params, :textDocument, :uri), :document_symbol) do |document|
         Requests::DocumentSymbol.new(document).run
+      end
+    end
+
+    on("textDocument/documentLink") do |request|
+      store.cache_fetch(request.dig(:params, :textDocument, :uri), :document_link) do |document|
+        RubyLsp::Requests::DocumentLink.new(document).run
       end
     end
 

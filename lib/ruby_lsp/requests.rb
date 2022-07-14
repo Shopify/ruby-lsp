@@ -5,6 +5,7 @@ module RubyLsp
   # Supported features
   #
   # - {RubyLsp::Requests::DocumentSymbol}
+  # - {RubyLsp::Requests::DocumentLink}
   # - {RubyLsp::Requests::FoldingRanges}
   # - {RubyLsp::Requests::SelectionRanges}
   # - {RubyLsp::Requests::SemanticHighlighting}
@@ -15,6 +16,7 @@ module RubyLsp
   module Requests
     autoload :BaseRequest, "ruby_lsp/requests/base_request"
     autoload :DocumentSymbol, "ruby_lsp/requests/document_symbol"
+    autoload :DocumentLink, "ruby_lsp/requests/document_link"
     autoload :FoldingRanges, "ruby_lsp/requests/folding_ranges"
     autoload :SelectionRanges, "ruby_lsp/requests/selection_ranges"
     autoload :SemanticHighlighting, "ruby_lsp/requests/semantic_highlighting"
