@@ -36,6 +36,13 @@ class StoreTest < Minitest::Test
     assert_empty(@store.instance_variable_get(:@state))
   end
 
+  def test_empty?
+    refute_empty(@store)
+
+    @store.clear
+    assert_empty(@store)
+  end
+
   def test_delete
     @store.delete("/foo/bar.rb")
 
