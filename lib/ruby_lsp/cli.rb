@@ -83,6 +83,8 @@ module RubyLsp
         on("shutdown") { shutdown }
 
         on("exit") do
+          # We return zero if shutdown has already been received or one otherwise as per the recommendation in the spec
+          # https://microsoft.github.io/language-server-protocol/specification/#exit
           status = store.empty? ? 0 : 1
           exit(status)
         end
