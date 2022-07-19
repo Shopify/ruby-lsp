@@ -1,6 +1,6 @@
-# typed: strict
+# typed: true
 # frozen_string_literal: true
 
 module RubyLsp
-  VERSION = T.let(File.read(File.expand_path("../VERSION", __dir__)).strip, String)
+  VERSION = File.read(File.expand_path("../VERSION", __dir__)).strip
 end
