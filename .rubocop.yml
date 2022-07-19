@@ -37,3 +37,4 @@ Sorbet/StrictSigil:
   Exclude:
     - "**/*.rake"
     - "test/**/*.rb"
+    - "lib/ruby-lsp.rb"
