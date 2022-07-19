@@ -141,7 +141,13 @@ export default class Client {
   }
 
   private async gemNotInstalled(): Promise<boolean> {
-    const bundlerCheck = await this.execInPath("bundle check");
+    let bundlerCheck: string;
+
+    try {
+      bundlerCheck = await this.execInPath("bundle check");
+    } catch {
+      bundlerCheck = "";
+    }
 
     if (bundlerCheck.includes("The Gemfile's dependencies are satisfied")) {
       return false;
