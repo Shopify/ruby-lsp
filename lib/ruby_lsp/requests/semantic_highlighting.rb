@@ -78,7 +78,7 @@ module RubyLsp
 
         @encoder = encoder
         @tokens = T.let([], T::Array[SemanticToken])
-        @tree = T.let(document.tree, SyntaxTree::Node)
+        @tree = T.let(T.must(document.tree), SyntaxTree::Node)
         @special_methods = T.let(nil, T.nilable(T::Array[String]))
       end
 
