@@ -36,6 +36,19 @@ class FormattingTest < Minitest::Test
     end
   end
 
+  def test_returns_nil_if_document_is_already_formatted
+    document = RubyLsp::Document.new(+<<~RUBY)
+      # typed: strict
+      # frozen_string_literal: true
+
+      class Foo
+        def foo
+        end
+      end
+    RUBY
+    assert_nil(RubyLsp::Requests::Formatting.new("file://#{__FILE__}", document).run)
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)

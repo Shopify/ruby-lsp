@@ -33,6 +33,8 @@ module RubyLsp
         formatted_text = formatted_file
         return unless formatted_text
 
+        return if formatted_text == @document.source
+
         size = @document.source.size
 
         [
