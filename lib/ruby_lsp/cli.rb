@@ -69,6 +69,14 @@ module RubyLsp
           respond_with_formatting(request.dig(:params, :textDocument, :uri))
         end
 
+        on("textDocument/onTypeFormatting") do |request|
+          uri = request.dig(:params, :textDocument, :uri)
+          position = request.dig(:params, :position)
+          character = request.dig(:params, :ch)
+
+          Requests::OnTypeFormatting.new(store.get(uri), position, character).run
+        end
+
         on("textDocument/documentHighlight") do |request|
           respond_with_document_highlight(request.dig(:params, :textDocument, :uri), request.dig(:params, :position))
         end

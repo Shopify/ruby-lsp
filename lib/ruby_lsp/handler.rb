@@ -113,6 +113,13 @@ module RubyLsp
         )
       end
 
+      on_type_formatting_provider = if enabled_features.include?("onTypeFormatting")
+        Interface::DocumentOnTypeFormattingOptions.new(
+          first_trigger_character: "{",
+          more_trigger_character: ["\n", "|"]
+        )
+      end
+
       Interface::InitializeResult.new(
         capabilities: Interface::ServerCapabilities.new(
           text_document_sync: Interface::TextDocumentSyncOptions.new(
@@ -124,6 +131,7 @@ module RubyLsp
           folding_range_provider: folding_ranges_provider,
           semantic_tokens_provider: semantic_tokens_provider,
           document_formatting_provider: enabled_features.include?("formatting"),
+          document_on_type_formatting_provider: on_type_formatting_provider,
           document_highlight_provider: enabled_features.include?("documentHighlights"),
           code_action_provider: enabled_features.include?("codeActions")
         )
