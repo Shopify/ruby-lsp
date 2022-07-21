@@ -6,6 +6,8 @@ module RubyLsp
     class DocumentLink < BaseRequest
       extend T::Sig
 
+      RUBY_ROOT = "RUBY_ROOT"
+
       sig { params(document: Document).void }
       def initialize(document)
         super
@@ -24,7 +26,11 @@ module RubyLsp
         match = node.value.match(%r{source://(?<path>.*):(?<line>\d+)$})
         return unless match
 
-        file_path = File.join(Bundler.bundle_path, "gems", match[:path])
+        file_path = if match[:path].start_with?(RUBY_ROOT)
+          match[:path].sub(RUBY_ROOT, RbConfig::CONFIG["rubylibdir"])
+        else
+          File.join(Bundler.bundle_path, "gems", match[:path])
+        end
         return unless File.exist?(file_path)
 
         target = "file://#{file_path}##{match[:line]}"
@@ -32,7 +38,7 @@ module RubyLsp
         @links << LanguageServer::Protocol::Interface::DocumentLink.new(
           range: range_from_syntax_tree_node(node),
           target: target,
-          tooltip: "Jump to the source"
+          tooltip: "Jump to #{target.delete_prefix("file://")}"
         )
       end
     end
