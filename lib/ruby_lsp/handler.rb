@@ -6,16 +6,16 @@ require "ruby_lsp/store"
 require "benchmark"
 
 module RubyLsp
+  Interface = LanguageServer::Protocol::Interface
+  Constant = LanguageServer::Protocol::Constant
+  Transport = LanguageServer::Protocol::Transport
+
   class Handler
     extend T::Sig
     VOID = T.let(Object.new.freeze, Object)
 
     sig { returns(Store) }
     attr_reader :store
-
-    Interface = LanguageServer::Protocol::Interface
-    Constant = LanguageServer::Protocol::Constant
-    Transport = LanguageServer::Protocol::Transport
 
     sig { void }
     def initialize

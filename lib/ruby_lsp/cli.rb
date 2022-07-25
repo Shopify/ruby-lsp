@@ -9,9 +9,6 @@ module RubyLsp
   module Cli
     extend T::Sig
 
-    Interface = LanguageServer::Protocol::Interface
-    Constant = LanguageServer::Protocol::Constant
-
     sig { void }
     def self.start
       handler = RubyLsp::Handler.new
