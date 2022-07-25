@@ -177,6 +177,7 @@ export default class Client {
 
   private registerAutoRestarts() {
     this.createRestartWatcher("Gemfile.lock");
+    this.createRestartWatcher(".rubocop.yml");
 
     // If a configuration that affects the Ruby LSP has changed, update the client options using the latest
     // configuration and restart the server
