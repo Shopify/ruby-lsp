@@ -34,6 +34,7 @@ module RubyLsp
         return unless formatted_text
 
         size = @document.source.size
+        return if formatted_text.size == size && formatted_text == @document.source
 
         [
           LanguageServer::Protocol::Interface::TextEdit.new(
