@@ -4,4 +4,4 @@
 require "sorbet-runtime"
 require "syntax_tree"
 require "ruby-lsp"
-require "ruby_lsp/cli"
+require "ruby_lsp/server"
