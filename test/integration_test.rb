@@ -212,6 +212,29 @@ class IntegrationTest < Minitest::Test
     )
   end
 
+  def test_incorrect_rubocop_configuration
+    initialize_lsp([])
+    open_file_with("class Foo\nend")
+
+    # Add an invalid cop to the configuration, but save a backup since we're modifying the real file
+    FileUtils.cp(".rubocop.yml", ".rubocop.yml.bak")
+    File.write(".rubocop.yml", "\nInvalidCop:\n  Enabled: true", mode: "a")
+
+    response = read_response("textDocument/publishDiagnostics")
+    assert_telemetry("textDocument/didOpen")
+
+    assert_equal("window/showMessage", response.dig(:method))
+    assert_equal(LanguageServer::Protocol::Constant::MessageType::ERROR, response.dig(:params, :type))
+    assert_equal(
+      "Error in RuboCop configuration file: unrecognized cop or department InvalidCop found in .rubocop.yml",
+      response.dig(:params, :message)
+    )
+  ensure
+    # Restore the original configuration file
+    FileUtils.rm(".rubocop.yml")
+    FileUtils.mv(".rubocop.yml.bak", ".rubocop.yml")
+  end
+
   private
 
   def assert_telemetry(request)

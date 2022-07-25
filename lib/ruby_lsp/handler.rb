@@ -194,6 +194,8 @@ module RubyLsp
           diagnostics: response.map(&:to_lsp_diagnostic)
         )
       )
+    rescue RuboCop::ValidationError => e
+      show_message(Constant::MessageType::ERROR, "Error in RuboCop configuration file: #{e.message}")
     end
 
     sig { params(uri: String).void }
@@ -201,6 +203,14 @@ module RubyLsp
       @writer.write(
         method: "textDocument/publishDiagnostics",
         params: Interface::PublishDiagnosticsParams.new(uri: uri, diagnostics: [])
+      )
+    end
+
+    sig { params(type: Integer, message: String).void }
+    def show_message(type, message)
+      @writer.write(
+        method: "window/showMessage",
+        params: Interface::ShowMessageParams.new(type: type, message: message)
       )
     end
 
