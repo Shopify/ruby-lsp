@@ -196,7 +196,10 @@ module RubyLsp
           when SyntaxTree::MethodAddBlock
             visit(receiver.block)
             receiver = receiver.call
-            receiver = receiver.receiver unless receiver.is_a?(SyntaxTree::FCall)
+
+            if receiver.is_a?(SyntaxTree::Call) || receiver.is_a?(SyntaxTree::CommandCall)
+              receiver = receiver.receiver
+            end
           else
             break
           end
