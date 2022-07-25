@@ -23,7 +23,7 @@ module RubyLsp
 
         sig { params(other: SyntaxTree::Node).returns(T.nilable(HighlightMatch)) }
         def highlight_type(other)
-          matched_highlight(other) if other.is_a?(SyntaxTree::Params) || @value == value(other)
+          matched_highlight(other) if other.is_a?(SyntaxTree::Params) || (@value && @value == value(other))
         end
 
         private
