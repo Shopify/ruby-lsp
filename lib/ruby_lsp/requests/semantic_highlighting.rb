@@ -180,7 +180,7 @@ module RubyLsp
         end
 
         name = node.keyword_rest&.name
-        add_token(node.keyword_rest.name.location, :variable) if name
+        add_token(name.location, :variable) if name
       end
 
       sig { params(node: SyntaxTree::VarField).void }
