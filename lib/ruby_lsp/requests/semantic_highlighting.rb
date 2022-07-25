@@ -179,7 +179,8 @@ module RubyLsp
           add_token(location_without_colon(location), :variable)
         end
 
-        add_token(node.keyword_rest.name.location, :variable) if node.keyword_rest
+        name = node.keyword_rest&.name
+        add_token(name.location, :variable) if name
       end
 
       sig { params(node: SyntaxTree::VarField).void }
