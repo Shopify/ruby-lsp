@@ -195,7 +195,7 @@ module RubyLsp
         )
       )
     rescue RuboCop::ValidationError => e
-      show_message(Constant::MessageType::ERROR, "RuboCop configuration error: #{e.message}")
+      show_message(Constant::MessageType::ERROR, "Error in RuboCop configuration file: #{e.message}")
     end
 
     sig { params(uri: String).void }
