@@ -3,5 +3,7 @@
 
 require "sorbet-runtime"
 require "syntax_tree"
+require "language_server-protocol"
+
 require "ruby-lsp"
-require "ruby_lsp/cli"
+require "ruby_lsp/handler"
