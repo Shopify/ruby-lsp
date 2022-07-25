@@ -130,14 +130,14 @@ module RubyLsp
       )
     end
 
-    sig { params(uri: String).returns(T::Array[LanguageServer::Protocol::Interface::DocumentSymbol]) }
+    sig { params(uri: String).returns(T.nilable(T::Array[LanguageServer::Protocol::Interface::DocumentSymbol])) }
     def respond_with_document_symbol(uri)
       store.cache_fetch(uri, :document_symbol) do |document|
         RubyLsp::Requests::DocumentSymbol.new(document).run
       end
     end
 
-    sig { params(uri: String).returns(T::Array[LanguageServer::Protocol::Interface::FoldingRange]) }
+    sig { params(uri: String).returns(T.nilable(T::Array[LanguageServer::Protocol::Interface::FoldingRange])) }
     def respond_with_folding_ranges(uri)
       store.cache_fetch(uri, :folding_ranges) do |document|
         Requests::FoldingRanges.new(document).run
@@ -148,12 +148,14 @@ module RubyLsp
       params(
         uri: String,
         positions: T::Array[Document::PositionShape]
-      ).returns(T::Array[T.nilable(RubyLsp::Requests::Support::SelectionRange)])
+      ).returns(T.nilable(T::Array[T.nilable(RubyLsp::Requests::Support::SelectionRange)]))
     end
     def respond_with_selection_ranges(uri, positions)
       ranges = store.cache_fetch(uri, :selection_ranges) do |document|
         Requests::SelectionRanges.new(document).run
       end
+
+      return if ranges.nil?
 
       # Per the selection range request spec (https://microsoft.github.io/language-server-protocol/specification#textDocument_selectionRange),
       # every position in the positions array should have an element at the same index in the response
@@ -166,7 +168,7 @@ module RubyLsp
       end
     end
 
-    sig { params(uri: String).returns(LanguageServer::Protocol::Interface::SemanticTokens) }
+    sig { params(uri: String).returns(T.nilable(LanguageServer::Protocol::Interface::SemanticTokens)) }
     def respond_with_semantic_highlighting(uri)
       store.cache_fetch(uri, :semantic_highlighting) do |document|
         T.cast(
@@ -178,7 +180,10 @@ module RubyLsp
 
     sig { params(uri: String).returns(T.nilable(T::Array[LanguageServer::Protocol::Interface::TextEdit])) }
     def respond_with_formatting(uri)
-      Requests::Formatting.new(uri, store.get(uri)).run
+      document = store.get(uri)
+      return if document.nil?
+
+      Requests::Formatting.new(uri, document).run
     end
 
     sig { params(uri: String).void }
@@ -186,6 +191,8 @@ module RubyLsp
       response = store.cache_fetch(uri, :diagnostics) do |document|
         Requests::Diagnostics.new(uri, document).run
       end
+
+      return if response.nil?
 
       @writer.write(
         method: "textDocument/publishDiagnostics",
@@ -205,7 +212,10 @@ module RubyLsp
     end
 
     sig do
-      params(uri: String, range: T::Range[Integer]).returns(T::Array[LanguageServer::Protocol::Interface::CodeAction])
+      params(
+        uri: String,
+        range: T::Range[Integer]
+      ).returns(T.nilable(T::Array[LanguageServer::Protocol::Interface::CodeAction]))
     end
     def respond_with_code_actions(uri, range)
       store.cache_fetch(uri, :code_actions) do |document|
@@ -217,10 +227,13 @@ module RubyLsp
       params(
         uri: String,
         position: Document::PositionShape
-      ).returns(T::Array[LanguageServer::Protocol::Interface::DocumentHighlight])
+      ).returns(T.nilable(T::Array[LanguageServer::Protocol::Interface::DocumentHighlight]))
     end
     def respond_with_document_highlight(uri, position)
-      Requests::DocumentHighlight.new(store.get(uri), position).run
+      document = store.get(uri)
+      return if document.nil? || document.tree.nil?
+
+      Requests::DocumentHighlight.new(document, position).run
     end
 
     sig do

@@ -24,10 +24,24 @@ class StoreTest < Minitest::Test
     file&.unlink
   end
 
-  def test_store_ignores_syntax_errors
-    @store.set("/foo/bar.rb", "def bar; end; end")
+  def test_push_edits_recovers_from_initial_syntax_error
+    file = Tempfile.new("foo.rb")
+    file.write("def great_code")
+    file.rewind
+    document = @store.get(file.path)
 
-    assert_equal(RubyLsp::Document.new("def foo; end"), @store.get("/foo/bar.rb"))
+    refute_nil(document)
+    assert_nil(document.tree)
+
+    @store.push_edits(file.path,
+      [{ range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } }, text: " ; end" }])
+
+    document = @store.get(file.path)
+    refute_nil(document)
+    refute_nil(document.tree)
+  ensure
+    file&.close
+    file&.unlink
   end
 
   def test_clear
@@ -47,6 +61,23 @@ class StoreTest < Minitest::Test
     @store.delete("/foo/bar.rb")
 
     assert_empty(@store.instance_variable_get(:@state))
+  end
+
+  def test_cache_fetch_doesnt_execute_block_on_reading_file_with_syntax_error
+    file = Tempfile.new("foo.rb")
+    file.write("def great_code")
+    file.rewind
+
+    counter = 0
+
+    5.times do
+      @store.cache_fetch(file.path, :any_key) { counter += 1 }
+    end
+
+    assert_equal(0, counter)
+  ensure
+    file&.close
+    file&.unlink
   end
 
   def test_cache
