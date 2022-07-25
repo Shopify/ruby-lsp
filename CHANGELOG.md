@@ -6,6 +6,12 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.5]
+
+- Add Ruby snippets (https://github.com/Shopify/vscode-ruby-lsp/pull/150)
+- Fix bundler check to verify gems are installed (https://github.com/Shopify/vscode-ruby-lsp/pull/165)
+- Auto-restart the LSP server on RuboCop config changes (https://github.com/Shopify/vscode-ruby-lsp/pull/167)
+
 ## [0.0.4]
 
 - Add extension logo (https://github.com/Shopify/vscode-ruby-lsp/pull/138)
