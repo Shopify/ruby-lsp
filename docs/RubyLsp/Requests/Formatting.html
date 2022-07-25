@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: RubyLsp::Requests::Formatting
+  
+    &mdash; Documentation by YARD 0.9.28
+  
+</title>
+
+  <link rel="stylesheet" href="../../css/style.css" type="text/css" />
+
+  <link rel="stylesheet" href="../../css/common.css" type="text/css" />
+
+<script type="text/javascript">
+  pathId = "RubyLsp::Requests::Formatting";
+  relpath = '../../';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="../../js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="../../js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="../../class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="../../_index.html">Index (F)</a> &raquo;
+    <span class='title'><span class='object_link'><a href="../../RubyLsp.html" title="RubyLsp (module)">RubyLsp</a></span></span> &raquo; <span class='title'><span class='object_link'><a href="../Requests.html" title="RubyLsp::Requests (module)">Requests</a></span></span>
+     &raquo; 
+    <span class="title">Formatting</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="../../class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: RubyLsp::Requests::Formatting
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName"><span class='object_link'><a href="BaseRequest.html" title="RubyLsp::Requests::BaseRequest (class)">BaseRequest</a></span></span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">SyntaxTree::Visitor</li>
+          
+            <li class="next"><span class='object_link'><a href="BaseRequest.html" title="RubyLsp::Requests::BaseRequest (class)">BaseRequest</a></span></li>
+          
+            <li class="next">RubyLsp::Requests::Formatting</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  <dl>
+      <dt>Extended by:</dt>
+      <dd>T::Sig</dd>
+  </dl>
+  
+  
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>lib/ruby_lsp/requests/formatting.rb</dd>
+  </dl>
+  
+</div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    
+<p><img src="../../misc/formatting.gif"></p>
+
+<p>The <a href="https://microsoft.github.io/language-server-protocol/specification#textDocument_formatting">formatting</a> request uses RuboCop to fix auto-correctable offenses in the document. This requires enabling format on save and registering the ruby-lsp as the Ruby formatter.</p>
+
+<h1 id="label-Example">Example</h1>
+
+<pre class="code ruby"><code class="ruby"><span class='kw'>def</span> <span class='id identifier rubyid_say_hello'>say_hello</span>
+<span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Hello</span><span class='tstring_end'>&quot;</span></span> <span class='comment'># --&gt; formatting: fixes the indentation on save
+</span><span class='kw'>end</span>
+</code></pre>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+
+
+
+
+
+
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(uri, document)  &#x21d2; Formatting </a>
+    
+
+    
+  </span>
+  
+  
+    <span class="note title constructor">constructor</span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>A new instance of Formatting.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#run-instance_method" title="#run (instance method)">#<strong>run</strong>  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+      
+    </ul>
+  
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <h3 class="inherited">Methods inherited from <span class='object_link'><a href="BaseRequest.html" title="RubyLsp::Requests::BaseRequest (class)">BaseRequest</a></span></h3>
+  <p class="inherited"><span class='object_link'><a href="BaseRequest.html#range_from_syntax_tree_node-instance_method" title="RubyLsp::Requests::BaseRequest#range_from_syntax_tree_node (method)">#range_from_syntax_tree_node</a></span></p>
+
+  
+  
+  <div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
+  
+    <div class="method_details first">
+  <h3 class="signature first" id="initialize-instance_method">
+  
+    #<strong>initialize</strong>(uri, document)  &#x21d2; <tt><span class='object_link'><a href="" title="RubyLsp::Requests::Formatting (class)">Formatting</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>Returns a new instance of Formatting.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+25
+26
+27
+28
+29</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ruby_lsp/requests/formatting.rb', line 25</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_uri'>uri</span><span class='comma'>,</span> <span class='id identifier rubyid_document'>document</span><span class='rparen'>)</span>
+  <span class='kw'>super</span><span class='lparen'>(</span><span class='id identifier rubyid_document'>document</span><span class='rparen'>)</span>
+
+  <span class='ivar'>@uri</span> <span class='op'>=</span> <span class='id identifier rubyid_uri'>uri</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+  
+</div>
+
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="run-instance_method">
+  
+    #<strong>run</strong>  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/ruby_lsp/requests/formatting.rb', line 32</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_run'>run</span>
+  <span class='id identifier rubyid_formatted_text'>formatted_text</span> <span class='op'>=</span> <span class='id identifier rubyid_formatted_file'>formatted_file</span>
+  <span class='kw'>return</span> <span class='kw'>unless</span> <span class='id identifier rubyid_formatted_text'>formatted_text</span>
+
+  <span class='id identifier rubyid_size'>size</span> <span class='op'>=</span> <span class='ivar'>@document</span><span class='period'>.</span><span class='id identifier rubyid_source'>source</span><span class='period'>.</span><span class='id identifier rubyid_size'>size</span>
+  <span class='kw'>return</span> <span class='kw'>if</span> <span class='id identifier rubyid_formatted_text'>formatted_text</span><span class='period'>.</span><span class='id identifier rubyid_size'>size</span> <span class='op'>==</span> <span class='id identifier rubyid_size'>size</span> <span class='op'>&amp;&amp;</span> <span class='id identifier rubyid_formatted_text'>formatted_text</span> <span class='op'>==</span> <span class='ivar'>@document</span><span class='period'>.</span><span class='id identifier rubyid_source'>source</span>
+
+  <span class='lbracket'>[</span>
+    <span class='const'>LanguageServer</span><span class='op'>::</span><span class='const'>Protocol</span><span class='op'>::</span><span class='const'>Interface</span><span class='op'>::</span><span class='const'>TextEdit</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span>
+      <span class='label'>range:</span> <span class='const'>LanguageServer</span><span class='op'>::</span><span class='const'>Protocol</span><span class='op'>::</span><span class='const'>Interface</span><span class='op'>::</span><span class='const'>Range</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span>
+        <span class='label'>start:</span> <span class='const'>LanguageServer</span><span class='op'>::</span><span class='const'>Protocol</span><span class='op'>::</span><span class='const'>Interface</span><span class='op'>::</span><span class='const'>Position</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>line:</span> <span class='int'>0</span><span class='comma'>,</span> <span class='label'>character:</span> <span class='int'>0</span><span class='rparen'>)</span><span class='comma'>,</span>
+        <span class='label'>end:</span> <span class='const'>LanguageServer</span><span class='op'>::</span><span class='const'>Protocol</span><span class='op'>::</span><span class='const'>Interface</span><span class='op'>::</span><span class='const'>Position</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>line:</span> <span class='id identifier rubyid_size'>size</span><span class='comma'>,</span> <span class='label'>character:</span> <span class='id identifier rubyid_size'>size</span><span class='rparen'>)</span>
+      <span class='rparen'>)</span><span class='comma'>,</span>
+      <span class='label'>new_text:</span> <span class='id identifier rubyid_formatted_text'>formatted_text</span>
+    <span class='rparen'>)</span><span class='comma'>,</span>
+  <span class='rbracket'>]</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Mon Jul 25 16:53:06 2022 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.28 (ruby-3.1.1).
+</div>
+
+    </div>
+  </body>
+</html>

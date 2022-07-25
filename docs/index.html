@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: README
+  
+    &mdash; Documentation by YARD 0.9.28
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" />
+
+<script type="text/javascript">
+  pathId = "README";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: README</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'>
+<p><img src="https://github.com/Shopify/ruby-lsp/workflows/CI/badge.svg"></p>
+
+<h1 id="label-Ruby+LSP">Ruby LSP</h1>
+
+<p>This gem is an implementation of the language server protocol specification for Ruby, used to improve editor features.</p>
+
+<h2 id="label-Usage">Usage</h2>
+
+<p>Install the gem. There’s no need to require it, since the server is used as a standalone executable.</p>
+
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_group'>group</span> <span class='symbol'>:development</span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_gem'>gem</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>ruby-lsp</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='label'>require:</span> <span class='kw'>false</span>
+<span class='kw'>end</span>
+</code></pre>
+
+<p>If using VS Code, install the <a href="https://github.com/Shopify/vscode-ruby-lsp">Ruby LSP plugin</a> to get the extra features in the editor.</p>
+
+<p>See the <a href="https://shopify.github.io/ruby-lsp">documentation</a> for <a href="https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html">supported features</a>.</p>
+
+<h2 id="label-Contributing">Contributing</h2>
+
+<p>Bug reports and pull requests are welcome on GitHub at <a href="https://github.com/Shopify/ruby-lsp">github.com/Shopify/ruby-lsp</a>. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the <a href="https://github.com/Shopify/ruby-lsp/blob/main/CODE_OF_CONDUCT.md">Contributor Covenant</a> code of conduct.</p>
+
+<h3 id="label-Expectation+testing">Expectation testing</h3>
+
+<p>To simplify the way we run tests over different pieces of Ruby code, we use a custom expectations test framework against a set of Ruby fixtures.</p>
+
+<p>To add a new fixture to the expectations test suite:</p>
+<ol><li>
+<p>Add a new fixture <code>my_fixture.rb</code> file under <code>test/fixtures</code></p>
+</li><li>
+<p>(optional) Add new expectations under <code>test/expectations/$HANDLER</code> for the request handlers you’re concerned by</p>
+</li><li>
+<p>Profit by running <code>bin/test test/requests/$HANDLER_expectations_test my_fixture</code></p>
+<ul><li>
+<p>Handlers for which you added expectations will be checked with <code>assert_expectations</code></p>
+</li><li>
+<p>Handlers without expectations will be ran against your new test to check that nothing breaks</p>
+</li></ul>
+</li></ol>
+
+<p>To add a new expectations test runner for a new request handler:</p>
+<ol><li>
+<p>Add a new file under <code>test/requests/$HANDLER_expectations_test.rb</code> that subclasses <code>ExpectationsTestRunner</code> and calls <code>expectations_tests $HANDLER, &quot;$EXPECTATIONS_DIR&quot;</code> where: <code>$HANDLER</code> is the fully qualified name or your handler class and <code>$EXPECTATIONS_DIR</code> is the directory name where you want to store the expectation files.</p>
+</li></ol>
+
+<p>“‘rb  # frozen_string_literal: true</p>
+
+<p>require “test_helper”  require “expectations/expectations_test_runner”</p>
+
+<p>class $HANDLERExpectationsTest &lt; ExpectationsTestRunner  expectations_tests RubyLsp::Requests::$HANDLER, “$EXPECTATIONS_DIR”  end  “‘</p>
+<ol><li>
+<p>(optional) Override the <code>run_expectations</code> and <code>assert_expectations</code> methods if needed. See the different request handler expectations runners under <code>test/requests/*_expectations_test.rb</code> for examples.</p>
+</li><li>
+<p>(optional) Add new fixtures for your handler under <code>test/fixtures</code></p>
+</li><li>
+<p>(optional) Add new expectations under <code>test/expectations/$HANDLER</code></p>
+</li><li>
+<p>No need to write the expectations by hand, just run the test with an empty expectation file and copy from the output.</p>
+</li><li>
+<p>Profit by running, <code>bin/test test/expectations_test $HANDLER</code></p>
+<ul><li>
+<p>Tests with expectations will be checked with <code>assert_expectations</code></p>
+</li><li>
+<p>Tests without expectations will be ran against your new $HANDLER to check that nothing breaks</p>
+</li></ul>
+</li></ol>
+
+<h2 id="label-Debugging">Debugging</h2>
+
+<h3 id="label-Tracing+LSP+requests+and+responses">Tracing LSP requests and responses</h3>
+
+<p>LSP server tracing can be controlled through the <code>ruby lsp.trace.server</code> config key in the <code>.vscode/settings.json</code> config file.</p>
+
+<p>Possible values are:</p>
+<ul><li>
+<p><code>off</code>: no tracing</p>
+</li><li>
+<p><code>messages</code>: display requests and responses notifications</p>
+</li><li>
+<p><code>verbose</code>: display each request and response as JSON</p>
+</li></ul>
+
+<h2 id="label-License">License</h2>
+
+<p>The gem is available as open source under the terms of the <a href="https://github.com/Shopify/ruby-lsp/blob/main/LICENSE.txt">MIT License</a>.</p>
+</div></div>
+
+      <div id="footer">
+  Generated on Mon Jul 25 16:53:06 2022 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.28 (ruby-3.1.1).
+</div>
+
+    </div>
+  </body>
+</html>
