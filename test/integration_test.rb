@@ -15,6 +15,7 @@ require "timeout"
 class IntegrationTest < Minitest::Test
   FEATURE_TO_PROVIDER = {
     "documentHighlights" => :documentHighlightProvider,
+    "documentLink" => :documentLinkProvider,
     "documentSymbols" => :documentSymbolProvider,
     "foldingRanges" => :foldingRangeProvider,
     "selectionRanges" => :selectionRangeProvider,
@@ -81,6 +82,21 @@ class IntegrationTest < Minitest::Test
 
     response = make_request("textDocument/semanticTokens/full", { textDocument: { uri: "file://#{__FILE__}" } })
     assert_equal([0, 6, 3, 0, 0], response[:result][:data])
+  end
+
+  def test_document_link
+    initialize_lsp(["documentLink"])
+    open_file_with(<<~DOC)
+      # source://syntax_tree-#{Gem::Specification.find_by_name("syntax_tree").version}/lib/syntax_tree.rb:39
+      def foo
+      end
+    DOC
+
+    read_response("textDocument/publishDiagnostics")
+    assert_telemetry("textDocument/didOpen")
+
+    response = make_request("textDocument/documentLink", { textDocument: { uri: "file://#{__FILE__}" } })
+    assert_match(/syntax_tree/, response.dig(:result, 0, :target))
   end
 
   def test_formatting
