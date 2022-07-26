@@ -54,6 +54,11 @@
               "type": "boolean",
               "default": true
             },
+            "documentLink": {
+              "description": "Enable document link, which generates clickable link to 'PATH' based on '# source://PATH' comments",
+              "type": "boolean",
+              "default": true
+            },
             "foldingRanges": {
               "description": "Enable folding ranges, which populates the places where code can be folded",
               "type": "boolean",
@@ -87,6 +92,7 @@
           },
           "default": {
             "documentHighlights": true,
+            "documentLink": true,
             "documentSymbols": true,
             "foldingRanges": true,
             "selectionRanges": true,
