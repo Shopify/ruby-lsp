@@ -6,16 +6,23 @@ require "ruby_lsp/store"
 require "benchmark"
 
 module RubyLsp
+  Interface = LanguageServer::Protocol::Interface
+  Constant = LanguageServer::Protocol::Constant
+  Transport = LanguageServer::Protocol::Transport
+
   class Handler
     extend T::Sig
     VOID = T.let(Object.new.freeze, Object)
 
+    sig { params(blk: T.proc.bind(Handler).params(arg0: T.untyped).void).void }
+    def self.start(&blk)
+      handler = new
+      handler.instance_exec(&blk)
+      handler.start
+    end
+
     sig { returns(Store) }
     attr_reader :store
-
-    Interface = LanguageServer::Protocol::Interface
-    Constant = LanguageServer::Protocol::Constant
-    Transport = LanguageServer::Protocol::Transport
 
     sig { void }
     def initialize
@@ -29,11 +36,6 @@ module RubyLsp
     def start
       $stderr.puts "Starting Ruby LSP..."
       @reader.read { |request| handle(request) }
-    end
-
-    sig { params(blk: T.proc.bind(Handler).params(arg0: T.untyped).void).void }
-    def config(&blk)
-      instance_exec(&blk)
     end
 
     private
@@ -84,103 +86,6 @@ module RubyLsp
       store.clear
     end
 
-    sig { params(enabled_features: T::Array[String]).returns(Interface::InitializeResult) }
-    def respond_with_capabilities(enabled_features)
-      document_symbol_provider = if enabled_features.include?("documentSymbols")
-        Interface::DocumentSymbolClientCapabilities.new(
-          hierarchical_document_symbol_support: true,
-          symbol_kind: {
-            value_set: Requests::DocumentSymbol::SYMBOL_KIND.values,
-          }
-        )
-      end
-
-      folding_ranges_provider = if enabled_features.include?("foldingRanges")
-        Interface::FoldingRangeClientCapabilities.new(line_folding_only: true)
-      end
-
-      semantic_tokens_provider = if enabled_features.include?("semanticHighlighting")
-        Interface::SemanticTokensRegistrationOptions.new(
-          document_selector: { scheme: "file", language: "ruby" },
-          legend: Interface::SemanticTokensLegend.new(
-            token_types: Requests::SemanticHighlighting::TOKEN_TYPES.keys,
-            token_modifiers: Requests::SemanticHighlighting::TOKEN_MODIFIERS.keys
-          ),
-          range: false,
-          full: {
-            delta: true,
-          }
-        )
-      end
-
-      Interface::InitializeResult.new(
-        capabilities: Interface::ServerCapabilities.new(
-          text_document_sync: Interface::TextDocumentSyncOptions.new(
-            change: Constant::TextDocumentSyncKind::INCREMENTAL,
-            open_close: true,
-          ),
-          selection_range_provider: enabled_features.include?("selectionRanges"),
-          document_symbol_provider: document_symbol_provider,
-          folding_range_provider: folding_ranges_provider,
-          semantic_tokens_provider: semantic_tokens_provider,
-          document_formatting_provider: enabled_features.include?("formatting"),
-          document_highlight_provider: enabled_features.include?("documentHighlights"),
-          code_action_provider: enabled_features.include?("codeActions")
-        )
-      )
-    end
-
-    sig { params(uri: String).returns(T::Array[LanguageServer::Protocol::Interface::DocumentSymbol]) }
-    def respond_with_document_symbol(uri)
-      store.cache_fetch(uri, :document_symbol) do |document|
-        RubyLsp::Requests::DocumentSymbol.new(document).run
-      end
-    end
-
-    sig { params(uri: String).returns(T::Array[LanguageServer::Protocol::Interface::FoldingRange]) }
-    def respond_with_folding_ranges(uri)
-      store.cache_fetch(uri, :folding_ranges) do |document|
-        Requests::FoldingRanges.new(document).run
-      end
-    end
-
-    sig do
-      params(
-        uri: String,
-        positions: T::Array[Document::PositionShape]
-      ).returns(T::Array[T.nilable(RubyLsp::Requests::Support::SelectionRange)])
-    end
-    def respond_with_selection_ranges(uri, positions)
-      ranges = store.cache_fetch(uri, :selection_ranges) do |document|
-        Requests::SelectionRanges.new(document).run
-      end
-
-      # Per the selection range request spec (https://microsoft.github.io/language-server-protocol/specification#textDocument_selectionRange),
-      # every position in the positions array should have an element at the same index in the response
-      # array. For positions without a valid selection range, the corresponding element in the response
-      # array will be nil.
-      positions.map do |position|
-        ranges.find do |range|
-          range.cover?(position)
-        end
-      end
-    end
-
-    sig { params(uri: String).returns(LanguageServer::Protocol::Interface::SemanticTokens) }
-    def respond_with_semantic_highlighting(uri)
-      store.cache_fetch(uri, :semantic_highlighting) do |document|
-        T.cast(
-          Requests::SemanticHighlighting.new(document, encoder: Requests::Support::SemanticTokenEncoder.new).run,
-          LanguageServer::Protocol::Interface::SemanticTokens
-        )
-      end
-    end
-
-    sig { params(uri: String).returns(T.nilable(T::Array[LanguageServer::Protocol::Interface::TextEdit])) }
-    def respond_with_formatting(uri)
-      Requests::Formatting.new(uri, store.get(uri)).run
-    end
-
     sig { params(uri: String).void }
     def send_diagnostics(uri)
       response = store.cache_fetch(uri, :diagnostics) do |document|
@@ -212,25 +117,6 @@ module RubyLsp
         method: "window/showMessage",
         params: Interface::ShowMessageParams.new(type: type, message: message)
       )
-    end
-
-    sig do
-      params(uri: String, range: T::Range[Integer]).returns(T::Array[LanguageServer::Protocol::Interface::CodeAction])
-    end
-    def respond_with_code_actions(uri, range)
-      store.cache_fetch(uri, :code_actions) do |document|
-        Requests::CodeActions.new(uri, document, range).run
-      end
-    end
-
-    sig do
-      params(
-        uri: String,
-        position: Document::PositionShape
-      ).returns(T::Array[LanguageServer::Protocol::Interface::DocumentHighlight])
-    end
-    def respond_with_document_highlight(uri, position)
-      Requests::DocumentHighlight.new(store.get(uri), position).run
     end
 
     sig do
