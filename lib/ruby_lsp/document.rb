@@ -9,7 +9,7 @@ module RubyLsp
     RangeShape = T.type_alias { { start: PositionShape, end: PositionShape } }
     EditShape = T.type_alias { { range: RangeShape, text: String } }
 
-    sig { returns(SyntaxTree::Node) }
+    sig { returns(T.nilable(SyntaxTree::Node)) }
     attr_reader :tree
 
     sig { returns(String) }
@@ -20,11 +20,13 @@ module RubyLsp
 
     sig { params(source: String).void }
     def initialize(source)
-      @tree = T.let(SyntaxTree.parse(source), SyntaxTree::Node)
       @cache = T.let({}, T::Hash[Symbol, T.untyped])
       @syntax_error_edits = T.let([], T::Array[EditShape])
-      @source = source
+      @source = T.let(source, String)
       @parsable_source = T.let(source.dup, String)
+      @tree = T.let(SyntaxTree.parse(@source), T.nilable(SyntaxTree::Node))
+    rescue SyntaxTree::Parser::ParseError
+      # Do not raise if we failed to parse
     end
 
     sig { params(other: Document).returns(T::Boolean) }
@@ -65,6 +67,11 @@ module RubyLsp
     sig { returns(T::Boolean) }
     def syntax_errors?
       @syntax_error_edits.any?
+    end
+
+    sig { returns(T::Boolean) }
+    def parsed?
+      !@tree.nil?
     end
 
     private

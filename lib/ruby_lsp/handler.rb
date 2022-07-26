@@ -92,6 +92,8 @@ module RubyLsp
         Requests::Diagnostics.new(uri, document).run
       end
 
+      return if response.nil?
+
       @writer.write(
         method: "textDocument/publishDiagnostics",
         params: Interface::PublishDiagnosticsParams.new(

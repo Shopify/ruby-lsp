@@ -245,6 +245,23 @@ class DocumentTest < Minitest::Test
     RUBY
   end
 
+  def test_parsed_returns_true_when_parsed_successfully
+    document = RubyLsp::Document.new(+<<~RUBY)
+      # frozen_string_literal: true
+      puts 'hello'
+    RUBY
+
+    assert_predicate(document, :parsed?)
+  end
+
+  def test_parsed_returns_false_when_parsing_fails
+    document = RubyLsp::Document.new(+<<~RUBY)
+      class Foo
+    RUBY
+
+    refute_predicate(document, :parsed?)
+  end
+
   private
 
   def assert_error_edit(actual, error_range)
