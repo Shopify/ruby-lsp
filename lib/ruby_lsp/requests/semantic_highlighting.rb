@@ -179,7 +179,10 @@ module RubyLsp
           add_token(location_without_colon(location), :variable)
         end
 
-        name = node.keyword_rest&.name
+        rest = node.keyword_rest
+        return if rest.nil? || rest.is_a?(SyntaxTree::ArgsForward)
+
+        name = rest.name
         add_token(name.location, :variable) if name
       end
 
