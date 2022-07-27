@@ -7,7 +7,7 @@ module RubyLsp
     #
     # The [document link](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentLink)
     # makes `# source://PATH_TO_FILE:line` comments in a Ruby/RBI file clickable if the file exists.
-    # When the user clicks the link, it'll take the user to that location.
+    # When the user clicks the link, it'll open that location.
     #
     # # Example
     #
