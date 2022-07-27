@@ -29,7 +29,7 @@ module RubyLsp
       def initialize(document, position)
         @highlights = T.let([], T::Array[LanguageServer::Protocol::Interface::DocumentHighlight])
         position = Document::Scanner.new(document.source).find_position(position)
-        @target = T.let(find(T.must(document.tree), position), T.nilable(VarNodes))
+        @target = T.let(find(T.must(document.tree), position), T.nilable(Support::HighlightTarget))
 
         super(document)
       end

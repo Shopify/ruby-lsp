@@ -33,6 +33,7 @@ module RubyLsp
         sig { params(other: SyntaxTree::Node).returns(T.nilable(HighlightMatch)) }
         def matched_highlight(other)
           case @node
+          # Method definitions and invocations
           when SyntaxTree::VCall, SyntaxTree::FCall, SyntaxTree::Call, SyntaxTree::Command,
                SyntaxTree::CommandCall, SyntaxTree::Def, SyntaxTree::Defs, SyntaxTree::DefEndless
             case other
@@ -41,6 +42,7 @@ module RubyLsp
             when SyntaxTree::Def, SyntaxTree::Defs, SyntaxTree::Defs
               HighlightMatch.new(type: WRITE, node: other.name)
             end
+          # Variables, parameters and constants
           when SyntaxTree::GVar, SyntaxTree::IVar, SyntaxTree::Const, SyntaxTree::CVar, SyntaxTree::VarField,
                SyntaxTree::VarRef, SyntaxTree::Ident
             case other
