@@ -6,6 +6,19 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.2.1]
+
+- Implement the exit lifecycle request (https://github.com/Shopify/ruby-lsp/pull/198)
+- Remove the Sorbet runtime from the gem's default load path (https://github.com/Shopify/ruby-lsp/pull/214)
+- Return nil if the document is already formatted (https://github.com/Shopify/ruby-lsp/pull/216)
+- Handle nameless keyword rest parameters in semantic highlighting (https://github.com/Shopify/ruby-lsp/pull/222)
+- Display a warning on invalid RuboCop configuration (https://github.com/Shopify/ruby-lsp/pull/226)
+- Centralize request handling logic in server.rb (https://github.com/Shopify/ruby-lsp/pull/221)
+- Fix folding ranges for chained invocations involving an FCall (https://github.com/Shopify/ruby-lsp/pull/223)
+- Fix handling of argument fowarding in semantic highlighting (https://github.com/Shopify/ruby-lsp/pull/228)
+- Recover from initial syntax errors when opening documents (https://github.com/Shopify/ruby-lsp/pull/224)
+- Highlight occurrences and definitions in document highlight (https://github.com/Shopify/ruby-lsp/pull/187)
+
 ## [0.2.0]
 
 - Add semantic token for keyword and keyword rest params (https://github.com/Shopify/ruby-lsp/pull/142)
