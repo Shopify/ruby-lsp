@@ -14,16 +14,28 @@ end
 # So, why does Bootsnap do alias-method-chain and not prepend? Glad you asked!
 # That's because RubyGems does alias-method-chain for Kernel#require and such,
 # so, if Bootsnap were to do prepend, it might end up breaking RubyGems.
+#
+# source://tapioca-0.9.2/lib/tapioca/runtime/trackers/autoload.rb:65
 class Module
+  # source://tapioca-0.9.2/lib/tapioca/runtime/trackers/mixin.rb:78
   def append_features(constant); end
+
+  # source://tapioca-0.9.2/lib/tapioca/runtime/trackers/autoload.rb:68
   def autoload(const_name, path); end
+
+  # source://tapioca-0.9.2/lib/tapioca/runtime/trackers/mixin.rb:90
   def extend_object(obj); end
+
+  # source://tapioca-0.9.2/lib/tapioca/runtime/trackers/mixin.rb:66
   def prepend_features(constant); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/rbi_ext/model.rb:4
 module RBI; end
 
+# source://tapioca-0.9.2/lib/tapioca/rbi_ext/model.rb:5
 class RBI::Tree < ::RBI::NodeWithComments
+  # source://rbi-0.0.15/lib/rbi/model.rb:115
   sig do
     params(
       loc: T.nilable(::RBI::Loc),
@@ -33,18 +45,23 @@ class RBI::Tree < ::RBI::NodeWithComments
   end
   def initialize(loc: T.unsafe(nil), comments: T.unsafe(nil), &block); end
 
+  # source://rbi-0.0.15/lib/rbi/model.rb:122
   sig { params(node: ::RBI::Node).void }
   def <<(node); end
 
+  # source://rbi-0.0.15/lib/rbi/printer.rb:224
   sig { override.params(v: ::RBI::Printer).void }
   def accept_printer(v); end
 
+  # source://rbi-0.0.15/lib/rbi/rewriters/add_sig_templates.rb:66
   sig { params(with_todo_comment: T::Boolean).void }
   def add_sig_templates!(with_todo_comment: T.unsafe(nil)); end
 
+  # source://rbi-0.0.15/lib/rbi/rewriters/annotate.rb:48
   sig { params(annotation: ::String, annotate_scopes: T::Boolean, annotate_properties: T::Boolean).void }
   def annotate!(annotation, annotate_scopes: T.unsafe(nil), annotate_properties: T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/rbi_ext/model.rb:38
   sig do
     params(
       name: ::String,
@@ -54,15 +71,19 @@ class RBI::Tree < ::RBI::NodeWithComments
   end
   def create_class(name, superclass_name: T.unsafe(nil), &block); end
 
+  # source://tapioca-0.9.2/lib/tapioca/rbi_ext/model.rb:45
   sig { params(name: ::String, value: ::String).void }
   def create_constant(name, value:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/rbi_ext/model.rb:55
   sig { params(name: ::String).void }
   def create_extend(name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/rbi_ext/model.rb:50
   sig { params(name: ::String).void }
   def create_include(name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/rbi_ext/model.rb:88
   sig do
     params(
       name: ::String,
@@ -74,15 +95,19 @@ class RBI::Tree < ::RBI::NodeWithComments
   end
   def create_method(name, parameters: T.unsafe(nil), return_type: T.unsafe(nil), class_method: T.unsafe(nil), visibility: T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/rbi_ext/model.rb:60
   sig { params(name: ::String).void }
   def create_mixes_in_class_methods(name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/rbi_ext/model.rb:25
   sig { params(name: ::String, block: T.nilable(T.proc.params(scope: ::RBI::Scope).void)).returns(::RBI::Scope) }
   def create_module(name, &block); end
 
+  # source://tapioca-0.9.2/lib/tapioca/rbi_ext/model.rb:9
   sig { params(constant: ::Module, block: T.nilable(T.proc.params(scope: ::RBI::Scope).void)).void }
   def create_path(constant, &block); end
 
+  # source://tapioca-0.9.2/lib/tapioca/rbi_ext/model.rb:74
   sig do
     params(
       name: ::String,
@@ -95,18 +120,23 @@ class RBI::Tree < ::RBI::NodeWithComments
   end
   def create_type_variable(name, type:, variance: T.unsafe(nil), fixed: T.unsafe(nil), upper: T.unsafe(nil), lower: T.unsafe(nil)); end
 
+  # source://rbi-0.0.15/lib/rbi/rewriters/deannotate.rb:40
   sig { params(annotation: ::String).void }
   def deannotate!(annotation); end
 
+  # source://rbi-0.0.15/lib/rbi/model.rb:128
   sig { returns(T::Boolean) }
   def empty?; end
 
+  # source://rbi-0.0.15/lib/rbi/rewriters/group_nodes.rb:38
   sig { void }
   def group_nodes!; end
 
+  # source://rbi-0.0.15/lib/rbi/index.rb:64
   sig { returns(::RBI::Index) }
   def index; end
 
+  # source://rbi-0.0.15/lib/rbi/rewriters/merge_trees.rb:318
   sig do
     params(
       other: ::RBI::Tree,
@@ -117,44 +147,60 @@ class RBI::Tree < ::RBI::NodeWithComments
   end
   def merge(other, left_name: T.unsafe(nil), right_name: T.unsafe(nil), keep: T.unsafe(nil)); end
 
+  # source://rbi-0.0.15/lib/rbi/rewriters/nest_non_public_methods.rb:45
   sig { void }
   def nest_non_public_methods!; end
 
+  # source://rbi-0.0.15/lib/rbi/rewriters/nest_singleton_methods.rb:35
   sig { void }
   def nest_singleton_methods!; end
 
+  # source://rbi-0.0.15/lib/rbi/model.rb:106
   sig { returns(T::Array[::RBI::Node]) }
   def nodes; end
 
+  # source://rbi-0.0.15/lib/rbi/printer.rb:231
   sig { override.returns(T::Boolean) }
   def oneline?; end
 
+  # source://rbi-0.0.15/lib/rbi/rewriters/sort_nodes.rb:105
   sig { void }
   def sort_nodes!; end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/rbi_ext/model.rb:108
   sig { params(node: ::RBI::Node).returns(::RBI::Node) }
   def create_node(node); end
 
+  # source://tapioca-0.9.2/lib/tapioca/rbi_ext/model.rb:103
   sig { returns(T::Hash[::String, ::RBI::Node]) }
   def nodes_cache; end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/rbi_ext/model.rb:118
 class RBI::TypedParam < ::T::Struct
   const :param, ::RBI::Param
   const :type, ::String
 
   class << self
+    # source://sorbet-runtime-0.5.10206/lib/types/struct.rb:13
     def inherited(s); end
   end
 end
 
+# source://rbi-0.0.15/lib/rbi/version.rb:5
 RBI::VERSION = T.let(T.unsafe(nil), String)
 
+# source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:5
 module T::Generic
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:13
   def [](*types); end
+
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:21
   def type_member(variance = T.unsafe(nil), fixed: T.unsafe(nil), lower: T.unsafe(nil), upper: T.unsafe(nil), &bounds_proc); end
+
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:37
   def type_template(variance = T.unsafe(nil), fixed: T.unsafe(nil), lower: T.unsafe(nil), upper: T.unsafe(nil), &bounds_proc); end
 end
 
@@ -164,48 +210,348 @@ end
 #
 # We are interested in the data of the `[]`, `type_member` and `type_template` calls which
 # are all needed to generate good generic information at runtime.
+#
+# source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:12
 module T::Generic::TypeStoragePatch
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:13
   def [](*types); end
+
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:21
   def type_member(variance = T.unsafe(nil), fixed: T.unsafe(nil), lower: T.unsafe(nil), upper: T.unsafe(nil), &bounds_proc); end
+
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:37
   def type_template(variance = T.unsafe(nil), fixed: T.unsafe(nil), lower: T.unsafe(nil), upper: T.unsafe(nil), &bounds_proc); end
 end
 
-class T::Types::Simple < ::T::Types::Base
+# source://tapioca-0.9.2/lib/tapioca/sorbet_ext/proc_bind_patch.rb:28
+module T::Private::Methods
+  class << self
+    # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/proc_bind_patch.rb:30
+    def finalize_proc(decl); end
+  end
+end
+
+# source://sorbet-runtime-0.5.10206/lib/types/private/methods/_methods.rb:29
+T::Private::Methods::ARG_NOT_PROVIDED = T.let(T.unsafe(nil), Object)
+
+class T::Private::Methods::Declaration < ::Struct
+  def bind; end
+  def bind=(_); end
+  def checked; end
+  def checked=(_); end
+  def finalized; end
+  def finalized=(_); end
+  def mod; end
+  def mod=(_); end
+  def mode; end
+  def mode=(_); end
+  def on_failure; end
+  def on_failure=(_); end
+  def override_allow_incompatible; end
+  def override_allow_incompatible=(_); end
+  def params; end
+  def params=(_); end
+  def raw; end
+  def raw=(_); end
+  def returns; end
+  def returns=(_); end
+  def type_parameters; end
+  def type_parameters=(_); end
+
+  class << self
+    def [](*_arg0); end
+    def inspect; end
+    def keyword_init?; end
+    def members; end
+    def new(*_arg0); end
+  end
+end
+
+class T::Private::Methods::DeclarationBlock < ::Struct
+  def blk; end
+  def blk=(_); end
+  def final; end
+  def final=(_); end
+  def loc; end
+  def loc=(_); end
+  def mod; end
+  def mod=(_); end
+  def raw; end
+  def raw=(_); end
+
+  class << self
+    def [](*_arg0); end
+    def inspect; end
+    def keyword_init?; end
+    def members; end
+    def new(*_arg0); end
+  end
+end
+
+module T::Private::Methods::MethodHooks
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/_methods.rb:517
+  def method_added(name); end
+end
+
+module T::Private::Methods::Modes
+  class << self
+    # source://sorbet-runtime-0.5.10206/lib/types/private/methods/modes.rb:8
+    def abstract; end
+
+    # source://sorbet-runtime-0.5.10206/lib/types/private/methods/modes.rb:11
+    def overridable; end
+
+    # source://sorbet-runtime-0.5.10206/lib/types/private/methods/modes.rb:17
+    def overridable_override; end
+
+    # source://sorbet-runtime-0.5.10206/lib/types/private/methods/modes.rb:14
+    def override; end
+
+    # source://sorbet-runtime-0.5.10206/lib/types/private/methods/modes.rb:5
+    def standard; end
+
+    # source://sorbet-runtime-0.5.10206/lib/types/private/methods/modes.rb:20
+    def untyped; end
+  end
+end
+
+# source://sorbet-runtime-0.5.10206/lib/types/private/methods/modes.rb:23
+T::Private::Methods::Modes::MODES = T.let(T.unsafe(nil), Array)
+
+# source://sorbet-runtime-0.5.10206/lib/types/private/methods/modes.rb:27
+T::Private::Methods::Modes::NON_OVERRIDE_MODES = T.let(T.unsafe(nil), Array)
+
+# source://sorbet-runtime-0.5.10206/lib/types/private/methods/modes.rb:25
+T::Private::Methods::Modes::OVERRIDABLE_MODES = T.let(T.unsafe(nil), Array)
+
+# source://sorbet-runtime-0.5.10206/lib/types/private/methods/modes.rb:26
+T::Private::Methods::Modes::OVERRIDE_MODES = T.let(T.unsafe(nil), Array)
+
+# source://sorbet-runtime-0.5.10206/lib/types/private/methods/_methods.rb:30
+T::Private::Methods::PROC_TYPE = T.let(T.unsafe(nil), Object)
+
+# source://tapioca-0.9.2/lib/tapioca/sorbet_ext/proc_bind_patch.rb:29
+module T::Private::Methods::ProcBindPatch
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/proc_bind_patch.rb:30
+  def finalize_proc(decl); end
+end
+
+class T::Private::Methods::Signature
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:36
+  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: T.unsafe(nil), override_allow_incompatible: T.unsafe(nil), defined_raw: T.unsafe(nil)); end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:149
+  def arg_count; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def arg_types; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:143
+  def as_alias(alias_name); end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def bind; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def block_name; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def block_type; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def check_level; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def defined_raw; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:161
+  def dsl_method; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:166
+  def each_args_value_type(args); end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def has_keyrest; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def has_rest; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def keyrest_name; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def keyrest_type; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:153
+  def kwarg_names; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def kwarg_types; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def method; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:215
+  def method_desc; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def method_name; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def mode; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def on_failure; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def override_allow_incompatible; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:157
+  def owner; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def parameters; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def req_arg_count; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def req_kwarg_names; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def rest_name; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def rest_type; end
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:5
+  def return_type; end
+
+  protected
+
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:140
+  def method_name=(_arg0); end
+
+  class << self
+    # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:11
+    def new_untyped(method:, mode: T.unsafe(nil), parameters: T.unsafe(nil)); end
+  end
+end
+
+# source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature.rb:224
+T::Private::Methods::Signature::EMPTY_HASH = T.let(T.unsafe(nil), Hash)
+
+module T::Private::Methods::SignatureValidation
+  class << self
+    # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature_validation.rb:8
+    def validate(signature); end
+
+    # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature_validation.rb:79
+    def validate_non_override_mode(signature); end
+
+    # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature_validation.rb:58
+    def validate_override_mode(signature, super_signature); end
+
+    # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature_validation.rb:116
+    def validate_override_shape(signature, super_signature); end
+
+    # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature_validation.rb:172
+    def validate_override_types(signature, super_signature); end
+
+    private
+
+    # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature_validation.rb:211
+    def base_override_loc_str(signature, super_signature); end
+
+    # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature_validation.rb:217
+    def method_loc_str(method); end
+
+    # source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature_validation.rb:50
+    def pretty_mode(signature); end
+  end
+end
+
+# source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature_validation.rb:5
+T::Private::Methods::SignatureValidation::Methods = T::Private::Methods
+
+# source://sorbet-runtime-0.5.10206/lib/types/private/methods/signature_validation.rb:6
+T::Private::Methods::SignatureValidation::Modes = T::Private::Methods::Modes
+
+module T::Private::Methods::SingletonMethodHooks
+  # source://sorbet-runtime-0.5.10206/lib/types/private/methods/_methods.rb:524
+  def singleton_method_added(name); end
+end
+
+# source://sorbet-runtime-0.5.10206/lib/types/private/methods/_methods.rb:581
+T::Private::Methods::TOP_SELF = T.let(T.unsafe(nil), Object)
+
+class T::Types::Proc < ::T::Types::Base; end
+
+# source://tapioca-0.9.2/lib/tapioca/sorbet_ext/proc_bind_patch.rb:6
+module T::Types::ProcBindPatch
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/proc_bind_patch.rb:7
+  def initialize(arg_types, returns, bind = T.unsafe(nil)); end
+
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/proc_bind_patch.rb:15
   def name; end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/sorbet_ext/name_patch.rb:6
+class T::Types::Simple < ::T::Types::Base
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:64
+  def name; end
+end
+
+# source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:59
 module T::Types::Simple::GenericPatch
   # This method intercepts calls to the `name` method for simple types, so that
   # it can ask the name to the type if the type is generic, since, by this point,
   # we've created a clone of that type with the `name` method returning the
   # appropriate name for that specific concrete type.
+  #
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:64
   def name; end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/sorbet_ext/name_patch.rb:7
 module T::Types::Simple::NamePatch
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/name_patch.rb:10
   def name; end
+
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/name_patch.rb:16
+  def qualified_name_of(constant); end
 end
+
+# source://tapioca-0.9.2/lib/tapioca/sorbet_ext/name_patch.rb:8
+T::Types::Simple::NamePatch::NAME_METHOD = T.let(T.unsafe(nil), UnboundMethod)
 
 module T::Types::Simple::Private; end
 
 module T::Types::Simple::Private::Pool
   class << self
+    # source://sorbet-runtime-0.5.10206/lib/types/types/simple.rb:62
     def type_for_module(mod); end
   end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:80
 module T::Utils
   class << self
+    # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:82
     def coerce(val); end
   end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:81
 module T::Utils::CoercePatch
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:82
   def coerce(val); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/runtime/trackers/autoload.rb:4
 module Tapioca
   class << self
+    # source://tapioca-0.9.2/lib/tapioca.rb:14
     sig do
       type_parameters(:Result)
         .params(
@@ -216,53 +562,88 @@ module Tapioca
   end
 end
 
+# source://tapioca-0.9.2/lib/tapioca.rb:31
 Tapioca::BINARY_FILE = T.let(T.unsafe(nil), String)
+
+# source://tapioca-0.9.2/lib/tapioca.rb:51
 Tapioca::CENTRAL_REPO_ANNOTATIONS_DIR = T.let(T.unsafe(nil), String)
+
+# source://tapioca-0.9.2/lib/tapioca.rb:50
 Tapioca::CENTRAL_REPO_INDEX_PATH = T.let(T.unsafe(nil), String)
+
+# source://tapioca-0.9.2/lib/tapioca.rb:49
 Tapioca::CENTRAL_REPO_ROOT_URI = T.let(T.unsafe(nil), String)
 
+# source://tapioca-0.9.2/lib/tapioca/cli.rb:5
 class Tapioca::Cli < ::Thor
   include ::Tapioca::CliHelper
   include ::Tapioca::ConfigHelper
   include ::Tapioca::EnvHelper
 
+  # source://tapioca-0.9.2/lib/tapioca/cli.rb:322
   def __print_version; end
+
+  # source://tapioca-0.9.2/lib/tapioca/cli.rb:304
   def annotations; end
+
+  # source://tapioca-0.9.2/lib/tapioca/cli.rb:279
   def check_shims; end
+
+  # source://tapioca-0.9.2/lib/tapioca/cli.rb:36
   def configure; end
+
+  # source://tapioca-0.9.2/lib/tapioca/cli.rb:119
   def dsl(*constants); end
+
+  # source://tapioca-0.9.2/lib/tapioca/cli.rb:224
   def gem(*gems); end
+
+  # source://tapioca-0.9.2/lib/tapioca/cli.rb:25
   def init; end
+
+  # source://tapioca-0.9.2/lib/tapioca/cli.rb:47
   def require; end
+
+  # source://tapioca-0.9.2/lib/tapioca/cli.rb:66
   def todo; end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/cli.rb:334
   def print_init_next_steps; end
 
   class << self
+    # source://tapioca-0.9.2/lib/tapioca/cli.rb:327
     def exit_on_failure?; end
   end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/cli.rb:10
 Tapioca::Cli::FILE_HEADER_OPTION_DESC = T.let(T.unsafe(nil), String)
 
+# source://tapioca-0.9.2/lib/tapioca/helpers/cli_helper.rb:5
 module Tapioca::CliHelper
   requires_ancestor { Thor::Shell }
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/cli_helper.rb:33
   sig { params(options: T::Hash[::Symbol, T.untyped]).returns(T.nilable(::String)) }
   def netrc_file(options); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/cli_helper.rb:26
   sig { params(options: T::Hash[::Symbol, T.untyped]).returns(::Tapioca::RBIFormatter) }
   def rbi_formatter(options); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/cli_helper.rb:12
   sig { params(message: ::String, color: T.any(::Symbol, T::Array[::Symbol])).void }
   def say_error(message = T.unsafe(nil), *color); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/commands.rb:5
 module Tapioca::Commands; end
 
+# source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:6
 class Tapioca::Commands::Annotations < ::Tapioca::Commands::Command
+  # source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:18
   sig do
     params(
       central_repo_root_uris: T::Array[::String],
@@ -274,61 +655,79 @@ class Tapioca::Commands::Annotations < ::Tapioca::Commands::Command
   end
   def initialize(central_repo_root_uris:, auth: T.unsafe(nil), netrc_file: T.unsafe(nil), central_repo_index_path: T.unsafe(nil), typed_overrides: T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:36
   sig { override.void }
   def execute; end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:189
   sig { params(name: ::String, content: ::String).returns(::String) }
   def add_header(name, content); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:207
   sig { params(name: ::String, content: ::String).returns(::String) }
   def apply_typed_override(name, content); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:130
   sig { params(repo_uris: T::Array[::String], gem_name: ::String).void }
   def fetch_annotation(repo_uris, gem_name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:110
   sig { params(gem_names: T::Array[::String]).returns(T::Array[::String]) }
   def fetch_annotations(gem_names); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:148
   sig { params(repo_uri: ::String, path: ::String).returns(T.nilable(::String)) }
   def fetch_file(repo_uri, path); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:165
   sig { params(repo_uri: ::String, path: ::String).returns(T.nilable(::String)) }
   def fetch_http_file(repo_uri, path); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:99
   sig { params(repo_uri: ::String, repo_number: T.nilable(::Integer)).returns(T.nilable(Tapioca::RepoIndex)) }
   def fetch_index(repo_uri, repo_number:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:77
   sig { returns(T::Hash[::String, Tapioca::RepoIndex]) }
   def fetch_indexes; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:157
   sig { params(repo_uri: ::String, path: ::String).returns(T.nilable(::String)) }
   def fetch_local_file(repo_uri, path); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:46
   sig { returns(T::Array[::String]) }
   def list_gemfile_gems; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:219
   sig { params(gem_name: ::String, contents: T::Array[::String]).returns(T.nilable(::String)) }
   def merge_files(gem_name, contents); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:56
   sig { params(project_gems: T::Array[::String]).void }
   def remove_expired_annotations(project_gems); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:246
   sig { returns(T::Hash[::String, T.nilable(::String)]) }
   def repo_tokens; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:274
   sig { params(path: ::String, repo_uri: ::String, message: ::String).void }
   def say_http_error(path, repo_uri, message:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/annotations.rb:258
   sig { params(repo_uri: ::String).returns(T.nilable(::String)) }
   def token_for(repo_uri); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/commands/check_shims.rb:6
 class Tapioca::Commands::CheckShims < ::Tapioca::Commands::Command
   include ::Tapioca::SorbetHelper
   include ::Tapioca::RBIFilesHelper
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/check_shims.rb:22
   sig do
     params(
       gem_rbi_dir: ::String,
@@ -336,16 +735,20 @@ class Tapioca::Commands::CheckShims < ::Tapioca::Commands::Command
       annotations_rbi_dir: ::String,
       shim_rbi_dir: ::String,
       todo_rbi_file: ::String,
-      payload: T::Boolean
+      payload: T::Boolean,
+      number_of_workers: T.nilable(::Integer)
     ).void
   end
-  def initialize(gem_rbi_dir:, dsl_rbi_dir:, annotations_rbi_dir:, shim_rbi_dir:, todo_rbi_file:, payload:); end
+  def initialize(gem_rbi_dir:, dsl_rbi_dir:, annotations_rbi_dir:, shim_rbi_dir:, todo_rbi_file:, payload:, number_of_workers:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/check_shims.rb:42
   sig { override.void }
   def execute; end
 end
 
 # @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+#
+# source://tapioca-0.9.2/lib/tapioca/commands/command.rb:6
 class Tapioca::Commands::Command
   include ::Thor::Base
   include ::Thor::Invocation
@@ -356,18 +759,23 @@ class Tapioca::Commands::Command
 
   abstract!
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/command.rb:20
   sig { void }
   def initialize; end
 
   # @abstract
+  #
+  # source://tapioca-0.9.2/lib/tapioca/commands/command.rb:25
   sig { abstract.void }
   def execute; end
 
+  # source://thor-1.2.1/lib/thor/base.rb:139
   sig { returns(::Thor::Actions) }
   def file_writer; end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/command.rb:46
   sig do
     params(
       path: T.any(::Pathname, ::String),
@@ -379,50 +787,64 @@ class Tapioca::Commands::Command
   end
   def create_file(path, content, force: T.unsafe(nil), skip: T.unsafe(nil), verbose: T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/command.rb:30
   sig { params(command: ::Symbol, args: ::String).returns(::String) }
   def default_command(command, *args); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/command.rb:56
   sig { params(path: T.any(::Pathname, ::String), verbose: T::Boolean).void }
   def remove_file(path, verbose: T.unsafe(nil)); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/commands/command.rb:10
 class Tapioca::Commands::Command::FileWriter < ::Thor
   include ::Thor::Actions
   extend ::Thor::Actions::ClassMethods
 end
 
+# source://tapioca-0.9.2/lib/tapioca/commands/configure.rb:6
 class Tapioca::Commands::Configure < ::Tapioca::Commands::Command
+  # source://tapioca-0.9.2/lib/tapioca/commands/configure.rb:14
   sig { params(sorbet_config: ::String, tapioca_config: ::String, default_postrequire: ::String).void }
   def initialize(sorbet_config:, tapioca_config:, default_postrequire:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/configure.rb:30
   sig { override.void }
   def execute; end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/configure.rb:78
   sig { void }
   def create_binstub; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/configure.rb:68
   sig { void }
   def create_post_require; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/configure.rb:40
   sig { void }
   def create_sorbet_config; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/configure.rb:49
   sig { void }
   def create_tapioca_config; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/configure.rb:91
   sig { returns(::Bundler::Installer) }
   def installer; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/configure.rb:96
   sig { returns(::Bundler::StubSpecification) }
   def spec; end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:6
 class Tapioca::Commands::Dsl < ::Tapioca::Commands::Command
   include ::Tapioca::SorbetHelper
   include ::Tapioca::RBIFilesHelper
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:28
   sig do
     params(
       requested_constants: T::Array[::String],
@@ -443,17 +865,21 @@ class Tapioca::Commands::Dsl < ::Tapioca::Commands::Command
   end
   def initialize(requested_constants:, outpath:, only:, exclude:, file_header:, compiler_path:, tapioca_path:, should_verify: T.unsafe(nil), quiet: T.unsafe(nil), verbose: T.unsafe(nil), number_of_workers: T.unsafe(nil), auto_strictness: T.unsafe(nil), gem_dir: T.unsafe(nil), rbi_formatter: T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:65
   sig { override.void }
   def execute; end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:147
   sig { void }
   def abort_if_pending_migrations!; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:322
   sig { params(cause: ::Symbol, files: T::Array[::String]).returns(::String) }
   def build_error_for_files(cause, files); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:246
   sig do
     params(
       constant_name: ::String,
@@ -464,62 +890,81 @@ class Tapioca::Commands::Dsl < ::Tapioca::Commands::Command
   end
   def compile_dsl_rbi(constant_name, rbi, outpath: T.unsafe(nil), quiet: T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:186
   sig { params(constant_names: T::Array[::String]).returns(T::Array[::Module]) }
   def constantize(constant_names); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:208
   sig { params(compiler_names: T::Array[::String]).returns(T::Array[T.class_of(Tapioca::Dsl::Compiler)]) }
   def constantize_compilers(compiler_names); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:285
   sig { params(constant_name: ::String).returns(::Pathname) }
   def dsl_rbi_filename(constant_name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:173
   sig { params(requested_constants: T::Array[::String], path: ::Pathname).returns(T::Set[::Pathname]) }
   def existing_rbi_filenames(requested_constants, path: T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:380
   sig { params(constant: ::String).returns(::String) }
   def generate_command_for(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:135
   sig { params(eager_load: T::Boolean).void }
   def load_application(eager_load:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:158
   sig { void }
   def load_dsl_compilers; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:385
   sig { void }
   def load_dsl_extensions; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:358
   sig { returns(::Tapioca::Runtime::Loader) }
   def loader; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:264
   sig { params(dir: ::Pathname).void }
   def perform_dsl_verification(dir); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:273
   sig { params(files: T::Set[::Pathname]).void }
   def purge_stale_dsl_rbi_files(files); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:375
   sig { params(constant: ::String).returns(::String) }
   def rbi_filename_for(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:351
   sig { params(path: ::Pathname).returns(T::Array[::Pathname]) }
   def rbi_files_in(path); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:331
   sig { params(diff: T::Hash[::String, ::Symbol], command: ::Symbol).void }
   def report_diff_and_exit_if_out_of_date(diff, command); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:226
   sig { params(name: ::String).returns(T.nilable(T.class_of(Tapioca::Dsl::Compiler))) }
   def resolve(name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:363
   sig { params(class_name: ::String).returns(::String) }
   def underscore(class_name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/dsl.rb:290
   sig { params(tmp_dir: ::Pathname).returns(T::Hash[::String, ::Symbol]) }
   def verify_dsl_rbi(tmp_dir:); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:6
 class Tapioca::Commands::Gem < ::Tapioca::Commands::Command
   include ::Tapioca::SorbetHelper
   include ::Tapioca::RBIFilesHelper
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:28
   sig do
     params(
       gem_names: T::Array[::String],
@@ -530,6 +975,7 @@ class Tapioca::Commands::Gem < ::Tapioca::Commands::Command
       outpath: ::Pathname,
       file_header: T::Boolean,
       include_doc: T::Boolean,
+      include_loc: T::Boolean,
       include_exported_rbis: T::Boolean,
       number_of_workers: T.nilable(::Integer),
       auto_strictness: T::Boolean,
@@ -537,126 +983,164 @@ class Tapioca::Commands::Gem < ::Tapioca::Commands::Command
       rbi_formatter: ::Tapioca::RBIFormatter
     ).void
   end
-  def initialize(gem_names:, exclude:, prerequire:, postrequire:, typed_overrides:, outpath:, file_header:, include_doc:, include_exported_rbis:, number_of_workers: T.unsafe(nil), auto_strictness: T.unsafe(nil), dsl_dir: T.unsafe(nil), rbi_formatter: T.unsafe(nil)); end
+  def initialize(gem_names:, exclude:, prerequire:, postrequire:, typed_overrides:, outpath:, file_header:, include_doc:, include_loc:, include_exported_rbis:, number_of_workers: T.unsafe(nil), auto_strictness: T.unsafe(nil), dsl_dir: T.unsafe(nil), rbi_formatter: T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:68
   sig { override.void }
   def execute; end
 
-  sig { params(should_verify: T::Boolean).void }
-  def sync(should_verify: T.unsafe(nil)); end
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:101
+  sig { params(should_verify: T::Boolean, exclude: T::Array[::String]).void }
+  def sync(should_verify: T.unsafe(nil), exclude: T.unsafe(nil)); end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:312
   sig { returns(T::Array[::String]) }
   def added_rbis; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:373
   sig { params(cause: ::Symbol, files: T::Array[::String]).returns(::String) }
   def build_error_for_files(cause, files); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:140
   sig { returns(::Tapioca::Gemfile) }
   def bundle; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:179
   sig { params(gem: ::Tapioca::Gemfile::GemSpec).void }
   def compile_gem_rbi(gem); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:307
   sig { params(gem_name: ::String).returns(::Pathname) }
   def existing_rbi(gem_name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:355
   sig { returns(T::Hash[::String, ::String]) }
   def existing_rbis; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:319
   sig { params(gem_name: ::String).returns(::Pathname) }
   def expected_rbi(gem_name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:361
   sig { returns(T::Hash[::String, ::String]) }
   def expected_rbis; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:291
   sig { params(file: ::String, error: ::LoadError).void }
   def explain_failed_require(file, error); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:324
   sig { params(gem_name: ::String).returns(T::Boolean) }
   def gem_rbi_exists?(gem_name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:368
   sig { params(gem_name: ::String, version: ::String).returns(::Pathname) }
   def gem_rbi_filename(gem_name, version); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:165
   sig { params(gem_names: T::Array[::String]).returns(T::Array[::Tapioca::Gemfile::GemSpec]) }
   def gems_to_generate(gem_names); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:135
   sig { returns(::Tapioca::Runtime::Loader) }
   def loader; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:378
   sig { params(gem: ::Tapioca::Gemfile::GemSpec, file: ::RBI::File).void }
   def merge_with_exported_rbi(gem, file); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:349
   sig { params(old_filename: ::Pathname, new_filename: ::Pathname).void }
   def move(old_filename, new_filename); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:254
   sig { void }
   def perform_additions; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:227
   sig { void }
   def perform_removals; end
 
-  sig { void }
-  def perform_sync_verification; end
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:208
+  sig { params(exclude: T::Array[::String]).void }
+  def perform_sync_verification(exclude: T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:302
   sig { returns(T::Array[::String]) }
   def removed_rbis; end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:329
   sig { params(diff: T::Hash[::String, ::Symbol], command: ::Symbol).void }
   def report_diff_and_exit_if_out_of_date(diff, command); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/gem.rb:145
   sig { void }
   def require_gem_file; end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/commands/require.rb:6
 class Tapioca::Commands::Require < ::Tapioca::Commands::Command
+  # source://tapioca-0.9.2/lib/tapioca/commands/require.rb:13
   sig { params(requires_path: ::String, sorbet_config_path: ::String).void }
   def initialize(requires_path:, sorbet_config_path:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/require.rb:21
   sig { override.void }
   def execute; end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/commands/todo.rb:6
 class Tapioca::Commands::Todo < ::Tapioca::Commands::Command
   include ::Tapioca::SorbetHelper
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/todo.rb:15
   sig { params(todo_file: ::String, file_header: T::Boolean).void }
   def initialize(todo_file:, file_header:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/todo.rb:23
   sig { override.void }
   def execute; end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/todo.rb:49
   sig { params(constants: T::Array[::String], command: ::String).returns(::RBI::File) }
   def rbi(constants, command:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/commands/todo.rb:69
   sig { returns(T::Array[::String]) }
   def unresolved_constants; end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/helpers/config_helper.rb:5
 module Tapioca::ConfigHelper
   requires_ancestor { Thor }
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/config_helper.rb:18
   sig { params(args: T.untyped, local_options: T.untyped, config: T.untyped).void }
   def initialize(args = T.unsafe(nil), local_options = T.unsafe(nil), config = T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/config_helper.rb:12
   sig { returns(::String) }
   def command_name; end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/config_helper.rb:15
   sig { returns(::Thor::CoreExt::HashWithIndifferentAccess) }
   def defaults; end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/config_helper.rb:34
   sig { returns(::Thor::CoreExt::HashWithIndifferentAccess) }
   def options; end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/config_helper.rb:152
   sig { params(msg: ::String).returns(::Tapioca::ConfigHelper::ConfigError) }
   def build_error(msg); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/config_helper.rb:56
   sig do
     params(
       options: ::Thor::CoreExt::HashWithIndifferentAccess
@@ -664,9 +1148,11 @@ module Tapioca::ConfigHelper
   end
   def config_options(options); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/config_helper.rb:46
   sig { params(options: T::Hash[::Symbol, ::Thor::Option]).void }
   def filter_defaults(options); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/config_helper.rb:194
   sig do
     params(
       options: T.nilable(::Thor::CoreExt::HashWithIndifferentAccess)
@@ -674,12 +1160,15 @@ module Tapioca::ConfigHelper
   end
   def merge_options(*options); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/config_helper.rb:177
   sig { params(config_file: ::String, errors: T::Array[::Tapioca::ConfigHelper::ConfigError]).void }
   def print_errors(config_file, errors); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/config_helper.rb:70
   sig { params(config_file: ::String, config: T::Hash[T.untyped, T.untyped]).void }
   def validate_config!(config_file, config); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/config_helper.rb:103
   sig do
     params(
       command_options: T::Hash[::Symbol, ::Thor::Option],
@@ -690,37 +1179,66 @@ module Tapioca::ConfigHelper
   def validate_config_options(command_options, config_key, config_options); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/helpers/config_helper.rb:147
 class Tapioca::ConfigHelper::ConfigError < ::T::Struct
   const :message_parts, T::Array[::Tapioca::ConfigHelper::ConfigErrorMessagePart]
 
   class << self
+    # source://sorbet-runtime-0.5.10206/lib/types/struct.rb:13
     def inherited(s); end
   end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/helpers/config_helper.rb:142
 class Tapioca::ConfigHelper::ConfigErrorMessagePart < ::T::Struct
   const :colors, T::Array[::Symbol]
   const :message, ::String
 
   class << self
+    # source://sorbet-runtime-0.5.10206/lib/types/struct.rb:13
     def inherited(s); end
   end
 end
 
+# source://tapioca-0.9.2/lib/tapioca.rb:38
 Tapioca::DEFAULT_ANNOTATIONS_DIR = T.let(T.unsafe(nil), String)
+
+# source://tapioca-0.9.2/lib/tapioca.rb:34
 Tapioca::DEFAULT_DSL_DIR = T.let(T.unsafe(nil), String)
+
+# source://tapioca-0.9.2/lib/tapioca.rb:47
 Tapioca::DEFAULT_ENVIRONMENT = T.let(T.unsafe(nil), String)
+
+# source://tapioca-0.9.2/lib/tapioca.rb:35
 Tapioca::DEFAULT_GEM_DIR = T.let(T.unsafe(nil), String)
+
+# source://tapioca-0.9.2/lib/tapioca.rb:40
 Tapioca::DEFAULT_OVERRIDES = T.let(T.unsafe(nil), Hash)
+
+# source://tapioca-0.9.2/lib/tapioca.rb:32
 Tapioca::DEFAULT_POSTREQUIRE_FILE = T.let(T.unsafe(nil), String)
+
+# source://tapioca-0.9.2/lib/tapioca.rb:33
 Tapioca::DEFAULT_RBI_DIR = T.let(T.unsafe(nil), String)
+
+# source://tapioca-0.9.2/lib/tapioca/rbi_formatter.rb:29
 Tapioca::DEFAULT_RBI_FORMATTER = T.let(T.unsafe(nil), Tapioca::RBIFormatter)
+
+# source://tapioca-0.9.2/lib/tapioca.rb:46
 Tapioca::DEFAULT_RBI_MAX_LINE_LENGTH = T.let(T.unsafe(nil), Integer)
+
+# source://tapioca-0.9.2/lib/tapioca.rb:36
 Tapioca::DEFAULT_SHIM_DIR = T.let(T.unsafe(nil), String)
+
+# source://tapioca-0.9.2/lib/tapioca.rb:37
 Tapioca::DEFAULT_TODO_FILE = T.let(T.unsafe(nil), String)
+
+# source://tapioca-0.9.2/lib/tapioca/dsl/compilers.rb:5
 module Tapioca::Dsl; end
 
 # @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+#
+# source://tapioca-0.9.2/lib/tapioca/dsl/compiler.rb:6
 class Tapioca::Dsl::Compiler
   extend T::Generic
   include ::Tapioca::SorbetHelper
@@ -732,66 +1250,89 @@ class Tapioca::Dsl::Compiler
 
   ConstantType = type_member { { upper: Module } }
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/compiler.rb:26
   sig { params(pipeline: ::Tapioca::Dsl::Pipeline, root: ::RBI::Tree, constant: ConstantType).void }
   def initialize(pipeline, root, constant); end
 
   # NOTE: This should eventually accept an `Error` object or `Exception` rather than simply a `String`.
+  #
+  # source://tapioca-0.9.2/lib/tapioca/dsl/compiler.rb:60
   sig { params(error: ::String).void }
   def add_error(error); end
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/compiler.rb:39
   sig { params(compiler_name: ::String).returns(T::Boolean) }
   def compiler_enabled?(compiler_name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/compiler.rb:20
   sig { returns(ConstantType) }
   def constant; end
 
   # @abstract
+  #
+  # source://tapioca-0.9.2/lib/tapioca/dsl/compiler.rb:44
   sig { abstract.void }
   def decorate; end
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/compiler.rb:23
   sig { returns(::RBI::Tree) }
   def root; end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/compiler.rb:164
   sig { params(type: ::String).returns(::String) }
   def as_nilable_type(type); end
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/compiler.rb:118
   sig { params(method_def: T.any(::Method, ::UnboundMethod)).returns(T::Array[::RBI::TypedParam]) }
   def compile_method_parameters_to_rbi(method_def); end
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/compiler.rb:154
   sig { params(method_def: T.any(::Method, ::UnboundMethod)).returns(::String) }
   def compile_method_return_type_to_rbi(method_def); end
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/compiler.rb:108
   sig { params(scope: ::RBI::Scope, method_def: T.any(::Method, ::UnboundMethod), class_method: T::Boolean).void }
   def create_method_from_def(scope, method_def, class_method: T.unsafe(nil)); end
 
   # Get the types of each parameter from a method signature
+  #
+  # source://tapioca-0.9.2/lib/tapioca/dsl/compiler.rb:85
   sig { params(method_def: T.any(::Method, ::UnboundMethod), signature: T.untyped).returns(T::Array[::String]) }
   def parameters_types_from_signature(method_def, signature); end
 
   class << self
     # @abstract
+    #
+    # source://tapioca-0.9.2/lib/tapioca/dsl/compiler.rb:47
     sig { abstract.returns(T::Enumerable[::Module]) }
     def gather_constants; end
 
+    # source://tapioca-0.9.2/lib/tapioca/dsl/compiler.rb:34
     sig { params(constant: ::Module).returns(T::Boolean) }
     def handles?(constant); end
 
+    # source://tapioca-0.9.2/lib/tapioca/dsl/compiler.rb:50
     sig { returns(T::Set[::Module]) }
     def processable_constants; end
 
     private
 
+    # source://tapioca-0.9.2/lib/tapioca/dsl/compiler.rb:67
     sig { returns(T::Enumerable[::Class]) }
     def all_classes; end
 
+    # source://tapioca-0.9.2/lib/tapioca/dsl/compiler.rb:73
     sig { returns(T::Enumerable[::Module]) }
     def all_modules; end
   end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/dsl/compilers.rb:6
 module Tapioca::Dsl::Compilers; end
+
+# source://tapioca-0.9.2/lib/tapioca/dsl/compilers.rb:7
 Tapioca::Dsl::Compilers::DIRECTORY = T.let(T.unsafe(nil), String)
 
 # DSL compilers are either built-in to Tapioca and live under the
@@ -800,9 +1341,13 @@ Tapioca::Dsl::Compilers::DIRECTORY = T.let(T.unsafe(nil), String)
 # a different namespace and can only be referred to using their fully
 # qualified name. This constant encapsulates that dual lookup when
 # a compiler needs to be resolved by name.
+#
+# source://tapioca-0.9.2/lib/tapioca/dsl/compilers.rb:18
 Tapioca::Dsl::Compilers::NAMESPACES = T.let(T.unsafe(nil), Array)
 
+# source://tapioca-0.9.2/lib/tapioca/dsl/pipeline.rb:6
 class Tapioca::Dsl::Pipeline
+  # source://tapioca-0.9.2/lib/tapioca/dsl/pipeline.rb:30
   sig do
     params(
       requested_constants: T::Array[::Module],
@@ -814,24 +1359,31 @@ class Tapioca::Dsl::Pipeline
   end
   def initialize(requested_constants:, requested_compilers: T.unsafe(nil), excluded_compilers: T.unsafe(nil), error_handler: T.unsafe(nil), number_of_workers: T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/pipeline.rb:82
   sig { params(error: ::String).void }
   def add_error(error); end
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/pipeline.rb:87
   sig { params(compiler_name: ::String).returns(T::Boolean) }
   def compiler_enabled?(compiler_name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/pipeline.rb:10
   sig { returns(T::Enumerable[T.class_of(Tapioca::Dsl::Compiler)]) }
   def compilers; end
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/pipeline.rb:16
   sig { returns(T.proc.params(error: ::String).void) }
   def error_handler; end
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/pipeline.rb:19
   sig { returns(T::Array[::String]) }
   def errors; end
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/pipeline.rb:13
   sig { returns(T::Array[::Module]) }
   def requested_constants; end
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/pipeline.rb:52
   sig do
     type_parameters(:T)
       .params(
@@ -842,9 +1394,11 @@ class Tapioca::Dsl::Pipeline
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/pipeline.rb:120
   sig { params(constants: T::Set[::Module]).returns(T::Set[::Module]) }
   def filter_anonymous_and_reloaded_constants(constants); end
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/pipeline.rb:103
   sig do
     params(
       requested_compilers: T::Array[T.class_of(Tapioca::Dsl::Compiler)],
@@ -853,29 +1407,37 @@ class Tapioca::Dsl::Pipeline
   end
   def gather_compilers(requested_compilers, excluded_compilers); end
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/pipeline.rb:111
   sig { params(requested_constants: T::Array[::Module]).returns(T::Set[::Module]) }
   def gather_constants(requested_constants); end
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/pipeline.rb:145
   sig { params(constant: ::Module).returns(T.nilable(::RBI::File)) }
   def rbi_for_constant(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/dsl/pipeline.rb:164
   sig { params(error: ::String).returns(T.noreturn) }
   def report_error(error); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/helpers/env_helper.rb:5
 module Tapioca::EnvHelper
   requires_ancestor { Thor }
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/env_helper.rb:12
   sig { params(options: T::Hash[::Symbol, T.untyped]).void }
   def set_environment(options); end
 end
 
 class Tapioca::Error < ::StandardError; end
 
+# source://tapioca-0.9.2/lib/tapioca/executor.rb:5
 class Tapioca::Executor
+  # source://tapioca-0.9.2/lib/tapioca/executor.rb:11
   sig { params(queue: T::Array[T.untyped], number_of_workers: T.nilable(::Integer)).void }
   def initialize(queue, number_of_workers: T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/executor.rb:28
   sig do
     type_parameters(:T)
       .params(
@@ -885,98 +1447,133 @@ class Tapioca::Executor
   def run_in_parallel(&block); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/executor.rb:8
 Tapioca::Executor::MINIMUM_ITEMS_PER_WORKER = T.let(T.unsafe(nil), Integer)
+
+# source://tapioca-0.9.2/lib/tapioca/gem/events.rb:5
 module Tapioca::Gem; end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/events.rb:77
 class Tapioca::Gem::ConstNodeAdded < ::Tapioca::Gem::NodeAdded
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:84
   sig { params(symbol: ::String, constant: ::Module, node: ::RBI::Const).void }
   def initialize(symbol, constant, node); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:81
   sig { returns(::RBI::Const) }
   def node; end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/events.rb:26
 class Tapioca::Gem::ConstantFound < ::Tapioca::Gem::Event
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:36
   sig { params(symbol: ::String, constant: ::BasicObject).void }
   def initialize(symbol, constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:33
   sig { returns(::BasicObject) }
   def constant; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:30
   sig { returns(::String) }
   def symbol; end
 end
 
 # @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+#
+# source://tapioca-0.9.2/lib/tapioca/gem/events.rb:6
 class Tapioca::Gem::Event
   abstract!
 
+  # source://sorbet-runtime-0.5.10206/lib/types/private/abstract/declare.rb:37
   def initialize(*args, **_arg1, &blk); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/events.rb:43
 class Tapioca::Gem::ForeignConstantFound < ::Tapioca::Gem::ConstantFound
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:52
   sig { params(symbol: ::String, constant: ::Module).void }
   def initialize(symbol, constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:47
   sig { override.returns(::Module) }
   def constant; end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/events.rb:103
 class Tapioca::Gem::ForeignScopeNodeAdded < ::Tapioca::Gem::ScopeNodeAdded; end
+
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/base.rb:6
 module Tapioca::Gem::Listeners; end
 
 # @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+#
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/base.rb:7
 class Tapioca::Gem::Listeners::Base
   abstract!
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/base.rb:14
   sig { params(pipeline: ::Tapioca::Gem::Pipeline).void }
   def initialize(pipeline); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/base.rb:19
   sig { params(event: ::Tapioca::Gem::NodeAdded).void }
   def dispatch(event); end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/base.rb:49
   sig { params(event: ::Tapioca::Gem::NodeAdded).returns(T::Boolean) }
   def ignore?(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/base.rb:37
   sig { params(event: ::Tapioca::Gem::ConstNodeAdded).void }
   def on_const(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/base.rb:45
   sig { params(event: ::Tapioca::Gem::MethodNodeAdded).void }
   def on_method(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/base.rb:41
   sig { params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
   def on_scope(event); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/dynamic_mixins.rb:7
 class Tapioca::Gem::Listeners::DynamicMixins < ::Tapioca::Gem::Listeners::Base
   include ::Tapioca::Runtime::Reflection
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/dynamic_mixins.rb:31
   sig { override.params(event: ::Tapioca::Gem::NodeAdded).returns(T::Boolean) }
   def ignore?(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/dynamic_mixins.rb:15
   sig { override.params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
   def on_scope(event); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/foreign_constants.rb:7
 class Tapioca::Gem::Listeners::ForeignConstants < ::Tapioca::Gem::Listeners::Base
   include ::Tapioca::Runtime::Reflection
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/foreign_constants.rb:59
   sig { override.params(event: ::Tapioca::Gem::NodeAdded).returns(T::Boolean) }
   def ignore?(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/foreign_constants.rb:54
   sig { params(location: ::String).returns(T::Boolean) }
   def mixed_in_by_gem?(location); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/foreign_constants.rb:15
   sig { override.params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
   def on_scope(event); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/methods.rb:7
 class Tapioca::Gem::Listeners::Methods < ::Tapioca::Gem::Listeners::Base
   include ::Tapioca::SorbetHelper
   include ::Tapioca::RBIHelper
@@ -984,9 +1581,11 @@ class Tapioca::Gem::Listeners::Methods < ::Tapioca::Gem::Listeners::Base
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/methods.rb:34
   sig { params(tree: ::RBI::Tree, module_name: ::String, mod: ::Module, for_visibility: T::Array[::Symbol]).void }
   def compile_directly_owned_methods(tree, module_name, mod, for_visibility = T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/methods.rb:63
   sig do
     params(
       tree: ::RBI::Tree,
@@ -998,12 +1597,15 @@ class Tapioca::Gem::Listeners::Methods < ::Tapioca::Gem::Listeners::Base
   end
   def compile_method(tree, symbol_name, constant, method, visibility = T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/methods.rb:191
   sig { override.params(event: ::Tapioca::Gem::NodeAdded).returns(T::Boolean) }
   def ignore?(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/methods.rb:184
   sig { params(constant: ::Module).returns(T.nilable(::UnboundMethod)) }
   def initialize_method_for(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/methods.rb:165
   sig { params(mod: ::Module).returns(T::Hash[::Symbol, T::Array[::Symbol]]) }
   def method_names_by_visibility(mod); end
 
@@ -1016,21 +1618,27 @@ class Tapioca::Gem::Listeners::Methods < ::Tapioca::Gem::Listeners::Base
   # This method implements a better way of checking whether a constant defines a method.
   # It walks up the ancestor tree via the `super_method` method; if any of the super
   # methods are owned by the constant, it means that the constant declares the method.
+  #
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/methods.rb:151
   sig { params(method: ::UnboundMethod, constant: ::Module).returns(T::Boolean) }
   def method_owned_by_constant?(method, constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/methods.rb:16
   sig { override.params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
   def on_scope(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/methods.rb:174
   sig { params(constant: ::Module, method_name: ::String).returns(T::Boolean) }
   def struct_method?(constant, method_name); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/mixins.rb:7
 class Tapioca::Gem::Listeners::Mixins < ::Tapioca::Gem::Listeners::Base
   include ::Tapioca::Runtime::Reflection
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/mixins.rb:42
   sig do
     params(
       tree: ::RBI::Tree,
@@ -1041,12 +1649,15 @@ class Tapioca::Gem::Listeners::Mixins < ::Tapioca::Gem::Listeners::Base
   end
   def add_mixins(tree, constant, mods, mixin_type); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/mixins.rb:88
   sig { params(mixin_name: ::String).returns(T::Boolean) }
   def filtered_mixin?(mixin_name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/mixins.rb:95
   sig { params(constant: ::Module).returns(T::Array[::Module]) }
   def interesting_ancestors_of(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/mixins.rb:75
   sig do
     params(
       constant: ::Module,
@@ -1056,64 +1667,81 @@ class Tapioca::Gem::Listeners::Mixins < ::Tapioca::Gem::Listeners::Base
   end
   def mixed_in_by_gem?(constant, mixin, mixin_type); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/mixins.rb:15
   sig { override.params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
   def on_scope(event); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/remove_empty_payload_scopes.rb:7
 class Tapioca::Gem::Listeners::RemoveEmptyPayloadScopes < ::Tapioca::Gem::Listeners::Base
   include ::Tapioca::Runtime::Reflection
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/remove_empty_payload_scopes.rb:20
   sig { override.params(event: ::Tapioca::Gem::NodeAdded).returns(T::Boolean) }
   def ignore?(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/remove_empty_payload_scopes.rb:15
   sig { override.params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
   def on_scope(event); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_enums.rb:7
 class Tapioca::Gem::Listeners::SorbetEnums < ::Tapioca::Gem::Listeners::Base
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_enums.rb:25
   sig { override.params(event: ::Tapioca::Gem::NodeAdded).returns(T::Boolean) }
   def ignore?(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_enums.rb:13
   sig { override.params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
   def on_scope(event); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_helpers.rb:7
 class Tapioca::Gem::Listeners::SorbetHelpers < ::Tapioca::Gem::Listeners::Base
   include ::Tapioca::Runtime::Reflection
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_helpers.rb:28
   sig { override.params(event: ::Tapioca::Gem::NodeAdded).returns(T::Boolean) }
   def ignore?(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_helpers.rb:15
   sig { override.params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
   def on_scope(event); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_props.rb:7
 class Tapioca::Gem::Listeners::SorbetProps < ::Tapioca::Gem::Listeners::Base
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_props.rb:32
   sig { override.params(event: ::Tapioca::Gem::NodeAdded).returns(T::Boolean) }
   def ignore?(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_props.rb:13
   sig { override.params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
   def on_scope(event); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_required_ancestors.rb:7
 class Tapioca::Gem::Listeners::SorbetRequiredAncestors < ::Tapioca::Gem::Listeners::Base
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_required_ancestors.rb:23
   sig { override.params(event: ::Tapioca::Gem::NodeAdded).returns(T::Boolean) }
   def ignore?(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_required_ancestors.rb:13
   sig { override.params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
   def on_scope(event); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_signatures.rb:7
 class Tapioca::Gem::Listeners::SorbetSignatures < ::Tapioca::Gem::Listeners::Base
   include ::Tapioca::Runtime::Reflection
   include ::Tapioca::SorbetHelper
@@ -1121,293 +1749,413 @@ class Tapioca::Gem::Listeners::SorbetSignatures < ::Tapioca::Gem::Listeners::Bas
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_signatures.rb:26
   sig { params(signature: T.untyped, parameters: T::Array[[::Symbol, ::String]]).returns(::RBI::Sig) }
   def compile_signature(signature, parameters); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_signatures.rb:78
   sig { override.params(event: ::Tapioca::Gem::NodeAdded).returns(T::Boolean) }
   def ignore?(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_signatures.rb:18
   sig { override.params(event: ::Tapioca::Gem::MethodNodeAdded).void }
   def on_method(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_signatures.rb:68
   sig { params(signature: T.untyped).returns(T::Boolean) }
   def signature_final?(signature); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_signatures.rb:13
 Tapioca::Gem::Listeners::SorbetSignatures::TYPE_PARAMETER_MATCHER = T.let(T.unsafe(nil), Regexp)
 
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_type_variables.rb:7
 class Tapioca::Gem::Listeners::SorbetTypeVariables < ::Tapioca::Gem::Listeners::Base
   include ::Tapioca::Runtime::Reflection
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_type_variables.rb:27
   sig { params(tree: ::RBI::Tree, constant: ::Module).void }
   def compile_type_variable_declarations(tree, constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_type_variables.rb:50
   sig { override.params(event: ::Tapioca::Gem::NodeAdded).returns(T::Boolean) }
   def ignore?(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/sorbet_type_variables.rb:15
   sig { override.params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
   def on_scope(event); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/source_location.rb:7
+class Tapioca::Gem::Listeners::SourceLocation < ::Tapioca::Gem::Listeners::Base
+  private
+
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/source_location.rb:41
+  sig { params(node: ::RBI::NodeWithComments, file: T.nilable(::String), line: T.nilable(::Integer)).void }
+  def add_source_location_comment(node, file, line); end
+
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/source_location.rb:13
+  sig { override.params(event: ::Tapioca::Gem::ConstNodeAdded).void }
+  def on_const(event); end
+
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/source_location.rb:35
+  sig { override.params(event: ::Tapioca::Gem::MethodNodeAdded).void }
+  def on_method(event); end
+
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/source_location.rb:19
+  sig { override.params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
+  def on_scope(event); end
+end
+
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/subconstants.rb:7
 class Tapioca::Gem::Listeners::Subconstants < ::Tapioca::Gem::Listeners::Base
   include ::Tapioca::Runtime::Reflection
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/subconstants.rb:36
   sig { override.params(event: ::Tapioca::Gem::NodeAdded).returns(T::Boolean) }
   def ignore?(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/subconstants.rb:15
   sig { override.params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
   def on_scope(event); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/yard_doc.rb:7
 class Tapioca::Gem::Listeners::YardDoc < ::Tapioca::Gem::Listeners::Base
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/yard_doc.rb:24
   sig { params(pipeline: ::Tapioca::Gem::Pipeline).void }
   def initialize(pipeline); end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/yard_doc.rb:51
   sig { params(name: ::String, sigs: T::Array[::RBI::Sig]).returns(T::Array[::RBI::Comment]) }
   def documentation_comments(name, sigs: T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/yard_doc.rb:95
   sig { override.params(event: ::Tapioca::Gem::NodeAdded).returns(T::Boolean) }
   def ignore?(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/yard_doc.rb:32
   sig { override.params(event: ::Tapioca::Gem::ConstNodeAdded).void }
   def on_const(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/yard_doc.rb:42
   sig { override.params(event: ::Tapioca::Gem::MethodNodeAdded).void }
   def on_method(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/listeners/yard_doc.rb:37
   sig { override.params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
   def on_scope(event); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/yard_doc.rb:10
 Tapioca::Gem::Listeners::YardDoc::IGNORED_COMMENTS = T.let(T.unsafe(nil), Array)
+
+# source://tapioca-0.9.2/lib/tapioca/gem/listeners/yard_doc.rb:21
 Tapioca::Gem::Listeners::YardDoc::IGNORED_SIG_TAGS = T.let(T.unsafe(nil), Array)
 
+# source://tapioca-0.9.2/lib/tapioca/gem/events.rb:105
 class Tapioca::Gem::MethodNodeAdded < ::Tapioca::Gem::NodeAdded
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:130
   sig do
     params(
       symbol: ::String,
       constant: ::Module,
+      method: ::UnboundMethod,
       node: ::RBI::Method,
       signature: T.untyped,
       parameters: T::Array[[::Symbol, ::String]]
     ).void
   end
-  def initialize(symbol, constant, node, signature, parameters); end
+  def initialize(symbol, constant, method, node, signature, parameters); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:109
+  sig { returns(::UnboundMethod) }
+  def method; end
+
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:112
   sig { returns(::RBI::Method) }
   def node; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:118
   sig { returns(T::Array[[::Symbol, ::String]]) }
   def parameters; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:115
   sig { returns(T.untyped) }
   def signature; end
 end
 
 # @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+#
+# source://tapioca-0.9.2/lib/tapioca/gem/events.rb:57
 class Tapioca::Gem::NodeAdded < ::Tapioca::Gem::Event
   abstract!
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:70
   sig { params(symbol: ::String, constant: ::Module).void }
   def initialize(symbol, constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:67
   sig { returns(::Module) }
   def constant; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:64
   sig { returns(::String) }
   def symbol; end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:6
 class Tapioca::Gem::Pipeline
   include ::Tapioca::Runtime::Reflection
   include ::Tapioca::SorbetHelper
   include ::Tapioca::RBIHelper
 
-  sig { params(gem: ::Tapioca::Gemfile::GemSpec, include_doc: T::Boolean).void }
-  def initialize(gem, include_doc: T.unsafe(nil)); end
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:17
+  sig { params(gem: ::Tapioca::Gemfile::GemSpec, include_doc: T::Boolean, include_loc: T::Boolean).void }
+  def initialize(gem, include_doc: T.unsafe(nil), include_loc: T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:48
   sig { returns(::RBI::Tree) }
   def compile; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:14
   sig { returns(::Tapioca::Gemfile::GemSpec) }
   def gem; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:110
   sig { params(method: ::UnboundMethod).returns(T::Boolean) }
   def method_in_gem?(method); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:118
   sig { params(constant: ::Module).returns(T.nilable(::String)) }
   def name_of(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:69
   sig { params(symbol: ::String, constant: ::Module, node: ::RBI::Const).void }
   def push_const(symbol, constant, node); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:59
   sig { params(symbol: ::String, constant: ::BasicObject).void }
   def push_constant(symbol, constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:64
   sig { params(symbol: ::String, constant: ::Module).void }
   def push_foreign_constant(symbol, constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:83
   sig { params(symbol: ::String, constant: ::Module, node: ::RBI::Scope).void }
   def push_foreign_scope(symbol, constant, node); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:97
   sig do
     params(
       symbol: ::String,
       constant: ::Module,
+      method: ::UnboundMethod,
       node: ::RBI::Method,
       signature: T.untyped,
       parameters: T::Array[[::Symbol, ::String]]
     ).void
   end
-  def push_method(symbol, constant, node, signature, parameters); end
+  def push_method(symbol, constant, method, node, signature, parameters); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:76
   sig { params(symbol: ::String, constant: ::Module, node: ::RBI::Scope).void }
   def push_scope(symbol, constant, node); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:54
   sig { params(symbol: ::String).void }
   def push_symbol(symbol); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:102
   sig { params(symbol_name: ::String).returns(T::Boolean) }
   def symbol_in_payload?(symbol_name); end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:364
   sig { params(name: ::String).void }
   def add_to_alias_namespace(name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:369
   sig { params(name: ::String).returns(T::Boolean) }
   def alias_namespaced?(name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:213
   sig { params(name: ::String, constant: ::Module).void }
   def compile_alias(name, constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:199
   sig { params(symbol: ::String, constant: ::BasicObject).void }
   def compile_constant(symbol, constant); end
 
   # Compile
+  #
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:194
   sig { params(symbol: ::String, constant: ::Module).void }
   def compile_foreign_constant(symbol, constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:269
   sig { params(name: ::String, constant: ::Module, foreign_constant: T::Boolean).void }
   def compile_module(name, constant, foreign_constant: T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:234
   sig { params(name: ::String, value: ::BasicObject).void }
   def compile_object(name, value); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:294
   sig { params(constant: ::Class).returns(T.nilable(::String)) }
   def compile_superclass(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:343
   sig { params(constant: ::Module, strict: T::Boolean).returns(T::Boolean) }
   def defined_in_gem?(constant, strict: T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:146
   sig { params(event: ::Tapioca::Gem::Event).void }
   def dispatch(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:386
   sig { params(constant: T.all(::Module, ::T::Generic)).returns(::String) }
   def generic_name_of(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:355
   sig { params(constant: ::Module).returns(T::Array[::String]) }
   def get_file_candidates(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:133
   sig { params(gem: ::Tapioca::Gemfile::GemSpec).returns(T::Set[::String]) }
   def load_bootstrap_symbols(gem); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:376
   sig { params(name: ::String).void }
   def mark_seen(name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:399
   sig { params(constant: ::Module, class_name: T.nilable(::String)).returns(T.nilable(::String)) }
   def name_of_proxy_target(constant, class_name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:141
   sig { returns(::Tapioca::Gem::Event) }
   def next_event; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:169
   sig { params(event: ::Tapioca::Gem::ConstantFound).void }
   def on_constant(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:187
   sig { params(event: ::Tapioca::Gem::NodeAdded).void }
   def on_node(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:160
   sig { params(event: ::Tapioca::Gem::SymbolFound).void }
   def on_symbol(event); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:381
   sig { params(name: ::String).returns(T::Boolean) }
   def seen?(name); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/pipeline.rb:11
 Tapioca::Gem::Pipeline::IGNORED_SYMBOLS = T.let(T.unsafe(nil), Array)
 
+# source://tapioca-0.9.2/lib/tapioca/gem/events.rb:90
 class Tapioca::Gem::ScopeNodeAdded < ::Tapioca::Gem::NodeAdded
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:97
   sig { params(symbol: ::String, constant: ::Module, node: ::RBI::Scope).void }
   def initialize(symbol, constant, node); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:94
   sig { returns(::RBI::Scope) }
   def node; end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gem/events.rb:13
 class Tapioca::Gem::SymbolFound < ::Tapioca::Gem::Event
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:20
   sig { params(symbol: ::String).void }
   def initialize(symbol); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gem/events.rb:17
   sig { returns(::String) }
   def symbol; end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/helpers/gem_helper.rb:5
 module Tapioca::GemHelper
+  # source://tapioca-0.9.2/lib/tapioca/helpers/gem_helper.rb:9
   sig { params(gemfile_dir: ::String, full_gem_path: ::String).returns(T::Boolean) }
   def gem_in_app_dir?(gemfile_dir, full_gem_path); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/gem_helper.rb:15
   sig { params(full_gem_path: ::String).returns(T::Boolean) }
   def gem_in_bundle_path?(full_gem_path); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/gem_helper.rb:20
   sig { params(path: T.any(::Pathname, ::String)).returns(::String) }
   def to_realpath(path); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gemfile.rb:5
 class Tapioca::Gemfile
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:69
   sig { params(exclude: T::Array[::String]).void }
   def initialize(exclude); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:60
   sig { returns(::Bundler::Definition) }
   def definition; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:63
   sig { returns(T::Array[::Tapioca::Gemfile::GemSpec]) }
   def dependencies; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:80
   sig { params(gem_name: ::String).returns(T.nilable(::Tapioca::Gemfile::GemSpec)) }
   def gem(gem_name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:66
   sig { returns(T::Array[::String]) }
   def missing_specs; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:85
   sig { void }
   def require_bundle; end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:131
   sig { returns(::String) }
   def dir; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:92
   sig { returns(::File) }
   def gemfile; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:126
   sig { returns(T::Array[::Symbol]) }
   def groups; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:95
   sig { returns([T::Array[::Tapioca::Gemfile::GemSpec], T::Array[::String]]) }
   def load_dependencies; end
 
   # @return [File]
+  #
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:92
   def lockfile; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:106
   sig { returns([T::Enumerable[T.any(::Bundler::StubSpecification, ::Gem::Specification)], T::Array[::String]]) }
   def materialize_deps; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:121
   sig { returns(::Bundler::Runtime) }
   def runtime; end
 end
@@ -1415,91 +2163,122 @@ end
 # This is a module that gets prepended to `Bundler::Dependency` and
 # makes sure even gems marked as `require: false` are required during
 # `Bundler.require`.
+#
+# source://tapioca-0.9.2/lib/tapioca/gemfile.rb:18
 module Tapioca::Gemfile::AutoRequireHook
   requires_ancestor { Bundler::Dependency }
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:39
   sig { returns(T.untyped) }
   def autorequire; end
 
   class << self
+    # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:30
     sig { params(exclude: T::Array[::String]).returns(T::Array[::String]) }
     def exclude=(exclude); end
 
+    # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:33
     sig { params(name: T.untyped).returns(T::Boolean) }
     def excluded?(name); end
   end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gemfile.rb:135
 class Tapioca::Gemfile::GemSpec
   include ::Tapioca::GemHelper
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:154
   sig { params(spec: T.any(::Bundler::StubSpecification, ::Gem::Specification)).void }
   def initialize(spec); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:179
   sig { params(path: ::String).returns(T::Boolean) }
   def contains_path?(path); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:198
   sig { returns(T::Boolean) }
   def export_rbi_files?; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:193
   sig { returns(T::Array[::String]) }
   def exported_rbi_files; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:203
   sig { returns(::RBI::MergeTree) }
   def exported_rbi_tree; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:151
   sig { returns(T::Array[::Pathname]) }
   def files; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:148
   sig { returns(::String) }
   def full_gem_path; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:164
   sig { params(gemfile_dir: ::String).returns(T::Boolean) }
   def ignore?(gemfile_dir); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:169
   sig { returns(::String) }
   def name; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:188
   sig { void }
   def parse_yard_docs; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:174
   sig { returns(::String) }
   def rbi_file_name; end
 
   # @return [String]
+  #
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:148
   def version; end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:217
   sig { returns(T::Array[::Pathname]) }
   def collect_files; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:232
   sig { returns(T.nilable(T::Boolean)) }
   def default_gem?; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:290
   sig { returns(T::Boolean) }
   def gem_ignored?; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:269
   sig { params(path: ::String).returns(T::Boolean) }
   def has_parent_gemspec?(path); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:237
   sig { returns(::Regexp) }
   def require_paths_prefix_matcher; end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:248
   sig { params(file: ::String).returns(::Pathname) }
   def resolve_to_ruby_lib_dir(file); end
 
+  # source://tapioca-0.9.2/lib/tapioca/gemfile.rb:262
   sig { returns(::String) }
   def version_string; end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/gemfile.rb:139
 Tapioca::Gemfile::GemSpec::IGNORED_GEMS = T.let(T.unsafe(nil), Array)
+
+# source://tapioca-0.9.2/lib/tapioca/gemfile.rb:8
 Tapioca::Gemfile::Spec = T.type_alias { T.any(::Bundler::StubSpecification, ::Gem::Specification) }
 
+# source://tapioca-0.9.2/lib/tapioca/helpers/rbi_files_helper.rb:5
 module Tapioca::RBIFilesHelper
   requires_ancestor { Tapioca::SorbetHelper }
   requires_ancestor { Thor::Shell }
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_files_helper.rb:48
   sig do
     params(
       index: ::RBI::Index,
@@ -1509,18 +2288,19 @@ module Tapioca::RBIFilesHelper
   end
   def duplicated_nodes_from_index(index, shim_rbi_dir:, todo_rbi_file:); end
 
-  sig { params(index: ::RBI::Index, dir: ::String).void }
-  def index_payload(index, dir); end
-
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_files_helper.rb:13
   sig { params(index: ::RBI::Index, kind: ::String, file: ::String).void }
   def index_rbi(index, kind, file); end
 
-  sig { params(index: ::RBI::Index, kind: ::String, dir: ::String).void }
-  def index_rbis(index, kind, dir); end
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_files_helper.rb:25
+  sig { params(index: ::RBI::Index, kind: ::String, dir: ::String, number_of_workers: T.nilable(::Integer)).void }
+  def index_rbis(index, kind, dir, number_of_workers:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_files_helper.rb:65
   sig { params(loc: ::RBI::Loc, path_prefix: T.nilable(::String)).returns(::String) }
   def location_to_payload_url(loc, path_prefix:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_files_helper.rb:86
   sig do
     params(
       command: ::String,
@@ -1535,12 +2315,15 @@ module Tapioca::RBIFilesHelper
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_files_helper.rb:207
   sig { params(nodes: T::Array[::RBI::Node]).returns(T::Array[::RBI::Scope]) }
   def extract_empty_scopes(nodes); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_files_helper.rb:212
   sig { params(nodes: T::Array[::RBI::Node]).returns(T::Array[T.any(::RBI::Attr, ::RBI::Method)]) }
   def extract_methods_and_attrs(nodes); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_files_helper.rb:219
   sig do
     params(
       nodes: T::Array[T.any(::RBI::Attr, ::RBI::Method)]
@@ -1548,6 +2331,7 @@ module Tapioca::RBIFilesHelper
   end
   def extract_nodes_with_sigs(nodes); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_files_helper.rb:200
   sig do
     params(
       nodes: T::Array[::RBI::Node],
@@ -1557,69 +2341,86 @@ module Tapioca::RBIFilesHelper
   end
   def extract_shims_and_todos(nodes, shim_rbi_dir:, todo_rbi_file:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_files_helper.rb:251
   sig { params(path: ::String).returns(::String) }
   def gem_name_from_rbi_path(path); end
 
-  sig { params(index: ::RBI::Index, file: ::String).void }
-  def parse_and_index_file(index, file); end
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_files_helper.rb:157
+  sig { params(index: ::RBI::Index, files: T::Array[::String], number_of_workers: T.nilable(::Integer)).void }
+  def parse_and_index_files(index, files, number_of_workers:); end
 
-  sig { params(index: ::RBI::Index, files: T::Array[::String]).void }
-  def parse_and_index_files(index, files); end
-
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_files_helper.rb:172
   sig { params(nodes: T::Array[::RBI::Node], shim_rbi_dir: ::String, todo_rbi_file: ::String).returns(T::Boolean) }
   def shims_or_todos_have_duplicates?(nodes, shim_rbi_dir:, todo_rbi_file:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_files_helper.rb:224
   sig { params(errors: T::Array[::Spoom::Sorbet::Errors::Error], gem_dir: ::String).void }
   def update_gem_rbis_strictnesses(errors, gem_dir); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/rbi_formatter.rb:5
 class Tapioca::RBIFormatter < ::RBI::Formatter
+  # source://tapioca-0.9.2/lib/tapioca/rbi_formatter.rb:22
   sig { params(file: ::RBI::File).void }
   def write_empty_body_comment!(file); end
 
+  # source://tapioca-0.9.2/lib/tapioca/rbi_formatter.rb:15
   sig { params(file: ::RBI::File, command: ::String, reason: T.nilable(::String)).void }
   def write_header!(file, command, reason: T.unsafe(nil)); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/helpers/rbi_helper.rb:5
 module Tapioca::RBIHelper
   include ::Tapioca::SorbetHelper
   extend ::Tapioca::SorbetHelper
   extend ::Tapioca::RBIHelper
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_helper.rb:42
   sig { params(name: ::String, type: ::String).returns(::RBI::TypedParam) }
   def create_block_param(name, type:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_helper.rb:32
   sig { params(name: ::String, type: ::String, default: ::String).returns(::RBI::TypedParam) }
   def create_kw_opt_param(name, type:, default:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_helper.rb:27
   sig { params(name: ::String, type: ::String).returns(::RBI::TypedParam) }
   def create_kw_param(name, type:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_helper.rb:37
   sig { params(name: ::String, type: ::String).returns(::RBI::TypedParam) }
   def create_kw_rest_param(name, type:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_helper.rb:17
   sig { params(name: ::String, type: ::String, default: ::String).returns(::RBI::TypedParam) }
   def create_opt_param(name, type:, default:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_helper.rb:12
   sig { params(name: ::String, type: ::String).returns(::RBI::TypedParam) }
   def create_param(name, type:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_helper.rb:22
   sig { params(name: ::String, type: ::String).returns(::RBI::TypedParam) }
   def create_rest_param(name, type:); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_helper.rb:47
   sig { params(param: ::RBI::Param, type: ::String).returns(::RBI::TypedParam) }
   def create_typed_param(param, type); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_helper.rb:52
   sig { params(sig_string: ::String).returns(::String) }
   def sanitize_signature_types(sig_string); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_helper.rb:95
   sig { params(name: ::String).returns(T::Boolean) }
   def valid_method_name?(name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_helper.rb:109
   sig { params(name: ::String).returns(T::Boolean) }
   def valid_parameter_name?(name); end
 
   class << self
+    # source://tapioca-0.9.2/lib/tapioca/helpers/rbi_helper.rb:69
     sig do
       params(
         type: ::String,
@@ -1633,72 +2434,100 @@ module Tapioca::RBIHelper
   end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/repo_index.rb:5
 class Tapioca::RepoIndex
+  # source://tapioca-0.9.2/lib/tapioca/repo_index.rb:22
   sig { void }
   def initialize; end
 
+  # source://tapioca-0.9.2/lib/tapioca/repo_index.rb:27
   sig { params(gem_name: ::String).void }
   def <<(gem_name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/repo_index.rb:32
   sig { returns(T::Enumerable[::String]) }
   def gems; end
 
+  # source://tapioca-0.9.2/lib/tapioca/repo_index.rb:37
   sig { params(gem_name: ::String).returns(T::Boolean) }
   def has_gem?(gem_name); end
 
   class << self
+    # source://tapioca-0.9.2/lib/tapioca/repo_index.rb:15
     sig { params(hash: T::Hash[::String, T::Hash[T.untyped, T.untyped]]).returns(Tapioca::RepoIndex) }
     def from_hash(hash); end
 
+    # source://tapioca-0.9.2/lib/tapioca/repo_index.rb:10
     sig { params(json: ::String).returns(Tapioca::RepoIndex) }
     def from_json(json); end
   end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/runtime/trackers/autoload.rb:5
 module Tapioca::Runtime; end
 
+# source://tapioca-0.9.2/lib/tapioca/runtime/dynamic_mixin_compiler.rb:6
 class Tapioca::Runtime::DynamicMixinCompiler
   include ::Tapioca::Runtime::Reflection
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/dynamic_mixin_compiler.rb:20
   sig { params(constant: ::Module).void }
   def initialize(constant); end
 
   # @return [Array<Symbol>]
+  #
+  # source://tapioca-0.9.2/lib/tapioca/runtime/dynamic_mixin_compiler.rb:14
   def class_attribute_predicates; end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/dynamic_mixin_compiler.rb:14
   sig { returns(T::Array[::Symbol]) }
   def class_attribute_readers; end
 
   # @return [Array<Symbol>]
+  #
+  # source://tapioca-0.9.2/lib/tapioca/runtime/dynamic_mixin_compiler.rb:14
   def class_attribute_writers; end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/dynamic_mixin_compiler.rb:137
   sig { params(tree: ::RBI::Tree).void }
   def compile_class_attributes(tree); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/dynamic_mixin_compiler.rb:180
   sig { params(tree: ::RBI::Tree).returns([T::Array[::Module], T::Array[::Module]]) }
   def compile_mixes_in_class_methods(tree); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/dynamic_mixin_compiler.rb:11
   sig { returns(T::Array[::Module]) }
   def dynamic_extends; end
 
   # @return [Array<Module>]
+  #
+  # source://tapioca-0.9.2/lib/tapioca/runtime/dynamic_mixin_compiler.rb:11
   def dynamic_includes; end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/dynamic_mixin_compiler.rb:132
   sig { returns(T::Boolean) }
   def empty_attributes?; end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/dynamic_mixin_compiler.rb:222
   sig { params(qualified_mixin_name: ::String).returns(T::Boolean) }
   def filtered_mixin?(qualified_mixin_name); end
 
   # @return [Array<Symbol>]
+  #
+  # source://tapioca-0.9.2/lib/tapioca/runtime/dynamic_mixin_compiler.rb:17
   def instance_attribute_predicates; end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/dynamic_mixin_compiler.rb:17
   sig { returns(T::Array[::Symbol]) }
   def instance_attribute_readers; end
 
   # @return [Array<Symbol>]
+  #
+  # source://tapioca-0.9.2/lib/tapioca/runtime/dynamic_mixin_compiler.rb:17
   def instance_attribute_writers; end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/dynamic_mixin_compiler.rb:215
   sig { params(mod: ::Module, dynamic_extends: T::Array[::Module]).returns(T::Boolean) }
   def module_included_by_another_dynamic_extend?(mod, dynamic_extends); end
 end
@@ -1720,11 +2549,15 @@ end
 # On the other hand, if we get a result, then the result will be a hash of type
 # variable to type variable serializers. This allows us to associate type variables
 # to the constant names that represent them, easily.
+#
+# source://tapioca-0.9.2/lib/tapioca/runtime/generic_type_registry.rb:23
 module Tapioca::Runtime::GenericTypeRegistry
   class << self
+    # source://tapioca-0.9.2/lib/tapioca/runtime/generic_type_registry.rb:64
     sig { params(instance: ::Object).returns(T::Boolean) }
     def generic_type_instance?(instance); end
 
+    # source://tapioca-0.9.2/lib/tapioca/runtime/generic_type_registry.rb:69
     sig { params(constant: ::Module).returns(T.nilable(T::Array[::Tapioca::TypeVariableModule])) }
     def lookup_type_variables(constant); end
 
@@ -1739,6 +2572,8 @@ module Tapioca::Runtime::GenericTypeRegistry
     # 2 hash lookups (for the other two `Foo[Integer]`s).
     #
     # This method returns the created or cached clone of the constant.
+    #
+    # source://tapioca-0.9.2/lib/tapioca/runtime/generic_type_registry.rb:49
     sig { params(constant: T.untyped, types: T.untyped).returns(::Module) }
     def register_type(constant, types); end
 
@@ -1751,25 +2586,32 @@ module Tapioca::Runtime::GenericTypeRegistry
     #
     # Finally, the original `type_variable` is returned from this method, so that the caller
     # can return it from the original methods as well.
+    #
+    # source://tapioca-0.9.2/lib/tapioca/runtime/generic_type_registry.rb:88
     sig { params(constant: T.untyped, type_variable: ::Tapioca::TypeVariableModule).void }
     def register_type_variable(constant, type_variable); end
 
     private
 
+    # source://tapioca-0.9.2/lib/tapioca/runtime/generic_type_registry.rb:97
     sig { params(constant: ::Module, name: ::String).returns(::Module) }
     def create_generic_type(constant, name); end
 
+    # source://tapioca-0.9.2/lib/tapioca/runtime/generic_type_registry.rb:135
     sig { params(constant: ::Class).returns(::Class) }
     def create_safe_subclass(constant); end
 
+    # source://tapioca-0.9.2/lib/tapioca/runtime/generic_type_registry.rb:162
     sig { params(constant: ::Module).returns(T::Array[::Tapioca::TypeVariableModule]) }
     def lookup_or_initialize_type_variables(constant); end
   end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/runtime/loader.rb:6
 class Tapioca::Runtime::Loader
   include ::Tapioca::GemHelper
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/loader.rb:13
   sig do
     params(
       gemfile: ::Tapioca::Gemfile,
@@ -1779,26 +2621,33 @@ class Tapioca::Runtime::Loader
   end
   def load_bundle(gemfile, initialize_file, require_file); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/loader.rb:26
   sig { params(environment_load: T::Boolean, eager_load: T::Boolean).void }
   def load_rails_application(environment_load: T.unsafe(nil), eager_load: T.unsafe(nil)); end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/loader.rb:82
   sig { void }
   def eager_load_rails_app; end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/loader.rb:108
   sig { void }
   def load_rails_engines; end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/loader.rb:53
   sig { returns(T::Array[T.untyped]) }
   def rails_engines; end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/loader.rb:43
   sig { params(file: T.nilable(::String)).void }
   def require_helper(file); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/loader.rb:67
   sig { params(path: ::String).void }
   def safe_require(path); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/loader.rb:74
   sig { void }
   def silence_deprecations; end
 end
@@ -1806,24 +2655,31 @@ end
 module Tapioca::Runtime::Reflection
   extend ::Tapioca::Runtime::Reflection
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:60
   sig { params(constant: ::Module).returns(T::Array[::Module]) }
   def ancestors_of(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:75
   sig { params(object: ::BasicObject, other: ::BasicObject).returns(T::Boolean) }
   def are_equal?(object, other); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:39
   sig { params(object: ::BasicObject).returns(::Class) }
   def class_of(object); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:177
   sig { params(constant: ::Module).returns(T.nilable(::BasicObject)) }
   def constant_from_singleton_class(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:172
   sig { params(constant: ::Module).returns(T.nilable(::String)) }
   def constant_name_from_singleton_class(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:32
   sig { params(symbol: ::String, inherit: T::Boolean, namespace: ::Module).returns(::BasicObject) }
   def constantize(symbol, inherit: T.unsafe(nil), namespace: T.unsafe(nil)); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:44
   sig { params(constant: ::Module).returns(T::Array[::Symbol]) }
   def constants_of(constant); end
 
@@ -1840,6 +2696,8 @@ module Tapioca::Runtime::Reflection
   #
   #   class D < C; end
   #   descendants_of(C) # => [B, A, D]
+  #
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:150
   sig do
     type_parameters(:U)
       .params(
@@ -1848,72 +2706,117 @@ module Tapioca::Runtime::Reflection
   end
   def descendants_of(klass); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:95
   sig { params(constant: ::Module).returns(T::Array[::Module]) }
   def inherited_ancestors_of(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:128
   sig { params(constant: ::Module, method: ::Symbol).returns(::Method) }
   def method_of(constant, method); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:49
   sig { params(constant: ::Module).returns(T.nilable(::String)) }
   def name_of(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:123
   sig { params(type: ::T::Types::Base).returns(::String) }
   def name_of_type(type); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:70
   sig { params(object: ::BasicObject).returns(::Integer) }
   def object_id_of(object); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:90
   sig { params(constant: ::Module).returns(T::Array[::Symbol]) }
   def private_instance_methods_of(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:85
   sig { params(constant: ::Module).returns(T::Array[::Symbol]) }
   def protected_instance_methods_of(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:80
   sig { params(constant: ::Module).returns(T::Array[::Symbol]) }
   def public_instance_methods_of(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:104
   sig { params(constant: ::Module).returns(T.nilable(::String)) }
   def qualified_name_of(constant); end
 
   # Examines the call stack to identify the closest location where a "require" is performed
   # by searching for the label "<top (required)>". If none is found, it returns the location
   # labeled "<main>", which is the original call site.
-  sig { returns(::String) }
-  def required_from_location; end
+  #
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:162
+  sig { params(locations: T.nilable(T::Array[::Thread::Backtrace::Location])).returns(::String) }
+  def resolve_loc(locations); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:116
   sig { params(method: T.any(::Method, ::UnboundMethod)).returns(T.untyped) }
   def signature_of(method); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:55
   sig { params(constant: ::Module).returns(::Class) }
   def singleton_class_of(constant); end
 
+  # source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:65
   sig { params(constant: ::Class).returns(T.nilable(::Class)) }
   def superclass_of(constant); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:14
 Tapioca::Runtime::Reflection::ANCESTORS_METHOD = T.let(T.unsafe(nil), UnboundMethod)
+
+# source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:10
 Tapioca::Runtime::Reflection::CLASS_METHOD = T.let(T.unsafe(nil), UnboundMethod)
+
+# source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:11
 Tapioca::Runtime::Reflection::CONSTANTS_METHOD = T.let(T.unsafe(nil), UnboundMethod)
+
+# source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:17
 Tapioca::Runtime::Reflection::EQUAL_METHOD = T.let(T.unsafe(nil), UnboundMethod)
+
+# source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:21
 Tapioca::Runtime::Reflection::METHOD_METHOD = T.let(T.unsafe(nil), UnboundMethod)
+
+# source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:12
 Tapioca::Runtime::Reflection::NAME_METHOD = T.let(T.unsafe(nil), UnboundMethod)
+
+# source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:16
 Tapioca::Runtime::Reflection::OBJECT_ID_METHOD = T.let(T.unsafe(nil), UnboundMethod)
+
+# source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:20
 Tapioca::Runtime::Reflection::PRIVATE_INSTANCE_METHODS_METHOD = T.let(T.unsafe(nil), UnboundMethod)
+
+# source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:19
 Tapioca::Runtime::Reflection::PROTECTED_INSTANCE_METHODS_METHOD = T.let(T.unsafe(nil), UnboundMethod)
+
+# source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:18
 Tapioca::Runtime::Reflection::PUBLIC_INSTANCE_METHODS_METHOD = T.let(T.unsafe(nil), UnboundMethod)
+
+# source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:23
 Tapioca::Runtime::Reflection::REQUIRED_FROM_LABELS = T.let(T.unsafe(nil), Array)
+
+# source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:13
 Tapioca::Runtime::Reflection::SINGLETON_CLASS_METHOD = T.let(T.unsafe(nil), UnboundMethod)
+
+# source://tapioca-0.9.2/lib/tapioca/runtime/reflection.rb:15
 Tapioca::Runtime::Reflection::SUPERCLASS_METHOD = T.let(T.unsafe(nil), UnboundMethod)
+
+# source://tapioca-0.9.2/lib/tapioca/runtime/trackers/autoload.rb:6
 module Tapioca::Runtime::Trackers; end
 
+# source://tapioca-0.9.2/lib/tapioca/runtime/trackers/autoload.rb:7
 module Tapioca::Runtime::Trackers::Autoload
   class << self
+    # source://tapioca-0.9.2/lib/tapioca/runtime/trackers/autoload.rb:18
     sig { void }
     def eager_load_all!; end
 
+    # source://tapioca-0.9.2/lib/tapioca/runtime/trackers/autoload.rb:30
     sig { params(constant_name: ::String).void }
     def register(constant_name); end
 
+    # source://tapioca-0.9.2/lib/tapioca/runtime/trackers/autoload.rb:39
     sig do
       type_parameters(:Result)
         .params(
@@ -1924,6 +2827,7 @@ module Tapioca::Runtime::Trackers::Autoload
   end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/runtime/trackers/autoload.rb:10
 Tapioca::Runtime::Trackers::Autoload::NOOP_METHOD = T.let(T.unsafe(nil), Proc)
 
 # Registers a TracePoint immediately upon load to track points at which
@@ -1934,10 +2838,18 @@ module Tapioca::Runtime::Trackers::ConstantDefinition
   extend ::Tapioca::Runtime::Reflection
 
   class << self
+    # source://tapioca-0.9.2/lib/tapioca/runtime/trackers/constant_definition.rb:52
+    def build_constant_location(tp, locations); end
+
     # Returns the files in which this class or module was opened. Doesn't know
     # about situations where the class was opened prior to +require+ing,
     # or where metaprogramming was used via +eval+, etc.
+    #
+    # source://tapioca-0.9.2/lib/tapioca/runtime/trackers/constant_definition.rb:62
     def files_for(klass); end
+
+    # source://tapioca-0.9.2/lib/tapioca/runtime/trackers/constant_definition.rb:66
+    def locations_for(klass); end
   end
 end
 
@@ -1946,12 +2858,14 @@ class Tapioca::Runtime::Trackers::ConstantDefinition::ConstantLocation < ::T::St
   const :path, ::String
 
   class << self
+    # source://sorbet-runtime-0.5.10206/lib/types/struct.rb:13
     def inherited(s); end
   end
 end
 
 module Tapioca::Runtime::Trackers::Mixin
   class << self
+    # source://tapioca-0.9.2/lib/tapioca/runtime/trackers/mixin.rb:52
     sig do
       params(
         mixin: ::Module
@@ -1959,9 +2873,11 @@ module Tapioca::Runtime::Trackers::Mixin
     end
     def constants_with_mixin(mixin); end
 
+    # source://tapioca-0.9.2/lib/tapioca/runtime/trackers/mixin.rb:42
     sig { params(constant: ::Module, mixin: ::Module, mixin_type: ::Tapioca::Runtime::Trackers::Mixin::Type).void }
     def register(constant, mixin, mixin_type); end
 
+    # source://tapioca-0.9.2/lib/tapioca/runtime/trackers/mixin.rb:27
     sig do
       type_parameters(:Result)
         .params(
@@ -1980,116 +2896,167 @@ class Tapioca::Runtime::Trackers::Mixin::Type < ::T::Enum
   end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/runtime/trackers/required_ancestor.rb:7
 module Tapioca::Runtime::Trackers::RequiredAncestor
   class << self
+    # source://tapioca-0.9.2/lib/tapioca/runtime/trackers/required_ancestor.rb:13
     sig { params(requiring: ::T::Helpers, block: T.proc.returns(::Module)).void }
     def register(requiring, block); end
 
+    # source://tapioca-0.9.2/lib/tapioca/runtime/trackers/required_ancestor.rb:19
     sig { params(mod: ::Module).returns(T::Array[T.proc.returns(::Module)]) }
     def required_ancestors_blocks_by(mod); end
 
+    # source://tapioca-0.9.2/lib/tapioca/runtime/trackers/required_ancestor.rb:24
     sig { params(mod: ::Module).returns(T::Array[T.nilable(::Module)]) }
     def required_ancestors_by(mod); end
   end
 end
 
+# source://tapioca-0.9.2/lib/tapioca.rb:27
 Tapioca::SORBET_CONFIG_FILE = T.let(T.unsafe(nil), String)
+
+# source://tapioca-0.9.2/lib/tapioca.rb:26
 Tapioca::SORBET_DIR = T.let(T.unsafe(nil), String)
 
+# source://tapioca-0.9.2/lib/tapioca/helpers/sorbet_helper.rb:5
 module Tapioca::SorbetHelper
+  # source://tapioca-0.9.2/lib/tapioca/helpers/sorbet_helper.rb:29
   sig { params(sorbet_args: ::String).returns(::Spoom::ExecResult) }
   def sorbet(*sorbet_args); end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/sorbet_helper.rb:34
   sig { returns(::String) }
   def sorbet_path; end
 
+  # source://tapioca-0.9.2/lib/tapioca/helpers/sorbet_helper.rb:41
   sig { params(feature: ::Symbol, version: T.nilable(::Gem::Version)).returns(T::Boolean) }
   def sorbet_supports?(feature, version: T.unsafe(nil)); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/helpers/sorbet_helper.rb:22
 Tapioca::SorbetHelper::FEATURE_REQUIREMENTS = T.let(T.unsafe(nil), Hash)
+
+# source://tapioca-0.9.2/lib/tapioca/helpers/sorbet_helper.rb:13
 Tapioca::SorbetHelper::SORBET_BIN = T.let(T.unsafe(nil), Pathname)
+
+# source://tapioca-0.9.2/lib/tapioca/helpers/sorbet_helper.rb:18
 Tapioca::SorbetHelper::SORBET_EXE_PATH_ENV_VAR = T.let(T.unsafe(nil), String)
+
+# source://tapioca-0.9.2/lib/tapioca/helpers/sorbet_helper.rb:8
 Tapioca::SorbetHelper::SORBET_GEM_SPEC = T.let(T.unsafe(nil), Gem::Specification)
+
+# source://tapioca-0.9.2/lib/tapioca/helpers/sorbet_helper.rb:20
 Tapioca::SorbetHelper::SORBET_PAYLOAD_URL = T.let(T.unsafe(nil), String)
+
+# source://tapioca-0.9.2/lib/tapioca/static/symbol_table_parser.rb:5
 module Tapioca::Static; end
 
+# source://tapioca-0.9.2/lib/tapioca/static/requires_compiler.rb:6
 class Tapioca::Static::RequiresCompiler
+  # source://tapioca-0.9.2/lib/tapioca/static/requires_compiler.rb:10
   sig { params(sorbet_path: ::String).void }
   def initialize(sorbet_path); end
 
+  # source://tapioca-0.9.2/lib/tapioca/static/requires_compiler.rb:15
   sig { returns(::String) }
   def compile; end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/static/requires_compiler.rb:29
   sig { params(config: ::Spoom::Sorbet::Config).returns(T::Array[::String]) }
   def collect_files(config); end
 
+  # source://tapioca-0.9.2/lib/tapioca/static/requires_compiler.rb:44
   sig { params(file_path: ::String).returns(T::Enumerable[::String]) }
   def collect_requires(file_path); end
 
+  # source://tapioca-0.9.2/lib/tapioca/static/requires_compiler.rb:52
   sig { params(config: ::Spoom::Sorbet::Config, file_path: ::Pathname).returns(T::Boolean) }
   def file_ignored_by_sorbet?(config, file_path); end
 
+  # source://tapioca-0.9.2/lib/tapioca/static/requires_compiler.rb:81
   sig { params(path: ::Pathname).returns(T::Array[::String]) }
   def path_parts(path); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/static/symbol_loader.rb:6
 module Tapioca::Static::SymbolLoader
   extend ::Tapioca::SorbetHelper
   extend ::Tapioca::Runtime::Reflection
 
   class << self
+    # source://tapioca-0.9.2/lib/tapioca/static/symbol_loader.rb:23
     sig { params(gem: ::Tapioca::Gemfile::GemSpec).returns(T::Set[::String]) }
     def engine_symbols(gem); end
 
+    # source://tapioca-0.9.2/lib/tapioca/static/symbol_loader.rb:40
     sig { params(gem: ::Tapioca::Gemfile::GemSpec).returns(T::Set[::String]) }
     def gem_symbols(gem); end
 
+    # source://tapioca-0.9.2/lib/tapioca/static/symbol_loader.rb:13
     sig { returns(T::Set[::String]) }
     def payload_symbols; end
 
     private
 
     # @return [Array<T.class_of(Rails::Engine)>]
+    #
+    # source://sorbet-runtime-0.5.10206/lib/types/private/methods/_methods.rb:250
     def engines(*args, **_arg1, &blk); end
 
+    # source://tapioca-0.9.2/lib/tapioca/static/symbol_loader.rb:59
     sig { params(input: ::String, table_type: ::String).returns(::String) }
     def symbol_table_json_from(input, table_type: T.unsafe(nil)); end
 
+    # source://tapioca-0.9.2/lib/tapioca/static/symbol_loader.rb:64
     sig { params(paths: T::Array[::Pathname]).returns(T::Set[::String]) }
     def symbols_from_paths(paths); end
   end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/static/symbol_table_parser.rb:6
 class Tapioca::Static::SymbolTableParser
+  # source://tapioca-0.9.2/lib/tapioca/static/symbol_table_parser.rb:24
   sig { void }
   def initialize; end
 
+  # source://tapioca-0.9.2/lib/tapioca/static/symbol_table_parser.rb:57
   sig { params(name: ::String).returns(::String) }
   def fully_qualified_name(name); end
 
+  # source://tapioca-0.9.2/lib/tapioca/static/symbol_table_parser.rb:30
   sig { params(object: T::Hash[::String, T.untyped]).void }
   def parse_object(object); end
 
+  # source://tapioca-0.9.2/lib/tapioca/static/symbol_table_parser.rb:21
   sig { returns(T::Set[::String]) }
   def symbols; end
 
   class << self
+    # source://tapioca-0.9.2/lib/tapioca/static/symbol_table_parser.rb:10
     sig { params(json_string: ::String).returns(T::Set[::String]) }
     def parse_json(json_string); end
   end
 end
 
+# source://tapioca-0.9.2/lib/tapioca.rb:29
 Tapioca::TAPIOCA_CONFIG_FILE = T.let(T.unsafe(nil), String)
+
+# source://tapioca-0.9.2/lib/tapioca.rb:28
 Tapioca::TAPIOCA_DIR = T.let(T.unsafe(nil), String)
 
+# source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:98
 class Tapioca::TypeVariable < ::T::Types::TypeVariable
   # @return [TypeVariable] a new instance of TypeVariable
+  #
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:99
   def initialize(name, variance); end
 
   # Returns the value of attribute name.
+  #
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:104
   def name; end
 end
 
@@ -2098,7 +3065,10 @@ end
 # get bound to the constant names they are assigned to by Ruby. As a result, we don't
 # need to do any matching of constants to type variables to bind their names, Ruby will
 # do that automatically for us and we get the `name` method for free from `Module`.
+#
+# source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:112
 class Tapioca::TypeVariableModule < ::Module
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:134
   sig do
     params(
       context: ::Module,
@@ -2112,17 +3082,21 @@ class Tapioca::TypeVariableModule < ::Module
   end
   def initialize(context, type, variance, fixed, lower, upper, bounds_proc); end
 
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:184
   sig { returns(::Tapioca::TypeVariable) }
   def coerce_to_type_variable; end
 
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:149
   sig { returns(T.nilable(::String)) }
   def name; end
 
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:168
   sig { returns(::String) }
   def serialize; end
 
   private
 
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:194
   sig do
     params(
       fixed: T.untyped,
@@ -2132,6 +3106,7 @@ class Tapioca::TypeVariableModule < ::Module
   end
   def build_bounds_proc(fixed, lower, upper); end
 
+  # source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:208
   sig do
     type_parameters(:Result)
       .params(
@@ -2141,6 +3116,7 @@ class Tapioca::TypeVariableModule < ::Module
   def with_bound_name_pre_3_0(&block); end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/sorbet_ext/generic_name_patch.rb:115
 class Tapioca::TypeVariableModule::Type < ::T::Enum
   enums do
     Member = new
@@ -2148,4 +3124,5 @@ class Tapioca::TypeVariableModule::Type < ::T::Enum
   end
 end
 
+# source://tapioca-0.9.2/lib/tapioca/version.rb:5
 Tapioca::VERSION = T.let(T.unsafe(nil), String)
