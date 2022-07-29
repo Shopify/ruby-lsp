@@ -12,11 +12,9 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/Shopify/ruby-lsp"
   s.license = "MIT"
 
-  s.files = Dir.chdir(File.expand_path(__dir__)) do
-    %x(git ls-files -z).split("\x0").reject { |f| f.match(%r{\A(?:test|spec|features|misc)/}) }
-  end
+  s.files = Dir.glob("lib/**/*.rb") + ["README.md", "CHANGELOG.md", "VERSION", "LICENSE.txt"]
   s.bindir = "exe"
-  s.executables = s.files.grep(/\Aexe/) { |f| File.basename(f) }
+  s.executables = ["ruby-lsp"]
   s.require_paths = ["lib"]
 
   s.add_dependency("language_server-protocol")
