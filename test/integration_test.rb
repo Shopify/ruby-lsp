@@ -73,6 +73,21 @@ class IntegrationTest < Minitest::Test
     assert_equal(LanguageServer::Protocol::Constant::DocumentHighlightKind::WRITE, range[:kind])
   end
 
+  def test_document_highlight_with_syntax_error
+    initialize_lsp(["documentHighlights"])
+    open_file_with("class Foo")
+
+    read_response("textDocument/publishDiagnostics")
+
+    response = make_request(
+      "textDocument/documentHighlight",
+      { textDocument: { uri: "file://#{__FILE__}" }, position: { line: 0, character: 1 } }
+    )
+
+    assert_nil(response[:result])
+    assert_nil(response[:error])
+  end
+
   def test_semantic_highlighting
     initialize_lsp(["semanticHighlighting"])
     open_file_with("class Foo\nend")
@@ -226,6 +241,24 @@ class IntegrationTest < Minitest::Test
       { range: { start: { line: 0, character: 0 }, end: { line: 1, character: 3 } } },
       response[:result].first,
     )
+  end
+
+  def test_selection_ranges_with_syntax_error
+    initialize_lsp(["selectionRanges"])
+    open_file_with("class Foo")
+
+    read_response("textDocument/publishDiagnostics")
+
+    response = make_request(
+      "textDocument/selectionRange",
+      {
+        textDocument: { uri: "file://#{__FILE__}" },
+        positions: [{ line: 0, character: 0 }],
+      }
+    )
+
+    assert_nil(response[:result])
+    assert_nil(response[:error])
   end
 
   def test_incorrect_rubocop_configuration

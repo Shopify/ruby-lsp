@@ -110,15 +110,16 @@ module RubyLsp
         Requests::SelectionRanges.new(document).run
       end
 
-      return if ranges.nil?
-
       # Per the selection range request spec (https://microsoft.github.io/language-server-protocol/specification#textDocument_selectionRange),
       # every position in the positions array should have an element at the same index in the response
       # array. For positions without a valid selection range, the corresponding element in the response
       # array will be nil.
-      positions.map do |position|
-        ranges.find do |range|
-          range.cover?(position)
+
+      unless ranges.nil?
+        positions.map do |position|
+          ranges.find do |range|
+            range.cover?(position)
+          end
         end
       end
     end
@@ -143,9 +144,10 @@ module RubyLsp
 
     on("textDocument/documentHighlight") do |request|
       document = store.get(request.dig(:params, :textDocument, :uri))
-      return unless document.parsed?
 
-      Requests::DocumentHighlight.new(document, request.dig(:params, :position)).run
+      if document.parsed?
+        Requests::DocumentHighlight.new(document, request.dig(:params, :position)).run
+      end
     end
 
     on("textDocument/codeAction") do |request|
