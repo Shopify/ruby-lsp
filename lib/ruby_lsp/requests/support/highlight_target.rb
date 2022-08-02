@@ -77,7 +77,7 @@ module RubyLsp
             node.value&.value
           when SyntaxTree::Call, SyntaxTree::Command, SyntaxTree::CommandCall
             message = node.message
-            node.message != :call ? message.value : nil
+            message != :call ? message.value : nil
           when SyntaxTree::ClassDeclaration, SyntaxTree::ModuleDeclaration
             node.constant.constant.value
           end
