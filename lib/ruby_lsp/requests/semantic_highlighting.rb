@@ -108,7 +108,10 @@ module RubyLsp
       sig { params(node: SyntaxTree::Call).void }
       def visit_call(node)
         visit(node.receiver)
-        add_token(node.message.location, :method)
+
+        message = node.message
+        add_token(message.location, :method) if message != :call
+
         visit(node.arguments)
       end
 
