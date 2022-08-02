@@ -60,10 +60,13 @@ module RubyLsp
         default_library: 9,
       }.freeze, T::Hash[Symbol, Integer])
 
-      SPECIAL_RUBY_METHODS = T.let((Module.instance_methods(false) +
-        Kernel.methods(false) + Bundler::Dsl.instance_methods(false) +
-        Module.private_instance_methods(false))
-        .map(&:to_s), T::Array[String])
+      SPECIAL_RUBY_METHODS = T.let([
+        Module.instance_methods(false),
+        Kernel.instance_methods(false),
+        Kernel.methods(false),
+        Bundler::Dsl.instance_methods(false),
+        Module.private_instance_methods(false),
+      ].flatten.map(&:to_s), T::Array[String])
 
       class SemanticToken < T::Struct
         const :location, SyntaxTree::Location
