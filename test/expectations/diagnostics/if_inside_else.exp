@@ -11,10 +11,10 @@
           "character": 14
         }
       },
-      "severity": 3,
+      "severity": 2,
       "code": "Sorbet/TrueSigil",
       "source": "RuboCop",
-      "message": "Sorbet/TrueSigil: Sorbet sigil should be at least `true` got `false`."
+      "message": "Sorbet/TrueSigil: Sorbet sigil should be at least `true` got `false`.\n\nThis offense is not auto-correctable.\n"
     },
     {
       "range": {

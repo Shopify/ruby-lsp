@@ -61,11 +61,18 @@ module RubyLsp
 
         sig { returns(LanguageServer::Protocol::Interface::Diagnostic) }
         def to_lsp_diagnostic
+          if @offense.correctable?
+            severity = RUBOCOP_TO_LSP_SEVERITY[@offense.severity.name]
+            message = @offense.message
+          else
+            severity = LanguageServer::Protocol::Constant::DiagnosticSeverity::WARNING
+            message = "#{@offense.message}\n\nThis offense is not auto-correctable.\n"
+          end
           LanguageServer::Protocol::Interface::Diagnostic.new(
-            message: @offense.message,
+            message: message,
             source: "RuboCop",
             code: @offense.cop_name,
-            severity: RUBOCOP_TO_LSP_SEVERITY[@offense.severity.name],
+            severity: severity,
             range: LanguageServer::Protocol::Interface::Range.new(
               start: LanguageServer::Protocol::Interface::Position.new(
                 line: @offense.line - 1,
