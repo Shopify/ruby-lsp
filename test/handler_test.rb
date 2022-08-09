@@ -19,6 +19,8 @@ class HandlerTest < Minitest::Test
     assert_equal(LanguageServer::Protocol::Constant::ErrorCodes::INTERNAL_ERROR, response.dig(:error, :code))
     assert_equal("#<RuntimeError: foo>", response.dig(:error, :message))
     assert_equal(request.to_json, response.dig(:error, :data))
+
+    handler.send(:shutdown)
   end
 
   sig { params(handler: RubyLsp::Handler, request: T::Hash[Symbol, T.untyped]).returns(T::Hash[Symbol, T.untyped]) }

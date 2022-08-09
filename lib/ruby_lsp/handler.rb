@@ -3,6 +3,7 @@
 
 require "ruby_lsp/requests"
 require "ruby_lsp/store"
+require "ruby_lsp/queue"
 require "benchmark"
 
 module RubyLsp
@@ -13,6 +14,11 @@ module RubyLsp
   class Handler
     extend T::Sig
     VOID = T.let(Object.new.freeze, Object)
+
+    class RequestHandler < T::Struct
+      const :action, T.proc.params(request: T::Hash[Symbol, T.untyped]).returns(T.untyped)
+      const :parallel, T::Boolean
+    end
 
     class << self
       extend T::Sig
@@ -32,52 +38,71 @@ module RubyLsp
     def initialize
       @writer = T.let(Transport::Stdio::Writer.new, Transport::Stdio::Writer)
       @reader = T.let(Transport::Stdio::Reader.new, Transport::Stdio::Reader)
-      @handlers = T.let({}, T::Hash[String, T.proc.params(request: T::Hash[Symbol, T.untyped]).returns(T.untyped)])
+      @handlers = T.let({}, T::Hash[String, RequestHandler])
       @store = T.let(Store.new, Store)
+      @queue = T.let(Queue.new, Queue)
     end
 
     sig { void }
     def start
       $stderr.puts "Starting Ruby LSP..."
-      @reader.read { |request| handle(request) }
+
+      @reader.read do |request|
+        handler = @handlers[request[:method]]
+        next if handler.nil?
+
+        if handler.parallel
+          @queue.push(request) { |request| handle(request) }
+        else
+          handle(request)
+        end
+      end
     end
 
     private
 
+    # The client still expects a response for cancelled requests, so we return nil
+    sig { params(id: T.any(String, Integer)).void }
+    def cancel_request(id)
+      @queue.cancel(id)
+      @writer.write(id: id, result: nil)
+    end
+
     sig do
       params(
         msg: String,
+        parallel: T::Boolean,
         blk: T.proc.bind(Handler).params(request: T::Hash[Symbol, T.untyped]).returns(T.untyped)
       ).void
     end
-    def on(msg, &blk)
-      @handlers[msg] = blk
+    def on(msg, parallel: false, &blk)
+      @handlers[msg] = RequestHandler.new(action: blk, parallel: parallel)
     end
 
     sig { params(request: T::Hash[Symbol, T.untyped]).void }
     def handle(request)
       result = T.let(nil, T.untyped)
       error = T.let(nil, T.nilable(StandardError))
-      handler = @handlers[request[:method]]
+      handler = T.must(@handlers[request[:method]])
 
       request_time = Benchmark.realtime do
-        if handler
-          begin
-            result = handler.call(request)
-          rescue StandardError => e
-            error = e
-          end
+        begin
+          result = handler.action.call(request)
+        rescue StandardError => e
+          error = e
+        end
 
-          if error
-            @writer.write(
-              {
-                id: request[:id],
-                error: { code: Constant::ErrorCodes::INTERNAL_ERROR, message: error.inspect, data: request.to_json },
-              }
-            )
-          elsif result != VOID
-            @writer.write(id: request[:id], result: result)
-          end
+        if error
+          @writer.write(
+            id: request[:id],
+            error: {
+              code: Constant::ErrorCodes::INTERNAL_ERROR,
+              message: error.inspect,
+              data: request.to_json,
+            },
+          )
+        elsif result != VOID
+          @writer.write(id: request[:id], result: result)
         end
       end
 
@@ -87,6 +112,7 @@ module RubyLsp
     sig { void }
     def shutdown
       $stderr.puts "Shutting down Ruby LSP..."
+      @queue.shutdown
       store.clear
     end
 
