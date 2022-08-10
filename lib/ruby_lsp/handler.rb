@@ -87,25 +87,6 @@ module RubyLsp
     end
 
     sig { params(uri: String).void }
-    def send_diagnostics(uri)
-      response = store.cache_fetch(uri, :diagnostics) do |document|
-        Requests::Diagnostics.new(uri, document).run
-      end
-
-      return if response.nil?
-
-      @writer.write(
-        method: "textDocument/publishDiagnostics",
-        params: Interface::PublishDiagnosticsParams.new(
-          uri: uri,
-          diagnostics: response.map(&:to_lsp_diagnostic)
-        )
-      )
-    rescue RuboCop::ValidationError => e
-      show_message(Constant::MessageType::ERROR, "Error in RuboCop configuration file: #{e.message}")
-    end
-
-    sig { params(uri: String).void }
     def clear_diagnostics(uri)
       @writer.write(
         method: "textDocument/publishDiagnostics",

@@ -22,6 +22,7 @@ class IntegrationTest < Minitest::Test
     "semanticHighlighting" => :semanticTokensProvider,
     "formatting" => :documentFormattingProvider,
     "codeActions" => :codeActionProvider,
+    "diagnostics" => :diagnosticProvider,
   }.freeze
 
   def setup
@@ -48,7 +49,6 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["documentSymbols"])
     open_file_with("class Foo\nend")
 
-    read_response("textDocument/publishDiagnostics")
     assert_telemetry("textDocument/didOpen")
 
     response = make_request("textDocument/documentSymbol", { textDocument: { uri: "file://#{__FILE__}" } })
@@ -61,7 +61,6 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["documentHighlights"])
     open_file_with("$foo = 1")
 
-    read_response("textDocument/publishDiagnostics")
     assert_telemetry("textDocument/didOpen")
 
     response = make_request(
@@ -77,8 +76,6 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["documentHighlights"])
     open_file_with("class Foo")
 
-    read_response("textDocument/publishDiagnostics")
-
     response = make_request(
       "textDocument/documentHighlight",
       { textDocument: { uri: "file://#{__FILE__}" }, position: { line: 0, character: 1 } }
@@ -92,7 +89,6 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["semanticHighlighting"])
     open_file_with("class Foo\nend")
 
-    read_response("textDocument/publishDiagnostics")
     assert_telemetry("textDocument/didOpen")
 
     response = make_request("textDocument/semanticTokens/full", { textDocument: { uri: "file://#{__FILE__}" } })
@@ -107,7 +103,6 @@ class IntegrationTest < Minitest::Test
       end
     DOC
 
-    read_response("textDocument/publishDiagnostics")
     assert_telemetry("textDocument/didOpen")
 
     response = make_request("textDocument/documentLink", { textDocument: { uri: "file://#{__FILE__}" } })
@@ -118,7 +113,6 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["formatting"])
     open_file_with("class Foo\nend")
 
-    read_response("textDocument/publishDiagnostics")
     assert_telemetry("textDocument/didOpen")
 
     response = make_request("textDocument/formatting", { textDocument: { uri: "file://#{__FILE__}" } })
@@ -135,7 +129,6 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["codeActions"])
     open_file_with("class Foo\nend")
 
-    read_response("textDocument/publishDiagnostics")
     assert_telemetry("textDocument/didOpen")
 
     response = make_request("textDocument/codeAction",
@@ -149,7 +142,6 @@ class IntegrationTest < Minitest::Test
     initialize_lsp([])
     open_file_with("class Foo\nend")
 
-    read_response("textDocument/publishDiagnostics")
     assert_telemetry("textDocument/didOpen")
 
     assert(send_request("textDocument/didClose", { textDocument: { uri: "file://#{__FILE__}" } }))
@@ -178,7 +170,6 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["foldingRanges"])
     open_file_with("class Foo\n\nend")
 
-    read_response("textDocument/publishDiagnostics")
     assert_telemetry("textDocument/didOpen")
 
     response = make_request("textDocument/foldingRange", { textDocument: { uri: "file://#{__FILE__}" } })
@@ -189,7 +180,6 @@ class IntegrationTest < Minitest::Test
     initialize_lsp([])
     open_file_with("class Foo\nend")
 
-    read_response("textDocument/publishDiagnostics")
     assert_telemetry("textDocument/didOpen")
 
     error_range = { start: { line: 1, character: 2 }, end: { line: 1, character: 3 } }
@@ -201,11 +191,11 @@ class IntegrationTest < Minitest::Test
         contentChanges: [{ text: "", range: error_range }],
       }
     ))
-    response = read_response("textDocument/publishDiagnostics")
+    assert_telemetry("textDocument/didChange")
+    response = make_request("textDocument/diagnostic", { textDocument: { uri: "file://#{__FILE__}" } })
 
-    assert_equal("textDocument/publishDiagnostics", response.dig(:method))
-    assert_equal("file://#{__FILE__}", response.dig(:params, :uri))
-    assert_equal(error_range, response.dig(:params, :diagnostics)[0][:range])
+    assert_equal("full", response.dig(:result, :kind))
+    assert_equal(error_range, response.dig(:result, :items)[0][:range])
   end
 
   def test_request_with_telemetry
@@ -214,7 +204,6 @@ class IntegrationTest < Minitest::Test
 
     send_request("textDocument/foldingRange", { textDocument: { uri: "file://#{__FILE__}" } })
 
-    read_response("textDocument/publishDiagnostics")
     assert_telemetry("textDocument/didOpen")
 
     response = read_response("textDocument/foldingRange")
@@ -226,7 +215,6 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["selectionRanges"])
     open_file_with("class Foo\nend")
 
-    read_response("textDocument/publishDiagnostics")
     assert_telemetry("textDocument/didOpen")
 
     response = make_request(
@@ -246,8 +234,6 @@ class IntegrationTest < Minitest::Test
   def test_selection_ranges_with_syntax_error
     initialize_lsp(["selectionRanges"])
     open_file_with("class Foo")
-
-    read_response("textDocument/publishDiagnostics")
 
     response = make_request(
       "textDocument/selectionRange",
@@ -269,8 +255,8 @@ class IntegrationTest < Minitest::Test
     FileUtils.cp(".rubocop.yml", ".rubocop.yml.bak")
     File.write(".rubocop.yml", "\nInvalidCop:\n  Enabled: true", mode: "a")
 
-    response = read_response("textDocument/publishDiagnostics")
-    assert_telemetry("textDocument/didOpen")
+    make_request("textDocument/diagnostic", { textDocument: { uri: "file://#{__FILE__}" } })
+    response = read_response("window/showMessage")
 
     assert_equal("window/showMessage", response.dig(:method))
     assert_equal(LanguageServer::Protocol::Constant::MessageType::ERROR, response.dig(:params, :type))
@@ -282,6 +268,18 @@ class IntegrationTest < Minitest::Test
     # Restore the original configuration file
     FileUtils.rm(".rubocop.yml")
     FileUtils.mv(".rubocop.yml.bak", ".rubocop.yml")
+  end
+
+  def test_diagnostics
+    initialize_lsp([])
+    open_file_with("class Foo\nend")
+
+    assert_telemetry("textDocument/didOpen")
+
+    response = make_request("textDocument/diagnostic", { textDocument: { uri: "file://#{__FILE__}" } })
+
+    assert_equal("full", response.dig(:result, :kind))
+    assert_equal("Sorbet/TrueSigil", response.dig(:result, :items)[0][:code])
   end
 
   private
