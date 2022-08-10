@@ -41,21 +41,30 @@ module RubyLsp
         )
       end
 
+      diagnostics_provider = if enabled_features.include?("diagnostics")
+        {
+          interFileDependencies: false,
+          workspaceDiagnostics: false,
+        }
+      end
+
+      # TODO: switch back to using Interface::ServerCapabilities once the gem is updated for spec 3.17
       Interface::InitializeResult.new(
-        capabilities: Interface::ServerCapabilities.new(
-          text_document_sync: Interface::TextDocumentSyncOptions.new(
+        capabilities: {
+          textDocumentSync: Interface::TextDocumentSyncOptions.new(
             change: Constant::TextDocumentSyncKind::INCREMENTAL,
             open_close: true,
           ),
-          selection_range_provider: enabled_features.include?("selectionRanges"),
-          document_symbol_provider: document_symbol_provider,
-          document_link_provider: document_link_provider,
-          folding_range_provider: folding_ranges_provider,
-          semantic_tokens_provider: semantic_tokens_provider,
-          document_formatting_provider: enabled_features.include?("formatting"),
-          document_highlight_provider: enabled_features.include?("documentHighlights"),
-          code_action_provider: enabled_features.include?("codeActions")
-        )
+          selectionRangeProvider: enabled_features.include?("selectionRanges"),
+          documentSymbolProvider: document_symbol_provider,
+          documentLinkProvider: document_link_provider,
+          foldingRangeProvider: folding_ranges_provider,
+          semanticTokensProvider: semantic_tokens_provider,
+          documentFormattingProvider: enabled_features.include?("formatting"),
+          documentHighlightProvider: enabled_features.include?("documentHighlights"),
+          codeActionProvider: enabled_features.include?("codeActions"),
+          diagnosticProvider: diagnostics_provider,
+        }.reject { |_, v| !v }
       )
     end
 
@@ -63,7 +72,6 @@ module RubyLsp
       uri = request.dig(:params, :textDocument, :uri)
       store.push_edits(uri, request.dig(:params, :contentChanges))
 
-      send_diagnostics(uri)
       Handler::VOID
     end
 
@@ -72,7 +80,6 @@ module RubyLsp
       text = request.dig(:params, :textDocument, :text)
       store.set(uri, text)
 
-      send_diagnostics(uri)
       Handler::VOID
     end
 
@@ -159,6 +166,18 @@ module RubyLsp
       store.cache_fetch(uri, :code_actions) do |document|
         Requests::CodeActions.new(uri, document, start_line..end_line).run
       end
+    end
+
+    on("textDocument/diagnostic") do |request|
+      uri = request.dig(:params, :textDocument, :uri)
+      response = store.cache_fetch(uri, :diagnostics) do |document|
+        Requests::Diagnostics.new(uri, document).run
+      end
+
+      { kind: "full", items: response.map(&:to_lsp_diagnostic) } if response
+    rescue RuboCop::ValidationError => e
+      show_message(Constant::MessageType::ERROR, "Error in RuboCop configuration file: #{e.message}")
+      nil
     end
 
     on("shutdown") { shutdown }
