@@ -1,23 +1,25 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "benchmark"
+
 module RubyLsp
   class Queue
-    class Cancelled < StandardError; end
+    class Cancelled < Interrupt; end
 
     extend T::Sig
+
+    class Result < T::Struct
+      const :response, T.untyped # rubocop:disable Sorbet/ForbidUntypedStructProps
+      const :error, T.nilable(StandardError)
+      const :request_time, T.nilable(Float)
+    end
 
     class Job < T::Struct
       extend T::Sig
 
-      const :action, T.proc.params(request: T::Hash[Symbol, T.untyped]).returns(T.untyped)
       const :request, T::Hash[Symbol, T.untyped]
       prop :cancelled, T::Boolean
-
-      sig { void }
-      def process
-        action.call(request)
-      end
 
       sig { void }
       def cancel
@@ -25,8 +27,15 @@ module RubyLsp
       end
     end
 
-    sig { void }
-    def initialize
+    sig do
+      params(
+        writer: LanguageServer::Protocol::Transport::Stdio::Writer,
+        handlers: T::Hash[String, Handler::RequestHandler]
+      ).void
+    end
+    def initialize(writer, handlers)
+      @writer = writer
+      @handlers = handlers
       # The job queue is the actual list of requests we have to process
       @job_queue = T.let(Thread::Queue.new, Thread::Queue)
       # The jobs hash is just a way of keeping a handle to jobs based on the request ID, so we can cancel them
@@ -34,41 +43,14 @@ module RubyLsp
       # The current job is a handle to cancel jobs that are currently being processed
       @current_job = T.let(nil, T.nilable(Job))
       @mutex = T.let(Mutex.new, Mutex)
-      @worker = T.let(
-        Thread.new do
-          loop do
-            # Thread::Queue#pop is thread safe and will wait until an item is available
-            job = @job_queue.pop
-            # The only time when the job is nil is when the queue is closed and we can then terminate the thread
-            break if job.nil?
+      @worker = T.let(new_worker, Thread)
 
-            @mutex.synchronize do
-              @jobs.delete(job.request[:id])
-              @current_job = job
-            end
-
-            begin
-              next if job.cancelled
-
-              job.process # only the compute part should be cancelable - the IO after should be irrevoable
-            rescue Cancelled
-              next
-            ensure
-              @mutex.synchronize { @current_job = nil }
-            end
-          end
-        end, Thread
-      )
+      Thread.main.priority = 1
     end
 
-    sig do
-      params(
-        request: T::Hash[Symbol, T.untyped],
-        block: T.proc.params(request: T::Hash[Symbol, T.untyped]).returns(T.untyped)
-      ).void
-    end
-    def push(request, &block)
-      job = Job.new(request: request, action: block, cancelled: false)
+    sig { params(request: T::Hash[Symbol, T.untyped]).void }
+    def push(request)
+      job = Job.new(request: request, cancelled: false)
 
       # Remember a handle to the job, so that we can cancel it
       @mutex.synchronize do
@@ -99,6 +81,109 @@ module RubyLsp
       @job_queue.clear
       # Wait until the thread is finished
       @worker.join
+    end
+
+    # Executes a request and returns a Queue::Result. No IO should happen in this method, because it can be cancelled in
+    # the middle with a raise
+    sig { params(request: T::Hash[Symbol, T.untyped]).returns(Queue::Result) }
+    def execute(request)
+      response = T.let(nil, T.untyped)
+      error = T.let(nil, T.nilable(StandardError))
+
+      request_time = Benchmark.realtime do
+        response = T.must(@handlers[request[:method]]).action.call(request)
+      rescue StandardError => e
+        error = e
+      end
+
+      Queue::Result.new(response: response, error: error, request_time: request_time)
+    end
+
+    # Finalize a Queue::Result. All IO operations should happen here to avoid any issues with cancelling requests
+    sig do
+      params(
+        result: Result,
+        request: T::Hash[Symbol, T.untyped]
+      ).void
+    end
+    def finalize_request(result, request)
+      error = result.error
+      if error
+        T.must(@handlers[request[:method]]).error_handler&.call(error, request)
+
+        @writer.write(
+          id: request[:id],
+          error: {
+            code: LanguageServer::Protocol::Constant::ErrorCodes::INTERNAL_ERROR,
+            message: result.error.inspect,
+            data: request.to_json,
+          },
+        )
+      elsif result.response != Handler::VOID
+        @writer.write(id: request[:id], result: result.response)
+      end
+
+      request_time = result.request_time
+      if request_time
+        @writer.write(method: "telemetry/event", params: telemetry_params(request, request_time, result.error))
+      end
+    end
+
+    private
+
+    sig { returns(Thread) }
+    def new_worker
+      Thread.new do
+        loop do
+          # Thread::Queue#pop is thread safe and will wait until an item is available
+          job = T.let(@job_queue.pop, T.nilable(Job))
+          # The only time when the job is nil is when the queue is closed and we can then terminate the thread
+          break if job.nil?
+
+          request = job.request
+          @mutex.synchronize do
+            @jobs.delete(request[:id])
+            @current_job = job
+          end
+
+          begin
+            next if job.cancelled
+
+            result = execute(request)
+          rescue Cancelled
+            # We need to return nil to the client even if the request was cancelled
+            result = Queue::Result.new(response: nil, error: nil, request_time: nil)
+          ensure
+            @mutex.synchronize { @current_job = nil }
+            finalize_request(result, request) unless result.nil?
+          end
+        end
+      end
+    end
+
+    sig do
+      params(
+        request: T::Hash[Symbol, T.untyped],
+        request_time: Float,
+        error: T.nilable(StandardError)
+      ).returns(T::Hash[Symbol, T.any(String, Float)])
+    end
+    def telemetry_params(request, request_time, error)
+      uri = request.dig(:params, :textDocument, :uri)
+
+      params = {
+        request: request[:method],
+        lspVersion: RubyLsp::VERSION,
+        requestTime: request_time,
+      }
+
+      if error
+        params[:errorClass] = error.class.name
+        params[:errorMessage] = error.message
+      end
+
+      params[:uri] = uri.sub(%r{.*://#{Dir.home}}, "~") if uri
+      params
     end
   end
 end

@@ -181,9 +181,10 @@ module RubyLsp
       end
 
       { kind: "full", items: response.map(&:to_lsp_diagnostic) } if response
-    rescue RuboCop::ValidationError => e
-      show_message(Constant::MessageType::ERROR, "Error in RuboCop configuration file: #{e.message}")
-      nil
+    end.on_error do |error|
+      if error.is_a?(RuboCop::ValidationError)
+        show_message(Constant::MessageType::ERROR, "Error in RuboCop configuration file: #{error.message}")
+      end
     end
 
     on("shutdown") { shutdown }

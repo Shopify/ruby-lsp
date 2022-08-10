@@ -4,7 +4,6 @@
 require "ruby_lsp/requests"
 require "ruby_lsp/store"
 require "ruby_lsp/queue"
-require "benchmark"
 
 module RubyLsp
   Interface = LanguageServer::Protocol::Interface
@@ -16,8 +15,23 @@ module RubyLsp
     VOID = T.let(Object.new.freeze, Object)
 
     class RequestHandler < T::Struct
+      extend T::Sig
+
       const :action, T.proc.params(request: T::Hash[Symbol, T.untyped]).returns(T.untyped)
       const :parallel, T::Boolean
+      prop :error_handler,
+        T.nilable(T.proc.params(error: StandardError, request: T::Hash[Symbol, T.untyped]).void)
+
+      # A proc that runs in case a request has errored. Receives the error and the original request as arguments. Useful
+      # for displaying window messages on errors
+      sig do
+        params(
+          block: T.proc.bind(Handler).params(error: StandardError, request: T::Hash[Symbol, T.untyped]).void
+        ).void
+      end
+      def on_error(&block)
+        self.error_handler = block
+      end
     end
 
     class << self
@@ -40,7 +54,7 @@ module RubyLsp
       @reader = T.let(Transport::Stdio::Reader.new, Transport::Stdio::Reader)
       @handlers = T.let({}, T::Hash[String, RequestHandler])
       @store = T.let(Store.new, Store)
-      @queue = T.let(Queue.new, Queue)
+      @queue = T.let(Queue.new(@writer, @handlers), Queue)
     end
 
     sig { void }
@@ -52,20 +66,19 @@ module RubyLsp
         next if handler.nil?
 
         if handler.parallel
-          @queue.push(request) { |request| handle(request) }
+          @queue.push(request)
         else
-          handle(request)
+          result = @queue.execute(request)
+          @queue.finalize_request(result, request)
         end
       end
     end
 
     private
 
-    # The client still expects a response for cancelled requests, so we return nil
     sig { params(id: T.any(String, Integer)).void }
     def cancel_request(id)
       @queue.cancel(id)
-      @writer.write(id: id, result: nil)
     end
 
     sig do
@@ -73,40 +86,10 @@ module RubyLsp
         msg: String,
         parallel: T::Boolean,
         blk: T.proc.bind(Handler).params(request: T::Hash[Symbol, T.untyped]).returns(T.untyped)
-      ).void
+      ).returns(RequestHandler)
     end
     def on(msg, parallel: false, &blk)
       @handlers[msg] = RequestHandler.new(action: blk, parallel: parallel)
-    end
-
-    sig { params(request: T::Hash[Symbol, T.untyped]).void }
-    def handle(request)
-      result = T.let(nil, T.untyped)
-      error = T.let(nil, T.nilable(StandardError))
-      handler = T.must(@handlers[request[:method]])
-
-      request_time = Benchmark.realtime do
-        begin
-          result = handler.action.call(request)
-        rescue StandardError => e
-          error = e
-        end
-
-        if error
-          @writer.write(
-            id: request[:id],
-            error: {
-              code: Constant::ErrorCodes::INTERNAL_ERROR,
-              message: error.inspect,
-              data: request.to_json,
-            },
-          )
-        elsif result != VOID
-          @writer.write(id: request[:id], result: result)
-        end
-      end
-
-      @writer.write(method: "telemetry/event", params: telemetry_params(request, request_time, error))
     end
 
     sig { void }
@@ -130,31 +113,6 @@ module RubyLsp
         method: "window/showMessage",
         params: Interface::ShowMessageParams.new(type: type, message: message)
       )
-    end
-
-    sig do
-      params(
-        request: T::Hash[Symbol, T.untyped],
-        request_time: Float,
-        error: T.nilable(StandardError)
-      ).returns(T::Hash[Symbol, T.any(String, Float)])
-    end
-    def telemetry_params(request, request_time, error)
-      uri = request.dig(:params, :textDocument, :uri)
-
-      params = {
-        request: request[:method],
-        lspVersion: RubyLsp::VERSION,
-        requestTime: request_time,
-      }
-
-      if error
-        params[:errorClass] = error.class.name
-        params[:errorMessage] = error.message
-      end
-
-      params[:uri] = uri.sub(%r{.*://#{Dir.home}}, "~") if uri
-      params
     end
   end
 end
