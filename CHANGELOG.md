@@ -6,6 +6,16 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.2.2]
+
+- Support document links (https://github.com/Shopify/ruby-lsp/pull/195)
+- Avoid returning on request blocks (https://github.com/Shopify/ruby-lsp/pull/232)
+- Better specify gemspec files (https://github.com/Shopify/ruby-lsp/pull/233)
+- Include Kernel instance methods as special methods for semantic highlighting (https://github.com/Shopify/ruby-lsp/pull/231)
+- Fix call processing when message is a :call symbol literal (https://github.com/Shopify/ruby-lsp/pull/236)
+- Alert users about non auto-correctable diagnostics (https://github.com/Shopify/ruby-lsp/pull/230)
+- Let clients pull diagnostics instead of pushing on edits (https://github.com/Shopify/ruby-lsp/pull/242)
+
 ## [0.2.1]
 
 - Implement the exit lifecycle request (https://github.com/Shopify/ruby-lsp/pull/198)
