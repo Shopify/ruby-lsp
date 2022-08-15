@@ -14,11 +14,15 @@ module RubyLsp
     extend T::Sig
     VOID = T.let(Object.new.freeze, Object)
 
-    sig { params(blk: T.proc.bind(Handler).params(arg0: T.untyped).void).void }
-    def self.start(&blk)
-      handler = new
-      handler.instance_exec(&blk)
-      handler.start
+    class << self
+      extend T::Sig
+
+      sig { params(blk: T.proc.bind(Handler).params(arg0: T.untyped).void).void }
+      def start(&blk)
+        handler = new
+        handler.instance_exec(&blk)
+        handler.start
+      end
     end
 
     sig { returns(Store) }
