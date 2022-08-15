@@ -105,9 +105,13 @@ module RubyLsp
         sig { returns(Integer) }
         attr_reader :end_line
 
-        sig { params(node: SyntaxTree::Node, kind: String).returns(PartialRange) }
-        def self.from(node, kind)
-          new(node.location.start_line - 1, node.location.end_line - 1, kind)
+        class << self
+          extend T::Sig
+
+          sig { params(node: SyntaxTree::Node, kind: String).returns(PartialRange) }
+          def from(node, kind)
+            new(node.location.start_line - 1, node.location.end_line - 1, kind)
+          end
         end
 
         sig { params(start_line: Integer, end_line: Integer, kind: String).void }
