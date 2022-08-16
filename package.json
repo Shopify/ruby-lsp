@@ -109,6 +109,58 @@
         "language": "ruby",
         "path": "./snippets.json"
       }
+    ],
+    "grammars": [
+      {
+        "language": "ruby",
+        "scopeName": "source.ruby",
+        "path": "./grammars/ruby.cson.json"
+      },
+      {
+        "language": "erb",
+        "scopeName": "text.html.erb",
+        "path": "./grammars/erb.cson.json",
+        "embeddedLanguages": {
+          "source.css": "css",
+          "source.js": "javascript",
+          "source.ruby": "ruby"
+        }
+      }
+    ],
+    "languages": [
+      {
+        "id": "ruby",
+        "aliases": [
+          "Ruby",
+          "ruby"
+        ],
+        "firstLine": "^#!\\s*/.*(?:ruby|rbx|rake)\\b",
+        "extensions": [
+          ".gemspec",
+          ".irbrc",
+          ".jbuilder",
+          ".pryrc",
+          ".rake",
+          ".rb",
+          ".ru",
+          ".ruby"
+        ],
+        "filenames": [
+          "brewfile",
+          "capfile",
+          "rakefile",
+          "gemfile"
+        ]
+      },
+      {
+        "id": "erb",
+        "extensions": [
+          ".erb",
+          ".rhtml",
+          ".rhtm"
+        ],
+        "configuration": "./languages/erb.json"
+      }
     ]
   },
   "scripts": {

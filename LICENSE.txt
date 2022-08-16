@@ -20,3 +20,23 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
+================================================================================
+The following files and related configuration in package.json are based on a
+sequence of adaptions: grammars/ruby.cson.json, grammars/erb.cson.json,
+languages/erb.json.
+
+Copyright (c) 2016 Peng Lv
+Copyright (c) 2017-2019 Stafford Brunk
+https://github.com/rubyide/vscode-ruby
+
+    Released under the MIT license
+    https://github.com/rubyide/vscode-ruby/blob/main/LICENSE.txt
+
+Copyright (c) 2014 GitHub Inc.
+https://github.com/atom/language-ruby
+
+    Released under the MIT license
+    https://github.com/atom/language-ruby/blob/master/LICENSE.md
+
+https://github.com/textmate/ruby.tmbundle
+    https://github.com/textmate/ruby.tmbundle#license
