@@ -20,19 +20,19 @@
 # http://httpd.apache.org/docs/mod/mod_log_config.html#formats.  See
 # AccessLog::setup_params for a list of supported options
 #
-# source://webrick-1.7.0/lib/webrick/accesslog.rb:30
+# source://webrick//lib/webrick/accesslog.rb#30
 module WEBrick::AccessLog
   private
 
   # Escapes control characters in +data+
   #
-  # source://webrick-1.7.0/lib/webrick/accesslog.rb:151
+  # source://webrick//lib/webrick/accesslog.rb#151
   def escape(data); end
 
   # Formats +params+ according to +format_string+ which is described in
   # setup_params.
   #
-  # source://webrick-1.7.0/lib/webrick/accesslog.rb:123
+  # source://webrick//lib/webrick/accesslog.rb#123
   def format(format_string, params); end
 
   # This format specification is a subset of mod_log_config of Apache:
@@ -60,19 +60,19 @@ module WEBrick::AccessLog
   # %U:: Unparsed URI
   # %%:: Literal %
   #
-  # source://webrick-1.7.0/lib/webrick/accesslog.rb:95
+  # source://webrick//lib/webrick/accesslog.rb#95
   def setup_params(config, req, res); end
 
   class << self
     # Escapes control characters in +data+
     #
-    # source://webrick-1.7.0/lib/webrick/accesslog.rb:151
+    # source://webrick//lib/webrick/accesslog.rb#151
     def escape(data); end
 
     # Formats +params+ according to +format_string+ which is described in
     # setup_params.
     #
-    # source://webrick-1.7.0/lib/webrick/accesslog.rb:123
+    # source://webrick//lib/webrick/accesslog.rb#123
     def format(format_string, params); end
 
     # This format specification is a subset of mod_log_config of Apache:
@@ -100,14 +100,14 @@ module WEBrick::AccessLog
     # %U:: Unparsed URI
     # %%:: Literal %
     #
-    # source://webrick-1.7.0/lib/webrick/accesslog.rb:95
+    # source://webrick//lib/webrick/accesslog.rb#95
     def setup_params(config, req, res); end
   end
 end
 
 # A generic logging class
 #
-# source://webrick-1.7.0/lib/webrick/log.rb:17
+# source://webrick//lib/webrick/log.rb#17
 class WEBrick::BasicLog
   # Initializes a new logger for +log_file+ that outputs messages at +level+
   # or higher.  +log_file+ can be a filename, an IO-like object that
@@ -117,93 +117,93 @@ class WEBrick::BasicLog
   #
   # @return [BasicLog] a new instance of BasicLog
   #
-  # source://webrick-1.7.0/lib/webrick/log.rb:50
+  # source://webrick//lib/webrick/log.rb#50
   def initialize(log_file = T.unsafe(nil), level = T.unsafe(nil)); end
 
   # Synonym for log(INFO, obj.to_s)
   #
-  # source://webrick-1.7.0/lib/webrick/log.rb:84
+  # source://webrick//lib/webrick/log.rb#84
   def <<(obj); end
 
   # Closes the logger (also closes the log device associated to the logger)
   #
-  # source://webrick-1.7.0/lib/webrick/log.rb:66
+  # source://webrick//lib/webrick/log.rb#66
   def close; end
 
   # Shortcut for logging a DEBUG message
   #
-  # source://webrick-1.7.0/lib/webrick/log.rb:97
+  # source://webrick//lib/webrick/log.rb#97
   def debug(msg); end
 
   # Will the logger output DEBUG messages?
   #
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/log.rb:108
+  # source://webrick//lib/webrick/log.rb#108
   def debug?; end
 
   # Shortcut for logging an ERROR message
   #
-  # source://webrick-1.7.0/lib/webrick/log.rb:91
+  # source://webrick//lib/webrick/log.rb#91
   def error(msg); end
 
   # Will the logger output ERROR messages?
   #
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/log.rb:102
+  # source://webrick//lib/webrick/log.rb#102
   def error?; end
 
   # Shortcut for logging a FATAL message
   #
-  # source://webrick-1.7.0/lib/webrick/log.rb:89
+  # source://webrick//lib/webrick/log.rb#89
   def fatal(msg); end
 
   # Will the logger output FATAL messages?
   #
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/log.rb:100
+  # source://webrick//lib/webrick/log.rb#100
   def fatal?; end
 
   # Shortcut for logging an INFO message
   #
-  # source://webrick-1.7.0/lib/webrick/log.rb:95
+  # source://webrick//lib/webrick/log.rb#95
   def info(msg); end
 
   # Will the logger output INFO messages?
   #
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/log.rb:106
+  # source://webrick//lib/webrick/log.rb#106
   def info?; end
 
   # log-level, messages above this level will be logged
   #
-  # source://webrick-1.7.0/lib/webrick/log.rb:41
+  # source://webrick//lib/webrick/log.rb#41
   def level; end
 
   # log-level, messages above this level will be logged
   #
-  # source://webrick-1.7.0/lib/webrick/log.rb:41
+  # source://webrick//lib/webrick/log.rb#41
   def level=(_arg0); end
 
   # Logs +data+ at +level+ if the given level is above the current log
   # level.
   #
-  # source://webrick-1.7.0/lib/webrick/log.rb:75
+  # source://webrick//lib/webrick/log.rb#75
   def log(level, data); end
 
   # Shortcut for logging a WARN message
   #
-  # source://webrick-1.7.0/lib/webrick/log.rb:93
+  # source://webrick//lib/webrick/log.rb#93
   def warn(msg); end
 
   # Will the logger output WARN messages?
   #
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/log.rb:104
+  # source://webrick//lib/webrick/log.rb#104
   def warn?; end
 
   private
@@ -215,58 +215,58 @@ class WEBrick::BasicLog
   # * If +arg+ responds to #to_str, it will return it.
   # * Otherwise it will return +arg+.inspect.
   #
-  # source://webrick-1.7.0/lib/webrick/log.rb:119
+  # source://webrick//lib/webrick/log.rb#119
   def format(arg); end
 end
 
 # --
 # Updates WEBrick::GenericServer with SSL functionality
 #
-# source://webrick-1.7.0/lib/webrick/server.rb:56
+# source://webrick//lib/webrick/server.rb#56
 class WEBrick::GenericServer
   # Creates a new generic server from +config+.  The default configuration
   # comes from +default+.
   #
   # @return [GenericServer] a new instance of GenericServer
   #
-  # source://webrick-1.7.0/lib/webrick/server.rb:88
+  # source://webrick//lib/webrick/server.rb#88
   def initialize(config = T.unsafe(nil), default = T.unsafe(nil)); end
 
   # Retrieves +key+ from the configuration
   #
-  # source://webrick-1.7.0/lib/webrick/server.rb:121
+  # source://webrick//lib/webrick/server.rb#121
   def [](key); end
 
   # The server configuration
   #
-  # source://webrick-1.7.0/lib/webrick/server.rb:66
+  # source://webrick//lib/webrick/server.rb#66
   def config; end
 
   # Updates +listen+ to enable SSL when the SSL configuration is active.
   #
-  # source://webrick-1.7.0/lib/webrick/server.rb:129
+  # source://webrick//lib/webrick/server.rb#129
   def listen(address, port); end
 
   # Sockets listening for connections.
   #
-  # source://webrick-1.7.0/lib/webrick/server.rb:82
+  # source://webrick//lib/webrick/server.rb#82
   def listeners; end
 
   # The server logger.  This is independent from the HTTP access log.
   #
-  # source://webrick-1.7.0/lib/webrick/server.rb:71
+  # source://webrick//lib/webrick/server.rb#71
   def logger; end
 
   # You must subclass GenericServer and implement \#run which accepts a TCP
   # client socket
   #
-  # source://webrick-1.7.0/lib/webrick/server.rb:244
+  # source://webrick//lib/webrick/server.rb#244
   def run(sock); end
 
   # Shuts down the server and all listening sockets.  New listeners must be
   # provided to restart the server.
   #
-  # source://webrick-1.7.0/lib/webrick/server.rb:234
+  # source://webrick//lib/webrick/server.rb#234
   def shutdown; end
 
   # Starts the server and runs the +block+ for each connection.  This method
@@ -291,23 +291,23 @@ class WEBrick::GenericServer
   #
   # @raise [ServerError]
   #
-  # source://webrick-1.7.0/lib/webrick/server.rb:154
+  # source://webrick//lib/webrick/server.rb#154
   def start(&block); end
 
   # The server status.  One of :Stop, :Running or :Shutdown
   #
-  # source://webrick-1.7.0/lib/webrick/server.rb:61
+  # source://webrick//lib/webrick/server.rb#61
   def status; end
 
   # Stops the server from accepting new connections.
   #
-  # source://webrick-1.7.0/lib/webrick/server.rb:222
+  # source://webrick//lib/webrick/server.rb#222
   def stop; end
 
   # Tokens control the number of outstanding clients.  The
   # <code>:MaxClients</code> configuration sets this.
   #
-  # source://webrick-1.7.0/lib/webrick/server.rb:77
+  # source://webrick//lib/webrick/server.rb#77
   def tokens; end
 
   private
@@ -315,24 +315,24 @@ class WEBrick::GenericServer
   # Accepts a TCP client socket from the TCP server socket +svr+ and returns
   # the client socket.
   #
-  # source://webrick-1.7.0/lib/webrick/server.rb:256
+  # source://webrick//lib/webrick/server.rb#256
   def accept_client(svr); end
 
-  # source://webrick-1.7.0/lib/webrick/server.rb:347
+  # source://webrick//lib/webrick/server.rb#347
   def alarm_shutdown_pipe; end
 
   # Calls the callback +callback_name+ from the configuration with +args+
   #
-  # source://webrick-1.7.0/lib/webrick/server.rb:334
+  # source://webrick//lib/webrick/server.rb#334
   def call_callback(callback_name, *args); end
 
-  # source://webrick-1.7.0/lib/webrick/server.rb:359
+  # source://webrick//lib/webrick/server.rb#359
   def cleanup_listener; end
 
-  # source://webrick-1.7.0/lib/webrick/server.rb:342
+  # source://webrick//lib/webrick/server.rb#342
   def cleanup_shutdown_pipe(shutdown_pipe); end
 
-  # source://webrick-1.7.0/lib/webrick/server.rb:338
+  # source://webrick//lib/webrick/server.rb#338
   def setup_shutdown_pipe; end
 
   # Starts a server thread for the client socket +sock+ that runs the given
@@ -343,23 +343,23 @@ class WEBrick::GenericServer
   #
   # If any errors occur in the block they are logged and handled.
   #
-  # source://webrick-1.7.0/lib/webrick/server.rb:288
+  # source://webrick//lib/webrick/server.rb#288
   def start_thread(sock, &block); end
 end
 
-# source://webrick-1.7.0/lib/webrick/htmlutils.rb:13
+# source://webrick//lib/webrick/htmlutils.rb#13
 module WEBrick::HTMLUtils
   private
 
   # Escapes &, ", > and < in +string+
   #
-  # source://webrick-1.7.0/lib/webrick/htmlutils.rb:18
+  # source://webrick//lib/webrick/htmlutils.rb#18
   def escape(string); end
 
   class << self
     # Escapes &, ", > and < in +string+
     #
-    # source://webrick-1.7.0/lib/webrick/htmlutils.rb:18
+    # source://webrick//lib/webrick/htmlutils.rb#18
     def escape(string); end
   end
 end
@@ -397,11 +397,11 @@ end
 # For digest authentication the authenticator must not be created every
 # request, it must be passed in as an option via WEBrick::HTTPServer#mount.
 #
-# source://webrick-1.7.0/lib/webrick/httpauth/authenticator.rb:12
+# source://webrick//lib/webrick/httpauth/authenticator.rb#12
 module WEBrick::HTTPAuth
   private
 
-  # source://webrick-1.7.0/lib/webrick/httpauth.rb:57
+  # source://webrick//lib/webrick/httpauth.rb#57
   def _basic_auth(req, res, realm, req_field, res_field, err_type, block); end
 
   # Simple wrapper for providing basic authentication for a request.  When
@@ -410,7 +410,7 @@ module WEBrick::HTTPAuth
   # the block returns true the request is allowed to continue, otherwise an
   # HTTPStatus::Unauthorized error is raised.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth.rb:79
+  # source://webrick//lib/webrick/httpauth.rb#79
   def basic_auth(req, res, realm, &block); end
 
   # Simple wrapper for providing basic authentication for a proxied request.
@@ -419,11 +419,11 @@ module WEBrick::HTTPAuth
   # If the block returns true the request is allowed to continue, otherwise
   # an HTTPStatus::ProxyAuthenticationRequired error is raised.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth.rb:91
+  # source://webrick//lib/webrick/httpauth.rb#91
   def proxy_basic_auth(req, res, realm, &block); end
 
   class << self
-    # source://webrick-1.7.0/lib/webrick/httpauth.rb:57
+    # source://webrick//lib/webrick/httpauth.rb#57
     def _basic_auth(req, res, realm, req_field, res_field, err_type, block); end
 
     # Simple wrapper for providing basic authentication for a request.  When
@@ -432,7 +432,7 @@ module WEBrick::HTTPAuth
     # the block returns true the request is allowed to continue, otherwise an
     # HTTPStatus::Unauthorized error is raised.
     #
-    # source://webrick-1.7.0/lib/webrick/httpauth.rb:79
+    # source://webrick//lib/webrick/httpauth.rb#79
     def basic_auth(req, res, realm, &block); end
 
     # Simple wrapper for providing basic authentication for a proxied request.
@@ -441,7 +441,7 @@ module WEBrick::HTTPAuth
     # If the block returns true the request is allowed to continue, otherwise
     # an HTTPStatus::ProxyAuthenticationRequired error is raised.
     #
-    # source://webrick-1.7.0/lib/webrick/httpauth.rb:91
+    # source://webrick//lib/webrick/httpauth.rb#91
     def proxy_basic_auth(req, res, realm, &block); end
   end
 end
@@ -449,46 +449,46 @@ end
 # Module providing generic support for both Digest and Basic
 # authentication schemes.
 #
-# source://webrick-1.7.0/lib/webrick/httpauth/authenticator.rb:18
+# source://webrick//lib/webrick/httpauth/authenticator.rb#18
 module WEBrick::HTTPAuth::Authenticator
   # The logger for this authenticator
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/authenticator.rb:43
+  # source://webrick//lib/webrick/httpauth/authenticator.rb#43
   def logger; end
 
   # The realm this authenticator covers
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/authenticator.rb:33
+  # source://webrick//lib/webrick/httpauth/authenticator.rb#33
   def realm; end
 
   # The user database for this authenticator
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/authenticator.rb:38
+  # source://webrick//lib/webrick/httpauth/authenticator.rb#38
   def userdb; end
 
   private
 
   # Initializes the authenticator from +config+
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/authenticator.rb:52
+  # source://webrick//lib/webrick/httpauth/authenticator.rb#52
   def check_init(config); end
 
   # Ensures +req+ has credentials that can be authenticated.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/authenticator.rb:72
+  # source://webrick//lib/webrick/httpauth/authenticator.rb#72
   def check_scheme(req); end
 
-  # source://webrick-1.7.0/lib/webrick/httpauth/authenticator.rb:91
+  # source://webrick//lib/webrick/httpauth/authenticator.rb#91
   def error(fmt, *args); end
 
-  # source://webrick-1.7.0/lib/webrick/httpauth/authenticator.rb:97
+  # source://webrick//lib/webrick/httpauth/authenticator.rb#97
   def info(fmt, *args); end
 
-  # source://webrick-1.7.0/lib/webrick/httpauth/authenticator.rb:85
+  # source://webrick//lib/webrick/httpauth/authenticator.rb#85
   def log(meth, fmt, *args); end
 end
 
-# source://webrick-1.7.0/lib/webrick/httpauth/authenticator.rb:23
+# source://webrick//lib/webrick/httpauth/authenticator.rb#23
 WEBrick::HTTPAuth::Authenticator::AuthException = WEBrick::HTTPStatus::Unauthorized
 
 # Basic Authentication for WEBrick
@@ -507,7 +507,7 @@ WEBrick::HTTPAuth::Authenticator::AuthException = WEBrick::HTTPStatus::Unauthori
 #
 #   basic_auth = WEBrick::HTTPAuth::BasicAuth.new config
 #
-# source://webrick-1.7.0/lib/webrick/httpauth/basicauth.rb:35
+# source://webrick//lib/webrick/httpauth/basicauth.rb#35
 class WEBrick::HTTPAuth::BasicAuth
   include ::WEBrick::HTTPAuth::Authenticator
 
@@ -523,41 +523,41 @@ class WEBrick::HTTPAuth::BasicAuth
   #
   # @return [BasicAuth] a new instance of BasicAuth
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/basicauth.rb:61
+  # source://webrick//lib/webrick/httpauth/basicauth.rb#61
   def initialize(config, default = T.unsafe(nil)); end
 
   # Authenticates a +req+ and returns a 401 Unauthorized using +res+ if
   # the authentication was not correct.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/basicauth.rb:70
+  # source://webrick//lib/webrick/httpauth/basicauth.rb#70
   def authenticate(req, res); end
 
   # Returns a challenge response which asks for authentication information
   #
   # @raise [@auth_exception]
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/basicauth.rb:103
+  # source://webrick//lib/webrick/httpauth/basicauth.rb#103
   def challenge(req, res); end
 
   # Returns the value of attribute logger.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/basicauth.rb:48
+  # source://webrick//lib/webrick/httpauth/basicauth.rb#48
   def logger; end
 
   # Returns the value of attribute realm.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/basicauth.rb:48
+  # source://webrick//lib/webrick/httpauth/basicauth.rb#48
   def realm; end
 
   # Returns the value of attribute userdb.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/basicauth.rb:48
+  # source://webrick//lib/webrick/httpauth/basicauth.rb#48
   def userdb; end
 
   class << self
     # Used by UserDB to create a basic password entry
     #
-    # source://webrick-1.7.0/lib/webrick/httpauth/basicauth.rb:43
+    # source://webrick//lib/webrick/httpauth/basicauth.rb#43
     def make_passwd(realm, user, pass); end
   end
 end
@@ -583,7 +583,7 @@ end
 # servlet instance for every request and the DigestAuth object must be
 # used across requests.
 #
-# source://webrick-1.7.0/lib/webrick/httpauth/digestauth.rb:46
+# source://webrick//lib/webrick/httpauth/digestauth.rb#46
 class WEBrick::HTTPAuth::DigestAuth
   include ::WEBrick::HTTPAuth::Authenticator
 
@@ -601,62 +601,62 @@ class WEBrick::HTTPAuth::DigestAuth
   #
   # @return [DigestAuth] a new instance of DigestAuth
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/digestauth.rb:87
+  # source://webrick//lib/webrick/httpauth/digestauth.rb#87
   def initialize(config, default = T.unsafe(nil)); end
 
   # Digest authentication algorithm
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/digestauth.rb:59
+  # source://webrick//lib/webrick/httpauth/digestauth.rb#59
   def algorithm; end
 
   # Authenticates a +req+ and returns a 401 Unauthorized using +res+ if
   # the authentication was not correct.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/digestauth.rb:121
+  # source://webrick//lib/webrick/httpauth/digestauth.rb#121
   def authenticate(req, res); end
 
   # Returns a challenge response which asks for authentication information
   #
   # @raise [@auth_exception]
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/digestauth.rb:134
+  # source://webrick//lib/webrick/httpauth/digestauth.rb#134
   def challenge(req, res, stale = T.unsafe(nil)); end
 
   # Quality of protection.  RFC 2617 defines "auth" and "auth-int"
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/digestauth.rb:64
+  # source://webrick//lib/webrick/httpauth/digestauth.rb#64
   def qop; end
 
   private
 
-  # source://webrick-1.7.0/lib/webrick/httpauth/digestauth.rb:163
+  # source://webrick//lib/webrick/httpauth/digestauth.rb#163
   def _authenticate(req, res); end
 
-  # source://webrick-1.7.0/lib/webrick/httpauth/digestauth.rb:306
+  # source://webrick//lib/webrick/httpauth/digestauth.rb#306
   def check_nonce(req, auth_req); end
 
-  # source://webrick-1.7.0/lib/webrick/httpauth/digestauth.rb:349
+  # source://webrick//lib/webrick/httpauth/digestauth.rb#349
   def check_opaque(opaque_struct, req, auth_req); end
 
-  # source://webrick-1.7.0/lib/webrick/httpauth/digestauth.rb:365
+  # source://webrick//lib/webrick/httpauth/digestauth.rb#365
   def check_uri(req, auth_req); end
 
-  # source://webrick-1.7.0/lib/webrick/httpauth/digestauth.rb:299
+  # source://webrick//lib/webrick/httpauth/digestauth.rb#299
   def generate_next_nonce(req); end
 
-  # source://webrick-1.7.0/lib/webrick/httpauth/digestauth.rb:332
+  # source://webrick//lib/webrick/httpauth/digestauth.rb#332
   def generate_opaque(req); end
 
-  # source://webrick-1.7.0/lib/webrick/httpauth/digestauth.rb:376
+  # source://webrick//lib/webrick/httpauth/digestauth.rb#376
   def hexdigest(*args); end
 
-  # source://webrick-1.7.0/lib/webrick/httpauth/digestauth.rb:291
+  # source://webrick//lib/webrick/httpauth/digestauth.rb#291
   def split_param_value(string); end
 
   class << self
     # Used by UserDB to create a digest password entry
     #
-    # source://webrick-1.7.0/lib/webrick/httpauth/digestauth.rb:69
+    # source://webrick//lib/webrick/httpauth/digestauth.rb#69
     def make_passwd(realm, user, pass); end
   end
 end
@@ -673,7 +673,7 @@ end
 #   htpasswd.set_passwd 'my realm', 'username', 'password'
 #   htpasswd.flush
 #
-# source://webrick-1.7.0/lib/webrick/httpauth/htdigest.rb:31
+# source://webrick//lib/webrick/httpauth/htdigest.rb#31
 class WEBrick::HTTPAuth::Htdigest
   include ::WEBrick::HTTPAuth::UserDB
 
@@ -681,39 +681,39 @@ class WEBrick::HTTPAuth::Htdigest
   #
   # @return [Htdigest] a new instance of Htdigest
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htdigest.rb:37
+  # source://webrick//lib/webrick/httpauth/htdigest.rb#37
   def initialize(path); end
 
   # Removes a password from the database for +user+ in +realm+.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htdigest.rb:113
+  # source://webrick//lib/webrick/httpauth/htdigest.rb#113
   def delete_passwd(realm, user); end
 
   # Iterate passwords in the database.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htdigest.rb:122
+  # source://webrick//lib/webrick/httpauth/htdigest.rb#122
   def each; end
 
   # Flush the password database.  If +output+ is given the database will
   # be written there instead of to the original path.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htdigest.rb:72
+  # source://webrick//lib/webrick/httpauth/htdigest.rb#72
   def flush(output = T.unsafe(nil)); end
 
   # Retrieves a password from the database for +user+ in +realm+.  If
   # +reload_db+ is true the database will be reloaded first.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htdigest.rb:91
+  # source://webrick//lib/webrick/httpauth/htdigest.rb#91
   def get_passwd(realm, user, reload_db); end
 
   # Reloads passwords from the database
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htdigest.rb:50
+  # source://webrick//lib/webrick/httpauth/htdigest.rb#50
   def reload; end
 
   # Sets a password in the database for +user+ in +realm+ to +pass+.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htdigest.rb:101
+  # source://webrick//lib/webrick/httpauth/htdigest.rb#101
   def set_passwd(realm, user, pass); end
 end
 
@@ -730,34 +730,34 @@ end
 #
 #   htgroup.members('superheroes').include? 'magneto' # => false
 #
-# source://webrick-1.7.0/lib/webrick/httpauth/htgroup.rb:30
+# source://webrick//lib/webrick/httpauth/htgroup.rb#30
 class WEBrick::HTTPAuth::Htgroup
   # Open a group database at +path+
   #
   # @return [Htgroup] a new instance of Htgroup
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htgroup.rb:35
+  # source://webrick//lib/webrick/httpauth/htgroup.rb#35
   def initialize(path); end
 
   # Add an Array of +members+ to +group+
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htgroup.rb:92
+  # source://webrick//lib/webrick/httpauth/htgroup.rb#92
   def add(group, members); end
 
   # Flush the group database.  If +output+ is given the database will be
   # written there instead of to the original path.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htgroup.rb:64
+  # source://webrick//lib/webrick/httpauth/htgroup.rb#64
   def flush(output = T.unsafe(nil)); end
 
   # Retrieve the list of members from +group+
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htgroup.rb:84
+  # source://webrick//lib/webrick/httpauth/htgroup.rb#84
   def members(group); end
 
   # Reload groups from the database
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htgroup.rb:46
+  # source://webrick//lib/webrick/httpauth/htgroup.rb#46
   def reload; end
 end
 
@@ -774,7 +774,7 @@ end
 #   htpasswd.set_passwd 'my realm', 'username', 'password'
 #   htpasswd.flush
 #
-# source://webrick-1.7.0/lib/webrick/httpauth/htpasswd.rb:32
+# source://webrick//lib/webrick/httpauth/htpasswd.rb#32
 class WEBrick::HTTPAuth::Htpasswd
   include ::WEBrick::HTTPAuth::UserDB
 
@@ -782,75 +782,75 @@ class WEBrick::HTTPAuth::Htpasswd
   #
   # @return [Htpasswd] a new instance of Htpasswd
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htpasswd.rb:38
+  # source://webrick//lib/webrick/httpauth/htpasswd.rb#38
   def initialize(path, password_hash: T.unsafe(nil)); end
 
   # Removes a password from the database for +user+ in +realm+.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htpasswd.rb:144
+  # source://webrick//lib/webrick/httpauth/htpasswd.rb#144
   def delete_passwd(realm, user); end
 
   # Iterate passwords in the database.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htpasswd.rb:151
+  # source://webrick//lib/webrick/httpauth/htpasswd.rb#151
   def each; end
 
   # Flush the password database.  If +output+ is given the database will
   # be written there instead of to the original path.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htpasswd.rb:103
+  # source://webrick//lib/webrick/httpauth/htpasswd.rb#103
   def flush(output = T.unsafe(nil)); end
 
   # Retrieves a password from the database for +user+ in +realm+.  If
   # +reload_db+ is true the database will be reloaded first.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htpasswd.rb:122
+  # source://webrick//lib/webrick/httpauth/htpasswd.rb#122
   def get_passwd(realm, user, reload_db); end
 
   # Reload passwords from the database
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htpasswd.rb:68
+  # source://webrick//lib/webrick/httpauth/htpasswd.rb#68
   def reload; end
 
   # Sets a password in the database for +user+ in +realm+ to +pass+.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/htpasswd.rb:130
+  # source://webrick//lib/webrick/httpauth/htpasswd.rb#130
   def set_passwd(realm, user, pass); end
 end
 
-# source://webrick-1.7.0/lib/webrick/httpauth/authenticator.rb:114
+# source://webrick//lib/webrick/httpauth/authenticator.rb#114
 WEBrick::HTTPAuth::ProxyAuthenticator::AuthException = WEBrick::HTTPStatus::ProxyAuthenticationRequired
 
 # Basic authentication for proxy servers.  See BasicAuth for details.
 #
-# source://webrick-1.7.0/lib/webrick/httpauth/basicauth.rb:112
+# source://webrick//lib/webrick/httpauth/basicauth.rb#112
 class WEBrick::HTTPAuth::ProxyBasicAuth < ::WEBrick::HTTPAuth::BasicAuth
   include ::WEBrick::HTTPAuth::ProxyAuthenticator
 end
 
 # Digest authentication for proxy servers.  See DigestAuth for details.
 #
-# source://webrick-1.7.0/lib/webrick/httpauth/digestauth.rb:386
+# source://webrick//lib/webrick/httpauth/digestauth.rb#386
 class WEBrick::HTTPAuth::ProxyDigestAuth < ::WEBrick::HTTPAuth::DigestAuth
   include ::WEBrick::HTTPAuth::ProxyAuthenticator
 
   private
 
-  # source://webrick-1.7.0/lib/webrick/httpauth/digestauth.rb:390
+  # source://webrick//lib/webrick/httpauth/digestauth.rb#390
   def check_uri(req, auth_req); end
 end
 
 # User database mixin for HTTPAuth.  This mixin dispatches user record
 # access to the underlying auth_type for this database.
 #
-# source://webrick-1.7.0/lib/webrick/httpauth/userdb.rb:18
+# source://webrick//lib/webrick/httpauth/userdb.rb#18
 module WEBrick::HTTPAuth::UserDB
   # The authentication type.
   #
   # WEBrick::HTTPAuth::BasicAuth or WEBrick::HTTPAuth::DigestAuth are
   # built-in.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/userdb.rb:26
+  # source://webrick//lib/webrick/httpauth/userdb.rb#26
   def auth_type; end
 
   # The authentication type.
@@ -858,143 +858,143 @@ module WEBrick::HTTPAuth::UserDB
   # WEBrick::HTTPAuth::BasicAuth or WEBrick::HTTPAuth::DigestAuth are
   # built-in.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/userdb.rb:26
+  # source://webrick//lib/webrick/httpauth/userdb.rb#26
   def auth_type=(_arg0); end
 
   # Retrieves a password in +realm+ for +user+ for the auth_type of this
   # database.  +reload_db+ is a dummy value.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/userdb.rb:48
+  # source://webrick//lib/webrick/httpauth/userdb.rb#48
   def get_passwd(realm, user, reload_db = T.unsafe(nil)); end
 
   # Creates an obscured password in +realm+ with +user+ and +password+
   # using the auth_type of this database.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/userdb.rb:32
+  # source://webrick//lib/webrick/httpauth/userdb.rb#32
   def make_passwd(realm, user, pass); end
 
   # Sets a password in +realm+ with +user+ and +password+ for the
   # auth_type of this database.
   #
-  # source://webrick-1.7.0/lib/webrick/httpauth/userdb.rb:40
+  # source://webrick//lib/webrick/httpauth/userdb.rb#40
   def set_passwd(realm, user, pass); end
 end
 
 # --
 # Adds SSL functionality to WEBrick::HTTPRequest
 #
-# source://webrick-1.7.0/lib/webrick/httprequest.rb:25
+# source://webrick//lib/webrick/httprequest.rb#25
 class WEBrick::HTTPRequest
   # Creates a new HTTP request.  WEBrick::Config::HTTP is the default
   # configuration.
   #
   # @return [HTTPRequest] a new instance of HTTPRequest
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:153
+  # source://webrick//lib/webrick/httprequest.rb#153
   def initialize(config); end
 
   # Retrieves +header_name+
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:318
+  # source://webrick//lib/webrick/httprequest.rb#318
   def [](header_name); end
 
   # The Accept header value
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:100
+  # source://webrick//lib/webrick/httprequest.rb#100
   def accept; end
 
   # The Accept-Charset header value
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:105
+  # source://webrick//lib/webrick/httprequest.rb#105
   def accept_charset; end
 
   # The Accept-Encoding header value
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:110
+  # source://webrick//lib/webrick/httprequest.rb#110
   def accept_encoding; end
 
   # The Accept-Language header value
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:115
+  # source://webrick//lib/webrick/httprequest.rb#115
   def accept_language; end
 
   # The socket address of the server
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:127
+  # source://webrick//lib/webrick/httprequest.rb#127
   def addr; end
 
   # Hash of request attributes
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:137
+  # source://webrick//lib/webrick/httprequest.rb#137
   def attributes; end
 
   # Returns the request body.
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:255
+  # source://webrick//lib/webrick/httprequest.rb#255
   def body(&block); end
 
   # Prepares the HTTPRequest object for use as the
   # source for IO.copy_stream
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:265
+  # source://webrick//lib/webrick/httprequest.rb#265
   def body_reader; end
 
   # The content-length header
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:304
+  # source://webrick//lib/webrick/httprequest.rb#304
   def content_length; end
 
   # The content-type header
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:311
+  # source://webrick//lib/webrick/httprequest.rb#311
   def content_type; end
 
   # Generate HTTP/1.1 100 continue response if the client expects it,
   # otherwise does nothing.
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:245
+  # source://webrick//lib/webrick/httprequest.rb#245
   def continue; end
 
   # The parsed request cookies
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:95
+  # source://webrick//lib/webrick/httprequest.rb#95
   def cookies; end
 
   # Iterates over the request headers
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:328
+  # source://webrick//lib/webrick/httprequest.rb#328
   def each; end
 
   # Consumes any remaining body and updates keep-alive status
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:390
+  # source://webrick//lib/webrick/httprequest.rb#390
   def fixup; end
 
   # The parsed header of the request
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:90
+  # source://webrick//lib/webrick/httprequest.rb#90
   def header; end
 
   # The host this request is for
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:340
+  # source://webrick//lib/webrick/httprequest.rb#340
   def host; end
 
   # The HTTP version of the request
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:51
+  # source://webrick//lib/webrick/httprequest.rb#51
   def http_version; end
 
   # Is this a keep-alive connection?
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:142
+  # source://webrick//lib/webrick/httprequest.rb#142
   def keep_alive; end
 
   # Should the connection this request was made on be kept alive?
   #
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:375
+  # source://webrick//lib/webrick/httprequest.rb#375
   def keep_alive?; end
 
   # This method provides the metavariables defined by the revision 3
@@ -1002,164 +1002,164 @@ class WEBrick::HTTPRequest
   # To browse the current document of CGI Version 1.1, see below:
   # http://tools.ietf.org/html/rfc3875
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:407
+  # source://webrick//lib/webrick/httprequest.rb#407
   def meta_vars; end
 
   # Parses a request from +socket+.  This is called internally by
   # WEBrick::HTTPServer.
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:193
+  # source://webrick//lib/webrick/httprequest.rb#193
   def parse(socket = T.unsafe(nil)); end
 
   # The request path
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:63
+  # source://webrick//lib/webrick/httprequest.rb#63
   def path; end
 
   # The path info (CGI variable)
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:73
+  # source://webrick//lib/webrick/httprequest.rb#73
   def path_info; end
 
   # The path info (CGI variable)
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:73
+  # source://webrick//lib/webrick/httprequest.rb#73
   def path_info=(_arg0); end
 
   # The socket address of the client
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:132
+  # source://webrick//lib/webrick/httprequest.rb#132
   def peeraddr; end
 
   # The port this request is for
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:347
+  # source://webrick//lib/webrick/httprequest.rb#347
   def port; end
 
   # Request query as a Hash
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:294
+  # source://webrick//lib/webrick/httprequest.rb#294
   def query; end
 
   # The query from the URI of the request
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:78
+  # source://webrick//lib/webrick/httprequest.rb#78
   def query_string; end
 
   # The query from the URI of the request
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:78
+  # source://webrick//lib/webrick/httprequest.rb#78
   def query_string=(_arg0); end
 
   # The raw header of the request
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:85
+  # source://webrick//lib/webrick/httprequest.rb#85
   def raw_header; end
 
   # for IO.copy_stream.
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:278
+  # source://webrick//lib/webrick/httprequest.rb#278
   def readpartial(size, buf = T.unsafe(nil)); end
 
   # The client's IP address
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:361
+  # source://webrick//lib/webrick/httprequest.rb#361
   def remote_ip; end
 
   # The complete request line such as:
   #
   #   GET / HTTP/1.1
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:36
+  # source://webrick//lib/webrick/httprequest.rb#36
   def request_line; end
 
   # The request method, GET, POST, PUT, etc.
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:41
+  # source://webrick//lib/webrick/httprequest.rb#41
   def request_method; end
 
   # The local time this request was received
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:147
+  # source://webrick//lib/webrick/httprequest.rb#147
   def request_time; end
 
   # The parsed URI of the request
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:58
+  # source://webrick//lib/webrick/httprequest.rb#58
   def request_uri; end
 
   # The script name (CGI variable)
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:68
+  # source://webrick//lib/webrick/httprequest.rb#68
   def script_name; end
 
   # The script name (CGI variable)
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:68
+  # source://webrick//lib/webrick/httprequest.rb#68
   def script_name=(_arg0); end
 
   # The server name this request is for
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:354
+  # source://webrick//lib/webrick/httprequest.rb#354
   def server_name; end
 
   # Is this an SSL request?
   #
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:368
+  # source://webrick//lib/webrick/httprequest.rb#368
   def ssl?; end
 
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:379
+  # source://webrick//lib/webrick/httprequest.rb#379
   def to_s; end
 
   # The unparsed URI of the request
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:46
+  # source://webrick//lib/webrick/httprequest.rb#46
   def unparsed_uri; end
 
   # The remote user (CGI variable)
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:122
+  # source://webrick//lib/webrick/httprequest.rb#122
   def user; end
 
   # The remote user (CGI variable)
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:122
+  # source://webrick//lib/webrick/httprequest.rb#122
   def user=(_arg0); end
 
   private
 
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:562
+  # source://webrick//lib/webrick/httprequest.rb#562
   def _read_data(io, method, *arg); end
 
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:582
+  # source://webrick//lib/webrick/httprequest.rb#582
   def parse_query; end
 
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:484
+  # source://webrick//lib/webrick/httprequest.rb#484
   def parse_uri(str, scheme = T.unsafe(nil)); end
 
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:507
+  # source://webrick//lib/webrick/httprequest.rb#507
   def read_body(socket, block); end
 
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:531
+  # source://webrick//lib/webrick/httprequest.rb#531
   def read_chunk_size(socket); end
 
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:542
+  # source://webrick//lib/webrick/httprequest.rb#542
   def read_chunked(socket, block); end
 
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:578
+  # source://webrick//lib/webrick/httprequest.rb#578
   def read_data(io, size); end
 
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:471
+  # source://webrick//lib/webrick/httprequest.rb#471
   def read_header(socket); end
 
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:574
+  # source://webrick//lib/webrick/httprequest.rb#574
   def read_line(io, size = T.unsafe(nil)); end
 
   # @raise [HTTPStatus::EOFError]
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:451
+  # source://webrick//lib/webrick/httprequest.rb#451
   def read_request_line(socket); end
 
   # It's said that all X-Forwarded-* headers will contain more than one
@@ -1168,36 +1168,36 @@ class WEBrick::HTTPRequest
   # the initial(first) value. (apr_table_mergen() adds new value after the
   # existing value with ", " prefix)
   #
-  # source://webrick-1.7.0/lib/webrick/httprequest.rb:610
+  # source://webrick//lib/webrick/httprequest.rb#610
   def setup_forwarded_info; end
 end
 
 # same as Mongrel, Thin and Puma
 #
-# source://webrick-1.7.0/lib/webrick/httprequest.rb:449
+# source://webrick//lib/webrick/httprequest.rb#449
 WEBrick::HTTPRequest::MAX_HEADER_LENGTH = T.let(T.unsafe(nil), Integer)
 
 # An HTTP response.  This is filled in by the service or do_* methods of a
 # WEBrick HTTP Servlet.
 #
-# source://webrick-1.7.0/lib/webrick/httpresponse.rb:24
+# source://webrick//lib/webrick/httpresponse.rb#24
 class WEBrick::HTTPResponse
   # Creates a new HTTP response object.  WEBrick::Config::HTTP is the
   # default configuration.
   #
   # @return [HTTPResponse] a new instance of HTTPResponse
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:112
+  # source://webrick//lib/webrick/httpresponse.rb#112
   def initialize(config); end
 
   # Retrieves the response header +field+
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:150
+  # source://webrick//lib/webrick/httpresponse.rb#150
   def [](field); end
 
   # Sets the response header +field+ to +value+
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:157
+  # source://webrick//lib/webrick/httpresponse.rb#157
   def []=(field, value); end
 
   # Body may be:
@@ -1216,7 +1216,7 @@ class WEBrick::HTTPResponse
   #     res.body = proc { |out| out.write(Time.now.to_s) }
   #   end
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:70
+  # source://webrick//lib/webrick/httpresponse.rb#70
   def body; end
 
   # Body may be:
@@ -1235,164 +1235,164 @@ class WEBrick::HTTPResponse
   #     res.body = proc { |out| out.write(Time.now.to_s) }
   #   end
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:70
+  # source://webrick//lib/webrick/httpresponse.rb#70
   def body=(_arg0); end
 
   # Enables chunked transfer encoding.
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:209
+  # source://webrick//lib/webrick/httpresponse.rb#209
   def chunked=(val); end
 
   # Will this response body be returned using chunked transfer-encoding?
   #
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:202
+  # source://webrick//lib/webrick/httpresponse.rb#202
   def chunked?; end
 
   # Configuration for this response
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:101
+  # source://webrick//lib/webrick/httpresponse.rb#101
   def config; end
 
   # The content-length header
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:165
+  # source://webrick//lib/webrick/httpresponse.rb#165
   def content_length; end
 
   # Sets the content-length header to +len+
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:174
+  # source://webrick//lib/webrick/httpresponse.rb#174
   def content_length=(len); end
 
   # The content-type header
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:181
+  # source://webrick//lib/webrick/httpresponse.rb#181
   def content_type; end
 
   # Sets the content-type header to +type+
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:188
+  # source://webrick//lib/webrick/httpresponse.rb#188
   def content_type=(type); end
 
   # Response cookies
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:46
+  # source://webrick//lib/webrick/httpresponse.rb#46
   def cookies; end
 
   # Iterates over each header in the response
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:195
+  # source://webrick//lib/webrick/httpresponse.rb#195
   def each; end
 
   # Filename of the static file in this response.  Only used by the
   # FileHandler servlet.
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:91
+  # source://webrick//lib/webrick/httpresponse.rb#91
   def filename; end
 
   # Filename of the static file in this response.  Only used by the
   # FileHandler servlet.
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:91
+  # source://webrick//lib/webrick/httpresponse.rb#91
   def filename=(_arg0); end
 
   # Response header
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:41
+  # source://webrick//lib/webrick/httpresponse.rb#41
   def header; end
 
   # HTTP Response version
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:31
+  # source://webrick//lib/webrick/httpresponse.rb#31
   def http_version; end
 
   # Is this a keep-alive response?
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:96
+  # source://webrick//lib/webrick/httpresponse.rb#96
   def keep_alive; end
 
   # Is this a keep-alive response?
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:96
+  # source://webrick//lib/webrick/httpresponse.rb#96
   def keep_alive=(_arg0); end
 
   # Will this response's connection be kept alive?
   #
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:216
+  # source://webrick//lib/webrick/httpresponse.rb#216
   def keep_alive?; end
 
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:303
+  # source://webrick//lib/webrick/httpresponse.rb#303
   def make_body_tempfile; end
 
   # Response reason phrase ("OK")
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:51
+  # source://webrick//lib/webrick/httpresponse.rb#51
   def reason_phrase; end
 
   # Response reason phrase ("OK")
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:51
+  # source://webrick//lib/webrick/httpresponse.rb#51
   def reason_phrase=(_arg0); end
 
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:321
+  # source://webrick//lib/webrick/httpresponse.rb#321
   def remove_body_tempfile; end
 
   # Request HTTP version for this response
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:85
+  # source://webrick//lib/webrick/httpresponse.rb#85
   def request_http_version; end
 
   # Request HTTP version for this response
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:85
+  # source://webrick//lib/webrick/httpresponse.rb#85
   def request_http_version=(_arg0); end
 
   # Request method for this response
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:75
+  # source://webrick//lib/webrick/httpresponse.rb#75
   def request_method; end
 
   # Request method for this response
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:75
+  # source://webrick//lib/webrick/httpresponse.rb#75
   def request_method=(_arg0); end
 
   # Request URI for this response
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:80
+  # source://webrick//lib/webrick/httpresponse.rb#80
   def request_uri; end
 
   # Request URI for this response
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:80
+  # source://webrick//lib/webrick/httpresponse.rb#80
   def request_uri=(_arg0); end
 
   # Sends the body on +socket+
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:356
+  # source://webrick//lib/webrick/httpresponse.rb#356
   def send_body(socket); end
 
   # Sends the headers on +socket+
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:333
+  # source://webrick//lib/webrick/httpresponse.rb#333
   def send_header(socket); end
 
   # Sends the response on +socket+
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:223
+  # source://webrick//lib/webrick/httpresponse.rb#223
   def send_response(socket); end
 
   # Bytes sent in this response
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:106
+  # source://webrick//lib/webrick/httpresponse.rb#106
   def sent_size; end
 
   # Creates an error page for exception +ex+ with an optional +backtrace+
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:383
+  # source://webrick//lib/webrick/httpresponse.rb#383
   def set_error(ex, backtrace = T.unsafe(nil)); end
 
   # Redirects to +url+ with a WEBrick::HTTPStatus::Redirect +status+.
@@ -1401,71 +1401,71 @@ class WEBrick::HTTPResponse
   #
   #   res.set_redirect WEBrick::HTTPStatus::TemporaryRedirect
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:373
+  # source://webrick//lib/webrick/httpresponse.rb#373
   def set_redirect(status, url); end
 
   # Sets up the headers for sending
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:240
+  # source://webrick//lib/webrick/httpresponse.rb#240
   def setup_header; end
 
   # Response status code (200)
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:36
+  # source://webrick//lib/webrick/httpresponse.rb#36
   def status; end
 
   # Sets the response's status to the +status+ code
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:142
+  # source://webrick//lib/webrick/httpresponse.rb#142
   def status=(status); end
 
   # The response's HTTP status line
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:135
+  # source://webrick//lib/webrick/httpresponse.rb#135
   def status_line; end
 
   private
 
   # preserved for compatibility with some 3rd-party handlers
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:557
+  # source://webrick//lib/webrick/httpresponse.rb#557
   def _write_data(socket, data); end
 
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:410
+  # source://webrick//lib/webrick/httpresponse.rb#410
   def check_header(header_value); end
 
   # :stopdoc:
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:421
+  # source://webrick//lib/webrick/httpresponse.rb#421
   def error_body(backtrace, ex, host, port); end
 
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:451
+  # source://webrick//lib/webrick/httpresponse.rb#451
   def send_body_io(socket); end
 
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:513
+  # source://webrick//lib/webrick/httpresponse.rb#513
   def send_body_proc(socket); end
 
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:491
+  # source://webrick//lib/webrick/httpresponse.rb#491
   def send_body_string(socket); end
 end
 
-# source://webrick-1.7.0/lib/webrick/httpresponse.rb:531
+# source://webrick//lib/webrick/httpresponse.rb#531
 class WEBrick::HTTPResponse::ChunkedWrapper
   # @return [ChunkedWrapper] a new instance of ChunkedWrapper
   #
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:532
+  # source://webrick//lib/webrick/httpresponse.rb#532
   def initialize(socket, resp); end
 
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:550
+  # source://webrick//lib/webrick/httpresponse.rb#550
   def <<(*buf); end
 
-  # source://webrick-1.7.0/lib/webrick/httpresponse.rb:537
+  # source://webrick//lib/webrick/httpresponse.rb#537
   def write(buf); end
 end
 
 # An HTTP Server
 #
-# source://webrick-1.7.0/lib/webrick/httpserver.rb:44
+# source://webrick//lib/webrick/httpserver.rb#44
 class WEBrick::HTTPServer < ::WEBrick::GenericServer
   # Creates a new HTTP server according to +config+
   #
@@ -1486,42 +1486,42 @@ class WEBrick::HTTPServer < ::WEBrick::GenericServer
   #
   # @return [HTTPServer] a new instance of HTTPServer
   #
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:46
+  # source://webrick//lib/webrick/httpserver.rb#46
   def initialize(config = T.unsafe(nil), default = T.unsafe(nil)); end
 
   # Logs +req+ and +res+ in the access logs.  +config+ is used for the
   # server name.
   #
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:220
+  # source://webrick//lib/webrick/httpserver.rb#220
   def access_log(config, req, res); end
 
   # Creates the HTTPRequest used when handling the HTTP
   # request. Can be overridden by subclasses.
   #
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:230
+  # source://webrick//lib/webrick/httpserver.rb#230
   def create_request(with_webrick_config); end
 
   # Creates the HTTPResponse used when handling the HTTP
   # request. Can be overridden by subclasses.
   #
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:237
+  # source://webrick//lib/webrick/httpserver.rb#237
   def create_response(with_webrick_config); end
 
   # The default OPTIONS request handler says GET, HEAD, POST and OPTIONS
   # requests are allowed.
   #
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:147
+  # source://webrick//lib/webrick/httpserver.rb#147
   def do_OPTIONS(req, res); end
 
   # Finds the appropriate virtual host to handle +req+
   #
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:207
+  # source://webrick//lib/webrick/httpserver.rb#207
   def lookup_server(req); end
 
   # Mounts +servlet+ on +dir+ passing +options+ to the servlet at creation
   # time
   #
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:155
+  # source://webrick//lib/webrick/httpserver.rb#155
   def mount(dir, servlet, *options); end
 
   # Mounts +proc+ or +block+ on +dir+ and calls it with a
@@ -1529,39 +1529,39 @@ class WEBrick::HTTPServer < ::WEBrick::GenericServer
   #
   # @raise [HTTPServerError]
   #
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:164
+  # source://webrick//lib/webrick/httpserver.rb#164
   def mount_proc(dir, proc = T.unsafe(nil), &block); end
 
   # Processes requests on +sock+
   #
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:69
+  # source://webrick//lib/webrick/httpserver.rb#69
   def run(sock); end
 
   # Finds a servlet for +path+
   #
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:182
+  # source://webrick//lib/webrick/httpserver.rb#182
   def search_servlet(path); end
 
   # Services +req+ and fills in +res+
   #
   # @raise [HTTPStatus::NotFound]
   #
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:125
+  # source://webrick//lib/webrick/httpserver.rb#125
   def service(req, res); end
 
   # Unmounts +dir+
   #
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:173
+  # source://webrick//lib/webrick/httpserver.rb#173
   def umount(dir); end
 
   # Unmounts +dir+
   #
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:173
+  # source://webrick//lib/webrick/httpserver.rb#173
   def unmount(dir); end
 
   # Adds +server+ as a virtual host.
   #
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:193
+  # source://webrick//lib/webrick/httpserver.rb#193
   def virtual_host(server); end
 end
 
@@ -1570,31 +1570,31 @@ end
 # WEBrick::HTTPServer#mount, WEBrick::HTTPServer#unmount and
 # WEBrick::HTTPServer#search_servlet
 #
-# source://webrick-1.7.0/lib/webrick/httpserver.rb:247
+# source://webrick//lib/webrick/httpserver.rb#247
 class WEBrick::HTTPServer::MountTable
   # @return [MountTable] a new instance of MountTable
   #
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:248
+  # source://webrick//lib/webrick/httpserver.rb#248
   def initialize; end
 
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:253
+  # source://webrick//lib/webrick/httpserver.rb#253
   def [](dir); end
 
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:258
+  # source://webrick//lib/webrick/httpserver.rb#258
   def []=(dir, val); end
 
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:265
+  # source://webrick//lib/webrick/httpserver.rb#265
   def delete(dir); end
 
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:272
+  # source://webrick//lib/webrick/httpserver.rb#272
   def scan(path); end
 
   private
 
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:279
+  # source://webrick//lib/webrick/httpserver.rb#279
   def compile; end
 
-  # source://webrick-1.7.0/lib/webrick/httpserver.rb:287
+  # source://webrick//lib/webrick/httpserver.rb#287
   def normalize(dir); end
 end
 
@@ -1653,45 +1653,45 @@ end
 #
 #   server.mount '/configurable', Configurable, 'red', '2em'
 #
-# source://webrick-1.7.0/lib/webrick/httpservlet/abstract.rb:76
+# source://webrick//lib/webrick/httpservlet/abstract.rb#76
 class WEBrick::HTTPServlet::AbstractServlet
   # Initializes a new servlet for +server+ using +options+ which are
   # stored as-is in +@options+.  +@logger+ is also provided.
   #
   # @return [AbstractServlet] a new instance of AbstractServlet
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/abstract.rb:91
+  # source://webrick//lib/webrick/httpservlet/abstract.rb#91
   def initialize(server, *options); end
 
   # Raises a NotFound exception
   #
   # @raise [HTTPStatus::NotFound]
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/abstract.rb:115
+  # source://webrick//lib/webrick/httpservlet/abstract.rb#115
   def do_GET(req, res); end
 
   # Dispatches to do_GET
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/abstract.rb:122
+  # source://webrick//lib/webrick/httpservlet/abstract.rb#122
   def do_HEAD(req, res); end
 
   # Returns the allowed HTTP request methods
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/abstract.rb:129
+  # source://webrick//lib/webrick/httpservlet/abstract.rb#129
   def do_OPTIONS(req, res); end
 
   # Dispatches to a +do_+ method based on +req+ if such a method is
   # available.  (+do_GET+ for a GET request).  Raises a MethodNotAllowed
   # exception if the method is not implemented.
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/abstract.rb:102
+  # source://webrick//lib/webrick/httpservlet/abstract.rb#102
   def service(req, res); end
 
   private
 
   # Redirects to a path ending in /
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/abstract.rb:140
+  # source://webrick//lib/webrick/httpservlet/abstract.rb#140
   def redirect_to_directory_uri(req, res); end
 
   class << self
@@ -1699,7 +1699,7 @@ class WEBrick::HTTPServlet::AbstractServlet
     # using +options+ from the mount point.  By default a new servlet
     # instance is created for every call.
     #
-    # source://webrick-1.7.0/lib/webrick/httpservlet/abstract.rb:83
+    # source://webrick//lib/webrick/httpservlet/abstract.rb#83
     def get_instance(server, *options); end
   end
 end
@@ -1711,31 +1711,31 @@ end
 #  server.mount('/cgi/my_script', WEBrick::HTTPServlet::CGIHandler,
 #               '/path/to/my_script')
 #
-# source://webrick-1.7.0/lib/webrick/httpservlet/cgihandler.rb:28
+# source://webrick//lib/webrick/httpservlet/cgihandler.rb#28
 class WEBrick::HTTPServlet::CGIHandler < ::WEBrick::HTTPServlet::AbstractServlet
   # Creates a new CGI script servlet for the script at +name+
   #
   # @return [CGIHandler] a new instance of CGIHandler
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/cgihandler.rb:36
+  # source://webrick//lib/webrick/httpservlet/cgihandler.rb#36
   def initialize(server, name); end
 
   # :stopdoc:
   #
   # @raise [HTTPStatus::InternalServerError]
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/cgihandler.rb:50
+  # source://webrick//lib/webrick/httpservlet/cgihandler.rb#50
   def do_GET(req, res); end
 
   # :stopdoc:
   #
   # @raise [HTTPStatus::InternalServerError]
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/cgihandler.rb:50
+  # source://webrick//lib/webrick/httpservlet/cgihandler.rb#50
   def do_POST(req, res); end
 end
 
-# source://webrick-1.7.0/lib/webrick/httpservlet/cgihandler.rb:31
+# source://webrick//lib/webrick/httpservlet/cgihandler.rb#31
 WEBrick::HTTPServlet::CGIHandler::CGIRunnerArray = T.let(T.unsafe(nil), Array)
 
 # Servlet for serving a single file.  You probably want to use the
@@ -1748,34 +1748,34 @@ WEBrick::HTTPServlet::CGIHandler::CGIRunnerArray = T.let(T.unsafe(nil), Array)
 #
 # This servlet handles If-Modified-Since and Range requests.
 #
-# source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:32
+# source://webrick//lib/webrick/httpservlet/filehandler.rb#32
 class WEBrick::HTTPServlet::DefaultFileHandler < ::WEBrick::HTTPServlet::AbstractServlet
   # Creates a DefaultFileHandler instance for the file at +local_path+.
   #
   # @return [DefaultFileHandler] a new instance of DefaultFileHandler
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:37
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#37
   def initialize(server, local_path); end
 
   # :stopdoc:
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:44
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#44
   def do_GET(req, res); end
 
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:118
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#118
   def make_partial_content(req, res, filename, filesize); end
 
   # returns a lambda for webrick/httpresponse.rb send_body_proc
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:90
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#90
   def multipart_body(body, parts, boundary, mtype, filesize); end
 
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:64
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#64
   def not_modified?(req, res, mtime, etag); end
 
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:155
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#155
   def prepare_range(range, filesize); end
 end
 
@@ -1795,26 +1795,26 @@ end
 #
 #   Query params <%= servlet_request.query.inspect %>
 #
-# source://webrick-1.7.0/lib/webrick/httpservlet/erbhandler.rb:36
+# source://webrick//lib/webrick/httpservlet/erbhandler.rb#36
 class WEBrick::HTTPServlet::ERBHandler < ::WEBrick::HTTPServlet::AbstractServlet
   # Creates a new ERBHandler on +server+ that will evaluate and serve the
   # ERB file +name+
   #
   # @return [ERBHandler] a new instance of ERBHandler
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/erbhandler.rb:42
+  # source://webrick//lib/webrick/httpservlet/erbhandler.rb#42
   def initialize(server, name); end
 
   # Handles GET requests
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/erbhandler.rb:50
+  # source://webrick//lib/webrick/httpservlet/erbhandler.rb#50
   def do_GET(req, res); end
 
   # Handles GET requests
   #
   # Handles POST requests
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/erbhandler.rb:50
+  # source://webrick//lib/webrick/httpservlet/erbhandler.rb#50
   def do_POST(req, res); end
 
   private
@@ -1822,7 +1822,7 @@ class WEBrick::HTTPServlet::ERBHandler < ::WEBrick::HTTPServlet::AbstractServlet
   # Evaluates +erb+ providing +servlet_request+ and +servlet_response+ as
   # local variables.
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/erbhandler.rb:79
+  # source://webrick//lib/webrick/httpservlet/erbhandler.rb#79
   def evaluate(erb, servlet_request, servlet_response); end
 end
 
@@ -1834,7 +1834,7 @@ end
 #   server.mount('/assets', WEBrick::HTTPServlet::FileHandler,
 #                '/path/to/assets')
 #
-# source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:175
+# source://webrick//lib/webrick/httpservlet/filehandler.rb#175
 class WEBrick::HTTPServlet::FileHandler < ::WEBrick::HTTPServlet::AbstractServlet
   # Creates a FileHandler servlet on +server+ that serves files starting
   # at directory +root+
@@ -1847,85 +1847,85 @@ class WEBrick::HTTPServlet::FileHandler < ::WEBrick::HTTPServlet::AbstractServle
   #
   # @return [FileHandler] a new instance of FileHandler
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:203
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#203
   def initialize(server, root, options = T.unsafe(nil), default = T.unsafe(nil)); end
 
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:245
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#245
   def do_GET(req, res); end
 
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:257
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#257
   def do_OPTIONS(req, res); end
 
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:251
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#251
   def do_POST(req, res); end
 
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:224
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#224
   def service(req, res); end
 
   # :stopdoc:
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:215
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#215
   def set_filesystem_encoding(str); end
 
   private
 
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:416
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#416
   def call_callback(callback_name, req, res); end
 
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:369
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#369
   def check_filename(req, res, name); end
 
   # @raise [HTTPStatus::NotFound]
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:309
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#309
   def exec_handler(req, res); end
 
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:322
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#322
   def get_handler(req, res); end
 
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:428
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#428
   def nondisclosure_name?(name); end
 
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:286
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#286
   def prevent_directory_traversal(req, res); end
 
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:394
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#394
   def search_file(req, res, basename); end
 
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:385
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#385
   def search_index_file(req, res); end
 
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:437
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#437
   def set_dir_list(req, res); end
 
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:335
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#335
   def set_filename(req, res); end
 
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:376
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#376
   def shift_path_info(req, res, path_info, base = T.unsafe(nil)); end
 
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:277
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#277
   def trailing_pathsep?(path); end
 
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:422
+  # source://webrick//lib/webrick/httpservlet/filehandler.rb#422
   def windows_ambiguous_name?(name); end
 
   class << self
     # Allow custom handling of requests for files with +suffix+ by class
     # +handler+
     #
-    # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:182
+    # source://webrick//lib/webrick/httpservlet/filehandler.rb#182
     def add_handler(suffix, handler); end
 
     # Remove custom handling of requests for files with +suffix+
     #
-    # source://webrick-1.7.0/lib/webrick/httpservlet/filehandler.rb:189
+    # source://webrick//lib/webrick/httpservlet/filehandler.rb#189
     def remove_handler(suffix); end
   end
 end
@@ -1935,7 +1935,7 @@ end
 # See http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html for more
 # information.
 #
-# source://webrick-1.7.0/lib/webrick/httpstatus.rb:21
+# source://webrick//lib/webrick/httpstatus.rb#21
 module WEBrick::HTTPStatus
   private
 
@@ -1943,21 +1943,21 @@ module WEBrick::HTTPStatus
   #
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/httpstatus.rb:170
+  # source://webrick//lib/webrick/httpstatus.rb#170
   def client_error?(code); end
 
   # Is +code+ an error status?
   #
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/httpstatus.rb:164
+  # source://webrick//lib/webrick/httpstatus.rb#164
   def error?(code); end
 
   # Is +code+ an informational status?
   #
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/httpstatus.rb:146
+  # source://webrick//lib/webrick/httpstatus.rb#146
   def info?(code); end
 
   # Returns the description corresponding to the HTTP status +code+
@@ -1965,28 +1965,28 @@ module WEBrick::HTTPStatus
   #   WEBrick::HTTPStatus.reason_phrase 404
   #   => "Not Found"
   #
-  # source://webrick-1.7.0/lib/webrick/httpstatus.rb:140
+  # source://webrick//lib/webrick/httpstatus.rb#140
   def reason_phrase(code); end
 
   # Is +code+ a redirection status?
   #
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/httpstatus.rb:158
+  # source://webrick//lib/webrick/httpstatus.rb#158
   def redirect?(code); end
 
   # Is +code+ a server error status?
   #
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/httpstatus.rb:176
+  # source://webrick//lib/webrick/httpstatus.rb#176
   def server_error?(code); end
 
   # Is +code+ a successful status?
   #
   # @return [Boolean]
   #
-  # source://webrick-1.7.0/lib/webrick/httpstatus.rb:152
+  # source://webrick//lib/webrick/httpstatus.rb#152
   def success?(code); end
 
   class << self
@@ -1995,28 +1995,28 @@ module WEBrick::HTTPStatus
     #   WEBrick::HTTPStatus[302]
     #   => WEBrick::HTTPStatus::NotFound
     #
-    # source://webrick-1.7.0/lib/webrick/httpstatus.rb:186
+    # source://webrick//lib/webrick/httpstatus.rb#186
     def [](code); end
 
     # Is +code+ a client error status?
     #
     # @return [Boolean]
     #
-    # source://webrick-1.7.0/lib/webrick/httpstatus.rb:170
+    # source://webrick//lib/webrick/httpstatus.rb#170
     def client_error?(code); end
 
     # Is +code+ an error status?
     #
     # @return [Boolean]
     #
-    # source://webrick-1.7.0/lib/webrick/httpstatus.rb:164
+    # source://webrick//lib/webrick/httpstatus.rb#164
     def error?(code); end
 
     # Is +code+ an informational status?
     #
     # @return [Boolean]
     #
-    # source://webrick-1.7.0/lib/webrick/httpstatus.rb:146
+    # source://webrick//lib/webrick/httpstatus.rb#146
     def info?(code); end
 
     # Returns the description corresponding to the HTTP status +code+
@@ -2024,56 +2024,56 @@ module WEBrick::HTTPStatus
     #   WEBrick::HTTPStatus.reason_phrase 404
     #   => "Not Found"
     #
-    # source://webrick-1.7.0/lib/webrick/httpstatus.rb:140
+    # source://webrick//lib/webrick/httpstatus.rb#140
     def reason_phrase(code); end
 
     # Is +code+ a redirection status?
     #
     # @return [Boolean]
     #
-    # source://webrick-1.7.0/lib/webrick/httpstatus.rb:158
+    # source://webrick//lib/webrick/httpstatus.rb#158
     def redirect?(code); end
 
     # Is +code+ a server error status?
     #
     # @return [Boolean]
     #
-    # source://webrick-1.7.0/lib/webrick/httpstatus.rb:176
+    # source://webrick//lib/webrick/httpstatus.rb#176
     def server_error?(code); end
 
     # Is +code+ a successful status?
     #
     # @return [Boolean]
     #
-    # source://webrick-1.7.0/lib/webrick/httpstatus.rb:152
+    # source://webrick//lib/webrick/httpstatus.rb#152
     def success?(code); end
   end
 end
 
 # Root of the HTTP status class hierarchy
 #
-# source://webrick-1.7.0/lib/webrick/httpstatus.rb:25
+# source://webrick//lib/webrick/httpstatus.rb#25
 class WEBrick::HTTPStatus::Status < ::StandardError
   # Returns the HTTP status code
   #
-  # source://webrick-1.7.0/lib/webrick/httpstatus.rb:31
+  # source://webrick//lib/webrick/httpstatus.rb#31
   def code; end
 
   # Returns the HTTP status description
   #
-  # source://webrick-1.7.0/lib/webrick/httpstatus.rb:34
+  # source://webrick//lib/webrick/httpstatus.rb#34
   def reason_phrase; end
 
   # Returns the HTTP status code
   #
-  # source://webrick-1.7.0/lib/webrick/httpstatus.rb:31
+  # source://webrick//lib/webrick/httpstatus.rb#31
   def to_i; end
 
   class << self
-    # source://webrick-1.7.0/lib/webrick/httpstatus.rb:27
+    # source://webrick//lib/webrick/httpstatus.rb#27
     def code; end
 
-    # source://webrick-1.7.0/lib/webrick/httpstatus.rb:27
+    # source://webrick//lib/webrick/httpstatus.rb#27
     def reason_phrase; end
   end
 end
@@ -2082,213 +2082,213 @@ end
 #
 # This module is generally used internally by WEBrick
 #
-# source://webrick-1.7.0/lib/webrick/httputils.rb:25
+# source://webrick//lib/webrick/httputils.rb#25
 module WEBrick::HTTPUtils
   private
 
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:443
+  # source://webrick//lib/webrick/httputils.rb#443
   def _escape(str, regex); end
 
   # :stopdoc:
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:441
+  # source://webrick//lib/webrick/httputils.rb#441
   def _make_regex(str); end
 
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:442
+  # source://webrick//lib/webrick/httputils.rb#442
   def _make_regex!(str); end
 
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:449
+  # source://webrick//lib/webrick/httputils.rb#449
   def _unescape(str, regex); end
 
   # Removes quotes and escapes from +str+
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:223
+  # source://webrick//lib/webrick/httputils.rb#223
   def dequote(str); end
 
   # Escapes HTTP reserved and unwise characters in +str+
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:467
+  # source://webrick//lib/webrick/httputils.rb#467
   def escape(str); end
 
   # Escapes 8 bit characters in +str+
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:508
+  # source://webrick//lib/webrick/httputils.rb#508
   def escape8bit(str); end
 
   # Escapes form reserved characters in +str+
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:481
+  # source://webrick//lib/webrick/httputils.rb#481
   def escape_form(str); end
 
   # Escapes path +str+
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:497
+  # source://webrick//lib/webrick/httputils.rb#497
   def escape_path(str); end
 
   # Loads Apache-compatible mime.types in +file+.
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:112
+  # source://webrick//lib/webrick/httputils.rb#112
   def load_mime_types(file); end
 
   # Returns the mime type of +filename+ from the list in +mime_tab+.  If no
   # mime type was found application/octet-stream is returned.
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:134
+  # source://webrick//lib/webrick/httputils.rb#134
   def mime_type(filename, mime_tab); end
 
   # Normalizes a request path.  Raises an exception if the path cannot be
   # normalized.
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:31
+  # source://webrick//lib/webrick/httputils.rb#31
   def normalize_path(path); end
 
   # Parses form data in +io+ with the given +boundary+
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:395
+  # source://webrick//lib/webrick/httputils.rb#395
   def parse_form_data(io, boundary); end
 
   # Parses an HTTP header +raw+ into a hash of header fields with an Array
   # of values.
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:145
+  # source://webrick//lib/webrick/httputils.rb#145
   def parse_header(raw); end
 
   # Parses the query component of a URI in +str+
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:371
+  # source://webrick//lib/webrick/httputils.rb#371
   def parse_query(str); end
 
   # Parses q values in +value+ as used in Accept headers.
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:202
+  # source://webrick//lib/webrick/httputils.rb#202
   def parse_qvalues(value); end
 
   # Parses a Range header value +ranges_specifier+
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:184
+  # source://webrick//lib/webrick/httputils.rb#184
   def parse_range_header(ranges_specifier); end
 
   # Quotes and escapes quotes in +str+
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:233
+  # source://webrick//lib/webrick/httputils.rb#233
   def quote(str); end
 
   # Splits a header value +str+ according to HTTP specification.
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:175
+  # source://webrick//lib/webrick/httputils.rb#175
   def split_header_value(str); end
 
   # Unescapes HTTP reserved and unwise characters in +str+
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:474
+  # source://webrick//lib/webrick/httputils.rb#474
   def unescape(str); end
 
   # Unescapes form reserved characters in +str+
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:490
+  # source://webrick//lib/webrick/httputils.rb#490
   def unescape_form(str); end
 
   class << self
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:443
+    # source://webrick//lib/webrick/httputils.rb#443
     def _escape(str, regex); end
 
     # :stopdoc:
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:441
+    # source://webrick//lib/webrick/httputils.rb#441
     def _make_regex(str); end
 
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:442
+    # source://webrick//lib/webrick/httputils.rb#442
     def _make_regex!(str); end
 
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:449
+    # source://webrick//lib/webrick/httputils.rb#449
     def _unescape(str, regex); end
 
     # Removes quotes and escapes from +str+
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:223
+    # source://webrick//lib/webrick/httputils.rb#223
     def dequote(str); end
 
     # Escapes HTTP reserved and unwise characters in +str+
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:467
+    # source://webrick//lib/webrick/httputils.rb#467
     def escape(str); end
 
     # Escapes 8 bit characters in +str+
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:508
+    # source://webrick//lib/webrick/httputils.rb#508
     def escape8bit(str); end
 
     # Escapes form reserved characters in +str+
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:481
+    # source://webrick//lib/webrick/httputils.rb#481
     def escape_form(str); end
 
     # Escapes path +str+
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:497
+    # source://webrick//lib/webrick/httputils.rb#497
     def escape_path(str); end
 
     # Loads Apache-compatible mime.types in +file+.
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:112
+    # source://webrick//lib/webrick/httputils.rb#112
     def load_mime_types(file); end
 
     # Returns the mime type of +filename+ from the list in +mime_tab+.  If no
     # mime type was found application/octet-stream is returned.
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:134
+    # source://webrick//lib/webrick/httputils.rb#134
     def mime_type(filename, mime_tab); end
 
     # Normalizes a request path.  Raises an exception if the path cannot be
     # normalized.
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:31
+    # source://webrick//lib/webrick/httputils.rb#31
     def normalize_path(path); end
 
     # Parses form data in +io+ with the given +boundary+
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:395
+    # source://webrick//lib/webrick/httputils.rb#395
     def parse_form_data(io, boundary); end
 
     # Parses an HTTP header +raw+ into a hash of header fields with an Array
     # of values.
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:145
+    # source://webrick//lib/webrick/httputils.rb#145
     def parse_header(raw); end
 
     # Parses the query component of a URI in +str+
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:371
+    # source://webrick//lib/webrick/httputils.rb#371
     def parse_query(str); end
 
     # Parses q values in +value+ as used in Accept headers.
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:202
+    # source://webrick//lib/webrick/httputils.rb#202
     def parse_qvalues(value); end
 
     # Parses a Range header value +ranges_specifier+
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:184
+    # source://webrick//lib/webrick/httputils.rb#184
     def parse_range_header(ranges_specifier); end
 
     # Quotes and escapes quotes in +str+
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:233
+    # source://webrick//lib/webrick/httputils.rb#233
     def quote(str); end
 
     # Splits a header value +str+ according to HTTP specification.
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:175
+    # source://webrick//lib/webrick/httputils.rb#175
     def split_header_value(str); end
 
     # Unescapes HTTP reserved and unwise characters in +str+
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:474
+    # source://webrick//lib/webrick/httputils.rb#474
     def unescape(str); end
 
     # Unescapes form reserved characters in +str+
     #
-    # source://webrick-1.7.0/lib/webrick/httputils.rb:490
+    # source://webrick//lib/webrick/httputils.rb#490
     def unescape_form(str); end
   end
 end
@@ -2296,7 +2296,7 @@ end
 # Stores multipart form data.  FormData objects are created when
 # WEBrick::HTTPUtils.parse_form_data is called.
 #
-# source://webrick-1.7.0/lib/webrick/httputils.rb:242
+# source://webrick//lib/webrick/httputils.rb#242
 class WEBrick::HTTPUtils::FormData < ::String
   # Creates a new FormData object.
   #
@@ -2307,7 +2307,7 @@ class WEBrick::HTTPUtils::FormData < ::String
   #
   # @return [FormData] a new instance of FormData
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:267
+  # source://webrick//lib/webrick/httputils.rb#267
   def initialize(*args); end
 
   # Adds +str+ to this FormData which may be the body, a header or a
@@ -2315,73 +2315,73 @@ class WEBrick::HTTPUtils::FormData < ::String
   #
   # This is called by WEBrick::HTTPUtils.parse_form_data for you
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:300
+  # source://webrick//lib/webrick/httputils.rb#300
   def <<(str); end
 
   # Retrieves the header at the first entry in +key+
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:286
+  # source://webrick//lib/webrick/httputils.rb#286
   def [](*key); end
 
   # Adds +data+ at the end of the chain of entries
   #
   # This is called by WEBrick::HTTPUtils.parse_form_data for you.
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:320
+  # source://webrick//lib/webrick/httputils.rb#320
   def append_data(data); end
 
   # Yields each entry in this FormData
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:335
+  # source://webrick//lib/webrick/httputils.rb#335
   def each_data; end
 
   # The filename of the form data part
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:254
+  # source://webrick//lib/webrick/httputils.rb#254
   def filename; end
 
   # The filename of the form data part
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:254
+  # source://webrick//lib/webrick/httputils.rb#254
   def filename=(_arg0); end
 
   # Returns all the FormData as an Array
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:347
+  # source://webrick//lib/webrick/httputils.rb#347
   def list; end
 
   # The name of the form data part
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:249
+  # source://webrick//lib/webrick/httputils.rb#249
   def name; end
 
   # The name of the form data part
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:249
+  # source://webrick//lib/webrick/httputils.rb#249
   def name=(_arg0); end
 
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:256
+  # source://webrick//lib/webrick/httputils.rb#256
   def next_data=(_arg0); end
 
   # Returns all the FormData as an Array
   #
   # A FormData will behave like an Array
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:347
+  # source://webrick//lib/webrick/httputils.rb#347
   def to_ary; end
 
   # This FormData's body
   #
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:363
+  # source://webrick//lib/webrick/httputils.rb#363
   def to_s; end
 
   protected
 
-  # source://webrick-1.7.0/lib/webrick/httputils.rb:256
+  # source://webrick//lib/webrick/httputils.rb#256
   def next_data; end
 end
 
-# source://webrick-1.7.0/lib/webrick/utils.rb:17
+# source://webrick//lib/webrick/utils.rb#17
 module WEBrick::Utils
   private
 
@@ -2389,32 +2389,32 @@ module WEBrick::Utils
   #
   # It will create IPV4 and IPV6 sockets on all interfaces.
   #
-  # source://webrick-1.7.0/lib/webrick/utils.rb:56
+  # source://webrick//lib/webrick/utils.rb#56
   def create_listeners(address, port); end
 
   # The server hostname
   #
-  # source://webrick-1.7.0/lib/webrick/utils.rb:47
+  # source://webrick//lib/webrick/utils.rb#47
   def getservername; end
 
   # Generates a random string of length +len+
   #
-  # source://webrick-1.7.0/lib/webrick/utils.rb:79
+  # source://webrick//lib/webrick/utils.rb#79
   def random_string(len); end
 
   # Sets the close on exec flag for +io+
   #
-  # source://webrick-1.7.0/lib/webrick/utils.rb:27
+  # source://webrick//lib/webrick/utils.rb#27
   def set_close_on_exec(io); end
 
   # Sets IO operations on +io+ to be non-blocking
   #
-  # source://webrick-1.7.0/lib/webrick/utils.rb:20
+  # source://webrick//lib/webrick/utils.rb#20
   def set_non_blocking(io); end
 
   # Changes the process's uid and gid to the ones of +user+
   #
-  # source://webrick-1.7.0/lib/webrick/utils.rb:34
+  # source://webrick//lib/webrick/utils.rb#34
   def su(user); end
 
   # Executes the passed block and raises +exception+ if execution takes more
@@ -2422,7 +2422,7 @@ module WEBrick::Utils
   #
   # If +seconds+ is zero or nil, simply executes the block
   #
-  # source://webrick-1.7.0/lib/webrick/utils.rb:253
+  # source://webrick//lib/webrick/utils.rb#253
   def timeout(seconds, exception = T.unsafe(nil)); end
 
   class << self
@@ -2430,32 +2430,32 @@ module WEBrick::Utils
     #
     # It will create IPV4 and IPV6 sockets on all interfaces.
     #
-    # source://webrick-1.7.0/lib/webrick/utils.rb:56
+    # source://webrick//lib/webrick/utils.rb#56
     def create_listeners(address, port); end
 
     # The server hostname
     #
-    # source://webrick-1.7.0/lib/webrick/utils.rb:47
+    # source://webrick//lib/webrick/utils.rb#47
     def getservername; end
 
     # Generates a random string of length +len+
     #
-    # source://webrick-1.7.0/lib/webrick/utils.rb:79
+    # source://webrick//lib/webrick/utils.rb#79
     def random_string(len); end
 
     # Sets the close on exec flag for +io+
     #
-    # source://webrick-1.7.0/lib/webrick/utils.rb:27
+    # source://webrick//lib/webrick/utils.rb#27
     def set_close_on_exec(io); end
 
     # Sets IO operations on +io+ to be non-blocking
     #
-    # source://webrick-1.7.0/lib/webrick/utils.rb:20
+    # source://webrick//lib/webrick/utils.rb#20
     def set_non_blocking(io); end
 
     # Changes the process's uid and gid to the ones of +user+
     #
-    # source://webrick-1.7.0/lib/webrick/utils.rb:34
+    # source://webrick//lib/webrick/utils.rb#34
     def su(user); end
 
     # Executes the passed block and raises +exception+ if execution takes more
@@ -2463,7 +2463,7 @@ module WEBrick::Utils
     #
     # If +seconds+ is zero or nil, simply executes the block
     #
-    # source://webrick-1.7.0/lib/webrick/utils.rb:253
+    # source://webrick//lib/webrick/utils.rb#253
     def timeout(seconds, exception = T.unsafe(nil)); end
   end
 end
@@ -2493,7 +2493,7 @@ end
 #
 # will print 'foo'
 #
-# source://webrick-1.7.0/lib/webrick/utils.rb:118
+# source://webrick//lib/webrick/utils.rb#118
 class WEBrick::Utils::TimeoutHandler
   include ::Singleton
   extend ::Singleton::SingletonClassMethods
@@ -2503,17 +2503,17 @@ class WEBrick::Utils::TimeoutHandler
   #
   # @return [TimeoutHandler] a new instance of TimeoutHandler
   #
-  # source://webrick-1.7.0/lib/webrick/utils.rb:148
+  # source://webrick//lib/webrick/utils.rb#148
   def initialize; end
 
   # Cancels the timeout handler +id+
   #
-  # source://webrick-1.7.0/lib/webrick/utils.rb:226
+  # source://webrick//lib/webrick/utils.rb#226
   def cancel(thread, id); end
 
   # Interrupts the timeout handler +id+ and raises +exception+
   #
-  # source://webrick-1.7.0/lib/webrick/utils.rb:203
+  # source://webrick//lib/webrick/utils.rb#203
   def interrupt(thread, id, exception); end
 
   # Registers a new timeout handler
@@ -2521,24 +2521,24 @@ class WEBrick::Utils::TimeoutHandler
   # +time+:: Timeout in seconds
   # +exception+:: Exception to raise when timeout elapsed
   #
-  # source://webrick-1.7.0/lib/webrick/utils.rb:214
+  # source://webrick//lib/webrick/utils.rb#214
   def register(thread, time, exception); end
 
-  # source://webrick-1.7.0/lib/webrick/utils.rb:240
+  # source://webrick//lib/webrick/utils.rb#240
   def terminate; end
 
   private
 
-  # source://webrick-1.7.0/lib/webrick/utils.rb:158
+  # source://webrick//lib/webrick/utils.rb#158
   def watch; end
 
-  # source://webrick-1.7.0/lib/webrick/utils.rb:193
+  # source://webrick//lib/webrick/utils.rb#193
   def watcher; end
 
   class << self
     # Cancels the timeout handler +id+
     #
-    # source://webrick-1.7.0/lib/webrick/utils.rb:137
+    # source://webrick//lib/webrick/utils.rb#137
     def cancel(id); end
 
     # Registers a new timeout handler
@@ -2546,10 +2546,10 @@ class WEBrick::Utils::TimeoutHandler
     # +time+:: Timeout in seconds
     # +exception+:: Exception to raise when timeout elapsed
     #
-    # source://webrick-1.7.0/lib/webrick/utils.rb:130
+    # source://webrick//lib/webrick/utils.rb#130
     def register(seconds, exception); end
 
-    # source://webrick-1.7.0/lib/webrick/utils.rb:141
+    # source://webrick//lib/webrick/utils.rb#141
     def terminate; end
   end
 end

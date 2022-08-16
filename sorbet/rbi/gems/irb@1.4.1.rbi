@@ -6,116 +6,116 @@
 
 module IRB::Color
   class << self
-    # source://RUBY_ROOT/irb/color.rb:104
+    # source://irb//irb/color.rb#104
     def clear(colorable: T.unsafe(nil)); end
 
     # @return [Boolean]
     #
-    # source://RUBY_ROOT/irb/color.rb:79
+    # source://irb//irb/color.rb#79
     def colorable?; end
 
-    # source://RUBY_ROOT/irb/color.rb:109
+    # source://irb//irb/color.rb#109
     def colorize(text, seq, colorable: T.unsafe(nil)); end
 
     # If `complete` is false (code is incomplete), this does not warn compile_error.
     # This option is needed to avoid warning a user when the compile_error is happening
     # because the input is not wrong but just incomplete.
     #
-    # source://RUBY_ROOT/irb/color.rb:118
+    # source://irb//irb/color.rb#118
     def colorize_code(code, complete: T.unsafe(nil), ignore_error: T.unsafe(nil), colorable: T.unsafe(nil)); end
 
     # @return [Boolean]
     #
-    # source://RUBY_ROOT/irb/color.rb:83
+    # source://irb//irb/color.rb#83
     def inspect_colorable?(obj, seen: T.unsafe(nil)); end
 
     private
 
-    # source://RUBY_ROOT/irb/color.rb:197
+    # source://irb//irb/color.rb#197
     def dispatch_seq(token, expr, str, in_symbol:); end
 
-    # source://RUBY_ROOT/irb/color.rb:164
+    # source://irb//irb/color.rb#164
     def scan(code, allow_last_error:); end
 
-    # source://RUBY_ROOT/irb/color.rb:156
+    # source://irb//irb/color.rb#156
     def without_circular_ref(obj, seen:, &block); end
   end
 end
 
 # A constant of all-bit 1 to match any Ripper's state in #dispatch_seq
 #
-# source://RUBY_ROOT/irb/color.rb:26
+# source://irb//irb/color.rb#26
 IRB::Color::ALL = T.let(T.unsafe(nil), Integer)
 
-# source://RUBY_ROOT/irb/color.rb:15
+# source://irb//irb/color.rb#15
 IRB::Color::BLUE = T.let(T.unsafe(nil), Integer)
 
-# source://RUBY_ROOT/irb/color.rb:9
+# source://irb//irb/color.rb#9
 IRB::Color::BOLD = T.let(T.unsafe(nil), Integer)
 
-# source://RUBY_ROOT/irb/color.rb:8
+# source://irb//irb/color.rb#8
 IRB::Color::CLEAR = T.let(T.unsafe(nil), Integer)
 
-# source://RUBY_ROOT/irb/color.rb:17
+# source://irb//irb/color.rb#17
 IRB::Color::CYAN = T.let(T.unsafe(nil), Integer)
 
-# source://debug-1.6.1/lib/debug/color.rb:8
+# source://debug/1.6.2/lib/debug/color.rb#8
 IRB::Color::DIM = T.let(T.unsafe(nil), Integer)
 
-# source://RUBY_ROOT/irb/color.rb:75
+# source://irb//irb/color.rb#75
 IRB::Color::ERROR_TOKENS = T.let(T.unsafe(nil), Array)
 
-# source://RUBY_ROOT/irb/color.rb:13
+# source://irb//irb/color.rb#13
 IRB::Color::GREEN = T.let(T.unsafe(nil), Integer)
 
-# source://RUBY_ROOT/irb/color.rb:16
+# source://irb//irb/color.rb#16
 IRB::Color::MAGENTA = T.let(T.unsafe(nil), Integer)
 
-# source://RUBY_ROOT/irb/color.rb:12
+# source://irb//irb/color.rb#12
 IRB::Color::RED = T.let(T.unsafe(nil), Integer)
 
-# source://RUBY_ROOT/irb/color.rb:11
+# source://irb//irb/color.rb#11
 IRB::Color::REVERSE = T.let(T.unsafe(nil), Integer)
 
 # A class to manage a state to know whether the current token is for Symbol or not.
 class IRB::Color::SymbolState
   # @return [SymbolState] a new instance of SymbolState
   #
-  # source://RUBY_ROOT/irb/color.rb:214
+  # source://irb//irb/color.rb#214
   def initialize; end
 
   # Return true if the token is a part of Symbol.
   #
-  # source://RUBY_ROOT/irb/color.rb:220
+  # source://irb//irb/color.rb#220
   def scan_token(token); end
 end
 
-# source://RUBY_ROOT/irb/color.rb:19
+# source://irb//irb/color.rb#19
 IRB::Color::TOKEN_KEYWORDS = T.let(T.unsafe(nil), Hash)
 
-# source://RUBY_ROOT/irb/color.rb:32
+# source://irb//irb/color.rb#32
 IRB::Color::TOKEN_SEQ_EXPRS = T.let(T.unsafe(nil), Hash)
 
-# source://RUBY_ROOT/irb/color.rb:10
+# source://irb//irb/color.rb#10
 IRB::Color::UNDERLINE = T.let(T.unsafe(nil), Integer)
 
-# source://RUBY_ROOT/irb/color.rb:14
+# source://irb//irb/color.rb#14
 IRB::Color::YELLOW = T.let(T.unsafe(nil), Integer)
 
 class IRB::ColorPrinter < ::PP
-  # source://RUBY_ROOT/irb/color_printer.rb:24
+  # source://irb//irb/color_printer.rb#24
   def pp(obj); end
 
-  # source://RUBY_ROOT/irb/color_printer.rb:33
+  # source://irb//irb/color_printer.rb#33
   def text(str, width = T.unsafe(nil)); end
 
   class << self
-    # source://RUBY_ROOT/irb/color_printer.rb:8
+    # source://irb//irb/color_printer.rb#8
     def pp(obj, out = T.unsafe(nil), width = T.unsafe(nil)); end
 
     private
 
-    # source://RUBY_ROOT/irb/color_printer.rb:17
+    # source://irb//irb/color_printer.rb#17
     def screen_width; end
   end
 end
@@ -133,7 +133,7 @@ module IRB::Notifier
   # expressions will be sent directly to STDOUT without any additional
   # formatting.
   #
-  # source://RUBY_ROOT/irb/notifier.rb:37
+  # source://irb//irb/notifier.rb#37
   def def_notifier(prefix = T.unsafe(nil), output_method = T.unsafe(nil)); end
 
   class << self
@@ -146,7 +146,7 @@ module IRB::Notifier
     # expressions will be sent directly to STDOUT without any additional
     # formatting.
     #
-    # source://RUBY_ROOT/irb/notifier.rb:37
+    # source://irb//irb/notifier.rb#37
     def def_notifier(prefix = T.unsafe(nil), output_method = T.unsafe(nil)); end
   end
 end
@@ -159,14 +159,14 @@ class IRB::Notifier::AbstractNotifier
   #
   # @return [AbstractNotifier] a new instance of AbstractNotifier
   #
-  # source://RUBY_ROOT/irb/notifier.rb:47
+  # source://irb//irb/notifier.rb#47
   def initialize(prefix, base_notifier); end
 
   # Execute the given block if notifications are enabled.
   #
   # @yield [@base_notifier]
   #
-  # source://RUBY_ROOT/irb/notifier.rb:105
+  # source://irb//irb/notifier.rb#105
   def exec_if; end
 
   # A wrapper method used to determine whether notifications are enabled.
@@ -175,14 +175,14 @@ class IRB::Notifier::AbstractNotifier
   #
   # @return [Boolean]
   #
-  # source://RUBY_ROOT/irb/notifier.rb:59
+  # source://irb//irb/notifier.rb#59
   def notify?; end
 
   # Same as #ppx, except it uses the #prefix given during object
   # initialization.
   # See OutputMethod#ppx for more detail.
   #
-  # source://RUBY_ROOT/irb/notifier.rb:88
+  # source://irb//irb/notifier.rb#88
   def pp(*objs); end
 
   # Same as #pp, except it concatenates the given +prefix+ with the #prefix
@@ -190,33 +190,33 @@ class IRB::Notifier::AbstractNotifier
   #
   # See OutputMethod#ppx for more detail.
   #
-  # source://RUBY_ROOT/irb/notifier.rb:98
+  # source://irb//irb/notifier.rb#98
   def ppx(prefix, *objs); end
 
   # The +prefix+ for this Notifier, which is appended to all objects being
   # inspected during output.
   #
-  # source://RUBY_ROOT/irb/notifier.rb:54
+  # source://irb//irb/notifier.rb#54
   def prefix; end
 
   # See OutputMethod#print for more detail.
   #
-  # source://RUBY_ROOT/irb/notifier.rb:64
+  # source://irb//irb/notifier.rb#64
   def print(*opts); end
 
   # See OutputMethod#printf for more detail.
   #
-  # source://RUBY_ROOT/irb/notifier.rb:74
+  # source://irb//irb/notifier.rb#74
   def printf(format, *opts); end
 
   # See OutputMethod#printn for more detail.
   #
-  # source://RUBY_ROOT/irb/notifier.rb:69
+  # source://irb//irb/notifier.rb#69
   def printn(*opts); end
 
   # See OutputMethod#puts for more detail.
   #
-  # source://RUBY_ROOT/irb/notifier.rb:79
+  # source://irb//irb/notifier.rb#79
   def puts(*objs); end
 end
 
@@ -236,7 +236,7 @@ class IRB::Notifier::CompositeNotifier < ::IRB::Notifier::AbstractNotifier
   #
   # @return [CompositeNotifier] a new instance of CompositeNotifier
   #
-  # source://RUBY_ROOT/irb/notifier.rb:123
+  # source://irb//irb/notifier.rb#123
   def initialize(prefix, base_notifier); end
 
   # Creates a new LeveledNotifier in the composite #notifiers group.
@@ -246,12 +246,12 @@ class IRB::Notifier::CompositeNotifier < ::IRB::Notifier::AbstractNotifier
   #
   # This method returns the newly created instance.
   #
-  # source://RUBY_ROOT/irb/notifier.rb:139
+  # source://irb//irb/notifier.rb#139
   def def_notifier(level, prefix = T.unsafe(nil)); end
 
   # Returns the leveled notifier for this object
   #
-  # source://RUBY_ROOT/irb/notifier.rb:146
+  # source://irb//irb/notifier.rb#146
   def level; end
 
   # Sets the leveled notifier for this object.
@@ -269,12 +269,12 @@ class IRB::Notifier::CompositeNotifier < ::IRB::Notifier::AbstractNotifier
   # found in the existing #notifiers Array, or an instance of
   # AbstractNotifier
   #
-  # source://RUBY_ROOT/irb/notifier.rb:163
+  # source://irb//irb/notifier.rb#163
   def level=(value); end
 
   # Returns the leveled notifier for this object
   #
-  # source://RUBY_ROOT/irb/notifier.rb:146
+  # source://irb//irb/notifier.rb#146
   def level_notifier; end
 
   # Sets the leveled notifier for this object.
@@ -292,26 +292,26 @@ class IRB::Notifier::CompositeNotifier < ::IRB::Notifier::AbstractNotifier
   # found in the existing #notifiers Array, or an instance of
   # AbstractNotifier
   #
-  # source://RUBY_ROOT/irb/notifier.rb:163
+  # source://irb//irb/notifier.rb#163
   def level_notifier=(value); end
 
   # List of notifiers in the group
   #
-  # source://RUBY_ROOT/irb/notifier.rb:131
+  # source://irb//irb/notifier.rb#131
   def notifiers; end
 end
 
 class IRB::Notifier::ErrUndefinedNotifier < ::StandardError
   # @return [ErrUndefinedNotifier] a new instance of ErrUndefinedNotifier
   #
-  # source://RUBY_ROOT/irb/notifier.rb:19
+  # source://irb//irb/notifier.rb#19
   def initialize(val); end
 end
 
 class IRB::Notifier::ErrUnrecognizedLevel < ::StandardError
   # @return [ErrUnrecognizedLevel] a new instance of ErrUnrecognizedLevel
   #
-  # source://RUBY_ROOT/irb/notifier.rb:24
+  # source://irb//irb/notifier.rb#24
   def initialize(val); end
 end
 
@@ -329,7 +329,7 @@ class IRB::Notifier::LeveledNotifier < ::IRB::Notifier::AbstractNotifier
   #
   # @return [LeveledNotifier] a new instance of LeveledNotifier
   #
-  # source://RUBY_ROOT/irb/notifier.rb:190
+  # source://irb//irb/notifier.rb#190
   def initialize(base, level, prefix); end
 
   # Compares the level of this notifier object with the given +other+
@@ -337,12 +337,12 @@ class IRB::Notifier::LeveledNotifier < ::IRB::Notifier::AbstractNotifier
   #
   # See the Comparable module for more information.
   #
-  # source://RUBY_ROOT/irb/notifier.rb:203
+  # source://irb//irb/notifier.rb#203
   def <=>(other); end
 
   # The current level of this notifier object
   #
-  # source://RUBY_ROOT/irb/notifier.rb:197
+  # source://irb//irb/notifier.rb#197
   def level; end
 
   # Whether to output messages to the output method, depending on the level
@@ -350,7 +350,7 @@ class IRB::Notifier::LeveledNotifier < ::IRB::Notifier::AbstractNotifier
   #
   # @return [Boolean]
   #
-  # source://RUBY_ROOT/irb/notifier.rb:209
+  # source://irb//irb/notifier.rb#209
   def notify?; end
 end
 
@@ -364,7 +364,7 @@ class IRB::Notifier::NoMsgNotifier < ::IRB::Notifier::LeveledNotifier
   #
   # @return [NoMsgNotifier] a new instance of NoMsgNotifier
   #
-  # source://RUBY_ROOT/irb/notifier.rb:221
+  # source://irb//irb/notifier.rb#221
   def initialize; end
 
   # Ensures notifications are ignored, see AbstractNotifier#notify? for
@@ -372,7 +372,7 @@ class IRB::Notifier::NoMsgNotifier < ::IRB::Notifier::LeveledNotifier
   #
   # @return [Boolean]
   #
-  # source://RUBY_ROOT/irb/notifier.rb:229
+  # source://irb//irb/notifier.rb#229
   def notify?; end
 end
 
@@ -391,14 +391,14 @@ class IRB::OutputMethod
   #     #<length modifier>(hh|h|l|ll|L|q|j|z|t)
   #     <conversion specifier>[diouxXeEfgGcsb%]
   #
-  # source://RUBY_ROOT/irb/output-method.rb:54
+  # source://irb//irb/output-method.rb#54
   def parse_printf_format(format, opts); end
 
   # Prints the given +objs+ calling Object#inspect on each.
   #
   # See #puts for more detail.
   #
-  # source://RUBY_ROOT/irb/output-method.rb:70
+  # source://irb//irb/output-method.rb#70
   def pp(*objs); end
 
   # Prints the given +objs+ calling Object#inspect on each and appending the
@@ -406,7 +406,7 @@ class IRB::OutputMethod
   #
   # See #puts for more detail.
   #
-  # source://RUBY_ROOT/irb/output-method.rb:78
+  # source://irb//irb/output-method.rb#78
   def ppx(prefix, *objs); end
 
   # Open this method to implement your own output method, raises a
@@ -414,31 +414,31 @@ class IRB::OutputMethod
   #
   # @raise [NotImplementedError]
   #
-  # source://RUBY_ROOT/irb/output-method.rb:26
+  # source://irb//irb/output-method.rb#26
   def print(*opts); end
 
   # Extends IO#printf to format the given +opts+ for Kernel#sprintf using
   # #parse_printf_format
   #
-  # source://RUBY_ROOT/irb/output-method.rb:37
+  # source://irb//irb/output-method.rb#37
   def printf(format, *opts); end
 
   # Prints the given +opts+, with a newline delimiter.
   #
-  # source://RUBY_ROOT/irb/output-method.rb:31
+  # source://irb//irb/output-method.rb#31
   def printn(*opts); end
 
   # Calls #print on each element in the given +objs+, followed by a newline
   # character.
   #
-  # source://RUBY_ROOT/irb/output-method.rb:60
+  # source://irb//irb/output-method.rb#60
   def puts(*objs); end
 end
 
 class IRB::OutputMethod::NotImplementedError < ::StandardError
   # @return [NotImplementedError] a new instance of NotImplementedError
   #
-  # source://RUBY_ROOT/irb/output-method.rb:19
+  # source://irb//irb/output-method.rb#19
   def initialize(val); end
 end
 
@@ -446,100 +446,100 @@ end
 class RubyLex
   # @return [RubyLex] a new instance of RubyLex
   #
-  # source://RUBY_ROOT/irb/ruby-lex.rb:25
+  # source://irb//irb/ruby-lex.rb#25
   def initialize; end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:319
+  # source://irb//irb/ruby-lex.rb#319
   def check_code_block(code, tokens = T.unsafe(nil)); end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:609
+  # source://irb//irb/ruby-lex.rb#609
   def check_corresponding_token_depth(lines, line_index); end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:539
+  # source://irb//irb/ruby-lex.rb#539
   def check_newline_depth_difference; end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:223
+  # source://irb//irb/ruby-lex.rb#223
   def check_state(code, tokens = T.unsafe(nil), context: T.unsafe(nil)); end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:717
+  # source://irb//irb/ruby-lex.rb#717
   def check_string_literal(tokens); end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:791
+  # source://irb//irb/ruby-lex.rb#791
   def check_termination_in_prev_line(code, context: T.unsafe(nil)); end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:247
+  # source://irb//irb/ruby-lex.rb#247
   def each_top_level_statement; end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:178
+  # source://irb//irb/ruby-lex.rb#178
   def find_prev_spaces(line_index); end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:238
+  # source://irb//irb/ruby-lex.rb#238
   def initialize_input; end
 
   # @return [Boolean]
   #
-  # source://RUBY_ROOT/irb/ruby-lex.rb:462
+  # source://irb//irb/ruby-lex.rb#462
   def is_method_calling?(tokens, index); end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:511
+  # source://irb//irb/ruby-lex.rb#511
   def is_the_in_correspond_to_a_for(tokens, index); end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:283
+  # source://irb//irb/ruby-lex.rb#283
   def lex; end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:298
+  # source://irb//irb/ruby-lex.rb#298
   def process_continue(tokens = T.unsafe(nil)); end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:758
+  # source://irb//irb/ruby-lex.rb#758
   def process_literal_type(tokens = T.unsafe(nil)); end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:412
+  # source://irb//irb/ruby-lex.rb#412
   def process_nesting_level(tokens = T.unsafe(nil)); end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:232
+  # source://irb//irb/ruby-lex.rb#232
   def prompt; end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:198
+  # source://irb//irb/ruby-lex.rb#198
   def set_auto_indent(context); end
 
   # io functions
   #
-  # source://RUBY_ROOT/irb/ruby-lex.rb:51
+  # source://irb//irb/ruby-lex.rb#51
   def set_input(io, p = T.unsafe(nil), context: T.unsafe(nil), &block); end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:121
+  # source://irb//irb/ruby-lex.rb#121
   def set_prompt(p = T.unsafe(nil), &block); end
 
-  # source://RUBY_ROOT/irb/ruby-lex.rb:480
+  # source://irb//irb/ruby-lex.rb#480
   def take_corresponding_syntax_to_kw_do(tokens, index); end
 
   private
 
   # @return [Boolean]
   #
-  # source://RUBY_ROOT/irb/ruby-lex.rb:840
+  # source://irb//irb/ruby-lex.rb#840
   def heredoc_scope?; end
 
   # @return [Boolean]
   #
-  # source://RUBY_ROOT/irb/ruby-lex.rb:845
+  # source://irb//irb/ruby-lex.rb#845
   def in_keyword_case_scope?; end
 
   class << self
-    # source://RUBY_ROOT/irb/ruby-lex.rb:33
+    # source://irb//irb/ruby-lex.rb#33
     def compile_with_errors_suppressed(code, line_no: T.unsafe(nil)); end
 
-    # source://RUBY_ROOT/irb/ruby-lex.rb:139
+    # source://irb//irb/ruby-lex.rb#139
     def ripper_lex_without_warning(code, context: T.unsafe(nil)); end
   end
 end
 
-# source://RUBY_ROOT/irb/ruby-lex.rb:130
+# source://irb//irb/ruby-lex.rb#130
 RubyLex::ERROR_TOKENS = T.let(T.unsafe(nil), Array)
 
 class RubyLex::TerminateLineInput < ::StandardError
   # @return [TerminateLineInput] a new instance of TerminateLineInput
   #
-  # source://RUBY_ROOT/irb/ruby-lex.rb:20
+  # source://irb//irb/ruby-lex.rb#20
   def initialize; end
 end

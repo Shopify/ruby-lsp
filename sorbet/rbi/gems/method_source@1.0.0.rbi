@@ -5,4 +5,4 @@
 # Please instead update this file by running `bin/tapioca gem method_source`.
 
 # THIS IS AN EMPTY RBI FILE.
-# see https://github.com/Shopify/tapioca/wiki/Manual-Gem-Requires
+# see https://github.com/Shopify/tapioca#manually-requiring-parts-of-a-gem
