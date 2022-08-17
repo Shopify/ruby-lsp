@@ -6,6 +6,12 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.6]
+
+- Enable document links (https://github.com/Shopify/vscode-ruby-lsp/pull/170)
+- Prompt users to update the server gem (https://github.com/Shopify/vscode-ruby-lsp/pull/172)
+- Bundle grammar files for simpler highlighting (https://github.com/Shopify/vscode-ruby-lsp/pull/187)
+
 ## [0.0.5]
 
 - Add Ruby snippets (https://github.com/Shopify/vscode-ruby-lsp/pull/150)
