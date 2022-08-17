@@ -134,11 +134,9 @@ module RubyLsp
     sig { returns(Thread) }
     def new_worker
       Thread.new do
-        loop do
-          # Thread::Queue#pop is thread safe and will wait until an item is available
-          job = T.let(@job_queue.pop, T.nilable(Job))
+        # Thread::Queue#pop is thread safe and will wait until an item is available
+        while (job = T.let(@job_queue.pop, T.nilable(Job)))
           # The only time when the job is nil is when the queue is closed and we can then terminate the thread
-          break if job.nil?
 
           request = job.request
           @mutex.synchronize do
