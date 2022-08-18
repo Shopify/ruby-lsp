@@ -5,9 +5,9 @@ require "benchmark"
 
 module RubyLsp
   class Queue
-    class Cancelled < Interrupt; end
-
     extend T::Sig
+
+    class Cancelled < Interrupt; end
 
     class Result < T::Struct
       const :response, T.untyped # rubocop:disable Sorbet/ForbidUntypedStructProps
