@@ -20,6 +20,13 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def run_expectations(source)
+    document = RubyLsp::Document.new(source)
+    RubyLsp::Requests::DocumentLink.new("file://fake/path/without_version.rb", document).run
+  end
+
+  private
+
   def substitute(original)
     substitute_syntax_tree_version(original)
       .sub("BUNDLER_PATH", Bundler.bundle_path.to_s)

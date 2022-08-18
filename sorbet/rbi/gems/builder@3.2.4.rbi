@@ -6,24 +6,35 @@
 
 # If the Builder::XChar module is not currently defined, fail on any
 # name clashes in standard library classes.
+#
+# source://builder//lib/builder/blankslate.rb#17
 module Builder
   class << self
+    # source://builder//lib/builder/xchar.rb#13
     def check_for_name_collision(klass, method_name, defined_constant = T.unsafe(nil)); end
   end
 end
 
+# source://builder//lib/builder/blankslate.rb#19
 Builder::BlankSlate = BasicObject
 
 # Generic error for builder
+#
+# source://builder//lib/builder/xmlbase.rb#9
 class Builder::IllegalBlockError < ::RuntimeError; end
 
+# source://builder//lib/builder/xchar.rb#33
 module Builder::XChar
   class << self
     # encode a string per XML rules
+    #
+    # source://builder//lib/builder/xchar.rb#152
     def encode(string); end
 
     # convert a string to valid UTF-8, compensating for a number of
     # common errors.
+    #
+    # source://builder//lib/builder/xchar.rb#126
     def unicode(string); end
   end
 end
@@ -31,29 +42,50 @@ end
 # See
 # http://intertwingly.net/stories/2004/04/14/i18n.html#CleaningWindows
 # for details.
+#
+# source://builder//lib/builder/xchar.rb#38
 Builder::XChar::CP1252 = T.let(T.unsafe(nil), Hash)
 
+# source://builder//lib/builder/xchar.rb#100
 Builder::XChar::CP1252_DIFFERENCES = T.let(T.unsafe(nil), String)
+
+# source://builder//lib/builder/xchar.rb#120
 Builder::XChar::ENCODING_BINARY = T.let(T.unsafe(nil), Encoding)
+
+# source://builder//lib/builder/xchar.rb#122
 Builder::XChar::ENCODING_ISO1 = T.let(T.unsafe(nil), Encoding)
+
+# source://builder//lib/builder/xchar.rb#121
 Builder::XChar::ENCODING_UTF8 = T.let(T.unsafe(nil), Encoding)
+
+# source://builder//lib/builder/xchar.rb#109
 Builder::XChar::INVALID_XML_CHAR = T.let(T.unsafe(nil), Regexp)
 
 # See http://www.w3.org/TR/REC-xml/#dt-chardata for details.
+#
+# source://builder//lib/builder/xchar.rb#69
 Builder::XChar::PREDEFINED = T.let(T.unsafe(nil), Hash)
 
 # http://www.fileformat.info/info/unicode/char/fffd/index.htm
+#
+# source://builder//lib/builder/xchar.rb#84
 Builder::XChar::REPLACEMENT_CHAR = T.let(T.unsafe(nil), String)
 
+# source://builder//lib/builder/xchar.rb#100
 Builder::XChar::UNICODE_EQUIVALENT = T.let(T.unsafe(nil), String)
 
 # See http://www.w3.org/TR/REC-xml/#charsets for details.
+#
+# source://builder//lib/builder/xchar.rb#76
 Builder::XChar::VALID = T.let(T.unsafe(nil), Array)
 
+# source://builder//lib/builder/xchar.rb#105
 Builder::XChar::XML_PREDEFINED = T.let(T.unsafe(nil), Regexp)
 
 # XmlBase is a base class for building XML builders.  See
 # Builder::XmlMarkup and Builder::XmlEvents for examples.
+#
+# source://builder//lib/builder/xmlbase.rb#13
 class Builder::XmlBase < ::BasicObject
   # Create an XML markup builder.
   #
@@ -67,6 +99,8 @@ class Builder::XmlBase < ::BasicObject
   #             the output stream.
   #
   # @return [XmlBase] a new instance of XmlBase
+  #
+  # source://builder//lib/builder/xmlbase.rb#29
   def initialize(indent = T.unsafe(nil), initial = T.unsafe(nil), encoding = T.unsafe(nil)); end
 
   # Append text to the output target without escaping any markup.
@@ -82,14 +116,20 @@ class Builder::XmlBase < ::BasicObject
   # use <tt><<</tt> to append to the target, so by supporting this
   # method/operation builders can use other builders as their
   # targets.
+  #
+  # source://builder//lib/builder/xmlbase.rb#118
   def <<(text); end
 
   # @return [Boolean]
+  #
+  # source://builder//lib/builder/xmlbase.rb#35
   def explicit_nil_handling?; end
 
   # Create XML markup based on the name of the method.  This method
   # is never invoked directly, but is called for each markup method
   # in the markup block that isn't cached.
+  #
+  # source://builder//lib/builder/xmlbase.rb#92
   def method_missing(sym, *args, &block); end
 
   # For some reason, nil? is sent to the XmlMarkup object.  If nil?
@@ -100,25 +140,40 @@ class Builder::XmlBase < ::BasicObject
   # cf. http://fishbowl.pastiche.org/2004/10/13/cargo_cult_programming).
   #
   # @return [Boolean]
+  #
+  # source://builder//lib/builder/xmlbase.rb#128
   def nil?; end
 
   # Create a tag named +sym+.  Other than the first argument which
   # is the tag name, the arguments are the same as the tags
   # implemented via <tt>method_missing</tt>.
+  #
+  # source://builder//lib/builder/xmlbase.rb#42
   def tag!(sym, *args, &block); end
 
   # Append text to the output target.  Escape any markup.  May be
   # used within the markup brackets as:
   #
   #   builder.p { |b| b.br; b.text! "HI" }   #=>  <p><br/>HI</p>
+  #
+  # source://builder//lib/builder/xmlbase.rb#101
   def text!(text); end
 
   private
 
+  # source://builder//lib/builder/xmlbase.rb#136
   def _escape(text); end
+
+  # source://builder//lib/builder/xmlbase.rb#159
   def _escape_attribute(text); end
+
+  # source://builder//lib/builder/xmlbase.rb#169
   def _indent; end
+
+  # source://builder//lib/builder/xmlbase.rb#174
   def _nested_structures(block); end
+
+  # source://builder//lib/builder/xmlbase.rb#164
   def _newline; end
 
   # If XmlBase.cache_method_calls = true, we dynamicly create the method
@@ -127,15 +182,21 @@ class Builder::XmlBase < ::BasicObject
   # be handled by the new method instead of method_missing. As
   # method_missing is very slow, this speeds up document generation
   # significantly.
+  #
+  # source://builder//lib/builder/xmlbase.rb#187
   def cache_method_call(sym); end
 
   class << self
     # Returns the value of attribute cache_method_calls.
+    #
+    # source://builder//lib/builder/xmlbase.rb#16
     def cache_method_calls; end
 
     # Sets the attribute cache_method_calls
     #
     # @param value the value to set the attribute cache_method_calls to.
+    #
+    # source://builder//lib/builder/xmlbase.rb#16
     def cache_method_calls=(_arg0); end
   end
 end
@@ -171,9 +232,16 @@ end
 #     A series of characters may be broken up into more than one
 #     +text+ call, so the client cannot assume that a single
 #     callback contains all the text data.
+#
+# source://builder//lib/builder/xmlevents.rb#49
 class Builder::XmlEvents < ::Builder::XmlMarkup
+  # source://builder//lib/builder/xmlevents.rb#59
   def _end_tag(sym); end
+
+  # source://builder//lib/builder/xmlevents.rb#54
   def _start_tag(sym, attrs, end_too = T.unsafe(nil)); end
+
+  # source://builder//lib/builder/xmlevents.rb#50
   def text!(text); end
 end
 
@@ -318,6 +386,8 @@ end
 #     xml_builder.div { |xml|
 #       xml.stong("text")
 #     }
+#
+# source://builder//lib/builder/xmlmarkup.rb#161
 class Builder::XmlMarkup < ::Builder::XmlBase
   # Create an XML markup builder.  Parameters are specified by an
   # option hash.
@@ -347,6 +417,8 @@ class Builder::XmlMarkup < ::Builder::XmlBase
   #    finer control over escaping attribute values.
   #
   # @return [XmlMarkup] a new instance of XmlMarkup
+  #
+  # source://builder//lib/builder/xmlmarkup.rb#190
   def initialize(options = T.unsafe(nil)); end
 
   # Insert a CDATA section into the XML markup.
@@ -355,9 +427,14 @@ class Builder::XmlMarkup < ::Builder::XmlBase
   #
   #    xml.cdata!("text to be included in cdata")
   #        #=> <![CDATA[text to be included in cdata]]>
+  #
+  # source://builder//lib/builder/xmlmarkup.rb#270
   def cdata!(text); end
 
+  # source://builder//lib/builder/xmlmarkup.rb#275
   def cdata_value!(open, text); end
+
+  # source://builder//lib/builder/xmlmarkup.rb#204
   def comment!(comment_text); end
 
   # Insert an XML declaration into the XML markup.
@@ -366,6 +443,8 @@ class Builder::XmlMarkup < ::Builder::XmlBase
   #
   #   xml.declare! :ELEMENT, :blah, "yada"
   #       # => <!ELEMENT blah "yada">
+  #
+  # source://builder//lib/builder/xmlmarkup.rb#215
   def declare!(inst, *args, &block); end
 
   # Insert a processing instruction into the XML markup.  E.g.
@@ -380,37 +459,48 @@ class Builder::XmlMarkup < ::Builder::XmlBase
   # Note: If the encoding is setup to "UTF-8" and the value of
   # $KCODE is "UTF8", then builder will emit UTF-8 encoded strings
   # rather than the entity encoding normally used.
+  #
+  # source://builder//lib/builder/xmlmarkup.rb#248
   def instruct!(directive_tag = T.unsafe(nil), attrs = T.unsafe(nil)); end
 
   # Return the target of the builder.
+  #
+  # source://builder//lib/builder/xmlmarkup.rb#200
   def target!; end
 
   private
 
+  # source://builder//lib/builder/xmlmarkup.rb#326
   def _attr_value(value); end
 
   # Insert an ending tag.
+  #
+  # source://builder//lib/builder/xmlmarkup.rb#310
   def _end_tag(sym); end
 
+  # source://builder//lib/builder/xmlmarkup.rb#335
   def _ensure_no_block(got_block); end
 
   # Insert the attributes (given in the hash).
+  #
+  # source://builder//lib/builder/xmlmarkup.rb#315
   def _insert_attributes(attrs, order = T.unsafe(nil)); end
 
   # Insert special instruction.
+  #
+  # source://builder//lib/builder/xmlmarkup.rb#291
   def _special(open, close, data = T.unsafe(nil), attrs = T.unsafe(nil), order = T.unsafe(nil)); end
 
   # Start an XML tag.  If <tt>end_too</tt> is true, then the start
   # tag is also the end tag (e.g.  <br/>
+  #
+  # source://builder//lib/builder/xmlmarkup.rb#302
   def _start_tag(sym, attrs, end_too = T.unsafe(nil)); end
 
   # Insert text directly in to the builder's target.
+  #
+  # source://builder//lib/builder/xmlmarkup.rb#286
   def _text(text); end
-end
-
-# Enhance the Integer class with a XML escaped character conversion.
-class Integer < ::Numeric
-  include ::JSON::Ext::Generator::GeneratorMethods::Integer
 end
 
 class Symbol

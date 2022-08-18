@@ -98,8 +98,9 @@ module RubyLsp
     end
 
     on("textDocument/documentLink") do |request|
-      store.cache_fetch(request.dig(:params, :textDocument, :uri), :document_link) do |document|
-        RubyLsp::Requests::DocumentLink.new(document).run
+      uri = request.dig(:params, :textDocument, :uri)
+      store.cache_fetch(uri, :document_link) do |document|
+        RubyLsp::Requests::DocumentLink.new(uri, document).run
       end
     end
 
