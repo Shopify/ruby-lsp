@@ -98,7 +98,7 @@ class IntegrationTest < Minitest::Test
   def test_document_link
     initialize_lsp(["documentLink"])
     open_file_with(<<~DOC)
-      # source://syntax_tree-#{Gem::Specification.find_by_name("syntax_tree").version}/lib/syntax_tree.rb:39
+      # source://syntax_tree/#{Gem::Specification.find_by_name("syntax_tree").version}/lib/syntax_tree.rb#39
       def foo
       end
     DOC
