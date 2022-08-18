@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.2.3]
+
+- Resolve generic source URIs for jump to gem source (https://github.com/Shopify/ruby-lsp/pull/237)
+
 ## [0.2.2]
 
 - Support document links (https://github.com/Shopify/ruby-lsp/pull/195)
