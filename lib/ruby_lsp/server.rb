@@ -91,26 +91,26 @@ module RubyLsp
       Handler::VOID
     end
 
-    on("textDocument/documentSymbol") do |request|
+    on("textDocument/documentSymbol", parallel: true) do |request|
       store.cache_fetch(request.dig(:params, :textDocument, :uri), :document_symbol) do |document|
         Requests::DocumentSymbol.new(document).run
       end
     end
 
-    on("textDocument/documentLink") do |request|
+    on("textDocument/documentLink", parallel: true) do |request|
       uri = request.dig(:params, :textDocument, :uri)
       store.cache_fetch(uri, :document_link) do |document|
         RubyLsp::Requests::DocumentLink.new(uri, document).run
       end
     end
 
-    on("textDocument/foldingRange") do |request|
+    on("textDocument/foldingRange", parallel: true) do |request|
       store.cache_fetch(request.dig(:params, :textDocument, :uri), :folding_ranges) do |document|
         Requests::FoldingRanges.new(document).run
       end
     end
 
-    on("textDocument/selectionRange") do |request|
+    on("textDocument/selectionRange", parallel: true) do |request|
       uri = request.dig(:params, :textDocument, :uri)
       positions = request.dig(:params, :positions)
 
@@ -132,7 +132,7 @@ module RubyLsp
       end
     end
 
-    on("textDocument/semanticTokens/full") do |request|
+    on("textDocument/semanticTokens/full", parallel: true) do |request|
       store.cache_fetch(request.dig(:params, :textDocument, :uri), :semantic_highlighting) do |document|
         T.cast(
           Requests::SemanticHighlighting.new(
@@ -144,13 +144,13 @@ module RubyLsp
       end
     end
 
-    on("textDocument/formatting") do |request|
+    on("textDocument/formatting", parallel: true) do |request|
       uri = request.dig(:params, :textDocument, :uri)
 
       Requests::Formatting.new(uri, store.get(uri)).run
     end
 
-    on("textDocument/documentHighlight") do |request|
+    on("textDocument/documentHighlight", parallel: true) do |request|
       document = store.get(request.dig(:params, :textDocument, :uri))
 
       if document.parsed?
@@ -158,7 +158,7 @@ module RubyLsp
       end
     end
 
-    on("textDocument/codeAction") do |request|
+    on("textDocument/codeAction", parallel: true) do |request|
       uri = request.dig(:params, :textDocument, :uri)
       range = request.dig(:params, :range)
       start_line = range.dig(:start, :line)
@@ -169,6 +169,11 @@ module RubyLsp
       end
     end
 
+    on("$/cancelRequest") do |request|
+      cancel_request(request[:params][:id])
+      Handler::VOID
+    end
+
     on("textDocument/diagnostic") do |request|
       uri = request.dig(:params, :textDocument, :uri)
       response = store.cache_fetch(uri, :diagnostics) do |document|
@@ -176,9 +181,10 @@ module RubyLsp
       end
 
       { kind: "full", items: response.map(&:to_lsp_diagnostic) } if response
-    rescue RuboCop::ValidationError => e
-      show_message(Constant::MessageType::ERROR, "Error in RuboCop configuration file: #{e.message}")
-      nil
+    end.on_error do |error|
+      if error.is_a?(RuboCop::ValidationError)
+        show_message(Constant::MessageType::ERROR, "Error in RuboCop configuration file: #{error.message}")
+      end
     end
 
     on("shutdown") { shutdown }

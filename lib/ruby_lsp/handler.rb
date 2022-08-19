@@ -3,7 +3,7 @@
 
 require "ruby_lsp/requests"
 require "ruby_lsp/store"
-require "benchmark"
+require "ruby_lsp/queue"
 
 module RubyLsp
   Interface = LanguageServer::Protocol::Interface
@@ -13,6 +13,26 @@ module RubyLsp
   class Handler
     extend T::Sig
     VOID = T.let(Object.new.freeze, Object)
+
+    class RequestHandler < T::Struct
+      extend T::Sig
+
+      const :action, T.proc.params(request: T::Hash[Symbol, T.untyped]).returns(T.untyped)
+      const :parallel, T::Boolean
+      prop :error_handler,
+        T.nilable(T.proc.params(error: StandardError, request: T::Hash[Symbol, T.untyped]).void)
+
+      # A proc that runs in case a request has errored. Receives the error and the original request as arguments. Useful
+      # for displaying window messages on errors
+      sig do
+        params(
+          block: T.proc.bind(Handler).params(error: StandardError, request: T::Hash[Symbol, T.untyped]).void
+        ).void
+      end
+      def on_error(&block)
+        self.error_handler = block
+      end
+    end
 
     class << self
       extend T::Sig
@@ -32,61 +52,50 @@ module RubyLsp
     def initialize
       @writer = T.let(Transport::Stdio::Writer.new, Transport::Stdio::Writer)
       @reader = T.let(Transport::Stdio::Reader.new, Transport::Stdio::Reader)
-      @handlers = T.let({}, T::Hash[String, T.proc.params(request: T::Hash[Symbol, T.untyped]).returns(T.untyped)])
+      @handlers = T.let({}, T::Hash[String, RequestHandler])
       @store = T.let(Store.new, Store)
+      @queue = T.let(Queue.new(@writer, @handlers), Queue)
     end
 
     sig { void }
     def start
       $stderr.puts "Starting Ruby LSP..."
-      @reader.read { |request| handle(request) }
+
+      @reader.read do |request|
+        handler = @handlers[request[:method]]
+        next if handler.nil?
+
+        if handler.parallel
+          @queue.push(request)
+        else
+          result = @queue.execute(request)
+          @queue.finalize_request(result, request)
+        end
+      end
     end
 
     private
 
+    sig { params(id: T.any(String, Integer)).void }
+    def cancel_request(id)
+      @queue.cancel(id)
+    end
+
     sig do
       params(
         msg: String,
+        parallel: T::Boolean,
         blk: T.proc.bind(Handler).params(request: T::Hash[Symbol, T.untyped]).returns(T.untyped)
-      ).void
+      ).returns(RequestHandler)
     end
-    def on(msg, &blk)
-      @handlers[msg] = blk
-    end
-
-    sig { params(request: T::Hash[Symbol, T.untyped]).void }
-    def handle(request)
-      result = T.let(nil, T.untyped)
-      error = T.let(nil, T.nilable(StandardError))
-      handler = @handlers[request[:method]]
-
-      request_time = Benchmark.realtime do
-        if handler
-          begin
-            result = handler.call(request)
-          rescue StandardError => e
-            error = e
-          end
-
-          if error
-            @writer.write(
-              {
-                id: request[:id],
-                error: { code: Constant::ErrorCodes::INTERNAL_ERROR, message: error.inspect, data: request.to_json },
-              }
-            )
-          elsif result != VOID
-            @writer.write(id: request[:id], result: result)
-          end
-        end
-      end
-
-      @writer.write(method: "telemetry/event", params: telemetry_params(request, request_time, error))
+    def on(msg, parallel: false, &blk)
+      @handlers[msg] = RequestHandler.new(action: blk, parallel: parallel)
     end
 
     sig { void }
     def shutdown
       $stderr.puts "Shutting down Ruby LSP..."
+      @queue.shutdown
       store.clear
     end
 
@@ -104,31 +113,6 @@ module RubyLsp
         method: "window/showMessage",
         params: Interface::ShowMessageParams.new(type: type, message: message)
       )
-    end
-
-    sig do
-      params(
-        request: T::Hash[Symbol, T.untyped],
-        request_time: Float,
-        error: T.nilable(StandardError)
-      ).returns(T::Hash[Symbol, T.any(String, Float)])
-    end
-    def telemetry_params(request, request_time, error)
-      uri = request.dig(:params, :textDocument, :uri)
-
-      params = {
-        request: request[:method],
-        lspVersion: RubyLsp::VERSION,
-        requestTime: request_time,
-      }
-
-      if error
-        params[:errorClass] = error.class.name
-        params[:errorMessage] = error.message
-      end
-
-      params[:uri] = uri.sub(%r{.*://#{Dir.home}}, "~") if uri
-      params
     end
   end
 end
