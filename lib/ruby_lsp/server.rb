@@ -148,6 +148,9 @@ module RubyLsp
       uri = request.dig(:params, :textDocument, :uri)
 
       Requests::Formatting.new(uri, store.get(uri)).run
+    rescue RuboCop::Runner::InfiniteCorrectionLoop => e
+      show_message(Constant::MessageType::ERROR, "Error from RuboCop: #{e.message}")
+      nil
     end
 
     on("textDocument/documentHighlight", parallel: true) do |request|
