@@ -23,7 +23,7 @@ GEM
     json (2.6.2)
     language_server-protocol (3.16.0.3)
     method_source (1.0.0)
-    minitest (5.16.2)
+    minitest (5.16.3)
     minitest-reporters (1.5.0)
       ansi
       builder
