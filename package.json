@@ -190,7 +190,7 @@
     "@typescript-eslint/eslint-plugin": "^5.33.1",
     "@typescript-eslint/parser": "^5.33.1",
     "@vscode/test-electron": "^2.1.5",
-    "esbuild": "^0.15.3",
+    "esbuild": "^0.15.5",
     "eslint": "^8.22.0",
     "eslint-import-resolver-typescript": "^3.4.1",
     "glob": "^8.0.3",
