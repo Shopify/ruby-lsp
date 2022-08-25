@@ -24,6 +24,7 @@ interface EnabledFeatures {
   formatting: boolean;
   diagnostics: boolean;
   codeActions: boolean;
+  inlayHint: boolean;
 }
 
 export default class Client {

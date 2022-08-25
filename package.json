@@ -93,6 +93,11 @@
               "description": "Enable code actions, like RuboCop quick fixes",
               "type": "boolean",
               "default": true
+            },
+            "inlayHint": {
+              "description": "Enable inlay hints",
+              "type": "boolean",
+              "default": true
             }
           },
           "default": {
@@ -105,7 +110,8 @@
             "formatting": true,
             "diagnostics": true,
             "codeActions": true,
-            "onTypeFormatting": true
+            "onTypeFormatting": true,
+            "inlayHint": true
           }
         }
       }
