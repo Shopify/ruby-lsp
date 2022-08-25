@@ -14,6 +14,8 @@ module RubyLsp
   # - {RubyLsp::Requests::Diagnostics}
   # - {RubyLsp::Requests::CodeActions}
   # - {RubyLsp::Requests::DocumentHighlight}
+  # - {RubyLsp::Requests::InlayHints}
+
   module Requests
     autoload :BaseRequest, "ruby_lsp/requests/base_request"
     autoload :DocumentSymbol, "ruby_lsp/requests/document_symbol"
@@ -26,6 +28,7 @@ module RubyLsp
     autoload :Diagnostics, "ruby_lsp/requests/diagnostics"
     autoload :CodeActions, "ruby_lsp/requests/code_actions"
     autoload :DocumentHighlight, "ruby_lsp/requests/document_highlight"
+    autoload :InlayHints, "ruby_lsp/requests/inlay_hints"
 
     # :nodoc:
     module Support
