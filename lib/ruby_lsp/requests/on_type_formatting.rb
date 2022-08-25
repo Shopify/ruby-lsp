@@ -106,6 +106,9 @@ module RubyLsp
           character: character
         )
 
+        # The $0 is a special snippet anchor that moves the cursor to that given position. See the snippets
+        # documentation for more information:
+        # https://code.visualstudio.com/docs/editor/userdefinedsnippets#_create-your-own-snippets
         @edits << Interface::TextEdit.new(
           range: Interface::Range.new(
             start: position,
