@@ -35,11 +35,11 @@ module RubyLsp
         @indentation = T.let(find_indentation(line), Integer)
         @previous_line = T.let(line.strip.chomp, String)
         @position = position
-        @edits = T.let([], T::Array[LanguageServer::Protocol::Interface::TextEdit])
+        @edits = T.let([], T::Array[Interface::TextEdit])
         @trigger_character = trigger_character
       end
 
-      sig { override.returns(T.nilable(T.all(T::Array[LanguageServer::Protocol::Interface::TextEdit], Object))) }
+      sig { override.returns(T.nilable(T.all(T::Array[Interface::TextEdit], Object))) }
       def run
         return unless @document.syntax_errors?
 
@@ -85,13 +85,13 @@ module RubyLsp
 
       sig { params(text: String).void }
       def add_edit_with_text(text)
-        position = LanguageServer::Protocol::Interface::Position.new(
+        position = Interface::Position.new(
           line: @position[:line],
           character: @position[:character]
         )
 
-        @edits << LanguageServer::Protocol::Interface::TextEdit.new(
-          range: LanguageServer::Protocol::Interface::Range.new(
+        @edits << Interface::TextEdit.new(
+          range: Interface::Range.new(
             start: position,
             end: position
           ),
@@ -101,13 +101,13 @@ module RubyLsp
 
       sig { params(line: Integer, character: Integer).void }
       def move_cursor_to(line, character)
-        position = LanguageServer::Protocol::Interface::Position.new(
+        position = Interface::Position.new(
           line: line,
           character: character
         )
 
-        @edits << LanguageServer::Protocol::Interface::TextEdit.new(
-          range: LanguageServer::Protocol::Interface::Range.new(
+        @edits << Interface::TextEdit.new(
+          range: Interface::Range.new(
             start: position,
             end: position
           ),
