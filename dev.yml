@@ -8,6 +8,11 @@ up:
       gemfile: Gemfile
 
 commands:
+  docs:
+    run: bundle exec rake yard
+    subcommands:
+      check:
+        run: bundle exec rake check_docs
   server: exe/ruby-lsp
   style: bin/rubocop
   typecheck:
