@@ -10,6 +10,7 @@ module RubyLsp
   # - {RubyLsp::Requests::SelectionRanges}
   # - {RubyLsp::Requests::SemanticHighlighting}
   # - {RubyLsp::Requests::Formatting}
+  # - {RubyLsp::Requests::OnTypeFormatting}
   # - {RubyLsp::Requests::Diagnostics}
   # - {RubyLsp::Requests::CodeActions}
   # - {RubyLsp::Requests::DocumentHighlight}
@@ -21,6 +22,7 @@ module RubyLsp
     autoload :SelectionRanges, "ruby_lsp/requests/selection_ranges"
     autoload :SemanticHighlighting, "ruby_lsp/requests/semantic_highlighting"
     autoload :Formatting, "ruby_lsp/requests/formatting"
+    autoload :OnTypeFormatting, "ruby_lsp/requests/on_type_formatting"
     autoload :Diagnostics, "ruby_lsp/requests/diagnostics"
     autoload :CodeActions, "ruby_lsp/requests/code_actions"
     autoload :DocumentHighlight, "ruby_lsp/requests/document_highlight"

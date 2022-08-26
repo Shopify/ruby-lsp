@@ -48,6 +48,13 @@ module RubyLsp
         }
       end
 
+      on_type_formatting_provider = if enabled_features.include?("onTypeFormatting")
+        Interface::DocumentOnTypeFormattingOptions.new(
+          first_trigger_character: "{",
+          more_trigger_character: ["\n", "|"]
+        )
+      end
+
       # TODO: switch back to using Interface::ServerCapabilities once the gem is updated for spec 3.17
       Interface::InitializeResult.new(
         capabilities: {
@@ -63,6 +70,7 @@ module RubyLsp
           documentFormattingProvider: enabled_features.include?("formatting"),
           documentHighlightProvider: enabled_features.include?("documentHighlights"),
           codeActionProvider: enabled_features.include?("codeActions"),
+          documentOnTypeFormattingProvider: on_type_formatting_provider,
           diagnosticProvider: diagnostics_provider,
         }.reject { |_, v| !v }
       )
@@ -151,6 +159,14 @@ module RubyLsp
     rescue RuboCop::Runner::InfiniteCorrectionLoop => e
       show_message(Constant::MessageType::ERROR, "Error from RuboCop: #{e.message}")
       nil
+    end
+
+    on("textDocument/onTypeFormatting", parallel: true) do |request|
+      uri = request.dig(:params, :textDocument, :uri)
+      position = request.dig(:params, :position)
+      character = request.dig(:params, :ch)
+
+      Requests::OnTypeFormatting.new(store.get(uri), position, character).run
     end
 
     on("textDocument/documentHighlight", parallel: true) do |request|

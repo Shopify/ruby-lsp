@@ -21,6 +21,7 @@ class IntegrationTest < Minitest::Test
     "selectionRanges" => :selectionRangeProvider,
     "semanticHighlighting" => :semanticTokensProvider,
     "formatting" => :documentFormattingProvider,
+    "onTypeFormatting" => :documentOnTypeFormattingProvider,
     "codeActions" => :codeActionProvider,
     "diagnostics" => :diagnosticProvider,
   }.freeze
@@ -123,6 +124,19 @@ class IntegrationTest < Minitest::Test
       class Foo
       end
     FORMATTED
+  end
+
+  def test_on_type_formatting
+    initialize_lsp(["onTypeFormatting"])
+    open_file_with("class Foo\nend")
+
+    assert_telemetry("textDocument/didOpen")
+
+    response = make_request(
+      "textDocument/onTypeFormatting",
+      { textDocument: { uri: "file://#{__FILE__}", position: { line: 0, character: 0 }, character: "\n" } }
+    )
+    assert_nil(response[:result])
   end
 
   def test_code_actions
