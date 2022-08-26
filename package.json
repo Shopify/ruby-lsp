@@ -79,6 +79,11 @@
               "type": "boolean",
               "default": true
             },
+            "onTypeFormatting": {
+              "description": "Enable on type formatting",
+              "type": "boolean",
+              "default": true
+            },
             "diagnostics": {
               "description": "Enable diagnostics, like RuboCop violations",
               "type": "boolean",
@@ -99,7 +104,8 @@
             "semanticHighlighting": true,
             "formatting": true,
             "diagnostics": true,
-            "codeActions": true
+            "codeActions": true,
+            "onTypeFormatting": true
           }
         }
       }

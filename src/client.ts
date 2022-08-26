@@ -60,6 +60,62 @@ export default class Client {
       initializationOptions: {
         enabledFeatures: this.listOfEnabledFeatures(),
       },
+      middleware: {
+        provideOnTypeFormattingEdits: async (
+          document,
+          position,
+          ch,
+          options,
+          token,
+          _next
+        ) => {
+          if (this.client) {
+            const response: vscode.TextEdit[] | null =
+              await this.client.sendRequest(
+                "textDocument/onTypeFormatting",
+                {
+                  textDocument: { uri: document.uri.toString() },
+                  position,
+                  ch,
+                  options,
+                },
+                token
+              );
+
+            if (!response) {
+              return null;
+            }
+
+            // Find the $0 anchor to move the cursor
+            const cursorPosition = response.find(
+              (edit) => edit.newText === "$0"
+            );
+
+            if (!cursorPosition) {
+              return response;
+            }
+
+            // Remove the edit including the $0 anchor
+            response.splice(response.indexOf(cursorPosition), 1);
+
+            const workspaceEdit = new vscode.WorkspaceEdit();
+            workspaceEdit.set(document.uri, response);
+            await vscode.workspace.applyEdit(workspaceEdit);
+
+            await vscode.window.activeTextEditor!.insertSnippet(
+              new vscode.SnippetString(cursorPosition.newText),
+              new vscode.Selection(
+                cursorPosition.range.start,
+                cursorPosition.range.end
+              )
+            );
+
+            return null;
+          }
+
+          return undefined;
+        },
+      },
     };
 
     this.context = context;
