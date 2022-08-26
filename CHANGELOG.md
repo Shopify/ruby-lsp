@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.7]
+
+- Add on type formatting with snippet support (https://github.com/Shopify/vscode-ruby-lsp/pull/193)
+
 ## [0.0.6]
 
 - Enable document links (https://github.com/Shopify/vscode-ruby-lsp/pull/170)
