@@ -6,6 +6,12 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.3.0]
+- Add on type formatting completions (https://github.com/Shopify/ruby-lsp/pull/253)
+- Upgrade syntax_tree requirement to >= 3.4 (https://github.com/Shopify/ruby-lsp/pull/254)
+- Show error message when there's a InfiniteCorrectionLoop exception (https://github.com/Shopify/ruby-lsp/pull/252)
+- Add request cancellation (https://github.com/Shopify/ruby-lsp/pull/243)
+
 ## [0.2.0]
 
 - Add semantic token for keyword and keyword rest params (https://github.com/Shopify/ruby-lsp/pull/142)
