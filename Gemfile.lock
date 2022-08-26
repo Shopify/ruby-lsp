@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruby-lsp (0.2.3)
+    ruby-lsp (0.2.4)
       language_server-protocol
       sorbet-runtime
       syntax_tree (>= 2.4)
@@ -80,7 +80,7 @@ GEM
       sorbet (>= 0.5.9204)
       sorbet-runtime (>= 0.5.9204)
       thor (>= 0.19.2)
-    syntax_tree (3.3.0)
+    syntax_tree (3.5.0)
       prettier_print
     tapioca (0.8.3)
       bundler (>= 1.17.3)
