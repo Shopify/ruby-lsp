@@ -17,14 +17,6 @@ const LSP_NAME = "Ruby LSP";
 
 interface EnabledFeatures {
   [key: string]: boolean;
-  documentSymbols: boolean;
-  foldingRanges: boolean;
-  selectionRanges: boolean;
-  semanticHighlighting: boolean;
-  formatting: boolean;
-  diagnostics: boolean;
-  codeActions: boolean;
-  inlayHint: boolean;
 }
 
 export default class Client {
