@@ -83,7 +83,7 @@ GEM
       thor (>= 0.19.2)
     syntax_tree (3.5.0)
       prettier_print
-    tapioca (0.9.3)
+    tapioca (0.9.4)
       bundler (>= 1.17.3)
       netrc (>= 0.11.0)
       parallel (>= 1.21.0)
@@ -101,7 +101,7 @@ GEM
     webrick (1.7.0)
     yard (0.9.28)
       webrick (~> 1.7.0)
-    yard-sorbet (0.6.1)
+    yard-sorbet (0.7.0)
       sorbet-runtime (>= 0.5)
       yard (>= 0.9)
 
