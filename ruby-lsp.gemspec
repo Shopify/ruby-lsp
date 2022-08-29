@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.executables = ["ruby-lsp"]
   s.require_paths = ["lib"]
 
-  s.add_dependency("language_server-protocol")
+  s.add_dependency("language_server-protocol", "~> 3.17.0")
   s.add_dependency("sorbet-runtime")
   s.add_dependency("syntax_tree", ">= 3.4")
 
