@@ -55,24 +55,23 @@ module RubyLsp
         )
       end
 
-      # TODO: switch back to using Interface::ServerCapabilities once the gem is updated for spec 3.17
       Interface::InitializeResult.new(
-        capabilities: {
-          textDocumentSync: Interface::TextDocumentSyncOptions.new(
+        capabilities: Interface::ServerCapabilities.new(
+          text_document_sync: Interface::TextDocumentSyncOptions.new(
             change: Constant::TextDocumentSyncKind::INCREMENTAL,
             open_close: true,
           ),
-          selectionRangeProvider: enabled_features.include?("selectionRanges"),
-          documentSymbolProvider: document_symbol_provider,
-          documentLinkProvider: document_link_provider,
-          foldingRangeProvider: folding_ranges_provider,
-          semanticTokensProvider: semantic_tokens_provider,
-          documentFormattingProvider: enabled_features.include?("formatting"),
-          documentHighlightProvider: enabled_features.include?("documentHighlights"),
-          codeActionProvider: enabled_features.include?("codeActions"),
-          documentOnTypeFormattingProvider: on_type_formatting_provider,
-          diagnosticProvider: diagnostics_provider,
-        }.reject { |_, v| !v }
+          selection_range_provider: enabled_features.include?("selectionRanges"),
+          document_symbol_provider: document_symbol_provider,
+          document_link_provider: document_link_provider,
+          folding_range_provider: folding_ranges_provider,
+          semantic_tokens_provider: semantic_tokens_provider,
+          document_formatting_provider: enabled_features.include?("formatting"),
+          document_highlight_provider: enabled_features.include?("documentHighlights"),
+          code_action_provider: enabled_features.include?("codeActions"),
+          document_on_type_formatting_provider: on_type_formatting_provider,
+          diagnostic_provider: diagnostics_provider,
+        )
       )
     end
 
