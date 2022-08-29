@@ -217,6 +217,19 @@ module RubyLsp
         add_token(node.value.location, :method) unless special_method?(node.value.value)
       end
 
+      sig { params(node: SyntaxTree::ClassDeclaration).void }
+      def visit_class(node)
+        add_token(node.constant.location, :class, [:declaration])
+        add_token(node.superclass.location, :class) if node.superclass
+        visit(node.bodystmt)
+      end
+
+      sig { params(node: SyntaxTree::ModuleDeclaration).void }
+      def visit_module(node)
+        add_token(node.constant.location, :class, [:declaration])
+        visit(node.bodystmt)
+      end
+
       sig { params(location: SyntaxTree::Location, type: Symbol, modifiers: T::Array[Symbol]).void }
       def add_token(location, type, modifiers = [])
         length = location.end_char - location.start_char
