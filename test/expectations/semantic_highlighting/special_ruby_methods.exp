@@ -4,8 +4,8 @@
       "delta_line": 5,
       "delta_start_char": 6,
       "length": 3,
-      "token_type": 0,
-      "token_modifiers": 0
+      "token_type": 2,
+      "token_modifiers": 1
     },
     {
       "delta_line": 1,
