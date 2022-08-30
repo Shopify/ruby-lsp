@@ -185,6 +185,10 @@ module RubyLsp
           add_token(location_without_colon(location), :variable)
         end
 
+        node.requireds.each do |required|
+          add_token(required.location, :variable)
+        end
+
         rest = node.keyword_rest
         return if rest.nil? || rest.is_a?(SyntaxTree::ArgsForward)
 
