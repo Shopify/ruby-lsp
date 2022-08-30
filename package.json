@@ -199,7 +199,7 @@
     "@types/mocha": "^9.1.1",
     "@types/node": "18.x",
     "@types/vscode": "^1.63.0",
-    "@typescript-eslint/eslint-plugin": "^5.34.0",
+    "@typescript-eslint/eslint-plugin": "^5.36.1",
     "@typescript-eslint/parser": "^5.36.1",
     "@vscode/test-electron": "^2.1.5",
     "esbuild": "^0.15.6",
