@@ -55,6 +55,10 @@ module RubyLsp
         )
       end
 
+      inlay_hint_provider = if enabled_features.include?("inlayHint")
+        Interface::InlayHintOptions.new(resolve_provider: false)
+      end
+
       Interface::InitializeResult.new(
         capabilities: Interface::ServerCapabilities.new(
           text_document_sync: Interface::TextDocumentSyncOptions.new(
@@ -71,6 +75,7 @@ module RubyLsp
           code_action_provider: enabled_features.include?("codeActions"),
           document_on_type_formatting_provider: on_type_formatting_provider,
           diagnostic_provider: diagnostics_provider,
+          inlay_hint_provider: inlay_hint_provider,
         )
       )
     end
@@ -184,6 +189,17 @@ module RubyLsp
 
       store.cache_fetch(uri, :code_actions) do |document|
         Requests::CodeActions.new(uri, document, start_line..end_line).run
+      end
+    end
+
+    on("textDocument/inlayHint", parallel: true) do |request|
+      document = store.get(request.dig(:params, :textDocument, :uri))
+      range = request.dig(:params, :range)
+      start_line = range.dig(:start, :line)
+      end_line = range.dig(:end, :line)
+
+      if document.parsed?
+        Requests::InlayHints.new(document, start_line..end_line).run
       end
     end
 
