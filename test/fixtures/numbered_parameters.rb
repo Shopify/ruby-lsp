@@ -1,0 +1,3 @@
+lambda {
+  puts _1
+}
