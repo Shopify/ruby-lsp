@@ -21,10 +21,7 @@ module RubyLsp
         attr_reader :offenses
 
         DEFAULT_ARGS = T.let([
-          "--stderr", # Print any output to stderr so that our stdout does not get polluted
           "--force-exclusion",
-          "--format",
-          "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
         ].freeze, T::Array[String])
 
         sig { params(args: String).void }
@@ -41,7 +38,7 @@ module RubyLsp
         def run(path, contents)
           @offenses = []
           @options[:stdin] = contents
-          super([path])
+          capture_output { super([path]) }
         end
 
         sig { returns(String) }
@@ -54,6 +51,23 @@ module RubyLsp
         sig { params(_file: String, offenses: T::Array[RuboCop::Cop::Offense]).void }
         def file_finished(_file, offenses)
           @offenses = offenses
+        end
+
+        sig { params(block: T.proc.void).void }
+        def capture_output(&block)
+          original_verbosity = $VERBOSE
+          orig_stdout = $stdout
+          orig_stderr = $stderr
+
+          $VERBOSE = nil
+          $stderr = StringIO.new
+          $stdout = StringIO.new
+
+          block.call
+        ensure
+          $stdout = orig_stdout
+          $stderr = orig_stderr
+          $VERBOSE = original_verbosity
         end
       end
     end
