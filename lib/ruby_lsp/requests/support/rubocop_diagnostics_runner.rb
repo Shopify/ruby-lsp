@@ -1,11 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
-begin
-  require "rubocop"
-rescue LoadError
-  return
-end
+require "ruby_lsp/requests/support/rubocop_runner"
+return unless defined?(::RubyLsp::Requests::Support::RuboCopRunner)
 
 require "cgi"
 require "singleton"
@@ -14,46 +11,31 @@ module RubyLsp
   module Requests
     module Support
       # :nodoc:
-      class RuboCopDiagnosticsRunner < RuboCop::Runner
+      class RuboCopDiagnosticsRunner
         extend T::Sig
         include Singleton
 
         sig { void }
         def initialize
-          @options = T.let({}, T::Hash[Symbol, T.untyped])
-          @uri = T.let(nil, T.nilable(String))
-          @diagnostics = T.let([], T::Array[Support::RuboCopDiagnostic])
-
-          super(
-            ::RuboCop::Options.new.parse([
-              "--stderr", # Print any output to stderr so that our stdout does not get polluted
-              "--force-exclusion",
-              "--format",
-              "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
-            ]).first,
-            ::RuboCop::ConfigStore.new
-          )
+          @runner = T.let(RuboCopRunner.new, RuboCopRunner)
         end
 
         sig { params(uri: String, document: Document).returns(T::Array[Support::RuboCopDiagnostic]) }
         def run(uri, document)
-          @diagnostics.clear
-          @uri = uri
-
-          file = CGI.unescape(URI.parse(uri).path)
-          # We communicate with Rubocop via stdin
-          @options[:stdin] = document.source
-
+          filename = CGI.unescape(URI.parse(uri).path)
           # Invoke RuboCop with just this file in `paths`
-          super([file])
-          @diagnostics
+          @runner.run(filename, document.source)
+
+          diagnostics(uri)
         end
 
         private
 
-        sig { params(_file: String, offenses: T::Array[RuboCop::Cop::Offense]).void }
-        def file_finished(_file, offenses)
-          @diagnostics = offenses.map { |offense| Support::RuboCopDiagnostic.new(offense, T.must(@uri)) }
+        sig { params(uri: String).returns(T::Array[Support::RuboCopDiagnostic]) }
+        def diagnostics(uri)
+          @runner.offenses.map do |offense|
+            Support::RuboCopDiagnostic.new(offense, uri)
+          end
         end
       end
     end
