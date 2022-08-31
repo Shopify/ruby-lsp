@@ -28,6 +28,8 @@ module RubyLsp
         def initialize(*args)
           @options = T.let({}, T::Hash[Symbol, T.untyped])
           @offenses = T.let([], T::Array[RuboCop::Cop::Offense])
+          @errors = T.let([], T::Array[String])
+          @warnings = T.let([], T::Array[String])
 
           args += DEFAULT_ARGS
           rubocop_options = ::RuboCop::Options.new.parse(args).first
@@ -36,9 +38,12 @@ module RubyLsp
 
         sig { params(path: String, contents: String).void }
         def run(path, contents)
+          @errors = []
+          @warnings = []
           @offenses = []
           @options[:stdin] = contents
           capture_output { super([path]) }
+          display_handled_errors
         end
 
         sig { returns(String) }
@@ -47,6 +52,16 @@ module RubyLsp
         end
 
         private
+
+        sig { void }
+        def display_handled_errors
+          return if errors.empty?
+
+          $stderr.puts "[RuboCop] Encountered and handled errors:"
+          errors.uniq.each do |error|
+            $stderr.puts "[RuboCop]   - #{error}"
+          end
+        end
 
         sig { params(_file: String, offenses: T::Array[RuboCop::Cop::Offense]).void }
         def file_finished(_file, offenses)
