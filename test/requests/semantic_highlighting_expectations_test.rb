@@ -7,7 +7,8 @@ require "expectations/expectations_test_runner"
 class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::SemanticHighlighting, "semantic_highlighting"
 
-  def run_expectations(source)
+  def run_expectations(path)
+    source = File.read(path)
     document = RubyLsp::Document.new(source)
     RubyLsp::Requests::SemanticHighlighting.new(
       document,
@@ -15,8 +16,8 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
     ).run
   end
 
-  def assert_expectations(source, expected)
-    actual = run_expectations(source).data
+  def assert_expectations(path, expected)
+    actual = run_expectations(path).data
     assert_equal(json_expectations(expected).to_json, decode_tokens(actual).to_json)
   end
 

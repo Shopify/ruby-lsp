@@ -7,14 +7,17 @@ require "expectations/expectations_test_runner"
 class CodeActionsExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::CodeActions, "code_actions"
 
-  def run_expectations(source)
+  def run_expectations(path)
+    # because we exclude fixture files in rubocop.yml, rubocop will ignore the file if we use the real fixture uri
+    uri = "file://#{__FILE__}"
+    source = File.read(path)
     params = @__params&.any? ? @__params : default_args
     document = RubyLsp::Document.new(source)
     result = T.let(nil, T.nilable(T::Array[LanguageServer::Protocol::Interface::CodeAction]))
 
     stdout, _ = capture_io do
       result = T.unsafe(RubyLsp::Requests::CodeActions).new(
-        "file://#{__FILE__}",
+        uri,
         document,
         params[:start]..params[:end]
       ).run
@@ -26,15 +29,15 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
     # developer's machine. To workaround it, we run using a real URI and then force set the result URIs to a fake one
     T.must(result).each do |action|
       action.attributes[:edit].attributes[:documentChanges].each do |changes|
-        changes.attributes[:textDocument].instance_variable_set(:@attributes, { uri: "file:///fake", version: nil })
+        changes.attributes[:textDocument].instance_variable_set(:@attributes, { uri: uri, version: nil })
       end
     end
 
     result
   end
 
-  def assert_expectations(source, expected)
-    actual = run_expectations(source)
+  def assert_expectations(path, expected)
+    actual = run_expectations(path)
     assert_equal(map_actions(json_expectations(expected)), JSON.parse(actual.to_json))
   end
 
@@ -53,7 +56,7 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
           document_changes: [
             LanguageServer::Protocol::Interface::TextDocumentEdit.new(
               text_document: LanguageServer::Protocol::Interface::OptionalVersionedTextDocumentIdentifier.new(
-                uri: "file:///fake",
+                uri: "file://#{__FILE__}",
                 version: nil
               ),
               edits: diagnostic["edit"]["documentChanges"].first["edits"]

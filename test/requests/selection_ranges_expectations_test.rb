@@ -7,7 +7,8 @@ require "expectations/expectations_test_runner"
 class SelectionRangesExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::SelectionRanges, "selection_ranges"
 
-  def run_expectations(source)
+  def run_expectations(path)
+    source = File.read(path)
     document = RubyLsp::Document.new(source)
     actual = RubyLsp::Requests::SelectionRanges.new(document).run
     params = @__params&.any? ? @__params : default_args

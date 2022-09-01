@@ -7,9 +7,8 @@ require "expectations/expectations_test_runner"
 class DocumentLinkExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::DocumentLink, "document_link"
 
-  def assert_expectations(source, expected)
-    source = substitute_syntax_tree_version(source)
-    actual = T.cast(run_expectations(source), T::Array[LanguageServer::Protocol::Interface::DocumentLink])
+  def assert_expectations(path, expected)
+    actual = T.cast(run_expectations(path), T::Array[LanguageServer::Protocol::Interface::DocumentLink])
     assert_equal(map_expectations(json_expectations(expected)), JSON.parse(actual.to_json))
   end
 
@@ -20,9 +19,13 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
     end
   end
 
-  def run_expectations(source)
+  def run_expectations(path)
+    uri = "file://#{File.join(Dir.pwd, path)}"
+    source = File.read(path)
+    source = substitute_syntax_tree_version(source)
+
     document = RubyLsp::Document.new(source)
-    RubyLsp::Requests::DocumentLink.new("file://fake/path/without_version.rb", document).run
+    RubyLsp::Requests::DocumentLink.new(uri, document).run
   end
 
   private

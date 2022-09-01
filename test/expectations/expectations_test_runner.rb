@@ -10,15 +10,16 @@ class ExpectationsTestRunner < Minitest::Test
     def expectations_tests(handler_class, expectation_suffix)
       class_eval(<<~RB)
         module ExpectationsRunnerMethods
-          def run_expectations(source)
+          def run_expectations(path)
+            source = File.read(path)
             params = @__params&.any? ? @__params : default_args
             document = RubyLsp::Document.new(source)
             #{handler_class}.new(document, *params).run
           end
 
-          def assert_expectations(source, expected)
+          def assert_expectations(path, expected)
             parsed_expected = JSON.parse(expected)
-            actual = run_expectations(source)
+            actual = run_expectations(path)
             assert_equal(parsed_expected["result"], JSON.parse(actual.to_json))
           end
 
@@ -50,17 +51,15 @@ class ExpectationsTestRunner < Minitest::Test
         elsif File.file?(expectation_path)
           class_eval(<<~RB)
             def test_#{expectation_suffix}_#{test_name}
-              source = File.read("#{path}")
               expected = File.read("#{expectation_path}")
               initialize_params(expected)
-              assert_expectations(source, expected)
+              assert_expectations("#{path}", expected)
             end
           RB
         else
           class_eval(<<~RB)
             def test_#{expectation_suffix}_#{test_name}_does_not_raise
-              source = File.read("#{path}")
-              run_expectations(source)
+              run_expectations("#{path}")
             end
           RB
         end
