@@ -7,7 +7,7 @@ module RubyLsp
   class Queue
     extend T::Sig
 
-    class Cancelled < Interrupt; end
+    class Cancelled < StandardError; end
 
     class Result < T::Struct
       const :response, T.untyped # rubocop:disable Sorbet/ForbidUntypedStructProps
@@ -92,6 +92,8 @@ module RubyLsp
 
       request_time = Benchmark.realtime do
         response = T.must(@handlers[request[:method]]).action.call(request)
+      rescue Cancelled
+        raise
       rescue StandardError => e
         error = e
       end
@@ -135,7 +137,10 @@ module RubyLsp
     def new_worker
       Thread.new do
         # Thread::Queue#pop is thread safe and will wait until an item is available
-        while (job = T.let(@job_queue.pop, T.nilable(Job)))
+        loop do
+          job = T.let(@job_queue.pop, T.nilable(Job))
+          break if job.nil?
+
           # The only time when the job is nil is when the queue is closed and we can then terminate the thread
 
           request = job.request
@@ -144,17 +149,18 @@ module RubyLsp
             @current_job = job
           end
 
-          begin
-            next if job.cancelled
+          next if job.cancelled
 
-            result = execute(request)
-          rescue Cancelled
-            # We need to return nil to the client even if the request was cancelled
-            result = Queue::Result.new(response: nil, error: nil, request_time: nil)
-          ensure
-            @mutex.synchronize { @current_job = nil }
-            finalize_request(result, request) unless result.nil?
-          end
+          result = execute(request)
+        rescue Cancelled
+          # We need to return nil to the client even if the request was cancelled
+          result = Queue::Result.new(response: nil, error: nil, request_time: nil)
+        ensure
+          @mutex.synchronize { @current_job = nil }
+
+          # If there's request, it means the worker was cancelled while waiting to pop from the queue or immediately
+          # after
+          finalize_request(result, request) unless result.nil? || request.nil?
         end
       end
     end
