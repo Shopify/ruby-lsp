@@ -1,0 +1,77 @@
+{
+  "result": [
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 13
+        },
+        "end": {
+          "line": 0,
+          "character": 31
+        }
+      },
+      "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/ActiveRecord/Base.html",
+      "tooltip": "Browse the Rails documentation for: ActiveRecord::Base"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 1,
+          "character": 2
+        },
+        "end": {
+          "line": 1,
+          "character": 12
+        }
+      },
+      "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/ActiveRecord/Associations/ClassMethods.html#method-i-belongs_to",
+      "tooltip": "Browse the Rails documentation for: ActiveRecord::Associations::ClassMethods#belongs_to"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 2
+        },
+        "end": {
+          "line": 2,
+          "character": 13
+        }
+      },
+      "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/ActiveRecord/Callbacks/ClassMethods.html#method-i-before_save",
+      "tooltip": "Browse the Rails documentation for: ActiveRecord::Callbacks::ClassMethods#before_save"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 2
+        },
+        "end": {
+          "line": 4,
+          "character": 18
+        }
+      },
+      "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/ActiveStorage/Attached/Model.html#method-i-has_one_attached",
+      "tooltip": "Browse the Rails documentation for: ActiveStorage::Attached::Model#has_one_attached"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 2
+        },
+        "end": {
+          "line": 5,
+          "character": 15
+        }
+      },
+      "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/ActionText/Attribute.html#method-i-has_rich_text",
+      "tooltip": "Browse the Rails documentation for: ActionText::Attribute#has_rich_text"
+    }
+  ],
+  "params": [
+
+  ]
+}

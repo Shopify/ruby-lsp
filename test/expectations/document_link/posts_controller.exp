@@ -1,0 +1,35 @@
+{
+  "result": [
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 27
+        },
+        "end": {
+          "line": 0,
+          "character": 49
+        }
+      },
+      "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/ActionController/Base.html",
+      "tooltip": "Browse the Rails documentation for: ActionController::Base"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 1,
+          "character": 2
+        },
+        "end": {
+          "line": 1,
+          "character": 15
+        }
+      },
+      "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/AbstractController/Callbacks/ClassMethods.html#method-i-before_action",
+      "tooltip": "Browse the Rails documentation for: AbstractController::Callbacks::ClassMethods#before_action"
+    }
+  ],
+  "params": [
+
+  ]
+}

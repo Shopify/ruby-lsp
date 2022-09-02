@@ -30,6 +30,25 @@ module RubyLsp
           end: LanguageServer::Protocol::Interface::Position.new(line: loc.end_line - 1, character: loc.end_column),
         )
       end
+
+      sig { params(node: SyntaxTree::ConstPathRef).returns(String) }
+      def full_constant_name(node)
+        name = +node.constant.value
+        constant = T.let(node, SyntaxTree::Node)
+
+        while constant.is_a?(SyntaxTree::ConstPathRef)
+          constant = constant.parent
+
+          case constant
+          when SyntaxTree::ConstPathRef
+            name.prepend("#{constant.constant.value}::")
+          when SyntaxTree::VarRef
+            name.prepend("#{constant.value.value}::")
+          end
+        end
+
+        name
+      end
     end
   end
 end

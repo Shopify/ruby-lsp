@@ -1,0 +1,63 @@
+{
+  "result": [
+    {
+      "range": {
+        "start": {
+          "line": 1,
+          "character": 2
+        },
+        "end": {
+          "line": 1,
+          "character": 9
+        }
+      },
+      "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/ActionDispatch/Routing/Mapper/Concerns.html#method-i-concern",
+      "tooltip": "Browse the Rails documentation for: ActionDispatch::Routing::Mapper::Concerns#concern"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 4
+        },
+        "end": {
+          "line": 2,
+          "character": 13
+        }
+      },
+      "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/ActionDispatch/Routing/Mapper/Resources.html#method-i-resources",
+      "tooltip": "Browse the Rails documentation for: ActionDispatch::Routing::Mapper::Resources#resources"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 2
+        },
+        "end": {
+          "line": 5,
+          "character": 6
+        }
+      },
+      "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/ActionDispatch/Routing/Mapper/Resources.html#method-i-root",
+      "tooltip": "Browse the Rails documentation for: ActionDispatch::Routing::Mapper::Resources#root"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 2
+        },
+        "end": {
+          "line": 7,
+          "character": 7
+        }
+      },
+      "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/ActionDispatch/Routing/Mapper/Base.html#method-i-mount",
+      "tooltip": "Browse the Rails documentation for: ActionDispatch::Routing::Mapper::Base#mount"
+    }
+  ],
+  "params": [
+
+  ]
+}

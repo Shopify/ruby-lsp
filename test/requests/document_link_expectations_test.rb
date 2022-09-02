@@ -20,20 +20,37 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  class FakeHTTPResponse
+    attr_reader :code, :body
+
+    def initialize(code, body)
+      @code = code
+      @body = body
+    end
+  end
+
   def run_expectations(source)
     document = RubyLsp::Document.new(source)
-    RubyLsp::Requests::DocumentLink.new("file://fake/path/without_version.rb", document).run
+    js_content = File.read(File.join(TEST_FIXTURES_DIR, "rails_search_index.js"))
+    fake_response = FakeHTTPResponse.new("200", js_content)
+    T.unsafe(Net::HTTP).stub(:get_response, fake_response) do
+      RubyLsp::Requests::DocumentLink.new(@_path, document).run
+    end
   end
 
   private
 
   def substitute(original)
-    substitute_syntax_tree_version(original)
+    substitute_railties_version(substitute_syntax_tree_version(original))
       .sub("BUNDLER_PATH", Bundler.bundle_path.to_s)
       .sub("RUBY_ROOT", RbConfig::CONFIG["rubylibdir"])
   end
 
   def substitute_syntax_tree_version(original)
     original.sub("SYNTAX_TREE_VERSION", Gem::Specification.find_by_name("syntax_tree").version.to_s)
+  end
+
+  def substitute_railties_version(original)
+    original.sub("RAILTIES_VERSION", Gem::Specification.find_by_name("railties").version.to_s)
   end
 end

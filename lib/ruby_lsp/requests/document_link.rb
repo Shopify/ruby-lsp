@@ -1,14 +1,21 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "net/http"
 require "ruby_lsp/requests/support/source_uri"
+require "ruby_lsp/requests/support/rails_document_client"
 
 module RubyLsp
   module Requests
-    # ![Document link demo](../../misc/document_link.gif)
     #
     # The [document link](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentLink)
-    # makes `# source://PATH_TO_FILE#line` comments in a Ruby/RBI file clickable if the file exists.
+    # provides 2 different features:
+    #
+    # 1. Jump from source comment
+    #
+    # ![Document link demo](../../misc/document_link.gif)
+    #
+    # It makes `# source://PATH_TO_FILE#line` comments in a Ruby/RBI file clickable if the file exists.
     # When the user clicks the link, it'll open that location.
     #
     # # Example
@@ -16,6 +23,22 @@ module RubyLsp
     # ```ruby
     # # source://syntax_tree/3.2.1/lib/syntax_tree.rb#51 <- it will be clickable and will take the user to that location
     # def format(source, maxwidth = T.unsafe(nil))
+    # end
+    # ```
+    #
+    # 2. Link to Rails DSL documentation
+    #
+    # ![Document link to Rails document demo](../../misc/document_link_rails_doc.gif)
+    #
+    # When detecting Rails DSLs under certain paths, like seeing `before_save :callback` in files under `models/`,
+    # it makes the DSL call clickable. When clicking the link, the user will be taken to its API doc in browser.
+    #
+    # # Example
+    #
+    # ```ruby
+    # class Post < ApplicationRecord
+    #   before_save :do_something # before_save will be clickable to its API document
+    #   validates :title # validates will also be clickable
     # end
     # ```
     class DocumentLink < BaseRequest
@@ -73,6 +96,7 @@ module RubyLsp
         # in the URI
         version_match = /(?<=%40)[\d.]+(?=\.rbi$)/.match(uri)
         @gem_version = T.let(version_match && version_match[0], T.nilable(String))
+        @file_dir = T.let(Pathname.new(uri).dirname.to_s, String)
         @links = T.let([], T::Array[LanguageServer::Protocol::Interface::DocumentLink])
       end
 
@@ -97,6 +121,32 @@ module RubyLsp
           target: "file://#{file_path}##{uri.line_number}",
           tooltip: "Jump to #{file_path}##{uri.line_number}",
         )
+      end
+
+      sig { override.params(node: SyntaxTree::Command).void }
+      def visit_command(node)
+        message = node.message
+        link = Support::RailsDocumentClient.generate_rails_document_link(
+          message.value,
+          range_from_syntax_tree_node(message),
+          @file_dir,
+        )
+
+        @links << link if link
+        super
+      end
+
+      sig { override.params(node: SyntaxTree::ConstPathRef).void }
+      def visit_const_path_ref(node)
+        constant_name = full_constant_name(node)
+        link = Support::RailsDocumentClient.generate_rails_document_link(
+          constant_name,
+          range_from_syntax_tree_node(node),
+          @file_dir,
+        )
+
+        @links << link if link
+        super
       end
 
       private
