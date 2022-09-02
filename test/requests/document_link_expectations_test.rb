@@ -22,7 +22,7 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
 
   def run_expectations(source)
     document = RubyLsp::Document.new(source)
-    RubyLsp::Requests::DocumentLink.new("file://fake/path/without_version.rb", document).run
+    RubyLsp::Requests::DocumentLink.new(@_path, document).run
   end
 
   private

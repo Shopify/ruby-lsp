@@ -50,7 +50,8 @@ class ExpectationsTestRunner < Minitest::Test
         elsif File.file?(expectation_path)
           class_eval(<<~RB, __FILE__, __LINE__ + 1)
             def test_#{expectation_suffix}_#{test_name}
-              source = File.read("#{path}")
+              @_path = "#{path}"
+              source = File.read(@_path)
               expected = File.read("#{expectation_path}")
               initialize_params(expected)
               assert_expectations(source, expected)
@@ -59,7 +60,8 @@ class ExpectationsTestRunner < Minitest::Test
         else
           class_eval(<<~RB, __FILE__, __LINE__ + 1)
             def test_#{expectation_suffix}_#{test_name}_does_not_raise
-              source = File.read("#{path}")
+              @_path = "#{path}"
+              source = File.read(@_path)
               run_expectations(source)
             end
           RB

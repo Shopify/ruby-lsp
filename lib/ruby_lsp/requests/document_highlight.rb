@@ -55,6 +55,14 @@ module RubyLsp
 
       private
 
+      DIRECT_HIGHLIGHTS = T.let([
+        SyntaxTree::GVar,
+        SyntaxTree::IVar,
+        SyntaxTree::Const,
+        SyntaxTree::CVar,
+        SyntaxTree::VarField,
+      ], T::Array[T.class_of(SyntaxTree::Node)])
+
       sig do
         params(
           node: SyntaxTree::Node,
@@ -62,27 +70,16 @@ module RubyLsp
         ).returns(T.nilable(Support::HighlightTarget))
       end
       def find(node, position)
-        matched =
-          node.child_nodes.compact.bsearch do |child|
-            if (child.location.start_char...child.location.end_char).cover?(position)
-              0
-            else
-              position <=> child.location.start_char
-            end
-          end
+        matched, parent = locate_node_and_parent(node, DIRECT_HIGHLIGHTS + [SyntaxTree::Ident], position)
+
+        return unless matched && parent
 
         case matched
-        when SyntaxTree::GVar,
-             SyntaxTree::IVar,
-             SyntaxTree::Const,
-             SyntaxTree::CVar,
-             SyntaxTree::VarField
+        when *DIRECT_HIGHLIGHTS
           Support::HighlightTarget.new(matched)
         when SyntaxTree::Ident
-          relevant_node = node.is_a?(SyntaxTree::Params) ? matched : node
+          relevant_node = parent.is_a?(SyntaxTree::Params) ? matched : parent
           Support::HighlightTarget.new(relevant_node)
-        when SyntaxTree::Node
-          find(matched, position)
         end
       end
 

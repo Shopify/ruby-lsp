@@ -23,6 +23,10 @@ module RubyLsp
         Interface::DocumentLinkOptions.new(resolve_provider: false)
       end
 
+      hover_provider = if enabled_features.include?("hover")
+        Interface::HoverClientCapabilities.new(dynamic_registration: false)
+      end
+
       folding_ranges_provider = if enabled_features.include?("foldingRanges")
         Interface::FoldingRangeClientCapabilities.new(line_folding_only: true)
       end
@@ -66,6 +70,7 @@ module RubyLsp
             open_close: true,
           ),
           selection_range_provider: enabled_features.include?("selectionRanges"),
+          hover_provider: hover_provider,
           document_symbol_provider: document_symbol_provider,
           document_link_provider: document_link_provider,
           folding_range_provider: folding_ranges_provider,
@@ -114,6 +119,13 @@ module RubyLsp
       store.cache_fetch(uri, :document_link) do |document|
         RubyLsp::Requests::DocumentLink.new(uri, document).run
       end
+    end
+
+    on("textDocument/hover") do |request|
+      position = request.dig(:params, :position)
+      document = store.get(request.dig(:params, :textDocument, :uri))
+
+      RubyLsp::Requests::Hover.new(document, position).run
     end
 
     on("textDocument/foldingRange", parallel: true) do |request|
