@@ -19,6 +19,8 @@ module RubyLsp
     # end
     # ```
     class Formatting < BaseRequest
+      class Error < StandardError; end
+
       extend T::Sig
 
       sig { params(uri: String, document: Document).void }

@@ -160,9 +160,8 @@ module RubyLsp
       uri = request.dig(:params, :textDocument, :uri)
 
       Requests::Formatting.new(uri, store.get(uri)).run
-    rescue RuboCop::Runner::InfiniteCorrectionLoop => e
-      show_message(Constant::MessageType::ERROR, "Error from RuboCop: #{e.message}")
-      nil
+    end.on_error do |error|
+      show_message(Constant::MessageType::ERROR, "Formatting error: #{error.message}")
     end
 
     on("textDocument/onTypeFormatting", parallel: true) do |request|
