@@ -61,7 +61,7 @@ module RubyLsp
 
       sig { void }
       def handle_pipe
-        return unless /".*|/.match?(@previous_line)
+        return unless /((?<=do)|(?<={))\s+\|/.match?(@previous_line)
 
         add_edit_with_text("|")
         move_cursor_to(@position[:line], @position[:character])
