@@ -48,6 +48,8 @@ module RubyLsp
           @options[:stdin] = contents
 
           super([path])
+        rescue RuboCop::Runner::InfiniteCorrectionLoop => error
+          raise Formatting::Error, error.message
         end
 
         sig { returns(String) }
