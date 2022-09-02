@@ -1,0 +1,94 @@
+{
+  "result": [
+    {
+      "position": {
+        "line": 0,
+        "character": 18
+      },
+      "label": "{",
+      "tooltip": "Braces are implied, this is where the left brace would be",
+      "paddingRight": true
+    },
+    {
+      "position": {
+        "line": 0,
+        "character": 40
+      },
+      "label": "}",
+      "tooltip": "Braces are implied, this is where the right brace would be",
+      "paddingLeft": true
+    },
+    {
+      "position": {
+        "line": 4,
+        "character": 2
+      },
+      "label": "{",
+      "tooltip": "Braces are implied, this is where the left brace would be",
+      "paddingRight": true
+    },
+    {
+      "position": {
+        "line": 5,
+        "character": 13
+      },
+      "label": "}",
+      "tooltip": "Braces are implied, this is where the right brace would be",
+      "paddingLeft": true
+    },
+    {
+      "position": {
+        "line": 8,
+        "character": 18
+      },
+      "label": "{",
+      "tooltip": "Braces are implied, this is where the left brace would be",
+      "paddingRight": true
+    },
+    {
+      "position": {
+        "line": 9,
+        "character": 12
+      },
+      "label": "}",
+      "tooltip": "Braces are implied, this is where the right brace would be",
+      "paddingLeft": true
+    },
+    {
+      "position": {
+        "line": 11,
+        "character": 5
+      },
+      "label": "{",
+      "tooltip": "Braces are implied, this is where the left brace would be",
+      "paddingRight": true
+    },
+    {
+      "position": {
+        "line": 11,
+        "character": 15
+      },
+      "label": "}",
+      "tooltip": "Braces are implied, this is where the right brace would be",
+      "paddingLeft": true
+    },
+    {
+      "position": {
+        "line": 13,
+        "character": 18
+      },
+      "label": "{",
+      "tooltip": "Braces are implied, this is where the left brace would be",
+      "paddingRight": true
+    },
+    {
+      "position": {
+        "line": 13,
+        "character": 40
+      },
+      "label": "}",
+      "tooltip": "Braces are implied, this is where the right brace would be",
+      "paddingLeft": true
+    }
+  ]
+}
