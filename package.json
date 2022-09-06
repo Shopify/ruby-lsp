@@ -202,7 +202,7 @@
     "@typescript-eslint/eslint-plugin": "^5.36.2",
     "@typescript-eslint/parser": "^5.36.1",
     "@vscode/test-electron": "^2.1.5",
-    "esbuild": "^0.15.6",
+    "esbuild": "^0.15.7",
     "eslint": "^8.23.0",
     "eslint-import-resolver-typescript": "^3.5.0",
     "glob": "^8.0.3",
