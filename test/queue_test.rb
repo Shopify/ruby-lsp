@@ -33,6 +33,9 @@ class QueueTest < Minitest::Test
       "with_error_handler" => RubyLsp::Handler::RequestHandler.new(
         action: ->(_r) { raise "foo" }, parallel: true
       ),
+      "load_error" => RubyLsp::Handler::RequestHandler.new(
+        action: ->(_r) { raise LoadError, "cannot require 'foo' -- no such file" }, parallel: true
+      ),
     }
 
     handlers["with_error_handler"].on_error do
@@ -119,6 +122,18 @@ class QueueTest < Minitest::Test
       @blocking_job_signal.push(:unblock)
 
       @queue.shutdown
+    end
+  end
+
+  def test_execute_is_resilient_to_load_errors
+    capture_subprocess_io do
+      @cancelled_run = Thread::Queue.new
+      @blocking_job_signal = Thread::Queue.new
+
+      @queue.push({ id: "job_to_cancel", method: "load_error" })
+      @queue.shutdown
+
+      assert_equal(0, @queue.instance_variable_get(:@job_queue).length)
     end
   end
 end

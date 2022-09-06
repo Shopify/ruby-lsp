@@ -11,7 +11,7 @@ module RubyLsp
 
     class Result < T::Struct
       const :response, T.untyped # rubocop:disable Sorbet/ForbidUntypedStructProps
-      const :error, T.nilable(StandardError)
+      const :error, T.nilable(Exception)
       const :request_time, T.nilable(Float)
     end
 
@@ -88,13 +88,13 @@ module RubyLsp
     sig { params(request: T::Hash[Symbol, T.untyped]).returns(Queue::Result) }
     def execute(request)
       response = T.let(nil, T.untyped)
-      error = T.let(nil, T.nilable(StandardError))
+      error = T.let(nil, T.nilable(Exception))
 
       request_time = Benchmark.realtime do
         response = T.must(@handlers[request[:method]]).action.call(request)
       rescue Cancelled
         raise
-      rescue StandardError => e
+      rescue StandardError, LoadError => e
         error = e
       end
 
@@ -169,7 +169,7 @@ module RubyLsp
       params(
         request: T::Hash[Symbol, T.untyped],
         request_time: Float,
-        error: T.nilable(StandardError)
+        error: T.nilable(Exception)
       ).returns(T::Hash[Symbol, T.any(String, Float)])
     end
     def telemetry_params(request, request_time, error)
