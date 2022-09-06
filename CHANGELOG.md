@@ -6,6 +6,19 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.3.1]
+
+- Resolve TODO for LSP v3.17 (https://github.com/Shopify/ruby-lsp/pull/268)
+- Add dependency constraint for LSP v3.17 (https://github.com/Shopify/ruby-lsp/pull/269)
+- Handle class/module declarations as a class token with declaration modifier (https://github.com/Shopify/ruby-lsp/pull/260)
+- Handle required parameters in semantic highlighting (https://github.com/Shopify/ruby-lsp/pull/271)
+- Add comment continuation via on type on_type_formatting (https://github.com/Shopify/ruby-lsp/pull/274)
+- Make RuboCop runner use composition instead of inheritance (https://github.com/Shopify/ruby-lsp/pull/278)
+- Protect worker against cancellation during popping (https://github.com/Shopify/ruby-lsp/pull/280)
+- Handle formatting errors in on_error block (https://github.com/Shopify/ruby-lsp/pull/279)
+- Fix on type formatting pipe completion for regular or expressions (https://github.com/Shopify/ruby-lsp/pull/282)
+- Do not fail on LoadError (https://github.com/Shopify/ruby-lsp/pull/292)
+
 ## [0.3.0]
 - Add on type formatting completions (https://github.com/Shopify/ruby-lsp/pull/253)
 - Upgrade syntax_tree requirement to >= 3.4 (https://github.com/Shopify/ruby-lsp/pull/254)
