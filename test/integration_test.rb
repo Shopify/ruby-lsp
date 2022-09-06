@@ -275,7 +275,7 @@ class IntegrationTest < Minitest::Test
     assert_equal("window/showMessage", response.dig(:method))
     assert_equal(LanguageServer::Protocol::Constant::MessageType::ERROR, response.dig(:params, :type))
     assert_equal(
-      "Error in RuboCop configuration file: unrecognized cop or department InvalidCop found in .rubocop.yml",
+      "Error running diagnostics: unrecognized cop or department InvalidCop found in .rubocop.yml",
       response.dig(:params, :message)
     )
   ensure
