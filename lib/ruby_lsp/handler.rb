@@ -20,13 +20,13 @@ module RubyLsp
       const :action, T.proc.params(request: T::Hash[Symbol, T.untyped]).returns(T.untyped)
       const :parallel, T::Boolean
       prop :error_handler,
-        T.nilable(T.proc.params(error: StandardError, request: T::Hash[Symbol, T.untyped]).void)
+        T.nilable(T.proc.params(error: Exception, request: T::Hash[Symbol, T.untyped]).void)
 
       # A proc that runs in case a request has errored. Receives the error and the original request as arguments. Useful
       # for displaying window messages on errors
       sig do
         params(
-          block: T.proc.bind(Handler).params(error: StandardError, request: T::Hash[Symbol, T.untyped]).void
+          block: T.proc.bind(Handler).params(error: Exception, request: T::Hash[Symbol, T.untyped]).void
         ).void
       end
       def on_error(&block)
