@@ -7,8 +7,6 @@ module RubyLsp
   class Queue
     extend T::Sig
 
-    class Cancelled < StandardError; end
-
     class Result < T::Struct
       const :response, T.untyped # rubocop:disable Sorbet/ForbidUntypedStructProps
       const :error, T.nilable(Exception)
@@ -40,8 +38,6 @@ module RubyLsp
       @job_queue = T.let(Thread::Queue.new, Thread::Queue)
       # The jobs hash is just a way of keeping a handle to jobs based on the request ID, so we can cancel them
       @jobs = T.let({}, T::Hash[T.any(String, Integer), Job])
-      # The current job is a handle to cancel jobs that are currently being processed
-      @current_job = T.let(nil, T.nilable(Job))
       @mutex = T.let(Mutex.new, Mutex)
       @worker = T.let(new_worker, Thread)
 
@@ -65,11 +61,6 @@ module RubyLsp
       @mutex.synchronize do
         # Cancel the job if it's still in the queue
         @jobs[id]&.cancel
-
-        # Cancel the job if we're in the middle of processing it
-        if @current_job&.request&.dig(:id) == id
-          @worker.raise(Cancelled)
-        end
       end
     end
 
@@ -92,8 +83,6 @@ module RubyLsp
 
       request_time = Benchmark.realtime do
         response = T.must(@handlers[request[:method]]).action.call(request)
-      rescue Cancelled
-        raise
       rescue StandardError, LoadError => e
         error = e
       end
@@ -109,25 +98,27 @@ module RubyLsp
       ).void
     end
     def finalize_request(result, request)
-      error = result.error
-      if error
-        T.must(@handlers[request[:method]]).error_handler&.call(error, request)
+      @mutex.synchronize do
+        error = result.error
+        if error
+          T.must(@handlers[request[:method]]).error_handler&.call(error, request)
 
-        @writer.write(
-          id: request[:id],
-          error: {
-            code: LanguageServer::Protocol::Constant::ErrorCodes::INTERNAL_ERROR,
-            message: result.error.inspect,
-            data: request.to_json,
-          },
-        )
-      elsif result.response != Handler::VOID
-        @writer.write(id: request[:id], result: result.response)
-      end
+          @writer.write(
+            id: request[:id],
+            error: {
+              code: LanguageServer::Protocol::Constant::ErrorCodes::INTERNAL_ERROR,
+              message: result.error.inspect,
+              data: request.to_json,
+            },
+          )
+        elsif result.response != Handler::VOID
+          @writer.write(id: request[:id], result: result.response)
+        end
 
-      request_time = result.request_time
-      if request_time
-        @writer.write(method: "telemetry/event", params: telemetry_params(request, request_time, result.error))
+        request_time = result.request_time
+        if request_time
+          @writer.write(method: "telemetry/event", params: telemetry_params(request, request_time, result.error))
+        end
       end
     end
 
@@ -143,23 +134,16 @@ module RubyLsp
           break if job.nil?
 
           request = job.request
-          @mutex.synchronize do
-            @jobs.delete(request[:id])
-            @current_job = job
+          @mutex.synchronize { @jobs.delete(request[:id]) }
+
+          result = if job.cancelled
+            # We need to return nil to the client even if the request was cancelled
+            Queue::Result.new(response: nil, error: nil, request_time: nil)
+          else
+            execute(request)
           end
 
-          next if job.cancelled
-
-          result = execute(request)
-        rescue Cancelled
-          # We need to return nil to the client even if the request was cancelled
-          result = Queue::Result.new(response: nil, error: nil, request_time: nil)
-        ensure
-          @mutex.synchronize { @current_job = nil }
-
-          # If there's request, it means the worker was cancelled while waiting to pop from the queue or immediately
-          # after
-          finalize_request(result, request) unless result.nil? || request.nil?
+          finalize_request(result, request)
         end
       end
     end
