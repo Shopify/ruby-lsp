@@ -8,7 +8,7 @@ class ExpectationsTestRunner < Minitest::Test
 
   class << self
     def expectations_tests(handler_class, expectation_suffix)
-      class_eval(<<~RB)
+      class_eval(<<~RB, __FILE__, __LINE__ + 1)
         module ExpectationsRunnerMethods
           def run_expectations(source)
             params = @__params&.any? ? @__params : default_args
@@ -42,13 +42,13 @@ class ExpectationsTestRunner < Minitest::Test
 
         required_ruby_version = ruby_requirement_magic_comment_version(path)
         if required_ruby_version && RUBY_VERSION < required_ruby_version
-          class_eval(<<~RB)
+          class_eval(<<~RB, __FILE__, __LINE__ + 1)
             def test_#{expectation_suffix}_#{test_name}
               skip "Fixture requires Ruby v#{required_ruby_version} while currently running v#{RUBY_VERSION}"
             end
           RB
         elsif File.file?(expectation_path)
-          class_eval(<<~RB)
+          class_eval(<<~RB, __FILE__, __LINE__ + 1)
             def test_#{expectation_suffix}_#{test_name}
               source = File.read("#{path}")
               expected = File.read("#{expectation_path}")
@@ -57,7 +57,7 @@ class ExpectationsTestRunner < Minitest::Test
             end
           RB
         else
-          class_eval(<<~RB)
+          class_eval(<<~RB, __FILE__, __LINE__ + 1)
             def test_#{expectation_suffix}_#{test_name}_does_not_raise
               source = File.read("#{path}")
               run_expectations(source)
@@ -85,10 +85,10 @@ class ExpectationsTestRunner < Minitest::Test
 
     begin
       # If the values are JSON we want to pretty print them
-      expected_obj = { "result" => JSON.parse(expected) }
+      expected_obj = { "result" => expected }
       expected_obj["params"] = @__params if @__params
 
-      actual_obj = { "result" => JSON.parse(actual) }
+      actual_obj = { "result" => actual }
       actual_obj["params"] = @__params if @__params
 
       $stderr.puts "########## Expected ##########"
