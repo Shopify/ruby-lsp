@@ -109,25 +109,27 @@ module RubyLsp
       ).void
     end
     def finalize_request(result, request)
-      error = result.error
-      if error
-        T.must(@handlers[request[:method]]).error_handler&.call(error, request)
+      @mutex.synchronize do
+        error = result.error
+        if error
+          T.must(@handlers[request[:method]]).error_handler&.call(error, request)
 
-        @writer.write(
-          id: request[:id],
-          error: {
-            code: LanguageServer::Protocol::Constant::ErrorCodes::INTERNAL_ERROR,
-            message: result.error.inspect,
-            data: request.to_json,
-          },
-        )
-      elsif result.response != Handler::VOID
-        @writer.write(id: request[:id], result: result.response)
-      end
+          @writer.write(
+            id: request[:id],
+            error: {
+              code: LanguageServer::Protocol::Constant::ErrorCodes::INTERNAL_ERROR,
+              message: result.error.inspect,
+              data: request.to_json,
+            },
+          )
+        elsif result.response != Handler::VOID
+          @writer.write(id: request[:id], result: result.response)
+        end
 
-      request_time = result.request_time
-      if request_time
-        @writer.write(method: "telemetry/event", params: telemetry_params(request, request_time, result.error))
+        request_time = result.request_time
+        if request_time
+          @writer.write(method: "telemetry/event", params: telemetry_params(request, request_time, result.error))
+        end
       end
     end
 
