@@ -139,9 +139,8 @@ module RubyLsp
         # Thread::Queue#pop is thread safe and will wait until an item is available
         loop do
           job = T.let(@job_queue.pop, T.nilable(Job))
-          break if job.nil?
-
           # The only time when the job is nil is when the queue is closed and we can then terminate the thread
+          break if job.nil?
 
           request = job.request
           @mutex.synchronize do

@@ -14,6 +14,8 @@ module RubyLsp
       class RuboCopRunner < RuboCop::Runner
         extend T::Sig
 
+        class ConfigurationError < StandardError; end
+
         sig { returns(T::Array[RuboCop::Cop::Offense]) }
         attr_reader :offenses
 
@@ -50,6 +52,8 @@ module RubyLsp
           super([path])
         rescue RuboCop::Runner::InfiniteCorrectionLoop => error
           raise Formatting::Error, error.message
+        rescue RuboCop::ValidationError => error
+          raise ConfigurationError, error.message
         end
 
         sig { returns(String) }
