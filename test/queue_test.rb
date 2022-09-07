@@ -72,42 +72,6 @@ class QueueTest < Minitest::Test
     end
   end
 
-  def test_cancel_while_processing
-    capture_subprocess_io do
-      @running_job_signal = Thread::Queue.new
-      @running_job_response = Thread::Queue.new
-
-      @queue.push({ id: "job_to_cancel", method: "cancelled_in_the_middle" })
-
-      assert_equal(:started, @running_job_response.pop)
-      @queue.cancel("job_to_cancel")
-      @running_job_signal.push(:unblock)
-
-      @queue.shutdown
-
-      assert_empty(@running_job_response)
-    end
-  end
-
-  def test_cancel_while_finalization
-    capture_subprocess_io do
-      @running_job_response = Thread::Queue.new
-      @blocking_job_signal = Thread::Queue.new
-
-      @queue.push({ id: "job_to_cancel", method: "with_error_handler" })
-      assert_equal(:started, @running_job_response.pop)
-
-      @queue.cancel("job_to_cancel")
-
-      @blocking_job_signal.push(:unblock)
-      assert_equal(:finished, @running_job_response.pop)
-
-      @queue.shutdown
-    end
-  rescue Exception => e # rubocop:disable Lint/RescueException
-    raise "error handler during finalization was cancelled. Error: #{e.message}"
-  end
-
   def test_cancel_after_processing
     capture_subprocess_io do
       @cancelled_run = Thread::Queue.new
