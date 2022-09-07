@@ -7,8 +7,6 @@ module RubyLsp
   class Queue
     extend T::Sig
 
-    class Cancelled < StandardError; end
-
     class Result < T::Struct
       const :response, T.untyped # rubocop:disable Sorbet/ForbidUntypedStructProps
       const :error, T.nilable(Exception)
@@ -40,8 +38,6 @@ module RubyLsp
       @job_queue = T.let(Thread::Queue.new, Thread::Queue)
       # The jobs hash is just a way of keeping a handle to jobs based on the request ID, so we can cancel them
       @jobs = T.let({}, T::Hash[T.any(String, Integer), Job])
-      # The current job is a handle to cancel jobs that are currently being processed
-      @current_job = T.let(nil, T.nilable(Job))
       @mutex = T.let(Mutex.new, Mutex)
       @worker = T.let(new_worker, Thread)
 
@@ -65,11 +61,6 @@ module RubyLsp
       @mutex.synchronize do
         # Cancel the job if it's still in the queue
         @jobs[id]&.cancel
-
-        # Cancel the job if we're in the middle of processing it
-        if @current_job&.request&.dig(:id) == id
-          @worker.raise(Cancelled)
-        end
       end
     end
 
@@ -92,8 +83,6 @@ module RubyLsp
 
       request_time = Benchmark.realtime do
         response = T.must(@handlers[request[:method]]).action.call(request)
-      rescue Cancelled
-        raise
       rescue StandardError, LoadError => e
         error = e
       end
@@ -141,28 +130,20 @@ module RubyLsp
         # Thread::Queue#pop is thread safe and will wait until an item is available
         loop do
           job = T.let(@job_queue.pop, T.nilable(Job))
+          # The only time when the job is nil is when the queue is closed and we can then terminate the thread
           break if job.nil?
 
-          # The only time when the job is nil is when the queue is closed and we can then terminate the thread
-
           request = job.request
-          @mutex.synchronize do
-            @jobs.delete(request[:id])
-            @current_job = job
+          @mutex.synchronize { @jobs.delete(request[:id]) }
+
+          result = if job.cancelled
+            # We need to return nil to the client even if the request was cancelled
+            Queue::Result.new(response: nil, error: nil, request_time: nil)
+          else
+            execute(request)
           end
 
-          next if job.cancelled
-
-          result = execute(request)
-        rescue Cancelled
-          # We need to return nil to the client even if the request was cancelled
-          result = Queue::Result.new(response: nil, error: nil, request_time: nil)
-        ensure
-          @mutex.synchronize { @current_job = nil }
-
-          # If there's request, it means the worker was cancelled while waiting to pop from the queue or immediately
-          # after
-          finalize_request(result, request) unless result.nil? || request.nil?
+          finalize_request(result, request)
         end
       end
     end
