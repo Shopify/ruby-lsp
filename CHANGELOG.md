@@ -6,6 +6,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.3.2]
+
+- Make the diagnostic request parallel (https://github.com/Shopify/ruby-lsp/pull/293)
+- Improve worker stability (https://github.com/Shopify/ruby-lsp/pull/295)
+
 ## [0.3.1]
 
 - Resolve TODO for LSP v3.17 (https://github.com/Shopify/ruby-lsp/pull/268)
