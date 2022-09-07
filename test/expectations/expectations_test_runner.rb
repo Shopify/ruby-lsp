@@ -85,10 +85,10 @@ class ExpectationsTestRunner < Minitest::Test
 
     begin
       # If the values are JSON we want to pretty print them
-      expected_obj = { "result" => JSON.parse(expected) }
+      expected_obj = { "result" => expected }
       expected_obj["params"] = @__params if @__params
 
-      actual_obj = { "result" => JSON.parse(actual) }
+      actual_obj = { "result" => actual }
       actual_obj["params"] = @__params if @__params
 
       $stderr.puts "########## Expected ##########"
