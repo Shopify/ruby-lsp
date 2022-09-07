@@ -191,7 +191,7 @@ module RubyLsp
       Handler::VOID
     end
 
-    on("textDocument/diagnostic") do |request|
+    on("textDocument/diagnostic", parallel: true) do |request|
       uri = request.dig(:params, :textDocument, :uri)
       response = store.cache_fetch(uri, :diagnostics) do |document|
         Requests::Diagnostics.new(uri, document).run
@@ -199,9 +199,7 @@ module RubyLsp
 
       { kind: "full", items: response.map(&:to_lsp_diagnostic) } if response
     end.on_error do |error|
-      if error.is_a?(RuboCop::ValidationError)
-        show_message(Constant::MessageType::ERROR, "Error in RuboCop configuration file: #{error.message}")
-      end
+      show_message(Constant::MessageType::ERROR, "Error running diagnostics: #{error.message}")
     end
 
     on("shutdown") { shutdown }
