@@ -184,7 +184,7 @@ class RBI::TypedParam < ::T::Struct
   const :type, ::String
 
   class << self
-    # source://sorbet-runtime/0.5.10326/lib/types/struct.rb#13
+    # source://sorbet-runtime/0.5.10416/lib/types/struct.rb#13
     def inherited(s); end
   end
 end
@@ -231,7 +231,7 @@ module T::Private::Methods
   end
 end
 
-# source://sorbet-runtime/0.5.10326/lib/types/private/methods/_methods.rb#29
+# source://sorbet-runtime/0.5.10416/lib/types/private/methods/_methods.rb#29
 T::Private::Methods::ARG_NOT_PROVIDED = T.let(T.unsafe(nil), Object)
 
 class T::Private::Methods::Declaration < ::Struct
@@ -289,45 +289,45 @@ class T::Private::Methods::DeclarationBlock < ::Struct
 end
 
 module T::Private::Methods::MethodHooks
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/_methods.rb#517
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/_methods.rb#517
   def method_added(name); end
 end
 
 module T::Private::Methods::Modes
   class << self
-    # source://sorbet-runtime/0.5.10326/lib/types/private/methods/modes.rb#8
+    # source://sorbet-runtime/0.5.10416/lib/types/private/methods/modes.rb#8
     def abstract; end
 
-    # source://sorbet-runtime/0.5.10326/lib/types/private/methods/modes.rb#11
+    # source://sorbet-runtime/0.5.10416/lib/types/private/methods/modes.rb#11
     def overridable; end
 
-    # source://sorbet-runtime/0.5.10326/lib/types/private/methods/modes.rb#17
+    # source://sorbet-runtime/0.5.10416/lib/types/private/methods/modes.rb#17
     def overridable_override; end
 
-    # source://sorbet-runtime/0.5.10326/lib/types/private/methods/modes.rb#14
+    # source://sorbet-runtime/0.5.10416/lib/types/private/methods/modes.rb#14
     def override; end
 
-    # source://sorbet-runtime/0.5.10326/lib/types/private/methods/modes.rb#5
+    # source://sorbet-runtime/0.5.10416/lib/types/private/methods/modes.rb#5
     def standard; end
 
-    # source://sorbet-runtime/0.5.10326/lib/types/private/methods/modes.rb#20
+    # source://sorbet-runtime/0.5.10416/lib/types/private/methods/modes.rb#20
     def untyped; end
   end
 end
 
-# source://sorbet-runtime/0.5.10326/lib/types/private/methods/modes.rb#23
+# source://sorbet-runtime/0.5.10416/lib/types/private/methods/modes.rb#23
 T::Private::Methods::Modes::MODES = T.let(T.unsafe(nil), Array)
 
-# source://sorbet-runtime/0.5.10326/lib/types/private/methods/modes.rb#27
+# source://sorbet-runtime/0.5.10416/lib/types/private/methods/modes.rb#27
 T::Private::Methods::Modes::NON_OVERRIDE_MODES = T.let(T.unsafe(nil), Array)
 
-# source://sorbet-runtime/0.5.10326/lib/types/private/methods/modes.rb#25
+# source://sorbet-runtime/0.5.10416/lib/types/private/methods/modes.rb#25
 T::Private::Methods::Modes::OVERRIDABLE_MODES = T.let(T.unsafe(nil), Array)
 
-# source://sorbet-runtime/0.5.10326/lib/types/private/methods/modes.rb#26
+# source://sorbet-runtime/0.5.10416/lib/types/private/methods/modes.rb#26
 T::Private::Methods::Modes::OVERRIDE_MODES = T.let(T.unsafe(nil), Array)
 
-# source://sorbet-runtime/0.5.10326/lib/types/private/methods/_methods.rb#30
+# source://sorbet-runtime/0.5.10416/lib/types/private/methods/_methods.rb#30
 T::Private::Methods::PROC_TYPE = T.let(T.unsafe(nil), Object)
 
 # source://tapioca//lib/tapioca/sorbet_ext/proc_bind_patch.rb#29
@@ -337,152 +337,152 @@ module T::Private::Methods::ProcBindPatch
 end
 
 class T::Private::Methods::Signature
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#36
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#36
   def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: T.unsafe(nil), override_allow_incompatible: T.unsafe(nil), defined_raw: T.unsafe(nil)); end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#149
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#149
   def arg_count; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def arg_types; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#143
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#143
   def as_alias(alias_name); end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def bind; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def block_name; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def block_type; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def check_level; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def defined_raw; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#161
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#161
   def dsl_method; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#166
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#166
   def each_args_value_type(args); end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def has_keyrest; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def has_rest; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def keyrest_name; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def keyrest_type; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#153
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#153
   def kwarg_names; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def kwarg_types; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def method; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#215
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#215
   def method_desc; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def method_name; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def mode; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def on_failure; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def override_allow_incompatible; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#157
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#157
   def owner; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def parameters; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def req_arg_count; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def req_kwarg_names; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def rest_name; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def rest_type; end
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#5
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#5
   def return_type; end
 
   protected
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#140
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#140
   def method_name=(_arg0); end
 
   class << self
-    # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#11
+    # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#11
     def new_untyped(method:, mode: T.unsafe(nil), parameters: T.unsafe(nil)); end
   end
 end
 
-# source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature.rb#224
+# source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature.rb#224
 T::Private::Methods::Signature::EMPTY_HASH = T.let(T.unsafe(nil), Hash)
 
 module T::Private::Methods::SignatureValidation
   class << self
-    # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature_validation.rb#8
+    # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature_validation.rb#8
     def validate(signature); end
 
-    # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature_validation.rb#79
+    # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature_validation.rb#79
     def validate_non_override_mode(signature); end
 
-    # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature_validation.rb#58
+    # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature_validation.rb#58
     def validate_override_mode(signature, super_signature); end
 
-    # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature_validation.rb#116
+    # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature_validation.rb#116
     def validate_override_shape(signature, super_signature); end
 
-    # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature_validation.rb#172
+    # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature_validation.rb#172
     def validate_override_types(signature, super_signature); end
 
     private
 
-    # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature_validation.rb#211
+    # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature_validation.rb#211
     def base_override_loc_str(signature, super_signature); end
 
-    # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature_validation.rb#217
+    # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature_validation.rb#217
     def method_loc_str(method); end
 
-    # source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature_validation.rb#50
+    # source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature_validation.rb#50
     def pretty_mode(signature); end
   end
 end
 
-# source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature_validation.rb#5
+# source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature_validation.rb#5
 T::Private::Methods::SignatureValidation::Methods = T::Private::Methods
 
-# source://sorbet-runtime/0.5.10326/lib/types/private/methods/signature_validation.rb#6
+# source://sorbet-runtime/0.5.10416/lib/types/private/methods/signature_validation.rb#6
 T::Private::Methods::SignatureValidation::Modes = T::Private::Methods::Modes
 
 module T::Private::Methods::SingletonMethodHooks
-  # source://sorbet-runtime/0.5.10326/lib/types/private/methods/_methods.rb#524
+  # source://sorbet-runtime/0.5.10416/lib/types/private/methods/_methods.rb#524
   def singleton_method_added(name); end
 end
 
-# source://sorbet-runtime/0.5.10326/lib/types/private/methods/_methods.rb#581
+# source://sorbet-runtime/0.5.10416/lib/types/private/methods/_methods.rb#581
 T::Private::Methods::TOP_SELF = T.let(T.unsafe(nil), Object)
 
 class T::Types::Proc < ::T::Types::Base; end
@@ -529,7 +529,7 @@ module T::Types::Simple::Private; end
 
 module T::Types::Simple::Private::Pool
   class << self
-    # source://sorbet-runtime/0.5.10326/lib/types/types/simple.rb#62
+    # source://sorbet-runtime/0.5.10416/lib/types/types/simple.rb#62
     def type_for_module(mod); end
   end
 end
@@ -754,7 +754,7 @@ class Tapioca::Commands::CheckShims < ::Tapioca::Commands::Command
   def execute; end
 end
 
-# @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+# @abstract It cannot be directly instantiated. Subclasses must implement the `abstract` methods below.
 #
 # source://tapioca//lib/tapioca/commands/command.rb#6
 class Tapioca::Commands::Command
@@ -1163,7 +1163,7 @@ class Tapioca::ConfigHelper::ConfigError < ::T::Struct
   const :message_parts, T::Array[::Tapioca::ConfigHelper::ConfigErrorMessagePart]
 
   class << self
-    # source://sorbet-runtime/0.5.10326/lib/types/struct.rb#13
+    # source://sorbet-runtime/0.5.10416/lib/types/struct.rb#13
     def inherited(s); end
   end
 end
@@ -1174,7 +1174,7 @@ class Tapioca::ConfigHelper::ConfigErrorMessagePart < ::T::Struct
   const :message, ::String
 
   class << self
-    # source://sorbet-runtime/0.5.10326/lib/types/struct.rb#13
+    # source://sorbet-runtime/0.5.10416/lib/types/struct.rb#13
     def inherited(s); end
   end
 end
@@ -1215,7 +1215,7 @@ Tapioca::DEFAULT_TODO_FILE = T.let(T.unsafe(nil), String)
 # source://tapioca//lib/tapioca/dsl/compilers.rb#5
 module Tapioca::Dsl; end
 
-# @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+# @abstract It cannot be directly instantiated. Subclasses must implement the `abstract` methods below.
 #
 # source://tapioca//lib/tapioca/dsl/compiler.rb#6
 class Tapioca::Dsl::Compiler
@@ -1258,10 +1258,6 @@ class Tapioca::Dsl::Compiler
   def root; end
 
   private
-
-  # source://tapioca//lib/tapioca/dsl/compiler.rb#169
-  sig { params(type: ::String).returns(::String) }
-  def as_nilable_type(type); end
 
   # source://tapioca//lib/tapioca/dsl/compiler.rb#123
   sig { params(method_def: T.any(::Method, ::UnboundMethod)).returns(T::Array[::RBI::TypedParam]) }
@@ -1459,13 +1455,13 @@ class Tapioca::Gem::ConstantFound < ::Tapioca::Gem::Event
   def symbol; end
 end
 
-# @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+# @abstract It cannot be directly instantiated. Subclasses must implement the `abstract` methods below.
 #
 # source://tapioca//lib/tapioca/gem/events.rb#6
 class Tapioca::Gem::Event
   abstract!
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/abstract/declare.rb#37
+  # source://sorbet-runtime/0.5.10416/lib/types/private/abstract/declare.rb#37
   def initialize(*args, **_arg1, &blk); end
 end
 
@@ -1486,7 +1482,7 @@ class Tapioca::Gem::ForeignScopeNodeAdded < ::Tapioca::Gem::ScopeNodeAdded; end
 # source://tapioca//lib/tapioca/gem/listeners/base.rb#6
 module Tapioca::Gem::Listeners; end
 
-# @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+# @abstract It cannot be directly instantiated. Subclasses must implement the `abstract` methods below.
 #
 # source://tapioca//lib/tapioca/gem/listeners/base.rb#7
 class Tapioca::Gem::Listeners::Base
@@ -1871,7 +1867,7 @@ class Tapioca::Gem::MethodNodeAdded < ::Tapioca::Gem::NodeAdded
   def signature; end
 end
 
-# @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+# @abstract It cannot be directly instantiated. Subclasses must implement the `abstract` methods below.
 #
 # source://tapioca//lib/tapioca/gem/events.rb#57
 class Tapioca::Gem::NodeAdded < ::Tapioca::Gem::Event
@@ -2346,7 +2342,7 @@ class Tapioca::Loaders::Gem < ::Tapioca::Loaders::Loader
   end
 end
 
-# @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+# @abstract It cannot be directly instantiated. Subclasses must implement the `abstract` methods below.
 #
 # source://tapioca//lib/tapioca/loaders/loader.rb#6
 class Tapioca::Loaders::Loader
@@ -2360,7 +2356,7 @@ class Tapioca::Loaders::Loader
 
   abstract!
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/abstract/declare.rb#37
+  # source://sorbet-runtime/0.5.10416/lib/types/private/abstract/declare.rb#37
   def initialize(*args, **_arg1, &blk); end
 
   # @abstract
@@ -2516,6 +2512,10 @@ module Tapioca::RBIHelper
   extend ::Tapioca::SorbetHelper
   extend ::Tapioca::RBIHelper
 
+  # source://tapioca//lib/tapioca/helpers/rbi_helper.rb#99
+  sig { params(type: ::String).returns(::String) }
+  def as_nilable_type(type); end
+
   # source://tapioca//lib/tapioca/helpers/rbi_helper.rb#80
   sig { params(name: ::String, type: ::String).returns(::RBI::TypedParam) }
   def create_block_param(name, type:); end
@@ -2552,11 +2552,11 @@ module Tapioca::RBIHelper
   sig { params(sig_string: ::String).returns(::String) }
   def sanitize_signature_types(sig_string); end
 
-  # source://tapioca//lib/tapioca/helpers/rbi_helper.rb#99
+  # source://tapioca//lib/tapioca/helpers/rbi_helper.rb#108
   sig { params(name: ::String).returns(T::Boolean) }
   def valid_method_name?(name); end
 
-  # source://tapioca//lib/tapioca/helpers/rbi_helper.rb#113
+  # source://tapioca//lib/tapioca/helpers/rbi_helper.rb#122
   sig { params(name: ::String).returns(T::Boolean) }
   def valid_parameter_name?(name); end
 
@@ -2950,7 +2950,7 @@ class Tapioca::Runtime::Trackers::ConstantDefinition::ConstantLocation < ::T::St
   const :path, ::String
 
   class << self
-    # source://sorbet-runtime/0.5.10326/lib/types/struct.rb#13
+    # source://sorbet-runtime/0.5.10416/lib/types/struct.rb#13
     def inherited(s); end
   end
 end
@@ -3095,7 +3095,7 @@ module Tapioca::Static::SymbolLoader
 
     # @return [Array<T.class_of(Rails::Engine)>]
     #
-    # source://sorbet-runtime/0.5.10326/lib/types/private/methods/_methods.rb#250
+    # source://sorbet-runtime/0.5.10416/lib/types/private/methods/_methods.rb#250
     def engines(*args, **_arg1, &blk); end
 
     # source://tapioca//lib/tapioca/static/symbol_loader.rb#59
@@ -3227,50 +3227,10 @@ module URI
   include ::URI::RFC2396_REGEXP
 end
 
-class URI::File < ::URI::Generic
-  # source://uri/0.11.0/uri/file.rb#76
-  def check_password(user); end
-
-  # source://uri/0.11.0/uri/file.rb#71
-  def check_user(user); end
-
-  # source://uri/0.11.0/uri/file.rb#66
-  def check_userinfo(user); end
-
-  # source://uri/0.11.0/uri/file.rb#56
-  def set_host(v); end
-
-  # source://uri/0.11.0/uri/file.rb#89
-  def set_password(v); end
-
-  # source://uri/0.11.0/uri/file.rb#62
-  def set_port(v); end
-
-  # source://uri/0.11.0/uri/file.rb#85
-  def set_user(v); end
-
-  # source://uri/0.11.0/uri/file.rb#81
-  def set_userinfo(v); end
-
-  class << self
-    # source://uri/0.11.0/uri/file.rb#47
-    def build(args); end
-  end
-end
-
-# source://uri/0.11.0/uri/file.rb#17
-URI::File::COMPONENT = T.let(T.unsafe(nil), Array)
-
 class URI::Generic
   include ::URI::RFC2396_REGEXP
   include ::URI
 end
-
-# source://uri/0.11.0/uri/common.rb#17
-URI::Parser = URI::RFC2396_Parser
-
-# source://uri/0.11.0/uri/common.rb#16
-URI::REGEXP = URI::RFC2396_REGEXP
 
 class URI::RFC2396_Parser
   include ::URI::RFC2396_REGEXP

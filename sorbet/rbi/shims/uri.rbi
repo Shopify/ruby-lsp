@@ -3,7 +3,7 @@
 module URI
   def self.register_scheme(scheme, klass); end
 
-  class File < Generic
+  class File
     attr_reader :path
   end
 
