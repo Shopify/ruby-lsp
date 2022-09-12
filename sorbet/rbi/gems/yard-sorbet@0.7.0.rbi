@@ -18,7 +18,7 @@ module YARDSorbet; end
 # source://yard-sorbet//lib/yard-sorbet/directives.rb#6
 module YARDSorbet::Directives
   class << self
-    # source://yard-sorbet//lib/yard-sorbet/directives.rb#24
+    # source://yard-sorbet//lib/yard-sorbet/directives.rb#21
     sig { params(docstring: ::String, directives: T::Array[::String]).void }
     def add_directives(docstring, directives); end
 
@@ -155,7 +155,7 @@ module YARDSorbet::Handlers::StructClassHandler
 
   private
 
-  # source://yard-sorbet//lib/yard-sorbet/handlers/struct_class_handler.rb#52
+  # source://yard-sorbet//lib/yard-sorbet/handlers/struct_class_handler.rb#50
   sig do
     params(
       object: ::YARD::CodeObjects::MethodObject,
@@ -172,7 +172,7 @@ module YARDSorbet::Handlers::StructClassHandler
   sig { params(props: T::Array[::YARDSorbet::TStructProp], class_ns: ::YARD::CodeObjects::ClassObject).void }
   def process_t_struct_props(props, class_ns); end
 
-  # source://yard-sorbet//lib/yard-sorbet/handlers/struct_class_handler.rb#62
+  # source://yard-sorbet//lib/yard-sorbet/handlers/struct_class_handler.rb#60
   sig { params(props: T::Array[::YARDSorbet::TStructProp]).returns(T::Array[[::String, T.nilable(::String)]]) }
   def to_object_parameters(props); end
 end
@@ -200,20 +200,20 @@ class YARDSorbet::Handlers::StructPropHandler < ::YARD::Handlers::Ruby::Base
   sig { returns(T.nilable(::String)) }
   def default_value; end
 
-  # source://yard-sorbet//lib/yard-sorbet/handlers/struct_prop_handler.rb#45
+  # source://yard-sorbet//lib/yard-sorbet/handlers/struct_prop_handler.rb#44
   sig { params(name: ::String).returns(::YARDSorbet::TStructProp) }
   def make_prop(name); end
 
   # Register the field explicitly as an attribute.
   # While `const` attributes are immutable, `prop` attributes may be reassigned.
   #
-  # source://yard-sorbet//lib/yard-sorbet/handlers/struct_prop_handler.rb#58
+  # source://yard-sorbet//lib/yard-sorbet/handlers/struct_prop_handler.rb#57
   sig { params(object: ::YARD::CodeObjects::MethodObject, name: ::String).void }
   def register_attrs(object, name); end
 
   # Store the prop for use in the constructor definition
   #
-  # source://yard-sorbet//lib/yard-sorbet/handlers/struct_prop_handler.rb#66
+  # source://yard-sorbet//lib/yard-sorbet/handlers/struct_prop_handler.rb#65
   sig { params(prop: ::YARDSorbet::TStructProp).void }
   def update_state(prop); end
 end
@@ -223,12 +223,12 @@ end
 # source://yard-sorbet//lib/yard-sorbet/node_utils.rb#6
 module YARDSorbet::NodeUtils
   class << self
-    # Traverese AST nodes in breadth-first order
+    # Traverse AST nodes in breadth-first order
     #
     # @note This will skip over some node types.
     # @yield [YARD::Parser::Ruby::AstNode]
     #
-    # source://yard-sorbet//lib/yard-sorbet/node_utils.rb#29
+    # source://yard-sorbet//lib/yard-sorbet/node_utils.rb#22
     sig do
       params(
         node: ::YARD::Parser::Ruby::AstNode,
@@ -239,7 +239,7 @@ module YARDSorbet::NodeUtils
 
     # Gets the node that a sorbet `sig` can be attached do, bypassing visisbility modifiers and the like
     #
-    # source://yard-sorbet//lib/yard-sorbet/node_utils.rb#41
+    # source://yard-sorbet//lib/yard-sorbet/node_utils.rb#34
     sig do
       params(
         node: ::YARD::Parser::Ruby::AstNode
@@ -251,7 +251,7 @@ module YARDSorbet::NodeUtils
     #
     # @raise [IndexError] if the node does not have an adjacent sibling (ascending)
     #
-    # source://yard-sorbet//lib/yard-sorbet/node_utils.rb#55
+    # source://yard-sorbet//lib/yard-sorbet/node_utils.rb#48
     sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(::YARD::Parser::Ruby::AstNode) }
     def sibling_node(node); end
   end
@@ -262,15 +262,15 @@ end
 # source://yard-sorbet//lib/yard-sorbet/node_utils.rb#10
 YARDSorbet::NodeUtils::ATTRIBUTE_METHODS = T.let(T.unsafe(nil), Array)
 
-# Node types that can have type signatures
-#
-# source://yard-sorbet//lib/yard-sorbet/node_utils.rb#12
-YARDSorbet::NodeUtils::SIGABLE_NODE = T.type_alias { T.any(::YARD::Parser::Ruby::MethodCallNode, ::YARD::Parser::Ruby::MethodDefinitionNode) }
-
 # Skip these method contents during BFS node traversal, they can have their own nested types via `T.Proc`
 #
-# source://yard-sorbet//lib/yard-sorbet/node_utils.rb#16
+# source://yard-sorbet//lib/yard-sorbet/node_utils.rb#12
 YARDSorbet::NodeUtils::SKIP_METHOD_CONTENTS = T.let(T.unsafe(nil), Array)
+
+# Node types that can have type signatures
+#
+# source://yard-sorbet//lib/yard-sorbet/node_utils.rb#14
+YARDSorbet::NodeUtils::SigableNode = T.type_alias { T.any(::YARD::Parser::Ruby::MethodCallNode, ::YARD::Parser::Ruby::MethodDefinitionNode) }
 
 # Translate `sig` type syntax to `YARD` type syntax.
 #
@@ -279,61 +279,64 @@ module YARDSorbet::SigToYARD
   class << self
     # @see https://yardoc.org/types.html
     #
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#11
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#21
     sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(T::Array[::String]) }
     def convert(node); end
 
     private
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#44
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#54
     sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(::String) }
     def build_generic_type(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#54
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#63
     sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(T::Array[::String]) }
     def convert_aref(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#66
-    sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(T::Array[::String]) }
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#75
+    sig { params(node: ::YARD::Parser::Ruby::AstNode).returns([::String]) }
     def convert_array(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#74
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#83
     sig { params(node: ::YARD::Parser::Ruby::MethodCallNode).returns(T::Array[::String]) }
     def convert_call(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#79
-    sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(T::Array[::String]) }
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#88
+    sig { params(node: ::YARD::Parser::Ruby::AstNode).returns([::String]) }
     def convert_collection(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#86
-    sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(T::Array[::String]) }
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#95
+    sig { params(node: ::YARD::Parser::Ruby::AstNode).returns([::String]) }
     def convert_hash(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#94
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#103
     sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(T::Array[::String]) }
     def convert_list(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#17
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#27
     sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(T::Array[::String]) }
     def convert_node(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#26
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#36
     sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(T::Array[::String]) }
     def convert_node_type(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#99
-    sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(T::Array[::String]) }
-    def convert_ref(node); end
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#108
+    sig { params(node_source: ::String).returns([::String]) }
+    def convert_ref(node_source); end
 
     # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#113
     sig { params(node: ::YARD::Parser::Ruby::MethodCallNode).returns(T::Array[::String]) }
     def convert_t_method(node); end
 
     # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#125
-    sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(T::Array[::String]) }
+    sig { params(node: ::YARD::Parser::Ruby::AstNode).returns([::String]) }
     def convert_unknown(node); end
   end
 end
+
+# source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#9
+YARDSorbet::SigToYARD::REF_TYPES = T.let(T.unsafe(nil), Hash)
 
 # Used to store the details of a `T::Struct` `prop` definition
 #
@@ -346,7 +349,7 @@ class YARDSorbet::TStructProp < ::T::Struct
   const :types, T::Array[::String]
 
   class << self
-    # source://sorbet-runtime/0.5.10326/lib/types/struct.rb#13
+    # source://sorbet-runtime/0.5.10416/lib/types/struct.rb#13
     def inherited(s); end
   end
 end
@@ -356,7 +359,7 @@ end
 # source://yard-sorbet//lib/yard-sorbet/tag_utils.rb#6
 module YARDSorbet::TagUtils
   class << self
-    # source://yard-sorbet//lib/yard-sorbet/tag_utils.rb#14
+    # source://yard-sorbet//lib/yard-sorbet/tag_utils.rb#13
     sig do
       params(
         docstring: ::YARD::Docstring,
@@ -368,7 +371,7 @@ module YARDSorbet::TagUtils
 
     # Create or update a `YARD` tag with type information
     #
-    # source://yard-sorbet//lib/yard-sorbet/tag_utils.rb#28
+    # source://yard-sorbet//lib/yard-sorbet/tag_utils.rb#27
     sig do
       params(
         docstring: ::YARD::Docstring,
