@@ -18,32 +18,17 @@ class QueueTest < Minitest::Test
         action: ->(r) { assert_equal(@expected_request, r) },
         parallel: true
       ),
-      # Jobs for this request start, pause waiting for @running_job_signal and never push :finished because they are
-      # cancelled first
-      "cancelled_in_the_middle" => RubyLsp::Handler::RequestHandler.new(
+      "always_errors" => RubyLsp::Handler::RequestHandler.new(
         action: ->(_r) {
-          @running_job_response.push(:started)
-          # The job is sitting here when it gets cancelled
-          @running_job_signal.pop
-          @running_job_response.push(:finished)
+          @blocking_signal.push(:run)
+          raise "foo"
         },
-        parallel: true
-      ),
-      "always_errors" => RubyLsp::Handler::RequestHandler.new(action: ->(_r) { raise "foo" }, parallel: true),
-      "with_error_handler" => RubyLsp::Handler::RequestHandler.new(
-        action: ->(_r) { raise "foo" }, parallel: true
+        parallel: true,
       ),
       "load_error" => RubyLsp::Handler::RequestHandler.new(
         action: ->(_r) { raise LoadError, "cannot require 'foo' -- no such file" }, parallel: true
       ),
     }
-
-    handlers["with_error_handler"].on_error do
-      @running_job_response.push(:started)
-      # The job is sitting here when it gets cancelled
-      @blocking_job_signal.pop
-      @running_job_response.push(:finished)
-    end
 
     @queue = RubyLsp::Queue.new(LanguageServer::Protocol::Transport::Stdio::Writer.new, handlers)
   end
@@ -91,13 +76,42 @@ class QueueTest < Minitest::Test
 
   def test_execute_is_resilient_to_load_errors
     capture_subprocess_io do
-      @cancelled_run = Thread::Queue.new
-      @blocking_job_signal = Thread::Queue.new
-
       @queue.push({ id: "job_to_cancel", method: "load_error" })
       @queue.shutdown
 
       assert_equal(0, @queue.instance_variable_get(:@job_queue).length)
     end
+  end
+
+  def test_error_telemetry
+    stdout, _ = capture_subprocess_io do
+      @blocking_signal = Thread::Queue.new
+      @queue.push({ id: 2, method: "always_errors" })
+      assert_equal(:run, @blocking_signal.pop)
+
+      @queue.shutdown
+
+      assert_equal(0, @queue.instance_variable_get(:@job_queue).length)
+    end
+
+    # We get stdout back as a string with two entries. The request response and the telemetry notification. This splits
+    # the two into separate JSONs
+    stdout = stdout.sub(/Content-Length: (\d+)\R\R/i, "")
+    stdout = stdout.sub(/Content-Length: (\d+)\R\R/i, "#SPLIT_HERE#")
+    response, telemetry = stdout.split("#SPLIT_HERE#")
+
+    # First response is the error result
+    response = JSON.parse(response, symbolize_names: true)
+
+    assert_equal(LanguageServer::Protocol::Constant::ErrorCodes::INTERNAL_ERROR, response.dig(:error, :code))
+    assert_equal("#<RuntimeError: foo>", response.dig(:error, :message))
+
+    # Second response is the error telemetry
+    telemetry = JSON.parse(telemetry, symbolize_names: true)
+
+    assert_equal("telemetry/event", telemetry[:method])
+    assert_equal("RuntimeError", telemetry.dig(:params, :errorClass))
+    assert_equal("foo", telemetry.dig(:params, :errorMessage))
+    assert_match(%r{ruby-lsp/test/queue_test.rb:\d+}, telemetry.dig(:params, :backtrace))
   end
 end
