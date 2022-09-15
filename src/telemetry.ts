@@ -7,6 +7,8 @@ export interface TelemetryEvent {
   uri?: string;
   errorClass?: string;
   errorMessage?: string;
+  backtrace?: string;
+  params?: string;
 }
 
 export interface TelemetryApi {

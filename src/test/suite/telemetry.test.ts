@@ -32,6 +32,8 @@ suite("Telemetry", () => {
       uri: "file:///test.rb",
       errorClass: "NoMethodError",
       errorMessage: "undefined method `visit` for nil:NilClass",
+      params: '{"position": {"line": 0, "character": 0}}',
+      backtrace: "test.rb:1:in `visit'\ntest.rb:5:in `block in <main>'",
     };
 
     await telemetry.sendEvent(event);
