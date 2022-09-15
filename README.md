@@ -12,12 +12,6 @@ Companion VS Code extension for the [Ruby LSP gem](https://github.com/Shopify/ru
 
 Search for `ruby-lsp` in the extensions tab and click install.
 
-**Note**
-
-For this extension to properly start the Ruby LSP server, the right Ruby version for the project being worked on must be
-activated or else it can't find the right gems. Currently, auto activation is only supported for `shadowenv`, but
-support will be added for other Ruby version managers soon.
-
 ### Configuration
 
 The Ruby LSP has all its features enabled by default, but disabling specific features is supported by changing the
@@ -34,6 +28,17 @@ following configuration (definition of all available values can be found in the
   "formatting": true,
   "diagnostics": true,
   "codeActions": true
+}
+```
+
+In order to boot the server properly, the Ruby version manager must be configured, which defaults to using shadowenv.
+Check the [package.json](https://github.com/Shopify/vscode-ruby-lsp/blob/main/package.json) for currently supported
+managers.
+
+```jsonc
+"rubyLsp.rubyVersionManager": {
+  "manager": "chruby", // The handle for the version manager (e.g.: chruby, shadowenv)
+  "path": "/opt/homebrew/opt/chruby/chruby.sh" // The path for the script or executable
 }
 ```
 
