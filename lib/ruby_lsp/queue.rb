@@ -107,7 +107,7 @@ module RubyLsp
             id: request[:id],
             error: {
               code: LanguageServer::Protocol::Constant::ErrorCodes::INTERNAL_ERROR,
-              message: result.error.inspect,
+              message: error.inspect,
               data: request.to_json,
             },
           )
@@ -117,7 +117,7 @@ module RubyLsp
 
         request_time = result.request_time
         if request_time
-          @writer.write(method: "telemetry/event", params: telemetry_params(request, request_time, result.error))
+          @writer.write(method: "telemetry/event", params: telemetry_params(request, request_time, error))
         end
       end
     end
@@ -167,6 +167,12 @@ module RubyLsp
       if error
         params[:errorClass] = error.class.name
         params[:errorMessage] = error.message
+
+        log_params = request[:params]&.reject { |k, _| k == :textDocument }
+        params[:params] = log_params.to_json if log_params&.any?
+
+        backtrace = error.backtrace
+        params[:backtrace] = backtrace.map { |bt| bt.sub(/^#{Dir.home}/, "~") }.join("\n") if backtrace
       end
 
       params[:uri] = uri.sub(%r{.*://#{Dir.home}}, "~") if uri
