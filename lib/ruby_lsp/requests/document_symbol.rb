@@ -89,7 +89,7 @@ module RubyLsp
         @root.children
       end
 
-      sig { params(node: SyntaxTree::ClassDeclaration).void }
+      sig { override.params(node: SyntaxTree::ClassDeclaration).void }
       def visit_class(node)
         symbol = create_document_symbol(
           name: fully_qualified_name(node),
@@ -103,7 +103,7 @@ module RubyLsp
         @stack.pop
       end
 
-      sig { params(node: SyntaxTree::Command).void }
+      sig { override.params(node: SyntaxTree::Command).void }
       def visit_command(node)
         return unless ATTR_ACCESSORS.include?(node.message.value)
 
@@ -119,7 +119,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: SyntaxTree::ConstPathField).void }
+      sig { override.params(node: SyntaxTree::ConstPathField).void }
       def visit_const_path_field(node)
         create_document_symbol(
           name: node.constant.value,
@@ -129,7 +129,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: SyntaxTree::Def).void }
+      sig { override.params(node: SyntaxTree::Def).void }
       def visit_def(node)
         name = node.name.value
 
@@ -145,7 +145,7 @@ module RubyLsp
         @stack.pop
       end
 
-      sig { params(node: SyntaxTree::DefEndless).void }
+      sig { override.params(node: SyntaxTree::DefEndless).void }
       def visit_def_endless(node)
         name = node.name.value
 
@@ -161,7 +161,7 @@ module RubyLsp
         @stack.pop
       end
 
-      sig { params(node: SyntaxTree::Defs).void }
+      sig { override.params(node: SyntaxTree::Defs).void }
       def visit_defs(node)
         symbol = create_document_symbol(
           name: "self.#{node.name.value}",
@@ -175,7 +175,7 @@ module RubyLsp
         @stack.pop
       end
 
-      sig { params(node: SyntaxTree::ModuleDeclaration).void }
+      sig { override.params(node: SyntaxTree::ModuleDeclaration).void }
       def visit_module(node)
         symbol = create_document_symbol(
           name: fully_qualified_name(node),
@@ -189,7 +189,7 @@ module RubyLsp
         @stack.pop
       end
 
-      sig { params(node: SyntaxTree::TopConstField).void }
+      sig { override.params(node: SyntaxTree::TopConstField).void }
       def visit_top_const_field(node)
         create_document_symbol(
           name: node.constant.value,
@@ -199,7 +199,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: SyntaxTree::VarField).void }
+      sig { override.params(node: SyntaxTree::VarField).void }
       def visit_var_field(node)
         kind = case node.value
         when SyntaxTree::Const

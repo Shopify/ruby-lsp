@@ -35,7 +35,7 @@ module RubyLsp
         @hints
       end
 
-      sig { params(node: SyntaxTree::Rescue).void }
+      sig { override.params(node: SyntaxTree::Rescue).void }
       def visit_rescue(node)
         return unless node.exception.nil?
 

@@ -76,7 +76,7 @@ module RubyLsp
 
       private
 
-      sig { params(node: T.nilable(SyntaxTree::Node)).void }
+      sig { override.params(node: T.nilable(SyntaxTree::Node)).void }
       def visit(node)
         return if node.nil?
 
