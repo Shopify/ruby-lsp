@@ -100,11 +100,6 @@ module RubyLsp
         @encoder.encode(@tokens)
       end
 
-      sig { params(node: SyntaxTree::ARefField).void }
-      def visit_a_ref_field(node)
-        add_token(node.collection.value.location, :variable)
-      end
-
       sig { params(node: SyntaxTree::Call).void }
       def visit_call(node)
         visit(node.receiver)
@@ -168,13 +163,6 @@ module RubyLsp
         case node.value
         when "self"
           add_token(node.location, :variable, [:default_library])
-        end
-      end
-
-      sig { params(node: SyntaxTree::MAssign).void }
-      def visit_m_assign(node)
-        node.target.parts.each do |var_ref|
-          add_token(var_ref.value.location, :variable)
         end
       end
 
