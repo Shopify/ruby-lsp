@@ -15,7 +15,7 @@ module RubyLsp
 
         sig do
           params(
-            tokens: T::Array[SemanticHighlighting::SemanticToken]
+            tokens: T::Array[SemanticHighlighting::SemanticToken],
           ).returns(LanguageServer::Protocol::Interface::SemanticTokens)
         end
         def encode(tokens)

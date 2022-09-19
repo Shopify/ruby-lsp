@@ -71,7 +71,7 @@ class SemanticTokenEncoderTest < Minitest::Test
       ),
       length: length,
       type: type,
-      modifier: modifier
+      modifier: modifier,
     )
   end
 end

@@ -90,7 +90,7 @@ module RubyLsp
           T.any(
             LanguageServer::Protocol::Interface::SemanticTokens,
             T.all(T::Array[SemanticToken], Object),
-          )
+          ),
         )
       end
       def run
@@ -231,8 +231,8 @@ module RubyLsp
             location: location,
             length: length,
             type: T.must(TOKEN_TYPES[type]),
-            modifier: modifiers_indices
-          )
+            modifier: modifiers_indices,
+          ),
         )
       end
 

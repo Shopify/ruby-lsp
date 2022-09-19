@@ -54,7 +54,7 @@ module RubyLsp
         .params(
           uri: String,
           request_name: Symbol,
-          block: T.proc.params(document: Document).returns(T.type_parameter(:T))
+          block: T.proc.params(document: Document).returns(T.type_parameter(:T)),
         ).returns(T.nilable(T.type_parameter(:T)))
     end
     def cache_fetch(uri, request_name, &block)

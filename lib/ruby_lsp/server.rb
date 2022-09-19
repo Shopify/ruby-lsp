@@ -15,7 +15,7 @@ module RubyLsp
           hierarchical_document_symbol_support: true,
           symbol_kind: {
             value_set: Requests::DocumentSymbol::SYMBOL_KIND.values,
-          }
+          },
         )
       end
 
@@ -32,12 +32,12 @@ module RubyLsp
           document_selector: { scheme: "file", language: "ruby" },
           legend: Interface::SemanticTokensLegend.new(
             token_types: Requests::SemanticHighlighting::TOKEN_TYPES.keys,
-            token_modifiers: Requests::SemanticHighlighting::TOKEN_MODIFIERS.keys
+            token_modifiers: Requests::SemanticHighlighting::TOKEN_MODIFIERS.keys,
           ),
           range: false,
           full: {
             delta: true,
-          }
+          },
         )
       end
 
@@ -51,7 +51,7 @@ module RubyLsp
       on_type_formatting_provider = if enabled_features.include?("onTypeFormatting")
         Interface::DocumentOnTypeFormattingOptions.new(
           first_trigger_character: "{",
-          more_trigger_character: ["\n", "|"]
+          more_trigger_character: ["\n", "|"],
         )
       end
 
@@ -76,7 +76,7 @@ module RubyLsp
           document_on_type_formatting_provider: on_type_formatting_provider,
           diagnostic_provider: diagnostics_provider,
           inlay_hint_provider: inlay_hint_provider,
-        )
+        ),
       )
     end
 
@@ -149,9 +149,9 @@ module RubyLsp
         T.cast(
           Requests::SemanticHighlighting.new(
             document,
-            encoder: Requests::Support::SemanticTokenEncoder.new
+            encoder: Requests::Support::SemanticTokenEncoder.new,
           ).run,
-          LanguageServer::Protocol::Interface::SemanticTokens
+          LanguageServer::Protocol::Interface::SemanticTokens,
         )
       end
     end

@@ -42,9 +42,9 @@ module RubyLsp
           LanguageServer::Protocol::Interface::TextEdit.new(
             range: LanguageServer::Protocol::Interface::Range.new(
               start: LanguageServer::Protocol::Interface::Position.new(line: 0, character: 0),
-              end: LanguageServer::Protocol::Interface::Position.new(line: size, character: size)
+              end: LanguageServer::Protocol::Interface::Position.new(line: size, character: size),
             ),
-            new_text: formatted_text
+            new_text: formatted_text,
           ),
         ]
       end

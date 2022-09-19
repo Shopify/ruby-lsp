@@ -26,7 +26,7 @@ module RubyLsp
       # for displaying window messages on errors
       sig do
         params(
-          block: T.proc.bind(Handler).params(error: Exception, request: T::Hash[Symbol, T.untyped]).void
+          block: T.proc.bind(Handler).params(error: Exception, request: T::Hash[Symbol, T.untyped]).void,
         ).void
       end
       def on_error(&block)
@@ -85,7 +85,7 @@ module RubyLsp
       params(
         msg: String,
         parallel: T::Boolean,
-        blk: T.proc.bind(Handler).params(request: T::Hash[Symbol, T.untyped]).returns(T.untyped)
+        blk: T.proc.bind(Handler).params(request: T::Hash[Symbol, T.untyped]).returns(T.untyped),
       ).returns(RequestHandler)
     end
     def on(msg, parallel: false, &blk)
@@ -103,7 +103,7 @@ module RubyLsp
     def clear_diagnostics(uri)
       @writer.write(
         method: "textDocument/publishDiagnostics",
-        params: Interface::PublishDiagnosticsParams.new(uri: uri, diagnostics: [])
+        params: Interface::PublishDiagnosticsParams.new(uri: uri, diagnostics: []),
       )
     end
 
@@ -111,7 +111,7 @@ module RubyLsp
     def show_message(type, message)
       @writer.write(
         method: "window/showMessage",
-        params: Interface::ShowMessageParams.new(type: type, message: message)
+        params: Interface::ShowMessageParams.new(type: type, message: message),
       )
     end
   end

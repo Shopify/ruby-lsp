@@ -23,7 +23,7 @@ module RubyLsp
         params(
           uri: String,
           document: Document,
-          range: T::Range[Integer]
+          range: T::Range[Integer],
         ).void
       end
       def initialize(uri, document, range)

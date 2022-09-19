@@ -33,7 +33,7 @@ module RubyLsp
           T.any(
             T.all(T::Array[Support::RuboCopDiagnostic], Object),
             T.all(T::Array[Support::SyntaxErrorDiagnostic], Object),
-          )
+          ),
         )
       end
       def run

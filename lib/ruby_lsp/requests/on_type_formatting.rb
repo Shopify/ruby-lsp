@@ -101,15 +101,15 @@ module RubyLsp
       def add_edit_with_text(text)
         position = Interface::Position.new(
           line: @position[:line],
-          character: @position[:character]
+          character: @position[:character],
         )
 
         @edits << Interface::TextEdit.new(
           range: Interface::Range.new(
             start: position,
-            end: position
+            end: position,
           ),
-          new_text: text
+          new_text: text,
         )
       end
 
@@ -117,7 +117,7 @@ module RubyLsp
       def move_cursor_to(line, character)
         position = Interface::Position.new(
           line: line,
-          character: character
+          character: character,
         )
 
         # The $0 is a special snippet anchor that moves the cursor to that given position. See the snippets
@@ -126,9 +126,9 @@ module RubyLsp
         @edits << Interface::TextEdit.new(
           range: Interface::Range.new(
             start: position,
-            end: position
+            end: position,
           ),
-          new_text: "$0"
+          new_text: "$0",
         )
       end
 

@@ -11,7 +11,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::Document.new(source)
     RubyLsp::Requests::SemanticHighlighting.new(
       document,
-      encoder: RubyLsp::Requests::Support::SemanticTokenEncoder.new
+      encoder: RubyLsp::Requests::Support::SemanticTokenEncoder.new,
     ).run
   end
 

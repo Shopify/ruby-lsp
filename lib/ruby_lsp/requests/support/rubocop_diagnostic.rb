@@ -25,7 +25,7 @@ module RubyLsp
           @uri = uri
           @replacements = T.let(
             offense.correctable? ? offense_replacements : [],
-            T::Array[LanguageServer::Protocol::Interface::TextEdit]
+            T::Array[LanguageServer::Protocol::Interface::TextEdit],
           )
         end
 
@@ -49,11 +49,11 @@ module RubyLsp
                 LanguageServer::Protocol::Interface::TextDocumentEdit.new(
                   text_document: LanguageServer::Protocol::Interface::OptionalVersionedTextDocumentIdentifier.new(
                     uri: @uri,
-                    version: nil
+                    version: nil,
                   ),
-                  edits: @replacements
+                  edits: @replacements,
                 ),
-              ]
+              ],
             ),
             is_preferred: true,
           )
@@ -76,13 +76,13 @@ module RubyLsp
             range: LanguageServer::Protocol::Interface::Range.new(
               start: LanguageServer::Protocol::Interface::Position.new(
                 line: @offense.line - 1,
-                character: @offense.column
+                character: @offense.column,
               ),
               end: LanguageServer::Protocol::Interface::Position.new(
                 line: @offense.last_line - 1,
-                character: @offense.last_column
-              )
-            )
+                character: @offense.last_column,
+              ),
+            ),
           )
         end
 
@@ -95,9 +95,9 @@ module RubyLsp
               range: LanguageServer::Protocol::Interface::Range.new(
                 start: LanguageServer::Protocol::Interface::Position.new(line: range.line - 1, character: range.column),
                 end: LanguageServer::Protocol::Interface::Position.new(line: range.last_line - 1,
-                  character: range.last_column)
+                  character: range.last_column),
               ),
-              new_text: replacement
+              new_text: replacement,
             )
           end
         end

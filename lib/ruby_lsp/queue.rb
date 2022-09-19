@@ -28,7 +28,7 @@ module RubyLsp
     sig do
       params(
         writer: LanguageServer::Protocol::Transport::Stdio::Writer,
-        handlers: T::Hash[String, Handler::RequestHandler]
+        handlers: T::Hash[String, Handler::RequestHandler],
       ).void
     end
     def initialize(writer, handlers)
@@ -94,7 +94,7 @@ module RubyLsp
     sig do
       params(
         result: Result,
-        request: T::Hash[Symbol, T.untyped]
+        request: T::Hash[Symbol, T.untyped],
       ).void
     end
     def finalize_request(result, request)
@@ -152,7 +152,7 @@ module RubyLsp
       params(
         request: T::Hash[Symbol, T.untyped],
         request_time: Float,
-        error: T.nilable(Exception)
+        error: T.nilable(Exception),
       ).returns(T::Hash[Symbol, T.any(String, Float)])
     end
     def telemetry_params(request, request_time, error)
