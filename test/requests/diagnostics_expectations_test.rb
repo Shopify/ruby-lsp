@@ -15,7 +15,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     stdout, _ = capture_io do
       result = T.cast(
         RubyLsp::Requests::Diagnostics.new("file://#{__FILE__}", document).run,
-        T::Array[RubyLsp::Requests::Support::RuboCopDiagnostic]
+        T::Array[RubyLsp::Requests::Support::RuboCopDiagnostic],
       )
     end
 
@@ -40,13 +40,13 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
         range: LanguageServer::Protocol::Interface::Range.new(
           start: LanguageServer::Protocol::Interface::Position.new(
             line: diagnostic["range"]["start"]["line"],
-            character: diagnostic["range"]["start"]["character"]
+            character: diagnostic["range"]["start"]["character"],
           ),
           end: LanguageServer::Protocol::Interface::Position.new(
             line: diagnostic["range"]["end"]["line"],
-            character: diagnostic["range"]["end"]["character"]
-          )
-        )
+            character: diagnostic["range"]["end"]["character"],
+          ),
+        ),
       )
     end.to_json
   end

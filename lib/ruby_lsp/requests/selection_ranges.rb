@@ -93,7 +93,7 @@ module RubyLsp
       sig do
         params(
           location: SyntaxTree::Location,
-          parent: T.nilable(Support::SelectionRange)
+          parent: T.nilable(Support::SelectionRange),
         ).returns(Support::SelectionRange)
       end
       def create_selection_range(location, parent = nil)
@@ -108,7 +108,7 @@ module RubyLsp
               character: location.end_column,
             ),
           ),
-          parent: parent
+          parent: parent,
         )
       end
     end

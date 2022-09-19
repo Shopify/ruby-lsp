@@ -137,7 +137,7 @@ module RubyLsp
           LanguageServer::Protocol::Interface::FoldingRange.new(
             start_line: @start_line,
             end_line: @end_line,
-            kind: @kind
+            kind: @kind,
           )
         end
 
@@ -248,7 +248,7 @@ module RubyLsp
         @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
           start_line: start_line - 1,
           end_line: end_line - 1,
-          kind: "region"
+          kind: "region",
         )
       end
     end

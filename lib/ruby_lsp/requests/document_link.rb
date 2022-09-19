@@ -25,7 +25,7 @@ module RubyLsp
         [*::Gem::Specification.default_stubs, *::Gem::Specification.stubs].map! do |s|
           [s.name, s.version.to_s]
         end.to_h.freeze,
-        T::Hash[String, String]
+        T::Hash[String, String],
       )
 
       class << self
@@ -95,7 +95,7 @@ module RubyLsp
         @links << LanguageServer::Protocol::Interface::DocumentLink.new(
           range: range_from_syntax_tree_node(node),
           target: "file://#{file_path}##{uri.line_number}",
-          tooltip: "Jump to #{file_path}##{uri.line_number}"
+          tooltip: "Jump to #{file_path}##{uri.line_number}",
         )
       end
 

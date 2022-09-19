@@ -37,7 +37,7 @@ class DiagnosticsTest < Minitest::Test
         message: "Syntax error",
         source: "SyntaxTree",
         severity: LanguageServer::Protocol::Constant::DiagnosticSeverity::ERROR,
-        range: edit[:range]
+        range: edit[:range],
       )
     end
   end

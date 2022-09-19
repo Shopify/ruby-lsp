@@ -11,12 +11,12 @@ class QueueTest < Minitest::Test
       # Jobs for this request run immediately pushing to @cancelled_run
       "cancelled_run" => RubyLsp::Handler::RequestHandler.new(
         action: ->(_r) { @cancelled_run.push(:run) },
-        parallel: true
+        parallel: true,
       ),
       # Jobs for this request run immediately and assert the right request was received
       "test" => RubyLsp::Handler::RequestHandler.new(
         action: ->(r) { assert_equal(@expected_request, r) },
-        parallel: true
+        parallel: true,
       ),
       "always_errors" => RubyLsp::Handler::RequestHandler.new(
         action: ->(_r) {
@@ -26,7 +26,7 @@ class QueueTest < Minitest::Test
         parallel: true,
       ),
       "load_error" => RubyLsp::Handler::RequestHandler.new(
-        action: ->(_r) { raise LoadError, "cannot require 'foo' -- no such file" }, parallel: true
+        action: ->(_r) { raise LoadError, "cannot require 'foo' -- no such file" }, parallel: true,
       ),
     }
 

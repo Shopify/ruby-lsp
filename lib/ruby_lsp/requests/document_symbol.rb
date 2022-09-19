@@ -79,7 +79,7 @@ module RubyLsp
         @root = T.let(SymbolHierarchyRoot.new, SymbolHierarchyRoot)
         @stack = T.let(
           [@root],
-          T::Array[T.any(SymbolHierarchyRoot, LanguageServer::Protocol::Interface::DocumentSymbol)]
+          T::Array[T.any(SymbolHierarchyRoot, LanguageServer::Protocol::Interface::DocumentSymbol)],
         )
       end
 
@@ -95,7 +95,7 @@ module RubyLsp
           name: fully_qualified_name(node),
           kind: :class,
           range_node: node,
-          selection_range_node: node.constant
+          selection_range_node: node.constant,
         )
 
         @stack << symbol
@@ -114,7 +114,7 @@ module RubyLsp
             name: argument.value.value,
             kind: :field,
             range_node: argument,
-            selection_range_node: argument.value
+            selection_range_node: argument.value,
           )
         end
       end
@@ -125,7 +125,7 @@ module RubyLsp
           name: node.constant.value,
           kind: :constant,
           range_node: node,
-          selection_range_node: node.constant
+          selection_range_node: node.constant,
         )
       end
 
@@ -137,7 +137,7 @@ module RubyLsp
           name: name,
           kind: name == "initialize" ? :constructor : :method,
           range_node: node,
-          selection_range_node: node.name
+          selection_range_node: node.name,
         )
 
         @stack << symbol
@@ -153,7 +153,7 @@ module RubyLsp
           name: name,
           kind: name == "initialize" ? :constructor : :method,
           range_node: node,
-          selection_range_node: node.name
+          selection_range_node: node.name,
         )
 
         @stack << symbol
@@ -167,7 +167,7 @@ module RubyLsp
           name: "self.#{node.name.value}",
           kind: :method,
           range_node: node,
-          selection_range_node: node.name
+          selection_range_node: node.name,
         )
 
         @stack << symbol
@@ -181,7 +181,7 @@ module RubyLsp
           name: fully_qualified_name(node),
           kind: :module,
           range_node: node,
-          selection_range_node: node.constant
+          selection_range_node: node.constant,
         )
 
         @stack << symbol
@@ -195,7 +195,7 @@ module RubyLsp
           name: node.constant.value,
           kind: :constant,
           range_node: node,
-          selection_range_node: node.constant
+          selection_range_node: node.constant,
         )
       end
 
@@ -214,7 +214,7 @@ module RubyLsp
           name: node.value.value,
           kind: kind,
           range_node: node,
-          selection_range_node: node.value
+          selection_range_node: node.value,
         )
       end
 
@@ -225,7 +225,7 @@ module RubyLsp
           name: String,
           kind: Symbol,
           range_node: SyntaxTree::Node,
-          selection_range_node: SyntaxTree::Node
+          selection_range_node: SyntaxTree::Node,
         ).returns(LanguageServer::Protocol::Interface::DocumentSymbol)
       end
       def create_document_symbol(name:, kind:, range_node:, selection_range_node:)

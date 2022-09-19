@@ -66,7 +66,7 @@ class IntegrationTest < Minitest::Test
 
     response = make_request(
       "textDocument/documentHighlight",
-      { textDocument: { uri: "file://#{__FILE__}" }, position: { line: 0, character: 1 } }
+      { textDocument: { uri: "file://#{__FILE__}" }, position: { line: 0, character: 1 } },
     )
 
     range = response[:result].first
@@ -79,7 +79,7 @@ class IntegrationTest < Minitest::Test
 
     response = make_request(
       "textDocument/documentHighlight",
-      { textDocument: { uri: "file://#{__FILE__}" }, position: { line: 0, character: 1 } }
+      { textDocument: { uri: "file://#{__FILE__}" }, position: { line: 0, character: 1 } },
     )
 
     assert_nil(response[:result])
@@ -134,7 +134,7 @@ class IntegrationTest < Minitest::Test
 
     response = make_request(
       "textDocument/onTypeFormatting",
-      { textDocument: { uri: "file://#{__FILE__}", position: { line: 0, character: 0 }, character: "\n" } }
+      { textDocument: { uri: "file://#{__FILE__}", position: { line: 0, character: 0 }, character: "\n" } },
     )
     assert_nil(response[:result])
   end
@@ -176,7 +176,7 @@ class IntegrationTest < Minitest::Test
           text: "class Foo\ndef bar\nend\nend",
           range: { start: { line: 0, character: 0 }, end: { line: 1, character: 3 } },
         }],
-      }
+      },
     ))
   end
 
@@ -203,7 +203,7 @@ class IntegrationTest < Minitest::Test
       {
         textDocument: { uri: "file://#{__FILE__}" },
         contentChanges: [{ text: "", range: error_range }],
-      }
+      },
     ))
     assert_telemetry("textDocument/didChange")
     response = make_request("textDocument/diagnostic", { textDocument: { uri: "file://#{__FILE__}" } })
@@ -236,7 +236,7 @@ class IntegrationTest < Minitest::Test
       {
         textDocument: { uri: "file://#{__FILE__}" },
         positions: [{ line: 0, character: 0 }],
-      }
+      },
     )
 
     assert_equal(
@@ -254,7 +254,7 @@ class IntegrationTest < Minitest::Test
       {
         textDocument: { uri: "file://#{__FILE__}" },
         positions: [{ line: 0, character: 0 }],
-      }
+      },
     )
 
     assert_nil(response[:result])
@@ -276,7 +276,7 @@ class IntegrationTest < Minitest::Test
     assert_equal(LanguageServer::Protocol::Constant::MessageType::ERROR, response.dig(:params, :type))
     assert_equal(
       "Error running diagnostics: unrecognized cop or department InvalidCop found in .rubocop.yml",
-      response.dig(:params, :message)
+      response.dig(:params, :message),
     )
   ensure
     # Restore the original configuration file
@@ -345,13 +345,13 @@ class IntegrationTest < Minitest::Test
           enabledFeatures: enabled_features,
           telemetryEnabled: telemetry_enabled,
         },
-      }
+      },
     )[:result]
 
     assert(true, response.dig(:capabilities, :textDocumentSync, :openClose))
     assert(
       LanguageServer::Protocol::Constant::TextDocumentSyncKind::INCREMENTAL,
-      response.dig(:capabilities, :textDocumentSync, :openClose)
+      response.dig(:capabilities, :textDocumentSync, :openClose),
     )
 
     enabled_features.each do |feature|

@@ -30,7 +30,7 @@ module URI
           gem_name: String,
           gem_version: T.nilable(String),
           path: String,
-          line_number: T.nilable(String)
+          line_number: T.nilable(String),
         ).returns(URI::Source)
       end
       def build(gem_name:, gem_version:, path:, line_number:)

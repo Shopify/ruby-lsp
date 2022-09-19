@@ -16,7 +16,7 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
       result = T.unsafe(RubyLsp::Requests::CodeActions).new(
         "file://#{__FILE__}",
         document,
-        params[:start]..params[:end]
+        params[:start]..params[:end],
       ).run
     end
 
@@ -54,11 +54,11 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
             LanguageServer::Protocol::Interface::TextDocumentEdit.new(
               text_document: LanguageServer::Protocol::Interface::OptionalVersionedTextDocumentIdentifier.new(
                 uri: "file:///fake",
-                version: nil
+                version: nil,
               ),
-              edits: diagnostic["edit"]["documentChanges"].first["edits"]
+              edits: diagnostic["edit"]["documentChanges"].first["edits"],
             ),
-          ]
+          ],
         ),
         is_preferred: true,
       )

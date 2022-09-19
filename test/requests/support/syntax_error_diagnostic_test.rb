@@ -9,7 +9,7 @@ class SyntaxErrorDiagnosticTest < Minitest::Test
       {
         range: { start: { line: 2, character: 1 }, end: { line: 2, character: 1 } },
         text: " ",
-      }
+      },
     )
   end
 
@@ -22,7 +22,7 @@ class SyntaxErrorDiagnosticTest < Minitest::Test
       message: "Syntax error",
       source: "SyntaxTree",
       severity: LanguageServer::Protocol::Constant::DiagnosticSeverity::ERROR,
-      range: { start: { line: 2, character: 1 }, end: { line: 2, character: 1 } }
+      range: { start: { line: 2, character: 1 }, end: { line: 2, character: 1 } },
     )
 
     assert_equal(expected.to_json, @diagnostic.to_lsp_diagnostic.to_json)
