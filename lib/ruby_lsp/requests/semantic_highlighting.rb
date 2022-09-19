@@ -100,7 +100,7 @@ module RubyLsp
         @encoder.encode(@tokens)
       end
 
-      sig { params(node: SyntaxTree::Call).void }
+      sig { override.params(node: SyntaxTree::Call).void }
       def visit_call(node)
         visit(node.receiver)
 
@@ -110,32 +110,32 @@ module RubyLsp
         visit(node.arguments)
       end
 
-      sig { params(node: SyntaxTree::Command).void }
+      sig { override.params(node: SyntaxTree::Command).void }
       def visit_command(node)
         add_token(node.message.location, :method) unless special_method?(node.message.value)
         visit(node.arguments)
       end
 
-      sig { params(node: SyntaxTree::CommandCall).void }
+      sig { override.params(node: SyntaxTree::CommandCall).void }
       def visit_command_call(node)
         visit(node.receiver)
         add_token(node.message.location, :method)
         visit(node.arguments)
       end
 
-      sig { params(node: SyntaxTree::Const).void }
+      sig { override.params(node: SyntaxTree::Const).void }
       def visit_const(node)
         add_token(node.location, :namespace)
       end
 
-      sig { params(node: SyntaxTree::Def).void }
+      sig { override.params(node: SyntaxTree::Def).void }
       def visit_def(node)
         add_token(node.name.location, :method, [:declaration])
         visit(node.params)
         visit(node.bodystmt)
       end
 
-      sig { params(node: SyntaxTree::DefEndless).void }
+      sig { override.params(node: SyntaxTree::DefEndless).void }
       def visit_def_endless(node)
         add_token(node.name.location, :method, [:declaration])
         visit(node.paren)
@@ -143,7 +143,7 @@ module RubyLsp
         visit(node.statement)
       end
 
-      sig { params(node: SyntaxTree::Defs).void }
+      sig { override.params(node: SyntaxTree::Defs).void }
       def visit_defs(node)
         visit(node.target)
         visit(node.operator)
@@ -152,13 +152,13 @@ module RubyLsp
         visit(node.bodystmt)
       end
 
-      sig { params(node: SyntaxTree::FCall).void }
+      sig { override.params(node: SyntaxTree::FCall).void }
       def visit_fcall(node)
         add_token(node.value.location, :method) unless special_method?(node.value.value)
         visit(node.arguments)
       end
 
-      sig { params(node: SyntaxTree::Kw).void }
+      sig { override.params(node: SyntaxTree::Kw).void }
       def visit_kw(node)
         case node.value
         when "self"
@@ -166,7 +166,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: SyntaxTree::Params).void }
+      sig { override.params(node: SyntaxTree::Params).void }
       def visit_params(node)
         node.keywords.each do |keyword,|
           location = keyword.location
@@ -184,7 +184,7 @@ module RubyLsp
         add_token(name.location, :variable) if name
       end
 
-      sig { params(node: SyntaxTree::VarField).void }
+      sig { override.params(node: SyntaxTree::VarField).void }
       def visit_var_field(node)
         case node.value
         when SyntaxTree::Ident
@@ -194,7 +194,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: SyntaxTree::VarRef).void }
+      sig { override.params(node: SyntaxTree::VarRef).void }
       def visit_var_ref(node)
         case node.value
         when SyntaxTree::Ident
@@ -204,19 +204,19 @@ module RubyLsp
         end
       end
 
-      sig { params(node: SyntaxTree::VCall).void }
+      sig { override.params(node: SyntaxTree::VCall).void }
       def visit_vcall(node)
         add_token(node.value.location, :method) unless special_method?(node.value.value)
       end
 
-      sig { params(node: SyntaxTree::ClassDeclaration).void }
+      sig { override.params(node: SyntaxTree::ClassDeclaration).void }
       def visit_class(node)
         add_token(node.constant.location, :class, [:declaration])
         add_token(node.superclass.location, :class) if node.superclass
         visit(node.bodystmt)
       end
 
-      sig { params(node: SyntaxTree::ModuleDeclaration).void }
+      sig { override.params(node: SyntaxTree::ModuleDeclaration).void }
       def visit_module(node)
         add_token(node.constant.location, :class, [:declaration])
         visit(node.bodystmt)

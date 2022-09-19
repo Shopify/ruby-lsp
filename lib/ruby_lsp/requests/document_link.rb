@@ -82,7 +82,7 @@ module RubyLsp
         @links
       end
 
-      sig { params(node: SyntaxTree::Comment).void }
+      sig { override.params(node: SyntaxTree::Comment).void }
       def visit_comment(node)
         match = node.value.match(%r{source://.*#\d+$})
         return unless match

@@ -18,6 +18,12 @@ commands:
   typecheck:
     aliases: ["tc"]
     run: "bundle exec srb tc"
+  ci:
+    run: "bundle exec rake check_docs &&
+      bundle exec rake check_visit_overrides &&
+      bundle exec srb tc &&
+      bin/rubocop &&
+      bin/test"
   test:
     syntax:
       argument: file

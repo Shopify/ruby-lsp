@@ -78,4 +78,6 @@ task :check_docs do
 
     exit!
   end
+
+  puts "All requests contain valid documentation"
 end
