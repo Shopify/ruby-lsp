@@ -81,7 +81,7 @@ GEM
       sorbet (>= 0.5.9204)
       sorbet-runtime (>= 0.5.9204)
       thor (>= 0.19.2)
-    syntax_tree (3.5.0)
+    syntax_tree (3.6.0)
       prettier_print
     tapioca (0.10.1)
       bundler (>= 1.17.3)
@@ -114,7 +114,7 @@ DEPENDENCIES
   minitest (~> 5.16)
   minitest-reporters (~> 1.5)
   rake (~> 13.0)
-  rubocop (>= 1.0.0)
+  rubocop (~> 1.33)
   rubocop-minitest (~> 0.22.1)
   rubocop-rake (~> 0.6.0)
   rubocop-shopify (~> 2.10)
