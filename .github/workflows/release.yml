@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version to be released in the format X.Y.Z"
+        required: true
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout
+
+      - name: Bump version
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+          sed -i 's/\"version\":.*,/\"version\": \"${{ inputs.version }}\",/' package.json
+
+          git add package.json
+          git commit -m "Bump version to v${{ inputs.version }}"
+          git push origin main
+
+      - name: Create tag
+        run: |
+          git tag v${{ inputs.version }}
+          git push origin --tags
+
+      - name: Create release
+        uses: actions/github-script@v6
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          script: |
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: "refs/tags/v${{ inputs.version }}",
+              name: "v${{ inputs.version }}",
+              generate_release_notes: true
+            })
