@@ -22,6 +22,6 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name: "${{ github.ref }}",
-              name: "${{ github.ref }}",
+              name: "${{ github.ref_name }}",
               generate_release_notes: true
             })
