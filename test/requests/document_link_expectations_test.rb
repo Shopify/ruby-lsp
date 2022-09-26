@@ -33,7 +33,7 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::Document.new(source)
     js_content = File.read(File.join(TEST_FIXTURES_DIR, "rails_search_index.js"))
     fake_response = FakeHTTPResponse.new("200", js_content)
-    T.unsafe(Net::HTTP).stub(:get_response, fake_response) do
+    Net::HTTP.stub(:get_response, fake_response) do
       RubyLsp::Requests::DocumentLink.new(@_path, document).run
     end
   end
