@@ -13,6 +13,34 @@
       },
       "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/ActiveJob/QueueName/ClassMethods.html#method-i-queue_as",
       "tooltip": "Browse the Rails documentation for: ActiveJob::QueueName::ClassMethods#queue_as"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 16
+        },
+        "end": {
+          "line": 4,
+          "character": 20
+        }
+      },
+      "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/ActiveRecord/Associations/CollectionProxy.html#method-i-find",
+      "tooltip": "Browse the Rails documentation for: ActiveRecord::Associations::CollectionProxy#find"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 16
+        },
+        "end": {
+          "line": 4,
+          "character": 20
+        }
+      },
+      "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/ActiveRecord/FinderMethods.html#method-i-find",
+      "tooltip": "Browse the Rails documentation for: ActiveRecord::FinderMethods#find"
     }
   ],
   "params": [

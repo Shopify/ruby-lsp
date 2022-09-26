@@ -1,13 +1,13 @@
 class PostJob < ApplicationJob
   queue_as :default
 
-  def perform(*guests)
+  def perform(id)
+    post = Post.find(id)
     # Do something later
   end
 end
 
 # ignore
 
-before_save :foo
 before_action :bar
 

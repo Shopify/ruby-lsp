@@ -27,6 +27,48 @@
       },
       "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/AbstractController/Callbacks/ClassMethods.html#method-i-before_action",
       "tooltip": "Browse the Rails documentation for: AbstractController::Callbacks::ClassMethods#before_action"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 37
+        },
+        "end": {
+          "line": 4,
+          "character": 42
+        }
+      },
+      "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/ActiveRecord/QueryMethods.html#method-i-limit",
+      "tooltip": "Browse the Rails documentation for: ActiveRecord::QueryMethods#limit"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 17
+        },
+        "end": {
+          "line": 4,
+          "character": 22
+        }
+      },
+      "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/ActiveRecord/QueryMethods.html#method-i-where",
+      "tooltip": "Browse the Rails documentation for: ActiveRecord::QueryMethods#where"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 17
+        },
+        "end": {
+          "line": 8,
+          "character": 24
+        }
+      },
+      "target": "https://api.rubyonrails.org/vRAILTIES_VERSION/classes/ActiveRecord/FinderMethods.html#method-i-find_by",
+      "tooltip": "Browse the Rails documentation for: ActiveRecord::FinderMethods#find_by"
     }
   ],
   "params": [

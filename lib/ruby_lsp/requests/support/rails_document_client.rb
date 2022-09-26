@@ -27,7 +27,7 @@ module RubyLsp
 
         class << self
           extend T::Sig
-          sig { returns(T.nilable(T::Hash[String, T::Hash[Symbol, String]])) }
+          sig { returns(T.nilable(T::Hash[String, T::Array[T::Hash[Symbol, String]]])) }
           def rails_documents
             @rails_documents ||= T.let(begin
               table = {}
@@ -71,7 +71,10 @@ module RubyLsp
 
                   doc_path = ary[2]
                   owner = method_owner.empty? ? method_or_class : method_owner
-                  table[method_or_class] = { owner: owner, path: doc_path }
+                  table[method_or_class] ||= []
+                  # It's possible to have multiple modules defining the same method name. For example,
+                  # both `ActiveRecord::FinderMethods` and `ActiveRecord::Associations::CollectionProxy` defines `#find`
+                  table[method_or_class] << { owner: owner, path: doc_path }
                 end
               else
                 $stderr.puts("Response failed: #{response.inspect}")
@@ -81,37 +84,41 @@ module RubyLsp
             rescue StandardError => e
               $stderr.puts("Exception occurred when fetching Rails document index: #{e.inspect}")
               table
-            end, T.nilable(T::Hash[String, T::Hash[Symbol, String]]))
+            end, T.nilable(T::Hash[String, T::Array[T::Hash[Symbol, String]]]))
           end
 
           sig do
             params(name: String, range: LanguageServer::Protocol::Interface::Range,
-              file_dir: String).returns(T.nilable(LanguageServer::Protocol::Interface::DocumentLink))
+              file_dir: String).returns(T::Array[(LanguageServer::Protocol::Interface::DocumentLink)])
           end
           def generate_rails_document_link(name, range, file_dir)
-            doc = T.must(rails_documents)[name]
+            docs = T.must(rails_documents)[name]
 
-            return unless doc
+            return [] unless docs
 
-            owner = doc[:owner]
-
-            return unless RAILS_DOC_PATHS_MAP.any? do |folder, patterns|
-              file_dir.match?(folder) && T.must(owner).match?(patterns)
+            docs = docs.select do |doc|
+              RAILS_DOC_PATHS_MAP.any? do |folder, patterns|
+                file_dir.match?(folder) && T.must(doc[:owner]).match?(patterns)
+              end
             end
 
-            tooltip_name =
-              # class/module name
-              if owner == name
-                name
-              else
-                "#{owner}##{name}"
-              end
+            docs.map do |doc|
+              owner = doc[:owner]
 
-            LanguageServer::Protocol::Interface::DocumentLink.new(
-              range: range,
-              target: "#{RAILS_DOC_HOST}/v#{RAILTIES_VERSION}/#{doc[:path]}",
-              tooltip: "Browse the Rails documentation for: #{tooltip_name}",
-            )
+              tooltip_name =
+                # class/module name
+                if owner == name
+                  name
+                else
+                  "#{owner}##{name}"
+                end
+
+              LanguageServer::Protocol::Interface::DocumentLink.new(
+                range: range,
+                target: "#{RAILS_DOC_HOST}/v#{RAILTIES_VERSION}/#{doc[:path]}",
+                tooltip: "Browse the Rails documentation for: #{tooltip_name}",
+              )
+            end
           end
         end
       end
