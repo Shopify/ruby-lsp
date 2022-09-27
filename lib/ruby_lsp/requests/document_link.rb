@@ -136,21 +136,6 @@ module RubyLsp
         super
       end
 
-      sig { override.params(node: SyntaxTree::Call).void }
-      def visit_call(node)
-        return super if node.message == :call
-
-        message = node.message
-        links = Support::RailsDocumentClient.generate_rails_document_link(
-          message.value,
-          range_from_syntax_tree_node(message),
-          @file_dir,
-        )
-
-        @links.concat(links)
-        super
-      end
-
       sig { override.params(node: SyntaxTree::ConstPathRef).void }
       def visit_const_path_ref(node)
         constant_name = full_constant_name(node)
