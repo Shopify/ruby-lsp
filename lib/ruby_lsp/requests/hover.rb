@@ -56,16 +56,16 @@ module RubyLsp
       def generate_rails_document_link_hover(name, node)
         urls = Support::RailsDocumentClient.generate_rails_document_urls(name)
 
-        unless urls.empty?
-          contents = LanguageServer::Protocol::Interface::MarkupContent.new(
-            kind: "markdown",
-            value: urls.join("\n\n"),
-          )
-          LanguageServer::Protocol::Interface::Hover.new(
-            range: range_from_syntax_tree_node(node),
-            contents: contents,
-          )
-        end
+        return if urls.empty?
+
+        contents = LanguageServer::Protocol::Interface::MarkupContent.new(
+          kind: "markdown",
+          value: urls.join("\n\n"),
+        )
+        LanguageServer::Protocol::Interface::Hover.new(
+          range: range_from_syntax_tree_node(node),
+          contents: contents,
+        )
       end
     end
   end

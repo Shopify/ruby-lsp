@@ -24,8 +24,31 @@ module RubyLsp
 
         class << self
           extend T::Sig
+          sig do
+            params(name: String).returns(T::Array[String])
+          end
+          def generate_rails_document_urls(name)
+            docs = T.must(search_index)[name]
+
+            return [] unless docs
+
+            docs.map do |doc|
+              owner = doc[:owner]
+
+              link_name =
+                # class/module name
+                if owner == name
+                  name
+                else
+                  "#{owner}##{name}"
+                end
+
+              "[Rails Document: `#{link_name}`](#{doc[:url]})"
+            end
+          end
+
           sig { returns(T.nilable(T::Hash[String, T::Array[T::Hash[Symbol, String]]])) }
-          def search_index
+          private def search_index
             @rails_documents ||= T.let(
               build_search_index,
               T.nilable(T::Hash[String, T::Array[T::Hash[Symbol, String]]]),
@@ -57,7 +80,6 @@ module RubyLsp
 
           sig { params(js: String).returns(T::Hash[String, T::Array[T::Hash[Symbol, String]]]) }
           private def process_search_index(js)
-            table = {}
             raw_data = js.sub("var search_data = ", "")
             info = JSON.parse(raw_data).dig("index", "info")
 
@@ -69,51 +91,20 @@ module RubyLsp
             #  "(name, scope = nil, **options)",                                          # method's parameters
             #  "<p>Specifies a one-to-one association with another class..."]             # document preview
             #
-            info.each do |ary|
-              doc_preview = ary[4]
-              # The 5th attribute is the method's document preview.
+            info.each_with_object({}) do |(method_or_class, method_owner, doc_path, _, doc_preview), table|
               # If a method doesn't have documentation, there's no need to generate the link to it.
               next if doc_preview.nil? || doc_preview.empty?
-
-              method_or_class = ary[0]
-              method_owner = ary[1]
 
               # If the method or class/module is not from the supported namespace, reject it
               next unless [method_or_class, method_owner].any? do |elem|
                             elem.match?(SUPPORTED_RAILS_DOC_NAMESPACES)
                           end
 
-              doc_path = ary[2]
               owner = method_owner.empty? ? method_or_class : method_owner
               table[method_or_class] ||= []
               # It's possible to have multiple modules defining the same method name. For example,
               # both `ActiveRecord::FinderMethods` and `ActiveRecord::Associations::CollectionProxy` defines `#find`
               table[method_or_class] << { owner: owner, url: "#{RAILS_DOC_HOST}/v#{RAILTIES_VERSION}/#{doc_path}" }
-            end
-
-            table
-          end
-
-          sig do
-            params(name: String).returns(T::Array[String])
-          end
-          def generate_rails_document_urls(name)
-            docs = T.must(search_index)[name]
-
-            return [] unless docs
-
-            docs.map do |doc|
-              owner = doc[:owner]
-
-              link_name =
-                # class/module name
-                if owner == name
-                  name
-                else
-                  "#{owner}##{name}"
-                end
-
-              "[Rails Document: `#{link_name}`](#{doc[:url]})"
             end
           end
         end
