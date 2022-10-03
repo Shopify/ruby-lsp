@@ -24,6 +24,7 @@ class IntegrationTest < Minitest::Test
     "onTypeFormatting" => :documentOnTypeFormattingProvider,
     "codeActions" => :codeActionProvider,
     "diagnostics" => :diagnosticProvider,
+    "hover" => :hoverProvider,
   }.freeze
 
   def setup
@@ -71,6 +72,21 @@ class IntegrationTest < Minitest::Test
 
     range = response[:result].first
     assert_equal(LanguageServer::Protocol::Constant::DocumentHighlightKind::WRITE, range[:kind])
+  end
+
+  def test_hover
+    initialize_lsp(["hover"])
+    open_file_with("$foo = 1")
+
+    assert_telemetry("textDocument/didOpen")
+
+    response = make_request(
+      "textDocument/hover",
+      { textDocument: { uri: "file://#{__FILE__}" }, position: { line: 0, character: 1 } },
+    )
+
+    assert_nil(response[:result])
+    assert_nil(response[:error])
   end
 
   def test_document_highlight_with_syntax_error
@@ -146,7 +162,8 @@ class IntegrationTest < Minitest::Test
     assert_telemetry("textDocument/didOpen")
 
     response = make_request("textDocument/codeAction",
-      { textDocument: { uri: "file://#{__FILE__}" }, range: { start: { line: 0 }, end: { line: 1 } } })
+      { textDocument: { uri: "file://#{__FILE__}" },
+        range: { start: { line: 0 }, end: { line: 1 } }, })
     quickfix = response[:result].first
     assert_equal("quickfix", quickfix[:kind])
     assert_match(%r{Autocorrect .*/.*}, quickfix[:title])

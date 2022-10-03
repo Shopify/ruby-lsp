@@ -5,3 +5,4 @@
 
 require "language_server-protocol"
 require "syntax_tree"
+require "minitest/mock"

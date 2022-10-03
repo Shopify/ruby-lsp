@@ -30,6 +30,51 @@ module RubyLsp
           end: LanguageServer::Protocol::Interface::Position.new(line: loc.end_line - 1, character: loc.end_column),
         )
       end
+
+      sig { params(node: SyntaxTree::ConstPathRef).returns(String) }
+      def full_constant_name(node)
+        name = +node.constant.value
+        constant = T.let(node, SyntaxTree::Node)
+
+        while constant.is_a?(SyntaxTree::ConstPathRef)
+          constant = constant.parent
+
+          case constant
+          when SyntaxTree::ConstPathRef
+            name.prepend("#{constant.constant.value}::")
+          when SyntaxTree::VarRef
+            name.prepend("#{constant.value.value}::")
+          end
+        end
+
+        name
+      end
+
+      sig do
+        params(
+          parent: SyntaxTree::Node,
+          target_nodes: T::Array[T.class_of(SyntaxTree::Node)],
+          position: Integer,
+        ).returns(T::Array[SyntaxTree::Node])
+      end
+      def locate_node_and_parent(parent, target_nodes, position)
+        matched = parent.child_nodes.compact.bsearch do |child|
+          if (child.location.start_char...child.location.end_char).cover?(position)
+            0
+          else
+            position <=> child.location.start_char
+          end
+        end
+
+        case matched
+        when *target_nodes
+          [matched, parent]
+        when SyntaxTree::Node
+          locate_node_and_parent(matched, target_nodes, position)
+        else
+          []
+        end
+      end
     end
   end
 end
