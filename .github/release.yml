@@ -1,0 +1,22 @@
+# release.yml
+
+changelog:
+  exclude:
+    labels:
+      - dependencies
+      - chore
+    authors:
+      - dependabot
+  categories:
+    - title: 🚧 Breaking Changes
+      labels:
+        - breaking-change
+    - title: ✨ Enhancements
+      labels:
+        - enhancement
+    - title: 🐛 Bug Fixes
+      labels:
+        - bug
+    - title: 🛠 Other Changes
+      labels:
+        - "*"
