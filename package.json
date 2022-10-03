@@ -115,28 +115,13 @@
           }
         },
         "rubyLsp.rubyVersionManager": {
-          "description": "Ruby version manager configuration",
-          "type": "object",
-          "properties": {
-            "manager": {
-              "description": "The Ruby version manager to use",
-              "type": "string",
-              "enum": [
-                "shadowenv",
-                "chruby"
-              ],
-              "default": "shadowenv"
-            },
-            "path": {
-              "description": "The path to the Ruby version manager script or executable",
-              "type": "string",
-              "default": ""
-            }
-          },
-          "default": {
-            "manager": "shadowenv",
-            "path": ""
-          }
+          "description": "The Ruby version manager to use",
+          "type": "string",
+          "enum": [
+            "shadowenv",
+            "chruby"
+          ],
+          "default": "shadowenv"
         }
       }
     },

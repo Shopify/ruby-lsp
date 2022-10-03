@@ -35,10 +35,13 @@ In order to boot the server properly, the Ruby version manager must be configure
 Check the [package.json](https://github.com/Shopify/vscode-ruby-lsp/blob/main/package.json) for currently supported
 managers.
 
+To make sure that the Ruby LSP can find the version manager scripts, make sure that they are loaded in the shell's
+configuration script (e.g.: ~/.bashrc, ~/.zshrc) and that the SHELL environment variable is set and pointing to the
+default shell.
+
 ```jsonc
 "rubyLsp.rubyVersionManager": {
   "manager": "chruby", // The handle for the version manager (e.g.: chruby, shadowenv)
-  "path": "/opt/homebrew/opt/chruby/chruby.sh" // The path for the script or executable
 }
 ```
 
