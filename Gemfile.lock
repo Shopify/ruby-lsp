@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruby-lsp (0.3.0)
+    ruby-lsp (0.3.3)
       language_server-protocol (~> 3.17.0)
       sorbet-runtime
       syntax_tree (>= 3.4)
