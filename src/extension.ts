@@ -2,16 +2,17 @@ import * as vscode from "vscode";
 
 import Client from "./client";
 import { Telemetry } from "./telemetry";
+import { Ruby } from "./ruby";
 
 let client: Client;
 
 export async function activate(context: vscode.ExtensionContext) {
-  activateRuby();
+  await new Ruby().activateRuby();
 
   const telemetry = new Telemetry(context);
   client = new Client(context, telemetry);
 
-  // Adding this delay guarantees that shadowenv has enough time to load the right environment
+  // Adding this delay guarantees that the Ruby environment is activated before trying to start the server
   await delay(500);
   await client.start();
 }
@@ -20,10 +21,6 @@ async function delay(mseconds: number) {
   return new Promise((resolve) => {
     setTimeout(resolve, mseconds);
   });
-}
-
-function activateRuby() {
-  vscode.extensions.getExtension("shopify.vscode-shadowenv")?.activate();
 }
 
 export async function deactivate(): Promise<void> {

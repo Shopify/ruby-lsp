@@ -119,6 +119,15 @@
             "selectionRanges": true,
             "semanticHighlighting": true
           }
+        },
+        "rubyLsp.rubyVersionManager": {
+          "description": "The Ruby version manager to use",
+          "type": "string",
+          "enum": [
+            "shadowenv",
+            "chruby"
+          ],
+          "default": "shadowenv"
         }
       }
     },
