@@ -4712,3 +4712,6 @@ class REXML::XPathParser
   # source://rexml//lib/rexml/xpath_parser.rb#877
   def value_type(value); end
 end
+
+# source://rexml//lib/rexml/xpath_parser.rb#58
+REXML::XPathParser::DEBUG = T.let(T.unsafe(nil), FalseClass)

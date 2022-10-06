@@ -4699,6 +4699,9 @@ end
 # source://parser//lib/parser/ruby31.rb#3666
 Parser::Ruby31::Racc_arg = T.let(T.unsafe(nil), Array)
 
+# source://parser//lib/parser/ruby31.rb#4071
+Parser::Ruby31::Racc_debug_parser = T.let(T.unsafe(nil), FalseClass)
+
 # source://parser//lib/parser/ruby31.rb#3682
 Parser::Ruby31::Racc_token_to_s_table = T.let(T.unsafe(nil), Array)
 

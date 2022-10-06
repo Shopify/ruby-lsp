@@ -4943,6 +4943,9 @@ RuboCop::AST::NodePattern::Parser::Lexer = RuboCop::AST::NodePattern::Lexer
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/parser.racc.rb#227
 RuboCop::AST::NodePattern::Parser::Racc_arg = T.let(T.unsafe(nil), Array)
 
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/parser.racc.rb#293
+RuboCop::AST::NodePattern::Parser::Racc_debug_parser = T.let(T.unsafe(nil), FalseClass)
+
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/parser.racc.rb#243
 RuboCop::AST::NodePattern::Parser::Racc_token_to_s_table = T.let(T.unsafe(nil), Array)
 
@@ -6884,11 +6887,11 @@ class RuboCop::AST::YieldNode < ::RuboCop::AST::Node
   def node_parts; end
 end
 
-# source://rubocop/1.35.0/lib/rubocop/ast_aliases.rb#5
+# source://rubocop/1.36.0/lib/rubocop/ast_aliases.rb#5
 RuboCop::NodePattern = RuboCop::AST::NodePattern
 
-# source://rubocop/1.35.0/lib/rubocop/ast_aliases.rb#6
+# source://rubocop/1.36.0/lib/rubocop/ast_aliases.rb#6
 RuboCop::ProcessedSource = RuboCop::AST::ProcessedSource
 
-# source://rubocop/1.35.0/lib/rubocop/ast_aliases.rb#7
+# source://rubocop/1.36.0/lib/rubocop/ast_aliases.rb#7
 RuboCop::Token = RuboCop::AST::Token

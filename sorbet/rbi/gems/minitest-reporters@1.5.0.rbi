@@ -7,73 +7,73 @@
 # source://minitest-reporters//lib/minitest/reporters.rb#3
 module Minitest
   class << self
-    # source://minitest/5.16.2/lib/minitest.rb#173
+    # source://minitest/5.16.3/lib/minitest.rb#173
     def __run(reporter, options); end
 
-    # source://minitest/5.16.2/lib/minitest.rb#94
+    # source://minitest/5.16.3/lib/minitest.rb#94
     def after_run(&block); end
 
-    # source://minitest/5.16.2/lib/minitest.rb#66
+    # source://minitest/5.16.3/lib/minitest.rb#66
     def autorun; end
 
-    # source://minitest/5.16.2/lib/minitest.rb#19
+    # source://minitest/5.16.3/lib/minitest.rb#19
     def backtrace_filter; end
 
-    # source://minitest/5.16.2/lib/minitest.rb#19
+    # source://minitest/5.16.3/lib/minitest.rb#19
     def backtrace_filter=(_arg0); end
 
-    # source://minitest/5.16.2/lib/minitest.rb#18
+    # source://minitest/5.16.3/lib/minitest.rb#18
     def cattr_accessor(name); end
 
-    # source://minitest/5.16.2/lib/minitest.rb#1067
+    # source://minitest/5.16.3/lib/minitest.rb#1067
     def clock_time; end
 
-    # source://minitest/5.16.2/lib/minitest.rb#19
+    # source://minitest/5.16.3/lib/minitest.rb#19
     def extensions; end
 
-    # source://minitest/5.16.2/lib/minitest.rb#19
+    # source://minitest/5.16.3/lib/minitest.rb#19
     def extensions=(_arg0); end
 
-    # source://minitest/5.16.2/lib/minitest.rb#264
+    # source://minitest/5.16.3/lib/minitest.rb#264
     def filter_backtrace(bt); end
 
-    # source://minitest/5.16.2/lib/minitest.rb#19
+    # source://minitest/5.16.3/lib/minitest.rb#19
     def info_signal; end
 
-    # source://minitest/5.16.2/lib/minitest.rb#19
+    # source://minitest/5.16.3/lib/minitest.rb#19
     def info_signal=(_arg0); end
 
-    # source://minitest/5.16.2/lib/minitest.rb#98
+    # source://minitest/5.16.3/lib/minitest.rb#98
     def init_plugins(options); end
 
-    # source://minitest/5.16.2/lib/minitest.rb#105
+    # source://minitest/5.16.3/lib/minitest.rb#105
     def load_plugins; end
 
-    # source://minitest/5.16.2/lib/minitest.rb#19
+    # source://minitest/5.16.3/lib/minitest.rb#19
     def parallel_executor; end
 
-    # source://minitest/5.16.2/lib/minitest.rb#19
+    # source://minitest/5.16.3/lib/minitest.rb#19
     def parallel_executor=(_arg0); end
 
-    # source://minitest/5.16.2/lib/minitest.rb#186
+    # source://minitest/5.16.3/lib/minitest.rb#186
     def process_args(args = T.unsafe(nil)); end
 
-    # source://minitest/5.16.2/lib/minitest.rb#19
+    # source://minitest/5.16.3/lib/minitest.rb#19
     def reporter; end
 
-    # source://minitest/5.16.2/lib/minitest.rb#19
+    # source://minitest/5.16.3/lib/minitest.rb#19
     def reporter=(_arg0); end
 
-    # source://minitest/5.16.2/lib/minitest.rb#140
+    # source://minitest/5.16.3/lib/minitest.rb#140
     def run(args = T.unsafe(nil)); end
 
-    # source://minitest/5.16.2/lib/minitest.rb#1058
+    # source://minitest/5.16.3/lib/minitest.rb#1058
     def run_one_method(klass, method_name); end
 
-    # source://minitest/5.16.2/lib/minitest.rb#19
+    # source://minitest/5.16.3/lib/minitest.rb#19
     def seed; end
 
-    # source://minitest/5.16.2/lib/minitest.rb#19
+    # source://minitest/5.16.3/lib/minitest.rb#19
     def seed=(_arg0); end
   end
 end
@@ -982,5 +982,5 @@ end
 # source://minitest-reporters//lib/minitest/reporters/version.rb#3
 Minitest::Reporters::VERSION = T.let(T.unsafe(nil), String)
 
-# source://minitest/5.16.2/lib/minitest.rb#12
+# source://minitest/5.16.3/lib/minitest.rb#12
 Minitest::VERSION = T.let(T.unsafe(nil), String)

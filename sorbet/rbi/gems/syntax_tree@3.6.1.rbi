@@ -1053,6 +1053,8 @@ end
 #
 # source://syntax_tree//lib/syntax_tree/basic_visitor.rb#11
 class SyntaxTree::BasicVisitor::VisitMethodError < ::StandardError
+  include ::DidYouMean::Correctable
+
   # @return [VisitMethodError] a new instance of VisitMethodError
   #
   # source://syntax_tree//lib/syntax_tree/basic_visitor.rb#14

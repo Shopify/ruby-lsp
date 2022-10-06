@@ -1513,6 +1513,12 @@ JSON::State = JSON::Ext::Generator::State
 # source://json//lib/json/common.rb#159
 JSON::UnparserError = JSON::GeneratorError
 
+# Since Ruby is very dynamic, methods added to the ancestors of
+# BlankSlate <em>after BlankSlate is defined</em> will show up in the
+# list of available BlankSlate methods.  We handle this by defining a
+# hook in the Object and Kernel classes that will hide any method
+# defined after BlankSlate has been loaded.
+#
 # source://json//lib/json/common.rb#658
 module Kernel
   private
