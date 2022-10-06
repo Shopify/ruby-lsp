@@ -191,7 +191,9 @@ class DocumentTest < Minitest::Test
     document.push_edits([
       { range: { start: { line: 2, character: 1 }, end: { line: 2, character: 1 } }, text: " " },
     ])
+    document.parse
     document.push_edits([error_edit])
+    document.parse
     assert_error_edit(document.syntax_error_edits, error_edit)
     assert_predicate(document, :syntax_errors?)
 
@@ -212,6 +214,7 @@ class DocumentTest < Minitest::Test
 
     error_edit = { range: { start: { line: 3, character: 2 }, end: { line: 3, character: 3 } }, text: "" }
     document.push_edits([error_edit])
+    document.parse
     assert_error_edit(document.syntax_error_edits, error_edit)
     assert_predicate(document, :syntax_errors?)
 

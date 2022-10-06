@@ -31,6 +31,8 @@ module RubyLsp
 
       sig { override.returns(T.nilable(LanguageServer::Protocol::Interface::Hover)) }
       def run
+        return unless @document.parsed?
+
         target, _ = locate_node_and_parent(
           T.must(@document.tree), [SyntaxTree::Command, SyntaxTree::FCall, SyntaxTree::ConstPathRef], @position
         )

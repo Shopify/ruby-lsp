@@ -94,6 +94,8 @@ module RubyLsp
         )
       end
       def run
+        return @tokens unless @document.parsed?
+
         visit(@tree)
         return @tokens unless @encoder
 
