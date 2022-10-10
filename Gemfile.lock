@@ -9,20 +9,20 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    actionpack (7.0.3.1)
-      actionview (= 7.0.3.1)
-      activesupport (= 7.0.3.1)
+    actionpack (7.0.4)
+      actionview (= 7.0.4)
+      activesupport (= 7.0.4)
       rack (~> 2.0, >= 2.2.0)
       rack-test (>= 0.6.3)
       rails-dom-testing (~> 2.0)
       rails-html-sanitizer (~> 1.0, >= 1.2.0)
-    actionview (7.0.3.1)
-      activesupport (= 7.0.3.1)
+    actionview (7.0.4)
+      activesupport (= 7.0.4)
       builder (~> 3.1)
       erubi (~> 1.4)
       rails-dom-testing (~> 2.0)
       rails-html-sanitizer (~> 1.1, >= 1.2.0)
-    activesupport (7.0.3.1)
+    activesupport (7.0.4)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
@@ -45,7 +45,7 @@ GEM
       reline (>= 0.3.0)
     json (2.6.2)
     language_server-protocol (3.17.0.1)
-    loofah (2.18.0)
+    loofah (2.19.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     method_source (1.0.0)
@@ -76,9 +76,9 @@ GEM
       nokogiri (>= 1.6)
     rails-html-sanitizer (1.4.3)
       loofah (~> 2.3)
-    railties (7.0.3.1)
-      actionpack (= 7.0.3.1)
-      activesupport (= 7.0.3.1)
+    railties (7.0.4)
+      actionpack (= 7.0.4)
+      activesupport (= 7.0.4)
       method_source
       rake (>= 12.2)
       thor (~> 1.0)
@@ -152,7 +152,7 @@ GEM
     yard-sorbet (0.7.0)
       sorbet-runtime (>= 0.5)
       yard (>= 0.9)
-    zeitwerk (2.6.0)
+    zeitwerk (2.6.1)
 
 PLATFORMS
   arm64-darwin-21
