@@ -15,14 +15,14 @@ export async function isGemOutdated(): Promise<boolean> {
   return false;
 }
 
-export async function updateGem(): Promise<void> {
-  await execInPath("bundle update ruby-lsp --conservative");
+export async function updateGem(): Promise<{ stdout: string; stderr: string }> {
+  return execInPath("bundle update ruby-lsp");
 }
 
-async function execInPath(command: string): Promise<string> {
-  const result = await asyncExec(command, {
+async function execInPath(
+  command: string
+): Promise<{ stdout: string; stderr: string }> {
+  return asyncExec(command, {
     cwd: vscode.workspace.workspaceFolders![0].uri.fsPath,
   });
-
-  return result.stdout;
 }
