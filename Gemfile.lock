@@ -4,7 +4,7 @@ PATH
     ruby-lsp (0.3.3)
       language_server-protocol (~> 3.17.0)
       sorbet-runtime
-      syntax_tree (>= 3.4)
+      syntax_tree (>= 3.6.3)
 
 GEM
   remote: https://rubygems.org/
@@ -127,7 +127,7 @@ GEM
       sorbet (>= 0.5.9204)
       sorbet-runtime (>= 0.5.9204)
       thor (>= 0.19.2)
-    syntax_tree (3.6.2)
+    syntax_tree (3.6.3)
       prettier_print
     tapioca (0.10.2)
       bundler (>= 1.17.3)

@@ -1053,6 +1053,8 @@ end
 #
 # source://syntax_tree//lib/syntax_tree/basic_visitor.rb#11
 class SyntaxTree::BasicVisitor::VisitMethodError < ::StandardError
+  include ::DidYouMean::Correctable
+
   # @return [VisitMethodError] a new instance of VisitMethodError
   #
   # source://syntax_tree//lib/syntax_tree/basic_visitor.rb#14
@@ -1232,7 +1234,7 @@ class SyntaxTree::BlockFormatter
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#1995
+  # source://syntax_tree//lib/syntax_tree/node.rb#2006
   def forced_brace_bounds?(q); end
 
   # If we're a sibling of a control-flow keyword, then we're going to have to
@@ -1240,13 +1242,13 @@ class SyntaxTree::BlockFormatter
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#1989
+  # source://syntax_tree//lib/syntax_tree/node.rb#1995
   def forced_do_end_bounds?(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2015
+  # source://syntax_tree//lib/syntax_tree/node.rb#2026
   def format_break(q, opening, closing); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2035
+  # source://syntax_tree//lib/syntax_tree/node.rb#2046
   def format_flat(q, opening, closing); end
 
   # If this is nested anywhere inside certain nodes, then we can't change
@@ -1254,7 +1256,7 @@ class SyntaxTree::BlockFormatter
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#1976
+  # source://syntax_tree//lib/syntax_tree/node.rb#1977
   def unchangeable_bounds?(q); end
 end
 
@@ -1399,46 +1401,46 @@ end
 #
 #     method { |variable| variable + 1 }
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2063
+# source://syntax_tree//lib/syntax_tree/node.rb#2074
 class SyntaxTree::BraceBlock < ::SyntaxTree::Node
   # @return [BraceBlock] a new instance of BraceBlock
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2075
+  # source://syntax_tree//lib/syntax_tree/node.rb#2086
   def initialize(lbrace:, block_var:, statements:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2083
+  # source://syntax_tree//lib/syntax_tree/node.rb#2094
   def accept(visitor); end
 
   # [nil | BlockVar] the optional set of parameters to the block
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2067
+  # source://syntax_tree//lib/syntax_tree/node.rb#2078
   def block_var; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2087
+  # source://syntax_tree//lib/syntax_tree/node.rb#2098
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2073
+  # source://syntax_tree//lib/syntax_tree/node.rb#2084
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2087
+  # source://syntax_tree//lib/syntax_tree/node.rb#2098
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2093
+  # source://syntax_tree//lib/syntax_tree/node.rb#2104
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2103
+  # source://syntax_tree//lib/syntax_tree/node.rb#2114
   def format(q); end
 
   # [LBrace] the left brace that opens this block
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2064
+  # source://syntax_tree//lib/syntax_tree/node.rb#2075
   def lbrace; end
 
   # [Statements] the list of expressions to evaluate within the block
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2070
+  # source://syntax_tree//lib/syntax_tree/node.rb#2081
   def statements; end
 end
 
@@ -1450,36 +1452,36 @@ end
 #
 #     break 1
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2271
+# source://syntax_tree//lib/syntax_tree/node.rb#2282
 class SyntaxTree::Break < ::SyntaxTree::Node
   # @return [Break] a new instance of Break
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2277
+  # source://syntax_tree//lib/syntax_tree/node.rb#2288
   def initialize(arguments:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2283
+  # source://syntax_tree//lib/syntax_tree/node.rb#2294
   def accept(visitor); end
 
   # [Args] the arguments being sent to the keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2272
+  # source://syntax_tree//lib/syntax_tree/node.rb#2283
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2287
+  # source://syntax_tree//lib/syntax_tree/node.rb#2298
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2275
+  # source://syntax_tree//lib/syntax_tree/node.rb#2286
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2287
+  # source://syntax_tree//lib/syntax_tree/node.rb#2298
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2293
+  # source://syntax_tree//lib/syntax_tree/node.rb#2304
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2297
+  # source://syntax_tree//lib/syntax_tree/node.rb#2308
   def format(q); end
 end
 
@@ -1527,36 +1529,36 @@ end
 #
 #     @@variable
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3357
+# source://syntax_tree//lib/syntax_tree/node.rb#3369
 class SyntaxTree::CVar < ::SyntaxTree::Node
   # @return [CVar] a new instance of CVar
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3363
+  # source://syntax_tree//lib/syntax_tree/node.rb#3375
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3369
+  # source://syntax_tree//lib/syntax_tree/node.rb#3381
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3373
+  # source://syntax_tree//lib/syntax_tree/node.rb#3385
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3361
+  # source://syntax_tree//lib/syntax_tree/node.rb#3373
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3373
+  # source://syntax_tree//lib/syntax_tree/node.rb#3385
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3379
+  # source://syntax_tree//lib/syntax_tree/node.rb#3391
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3383
+  # source://syntax_tree//lib/syntax_tree/node.rb#3395
   def format(q); end
 
   # [String] the name of the class variable
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3358
+  # source://syntax_tree//lib/syntax_tree/node.rb#3370
   def value; end
 end
 
@@ -1564,57 +1566,57 @@ end
 #
 #     receiver.message
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2535
+# source://syntax_tree//lib/syntax_tree/node.rb#2547
 class SyntaxTree::Call < ::SyntaxTree::Node
   # @return [Call] a new instance of Call
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2550
+  # source://syntax_tree//lib/syntax_tree/node.rb#2562
   def initialize(receiver:, operator:, message:, arguments:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2566
+  # source://syntax_tree//lib/syntax_tree/node.rb#2578
   def accept(visitor); end
 
   # [nil | ArgParen | Args] the arguments to the method call
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2545
+  # source://syntax_tree//lib/syntax_tree/node.rb#2557
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2570
+  # source://syntax_tree//lib/syntax_tree/node.rb#2582
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2548
+  # source://syntax_tree//lib/syntax_tree/node.rb#2560
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2570
+  # source://syntax_tree//lib/syntax_tree/node.rb#2582
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2581
+  # source://syntax_tree//lib/syntax_tree/node.rb#2593
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2592
+  # source://syntax_tree//lib/syntax_tree/node.rb#2604
   def format(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2608
+  # source://syntax_tree//lib/syntax_tree/node.rb#2620
   def format_arguments(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2620
+  # source://syntax_tree//lib/syntax_tree/node.rb#2632
   def format_contents(q); end
 
   # [:call | Backtick | Const | Ident | Op] the message being sent
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2542
+  # source://syntax_tree//lib/syntax_tree/node.rb#2554
   def message; end
 
   # [:"::" | Op | Period] the operator being used to send the message
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2539
+  # source://syntax_tree//lib/syntax_tree/node.rb#2551
   def operator; end
 
   # [untyped] the receiver of the method call
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2536
+  # source://syntax_tree//lib/syntax_tree/node.rb#2548
   def receiver; end
 end
 
@@ -1633,22 +1635,22 @@ end
 # Of course there are a lot of caveats to that, including trailing operators
 # when necessary, where comments are places, how blocks are aligned, etc.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2339
+# source://syntax_tree//lib/syntax_tree/node.rb#2351
 class SyntaxTree::CallChainFormatter
   # @return [CallChainFormatter] a new instance of CallChainFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2343
+  # source://syntax_tree//lib/syntax_tree/node.rb#2355
   def initialize(node); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2347
+  # source://syntax_tree//lib/syntax_tree/node.rb#2359
   def format(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2397
+  # source://syntax_tree//lib/syntax_tree/node.rb#2409
   def format_chain(q, children); end
 
   # [Call | MethodAddBlock] the top of the call chain
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2341
+  # source://syntax_tree//lib/syntax_tree/node.rb#2353
   def node; end
 
   private
@@ -1659,16 +1661,16 @@ class SyntaxTree::CallChainFormatter
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2490
+  # source://syntax_tree//lib/syntax_tree/node.rb#2502
   def attach_directly?(node); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2496
+  # source://syntax_tree//lib/syntax_tree/node.rb#2508
   def format_child(q, child, skip_comments: T.unsafe(nil), skip_operator: T.unsafe(nil), skip_attached: T.unsafe(nil)); end
 
   class << self
     # @return [Boolean]
     #
-    # source://syntax_tree//lib/syntax_tree/node.rb#2476
+    # source://syntax_tree//lib/syntax_tree/node.rb#2488
     def chained?(node); end
   end
 end
@@ -1676,22 +1678,22 @@ end
 # Wraps a call operator (which can be a string literal :: or an Op node or a
 # Period node) and formats it when called.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2304
+# source://syntax_tree//lib/syntax_tree/node.rb#2315
 class SyntaxTree::CallOperatorFormatter
   # @return [CallOperatorFormatter] a new instance of CallOperatorFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2308
+  # source://syntax_tree//lib/syntax_tree/node.rb#2319
   def initialize(operator); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2312
+  # source://syntax_tree//lib/syntax_tree/node.rb#2323
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2316
+  # source://syntax_tree//lib/syntax_tree/node.rb#2327
   def format(q); end
 
   # [:"::" | Op | Period] the operator being formatted
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2306
+  # source://syntax_tree//lib/syntax_tree/node.rb#2317
   def operator; end
 end
 
@@ -1706,46 +1708,46 @@ end
 #       "number"
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2661
+# source://syntax_tree//lib/syntax_tree/node.rb#2673
 class SyntaxTree::Case < ::SyntaxTree::Node
   # @return [Case] a new instance of Case
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2673
+  # source://syntax_tree//lib/syntax_tree/node.rb#2685
   def initialize(keyword:, value:, consequent:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2681
+  # source://syntax_tree//lib/syntax_tree/node.rb#2693
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2685
+  # source://syntax_tree//lib/syntax_tree/node.rb#2697
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2671
+  # source://syntax_tree//lib/syntax_tree/node.rb#2683
   def comments; end
 
   # [In | When] the next clause in the chain
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2668
+  # source://syntax_tree//lib/syntax_tree/node.rb#2680
   def consequent; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2685
+  # source://syntax_tree//lib/syntax_tree/node.rb#2697
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2691
+  # source://syntax_tree//lib/syntax_tree/node.rb#2703
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2701
+  # source://syntax_tree//lib/syntax_tree/node.rb#2713
   def format(q); end
 
   # [Kw] the keyword that opens this expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2662
+  # source://syntax_tree//lib/syntax_tree/node.rb#2674
   def keyword; end
 
   # [nil | untyped] optional value being switched on
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2665
+  # source://syntax_tree//lib/syntax_tree/node.rb#2677
   def value; end
 end
 
@@ -1781,74 +1783,74 @@ end
 #     class Child < method
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2822
+# source://syntax_tree//lib/syntax_tree/node.rb#2834
 class SyntaxTree::ClassDeclaration < ::SyntaxTree::Node
   # @return [ClassDeclaration] a new instance of ClassDeclaration
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2834
+  # source://syntax_tree//lib/syntax_tree/node.rb#2846
   def initialize(constant:, superclass:, bodystmt:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2842
+  # source://syntax_tree//lib/syntax_tree/node.rb#2854
   def accept(visitor); end
 
   # [BodyStmt] the expressions to execute within the context of the class
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2829
+  # source://syntax_tree//lib/syntax_tree/node.rb#2841
   def bodystmt; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2846
+  # source://syntax_tree//lib/syntax_tree/node.rb#2858
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2832
+  # source://syntax_tree//lib/syntax_tree/node.rb#2844
   def comments; end
 
   # [ConstPathRef | ConstRef | TopConstRef] the name of the class being
   # defined
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2823
+  # source://syntax_tree//lib/syntax_tree/node.rb#2835
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2846
+  # source://syntax_tree//lib/syntax_tree/node.rb#2858
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2852
+  # source://syntax_tree//lib/syntax_tree/node.rb#2864
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2862
+  # source://syntax_tree//lib/syntax_tree/node.rb#2874
   def format(q); end
 
   # [nil | untyped] the optional superclass declaration
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2826
+  # source://syntax_tree//lib/syntax_tree/node.rb#2838
   def superclass; end
 end
 
 # Comma represents the use of the , operator.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2899
+# source://syntax_tree//lib/syntax_tree/node.rb#2911
 class SyntaxTree::Comma < ::SyntaxTree::Node
   # @return [Comma] a new instance of Comma
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2902
+  # source://syntax_tree//lib/syntax_tree/node.rb#2914
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2907
+  # source://syntax_tree//lib/syntax_tree/node.rb#2919
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2911
+  # source://syntax_tree//lib/syntax_tree/node.rb#2923
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2911
+  # source://syntax_tree//lib/syntax_tree/node.rb#2923
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2917
+  # source://syntax_tree//lib/syntax_tree/node.rb#2929
   def deconstruct_keys(_keys); end
 
   # [String] the comma in the string
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2900
+  # source://syntax_tree//lib/syntax_tree/node.rb#2912
   def value; end
 end
 
@@ -1858,46 +1860,46 @@ end
 #
 #     method argument
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2929
+# source://syntax_tree//lib/syntax_tree/node.rb#2941
 class SyntaxTree::Command < ::SyntaxTree::Node
   # @return [Command] a new instance of Command
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2938
+  # source://syntax_tree//lib/syntax_tree/node.rb#2950
   def initialize(message:, arguments:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2945
+  # source://syntax_tree//lib/syntax_tree/node.rb#2957
   def accept(visitor); end
 
   # [Args] the arguments being sent with the message
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2933
+  # source://syntax_tree//lib/syntax_tree/node.rb#2945
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2949
+  # source://syntax_tree//lib/syntax_tree/node.rb#2961
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2936
+  # source://syntax_tree//lib/syntax_tree/node.rb#2948
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2949
+  # source://syntax_tree//lib/syntax_tree/node.rb#2961
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2955
+  # source://syntax_tree//lib/syntax_tree/node.rb#2967
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2964
+  # source://syntax_tree//lib/syntax_tree/node.rb#2976
   def format(q); end
 
   # [Const | Ident] the message being sent to the implicit receiver
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2930
+  # source://syntax_tree//lib/syntax_tree/node.rb#2942
   def message; end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2973
+  # source://syntax_tree//lib/syntax_tree/node.rb#2985
   def align(q, node, &block); end
 end
 
@@ -1906,56 +1908,56 @@ end
 #
 #     object.method argument
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2996
+# source://syntax_tree//lib/syntax_tree/node.rb#3008
 class SyntaxTree::CommandCall < ::SyntaxTree::Node
   # @return [CommandCall] a new instance of CommandCall
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3011
+  # source://syntax_tree//lib/syntax_tree/node.rb#3023
   def initialize(receiver:, operator:, message:, arguments:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3027
+  # source://syntax_tree//lib/syntax_tree/node.rb#3039
   def accept(visitor); end
 
   # [nil | Args] the arguments going along with the message
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3006
+  # source://syntax_tree//lib/syntax_tree/node.rb#3018
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3031
+  # source://syntax_tree//lib/syntax_tree/node.rb#3043
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3009
+  # source://syntax_tree//lib/syntax_tree/node.rb#3021
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3031
+  # source://syntax_tree//lib/syntax_tree/node.rb#3043
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3037
+  # source://syntax_tree//lib/syntax_tree/node.rb#3049
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3048
+  # source://syntax_tree//lib/syntax_tree/node.rb#3060
   def format(q); end
 
   # [Const | Ident | Op] the message being send
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3003
+  # source://syntax_tree//lib/syntax_tree/node.rb#3015
   def message; end
 
   # [:"::" | Op | Period] the operator used to send the message
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3000
+  # source://syntax_tree//lib/syntax_tree/node.rb#3012
   def operator; end
 
   # [untyped] the receiver of the message
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2997
+  # source://syntax_tree//lib/syntax_tree/node.rb#3009
   def receiver; end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3084
+  # source://syntax_tree//lib/syntax_tree/node.rb#3096
   def argument_alignment(q, doc); end
 end
 
@@ -1963,134 +1965,134 @@ end
 #
 #     # comment
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3112
+# source://syntax_tree//lib/syntax_tree/node.rb#3124
 class SyntaxTree::Comment < ::SyntaxTree::Node
   # @return [Comment] a new instance of Comment
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3120
+  # source://syntax_tree//lib/syntax_tree/node.rb#3132
   def initialize(value:, inline:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3153
+  # source://syntax_tree//lib/syntax_tree/node.rb#3165
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3157
+  # source://syntax_tree//lib/syntax_tree/node.rb#3169
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3149
+  # source://syntax_tree//lib/syntax_tree/node.rb#3161
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3157
+  # source://syntax_tree//lib/syntax_tree/node.rb#3169
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3163
+  # source://syntax_tree//lib/syntax_tree/node.rb#3175
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3167
+  # source://syntax_tree//lib/syntax_tree/node.rb#3179
   def format(q); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3145
+  # source://syntax_tree//lib/syntax_tree/node.rb#3157
   def ignore?; end
 
   # [boolean] whether or not there is code on the same line as this comment.
   # If there is, then inline will be true.
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3117
+  # source://syntax_tree//lib/syntax_tree/node.rb#3129
   def inline; end
 
   # [boolean] whether or not there is code on the same line as this comment.
   # If there is, then inline will be true.
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3117
+  # source://syntax_tree//lib/syntax_tree/node.rb#3129
   def inline?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3129
+  # source://syntax_tree//lib/syntax_tree/node.rb#3141
   def leading!; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3133
+  # source://syntax_tree//lib/syntax_tree/node.rb#3145
   def leading?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3137
+  # source://syntax_tree//lib/syntax_tree/node.rb#3149
   def trailing!; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3141
+  # source://syntax_tree//lib/syntax_tree/node.rb#3153
   def trailing?; end
 
   # [String] the contents of the comment
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3113
+  # source://syntax_tree//lib/syntax_tree/node.rb#3125
   def value; end
 end
 
 # Formats an If or Unless node.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5248
+# source://syntax_tree//lib/syntax_tree/node.rb#5260
 class SyntaxTree::ConditionalFormatter
   # @return [ConditionalFormatter] a new instance of ConditionalFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5255
+  # source://syntax_tree//lib/syntax_tree/node.rb#5267
   def initialize(keyword, node); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5260
+  # source://syntax_tree//lib/syntax_tree/node.rb#5272
   def format(q); end
 
   # [String] the keyword associated with this conditional
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5250
+  # source://syntax_tree//lib/syntax_tree/node.rb#5262
   def keyword; end
 
   # [If | Unless] the node that is being formatted
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5253
+  # source://syntax_tree//lib/syntax_tree/node.rb#5265
   def node; end
 
   private
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5361
+  # source://syntax_tree//lib/syntax_tree/node.rb#5373
   def contains_conditional?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5296
+  # source://syntax_tree//lib/syntax_tree/node.rb#5308
   def format_break(q, force:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5316
+  # source://syntax_tree//lib/syntax_tree/node.rb#5328
   def format_ternary(q); end
 end
 
 # Formats an IfMod or UnlessMod node.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5531
+# source://syntax_tree//lib/syntax_tree/node.rb#5543
 class SyntaxTree::ConditionalModFormatter
   # @return [ConditionalModFormatter] a new instance of ConditionalModFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5538
+  # source://syntax_tree//lib/syntax_tree/node.rb#5550
   def initialize(keyword, node); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5543
+  # source://syntax_tree//lib/syntax_tree/node.rb#5555
   def format(q); end
 
   # [String] the keyword associated with this conditional
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5533
+  # source://syntax_tree//lib/syntax_tree/node.rb#5545
   def keyword; end
 
   # [IfMod | UnlessMod] the node that is being formatted
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5536
+  # source://syntax_tree//lib/syntax_tree/node.rb#5548
   def node; end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5553
+  # source://syntax_tree//lib/syntax_tree/node.rb#5565
   def format_break(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5564
+  # source://syntax_tree//lib/syntax_tree/node.rb#5576
   def format_flat(q); end
 end
 
@@ -2108,36 +2110,36 @@ end
 #
 #     :Constant
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3187
+# source://syntax_tree//lib/syntax_tree/node.rb#3199
 class SyntaxTree::Const < ::SyntaxTree::Node
   # @return [Const] a new instance of Const
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3193
+  # source://syntax_tree//lib/syntax_tree/node.rb#3205
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3199
+  # source://syntax_tree//lib/syntax_tree/node.rb#3211
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3203
+  # source://syntax_tree//lib/syntax_tree/node.rb#3215
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3191
+  # source://syntax_tree//lib/syntax_tree/node.rb#3203
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3203
+  # source://syntax_tree//lib/syntax_tree/node.rb#3215
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3209
+  # source://syntax_tree//lib/syntax_tree/node.rb#3221
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3213
+  # source://syntax_tree//lib/syntax_tree/node.rb#3225
   def format(q); end
 
   # [String] the name of the constant
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3188
+  # source://syntax_tree//lib/syntax_tree/node.rb#3200
   def value; end
 end
 
@@ -2147,41 +2149,41 @@ end
 #
 #     object::Const = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3225
+# source://syntax_tree//lib/syntax_tree/node.rb#3237
 class SyntaxTree::ConstPathField < ::SyntaxTree::Node
   # @return [ConstPathField] a new instance of ConstPathField
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3234
+  # source://syntax_tree//lib/syntax_tree/node.rb#3246
   def initialize(parent:, constant:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3241
+  # source://syntax_tree//lib/syntax_tree/node.rb#3253
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3245
+  # source://syntax_tree//lib/syntax_tree/node.rb#3257
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3232
+  # source://syntax_tree//lib/syntax_tree/node.rb#3244
   def comments; end
 
   # [Const] the constant itself
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3229
+  # source://syntax_tree//lib/syntax_tree/node.rb#3241
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3245
+  # source://syntax_tree//lib/syntax_tree/node.rb#3257
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3251
+  # source://syntax_tree//lib/syntax_tree/node.rb#3263
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3260
+  # source://syntax_tree//lib/syntax_tree/node.rb#3272
   def format(q); end
 
   # [untyped] the source of the constant
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3226
+  # source://syntax_tree//lib/syntax_tree/node.rb#3238
   def parent; end
 end
 
@@ -2189,41 +2191,41 @@ end
 #
 #     object::Const
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3272
+# source://syntax_tree//lib/syntax_tree/node.rb#3284
 class SyntaxTree::ConstPathRef < ::SyntaxTree::Node
   # @return [ConstPathRef] a new instance of ConstPathRef
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3281
+  # source://syntax_tree//lib/syntax_tree/node.rb#3293
   def initialize(parent:, constant:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3288
+  # source://syntax_tree//lib/syntax_tree/node.rb#3300
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3292
+  # source://syntax_tree//lib/syntax_tree/node.rb#3304
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3279
+  # source://syntax_tree//lib/syntax_tree/node.rb#3291
   def comments; end
 
   # [Const] the constant itself
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3276
+  # source://syntax_tree//lib/syntax_tree/node.rb#3288
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3292
+  # source://syntax_tree//lib/syntax_tree/node.rb#3304
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3298
+  # source://syntax_tree//lib/syntax_tree/node.rb#3310
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3307
+  # source://syntax_tree//lib/syntax_tree/node.rb#3319
   def format(q); end
 
   # [untyped] the source of the constant
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3273
+  # source://syntax_tree//lib/syntax_tree/node.rb#3285
   def parent; end
 end
 
@@ -2233,36 +2235,36 @@ end
 #     class Container
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3321
+# source://syntax_tree//lib/syntax_tree/node.rb#3333
 class SyntaxTree::ConstRef < ::SyntaxTree::Node
   # @return [ConstRef] a new instance of ConstRef
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3327
+  # source://syntax_tree//lib/syntax_tree/node.rb#3339
   def initialize(constant:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3333
+  # source://syntax_tree//lib/syntax_tree/node.rb#3345
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3337
+  # source://syntax_tree//lib/syntax_tree/node.rb#3349
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3325
+  # source://syntax_tree//lib/syntax_tree/node.rb#3337
   def comments; end
 
   # [Const] the constant itself
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3322
+  # source://syntax_tree//lib/syntax_tree/node.rb#3334
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3337
+  # source://syntax_tree//lib/syntax_tree/node.rb#3349
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3343
+  # source://syntax_tree//lib/syntax_tree/node.rb#3355
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3347
+  # source://syntax_tree//lib/syntax_tree/node.rb#3359
   def format(q); end
 end
 
@@ -2271,10 +2273,10 @@ end
 # statements inside the conditional) then we can't use the modifier form
 # and we must use the block form.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5174
+# source://syntax_tree//lib/syntax_tree/node.rb#5186
 module SyntaxTree::ContainsAssignment
   class << self
-    # source://syntax_tree//lib/syntax_tree/node.rb#5175
+    # source://syntax_tree//lib/syntax_tree/node.rb#5187
     def call(parent); end
   end
 end
@@ -2290,46 +2292,46 @@ SyntaxTree::DEFAULT_PRINT_WIDTH = T.let(T.unsafe(nil), Integer)
 #
 #     def method(param) result end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3393
+# source://syntax_tree//lib/syntax_tree/node.rb#3405
 class SyntaxTree::Def < ::SyntaxTree::Node
   # @return [Def] a new instance of Def
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3405
+  # source://syntax_tree//lib/syntax_tree/node.rb#3417
   def initialize(name:, params:, bodystmt:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3413
+  # source://syntax_tree//lib/syntax_tree/node.rb#3425
   def accept(visitor); end
 
   # [BodyStmt] the expressions to be executed by the method
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3400
+  # source://syntax_tree//lib/syntax_tree/node.rb#3412
   def bodystmt; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3417
+  # source://syntax_tree//lib/syntax_tree/node.rb#3429
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3403
+  # source://syntax_tree//lib/syntax_tree/node.rb#3415
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3417
+  # source://syntax_tree//lib/syntax_tree/node.rb#3429
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3423
+  # source://syntax_tree//lib/syntax_tree/node.rb#3435
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3433
+  # source://syntax_tree//lib/syntax_tree/node.rb#3445
   def format(q); end
 
   # [Backtick | Const | Ident | Kw | Op] the name of the method
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3394
+  # source://syntax_tree//lib/syntax_tree/node.rb#3406
   def name; end
 
   # [Params | Paren] the parameter declaration for the method
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3397
+  # source://syntax_tree//lib/syntax_tree/node.rb#3409
   def params; end
 end
 
@@ -2337,56 +2339,56 @@ end
 #
 #     def method = result
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3462
+# source://syntax_tree//lib/syntax_tree/node.rb#3474
 class SyntaxTree::DefEndless < ::SyntaxTree::Node
   # @return [DefEndless] a new instance of DefEndless
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3480
+  # source://syntax_tree//lib/syntax_tree/node.rb#3492
   def initialize(target:, operator:, name:, paren:, statement:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3498
+  # source://syntax_tree//lib/syntax_tree/node.rb#3510
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3502
+  # source://syntax_tree//lib/syntax_tree/node.rb#3514
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3478
+  # source://syntax_tree//lib/syntax_tree/node.rb#3490
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3502
+  # source://syntax_tree//lib/syntax_tree/node.rb#3514
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3508
+  # source://syntax_tree//lib/syntax_tree/node.rb#3520
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3520
+  # source://syntax_tree//lib/syntax_tree/node.rb#3532
   def format(q); end
 
   # [Backtick | Const | Ident | Kw | Op] the name of the method
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3469
+  # source://syntax_tree//lib/syntax_tree/node.rb#3481
   def name; end
 
   # [Op | Period] the operator being used to declare the method
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3466
+  # source://syntax_tree//lib/syntax_tree/node.rb#3478
   def operator; end
 
   # [nil | Params | Paren] the parameter declaration for the method
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3472
+  # source://syntax_tree//lib/syntax_tree/node.rb#3484
   def paren; end
 
   # [untyped] the expression to be executed by the method
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3475
+  # source://syntax_tree//lib/syntax_tree/node.rb#3487
   def statement; end
 
   # [untyped] the target where the method is being defined
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3463
+  # source://syntax_tree//lib/syntax_tree/node.rb#3475
   def target; end
 end
 
@@ -2395,36 +2397,36 @@ end
 #
 #     defined?(variable)
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3554
+# source://syntax_tree//lib/syntax_tree/node.rb#3566
 class SyntaxTree::Defined < ::SyntaxTree::Node
   # @return [Defined] a new instance of Defined
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3560
+  # source://syntax_tree//lib/syntax_tree/node.rb#3572
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3566
+  # source://syntax_tree//lib/syntax_tree/node.rb#3578
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3570
+  # source://syntax_tree//lib/syntax_tree/node.rb#3582
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3558
+  # source://syntax_tree//lib/syntax_tree/node.rb#3570
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3570
+  # source://syntax_tree//lib/syntax_tree/node.rb#3582
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3576
+  # source://syntax_tree//lib/syntax_tree/node.rb#3588
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3580
+  # source://syntax_tree//lib/syntax_tree/node.rb#3592
   def format(q); end
 
   # [untyped] the value being sent to the keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3555
+  # source://syntax_tree//lib/syntax_tree/node.rb#3567
   def value; end
 end
 
@@ -2432,56 +2434,56 @@ end
 #
 #     def object.method(param) result end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3596
+# source://syntax_tree//lib/syntax_tree/node.rb#3608
 class SyntaxTree::Defs < ::SyntaxTree::Node
   # @return [Defs] a new instance of Defs
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3614
+  # source://syntax_tree//lib/syntax_tree/node.rb#3626
   def initialize(target:, operator:, name:, params:, bodystmt:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3632
+  # source://syntax_tree//lib/syntax_tree/node.rb#3644
   def accept(visitor); end
 
   # [BodyStmt] the expressions to be executed by the method
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3609
+  # source://syntax_tree//lib/syntax_tree/node.rb#3621
   def bodystmt; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3636
+  # source://syntax_tree//lib/syntax_tree/node.rb#3648
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3612
+  # source://syntax_tree//lib/syntax_tree/node.rb#3624
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3636
+  # source://syntax_tree//lib/syntax_tree/node.rb#3648
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3642
+  # source://syntax_tree//lib/syntax_tree/node.rb#3654
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3654
+  # source://syntax_tree//lib/syntax_tree/node.rb#3666
   def format(q); end
 
   # [Backtick | Const | Ident | Kw | Op] the name of the method
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3603
+  # source://syntax_tree//lib/syntax_tree/node.rb#3615
   def name; end
 
   # [Op | Period] the operator being used to declare the method
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3600
+  # source://syntax_tree//lib/syntax_tree/node.rb#3612
   def operator; end
 
   # [Params | Paren] the parameter declaration for the method
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3606
+  # source://syntax_tree//lib/syntax_tree/node.rb#3618
   def params; end
 
   # [untyped] the target where the method is being defined
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3597
+  # source://syntax_tree//lib/syntax_tree/node.rb#3609
   def target; end
 end
 
@@ -2491,46 +2493,46 @@ end
 #     method do |value|
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3687
+# source://syntax_tree//lib/syntax_tree/node.rb#3699
 class SyntaxTree::DoBlock < ::SyntaxTree::Node
   # @return [DoBlock] a new instance of DoBlock
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3699
+  # source://syntax_tree//lib/syntax_tree/node.rb#3711
   def initialize(keyword:, block_var:, bodystmt:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3707
+  # source://syntax_tree//lib/syntax_tree/node.rb#3719
   def accept(visitor); end
 
   # [nil | BlockVar] the optional variable declaration within this block
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3691
+  # source://syntax_tree//lib/syntax_tree/node.rb#3703
   def block_var; end
 
   # [BodyStmt] the expressions to be executed within this block
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3694
+  # source://syntax_tree//lib/syntax_tree/node.rb#3706
   def bodystmt; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3711
+  # source://syntax_tree//lib/syntax_tree/node.rb#3723
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3697
+  # source://syntax_tree//lib/syntax_tree/node.rb#3709
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3711
+  # source://syntax_tree//lib/syntax_tree/node.rb#3723
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3717
+  # source://syntax_tree//lib/syntax_tree/node.rb#3729
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3727
+  # source://syntax_tree//lib/syntax_tree/node.rb#3739
   def format(q); end
 
   # [Kw] the do keyword that opens this block
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3688
+  # source://syntax_tree//lib/syntax_tree/node.rb#3700
   def keyword; end
 end
 
@@ -2546,41 +2548,41 @@ end
 #
 # One of the sides of the expression may be nil, but not both.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3771
+# source://syntax_tree//lib/syntax_tree/node.rb#3783
 class SyntaxTree::Dot2 < ::SyntaxTree::Node
   # @return [Dot2] a new instance of Dot2
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3780
+  # source://syntax_tree//lib/syntax_tree/node.rb#3792
   def initialize(left:, right:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3787
+  # source://syntax_tree//lib/syntax_tree/node.rb#3799
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3791
+  # source://syntax_tree//lib/syntax_tree/node.rb#3803
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3778
+  # source://syntax_tree//lib/syntax_tree/node.rb#3790
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3791
+  # source://syntax_tree//lib/syntax_tree/node.rb#3803
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3797
+  # source://syntax_tree//lib/syntax_tree/node.rb#3809
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3801
+  # source://syntax_tree//lib/syntax_tree/node.rb#3813
   def format(q); end
 
   # [nil | untyped] the left side of the expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3772
+  # source://syntax_tree//lib/syntax_tree/node.rb#3784
   def left; end
 
   # [nil | untyped] the right side of the expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3775
+  # source://syntax_tree//lib/syntax_tree/node.rb#3787
   def right; end
 end
 
@@ -2597,64 +2599,64 @@ end
 #
 # One of the sides of the expression may be nil, but not both.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3819
+# source://syntax_tree//lib/syntax_tree/node.rb#3831
 class SyntaxTree::Dot3 < ::SyntaxTree::Node
   # @return [Dot3] a new instance of Dot3
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3828
+  # source://syntax_tree//lib/syntax_tree/node.rb#3840
   def initialize(left:, right:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3835
+  # source://syntax_tree//lib/syntax_tree/node.rb#3847
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3839
+  # source://syntax_tree//lib/syntax_tree/node.rb#3851
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3826
+  # source://syntax_tree//lib/syntax_tree/node.rb#3838
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3839
+  # source://syntax_tree//lib/syntax_tree/node.rb#3851
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3845
+  # source://syntax_tree//lib/syntax_tree/node.rb#3857
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3849
+  # source://syntax_tree//lib/syntax_tree/node.rb#3861
   def format(q); end
 
   # [nil | untyped] the left side of the expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3820
+  # source://syntax_tree//lib/syntax_tree/node.rb#3832
   def left; end
 
   # [nil | untyped] the right side of the expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3823
+  # source://syntax_tree//lib/syntax_tree/node.rb#3835
   def right; end
 end
 
 # Responsible for formatting Dot2 and Dot3 nodes.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3733
+# source://syntax_tree//lib/syntax_tree/node.rb#3745
 class SyntaxTree::DotFormatter
   # @return [DotFormatter] a new instance of DotFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3740
+  # source://syntax_tree//lib/syntax_tree/node.rb#3752
   def initialize(operator, node); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3745
+  # source://syntax_tree//lib/syntax_tree/node.rb#3757
   def format(q); end
 
   # [Dot2 | Dot3] the node that is being formatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3738
+  # source://syntax_tree//lib/syntax_tree/node.rb#3750
   def node; end
 
   # [String] the operator to display
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3735
+  # source://syntax_tree//lib/syntax_tree/node.rb#3747
   def operator; end
 end
 
@@ -2667,42 +2669,42 @@ end
 #
 #     { "#{key}": value }
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3906
+# source://syntax_tree//lib/syntax_tree/node.rb#3918
 class SyntaxTree::DynaSymbol < ::SyntaxTree::Node
   # @return [DynaSymbol] a new instance of DynaSymbol
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3915
+  # source://syntax_tree//lib/syntax_tree/node.rb#3927
   def initialize(parts:, quote:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3922
+  # source://syntax_tree//lib/syntax_tree/node.rb#3934
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3926
+  # source://syntax_tree//lib/syntax_tree/node.rb#3938
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3913
+  # source://syntax_tree//lib/syntax_tree/node.rb#3925
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3926
+  # source://syntax_tree//lib/syntax_tree/node.rb#3938
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3932
+  # source://syntax_tree//lib/syntax_tree/node.rb#3944
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3936
+  # source://syntax_tree//lib/syntax_tree/node.rb#3948
   def format(q); end
 
   # [Array[ StringDVar | StringEmbExpr | TStringContent ]] the parts of the
   # dynamic symbol
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3907
+  # source://syntax_tree//lib/syntax_tree/node.rb#3919
   def parts; end
 
   # [String] the quote used to delimit the dynamic symbol
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3910
+  # source://syntax_tree//lib/syntax_tree/node.rb#3922
   def quote; end
 
   private
@@ -2711,7 +2713,7 @@ class SyntaxTree::DynaSymbol < ::SyntaxTree::Node
   # lot of rules because it could be in many different contexts with many
   # different kinds of escaping.
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3959
+  # source://syntax_tree//lib/syntax_tree/node.rb#3971
   def quotes(q); end
 end
 
@@ -2769,41 +2771,41 @@ end
 #     else
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4006
+# source://syntax_tree//lib/syntax_tree/node.rb#4018
 class SyntaxTree::Else < ::SyntaxTree::Node
   # @return [Else] a new instance of Else
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4015
+  # source://syntax_tree//lib/syntax_tree/node.rb#4027
   def initialize(keyword:, statements:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4022
+  # source://syntax_tree//lib/syntax_tree/node.rb#4034
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4026
+  # source://syntax_tree//lib/syntax_tree/node.rb#4038
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4013
+  # source://syntax_tree//lib/syntax_tree/node.rb#4025
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4026
+  # source://syntax_tree//lib/syntax_tree/node.rb#4038
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4032
+  # source://syntax_tree//lib/syntax_tree/node.rb#4044
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4041
+  # source://syntax_tree//lib/syntax_tree/node.rb#4053
   def format(q); end
 
   # [Kw] the else keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4007
+  # source://syntax_tree//lib/syntax_tree/node.rb#4019
   def keyword; end
 
   # [Statements] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4010
+  # source://syntax_tree//lib/syntax_tree/node.rb#4022
   def statements; end
 end
 
@@ -2813,46 +2815,46 @@ end
 #     elsif other_variable
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4062
+# source://syntax_tree//lib/syntax_tree/node.rb#4074
 class SyntaxTree::Elsif < ::SyntaxTree::Node
   # @return [Elsif] a new instance of Elsif
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4074
+  # source://syntax_tree//lib/syntax_tree/node.rb#4086
   def initialize(predicate:, statements:, consequent:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4088
+  # source://syntax_tree//lib/syntax_tree/node.rb#4100
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4092
+  # source://syntax_tree//lib/syntax_tree/node.rb#4104
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4072
+  # source://syntax_tree//lib/syntax_tree/node.rb#4084
   def comments; end
 
   # [nil | Elsif | Else] the next clause in the chain
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4069
+  # source://syntax_tree//lib/syntax_tree/node.rb#4081
   def consequent; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4092
+  # source://syntax_tree//lib/syntax_tree/node.rb#4104
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4098
+  # source://syntax_tree//lib/syntax_tree/node.rb#4110
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4108
+  # source://syntax_tree//lib/syntax_tree/node.rb#4120
   def format(q); end
 
   # [untyped] the expression to be checked
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4063
+  # source://syntax_tree//lib/syntax_tree/node.rb#4075
   def predicate; end
 
   # [Statements] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4066
+  # source://syntax_tree//lib/syntax_tree/node.rb#4078
   def statements; end
 end
 
@@ -2863,44 +2865,44 @@ end
 #     second line
 #     =end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4140
+# source://syntax_tree//lib/syntax_tree/node.rb#4152
 class SyntaxTree::EmbDoc < ::SyntaxTree::Node
   # @return [EmbDoc] a new instance of EmbDoc
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4143
+  # source://syntax_tree//lib/syntax_tree/node.rb#4155
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4160
+  # source://syntax_tree//lib/syntax_tree/node.rb#4172
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4164
+  # source://syntax_tree//lib/syntax_tree/node.rb#4176
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4156
+  # source://syntax_tree//lib/syntax_tree/node.rb#4168
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4164
+  # source://syntax_tree//lib/syntax_tree/node.rb#4176
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4170
+  # source://syntax_tree//lib/syntax_tree/node.rb#4182
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4174
+  # source://syntax_tree//lib/syntax_tree/node.rb#4186
   def format(q); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4152
+  # source://syntax_tree//lib/syntax_tree/node.rb#4164
   def ignore?; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4148
+  # source://syntax_tree//lib/syntax_tree/node.rb#4160
   def inline?; end
 
   # [String] the contents of the comment
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4141
+  # source://syntax_tree//lib/syntax_tree/node.rb#4153
   def value; end
 end
 
@@ -2910,28 +2912,28 @@ end
 #
 #     "Hello, #{person}!"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4187
+# source://syntax_tree//lib/syntax_tree/node.rb#4199
 class SyntaxTree::EmbExprBeg < ::SyntaxTree::Node
   # @return [EmbExprBeg] a new instance of EmbExprBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4190
+  # source://syntax_tree//lib/syntax_tree/node.rb#4202
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4195
+  # source://syntax_tree//lib/syntax_tree/node.rb#4207
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4199
+  # source://syntax_tree//lib/syntax_tree/node.rb#4211
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4199
+  # source://syntax_tree//lib/syntax_tree/node.rb#4211
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4205
+  # source://syntax_tree//lib/syntax_tree/node.rb#4217
   def deconstruct_keys(_keys); end
 
   # [String] the #{ used in the string
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4188
+  # source://syntax_tree//lib/syntax_tree/node.rb#4200
   def value; end
 end
 
@@ -2941,28 +2943,28 @@ end
 #
 #     "Hello, #{person}!"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4217
+# source://syntax_tree//lib/syntax_tree/node.rb#4229
 class SyntaxTree::EmbExprEnd < ::SyntaxTree::Node
   # @return [EmbExprEnd] a new instance of EmbExprEnd
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4220
+  # source://syntax_tree//lib/syntax_tree/node.rb#4232
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4225
+  # source://syntax_tree//lib/syntax_tree/node.rb#4237
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4229
+  # source://syntax_tree//lib/syntax_tree/node.rb#4241
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4229
+  # source://syntax_tree//lib/syntax_tree/node.rb#4241
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4235
+  # source://syntax_tree//lib/syntax_tree/node.rb#4247
   def deconstruct_keys(_keys); end
 
   # [String] the } used in the string
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4218
+  # source://syntax_tree//lib/syntax_tree/node.rb#4230
   def value; end
 end
 
@@ -2974,28 +2976,28 @@ end
 #
 # In the example above, an EmbVar node represents the # because it forces
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4249
+# source://syntax_tree//lib/syntax_tree/node.rb#4261
 class SyntaxTree::EmbVar < ::SyntaxTree::Node
   # @return [EmbVar] a new instance of EmbVar
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4252
+  # source://syntax_tree//lib/syntax_tree/node.rb#4264
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4257
+  # source://syntax_tree//lib/syntax_tree/node.rb#4269
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4261
+  # source://syntax_tree//lib/syntax_tree/node.rb#4273
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4261
+  # source://syntax_tree//lib/syntax_tree/node.rb#4273
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4267
+  # source://syntax_tree//lib/syntax_tree/node.rb#4279
   def deconstruct_keys(_keys); end
 
   # [String] the # used in the string
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4250
+  # source://syntax_tree//lib/syntax_tree/node.rb#4262
   def value; end
 end
 
@@ -3048,41 +3050,41 @@ end
 #     ensure
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4280
+# source://syntax_tree//lib/syntax_tree/node.rb#4292
 class SyntaxTree::Ensure < ::SyntaxTree::Node
   # @return [Ensure] a new instance of Ensure
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4289
+  # source://syntax_tree//lib/syntax_tree/node.rb#4301
   def initialize(keyword:, statements:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4296
+  # source://syntax_tree//lib/syntax_tree/node.rb#4308
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4300
+  # source://syntax_tree//lib/syntax_tree/node.rb#4312
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4287
+  # source://syntax_tree//lib/syntax_tree/node.rb#4299
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4300
+  # source://syntax_tree//lib/syntax_tree/node.rb#4312
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4306
+  # source://syntax_tree//lib/syntax_tree/node.rb#4318
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4315
+  # source://syntax_tree//lib/syntax_tree/node.rb#4327
   def format(q); end
 
   # [Kw] the ensure keyword that began this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4281
+  # source://syntax_tree//lib/syntax_tree/node.rb#4293
   def keyword; end
 
   # [Statements] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4284
+  # source://syntax_tree//lib/syntax_tree/node.rb#4296
   def statements; end
 end
 
@@ -3097,36 +3099,36 @@ end
 # position typically represents a rest-type parameter, but in this case is
 # used to indicate that a trailing comma was used.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4338
+# source://syntax_tree//lib/syntax_tree/node.rb#4350
 class SyntaxTree::ExcessedComma < ::SyntaxTree::Node
   # @return [ExcessedComma] a new instance of ExcessedComma
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4344
+  # source://syntax_tree//lib/syntax_tree/node.rb#4356
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4350
+  # source://syntax_tree//lib/syntax_tree/node.rb#4362
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4354
+  # source://syntax_tree//lib/syntax_tree/node.rb#4366
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4342
+  # source://syntax_tree//lib/syntax_tree/node.rb#4354
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4354
+  # source://syntax_tree//lib/syntax_tree/node.rb#4366
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4360
+  # source://syntax_tree//lib/syntax_tree/node.rb#4372
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4364
+  # source://syntax_tree//lib/syntax_tree/node.rb#4376
   def format(q); end
 
   # [String] the comma
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4339
+  # source://syntax_tree//lib/syntax_tree/node.rb#4351
   def value; end
 end
 
@@ -3138,41 +3140,41 @@ end
 #
 # In the above example, it's referring to the +method+ segment.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4377
+# source://syntax_tree//lib/syntax_tree/node.rb#4389
 class SyntaxTree::FCall < ::SyntaxTree::Node
   # @return [FCall] a new instance of FCall
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4386
+  # source://syntax_tree//lib/syntax_tree/node.rb#4398
   def initialize(value:, arguments:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4393
+  # source://syntax_tree//lib/syntax_tree/node.rb#4405
   def accept(visitor); end
 
   # [nil | ArgParen | Args] the arguments to the method call
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4381
+  # source://syntax_tree//lib/syntax_tree/node.rb#4393
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4397
+  # source://syntax_tree//lib/syntax_tree/node.rb#4409
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4384
+  # source://syntax_tree//lib/syntax_tree/node.rb#4396
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4397
+  # source://syntax_tree//lib/syntax_tree/node.rb#4409
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4403
+  # source://syntax_tree//lib/syntax_tree/node.rb#4415
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4412
+  # source://syntax_tree//lib/syntax_tree/node.rb#4424
   def format(q); end
 
   # [Const | Ident] the name of the method
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4378
+  # source://syntax_tree//lib/syntax_tree/node.rb#4390
   def value; end
 end
 
@@ -3181,46 +3183,46 @@ end
 #
 #     object.variable = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4433
+# source://syntax_tree//lib/syntax_tree/node.rb#4445
 class SyntaxTree::Field < ::SyntaxTree::Node
   # @return [Field] a new instance of Field
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4445
+  # source://syntax_tree//lib/syntax_tree/node.rb#4457
   def initialize(parent:, operator:, name:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4453
+  # source://syntax_tree//lib/syntax_tree/node.rb#4465
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4457
+  # source://syntax_tree//lib/syntax_tree/node.rb#4469
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4443
+  # source://syntax_tree//lib/syntax_tree/node.rb#4455
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4457
+  # source://syntax_tree//lib/syntax_tree/node.rb#4469
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4463
+  # source://syntax_tree//lib/syntax_tree/node.rb#4475
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4473
+  # source://syntax_tree//lib/syntax_tree/node.rb#4485
   def format(q); end
 
   # [Const | Ident] the name of the field being assigned
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4440
+  # source://syntax_tree//lib/syntax_tree/node.rb#4452
   def name; end
 
   # [:"::" | Op | Period] the operator being used for the assignment
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4437
+  # source://syntax_tree//lib/syntax_tree/node.rb#4449
   def operator; end
 
   # [untyped] the parent object that owns the field being assigned
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4434
+  # source://syntax_tree//lib/syntax_tree/node.rb#4446
   def parent; end
 end
 
@@ -3228,72 +3230,72 @@ end
 #
 #     1.0
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4487
+# source://syntax_tree//lib/syntax_tree/node.rb#4499
 class SyntaxTree::FloatLiteral < ::SyntaxTree::Node
   # @return [FloatLiteral] a new instance of FloatLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4493
+  # source://syntax_tree//lib/syntax_tree/node.rb#4505
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4499
+  # source://syntax_tree//lib/syntax_tree/node.rb#4511
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4503
+  # source://syntax_tree//lib/syntax_tree/node.rb#4515
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4491
+  # source://syntax_tree//lib/syntax_tree/node.rb#4503
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4503
+  # source://syntax_tree//lib/syntax_tree/node.rb#4515
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4509
+  # source://syntax_tree//lib/syntax_tree/node.rb#4521
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4513
+  # source://syntax_tree//lib/syntax_tree/node.rb#4525
   def format(q); end
 
   # [String] the value of the floating point number literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4488
+  # source://syntax_tree//lib/syntax_tree/node.rb#4500
   def value; end
 end
 
 # Formats either a Break, Next, or Return node.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2109
+# source://syntax_tree//lib/syntax_tree/node.rb#2120
 class SyntaxTree::FlowControlFormatter
   # @return [FlowControlFormatter] a new instance of FlowControlFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2116
+  # source://syntax_tree//lib/syntax_tree/node.rb#2127
   def initialize(keyword, node); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2121
+  # source://syntax_tree//lib/syntax_tree/node.rb#2132
   def format(q); end
 
   # [String] the keyword to print
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2111
+  # source://syntax_tree//lib/syntax_tree/node.rb#2122
   def keyword; end
 
   # [Break | Next | Return] the node being formatted
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2114
+  # source://syntax_tree//lib/syntax_tree/node.rb#2125
   def node; end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2240
+  # source://syntax_tree//lib/syntax_tree/node.rb#2251
   def format_arguments(q, opening, closing); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2230
+  # source://syntax_tree//lib/syntax_tree/node.rb#2241
   def format_array_contents(q, array); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2250
+  # source://syntax_tree//lib/syntax_tree/node.rb#2261
   def skip_parens?(node); end
 end
 
@@ -3304,52 +3306,52 @@ end
 #     in [*, 7, *]
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4526
+# source://syntax_tree//lib/syntax_tree/node.rb#4538
 class SyntaxTree::FndPtn < ::SyntaxTree::Node
   # @return [FndPtn] a new instance of FndPtn
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4542
+  # source://syntax_tree//lib/syntax_tree/node.rb#4554
   def initialize(constant:, left:, values:, right:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4551
+  # source://syntax_tree//lib/syntax_tree/node.rb#4563
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4555
+  # source://syntax_tree//lib/syntax_tree/node.rb#4567
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4540
+  # source://syntax_tree//lib/syntax_tree/node.rb#4552
   def comments; end
 
   # [nil | untyped] the optional constant wrapper
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4527
+  # source://syntax_tree//lib/syntax_tree/node.rb#4539
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4555
+  # source://syntax_tree//lib/syntax_tree/node.rb#4567
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4561
+  # source://syntax_tree//lib/syntax_tree/node.rb#4573
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4572
+  # source://syntax_tree//lib/syntax_tree/node.rb#4584
   def format(q); end
 
   # [VarField] the splat on the left-hand side
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4530
+  # source://syntax_tree//lib/syntax_tree/node.rb#4542
   def left; end
 
   # [VarField] the splat on the right-hand side
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4537
+  # source://syntax_tree//lib/syntax_tree/node.rb#4549
   def right; end
 
   # [Array[ untyped ]] the list of positional expressions in the pattern that
   # are being matched
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4534
+  # source://syntax_tree//lib/syntax_tree/node.rb#4546
   def values; end
 end
 
@@ -3358,47 +3360,47 @@ end
 #     for value in list do
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4605
+# source://syntax_tree//lib/syntax_tree/node.rb#4617
 class SyntaxTree::For < ::SyntaxTree::Node
   # @return [For] a new instance of For
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4617
+  # source://syntax_tree//lib/syntax_tree/node.rb#4629
   def initialize(index:, collection:, statements:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4625
+  # source://syntax_tree//lib/syntax_tree/node.rb#4637
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4629
+  # source://syntax_tree//lib/syntax_tree/node.rb#4641
   def child_nodes; end
 
   # [untyped] the object being enumerated in the loop
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4609
+  # source://syntax_tree//lib/syntax_tree/node.rb#4621
   def collection; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4615
+  # source://syntax_tree//lib/syntax_tree/node.rb#4627
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4629
+  # source://syntax_tree//lib/syntax_tree/node.rb#4641
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4635
+  # source://syntax_tree//lib/syntax_tree/node.rb#4647
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4645
+  # source://syntax_tree//lib/syntax_tree/node.rb#4657
   def format(q); end
 
   # [MLHS | VarField] the variable declaration being used to
   # pull values out of the object being enumerated
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4606
+  # source://syntax_tree//lib/syntax_tree/node.rb#4618
   def index; end
 
   # [Statements] the statements to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4612
+  # source://syntax_tree//lib/syntax_tree/node.rb#4624
   def statements; end
 end
 
@@ -3488,36 +3490,36 @@ SyntaxTree::Formatter::OPTIONS = T.let(T.unsafe(nil), Hash)
 #
 #     $variable
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4670
+# source://syntax_tree//lib/syntax_tree/node.rb#4682
 class SyntaxTree::GVar < ::SyntaxTree::Node
   # @return [GVar] a new instance of GVar
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4676
+  # source://syntax_tree//lib/syntax_tree/node.rb#4688
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4682
+  # source://syntax_tree//lib/syntax_tree/node.rb#4694
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4686
+  # source://syntax_tree//lib/syntax_tree/node.rb#4698
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4674
+  # source://syntax_tree//lib/syntax_tree/node.rb#4686
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4686
+  # source://syntax_tree//lib/syntax_tree/node.rb#4698
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4692
+  # source://syntax_tree//lib/syntax_tree/node.rb#4704
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4696
+  # source://syntax_tree//lib/syntax_tree/node.rb#4708
   def format(q); end
 
   # [String] the name of the global variable
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4671
+  # source://syntax_tree//lib/syntax_tree/node.rb#4683
   def value; end
 end
 
@@ -3562,44 +3564,44 @@ end
 #
 #     { key => value }
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4708
+# source://syntax_tree//lib/syntax_tree/node.rb#4720
 class SyntaxTree::HashLiteral < ::SyntaxTree::Node
   # @return [HashLiteral] a new instance of HashLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4741
+  # source://syntax_tree//lib/syntax_tree/node.rb#4753
   def initialize(lbrace:, assocs:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4748
+  # source://syntax_tree//lib/syntax_tree/node.rb#4760
   def accept(visitor); end
 
   # [Array[ AssocNew | AssocSplat ]] the optional contents of the hash
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4736
+  # source://syntax_tree//lib/syntax_tree/node.rb#4748
   def assocs; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4752
+  # source://syntax_tree//lib/syntax_tree/node.rb#4764
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4739
+  # source://syntax_tree//lib/syntax_tree/node.rb#4751
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4752
+  # source://syntax_tree//lib/syntax_tree/node.rb#4764
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4758
+  # source://syntax_tree//lib/syntax_tree/node.rb#4770
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4762
+  # source://syntax_tree//lib/syntax_tree/node.rb#4774
   def format(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4770
+  # source://syntax_tree//lib/syntax_tree/node.rb#4782
   def format_key(q, key); end
 
   # [LBrace] the left brace that opens this hash
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4733
+  # source://syntax_tree//lib/syntax_tree/node.rb#4745
   def lbrace; end
 
   private
@@ -3609,10 +3611,10 @@ class SyntaxTree::HashLiteral < ::SyntaxTree::Node
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4778
+  # source://syntax_tree//lib/syntax_tree/node.rb#4790
   def empty_with_comments?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4782
+  # source://syntax_tree//lib/syntax_tree/node.rb#4794
   def format_contents(q); end
 end
 
@@ -3620,19 +3622,19 @@ end
 # but _does_ contain comments. In this case we do some special formatting to
 # make sure the comments gets indented properly.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4709
+# source://syntax_tree//lib/syntax_tree/node.rb#4721
 class SyntaxTree::HashLiteral::EmptyWithCommentsFormatter
   # @return [EmptyWithCommentsFormatter] a new instance of EmptyWithCommentsFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4713
+  # source://syntax_tree//lib/syntax_tree/node.rb#4725
   def initialize(lbrace); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4717
+  # source://syntax_tree//lib/syntax_tree/node.rb#4729
   def format(q); end
 
   # [LBrace] the opening brace
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4711
+  # source://syntax_tree//lib/syntax_tree/node.rb#4723
   def lbrace; end
 end
 
@@ -3642,52 +3644,52 @@ end
 #       contents
 #     DOC
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4812
+# source://syntax_tree//lib/syntax_tree/node.rb#4824
 class SyntaxTree::Heredoc < ::SyntaxTree::Node
   # @return [Heredoc] a new instance of Heredoc
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4828
+  # source://syntax_tree//lib/syntax_tree/node.rb#4840
   def initialize(beginning:, location:, ending: T.unsafe(nil), dedent: T.unsafe(nil), parts: T.unsafe(nil), comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4844
+  # source://syntax_tree//lib/syntax_tree/node.rb#4856
   def accept(visitor); end
 
   # [HeredocBeg] the opening of the heredoc
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4813
+  # source://syntax_tree//lib/syntax_tree/node.rb#4825
   def beginning; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4848
+  # source://syntax_tree//lib/syntax_tree/node.rb#4860
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4826
+  # source://syntax_tree//lib/syntax_tree/node.rb#4838
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4848
+  # source://syntax_tree//lib/syntax_tree/node.rb#4860
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4854
+  # source://syntax_tree//lib/syntax_tree/node.rb#4866
   def deconstruct_keys(_keys); end
 
   # [Integer] how far to dedent the heredoc
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4819
+  # source://syntax_tree//lib/syntax_tree/node.rb#4831
   def dedent; end
 
   # [HeredocEnd] the ending of the heredoc
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4816
+  # source://syntax_tree//lib/syntax_tree/node.rb#4828
   def ending; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4864
+  # source://syntax_tree//lib/syntax_tree/node.rb#4876
   def format(q); end
 
   # [Array[ StringEmbExpr | StringDVar | TStringContent ]] the parts of the
   # heredoc string literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4823
+  # source://syntax_tree//lib/syntax_tree/node.rb#4835
   def parts; end
 end
 
@@ -3699,36 +3701,36 @@ end
 #
 # In the example above the HeredocBeg node represents <<~DOC.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4900
+# source://syntax_tree//lib/syntax_tree/node.rb#4912
 class SyntaxTree::HeredocBeg < ::SyntaxTree::Node
   # @return [HeredocBeg] a new instance of HeredocBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4906
+  # source://syntax_tree//lib/syntax_tree/node.rb#4918
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4912
+  # source://syntax_tree//lib/syntax_tree/node.rb#4924
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4916
+  # source://syntax_tree//lib/syntax_tree/node.rb#4928
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4904
+  # source://syntax_tree//lib/syntax_tree/node.rb#4916
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4916
+  # source://syntax_tree//lib/syntax_tree/node.rb#4928
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4922
+  # source://syntax_tree//lib/syntax_tree/node.rb#4934
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4926
+  # source://syntax_tree//lib/syntax_tree/node.rb#4938
   def format(q); end
 
   # [String] the opening declaration of the heredoc
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4901
+  # source://syntax_tree//lib/syntax_tree/node.rb#4913
   def value; end
 end
 
@@ -3740,36 +3742,36 @@ end
 #
 # In the example above the HeredocEnd node represents the closing DOC.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4939
+# source://syntax_tree//lib/syntax_tree/node.rb#4951
 class SyntaxTree::HeredocEnd < ::SyntaxTree::Node
   # @return [HeredocEnd] a new instance of HeredocEnd
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4945
+  # source://syntax_tree//lib/syntax_tree/node.rb#4957
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4951
+  # source://syntax_tree//lib/syntax_tree/node.rb#4963
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4955
+  # source://syntax_tree//lib/syntax_tree/node.rb#4967
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4943
+  # source://syntax_tree//lib/syntax_tree/node.rb#4955
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4955
+  # source://syntax_tree//lib/syntax_tree/node.rb#4967
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4961
+  # source://syntax_tree//lib/syntax_tree/node.rb#4973
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4965
+  # source://syntax_tree//lib/syntax_tree/node.rb#4977
   def format(q); end
 
   # [String] the closing declaration of the heredoc
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4940
+  # source://syntax_tree//lib/syntax_tree/node.rb#4952
   def value; end
 end
 
@@ -3780,94 +3782,94 @@ end
 #     in { key: }
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4978
+# source://syntax_tree//lib/syntax_tree/node.rb#4990
 class SyntaxTree::HshPtn < ::SyntaxTree::Node
   # @return [HshPtn] a new instance of HshPtn
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5037
+  # source://syntax_tree//lib/syntax_tree/node.rb#5049
   def initialize(constant:, keywords:, keyword_rest:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5045
+  # source://syntax_tree//lib/syntax_tree/node.rb#5057
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5049
+  # source://syntax_tree//lib/syntax_tree/node.rb#5061
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5035
+  # source://syntax_tree//lib/syntax_tree/node.rb#5047
   def comments; end
 
   # [nil | untyped] the optional constant wrapper
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5025
+  # source://syntax_tree//lib/syntax_tree/node.rb#5037
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5049
+  # source://syntax_tree//lib/syntax_tree/node.rb#5061
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5055
+  # source://syntax_tree//lib/syntax_tree/node.rb#5067
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5065
+  # source://syntax_tree//lib/syntax_tree/node.rb#5077
   def format(q); end
 
   # [nil | VarField] an optional parameter to gather up all remaining keywords
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5032
+  # source://syntax_tree//lib/syntax_tree/node.rb#5044
   def keyword_rest; end
 
   # [Array[ [Label, untyped] ]] the set of tuples representing the keywords
   # that should be matched against in the pattern
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5029
+  # source://syntax_tree//lib/syntax_tree/node.rb#5041
   def keywords; end
 end
 
 # Formats a key-value pair in a hash pattern. The value is optional.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4979
+# source://syntax_tree//lib/syntax_tree/node.rb#4991
 class SyntaxTree::HshPtn::KeywordFormatter
   # @return [KeywordFormatter] a new instance of KeywordFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4986
+  # source://syntax_tree//lib/syntax_tree/node.rb#4998
   def initialize(key, value); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4991
+  # source://syntax_tree//lib/syntax_tree/node.rb#5003
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4995
+  # source://syntax_tree//lib/syntax_tree/node.rb#5007
   def format(q); end
 
   # [Label] the keyword being used
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4981
+  # source://syntax_tree//lib/syntax_tree/node.rb#4993
   def key; end
 
   # [untyped] the optional value for the keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4984
+  # source://syntax_tree//lib/syntax_tree/node.rb#4996
   def value; end
 end
 
 # Formats the optional double-splat from the pattern.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5006
+# source://syntax_tree//lib/syntax_tree/node.rb#5018
 class SyntaxTree::HshPtn::KeywordRestFormatter
   # @return [KeywordRestFormatter] a new instance of KeywordRestFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5010
+  # source://syntax_tree//lib/syntax_tree/node.rb#5022
   def initialize(keyword_rest); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5014
+  # source://syntax_tree//lib/syntax_tree/node.rb#5026
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5018
+  # source://syntax_tree//lib/syntax_tree/node.rb#5030
   def format(q); end
 
   # [VarField] the parameter that matches the remaining keywords
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5008
+  # source://syntax_tree//lib/syntax_tree/node.rb#5020
   def keyword_rest; end
 end
 
@@ -3875,36 +3877,36 @@ end
 #
 #     @variable
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5773
+# source://syntax_tree//lib/syntax_tree/node.rb#5785
 class SyntaxTree::IVar < ::SyntaxTree::Node
   # @return [IVar] a new instance of IVar
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5779
+  # source://syntax_tree//lib/syntax_tree/node.rb#5791
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5785
+  # source://syntax_tree//lib/syntax_tree/node.rb#5797
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5789
+  # source://syntax_tree//lib/syntax_tree/node.rb#5801
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5777
+  # source://syntax_tree//lib/syntax_tree/node.rb#5789
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5789
+  # source://syntax_tree//lib/syntax_tree/node.rb#5801
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5795
+  # source://syntax_tree//lib/syntax_tree/node.rb#5807
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5799
+  # source://syntax_tree//lib/syntax_tree/node.rb#5811
   def format(q); end
 
   # [String] the name of the instance variable
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5774
+  # source://syntax_tree//lib/syntax_tree/node.rb#5786
   def value; end
 end
 
@@ -3913,36 +3915,36 @@ end
 #
 #     value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5139
+# source://syntax_tree//lib/syntax_tree/node.rb#5151
 class SyntaxTree::Ident < ::SyntaxTree::Node
   # @return [Ident] a new instance of Ident
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5145
+  # source://syntax_tree//lib/syntax_tree/node.rb#5157
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5151
+  # source://syntax_tree//lib/syntax_tree/node.rb#5163
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5155
+  # source://syntax_tree//lib/syntax_tree/node.rb#5167
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5143
+  # source://syntax_tree//lib/syntax_tree/node.rb#5155
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5155
+  # source://syntax_tree//lib/syntax_tree/node.rb#5167
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5161
+  # source://syntax_tree//lib/syntax_tree/node.rb#5173
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5165
+  # source://syntax_tree//lib/syntax_tree/node.rb#5177
   def format(q); end
 
   # [String] the value of the identifier
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5140
+  # source://syntax_tree//lib/syntax_tree/node.rb#5152
   def value; end
 end
 
@@ -3951,46 +3953,46 @@ end
 #     if predicate
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5377
+# source://syntax_tree//lib/syntax_tree/node.rb#5389
 class SyntaxTree::If < ::SyntaxTree::Node
   # @return [If] a new instance of If
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5389
+  # source://syntax_tree//lib/syntax_tree/node.rb#5401
   def initialize(predicate:, statements:, consequent:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5403
+  # source://syntax_tree//lib/syntax_tree/node.rb#5415
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5407
+  # source://syntax_tree//lib/syntax_tree/node.rb#5419
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5387
+  # source://syntax_tree//lib/syntax_tree/node.rb#5399
   def comments; end
 
   # [nil, Elsif, Else] the next clause in the chain
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5384
+  # source://syntax_tree//lib/syntax_tree/node.rb#5396
   def consequent; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5407
+  # source://syntax_tree//lib/syntax_tree/node.rb#5419
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5413
+  # source://syntax_tree//lib/syntax_tree/node.rb#5425
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5423
+  # source://syntax_tree//lib/syntax_tree/node.rb#5435
   def format(q); end
 
   # [untyped] the expression to be checked
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5378
+  # source://syntax_tree//lib/syntax_tree/node.rb#5390
   def predicate; end
 
   # [Statements] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5381
+  # source://syntax_tree//lib/syntax_tree/node.rb#5393
   def statements; end
 end
 
@@ -3998,41 +4000,41 @@ end
 #
 #     expression if predicate
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5578
+# source://syntax_tree//lib/syntax_tree/node.rb#5590
 class SyntaxTree::IfMod < ::SyntaxTree::Node
   # @return [IfMod] a new instance of IfMod
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5587
+  # source://syntax_tree//lib/syntax_tree/node.rb#5599
   def initialize(statement:, predicate:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5594
+  # source://syntax_tree//lib/syntax_tree/node.rb#5606
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5598
+  # source://syntax_tree//lib/syntax_tree/node.rb#5610
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5585
+  # source://syntax_tree//lib/syntax_tree/node.rb#5597
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5598
+  # source://syntax_tree//lib/syntax_tree/node.rb#5610
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5604
+  # source://syntax_tree//lib/syntax_tree/node.rb#5616
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5613
+  # source://syntax_tree//lib/syntax_tree/node.rb#5625
   def format(q); end
 
   # [untyped] the expression to be checked
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5582
+  # source://syntax_tree//lib/syntax_tree/node.rb#5594
   def predicate; end
 
   # [untyped] the expression to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5579
+  # source://syntax_tree//lib/syntax_tree/node.rb#5591
   def statement; end
 end
 
@@ -4040,54 +4042,54 @@ end
 #
 #     predicate ? truthy : falsy
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5433
+# source://syntax_tree//lib/syntax_tree/node.rb#5445
 class SyntaxTree::IfOp < ::SyntaxTree::Node
   # @return [IfOp] a new instance of IfOp
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5445
+  # source://syntax_tree//lib/syntax_tree/node.rb#5457
   def initialize(predicate:, truthy:, falsy:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5453
+  # source://syntax_tree//lib/syntax_tree/node.rb#5465
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5457
+  # source://syntax_tree//lib/syntax_tree/node.rb#5469
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5443
+  # source://syntax_tree//lib/syntax_tree/node.rb#5455
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5457
+  # source://syntax_tree//lib/syntax_tree/node.rb#5469
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5463
+  # source://syntax_tree//lib/syntax_tree/node.rb#5475
   def deconstruct_keys(_keys); end
 
   # [untyped] the expression to be executed if the predicate is falsy
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5440
+  # source://syntax_tree//lib/syntax_tree/node.rb#5452
   def falsy; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5473
+  # source://syntax_tree//lib/syntax_tree/node.rb#5485
   def format(q); end
 
   # [untyped] the expression to be checked
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5434
+  # source://syntax_tree//lib/syntax_tree/node.rb#5446
   def predicate; end
 
   # [untyped] the expression to be executed if the predicate is truthy
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5437
+  # source://syntax_tree//lib/syntax_tree/node.rb#5449
   def truthy; end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5492
+  # source://syntax_tree//lib/syntax_tree/node.rb#5504
   def format_break(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5515
+  # source://syntax_tree//lib/syntax_tree/node.rb#5527
   def format_flat(q); end
 end
 
@@ -4095,36 +4097,36 @@ end
 #
 #     1i
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5623
+# source://syntax_tree//lib/syntax_tree/node.rb#5635
 class SyntaxTree::Imaginary < ::SyntaxTree::Node
   # @return [Imaginary] a new instance of Imaginary
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5629
+  # source://syntax_tree//lib/syntax_tree/node.rb#5641
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5635
+  # source://syntax_tree//lib/syntax_tree/node.rb#5647
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5639
+  # source://syntax_tree//lib/syntax_tree/node.rb#5651
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5627
+  # source://syntax_tree//lib/syntax_tree/node.rb#5639
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5639
+  # source://syntax_tree//lib/syntax_tree/node.rb#5651
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5645
+  # source://syntax_tree//lib/syntax_tree/node.rb#5657
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5649
+  # source://syntax_tree//lib/syntax_tree/node.rb#5661
   def format(q); end
 
   # [String] the value of the imaginary number literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5624
+  # source://syntax_tree//lib/syntax_tree/node.rb#5636
   def value; end
 end
 
@@ -4135,46 +4137,46 @@ end
 #     in pattern
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5662
+# source://syntax_tree//lib/syntax_tree/node.rb#5674
 class SyntaxTree::In < ::SyntaxTree::Node
   # @return [In] a new instance of In
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5674
+  # source://syntax_tree//lib/syntax_tree/node.rb#5686
   def initialize(pattern:, statements:, consequent:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5682
+  # source://syntax_tree//lib/syntax_tree/node.rb#5694
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5686
+  # source://syntax_tree//lib/syntax_tree/node.rb#5698
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5672
+  # source://syntax_tree//lib/syntax_tree/node.rb#5684
   def comments; end
 
   # [nil | In | Else] the next clause in the chain
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5669
+  # source://syntax_tree//lib/syntax_tree/node.rb#5681
   def consequent; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5686
+  # source://syntax_tree//lib/syntax_tree/node.rb#5698
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5692
+  # source://syntax_tree//lib/syntax_tree/node.rb#5704
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5702
+  # source://syntax_tree//lib/syntax_tree/node.rb#5714
   def format(q); end
 
   # [untyped] the pattern to check against
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5663
+  # source://syntax_tree//lib/syntax_tree/node.rb#5675
   def pattern; end
 
   # [Statements] the expressions to execute if the pattern matched
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5666
+  # source://syntax_tree//lib/syntax_tree/node.rb#5678
   def statements; end
 end
 
@@ -4182,36 +4184,36 @@ end
 #
 #     1
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5729
+# source://syntax_tree//lib/syntax_tree/node.rb#5741
 class SyntaxTree::Int < ::SyntaxTree::Node
   # @return [Int] a new instance of Int
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5735
+  # source://syntax_tree//lib/syntax_tree/node.rb#5747
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5741
+  # source://syntax_tree//lib/syntax_tree/node.rb#5753
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5745
+  # source://syntax_tree//lib/syntax_tree/node.rb#5757
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5733
+  # source://syntax_tree//lib/syntax_tree/node.rb#5745
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5745
+  # source://syntax_tree//lib/syntax_tree/node.rb#5757
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5751
+  # source://syntax_tree//lib/syntax_tree/node.rb#5763
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5755
+  # source://syntax_tree//lib/syntax_tree/node.rb#5767
   def format(q); end
 
   # [String] the value of the integer
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5730
+  # source://syntax_tree//lib/syntax_tree/node.rb#5742
   def value; end
 end
 
@@ -4229,36 +4231,36 @@ end
 #
 # then the contents of the symbol node will contain a Kw node.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5818
+# source://syntax_tree//lib/syntax_tree/node.rb#5830
 class SyntaxTree::Kw < ::SyntaxTree::Node
   # @return [Kw] a new instance of Kw
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5824
+  # source://syntax_tree//lib/syntax_tree/node.rb#5836
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5830
+  # source://syntax_tree//lib/syntax_tree/node.rb#5842
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5834
+  # source://syntax_tree//lib/syntax_tree/node.rb#5846
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5822
+  # source://syntax_tree//lib/syntax_tree/node.rb#5834
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5834
+  # source://syntax_tree//lib/syntax_tree/node.rb#5846
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5840
+  # source://syntax_tree//lib/syntax_tree/node.rb#5852
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5844
+  # source://syntax_tree//lib/syntax_tree/node.rb#5856
   def format(q); end
 
   # [String] the value of the keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5819
+  # source://syntax_tree//lib/syntax_tree/node.rb#5831
   def value; end
 end
 
@@ -4267,141 +4269,141 @@ end
 #
 #     def method(**kwargs) end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5855
+# source://syntax_tree//lib/syntax_tree/node.rb#5867
 class SyntaxTree::KwRestParam < ::SyntaxTree::Node
   # @return [KwRestParam] a new instance of KwRestParam
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5861
+  # source://syntax_tree//lib/syntax_tree/node.rb#5873
   def initialize(name:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5867
+  # source://syntax_tree//lib/syntax_tree/node.rb#5879
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5871
+  # source://syntax_tree//lib/syntax_tree/node.rb#5883
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5859
+  # source://syntax_tree//lib/syntax_tree/node.rb#5871
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5871
+  # source://syntax_tree//lib/syntax_tree/node.rb#5883
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5877
+  # source://syntax_tree//lib/syntax_tree/node.rb#5889
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5881
+  # source://syntax_tree//lib/syntax_tree/node.rb#5893
   def format(q); end
 
   # [nil | Ident] the name of the parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5856
+  # source://syntax_tree//lib/syntax_tree/node.rb#5868
   def name; end
 end
 
 # LBrace represents the use of a left brace, i.e., {.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6119
+# source://syntax_tree//lib/syntax_tree/node.rb#6133
 class SyntaxTree::LBrace < ::SyntaxTree::Node
   # @return [LBrace] a new instance of LBrace
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6125
+  # source://syntax_tree//lib/syntax_tree/node.rb#6139
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6131
+  # source://syntax_tree//lib/syntax_tree/node.rb#6145
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6135
+  # source://syntax_tree//lib/syntax_tree/node.rb#6149
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6123
+  # source://syntax_tree//lib/syntax_tree/node.rb#6137
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6135
+  # source://syntax_tree//lib/syntax_tree/node.rb#6149
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6141
+  # source://syntax_tree//lib/syntax_tree/node.rb#6155
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6145
+  # source://syntax_tree//lib/syntax_tree/node.rb#6159
   def format(q); end
 
   # [String] the left brace
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6120
+  # source://syntax_tree//lib/syntax_tree/node.rb#6134
   def value; end
 end
 
 # LBracket represents the use of a left bracket, i.e., [.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6152
+# source://syntax_tree//lib/syntax_tree/node.rb#6166
 class SyntaxTree::LBracket < ::SyntaxTree::Node
   # @return [LBracket] a new instance of LBracket
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6158
+  # source://syntax_tree//lib/syntax_tree/node.rb#6172
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6164
+  # source://syntax_tree//lib/syntax_tree/node.rb#6178
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6168
+  # source://syntax_tree//lib/syntax_tree/node.rb#6182
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6156
+  # source://syntax_tree//lib/syntax_tree/node.rb#6170
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6168
+  # source://syntax_tree//lib/syntax_tree/node.rb#6182
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6174
+  # source://syntax_tree//lib/syntax_tree/node.rb#6188
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6178
+  # source://syntax_tree//lib/syntax_tree/node.rb#6192
   def format(q); end
 
   # [String] the left bracket
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6153
+  # source://syntax_tree//lib/syntax_tree/node.rb#6167
   def value; end
 end
 
 # LParen represents the use of a left parenthesis, i.e., (.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6185
+# source://syntax_tree//lib/syntax_tree/node.rb#6199
 class SyntaxTree::LParen < ::SyntaxTree::Node
   # @return [LParen] a new instance of LParen
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6191
+  # source://syntax_tree//lib/syntax_tree/node.rb#6205
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6197
+  # source://syntax_tree//lib/syntax_tree/node.rb#6211
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6201
+  # source://syntax_tree//lib/syntax_tree/node.rb#6215
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6189
+  # source://syntax_tree//lib/syntax_tree/node.rb#6203
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6201
+  # source://syntax_tree//lib/syntax_tree/node.rb#6215
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6207
+  # source://syntax_tree//lib/syntax_tree/node.rb#6221
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6211
+  # source://syntax_tree//lib/syntax_tree/node.rb#6225
   def format(q); end
 
   # [String] the left parenthesis
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6186
+  # source://syntax_tree//lib/syntax_tree/node.rb#6200
   def value; end
 end
 
@@ -4419,36 +4421,36 @@ end
 #
 # In this case "key:" would be the body of the label.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5901
+# source://syntax_tree//lib/syntax_tree/node.rb#5913
 class SyntaxTree::Label < ::SyntaxTree::Node
   # @return [Label] a new instance of Label
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5907
+  # source://syntax_tree//lib/syntax_tree/node.rb#5919
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5913
+  # source://syntax_tree//lib/syntax_tree/node.rb#5925
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5917
+  # source://syntax_tree//lib/syntax_tree/node.rb#5929
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5905
+  # source://syntax_tree//lib/syntax_tree/node.rb#5917
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5917
+  # source://syntax_tree//lib/syntax_tree/node.rb#5929
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5923
+  # source://syntax_tree//lib/syntax_tree/node.rb#5935
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5927
+  # source://syntax_tree//lib/syntax_tree/node.rb#5939
   def format(q); end
 
   # [String] the value of the label
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5902
+  # source://syntax_tree//lib/syntax_tree/node.rb#5914
   def value; end
 end
 
@@ -4460,28 +4462,28 @@ end
 # hash key. This node is important for determining the type of quote being
 # used by the label.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5940
+# source://syntax_tree//lib/syntax_tree/node.rb#5952
 class SyntaxTree::LabelEnd < ::SyntaxTree::Node
   # @return [LabelEnd] a new instance of LabelEnd
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5943
+  # source://syntax_tree//lib/syntax_tree/node.rb#5955
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5948
+  # source://syntax_tree//lib/syntax_tree/node.rb#5960
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5952
+  # source://syntax_tree//lib/syntax_tree/node.rb#5964
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5952
+  # source://syntax_tree//lib/syntax_tree/node.rb#5964
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5958
+  # source://syntax_tree//lib/syntax_tree/node.rb#5970
   def deconstruct_keys(_keys); end
 
   # [String] the end of the label
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5941
+  # source://syntax_tree//lib/syntax_tree/node.rb#5953
   def value; end
 end
 
@@ -4489,41 +4491,41 @@ end
 #
 #     ->(value) { value * 2 }
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5968
+# source://syntax_tree//lib/syntax_tree/node.rb#5980
 class SyntaxTree::Lambda < ::SyntaxTree::Node
   # @return [Lambda] a new instance of Lambda
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5977
+  # source://syntax_tree//lib/syntax_tree/node.rb#5989
   def initialize(params:, statements:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5984
+  # source://syntax_tree//lib/syntax_tree/node.rb#5996
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5988
+  # source://syntax_tree//lib/syntax_tree/node.rb#6000
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5975
+  # source://syntax_tree//lib/syntax_tree/node.rb#5987
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5988
+  # source://syntax_tree//lib/syntax_tree/node.rb#6000
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5994
+  # source://syntax_tree//lib/syntax_tree/node.rb#6006
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6003
+  # source://syntax_tree//lib/syntax_tree/node.rb#6015
   def format(q); end
 
   # [LambdaVar | Paren] the parameter declaration for this lambda
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5969
+  # source://syntax_tree//lib/syntax_tree/node.rb#5981
   def params; end
 
   # [BodyStmt | Statements] the expressions to be executed in this lambda
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5972
+  # source://syntax_tree//lib/syntax_tree/node.rb#5984
   def statements; end
 end
 
@@ -4535,46 +4537,46 @@ end
 #     -> (positional, optional = value, keyword:, &block; local) do
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6073
+# source://syntax_tree//lib/syntax_tree/node.rb#6087
 class SyntaxTree::LambdaVar < ::SyntaxTree::Node
   # @return [LambdaVar] a new instance of LambdaVar
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6082
+  # source://syntax_tree//lib/syntax_tree/node.rb#6096
   def initialize(params:, locals:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6089
+  # source://syntax_tree//lib/syntax_tree/node.rb#6103
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6093
+  # source://syntax_tree//lib/syntax_tree/node.rb#6107
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6080
+  # source://syntax_tree//lib/syntax_tree/node.rb#6094
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6093
+  # source://syntax_tree//lib/syntax_tree/node.rb#6107
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6099
+  # source://syntax_tree//lib/syntax_tree/node.rb#6113
   def deconstruct_keys(_keys); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6103
+  # source://syntax_tree//lib/syntax_tree/node.rb#6117
   def empty?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6107
+  # source://syntax_tree//lib/syntax_tree/node.rb#6121
   def format(q); end
 
   # [Array[ Ident ]] the list of block-local variable declarations
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6077
+  # source://syntax_tree//lib/syntax_tree/node.rb#6091
   def locals; end
 
   # [Params] the parameters being declared with the block
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6074
+  # source://syntax_tree//lib/syntax_tree/node.rb#6088
   def params; end
 end
 
@@ -4643,34 +4645,34 @@ end
 
 # Formats an Until, UntilMod, While, or WhileMod node.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9263
+# source://syntax_tree//lib/syntax_tree/node.rb#9277
 class SyntaxTree::LoopFormatter
   # @return [LoopFormatter] a new instance of LoopFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9273
+  # source://syntax_tree//lib/syntax_tree/node.rb#9287
   def initialize(keyword, node, statements); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9279
+  # source://syntax_tree//lib/syntax_tree/node.rb#9293
   def format(q); end
 
   # [String] the name of the keyword used for this loop
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9265
+  # source://syntax_tree//lib/syntax_tree/node.rb#9279
   def keyword; end
 
   # [Until | UntilMod | While | WhileMod] the node that is being formatted
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9268
+  # source://syntax_tree//lib/syntax_tree/node.rb#9282
   def node; end
 
   # [untyped] the statements associated with the node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9271
+  # source://syntax_tree//lib/syntax_tree/node.rb#9285
   def statements; end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9301
+  # source://syntax_tree//lib/syntax_tree/node.rb#9315
   def format_break(q); end
 end
 
@@ -4688,41 +4690,41 @@ end
 #
 #     first, = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6231
+# source://syntax_tree//lib/syntax_tree/node.rb#6245
 class SyntaxTree::MAssign < ::SyntaxTree::Node
   # @return [MAssign] a new instance of MAssign
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6240
+  # source://syntax_tree//lib/syntax_tree/node.rb#6254
   def initialize(target:, value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6247
+  # source://syntax_tree//lib/syntax_tree/node.rb#6261
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6251
+  # source://syntax_tree//lib/syntax_tree/node.rb#6265
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6238
+  # source://syntax_tree//lib/syntax_tree/node.rb#6252
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6251
+  # source://syntax_tree//lib/syntax_tree/node.rb#6265
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6257
+  # source://syntax_tree//lib/syntax_tree/node.rb#6271
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6261
+  # source://syntax_tree//lib/syntax_tree/node.rb#6275
   def format(q); end
 
   # [MLHS | MLHSParen] the target of the multiple assignment
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6232
+  # source://syntax_tree//lib/syntax_tree/node.rb#6246
   def target; end
 
   # [untyped] the value being assigned
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6235
+  # source://syntax_tree//lib/syntax_tree/node.rb#6249
   def value; end
 end
 
@@ -4731,51 +4733,51 @@ end
 #
 #     first, second, third = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6337
+# source://syntax_tree//lib/syntax_tree/node.rb#6351
 class SyntaxTree::MLHS < ::SyntaxTree::Node
   # @return [MLHS] a new instance of MLHS
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6348
+  # source://syntax_tree//lib/syntax_tree/node.rb#6362
   def initialize(parts:, location:, comma: T.unsafe(nil), comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6355
+  # source://syntax_tree//lib/syntax_tree/node.rb#6369
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6359
+  # source://syntax_tree//lib/syntax_tree/node.rb#6373
   def child_nodes; end
 
   # [boolean] whether or not there is a trailing comma at the end of this
   # list, which impacts destructuring. It's an attr_accessor so that while
   # the syntax tree is being built it can be set by its parent node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6343
+  # source://syntax_tree//lib/syntax_tree/node.rb#6357
   def comma; end
 
   # [boolean] whether or not there is a trailing comma at the end of this
   # list, which impacts destructuring. It's an attr_accessor so that while
   # the syntax tree is being built it can be set by its parent node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6343
+  # source://syntax_tree//lib/syntax_tree/node.rb#6357
   def comma=(_arg0); end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6346
+  # source://syntax_tree//lib/syntax_tree/node.rb#6360
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6359
+  # source://syntax_tree//lib/syntax_tree/node.rb#6373
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6365
+  # source://syntax_tree//lib/syntax_tree/node.rb#6379
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6369
+  # source://syntax_tree//lib/syntax_tree/node.rb#6383
   def format(q); end
 
   # Array[ARefField | ArgStar | Field | Ident | MLHSParen | VarField] the
   # parts of the left-hand side of a multiple assignment
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6338
+  # source://syntax_tree//lib/syntax_tree/node.rb#6352
   def parts; end
 end
 
@@ -4784,50 +4786,50 @@ end
 #
 #     (left, right) = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6381
+# source://syntax_tree//lib/syntax_tree/node.rb#6395
 class SyntaxTree::MLHSParen < ::SyntaxTree::Node
   # @return [MLHSParen] a new instance of MLHSParen
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6392
+  # source://syntax_tree//lib/syntax_tree/node.rb#6406
   def initialize(contents:, location:, comma: T.unsafe(nil), comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6399
+  # source://syntax_tree//lib/syntax_tree/node.rb#6413
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6403
+  # source://syntax_tree//lib/syntax_tree/node.rb#6417
   def child_nodes; end
 
   # [boolean] whether or not there is a trailing comma at the end of this
   # list, which impacts destructuring. It's an attr_accessor so that while
   # the syntax tree is being built it can be set by its parent node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6387
+  # source://syntax_tree//lib/syntax_tree/node.rb#6401
   def comma; end
 
   # [boolean] whether or not there is a trailing comma at the end of this
   # list, which impacts destructuring. It's an attr_accessor so that while
   # the syntax tree is being built it can be set by its parent node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6387
+  # source://syntax_tree//lib/syntax_tree/node.rb#6401
   def comma=(_arg0); end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6390
+  # source://syntax_tree//lib/syntax_tree/node.rb#6404
   def comments; end
 
   # [MLHS | MLHSParen] the contents inside of the parentheses
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6382
+  # source://syntax_tree//lib/syntax_tree/node.rb#6396
   def contents; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6403
+  # source://syntax_tree//lib/syntax_tree/node.rb#6417
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6409
+  # source://syntax_tree//lib/syntax_tree/node.rb#6423
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6413
+  # source://syntax_tree//lib/syntax_tree/node.rb#6427
   def format(q); end
 end
 
@@ -4836,36 +4838,36 @@ end
 #
 #     values = first, second, third
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6510
+# source://syntax_tree//lib/syntax_tree/node.rb#6524
 class SyntaxTree::MRHS < ::SyntaxTree::Node
   # @return [MRHS] a new instance of MRHS
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6516
+  # source://syntax_tree//lib/syntax_tree/node.rb#6530
   def initialize(parts:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6522
+  # source://syntax_tree//lib/syntax_tree/node.rb#6536
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6526
+  # source://syntax_tree//lib/syntax_tree/node.rb#6540
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6514
+  # source://syntax_tree//lib/syntax_tree/node.rb#6528
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6526
+  # source://syntax_tree//lib/syntax_tree/node.rb#6540
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6532
+  # source://syntax_tree//lib/syntax_tree/node.rb#6546
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6536
+  # source://syntax_tree//lib/syntax_tree/node.rb#6550
   def format(q); end
 
   # Array[untyped] the parts that are being assigned
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6511
+  # source://syntax_tree//lib/syntax_tree/node.rb#6525
   def parts; end
 end
 
@@ -4873,44 +4875,44 @@ end
 #
 #     method {}
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6278
+# source://syntax_tree//lib/syntax_tree/node.rb#6292
 class SyntaxTree::MethodAddBlock < ::SyntaxTree::Node
   # @return [MethodAddBlock] a new instance of MethodAddBlock
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6287
+  # source://syntax_tree//lib/syntax_tree/node.rb#6301
   def initialize(call:, block:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6294
+  # source://syntax_tree//lib/syntax_tree/node.rb#6308
   def accept(visitor); end
 
   # [BraceBlock | DoBlock] the block being sent with the method call
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6282
+  # source://syntax_tree//lib/syntax_tree/node.rb#6296
   def block; end
 
   # [Call | Command | CommandCall | FCall] the method call
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6279
+  # source://syntax_tree//lib/syntax_tree/node.rb#6293
   def call; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6298
+  # source://syntax_tree//lib/syntax_tree/node.rb#6312
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6285
+  # source://syntax_tree//lib/syntax_tree/node.rb#6299
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6298
+  # source://syntax_tree//lib/syntax_tree/node.rb#6312
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6304
+  # source://syntax_tree//lib/syntax_tree/node.rb#6318
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6308
+  # source://syntax_tree//lib/syntax_tree/node.rb#6322
   def format(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6324
+  # source://syntax_tree//lib/syntax_tree/node.rb#6338
   def format_contents(q); end
 end
 
@@ -4919,41 +4921,41 @@ end
 #     module Namespace
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6439
+# source://syntax_tree//lib/syntax_tree/node.rb#6453
 class SyntaxTree::ModuleDeclaration < ::SyntaxTree::Node
   # @return [ModuleDeclaration] a new instance of ModuleDeclaration
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6448
+  # source://syntax_tree//lib/syntax_tree/node.rb#6462
   def initialize(constant:, bodystmt:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6455
+  # source://syntax_tree//lib/syntax_tree/node.rb#6469
   def accept(visitor); end
 
   # [BodyStmt] the expressions to be executed in the context of the module
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6443
+  # source://syntax_tree//lib/syntax_tree/node.rb#6457
   def bodystmt; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6459
+  # source://syntax_tree//lib/syntax_tree/node.rb#6473
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6446
+  # source://syntax_tree//lib/syntax_tree/node.rb#6460
   def comments; end
 
   # [ConstPathRef | ConstRef | TopConstRef] the name of the module
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6440
+  # source://syntax_tree//lib/syntax_tree/node.rb#6454
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6459
+  # source://syntax_tree//lib/syntax_tree/node.rb#6473
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6465
+  # source://syntax_tree//lib/syntax_tree/node.rb#6479
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6474
+  # source://syntax_tree//lib/syntax_tree/node.rb#6488
   def format(q); end
 end
 
@@ -4974,36 +4976,36 @@ end
 #
 #     next(value)
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6559
+# source://syntax_tree//lib/syntax_tree/node.rb#6573
 class SyntaxTree::Next < ::SyntaxTree::Node
   # @return [Next] a new instance of Next
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6565
+  # source://syntax_tree//lib/syntax_tree/node.rb#6579
   def initialize(arguments:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6571
+  # source://syntax_tree//lib/syntax_tree/node.rb#6585
   def accept(visitor); end
 
   # [Args] the arguments passed to the next keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6560
+  # source://syntax_tree//lib/syntax_tree/node.rb#6574
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6575
+  # source://syntax_tree//lib/syntax_tree/node.rb#6589
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6563
+  # source://syntax_tree//lib/syntax_tree/node.rb#6577
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6575
+  # source://syntax_tree//lib/syntax_tree/node.rb#6589
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6581
+  # source://syntax_tree//lib/syntax_tree/node.rb#6595
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6585
+  # source://syntax_tree//lib/syntax_tree/node.rb#6599
   def format(q); end
 end
 
@@ -5057,41 +5059,41 @@ end
 #
 #     not value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8984
+# source://syntax_tree//lib/syntax_tree/node.rb#8998
 class SyntaxTree::Not < ::SyntaxTree::Node
   # @return [Not] a new instance of Not
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8993
+  # source://syntax_tree//lib/syntax_tree/node.rb#9007
   def initialize(statement:, parentheses:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9000
+  # source://syntax_tree//lib/syntax_tree/node.rb#9014
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9004
+  # source://syntax_tree//lib/syntax_tree/node.rb#9018
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8991
+  # source://syntax_tree//lib/syntax_tree/node.rb#9005
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9004
+  # source://syntax_tree//lib/syntax_tree/node.rb#9018
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9010
+  # source://syntax_tree//lib/syntax_tree/node.rb#9024
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9019
+  # source://syntax_tree//lib/syntax_tree/node.rb#9033
   def format(q); end
 
   # [boolean] whether or not parentheses were used
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8988
+  # source://syntax_tree//lib/syntax_tree/node.rb#9002
   def parentheses; end
 
   # [nil | untyped] the statement on which to operate
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8985
+  # source://syntax_tree//lib/syntax_tree/node.rb#8999
   def statement; end
 end
 
@@ -5101,36 +5103,36 @@ end
 #
 # In the example above, the Op node represents the + operator.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6596
+# source://syntax_tree//lib/syntax_tree/node.rb#6610
 class SyntaxTree::Op < ::SyntaxTree::Node
   # @return [Op] a new instance of Op
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6602
+  # source://syntax_tree//lib/syntax_tree/node.rb#6616
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6608
+  # source://syntax_tree//lib/syntax_tree/node.rb#6622
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6612
+  # source://syntax_tree//lib/syntax_tree/node.rb#6626
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6600
+  # source://syntax_tree//lib/syntax_tree/node.rb#6614
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6612
+  # source://syntax_tree//lib/syntax_tree/node.rb#6626
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6618
+  # source://syntax_tree//lib/syntax_tree/node.rb#6632
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6622
+  # source://syntax_tree//lib/syntax_tree/node.rb#6636
   def format(q); end
 
   # [String] the operator
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6597
+  # source://syntax_tree//lib/syntax_tree/node.rb#6611
   def value; end
 end
 
@@ -5139,94 +5141,94 @@ end
 #
 #     variable += value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6634
+# source://syntax_tree//lib/syntax_tree/node.rb#6648
 class SyntaxTree::OpAssign < ::SyntaxTree::Node
   # @return [OpAssign] a new instance of OpAssign
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6646
+  # source://syntax_tree//lib/syntax_tree/node.rb#6660
   def initialize(target:, operator:, value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6654
+  # source://syntax_tree//lib/syntax_tree/node.rb#6668
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6658
+  # source://syntax_tree//lib/syntax_tree/node.rb#6672
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6644
+  # source://syntax_tree//lib/syntax_tree/node.rb#6658
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6658
+  # source://syntax_tree//lib/syntax_tree/node.rb#6672
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6664
+  # source://syntax_tree//lib/syntax_tree/node.rb#6678
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6674
+  # source://syntax_tree//lib/syntax_tree/node.rb#6688
   def format(q); end
 
   # [Op] the operator being used for the assignment
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6638
+  # source://syntax_tree//lib/syntax_tree/node.rb#6652
   def operator; end
 
   # [ARefField | ConstPathField | Field | TopConstField | VarField] the target
   # to assign the result of the expression to
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6635
+  # source://syntax_tree//lib/syntax_tree/node.rb#6649
   def target; end
 
   # [untyped] the expression to be assigned
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6641
+  # source://syntax_tree//lib/syntax_tree/node.rb#6655
   def value; end
 
   private
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6694
+  # source://syntax_tree//lib/syntax_tree/node.rb#6708
   def skip_indent?; end
 end
 
 # The list of nodes that represent patterns inside of pattern matching so that
 # when a pattern is being printed it knows if it's nested.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5131
+# source://syntax_tree//lib/syntax_tree/node.rb#5143
 SyntaxTree::PATTERNS = T.let(T.unsafe(nil), Array)
 
 # Params represents defining parameters on a method or lambda.
 #
 #     def method(param) end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6774
+# source://syntax_tree//lib/syntax_tree/node.rb#6788
 class SyntaxTree::Params < ::SyntaxTree::Node
   # @return [Params] a new instance of Params
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6873
+  # source://syntax_tree//lib/syntax_tree/node.rb#6887
   def initialize(location:, requireds: T.unsafe(nil), optionals: T.unsafe(nil), rest: T.unsafe(nil), posts: T.unsafe(nil), keywords: T.unsafe(nil), keyword_rest: T.unsafe(nil), block: T.unsafe(nil), comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6904
+  # source://syntax_tree//lib/syntax_tree/node.rb#6918
   def accept(visitor); end
 
   # [nil | BlockArg] the optional block parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6868
+  # source://syntax_tree//lib/syntax_tree/node.rb#6882
   def block; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6908
+  # source://syntax_tree//lib/syntax_tree/node.rb#6922
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6871
+  # source://syntax_tree//lib/syntax_tree/node.rb#6885
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6908
+  # source://syntax_tree//lib/syntax_tree/node.rb#6922
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6922
+  # source://syntax_tree//lib/syntax_tree/node.rb#6936
   def deconstruct_keys(_keys); end
 
   # Params nodes are the most complicated in the tree. Occasionally you want
@@ -5236,120 +5238,120 @@ class SyntaxTree::Params < ::SyntaxTree::Node
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6899
+  # source://syntax_tree//lib/syntax_tree/node.rb#6913
   def empty?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6936
+  # source://syntax_tree//lib/syntax_tree/node.rb#6950
   def format(q); end
 
   # [nil | :nil | KwRestParam] the optional keyword rest parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6865
+  # source://syntax_tree//lib/syntax_tree/node.rb#6879
   def keyword_rest; end
 
   # [Array[ [ Ident, nil | untyped ] ]] any keyword parameters and their
   # optional default values
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6862
+  # source://syntax_tree//lib/syntax_tree/node.rb#6876
   def keywords; end
 
   # [Array[ [ Ident, untyped ] ]] any optional parameters and their default
   # values
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6850
+  # source://syntax_tree//lib/syntax_tree/node.rb#6864
   def optionals; end
 
   # [Array[ Ident ]] any positional parameters that exist after a rest
   # parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6858
+  # source://syntax_tree//lib/syntax_tree/node.rb#6872
   def posts; end
 
   # [Array[ Ident ]] any required parameters
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6846
+  # source://syntax_tree//lib/syntax_tree/node.rb#6860
   def requireds; end
 
   # [nil | ArgsForward | ExcessedComma | RestParam] the optional rest
   # parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6854
+  # source://syntax_tree//lib/syntax_tree/node.rb#6868
   def rest; end
 end
 
 # Formats the keyword position of the parameters. This includes the label,
 # as well as an optional default value.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6800
+# source://syntax_tree//lib/syntax_tree/node.rb#6814
 class SyntaxTree::Params::KeywordFormatter
   # @return [KeywordFormatter] a new instance of KeywordFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6807
+  # source://syntax_tree//lib/syntax_tree/node.rb#6821
   def initialize(name, value); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6812
+  # source://syntax_tree//lib/syntax_tree/node.rb#6826
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6816
+  # source://syntax_tree//lib/syntax_tree/node.rb#6830
   def format(q); end
 
   # [Ident] the name of the parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6802
+  # source://syntax_tree//lib/syntax_tree/node.rb#6816
   def name; end
 
   # [nil | untyped] the value of the parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6805
+  # source://syntax_tree//lib/syntax_tree/node.rb#6819
   def value; end
 end
 
 # Formats the keyword_rest position of the parameters. This can be the **nil
 # syntax, the ... syntax, or the ** syntax.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6828
+# source://syntax_tree//lib/syntax_tree/node.rb#6842
 class SyntaxTree::Params::KeywordRestFormatter
   # @return [KeywordRestFormatter] a new instance of KeywordRestFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6832
+  # source://syntax_tree//lib/syntax_tree/node.rb#6846
   def initialize(value); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6836
+  # source://syntax_tree//lib/syntax_tree/node.rb#6850
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6840
+  # source://syntax_tree//lib/syntax_tree/node.rb#6854
   def format(q); end
 
   # [:nil | ArgsForward | KwRestParam] the value of the parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6830
+  # source://syntax_tree//lib/syntax_tree/node.rb#6844
   def value; end
 end
 
 # Formats the optional position of the parameters. This includes the label,
 # as well as the default value.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6775
+# source://syntax_tree//lib/syntax_tree/node.rb#6789
 class SyntaxTree::Params::OptionalFormatter
   # @return [OptionalFormatter] a new instance of OptionalFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6782
+  # source://syntax_tree//lib/syntax_tree/node.rb#6796
   def initialize(name, value); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6787
+  # source://syntax_tree//lib/syntax_tree/node.rb#6801
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6791
+  # source://syntax_tree//lib/syntax_tree/node.rb#6805
   def format(q); end
 
   # [Ident] the name of the parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6777
+  # source://syntax_tree//lib/syntax_tree/node.rb#6791
   def name; end
 
   # [untyped] the value of the parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6780
+  # source://syntax_tree//lib/syntax_tree/node.rb#6794
   def value; end
 end
 
@@ -5359,41 +5361,41 @@ end
 #
 #     (1 + 2)
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6977
+# source://syntax_tree//lib/syntax_tree/node.rb#6991
 class SyntaxTree::Paren < ::SyntaxTree::Node
   # @return [Paren] a new instance of Paren
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6986
+  # source://syntax_tree//lib/syntax_tree/node.rb#7000
   def initialize(lparen:, contents:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6993
+  # source://syntax_tree//lib/syntax_tree/node.rb#7007
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6997
+  # source://syntax_tree//lib/syntax_tree/node.rb#7011
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6984
+  # source://syntax_tree//lib/syntax_tree/node.rb#6998
   def comments; end
 
   # [nil | untyped] the expression inside the parentheses
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6981
+  # source://syntax_tree//lib/syntax_tree/node.rb#6995
   def contents; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6997
+  # source://syntax_tree//lib/syntax_tree/node.rb#7011
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7003
+  # source://syntax_tree//lib/syntax_tree/node.rb#7017
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7012
+  # source://syntax_tree//lib/syntax_tree/node.rb#7026
   def format(q); end
 
   # [LParen] the left parenthesis that opened this statement
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6978
+  # source://syntax_tree//lib/syntax_tree/node.rb#6992
   def lparen; end
 end
 
@@ -5429,18 +5431,18 @@ end
 # This approach maintains the nice conciseness of the inline version, while
 # keeping the correct semantic meaning.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6731
+# source://syntax_tree//lib/syntax_tree/node.rb#6745
 module SyntaxTree::Parentheses
   class << self
-    # source://syntax_tree//lib/syntax_tree/node.rb#6751
+    # source://syntax_tree//lib/syntax_tree/node.rb#6765
     def break(q); end
 
-    # source://syntax_tree//lib/syntax_tree/node.rb#6743
+    # source://syntax_tree//lib/syntax_tree/node.rb#6757
     def flat(q); end
   end
 end
 
-# source://syntax_tree//lib/syntax_tree/node.rb#6732
+# source://syntax_tree//lib/syntax_tree/node.rb#6746
 SyntaxTree::Parentheses::NODES = T.let(T.unsafe(nil), Array)
 
 # Parser is a subclass of the Ripper library that subscribes to the stream of
@@ -5487,7 +5489,7 @@ class SyntaxTree::Parser < ::Ripper
   # Attaches comments to the nodes in the tree that most closely correspond to
   # the location of the comments.
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2565
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2576
   def attach_comments(program, comments); end
 
   # This represents the current place in the source string that we've gotten
@@ -5556,13 +5558,13 @@ class SyntaxTree::Parser < ::Ripper
   # declaration has block-local variables. Once it does, we parse those out
   # and convert them into Ident nodes.
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2056
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2067
   def lambda_locals(source); end
 
   # Responsible for finding the nearest nodes to the given comment within the
   # context of the given encapsulating node.
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2600
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2611
   def nearest_nodes(node, comment); end
 
   # :call-seq:
@@ -5603,7 +5605,7 @@ class SyntaxTree::Parser < ::Ripper
   #
   # @raise [ParseError]
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2517
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2528
   def on_alias_error(error, *_arg1); end
 
   # :call-seq:
@@ -5700,7 +5702,7 @@ class SyntaxTree::Parser < ::Ripper
   #
   # @raise [ParseError]
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2517
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2528
   def on_assign_error(error, *_arg1); end
 
   # :call-seq:
@@ -5820,7 +5822,7 @@ class SyntaxTree::Parser < ::Ripper
   #
   # @raise [ParseError]
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2517
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2528
   def on_class_name_error(error, *_arg1); end
 
   # :call-seq:
@@ -5947,49 +5949,49 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | Elsif | Else) consequent
   #   ) -> Elsif
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1354
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1359
   def on_elsif(predicate, statements, consequent); end
 
   # :call-seq:
   #   on_embdoc: (String value) -> EmbDoc
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1375
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1381
   def on_embdoc(value); end
 
   # :call-seq:
   #   on_embdoc_beg: (String value) -> EmbDoc
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1382
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1388
   def on_embdoc_beg(value); end
 
   # :call-seq:
   #   on_embdoc_end: (String value) -> EmbDoc
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1393
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1399
   def on_embdoc_end(value); end
 
   # :call-seq:
   #   on_embexpr_beg: (String value) -> EmbExprBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1417
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1423
   def on_embexpr_beg(value); end
 
   # :call-seq:
   #   on_embexpr_end: (String value) -> EmbExprEnd
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1436
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1442
   def on_embexpr_end(value); end
 
   # :call-seq:
   #   on_embvar: (String value) -> EmbVar
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1455
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1461
   def on_embvar(value); end
 
   # :call-seq:
   #   on_ensure: (Statements statements) -> Ensure
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1474
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1480
   def on_ensure(statements); end
 
   # The handler for this event accepts no parameters (though in previous
@@ -5998,13 +6000,13 @@ class SyntaxTree::Parser < ::Ripper
   # :call-seq:
   #   on_excessed_comma: () -> ExcessedComma
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1500
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1506
   def on_excessed_comma(*_arg0); end
 
   # :call-seq:
   #   on_fcall: ((Const | Ident) value) -> FCall
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1508
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1514
   def on_fcall(value); end
 
   # :call-seq:
@@ -6014,13 +6016,13 @@ class SyntaxTree::Parser < ::Ripper
   #     (Const | Ident) name
   #   ) -> Field
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1518
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1524
   def on_field(parent, operator, name); end
 
   # :call-seq:
   #   on_float: (String value) -> FloatLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1529
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1535
   def on_float(value); end
 
   # :call-seq:
@@ -6031,7 +6033,7 @@ class SyntaxTree::Parser < ::Ripper
   #     VarField right
   #   ) -> FndPtn
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1549
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1555
   def on_fndptn(constant, left, values, right); end
 
   # :call-seq:
@@ -6041,37 +6043,37 @@ class SyntaxTree::Parser < ::Ripper
   #     Statements statements
   #   ) -> For
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1587
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1593
   def on_for(index, collection, statements); end
 
   # :call-seq:
   #   on_gvar: (String value) -> GVar
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1623
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1632
   def on_gvar(value); end
 
   # :call-seq:
   #   on_hash: ((nil | Array[AssocNew | AssocSplat]) assocs) -> HashLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1638
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1647
   def on_hash(assocs); end
 
   # :call-seq:
   #   on_heredoc_beg: (String value) -> HeredocBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1651
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1660
   def on_heredoc_beg(value); end
 
   # :call-seq:
   #   on_heredoc_dedent: (StringContent string, Integer width) -> Heredoc
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1670
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1679
   def on_heredoc_dedent(string, width); end
 
   # :call-seq:
   #   on_heredoc_end: (String value) -> Heredoc
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1684
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1693
   def on_heredoc_end(value); end
 
   # :call-seq:
@@ -6081,13 +6083,13 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | VarField) keyword_rest
   #   ) -> HshPtn
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1720
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1729
   def on_hshptn(constant, keywords, keyword_rest); end
 
   # :call-seq:
   #   on_ident: (String value) -> Ident
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1758
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1767
   def on_ident(value); end
 
   # :call-seq:
@@ -6097,25 +6099,25 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | Elsif | Else) consequent
   #   ) -> If
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1777
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1786
   def on_if(predicate, statements, consequent); end
 
   # :call-seq:
   #   on_if_mod: (untyped predicate, untyped statement) -> IfMod
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1809
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1819
   def on_if_mod(predicate, statement); end
 
   # :call-seq:
   #   on_ifop: (untyped predicate, untyped truthy, untyped falsy) -> IfOp
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1798
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1808
   def on_ifop(predicate, truthy, falsy); end
 
   # :call-seq:
   #   on_imaginary: (String value) -> Imaginary
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1829
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1839
   def on_imaginary(value); end
 
   # :call-seq:
@@ -6126,43 +6128,43 @@ class SyntaxTree::Parser < ::Ripper
   #            (nil | In | Else) consequent
   #          ) -> In
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1849
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1859
   def on_in(pattern, statements, consequent); end
 
   # :call-seq:
   #   on_int: (String value) -> Int
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1881
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1891
   def on_int(value); end
 
   # :call-seq:
   #   on_ivar: (String value) -> IVar
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1896
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1906
   def on_ivar(value); end
 
   # :call-seq:
   #   on_kw: (String value) -> Kw
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1911
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1921
   def on_kw(value); end
 
   # :call-seq:
   #   on_kwrest_param: ((nil | Ident) name) -> KwRestParam
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1930
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1940
   def on_kwrest_param(name); end
 
   # :call-seq:
   #   on_label: (String value) -> Label
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1939
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1949
   def on_label(value); end
 
   # :call-seq:
   #   on_label_end: (String value) -> LabelEnd
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1954
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1964
   def on_label_end(value); end
 
   # :call-seq:
@@ -6171,37 +6173,37 @@ class SyntaxTree::Parser < ::Ripper
   #     (BodyStmt | Statements) statements
   #   ) -> Lambda
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1976
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1986
   def on_lambda(params, statements); end
 
   # :call-seq:
   #   on_lambda_var: (Params params, Array[ Ident ] locals) -> LambdaVar
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2043
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2054
   def on_lambda_var(params, locals); end
 
   # :call-seq:
   #   on_lbrace: (String value) -> LBrace
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2120
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2131
   def on_lbrace(value); end
 
   # :call-seq:
   #   on_lbracket: (String value) -> LBracket
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2139
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2150
   def on_lbracket(value); end
 
   # :call-seq:
   #   on_lparen: (String value) -> LParen
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2158
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2169
   def on_lparen(value); end
 
   # :call-seq:
   #   on_massign: ((MLHS | MLHSParen) target, untyped value) -> MAssign
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2181
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2192
   def on_massign(target, value); end
 
   # :call-seq:
@@ -6210,7 +6212,7 @@ class SyntaxTree::Parser < ::Ripper
   #     (ArgParen | Args) arguments
   #   ) -> Call | FCall
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2197
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2208
   def on_method_add_arg(call, arguments); end
 
   # :call-seq:
@@ -6219,7 +6221,7 @@ class SyntaxTree::Parser < ::Ripper
   #     (BraceBlock | DoBlock) block
   #   ) -> MethodAddBlock
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2219
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2230
   def on_method_add_block(call, block); end
 
   # :call-seq:
@@ -6228,13 +6230,13 @@ class SyntaxTree::Parser < ::Ripper
   #     (ARefField | Field | Ident | MLHSParen | VarField) part
   #   ) -> MLHS
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2232
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2243
   def on_mlhs_add(mlhs, part); end
 
   # :call-seq:
   #   on_mlhs_add_post: (MLHS left, MLHS right) -> MLHS
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2241
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2252
   def on_mlhs_add_post(left, right); end
 
   # :call-seq:
@@ -6243,19 +6245,19 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | ARefField | Field | Ident | VarField) part
   #   ) -> MLHS
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2253
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2264
   def on_mlhs_add_star(mlhs, part); end
 
   # :call-seq:
   #   on_mlhs_new: () -> MLHS
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2266
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2277
   def on_mlhs_new; end
 
   # :call-seq:
   #   on_mlhs_paren: ((MLHS | MLHSParen) contents) -> MLHSParen
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2276
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2287
   def on_mlhs_paren(contents); end
 
   # :call-seq:
@@ -6264,43 +6266,43 @@ class SyntaxTree::Parser < ::Ripper
   #     BodyStmt bodystmt
   #   ) -> ModuleDeclaration
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2294
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2305
   def on_module(constant, bodystmt); end
 
   # :call-seq:
   #   on_mrhs_add: (MRHS mrhs, untyped part) -> MRHS
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2325
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2336
   def on_mrhs_add(mrhs, part); end
 
   # :call-seq:
   #   on_mrhs_add_star: (MRHS mrhs, untyped value) -> MRHS
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2334
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2345
   def on_mrhs_add_star(mrhs, value); end
 
   # :call-seq:
   #   on_mrhs_new: () -> MRHS
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2315
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2326
   def on_mrhs_new; end
 
   # :call-seq:
   #   on_mrhs_new_from_args: (Args arguments) -> MRHS
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2356
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2367
   def on_mrhs_new_from_args(arguments); end
 
   # :call-seq:
   #   on_next: (Args arguments) -> Next
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2362
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2373
   def on_next(arguments); end
 
   # :call-seq:
   #   on_op: (String value) -> Op
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2381
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2392
   def on_op(value); end
 
   # :call-seq:
@@ -6316,7 +6318,7 @@ class SyntaxTree::Parser < ::Ripper
   #     untyped value
   #   ) -> OpAssign
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2410
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2421
   def on_opassign(target, operator, value); end
 
   # If we encounter a parse error, just immediately bail out so that our
@@ -6324,7 +6326,7 @@ class SyntaxTree::Parser < ::Ripper
   #
   # @raise [ParseError]
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2517
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2528
   def on_param_error(error, *_arg1); end
 
   # :call-seq:
@@ -6338,13 +6340,13 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | :& | BlockArg) block
   #   ) -> Params
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2433
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2444
   def on_params(requireds, optionals, rest, posts, keywords, keyword_rest, block); end
 
   # :call-seq:
   #   on_paren: (untyped contents) -> Paren
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2477
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2488
   def on_paren(contents); end
 
   # If we encounter a parse error, just immediately bail out so that our
@@ -6352,79 +6354,79 @@ class SyntaxTree::Parser < ::Ripper
   #
   # @raise [ParseError]
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2517
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2528
   def on_parse_error(error, *_arg1); end
 
   # :call-seq:
   #   on_period: (String value) -> Period
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2527
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2538
   def on_period(value); end
 
   # :call-seq:
   #   on_program: (Statements statements) -> Program
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2542
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2553
   def on_program(statements); end
 
   # :call-seq:
   #   on_qsymbols_add: (QSymbols qsymbols, TStringContent element) -> QSymbols
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2654
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2665
   def on_qsymbols_add(qsymbols, element); end
 
   # :call-seq:
   #   on_qsymbols_beg: (String value) -> QSymbolsBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2664
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2675
   def on_qsymbols_beg(value); end
 
   # :call-seq:
   #   on_qsymbols_new: () -> QSymbols
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2683
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2694
   def on_qsymbols_new; end
 
   # :call-seq:
   #   on_qwords_add: (QWords qwords, TStringContent element) -> QWords
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2695
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2706
   def on_qwords_add(qwords, element); end
 
   # :call-seq:
   #   on_qwords_beg: (String value) -> QWordsBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2705
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2716
   def on_qwords_beg(value); end
 
   # :call-seq:
   #   on_qwords_new: () -> QWords
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2724
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2735
   def on_qwords_new; end
 
   # :call-seq:
   #   on_rational: (String value) -> RationalLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2736
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2747
   def on_rational(value); end
 
   # :call-seq:
   #   on_rbrace: (String value) -> RBrace
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2751
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2762
   def on_rbrace(value); end
 
   # :call-seq:
   #   on_rbracket: (String value) -> RBracket
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2770
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2781
   def on_rbracket(value); end
 
   # :call-seq:
   #   on_redo: () -> Redo
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2789
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2800
   def on_redo; end
 
   # :call-seq:
@@ -6433,19 +6435,19 @@ class SyntaxTree::Parser < ::Ripper
   #     (StringDVar | StringEmbExpr | TStringContent) part
   #   ) -> RegexpContent
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2800
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2811
   def on_regexp_add(regexp_content, part); end
 
   # :call-seq:
   #   on_regexp_beg: (String value) -> RegexpBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2810
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2821
   def on_regexp_beg(value); end
 
   # :call-seq:
   #   on_regexp_end: (String value) -> RegexpEnd
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2829
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2840
   def on_regexp_end(value); end
 
   # :call-seq:
@@ -6454,13 +6456,13 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | RegexpEnd) ending
   #   ) -> RegexpLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2847
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2858
   def on_regexp_literal(regexp_content, ending); end
 
   # :call-seq:
   #   on_regexp_new: () -> RegexpContent
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2865
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2876
   def on_regexp_new; end
 
   # :call-seq:
@@ -6471,49 +6473,49 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | Rescue) consequent
   #   ) -> Rescue
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2882
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2893
   def on_rescue(exceptions, variable, statements, consequent); end
 
   # :call-seq:
   #   on_rescue_mod: (untyped statement, untyped value) -> RescueMod
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2934
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2945
   def on_rescue_mod(statement, value); end
 
   # :call-seq:
   #   on_rest_param: ((nil | Ident) name) -> RestParam
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2946
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2957
   def on_rest_param(name); end
 
   # :call-seq:
   #   on_retry: () -> Retry
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2955
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2966
   def on_retry; end
 
   # :call-seq:
   #   on_return: (Args arguments) -> Return
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2963
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2974
   def on_return(arguments); end
 
   # :call-seq:
   #   on_return0: () -> Return0
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2974
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2985
   def on_return0; end
 
   # :call-seq:
   #   on_rparen: (String value) -> RParen
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2982
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2993
   def on_rparen(value); end
 
   # :call-seq:
   #   on_sclass: (untyped target, BodyStmt bodystmt) -> SClass
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3001
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3012
   def on_sclass(target, bodystmt); end
 
   # stmts_add is a parser event that represents a single statement inside a
@@ -6521,13 +6523,13 @@ class SyntaxTree::Parser < ::Ripper
   # parent stmts node as well as an stmt which can be any expression in
   # Ruby.
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3032
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3043
   def on_stmts_add(statements, statement); end
 
   # :call-seq:
   #   on_stmts_new: () -> Statements
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3049
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3060
   def on_stmts_new; end
 
   # :call-seq:
@@ -6536,7 +6538,7 @@ class SyntaxTree::Parser < ::Ripper
   #     (StringEmbExpr | StringDVar | TStringContent) part
   #   ) -> StringContent
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3063
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3074
   def on_string_add(string, part); end
 
   # :call-seq:
@@ -6545,44 +6547,44 @@ class SyntaxTree::Parser < ::Ripper
   #     StringLiteral right
   #   ) -> StringConcat
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3080
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3091
   def on_string_concat(left, right); end
 
   # :call-seq:
   #   on_string_content: () -> StringContent
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3090
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3101
   def on_string_content; end
 
   # :call-seq:
   #   on_string_dvar: ((Backref | VarRef) variable) -> StringDVar
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3100
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3111
   def on_string_dvar(variable); end
 
   # :call-seq:
   #   on_string_embexpr: (Statements statements) -> StringEmbExpr
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3111
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3122
   def on_string_embexpr(statements); end
 
   # :call-seq:
   #   on_string_literal: (String string) -> Heredoc | StringLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3140
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3151
   def on_string_literal(string); end
 
   # :call-seq:
   #   on_super: ((ArgParen | Args) arguments) -> Super
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3180
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3191
   def on_super(arguments); end
 
   # symbeg is a token that represents the beginning of a symbol literal. In
   # most cases it will contain just ":" as in the value, but if its a dynamic
   # symbol being defined it will contain ":'" or ":\"".
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3192
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3203
   def on_symbeg(value); end
 
   # :call-seq:
@@ -6590,7 +6592,7 @@ class SyntaxTree::Parser < ::Ripper
   #     (Backtick | Const | CVar | GVar | Ident | IVar | Kw | Op) value
   #   ) -> SymbolContent
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3213
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3224
   def on_symbol(value); end
 
   # :call-seq:
@@ -6601,80 +6603,80 @@ class SyntaxTree::Parser < ::Ripper
   #     ) value
   #   ) -> SymbolLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3226
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3237
   def on_symbol_literal(value); end
 
   # :call-seq:
   #   on_symbols_add: (Symbols symbols, Word word) -> Symbols
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3242
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3253
   def on_symbols_add(symbols, word); end
 
   # :call-seq:
   #   on_symbols_beg: (String value) -> SymbolsBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3252
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3263
   def on_symbols_beg(value); end
 
   # :call-seq:
   #   on_symbols_new: () -> Symbols
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3271
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3282
   def on_symbols_new; end
 
   # :call-seq:
   #   on_tlambda: (String value) -> TLambda
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3283
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3294
   def on_tlambda(value); end
 
   # :call-seq:
   #   on_tlambeg: (String value) -> TLamBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3302
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3313
   def on_tlambeg(value); end
 
   # :call-seq:
   #   on_top_const_field: (Const constant) -> TopConstRef
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3321
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3332
   def on_top_const_field(constant); end
 
   # :call-seq:
   #   on_top_const_ref: (Const constant) -> TopConstRef
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3332
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3343
   def on_top_const_ref(constant); end
 
   # :call-seq:
   #   on_tstring_beg: (String value) -> TStringBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3343
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3354
   def on_tstring_beg(value); end
 
   # :call-seq:
   #   on_tstring_content: (String value) -> TStringContent
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3362
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3373
   def on_tstring_content(value); end
 
   # :call-seq:
   #   on_tstring_end: (String value) -> TStringEnd
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3377
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3388
   def on_tstring_end(value); end
 
   # :call-seq:
   #   on_unary: (:not operator, untyped statement) -> Not
   #           | (Symbol operator, untyped statement) -> Unary
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3397
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3408
   def on_unary(operator, statement); end
 
   # :call-seq:
   #   on_undef: (Array[DynaSymbol | SymbolLiteral] symbols) -> Undef
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3440
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3451
   def on_undef(symbols); end
 
   # :call-seq:
@@ -6684,31 +6686,31 @@ class SyntaxTree::Parser < ::Ripper
   #     ((nil | Elsif | Else) consequent)
   #   ) -> Unless
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3455
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3466
   def on_unless(predicate, statements, consequent); end
 
   # :call-seq:
   #   on_unless_mod: (untyped predicate, untyped statement) -> UnlessMod
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3476
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3488
   def on_unless_mod(predicate, statement); end
 
   # :call-seq:
   #   on_until: (untyped predicate, Statements statements) -> Until
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3488
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3500
   def on_until(predicate, statements); end
 
   # :call-seq:
   #   on_until_mod: (untyped predicate, untyped statement) -> UntilMod
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3517
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3530
   def on_until_mod(predicate, statement); end
 
   # :call-seq:
   #   on_var_alias: (GVar left, (Backref | GVar) right) -> VarAlias
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3529
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3542
   def on_var_alias(left, right); end
 
   # :call-seq:
@@ -6716,25 +6718,25 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | Const | CVar | GVar | Ident | IVar) value
   #   ) -> VarField
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3543
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3556
   def on_var_field(value); end
 
   # :call-seq:
   #   on_var_ref: ((Const | CVar | GVar | Ident | IVar | Kw) value) -> VarRef
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3558
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3571
   def on_var_ref(value); end
 
   # :call-seq:
   #   on_vcall: (Ident ident) -> VCall
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3574
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3587
   def on_vcall(ident); end
 
   # :call-seq:
   #   on_void_stmt: () -> VoidStmt
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3580
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3593
   def on_void_stmt; end
 
   # :call-seq:
@@ -6744,19 +6746,19 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | Else | When) consequent
   #   ) -> When
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3593
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3606
   def on_when(arguments, statements, consequent); end
 
   # :call-seq:
   #   on_while: (untyped predicate, Statements statements) -> While
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3623
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3636
   def on_while(predicate, statements); end
 
   # :call-seq:
   #   on_while_mod: (untyped predicate, untyped statement) -> WhileMod
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3652
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3666
   def on_while_mod(predicate, statement); end
 
   # :call-seq:
@@ -6765,31 +6767,31 @@ class SyntaxTree::Parser < ::Ripper
   #     (StringEmbExpr | StringDVar | TStringContent) part
   #   ) -> Word
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3667
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3681
   def on_word_add(word, part); end
 
   # :call-seq:
   #   on_word_new: () -> Word
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3676
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3690
   def on_word_new; end
 
   # :call-seq:
   #   on_words_add: (Words words, Word word) -> Words
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3686
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3700
   def on_words_add(words, word); end
 
   # :call-seq:
   #   on_words_beg: (String value) -> WordsBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3696
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3710
   def on_words_beg(value); end
 
   # :call-seq:
   #   on_words_new: () -> Words
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3715
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3729
   def on_words_new; end
 
   # :call-seq:
@@ -6798,37 +6800,37 @@ class SyntaxTree::Parser < ::Ripper
   #     (StringEmbExpr | StringDVar | TStringContent) part
   #   ) -> XString
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3734
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3748
   def on_xstring_add(xstring, part); end
 
   # :call-seq:
   #   on_xstring_literal: (XString xstring) -> Heredoc | XStringLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3758
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3772
   def on_xstring_literal(xstring); end
 
   # :call-seq:
   #   on_xstring_new: () -> XString
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3743
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3757
   def on_xstring_new; end
 
   # :call-seq:
   #   on_yield: ((Args | Paren) arguments) -> Yield
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3781
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3795
   def on_yield(arguments); end
 
   # :call-seq:
   #   on_yield0: () -> Yield0
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3792
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3806
   def on_yield0; end
 
   # :call-seq:
   #   on_zsuper: () -> ZSuper
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3800
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3814
   def on_zsuper; end
 end
 
@@ -6929,36 +6931,36 @@ end
 # Period represents the use of the +.+ operator. It is usually found in method
 # calls.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7032
+# source://syntax_tree//lib/syntax_tree/node.rb#7046
 class SyntaxTree::Period < ::SyntaxTree::Node
   # @return [Period] a new instance of Period
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7038
+  # source://syntax_tree//lib/syntax_tree/node.rb#7052
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7044
+  # source://syntax_tree//lib/syntax_tree/node.rb#7058
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7048
+  # source://syntax_tree//lib/syntax_tree/node.rb#7062
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7036
+  # source://syntax_tree//lib/syntax_tree/node.rb#7050
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7048
+  # source://syntax_tree//lib/syntax_tree/node.rb#7062
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7054
+  # source://syntax_tree//lib/syntax_tree/node.rb#7068
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7058
+  # source://syntax_tree//lib/syntax_tree/node.rb#7072
   def format(q); end
 
   # [String] the period
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7033
+  # source://syntax_tree//lib/syntax_tree/node.rb#7047
   def value; end
 end
 
@@ -7011,71 +7013,71 @@ end
 # This can be a plain local variable like the example above. It can also be a
 # a class variable, a global variable, or an instance variable.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9573
+# source://syntax_tree//lib/syntax_tree/node.rb#9587
 class SyntaxTree::PinnedVarRef < ::SyntaxTree::Node
   # @return [PinnedVarRef] a new instance of PinnedVarRef
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9579
+  # source://syntax_tree//lib/syntax_tree/node.rb#9593
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9585
+  # source://syntax_tree//lib/syntax_tree/node.rb#9599
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9589
+  # source://syntax_tree//lib/syntax_tree/node.rb#9603
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9577
+  # source://syntax_tree//lib/syntax_tree/node.rb#9591
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9589
+  # source://syntax_tree//lib/syntax_tree/node.rb#9603
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9595
+  # source://syntax_tree//lib/syntax_tree/node.rb#9609
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9599
+  # source://syntax_tree//lib/syntax_tree/node.rb#9613
   def format(q); end
 
   # [VarRef] the value of this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9574
+  # source://syntax_tree//lib/syntax_tree/node.rb#9588
   def value; end
 end
 
 # Program represents the overall syntax tree.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7065
+# source://syntax_tree//lib/syntax_tree/node.rb#7079
 class SyntaxTree::Program < ::SyntaxTree::Node
   # @return [Program] a new instance of Program
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7071
+  # source://syntax_tree//lib/syntax_tree/node.rb#7085
   def initialize(statements:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7077
+  # source://syntax_tree//lib/syntax_tree/node.rb#7091
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7081
+  # source://syntax_tree//lib/syntax_tree/node.rb#7095
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7069
+  # source://syntax_tree//lib/syntax_tree/node.rb#7083
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7081
+  # source://syntax_tree//lib/syntax_tree/node.rb#7095
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7087
+  # source://syntax_tree//lib/syntax_tree/node.rb#7101
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7091
+  # source://syntax_tree//lib/syntax_tree/node.rb#7105
   def format(q); end
 
   # [Statements] the top-level expressions of the program
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7066
+  # source://syntax_tree//lib/syntax_tree/node.rb#7080
   def statements; end
 end
 
@@ -7083,41 +7085,41 @@ end
 #
 #     %i[one two three]
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7106
+# source://syntax_tree//lib/syntax_tree/node.rb#7120
 class SyntaxTree::QSymbols < ::SyntaxTree::Node
   # @return [QSymbols] a new instance of QSymbols
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7115
+  # source://syntax_tree//lib/syntax_tree/node.rb#7129
   def initialize(beginning:, elements:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7122
+  # source://syntax_tree//lib/syntax_tree/node.rb#7136
   def accept(visitor); end
 
   # [QSymbolsBeg] the token that opens this array literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7107
+  # source://syntax_tree//lib/syntax_tree/node.rb#7121
   def beginning; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7126
+  # source://syntax_tree//lib/syntax_tree/node.rb#7140
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7113
+  # source://syntax_tree//lib/syntax_tree/node.rb#7127
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7126
+  # source://syntax_tree//lib/syntax_tree/node.rb#7140
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7132
+  # source://syntax_tree//lib/syntax_tree/node.rb#7146
   def deconstruct_keys(_keys); end
 
   # [Array[ TStringContent ]] the elements of the array
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7110
+  # source://syntax_tree//lib/syntax_tree/node.rb#7124
   def elements; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7141
+  # source://syntax_tree//lib/syntax_tree/node.rb#7155
   def format(q); end
 end
 
@@ -7129,28 +7131,28 @@ end
 # these kinds of arrays can start with a lot of different delimiter types
 # (e.g., %i| or %i<).
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7169
+# source://syntax_tree//lib/syntax_tree/node.rb#7183
 class SyntaxTree::QSymbolsBeg < ::SyntaxTree::Node
   # @return [QSymbolsBeg] a new instance of QSymbolsBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7172
+  # source://syntax_tree//lib/syntax_tree/node.rb#7186
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7177
+  # source://syntax_tree//lib/syntax_tree/node.rb#7191
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7181
+  # source://syntax_tree//lib/syntax_tree/node.rb#7195
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7181
+  # source://syntax_tree//lib/syntax_tree/node.rb#7195
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7187
+  # source://syntax_tree//lib/syntax_tree/node.rb#7201
   def deconstruct_keys(_keys); end
 
   # [String] the beginning of the array literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7170
+  # source://syntax_tree//lib/syntax_tree/node.rb#7184
   def value; end
 end
 
@@ -7158,41 +7160,41 @@ end
 #
 #     %w[one two three]
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7197
+# source://syntax_tree//lib/syntax_tree/node.rb#7211
 class SyntaxTree::QWords < ::SyntaxTree::Node
   # @return [QWords] a new instance of QWords
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7206
+  # source://syntax_tree//lib/syntax_tree/node.rb#7220
   def initialize(beginning:, elements:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7213
+  # source://syntax_tree//lib/syntax_tree/node.rb#7227
   def accept(visitor); end
 
   # [QWordsBeg] the token that opens this array literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7198
+  # source://syntax_tree//lib/syntax_tree/node.rb#7212
   def beginning; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7217
+  # source://syntax_tree//lib/syntax_tree/node.rb#7231
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7204
+  # source://syntax_tree//lib/syntax_tree/node.rb#7218
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7217
+  # source://syntax_tree//lib/syntax_tree/node.rb#7231
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7223
+  # source://syntax_tree//lib/syntax_tree/node.rb#7237
   def deconstruct_keys(_keys); end
 
   # [Array[ TStringContent ]] the elements of the array
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7201
+  # source://syntax_tree//lib/syntax_tree/node.rb#7215
   def elements; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7232
+  # source://syntax_tree//lib/syntax_tree/node.rb#7246
   def format(q); end
 end
 
@@ -7204,35 +7206,35 @@ end
 # kinds of arrays can start with a lot of different delimiter types (e.g.,
 # %w| or %w<).
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7260
+# source://syntax_tree//lib/syntax_tree/node.rb#7274
 class SyntaxTree::QWordsBeg < ::SyntaxTree::Node
   # @return [QWordsBeg] a new instance of QWordsBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7263
+  # source://syntax_tree//lib/syntax_tree/node.rb#7277
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7268
+  # source://syntax_tree//lib/syntax_tree/node.rb#7282
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7272
+  # source://syntax_tree//lib/syntax_tree/node.rb#7286
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7272
+  # source://syntax_tree//lib/syntax_tree/node.rb#7286
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7278
+  # source://syntax_tree//lib/syntax_tree/node.rb#7292
   def deconstruct_keys(_keys); end
 
   # [String] the beginning of the array literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7261
+  # source://syntax_tree//lib/syntax_tree/node.rb#7275
   def value; end
 end
 
 # Responsible for providing information about quotes to be used for strings
 # and dynamic symbols.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3856
+# source://syntax_tree//lib/syntax_tree/node.rb#3868
 module SyntaxTree::Quotes
   class << self
     # If there is some part of this string that matches an escape sequence or
@@ -7243,25 +7245,25 @@ module SyntaxTree::Quotes
     #
     # @return [Boolean]
     #
-    # source://syntax_tree//lib/syntax_tree/node.rb#3865
+    # source://syntax_tree//lib/syntax_tree/node.rb#3877
     def locked?(node, quote); end
 
     # Find the matching closing quote for the given opening quote.
     #
-    # source://syntax_tree//lib/syntax_tree/node.rb#3872
+    # source://syntax_tree//lib/syntax_tree/node.rb#3884
     def matching(quote); end
 
     # Escape and unescape single and double quotes as needed to be able to
     # enclose +content+ with +enclosing+.
     #
-    # source://syntax_tree//lib/syntax_tree/node.rb#3878
+    # source://syntax_tree//lib/syntax_tree/node.rb#3890
     def normalize(content, enclosing); end
   end
 end
 
 # The matching pairs of quotes that can be used with % literals.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3858
+# source://syntax_tree//lib/syntax_tree/node.rb#3870
 SyntaxTree::Quotes::PAIRS = T.let(T.unsafe(nil), Hash)
 
 # RAssign represents a single-line pattern match.
@@ -7269,128 +7271,128 @@ SyntaxTree::Quotes::PAIRS = T.let(T.unsafe(nil), Hash)
 #     value in pattern
 #     value => pattern
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2725
+# source://syntax_tree//lib/syntax_tree/node.rb#2737
 class SyntaxTree::RAssign < ::SyntaxTree::Node
   # @return [RAssign] a new instance of RAssign
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2738
+  # source://syntax_tree//lib/syntax_tree/node.rb#2750
   def initialize(value:, operator:, pattern:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2746
+  # source://syntax_tree//lib/syntax_tree/node.rb#2758
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2750
+  # source://syntax_tree//lib/syntax_tree/node.rb#2762
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2736
+  # source://syntax_tree//lib/syntax_tree/node.rb#2748
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2750
+  # source://syntax_tree//lib/syntax_tree/node.rb#2762
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2756
+  # source://syntax_tree//lib/syntax_tree/node.rb#2768
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2766
+  # source://syntax_tree//lib/syntax_tree/node.rb#2778
   def format(q); end
 
   # [Kw | Op] the operator being used to match against the pattern, which is
   # either => or in
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2730
+  # source://syntax_tree//lib/syntax_tree/node.rb#2742
   def operator; end
 
   # [untyped] the pattern on the right-hand side of the expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2733
+  # source://syntax_tree//lib/syntax_tree/node.rb#2745
   def pattern; end
 
   # [untyped] the left-hand expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2726
+  # source://syntax_tree//lib/syntax_tree/node.rb#2738
   def value; end
 end
 
 # RBrace represents the use of a right brace, i.e., +++.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7321
+# source://syntax_tree//lib/syntax_tree/node.rb#7335
 class SyntaxTree::RBrace < ::SyntaxTree::Node
   # @return [RBrace] a new instance of RBrace
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7324
+  # source://syntax_tree//lib/syntax_tree/node.rb#7338
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7329
+  # source://syntax_tree//lib/syntax_tree/node.rb#7343
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7333
+  # source://syntax_tree//lib/syntax_tree/node.rb#7347
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7333
+  # source://syntax_tree//lib/syntax_tree/node.rb#7347
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7339
+  # source://syntax_tree//lib/syntax_tree/node.rb#7353
   def deconstruct_keys(_keys); end
 
   # [String] the right brace
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7322
+  # source://syntax_tree//lib/syntax_tree/node.rb#7336
   def value; end
 end
 
 # RBracket represents the use of a right bracket, i.e., +]+.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7346
+# source://syntax_tree//lib/syntax_tree/node.rb#7360
 class SyntaxTree::RBracket < ::SyntaxTree::Node
   # @return [RBracket] a new instance of RBracket
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7349
+  # source://syntax_tree//lib/syntax_tree/node.rb#7363
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7354
+  # source://syntax_tree//lib/syntax_tree/node.rb#7368
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7358
+  # source://syntax_tree//lib/syntax_tree/node.rb#7372
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7358
+  # source://syntax_tree//lib/syntax_tree/node.rb#7372
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7364
+  # source://syntax_tree//lib/syntax_tree/node.rb#7378
   def deconstruct_keys(_keys); end
 
   # [String] the right bracket
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7347
+  # source://syntax_tree//lib/syntax_tree/node.rb#7361
   def value; end
 end
 
 # RParen represents the use of a right parenthesis, i.e., +)+.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7988
+# source://syntax_tree//lib/syntax_tree/node.rb#8002
 class SyntaxTree::RParen < ::SyntaxTree::Node
   # @return [RParen] a new instance of RParen
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7991
+  # source://syntax_tree//lib/syntax_tree/node.rb#8005
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7996
+  # source://syntax_tree//lib/syntax_tree/node.rb#8010
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8000
+  # source://syntax_tree//lib/syntax_tree/node.rb#8014
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8000
+  # source://syntax_tree//lib/syntax_tree/node.rb#8014
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8006
+  # source://syntax_tree//lib/syntax_tree/node.rb#8020
   def deconstruct_keys(_keys); end
 
   # [String] the parenthesis
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7989
+  # source://syntax_tree//lib/syntax_tree/node.rb#8003
   def value; end
 end
 
@@ -7398,36 +7400,36 @@ end
 #
 #     1r
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7288
+# source://syntax_tree//lib/syntax_tree/node.rb#7302
 class SyntaxTree::RationalLiteral < ::SyntaxTree::Node
   # @return [RationalLiteral] a new instance of RationalLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7294
+  # source://syntax_tree//lib/syntax_tree/node.rb#7308
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7300
+  # source://syntax_tree//lib/syntax_tree/node.rb#7314
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7304
+  # source://syntax_tree//lib/syntax_tree/node.rb#7318
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7292
+  # source://syntax_tree//lib/syntax_tree/node.rb#7306
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7304
+  # source://syntax_tree//lib/syntax_tree/node.rb#7318
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7310
+  # source://syntax_tree//lib/syntax_tree/node.rb#7324
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7314
+  # source://syntax_tree//lib/syntax_tree/node.rb#7328
   def format(q); end
 
   # [String] the rational number literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7289
+  # source://syntax_tree//lib/syntax_tree/node.rb#7303
   def value; end
 end
 
@@ -7435,36 +7437,36 @@ end
 #
 #     redo
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7374
+# source://syntax_tree//lib/syntax_tree/node.rb#7388
 class SyntaxTree::Redo < ::SyntaxTree::Node
   # @return [Redo] a new instance of Redo
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7380
+  # source://syntax_tree//lib/syntax_tree/node.rb#7394
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7386
+  # source://syntax_tree//lib/syntax_tree/node.rb#7400
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7390
+  # source://syntax_tree//lib/syntax_tree/node.rb#7404
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7378
+  # source://syntax_tree//lib/syntax_tree/node.rb#7392
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7390
+  # source://syntax_tree//lib/syntax_tree/node.rb#7404
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7396
+  # source://syntax_tree//lib/syntax_tree/node.rb#7410
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7400
+  # source://syntax_tree//lib/syntax_tree/node.rb#7414
   def format(q); end
 
   # [String] the value of the keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7375
+  # source://syntax_tree//lib/syntax_tree/node.rb#7389
   def value; end
 end
 
@@ -7477,28 +7479,28 @@ end
 #
 #     %r{.+}
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7450
+# source://syntax_tree//lib/syntax_tree/node.rb#7464
 class SyntaxTree::RegexpBeg < ::SyntaxTree::Node
   # @return [RegexpBeg] a new instance of RegexpBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7453
+  # source://syntax_tree//lib/syntax_tree/node.rb#7467
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7458
+  # source://syntax_tree//lib/syntax_tree/node.rb#7472
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7462
+  # source://syntax_tree//lib/syntax_tree/node.rb#7476
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7462
+  # source://syntax_tree//lib/syntax_tree/node.rb#7476
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7468
+  # source://syntax_tree//lib/syntax_tree/node.rb#7482
   def deconstruct_keys(_keys); end
 
   # [String] the beginning of the regular expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7451
+  # source://syntax_tree//lib/syntax_tree/node.rb#7465
   def value; end
 end
 
@@ -7509,34 +7511,34 @@ end
 # In the example above, a RegexpContent node represents everything contained
 # within the forward slashes.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7412
+# source://syntax_tree//lib/syntax_tree/node.rb#7426
 class SyntaxTree::RegexpContent < ::SyntaxTree::Node
   # @return [RegexpContent] a new instance of RegexpContent
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7419
+  # source://syntax_tree//lib/syntax_tree/node.rb#7433
   def initialize(beginning:, parts:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7425
+  # source://syntax_tree//lib/syntax_tree/node.rb#7439
   def accept(visitor); end
 
   # [String] the opening of the regular expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7413
+  # source://syntax_tree//lib/syntax_tree/node.rb#7427
   def beginning; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7429
+  # source://syntax_tree//lib/syntax_tree/node.rb#7443
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7429
+  # source://syntax_tree//lib/syntax_tree/node.rb#7443
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7435
+  # source://syntax_tree//lib/syntax_tree/node.rb#7449
   def deconstruct_keys(_keys); end
 
   # [Array[ StringDVar | StringEmbExpr | TStringContent ]] the parts of the
   # regular expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7417
+  # source://syntax_tree//lib/syntax_tree/node.rb#7431
   def parts; end
 end
 
@@ -7550,28 +7552,28 @@ end
 #
 #     %r{.+}m
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7484
+# source://syntax_tree//lib/syntax_tree/node.rb#7498
 class SyntaxTree::RegexpEnd < ::SyntaxTree::Node
   # @return [RegexpEnd] a new instance of RegexpEnd
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7487
+  # source://syntax_tree//lib/syntax_tree/node.rb#7501
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7492
+  # source://syntax_tree//lib/syntax_tree/node.rb#7506
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7496
+  # source://syntax_tree//lib/syntax_tree/node.rb#7510
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7496
+  # source://syntax_tree//lib/syntax_tree/node.rb#7510
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7502
+  # source://syntax_tree//lib/syntax_tree/node.rb#7516
   def deconstruct_keys(_keys); end
 
   # [String] the end of the regular expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7485
+  # source://syntax_tree//lib/syntax_tree/node.rb#7499
   def value; end
 end
 
@@ -7579,50 +7581,50 @@ end
 #
 #     /.+/
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7512
+# source://syntax_tree//lib/syntax_tree/node.rb#7526
 class SyntaxTree::RegexpLiteral < ::SyntaxTree::Node
   # @return [RegexpLiteral] a new instance of RegexpLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7525
+  # source://syntax_tree//lib/syntax_tree/node.rb#7539
   def initialize(beginning:, ending:, parts:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7533
+  # source://syntax_tree//lib/syntax_tree/node.rb#7547
   def accept(visitor); end
 
   # [String] the beginning of the regular expression literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7513
+  # source://syntax_tree//lib/syntax_tree/node.rb#7527
   def beginning; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7537
+  # source://syntax_tree//lib/syntax_tree/node.rb#7551
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7523
+  # source://syntax_tree//lib/syntax_tree/node.rb#7537
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7537
+  # source://syntax_tree//lib/syntax_tree/node.rb#7551
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7543
+  # source://syntax_tree//lib/syntax_tree/node.rb#7557
   def deconstruct_keys(_keys); end
 
   # [String] the ending of the regular expression literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7516
+  # source://syntax_tree//lib/syntax_tree/node.rb#7530
   def ending; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7554
+  # source://syntax_tree//lib/syntax_tree/node.rb#7568
   def format(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7594
+  # source://syntax_tree//lib/syntax_tree/node.rb#7608
   def options; end
 
   # [Array[ StringEmbExpr | StringDVar | TStringContent ]] the parts of the
   # regular expression literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7520
+  # source://syntax_tree//lib/syntax_tree/node.rb#7534
   def parts; end
 
   private
@@ -7634,12 +7636,12 @@ class SyntaxTree::RegexpLiteral < ::SyntaxTree::Node
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7610
+  # source://syntax_tree//lib/syntax_tree/node.rb#7624
   def ambiguous?(q); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7600
+  # source://syntax_tree//lib/syntax_tree/node.rb#7614
   def include?(pattern); end
 end
 
@@ -7649,54 +7651,54 @@ end
 #     rescue
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7684
+# source://syntax_tree//lib/syntax_tree/node.rb#7698
 class SyntaxTree::Rescue < ::SyntaxTree::Node
   # @return [Rescue] a new instance of Rescue
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7699
+  # source://syntax_tree//lib/syntax_tree/node.rb#7713
   def initialize(keyword:, exception:, statements:, consequent:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7737
+  # source://syntax_tree//lib/syntax_tree/node.rb#7751
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7715
+  # source://syntax_tree//lib/syntax_tree/node.rb#7729
   def bind_end(end_char, end_column); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7741
+  # source://syntax_tree//lib/syntax_tree/node.rb#7755
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7697
+  # source://syntax_tree//lib/syntax_tree/node.rb#7711
   def comments; end
 
   # [nil | Rescue] the optional next clause in the chain
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7694
+  # source://syntax_tree//lib/syntax_tree/node.rb#7708
   def consequent; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7741
+  # source://syntax_tree//lib/syntax_tree/node.rb#7755
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7747
+  # source://syntax_tree//lib/syntax_tree/node.rb#7761
   def deconstruct_keys(_keys); end
 
   # [RescueEx] the exceptions being rescued
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7688
+  # source://syntax_tree//lib/syntax_tree/node.rb#7702
   def exception; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7758
+  # source://syntax_tree//lib/syntax_tree/node.rb#7772
   def format(q); end
 
   # [Kw] the rescue keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7685
+  # source://syntax_tree//lib/syntax_tree/node.rb#7699
   def keyword; end
 
   # [Statements] the expressions to evaluate when an error is rescued
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7691
+  # source://syntax_tree//lib/syntax_tree/node.rb#7705
   def statements; end
 end
 
@@ -7706,42 +7708,42 @@ end
 #     rescue Exception => exception
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7626
+# source://syntax_tree//lib/syntax_tree/node.rb#7640
 class SyntaxTree::RescueEx < ::SyntaxTree::Node
   # @return [RescueEx] a new instance of RescueEx
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7636
+  # source://syntax_tree//lib/syntax_tree/node.rb#7650
   def initialize(exceptions:, variable:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7643
+  # source://syntax_tree//lib/syntax_tree/node.rb#7657
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7647
+  # source://syntax_tree//lib/syntax_tree/node.rb#7661
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7634
+  # source://syntax_tree//lib/syntax_tree/node.rb#7648
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7647
+  # source://syntax_tree//lib/syntax_tree/node.rb#7661
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7653
+  # source://syntax_tree//lib/syntax_tree/node.rb#7667
   def deconstruct_keys(_keys); end
 
   # [untyped] the list of exceptions being rescued
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7627
+  # source://syntax_tree//lib/syntax_tree/node.rb#7641
   def exceptions; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7662
+  # source://syntax_tree//lib/syntax_tree/node.rb#7676
   def format(q); end
 
   # [nil | Field | VarField] the expression being used to capture the raised
   # exception
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7631
+  # source://syntax_tree//lib/syntax_tree/node.rb#7645
   def variable; end
 end
 
@@ -7749,41 +7751,41 @@ end
 #
 #     expression rescue value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7788
+# source://syntax_tree//lib/syntax_tree/node.rb#7802
 class SyntaxTree::RescueMod < ::SyntaxTree::Node
   # @return [RescueMod] a new instance of RescueMod
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7797
+  # source://syntax_tree//lib/syntax_tree/node.rb#7811
   def initialize(statement:, value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7804
+  # source://syntax_tree//lib/syntax_tree/node.rb#7818
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7808
+  # source://syntax_tree//lib/syntax_tree/node.rb#7822
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7795
+  # source://syntax_tree//lib/syntax_tree/node.rb#7809
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7808
+  # source://syntax_tree//lib/syntax_tree/node.rb#7822
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7814
+  # source://syntax_tree//lib/syntax_tree/node.rb#7828
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7823
+  # source://syntax_tree//lib/syntax_tree/node.rb#7837
   def format(q); end
 
   # [untyped] the expression to execute
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7789
+  # source://syntax_tree//lib/syntax_tree/node.rb#7803
   def statement; end
 
   # [untyped] the value to use if the executed expression raises an error
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7792
+  # source://syntax_tree//lib/syntax_tree/node.rb#7806
   def value; end
 end
 
@@ -7792,36 +7794,36 @@ end
 #
 #     def method(*rest) end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7846
+# source://syntax_tree//lib/syntax_tree/node.rb#7860
 class SyntaxTree::RestParam < ::SyntaxTree::Node
   # @return [RestParam] a new instance of RestParam
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7852
+  # source://syntax_tree//lib/syntax_tree/node.rb#7866
   def initialize(name:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7858
+  # source://syntax_tree//lib/syntax_tree/node.rb#7872
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7862
+  # source://syntax_tree//lib/syntax_tree/node.rb#7876
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7850
+  # source://syntax_tree//lib/syntax_tree/node.rb#7864
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7862
+  # source://syntax_tree//lib/syntax_tree/node.rb#7876
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7868
+  # source://syntax_tree//lib/syntax_tree/node.rb#7882
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7872
+  # source://syntax_tree//lib/syntax_tree/node.rb#7886
   def format(q); end
 
   # [nil | Ident] the name of the parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7847
+  # source://syntax_tree//lib/syntax_tree/node.rb#7861
   def name; end
 end
 
@@ -7829,36 +7831,36 @@ end
 #
 #     retry
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7883
+# source://syntax_tree//lib/syntax_tree/node.rb#7897
 class SyntaxTree::Retry < ::SyntaxTree::Node
   # @return [Retry] a new instance of Retry
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7889
+  # source://syntax_tree//lib/syntax_tree/node.rb#7903
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7895
+  # source://syntax_tree//lib/syntax_tree/node.rb#7909
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7899
+  # source://syntax_tree//lib/syntax_tree/node.rb#7913
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7887
+  # source://syntax_tree//lib/syntax_tree/node.rb#7901
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7899
+  # source://syntax_tree//lib/syntax_tree/node.rb#7913
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7905
+  # source://syntax_tree//lib/syntax_tree/node.rb#7919
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7909
+  # source://syntax_tree//lib/syntax_tree/node.rb#7923
   def format(q); end
 
   # [String] the value of the keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7884
+  # source://syntax_tree//lib/syntax_tree/node.rb#7898
   def value; end
 end
 
@@ -7866,36 +7868,36 @@ end
 #
 #     return value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7919
+# source://syntax_tree//lib/syntax_tree/node.rb#7933
 class SyntaxTree::Return < ::SyntaxTree::Node
   # @return [Return] a new instance of Return
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7925
+  # source://syntax_tree//lib/syntax_tree/node.rb#7939
   def initialize(arguments:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7931
+  # source://syntax_tree//lib/syntax_tree/node.rb#7945
   def accept(visitor); end
 
   # [Args] the arguments being passed to the keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7920
+  # source://syntax_tree//lib/syntax_tree/node.rb#7934
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7935
+  # source://syntax_tree//lib/syntax_tree/node.rb#7949
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7923
+  # source://syntax_tree//lib/syntax_tree/node.rb#7937
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7935
+  # source://syntax_tree//lib/syntax_tree/node.rb#7949
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7941
+  # source://syntax_tree//lib/syntax_tree/node.rb#7955
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7945
+  # source://syntax_tree//lib/syntax_tree/node.rb#7959
   def format(q); end
 end
 
@@ -7903,36 +7905,36 @@ end
 #
 #     return
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7955
+# source://syntax_tree//lib/syntax_tree/node.rb#7969
 class SyntaxTree::Return0 < ::SyntaxTree::Node
   # @return [Return0] a new instance of Return0
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7961
+  # source://syntax_tree//lib/syntax_tree/node.rb#7975
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7967
+  # source://syntax_tree//lib/syntax_tree/node.rb#7981
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7971
+  # source://syntax_tree//lib/syntax_tree/node.rb#7985
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7959
+  # source://syntax_tree//lib/syntax_tree/node.rb#7973
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7971
+  # source://syntax_tree//lib/syntax_tree/node.rb#7985
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7977
+  # source://syntax_tree//lib/syntax_tree/node.rb#7991
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7981
+  # source://syntax_tree//lib/syntax_tree/node.rb#7995
   def format(q); end
 
   # [String] the value of the keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7956
+  # source://syntax_tree//lib/syntax_tree/node.rb#7970
   def value; end
 end
 
@@ -7943,41 +7945,41 @@ end
 #     class << self
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8019
+# source://syntax_tree//lib/syntax_tree/node.rb#8033
 class SyntaxTree::SClass < ::SyntaxTree::Node
   # @return [SClass] a new instance of SClass
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8028
+  # source://syntax_tree//lib/syntax_tree/node.rb#8042
   def initialize(target:, bodystmt:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8035
+  # source://syntax_tree//lib/syntax_tree/node.rb#8049
   def accept(visitor); end
 
   # [BodyStmt] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8023
+  # source://syntax_tree//lib/syntax_tree/node.rb#8037
   def bodystmt; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8039
+  # source://syntax_tree//lib/syntax_tree/node.rb#8053
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8026
+  # source://syntax_tree//lib/syntax_tree/node.rb#8040
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8039
+  # source://syntax_tree//lib/syntax_tree/node.rb#8053
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8045
+  # source://syntax_tree//lib/syntax_tree/node.rb#8059
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8054
+  # source://syntax_tree//lib/syntax_tree/node.rb#8068
   def format(q); end
 
   # [untyped] the target of the singleton class to enter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8020
+  # source://syntax_tree//lib/syntax_tree/node.rb#8034
   def target; end
 end
 
@@ -7989,52 +7991,52 @@ end
 # propagate that onto void_stmt nodes inside the stmts in order to make sure
 # all comments get printed appropriately.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8074
+# source://syntax_tree//lib/syntax_tree/node.rb#8088
 class SyntaxTree::Statements < ::SyntaxTree::Node
   # @return [Statements] a new instance of Statements
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8083
+  # source://syntax_tree//lib/syntax_tree/node.rb#8097
   def initialize(parser, body:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8137
+  # source://syntax_tree//lib/syntax_tree/node.rb#8151
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8090
+  # source://syntax_tree//lib/syntax_tree/node.rb#8104
   def bind(start_char, start_column, end_char, end_column); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8119
+  # source://syntax_tree//lib/syntax_tree/node.rb#8133
   def bind_end(end_char, end_column); end
 
   # [Array[ untyped ]] the list of expressions contained within this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8078
+  # source://syntax_tree//lib/syntax_tree/node.rb#8092
   def body; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8141
+  # source://syntax_tree//lib/syntax_tree/node.rb#8155
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8081
+  # source://syntax_tree//lib/syntax_tree/node.rb#8095
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8141
+  # source://syntax_tree//lib/syntax_tree/node.rb#8155
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8147
+  # source://syntax_tree//lib/syntax_tree/node.rb#8161
   def deconstruct_keys(_keys); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8131
+  # source://syntax_tree//lib/syntax_tree/node.rb#8145
   def empty?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8151
+  # source://syntax_tree//lib/syntax_tree/node.rb#8165
   def format(q); end
 
   # [SyntaxTree] the parser that is generating this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8075
+  # source://syntax_tree//lib/syntax_tree/node.rb#8089
   def parser; end
 
   private
@@ -8043,7 +8045,7 @@ class SyntaxTree::Statements < ::SyntaxTree::Node
   # found while this statements list was being parsed and add them into the
   # body.
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8207
+  # source://syntax_tree//lib/syntax_tree/node.rb#8221
   def attach_comments(start_char, end_char); end
 end
 
@@ -8053,41 +8055,41 @@ end
 #     "first" \
 #       "second"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8281
+# source://syntax_tree//lib/syntax_tree/node.rb#8295
 class SyntaxTree::StringConcat < ::SyntaxTree::Node
   # @return [StringConcat] a new instance of StringConcat
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8290
+  # source://syntax_tree//lib/syntax_tree/node.rb#8304
   def initialize(left:, right:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8297
+  # source://syntax_tree//lib/syntax_tree/node.rb#8311
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8301
+  # source://syntax_tree//lib/syntax_tree/node.rb#8315
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8288
+  # source://syntax_tree//lib/syntax_tree/node.rb#8302
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8301
+  # source://syntax_tree//lib/syntax_tree/node.rb#8315
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8307
+  # source://syntax_tree//lib/syntax_tree/node.rb#8321
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8311
+  # source://syntax_tree//lib/syntax_tree/node.rb#8325
   def format(q); end
 
   # [StringConcat | StringLiteral] the left side of the concatenation
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8282
+  # source://syntax_tree//lib/syntax_tree/node.rb#8296
   def left; end
 
   # [StringLiteral] the right side of the concatenation
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8285
+  # source://syntax_tree//lib/syntax_tree/node.rb#8299
   def right; end
 end
 
@@ -8095,29 +8097,29 @@ end
 #
 #     "string"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8251
+# source://syntax_tree//lib/syntax_tree/node.rb#8265
 class SyntaxTree::StringContent < ::SyntaxTree::Node
   # @return [StringContent] a new instance of StringContent
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8254
+  # source://syntax_tree//lib/syntax_tree/node.rb#8268
   def initialize(parts:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8259
+  # source://syntax_tree//lib/syntax_tree/node.rb#8273
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8263
+  # source://syntax_tree//lib/syntax_tree/node.rb#8277
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8263
+  # source://syntax_tree//lib/syntax_tree/node.rb#8277
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8269
+  # source://syntax_tree//lib/syntax_tree/node.rb#8283
   def deconstruct_keys(_keys); end
 
   # [Array[ StringEmbExpr | StringDVar | TStringContent ]] the parts of the
   # string
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8252
+  # source://syntax_tree//lib/syntax_tree/node.rb#8266
   def parts; end
 end
 
@@ -8127,36 +8129,36 @@ end
 #
 #     "#@variable"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8330
+# source://syntax_tree//lib/syntax_tree/node.rb#8344
 class SyntaxTree::StringDVar < ::SyntaxTree::Node
   # @return [StringDVar] a new instance of StringDVar
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8336
+  # source://syntax_tree//lib/syntax_tree/node.rb#8350
   def initialize(variable:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8342
+  # source://syntax_tree//lib/syntax_tree/node.rb#8356
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8346
+  # source://syntax_tree//lib/syntax_tree/node.rb#8360
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8334
+  # source://syntax_tree//lib/syntax_tree/node.rb#8348
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8346
+  # source://syntax_tree//lib/syntax_tree/node.rb#8360
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8352
+  # source://syntax_tree//lib/syntax_tree/node.rb#8366
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8356
+  # source://syntax_tree//lib/syntax_tree/node.rb#8370
   def format(q); end
 
   # [Backref | VarRef] the variable being interpolated
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8331
+  # source://syntax_tree//lib/syntax_tree/node.rb#8345
   def variable; end
 end
 
@@ -8166,36 +8168,36 @@ end
 #
 #     "string #{expression}"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8370
+# source://syntax_tree//lib/syntax_tree/node.rb#8384
 class SyntaxTree::StringEmbExpr < ::SyntaxTree::Node
   # @return [StringEmbExpr] a new instance of StringEmbExpr
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8376
+  # source://syntax_tree//lib/syntax_tree/node.rb#8390
   def initialize(statements:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8382
+  # source://syntax_tree//lib/syntax_tree/node.rb#8396
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8386
+  # source://syntax_tree//lib/syntax_tree/node.rb#8400
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8374
+  # source://syntax_tree//lib/syntax_tree/node.rb#8388
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8386
+  # source://syntax_tree//lib/syntax_tree/node.rb#8400
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8392
+  # source://syntax_tree//lib/syntax_tree/node.rb#8406
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8396
+  # source://syntax_tree//lib/syntax_tree/node.rb#8410
   def format(q); end
 
   # [Statements] the expressions to be interpolated
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8371
+  # source://syntax_tree//lib/syntax_tree/node.rb#8385
   def statements; end
 end
 
@@ -8203,42 +8205,42 @@ end
 #
 #     "string"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8423
+# source://syntax_tree//lib/syntax_tree/node.rb#8437
 class SyntaxTree::StringLiteral < ::SyntaxTree::Node
   # @return [StringLiteral] a new instance of StringLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8432
+  # source://syntax_tree//lib/syntax_tree/node.rb#8446
   def initialize(parts:, quote:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8439
+  # source://syntax_tree//lib/syntax_tree/node.rb#8453
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8443
+  # source://syntax_tree//lib/syntax_tree/node.rb#8457
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8430
+  # source://syntax_tree//lib/syntax_tree/node.rb#8444
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8443
+  # source://syntax_tree//lib/syntax_tree/node.rb#8457
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8449
+  # source://syntax_tree//lib/syntax_tree/node.rb#8463
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8453
+  # source://syntax_tree//lib/syntax_tree/node.rb#8467
   def format(q); end
 
   # [Array[ StringEmbExpr | StringDVar | TStringContent ]] the parts of the
   # string literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8424
+  # source://syntax_tree//lib/syntax_tree/node.rb#8438
   def parts; end
 
   # [String] which quote was used by the string literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8427
+  # source://syntax_tree//lib/syntax_tree/node.rb#8441
   def quote; end
 end
 
@@ -8247,36 +8249,36 @@ end
 #
 #     super(value)
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8490
+# source://syntax_tree//lib/syntax_tree/node.rb#8504
 class SyntaxTree::Super < ::SyntaxTree::Node
   # @return [Super] a new instance of Super
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8496
+  # source://syntax_tree//lib/syntax_tree/node.rb#8510
   def initialize(arguments:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8502
+  # source://syntax_tree//lib/syntax_tree/node.rb#8516
   def accept(visitor); end
 
   # [ArgParen | Args] the arguments to the keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8491
+  # source://syntax_tree//lib/syntax_tree/node.rb#8505
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8506
+  # source://syntax_tree//lib/syntax_tree/node.rb#8520
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8494
+  # source://syntax_tree//lib/syntax_tree/node.rb#8508
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8506
+  # source://syntax_tree//lib/syntax_tree/node.rb#8520
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8512
+  # source://syntax_tree//lib/syntax_tree/node.rb#8526
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8516
+  # source://syntax_tree//lib/syntax_tree/node.rb#8530
   def format(q); end
 end
 
@@ -8297,28 +8299,28 @@ end
 # contain ":'" or ":\"". In the case of %s symbols, it will contain the start
 # of the symbol including the %s and the delimiter.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8547
+# source://syntax_tree//lib/syntax_tree/node.rb#8561
 class SyntaxTree::SymBeg < ::SyntaxTree::Node
   # @return [SymBeg] a new instance of SymBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8550
+  # source://syntax_tree//lib/syntax_tree/node.rb#8564
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8555
+  # source://syntax_tree//lib/syntax_tree/node.rb#8569
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8559
+  # source://syntax_tree//lib/syntax_tree/node.rb#8573
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8559
+  # source://syntax_tree//lib/syntax_tree/node.rb#8573
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8565
+  # source://syntax_tree//lib/syntax_tree/node.rb#8579
   def deconstruct_keys(_keys); end
 
   # [String] the beginning of the symbol
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8548
+  # source://syntax_tree//lib/syntax_tree/node.rb#8562
   def value; end
 end
 
@@ -8327,29 +8329,29 @@ end
 #
 #     :symbol
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8577
+# source://syntax_tree//lib/syntax_tree/node.rb#8591
 class SyntaxTree::SymbolContent < ::SyntaxTree::Node
   # @return [SymbolContent] a new instance of SymbolContent
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8580
+  # source://syntax_tree//lib/syntax_tree/node.rb#8594
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8585
+  # source://syntax_tree//lib/syntax_tree/node.rb#8599
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8589
+  # source://syntax_tree//lib/syntax_tree/node.rb#8603
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8589
+  # source://syntax_tree//lib/syntax_tree/node.rb#8603
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8595
+  # source://syntax_tree//lib/syntax_tree/node.rb#8609
   def deconstruct_keys(_keys); end
 
   # [Backtick | Const | CVar | GVar | Ident | IVar | Kw | Op] the value of the
   # symbol
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8578
+  # source://syntax_tree//lib/syntax_tree/node.rb#8592
   def value; end
 end
 
@@ -8358,37 +8360,37 @@ end
 #
 #     :symbol
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8607
+# source://syntax_tree//lib/syntax_tree/node.rb#8621
 class SyntaxTree::SymbolLiteral < ::SyntaxTree::Node
   # @return [SymbolLiteral] a new instance of SymbolLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8613
+  # source://syntax_tree//lib/syntax_tree/node.rb#8627
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8619
+  # source://syntax_tree//lib/syntax_tree/node.rb#8633
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8623
+  # source://syntax_tree//lib/syntax_tree/node.rb#8637
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8611
+  # source://syntax_tree//lib/syntax_tree/node.rb#8625
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8623
+  # source://syntax_tree//lib/syntax_tree/node.rb#8637
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8629
+  # source://syntax_tree//lib/syntax_tree/node.rb#8643
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8633
+  # source://syntax_tree//lib/syntax_tree/node.rb#8647
   def format(q); end
 
   # [Backtick | Const | CVar | GVar | Ident | IVar | Kw | Op] the value of the
   # symbol
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8608
+  # source://syntax_tree//lib/syntax_tree/node.rb#8622
   def value; end
 end
 
@@ -8396,41 +8398,41 @@ end
 #
 #     %I[one two three]
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8644
+# source://syntax_tree//lib/syntax_tree/node.rb#8658
 class SyntaxTree::Symbols < ::SyntaxTree::Node
   # @return [Symbols] a new instance of Symbols
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8653
+  # source://syntax_tree//lib/syntax_tree/node.rb#8667
   def initialize(beginning:, elements:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8660
+  # source://syntax_tree//lib/syntax_tree/node.rb#8674
   def accept(visitor); end
 
   # [SymbolsBeg] the token that opens this array literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8645
+  # source://syntax_tree//lib/syntax_tree/node.rb#8659
   def beginning; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8664
+  # source://syntax_tree//lib/syntax_tree/node.rb#8678
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8651
+  # source://syntax_tree//lib/syntax_tree/node.rb#8665
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8664
+  # source://syntax_tree//lib/syntax_tree/node.rb#8678
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8670
+  # source://syntax_tree//lib/syntax_tree/node.rb#8684
   def deconstruct_keys(_keys); end
 
   # [Array[ Word ]] the words in the symbol array literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8648
+  # source://syntax_tree//lib/syntax_tree/node.rb#8662
   def elements; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8679
+  # source://syntax_tree//lib/syntax_tree/node.rb#8693
   def format(q); end
 end
 
@@ -8443,28 +8445,28 @@ end
 # kinds of arrays can start with a lot of different delimiter types
 # (e.g., %I| or %I<).
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8708
+# source://syntax_tree//lib/syntax_tree/node.rb#8722
 class SyntaxTree::SymbolsBeg < ::SyntaxTree::Node
   # @return [SymbolsBeg] a new instance of SymbolsBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8711
+  # source://syntax_tree//lib/syntax_tree/node.rb#8725
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8716
+  # source://syntax_tree//lib/syntax_tree/node.rb#8730
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8720
+  # source://syntax_tree//lib/syntax_tree/node.rb#8734
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8720
+  # source://syntax_tree//lib/syntax_tree/node.rb#8734
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8726
+  # source://syntax_tree//lib/syntax_tree/node.rb#8740
   def deconstruct_keys(_keys); end
 
   # [String] the beginning of the symbol literal array
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8709
+  # source://syntax_tree//lib/syntax_tree/node.rb#8723
   def value; end
 end
 
@@ -8475,28 +8477,28 @@ end
 #
 # In the example above the TLamBeg represents the +{+ operator.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8767
+# source://syntax_tree//lib/syntax_tree/node.rb#8781
 class SyntaxTree::TLamBeg < ::SyntaxTree::Node
   # @return [TLamBeg] a new instance of TLamBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8770
+  # source://syntax_tree//lib/syntax_tree/node.rb#8784
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8775
+  # source://syntax_tree//lib/syntax_tree/node.rb#8789
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8779
+  # source://syntax_tree//lib/syntax_tree/node.rb#8793
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8779
+  # source://syntax_tree//lib/syntax_tree/node.rb#8793
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8785
+  # source://syntax_tree//lib/syntax_tree/node.rb#8799
   def deconstruct_keys(_keys); end
 
   # [String] the beginning of the body of the lambda literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8768
+  # source://syntax_tree//lib/syntax_tree/node.rb#8782
   def value; end
 end
 
@@ -8506,28 +8508,28 @@ end
 #
 # In the example above the TLambda represents the +->+ operator.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8737
+# source://syntax_tree//lib/syntax_tree/node.rb#8751
 class SyntaxTree::TLambda < ::SyntaxTree::Node
   # @return [TLambda] a new instance of TLambda
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8740
+  # source://syntax_tree//lib/syntax_tree/node.rb#8754
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8745
+  # source://syntax_tree//lib/syntax_tree/node.rb#8759
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8749
+  # source://syntax_tree//lib/syntax_tree/node.rb#8763
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8749
+  # source://syntax_tree//lib/syntax_tree/node.rb#8763
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8755
+  # source://syntax_tree//lib/syntax_tree/node.rb#8769
   def deconstruct_keys(_keys); end
 
   # [String] the beginning of the lambda literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8738
+  # source://syntax_tree//lib/syntax_tree/node.rb#8752
   def value; end
 end
 
@@ -8541,28 +8543,28 @@ end
 #
 #     %q{string}
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8878
+# source://syntax_tree//lib/syntax_tree/node.rb#8892
 class SyntaxTree::TStringBeg < ::SyntaxTree::Node
   # @return [TStringBeg] a new instance of TStringBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8881
+  # source://syntax_tree//lib/syntax_tree/node.rb#8895
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8886
+  # source://syntax_tree//lib/syntax_tree/node.rb#8900
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8890
+  # source://syntax_tree//lib/syntax_tree/node.rb#8904
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8890
+  # source://syntax_tree//lib/syntax_tree/node.rb#8904
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8896
+  # source://syntax_tree//lib/syntax_tree/node.rb#8910
   def deconstruct_keys(_keys); end
 
   # [String] the beginning of the string
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8879
+  # source://syntax_tree//lib/syntax_tree/node.rb#8893
   def value; end
 end
 
@@ -8575,41 +8577,41 @@ end
 # In the example above, TStringContent represents the +string+ token contained
 # within the string.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8910
+# source://syntax_tree//lib/syntax_tree/node.rb#8924
 class SyntaxTree::TStringContent < ::SyntaxTree::Node
   # @return [TStringContent] a new instance of TStringContent
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8916
+  # source://syntax_tree//lib/syntax_tree/node.rb#8930
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8926
+  # source://syntax_tree//lib/syntax_tree/node.rb#8940
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8930
+  # source://syntax_tree//lib/syntax_tree/node.rb#8944
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8914
+  # source://syntax_tree//lib/syntax_tree/node.rb#8928
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8930
+  # source://syntax_tree//lib/syntax_tree/node.rb#8944
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8936
+  # source://syntax_tree//lib/syntax_tree/node.rb#8950
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8940
+  # source://syntax_tree//lib/syntax_tree/node.rb#8954
   def format(q); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8922
+  # source://syntax_tree//lib/syntax_tree/node.rb#8936
   def match?(pattern); end
 
   # [String] the content of the string
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8911
+  # source://syntax_tree//lib/syntax_tree/node.rb#8925
   def value; end
 end
 
@@ -8623,28 +8625,28 @@ end
 #
 #     %q{string}
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8956
+# source://syntax_tree//lib/syntax_tree/node.rb#8970
 class SyntaxTree::TStringEnd < ::SyntaxTree::Node
   # @return [TStringEnd] a new instance of TStringEnd
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8959
+  # source://syntax_tree//lib/syntax_tree/node.rb#8973
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8964
+  # source://syntax_tree//lib/syntax_tree/node.rb#8978
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8968
+  # source://syntax_tree//lib/syntax_tree/node.rb#8982
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8968
+  # source://syntax_tree//lib/syntax_tree/node.rb#8982
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8974
+  # source://syntax_tree//lib/syntax_tree/node.rb#8988
   def deconstruct_keys(_keys); end
 
   # [String] the end of the string
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8957
+  # source://syntax_tree//lib/syntax_tree/node.rb#8971
   def value; end
 end
 
@@ -8654,10 +8656,10 @@ end
 # statement, and that statement must not be on the denied list of potential
 # statements.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5192
+# source://syntax_tree//lib/syntax_tree/node.rb#5204
 module SyntaxTree::Ternaryable
   class << self
-    # source://syntax_tree//lib/syntax_tree/node.rb#5194
+    # source://syntax_tree//lib/syntax_tree/node.rb#5206
     def call(q, node); end
 
     private
@@ -8668,7 +8670,7 @@ module SyntaxTree::Ternaryable
     #
     # @return [Boolean]
     #
-    # source://syntax_tree//lib/syntax_tree/node.rb#5224
+    # source://syntax_tree//lib/syntax_tree/node.rb#5236
     def ternaryable?(statement); end
   end
 end
@@ -8679,36 +8681,36 @@ end
 #
 #     ::Constant = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8797
+# source://syntax_tree//lib/syntax_tree/node.rb#8811
 class SyntaxTree::TopConstField < ::SyntaxTree::Node
   # @return [TopConstField] a new instance of TopConstField
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8803
+  # source://syntax_tree//lib/syntax_tree/node.rb#8817
   def initialize(constant:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8809
+  # source://syntax_tree//lib/syntax_tree/node.rb#8823
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8813
+  # source://syntax_tree//lib/syntax_tree/node.rb#8827
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8801
+  # source://syntax_tree//lib/syntax_tree/node.rb#8815
   def comments; end
 
   # [Const] the constant being assigned
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8798
+  # source://syntax_tree//lib/syntax_tree/node.rb#8812
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8813
+  # source://syntax_tree//lib/syntax_tree/node.rb#8827
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8819
+  # source://syntax_tree//lib/syntax_tree/node.rb#8833
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8823
+  # source://syntax_tree//lib/syntax_tree/node.rb#8837
   def format(q); end
 end
 
@@ -8717,36 +8719,36 @@ end
 #
 #     ::Constant
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8835
+# source://syntax_tree//lib/syntax_tree/node.rb#8849
 class SyntaxTree::TopConstRef < ::SyntaxTree::Node
   # @return [TopConstRef] a new instance of TopConstRef
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8841
+  # source://syntax_tree//lib/syntax_tree/node.rb#8855
   def initialize(constant:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8847
+  # source://syntax_tree//lib/syntax_tree/node.rb#8861
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8851
+  # source://syntax_tree//lib/syntax_tree/node.rb#8865
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8839
+  # source://syntax_tree//lib/syntax_tree/node.rb#8853
   def comments; end
 
   # [Const] the constant being referenced
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8836
+  # source://syntax_tree//lib/syntax_tree/node.rb#8850
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8851
+  # source://syntax_tree//lib/syntax_tree/node.rb#8865
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8857
+  # source://syntax_tree//lib/syntax_tree/node.rb#8871
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8861
+  # source://syntax_tree//lib/syntax_tree/node.rb#8875
   def format(q); end
 end
 
@@ -8755,41 +8757,41 @@ end
 #
 #     !value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9051
+# source://syntax_tree//lib/syntax_tree/node.rb#9065
 class SyntaxTree::Unary < ::SyntaxTree::Node
   # @return [Unary] a new instance of Unary
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9060
+  # source://syntax_tree//lib/syntax_tree/node.rb#9074
   def initialize(operator:, statement:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9067
+  # source://syntax_tree//lib/syntax_tree/node.rb#9081
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9071
+  # source://syntax_tree//lib/syntax_tree/node.rb#9085
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9058
+  # source://syntax_tree//lib/syntax_tree/node.rb#9072
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9071
+  # source://syntax_tree//lib/syntax_tree/node.rb#9085
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9077
+  # source://syntax_tree//lib/syntax_tree/node.rb#9091
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9086
+  # source://syntax_tree//lib/syntax_tree/node.rb#9100
   def format(q); end
 
   # [String] the operator being used
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9052
+  # source://syntax_tree//lib/syntax_tree/node.rb#9066
   def operator; end
 
   # [untyped] the statement on which to operate
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9055
+  # source://syntax_tree//lib/syntax_tree/node.rb#9069
   def statement; end
 end
 
@@ -8797,36 +8799,36 @@ end
 #
 #     undef method
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9099
+# source://syntax_tree//lib/syntax_tree/node.rb#9113
 class SyntaxTree::Undef < ::SyntaxTree::Node
   # @return [Undef] a new instance of Undef
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9127
+  # source://syntax_tree//lib/syntax_tree/node.rb#9141
   def initialize(symbols:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9133
+  # source://syntax_tree//lib/syntax_tree/node.rb#9147
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9137
+  # source://syntax_tree//lib/syntax_tree/node.rb#9151
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9125
+  # source://syntax_tree//lib/syntax_tree/node.rb#9139
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9137
+  # source://syntax_tree//lib/syntax_tree/node.rb#9151
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9143
+  # source://syntax_tree//lib/syntax_tree/node.rb#9157
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9147
+  # source://syntax_tree//lib/syntax_tree/node.rb#9161
   def format(q); end
 
   # [Array[ DynaSymbol | SymbolLiteral ]] the symbols to undefine
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9122
+  # source://syntax_tree//lib/syntax_tree/node.rb#9136
   def symbols; end
 end
 
@@ -8834,22 +8836,22 @@ end
 # or SymbolLiteral objects. For SymbolLiteral objects we descend directly
 # into the value in order to have it come out as bare words.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9100
+# source://syntax_tree//lib/syntax_tree/node.rb#9114
 class SyntaxTree::Undef::UndefArgumentFormatter
   # @return [UndefArgumentFormatter] a new instance of UndefArgumentFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9104
+  # source://syntax_tree//lib/syntax_tree/node.rb#9118
   def initialize(node); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9108
+  # source://syntax_tree//lib/syntax_tree/node.rb#9122
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9116
+  # source://syntax_tree//lib/syntax_tree/node.rb#9130
   def format(q); end
 
   # [DynaSymbol | SymbolLiteral] the symbol to undefine
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9102
+  # source://syntax_tree//lib/syntax_tree/node.rb#9116
   def node; end
 end
 
@@ -8858,46 +8860,46 @@ end
 #     unless predicate
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9166
+# source://syntax_tree//lib/syntax_tree/node.rb#9180
 class SyntaxTree::Unless < ::SyntaxTree::Node
   # @return [Unless] a new instance of Unless
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9178
+  # source://syntax_tree//lib/syntax_tree/node.rb#9192
   def initialize(predicate:, statements:, consequent:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9192
+  # source://syntax_tree//lib/syntax_tree/node.rb#9206
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9196
+  # source://syntax_tree//lib/syntax_tree/node.rb#9210
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9176
+  # source://syntax_tree//lib/syntax_tree/node.rb#9190
   def comments; end
 
   # [nil, Elsif, Else] the next clause in the chain
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9173
+  # source://syntax_tree//lib/syntax_tree/node.rb#9187
   def consequent; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9196
+  # source://syntax_tree//lib/syntax_tree/node.rb#9210
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9202
+  # source://syntax_tree//lib/syntax_tree/node.rb#9216
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9212
+  # source://syntax_tree//lib/syntax_tree/node.rb#9226
   def format(q); end
 
   # [untyped] the expression to be checked
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9167
+  # source://syntax_tree//lib/syntax_tree/node.rb#9181
   def predicate; end
 
   # [Statements] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9170
+  # source://syntax_tree//lib/syntax_tree/node.rb#9184
   def statements; end
 end
 
@@ -8905,41 +8907,41 @@ end
 #
 #     expression unless predicate
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9222
+# source://syntax_tree//lib/syntax_tree/node.rb#9236
 class SyntaxTree::UnlessMod < ::SyntaxTree::Node
   # @return [UnlessMod] a new instance of UnlessMod
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9231
+  # source://syntax_tree//lib/syntax_tree/node.rb#9245
   def initialize(statement:, predicate:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9238
+  # source://syntax_tree//lib/syntax_tree/node.rb#9252
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9242
+  # source://syntax_tree//lib/syntax_tree/node.rb#9256
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9229
+  # source://syntax_tree//lib/syntax_tree/node.rb#9243
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9242
+  # source://syntax_tree//lib/syntax_tree/node.rb#9256
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9248
+  # source://syntax_tree//lib/syntax_tree/node.rb#9262
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9257
+  # source://syntax_tree//lib/syntax_tree/node.rb#9271
   def format(q); end
 
   # [untyped] the expression to be checked
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9226
+  # source://syntax_tree//lib/syntax_tree/node.rb#9240
   def predicate; end
 
   # [untyped] the expression to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9223
+  # source://syntax_tree//lib/syntax_tree/node.rb#9237
   def statement; end
 end
 
@@ -8948,41 +8950,41 @@ end
 #     until predicate
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9319
+# source://syntax_tree//lib/syntax_tree/node.rb#9333
 class SyntaxTree::Until < ::SyntaxTree::Node
   # @return [Until] a new instance of Until
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9328
+  # source://syntax_tree//lib/syntax_tree/node.rb#9342
   def initialize(predicate:, statements:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9335
+  # source://syntax_tree//lib/syntax_tree/node.rb#9349
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9339
+  # source://syntax_tree//lib/syntax_tree/node.rb#9353
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9326
+  # source://syntax_tree//lib/syntax_tree/node.rb#9340
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9339
+  # source://syntax_tree//lib/syntax_tree/node.rb#9353
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9345
+  # source://syntax_tree//lib/syntax_tree/node.rb#9359
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9354
+  # source://syntax_tree//lib/syntax_tree/node.rb#9368
   def format(q); end
 
   # [untyped] the expression to be checked
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9320
+  # source://syntax_tree//lib/syntax_tree/node.rb#9334
   def predicate; end
 
   # [Statements] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9323
+  # source://syntax_tree//lib/syntax_tree/node.rb#9337
   def statements; end
 end
 
@@ -8990,41 +8992,41 @@ end
 #
 #     expression until predicate
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9375
+# source://syntax_tree//lib/syntax_tree/node.rb#9389
 class SyntaxTree::UntilMod < ::SyntaxTree::Node
   # @return [UntilMod] a new instance of UntilMod
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9384
+  # source://syntax_tree//lib/syntax_tree/node.rb#9398
   def initialize(statement:, predicate:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9391
+  # source://syntax_tree//lib/syntax_tree/node.rb#9405
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9395
+  # source://syntax_tree//lib/syntax_tree/node.rb#9409
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9382
+  # source://syntax_tree//lib/syntax_tree/node.rb#9396
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9395
+  # source://syntax_tree//lib/syntax_tree/node.rb#9409
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9401
+  # source://syntax_tree//lib/syntax_tree/node.rb#9415
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9410
+  # source://syntax_tree//lib/syntax_tree/node.rb#9424
   def format(q); end
 
   # [untyped] the expression to be checked
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9379
+  # source://syntax_tree//lib/syntax_tree/node.rb#9393
   def predicate; end
 
   # [untyped] the expression to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9376
+  # source://syntax_tree//lib/syntax_tree/node.rb#9390
   def statement; end
 end
 
@@ -9033,36 +9035,36 @@ end
 #
 #     variable
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9613
+# source://syntax_tree//lib/syntax_tree/node.rb#9627
 class SyntaxTree::VCall < ::SyntaxTree::Node
   # @return [VCall] a new instance of VCall
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9619
+  # source://syntax_tree//lib/syntax_tree/node.rb#9633
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9625
+  # source://syntax_tree//lib/syntax_tree/node.rb#9639
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9629
+  # source://syntax_tree//lib/syntax_tree/node.rb#9643
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9617
+  # source://syntax_tree//lib/syntax_tree/node.rb#9631
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9629
+  # source://syntax_tree//lib/syntax_tree/node.rb#9643
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9635
+  # source://syntax_tree//lib/syntax_tree/node.rb#9649
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9639
+  # source://syntax_tree//lib/syntax_tree/node.rb#9653
   def format(q); end
 
   # [Ident] the value of this expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9614
+  # source://syntax_tree//lib/syntax_tree/node.rb#9628
   def value; end
 end
 
@@ -9074,41 +9076,41 @@ SyntaxTree::VERSION = T.let(T.unsafe(nil), String)
 #
 #     alias $new $old
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9441
+# source://syntax_tree//lib/syntax_tree/node.rb#9455
 class SyntaxTree::VarAlias < ::SyntaxTree::Node
   # @return [VarAlias] a new instance of VarAlias
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9450
+  # source://syntax_tree//lib/syntax_tree/node.rb#9464
   def initialize(left:, right:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9457
+  # source://syntax_tree//lib/syntax_tree/node.rb#9471
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9461
+  # source://syntax_tree//lib/syntax_tree/node.rb#9475
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9448
+  # source://syntax_tree//lib/syntax_tree/node.rb#9462
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9461
+  # source://syntax_tree//lib/syntax_tree/node.rb#9475
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9467
+  # source://syntax_tree//lib/syntax_tree/node.rb#9481
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9471
+  # source://syntax_tree//lib/syntax_tree/node.rb#9485
   def format(q); end
 
   # [GVar] the new alias of the variable
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9442
+  # source://syntax_tree//lib/syntax_tree/node.rb#9456
   def left; end
 
   # [Backref | GVar] the current name of the variable to be aliased
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9445
+  # source://syntax_tree//lib/syntax_tree/node.rb#9459
   def right; end
 end
 
@@ -9119,36 +9121,36 @@ end
 #
 # In the example above, the VarField node represents the +variable+ token.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9488
+# source://syntax_tree//lib/syntax_tree/node.rb#9502
 class SyntaxTree::VarField < ::SyntaxTree::Node
   # @return [VarField] a new instance of VarField
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9494
+  # source://syntax_tree//lib/syntax_tree/node.rb#9508
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9500
+  # source://syntax_tree//lib/syntax_tree/node.rb#9514
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9504
+  # source://syntax_tree//lib/syntax_tree/node.rb#9518
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9492
+  # source://syntax_tree//lib/syntax_tree/node.rb#9506
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9504
+  # source://syntax_tree//lib/syntax_tree/node.rb#9518
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9510
+  # source://syntax_tree//lib/syntax_tree/node.rb#9524
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9514
+  # source://syntax_tree//lib/syntax_tree/node.rb#9528
   def format(q); end
 
   # [nil | Const | CVar | GVar | Ident | IVar] the target of this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9489
+  # source://syntax_tree//lib/syntax_tree/node.rb#9503
   def value; end
 end
 
@@ -9161,36 +9163,36 @@ end
 # keyword (like +self+, +nil+, +true+, or +false+), or a numbered block
 # variable.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9532
+# source://syntax_tree//lib/syntax_tree/node.rb#9546
 class SyntaxTree::VarRef < ::SyntaxTree::Node
   # @return [VarRef] a new instance of VarRef
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9538
+  # source://syntax_tree//lib/syntax_tree/node.rb#9552
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9544
+  # source://syntax_tree//lib/syntax_tree/node.rb#9558
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9548
+  # source://syntax_tree//lib/syntax_tree/node.rb#9562
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9536
+  # source://syntax_tree//lib/syntax_tree/node.rb#9550
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9548
+  # source://syntax_tree//lib/syntax_tree/node.rb#9562
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9554
+  # source://syntax_tree//lib/syntax_tree/node.rb#9568
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9558
+  # source://syntax_tree//lib/syntax_tree/node.rb#9572
   def format(q); end
 
   # [Const | CVar | GVar | Ident | IVar | Kw] the value of this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9533
+  # source://syntax_tree//lib/syntax_tree/node.rb#9547
   def value; end
 end
 
@@ -10681,36 +10683,36 @@ end
 #
 #     ;;
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9649
+# source://syntax_tree//lib/syntax_tree/node.rb#9663
 class SyntaxTree::VoidStmt < ::SyntaxTree::Node
   # @return [VoidStmt] a new instance of VoidStmt
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9655
+  # source://syntax_tree//lib/syntax_tree/node.rb#9669
   def initialize(location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9660
+  # source://syntax_tree//lib/syntax_tree/node.rb#9674
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9664
+  # source://syntax_tree//lib/syntax_tree/node.rb#9678
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9653
+  # source://syntax_tree//lib/syntax_tree/node.rb#9667
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9664
+  # source://syntax_tree//lib/syntax_tree/node.rb#9678
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9670
+  # source://syntax_tree//lib/syntax_tree/node.rb#9684
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9674
+  # source://syntax_tree//lib/syntax_tree/node.rb#9688
   def format(q); end
 
   # [Location] the location of this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9650
+  # source://syntax_tree//lib/syntax_tree/node.rb#9664
   def location; end
 end
 
@@ -10720,46 +10722,46 @@ end
 #     when predicate
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9685
+# source://syntax_tree//lib/syntax_tree/node.rb#9699
 class SyntaxTree::When < ::SyntaxTree::Node
   # @return [When] a new instance of When
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9697
+  # source://syntax_tree//lib/syntax_tree/node.rb#9711
   def initialize(arguments:, statements:, consequent:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9711
+  # source://syntax_tree//lib/syntax_tree/node.rb#9725
   def accept(visitor); end
 
   # [Args] the arguments to the when clause
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9686
+  # source://syntax_tree//lib/syntax_tree/node.rb#9700
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9715
+  # source://syntax_tree//lib/syntax_tree/node.rb#9729
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9695
+  # source://syntax_tree//lib/syntax_tree/node.rb#9709
   def comments; end
 
   # [nil | Else | When] the next clause in the chain
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9692
+  # source://syntax_tree//lib/syntax_tree/node.rb#9706
   def consequent; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9715
+  # source://syntax_tree//lib/syntax_tree/node.rb#9729
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9721
+  # source://syntax_tree//lib/syntax_tree/node.rb#9735
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9731
+  # source://syntax_tree//lib/syntax_tree/node.rb#9745
   def format(q); end
 
   # [Statements] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9689
+  # source://syntax_tree//lib/syntax_tree/node.rb#9703
   def statements; end
 end
 
@@ -10768,41 +10770,41 @@ end
 #     while predicate
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9776
+# source://syntax_tree//lib/syntax_tree/node.rb#9790
 class SyntaxTree::While < ::SyntaxTree::Node
   # @return [While] a new instance of While
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9785
+  # source://syntax_tree//lib/syntax_tree/node.rb#9799
   def initialize(predicate:, statements:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9792
+  # source://syntax_tree//lib/syntax_tree/node.rb#9806
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9796
+  # source://syntax_tree//lib/syntax_tree/node.rb#9810
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9783
+  # source://syntax_tree//lib/syntax_tree/node.rb#9797
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9796
+  # source://syntax_tree//lib/syntax_tree/node.rb#9810
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9802
+  # source://syntax_tree//lib/syntax_tree/node.rb#9816
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9811
+  # source://syntax_tree//lib/syntax_tree/node.rb#9825
   def format(q); end
 
   # [untyped] the expression to be checked
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9777
+  # source://syntax_tree//lib/syntax_tree/node.rb#9791
   def predicate; end
 
   # [Statements] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9780
+  # source://syntax_tree//lib/syntax_tree/node.rb#9794
   def statements; end
 end
 
@@ -10810,41 +10812,41 @@ end
 #
 #     expression while predicate
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9832
+# source://syntax_tree//lib/syntax_tree/node.rb#9846
 class SyntaxTree::WhileMod < ::SyntaxTree::Node
   # @return [WhileMod] a new instance of WhileMod
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9841
+  # source://syntax_tree//lib/syntax_tree/node.rb#9855
   def initialize(statement:, predicate:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9848
+  # source://syntax_tree//lib/syntax_tree/node.rb#9862
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9852
+  # source://syntax_tree//lib/syntax_tree/node.rb#9866
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9839
+  # source://syntax_tree//lib/syntax_tree/node.rb#9853
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9852
+  # source://syntax_tree//lib/syntax_tree/node.rb#9866
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9858
+  # source://syntax_tree//lib/syntax_tree/node.rb#9872
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9867
+  # source://syntax_tree//lib/syntax_tree/node.rb#9881
   def format(q); end
 
   # [untyped] the expression to be checked
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9836
+  # source://syntax_tree//lib/syntax_tree/node.rb#9850
   def predicate; end
 
   # [untyped] the expression to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9833
+  # source://syntax_tree//lib/syntax_tree/node.rb#9847
   def statement; end
 end
 
@@ -10856,42 +10858,42 @@ end
 # In the example above, there would be two Word nodes within a parent Words
 # node.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9901
+# source://syntax_tree//lib/syntax_tree/node.rb#9915
 class SyntaxTree::Word < ::SyntaxTree::Node
   # @return [Word] a new instance of Word
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9907
+  # source://syntax_tree//lib/syntax_tree/node.rb#9921
   def initialize(parts:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9917
+  # source://syntax_tree//lib/syntax_tree/node.rb#9931
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9921
+  # source://syntax_tree//lib/syntax_tree/node.rb#9935
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9905
+  # source://syntax_tree//lib/syntax_tree/node.rb#9919
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9921
+  # source://syntax_tree//lib/syntax_tree/node.rb#9935
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9927
+  # source://syntax_tree//lib/syntax_tree/node.rb#9941
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9931
+  # source://syntax_tree//lib/syntax_tree/node.rb#9945
   def format(q); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9913
+  # source://syntax_tree//lib/syntax_tree/node.rb#9927
   def match?(pattern); end
 
   # [Array[ StringEmbExpr | StringDVar | TStringContent ]] the parts of the
   # word
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9902
+  # source://syntax_tree//lib/syntax_tree/node.rb#9916
   def parts; end
 end
 
@@ -10899,41 +10901,41 @@ end
 #
 #     %W[one two three]
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9941
+# source://syntax_tree//lib/syntax_tree/node.rb#9955
 class SyntaxTree::Words < ::SyntaxTree::Node
   # @return [Words] a new instance of Words
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9950
+  # source://syntax_tree//lib/syntax_tree/node.rb#9964
   def initialize(beginning:, elements:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9957
+  # source://syntax_tree//lib/syntax_tree/node.rb#9971
   def accept(visitor); end
 
   # [WordsBeg] the token that opens this array literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9942
+  # source://syntax_tree//lib/syntax_tree/node.rb#9956
   def beginning; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9961
+  # source://syntax_tree//lib/syntax_tree/node.rb#9975
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9948
+  # source://syntax_tree//lib/syntax_tree/node.rb#9962
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9961
+  # source://syntax_tree//lib/syntax_tree/node.rb#9975
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9967
+  # source://syntax_tree//lib/syntax_tree/node.rb#9981
   def deconstruct_keys(_keys); end
 
   # [Array[ Word ]] the elements of this array
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9945
+  # source://syntax_tree//lib/syntax_tree/node.rb#9959
   def elements; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9976
+  # source://syntax_tree//lib/syntax_tree/node.rb#9990
   def format(q); end
 end
 
@@ -10946,28 +10948,28 @@ end
 # Note that these kinds of arrays can start with a lot of different delimiter
 # types (e.g., %W| or %W<).
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10005
+# source://syntax_tree//lib/syntax_tree/node.rb#10019
 class SyntaxTree::WordsBeg < ::SyntaxTree::Node
   # @return [WordsBeg] a new instance of WordsBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10008
+  # source://syntax_tree//lib/syntax_tree/node.rb#10022
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10013
+  # source://syntax_tree//lib/syntax_tree/node.rb#10027
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10017
+  # source://syntax_tree//lib/syntax_tree/node.rb#10031
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10017
+  # source://syntax_tree//lib/syntax_tree/node.rb#10031
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10023
+  # source://syntax_tree//lib/syntax_tree/node.rb#10037
   def deconstruct_keys(_keys); end
 
   # [String] the start of the word literal array
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10006
+  # source://syntax_tree//lib/syntax_tree/node.rb#10020
   def value; end
 end
 
@@ -10975,29 +10977,29 @@ end
 #
 #     `ls`
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10034
+# source://syntax_tree//lib/syntax_tree/node.rb#10048
 class SyntaxTree::XString < ::SyntaxTree::Node
   # @return [XString] a new instance of XString
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10037
+  # source://syntax_tree//lib/syntax_tree/node.rb#10051
   def initialize(parts:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10042
+  # source://syntax_tree//lib/syntax_tree/node.rb#10056
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10046
+  # source://syntax_tree//lib/syntax_tree/node.rb#10060
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10046
+  # source://syntax_tree//lib/syntax_tree/node.rb#10060
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10052
+  # source://syntax_tree//lib/syntax_tree/node.rb#10066
   def deconstruct_keys(_keys); end
 
   # [Array[ StringEmbExpr | StringDVar | TStringContent ]] the parts of the
   # xstring
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10035
+  # source://syntax_tree//lib/syntax_tree/node.rb#10049
   def parts; end
 end
 
@@ -11005,37 +11007,37 @@ end
 #
 #     `ls`
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10063
+# source://syntax_tree//lib/syntax_tree/node.rb#10077
 class SyntaxTree::XStringLiteral < ::SyntaxTree::Node
   # @return [XStringLiteral] a new instance of XStringLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10069
+  # source://syntax_tree//lib/syntax_tree/node.rb#10083
   def initialize(parts:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10075
+  # source://syntax_tree//lib/syntax_tree/node.rb#10089
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10079
+  # source://syntax_tree//lib/syntax_tree/node.rb#10093
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10067
+  # source://syntax_tree//lib/syntax_tree/node.rb#10081
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10079
+  # source://syntax_tree//lib/syntax_tree/node.rb#10093
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10085
+  # source://syntax_tree//lib/syntax_tree/node.rb#10099
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10089
+  # source://syntax_tree//lib/syntax_tree/node.rb#10103
   def format(q); end
 
   # [Array[ StringEmbExpr | StringDVar | TStringContent ]] the parts of the
   # xstring
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10064
+  # source://syntax_tree//lib/syntax_tree/node.rb#10078
   def parts; end
 end
 
@@ -11043,36 +11045,36 @@ end
 #
 #     yield value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10101
+# source://syntax_tree//lib/syntax_tree/node.rb#10115
 class SyntaxTree::Yield < ::SyntaxTree::Node
   # @return [Yield] a new instance of Yield
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10107
+  # source://syntax_tree//lib/syntax_tree/node.rb#10121
   def initialize(arguments:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10113
+  # source://syntax_tree//lib/syntax_tree/node.rb#10127
   def accept(visitor); end
 
   # [Args | Paren] the arguments passed to the yield
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10102
+  # source://syntax_tree//lib/syntax_tree/node.rb#10116
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10117
+  # source://syntax_tree//lib/syntax_tree/node.rb#10131
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10105
+  # source://syntax_tree//lib/syntax_tree/node.rb#10119
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10117
+  # source://syntax_tree//lib/syntax_tree/node.rb#10131
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10123
+  # source://syntax_tree//lib/syntax_tree/node.rb#10137
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10127
+  # source://syntax_tree//lib/syntax_tree/node.rb#10141
   def format(q); end
 end
 
@@ -11080,36 +11082,36 @@ end
 #
 #     yield
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10151
+# source://syntax_tree//lib/syntax_tree/node.rb#10165
 class SyntaxTree::Yield0 < ::SyntaxTree::Node
   # @return [Yield0] a new instance of Yield0
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10157
+  # source://syntax_tree//lib/syntax_tree/node.rb#10171
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10163
+  # source://syntax_tree//lib/syntax_tree/node.rb#10177
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10167
+  # source://syntax_tree//lib/syntax_tree/node.rb#10181
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10155
+  # source://syntax_tree//lib/syntax_tree/node.rb#10169
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10167
+  # source://syntax_tree//lib/syntax_tree/node.rb#10181
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10173
+  # source://syntax_tree//lib/syntax_tree/node.rb#10187
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10177
+  # source://syntax_tree//lib/syntax_tree/node.rb#10191
   def format(q); end
 
   # [String] the value of the keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10152
+  # source://syntax_tree//lib/syntax_tree/node.rb#10166
   def value; end
 end
 
@@ -11117,35 +11119,35 @@ end
 #
 #     super
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10187
+# source://syntax_tree//lib/syntax_tree/node.rb#10201
 class SyntaxTree::ZSuper < ::SyntaxTree::Node
   # @return [ZSuper] a new instance of ZSuper
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10193
+  # source://syntax_tree//lib/syntax_tree/node.rb#10207
   def initialize(value:, location:, comments: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10199
+  # source://syntax_tree//lib/syntax_tree/node.rb#10213
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10203
+  # source://syntax_tree//lib/syntax_tree/node.rb#10217
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10191
+  # source://syntax_tree//lib/syntax_tree/node.rb#10205
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10203
+  # source://syntax_tree//lib/syntax_tree/node.rb#10217
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10209
+  # source://syntax_tree//lib/syntax_tree/node.rb#10223
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10213
+  # source://syntax_tree//lib/syntax_tree/node.rb#10227
   def format(q); end
 
   # [String] the value of the keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10188
+  # source://syntax_tree//lib/syntax_tree/node.rb#10202
   def value; end
 end
