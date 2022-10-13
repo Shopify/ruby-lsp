@@ -66,8 +66,11 @@ module RubyLsp
 
       sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::FoldingRange], Object)) }
       def run
-        visit(@document.tree)
-        emit_partial_range
+        if @document.parsed?
+          visit(@document.tree)
+          emit_partial_range
+        end
+
         @ranges
       end
 

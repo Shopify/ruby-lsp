@@ -14,6 +14,10 @@ module RubyLsp
       def initialize(document)
         @document = document
 
+        # Parsing the document here means we're taking a lazy approach by only doing it when the first feature request
+        # is received by the server. This happens because {Document#parse} remembers if there are new edits to be parsed
+        @document.parse
+
         super()
       end
 

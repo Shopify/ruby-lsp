@@ -37,6 +37,7 @@ class StoreTest < Minitest::Test
       [{ range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } }, text: " ; end" }])
 
     document = @store.get(file.path)
+    document.parse
     refute_nil(document)
     refute_nil(document.tree)
   ensure
@@ -61,23 +62,6 @@ class StoreTest < Minitest::Test
     @store.delete("/foo/bar.rb")
 
     assert_empty(@store.instance_variable_get(:@state))
-  end
-
-  def test_cache_fetch_doesnt_execute_block_on_reading_file_with_syntax_error
-    file = Tempfile.new("foo.rb")
-    file.write("def great_code")
-    file.rewind
-
-    counter = 0
-
-    5.times do
-      @store.cache_fetch(file.path, :any_key) { counter += 1 }
-    end
-
-    assert_equal(0, counter)
-  ensure
-    file&.close
-    file&.unlink
   end
 
   def test_cache

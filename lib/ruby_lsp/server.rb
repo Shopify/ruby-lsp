@@ -187,9 +187,7 @@ module RubyLsp
     on("textDocument/documentHighlight", parallel: true) do |request|
       document = store.get(request.dig(:params, :textDocument, :uri))
 
-      if document.parsed?
-        Requests::DocumentHighlight.new(document, request.dig(:params, :position)).run
-      end
+      Requests::DocumentHighlight.new(document, request.dig(:params, :position)).run
     end
 
     on("textDocument/codeAction", parallel: true) do |request|
@@ -209,9 +207,7 @@ module RubyLsp
       start_line = range.dig(:start, :line)
       end_line = range.dig(:end, :line)
 
-      if document.parsed?
-        Requests::InlayHints.new(document, start_line..end_line).run
-      end
+      Requests::InlayHints.new(document, start_line..end_line).run
     end
 
     on("$/cancelRequest") do |request|

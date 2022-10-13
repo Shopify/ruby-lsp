@@ -70,7 +70,7 @@ module RubyLsp
 
       sig { override.returns(T.all(T::Array[Support::SelectionRange], Object)) }
       def run
-        visit(@document.tree)
+        visit(@document.tree) if @document.parsed?
         @ranges.reverse!
       end
 

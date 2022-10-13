@@ -55,13 +55,10 @@ module RubyLsp
           uri: String,
           request_name: Symbol,
           block: T.proc.params(document: Document).returns(T.type_parameter(:T)),
-        ).returns(T.nilable(T.type_parameter(:T)))
+        ).returns(T.type_parameter(:T))
     end
     def cache_fetch(uri, request_name, &block)
-      document = get(uri)
-      return unless document.parsed?
-
-      document.cache_fetch(request_name, &block)
+      get(uri).cache_fetch(request_name, &block)
     end
   end
 end

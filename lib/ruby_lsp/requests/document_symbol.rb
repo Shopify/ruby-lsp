@@ -85,7 +85,7 @@ module RubyLsp
 
       sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::DocumentSymbol], Object)) }
       def run
-        visit(@document.tree)
+        visit(@document.tree) if @document.parsed?
         @root.children
       end
 

@@ -24,6 +24,7 @@ module RubyLsp
       @syntax_error_edits = T.let([], T::Array[EditShape])
       @source = T.let(source, String)
       @parsable_source = T.let(source.dup, String)
+      @unparsed_edits = T.let([], T::Array[EditShape])
       @tree = T.let(SyntaxTree.parse(@source), T.nilable(SyntaxTree::Node))
     rescue SyntaxTree::Parser::ParseError
       # Do not raise if we failed to parse
@@ -55,13 +56,21 @@ module RubyLsp
       # Apply the edits on the real source
       edits.each { |edit| apply_edit(@source, edit[:range], edit[:text]) }
 
+      @unparsed_edits.concat(edits)
       @cache.clear
+    end
+
+    sig { void }
+    def parse
+      return if @unparsed_edits.empty?
+
       @tree = SyntaxTree.parse(@source)
       @syntax_error_edits.clear
+      @unparsed_edits.clear
       @parsable_source = @source.dup
-      nil
     rescue SyntaxTree::Parser::ParseError
-      update_parsable_source(edits)
+      @syntax_error_edits = @unparsed_edits
+      update_parsable_source(@unparsed_edits)
     end
 
     sig { returns(T::Boolean) }
@@ -81,7 +90,6 @@ module RubyLsp
       # If the new edits caused a syntax error, make all edits blank spaces and line breaks to adjust the line and
       # column numbers. This is attempt to make the document parsable while partial edits are being applied
       edits.each do |edit|
-        @syntax_error_edits << edit
         next if edit[:text].empty? # skip deletions, since they may have caused the syntax error
 
         apply_edit(@parsable_source, edit[:range], edit[:text].gsub(/[^\r\n]/, " "))
