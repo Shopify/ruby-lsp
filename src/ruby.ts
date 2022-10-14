@@ -19,8 +19,17 @@ export class Ruby {
 
   async activateRuby() {
     switch (this.versionManager) {
+      case "asdf":
+        await this.activate("asdf", "asdf exec");
+        break;
       case "chruby":
-        await this.activateChruby();
+        await this.activate("chruby", "chruby-exec");
+        break;
+      case "rbenv":
+        await this.activate("rbenv", "rbenv exec");
+        break;
+      case "rvm":
+        await this.activate("rvm", "rvm exec");
         break;
       default:
         await this.activateShadowenv();
@@ -34,7 +43,7 @@ export class Ruby {
       ?.activate();
   }
 
-  async activateChruby() {
+  async activate(name: string, command: string) {
     try {
       let shellProfilePath;
       // eslint-disable-next-line no-process-env
@@ -55,8 +64,7 @@ export class Ruby {
       }
 
       const result = await asyncExec(
-        `source ${shellProfilePath} &&
-         chruby-exec ruby -rjson -e "puts JSON.dump(ENV.to_h)"`,
+        `source ${shellProfilePath} && ${command} ruby -rjson -e "puts JSON.dump(ENV.to_h)"`,
         { shell, cwd: this.workingFolder }
       );
 
@@ -64,7 +72,7 @@ export class Ruby {
       process.env = JSON.parse(result.stdout);
     } catch (error) {
       vscode.window.showErrorMessage(
-        `Error when trying to activate chruby environment ${error}`
+        `Error when trying to activate ${name} environment ${error}`
       );
     }
   }
