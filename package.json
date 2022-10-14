@@ -128,6 +128,11 @@
             "chruby"
           ],
           "default": "shadowenv"
+        },
+        "rubyLsp.yjit": {
+          "description": "Use YJIT to speed up the Ruby LSP server",
+          "type": "boolean",
+          "default": true
         }
       }
     },
