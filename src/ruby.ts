@@ -64,7 +64,7 @@ export class Ruby {
       }
 
       const result = await asyncExec(
-        `source ${shellProfilePath} && ${command} ruby -rjson -e "puts JSON.dump(ENV.to_h)"`,
+        `source ${shellProfilePath} > /dev/null 2>&1 && ${command} ruby -rjson -e "puts JSON.dump(ENV.to_h)"`,
         { shell, cwd: this.workingFolder }
       );
 
