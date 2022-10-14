@@ -1,11 +1,9 @@
 import { exec } from "child_process";
 import { promisify } from "util";
-import * as fs from "fs";
 
 import * as vscode from "vscode";
 
 const asyncExec = promisify(exec);
-const asyncReadFile = promisify(fs.readFile);
 
 export class Ruby {
   private workingFolder: string;
@@ -37,17 +35,6 @@ export class Ruby {
   }
 
   async activateChruby() {
-    if (!fs.existsSync(`${this.workingFolder}/.ruby-version`)) {
-      vscode.window.showErrorMessage(
-        "Attempted to activate chruby environment, but no .ruby-version file was found."
-      );
-      return;
-    }
-
-    const rubyVersion = await asyncReadFile(
-      `${this.workingFolder}/.ruby-version`
-    );
-
     try {
       let shellProfilePath;
       // eslint-disable-next-line no-process-env
@@ -69,9 +56,8 @@ export class Ruby {
 
       const result = await asyncExec(
         `source ${shellProfilePath} &&
-         chruby "${rubyVersion.toString().trim()}" &&
-         ruby -rjson -e "puts JSON.dump(ENV.to_h)"`,
-        { shell }
+         chruby-exec ruby -rjson -e "puts JSON.dump(ENV.to_h)"`,
+        { shell, cwd: this.workingFolder }
       );
 
       // eslint-disable-next-line no-process-env
