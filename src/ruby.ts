@@ -21,16 +21,16 @@ export class Ruby {
     try {
       switch (this.versionManager) {
         case "asdf":
-          await this.activate("asdf exec");
+          await this.activate("asdf exec ruby");
           break;
         case "chruby":
           await this.activateChruby();
           break;
         case "rbenv":
-          await this.activate("rbenv exec");
+          await this.activate("rbenv exec ruby");
           break;
         case "rvm":
-          await this.activate("rvm exec");
+          await this.activate("rvm-auto-ruby");
           break;
         default:
           await this.activateShadowenv();
@@ -51,10 +51,10 @@ export class Ruby {
 
   async activateChruby() {
     const rubyVersion = await this.readRubyVersion();
-    await this.activate(`chruby-exec "${rubyVersion}" --`);
+    await this.activate(`chruby-exec "${rubyVersion}" -- ruby`);
   }
 
-  async activate(command: string) {
+  async activate(ruby: string) {
     let shellProfilePath;
     // eslint-disable-next-line no-process-env
     const shell = process.env.SHELL?.split("/").pop();
@@ -74,7 +74,7 @@ export class Ruby {
     }
 
     const result = await asyncExec(
-      `source ${shellProfilePath} > /dev/null 2>&1 && ${command} ruby -rjson -e "puts JSON.dump(ENV.to_h)"`,
+      `source ${shellProfilePath} > /dev/null 2>&1 && ${ruby} -rjson -e "puts JSON.dump(ENV.to_h)"`,
       { shell, cwd: this.workingFolder }
     );
 
