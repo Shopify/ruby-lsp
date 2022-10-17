@@ -121,8 +121,6 @@ export default class Client {
       return;
     }
 
-    await this.gemOutdated();
-
     this.client = new LanguageClient(
       LSP_NAME,
       this.serverOptions,
@@ -189,22 +187,6 @@ export default class Client {
 
     this.context.workspaceState.update("ruby-lsp.cancelledBundleAdd", true);
     return true;
-  }
-
-  private async gemOutdated(): Promise<void> {
-    try {
-      await this.execInPath("bundle outdated ruby-lsp");
-    } catch {
-      const response = await vscode.window.showInformationMessage(
-        "The Ruby LSP gem is not up-to-date",
-        "Run bundle update",
-        "Cancel"
-      );
-
-      if (response === "Run bundle update") {
-        await this.execInPath("bundle update ruby-lsp --conservative");
-      }
-    }
   }
 
   private async gemNotInstalled(): Promise<boolean> {
