@@ -1,6 +1,6 @@
 import { exec } from "child_process";
 import { promisify } from "util";
-
+import { readFile } from "fs/promises";
 import * as vscode from "vscode";
 
 const asyncExec = promisify(exec);
@@ -18,22 +18,28 @@ export class Ruby {
   }
 
   async activateRuby() {
-    switch (this.versionManager) {
-      case "asdf":
-        await this.activate("asdf", "asdf exec");
-        break;
-      case "chruby":
-        await this.activate("chruby", "chruby-exec");
-        break;
-      case "rbenv":
-        await this.activate("rbenv", "rbenv exec");
-        break;
-      case "rvm":
-        await this.activate("rvm", "rvm exec");
-        break;
-      default:
-        await this.activateShadowenv();
-        break;
+    try {
+      switch (this.versionManager) {
+        case "asdf":
+          await this.activate("asdf exec");
+          break;
+        case "chruby":
+          await this.activateChruby();
+          break;
+        case "rbenv":
+          await this.activate("rbenv exec");
+          break;
+        case "rvm":
+          await this.activate("rvm exec");
+          break;
+        default:
+          await this.activateShadowenv();
+          break;
+      }
+    } catch (error: any) {
+      vscode.window.showErrorMessage(
+        `Failed to activate ${this.versionManager} environment: ${error.message}`
+      );
     }
   }
 
@@ -43,37 +49,53 @@ export class Ruby {
       ?.activate();
   }
 
-  async activate(name: string, command: string) {
+  async activateChruby() {
+    const rubyVersion = await this.readRubyVersion();
+    await this.activate(`chruby-exec "${rubyVersion}" --`);
+  }
+
+  async activate(command: string) {
+    let shellProfilePath;
+    // eslint-disable-next-line no-process-env
+    const shell = process.env.SHELL?.split("/").pop();
+    // eslint-disable-next-line no-process-env
+    const home = process.env.HOME;
+
+    switch (shell) {
+      case "fish":
+        shellProfilePath = `${home}/.config/fish/config.fish`;
+        break;
+      case "zsh":
+        shellProfilePath = `${home}/.zshrc`;
+        break;
+      default:
+        shellProfilePath = `${home}/.bashrc`;
+        break;
+    }
+
+    const result = await asyncExec(
+      `source ${shellProfilePath} > /dev/null 2>&1 && ${command} ruby -rjson -e "puts JSON.dump(ENV.to_h)"`,
+      { shell, cwd: this.workingFolder }
+    );
+
+    // eslint-disable-next-line no-process-env
+    process.env = JSON.parse(result.stdout);
+  }
+
+  private async readRubyVersion() {
     try {
-      let shellProfilePath;
-      // eslint-disable-next-line no-process-env
-      const shell = process.env.SHELL?.split("/").pop();
-      // eslint-disable-next-line no-process-env
-      const home = process.env.HOME;
+      const version = await readFile(
+        `${this.workingFolder}/.ruby-version`,
+        "utf8"
+      );
 
-      switch (shell) {
-        case "fish":
-          shellProfilePath = `${home}/.config/fish/config.fish`;
-          break;
-        case "zsh":
-          shellProfilePath = `${home}/.zshrc`;
-          break;
-        default:
-          shellProfilePath = `${home}/.bashrc`;
-          break;
+      return version.trim();
+    } catch (error: any) {
+      if (error.code === "ENOENT") {
+        throw new Error("No .ruby-version file was found");
+      } else {
+        throw error;
       }
-
-      const result = await asyncExec(
-        `source ${shellProfilePath} > /dev/null 2>&1 && ${command} ruby -rjson -e "puts JSON.dump(ENV.to_h)"`,
-        { shell, cwd: this.workingFolder }
-      );
-
-      // eslint-disable-next-line no-process-env
-      process.env = JSON.parse(result.stdout);
-    } catch (error) {
-      vscode.window.showErrorMessage(
-        `Error when trying to activate ${name} environment ${error}`
-      );
     }
   }
 }
