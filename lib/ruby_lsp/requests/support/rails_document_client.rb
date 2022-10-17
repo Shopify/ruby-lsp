@@ -28,7 +28,7 @@ module RubyLsp
             params(name: String).returns(T::Array[String])
           end
           def generate_rails_document_urls(name)
-            docs = T.must(search_index)[name]
+            docs = search_index&.fetch(name, nil)
 
             return [] unless docs
 

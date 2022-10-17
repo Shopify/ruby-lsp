@@ -14,6 +14,14 @@ class HoverExpectationsTest < ExpectationsTestRunner
     assert_equal(json_expectations(substitute(expected)), actual_json)
   end
 
+  def test_search_index_being_nil
+    document = RubyLsp::Document.new("belongs_to :foo")
+
+    RubyLsp::Requests::Support::RailsDocumentClient.stub(:search_index, nil) do
+      RubyLsp::Requests::Hover.new(document, { character: 0, line: 0 }).run
+    end
+  end
+
   class FakeHTTPResponse
     attr_reader :code, :body
 
