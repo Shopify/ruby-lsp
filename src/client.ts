@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { exec, execSync } from "child_process";
 import { promisify } from "util";
 
 import * as vscode from "vscode";
@@ -32,11 +32,14 @@ export default class Client {
     this.workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
     this.telemetry = telemetry;
 
+    const env = this.getEnv();
+
     const executable: Executable = {
       command: "bundle",
       args: ["exec", "ruby-lsp"],
       options: {
         cwd: this.workingFolder,
+        env,
       },
     };
 
@@ -257,5 +260,32 @@ export default class Client {
       .get("enabledFeatures")!;
 
     return Object.keys(features).filter((key) => features[key]);
+  }
+
+  private getEnv() {
+    // eslint-disable-next-line no-process-env
+    const env = process.env;
+    const useYjit = vscode.workspace.getConfiguration("rubyLsp").get("yjit");
+
+    // Enabling YJIT only provides a performance benefit on Ruby 3.2.0 and above
+    if (!useYjit || env.RUBY_VERSION! < "3.2.0") {
+      return env;
+    }
+
+    // Check if the Ruby was compiled with YJIT since it's not required. The exec must be sync here because this is used
+    // in the constructor, which cannot be an async function
+    if (!execSync("ruby -v --yjit").toString().includes("+YJIT")) {
+      return env;
+    }
+
+    // RUBYOPT may be empty or it may contain bundler paths. In the second case, we must concat to avoid accidentally
+    // removing the paths from the env variable
+    if (env.RUBYOPT) {
+      env.RUBYOPT.concat(" --yjit");
+    } else {
+      env.RUBYOPT = "--yjit";
+    }
+
+    return env;
   }
 }
