@@ -212,7 +212,21 @@ export default class Client {
     );
 
     if (response === "Run bundle install") {
-      await this.execInPath("bundle install");
+      await vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: "Installing gems",
+        },
+        async (progress) => {
+          try {
+            await this.execInPath("bundle install");
+          } catch {
+            // The progress dialog can't be closed by the user, so we have to guarantee that we catch errors
+            progress.report({ message: "Failed to install gems" });
+          }
+        }
+      );
+
       return false;
     }
 
