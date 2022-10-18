@@ -40,9 +40,7 @@ configuration script (e.g.: ~/.bashrc, ~/.zshrc) and that the SHELL environment 
 default shell.
 
 ```jsonc
-"rubyLsp.rubyVersionManager": {
-  "manager": "chruby", // The handle for the version manager (e.g.: chruby, shadowenv)
-}
+"rubyLsp.rubyVersionManager": "chruby" // The handle for the version manager (e.g.: chruby, shadowenv)
 ```
 
 ### Commands
