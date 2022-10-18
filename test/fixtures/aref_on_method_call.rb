@@ -1,0 +1,1 @@
+object.attributes["name"] = "something"
