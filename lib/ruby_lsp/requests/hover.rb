@@ -1,8 +1,6 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "ruby_lsp/requests/support/rails_document_client"
-
 module RubyLsp
   module Requests
     # ![Hover demo](../../misc/rails_document_link_hover.gif)

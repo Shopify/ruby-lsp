@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "net/http" # for stubbing
 require "expectations/expectations_test_runner"
 
 class HoverExpectationsTest < ExpectationsTestRunner

@@ -39,6 +39,7 @@ module RubyLsp
       autoload :SemanticTokenEncoder, "ruby_lsp/requests/support/semantic_token_encoder"
       autoload :SyntaxErrorDiagnostic, "ruby_lsp/requests/support/syntax_error_diagnostic"
       autoload :HighlightTarget, "ruby_lsp/requests/support/highlight_target"
+      autoload :RailsDocumentClient, "ruby_lsp/requests/support/rails_document_client"
     end
   end
 end
