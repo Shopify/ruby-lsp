@@ -9,7 +9,7 @@ require "minitest/reporters"
 require "tempfile"
 require "debug"
 
-Minitest::Reporters.use!(Minitest::Reporters::SpecReporter.new(color: true))
+Minitest::Reporters.use!(Minitest::Reporters::DefaultReporter.new(color: true))
 
 module Minitest
   class Test
