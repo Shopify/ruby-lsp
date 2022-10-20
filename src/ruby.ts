@@ -36,6 +36,8 @@ export class Ruby {
           await this.activateShadowenv();
           break;
       }
+
+      this.displayRubyVersion();
     } catch (error: any) {
       vscode.window.showErrorMessage(
         `Failed to activate ${this.versionManager} environment: ${error.message}`
@@ -80,6 +82,11 @@ export class Ruby {
 
     // eslint-disable-next-line no-process-env
     process.env = JSON.parse(result.stdout);
+  }
+
+  private async displayRubyVersion() {
+    const rubyVersion = await asyncExec('ruby -e "puts RUBY_VERSION"');
+    vscode.window.setStatusBarMessage(`Ruby ${rubyVersion.stdout.trim()}`);
   }
 
   private async readRubyVersion() {
