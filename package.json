@@ -125,7 +125,10 @@
           "type": "string",
           "enum": [
             "shadowenv",
-            "chruby"
+            "chruby",
+            "asdf",
+            "rbenv",
+            "rvm"
           ],
           "default": "shadowenv"
         },
