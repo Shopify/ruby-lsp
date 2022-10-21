@@ -181,7 +181,7 @@ module RubyLsp
         end
 
         rest = node.keyword_rest
-        unless rest.nil? || rest.is_a?(SyntaxTree::ArgsForward)
+        if rest && !rest.is_a?(SyntaxTree::ArgsForward)
           name = rest.name
           add_token(name.location, :parameter) if name
         end
@@ -195,14 +195,7 @@ module RubyLsp
 
         case value
         when SyntaxTree::Ident
-          local = current_environment.find_local(value.value)
-
-          type = if local.nil? || local.type == :variable
-            :variable
-          else
-            :parameter
-          end
-
+          type = type_for_local(value)
           add_token(value.location, type)
         else
           visit(value)
@@ -215,14 +208,7 @@ module RubyLsp
 
         case value
         when SyntaxTree::Ident
-          local = current_environment.find_local(value.value)
-
-          type = if local.nil? || local.type == :variable
-            :variable
-          else
-            :parameter
-          end
-
+          type = type_for_local(value)
           add_token(value.location, type)
         else
           visit(value)
@@ -285,6 +271,17 @@ module RubyLsp
       sig { params(method_name: String).returns(T::Boolean) }
       def special_method?(method_name)
         SPECIAL_RUBY_METHODS.include?(method_name)
+      end
+
+      sig { params(value: SyntaxTree::Ident).returns(Symbol) }
+      def type_for_local(value)
+        local = current_environment.find_local(value.value)
+
+        if local.nil? || local.type == :variable
+          :variable
+        else
+          :parameter
+        end
       end
     end
   end

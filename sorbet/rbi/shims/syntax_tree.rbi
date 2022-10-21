@@ -7,7 +7,7 @@ module SyntaxTree
   end
 
   class Environment
-    sig { params(name: String).returns(Local) }
+    sig { params(name: String).returns(T.nilable(Local)) }
     def find_local(name); end
   end
 end
