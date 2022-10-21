@@ -126,8 +126,10 @@ module RubyLsp
         visit(node.receiver)
 
         message = node.message
-        unless message == :call || special_method?(message.value)
-          add_token(message.location, :method)
+        if message != :call && !special_method?(message.value)
+          type = Support::Sorbet.annotation?(node) ? :type : :method
+
+          add_token(message.location, type)
         end
 
         visit(node.arguments)
@@ -137,7 +139,9 @@ module RubyLsp
       def visit_command(node)
         return super unless visible?(node, @range)
 
-        add_token(node.message.location, :method) unless special_method?(node.message.value)
+        unless special_method?(node.message.value)
+          add_token(node.message.location, :method)
+        end
         visit(node.arguments)
       end
 
@@ -243,7 +247,10 @@ module RubyLsp
       def visit_vcall(node)
         return super unless visible?(node, @range)
 
-        add_token(node.value.location, :method) unless special_method?(node.value.value)
+        return if special_method?(node.value.value)
+
+        type = Support::Sorbet.annotation?(node) ? :type : :method
+        add_token(node.value.location, type)
       end
 
       sig { override.params(node: SyntaxTree::ClassDeclaration).void }
