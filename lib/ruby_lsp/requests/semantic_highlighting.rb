@@ -20,6 +20,7 @@ module RubyLsp
     # ```
     class SemanticHighlighting < BaseRequest
       extend T::Sig
+      include SyntaxTree::WithEnvironment
 
       TOKEN_TYPES = T.let({
         namespace: 0,
@@ -172,37 +173,45 @@ module RubyLsp
       def visit_params(node)
         node.keywords.each do |keyword,|
           location = keyword.location
-          add_token(location_without_colon(location), :variable)
+          add_token(location_without_colon(location), :parameter)
         end
 
         node.requireds.each do |required|
-          add_token(required.location, :variable)
+          add_token(required.location, :parameter)
         end
 
         rest = node.keyword_rest
-        return if rest.nil? || rest.is_a?(SyntaxTree::ArgsForward)
+        if rest && !rest.is_a?(SyntaxTree::ArgsForward)
+          name = rest.name
+          add_token(name.location, :parameter) if name
+        end
 
-        name = rest.name
-        add_token(name.location, :variable) if name
+        super
       end
 
       sig { override.params(node: SyntaxTree::VarField).void }
       def visit_var_field(node)
-        case node.value
+        value = node.value
+
+        case value
         when SyntaxTree::Ident
-          add_token(node.value.location, :variable)
+          type = type_for_local(value)
+          add_token(value.location, type)
         else
-          visit(node.value)
+          visit(value)
         end
       end
 
       sig { override.params(node: SyntaxTree::VarRef).void }
       def visit_var_ref(node)
-        case node.value
+        value = node.value
+
+        case value
         when SyntaxTree::Ident
-          add_token(node.value.location, :variable)
+          type = type_for_local(value)
+          add_token(value.location, type)
         else
-          visit(node.value)
+          visit(value)
         end
       end
 
@@ -262,6 +271,17 @@ module RubyLsp
       sig { params(method_name: String).returns(T::Boolean) }
       def special_method?(method_name)
         SPECIAL_RUBY_METHODS.include?(method_name)
+      end
+
+      sig { params(value: SyntaxTree::Ident).returns(Symbol) }
+      def type_for_local(value)
+        local = current_environment.find_local(value.value)
+
+        if local.nil? || local.type == :variable
+          :variable
+        else
+          :parameter
+        end
       end
     end
   end

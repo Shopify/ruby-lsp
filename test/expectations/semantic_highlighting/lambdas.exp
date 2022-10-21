@@ -4,14 +4,14 @@
       "delta_line": 0,
       "delta_start_char": 10,
       "length": 4,
-      "token_type": 8,
+      "token_type": 7,
       "token_modifiers": 0
     },
     {
       "delta_line": 1,
       "delta_start_char": 7,
       "length": 4,
-      "token_type": 8,
+      "token_type": 7,
       "token_modifiers": 0
     }
   ]
