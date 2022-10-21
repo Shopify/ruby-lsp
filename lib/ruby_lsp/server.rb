@@ -1,250 +1,157 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "ruby_lsp/internal"
-
 module RubyLsp
-  Handler.start do
-    on("initialize") do |request|
-      store.clear
-      store.encoding = request.dig(:params, :capabilities, :general, :positionEncodings)
+  Interface = LanguageServer::Protocol::Interface
+  Constant = LanguageServer::Protocol::Constant
+  Transport = LanguageServer::Protocol::Transport
 
-      initialization_options = request.dig(:params, :initializationOptions)
-      enabled_features = initialization_options.fetch(:enabledFeatures, [])
+  class Server
+    extend T::Sig
 
-      document_symbol_provider = if enabled_features.include?("documentSymbols")
-        Interface::DocumentSymbolClientCapabilities.new(
-          hierarchical_document_symbol_support: true,
-          symbol_kind: {
-            value_set: Requests::DocumentSymbol::SYMBOL_KIND.values,
-          },
-        )
-      end
+    sig { void }
+    def initialize
+      @writer = T.let(Transport::Stdio::Writer.new, Transport::Stdio::Writer)
+      @reader = T.let(Transport::Stdio::Reader.new, Transport::Stdio::Reader)
+      @store = T.let(Store.new, Store)
 
-      document_link_provider = if enabled_features.include?("documentLink")
-        Interface::DocumentLinkOptions.new(resolve_provider: false)
-      end
+      # The job queue is the actual list of requests we have to process
+      @job_queue = T.let(Thread::Queue.new, Thread::Queue)
+      # The jobs hash is just a way of keeping a handle to jobs based on the request ID, so we can cancel them
+      @jobs = T.let({}, T::Hash[T.any(String, Integer), Job])
+      @mutex = T.let(Mutex.new, Mutex)
+      @worker = T.let(new_worker, Thread)
 
-      hover_provider = if enabled_features.include?("hover")
-        Interface::HoverClientCapabilities.new(dynamic_registration: false)
-      end
-
-      folding_ranges_provider = if enabled_features.include?("foldingRanges")
-        Interface::FoldingRangeClientCapabilities.new(line_folding_only: true)
-      end
-
-      semantic_tokens_provider = if enabled_features.include?("semanticHighlighting")
-        Interface::SemanticTokensRegistrationOptions.new(
-          document_selector: { scheme: "file", language: "ruby" },
-          legend: Interface::SemanticTokensLegend.new(
-            token_types: Requests::SemanticHighlighting::TOKEN_TYPES.keys,
-            token_modifiers: Requests::SemanticHighlighting::TOKEN_MODIFIERS.keys,
-          ),
-          range: true,
-          full: { delta: false },
-        )
-      end
-
-      diagnostics_provider = if enabled_features.include?("diagnostics")
-        {
-          interFileDependencies: false,
-          workspaceDiagnostics: false,
-        }
-      end
-
-      on_type_formatting_provider = if enabled_features.include?("onTypeFormatting")
-        Interface::DocumentOnTypeFormattingOptions.new(
-          first_trigger_character: "{",
-          more_trigger_character: ["\n", "|"],
-        )
-      end
-
-      inlay_hint_provider = if enabled_features.include?("inlayHint")
-        Interface::InlayHintOptions.new(resolve_provider: false)
-      end
-
-      Interface::InitializeResult.new(
-        capabilities: Interface::ServerCapabilities.new(
-          text_document_sync: Interface::TextDocumentSyncOptions.new(
-            change: Constant::TextDocumentSyncKind::INCREMENTAL,
-            open_close: true,
-          ),
-          selection_range_provider: enabled_features.include?("selectionRanges"),
-          hover_provider: hover_provider,
-          document_symbol_provider: document_symbol_provider,
-          document_link_provider: document_link_provider,
-          folding_range_provider: folding_ranges_provider,
-          semantic_tokens_provider: semantic_tokens_provider,
-          document_formatting_provider: enabled_features.include?("formatting"),
-          document_highlight_provider: enabled_features.include?("documentHighlights"),
-          code_action_provider: enabled_features.include?("codeActions"),
-          document_on_type_formatting_provider: on_type_formatting_provider,
-          diagnostic_provider: diagnostics_provider,
-          inlay_hint_provider: inlay_hint_provider,
-        ),
-      )
+      Thread.main.priority = 1
     end
 
-    on("textDocument/didChange") do |request|
-      uri = request.dig(:params, :textDocument, :uri)
-      store.push_edits(uri, request.dig(:params, :contentChanges))
+    sig { void }
+    def start
+      warn("Starting Ruby LSP...")
 
-      Handler::VOID
-    end
+      # Requests that have to be executed sequentially or in the main process are implemented here. All other requests
+      # fall under the else branch which just pushes requests to the queue
+      @reader.read do |request|
+        case request[:method]
+        when "initialize", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange"
+          result = Executor.new(@store).execute(request)
+          finalize_request(result, request)
+        when "$/cancelRequest"
+          # Cancel the job if it's still in the queue
+          @mutex.synchronize { @jobs[request[:params][:id]]&.cancel }
+        when "shutdown"
+          warn("Shutting down Ruby LSP...")
 
-    on("textDocument/didOpen") do |request|
-      uri = request.dig(:params, :textDocument, :uri)
-      text = request.dig(:params, :textDocument, :text)
-      store.set(uri, text)
+          # Close the queue so that we can no longer receive items
+          @job_queue.close
+          # Clear any remaining jobs so that the thread can terminate
+          @job_queue.clear
+          @jobs.clear
+          # Wait until the thread is finished
+          @worker.join
+          @store.clear
 
-      Handler::VOID
-    end
+          finalize_request(Result.new(response: nil, notifications: []), request)
+        when "exit"
+          # We return zero if shutdown has already been received or one otherwise as per the recommendation in the spec
+          # https://microsoft.github.io/language-server-protocol/specification/#exit
+          status = @store.empty? ? 0 : 1
+          exit(status)
+        else
+          # Default case: push the request to the queue to be executed by the worker
+          job = Job.new(request: request, cancelled: false)
 
-    on("textDocument/didClose") do |request|
-      uri = request.dig(:params, :textDocument, :uri)
-      store.delete(uri)
-      clear_diagnostics(uri)
-
-      Handler::VOID
-    end
-
-    on("textDocument/documentSymbol", parallel: true) do |request|
-      store.cache_fetch(request.dig(:params, :textDocument, :uri), :document_symbol) do |document|
-        Requests::DocumentSymbol.new(document).run
-      end
-    end
-
-    on("textDocument/documentLink", parallel: true) do |request|
-      uri = request.dig(:params, :textDocument, :uri)
-      store.cache_fetch(uri, :document_link) do |document|
-        RubyLsp::Requests::DocumentLink.new(uri, document).run
-      end
-    end
-
-    on("textDocument/hover") do |request|
-      position = request.dig(:params, :position)
-      document = store.get(request.dig(:params, :textDocument, :uri))
-
-      RubyLsp::Requests::Hover.new(document, position).run
-    end
-
-    on("textDocument/foldingRange", parallel: true) do |request|
-      store.cache_fetch(request.dig(:params, :textDocument, :uri), :folding_ranges) do |document|
-        Requests::FoldingRanges.new(document).run
-      end
-    end
-
-    on("textDocument/selectionRange", parallel: true) do |request|
-      uri = request.dig(:params, :textDocument, :uri)
-      positions = request.dig(:params, :positions)
-
-      ranges = store.cache_fetch(uri, :selection_ranges) do |document|
-        Requests::SelectionRanges.new(document).run
-      end
-
-      # Per the selection range request spec (https://microsoft.github.io/language-server-protocol/specification#textDocument_selectionRange),
-      # every position in the positions array should have an element at the same index in the response
-      # array. For positions without a valid selection range, the corresponding element in the response
-      # array will be nil.
-
-      unless ranges.nil?
-        positions.map do |position|
-          ranges.find do |range|
-            range.cover?(position)
-          end
+          # Remember a handle to the job, so that we can cancel it
+          @mutex.synchronize { @jobs[request[:id]] = job }
+          @job_queue << job
         end
       end
     end
 
-    on("textDocument/semanticTokens/full", parallel: true) do |request|
-      store.cache_fetch(request.dig(:params, :textDocument, :uri), :semantic_highlighting) do |document|
-        T.cast(
-          Requests::SemanticHighlighting.new(
-            document,
-            encoder: Requests::Support::SemanticTokenEncoder.new,
-          ).run,
-          LanguageServer::Protocol::Interface::SemanticTokens,
-        )
+    private
+
+    sig { returns(Thread) }
+    def new_worker
+      Thread.new do
+        # Thread::Queue#pop is thread safe and will wait until an item is available
+        loop do
+          job = T.let(@job_queue.pop, T.nilable(Job))
+          # The only time when the job is nil is when the queue is closed and we can then terminate the thread
+          break if job.nil?
+
+          request = job.request
+          @mutex.synchronize { @jobs.delete(request[:id]) }
+
+          result = if job.cancelled
+            # We need to return nil to the client even if the request was cancelled
+            Result.new(response: nil, notifications: [])
+          else
+            Executor.new(@store).execute(request)
+          end
+
+          finalize_request(result, request)
+        end
       end
     end
 
-    on("textDocument/semanticTokens/range", parallel: true) do |request|
-      document = store.get(request.dig(:params, :textDocument, :uri))
-      range = request.dig(:params, :range)
-      start_line = range.dig(:start, :line)
-      end_line = range.dig(:end, :line)
+    # Finalize a Queue::Result. All IO operations should happen here to avoid any issues with cancelling requests
+    sig { params(result: Result, request: T::Hash[Symbol, T.untyped]).void }
+    def finalize_request(result, request)
+      @mutex.synchronize do
+        error = result.error
+        response = result.response
 
-      Requests::SemanticHighlighting.new(
-        document,
-        range: start_line..end_line,
-        encoder: Requests::Support::SemanticTokenEncoder.new,
-      ).run
+        # If the response include any notifications, go through them and publish each one
+        result.notifications.each { |n| @writer.write(method: n.message, params: n.params) }
+
+        if error
+          @writer.write(
+            id: request[:id],
+            error: {
+              code: Constant::ErrorCodes::INTERNAL_ERROR,
+              message: error.inspect,
+              data: request.to_json,
+            },
+          )
+        elsif response != VOID
+          @writer.write(id: request[:id], result: response)
+        end
+
+        request_time = result.request_time
+        if request_time
+          @writer.write(method: "telemetry/event", params: telemetry_params(request, request_time, error))
+        end
+      end
     end
 
-    on("textDocument/formatting", parallel: true) do |request|
+    sig do
+      params(
+        request: T::Hash[Symbol, T.untyped],
+        request_time: Float,
+        error: T.nilable(Exception),
+      ).returns(T::Hash[Symbol, T.any(String, Float)])
+    end
+    def telemetry_params(request, request_time, error)
       uri = request.dig(:params, :textDocument, :uri)
+      params = {
+        request: request[:method],
+        lspVersion: RubyLsp::VERSION,
+        requestTime: request_time,
+      }
 
-      Requests::Formatting.new(uri, store.get(uri)).run
-    end.on_error do |error|
-      show_message(Constant::MessageType::ERROR, "Formatting error: #{error.message}")
-    end
+      if error
+        params[:errorClass] = error.class.name
+        params[:errorMessage] = error.message
 
-    on("textDocument/onTypeFormatting", parallel: true) do |request|
-      uri = request.dig(:params, :textDocument, :uri)
-      position = request.dig(:params, :position)
-      character = request.dig(:params, :ch)
+        log_params = request[:params]
+        params[:params] = log_params.reject { |k, _| k == :textDocument }.to_json if log_params
 
-      Requests::OnTypeFormatting.new(store.get(uri), position, character).run
-    end
-
-    on("textDocument/documentHighlight", parallel: true) do |request|
-      document = store.get(request.dig(:params, :textDocument, :uri))
-
-      Requests::DocumentHighlight.new(document, request.dig(:params, :position)).run
-    end
-
-    on("textDocument/codeAction", parallel: true) do |request|
-      uri = request.dig(:params, :textDocument, :uri)
-      document = store.get(uri)
-      range = request.dig(:params, :range)
-      start_line = range.dig(:start, :line)
-      end_line = range.dig(:end, :line)
-
-      Requests::CodeActions.new(uri, document, start_line..end_line).run
-    end
-
-    on("textDocument/inlayHint", parallel: true) do |request|
-      document = store.get(request.dig(:params, :textDocument, :uri))
-      range = request.dig(:params, :range)
-      start_line = range.dig(:start, :line)
-      end_line = range.dig(:end, :line)
-
-      Requests::InlayHints.new(document, start_line..end_line).run
-    end
-
-    on("$/cancelRequest") do |request|
-      cancel_request(request[:params][:id])
-      Handler::VOID
-    end
-
-    on("textDocument/diagnostic", parallel: true) do |request|
-      uri = request.dig(:params, :textDocument, :uri)
-      response = store.cache_fetch(uri, :diagnostics) do |document|
-        Requests::Diagnostics.new(uri, document).run
+        backtrace = error.backtrace
+        params[:backtrace] = backtrace.map { |bt| bt.sub(/^#{Dir.home}/, "~") }.join("\n") if backtrace
       end
 
-      { kind: "full", items: response.map(&:to_lsp_diagnostic) } if response
-    end.on_error do |error|
-      show_message(Constant::MessageType::ERROR, "Error running diagnostics: #{error.message}")
-    end
-
-    on("shutdown") { shutdown }
-
-    on("exit") do
-      # We return zero if shutdown has already been received or one otherwise as per the recommendation in the spec
-      # https://microsoft.github.io/language-server-protocol/specification/#exit
-      status = store.empty? ? 0 : 1
-      exit(status)
+      params[:uri] = uri.sub(%r{.*://#{Dir.home}}, "~") if uri
+      params
     end
   end
 end
