@@ -189,6 +189,13 @@ module RubyLsp
         super
       end
 
+      sig { override.params(node: SyntaxTree::Field).void }
+      def visit_field(node)
+        add_token(node.name.location, :method)
+
+        super
+      end
+
       sig { override.params(node: SyntaxTree::VarField).void }
       def visit_var_field(node)
         value = node.value
