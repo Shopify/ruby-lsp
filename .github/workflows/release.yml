@@ -9,34 +9,49 @@ on:
         type: string
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
         name: Checkout
 
-      - name: Bump version
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-
-          sed -i 's/\"version\":.*,/\"version\": \"${{ inputs.version }}\",/' package.json
-
-          git add package.json
-          git commit -m "Bump version to v${{ inputs.version }}"
-          git push origin main
-
-      - name: Create tag
-        run: |
-          git tag v${{ inputs.version }}
-          git push origin --tags
-
-      - name: Create release
+      - name: Release
         uses: actions/github-script@v6
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |
+            const { data } = await github.rest.repos.getContent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: "package.json",
+            });
+
+            const decoded = Buffer.from(data.content, "base64").toString("ascii");
+            const updated = decoded.replace(/\"version\":.*,/, `"version": "${{ inputs.version }}",`);
+
+            const response = await github.rest.repos.createOrUpdateFileContents({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: "package.json",
+              message: `Bump version to v${{ inputs.version }}`,
+              content: Buffer.from(updated).toString("base64"),
+              "committer.name": "github-actions",
+              "committer.email": "github-actions@github.com",
+              sha: data.sha
+            })
+
+            await github.rest.git.createTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: `v${{ inputs.version }}`,
+              message: `v${{ inputs.version }}`,
+              object: response.data.commit.tree.sha,
+              type: "commit",
+              "tagger.name": "github-actions",
+              "tagger.email": "github-actions@github.com"
+            })
+
             await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
