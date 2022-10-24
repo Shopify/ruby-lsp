@@ -31,7 +31,7 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(T::Hash[String, T::Array[String]]) }
+        sig { returns(T::Hash[String, T::Hash[String, T::Hash[String, String]]]) }
         def gem_paths
           @gem_paths ||= T.let(begin
             lookup = {}
@@ -61,7 +61,7 @@ module RubyLsp
             end
 
             lookup
-          end, T.nilable(T::Hash[String, T::Array[String]]))
+          end, T.nilable(T::Hash[String, T::Hash[String, T::Hash[String, String]]]))
         end
       end
 
@@ -88,7 +88,7 @@ module RubyLsp
         return unless match
 
         uri = T.cast(URI(match[0]), URI::Source)
-        gem_version = resolve_version(uri)
+        gem_version = T.must(resolve_version(uri))
         file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, uri.path)
         return if file_path.nil?
 
