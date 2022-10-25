@@ -232,7 +232,7 @@
     "mocha": "^10.1.0",
     "prettier": "^2.7.1",
     "typescript": "^4.8.4",
-    "vsce": "^2.11.0"
+    "vsce": "^2.13.0"
   },
   "dependencies": {
     "vscode-languageclient": "^8.0.2"
