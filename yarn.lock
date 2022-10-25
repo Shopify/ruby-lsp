@@ -3675,10 +3675,10 @@ util-deprecate@^1.0.1, util-deprecate@~1.0.1:
   resolved "https://registry.npmjs.org/util-deprecate/-/util-deprecate-1.0.2.tgz"
   integrity sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8=
 
-vsce@^2.11.0:
-  version "2.11.0"
-  resolved "https://registry.yarnpkg.com/vsce/-/vsce-2.11.0.tgz#e60aac58ecfc3aec6e40024e13ea8c8d29764aef"
-  integrity sha512-pr9Y0va/HCer0tTifeqaUrK24JJSpRd6oLeF/PY6FtrY41e+lwxiAq6jfMXx4ShAZglYg2rFKoKROwa7E7SEqQ==
+vsce@^2.13.0:
+  version "2.13.0"
+  resolved "https://registry.yarnpkg.com/vsce/-/vsce-2.13.0.tgz#832adc2926a4ca9facf898fea011dd33515f7ace"
+  integrity sha512-t1otQ2lqyi5Y/G6qUl9BEc561nEIYrZbLT8k+R1SoZaKNa6gaehaLGQG5zvB524YPGZOVvbOBzAXoO7Mor1J5g==
   dependencies:
     azure-devops-node-api "^11.0.1"
     chalk "^2.4.2"
