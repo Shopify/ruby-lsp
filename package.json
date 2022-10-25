@@ -227,7 +227,7 @@
     "@vscode/test-electron": "^2.1.5",
     "esbuild": "^0.15.11",
     "eslint": "^8.25.0",
-    "eslint-import-resolver-typescript": "^3.5.1",
+    "eslint-import-resolver-typescript": "^3.5.2",
     "glob": "^8.0.3",
     "mocha": "^10.1.0",
     "prettier": "^2.7.1",
