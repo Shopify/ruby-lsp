@@ -27,11 +27,14 @@ module RubyLsp
 
       sig { params(document: Document, position: Document::PositionShape).void }
       def initialize(document, position)
+        super(document)
+
         @highlights = T.let([], T::Array[LanguageServer::Protocol::Interface::DocumentHighlight])
         position = Document::Scanner.new(document.source).find_position(position)
-        @target = T.let(find(T.must(document.tree), position), T.nilable(Support::HighlightTarget))
 
-        super(document)
+        return unless document.parsed?
+
+        @target = T.let(find(T.must(document.tree), position), T.nilable(Support::HighlightTarget))
       end
 
       sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::DocumentHighlight], Object)) }
