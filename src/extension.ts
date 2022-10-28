@@ -8,22 +8,16 @@ import { isGemOutdated, updateGem } from "./bundler";
 let client: Client;
 
 export async function activate(context: vscode.ExtensionContext) {
-  await new Ruby().activateRuby();
+  const ruby = new Ruby();
+  await ruby.activateRuby();
 
   const telemetry = new Telemetry(context);
-  client = new Client(context, telemetry);
+  client = new Client(context, telemetry, ruby);
 
   // Adding this delay guarantees that the Ruby environment is activated before trying to start the server
-  await delay(500);
   await client.start();
 
   activateGemOutdatedButton(context);
-}
-
-async function delay(mseconds: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, mseconds);
-  });
 }
 
 export async function deactivate(): Promise<void> {
