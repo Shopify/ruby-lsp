@@ -7,18 +7,20 @@ import * as vscode from "vscode";
 const asyncExec = promisify(exec);
 
 export class Ruby {
+  public rubyVersion?: string;
+  public yjitEnabled?: boolean;
   private workingFolder: string;
-  private versionManager: string;
+  private versionManager?: string;
 
   constructor() {
     this.workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
-
-    this.versionManager = vscode.workspace
-      .getConfiguration("rubyLsp")
-      .get("rubyVersionManager")!;
   }
 
   async activateRuby() {
+    this.versionManager = vscode.workspace
+      .getConfiguration("rubyLsp")
+      .get("rubyVersionManager")!;
+
     try {
       switch (this.versionManager) {
         case "asdf":
@@ -38,7 +40,9 @@ export class Ruby {
           break;
       }
 
-      this.displayRubyVersion();
+      await this.delay(500);
+      await this.displayRubyVersion();
+      this.checkYjit();
     } catch (error: any) {
       vscode.window.showErrorMessage(
         `Failed to activate ${this.versionManager} environment: ${error.message}`
@@ -46,18 +50,18 @@ export class Ruby {
     }
   }
 
-  async activateShadowenv() {
+  private async activateShadowenv() {
     await vscode.extensions
       .getExtension("shopify.vscode-shadowenv")
       ?.activate();
   }
 
-  async activateChruby() {
+  private async activateChruby() {
     const rubyVersion = await this.readRubyVersion();
     await this.activate(`chruby-exec "${rubyVersion}" -- ruby`);
   }
 
-  async activate(ruby: string) {
+  private async activate(ruby: string) {
     let shellProfilePath;
     // eslint-disable-next-line no-process-env
     const shell = process.env.SHELL?.split("/").pop();
@@ -87,7 +91,8 @@ export class Ruby {
 
   private async displayRubyVersion() {
     const rubyVersion = await asyncExec('ruby -e "puts RUBY_VERSION"');
-    vscode.window.setStatusBarMessage(`Ruby ${rubyVersion.stdout.trim()}`);
+    this.rubyVersion = rubyVersion.stdout.trim();
+    vscode.window.setStatusBarMessage(`Ruby ${this.rubyVersion}`);
   }
 
   private async readRubyVersion() {
@@ -105,5 +110,19 @@ export class Ruby {
         throw error;
       }
     }
+  }
+
+  private async checkYjit() {
+    const yjitIsDefined = await asyncExec(
+      'ruby -e "puts defined?(RubyVM::YJIT)"'
+    );
+
+    this.yjitEnabled = yjitIsDefined.stdout.trim() === "constant";
+  }
+
+  private async delay(mseconds: number) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, mseconds);
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { exec, execSync } from "child_process";
+import { exec } from "child_process";
 import { promisify } from "util";
 
 import * as vscode from "vscode";
@@ -11,6 +11,7 @@ import {
 } from "vscode-languageclient/node";
 
 import { Telemetry } from "./telemetry";
+import { Ruby } from "./ruby";
 
 const asyncExec = promisify(exec);
 const LSP_NAME = "Ruby LSP";
@@ -26,11 +27,17 @@ export default class Client {
   private serverOptions: ServerOptions;
   private clientOptions: LanguageClientOptions;
   private telemetry: Telemetry;
+  private ruby: Ruby;
 
-  constructor(context: vscode.ExtensionContext, telemetry: Telemetry) {
+  constructor(
+    context: vscode.ExtensionContext,
+    telemetry: Telemetry,
+    ruby: Ruby
+  ) {
     const outputChannel = vscode.window.createOutputChannel(LSP_NAME);
     this.workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
     this.telemetry = telemetry;
+    this.ruby = ruby;
 
     const env = this.getEnv();
 
@@ -247,10 +254,15 @@ export default class Client {
 
     // If a configuration that affects the Ruby LSP has changed, update the client options using the latest
     // configuration and restart the server
-    vscode.workspace.onDidChangeConfiguration((event) => {
+    vscode.workspace.onDidChangeConfiguration(async (event) => {
       if (event.affectsConfiguration("rubyLsp")) {
         this.clientOptions.initializationOptions.enabledFeatures =
           this.listOfEnabledFeatures();
+
+        // Re-activate Ruby if the version manager changed
+        if (event.affectsConfiguration("rubyLsp.rubyVersionManager")) {
+          await this.ruby.activateRuby();
+        }
 
         this.restart();
       }
@@ -281,14 +293,14 @@ export default class Client {
     const env = process.env;
     const useYjit = vscode.workspace.getConfiguration("rubyLsp").get("yjit");
 
-    // Enabling YJIT only provides a performance benefit on Ruby 3.2.0 and above
-    if (!useYjit || env.RUBY_VERSION! < "3.2.0") {
+    if (!this.ruby.rubyVersion) {
       return env;
     }
 
-    // Check if the Ruby was compiled with YJIT since it's not required. The exec must be sync here because this is used
-    // in the constructor, which cannot be an async function
-    if (!execSync("ruby -v --yjit").toString().includes("+YJIT")) {
+    const [major, minor, _patch] = this.ruby.rubyVersion.split(".").map(Number);
+
+    // Enabling YJIT only provides a performance benefit on Ruby 3.2.0 and above
+    if (!useYjit || !this.ruby.yjitEnabled || [major, minor] < [3, 2]) {
       return env;
     }
 
