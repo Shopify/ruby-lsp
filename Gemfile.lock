@@ -127,7 +127,7 @@ GEM
       sorbet (>= 0.5.9204)
       sorbet-runtime (>= 0.5.9204)
       thor (>= 0.19.2)
-    syntax_tree (4.0.2)
+    syntax_tree (4.3.0)
       prettier_print (>= 1.0.2)
     tapioca (0.10.2)
       bundler (>= 1.17.3)
