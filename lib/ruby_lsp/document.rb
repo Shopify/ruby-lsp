@@ -95,9 +95,12 @@ module RubyLsp
         apply_edit(@parsable_source, edit[:range], edit[:text].gsub(/[^\r\n]/, " "))
       end
 
-      @tree = SyntaxTree.parse(@parsable_source)
-    rescue SyntaxTree::Parser::ParseError
-      # If we can't parse the source even after emptying the edits, then just fallback to the previous source
+      begin
+        @tree = SyntaxTree.parse(@parsable_source)
+      rescue StandardError
+        # Trying to maintain a parsable source when there are syntax errors is a best effort. If we fail to parse for
+        # any reason, just ignore it
+      end
     end
 
     sig { params(source: String, range: RangeShape, text: String).void }
