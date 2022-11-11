@@ -9,8 +9,17 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
 
   def run_expectations(source)
     document = RubyLsp::Document.new(source)
+    range = @__params&.any? ? @__params.first : nil
+
+    if range
+      start_line = range.dig(:start, :line)
+      end_line = range.dig(:end, :line)
+      processed_range = start_line..end_line
+    end
+
     RubyLsp::Requests::SemanticHighlighting.new(
       document,
+      range: processed_range,
       encoder: RubyLsp::Requests::Support::SemanticTokenEncoder.new,
     ).run
   end

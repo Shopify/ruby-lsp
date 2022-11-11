@@ -79,6 +79,15 @@ module RubyLsp
           []
         end
       end
+
+      sig { params(node: T.nilable(SyntaxTree::Node), range: T.nilable(T::Range[Integer])).returns(T::Boolean) }
+      def visible?(node, range)
+        return true if range.nil?
+        return false if node.nil?
+
+        loc = node.location
+        range.cover?(loc.start_line - 1) && range.cover?(loc.end_line - 1)
+      end
     end
   end
 end
