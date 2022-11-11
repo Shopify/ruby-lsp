@@ -7,6 +7,8 @@ module RubyLsp
   Handler.start do
     on("initialize") do |request|
       store.clear
+      store.encoding = request.dig(:params, :capabilities, :general, :positionEncodings)
+
       initialization_options = request.dig(:params, :initializationOptions)
       enabled_features = initialization_options.fetch(:enabledFeatures, [])
 

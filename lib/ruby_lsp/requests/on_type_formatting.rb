@@ -27,9 +27,9 @@ module RubyLsp
       def initialize(document, position, trigger_character)
         super(document)
 
-        scanner = Document::Scanner.new(document.source)
-        line_begin = position[:line] == 0 ? 0 : scanner.find_position({ line: position[:line] - 1, character: 0 })
-        line_end = scanner.find_position(position)
+        scanner = document.create_scanner
+        line_begin = position[:line] == 0 ? 0 : scanner.find_char_position({ line: position[:line] - 1, character: 0 })
+        line_end = scanner.find_char_position(position)
         line = T.must(@document.source[line_begin..line_end])
 
         @indentation = T.let(find_indentation(line), Integer)

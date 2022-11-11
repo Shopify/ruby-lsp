@@ -24,7 +24,7 @@ module RubyLsp
       def initialize(document, position)
         super(document)
 
-        @position = T.let(Document::Scanner.new(document.source).find_position(position), Integer)
+        @position = T.let(document.create_scanner.find_char_position(position), Integer)
       end
 
       sig { override.returns(T.nilable(LanguageServer::Protocol::Interface::Hover)) }

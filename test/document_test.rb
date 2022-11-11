@@ -265,6 +265,47 @@ class DocumentTest < Minitest::Test
     refute_predicate(document, :parsed?)
   end
 
+  def test_document_handle_4_byte_unicode_characters
+    document = RubyLsp::Document.new(+<<~RUBY, "utf-16")
+      class Foo
+        a = "👋"
+      end
+    RUBY
+
+    document.push_edits([
+      { range: { start: { line: 1, character: 9 }, end: { line: 1, character: 9 } }, text: "s" },
+    ])
+
+    document.parse
+    assert_predicate(document, :parsed?)
+
+    assert_equal(<<~RUBY, document.source)
+      class Foo
+        a = "👋s"
+      end
+    RUBY
+
+    document.push_edits([{ range: { start: { line: 1, character: 11 }, end: { line: 1, character: 11 } }, text: "\n" }])
+    document.push_edits([{ range: { start: { line: 2, character: 0 }, end: { line: 2, character: 0 } }, text: "  p" }])
+    document.push_edits([{ range: { start: { line: 2, character: 3 }, end: { line: 2, character: 3 } }, text: "u" }])
+    document.push_edits([{ range: { start: { line: 2, character: 4 }, end: { line: 2, character: 4 } }, text: "t" }])
+    document.push_edits([{ range: { start: { line: 2, character: 5 }, end: { line: 2, character: 5 } }, text: "s" }])
+    document.push_edits([{ range: { start: { line: 2, character: 6 }, end: { line: 2, character: 6 } }, text: " " }])
+    document.push_edits([{ range: { start: { line: 2, character: 7 }, end: { line: 2, character: 7 } }, text: "'" }])
+    document.push_edits([{ range: { start: { line: 2, character: 8 }, end: { line: 2, character: 8 } }, text: "a" }])
+    document.push_edits([{ range: { start: { line: 2, character: 9 }, end: { line: 2, character: 9 } }, text: "'" }])
+
+    document.parse
+    assert_predicate(document, :parsed?)
+
+    assert_equal(<<~RUBY, document.source)
+      class Foo
+        a = "👋s"
+        puts 'a'
+      end
+    RUBY
+  end
+
   private
 
   def assert_error_edit(actual, error_range)
