@@ -30,10 +30,9 @@ module RubyLsp
         super(document)
 
         @highlights = T.let([], T::Array[LanguageServer::Protocol::Interface::DocumentHighlight])
-        position = Document::Scanner.new(document.source).find_position(position)
-
         return unless document.parsed?
 
+        position = document.create_scanner.find_char_position(position)
         @target = T.let(find(T.must(document.tree), position), T.nilable(Support::HighlightTarget))
       end
 

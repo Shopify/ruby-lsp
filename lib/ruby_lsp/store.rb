@@ -9,9 +9,13 @@ module RubyLsp
   class Store
     extend T::Sig
 
+    sig { params(encoding: String).void }
+    attr_writer :encoding
+
     sig { void }
     def initialize
       @state = T.let({}, T::Hash[String, Document])
+      @encoding = T.let("utf-8", String)
     end
 
     sig { params(uri: String).returns(Document) }
@@ -25,7 +29,7 @@ module RubyLsp
 
     sig { params(uri: String, content: String).void }
     def set(uri, content)
-      document = Document.new(content)
+      document = Document.new(content, @encoding)
       @state[uri] = document
     end
 
