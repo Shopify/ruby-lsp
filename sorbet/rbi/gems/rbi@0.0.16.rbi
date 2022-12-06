@@ -7,13 +7,13 @@
 # source://rbi//lib/rbi.rb#7
 module RBI; end
 
-# @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+# @abstract It cannot be directly instantiated. Subclasses must implement the `abstract` methods below.
 #
 # source://rbi//lib/rbi/parser.rb#129
 class RBI::ASTVisitor
   abstract!
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/abstract/declare.rb#37
+  # source://sorbet-runtime/0.5.10572/lib/types/private/abstract/declare.rb#37
   def initialize(*args, **_arg1, &blk); end
 
   # @abstract
@@ -62,7 +62,7 @@ end
 
 # Attributes
 #
-# @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+# @abstract It cannot be directly instantiated. Subclasses must implement the `abstract` methods below.
 #
 # source://rbi//lib/rbi/model.rb#341
 class RBI::Attr < ::RBI::NodeWithComments
@@ -1104,7 +1104,7 @@ end
 
 # Mixins
 #
-# @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+# @abstract It cannot be directly instantiated. Subclasses must implement the `abstract` methods below.
 #
 # source://rbi//lib/rbi/model.rb#762
 class RBI::Mixin < ::RBI::NodeWithComments
@@ -1174,7 +1174,7 @@ class RBI::Module < ::RBI::Scope
   def print_header(v); end
 end
 
-# @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+# @abstract It cannot be directly instantiated. Subclasses must implement the `abstract` methods below.
 #
 # source://rbi//lib/rbi/model.rb#5
 class RBI::Node
@@ -1264,7 +1264,7 @@ class RBI::Node
   def string(indent: T.unsafe(nil), print_locs: T.unsafe(nil), max_line_length: T.unsafe(nil)); end
 end
 
-# @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+# @abstract It cannot be directly instantiated. Subclasses must implement the `abstract` methods below.
 #
 # source://rbi//lib/rbi/model.rb#79
 class RBI::NodeWithComments < ::RBI::Node
@@ -1327,7 +1327,7 @@ class RBI::OptParam < ::RBI::Param
   def value; end
 end
 
-# @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+# @abstract It cannot be directly instantiated. Subclasses must implement the `abstract` methods below.
 #
 # source://rbi//lib/rbi/model.rb#544
 class RBI::Param < ::RBI::NodeWithComments
@@ -1752,8 +1752,8 @@ end
 # source://rbi//lib/rbi/rewriters/merge_trees.rb#82
 class RBI::Rewriters::Merge::Conflict < ::T::Struct
   const :left, ::RBI::Node
-  const :left_name, ::String
   const :right, ::RBI::Node
+  const :left_name, ::String
   const :right_name, ::String
 
   # source://rbi//lib/rbi/rewriters/merge_trees.rb#91
@@ -1761,7 +1761,7 @@ class RBI::Rewriters::Merge::Conflict < ::T::Struct
   def to_s; end
 
   class << self
-    # source://sorbet-runtime/0.5.10326/lib/types/struct.rb#13
+    # source://sorbet-runtime/0.5.10572/lib/types/struct.rb#13
     def inherited(s); end
   end
 end
@@ -1978,7 +1978,7 @@ class RBI::Rewriters::RemoveKnownDefinitions::Operation < ::T::Struct
   def to_s; end
 
   class << self
-    # source://sorbet-runtime/0.5.10326/lib/types/struct.rb#13
+    # source://sorbet-runtime/0.5.10572/lib/types/struct.rb#13
     def inherited(s); end
   end
 end
@@ -2003,14 +2003,14 @@ class RBI::Rewriters::SortNodes < ::RBI::Visitor
   sig { params(node: ::RBI::Node).returns(::Integer) }
   def node_rank(node); end
 
-  # source://rbi//lib/rbi/rewriters/sort_nodes.rb#92
+  # source://rbi//lib/rbi/rewriters/sort_nodes.rb#94
   sig { params(node: ::RBI::Node).void }
   def sort_node_names!(node); end
 end
 
 # Scopes
 #
-# @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+# @abstract It cannot be directly instantiated. Subclasses must implement the `abstract` methods below.
 #
 # source://rbi//lib/rbi/model.rb#172
 class RBI::Scope < ::RBI::Tree
@@ -2018,7 +2018,7 @@ class RBI::Scope < ::RBI::Tree
 
   abstract!
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/abstract/declare.rb#37
+  # source://sorbet-runtime/0.5.10572/lib/types/private/abstract/declare.rb#37
   def initialize(*args, **_arg1, &blk); end
 
   # source://rbi//lib/rbi/printer.rb#240
@@ -2521,7 +2521,7 @@ class RBI::TStructConst < ::RBI::TStructField
   def to_s; end
 end
 
-# @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+# @abstract It cannot be directly instantiated. Subclasses must implement the `abstract` methods below.
 #
 # source://rbi//lib/rbi/model.rb#1136
 class RBI::TStructField < ::RBI::NodeWithComments
@@ -2644,7 +2644,7 @@ class RBI::Tree < ::RBI::NodeWithComments
   sig { params(annotation: ::String, annotate_scopes: T::Boolean, annotate_properties: T::Boolean).void }
   def annotate!(annotation, annotate_scopes: T.unsafe(nil), annotate_properties: T.unsafe(nil)); end
 
-  # source://tapioca/0.9.2-5765840c9e7e51312a1898677d30521c61da7e6d/lib/tapioca/rbi_ext/model.rb#38
+  # source://tapioca/0.10.3/lib/tapioca/rbi_ext/model.rb#38
   sig do
     params(
       name: ::String,
@@ -2654,43 +2654,44 @@ class RBI::Tree < ::RBI::NodeWithComments
   end
   def create_class(name, superclass_name: T.unsafe(nil), &block); end
 
-  # source://tapioca/0.9.2-5765840c9e7e51312a1898677d30521c61da7e6d/lib/tapioca/rbi_ext/model.rb#45
+  # source://tapioca/0.10.3/lib/tapioca/rbi_ext/model.rb#45
   sig { params(name: ::String, value: ::String).void }
   def create_constant(name, value:); end
 
-  # source://tapioca/0.9.2-5765840c9e7e51312a1898677d30521c61da7e6d/lib/tapioca/rbi_ext/model.rb#55
+  # source://tapioca/0.10.3/lib/tapioca/rbi_ext/model.rb#55
   sig { params(name: ::String).void }
   def create_extend(name); end
 
-  # source://tapioca/0.9.2-5765840c9e7e51312a1898677d30521c61da7e6d/lib/tapioca/rbi_ext/model.rb#50
+  # source://tapioca/0.10.3/lib/tapioca/rbi_ext/model.rb#50
   sig { params(name: ::String).void }
   def create_include(name); end
 
-  # source://tapioca/0.9.2-5765840c9e7e51312a1898677d30521c61da7e6d/lib/tapioca/rbi_ext/model.rb#88
+  # source://tapioca/0.10.3/lib/tapioca/rbi_ext/model.rb#89
   sig do
     params(
       name: ::String,
       parameters: T::Array[::RBI::TypedParam],
       return_type: ::String,
       class_method: T::Boolean,
-      visibility: ::RBI::Visibility
+      visibility: ::RBI::Visibility,
+      comments: T::Array[::RBI::Comment]
     ).void
   end
-  def create_method(name, parameters: T.unsafe(nil), return_type: T.unsafe(nil), class_method: T.unsafe(nil), visibility: T.unsafe(nil)); end
+  def create_method(name, parameters: T.unsafe(nil), return_type: T.unsafe(nil), class_method: T.unsafe(nil), visibility: T.unsafe(nil), comments: T.unsafe(nil)); end
 
-  # source://tapioca/0.9.2-5765840c9e7e51312a1898677d30521c61da7e6d/lib/tapioca/rbi_ext/model.rb#60
+  # source://tapioca/0.10.3/lib/tapioca/rbi_ext/model.rb#60
   sig { params(name: ::String).void }
   def create_mixes_in_class_methods(name); end
 
-  # source://tapioca/0.9.2-5765840c9e7e51312a1898677d30521c61da7e6d/lib/tapioca/rbi_ext/model.rb#25
+  # source://tapioca/0.10.3/lib/tapioca/rbi_ext/model.rb#25
   sig { params(name: ::String, block: T.nilable(T.proc.params(scope: ::RBI::Scope).void)).returns(::RBI::Scope) }
   def create_module(name, &block); end
 
-  # source://tapioca/0.9.2-5765840c9e7e51312a1898677d30521c61da7e6d/lib/tapioca/rbi_ext/model.rb#9
+  # source://tapioca/0.10.3/lib/tapioca/rbi_ext/model.rb#9
   sig { params(constant: ::Module, block: T.nilable(T.proc.params(scope: ::RBI::Scope).void)).void }
   def create_path(constant, &block); end
 
-  # source://tapioca/0.9.2-5765840c9e7e51312a1898677d30521c61da7e6d/lib/tapioca/rbi_ext/model.rb#74
+  # source://tapioca/0.10.3/lib/tapioca/rbi_ext/model.rb#74
   sig do
     params(
       name: ::String,
@@ -2746,17 +2747,17 @@ class RBI::Tree < ::RBI::NodeWithComments
   sig { override.returns(T::Boolean) }
   def oneline?; end
 
-  # source://rbi//lib/rbi/rewriters/sort_nodes.rb#105
+  # source://rbi//lib/rbi/rewriters/sort_nodes.rb#107
   sig { void }
   def sort_nodes!; end
 
   private
 
-  # source://tapioca/0.9.2-5765840c9e7e51312a1898677d30521c61da7e6d/lib/tapioca/rbi_ext/model.rb#108
+  # source://tapioca/0.10.3/lib/tapioca/rbi_ext/model.rb#111
   sig { params(node: ::RBI::Node).returns(::RBI::Node) }
   def create_node(node); end
 
-  # source://tapioca/0.9.2-5765840c9e7e51312a1898677d30521c61da7e6d/lib/tapioca/rbi_ext/model.rb#103
+  # source://tapioca/0.10.3/lib/tapioca/rbi_ext/model.rb#106
   sig { returns(T::Hash[::String, ::RBI::Node]) }
   def nodes_cache; end
 end
@@ -2932,7 +2933,7 @@ RBI::VERSION = T.let(T.unsafe(nil), String)
 
 # Visibility
 #
-# @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+# @abstract It cannot be directly instantiated. Subclasses must implement the `abstract` methods below.
 #
 # source://rbi//lib/rbi/model.rb#833
 class RBI::Visibility < ::RBI::NodeWithComments
@@ -2986,13 +2987,13 @@ class RBI::VisibilityGroup < ::RBI::Tree
   def visibility; end
 end
 
-# @abstract It cannont be directly instantiated. Subclasses must implement the `abstract` methods below.
+# @abstract It cannot be directly instantiated. Subclasses must implement the `abstract` methods below.
 #
 # source://rbi//lib/rbi/visitor.rb#5
 class RBI::Visitor
   abstract!
 
-  # source://sorbet-runtime/0.5.10326/lib/types/private/abstract/declare.rb#37
+  # source://sorbet-runtime/0.5.10572/lib/types/private/abstract/declare.rb#37
   def initialize(*args, **_arg1, &blk); end
 
   # @abstract

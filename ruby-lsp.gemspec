@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency("language_server-protocol", "~> 3.17.0")
   s.add_dependency("sorbet-runtime")
-  s.add_dependency("syntax_tree", ">= 4.0.2", "< 5.0.0")
+  s.add_dependency("syntax_tree", ">= 5.0.0", "< 6")
 
   s.required_ruby_version = ">= 2.7.3"
 end

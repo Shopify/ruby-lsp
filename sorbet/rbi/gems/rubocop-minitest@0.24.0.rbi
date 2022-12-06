@@ -36,10 +36,10 @@ module RuboCop::Cop::ArgumentRangeHelper
   def first_argument_range(node); end
 end
 
-# source://rubocop/1.36.0/lib/rubocop/cop/mixin/allowed_methods.rb#38
+# source://rubocop/1.39.0/lib/rubocop/cop/mixin/allowed_methods.rb#38
 RuboCop::Cop::IgnoredMethods = RuboCop::Cop::AllowedMethods
 
-# source://rubocop/1.36.0/lib/rubocop/cop/mixin/allowed_pattern.rb#54
+# source://rubocop/1.39.0/lib/rubocop/cop/mixin/allowed_pattern.rb#54
 RuboCop::Cop::IgnoredPattern = RuboCop::Cop::AllowedPattern
 
 # Common functionality for `AssertInDelta` and `RefuteInDelta` cops.
@@ -861,6 +861,65 @@ end
 
 # source://rubocop-minitest//lib/rubocop/cop/minitest/duplicate_test_run.rb#51
 RuboCop::Cop::Minitest::DuplicateTestRun::MSG = T.let(T.unsafe(nil), String)
+
+# Enforces empty line before assertion methods because it separates assertion phase.
+#
+# @example
+#
+#   # bad
+#   do_something
+#   assert_equal(expected, actual)
+#
+#   # good
+#   do_something
+#
+#   assert_equal(expected, actual)
+#
+# source://rubocop-minitest//lib/rubocop/cop/minitest/empty_line_before_assertion_methods.rb#19
+class RuboCop::Cop::Minitest::EmptyLineBeforeAssertionMethods < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::MinitestExplorationHelpers
+  include ::RuboCop::Cop::RangeHelp
+  extend ::RuboCop::Cop::AutoCorrector
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/empty_line_before_assertion_methods.rb#27
+  def on_send(node); end
+
+  private
+
+  # @return [Boolean]
+  #
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/empty_line_before_assertion_methods.rb#52
+  def accept_previous_line?(previous_line_node, node); end
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/empty_line_before_assertion_methods.rb#43
+  def assertion_method(node); end
+
+  # @return [Boolean]
+  #
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/empty_line_before_assertion_methods.rb#73
+  def heredoc?(last_argument); end
+
+  # @return [Boolean]
+  #
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/empty_line_before_assertion_methods.rb#77
+  def no_empty_line?(previous_line_node, node); end
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/empty_line_before_assertion_methods.rb#87
+  def register_offense(node, previous_line_node); end
+
+  # @return [Boolean]
+  #
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/empty_line_before_assertion_methods.rb#63
+  def use_assertion_method_at_last_of_block?(node); end
+
+  # @return [Boolean]
+  #
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/empty_line_before_assertion_methods.rb#59
+  def use_heredoc_argument?(node); end
+end
+
+# source://rubocop-minitest//lib/rubocop/cop/minitest/empty_line_before_assertion_methods.rb#24
+RuboCop::Cop::Minitest::EmptyLineBeforeAssertionMethods::MSG = T.let(T.unsafe(nil), String)
 
 # Checks for deprecated global expectations
 # and autocorrects them to use expect format.
@@ -1770,6 +1829,53 @@ end
 # source://rubocop-minitest//lib/rubocop/cop/minitest/skip_ensure.rb#65
 RuboCop::Cop::Minitest::SkipEnsure::MSG = T.let(T.unsafe(nil), String)
 
+# Checks for skipped tests missing the skipping reason.
+#
+# @example
+#   # bad
+#   skip
+#   skip('')
+#
+#   # bad
+#   if condition?
+#   skip
+#   else
+#   skip
+#   end
+#
+#   # good
+#   skip("Reason why the test was skipped")
+#
+#   # good
+#   skip if condition?
+#
+# source://rubocop-minitest//lib/rubocop/cop/minitest/skip_without_reason.rb#26
+class RuboCop::Cop::Minitest::SkipWithoutReason < ::RuboCop::Cop::Base
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/skip_without_reason.rb#31
+  def on_send(node); end
+
+  private
+
+  # @return [Boolean]
+  #
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/skip_without_reason.rb#44
+  def blank_argument?(node); end
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/skip_without_reason.rb#49
+  def conditional_parent(node); end
+
+  # @return [Boolean]
+  #
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/skip_without_reason.rb#59
+  def only_skip_branches?(node); end
+end
+
+# source://rubocop-minitest//lib/rubocop/cop/minitest/skip_without_reason.rb#27
+RuboCop::Cop::Minitest::SkipWithoutReason::MSG = T.let(T.unsafe(nil), String)
+
+# source://rubocop-minitest//lib/rubocop/cop/minitest/skip_without_reason.rb#29
+RuboCop::Cop::Minitest::SkipWithoutReason::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
+
 # Enforces that test method names start with `test_` prefix.
 # It aims to prevent tests that aren't executed by forgetting to start test method name with `test_`.
 #
@@ -2017,11 +2123,11 @@ end
 # source://rubocop-minitest//lib/rubocop/minitest/version.rb#7
 RuboCop::Minitest::Version::STRING = T.let(T.unsafe(nil), String)
 
-# source://rubocop/1.36.0/lib/rubocop/ast_aliases.rb#5
+# source://rubocop/1.39.0/lib/rubocop/ast_aliases.rb#5
 RuboCop::NodePattern = RuboCop::AST::NodePattern
 
-# source://rubocop/1.36.0/lib/rubocop/ast_aliases.rb#6
+# source://rubocop/1.39.0/lib/rubocop/ast_aliases.rb#6
 RuboCop::ProcessedSource = RuboCop::AST::ProcessedSource
 
-# source://rubocop/1.36.0/lib/rubocop/ast_aliases.rb#7
+# source://rubocop/1.39.0/lib/rubocop/ast_aliases.rb#7
 RuboCop::Token = RuboCop::AST::Token

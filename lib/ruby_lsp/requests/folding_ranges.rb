@@ -20,21 +20,19 @@ module RubyLsp
 
       SIMPLE_FOLDABLES = T.let([
         SyntaxTree::ArrayLiteral,
-        SyntaxTree::BraceBlock,
+        SyntaxTree::BlockNode,
         SyntaxTree::Case,
         SyntaxTree::ClassDeclaration,
         SyntaxTree::Command,
-        SyntaxTree::DoBlock,
-        SyntaxTree::FCall,
         SyntaxTree::For,
         SyntaxTree::HashLiteral,
         SyntaxTree::Heredoc,
-        SyntaxTree::If,
+        SyntaxTree::IfNode,
         SyntaxTree::ModuleDeclaration,
         SyntaxTree::SClass,
-        SyntaxTree::Unless,
-        SyntaxTree::Until,
-        SyntaxTree::While,
+        SyntaxTree::UnlessNode,
+        SyntaxTree::UntilNode,
+        SyntaxTree::WhileNode,
         SyntaxTree::Else,
         SyntaxTree::Ensure,
         SyntaxTree::Begin,
@@ -86,10 +84,17 @@ module RubyLsp
           add_lines_range(location.start_line, location.end_line - 1)
         when *NODES_WITH_STATEMENTS
           add_statements_range(T.must(node), T.cast(node, StatementNode).statements)
-        when SyntaxTree::Call, SyntaxTree::CommandCall
-          add_call_range(node)
-          return
-        when SyntaxTree::Def, SyntaxTree::Defs
+        when SyntaxTree::CallNode, SyntaxTree::CommandCall
+          # If there is a receiver, it may be a chained invocation,
+          # so we need to process it in special way.
+          unless node.receiver.nil?
+            add_call_range(node)
+            return
+          end
+
+          location = node.location
+          add_lines_range(location.start_line, location.end_line - 1)
+        when SyntaxTree::DefNode
           add_def_range(node)
         when SyntaxTree::StringConcat
           add_string_concat(node)
@@ -192,19 +197,19 @@ module RubyLsp
         @partial_range = nil
       end
 
-      sig { params(node: T.any(SyntaxTree::Call, SyntaxTree::CommandCall)).void }
+      sig { params(node: T.any(SyntaxTree::CallNode, SyntaxTree::CommandCall)).void }
       def add_call_range(node)
         receiver = T.let(node.receiver, SyntaxTree::Node)
         loop do
           case receiver
-          when SyntaxTree::Call
+          when SyntaxTree::CallNode
             visit(receiver.arguments)
             receiver = receiver.receiver
           when SyntaxTree::MethodAddBlock
             visit(receiver.block)
             receiver = receiver.call
 
-            if receiver.is_a?(SyntaxTree::Call) || receiver.is_a?(SyntaxTree::CommandCall)
+            if receiver.is_a?(SyntaxTree::CallNode) || receiver.is_a?(SyntaxTree::CommandCall)
               receiver = receiver.receiver
             end
           else
@@ -212,13 +217,17 @@ module RubyLsp
           end
         end
 
-        add_lines_range(receiver.location.start_line, node.location.end_line - 1)
+        add_lines_range(receiver.location.start_line, node.location.end_line - 1) if receiver
 
         visit(node.arguments)
       end
 
-      sig { params(node: T.any(SyntaxTree::Def, SyntaxTree::Defs)).void }
+      sig { params(node: SyntaxTree::DefNode).void }
       def add_def_range(node)
+        # For an endless method with no arguments, `node.params` returns `nil` for Ruby 3.0, but a `Syntax::Params`
+        # for Ruby 3.1
+        return unless node.params
+
         params_location = node.params.location
 
         if params_location.start_line < params_location.end_line
@@ -228,7 +237,12 @@ module RubyLsp
           add_lines_range(location.start_line, location.end_line - 1)
         end
 
-        visit(node.bodystmt.statements)
+        bodystmt = node.bodystmt
+        if bodystmt.is_a?(SyntaxTree::BodyStmt)
+          visit(bodystmt.statements)
+        else
+          visit(bodystmt)
+        end
       end
 
       sig { params(node: SyntaxTree::Node, statements: SyntaxTree::Statements).void }

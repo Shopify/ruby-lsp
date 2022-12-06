@@ -110,14 +110,18 @@ module RubyLsp
         @encoder.encode(@tokens)
       end
 
-      sig { override.params(node: SyntaxTree::Call).void }
+      sig { override.params(node: SyntaxTree::CallNode).void }
       def visit_call(node)
         return super unless visible?(node, @range)
 
         visit(node.receiver)
 
         message = node.message
-        add_token(message.location, :method) if message != :call
+        if message != :call
+          unless node.message&.value == "lambda"
+            add_token(message.location, :method)
+          end
+        end
 
         visit(node.arguments)
       end
@@ -146,42 +150,15 @@ module RubyLsp
         add_token(node.location, :namespace)
       end
 
-      sig { override.params(node: SyntaxTree::Def).void }
+      sig { override.params(node: SyntaxTree::DefNode).void }
       def visit_def(node)
         return super unless visible?(node, @range)
 
         add_token(node.name.location, :method, [:declaration])
         visit(node.params)
         visit(node.bodystmt)
-      end
-
-      sig { override.params(node: SyntaxTree::DefEndless).void }
-      def visit_def_endless(node)
-        return super unless visible?(node, @range)
-
-        add_token(node.name.location, :method, [:declaration])
-        visit(node.paren)
-        visit(node.operator)
-        visit(node.statement)
-      end
-
-      sig { override.params(node: SyntaxTree::Defs).void }
-      def visit_defs(node)
-        return super unless visible?(node, @range)
-
-        visit(node.target)
-        visit(node.operator)
-        add_token(node.name.location, :method, [:declaration])
-        visit(node.params)
-        visit(node.bodystmt)
-      end
-
-      sig { override.params(node: SyntaxTree::FCall).void }
-      def visit_fcall(node)
-        return super unless visible?(node, @range)
-
-        add_token(node.value.location, :method) unless special_method?(node.value.value)
-        visit(node.arguments)
+        visit(node.target) if node.target
+        visit(node.operator) if node.operator
       end
 
       sig { override.params(node: SyntaxTree::Kw).void }

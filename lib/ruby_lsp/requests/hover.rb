@@ -32,16 +32,19 @@ module RubyLsp
         return unless @document.parsed?
 
         target, _ = locate_node_and_parent(
-          T.must(@document.tree), [SyntaxTree::Command, SyntaxTree::FCall, SyntaxTree::ConstPathRef], @position
+          T.must(@document.tree), [SyntaxTree::Command, SyntaxTree::CallNode, SyntaxTree::ConstPathRef], @position
         )
 
         case target
         when SyntaxTree::Command
           message = target.message
           generate_rails_document_link_hover(message.value, message)
-        when SyntaxTree::FCall
-          message = target.value
-          generate_rails_document_link_hover(message.value, message)
+        when SyntaxTree::CallNode
+          if target.message == :call
+            generate_rails_document_link_hover(target.message.to_s, target)
+          else
+            generate_rails_document_link_hover(target.message.value, target.message)
+          end
         when SyntaxTree::ConstPathRef
           constant_name = full_constant_name(target)
           generate_rails_document_link_hover(constant_name, target)

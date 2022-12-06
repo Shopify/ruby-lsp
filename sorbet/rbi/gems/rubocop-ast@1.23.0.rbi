@@ -2052,7 +2052,7 @@ module RuboCop::AST::MethodDispatchNode
   # @example
   #
   #   foo + bar
-  # @return [Bookean] whether this method is a binary operation
+  # @return [Boolean] whether this method is a binary operation
   #
   # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#237
   def binary_operation?; end
@@ -2748,6 +2748,12 @@ class RuboCop::AST::Node < ::Parser::AST::Node
 
   # source://rubocop-ast//lib/rubocop/ast/node.rb#106
   def forwarded_args_type?; end
+
+  # source://rubocop-ast//lib/rubocop/ast/node.rb#106
+  def forwarded_kwrestarg_type?; end
+
+  # source://rubocop-ast//lib/rubocop/ast/node.rb#106
+  def forwarded_restarg_type?; end
 
   # source://rubocop-ast//lib/rubocop/ast/node.rb#499
   def global_const?(param0 = T.unsafe(nil), param1); end
@@ -4943,6 +4949,9 @@ RuboCop::AST::NodePattern::Parser::Lexer = RuboCop::AST::NodePattern::Lexer
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/parser.racc.rb#227
 RuboCop::AST::NodePattern::Parser::Racc_arg = T.let(T.unsafe(nil), Array)
 
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/parser.racc.rb#293
+RuboCop::AST::NodePattern::Parser::Racc_debug_parser = T.let(T.unsafe(nil), FalseClass)
+
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/parser.racc.rb#243
 RuboCop::AST::NodePattern::Parser::Racc_token_to_s_table = T.let(T.unsafe(nil), Array)
 
@@ -5105,9 +5114,6 @@ RuboCop::AST::NodePattern::Sets::SET_EACH_WITH_INDEX_WITH_INDEX = T.let(T.unsafe
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET_EACH_WITH_OBJECT_WITH_OBJECT = T.let(T.unsafe(nil), Set)
-
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
-RuboCop::AST::NodePattern::Sets::SET_ENUMERATOR_RATIONAL_COMPLEX_THREAD = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET_ESCAPE_ENCODE_UNESCAPE_DECODE = T.let(T.unsafe(nil), Set)
@@ -6132,6 +6138,11 @@ class RuboCop::AST::StrNode < ::RuboCop::AST::Node
   # @return [Boolean]
   #
   # source://rubocop-ast//lib/rubocop/ast/node/str_node.rb#11
+  def character_literal?; end
+
+  # @return [Boolean]
+  #
+  # source://rubocop-ast//lib/rubocop/ast/node/str_node.rb#15
   def heredoc?; end
 end
 
@@ -6244,6 +6255,11 @@ class RuboCop::AST::Token
   # source://rubocop-ast//lib/rubocop/ast/token.rb#22
   def line; end
 
+  # @return [Boolean]
+  #
+  # source://rubocop-ast//lib/rubocop/ast/token.rb#123
+  def new_line?; end
+
   # Returns the value of attribute pos.
   #
   # source://rubocop-ast//lib/rubocop/ast/token.rb#7
@@ -6320,9 +6336,6 @@ end
 # source://rubocop-ast//lib/rubocop/ast/traversal.rb#9
 module RuboCop::AST::Traversal
   extend ::RuboCop::AST::Traversal::CallbackCompiler
-
-  # source://rubocop-ast//lib/rubocop/ast/traversal.rb#172
-  def on_(node); end
 
   # source://rubocop-ast//lib/rubocop/ast/traversal.rb#122
   def on___ENCODING__(node); end
@@ -6458,6 +6471,12 @@ module RuboCop::AST::Traversal
 
   # source://rubocop-ast//lib/rubocop/ast/traversal.rb#122
   def on_forwarded_args(node); end
+
+  # source://rubocop-ast//lib/rubocop/ast/traversal.rb#172
+  def on_forwarded_kwrestarg(node); end
+
+  # source://rubocop-ast//lib/rubocop/ast/traversal.rb#172
+  def on_forwarded_restarg(node); end
 
   # source://rubocop-ast//lib/rubocop/ast/traversal.rb#126
   def on_gvar(node); end
@@ -6884,11 +6903,11 @@ class RuboCop::AST::YieldNode < ::RuboCop::AST::Node
   def node_parts; end
 end
 
-# source://rubocop/1.35.0/lib/rubocop/ast_aliases.rb#5
+# source://rubocop/1.39.0/lib/rubocop/ast_aliases.rb#5
 RuboCop::NodePattern = RuboCop::AST::NodePattern
 
-# source://rubocop/1.35.0/lib/rubocop/ast_aliases.rb#6
+# source://rubocop/1.39.0/lib/rubocop/ast_aliases.rb#6
 RuboCop::ProcessedSource = RuboCop::AST::ProcessedSource
 
-# source://rubocop/1.35.0/lib/rubocop/ast_aliases.rb#7
+# source://rubocop/1.39.0/lib/rubocop/ast_aliases.rb#7
 RuboCop::Token = RuboCop::AST::Token

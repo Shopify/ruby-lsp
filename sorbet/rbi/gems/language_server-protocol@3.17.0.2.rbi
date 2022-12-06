@@ -2930,12 +2930,12 @@ class LanguageServer::Protocol::Interface::CompletionOptions
   #
   # @return [string[]]
   #
-  # source://language_server-protocol//lib/language_server/protocol/interface/completion_options.rb#52
+  # source://language_server-protocol//lib/language_server/protocol/interface/completion_options.rb#53
   def all_commit_characters; end
 
   # Returns the value of attribute attributes.
   #
-  # source://language_server-protocol//lib/language_server/protocol/interface/completion_options.rb#74
+  # source://language_server-protocol//lib/language_server/protocol/interface/completion_options.rb#75
   def attributes; end
 
   # The server supports the following `CompletionItem` specific
@@ -2943,7 +2943,7 @@ class LanguageServer::Protocol::Interface::CompletionOptions
   #
   # @return [{ labelDetailsSupport?: boolean; }]
   #
-  # source://language_server-protocol//lib/language_server/protocol/interface/completion_options.rb#70
+  # source://language_server-protocol//lib/language_server/protocol/interface/completion_options.rb#71
   def completion_item; end
 
   # The server provides support to resolve additional
@@ -2951,29 +2951,30 @@ class LanguageServer::Protocol::Interface::CompletionOptions
   #
   # @return [boolean]
   #
-  # source://language_server-protocol//lib/language_server/protocol/interface/completion_options.rb#61
+  # source://language_server-protocol//lib/language_server/protocol/interface/completion_options.rb#62
   def resolve_provider; end
 
-  # source://language_server-protocol//lib/language_server/protocol/interface/completion_options.rb#76
+  # source://language_server-protocol//lib/language_server/protocol/interface/completion_options.rb#77
   def to_hash; end
 
-  # source://language_server-protocol//lib/language_server/protocol/interface/completion_options.rb#80
+  # source://language_server-protocol//lib/language_server/protocol/interface/completion_options.rb#81
   def to_json(*args); end
 
-  # Most tools trigger completion request automatically without explicitly
+  # The additional characters, beyond the defaults provided by the client (typically
+  # [a-zA-Z]), that should automatically trigger a completion request. For example
+  # `.` in JavaScript represents the beginning of an object property or method and is
+  # thus a good candidate for triggering a completion request.
+  #
+  # Most tools trigger a completion request automatically without explicitly
   # requesting it using a keyboard shortcut (e.g. Ctrl+Space). Typically they
   # do so when the user starts to type an identifier. For example if the user
   # types `c` in a JavaScript file code complete will automatically pop up
   # present `console` besides others as a completion item. Characters that
   # make up identifiers don't need to be listed here.
   #
-  # If code complete should automatically be trigger on characters not being
-  # valid inside an identifier (for example `.` in JavaScript) list them in
-  # `triggerCharacters`.
-  #
   # @return [string[]]
   #
-  # source://language_server-protocol//lib/language_server/protocol/interface/completion_options.rb#38
+  # source://language_server-protocol//lib/language_server/protocol/interface/completion_options.rb#39
   def trigger_characters; end
 
   # @return [boolean]
@@ -3056,12 +3057,12 @@ class LanguageServer::Protocol::Interface::CompletionRegistrationOptions
   #
   # @return [string[]]
   #
-  # source://language_server-protocol//lib/language_server/protocol/interface/completion_registration_options.rb#59
+  # source://language_server-protocol//lib/language_server/protocol/interface/completion_registration_options.rb#60
   def all_commit_characters; end
 
   # Returns the value of attribute attributes.
   #
-  # source://language_server-protocol//lib/language_server/protocol/interface/completion_registration_options.rb#81
+  # source://language_server-protocol//lib/language_server/protocol/interface/completion_registration_options.rb#82
   def attributes; end
 
   # The server supports the following `CompletionItem` specific
@@ -3069,7 +3070,7 @@ class LanguageServer::Protocol::Interface::CompletionRegistrationOptions
   #
   # @return [{ labelDetailsSupport?: boolean; }]
   #
-  # source://language_server-protocol//lib/language_server/protocol/interface/completion_registration_options.rb#77
+  # source://language_server-protocol//lib/language_server/protocol/interface/completion_registration_options.rb#78
   def completion_item; end
 
   # A document selector to identify the scope of the registration. If set to
@@ -3085,29 +3086,30 @@ class LanguageServer::Protocol::Interface::CompletionRegistrationOptions
   #
   # @return [boolean]
   #
-  # source://language_server-protocol//lib/language_server/protocol/interface/completion_registration_options.rb#68
+  # source://language_server-protocol//lib/language_server/protocol/interface/completion_registration_options.rb#69
   def resolve_provider; end
 
-  # source://language_server-protocol//lib/language_server/protocol/interface/completion_registration_options.rb#83
+  # source://language_server-protocol//lib/language_server/protocol/interface/completion_registration_options.rb#84
   def to_hash; end
 
-  # source://language_server-protocol//lib/language_server/protocol/interface/completion_registration_options.rb#87
+  # source://language_server-protocol//lib/language_server/protocol/interface/completion_registration_options.rb#88
   def to_json(*args); end
 
-  # Most tools trigger completion request automatically without explicitly
+  # The additional characters, beyond the defaults provided by the client (typically
+  # [a-zA-Z]), that should automatically trigger a completion request. For example
+  # `.` in JavaScript represents the beginning of an object property or method and is
+  # thus a good candidate for triggering a completion request.
+  #
+  # Most tools trigger a completion request automatically without explicitly
   # requesting it using a keyboard shortcut (e.g. Ctrl+Space). Typically they
   # do so when the user starts to type an identifier. For example if the user
   # types `c` in a JavaScript file code complete will automatically pop up
   # present `console` besides others as a completion item. Characters that
   # make up identifiers don't need to be listed here.
   #
-  # If code complete should automatically be trigger on characters not being
-  # valid inside an identifier (for example `.` in JavaScript) list them in
-  # `triggerCharacters`.
-  #
   # @return [string[]]
   #
-  # source://language_server-protocol//lib/language_server/protocol/interface/completion_registration_options.rb#45
+  # source://language_server-protocol//lib/language_server/protocol/interface/completion_registration_options.rb#46
   def trigger_characters; end
 
   # @return [boolean]
