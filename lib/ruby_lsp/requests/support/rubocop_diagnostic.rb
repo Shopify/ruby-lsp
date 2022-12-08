@@ -44,18 +44,21 @@ module RubyLsp
           LanguageServer::Protocol::Interface::CodeAction.new(
             title: "Autocorrect #{@offense.cop_name}",
             kind: LanguageServer::Protocol::Constant::CodeActionKind::QUICK_FIX,
-            edit: LanguageServer::Protocol::Interface::WorkspaceEdit.new(
-              document_changes: [
-                LanguageServer::Protocol::Interface::TextDocumentEdit.new(
-                  text_document: LanguageServer::Protocol::Interface::OptionalVersionedTextDocumentIdentifier.new(
-                    uri: @uri,
-                    version: nil,
-                  ),
-                  edits: @replacements,
-                ),
-              ],
-            ),
             is_preferred: true,
+            data: {
+              uri: @uri,
+              edit: LanguageServer::Protocol::Interface::WorkspaceEdit.new(
+                document_changes: [
+                  LanguageServer::Protocol::Interface::TextDocumentEdit.new(
+                    text_document: LanguageServer::Protocol::Interface::OptionalVersionedTextDocumentIdentifier.new(
+                      uri: @uri,
+                      version: nil,
+                    ),
+                    edits: @replacements,
+                  ),
+                ],
+              ),
+            },
           )
         end
 
