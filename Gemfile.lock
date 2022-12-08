@@ -48,6 +48,7 @@ GEM
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     method_source (1.0.0)
+    mini_portile2 (2.8.0)
     minitest (5.16.3)
     minitest-reporters (1.5.0)
       ansi
@@ -55,9 +56,8 @@ GEM
       minitest (>= 5.0)
       ruby-progressbar
     netrc (0.11.0)
-    nokogiri (1.13.10-arm64-darwin)
-      racc (~> 1.4)
-    nokogiri (1.13.10-x86_64-linux)
+    nokogiri (1.13.10)
+      mini_portile2 (~> 2.8.0)
       racc (~> 1.4)
     parallel (1.22.1)
     parser (3.1.3.0)
@@ -115,6 +115,7 @@ GEM
       sorbet-static (= 0.5.10572)
     sorbet-runtime (0.5.10572)
     sorbet-static (0.5.10572-universal-darwin-21)
+    sorbet-static (0.5.10572-universal-darwin-22)
     sorbet-static (0.5.10572-x86_64-linux)
     sorbet-static-and-runtime (0.5.10572)
       sorbet (= 0.5.10572)
@@ -151,6 +152,7 @@ GEM
 
 PLATFORMS
   arm64-darwin-21
+  arm64-darwin-22
   x86_64-linux
 
 DEPENDENCIES

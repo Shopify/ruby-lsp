@@ -50,9 +50,8 @@ module RubyLsp
               spec = stub.to_spec
               lookup[spec.name] = {}
               lookup[spec.name][spec.version.to_s] = {}
-              prefix_matchers = [//]
-              prefix_matchers.concat(spec.require_paths.map { |rp| Regexp.new("^#{rp}/") })
-              prefix_matcher = Regexp.union(prefix_matchers)
+              prefix_matchers = Regexp.union(spec.require_paths.map { |rp| Regexp.new("^#{rp}/") })
+              prefix_matcher = Regexp.union(prefix_matchers, //)
 
               spec.files.each do |file|
                 path = file.sub(prefix_matcher, "")
