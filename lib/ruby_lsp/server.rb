@@ -40,10 +40,8 @@ module RubyLsp
             token_types: Requests::SemanticHighlighting::TOKEN_TYPES.keys,
             token_modifiers: Requests::SemanticHighlighting::TOKEN_MODIFIERS.keys,
           ),
-          range: false,
-          full: {
-            delta: true,
-          },
+          range: true,
+          full: { delta: false },
         )
       end
 
@@ -168,6 +166,19 @@ module RubyLsp
           LanguageServer::Protocol::Interface::SemanticTokens,
         )
       end
+    end
+
+    on("textDocument/semanticTokens/range", parallel: true) do |request|
+      document = store.get(request.dig(:params, :textDocument, :uri))
+      range = request.dig(:params, :range)
+      start_line = range.dig(:start, :line)
+      end_line = range.dig(:end, :line)
+
+      Requests::SemanticHighlighting.new(
+        document,
+        range: start_line..end_line,
+        encoder: Requests::Support::SemanticTokenEncoder.new,
+      ).run
     end
 
     on("textDocument/formatting", parallel: true) do |request|

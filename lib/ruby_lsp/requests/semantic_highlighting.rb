@@ -76,13 +76,20 @@ module RubyLsp
         const :modifier, T::Array[Integer]
       end
 
-      sig { params(document: Document, encoder: T.nilable(Support::SemanticTokenEncoder)).void }
-      def initialize(document, encoder: nil)
+      sig do
+        params(
+          document: Document,
+          range: T.nilable(T::Range[Integer]),
+          encoder: T.nilable(Support::SemanticTokenEncoder),
+        ).void
+      end
+      def initialize(document, range: nil, encoder: nil)
         super(document)
 
         @encoder = encoder
         @tokens = T.let([], T::Array[SemanticToken])
         @tree = T.let(T.must(document.tree), SyntaxTree::Node)
+        @range = range
         @special_methods = T.let(nil, T.nilable(T::Array[String]))
       end
 
@@ -105,6 +112,8 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::Call).void }
       def visit_call(node)
+        return super unless visible?(node, @range)
+
         visit(node.receiver)
 
         message = node.message
@@ -115,12 +124,16 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::Command).void }
       def visit_command(node)
+        return super unless visible?(node, @range)
+
         add_token(node.message.location, :method) unless special_method?(node.message.value)
         visit(node.arguments)
       end
 
       sig { override.params(node: SyntaxTree::CommandCall).void }
       def visit_command_call(node)
+        return super unless visible?(node, @range)
+
         visit(node.receiver)
         add_token(node.message.location, :method)
         visit(node.arguments)
@@ -128,11 +141,15 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::Const).void }
       def visit_const(node)
+        return super unless visible?(node, @range)
+
         add_token(node.location, :namespace)
       end
 
       sig { override.params(node: SyntaxTree::Def).void }
       def visit_def(node)
+        return super unless visible?(node, @range)
+
         add_token(node.name.location, :method, [:declaration])
         visit(node.params)
         visit(node.bodystmt)
@@ -140,6 +157,8 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::DefEndless).void }
       def visit_def_endless(node)
+        return super unless visible?(node, @range)
+
         add_token(node.name.location, :method, [:declaration])
         visit(node.paren)
         visit(node.operator)
@@ -148,6 +167,8 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::Defs).void }
       def visit_defs(node)
+        return super unless visible?(node, @range)
+
         visit(node.target)
         visit(node.operator)
         add_token(node.name.location, :method, [:declaration])
@@ -157,12 +178,16 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::FCall).void }
       def visit_fcall(node)
+        return super unless visible?(node, @range)
+
         add_token(node.value.location, :method) unless special_method?(node.value.value)
         visit(node.arguments)
       end
 
       sig { override.params(node: SyntaxTree::Kw).void }
       def visit_kw(node)
+        return super unless visible?(node, @range)
+
         case node.value
         when "self"
           add_token(node.location, :variable, [:default_library])
@@ -171,6 +196,8 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::Params).void }
       def visit_params(node)
+        return super unless visible?(node, @range)
+
         node.keywords.each do |keyword,|
           location = keyword.location
           add_token(location_without_colon(location), :parameter)
@@ -191,6 +218,8 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::Field).void }
       def visit_field(node)
+        return super unless visible?(node, @range)
+
         add_token(node.name.location, :method)
 
         super
@@ -198,6 +227,8 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::VarField).void }
       def visit_var_field(node)
+        return super unless visible?(node, @range)
+
         value = node.value
 
         case value
@@ -211,6 +242,8 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::VarRef).void }
       def visit_var_ref(node)
+        return super unless visible?(node, @range)
+
         value = node.value
 
         case value
@@ -224,11 +257,15 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::VCall).void }
       def visit_vcall(node)
+        return super unless visible?(node, @range)
+
         add_token(node.value.location, :method) unless special_method?(node.value.value)
       end
 
       sig { override.params(node: SyntaxTree::ClassDeclaration).void }
       def visit_class(node)
+        return super unless visible?(node, @range)
+
         add_token(node.constant.location, :class, [:declaration])
         add_token(node.superclass.location, :class) if node.superclass
         visit(node.bodystmt)
@@ -236,6 +273,8 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::ModuleDeclaration).void }
       def visit_module(node)
+        return super unless visible?(node, @range)
+
         add_token(node.constant.location, :class, [:declaration])
         visit(node.bodystmt)
       end

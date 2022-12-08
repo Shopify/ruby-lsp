@@ -117,8 +117,7 @@ class ExpectationsTestRunner < Minitest::Test
   end
 
   def initialize_params(expected)
-    parsed_expected = JSON.parse(expected)
-    @__params = parsed_expected["params"] || []
-    @__params.each { |param| param.transform_keys!(&:to_sym) if param.is_a?(Hash) }
+    parsed_expected = JSON.parse(expected, symbolize_names: true)
+    @__params = parsed_expected[:params] || []
   end
 end

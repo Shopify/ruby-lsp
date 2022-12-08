@@ -40,7 +40,7 @@ module RubyLsp
         return unless node.exception.nil?
 
         loc = node.location
-        return unless @range.cover?(loc.start_line - 1) && @range.cover?(loc.end_line - 1)
+        return unless visible?(node, @range)
 
         @hints << LanguageServer::Protocol::Interface::InlayHint.new(
           position: { line: loc.start_line - 1, character: loc.start_column + RESCUE_STRING_LENGTH },
