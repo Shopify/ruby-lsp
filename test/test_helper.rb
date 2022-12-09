@@ -12,7 +12,12 @@ require "debug"
 sorbet_paths = Gem.loaded_specs["sorbet-runtime"].full_require_paths.freeze
 DEBUGGER__::CONFIG[:skip_path] = Array(DEBUGGER__::CONFIG[:skip_path]) + sorbet_paths
 
-Minitest::Reporters.use!(Minitest::Reporters::DefaultReporter.new(color: true))
+minitest_reporter = if ENV["SPEC_REPORTER"]
+  Minitest::Reporters::SpecReporter.new(color: true)
+else
+  Minitest::Reporters::DefaultReporter.new(color: true)
+end
+Minitest::Reporters.use!(minitest_reporter)
 
 module Minitest
   class Test

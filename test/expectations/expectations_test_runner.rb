@@ -43,13 +43,13 @@ class ExpectationsTestRunner < Minitest::Test
         required_ruby_version = ruby_requirement_magic_comment_version(path)
         if required_ruby_version && RUBY_VERSION < required_ruby_version
           class_eval(<<~RB, __FILE__, __LINE__ + 1)
-            def test_#{expectation_suffix}_#{test_name}
+            def test_#{expectation_suffix}__#{test_name}
               skip "Fixture requires Ruby v#{required_ruby_version} while currently running v#{RUBY_VERSION}"
             end
           RB
         elsif File.file?(expectation_path)
           class_eval(<<~RB, __FILE__, __LINE__ + 1)
-            def test_#{expectation_suffix}_#{test_name}
+            def test_#{expectation_suffix}__#{test_name}
               @_path = "#{path}"
               source = File.read(@_path)
               expected = File.read("#{expectation_path}")
@@ -59,7 +59,7 @@ class ExpectationsTestRunner < Minitest::Test
           RB
         else
           class_eval(<<~RB, __FILE__, __LINE__ + 1)
-            def test_#{expectation_suffix}_#{test_name}_does_not_raise
+            def test_#{expectation_suffix}__#{test_name}__does_not_raise
               @_path = "#{path}"
               source = File.read(@_path)
               run_expectations(source)
