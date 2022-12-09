@@ -1,6 +1,3 @@
-import { exec } from "child_process";
-import { promisify } from "util";
-
 import * as vscode from "vscode";
 import {
   LanguageClientOptions,
@@ -12,8 +9,8 @@ import {
 
 import { Telemetry } from "./telemetry";
 import { Ruby } from "./ruby";
+import { StatusItem, ServerCommand } from "./status";
 
-const asyncExec = promisify(exec);
 const LSP_NAME = "Ruby LSP";
 
 interface EnabledFeatures {
@@ -28,6 +25,7 @@ export default class Client {
   private clientOptions: LanguageClientOptions;
   private telemetry: Telemetry;
   private ruby: Ruby;
+  private statusItem: StatusItem;
 
   constructor(
     context: vscode.ExtensionContext,
@@ -122,11 +120,21 @@ export default class Client {
     };
 
     this.context = context;
+    this.statusItem = new StatusItem(this.context, this.ruby);
     this.registerCommands();
     this.registerAutoRestarts();
   }
 
   async start() {
+    if (
+      (await this.statusItem.installGems()) ||
+      (await this.statusItem.addMissingGem())
+    ) {
+      return;
+    }
+
+    await this.statusItem.updateStatus(ServerCommand.Start);
+
     this.client = new LanguageClient(
       LSP_NAME,
       this.serverOptions,
@@ -143,6 +151,7 @@ export default class Client {
 
   async stop(): Promise<void> {
     if (this.client) {
+      await this.statusItem.updateStatus(ServerCommand.Stop);
       return this.client.stop();
     }
   }
@@ -158,94 +167,6 @@ export default class Client {
       vscode.commands.registerCommand("ruby-lsp.restart", () => this.restart()),
       vscode.commands.registerCommand("ruby-lsp.stop", () => this.stop())
     );
-  }
-
-  private async gemMissing(): Promise<boolean> {
-    const bundledGems = await this.execInPath("bundle list");
-    const hasRubocopLsp = bundledGems.includes("rubocop-lsp");
-    const hasRubyLsp = bundledGems.includes("ruby-lsp");
-
-    if (hasRubocopLsp) {
-      await vscode.window.showErrorMessage(
-        "The rubocop-lsp gem has been replaced by the ruby-lsp.",
-        {
-          modal: true,
-          detail: "Please remove the rubocop-lsp from the Gemfile",
-        }
-      );
-    }
-
-    if (hasRubyLsp) {
-      return false;
-    }
-
-    if (this.context.workspaceState.get("ruby-lsp.cancelledBundleAdd")) {
-      return true;
-    }
-
-    const response = await vscode.window.showErrorMessage(
-      "The Ruby LSP gem is not a part of the bundle.",
-      "Run bundle add and install",
-      "Cancel"
-    );
-
-    if (response === "Run bundle add and install") {
-      await this.execInPath("bundle add ruby-lsp --group=development");
-      await this.execInPath("bundle install");
-      return false;
-    }
-
-    this.context.workspaceState.update("ruby-lsp.cancelledBundleAdd", true);
-    return true;
-  }
-
-  private async gemNotInstalled(): Promise<boolean> {
-    let bundlerCheck: string;
-
-    try {
-      bundlerCheck = await this.execInPath("bundle check");
-    } catch {
-      bundlerCheck = "";
-    }
-
-    if (bundlerCheck.includes("The Gemfile's dependencies are satisfied")) {
-      return false;
-    }
-
-    const response = await vscode.window.showErrorMessage(
-      "The gems in the bundle are not installed.",
-      "Run bundle install",
-      "Cancel"
-    );
-
-    if (response === "Run bundle install") {
-      await vscode.window.withProgress(
-        {
-          location: vscode.ProgressLocation.Notification,
-          title: "Installing gems",
-        },
-        async (progress) => {
-          try {
-            await this.execInPath("bundle install");
-          } catch {
-            // The progress dialog can't be closed by the user, so we have to guarantee that we catch errors
-            progress.report({ message: "Failed to install gems" });
-          }
-        }
-      );
-
-      return false;
-    }
-
-    return true;
-  }
-
-  private async execInPath(command: string): Promise<string> {
-    const result = await asyncExec(command, {
-      cwd: this.workingFolder,
-    });
-
-    return result.stdout;
   }
 
   private registerAutoRestarts() {
