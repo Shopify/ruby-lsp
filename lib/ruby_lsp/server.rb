@@ -205,13 +205,12 @@ module RubyLsp
 
     on("textDocument/codeAction", parallel: true) do |request|
       uri = request.dig(:params, :textDocument, :uri)
+      document = store.get(uri)
       range = request.dig(:params, :range)
       start_line = range.dig(:start, :line)
       end_line = range.dig(:end, :line)
 
-      store.cache_fetch(uri, :code_actions) do |document|
-        Requests::CodeActions.new(uri, document, start_line..end_line).run
-      end
+      Requests::CodeActions.new(uri, document, start_line..end_line).run
     end
 
     on("textDocument/inlayHint", parallel: true) do |request|
