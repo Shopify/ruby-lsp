@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "ruby_lsp/requests/support/rubocop_diagnostics_runner"
 
 class CodeActionsTest < Minitest::Test
   def test_diagnostic_calls_are_cached
@@ -23,6 +22,10 @@ class CodeActionsTest < Minitest::Test
       []
     }
 
+    # We need to require this here and not at the top level because we do some unloading in formatting_test. If this is
+    # at the top level, it gets loaded when initializing the test run and may be unloaded before running this, which
+    # results in flaky tests
+    require "ruby_lsp/requests/support/rubocop_diagnostics_runner"
     # If diagnostics is being properly cached, then we should only see the increment_counter block invoked once for the
     # same URI, no matter how many times we invoke it and with which range
     RubyLsp::Requests::Support::RuboCopDiagnosticsRunner.instance.stub(:run, increment_counter) do
