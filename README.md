@@ -28,6 +28,14 @@ are expected to adhere to the
 [Contributor Covenant](https://github.com/Shopify/ruby-lsp/blob/main/CODE_OF_CONDUCT.md)
 code of conduct.
 
+### Running the test suite
+
+Run the test suite with `bin/test`.
+
+For more visibility into which tests are running, use the `SpecReporter`:
+
+`SPEC_REPORTER=1 bin/test`
+
 ### Expectation testing
 
 To simplify the way we run tests over different pieces of Ruby code, we use a custom expectations test framework against a set of Ruby fixtures.
