@@ -3,5 +3,8 @@
   "ruby lsp.trace.server": "messages",
   "[ruby]": {
     "editor.defaultFormatter": "Shopify.ruby-lsp",
-  }
+  },
+  "files.associations": {
+    "*.exp": "json"
+  },
 }
