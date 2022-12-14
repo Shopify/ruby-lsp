@@ -17,6 +17,8 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           # bundler-cache: true
+
+      - name: Install gems
         run: bundle install
 
       - name: Check if documentation is up to date
