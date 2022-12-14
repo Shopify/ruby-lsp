@@ -17,6 +17,7 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           # bundler-cache: true
+        run: bundle install
 
       - name: Check if documentation is up to date
         run: bundle exec rake check_docs
