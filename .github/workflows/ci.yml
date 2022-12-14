@@ -16,10 +16,10 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-          # bundler-cache: true
+          bundler-cache: true
 
-      - name: Install gems
-        run: bundle install
+      # - name: Install gems
+      #   run: bundle install
 
       - name: Check if documentation is up to date
         run: bundle exec rake check_docs
