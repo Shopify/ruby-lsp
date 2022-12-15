@@ -67,8 +67,7 @@ module RubyLsp
           case node
           when SyntaxTree::ConstPathRef, SyntaxTree::ConstPathField, SyntaxTree::TopConstField
             node.constant.value
-          when SyntaxTree::GVar, SyntaxTree::IVar, SyntaxTree::Const, SyntaxTree::CVar, SyntaxTree::Ident,
-               SyntaxTree::ArgsForward
+          when SyntaxTree::GVar, SyntaxTree::IVar, SyntaxTree::Const, SyntaxTree::CVar, SyntaxTree::Ident
             node.value
           when SyntaxTree::Field, SyntaxTree::Def, SyntaxTree::Defs, SyntaxTree::DefEndless, SyntaxTree::RestParam,
                SyntaxTree::KwRestParam, SyntaxTree::BlockArg
