@@ -41,8 +41,8 @@ For more visibility into which tests are running, use the `SpecReporter`:
 To simplify the way we run tests over different pieces of Ruby code, we use a custom expectations test framework against a set of Ruby fixtures.
 
 We define expectations as `.exp` files, of which there are two variants:
-* Ruby, to indicate the resulting code after an operation.
-* JSON, consisting of a `result`, and an optional set of input `params`.
+* `.exp` (Ruby), to indicate the resulting code after an operation.
+* `.exp.json`, consisting of a `result`, and an optional set of input `params`.
 
 To add a new fixture to the expectations test suite:
 
