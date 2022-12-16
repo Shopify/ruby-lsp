@@ -23,9 +23,7 @@
           "character": 2
         }
       },
-      "children": [
-
-      ]
+      "children": []
     },
     {
       "name": "C2",
@@ -50,9 +48,7 @@
           "character": 4
         }
       },
-      "children": [
-
-      ]
+      "children": []
     },
     {
       "name": "C3",
@@ -77,9 +73,7 @@
           "character": 7
         }
       },
-      "children": [
-
-      ]
+      "children": []
     },
     {
       "name": "C4",
@@ -104,9 +98,7 @@
           "character": 9
         }
       },
-      "children": [
-
-      ]
+      "children": []
     }
   ]
 }

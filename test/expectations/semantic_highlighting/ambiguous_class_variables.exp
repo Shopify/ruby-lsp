@@ -1,4 +1,15 @@
 {
-  "params": [{ "start": { "line": 6, "character": 0 }, "end": { "line": 7, "character": 0 } }],
+  "params": [
+    {
+      "start": {
+        "line": 6,
+        "character": 0
+      },
+      "end": {
+        "line": 7,
+        "character": 0
+      }
+    }
+  ],
   "result": []
 }

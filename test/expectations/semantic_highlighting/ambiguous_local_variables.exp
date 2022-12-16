@@ -1,5 +1,16 @@
 {
-  "params": [{ "start": { "line": 2, "character": 0 }, "end": { "line": 3, "character": 0 } }],
+  "params": [
+    {
+      "start": {
+        "line": 2,
+        "character": 0
+      },
+      "end": {
+        "line": 3,
+        "character": 0
+      }
+    }
+  ],
   "result": [
     {
       "delta_line": 3,

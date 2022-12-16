@@ -47,9 +47,7 @@
               "character": 11
             }
           },
-          "children": [
-
-          ]
+          "children": []
         },
         {
           "name": "Baz",
@@ -74,9 +72,7 @@
               "character": 12
             }
           },
-          "children": [
-
-          ]
+          "children": []
         }
       ]
     }
