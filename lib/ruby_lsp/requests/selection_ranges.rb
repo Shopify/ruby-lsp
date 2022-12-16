@@ -11,6 +11,8 @@ module RubyLsp
     #
     # Trigger this request with: Ctrl + Shift + -> or Ctrl + Shift + <-
     #
+    # Note that if using VSCode Neovim, you will need to be in Insert mode for this to work correctly.
+    #
     # # Example
     #
     # ```ruby
