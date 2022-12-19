@@ -87,13 +87,13 @@ module RubyLsp
         when SyntaxTree::CallNode, SyntaxTree::CommandCall
           # If there is a receiver, it may be a chained invocation,
           # so we need to process it in special way.
-          unless node.receiver.nil?
+          if node.receiver.nil?        
+            location = node.location
+            add_lines_range(location.start_line, location.end_line - 1)
+          else
             add_call_range(node)
             return
           end
-
-          location = node.location
-          add_lines_range(location.start_line, location.end_line - 1)
         when SyntaxTree::DefNode
           add_def_range(node)
         when SyntaxTree::StringConcat
