@@ -40,11 +40,9 @@ module RubyLsp
           message = target.message
           generate_rails_document_link_hover(message.value, message)
         when SyntaxTree::CallNode
-          if target.message == :call
-            generate_rails_document_link_hover(target.message.to_s, target)
-          else
-            generate_rails_document_link_hover(target.message.value, target.message)
-          end
+          return if target.message == :call
+
+          generate_rails_document_link_hover(target.message.value, target.message)
         when SyntaxTree::ConstPathRef
           constant_name = full_constant_name(target)
           generate_rails_document_link_hover(constant_name, target)
