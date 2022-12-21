@@ -117,7 +117,7 @@ module RubyLsp
         visit(node.receiver)
 
         message = node.message
-        if message != :call && message&.value != "lambda"
+        unless message == :call || special_method?(message.value)
           add_token(message.location, :method)
         end
 
