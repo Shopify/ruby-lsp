@@ -44,17 +44,17 @@ module RubyLsp
 
       sig { override.returns(T.nilable(T.all(T::Array[Interface::TextEdit], Object))) }
       def run
-        handle_comment_line
-
-        return @edits unless @document.syntax_errors?
-
         case @trigger_character
         when "{"
-          handle_curly_brace
+          handle_curly_brace if @document.syntax_errors?
         when "|"
-          handle_pipe
+          handle_pipe if @document.syntax_errors?
         when "\n"
-          handle_statement_end
+          if (comment_match = @previous_line.match(/^#(\s*)/))
+            handle_comment_line(T.must(comment_match[1]))
+          elsif @document.syntax_errors?
+            handle_statement_end
+          end
         end
 
         @edits
@@ -88,14 +88,8 @@ module RubyLsp
         move_cursor_to(@position[:line], @indentation + 2)
       end
 
-      sig { void }
-      def handle_comment_line
-        return unless @trigger_character == "\n"
-
-        is_comment_match = @previous_line.match(/^#(\s*)/)
-        return unless is_comment_match
-
-        spaces = T.must(is_comment_match[1])
+      sig { params(spaces: String).void }
+      def handle_comment_line(spaces)
         add_edit_with_text("##{spaces}")
         move_cursor_to(@position[:line], @indentation + spaces.size + 1)
       end
