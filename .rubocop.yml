@@ -14,6 +14,7 @@ AllCops:
   - "vendor/**/*"
   - "features/**/*"
   - "test/fixtures/**/*"
+  - "test/expectations/**/*"
 
 Naming/FileName:
   Exclude:
@@ -29,7 +30,6 @@ Sorbet/TrueSigil:
   Exclude:
     - "**/*.rake"
     - "lib/**/*.rb"
-    - "test/expectations/formatting/*.rb"
 
 Sorbet/StrictSigil:
   Enabled: true
