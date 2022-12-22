@@ -1,0 +1,22 @@
+{
+    "params": [
+        {
+            "line": 2,
+            "character": 2
+        }
+    ],
+    "result": [
+        {
+            "range": {
+                "start": {
+                    "line": 2,
+                    "character": 0
+                },
+                "end": {
+                    "line": 2,
+                    "character": 12
+                }
+            }
+        }
+    ]
+}

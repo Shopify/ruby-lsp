@@ -2,7 +2,7 @@
 
 # Ruby LSP
 
-This gem is an implementation of the language server protocol specification for Ruby, used to improve editor features.
+This gem is an implementation of the [language server protocol specification](https://microsoft.github.io/language-server-protocol/) for Ruby, used to improve editor features.
 
 ## Usage
 

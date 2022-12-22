@@ -92,7 +92,7 @@ module RubyLsp
       sig { override.params(node: SyntaxTree::ClassDeclaration).void }
       def visit_class(node)
         symbol = create_document_symbol(
-          name: fully_qualified_name(node),
+          name: full_constant_name(node.constant),
           kind: :class,
           range_node: node,
           selection_range_node: node.constant,
@@ -129,43 +129,19 @@ module RubyLsp
         )
       end
 
-      sig { override.params(node: SyntaxTree::Def).void }
+      sig { override.params(node: SyntaxTree::DefNode).void }
       def visit_def(node)
-        name = node.name.value
+        if node.target&.value&.value == "self"
+          name = "self.#{node.name.value}"
+          kind = :method
+        else
+          name = node.name.value
+          kind = name == "initialize" ? :constructor : :method
+        end
 
         symbol = create_document_symbol(
           name: name,
-          kind: name == "initialize" ? :constructor : :method,
-          range_node: node,
-          selection_range_node: node.name,
-        )
-
-        @stack << symbol
-        visit(node.bodystmt)
-        @stack.pop
-      end
-
-      sig { override.params(node: SyntaxTree::DefEndless).void }
-      def visit_def_endless(node)
-        name = node.name.value
-
-        symbol = create_document_symbol(
-          name: name,
-          kind: name == "initialize" ? :constructor : :method,
-          range_node: node,
-          selection_range_node: node.name,
-        )
-
-        @stack << symbol
-        visit(node.statement)
-        @stack.pop
-      end
-
-      sig { override.params(node: SyntaxTree::Defs).void }
-      def visit_defs(node)
-        symbol = create_document_symbol(
-          name: "self.#{node.name.value}",
-          kind: :method,
+          kind: kind,
           range_node: node,
           selection_range_node: node.name,
         )
@@ -178,7 +154,7 @@ module RubyLsp
       sig { override.params(node: SyntaxTree::ModuleDeclaration).void }
       def visit_module(node)
         symbol = create_document_symbol(
-          name: fully_qualified_name(node),
+          name: full_constant_name(node.constant),
           kind: :module,
           range_node: node,
           selection_range_node: node.constant,
@@ -240,25 +216,6 @@ module RubyLsp
         T.must(@stack.last).children << symbol
 
         symbol
-      end
-
-      sig { params(node: T.any(SyntaxTree::ClassDeclaration, SyntaxTree::ModuleDeclaration)).returns(String) }
-      def fully_qualified_name(node)
-        constant = T.let(node.constant, SyntaxTree::Node)
-        name = +node.constant.constant.value
-
-        while constant.is_a?(SyntaxTree::ConstPathRef)
-          constant = constant.parent
-
-          case constant
-          when SyntaxTree::ConstPathRef
-            name.prepend("#{constant.constant.value}::")
-          when SyntaxTree::VarRef
-            name.prepend("#{constant.value.value}::")
-          end
-        end
-
-        name
       end
     end
   end

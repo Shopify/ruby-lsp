@@ -7,7 +7,7 @@ module RubyLsp
     #
     # The [document highlight](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentHighlight)
     # informs the editor all relevant elements of the currently pointed item for highlighting. For example, when
-    # the cursor is on the `F` of the constant `FOO`, the editor should identify other occurences of `FOO`
+    # the cursor is on the `F` of the constant `FOO`, the editor should identify other occurrences of `FOO`
     # and highlight them.
     #
     # For writable elements like constants or variables, their read/write occurrences should be highlighted differently.

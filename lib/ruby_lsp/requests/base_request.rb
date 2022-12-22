@@ -35,7 +35,9 @@ module RubyLsp
         )
       end
 
-      sig { params(node: SyntaxTree::ConstPathRef).returns(String) }
+      sig do
+        params(node: T.any(SyntaxTree::ConstPathRef, SyntaxTree::ConstRef, SyntaxTree::TopConstRef)).returns(String)
+      end
       def full_constant_name(node)
         name = +node.constant.value
         constant = T.let(node, SyntaxTree::Node)

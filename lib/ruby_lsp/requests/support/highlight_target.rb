@@ -34,12 +34,12 @@ module RubyLsp
         def matched_highlight(other)
           case @node
           # Method definitions and invocations
-          when SyntaxTree::VCall, SyntaxTree::FCall, SyntaxTree::Call, SyntaxTree::Command,
-               SyntaxTree::CommandCall, SyntaxTree::Def, SyntaxTree::Defs, SyntaxTree::DefEndless
+          when SyntaxTree::VCall, SyntaxTree::CallNode, SyntaxTree::Command,
+               SyntaxTree::CommandCall, SyntaxTree::DefNode
             case other
-            when SyntaxTree::VCall, SyntaxTree::FCall, SyntaxTree::Call, SyntaxTree::Command, SyntaxTree::CommandCall
+            when SyntaxTree::VCall, SyntaxTree::CallNode, SyntaxTree::Command, SyntaxTree::CommandCall
               HighlightMatch.new(type: READ, node: other)
-            when SyntaxTree::Def, SyntaxTree::Defs, SyntaxTree::Defs
+            when SyntaxTree::DefNode
               HighlightMatch.new(type: WRITE, node: other.name)
             end
           # Variables, parameters and constants
@@ -69,12 +69,12 @@ module RubyLsp
             node.constant.value
           when SyntaxTree::GVar, SyntaxTree::IVar, SyntaxTree::Const, SyntaxTree::CVar, SyntaxTree::Ident
             node.value
-          when SyntaxTree::Field, SyntaxTree::Def, SyntaxTree::Defs, SyntaxTree::DefEndless, SyntaxTree::RestParam,
+          when SyntaxTree::Field, SyntaxTree::DefNode, SyntaxTree::RestParam,
                SyntaxTree::KwRestParam, SyntaxTree::BlockArg
             node.name&.value
-          when SyntaxTree::VarField, SyntaxTree::VarRef, SyntaxTree::VCall, SyntaxTree::FCall
+          when SyntaxTree::VarField, SyntaxTree::VarRef, SyntaxTree::VCall
             node.value&.value
-          when SyntaxTree::Call, SyntaxTree::Command, SyntaxTree::CommandCall
+          when SyntaxTree::CallNode, SyntaxTree::Command, SyntaxTree::CommandCall
             message = node.message
             message != :call ? message.value : nil
           when SyntaxTree::ClassDeclaration, SyntaxTree::ModuleDeclaration
