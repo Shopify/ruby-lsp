@@ -29,6 +29,7 @@ Sorbet/TrueSigil:
   Exclude:
     - "**/*.rake"
     - "lib/**/*.rb"
+    - "test/expectations/formatting/*.rb"
 
 Sorbet/StrictSigil:
   Enabled: true
