@@ -38,7 +38,7 @@ class ExpectationsTestRunner < Minitest::Test
           raise "Expectations directory #{expectations_dir} does not exist"
         end
 
-        expectation_glob = Dir.glob(File.join(expectations_dir, "#{test_name}.exp{,.json}"))
+        expectation_glob = Dir.glob(File.join(expectations_dir, "#{test_name}.exp.{rb,json}"))
         if expectation_glob.size == 1
           expectation_path = expectation_glob.first
         elsif expectation_glob.size > 1
