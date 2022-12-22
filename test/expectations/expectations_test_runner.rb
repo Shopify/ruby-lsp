@@ -38,7 +38,12 @@ class ExpectationsTestRunner < Minitest::Test
           raise "Expectations directory #{expectations_dir} does not exist"
         end
 
-        expectation_path = File.join(expectations_dir, "#{test_name}.exp")
+        expectation_glob = Dir.glob(File.join(expectations_dir, "#{test_name}.exp.{rb,json}"))
+        if expectation_glob.size == 1
+          expectation_path = expectation_glob.first
+        elsif expectation_glob.size > 1
+          raise "multiple expectations for #{test_name}"
+        end
 
         required_ruby_version = ruby_requirement_magic_comment_version(path)
         if required_ruby_version && RUBY_VERSION < required_ruby_version
@@ -47,7 +52,7 @@ class ExpectationsTestRunner < Minitest::Test
               skip "Fixture requires Ruby v#{required_ruby_version} while currently running v#{RUBY_VERSION}"
             end
           RB
-        elsif File.file?(expectation_path)
+        elsif expectation_path && File.file?(expectation_path)
           class_eval(<<~RB, __FILE__, __LINE__ + 1)
             def test_#{expectation_suffix}__#{test_name}
               @_path = "#{path}"

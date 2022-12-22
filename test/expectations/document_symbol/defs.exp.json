@@ -1,7 +1,7 @@
 {
   "result": [
     {
-      "name": "foo",
+      "name": "self.foo",
       "kind": 6,
       "range": {
         "start": {
@@ -16,16 +16,14 @@
       "selectionRange": {
         "start": {
           "line": 0,
-          "character": 4
+          "character": 9
         },
         "end": {
           "line": 0,
-          "character": 7
+          "character": 12
         }
       },
-      "children": [
-
-      ]
+      "children": []
     }
   ]
 }

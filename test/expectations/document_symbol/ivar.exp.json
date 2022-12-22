@@ -23,9 +23,7 @@
           "character": 2
         }
       },
-      "children": [
-
-      ]
+      "children": []
     },
     {
       "name": "@aa",
@@ -50,9 +48,7 @@
           "character": 3
         }
       },
-      "children": [
-
-      ]
+      "children": []
     },
     {
       "name": "Foo",
@@ -101,9 +97,7 @@
               "character": 4
             }
           },
-          "children": [
-
-          ]
+          "children": []
         },
         {
           "name": "@bb",
@@ -128,9 +122,7 @@
               "character": 5
             }
           },
-          "children": [
-
-          ]
+          "children": []
         },
         {
           "name": "initialize",
@@ -179,9 +171,7 @@
                   "character": 6
                 }
               },
-              "children": [
-
-              ]
+              "children": []
             },
             {
               "name": "@cc",
@@ -206,9 +196,7 @@
                   "character": 7
                 }
               },
-              "children": [
-
-              ]
+              "children": []
             }
           ]
         }

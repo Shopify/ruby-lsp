@@ -1,0 +1,23 @@
+{
+  "params": [
+    {
+      "start": {
+        "line": 2,
+        "character": 0
+      },
+      "end": {
+        "line": 3,
+        "character": 0
+      }
+    }
+  ],
+  "result": [
+    {
+      "delta_line": 3,
+      "delta_start_char": 0,
+      "length": 3,
+      "token_type": 8,
+      "token_modifiers": 0
+    }
+  ]
+}
