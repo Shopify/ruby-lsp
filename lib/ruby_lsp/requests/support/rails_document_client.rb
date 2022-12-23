@@ -66,7 +66,7 @@ module RubyLsp
           private def build_search_index
             return unless RAILTIES_VERSION
 
-            $stderr.puts "Fetching Rails Documents..."
+            warn("Fetching Rails Documents...")
             # If the version's doc is not found, e.g. Rails main, it'll be redirected
             # In this case, we just fetch the latest doc
             response = if Gem::Version.new(RAILTIES_VERSION).prerelease?
@@ -78,11 +78,11 @@ module RubyLsp
             if response.code == "200"
               process_search_index(response.body)
             else
-              $stderr.puts("Response failed: #{response.inspect}")
+              warn("Response failed: #{response.inspect}")
               nil
             end
           rescue StandardError => e
-            $stderr.puts("Exception occurred when fetching Rails document index: #{e.inspect}")
+            warn("Exception occurred when fetching Rails document index: #{e.inspect}")
           end
 
           sig { params(js: String).returns(T::Hash[String, T::Array[T::Hash[Symbol, String]]]) }
