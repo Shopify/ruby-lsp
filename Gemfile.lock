@@ -48,7 +48,7 @@ GEM
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     method_source (1.0.0)
-    minitest (5.16.3)
+    minitest (5.17.0)
     minitest-reporters (1.5.0)
       ansi
       builder
@@ -166,7 +166,7 @@ PLATFORMS
 
 DEPENDENCIES
   debug (~> 1.7)
-  minitest (~> 5.16)
+  minitest (~> 5.17)
   minitest-reporters (~> 1.5)
   railties (~> 7.0)
   rake (~> 13.0)

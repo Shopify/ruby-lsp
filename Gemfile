@@ -5,7 +5,7 @@ source "https://rubygems.org"
 gemspec
 
 gem "debug", "~> 1.7", require: false
-gem "minitest", "~> 5.16"
+gem "minitest", "~> 5.17"
 gem "minitest-reporters", "~> 1.5"
 gem "rake", "~> 13.0"
 gem "rubocop", "~> 1.42"
