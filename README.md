@@ -36,7 +36,7 @@ For more visibility into which tests are running, use the `SpecReporter`:
 
 `SPEC_REPORTER=1 bin/test`
 
-By default the tests run with warnings disabled to reduce. To enable warnings, pass `VERBOSE=1`.
+By default the tests run with warnings disabled to reduce noise. To enable warnings, pass `VERBOSE=1`.
 Warnings are always shown when running in CI.
 
 ### Expectation testing
