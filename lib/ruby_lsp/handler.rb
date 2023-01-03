@@ -59,7 +59,7 @@ module RubyLsp
 
     sig { void }
     def start
-      $stderr.puts "Starting Ruby LSP..."
+      warn("Starting Ruby LSP...")
 
       @reader.read do |request|
         handler = @handlers[request[:method]]
@@ -94,7 +94,7 @@ module RubyLsp
 
     sig { void }
     def shutdown
-      $stderr.puts "Shutting down Ruby LSP..."
+      warn("Shutting down Ruby LSP...")
       @queue.shutdown
       store.clear
     end

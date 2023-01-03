@@ -36,6 +36,9 @@ For more visibility into which tests are running, use the `SpecReporter`:
 
 `SPEC_REPORTER=1 bin/test`
 
+By default the tests run with warnings disabled to reduce noise. To enable warnings, pass `VERBOSE=1`.
+Warnings are always shown when running in CI.
+
 ### Expectation testing
 
 To simplify the way we run tests over different pieces of Ruby code, we use a custom expectations test framework against a set of Ruby fixtures.
