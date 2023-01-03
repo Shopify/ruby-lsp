@@ -8,13 +8,16 @@ module URI
   class Source < URI::File
     extend T::Sig
 
-    COMPONENT = T.let([
-      :scheme,
-      :gem_name,
-      :gem_version,
-      :path,
-      :line_number,
-    ].freeze, T::Array[Symbol])
+    COMPONENT = T.let(
+      [
+        :scheme,
+        :gem_name,
+        :gem_version,
+        :path,
+        :line_number,
+      ].freeze,
+      T::Array[Symbol],
+    )
 
     T.unsafe(self).alias_method(:gem_name, :host)
     T.unsafe(self).alias_method(:line_number, :fragment)

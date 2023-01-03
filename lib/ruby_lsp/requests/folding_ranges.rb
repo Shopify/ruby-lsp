@@ -18,32 +18,38 @@ module RubyLsp
     class FoldingRanges < BaseRequest
       extend T::Sig
 
-      SIMPLE_FOLDABLES = T.let([
-        SyntaxTree::ArrayLiteral,
-        SyntaxTree::BlockNode,
-        SyntaxTree::Case,
-        SyntaxTree::ClassDeclaration,
-        SyntaxTree::Command,
-        SyntaxTree::For,
-        SyntaxTree::HashLiteral,
-        SyntaxTree::Heredoc,
-        SyntaxTree::IfNode,
-        SyntaxTree::ModuleDeclaration,
-        SyntaxTree::SClass,
-        SyntaxTree::UnlessNode,
-        SyntaxTree::UntilNode,
-        SyntaxTree::WhileNode,
-        SyntaxTree::Else,
-        SyntaxTree::Ensure,
-        SyntaxTree::Begin,
-      ].freeze, T::Array[T.class_of(SyntaxTree::Node)])
+      SIMPLE_FOLDABLES = T.let(
+        [
+          SyntaxTree::ArrayLiteral,
+          SyntaxTree::BlockNode,
+          SyntaxTree::Case,
+          SyntaxTree::ClassDeclaration,
+          SyntaxTree::Command,
+          SyntaxTree::For,
+          SyntaxTree::HashLiteral,
+          SyntaxTree::Heredoc,
+          SyntaxTree::IfNode,
+          SyntaxTree::ModuleDeclaration,
+          SyntaxTree::SClass,
+          SyntaxTree::UnlessNode,
+          SyntaxTree::UntilNode,
+          SyntaxTree::WhileNode,
+          SyntaxTree::Else,
+          SyntaxTree::Ensure,
+          SyntaxTree::Begin,
+        ].freeze,
+        T::Array[T.class_of(SyntaxTree::Node)],
+      )
 
-      NODES_WITH_STATEMENTS = T.let([
-        SyntaxTree::Elsif,
-        SyntaxTree::In,
-        SyntaxTree::Rescue,
-        SyntaxTree::When,
-      ].freeze, T::Array[T.class_of(SyntaxTree::Node)])
+      NODES_WITH_STATEMENTS = T.let(
+        [
+          SyntaxTree::Elsif,
+          SyntaxTree::In,
+          SyntaxTree::Rescue,
+          SyntaxTree::When,
+        ].freeze,
+        T::Array[T.class_of(SyntaxTree::Node)],
+      )
 
       StatementNode = T.type_alias do
         T.any(

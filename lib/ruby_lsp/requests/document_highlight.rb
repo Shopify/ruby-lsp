@@ -55,13 +55,16 @@ module RubyLsp
 
       private
 
-      DIRECT_HIGHLIGHTS = T.let([
-        SyntaxTree::GVar,
-        SyntaxTree::IVar,
-        SyntaxTree::Const,
-        SyntaxTree::CVar,
-        SyntaxTree::VarField,
-      ], T::Array[T.class_of(SyntaxTree::Node)])
+      DIRECT_HIGHLIGHTS = T.let(
+        [
+          SyntaxTree::GVar,
+          SyntaxTree::IVar,
+          SyntaxTree::Const,
+          SyntaxTree::CVar,
+          SyntaxTree::VarField,
+        ],
+        T::Array[T.class_of(SyntaxTree::Node)],
+      )
 
       sig do
         params(

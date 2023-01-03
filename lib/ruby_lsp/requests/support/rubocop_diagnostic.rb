@@ -7,14 +7,17 @@ module RubyLsp
       class RuboCopDiagnostic
         extend T::Sig
 
-        RUBOCOP_TO_LSP_SEVERITY = T.let({
-          convention: LanguageServer::Protocol::Constant::DiagnosticSeverity::INFORMATION,
-          info: LanguageServer::Protocol::Constant::DiagnosticSeverity::INFORMATION,
-          refactor: LanguageServer::Protocol::Constant::DiagnosticSeverity::INFORMATION,
-          warning: LanguageServer::Protocol::Constant::DiagnosticSeverity::WARNING,
-          error: LanguageServer::Protocol::Constant::DiagnosticSeverity::ERROR,
-          fatal: LanguageServer::Protocol::Constant::DiagnosticSeverity::ERROR,
-        }.freeze, T::Hash[Symbol, Integer])
+        RUBOCOP_TO_LSP_SEVERITY = T.let(
+          {
+            convention: LanguageServer::Protocol::Constant::DiagnosticSeverity::INFORMATION,
+            info: LanguageServer::Protocol::Constant::DiagnosticSeverity::INFORMATION,
+            refactor: LanguageServer::Protocol::Constant::DiagnosticSeverity::INFORMATION,
+            warning: LanguageServer::Protocol::Constant::DiagnosticSeverity::WARNING,
+            error: LanguageServer::Protocol::Constant::DiagnosticSeverity::ERROR,
+            fatal: LanguageServer::Protocol::Constant::DiagnosticSeverity::ERROR,
+          }.freeze,
+          T::Hash[Symbol, Integer],
+        )
 
         sig { returns(T::Array[LanguageServer::Protocol::Interface::TextEdit]) }
         attr_reader :replacements
@@ -94,8 +97,10 @@ module RubyLsp
             LanguageServer::Protocol::Interface::TextEdit.new(
               range: LanguageServer::Protocol::Interface::Range.new(
                 start: LanguageServer::Protocol::Interface::Position.new(line: range.line - 1, character: range.column),
-                end: LanguageServer::Protocol::Interface::Position.new(line: range.last_line - 1,
-                  character: range.last_column),
+                end: LanguageServer::Protocol::Interface::Position.new(
+                  line: range.last_line - 1,
+                  character: range.last_column,
+                ),
               ),
               new_text: replacement,
             )

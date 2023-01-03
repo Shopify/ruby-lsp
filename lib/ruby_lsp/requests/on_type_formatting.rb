@@ -18,10 +18,13 @@ module RubyLsp
     class OnTypeFormatting < BaseRequest
       extend T::Sig
 
-      END_REGEXES = T.let([
-        /(if|unless|for|while|class|module|until|def|case).*/,
-        /.*\sdo/,
-      ], T::Array[Regexp])
+      END_REGEXES = T.let(
+        [
+          /(if|unless|for|while|class|module|until|def|case).*/,
+          /.*\sdo/,
+        ],
+        T::Array[Regexp],
+      )
 
       sig { params(document: Document, position: Document::PositionShape, trigger_character: String).void }
       def initialize(document, position, trigger_character)

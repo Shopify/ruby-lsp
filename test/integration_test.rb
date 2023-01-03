@@ -161,9 +161,13 @@ class IntegrationTest < Minitest::Test
 
     assert_telemetry("textDocument/didOpen")
 
-    response = make_request("textDocument/codeAction",
-      { textDocument: { uri: "file://#{__FILE__}" },
-        range: { start: { line: 0 }, end: { line: 1 } }, })
+    response = make_request(
+      "textDocument/codeAction",
+      {
+        textDocument: { uri: "file://#{__FILE__}" },
+        range: { start: { line: 0 }, end: { line: 1 } },
+      },
+    )
     quickfix = response[:result].first
     assert_equal("quickfix", quickfix[:kind])
     assert_match(%r{Autocorrect .*/.*}, quickfix[:title])

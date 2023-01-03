@@ -13,14 +13,32 @@ class SemanticTokenEncoderTest < Minitest::Test
     ]
 
     expected_encoding = [
-      0, 2, 1, 0, 1,
-      0, 2, 2, 9, 1,
-      1, 2, 3, 0, 64,
-      3, 6, 10, 4, 16,
+      0,
+      2,
+      1,
+      0,
+      1,
+      0,
+      2,
+      2,
+      9,
+      1,
+      1,
+      2,
+      3,
+      0,
+      64,
+      3,
+      6,
+      10,
+      4,
+      16,
     ]
 
-    assert_equal(expected_encoding,
-      RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode(tokens).data)
+    assert_equal(
+      expected_encoding,
+      RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode(tokens).data,
+    )
   end
 
   def test_tokens_sorted_before_encoded
@@ -32,14 +50,32 @@ class SemanticTokenEncoderTest < Minitest::Test
     ]
 
     expected_encoding = [
-      0, 2, 1, 0, 1,
-      0, 2, 2, 9, 1,
-      1, 2, 3, 0, 64,
-      3, 6, 10, 4, 16,
+      0,
+      2,
+      1,
+      0,
+      1,
+      0,
+      2,
+      2,
+      9,
+      1,
+      1,
+      2,
+      3,
+      0,
+      64,
+      3,
+      6,
+      10,
+      4,
+      16,
     ]
 
-    assert_equal(expected_encoding,
-      RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode(tokens).data)
+    assert_equal(
+      expected_encoding,
+      RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode(tokens).data,
+    )
   end
 
   def test_encoded_modifiers_with_no_modifiers

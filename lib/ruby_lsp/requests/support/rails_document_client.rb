@@ -10,8 +10,14 @@ module RubyLsp
         RAILS_DOC_HOST = "https://api.rubyonrails.org"
         SUPPORTED_RAILS_DOC_NAMESPACES = T.let(
           Regexp.union(
-            /ActionDispatch/, /ActionController/, /AbstractController/, /ActiveRecord/, /ActiveModel/, /ActiveStorage/,
-            /ActionText/, /ActiveJob/
+            /ActionDispatch/,
+            /ActionController/,
+            /AbstractController/,
+            /ActiveRecord/,
+            /ActiveModel/,
+            /ActiveStorage/,
+            /ActionText/,
+            /ActiveJob/,
           ).freeze,
           Regexp,
         )
@@ -19,7 +25,8 @@ module RubyLsp
         RAILTIES_VERSION = T.let(
           [*::Gem::Specification.default_stubs, *::Gem::Specification.stubs].find do |s|
             s.name == "railties"
-          end&.version&.to_s, T.nilable(String)
+          end&.version&.to_s,
+          T.nilable(String),
         )
 
         class << self
