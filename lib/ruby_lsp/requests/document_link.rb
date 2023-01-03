@@ -58,8 +58,7 @@ module RubyLsp
 
                 spec.files.each do |file|
                   path = file.sub(prefix_matcher, "")
-                  lookup[spec.name][spec.version.to_s][path] =
-"#{RbConfig::CONFIG["rubylibdir"]}/#{path}"
+                  lookup[spec.name][spec.version.to_s][path] = "#{RbConfig::CONFIG["rubylibdir"]}/#{path}"
                 end
               end
 
