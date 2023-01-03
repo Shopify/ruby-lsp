@@ -33,8 +33,10 @@ class StoreTest < Minitest::Test
     refute_nil(document)
     assert_nil(document.tree)
 
-    @store.push_edits(file.path,
-      [{ range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } }, text: " ; end" }])
+    @store.push_edits(
+      file.path,
+      [{ range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } }, text: " ; end" }],
+    )
 
     document = @store.get(file.path)
     document.parse
@@ -92,26 +94,46 @@ class StoreTest < Minitest::Test
     @store.set(uri, +"def bar; end")
 
     # Write puts 'a' in incremental edits
-    @store.push_edits(uri,
-      [{ range: { start: { line: 0, character: 8 }, end: { line: 0, character: 8 } }, text: " " }])
-    @store.push_edits(uri,
-      [{ range: { start: { line: 0, character: 9 }, end: { line: 0, character: 9 } }, text: "p" }])
-    @store.push_edits(uri,
-      [{ range: { start: { line: 0, character: 10 }, end: { line: 0, character: 10 } }, text: "u" }])
-    @store.push_edits(uri,
-      [{ range: { start: { line: 0, character: 11 }, end: { line: 0, character: 11 } }, text: "t" }])
-    @store.push_edits(uri,
-      [{ range: { start: { line: 0, character: 12 }, end: { line: 0, character: 12 } }, text: "s" }])
-    @store.push_edits(uri,
-      [{ range: { start: { line: 0, character: 13 }, end: { line: 0, character: 13 } }, text: " " }])
-    @store.push_edits(uri,
-      [{ range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } }, text: "'" }])
-    @store.push_edits(uri,
-      [{ range: { start: { line: 0, character: 15 }, end: { line: 0, character: 15 } }, text: "a" }])
-    @store.push_edits(uri,
-      [{ range: { start: { line: 0, character: 16 }, end: { line: 0, character: 16 } }, text: "'" }])
-    @store.push_edits(uri,
-      [{ range: { start: { line: 0, character: 17 }, end: { line: 0, character: 17 } }, text: ";" }])
+    @store.push_edits(
+      uri,
+      [{ range: { start: { line: 0, character: 8 }, end: { line: 0, character: 8 } }, text: " " }],
+    )
+    @store.push_edits(
+      uri,
+      [{ range: { start: { line: 0, character: 9 }, end: { line: 0, character: 9 } }, text: "p" }],
+    )
+    @store.push_edits(
+      uri,
+      [{ range: { start: { line: 0, character: 10 }, end: { line: 0, character: 10 } }, text: "u" }],
+    )
+    @store.push_edits(
+      uri,
+      [{ range: { start: { line: 0, character: 11 }, end: { line: 0, character: 11 } }, text: "t" }],
+    )
+    @store.push_edits(
+      uri,
+      [{ range: { start: { line: 0, character: 12 }, end: { line: 0, character: 12 } }, text: "s" }],
+    )
+    @store.push_edits(
+      uri,
+      [{ range: { start: { line: 0, character: 13 }, end: { line: 0, character: 13 } }, text: " " }],
+    )
+    @store.push_edits(
+      uri,
+      [{ range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } }, text: "'" }],
+    )
+    @store.push_edits(
+      uri,
+      [{ range: { start: { line: 0, character: 15 }, end: { line: 0, character: 15 } }, text: "a" }],
+    )
+    @store.push_edits(
+      uri,
+      [{ range: { start: { line: 0, character: 16 }, end: { line: 0, character: 16 } }, text: "'" }],
+    )
+    @store.push_edits(
+      uri,
+      [{ range: { start: { line: 0, character: 17 }, end: { line: 0, character: 17 } }, text: ";" }],
+    )
 
     assert_equal(RubyLsp::Document.new("def bar; puts 'a'; end"), @store.get(uri))
   end

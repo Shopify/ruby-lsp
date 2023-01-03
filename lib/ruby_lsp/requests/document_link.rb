@@ -33,34 +33,40 @@ module RubyLsp
 
         sig { returns(T::Hash[String, T::Hash[String, T::Hash[String, String]]]) }
         def gem_paths
-          @gem_paths ||= T.let(begin
-            lookup = {}
+          @gem_paths ||= T.let(
+            begin
+              lookup = {}
 
-            Gem::Specification.stubs.each do |stub|
-              spec = stub.to_spec
-              lookup[spec.name] = {}
-              lookup[spec.name][spec.version.to_s] = {}
+              Gem::Specification.stubs.each do |stub|
+                spec = stub.to_spec
+                lookup[spec.name] = {}
+                lookup[spec.name][spec.version.to_s] = {}
 
-              Dir.glob("**/*.rb", base: "#{spec.full_gem_path}/").each do |path|
-                lookup[spec.name][spec.version.to_s][path] = "#{spec.full_gem_path}/#{path}"
+                Dir.glob("**/*.rb", base: "#{spec.full_gem_path}/").each do |path|
+                  lookup[spec.name][spec.version.to_s][path] = "#{spec.full_gem_path}/#{path}"
+                end
               end
-            end
 
-            Gem::Specification.default_stubs.each do |stub|
-              spec = stub.to_spec
-              lookup[spec.name] = {}
-              lookup[spec.name][spec.version.to_s] = {}
-              prefix_matchers = Regexp.union(spec.require_paths.map { |rp| Regexp.new("^#{rp}/") })
-              prefix_matcher = Regexp.union(prefix_matchers, //)
+              Gem::Specification.default_stubs.each do |stub|
+                spec = stub.to_spec
+                lookup[spec.name] = {}
+                lookup[spec.name][spec.version.to_s] = {}
+                prefix_matchers = Regexp.union(spec.require_paths.map do |rp|
+                                                 Regexp.new("^#{rp}/")
+                                               end)
+                prefix_matcher = Regexp.union(prefix_matchers, //)
 
-              spec.files.each do |file|
-                path = file.sub(prefix_matcher, "")
-                lookup[spec.name][spec.version.to_s][path] = "#{RbConfig::CONFIG["rubylibdir"]}/#{path}"
+                spec.files.each do |file|
+                  path = file.sub(prefix_matcher, "")
+                  lookup[spec.name][spec.version.to_s][path] =
+"#{RbConfig::CONFIG["rubylibdir"]}/#{path}"
+                end
               end
-            end
 
-            lookup
-          end, T.nilable(T::Hash[String, T::Hash[String, T::Hash[String, String]]]))
+              lookup
+            end,
+            T.nilable(T::Hash[String, T::Hash[String, T::Hash[String, String]]]),
+          )
         end
       end
 

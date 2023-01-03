@@ -25,12 +25,15 @@ module RubyLsp
         sig { returns(T::Array[RuboCop::Cop::Offense]) }
         attr_reader :offenses
 
-        DEFAULT_ARGS = T.let([
-          "--stderr", # Print any output to stderr so that our stdout does not get polluted
-          "--force-exclusion",
-          "--format",
-          "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
-        ].freeze, T::Array[String])
+        DEFAULT_ARGS = T.let(
+          [
+            "--stderr", # Print any output to stderr so that our stdout does not get polluted
+            "--force-exclusion",
+            "--format",
+            "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
+          ].freeze,
+          T::Array[String],
+        )
 
         sig { params(args: String).void }
         def initialize(*args)

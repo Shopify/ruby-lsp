@@ -80,8 +80,10 @@ class DocumentTest < Minitest::Test
     document = RubyLsp::Document.new(+"puts 'a'")
 
     # Replace for puts 'b'
-    document.push_edits([{ range: { start: { line: 0, character: 0 }, end: { line: 0, character: 8 } },
-                           text: "puts 'b'", }])
+    document.push_edits([{
+      range: { start: { line: 0, character: 0 }, end: { line: 0, character: 8 } },
+      text: "puts 'b'",
+    }])
 
     assert_equal("puts 'b'", document.source)
   end
@@ -97,10 +99,16 @@ class DocumentTest < Minitest::Test
     RUBY
 
     # Write puts 'a' in incremental edits
-    document.push_edits([{ range: { start: { line: 3, character: 9 }, end: { line: 3, character: 9 } },
-                           rangeLength: 0, text: "\n    ", }])
-    document.push_edits([{ range: { start: { line: 4, character: 4 }, end: { line: 4, character: 4 } },
-                           rangeLength: 0, text: "a", }])
+    document.push_edits([{
+      range: { start: { line: 3, character: 9 }, end: { line: 3, character: 9 } },
+      rangeLength: 0,
+      text: "\n    ",
+    }])
+    document.push_edits([{
+      range: { start: { line: 4, character: 4 }, end: { line: 4, character: 4 } },
+      rangeLength: 0,
+      text: "a",
+    }])
 
     assert_equal(<<~RUBY, document.source)
       # frozen_string_literal: true

@@ -22,52 +22,61 @@ module RubyLsp
       extend T::Sig
       include SyntaxTree::WithEnvironment
 
-      TOKEN_TYPES = T.let({
-        namespace: 0,
-        type: 1,
-        class: 2,
-        enum: 3,
-        interface: 4,
-        struct: 5,
-        typeParameter: 6,
-        parameter: 7,
-        variable: 8,
-        property: 9,
-        enumMember: 10,
-        event: 11,
-        function: 12,
-        method: 13,
-        macro: 14,
-        keyword: 15,
-        modifier: 16,
-        comment: 17,
-        string: 18,
-        number: 19,
-        regexp: 20,
-        operator: 21,
-        decorator: 22,
-      }.freeze, T::Hash[Symbol, Integer])
+      TOKEN_TYPES = T.let(
+        {
+          namespace: 0,
+          type: 1,
+          class: 2,
+          enum: 3,
+          interface: 4,
+          struct: 5,
+          typeParameter: 6,
+          parameter: 7,
+          variable: 8,
+          property: 9,
+          enumMember: 10,
+          event: 11,
+          function: 12,
+          method: 13,
+          macro: 14,
+          keyword: 15,
+          modifier: 16,
+          comment: 17,
+          string: 18,
+          number: 19,
+          regexp: 20,
+          operator: 21,
+          decorator: 22,
+        }.freeze,
+        T::Hash[Symbol, Integer],
+      )
 
-      TOKEN_MODIFIERS = T.let({
-        declaration: 0,
-        definition: 1,
-        readonly: 2,
-        static: 3,
-        deprecated: 4,
-        abstract: 5,
-        async: 6,
-        modification: 7,
-        documentation: 8,
-        default_library: 9,
-      }.freeze, T::Hash[Symbol, Integer])
+      TOKEN_MODIFIERS = T.let(
+        {
+          declaration: 0,
+          definition: 1,
+          readonly: 2,
+          static: 3,
+          deprecated: 4,
+          abstract: 5,
+          async: 6,
+          modification: 7,
+          documentation: 8,
+          default_library: 9,
+        }.freeze,
+        T::Hash[Symbol, Integer],
+      )
 
-      SPECIAL_RUBY_METHODS = T.let([
-        Module.instance_methods(false),
-        Kernel.instance_methods(false),
-        Kernel.methods(false),
-        Bundler::Dsl.instance_methods(false),
-        Module.private_instance_methods(false),
-      ].flatten.map(&:to_s), T::Array[String])
+      SPECIAL_RUBY_METHODS = T.let(
+        [
+          Module.instance_methods(false),
+          Kernel.instance_methods(false),
+          Kernel.methods(false),
+          Bundler::Dsl.instance_methods(false),
+          Module.private_instance_methods(false),
+        ].flatten.map(&:to_s),
+        T::Array[String],
+      )
 
       class SemanticToken < T::Struct
         const :location, SyntaxTree::Location
