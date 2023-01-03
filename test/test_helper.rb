@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
-$VERBOSE = nil unless ENV["CI"]
+$VERBOSE = nil unless ENV["VERBOSE"] || ENV["CI"]
 
 require_relative "../lib/ruby_lsp/internal"
 require "minitest/autorun"
