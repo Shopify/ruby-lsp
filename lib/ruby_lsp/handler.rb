@@ -4,6 +4,7 @@
 require "ruby_lsp/requests"
 require "ruby_lsp/store"
 require "ruby_lsp/queue"
+require "ruby_lsp/indexer"
 
 module RubyLsp
   Interface = LanguageServer::Protocol::Interface
@@ -48,18 +49,26 @@ module RubyLsp
     sig { returns(Store) }
     attr_reader :store
 
+    sig { returns(Indexer) }
+    attr_reader :indexer
+
     sig { void }
     def initialize
       @writer = T.let(Transport::Stdio::Writer.new, Transport::Stdio::Writer)
       @reader = T.let(Transport::Stdio::Reader.new, Transport::Stdio::Reader)
       @handlers = T.let({}, T::Hash[String, RequestHandler])
       @store = T.let(Store.new, Store)
+      @indexer = T.let(Indexer.new(Bundler.root), Indexer)
       @queue = T.let(Queue.new(@writer, @handlers), Queue)
     end
 
     sig { void }
     def start
       $stderr.puts "Starting Ruby LSP..."
+
+      $stderr.puts "Indexing..."
+      indexer.run
+      $stderr.puts "Indexing done!"
 
       @reader.read do |request|
         handler = @handlers[request[:method]]

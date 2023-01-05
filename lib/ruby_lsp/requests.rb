@@ -31,7 +31,7 @@ module RubyLsp
     autoload :CodeActions, "ruby_lsp/requests/code_actions"
     autoload :DocumentHighlight, "ruby_lsp/requests/document_highlight"
     autoload :InlayHints, "ruby_lsp/requests/inlay_hints"
-
+    autoload :GoToDefinition, "ruby_lsp/requests/go_to_definition"
     # :nodoc:
     module Support
       autoload :RuboCopDiagnostic, "ruby_lsp/requests/support/rubocop_diagnostic"

@@ -81,8 +81,22 @@ module RubyLsp
           document_on_type_formatting_provider: on_type_formatting_provider,
           diagnostic_provider: diagnostics_provider,
           inlay_hint_provider: inlay_hint_provider,
+          definition_provider: true,
         ),
       )
+    end
+
+    on("textDocument/definition") do |request|
+      uri = request.dig(:params, :textDocument, :uri)
+      position = request.dig(:params, :position)
+
+      $stderr.puts "====== Here...."
+      store.cache_fetch(uri, :definition) do |document|
+        $stderr.puts "====== Inside cache...."
+        RubyLsp::Requests::GoToDefinition.new(indexer, uri, document, position).run.tap do |response|
+          $stderr.puts(response.inspect)
+        end
+      end
     end
 
     on("textDocument/didChange") do |request|
