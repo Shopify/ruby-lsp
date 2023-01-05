@@ -93,6 +93,10 @@ Possible values are:
 * `messages`: display requests and responses notifications
 * `verbose`: display each request and response as JSON
 
+### Debugging using VS Code
+
+You can use the use the "Minitest - current file" configuration and set breakpoints.
+
 ## License
 
 The gem is available as open source under the terms of the
