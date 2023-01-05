@@ -95,7 +95,7 @@ Possible values are:
 
 ### Debugging using VS Code
 
-You can use the use the "Minitest - current file" configuration and set breakpoints.
+You can use the "Minitest - current file" configuration and set breakpoints.
 
 ## License
 
