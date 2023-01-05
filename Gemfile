@@ -4,6 +4,7 @@ source "https://rubygems.org"
 
 gemspec
 
+gem "bundler", "~> 2.4.2"
 gem "debug", "~> 1.7", require: false
 gem "minitest", "~> 5.17"
 gem "minitest-reporters", "~> 1.5"
