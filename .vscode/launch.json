@@ -6,16 +6,15 @@
     "configurations": [
         {
             "type": "rdbg",
-            "name": "Debug current file with rdbg",
+            "name": "Minitest - current file",
             "request": "launch",
-            "script": "${file}",
-            "args": [],
-            "askParameters": true
+            "script": "-Itest ${file}",
+            "askParameters": false
         },
         {
             "type": "rdbg",
             "name": "Attach with rdbg",
-            "request": "attach"
+            "request": "attach",
         }
     ]
 }
