@@ -95,7 +95,25 @@ Possible values are:
 
 ### Debugging using VS Code
 
-You can use the "Minitest - current file" configuration and set breakpoints.
+The `launch.json` contains two configurations for the debugger:
+
+1. You can use the `Minitest - current file` to launch a new ruby-lsp server process.
+
+2. You can use `Attach with rdbg` to attach to the active ruby-lsp server process.
+
+You may encounter an error dialog with a long message beginning `Command failed: /bin/zsh -l -c 'rdbg --util=list-socks'`.
+The underlying cause is similar to https://github.com/ruby/vscode-rdbg/issues/21.
+To work around it, you can remove the `rdbg` binstub, which causes the globally installed `rdbg` to be used instead:
+
+```
+rm `which rdbg`
+```
+
+### Debugging using the command line
+
+You can attach to the ruby-lsp process from the command line with:
+
+`bundle exec rdbg --attach`
 
 ## License
 
