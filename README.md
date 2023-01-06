@@ -93,6 +93,70 @@ Possible values are:
 * `messages`: display requests and responses notifications
 * `verbose`: display each request and response as JSON
 
+## How does ruby-lsp differ from Solargraph?
+
+**Background**
+
+In July 2021, Shopify quietly released [rubocop-lsp](https://github.com/Shopify/rubocop-lsp). In March 2022, that was succeeded by [ruby-lsp](https://github.com/Shopify/ruby-lsp).
+As the name suggests, the newer library is intended to have a wider set of capabilities.
+It has a corresponding [VS Code extension](https://github.com/Shopify/vscode-ruby-lsp).
+ruby-lsp is widely used at Shopify, and is installed by default as part of most Ruby or Rails codebases.
+
+Solargraph is an older project, first released in March 2017.
+It was developed by [Castwide Technologies](https://castwide.com/), an Columbus, OH based company who provide various services including web hosting and software development.
+It also has a corresponding [VS Code extension](https://marketplace.visualstudio.com/items?itemName=castwide.solargraph).
+
+**Major Differences**
+
+The biggest difference between the two libraries is their approach to understanding the structure of your code, and its dependencies.
+This is used to provide capabilities such as intellisense (context-aware auto-completion) and navigation (e.g. Go To Definition).
+
+Solargraph relies on [YARD](https://yardoc.org/), a popular tool for building documentation.
+Developers run the `yard gems` command on their local machine to generate this information
+
+ruby-lsp does not provide direct support for these features.
+The intention is that they are handled by Sorbet’s LSP server, running alongside ruby-lsp.
+This means some functionality is only available if the files are [typed at ‘true’ or higher](https://sorbet.org/docs/static#file-level-granularity-strictness-levels).
+However there is some experimental work [in progress](https://github.com/Shopify/ruby-lsp/pull/429) to improve support for untyped code.
+
+**Similarities**
+
+Some LSP features are supported by both libraries, although it is likely there are differences in behaviour:
+
+* Both libraries integrate with RuboCop for linting and auto-formatting. (Only ruby-lsp has a Quick Fix feature, allowing individual corrections.).
+* Both support Code Folding
+
+**Other differences**
+
+Features only in ruby-lsp:
+
+* Selection ranges (Expand Selection / Shrink Selection)
+* Inlay hints
+* Snippets
+
+Features only in Solargraph:
+
+* [Plugin support](https://solargraph.org/guides/plugins)
+
+**Underlying Technologies**
+
+To parse Ruby code, Solargraph uses https://github.com/whitequark/parser.
+ruby-lsp uses https://github.com/ruby-syntax-tree/syntax_tree.
+
+**Type Checking**
+
+As mentioned previously, ruby-lsp relies on Sorbet for typechecking.
+
+In Solargraph, type checking is described as a “work in progress” and is done “through a combination of YARD tag analysis and type inference”.
+
+**Setup**
+
+ruby-lsp requires that the gem be part of the Gemfile.
+
+solargraph can be globally installed.
+
+There are pros and cons to each approach.
+
 ## License
 
 The gem is available as open source under the terms of the
