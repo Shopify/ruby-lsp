@@ -103,4 +103,53 @@ class OnTypeFormattingTest < Minitest::Test
     ]
     assert_equal(expected_edits.to_json, T.must(edits).to_json)
   end
+
+  def test_comment_continuation_with_other_line_break_matches
+    document = RubyLsp::Document.new(+"")
+
+    # If the current comment line has another word we match for, such as `while`, we still only want to complete the new
+    # comment, but avoid adding an incorrect end to the comment's `while` word
+    document.push_edits([{
+      range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+      text: "    #    while",
+    }])
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 14 }, "\n").run
+    expected_edits = [
+      {
+        range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } },
+        newText: "#    ",
+      },
+      {
+        range: { start: { line: 0, character: 9 }, end: { line: 0, character: 9 } },
+        newText: "$0",
+      },
+    ]
+    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+  end
+
+  def test_comment_continuation_when_inserting_new_line_in_the_middle
+    document = RubyLsp::Document.new(+"")
+
+    # When inserting a new line between while and blah, the document will have a syntax error momentarily before we auto
+    # insert the comment continuation. We must avoid accidentally trying to add an `end` token to `while` while the
+    # syntax error exists
+    document.push_edits([{
+      range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+      text: "# while blah blah",
+    }])
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 7 }, "\n").run
+    expected_edits = [
+      {
+        range: { start: { line: 0, character: 7 }, end: { line: 0, character: 7 } },
+        newText: "# ",
+      },
+      {
+        range: { start: { line: 0, character: 2 }, end: { line: 0, character: 2 } },
+        newText: "$0",
+      },
+    ]
+    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+  end
 end
