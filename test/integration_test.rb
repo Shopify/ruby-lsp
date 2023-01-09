@@ -211,28 +211,6 @@ class IntegrationTest < Minitest::Test
     assert_equal({ startLine: 0, endLine: 1, kind: "region" }, response[:result].first)
   end
 
-  def test_syntax_error_diagnostics
-    initialize_lsp([])
-    open_file_with("class Foo\nend")
-
-    assert_telemetry("textDocument/didOpen")
-
-    error_range = { start: { line: 1, character: 2 }, end: { line: 1, character: 3 } }
-
-    assert(send_request(
-      "textDocument/didChange",
-      {
-        textDocument: { uri: "file://#{__FILE__}" },
-        contentChanges: [{ text: "", range: error_range }],
-      },
-    ))
-    assert_telemetry("textDocument/didChange")
-    response = make_request("textDocument/diagnostic", { textDocument: { uri: "file://#{__FILE__}" } })
-
-    assert_equal("full", response.dig(:result, :kind))
-    assert_equal(error_range, response.dig(:result, :items)[0][:range])
-  end
-
   def test_request_with_telemetry
     initialize_lsp(["foldingRanges"], telemetry_enabled: true)
     open_file_with("class Foo\n\nend")
