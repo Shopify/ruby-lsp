@@ -97,7 +97,7 @@ Possible values are:
 
 The `launch.json` contains two configurations for the debugger:
 
-1. You can use the `Minitest - current file` to launch a new ruby-lsp server process.
+1. You can use the `Minitest - current file` to run tests with the debugger activated.
 
 2. You can use `Attach with rdbg` to attach to the active ruby-lsp server process.
 
