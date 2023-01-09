@@ -11,6 +11,8 @@ module RubyLsp
     # request uses RuboCop to fix auto-correctable offenses in the document. This requires enabling format on save and
     # registering the ruby-lsp as the Ruby formatter.
     #
+    # If RuboCop is not available, the request will fall back to SyntaxTree.
+    #
     # # Example
     #
     # ```ruby
