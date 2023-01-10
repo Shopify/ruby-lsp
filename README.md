@@ -97,8 +97,7 @@ Possible values are:
 
 **Background**
 
-In July 2021, Shopify quietly released [rubocop-lsp](https://github.com/Shopify/rubocop-lsp). In March 2022, that was succeeded by [ruby-lsp](https://github.com/Shopify/ruby-lsp).
-As the name suggests, the newer library is intended to have a wider set of capabilities.
+[ruby-lsp](https://github.com/Shopify/ruby-lsp) was first released in March 2022.
 It has a corresponding [VS Code extension](https://github.com/Shopify/vscode-ruby-lsp).
 ruby-lsp is widely used at Shopify, and is installed by default as part of most Ruby or Rails codebases.
 
@@ -114,10 +113,7 @@ This is used to provide capabilities such as intellisense (context-aware auto-co
 Solargraph relies on [YARD](https://yardoc.org/), a popular tool for building documentation.
 Developers run the `yard gems` command on their local machine to generate this information
 
-ruby-lsp does not provide direct support for these features.
-The intention is that they are handled by Sorbet’s LSP server, running alongside ruby-lsp.
-This means some functionality is only available if the files are [typed at ‘true’ or higher](https://sorbet.org/docs/static#file-level-granularity-strictness-levels).
-However there is some experimental work [in progress](https://github.com/Shopify/ruby-lsp/pull/429) to improve support for untyped code.
+While the Ruby LSP does not yet implement these features, the goal is to have it index Ruby codebases to provide them without requiring any form of annotations.
 
 **Similarities**
 
@@ -136,7 +132,7 @@ Features only in ruby-lsp:
 
 Features only in Solargraph:
 
-* [Plugin support](https://solargraph.org/guides/plugins)
+* [Plugin support](https://solargraph.org/guides/plugins) (but it is [planned](https://github.com/Shopify/ruby-lsp/issues/443) for ruby-lsp)
 
 **Underlying Technologies**
 
@@ -145,9 +141,9 @@ ruby-lsp uses https://github.com/ruby-syntax-tree/syntax_tree.
 
 **Type Checking**
 
-As mentioned previously, ruby-lsp relies on Sorbet for typechecking.
+As mentioned previously, ruby-lsp does not perform type-checking.
 
-In Solargraph, type checking is described as a “work in progress” and is done “through a combination of YARD tag analysis and type inference”.
+In Solargraph, type checking is described as a "work in progress" and is done "through a combination of YARD tag analysis and type inference".
 
 **Setup**
 
