@@ -84,6 +84,43 @@ module RubyLsp
         end
       end
 
+      sig do
+        params(
+          node: SyntaxTree::Node,
+          position: Integer,
+        ).returns([T.nilable(SyntaxTree::Node), T.nilable(SyntaxTree::Node)])
+      end
+      def locate(node, position)
+        queue = T.let(node.child_nodes.compact, T::Array[T.nilable(SyntaxTree::Node)])
+        closest = node
+
+        until queue.empty?
+          candidate = queue.shift
+
+          # Skip nil child nodes
+          next if candidate.nil?
+
+          # Add the next child_nodes to the queue to be processed
+          queue.concat(candidate.child_nodes)
+
+          # Skip if the current node doesn't cover the desired position
+          loc = candidate.location
+          next unless (loc.start_char...loc.end_char).cover?(position)
+
+          # If the node's start character is already past the position, then we should've found the closest node already
+          break if position < loc.start_char
+
+          # If the current node is narrower or equal than the previous closest node, than it is more precise
+          closest_loc = closest.location
+          if loc.end_char - loc.start_char <= closest_loc.end_char - closest_loc.start_char
+            parent = T.let(closest, SyntaxTree::Node)
+            closest = candidate
+          end
+        end
+
+        [closest, parent]
+      end
+
       sig { params(node: T.nilable(SyntaxTree::Node), range: T.nilable(T::Range[Integer])).returns(T::Boolean) }
       def visible?(node, range)
         return true if range.nil?
