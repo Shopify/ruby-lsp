@@ -4,6 +4,33 @@
 
 This gem is an implementation of the [language server protocol specification](https://microsoft.github.io/language-server-protocol/) for Ruby, used to improve editor features.
 
+# Overview
+
+The intention of Ruby LSP is to provide a fast, robust and feature-rich coding environment for Ruby developers.
+
+It's part of a [wider Shopify goal](https://github.com/Shopify/vscode-shopify-ruby) to provide a state-of-the-art experience to Ruby developers using modern standards for cross-editor features, documentation and debugging.
+
+It provides many features, including:
+
+* Syntax highlighting
+* Linting and formatting
+* Code folding
+* Selection ranges
+
+It does not perform typechecking, so its features are implemented on a best-effort basis, aiming to be as accurate as possible.
+
+Planned future features include:
+
+* Auto-completion and navigation ("Go To Definition") ([prototype](https://github.com/Shopify/ruby-lsp/pull/429))
+* Support for plug-ins to extend behavior
+
+The Ruby LSP does not perform any type-checking or provide any type-related assistance, but it can be used alongside [Sorbet](https://github.com/sorbet/sorbet)'s LSP server.
+
+At the time of writing, these are the major differences between Ruby LSP and [Solargraph](https://solargraph.org/):
+
+* Solargraph [uses](https://solargraph.org/guides/yard) YARD documentation to gather information about your project and its gem dependencies. This provides functionality such as context-aware auto-completion and navigation ("Go To Definition")
+* Solargraph can be used as a globally installed gem, but Ruby LSP must be added to the Gemfile or gemspec if using RuboCop. (There are pros and cons to each approach)
+
 ## Usage
 
 Install the gem. There's no need to require it, since the server is used as a standalone executable.
@@ -17,7 +44,7 @@ end
 If using VS Code, install the [Ruby LSP extension](https://github.com/Shopify/vscode-ruby-lsp) to get the extra features in
 the editor.
 
-See the [documentation](https://shopify.github.io/ruby-lsp) for
+See the [documentation](https://shopify.github.io/ruby-lsp) for more in-depth details about the
 [supported features](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html).
 
 ## Contributing
