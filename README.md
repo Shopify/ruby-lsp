@@ -93,6 +93,18 @@ Possible values are:
 * `messages`: display requests and responses notifications
 * `verbose`: display each request and response as JSON
 
+### Debugging using VS Code
+
+The `launch.json` contains a 'Minitest - current file' configuration for the debugger.
+
+1. Add a breakpoint using the VS Code UI.
+1. Open the relevant test file.
+1. Open the **Run and Debug** panel on the sidebar.
+1. Ensure `Minitest - current file` is selected in the top dropdown.
+1. Press `F5` OR click the green triangle next to the top dropdown. VS Code will then run the test file with debugger activated.
+1. When the breakpoint is triggered, the process will pause and VS Code will connect to the debugger and activate the debugger UI.
+1. Open the Debug Console view to use the debugger's REPL.
+
 ## License
 
 The gem is available as open source under the terms of the
