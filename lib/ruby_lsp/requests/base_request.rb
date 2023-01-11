@@ -84,7 +84,7 @@ module RubyLsp
           # If the node's start character is already past the position, then we should've found the closest node already
           break if position < loc.start_char
 
-          # If the current node is narrower or equal than the previous closest node, than it is more precise
+          # If the current node is narrower than or equal to the previous closest node, then it is more precise
           closest_loc = closest.location
           if loc.end_char - loc.start_char <= closest_loc.end_char - closest_loc.start_char
             parent = T.let(closest, SyntaxTree::Node)
