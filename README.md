@@ -97,9 +97,13 @@ Possible values are:
 
 The `launch.json` contains a 'Minitest - current file' configuration for the debugger.
 
-You may encounter an error dialog with a long message beginning `Command failed: /bin/zsh -l -c 'rdbg --util=list-socks'`.
-The underlying cause is similar to https://github.com/ruby/vscode-rdbg/issues/21.
-To work around it, you can remove the `rdbg` binstub, which causes the globally installed `rdbg` to be used instead:
+1. Add a breakpoint using the VS Code UI.
+1. Open the relevant test file.
+1. Open the **Run and Debug** panel on the sidebar.
+1. Ensure `Minitest - current file` is selected in the top dropdown.
+1. Press `F5` OR click the green triangle next to the top dropdown. VS Code will then run the test file with debugger activated.
+1. When the breakpoint is triggered, the process will pause and VS Code will connect to the debugger and activate the debugger UI.
+1. Open the Debug Console view to use the debugger's REPL.
 
 ```
 rm `which rdbg`
