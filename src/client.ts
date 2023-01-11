@@ -264,7 +264,7 @@ export default class Client {
           await this.ruby.activateRuby();
         }
 
-        this.restart();
+        await this.restart();
       }
     });
   }

@@ -37,12 +37,12 @@ export class Ruby {
           break;
         default:
           await this.activateShadowenv();
+          await this.delay(500);
           break;
       }
 
-      await this.delay(500);
       await this.displayRubyVersion();
-      this.checkYjit();
+      await this.checkYjit();
     } catch (error: any) {
       vscode.window.showErrorMessage(
         `Failed to activate ${this.versionManager} environment: ${error.message}`
@@ -62,27 +62,10 @@ export class Ruby {
   }
 
   private async activate(ruby: string) {
-    let shellProfilePath;
-    // eslint-disable-next-line no-process-env
-    const shell = process.env.SHELL?.split("/").pop();
-    // eslint-disable-next-line no-process-env
-    const home = process.env.HOME;
-
-    switch (shell) {
-      case "fish":
-        shellProfilePath = `${home}/.config/fish/config.fish`;
-        break;
-      case "zsh":
-        shellProfilePath = `${home}/.zshrc`;
-        break;
-      default:
-        shellProfilePath = `${home}/.bashrc`;
-        break;
-    }
-
     const result = await asyncExec(
-      `source ${shellProfilePath} > /dev/null 2>&1 && ${ruby} -rjson -e "puts JSON.dump(ENV.to_h)"`,
-      { shell, cwd: this.workingFolder }
+      // eslint-disable-next-line no-process-env
+      `${process.env.SHELL} -lic '${ruby} -rjson -e "puts JSON.dump(ENV.to_h)"'`,
+      { cwd: this.workingFolder }
     );
 
     // eslint-disable-next-line no-process-env
