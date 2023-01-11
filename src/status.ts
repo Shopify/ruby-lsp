@@ -10,10 +10,10 @@ import {
 } from "./bundler";
 import { Ruby } from "./ruby";
 
-export const enum ServerCommand {
+export enum ServerCommand {
   Start = "ruby-lsp.start",
   Stop = "ruby-lsp.stop",
-  Error = "ruby-lsp.restart",
+  Restart = "ruby-lsp.restart",
 }
 
 export class StatusItem {
@@ -21,6 +21,7 @@ export class StatusItem {
   private ruby: Ruby;
   private selector: vscode.DocumentSelector;
   private serverStatus: vscode.LanguageStatusItem;
+  private yjitStatus: vscode.LanguageStatusItem;
 
   constructor(context: vscode.ExtensionContext, ruby: Ruby) {
     this.context = context;
@@ -33,82 +34,65 @@ export class StatusItem {
     this.serverStatus = this.createStatusItem(
       "serverStatus",
       "Ruby LSP: Starting...",
-      vscode.LanguageStatusSeverity?.Warning
+      vscode.LanguageStatusSeverity?.Information
     );
 
     this.serverStatus.command = {
       title: "Restart server",
-      command: ServerCommand.Error,
+      command: "rubyLsp.serverOptions",
     };
+
+    this.yjitStatus = vscode.languages.createLanguageStatusItem(
+      "yjit",
+      this.selector
+    );
 
     this.createYjitStatus(this.ruby);
     this.createRubyStatus(this.ruby);
+
+    this.registerCommands();
   }
 
   public async updateStatus(status: ServerCommand) {
-    if (this.serverStatus) {
-      this.serverStatus.dispose();
-    }
+    this.serverStatus.severity = vscode.LanguageStatusSeverity?.Information;
 
     switch (status) {
       case ServerCommand.Start: {
-        this.serverStatus = this.createStatusItem(
-          "serverStatus",
-          "Ruby LSP: Running...",
-          vscode.LanguageStatusSeverity?.Warning
-        );
-
-        this.serverStatus.command = {
-          title: "Stop Server",
-          command: ServerCommand.Stop,
-        };
+        this.serverStatus.text = "Ruby LSP: Running...";
+        this.serverStatus.command!.title = "Stop Server";
 
         this.activateGemOutdatedButton();
 
         break;
       }
       case ServerCommand.Stop: {
-        this.serverStatus = this.createStatusItem(
-          "serverStatus",
-          "Ruby LSP: Stopped",
-          vscode.LanguageStatusSeverity?.Warning
-        );
-
-        this.serverStatus.command = {
-          title: "Start Server",
-          command: ServerCommand.Start,
-        };
+        this.serverStatus.text = "Ruby LSP: Stopped";
+        this.serverStatus.command!.title = "Start Server";
 
         break;
       }
-      case ServerCommand.Error: {
-        this.serverStatus = this.createStatusItem(
-          "serverStatus",
-          "Ruby LSP: Error",
-          vscode.LanguageStatusSeverity?.Error
-        );
-
-        this.serverStatus.command = {
-          title: "Restart Server",
-          command: ServerCommand.Error,
-        };
+      case ServerCommand.Restart: {
+        this.serverStatus.text = "Ruby LSP: Error";
+        this.serverStatus.severity = vscode.LanguageStatusSeverity?.Error;
+        this.serverStatus.command!.title = "Restart Server";
       }
     }
   }
 
   public async installGems(): Promise<boolean> {
     if (await bundleCheck()) {
-      this.updateStatus(ServerCommand.Error);
+      this.updateStatus(ServerCommand.Restart);
       const status: vscode.LanguageStatusItem = this.createStatusItem(
         "installGems",
         "Ruby LSP: The gems in the bundle are not installed.",
         vscode.LanguageStatusSeverity?.Error
       );
 
+      const commandId = "rubyLsp.installGems";
+
       this.context.subscriptions.push(
-        vscode.commands.registerCommand("ruby-lsp.installGems", () => {
+        vscode.commands.registerCommand(commandId, () => {
           status.text = "Ruby LSP: Installing gems...";
-          status.command = undefined;
           status.busy = true;
           bundleInstall()
             .then(() => {
@@ -128,7 +112,7 @@ export class StatusItem {
 
       status.command = {
         title: "Run bundle install",
-        command: "ruby-lsp.installGems",
+        command: commandId,
       };
       return true;
     }
@@ -137,17 +121,18 @@ export class StatusItem {
 
   public async addMissingGem(): Promise<boolean> {
     if (await isGemMissing()) {
-      this.updateStatus(ServerCommand.Error);
+      this.updateStatus(ServerCommand.Restart);
       const status: vscode.LanguageStatusItem = this.createStatusItem(
         "addMissingGem",
         "Ruby LSP: Bundle Add",
         vscode.LanguageStatusSeverity?.Error
       );
 
+      const commandId = "rubyLsp.addMissingGem";
+
       this.context.subscriptions.push(
-        vscode.commands.registerCommand("ruby-lsp.addMissingGem", () => {
+        vscode.commands.registerCommand(commandId, () => {
           status.text = "Ruby LSP: Adding gem...";
-          status.command = undefined;
           status.busy = true;
           addGem()
             .then(() => status.dispose())
@@ -180,9 +165,8 @@ export class StatusItem {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(commandId, async () => {
-        status.text = "Ruby LSP: Updating Ruby LSP";
+        status.text = "Ruby LSP: Updating Ruby LSP...";
         status.busy = true;
-        status.command = undefined;
 
         const result = await updateGem();
 
@@ -225,22 +209,22 @@ export class StatusItem {
       [major, minor] = this.ruby.rubyVersion.split(".").map(Number);
     }
 
-    const yjit: vscode.LanguageStatusItem =
-      vscode.languages.createLanguageStatusItem("yjit", this.selector);
-    yjit.name = "Ruby LSP Status";
+    this.yjitStatus.name = "Ruby LSP Status";
 
     if (useYjit && ruby.yjitEnabled && [major, minor] >= [3, 2]) {
-      yjit.text = "Ruby LSP: YJIT is in use";
+      this.yjitStatus.text = "YJIT enabled";
+
+      this.yjitStatus.command = {
+        title: "Disable",
+        command: "rubyLsp.toggleYjit",
+      };
     } else {
-      yjit.text = "Ruby LSP: YJIT is not in use";
-      if ([major, minor] >= [3, 2]) {
-        yjit.severity = vscode.LanguageStatusSeverity?.Warning;
-        yjit.command = {
-          title: "Enable it",
-          command: "",
+      this.yjitStatus.text = "YJIT disabled";
+      if ([major, minor] >= [3, 2] && ruby.yjitEnabled) {
+        this.yjitStatus.command = {
+          title: "Enable",
+          command: "rubyLsp.toggleYjit",
         };
-      } else {
-        yjit.severity = vscode.LanguageStatusSeverity?.Information;
       }
     }
   }
@@ -263,5 +247,35 @@ export class StatusItem {
     status.text = text;
     status.severity = severity;
     return status;
+  }
+
+  private registerCommands() {
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand("rubyLsp.toggleYjit", async () => {
+        const lspConfig = vscode.workspace.getConfiguration("rubyLsp");
+        const yjitEnabled = lspConfig.get("yjit");
+        lspConfig.update("yjit", !yjitEnabled);
+        this.yjitStatus.text = yjitEnabled ? "YJIT disabled" : "YJIT enabled";
+        this.yjitStatus.command!.title = yjitEnabled ? "Enable" : "Disable";
+      })
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand("rubyLsp.serverOptions", async () => {
+        const result = await vscode.window.showQuickPick(
+          [
+            { label: "Ruby LSP: Start", description: "ruby-lsp.start" },
+            { label: "Ruby LSP: Stop", description: "ruby-lsp.stop" },
+            { label: "Ruby LSP: Restart", description: "ruby-lsp.restart" },
+          ],
+          {
+            placeHolder: "Select server action",
+          }
+        );
+
+        if (result !== undefined)
+          await vscode.commands.executeCommand(result.description);
+      })
+    );
   }
 }

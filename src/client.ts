@@ -157,7 +157,9 @@ export default class Client {
   }
 
   async restart() {
+    await this.statusItem.updateStatus(ServerCommand.Stop);
     await this.stop();
+    await this.statusItem.updateStatus(ServerCommand.Start);
     await this.start();
   }
 
