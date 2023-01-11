@@ -20,6 +20,15 @@ module RubyLsp
     class Hover < BaseRequest
       extend T::Sig
 
+      ALLOWED_TARGETS = T.let(
+        [
+          SyntaxTree::Command,
+          SyntaxTree::CallNode,
+          SyntaxTree::ConstPathRef,
+        ],
+        T::Array[T.class_of(SyntaxTree::Node)],
+      )
+
       sig { params(document: Document, position: Document::PositionShape).void }
       def initialize(document, position)
         super(document)
@@ -31,9 +40,8 @@ module RubyLsp
       def run
         return unless @document.parsed?
 
-        target, _ = locate_node_and_parent(
-          T.must(@document.tree), [SyntaxTree::Command, SyntaxTree::CallNode, SyntaxTree::ConstPathRef], @position
-        )
+        target, parent = locate(T.must(@document.tree), @position)
+        target = parent if !ALLOWED_TARGETS.include?(target.class) && ALLOWED_TARGETS.include?(parent.class)
 
         case target
         when SyntaxTree::Command
