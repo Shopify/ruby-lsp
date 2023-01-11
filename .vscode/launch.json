@@ -10,11 +10,6 @@
             "request": "launch",
             "script": "-Itest ${file}",
             "askParameters": false
-        },
-        {
-            "type": "rdbg",
-            "name": "Attach with rdbg",
-            "request": "attach",
         }
     ]
 }

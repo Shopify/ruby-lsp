@@ -3,12 +3,6 @@
 
 require "ruby_lsp/internal"
 
-begin
-  require "debug/open_nonstop"
-rescue LoadError
-  # debug is only available in development
-end
-
 module RubyLsp
   Handler.start do
     on("initialize") do |request|
