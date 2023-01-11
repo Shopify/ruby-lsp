@@ -60,32 +60,6 @@ module RubyLsp
 
       sig do
         params(
-          parent: SyntaxTree::Node,
-          target_nodes: T::Array[T.class_of(SyntaxTree::Node)],
-          position: Integer,
-        ).returns(T::Array[SyntaxTree::Node])
-      end
-      def locate_node_and_parent(parent, target_nodes, position)
-        matched = parent.child_nodes.compact.bsearch do |child|
-          if (child.location.start_char...child.location.end_char).cover?(position)
-            0
-          else
-            position <=> child.location.start_char
-          end
-        end
-
-        case matched
-        when *target_nodes
-          [matched, parent]
-        when SyntaxTree::Node
-          locate_node_and_parent(matched, target_nodes, position)
-        else
-          []
-        end
-      end
-
-      sig do
-        params(
           node: SyntaxTree::Node,
           position: Integer,
         ).returns([T.nilable(SyntaxTree::Node), T.nilable(SyntaxTree::Node)])
