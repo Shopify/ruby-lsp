@@ -73,9 +73,10 @@ module RubyLsp
         ).returns(T.nilable(Support::HighlightTarget))
       end
       def find(node, position)
-        matched, parent = locate_node_and_parent(node, DIRECT_HIGHLIGHTS + [SyntaxTree::Ident], position)
+        matched, parent = locate(node, position)
 
         return unless matched && parent
+        return unless matched.is_a?(SyntaxTree::Ident) || DIRECT_HIGHLIGHTS.include?(matched.class)
 
         case matched
         when *DIRECT_HIGHLIGHTS
