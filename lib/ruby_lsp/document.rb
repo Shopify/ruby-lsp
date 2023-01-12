@@ -20,7 +20,6 @@ module RubyLsp
       @cache = T.let({}, T::Hash[Symbol, T.untyped])
       @encoding = T.let(encoding, String)
       @source = T.let(source, String)
-      @parsable_source = T.let(source.dup, String)
       @unparsed_edits = T.let([], T::Array[EditShape])
       @tree = T.let(SyntaxTree.parse(@source), T.nilable(SyntaxTree::Node))
     rescue SyntaxTree::Parser::ParseError
@@ -50,8 +49,15 @@ module RubyLsp
 
     sig { params(edits: T::Array[EditShape]).void }
     def push_edits(edits)
-      # Apply the edits on the real source
-      edits.each { |edit| apply_edit(@source, edit[:range], edit[:text]) }
+      edits.each do |edit|
+        range = edit[:range]
+        scanner = create_scanner
+
+        start_position = scanner.find_char_position(range[:start])
+        end_position = scanner.find_char_position(range[:end])
+
+        @source[start_position...end_position] = edit[:text]
+      end
 
       @unparsed_edits.concat(edits)
       @cache.clear
@@ -63,9 +69,8 @@ module RubyLsp
 
       @tree = SyntaxTree.parse(@source)
       @unparsed_edits.clear
-      @parsable_source = @source.dup
     rescue SyntaxTree::Parser::ParseError
-      update_parsable_source(@unparsed_edits)
+      # Do nothing if we fail parse
     end
 
     sig { returns(T::Boolean) }
@@ -81,33 +86,6 @@ module RubyLsp
     sig { returns(Scanner) }
     def create_scanner
       Scanner.new(@source, @encoding)
-    end
-
-    private
-
-    sig { params(edits: T::Array[EditShape]).void }
-    def update_parsable_source(edits)
-      # If the new edits caused a syntax error, make all edits blank spaces and line breaks to adjust the line and
-      # column numbers. This is attempt to make the document parsable while partial edits are being applied
-      edits.each do |edit|
-        next if edit[:text].empty? # skip deletions, since they may have caused the syntax error
-
-        apply_edit(@parsable_source, edit[:range], edit[:text].gsub(/[^\r\n]/, " "))
-      end
-
-      @tree = SyntaxTree.parse(@parsable_source)
-    rescue StandardError
-      # Trying to maintain a parsable source when there are syntax errors is a best effort. If we fail to apply edits or
-      # parse, just ignore it
-    end
-
-    sig { params(source: String, range: RangeShape, text: String).void }
-    def apply_edit(source, range, text)
-      scanner = Scanner.new(source, @encoding)
-      start_position = scanner.find_char_position(range[:start])
-      end_position = scanner.find_char_position(range[:end])
-
-      source[start_position...end_position] = text
     end
 
     class Scanner
