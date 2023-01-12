@@ -60,28 +60,39 @@ module RubyLsp
 
       sig do
         params(
-          parent: SyntaxTree::Node,
-          target_nodes: T::Array[T.class_of(SyntaxTree::Node)],
+          node: SyntaxTree::Node,
           position: Integer,
-        ).returns(T::Array[SyntaxTree::Node])
+        ).returns([T.nilable(SyntaxTree::Node), T.nilable(SyntaxTree::Node)])
       end
-      def locate_node_and_parent(parent, target_nodes, position)
-        matched = parent.child_nodes.compact.bsearch do |child|
-          if (child.location.start_char...child.location.end_char).cover?(position)
-            0
-          else
-            position <=> child.location.start_char
+      def locate(node, position)
+        queue = T.let(node.child_nodes.compact, T::Array[T.nilable(SyntaxTree::Node)])
+        closest = node
+
+        until queue.empty?
+          candidate = queue.shift
+
+          # Skip nil child nodes
+          next if candidate.nil?
+
+          # Add the next child_nodes to the queue to be processed
+          queue.concat(candidate.child_nodes)
+
+          # Skip if the current node doesn't cover the desired position
+          loc = candidate.location
+          next unless (loc.start_char...loc.end_char).cover?(position)
+
+          # If the node's start character is already past the position, then we should've found the closest node already
+          break if position < loc.start_char
+
+          # If the current node is narrower than or equal to the previous closest node, then it is more precise
+          closest_loc = closest.location
+          if loc.end_char - loc.start_char <= closest_loc.end_char - closest_loc.start_char
+            parent = T.let(closest, SyntaxTree::Node)
+            closest = candidate
           end
         end
 
-        case matched
-        when *target_nodes
-          [matched, parent]
-        when SyntaxTree::Node
-          locate_node_and_parent(matched, target_nodes, position)
-        else
-          []
-        end
+        [closest, parent]
       end
 
       sig { params(node: T.nilable(SyntaxTree::Node), range: T.nilable(T::Range[Integer])).returns(T::Boolean) }
