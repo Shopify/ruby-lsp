@@ -15,13 +15,9 @@ module RubyLsp
     sig { returns(String) }
     attr_reader :source
 
-    sig { returns(T::Array[EditShape]) }
-    attr_reader :syntax_error_edits
-
     sig { params(source: String, encoding: String).void }
     def initialize(source, encoding = "utf-8")
       @cache = T.let({}, T::Hash[Symbol, T.untyped])
-      @syntax_error_edits = T.let([], T::Array[EditShape])
       @encoding = T.let(encoding, String)
       @source = T.let(source, String)
       @parsable_source = T.let(source.dup, String)
@@ -66,17 +62,15 @@ module RubyLsp
       return if @unparsed_edits.empty?
 
       @tree = SyntaxTree.parse(@source)
-      @syntax_error_edits.clear
       @unparsed_edits.clear
       @parsable_source = @source.dup
     rescue SyntaxTree::Parser::ParseError
-      @syntax_error_edits = @unparsed_edits
       update_parsable_source(@unparsed_edits)
     end
 
     sig { returns(T::Boolean) }
-    def syntax_errors?
-      @syntax_error_edits.any?
+    def syntax_error?
+      @unparsed_edits.any?
     end
 
     sig { returns(T::Boolean) }

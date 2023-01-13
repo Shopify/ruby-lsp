@@ -37,17 +37,10 @@ module RubyLsp
         )
       end
       def run
-        return syntax_error_diagnostics if @document.syntax_errors?
+        return [] if @document.syntax_error?
         return [] unless defined?(Support::RuboCopDiagnosticsRunner)
 
         Support::RuboCopDiagnosticsRunner.instance.run(@uri, @document)
-      end
-
-      private
-
-      sig { returns(T::Array[Support::SyntaxErrorDiagnostic]) }
-      def syntax_error_diagnostics
-        @document.syntax_error_edits.map { |e| Support::SyntaxErrorDiagnostic.new(e) }
       end
     end
   end

@@ -46,13 +46,13 @@ module RubyLsp
       def run
         case @trigger_character
         when "{"
-          handle_curly_brace if @document.syntax_errors?
+          handle_curly_brace if @document.syntax_error?
         when "|"
-          handle_pipe if @document.syntax_errors?
+          handle_pipe if @document.syntax_error?
         when "\n"
           if (comment_match = @previous_line.match(/^#(\s*)/))
             handle_comment_line(T.must(comment_match[1]))
-          elsif @document.syntax_errors?
+          elsif @document.syntax_error?
             handle_statement_end
           end
         end

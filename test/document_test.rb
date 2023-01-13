@@ -187,53 +187,6 @@ class DocumentTest < Minitest::Test
     RUBY
   end
 
-  def test_syntax_error_on_addition_returns_diagnostics
-    document = RubyLsp::Document.new(+<<~RUBY)
-      # frozen_string_literal: true
-
-      a
-    RUBY
-
-    error_edit = { range: { start: { line: 2, character: 2 }, end: { line: 2, character: 2 } }, text: "=" }
-
-    document.push_edits([
-      { range: { start: { line: 2, character: 1 }, end: { line: 2, character: 1 } }, text: " " },
-    ])
-    document.parse
-    document.push_edits([error_edit])
-    document.parse
-    assert_error_edit(document.syntax_error_edits, error_edit)
-    assert_predicate(document, :syntax_errors?)
-
-    assert_equal(<<~RUBY, document.source)
-      # frozen_string_literal: true
-
-      a =
-    RUBY
-  end
-
-  def test_syntax_error_on_removal_returns_diagnostics
-    document = RubyLsp::Document.new(+<<~RUBY)
-      # frozen_string_literal: true
-
-      class Foo
-      end
-    RUBY
-
-    error_edit = { range: { start: { line: 3, character: 2 }, end: { line: 3, character: 3 } }, text: "" }
-    document.push_edits([error_edit])
-    document.parse
-    assert_error_edit(document.syntax_error_edits, error_edit)
-    assert_predicate(document, :syntax_errors?)
-
-    assert_equal(<<~RUBY, document.source)
-      # frozen_string_literal: true
-
-      class Foo
-      en
-    RUBY
-  end
-
   def test_pushing_edits_to_document_with_unicode
     document = RubyLsp::Document.new(+<<~RUBY)
       chars = ["億"]
@@ -312,6 +265,19 @@ class DocumentTest < Minitest::Test
         puts 'a'
       end
     RUBY
+  end
+
+  def test_unparsed_edits_indicates_when_edits_are_present
+    document = RubyLsp::Document.new(+<<~RUBY)
+      def foo
+      end
+    RUBY
+
+    refute(document.syntax_error?)
+
+    document.push_edits([{ range: { start: { line: 0, character: 7 }, end: { line: 0, character: 7 } }, text: "\n  " }])
+
+    assert(document.syntax_error?)
   end
 
   private
