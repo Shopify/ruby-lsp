@@ -6,10 +6,12 @@ import * as vscode from "vscode";
 const asyncExec = promisify(exec);
 
 export async function isGemMissing(): Promise<boolean> {
-  const bundledGems = await execInPath("bundle list");
-  const hasRubyLsp = bundledGems.stdout.includes("ruby-lsp");
-
-  return !hasRubyLsp;
+  try {
+    await execInPath("bundle show ruby-lsp");
+    return false;
+  } catch {
+    return true;
+  }
 }
 
 export async function isGemOutdated(): Promise<boolean> {
@@ -23,8 +25,9 @@ export async function isGemOutdated(): Promise<boolean> {
 }
 
 export async function addGem(): Promise<void> {
-  await execInPath("bundle add ruby-lsp --group=development");
-  await execInPath("bundle install");
+  await execInPath(
+    "bundle add ruby-lsp --group=development --require=false && bundle install"
+  );
 }
 
 export async function updateGem(): Promise<{ stdout: string; stderr: string }> {
@@ -32,19 +35,12 @@ export async function updateGem(): Promise<{ stdout: string; stderr: string }> {
 }
 
 export async function bundleCheck(): Promise<boolean> {
-  let bundlerCheck: string;
-
   try {
-    bundlerCheck = (await execInPath("bundle check")).stdout;
+    await execInPath("bundle check");
+    return true;
   } catch {
-    bundlerCheck = "";
-  }
-
-  if (bundlerCheck.includes("The Gemfile's dependencies are satisfied")) {
     return false;
   }
-
-  return true;
 }
 
 export async function bundleInstall(): Promise<{

@@ -1,13 +1,6 @@
 import * as vscode from "vscode";
 
-import {
-  isGemMissing,
-  addGem,
-  bundleCheck,
-  bundleInstall,
-  isGemOutdated,
-  updateGem,
-} from "./bundler";
+import * as Bundler from "./bundler";
 import { Ruby } from "./ruby";
 
 export enum ServerCommand {
@@ -80,8 +73,10 @@ export class StatusItem {
   }
 
   public async installGems(): Promise<boolean> {
-    if (await bundleCheck()) {
-      this.updateStatus(ServerCommand.Restart);
+    if (!(await Bundler.bundleCheck())) {
+      this.serverStatus.text = "Ruby LSP: Error";
+      this.serverStatus.severity = vscode.LanguageStatusSeverity?.Error;
+
       const status: vscode.LanguageStatusItem = this.createStatusItem(
         "installGems",
         "Ruby LSP: The gems in the bundle are not installed.",
@@ -94,7 +89,7 @@ export class StatusItem {
         vscode.commands.registerCommand(commandId, () => {
           status.text = "Ruby LSP: Installing gems...";
           status.busy = true;
-          bundleInstall()
+          Bundler.bundleInstall()
             .then(() => {
               status.dispose();
               this.addMissingGem();
@@ -120,8 +115,10 @@ export class StatusItem {
   }
 
   public async addMissingGem(): Promise<boolean> {
-    if (await isGemMissing()) {
-      this.updateStatus(ServerCommand.Restart);
+    if (await Bundler.isGemMissing()) {
+      this.serverStatus.text = "Ruby LSP: Error";
+      this.serverStatus.severity = vscode.LanguageStatusSeverity?.Error;
+
       const status: vscode.LanguageStatusItem = this.createStatusItem(
         "addMissingGem",
         "Ruby LSP: Bundle Add",
@@ -134,7 +131,7 @@ export class StatusItem {
         vscode.commands.registerCommand(commandId, () => {
           status.text = "Ruby LSP: Adding gem...";
           status.busy = true;
-          addGem()
+          Bundler.addGem()
             .then(() => status.dispose())
             .catch(() => {});
         })
@@ -150,7 +147,7 @@ export class StatusItem {
   }
 
   private async activateGemOutdatedButton() {
-    const gemOutdated = await isGemOutdated();
+    const gemOutdated = await Bundler.isGemOutdated();
     if (!gemOutdated) {
       return;
     }
@@ -168,7 +165,7 @@ export class StatusItem {
         status.text = "Ruby LSP: Updating Ruby LSP...";
         status.busy = true;
 
-        const result = await updateGem();
+        const result = await Bundler.updateGem();
 
         if (result.stderr.length > 0) {
           status.text = "Ruby LSP: Update failed";
