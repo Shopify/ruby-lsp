@@ -18,4 +18,5 @@ rescue
   nil
 end
 
-require_relative "../lib/ruby_lsp/server"
+require_relative "../lib/ruby_lsp/internal"
+RubyLsp::Server.new.start

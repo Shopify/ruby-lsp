@@ -35,7 +35,7 @@ class IntegrationTest < Minitest::Test
   def teardown
     # Tell the LSP to shutdown
     make_request("shutdown")
-    make_request("exit")
+    send_request("exit")
 
     # Make sure IOs are closed
     @stdin.close
