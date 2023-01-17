@@ -442,10 +442,10 @@
     tiny-glob "^0.2.9"
     tslib "^2.4.0"
 
-"@shopify/eslint-plugin@^42.0.2":
-  version "42.0.2"
-  resolved "https://registry.yarnpkg.com/@shopify/eslint-plugin/-/eslint-plugin-42.0.2.tgz#dbe2cf0eda5915d0b9cac7e5cf3ad170907eed37"
-  integrity sha512-z8r01/KIgeI9YDiPhjrcDC4RjHppZwtNR8C5um6syAq76oXdpsNZLzaVUE3bhWfPuEuETQrEBwHiKxkbtizm6g==
+"@shopify/eslint-plugin@^42.0.3":
+  version "42.0.3"
+  resolved "https://registry.yarnpkg.com/@shopify/eslint-plugin/-/eslint-plugin-42.0.3.tgz#9030e89b636643ac8556fe92c41c46be332fbb1c"
+  integrity sha512-Vve7bpv3qeiDSIViHx1v0oJ6jDSiwqFzUlJZXIcgU/AcQTMEVYHozhxnNO02XTVeN1CJS3hiMjq2ruZdBiKWPw==
   dependencies:
     "@babel/eslint-parser" "^7.16.3"
     "@babel/eslint-plugin" "^7.14.5"
