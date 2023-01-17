@@ -228,7 +228,7 @@
     "esbuild": "^0.16.16",
     "eslint": "^8.31.0",
     "eslint-import-resolver-typescript": "^3.5.2",
-    "glob": "^8.0.3",
+    "glob": "^8.1.0",
     "mocha": "^10.2.0",
     "prettier": "^2.8.2",
     "typescript": "^4.9.4",
