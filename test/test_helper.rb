@@ -9,6 +9,7 @@ require "minitest/autorun"
 require "minitest/reporters"
 require "tempfile"
 require "debug"
+require "mocha/minitest"
 
 sorbet_paths = Gem.loaded_specs["sorbet-runtime"].full_require_paths.freeze
 DEBUGGER__::CONFIG[:skip_path] = Array(DEBUGGER__::CONFIG[:skip_path]) + sorbet_paths
