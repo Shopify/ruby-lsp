@@ -152,4 +152,27 @@ class OnTypeFormattingTest < Minitest::Test
     ]
     assert_equal(expected_edits.to_json, T.must(edits).to_json)
   end
+
+  def test_breaking_line_between_keyword_and_more_content
+    document = RubyLsp::Document.new(+"")
+
+    document.push_edits([{
+      range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+      text: "if something\n",
+    }])
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").run
+    expected_edits = [
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: " \nend",
+      },
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: "$0",
+      },
+    ]
+
+    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+  end
 end

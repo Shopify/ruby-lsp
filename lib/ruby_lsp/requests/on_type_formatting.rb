@@ -32,8 +32,8 @@ module RubyLsp
 
         scanner = document.create_scanner
         line_begin = position[:line] == 0 ? 0 : scanner.find_char_position({ line: position[:line] - 1, character: 0 })
-        line_end = scanner.find_char_position(position)
-        line = T.must(@document.source[line_begin..line_end])
+        @line_end = T.let(scanner.find_char_position(position), Integer)
+        line = T.must(@document.source[line_begin..@line_end])
 
         @indentation = T.let(find_indentation(line), Integer)
         @previous_line = T.let(line.strip.chomp, String)
@@ -84,8 +84,30 @@ module RubyLsp
 
         indents = " " * @indentation
 
-        add_edit_with_text(" \n#{indents}end")
-        move_cursor_to(@position[:line], @indentation + 2)
+        if @previous_line.include?("\n")
+          # If the previous line has a line break, then it means there's content after the line break that triggered
+          # this completion. For these cases, we want to add the `end` after the content and move the cursor back to the
+          # keyword that triggered the completion
+
+          line = @position[:line]
+
+          # If there are enough lines in the document, we want to add the `end` token on the line below the extra
+          # content. Otherwise, we want to insert and extra line break ourselves
+          correction = if T.must(@document.source[@line_end..-1]).count("\n") >= 2
+            line -= 1
+            "#{indents}end"
+          else
+            "#{indents}\nend"
+          end
+
+          add_edit_with_text(correction, { line: @position[:line] + 1, character: @position[:character] })
+          move_cursor_to(line, @indentation + 3)
+        else
+          # If there's nothing after the new line break that triggered the completion, then we want to add the `end` and
+          # move the cursor to the body of the statement
+          add_edit_with_text(" \n#{indents}end")
+          move_cursor_to(@position[:line], @indentation + 2)
+        end
       end
 
       sig { params(spaces: String).void }
@@ -94,18 +116,15 @@ module RubyLsp
         move_cursor_to(@position[:line], @indentation + spaces.size + 1)
       end
 
-      sig { params(text: String).void }
-      def add_edit_with_text(text)
-        position = Interface::Position.new(
-          line: @position[:line],
-          character: @position[:character],
+      sig { params(text: String, position: Document::PositionShape).void }
+      def add_edit_with_text(text, position = @position)
+        pos = Interface::Position.new(
+          line: position[:line],
+          character: position[:character],
         )
 
         @edits << Interface::TextEdit.new(
-          range: Interface::Range.new(
-            start: position,
-            end: position,
-          ),
+          range: Interface::Range.new(start: pos, end: pos),
           new_text: text,
         )
       end
