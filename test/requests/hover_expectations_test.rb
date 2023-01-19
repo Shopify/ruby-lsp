@@ -18,9 +18,8 @@ class HoverExpectationsTest < ExpectationsTestRunner
   def test_search_index_being_nil
     document = RubyLsp::Document.new("belongs_to :foo")
 
-    RubyLsp::Requests::Support::RailsDocumentClient.stub(:search_index, nil) do
-      RubyLsp::Requests::Hover.new(document, { character: 0, line: 0 }).run
-    end
+    RubyLsp::Requests::Support::RailsDocumentClient.stubs(search_index: nil)
+    RubyLsp::Requests::Hover.new(document, { character: 0, line: 0 }).run
   end
 
   class FakeHTTPResponse
@@ -39,9 +38,8 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
     position = @__params&.first || { character: 0, line: 0 }
 
-    Net::HTTP.stub(:get_response, fake_response) do
-      RubyLsp::Requests::Hover.new(document, position).run
-    end
+    Net::HTTP.stubs(get_response: fake_response)
+    RubyLsp::Requests::Hover.new(document, position).run
   end
 
   private

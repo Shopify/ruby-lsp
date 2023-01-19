@@ -54,6 +54,8 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
+    mocha (2.0.2)
+      ruby2_keywords (>= 0.0.5)
     netrc (0.11.0)
     nokogiri (1.14.0-arm64-darwin)
       racc (~> 1.4)
@@ -113,6 +115,7 @@ GEM
     rubocop-sorbet (0.6.11)
       rubocop (>= 0.90.0)
     ruby-progressbar (1.11.0)
+    ruby2_keywords (0.0.5)
     sorbet (0.5.10626)
       sorbet-static (= 0.5.10626)
     sorbet-runtime (0.5.10626)
@@ -169,6 +172,7 @@ DEPENDENCIES
   debug (~> 1.7)
   minitest (~> 5.17)
   minitest-reporters (~> 1.5)
+  mocha (~> 2.0)
   railties (~> 7.0)
   rake (~> 13.0)
   rubocop (~> 1.43)
