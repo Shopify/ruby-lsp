@@ -21,7 +21,7 @@ module RubyLsp
           @runner = T.let(RuboCopRunner.new("-a"), RuboCopRunner)
         end
 
-        sig { params(uri: String, document: Document).returns(T.nilable(String)) }
+        sig { params(uri: String, document: Document).returns(String) }
         def run(uri, document)
           filename = CGI.unescape(URI.parse(uri).path)
 
