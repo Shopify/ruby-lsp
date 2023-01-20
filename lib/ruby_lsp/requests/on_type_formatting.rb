@@ -42,7 +42,7 @@ module RubyLsp
         @trigger_character = trigger_character
       end
 
-      sig { override.returns(T.nilable(T.all(T::Array[Interface::TextEdit], Object))) }
+      sig { override.returns(T.all(T::Array[Interface::TextEdit], Object)) }
       def run
         case @trigger_character
         when "{"

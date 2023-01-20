@@ -198,7 +198,7 @@ module RubyLsp
         uri: String,
         position: Document::PositionShape,
         character: String,
-      ).returns(T.nilable(T::Array[Interface::TextEdit]))
+      ).returns(T::Array[Interface::TextEdit])
     end
     def on_type_formatting(uri, position, character)
       Requests::OnTypeFormatting.new(@store.get(uri), position, character).run
