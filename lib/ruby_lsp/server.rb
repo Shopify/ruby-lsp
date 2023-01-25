@@ -15,14 +15,9 @@ module RubyLsp
       @reader = T.let(Transport::Stdio::Reader.new, Transport::Stdio::Reader)
       @store = T.let(Store.new, Store)
 
-      # The job queue is the actual list of requests we have to process
-      @job_queue = T.let(Thread::Queue.new, Thread::Queue)
-      # The jobs hash is just a way of keeping a handle to jobs based on the request ID, so we can cancel them
-      @jobs = T.let({}, T::Hash[T.any(String, Integer), Job])
+      @processes = T.let({}, T::Hash[Symbol, T.untyped])
       @mutex = T.let(Mutex.new, Mutex)
       @worker = T.let(new_worker, Thread)
-
-      Thread.main.priority = 1
     end
 
     sig { void }
@@ -37,18 +32,27 @@ module RubyLsp
           result = Executor.new(@store).execute(request)
           finalize_request(result, request)
         when "$/cancelRequest"
-          # Cancel the job if it's still in the queue
-          @mutex.synchronize { @jobs[request[:params][:id]]&.cancel }
+          # Kill the process if it still exists
+          pid, request, _ = @mutex.synchronize { @processes.delete(request[:params][:id]) }
+
+          # Handle request being processed
+          Process.kill("INT", pid)
+
+          # Remove request from open processes
+          @processes.delete(request[:params][:id])
+
+          # Return nil response for the request
+          finalize_request(Result.new(response: nil, notifications: []), request)
         when "shutdown"
           warn("Shutting down Ruby LSP...")
 
-          # Close the queue so that we can no longer receive items
-          @job_queue.close
-          # Clear any remaining jobs so that the thread can terminate
-          @job_queue.clear
-          @jobs.clear
-          # Wait until the thread is finished
-          @worker.join
+          # Kill all processes of this group
+          # Process.kill("INT", 0)
+          @processes.each do |_, (pid, _, _)|
+            Process.kill("INT", pid)
+          end
+
+          Thread.kill(@worker)
           @store.clear
 
           finalize_request(Result.new(response: nil, notifications: []), request)
@@ -58,68 +62,88 @@ module RubyLsp
           status = @store.empty? ? 0 : 1
           exit(status)
         else
-          # Default case: push the request to the queue to be executed by the worker
-          job = Job.new(request: request, cancelled: false)
+          # Create reader/writer for communication with process
+          process_reader, process_writer = IO.pipe
 
-          # Remember a handle to the job, so that we can cancel it
-          @mutex.synchronize { @jobs[request[:id]] = job }
-          @job_queue << job
+          # Fork process and store the pid to check when the process is finished / close when
+          # the LSP recieves a shutdown request
+          pid = fork do
+            # Close reader as there is no main process -> sub process communication
+            process_reader.close
+
+            # Process request with new executor
+            result = T.let(Executor.new(@store).execute(request), Executor)
+
+            # Marshal result and pass back to main process with writer pipe
+            Marshal.dump(result, process_writer)
+          end
+
+          # Close writer as there is no main process -> sub process communication
+          process_writer.close
+
+          # Store the process, the request that instigated it, and the reader to get back the result
+          @mutex.synchronize { @processes[request[:id]] = [pid, request, process_reader] }
         end
       end
     end
 
     private
 
-    sig { returns(Thread) }
-    def new_worker
-      Thread.new do
-        # Thread::Queue#pop is thread safe and will wait until an item is available
-        loop do
-          job = T.let(@job_queue.pop, T.nilable(Job))
-          # The only time when the job is nil is when the queue is closed and we can then terminate the thread
-          break if job.nil?
-
-          request = job.request
-          @mutex.synchronize { @jobs.delete(request[:id]) }
-
-          result = if job.cancelled
-            # We need to return nil to the client even if the request was cancelled
-            Result.new(response: nil, notifications: [])
-          else
-            Executor.new(@store).execute(request)
-          end
-
-          finalize_request(result, request)
-        end
-      end
-    end
-
     # Finalize a Queue::Result. All IO operations should happen here to avoid any issues with cancelling requests
     sig { params(result: Result, request: T::Hash[Symbol, T.untyped]).void }
     def finalize_request(result, request)
-      @mutex.synchronize do
-        error = result.error
-        response = result.response
+      error = result.error
+      response = result.response
 
-        # If the response include any notifications, go through them and publish each one
-        result.notifications.each { |n| @writer.write(method: n.message, params: n.params) }
+      # If the response include any notifications, go through them and publish each one
+      result.notifications.each { |n| @writer.write(method: n.message, params: n.params) }
 
-        if error
-          @writer.write(
-            id: request[:id],
-            error: {
-              code: Constant::ErrorCodes::INTERNAL_ERROR,
-              message: error.inspect,
-              data: request.to_json,
-            },
-          )
-        elsif response != VOID
-          @writer.write(id: request[:id], result: response)
-        end
+      if error
+        @writer.write(
+          id: request[:id],
+          error: {
+            code: Constant::ErrorCodes::INTERNAL_ERROR,
+            message: error.inspect,
+            data: request.to_json,
+          },
+        )
+      elsif response != VOID
+        @writer.write(id: request[:id], result: response)
+      end
 
-        request_time = result.request_time
-        if request_time
-          @writer.write(method: "telemetry/event", params: telemetry_params(request, request_time, error))
+      request_time = result.request_time
+      if request_time
+        @writer.write(method: "telemetry/event", params: telemetry_params(request, request_time, error))
+      end
+    end
+
+    sig { returns(Thread) }
+    def new_worker
+      Thread.new do
+        loop do
+          @mutex.synchronize do
+            # Iterate over the processes to check if they've finished, finalizing the request on result
+            @processes.each do |id, (pid, request, reader)|
+              # Check the process id without hanging
+              # TODO: Handle, might raise if there are no child processes
+              next unless Process.waitpid(pid, Process::WNOHANG)
+
+
+              # Check the exit status and raise if non-zero
+              # if $?.exitstatus != 0; end
+
+              # Read result from reader
+              # TODO: Handle, reader being empty
+              result = T.cast(Marshal.load(reader.read), Result)
+
+              # Finalize response for the request
+              finalize_request(result, request)
+
+              # Remove process from list
+              @processes.delete(pid)
+            end
+          end
+          sleep(1)
         end
       end
     end
