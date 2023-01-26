@@ -14,7 +14,7 @@ module RubyLsp
       @notifications = T.let([], T::Array[Notification])
     end
 
-    sig { params(request: T::Hash[Symbol, T.untyped]).returns(T.untyped) }
+    sig { params(request: T::Hash[Symbol, T.untyped]).returns(Result) }
     def execute(request)
       response = T.let(nil, T.untyped)
       error = T.let(nil, T.nilable(Exception))
