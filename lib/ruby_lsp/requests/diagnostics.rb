@@ -30,15 +30,20 @@ module RubyLsp
 
       sig do
         override.returns(
-          T.any(
-            T.all(T::Array[Support::RuboCopDiagnostic], Object),
-            T.all(T::Array[Support::SyntaxErrorDiagnostic], Object),
+          T.nilable(
+            T.any(
+              T.all(T::Array[Support::RuboCopDiagnostic], Object),
+              T.all(T::Array[Support::SyntaxErrorDiagnostic], Object),
+            ),
           ),
         )
       end
       def run
-        return [] if @document.syntax_error?
-        return [] unless defined?(Support::RuboCopDiagnosticsRunner)
+        return if @document.syntax_error?
+        return unless defined?(Support::RuboCopDiagnosticsRunner)
+
+        # Don't try to run RuboCop diagnostics for files outside the current working directory
+        return unless @uri.sub("file://", "").start_with?(Dir.pwd)
 
         Support::RuboCopDiagnosticsRunner.instance.run(@uri, @document)
       end
