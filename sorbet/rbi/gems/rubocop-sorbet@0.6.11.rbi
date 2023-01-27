@@ -10,10 +10,10 @@ module RuboCop; end
 # source://rubocop-sorbet//lib/rubocop/cop/sorbet/binding_constants_without_type_alias.rb#6
 module RuboCop::Cop; end
 
-# source://rubocop/1.35.0/lib/rubocop/cop/mixin/allowed_methods.rb#33
+# source://rubocop/1.43.0/lib/rubocop/cop/mixin/allowed_methods.rb#38
 RuboCop::Cop::IgnoredMethods = RuboCop::Cop::AllowedMethods
 
-# source://rubocop/1.35.0/lib/rubocop/cop/mixin/allowed_pattern.rb#46
+# source://rubocop/1.43.0/lib/rubocop/cop/mixin/allowed_pattern.rb#54
 RuboCop::Cop::IgnoredPattern = RuboCop::Cop::AllowedPattern
 
 # source://rubocop-sorbet//lib/rubocop/cop/sorbet/binding_constants_without_type_alias.rb#7
@@ -945,14 +945,16 @@ RuboCop::Cop::Sorbet::ValidSigil::SIGIL_REGEX = T.let(T.unsafe(nil), Regexp)
 # source://rubocop-sorbet//lib/rubocop/cop/sorbet/sigils/valid_sigil.rb#51
 RuboCop::Cop::Sorbet::ValidSigil::STRICTNESS_LEVELS = T.let(T.unsafe(nil), Array)
 
+module RuboCop::Cop::Style; end
+
 class RuboCop::Cop::Style::MutableConstant < ::RuboCop::Cop::Base
   include ::RuboCop::Cop::Sorbet::MutableConstantSorbetAwareBehaviour
 end
 
-# source://rubocop/1.35.0/lib/rubocop/ast_aliases.rb#5
+# source://rubocop/1.43.0/lib/rubocop/ast_aliases.rb#5
 RuboCop::NodePattern = RuboCop::AST::NodePattern
 
-# source://rubocop/1.35.0/lib/rubocop/ast_aliases.rb#6
+# source://rubocop/1.43.0/lib/rubocop/ast_aliases.rb#6
 RuboCop::ProcessedSource = RuboCop::AST::ProcessedSource
 
 # source://rubocop-sorbet//lib/rubocop/sorbet/version.rb#3
@@ -984,5 +986,5 @@ RuboCop::Sorbet::PROJECT_ROOT = T.let(T.unsafe(nil), Pathname)
 # source://rubocop-sorbet//lib/rubocop/sorbet/version.rb#4
 RuboCop::Sorbet::VERSION = T.let(T.unsafe(nil), String)
 
-# source://rubocop/1.35.0/lib/rubocop/ast_aliases.rb#7
+# source://rubocop/1.43.0/lib/rubocop/ast_aliases.rb#7
 RuboCop::Token = RuboCop::AST::Token

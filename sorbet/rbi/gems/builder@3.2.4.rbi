@@ -502,7 +502,3 @@ class Builder::XmlMarkup < ::Builder::XmlBase
   # source://builder//lib/builder/xmlmarkup.rb#286
   def _text(text); end
 end
-
-class Symbol
-  include ::Comparable
-end

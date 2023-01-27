@@ -3366,7 +3366,7 @@ Thor::Shell::Basic::DEFAULT_TERMINAL_WIDTH = T.let(T.unsafe(nil), Integer)
 # Inherit from Thor::Shell::Basic and add set_color behavior. Check
 # Thor::Shell::Basic to see all available methods.
 #
-# source://thor//lib/thor/shell/color.rb#9
+# source://thor//lib/thor/shell/color.rb#8
 class Thor::Shell::Color < ::Thor::Shell::Basic
   # Set color by using a string or one of the defined constants. If a third
   # option is set to true, it also adds bold to the string. This is based
@@ -3531,7 +3531,7 @@ Thor::Shell::Color::YELLOW = T.let(T.unsafe(nil), String)
 # Inherit from Thor::Shell::Basic and add set_color behavior. Check
 # Thor::Shell::Basic to see all available methods.
 #
-# source://thor//lib/thor/shell/html.rb#9
+# source://thor//lib/thor/shell/html.rb#8
 class Thor::Shell::HTML < ::Thor::Shell::Basic
   # Ask something to the user and receives a response.
   #

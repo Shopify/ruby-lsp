@@ -10,10 +10,10 @@ module RuboCop; end
 # source://rubocop-rake//lib/rubocop/cop/rake/helper/class_definition.rb#4
 module RuboCop::Cop; end
 
-# source://rubocop/1.35.0/lib/rubocop/cop/mixin/allowed_methods.rb#33
+# source://rubocop/1.43.0/lib/rubocop/cop/mixin/allowed_methods.rb#38
 RuboCop::Cop::IgnoredMethods = RuboCop::Cop::AllowedMethods
 
-# source://rubocop/1.35.0/lib/rubocop/cop/mixin/allowed_pattern.rb#46
+# source://rubocop/1.43.0/lib/rubocop/cop/mixin/allowed_pattern.rb#54
 RuboCop::Cop::IgnoredPattern = RuboCop::Cop::AllowedPattern
 
 # source://rubocop-rake//lib/rubocop/cop/rake/helper/class_definition.rb#5
@@ -304,10 +304,10 @@ end
 # source://rubocop-rake//lib/rubocop/cop/rake/method_definition_in_task.rb#34
 RuboCop::Cop::Rake::MethodDefinitionInTask::MSG = T.let(T.unsafe(nil), String)
 
-# source://rubocop/1.35.0/lib/rubocop/ast_aliases.rb#5
+# source://rubocop/1.43.0/lib/rubocop/ast_aliases.rb#5
 RuboCop::NodePattern = RuboCop::AST::NodePattern
 
-# source://rubocop/1.35.0/lib/rubocop/ast_aliases.rb#6
+# source://rubocop/1.43.0/lib/rubocop/ast_aliases.rb#6
 RuboCop::ProcessedSource = RuboCop::AST::ProcessedSource
 
 # source://rubocop-rake//lib/rubocop/rake/version.rb#4
@@ -339,5 +339,5 @@ RuboCop::Rake::PROJECT_ROOT = T.let(T.unsafe(nil), Pathname)
 # source://rubocop-rake//lib/rubocop/rake/version.rb#5
 RuboCop::Rake::VERSION = T.let(T.unsafe(nil), String)
 
-# source://rubocop/1.35.0/lib/rubocop/ast_aliases.rb#7
+# source://rubocop/1.43.0/lib/rubocop/ast_aliases.rb#7
 RuboCop::Token = RuboCop::AST::Token

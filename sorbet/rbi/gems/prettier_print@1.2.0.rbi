@@ -84,13 +84,13 @@ class PrettierPrint
   #
   # @return [PrettierPrint] a new instance of PrettierPrint
   #
-  # source://prettier_print//lib/prettier_print.rb#435
+  # source://prettier_print//lib/prettier_print.rb#441
   def initialize(output = T.unsafe(nil), maxwidth = T.unsafe(nil), newline = T.unsafe(nil), &genspace); end
 
   # This inserts a BreakParent node into the print tree which forces the
   # surrounding and all parent group nodes to break.
   #
-  # source://prettier_print//lib/prettier_print.rb#802
+  # source://prettier_print//lib/prettier_print.rb#811
   def break_parent; end
 
   # This says "you can break a line here if necessary", and a +width+\-column
@@ -118,34 +118,34 @@ class PrettierPrint
   # can pass `force: :skip_break_parent` to this method and it will not insert
   # a break parent.`
   #
-  # source://prettier_print//lib/prettier_print.rb#790
+  # source://prettier_print//lib/prettier_print.rb#799
   def breakable(separator = T.unsafe(nil), width = T.unsafe(nil), indent: T.unsafe(nil), force: T.unsafe(nil)); end
 
   # Another very common breakable call you receive while formatting is an
   # empty string in flat mode and a newline in break mode. Similar to
   # breakable_space, this is here for avoid unnecessary calculation.
   #
-  # source://prettier_print//lib/prettier_print.rb#634
+  # source://prettier_print//lib/prettier_print.rb#643
   def breakable_empty; end
 
   # The final of the very common breakable calls you receive while formatting
   # is the normal breakable space but with the addition of the break_parent.
   #
-  # source://prettier_print//lib/prettier_print.rb#640
+  # source://prettier_print//lib/prettier_print.rb#649
   def breakable_force; end
 
   # This is the same shortcut as breakable_force, except that it doesn't indent
   # the next line. This is necessary if you're trying to preserve some custom
   # formatting like a multi-line string.
   #
-  # source://prettier_print//lib/prettier_print.rb#648
+  # source://prettier_print//lib/prettier_print.rb#657
   def breakable_return; end
 
   # The vast majority of breakable calls you receive while formatting are a
   # space in flat mode and a newline in break mode. Since this is so common,
   # we have a method here to skip past unnecessary calculation.
   #
-  # source://prettier_print//lib/prettier_print.rb#627
+  # source://prettier_print//lib/prettier_print.rb#636
   def breakable_space; end
 
   # This is an output buffer that wraps the output object and provides
@@ -153,7 +153,7 @@ class PrettierPrint
   #
   # This defaults to Buffer::StringBuffer.new("".dup)
   #
-  # source://prettier_print//lib/prettier_print.rb#394
+  # source://prettier_print//lib/prettier_print.rb#400
   def buffer; end
 
   # A convenience method which is same as follows:
@@ -161,7 +161,7 @@ class PrettierPrint
   #   text(",")
   #   breakable
   #
-  # source://prettier_print//lib/prettier_print.rb#657
+  # source://prettier_print//lib/prettier_print.rb#666
   def comma_breakable; end
 
   # Returns the group most recently added to the stack.
@@ -194,7 +194,7 @@ class PrettierPrint
   #   #<PrettierPrint::Group:0x0 @depth=3>
   #   #<PrettierPrint::Group:0x0 @depth=4>
   #
-  # source://prettier_print//lib/prettier_print.rb#478
+  # source://prettier_print//lib/prettier_print.rb#484
   def current_group; end
 
   # This is similar to #breakable except the decision to break or not is
@@ -212,21 +212,21 @@ class PrettierPrint
   # If +width+ is not specified, +separator.length+ is used. You will have to
   # specify this when +separator+ is a multibyte character, for example.
   #
-  # source://prettier_print//lib/prettier_print.rb#676
+  # source://prettier_print//lib/prettier_print.rb#685
   def fill_breakable(separator = T.unsafe(nil), width = T.unsafe(nil)); end
 
   # Flushes all of the generated print tree onto the output buffer, then clears
   # the generated tree from memory.
   #
-  # source://prettier_print//lib/prettier_print.rb#484
-  def flush; end
+  # source://prettier_print//lib/prettier_print.rb#490
+  def flush(base_indentation = T.unsafe(nil)); end
 
   # An object that responds to call that takes one argument, of an Integer, and
   # returns the corresponding number of spaces.
   #
   # By default this is: ->(n) { ' ' * n }
   #
-  # source://prettier_print//lib/prettier_print.rb#410
+  # source://prettier_print//lib/prettier_print.rb#416
   def genspace; end
 
   # Groups line break hints added in the block. The line break hints are all to
@@ -239,12 +239,12 @@ class PrettierPrint
   # called before grouping. If +close_object+ is specified,
   # <tt>text(close_object, close_width)</tt> is called after grouping.
   #
-  # source://prettier_print//lib/prettier_print.rb#833
+  # source://prettier_print//lib/prettier_print.rb#842
   def group(indent = T.unsafe(nil), open_object = T.unsafe(nil), close_object = T.unsafe(nil), open_width = T.unsafe(nil), close_width = T.unsafe(nil)); end
 
   # The stack of groups that are being printed.
   #
-  # source://prettier_print//lib/prettier_print.rb#413
+  # source://prettier_print//lib/prettier_print.rb#419
   def groups; end
 
   # Inserts an IfBreak node with the contents of the block being added to its
@@ -257,21 +257,21 @@ class PrettierPrint
   # In the example above, if the surrounding group is broken it will print 'do'
   # and if it is not it will print '{'.
   #
-  # source://prettier_print//lib/prettier_print.rb#905
+  # source://prettier_print//lib/prettier_print.rb#914
   def if_break; end
 
   # This is similar to if_break in that it also inserts an IfBreak node into the
   # print tree, however it's starting from the flat contents, and cannot be used
   # to build the break contents.
   #
-  # source://prettier_print//lib/prettier_print.rb#924
+  # source://prettier_print//lib/prettier_print.rb#933
   def if_flat; end
 
   # Very similar to the #nest method, this indents the nested content by one
   # level by inserting an Indent node into the print tree. The contents of the
   # node are determined by the block.
   #
-  # source://prettier_print//lib/prettier_print.rb#944
+  # source://prettier_print//lib/prettier_print.rb#953
   def indent; end
 
   # This method calculates the position of the text relative to the current
@@ -279,33 +279,33 @@ class PrettierPrint
   # determining how to align text to doc nodes that are already built into the
   # tree.
   #
-  # source://prettier_print//lib/prettier_print.rb#684
+  # source://prettier_print//lib/prettier_print.rb#693
   def last_position(node); end
 
   # Inserts a LineSuffix node into the print tree. The contents of the node are
   # determined by the block.
   #
-  # source://prettier_print//lib/prettier_print.rb#955
+  # source://prettier_print//lib/prettier_print.rb#964
   def line_suffix(priority: T.unsafe(nil)); end
 
   # The maximum width of a line, before it is separated in to a newline
   #
   # This defaults to 80, and should be an Integer
   #
-  # source://prettier_print//lib/prettier_print.rb#399
+  # source://prettier_print//lib/prettier_print.rb#405
   def maxwidth; end
 
   # Increases left margin after newline with +indent+ for line breaks added in
   # the block.
   #
-  # source://prettier_print//lib/prettier_print.rb#965
+  # source://prettier_print//lib/prettier_print.rb#974
   def nest(indent); end
 
   # The value that is appended to +output+ to add a new line.
   #
   # This defaults to "\n", and should be String
   #
-  # source://prettier_print//lib/prettier_print.rb#404
+  # source://prettier_print//lib/prettier_print.rb#410
   def newline; end
 
   # The output object. It represents the final destination of the contents of
@@ -313,14 +313,14 @@ class PrettierPrint
   #
   # This defaults to "".dup
   #
-  # source://prettier_print//lib/prettier_print.rb#388
+  # source://prettier_print//lib/prettier_print.rb#394
   def output; end
 
   # This method will remove any breakables from the list of contents so that
   # no newlines are present in the output. If a newline is being forced into
   # the output, the replace value will be used.
   #
-  # source://prettier_print//lib/prettier_print.rb#709
+  # source://prettier_print//lib/prettier_print.rb#718
   def remove_breaks(node, replace = T.unsafe(nil)); end
 
   # Adds a separated list.
@@ -348,20 +348,20 @@ class PrettierPrint
   #   q.comma_breakable
   #   xxx 3
   #
-  # source://prettier_print//lib/prettier_print.rb#748
+  # source://prettier_print//lib/prettier_print.rb#757
   def seplist(list, sep = T.unsafe(nil), iter_method = T.unsafe(nil)); end
 
   # The current array of contents that calls to methods that generate print tree
   # nodes will append to.
   #
-  # source://prettier_print//lib/prettier_print.rb#417
+  # source://prettier_print//lib/prettier_print.rb#423
   def target; end
 
   # This adds +object+ as a text of +width+ columns in width.
   #
   # If +width+ is not specified, object.length is used.
   #
-  # source://prettier_print//lib/prettier_print.rb#977
+  # source://prettier_print//lib/prettier_print.rb#986
   def text(object = T.unsafe(nil), width = T.unsafe(nil)); end
 
   # This inserts a Trim node into the print tree which, when printed, will clear
@@ -369,13 +369,13 @@ class PrettierPrint
   # case where you need to delete printed indentation and force the next node
   # to start at the beginning of the line.
   #
-  # source://prettier_print//lib/prettier_print.rb#816
+  # source://prettier_print//lib/prettier_print.rb#825
   def trim; end
 
   # A convenience method used by a lot of the print tree node builders that
   # temporarily changes the target that the builders will append to.
   #
-  # source://prettier_print//lib/prettier_print.rb#995
+  # source://prettier_print//lib/prettier_print.rb#1004
   def with_target(target); end
 
   private
@@ -387,16 +387,16 @@ class PrettierPrint
   #
   # @return [Boolean]
   #
-  # source://prettier_print//lib/prettier_print.rb#1007
+  # source://prettier_print//lib/prettier_print.rb#1016
   def fits?(next_commands, rest_commands, remaining); end
 
-  # source://prettier_print//lib/prettier_print.rb#1079
+  # source://prettier_print//lib/prettier_print.rb#1088
   def remove_breaks_with(doc, replace); end
 
   # Resets the group stack and target array so that this pretty printer object
   # can continue to be used before calling flush again if desired.
   #
-  # source://prettier_print//lib/prettier_print.rb#1073
+  # source://prettier_print//lib/prettier_print.rb#1082
   def reset; end
 
   class << self
@@ -411,8 +411,8 @@ class PrettierPrint
     #
     # @yield [q]
     #
-    # source://prettier_print//lib/prettier_print.rb#372
-    def format(output = T.unsafe(nil), maxwidth = T.unsafe(nil), newline = T.unsafe(nil), genspace = T.unsafe(nil)); end
+    # source://prettier_print//lib/prettier_print.rb#377
+    def format(output = T.unsafe(nil), maxwidth = T.unsafe(nil), newline = T.unsafe(nil), genspace = T.unsafe(nil), indentation = T.unsafe(nil)); end
 
     # This is similar to PrettierPrint::format but the result has no breaks.
     #
@@ -589,6 +589,13 @@ end
 # source://prettier_print//lib/prettier_print.rb#350
 PrettierPrint::DEFAULT_GENSPACE = T.let(T.unsafe(nil), Proc)
 
+# The default indentation for printing is zero, assuming that the code starts
+# at the top level. That can be changed if desired to start from a different
+# indentation level.
+#
+# source://prettier_print//lib/prettier_print.rb#366
+PrettierPrint::DEFAULT_INDENTATION = T.let(T.unsafe(nil), Integer)
+
 # When printing, you can optionally specify the value that should be used
 # whenever a group needs to be broken onto multiple lines. In this case the
 # default is \n.
@@ -660,24 +667,24 @@ end
 # A small DSL-like object used for specifying the alternative contents to be
 # printed if the surrounding group doesn't break for an IfBreak node.
 #
-# source://prettier_print//lib/prettier_print.rb#862
+# source://prettier_print//lib/prettier_print.rb#871
 class PrettierPrint::IfBreakBuilder
   # @return [IfBreakBuilder] a new instance of IfBreakBuilder
   #
-  # source://prettier_print//lib/prettier_print.rb#865
+  # source://prettier_print//lib/prettier_print.rb#874
   def initialize(q, flat_contents); end
 
   # Returns the value of attribute flat_contents.
   #
-  # source://prettier_print//lib/prettier_print.rb#863
+  # source://prettier_print//lib/prettier_print.rb#872
   def flat_contents; end
 
-  # source://prettier_print//lib/prettier_print.rb#870
+  # source://prettier_print//lib/prettier_print.rb#879
   def if_flat; end
 
   # Returns the value of attribute q.
   #
-  # source://prettier_print//lib/prettier_print.rb#863
+  # source://prettier_print//lib/prettier_print.rb#872
   def q; end
 end
 
@@ -687,19 +694,19 @@ end
 # impact is that if there's a forced break in the flat contents, then we need
 # to propagate that break up the whole tree.
 #
-# source://prettier_print//lib/prettier_print.rb#880
+# source://prettier_print//lib/prettier_print.rb#889
 class PrettierPrint::IfFlatIgnore
   # @return [IfFlatIgnore] a new instance of IfFlatIgnore
   #
-  # source://prettier_print//lib/prettier_print.rb#883
+  # source://prettier_print//lib/prettier_print.rb#892
   def initialize(q); end
 
-  # source://prettier_print//lib/prettier_print.rb#887
+  # source://prettier_print//lib/prettier_print.rb#896
   def if_flat; end
 
   # Returns the value of attribute q.
   #
-  # source://prettier_print//lib/prettier_print.rb#881
+  # source://prettier_print//lib/prettier_print.rb#890
   def q; end
 end
 

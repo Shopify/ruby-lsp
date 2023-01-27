@@ -946,7 +946,7 @@ end
 # and in particular, the
 # {tasks page for documents}[../doc/rexml/tasks/tocs/document_toc_rdoc.html].
 #
-# source://rexml//lib/rexml/document.rb#39
+# source://rexml//lib/rexml/document.rb#35
 class REXML::Document < ::REXML::Element
   # :call-seq:
   #   new(string = nil, context = {}) -> new_document
@@ -3445,7 +3445,7 @@ end
 # A Source that wraps an IO.  See the Source class for method
 # documentation
 #
-# source://rexml//lib/rexml/source.rb#160
+# source://rexml//lib/rexml/source.rb#159
 class REXML::IOSource < ::REXML::Source
   # block_size has been deprecated
   #
@@ -4712,3 +4712,6 @@ class REXML::XPathParser
   # source://rexml//lib/rexml/xpath_parser.rb#877
   def value_type(value); end
 end
+
+# source://rexml//lib/rexml/xpath_parser.rb#58
+REXML::XPathParser::DEBUG = T.let(T.unsafe(nil), FalseClass)

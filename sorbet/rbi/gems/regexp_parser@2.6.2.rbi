@@ -15,7 +15,7 @@ class Regexp::Expression::Alternation < ::Regexp::Expression::SequenceOperation
   # source://regexp_parser//lib/regexp_parser/expression/methods/human_name.rb#9
   def human_name; end
 
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#127
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#131
   def match_length; end
 end
 
@@ -41,7 +41,7 @@ Regexp::Expression::Anchor::BOS = Regexp::Expression::Anchor::BeginningOfString
 
 # source://regexp_parser//lib/regexp_parser/expression/classes/anchor.rb#3
 class Regexp::Expression::Anchor::Base < ::Regexp::Expression::Base
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#144
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#148
   def match_length; end
 end
 
@@ -107,7 +107,7 @@ module Regexp::Expression::Assertion; end
 
 # source://regexp_parser//lib/regexp_parser/expression/classes/group.rb#87
 class Regexp::Expression::Assertion::Base < ::Regexp::Expression::Group::Base
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#144
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#148
   def match_length; end
 end
 
@@ -142,7 +142,7 @@ module Regexp::Expression::Backreference; end
 
 # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#4
 class Regexp::Expression::Backreference::Base < ::Regexp::Expression::Base
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#151
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#155
   def match_length; end
 
   # Returns the value of attribute referenced_expression.
@@ -163,11 +163,11 @@ class Regexp::Expression::Backreference::Base < ::Regexp::Expression::Base
   def initialize_copy(orig); end
 end
 
-# source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#23
+# source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#35
 class Regexp::Expression::Backreference::Name < ::Regexp::Expression::Backreference::Base
   # @return [Name] a new instance of Name
   #
-  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#27
+  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#39
   def initialize(token, options = T.unsafe(nil)); end
 
   # source://regexp_parser//lib/regexp_parser/expression/methods/human_name.rb#23
@@ -175,39 +175,39 @@ class Regexp::Expression::Backreference::Name < ::Regexp::Expression::Backrefere
 
   # Returns the value of attribute name.
   #
-  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#24
+  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#36
   def name; end
 
   # Returns the value of attribute name.
   #
-  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#24
+  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#36
   def reference; end
 end
 
-# source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#39
+# source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#51
 class Regexp::Expression::Backreference::NameCall < ::Regexp::Expression::Backreference::Name
   # source://regexp_parser//lib/regexp_parser/expression/methods/human_name.rb#24
   def human_name; end
 end
 
-# source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#51
+# source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#63
 class Regexp::Expression::Backreference::NameRecursionLevel < ::Regexp::Expression::Backreference::Name
   # @return [NameRecursionLevel] a new instance of NameRecursionLevel
   #
-  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#54
+  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#66
   def initialize(token, options = T.unsafe(nil)); end
 
   # Returns the value of attribute recursion_level.
   #
-  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#52
+  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#64
   def recursion_level; end
 end
 
-# source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#13
+# source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#25
 class Regexp::Expression::Backreference::Number < ::Regexp::Expression::Backreference::Base
   # @return [Number] a new instance of Number
   #
-  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#17
+  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#29
   def initialize(token, options = T.unsafe(nil)); end
 
   # source://regexp_parser//lib/regexp_parser/expression/methods/human_name.rb#25
@@ -215,52 +215,52 @@ class Regexp::Expression::Backreference::Number < ::Regexp::Expression::Backrefe
 
   # Returns the value of attribute number.
   #
-  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#14
+  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#26
   def number; end
 
   # Returns the value of attribute number.
   #
-  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#14
+  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#26
   def reference; end
 end
 
-# source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#38
+# source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#50
 class Regexp::Expression::Backreference::NumberCall < ::Regexp::Expression::Backreference::Number
   # source://regexp_parser//lib/regexp_parser/expression/methods/human_name.rb#27
   def human_name; end
 end
 
-# source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#40
+# source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#52
 class Regexp::Expression::Backreference::NumberCallRelative < ::Regexp::Expression::Backreference::NumberRelative
   # source://regexp_parser//lib/regexp_parser/expression/methods/human_name.rb#28
   def human_name; end
 end
 
-# source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#42
+# source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#54
 class Regexp::Expression::Backreference::NumberRecursionLevel < ::Regexp::Expression::Backreference::NumberRelative
   # @return [NumberRecursionLevel] a new instance of NumberRecursionLevel
   #
-  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#45
+  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#57
   def initialize(token, options = T.unsafe(nil)); end
 
   # Returns the value of attribute recursion_level.
   #
-  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#43
+  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#55
   def recursion_level; end
 end
 
-# source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#33
+# source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#45
 class Regexp::Expression::Backreference::NumberRelative < ::Regexp::Expression::Backreference::Number
   # Returns the value of attribute effective_number.
   #
-  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#34
+  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#46
   def effective_number; end
 
   # Sets the attribute effective_number
   #
   # @param value the value to set the attribute effective_number to.
   #
-  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#34
+  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#46
   def effective_number=(_arg0); end
 
   # source://regexp_parser//lib/regexp_parser/expression/methods/human_name.rb#26
@@ -268,7 +268,7 @@ class Regexp::Expression::Backreference::NumberRelative < ::Regexp::Expression::
 
   # Returns the value of attribute effective_number.
   #
-  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#34
+  # source://regexp_parser//lib/regexp_parser/expression/classes/backreference.rb#46
   def reference; end
 end
 
@@ -576,7 +576,7 @@ class Regexp::Expression::CharacterSet < ::Regexp::Expression::Subexpression
   # source://regexp_parser//lib/regexp_parser/expression/classes/character_set.rb#3
   def closed?; end
 
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#94
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#98
   def match_length; end
 
   # source://regexp_parser//lib/regexp_parser/expression/classes/character_set.rb#15
@@ -613,7 +613,7 @@ class Regexp::Expression::CharacterSet::IntersectedSequence < ::Regexp::Expressi
   # source://regexp_parser//lib/regexp_parser/expression/methods/human_name.rb#29
   def human_name; end
 
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#94
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#98
   def match_length; end
 end
 
@@ -622,7 +622,7 @@ class Regexp::Expression::CharacterSet::Intersection < ::Regexp::Expression::Seq
   # source://regexp_parser//lib/regexp_parser/expression/methods/human_name.rb#30
   def human_name; end
 
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#94
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#98
   def match_length; end
 end
 
@@ -642,7 +642,7 @@ class Regexp::Expression::CharacterSet::Range < ::Regexp::Expression::Subexpress
   # source://regexp_parser//lib/regexp_parser/expression/methods/human_name.rb#31
   def human_name; end
 
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#94
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#98
   def match_length; end
 
   # source://regexp_parser//lib/regexp_parser/expression/classes/character_set/range.rb#19
@@ -666,7 +666,7 @@ end
 
 # source://regexp_parser//lib/regexp_parser/expression/classes/character_type.rb#3
 class Regexp::Expression::CharacterType::Base < ::Regexp::Expression::Base
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#94
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#98
   def match_length; end
 end
 
@@ -720,7 +720,7 @@ class Regexp::Expression::Conditional::Condition < ::Regexp::Expression::Base
   # source://regexp_parser//lib/regexp_parser/expression/methods/human_name.rb#35
   def human_name; end
 
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#144
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#148
   def match_length; end
 
   # Name or number of the referenced capturing group that determines state.
@@ -774,7 +774,7 @@ class Regexp::Expression::Conditional::Expression < ::Regexp::Expression::Subexp
   # source://regexp_parser//lib/regexp_parser/expression/methods/human_name.rb#36
   def human_name; end
 
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#127
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#131
   def match_length; end
 
   # source://regexp_parser//lib/regexp_parser/expression/classes/conditional.rb#58
@@ -842,7 +842,7 @@ class Regexp::Expression::EscapeSequence::Base < ::Regexp::Expression::Base
   # source://regexp_parser//lib/regexp_parser/expression/classes/escape_sequence.rb#5
   def codepoint; end
 
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#94
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#98
   def match_length; end
 end
 
@@ -870,7 +870,7 @@ class Regexp::Expression::EscapeSequence::CodepointList < ::Regexp::Expression::
   # source://regexp_parser//lib/regexp_parser/expression/classes/escape_sequence.rb#53
   def codepoints; end
 
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#160
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#164
   def match_length; end
 end
 
@@ -924,7 +924,7 @@ class Regexp::Expression::EscapeSequence::VerticalTab < ::Regexp::Expression::Es
 
 # source://regexp_parser//lib/regexp_parser/expression/classes/free_space.rb#2
 class Regexp::Expression::FreeSpace < ::Regexp::Expression::Base
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#144
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#148
   def match_length; end
 
   # @raise [Regexp::Parser::Error]
@@ -941,7 +941,7 @@ module Regexp::Expression::Group; end
 #
 # source://regexp_parser//lib/regexp_parser/expression/classes/group.rb#34
 class Regexp::Expression::Group::Absence < ::Regexp::Expression::Group::Base
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#168
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#172
   def match_length; end
 end
 
@@ -1101,7 +1101,7 @@ class Regexp::Expression::Keep::Mark < ::Regexp::Expression::Base
   # source://regexp_parser//lib/regexp_parser/expression/methods/human_name.rb#39
   def human_name; end
 
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#144
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#148
   def match_length; end
 end
 
@@ -1110,16 +1110,16 @@ class Regexp::Expression::Literal < ::Regexp::Expression::Base
   # source://regexp_parser//lib/regexp_parser/expression/methods/human_name.rb#40
   def human_name; end
 
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#101
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#105
   def match_length; end
 end
 
-# source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#81
+# source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#85
 Regexp::Expression::MatchLength = Regexp::MatchLength
 
 # source://regexp_parser//lib/regexp_parser/expression/classes/posix_class.rb#2
 class Regexp::Expression::PosixClass < ::Regexp::Expression::Base
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#94
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#98
   def match_length; end
 
   # source://regexp_parser//lib/regexp_parser/expression/classes/posix_class.rb#7
@@ -1555,7 +1555,7 @@ class Regexp::Expression::Subexpression < ::Regexp::Expression::Base
   # source://regexp_parser//lib/regexp_parser/expression/subexpression.rb#29
   def index(*args, &block); end
 
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#114
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#118
   def inner_match_length; end
 
   # source://regexp_parser//lib/regexp_parser/expression/subexpression.rb#29
@@ -1567,7 +1567,7 @@ class Regexp::Expression::Subexpression < ::Regexp::Expression::Base
   # source://regexp_parser//lib/regexp_parser/expression/subexpression.rb#29
   def length(*args, &block); end
 
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#107
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#111
   def match_length; end
 
   # source://regexp_parser//lib/regexp_parser/expression/subexpression.rb#45
@@ -1656,7 +1656,7 @@ class Regexp::Expression::UnicodeProperty::Assigned < ::Regexp::Expression::Unic
 
 # source://regexp_parser//lib/regexp_parser/expression/classes/unicode_property.rb#4
 class Regexp::Expression::UnicodeProperty::Base < ::Regexp::Expression::Base
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#94
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#98
   def match_length; end
 
   # source://regexp_parser//lib/regexp_parser/expression/classes/unicode_property.rb#9
@@ -2112,7 +2112,7 @@ class Regexp::MatchLength
   # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#71
   def reify=(_arg0); end
 
-  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#73
+  # source://regexp_parser//lib/regexp_parser/expression/methods/match_length.rb#74
   def test_regexp; end
 
   class << self
