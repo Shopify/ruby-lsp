@@ -99,6 +99,9 @@ class Netrc
   end
 end
 
+# source://netrc//lib/netrc.rb#8
+Netrc::CYGWIN = T.let(T.unsafe(nil), T.untyped)
+
 # source://netrc//lib/netrc.rb#244
 class Netrc::Entry < ::Struct
   # Returns the value of attribute login
@@ -148,3 +151,8 @@ end
 
 # source://netrc//lib/netrc.rb#4
 Netrc::VERSION = T.let(T.unsafe(nil), String)
+
+# see http://stackoverflow.com/questions/4871309/what-is-the-correct-way-to-detect-if-ruby-is-running-on-windows
+#
+# source://netrc//lib/netrc.rb#7
+Netrc::WINDOWS = T.let(T.unsafe(nil), T.untyped)

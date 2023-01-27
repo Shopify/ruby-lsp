@@ -892,20 +892,12 @@ class Unparser::Buffer
   # source://unparser//lib/unparser/buffer.rb#45
   def append_without_prefix(string); end
 
-  # Capture the content written to the buffer within the block
-  #
-  # @api private
-  # @return [String]
-  #
-  # source://unparser//lib/unparser/buffer.rb#116
-  def capture_content; end
-
   # Return content of buffer
   #
   # @api private
   # @return [String]
   #
-  # source://unparser//lib/unparser/buffer.rb#106
+  # source://unparser//lib/unparser/buffer.rb#104
   def content; end
 
   # Test for a fresh line
@@ -913,7 +905,7 @@ class Unparser::Buffer
   # @api private
   # @return [Boolean]
   #
-  # source://unparser//lib/unparser/buffer.rb#96
+  # source://unparser//lib/unparser/buffer.rb#94
   def fresh_line?; end
 
   # Increase indent
@@ -921,7 +913,7 @@ class Unparser::Buffer
   # @api private
   # @return [self]
   #
-  # source://unparser//lib/unparser/buffer.rb#56
+  # source://unparser//lib/unparser/buffer.rb#55
   def indent; end
 
   # Write newline
@@ -929,10 +921,10 @@ class Unparser::Buffer
   # @api private
   # @return [self]
   #
-  # source://unparser//lib/unparser/buffer.rb#78
+  # source://unparser//lib/unparser/buffer.rb#77
   def nl; end
 
-  # source://unparser//lib/unparser/buffer.rb#83
+  # source://unparser//lib/unparser/buffer.rb#81
   def root_indent; end
 
   # Decrease indent
@@ -940,7 +932,7 @@ class Unparser::Buffer
   # @api private
   # @return [self]
   #
-  # source://unparser//lib/unparser/buffer.rb#67
+  # source://unparser//lib/unparser/buffer.rb#66
   def unindent; end
 
   # Write raw fragment to buffer
@@ -950,16 +942,16 @@ class Unparser::Buffer
   # @param fragment [String]
   # @return [self]
   #
-  # source://unparser//lib/unparser/buffer.rb#129
+  # source://unparser//lib/unparser/buffer.rb#115
   def write(fragment); end
 
   private
 
-  # source://unparser//lib/unparser/buffer.rb#138
+  # source://unparser//lib/unparser/buffer.rb#124
   def prefix; end
 end
 
-# source://unparser//lib/unparser/buffer.rb#136
+# source://unparser//lib/unparser/buffer.rb#122
 Unparser::Buffer::INDENT_SPACE = T.let(T.unsafe(nil), String)
 
 # source://unparser//lib/unparser/buffer.rb#8
@@ -1107,13 +1099,13 @@ class Unparser::Color
   def format(text); end
 end
 
-# source://unparser//lib/unparser/color.rb#36
+# source://unparser//lib/unparser/color.rb#39
 Unparser::Color::GREEN = T.let(T.unsafe(nil), Unparser::Color)
 
 # source://unparser//lib/unparser/color.rb#17
 Unparser::Color::NONE = T.let(T.unsafe(nil), T.untyped)
 
-# source://unparser//lib/unparser/color.rb#35
+# source://unparser//lib/unparser/color.rb#38
 Unparser::Color::RED = T.let(T.unsafe(nil), Unparser::Color)
 
 # Holds the comments that remain to be emitted
@@ -1570,7 +1562,7 @@ class Unparser::Either
   end
 end
 
-# source://unparser//lib/unparser/either.rb#56
+# source://unparser//lib/unparser/either.rb#53
 class Unparser::Either::Left < ::Unparser::Either
   # Evaluate applicative block
   #
@@ -1618,7 +1610,7 @@ end
 
 # Left
 #
-# source://unparser//lib/unparser/either.rb#106
+# source://unparser//lib/unparser/either.rb#103
 class Unparser::Either::Right < ::Unparser::Either
   # Evaluate applicative block
   #
@@ -1785,11 +1777,11 @@ end
 
 # Argument emitter
 #
-# source://unparser//lib/unparser/emitter/argument.rb#82
+# source://unparser//lib/unparser/emitter/argument.rb#84
 class Unparser::Emitter::Argument < ::Unparser::Emitter
   private
 
-  # source://unparser//lib/unparser/emitter/argument.rb#89
+  # source://unparser//lib/unparser/emitter/argument.rb#91
   def dispatch; end
 
   # source://unparser//lib/unparser/dsl.rb#18
@@ -2006,11 +1998,11 @@ end
 
 # Block pass node emitter
 #
-# source://unparser//lib/unparser/emitter/argument.rb#121
+# source://unparser//lib/unparser/emitter/argument.rb#123
 class Unparser::Emitter::BlockPass < ::Unparser::Emitter
   private
 
-  # source://unparser//lib/unparser/emitter/argument.rb#128
+  # source://unparser//lib/unparser/emitter/argument.rb#130
   def dispatch; end
 
   # source://unparser//lib/unparser/dsl.rb#18
@@ -2403,25 +2395,41 @@ class Unparser::Emitter::For < ::Unparser::Emitter
   def remaining_children; end
 end
 
+# Emitter for forwarding arguments
+#
+# source://unparser//lib/unparser/emitter/argument.rb#6
+class Unparser::Emitter::ForwardArg < ::Unparser::Emitter
+  private
+
+  # source://unparser//lib/unparser/emitter/argument.rb#20
+  def dispatch; end
+
+  # source://unparser//lib/unparser/dsl.rb#18
+  def name; end
+
+  # source://unparser//lib/unparser/dsl.rb#11
+  def remaining_children; end
+end
+
+# source://unparser//lib/unparser/emitter/argument.rb#7
+Unparser::Emitter::ForwardArg::MAP = T.let(T.unsafe(nil), Hash)
+
 # Emitter for Hash literals
 #
 # source://unparser//lib/unparser/emitter/hash.rb#6
 class Unparser::Emitter::Hash < ::Unparser::Emitter
-  # source://unparser//lib/unparser/emitter/hash.rb#17
-  def emit_heredoc_reminders; end
-
   # source://unparser//lib/unparser/emitter/hash.rb#9
-  def emit_last_argument_hash; end
+  def emit_heredoc_reminders; end
 
   private
 
-  # source://unparser//lib/unparser/emitter/hash.rb#23
+  # source://unparser//lib/unparser/emitter/hash.rb#15
   def dispatch; end
 
-  # source://unparser//lib/unparser/emitter/hash.rb#39
+  # source://unparser//lib/unparser/emitter/hash.rb#31
   def emit_hash_body; end
 
-  # source://unparser//lib/unparser/emitter/hash.rb#35
+  # source://unparser//lib/unparser/emitter/hash.rb#27
   def emit_heredoc_reminder_member(node); end
 end
 
@@ -2633,11 +2641,11 @@ end
 
 # Optional keyword argument emitter
 #
-# source://unparser//lib/unparser/emitter/argument.rb#39
+# source://unparser//lib/unparser/emitter/argument.rb#41
 class Unparser::Emitter::KeywordOptional < ::Unparser::Emitter
   private
 
-  # source://unparser//lib/unparser/emitter/argument.rb#46
+  # source://unparser//lib/unparser/emitter/argument.rb#48
   def dispatch; end
 
   # source://unparser//lib/unparser/dsl.rb#18
@@ -2668,11 +2676,11 @@ end
 
 # Keyword argument emitter
 #
-# source://unparser//lib/unparser/emitter/argument.rb#54
+# source://unparser//lib/unparser/emitter/argument.rb#56
 class Unparser::Emitter::Kwarg < ::Unparser::Emitter
   private
 
-  # source://unparser//lib/unparser/emitter/argument.rb#61
+  # source://unparser//lib/unparser/emitter/argument.rb#63
   def dispatch; end
 
   # source://unparser//lib/unparser/dsl.rb#18
@@ -2756,7 +2764,7 @@ Unparser::Emitter::MLHS::NO_COMMA = T.let(T.unsafe(nil), Array)
 
 # Base class for special match node emitters
 #
-# source://unparser//lib/unparser/emitter/match.rb#8
+# source://unparser//lib/unparser/emitter/match.rb#7
 class Unparser::Emitter::Match < ::Unparser::Emitter; end
 
 # Emitter for match current line
@@ -2939,25 +2947,6 @@ class Unparser::Emitter::Module < ::Unparser::Emitter
   def remaining_children; end
 end
 
-# Emitter for block and kwrestarg arguments
-#
-# source://unparser//lib/unparser/emitter/argument.rb#6
-class Unparser::Emitter::Morearg < ::Unparser::Emitter
-  private
-
-  # source://unparser//lib/unparser/emitter/argument.rb#18
-  def dispatch; end
-
-  # source://unparser//lib/unparser/dsl.rb#18
-  def name; end
-
-  # source://unparser//lib/unparser/dsl.rb#11
-  def remaining_children; end
-end
-
-# source://unparser//lib/unparser/emitter/argument.rb#7
-Unparser::Emitter::Morearg::MAP = T.let(T.unsafe(nil), Hash)
-
 # source://unparser//lib/unparser/emitter.rb#18
 Unparser::Emitter::NO_INDENT = T.let(T.unsafe(nil), Array)
 
@@ -3007,11 +2996,11 @@ end
 
 # Optional argument emitter
 #
-# source://unparser//lib/unparser/emitter/argument.rb#25
+# source://unparser//lib/unparser/emitter/argument.rb#27
 class Unparser::Emitter::Optarg < ::Unparser::Emitter
   private
 
-  # source://unparser//lib/unparser/emitter/argument.rb#32
+  # source://unparser//lib/unparser/emitter/argument.rb#34
   def dispatch; end
 
   # source://unparser//lib/unparser/dsl.rb#18
@@ -3162,20 +3151,20 @@ Unparser::Emitter::Primitive::Rational::RATIONAL_FORMAT = T.let(T.unsafe(nil), S
 
 # Progarg emitter
 #
-# source://unparser//lib/unparser/emitter/argument.rb#96
+# source://unparser//lib/unparser/emitter/argument.rb#98
 class Unparser::Emitter::Procarg < ::Unparser::Emitter
   private
 
-  # source://unparser//lib/unparser/emitter/argument.rb#103
+  # source://unparser//lib/unparser/emitter/argument.rb#105
   def dispatch; end
 
   # @return [Boolean]
   #
-  # source://unparser//lib/unparser/emitter/argument.rb#113
+  # source://unparser//lib/unparser/emitter/argument.rb#115
   def needs_parens?; end
 end
 
-# source://unparser//lib/unparser/emitter/argument.rb#99
+# source://unparser//lib/unparser/emitter/argument.rb#101
 Unparser::Emitter::Procarg::PARENS = T.let(T.unsafe(nil), Array)
 
 # Registry for node emitters
@@ -3278,11 +3267,11 @@ end
 
 # Rest argument emitter
 #
-# source://unparser//lib/unparser/emitter/argument.rb#68
+# source://unparser//lib/unparser/emitter/argument.rb#70
 class Unparser::Emitter::Restarg < ::Unparser::Emitter
   private
 
-  # source://unparser//lib/unparser/emitter/argument.rb#75
+  # source://unparser//lib/unparser/emitter/argument.rb#77
   def dispatch; end
 
   # source://unparser//lib/unparser/dsl.rb#18
@@ -3298,11 +3287,20 @@ end
 class Unparser::Emitter::Root < ::Unparser::Emitter
   include ::Unparser::Emitter::LocalVariableRoot
 
+  # source://unparser//lib/unparser/concord.rb#60
+  def buffer; end
+
+  # source://unparser//lib/unparser/concord.rb#60
+  def comments; end
+
   # source://unparser//lib/unparser/emitter/root.rb#14
   def dispatch; end
 
   # source://unparser//lib/unparser/adamantium/method_builder.rb#87
   def local_variable_scope(&block); end
+
+  # source://unparser//lib/unparser/concord.rb#60
+  def node; end
 end
 
 # source://unparser//lib/unparser/emitter/root.rb#10
@@ -3477,7 +3475,7 @@ end
 #
 # Original code before vendoring and reduction from: https://github.com/dkubb/equalizer.
 #
-# source://unparser//lib/unparser/equalizer.rb#19
+# source://unparser//lib/unparser/equalizer.rb#7
 class Unparser::Equalizer < ::Module
   # Initialize an Equalizer with the given keys
   #
@@ -4122,7 +4120,7 @@ class Unparser::Writer::DynamicString
 
   # @return [Boolean]
   #
-  # source://unparser//lib/unparser/writer/dynamic_string.rb#171
+  # source://unparser//lib/unparser/writer/dynamic_string.rb#159
   def breakpoint?(child, current); end
 
   # source://unparser//lib/unparser/writer/dynamic_string.rb#63
@@ -4131,16 +4129,16 @@ class Unparser::Writer::DynamicString
   # source://unparser//lib/unparser/writer/dynamic_string.rb#71
   def classify_str(node); end
 
-  # source://unparser//lib/unparser/writer/dynamic_string.rb#205
+  # source://unparser//lib/unparser/writer/dynamic_string.rb#193
   def emit_body(children); end
 
-  # source://unparser//lib/unparser/writer/dynamic_string.rb#161
+  # source://unparser//lib/unparser/writer/dynamic_string.rb#149
   def emit_dstr; end
 
-  # source://unparser//lib/unparser/writer/dynamic_string.rb#144
+  # source://unparser//lib/unparser/writer/dynamic_string.rb#132
   def emit_dynamic(child); end
 
-  # source://unparser//lib/unparser/writer/dynamic_string.rb#157
+  # source://unparser//lib/unparser/writer/dynamic_string.rb#145
   def emit_dynamic_component(node); end
 
   # source://unparser//lib/unparser/writer/dynamic_string.rb#54
@@ -4152,16 +4150,13 @@ class Unparser::Writer::DynamicString
   # source://unparser//lib/unparser/writer/dynamic_string.rb#50
   def emit_heredoc_header; end
 
-  # source://unparser//lib/unparser/writer/dynamic_string.rb#128
+  # source://unparser//lib/unparser/writer/dynamic_string.rb#116
   def emit_normal_heredoc_body; end
 
-  # source://unparser//lib/unparser/writer/dynamic_string.rb#197
+  # source://unparser//lib/unparser/writer/dynamic_string.rb#185
   def emit_segment(children, index); end
 
-  # source://unparser//lib/unparser/writer/dynamic_string.rb#116
-  def emit_squiggly_heredoc_body; end
-
-  # source://unparser//lib/unparser/writer/dynamic_string.rb#140
+  # source://unparser//lib/unparser/writer/dynamic_string.rb#128
   def escape_dynamic(string); end
 
   # @return [Boolean]
@@ -4192,7 +4187,7 @@ class Unparser::Writer::DynamicString
   # source://unparser//lib/unparser/writer/dynamic_string.rb#111
   def nl_last_child?; end
 
-  # source://unparser//lib/unparser/writer/dynamic_string.rb#181
+  # source://unparser//lib/unparser/writer/dynamic_string.rb#169
   def segments; end
 
   # @return [Boolean]
