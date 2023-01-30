@@ -132,6 +132,13 @@ The `launch.json` contains a 'Minitest - current file' configuration for the deb
 1. When the breakpoint is triggered, the process will pause and VS Code will connect to the debugger and activate the debugger UI.
 1. Open the Debug Console view to use the debugger's REPL.
 
+## Spell Checking
+
+VS Code users will be prompted to enable the [Code Spell Checker](https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker) extension.
+By default this will be enabled for all workspaces, but you can choose to selectively enable or disable it per workspace.
+
+If you introduce a word which the spell checker does not recognize, you can add it to the `cspell.json` configuration alongside your PR.
+
 ## License
 
 The gem is available as open source under the terms of the

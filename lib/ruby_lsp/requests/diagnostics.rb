@@ -15,7 +15,7 @@ module RubyLsp
     #
     # ```ruby
     # def say_hello
-    # puts "Hello" # --> diagnostics: incorrect indentantion
+    # puts "Hello" # --> diagnostics: incorrect indentation
     # end
     # ```
     class Diagnostics < BaseRequest
