@@ -141,10 +141,6 @@ export default class Client {
       this.clientOptions
     );
 
-    if ((await this.gemNotInstalled()) || (await this.gemMissing())) {
-      return;
-    }
-
     this.client.onTelemetry(this.telemetry.sendEvent.bind(this.telemetry));
     await this.client.start();
   }

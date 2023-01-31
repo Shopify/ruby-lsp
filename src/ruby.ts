@@ -72,6 +72,12 @@ export class Ruby {
     process.env = JSON.parse(result.stdout);
   }
 
+  private async displayRubyVersion() {
+    const rubyVersion = await asyncExec('ruby -e "puts RUBY_VERSION"');
+    this.rubyVersion = rubyVersion.stdout.trim();
+    vscode.window.setStatusBarMessage(`Ruby ${this.rubyVersion}`);
+  }
+
   private async readRubyVersion() {
     try {
       const version = await readFile(
