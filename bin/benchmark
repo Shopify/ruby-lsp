@@ -1,0 +1,180 @@
+#!/usr/bin/env ruby
+# typed: true
+# frozen_string_literal: true
+
+$LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+$VERBOSE = nil
+
+require "ruby_lsp/internal"
+require "benchmark"
+
+ITERATIONS = 50
+
+def avg_bench(method, params)
+  (0...ITERATIONS).map do
+    # Create a new store every time to prevent caching
+    store = RubyLsp::Store.new
+    store.set(FILE_URI, FIXTURE)
+    # Parse ahead of time or else one of the requests will do it
+    store.get(FILE_URI).parse
+
+    Benchmark.realtime do
+      RubyLsp::Executor.new(store).execute({
+        method: method,
+        params: params,
+      })
+    end
+  end.sum.to_f / ITERATIONS
+end
+
+FILE_URI = "file://#{File.expand_path(__FILE__)}"
+base_params = { textDocument: { uri: FILE_URI } }
+range = {
+  start: { line: 50, character: 0 },
+  end: { line: 75, character: 0 },
+}
+position = { line: 50, character: 8 }
+
+# The purpose of this fixture is not to make sense semantically, but to be syntatically complex. It also contains style
+# violations on purpose to ensure RuboCop finds at least some
+FIXTURE = <<~RUBY
+  # typed: true
+  # frozen_string_literal: true
+
+  require "sorbet-runtime"
+  require "active_support/concern"
+  require "active_support/core_ext/module/delegation"
+
+  module App
+    module Articles
+      class Post < ApplicationRecord
+        extend T::Sig
+
+        include Taggable
+        include Commentable
+
+        belongs_to :author
+        has_many :tags, through: :taggings
+          has_many :taggings, dependent: :destroy
+          has_many :comments, dependent: :destroy
+
+        before_save :set_published_at
+
+        validates :title, presence: true
+        validates :body, presence: true
+
+        scope :published, -> { where.not(published_at: nil) }
+        scope :by_author do |author_id|
+          where(author_id: author_id)
+        end
+
+        sig { void }
+        def publish!
+          SubscriberNotifierJob.perform_later(self)
+          save!
+        end
+
+        sig { returns(Float) }
+        def caculate_score
+          comments.average(:score) || 0.0
+        end
+
+        private
+
+        sig { void }
+        def set_published_at
+          self.published_at = Time.current if published? && published_at.blank?
+        end
+      end
+
+      class Comment < ApplicationRecord
+        extend T::Sig
+
+        belongs_to :post
+        belongs_to :user
+        has_many :replies, dependent: :destroy
+
+        validates :body, presence: true
+        validates :user, presence: true
+        validates :post, presence: true
+
+        validate   :safe_content
+
+        scope :by_user, ->(user_id) { where(user_id: user_id) }
+        scope :by_post, ->(post_id) { where(post_id: post_id) }
+
+        sig { returns(T::Boolean) }
+        def spam?
+          # TODO: Implement spam detection
+        end
+
+        private
+
+        sig { void }
+        def safe_content
+          # TODO: Validate if comment contains apropriate content
+        end
+      end
+
+      class User < ApplicationRecord
+        extend T::Sig
+
+        has_many :comments, dependent: :destroy
+        has_many :favourites, dependent: :destroy, class_name: "Post"
+
+        scope :by_name, ->(name) { where(name: name) }
+      end
+
+      class Author < ApplicationRecord
+        extend T::Sig
+
+        has_many :posts, dependent: :destroy
+
+        scope :by_name, ->(name) { where(name: name) }
+      end
+
+      class Tag < ApplicationRecord
+        extend T::Sig
+
+        has_many :taggings, dependent: :destroy
+        has_many :posts, through: :taggings
+
+        scope :by_name, ->(name) { where(name: name) }
+      end
+
+      class Tagging < ApplicationRecord
+        extend T::Sig
+
+        belongs_to :post
+        belongs_to :tag
+
+      scope :by_post, ->(post_id) { where(post_id: post_id) }
+      scope :by_tag, ->(tag_id) { where(tag_id: tag_id) }
+      end
+    end
+  end
+RUBY
+
+requests = {
+  "textDocument/semanticTokens/full" => base_params,
+  "textDocument/semanticTokens/range" => base_params.merge(range: range),
+  "textDocument/documentSymbol" => base_params,
+  "textDocument/foldingRange" => base_params,
+  "textDocument/formatting" => base_params,
+  "textDocument/diagnostic" => base_params,
+  "textDocument/documentLink" => base_params,
+  "textDocument/inlayHint" => base_params.merge(range: range),
+  "textDocument/selectionRange" => base_params.merge(positions: [position]),
+  "textDocument/documentHighlight" => base_params.merge(position: position),
+  "textDocument/hover" => base_params.merge(position: position),
+  "textDocument/codeAction" => base_params.merge(range: range),
+  "textDocument/onTypeFormatting" => base_params.merge(position: { line: 1, character: 31 }, ch: "\n"),
+}
+
+results = {}
+requests.each { |method, params| results[method] = avg_bench(method, params) }
+
+longest_key_length = requests.keys.max_by(&:length).length
+
+puts "Benchmark results in seconds (slowest at top)\n\n"
+puts results.sort_by { |_, v| -v }.map { |k, v| "#{k.rjust(longest_key_length)} #{v}" }.join("\n")
