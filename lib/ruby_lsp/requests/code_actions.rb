@@ -33,9 +33,11 @@ module RubyLsp
         @range = range
       end
 
-      sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::CodeAction], Object)) }
+      sig { override.returns(T.nilable(T.all(T::Array[LanguageServer::Protocol::Interface::CodeAction], Object))) }
       def run
         diagnostics = @document.cache_fetch(:diagnostics) { Diagnostics.new(@uri, @document).run }
+        return if diagnostics.nil?
+
         corrections = diagnostics.select do |diagnostic|
           diagnostic.correctable? && T.cast(diagnostic, Support::RuboCopDiagnostic).in_range?(@range)
         end

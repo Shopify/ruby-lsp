@@ -223,7 +223,7 @@ module RubyLsp
       Requests::InlayHints.new(document, start_line..end_line).run
     end
 
-    sig { params(uri: String, range: Document::RangeShape).returns(T::Array[Interface::CodeAction]) }
+    sig { params(uri: String, range: Document::RangeShape).returns(T.nilable(T::Array[Interface::CodeAction])) }
     def code_action(uri, range)
       start_line = range.dig(:start, :line)
       end_line = range.dig(:end, :line)

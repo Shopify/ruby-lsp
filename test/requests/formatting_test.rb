@@ -49,6 +49,10 @@ class FormattingTest < Minitest::Test
     assert_nil(RubyLsp::Requests::Formatting.new("file://#{__FILE__}", document).run)
   end
 
+  def test_returns_nil_if_document_is_not_in_project_folder
+    assert_nil(RubyLsp::Requests::Formatting.new("file:///some/other/folder/file.rb", @document).run)
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)

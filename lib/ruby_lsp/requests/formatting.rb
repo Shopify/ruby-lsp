@@ -32,8 +32,11 @@ module RubyLsp
         @uri = uri
       end
 
-      sig { override.returns(T.nilable(T.all(T::Array[LanguageServer::Protocol::Interface::TextEdit], Object))) }
+      sig { override.returns(T.nilable(T.all(T::Array[Interface::TextEdit], Object))) }
       def run
+        # Don't try to format files outside the current working directory
+        return unless @uri.sub("file://", "").start_with?(Dir.pwd)
+
         formatted_text = formatted_file
         return unless formatted_text
 
@@ -41,10 +44,10 @@ module RubyLsp
         return if formatted_text.size == size && formatted_text == @document.source
 
         [
-          LanguageServer::Protocol::Interface::TextEdit.new(
-            range: LanguageServer::Protocol::Interface::Range.new(
-              start: LanguageServer::Protocol::Interface::Position.new(line: 0, character: 0),
-              end: LanguageServer::Protocol::Interface::Position.new(line: size, character: size),
+          Interface::TextEdit.new(
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: 0, character: 0),
+              end: Interface::Position.new(line: size, character: size),
             ),
             new_text: formatted_text,
           ),
