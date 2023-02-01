@@ -78,8 +78,8 @@ module RubyLsp
         document_highlight(uri, request.dig(:params, :position))
       when "textDocument/onTypeFormatting"
         on_type_formatting(uri, request.dig(:params, :position), request.dig(:params, :ch))
-      when "hover"
-        hover(request.dig(:params, :textDocument, :uri), request.dig(:params, :position))
+      when "textDocument/hover"
+        hover(uri, request.dig(:params, :position))
       when "textDocument/inlayHint"
         inlay_hint(uri, request.dig(:params, :range))
       when "textDocument/codeAction"
