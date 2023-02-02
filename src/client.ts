@@ -127,15 +127,15 @@ export default class Client {
   }
 
   async start() {
-    if ((await this.gemNotInstalled()) || (await this.gemMissing())) {
-      return;
-    }
-
     this.client = new LanguageClient(
       LSP_NAME,
       this.serverOptions,
       this.clientOptions
     );
+
+    if ((await this.gemNotInstalled()) || (await this.gemMissing())) {
+      return;
+    }
 
     this.client.onTelemetry(this.telemetry.sendEvent.bind(this.telemetry));
     await this.client.start();
@@ -275,9 +275,15 @@ export default class Client {
     );
     this.context.subscriptions.push(watcher);
 
-    watcher.onDidChange(() => this.restart());
-    watcher.onDidCreate(() => this.restart());
-    watcher.onDidDelete(() => this.restart());
+    watcher.onDidChange(async () => {
+      await this.restart();
+    });
+    watcher.onDidCreate(async () => {
+      await this.restart();
+    });
+    watcher.onDidDelete(async () => {
+      await this.restart();
+    });
   }
 
   private listOfEnabledFeatures(): string[] {
