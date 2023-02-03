@@ -27,7 +27,31 @@ jobs:
 
       # Run the benchmark. The script reads the cache and compares the results between the PR's branch and main
       - name: Benchmark
-        run: bin/benchmark
+        id: benchmark
+        run: |
+          result=$(bin/benchmark) || true
+          echo "REPORT=$(echo "$result" | tr '\n' '#')" >> $GITHUB_OUTPUT
+
+      - name: Comment report
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '```#${{ steps.benchmark.outputs.REPORT }}#```'.split("#").join("\n"),
+            });
+
+      - name: Finalize job
+        run: |
+          if [[ "${{ steps.benchmark.outputs.REPORT }}" == *"At least one benchmark is 15% slower than the main branch"* ]]; then
+            exit 1
+          else
+            exit 0
+          fi
 
       # Only cache benchmark results from the main branch
       - name: Save main benchmark results
