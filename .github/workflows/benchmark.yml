@@ -1,0 +1,40 @@
+name: Benchmark
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Benchmark
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2
+          bundler-cache: true
+
+      # Restore the cached benchmark results from the main branch to compare it with the current branch
+      - name: Restore main benchmark results
+        id: restore-main-results
+        uses: actions/cache/restore@v3
+        if: github.event_name == 'pull_request'
+        with:
+          path: |
+            /tmp/ruby_lsp_benchmark_results.json
+          key: main-benchmark-results
+
+      # Run the benchmark. The script reads the cache and compares the results between the PR's branch and main
+      - name: Benchmark
+        run: bin/benchmark
+
+      # Only cache benchmark results from the main branch
+      - name: Save main benchmark results
+        id: save-main-results
+        uses: actions/cache/save@v3
+        if: github.ref_name == 'main'
+        with:
+          path: |
+            /tmp/ruby_lsp_benchmark_results.json
+          key: main-benchmark-results
