@@ -14,7 +14,7 @@ gem "rubocop", "~> 1.44"
 gem "rubocop-shopify", "~> 2.12", require: false
 gem "rubocop-minitest", "~> 0.27.0", require: false
 gem "rubocop-rake", "~> 0.6.0", require: false
-gem "rubocop-sorbet", "~> 0.6", require: false
+gem "rubocop-sorbet", "~> 0.7", require: false
 gem "sorbet-static-and-runtime"
 gem "tapioca", "~> 0.10", require: false
 gem "yard", "~> 0.9", require: false
