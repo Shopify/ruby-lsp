@@ -10,7 +10,8 @@ Companion VS Code extension for the [Ruby LSP gem](https://github.com/Shopify/ru
 
 ## Usage
 
-Search for `ruby-lsp` in the extensions tab and click install.
+Search for `ruby-lsp` in the extensions tab and click install. Please check the configuration section for further
+instructions.
 
 ### Configuration
 
@@ -31,9 +32,12 @@ following configuration (definition of all available values can be found in the
 }
 ```
 
-In order to boot the server properly, the Ruby version manager must be configured, which defaults to using shadowenv.
+To boot the server properly, the Ruby version manager must be configured, which defaults to using shadowenv.
 Check the [package.json](https://github.com/Shopify/vscode-ruby-lsp/blob/main/package.json) for currently supported
-managers.
+managers and use the extension's `rubyLsp.rubyVersionManager` setting to control which version manager is used.
+
+The Ruby LSP uses the Ruby version manager to reactivate the required Ruby version and to select the correct gem and
+Bundler paths, which is necessary when switching between projects using different Ruby versions.
 
 To make sure that the Ruby LSP can find the version manager scripts, make sure that they are loaded in the shell's
 configuration script (e.g.: ~/.bashrc, ~/.zshrc) and that the SHELL environment variable is set and pointing to the
