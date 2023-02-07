@@ -28,16 +28,7 @@ module RubyLsp
         @uri = uri
       end
 
-      sig do
-        override.returns(
-          T.nilable(
-            T.any(
-              T.all(T::Array[Support::RuboCopDiagnostic], Object),
-              T.all(T::Array[Support::SyntaxErrorDiagnostic], Object),
-            ),
-          ),
-        )
-      end
+      sig { override.returns(T.nilable(T.all(T::Array[Support::RuboCopDiagnostic], Object))) }
       def run
         return if @document.syntax_error?
         return unless defined?(Support::RuboCopDiagnosticsRunner)
