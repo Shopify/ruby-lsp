@@ -41,8 +41,7 @@ export class Ruby {
           break;
       }
 
-      await this.displayRubyVersion();
-      await this.checkYjit();
+      await this.fetchRubyInfo();
     } catch (error: any) {
       vscode.window.showErrorMessage(
         `Failed to activate ${this.versionManager} environment: ${error.message}`
@@ -64,7 +63,7 @@ export class Ruby {
   private async activate(ruby: string) {
     const result = await asyncExec(
       // eslint-disable-next-line no-process-env
-      `${process.env.SHELL} -lic '${ruby} -rjson -e "puts JSON.dump(ENV.to_h)"'`,
+      `${process.env.SHELL} -lic '${ruby} --disable-gems -rjson -e "puts JSON.dump(ENV.to_h)"'`,
       { cwd: this.workingFolder }
     );
 
@@ -72,10 +71,15 @@ export class Ruby {
     process.env = JSON.parse(result.stdout);
   }
 
-  private async displayRubyVersion() {
-    const rubyVersion = await asyncExec('ruby -e "puts RUBY_VERSION"');
-    this.rubyVersion = rubyVersion.stdout.trim();
-    vscode.window.setStatusBarMessage(`Ruby ${this.rubyVersion}`);
+  private async fetchRubyInfo() {
+    const rubyInfo = await asyncExec(
+      "ruby --disable-gems -e 'puts \"#{RUBY_VERSION},#{defined?(RubyVM::YJIT)}\"'"
+    );
+
+    const [rubyVersion, yjitIsDefined] = rubyInfo.stdout.trim().split(",");
+
+    this.rubyVersion = rubyVersion;
+    this.yjitEnabled = yjitIsDefined === "constant";
   }
 
   private async readRubyVersion() {
@@ -93,14 +97,6 @@ export class Ruby {
         throw error;
       }
     }
-  }
-
-  private async checkYjit() {
-    const yjitIsDefined = await asyncExec(
-      'ruby -e "puts defined?(RubyVM::YJIT)"'
-    );
-
-    this.yjitEnabled = yjitIsDefined.stdout.trim() === "constant";
   }
 
   private async delay(mseconds: number) {
