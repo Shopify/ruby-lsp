@@ -210,11 +210,16 @@ export default class Client {
   }
 
   private listOfEnabledFeatures(): string[] {
-    const features: EnabledFeatures = vscode.workspace
-      .getConfiguration("rubyLsp")
-      .get("enabledFeatures")!;
+    const configuration = vscode.workspace.getConfiguration("rubyLsp");
+    const features: EnabledFeatures = configuration.get("enabledFeatures")!;
+    const allFeatures = Object.keys(features);
 
-    return Object.keys(features).filter((key) => features[key]);
+    // If enableExperimentalFeatures is true, all features are enabled
+    if (configuration.get("enableExperimentalFeatures")) {
+      return allFeatures;
+    }
+
+    return allFeatures.filter((key) => features[key]);
   }
 
   private getEnv() {
