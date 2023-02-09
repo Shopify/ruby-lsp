@@ -23,7 +23,7 @@ module RubyLsp
         params(
           uri: String,
           document: Document,
-          range: T::Range[Integer],
+          range: Document::RangeShape,
           context: T::Hash[Symbol, T.untyped],
         ).void
       end
@@ -38,9 +38,8 @@ module RubyLsp
       sig { override.returns(T.nilable(T.all(T::Array[Interface::CodeAction], Object))) }
       def run
         diagnostics = @context[:diagnostics]
-        return if diagnostics.nil? || diagnostics.empty?
 
-        diagnostics.filter_map do |diagnostic|
+        code_actions = diagnostics.filter_map do |diagnostic|
           code_action = diagnostic.dig(:data, :code_action)
           next if code_action.nil?
 
@@ -49,13 +48,30 @@ module RubyLsp
           range = code_action.dig(:edit, :documentChanges, 0, :edits, 0, :range)
           code_action if diagnostic.dig(:data, :correctable) && cover?(range)
         end
+
+        code_actions << refactor_code_action(@range, @uri)
       end
 
       private
 
       sig { params(range: T.nilable(Document::RangeShape)).returns(T::Boolean) }
       def cover?(range)
-        range.nil? || @range.cover?(range.dig(:start, :line)..range.dig(:end, :line))
+        range.nil? ||
+          ((@range.dig(:start, :line))..(@range.dig(:end, :line))).cover?(
+            (range.dig(:start, :line))..(range.dig(:end, :line)),
+          )
+      end
+
+      sig { params(range: Document::RangeShape, uri: String).returns(Interface::CodeAction) }
+      def refactor_code_action(range, uri)
+        Interface::CodeAction.new(
+          title: "Refactor: Extract variable",
+          kind: Constant::CodeActionKind::REFACTOR_EXTRACT,
+          data: {
+            range: range,
+            uri: uri,
+          },
+        )
       end
     end
   end

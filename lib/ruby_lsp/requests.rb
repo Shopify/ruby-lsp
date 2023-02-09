@@ -14,6 +14,7 @@ module RubyLsp
   # - {RubyLsp::Requests::OnTypeFormatting}
   # - {RubyLsp::Requests::Diagnostics}
   # - {RubyLsp::Requests::CodeActions}
+  # - {RubyLsp::Requests::CodeActionResolve}
   # - {RubyLsp::Requests::DocumentHighlight}
   # - {RubyLsp::Requests::InlayHints}
   # - {RubyLsp::Requests::PathCompletion}
@@ -30,6 +31,7 @@ module RubyLsp
     autoload :OnTypeFormatting, "ruby_lsp/requests/on_type_formatting"
     autoload :Diagnostics, "ruby_lsp/requests/diagnostics"
     autoload :CodeActions, "ruby_lsp/requests/code_actions"
+    autoload :CodeActionResolve, "ruby_lsp/requests/code_action_resolve"
     autoload :DocumentHighlight, "ruby_lsp/requests/document_highlight"
     autoload :InlayHints, "ruby_lsp/requests/inlay_hints"
     autoload :PathCompletion, "ruby_lsp/requests/path_completion"

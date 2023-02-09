@@ -87,6 +87,8 @@ module RubyLsp
         inlay_hint(uri, request.dig(:params, :range))
       when "textDocument/codeAction"
         code_action(uri, request.dig(:params, :range), request.dig(:params, :context))
+      when "codeAction/resolve"
+        code_action_resolve(request.dig(:params))
       when "textDocument/diagnostic"
         begin
           diagnostic(uri)
@@ -236,11 +238,30 @@ module RubyLsp
       ).returns(T.nilable(T::Array[Interface::CodeAction]))
     end
     def code_action(uri, range, context)
-      start_line = range.dig(:start, :line)
-      end_line = range.dig(:end, :line)
       document = @store.get(uri)
 
-      Requests::CodeActions.new(uri, document, start_line..end_line, context).run
+      Requests::CodeActions.new(uri, document, range, context).run
+    end
+
+    sig { params(params: T::Hash[Symbol, T.untyped]).returns(Interface::CodeAction) }
+    def code_action_resolve(params)
+      uri = params.dig(:data, :uri)
+      document = @store.get(uri)
+      result = Requests::CodeActionResolve.new(document, params).run
+
+      case result
+      when Requests::CodeActionResolve::Error::EmptySelection
+        @notifications << Notification.new(
+          message: "window/showMessage",
+          params: Interface::ShowMessageParams.new(
+            type: Constant::MessageType::ERROR,
+            message: "Invalid selection for extract refactor",
+          ),
+        )
+        raise Requests::CodeActionResolve::CodeActionError
+      else
+        result
+      end
     end
 
     sig { params(uri: String).returns(T.nilable(Interface::FullDocumentDiagnosticReport)) }
@@ -328,6 +349,10 @@ module RubyLsp
         )
       end
 
+      code_action_provider = if enabled_features.include?("codeActions")
+        Interface::CodeActionOptions.new(resolve_provider: true)
+      end
+
       inlay_hint_provider = if enabled_features.include?("inlayHint")
         Interface::InlayHintOptions.new(resolve_provider: false)
       end
@@ -353,7 +378,7 @@ module RubyLsp
           semantic_tokens_provider: semantic_tokens_provider,
           document_formatting_provider: enabled_features.include?("formatting"),
           document_highlight_provider: enabled_features.include?("documentHighlights"),
-          code_action_provider: enabled_features.include?("codeActions"),
+          code_action_provider: code_action_provider,
           document_on_type_formatting_provider: on_type_formatting_provider,
           diagnostic_provider: diagnostics_provider,
           inlay_hint_provider: inlay_hint_provider,

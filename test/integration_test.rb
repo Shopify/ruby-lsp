@@ -206,9 +206,28 @@ class IntegrationTest < Minitest::Test
         },
       },
     )
-    quickfix = response[:result].first
-    assert_equal("quickfix", quickfix[:kind])
+    quickfix = response[:result].detect { |action| action[:kind] == "quickfix" }
+    assert(quickfix)
     assert_match(%r{Autocorrect .*/.*}, quickfix[:title])
+  end
+
+  def test_code_action_resolve
+    initialize_lsp(["codeActions"])
+    open_file_with("class Foo\nend")
+
+    assert_telemetry("textDocument/didOpen")
+
+    response = make_request(
+      "codeAction/resolve",
+      {
+        kind: "refactor.extract",
+        data: {
+          range: { start: { line: 1, character: 1 }, end: { line: 1, character: 3 } },
+          uri: "file://#{__FILE__}",
+        },
+      },
+    )
+    assert_equal("Refactor: Extract variable", response[:result][:title])
   end
 
   def test_document_did_close
