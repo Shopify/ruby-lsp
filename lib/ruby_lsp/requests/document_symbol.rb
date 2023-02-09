@@ -57,11 +57,26 @@ module RubyLsp
           event: 24,
           operator: 25,
           typeparameter: 26,
+          # TODO: How do I go about "adding" these in as a Document Symbol
+          testcase: 27,
+          scope: 28,
         }.freeze,
         T::Hash[Symbol, Integer],
       )
 
+      COMMAND_KIND = T.let(
+        {
+          attr: :field,
+          test_case: :testcase,
+          top_level: :scope,
+        }.freeze,
+        T::Hash[Symbol, Symbol],
+      )
+
       ATTR_ACCESSORS = T.let(["attr_reader", "attr_writer", "attr_accessor"].freeze, T::Array[String])
+      RSPEC_TOP_LEVEL_COMMANDS = T.let(["describe", "context"].freeze, T::Array[String])
+      TEST_COMMANDS = T.let(["test", "it"].freeze, T::Array[String])
+      ALLOW_COMMANDS = T.let((ATTR_ACCESSORS + TEST_COMMANDS + RSPEC_TOP_LEVEL_COMMANDS).freeze, T::Array[String])
 
       class SymbolHierarchyRoot
         extend T::Sig
@@ -108,17 +123,53 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::Command).void }
       def visit_command(node)
-        return unless ATTR_ACCESSORS.include?(node.message.value)
+        return unless ALLOW_COMMANDS.include?(node.message.value)
 
-        node.arguments.parts.each do |argument|
-          next unless argument.is_a?(SyntaxTree::SymbolLiteral)
+        command_type = case node.message.value
+        when *TEST_COMMANDS
+          :test_case
+        when *RSPEC_TOP_LEVEL_COMMANDS
+          :top_level
+        else
+          :attr
+        end
 
+        # Handle attr_accessors
+        if command_type == :attr
+          node.arguments.parts.each do |argument|
+            next unless argument.is_a?(SyntaxTree::SymbolLiteral)
+
+            create_document_symbol(
+              name: argument.value.value,
+              kind: T.must(COMMAND_KIND[command_type]),
+              range_node: argument,
+              selection_range_node: argument.value,
+            )
+          end
+        # Handle test cases
+        elsif command_type == :test_case
+          argument = node.arguments.parts.first
           create_document_symbol(
-            name: argument.value.value,
-            kind: :field,
+            name: argument.parts.first.value,
+            kind: T.must(COMMAND_KIND[command_type]),
             range_node: argument,
-            selection_range_node: argument.value,
+            selection_range_node: argument.parts.first,
           )
+        # Recursively handle rspecs
+        elsif command_type == :top_level
+          argument = node.arguments.parts.first
+          return unless argument.is_a?(SyntaxTree::StringLiteral)
+
+          symbol = create_document_symbol(
+            name: argument.parts.first.value,
+            kind: T.must(COMMAND_KIND[command_type]),
+            range_node: argument,
+            selection_range_node: argument.parts.first,
+          )
+          @stack << symbol
+          # visit(node.bodystmt)
+          visit(node.block.bodystmt)
+          @stack.pop
         end
       end
 
