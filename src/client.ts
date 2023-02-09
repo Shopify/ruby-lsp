@@ -159,9 +159,15 @@ export default class Client {
 
   private registerCommands() {
     this.context.subscriptions.push(
-      vscode.commands.registerCommand("ruby-lsp.start", () => this.start()),
-      vscode.commands.registerCommand("ruby-lsp.restart", () => this.restart()),
-      vscode.commands.registerCommand("ruby-lsp.stop", () => this.stop())
+      vscode.commands.registerCommand("ruby-lsp.start", async () => {
+        await this.start();
+      }),
+      vscode.commands.registerCommand("ruby-lsp.restart", async () => {
+        await this.restart();
+      }),
+      vscode.commands.registerCommand("ruby-lsp.stop", async () => {
+        await this.stop();
+      })
     );
   }
 
