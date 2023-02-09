@@ -46,6 +46,8 @@ module RubyLsp
         when "shutdown"
           warn("Shutting down Ruby LSP...")
 
+          @store.clear
+
           # Kill all processes of this group
           # Process.kill("INT", 0)
           @processes.each do |_, (pid, _, _)|
@@ -53,7 +55,6 @@ module RubyLsp
           end
 
           Thread.kill(@worker)
-          @store.clear
 
           finalize_request(Result.new(response: nil, notifications: []), request)
         when "exit"
@@ -126,8 +127,12 @@ module RubyLsp
             @processes.each do |id, (pid, request, reader)|
               # Check the process id without hanging
               # TODO: Handle, might raise if there are no child processes
-              next unless Process.waitpid(pid, Process::WNOHANG)
-
+              begin
+                next unless Process.waitpid(pid, Process::WNOHANG)
+              rescue => ex
+                @processes.delete(pid)
+                next
+              end
 
               # Check the exit status and raise if non-zero
               # if $?.exitstatus != 0; end
