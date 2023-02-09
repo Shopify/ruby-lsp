@@ -126,6 +126,12 @@ export default class Client {
   }
 
   async start() {
+    this.client = new LanguageClient(
+      LSP_NAME,
+      this.serverOptions,
+      this.clientOptions
+    );
+
     if (
       (await this.statusItem.installGems()) ||
       (await this.statusItem.addMissingGem())
@@ -134,12 +140,6 @@ export default class Client {
     }
 
     await this.statusItem.updateStatus(ServerCommand.Start);
-
-    this.client = new LanguageClient(
-      LSP_NAME,
-      this.serverOptions,
-      this.clientOptions
-    );
 
     this.client.onTelemetry(this.telemetry.sendEvent.bind(this.telemetry));
     await this.client.start();
