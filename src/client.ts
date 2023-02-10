@@ -222,6 +222,19 @@ export default class Client {
     const env = process.env;
     const useYjit = vscode.workspace.getConfiguration("rubyLsp").get("yjit");
 
+    [
+      "RUBY_GC_HEAP_OLDOBJECT_LIMIT_FACTOR",
+      "RUBY_GC_HEAP_FREE_SLOTS",
+      "RUBY_GC_HEAP_SLOTS_GROWTH_FACTOR",
+      "RUBY_GLOBAL_METHOD_CACHE_SIZE",
+      "RUBY_GC_MALLOC_LIMIT",
+      "RUBY_GC_HEAP_GROWTH_MAX_SLOTS",
+      "RUBY_GC_OLDMALLOC_LIMIT",
+      "RUBY_GC_HEAP_INIT_SLOTS",
+    ].forEach((key) => {
+      delete env[key];
+    });
+
     if (!this.ruby.rubyVersion) {
       return env;
     }
