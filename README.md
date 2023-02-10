@@ -31,6 +31,10 @@ At the time of writing, these are the major differences between Ruby LSP and [So
 * Solargraph [uses](https://solargraph.org/guides/yard) YARD documentation to gather information about your project and its gem dependencies. This provides functionality such as context-aware auto-completion and navigation ("Go To Definition")
 * Solargraph can be used as a globally installed gem, but Ruby LSP must be added to the Gemfile or gemspec if using RuboCop. (There are pros and cons to each approach)
 
+## Learn More
+
+* [RubyConf 2022: Improving the development experience with language servers](https://www.youtube.com/watch?v=kEfXPTm1aCI) ([Vinicius Stock](https://github.com/vinistock))
+
 ## Usage
 
 Install the gem. There's no need to require it, since the server is used as a standalone executable.
