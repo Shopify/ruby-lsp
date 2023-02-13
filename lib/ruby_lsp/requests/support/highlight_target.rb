@@ -10,9 +10,20 @@ module RubyLsp
         READ = LanguageServer::Protocol::Constant::DocumentHighlightKind::READ
         WRITE = LanguageServer::Protocol::Constant::DocumentHighlightKind::WRITE
 
-        class HighlightMatch < T::Struct
-          const :type, Integer
-          const :node, SyntaxTree::Node
+        class HighlightMatch
+          extend T::Sig
+
+          sig { returns(Integer) }
+          attr_reader :type
+
+          sig { returns(SyntaxTree::Node) }
+          attr_reader :node
+
+          sig { params(type: Integer, node: SyntaxTree::Node).void }
+          def initialize(type:, node:)
+            @type = type
+            @node = node
+          end
         end
 
         sig { params(node: SyntaxTree::Node).void }

@@ -78,11 +78,28 @@ module RubyLsp
         T::Array[String],
       )
 
-      class SemanticToken < T::Struct
-        const :location, SyntaxTree::Location
-        const :length, Integer
-        const :type, Integer
-        const :modifier, T::Array[Integer]
+      class SemanticToken
+        extend T::Sig
+
+        sig { returns(SyntaxTree::Location) }
+        attr_reader :location
+
+        sig { returns(Integer) }
+        attr_reader :length
+
+        sig { returns(Integer) }
+        attr_reader :type
+
+        sig { returns(T::Array[Integer]) }
+        attr_reader :modifier
+
+        sig { params(location: SyntaxTree::Location, length: Integer, type: Integer, modifier: T::Array[Integer]).void }
+        def initialize(location:, length:, type:, modifier:)
+          @location = location
+          @length = length
+          @type = type
+          @modifier = modifier
+        end
       end
 
       sig do
