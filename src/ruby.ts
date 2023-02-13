@@ -63,7 +63,7 @@ export class Ruby {
   private async activate(ruby: string) {
     const result = await asyncExec(
       // eslint-disable-next-line no-process-env
-      `${process.env.SHELL} -lic '${ruby} --disable-gems -rjson -e "puts 'RUBY_ENV_ACTIVATE' + JSON.dump(ENV.to_h) + 'RUBY_ENV_ACTIVATE'"'`,
+      `${process.env.SHELL} -lic '${ruby} --disable-gems -rjson -e "puts %Q{RUBY_ENV_ACTIVATE#{JSON.dump(ENV.to_h)}RUBY_ENV_ACTIVATE}"'`,
       { cwd: this.workingFolder }
     );
 
