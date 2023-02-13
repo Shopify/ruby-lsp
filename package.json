@@ -40,6 +40,11 @@
     "configuration": {
       "title": "Ruby LSP",
       "properties": {
+        "rubyLsp.enableExperimentalFeatures": {
+          "description": "Enable experimental and under development features",
+          "type": "boolean",
+          "default": false
+        },
         "rubyLsp.enabledFeatures": {
           "description": "List of enabled LSP features",
           "type": "object",
