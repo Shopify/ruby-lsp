@@ -20,7 +20,7 @@ module RubyLsp
     # ```
     class SemanticHighlighting < BaseRequest
       extend T::Sig
-      include SyntaxTree::WithEnvironment
+      include SyntaxTree::WithScope
 
       TOKEN_TYPES = T.let(
         {
@@ -312,7 +312,7 @@ module RubyLsp
 
       sig { params(value: SyntaxTree::Ident).returns(Symbol) }
       def type_for_local(value)
-        local = current_environment.find_local(value.value)
+        local = current_scope.find_local(value.value)
 
         if local.nil? || local.type == :variable
           :variable
