@@ -25,6 +25,7 @@ export class StatusItem {
   private selector: vscode.DocumentSelector;
   private serverStatus: vscode.LanguageStatusItem;
   private yjitStatus: vscode.LanguageStatusItem;
+  private experimentalFeaturesStatus: vscode.LanguageStatusItem;
 
   constructor(context: vscode.ExtensionContext, ruby: Ruby) {
     this.context = context;
@@ -37,7 +38,7 @@ export class StatusItem {
     this.serverStatus = this.createStatusItem(
       "serverStatus",
       "Ruby LSP: Starting...",
-      vscode.LanguageStatusSeverity?.Information
+      vscode.LanguageStatusSeverity.Information
     );
 
     this.serverStatus.command = {
@@ -54,11 +55,13 @@ export class StatusItem {
     this.createYjitStatus(this.ruby);
     this.createRubyStatus(this.ruby);
 
+    this.experimentalFeaturesStatus = this.createExperimentalFeaturesStatus();
+
     this.registerCommands();
   }
 
   public async updateStatus(status: ServerCommand) {
-    this.serverStatus.severity = vscode.LanguageStatusSeverity?.Information;
+    this.serverStatus.severity = vscode.LanguageStatusSeverity.Information;
 
     switch (status) {
       case ServerCommand.Start: {
@@ -77,7 +80,7 @@ export class StatusItem {
       }
       case ServerCommand.Restart: {
         this.serverStatus.text = "Ruby LSP: Error";
-        this.serverStatus.severity = vscode.LanguageStatusSeverity?.Error;
+        this.serverStatus.severity = vscode.LanguageStatusSeverity.Error;
         this.serverStatus.command!.arguments = [STOPPED_SERVER_OPTIONS];
       }
     }
@@ -91,7 +94,7 @@ export class StatusItem {
     const status: vscode.LanguageStatusItem = this.createStatusItem(
       "installGems",
       "Ruby LSP: The gems in the bundle are not installed.",
-      vscode.LanguageStatusSeverity?.Error
+      vscode.LanguageStatusSeverity.Error
     );
 
     status.command = {
@@ -110,7 +113,7 @@ export class StatusItem {
     const status: vscode.LanguageStatusItem = this.createStatusItem(
       "addMissingGem",
       "Ruby LSP: Bundle Add",
-      vscode.LanguageStatusSeverity?.Error
+      vscode.LanguageStatusSeverity.Error
     );
 
     status.command = {
@@ -130,7 +133,7 @@ export class StatusItem {
     const status: vscode.LanguageStatusItem = this.createStatusItem(
       "updateGem",
       "Ruby LSP: The gem is not up-to-date",
-      vscode.LanguageStatusSeverity?.Warning
+      vscode.LanguageStatusSeverity.Warning
     );
 
     status.command = {
@@ -189,12 +192,36 @@ export class StatusItem {
     return status;
   }
 
+  private createExperimentalFeaturesStatus() {
+    const experimentalFeaturesEnabled =
+      vscode.workspace
+        .getConfiguration("rubyLsp")
+        .get("enableExperimentalFeatures") === true;
+    const message = experimentalFeaturesEnabled
+      ? "Experimental features enabled"
+      : "Experimental features disabled";
+
+    const status: vscode.LanguageStatusItem =
+      vscode.languages.createLanguageStatusItem(
+        "experimentalFeatures",
+        this.selector
+      );
+
+    status.text = message;
+    status.command = {
+      title: experimentalFeaturesEnabled ? "Disable" : "Enable",
+      command: "rubyLsp.toggleExperimentalFeatures",
+    };
+
+    return status;
+  }
+
   private registerCommands() {
     this.context.subscriptions.push(
       vscode.commands.registerCommand("rubyLsp.toggleYjit", async () => {
         const lspConfig = vscode.workspace.getConfiguration("rubyLsp");
         const yjitEnabled = lspConfig.get("yjit");
-        lspConfig.update("yjit", !yjitEnabled);
+        lspConfig.update("yjit", !yjitEnabled, true, true);
         this.yjitStatus.text = yjitEnabled ? "YJIT disabled" : "YJIT enabled";
         this.yjitStatus.command!.title = yjitEnabled ? "Enable" : "Disable";
       })
@@ -273,10 +300,34 @@ export class StatusItem {
             this.createStatusItem(
               "installFail",
               "Ruby LSP: Failed to install gems.",
-              vscode.LanguageStatusSeverity?.Error
+              vscode.LanguageStatusSeverity.Error
             );
           });
       })
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        "rubyLsp.toggleExperimentalFeatures",
+        async () => {
+          const lspConfig = vscode.workspace.getConfiguration("rubyLsp");
+          const experimentalFeaturesEnabled = lspConfig.get(
+            "enableExperimentalFeatures"
+          );
+          await lspConfig.update(
+            "enableExperimentalFeatures",
+            !experimentalFeaturesEnabled,
+            true,
+            true
+          );
+          const message = experimentalFeaturesEnabled
+            ? "Experimental features disabled"
+            : "Experimental features enabled";
+          this.experimentalFeaturesStatus.text = message;
+          this.experimentalFeaturesStatus.command!.title =
+            experimentalFeaturesEnabled ? "Enable" : "Disable";
+        }
+      )
     );
   }
 }
