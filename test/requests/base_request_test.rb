@@ -42,4 +42,15 @@ class BaseRequestTest < Minitest::Test
 
     assert_instance_of(SyntaxTree::CallNode, parent)
   end
+
+  # We can remove this once we drop support for Ruby 2.7
+  def test_super_is_valid_on_ruby_2_7
+    document = RubyLsp::Document.new("")
+    semantic_highlighting = RubyLsp::Requests::SemanticHighlighting.new(
+      document,
+      range: nil,
+      encoder: RubyLsp::Requests::Support::SemanticTokenEncoder.new,
+    )
+    assert_instance_of(RubyLsp::Requests::SemanticHighlighting, semantic_highlighting)
+  end
 end
