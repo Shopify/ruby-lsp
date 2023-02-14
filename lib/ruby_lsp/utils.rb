@@ -6,29 +6,73 @@ module RubyLsp
   VOID = T.let(Object.new.freeze, Object)
 
   # A notification to be sent to the client
-  class Notification < T::Struct
-    const :message, String
-    const :params, Object
+  class Notification
+    extend T::Sig
+
+    sig { returns(String) }
+    attr_reader :message
+
+    sig { returns(Object) }
+    attr_reader :params
+
+    sig { params(message: String, params: Object).void }
+    def initialize(message:, params:)
+      @message = message
+      @params = params
+    end
   end
 
   # The final result of running a request before its IO is finalized
-  class Result < T::Struct
-    const :response, T.untyped # rubocop:disable Sorbet/ForbidUntypedStructProps
-    const :error, T.nilable(Exception)
-    const :request_time, T.nilable(Float)
-    const :notifications, T::Array[Notification]
+  class Result
+    extend T::Sig
+
+    sig { returns(T.untyped) }
+    attr_reader :response
+
+    sig { returns(T::Array[Notification]) }
+    attr_reader :notifications
+
+    sig { returns(T.nilable(Exception)) }
+    attr_reader :error
+
+    sig { returns(T.nilable(Float)) }
+    attr_reader :request_time
+
+    sig do
+      params(
+        response: T.untyped,
+        notifications: T::Array[Notification],
+        error: T.nilable(Exception),
+        request_time: T.nilable(Float),
+      ).void
+    end
+    def initialize(response:, notifications:, error: nil, request_time: nil)
+      @response = response
+      @notifications = notifications
+      @error = error
+      @request_time = request_time
+    end
   end
 
   # A request that will sit in the queue until it's executed
-  class Job < T::Struct
+  class Job
     extend T::Sig
 
-    const :request, T::Hash[Symbol, T.untyped]
-    prop :cancelled, T::Boolean
+    sig { returns(T::Hash[Symbol, T.untyped]) }
+    attr_reader :request
+
+    sig { returns(T::Boolean) }
+    attr_reader :cancelled
+
+    sig { params(request: T::Hash[Symbol, T.untyped], cancelled: T::Boolean).void }
+    def initialize(request:, cancelled:)
+      @request = request
+      @cancelled = cancelled
+    end
 
     sig { void }
     def cancel
-      self.cancelled = true
+      @cancelled = true
     end
   end
 end
