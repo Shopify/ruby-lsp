@@ -6,27 +6,58 @@ $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 $VERBOSE = nil
 
 require "bundler/setup"
+require "sorbet-runtime"
+
+# Disable any Sorbet checks
+begin
+  T::Configuration.default_checked_level = :never
+  T::Configuration.call_validation_error_handler = ->(*) {}
+  T::Configuration.inline_type_error_handler = ->(*) {}
+  T::Configuration.sig_validation_error_handler = ->(*) {}
+rescue
+  nil
+end
+
 require "ruby_lsp/internal"
 require "benchmark"
 
-ITERATIONS = 500
+# Run signature blocks ahead of time
+T::Utils.run_all_sig_blocks
+
+# Fetch Rails documents ahead of time
+RubyLsp::Requests::Support::RailsDocumentClient.send(:search_index)
+
+# Build gem file paths ahead of time
+RubyLsp::Requests::DocumentLink.gem_paths
+
+ITERATIONS = 1000
 CACHE_FILE_PATH = "/tmp/ruby_lsp_benchmark_results.json"
 
 def avg_bench(method, params)
-  (0...ITERATIONS).map do
+  results = (0...ITERATIONS).map do
     # Create a new store every time to prevent caching
     store = RubyLsp::Store.new
     store.set(FILE_URI, FIXTURE)
     # Parse ahead of time or else one of the requests will do it
     store.get(FILE_URI).parse
 
-    Benchmark.realtime do
+    GC.disable
+    result = Benchmark.measure do
       RubyLsp::Executor.new(store).execute({
         method: method,
         params: params,
       })
-    end
-  end.sum.to_f / ITERATIONS
+    end.utime
+    GC.enable
+    result
+  end
+
+  average = results.sum.to_f / ITERATIONS
+
+  # Calculate standard deviation
+  variance = results.map { |r| (r - average)**2 }.sum / ITERATIONS
+  standard_deviation = Math.sqrt(variance)
+  [average, standard_deviation]
 end
 
 FILE_URI = "file://#{File.expand_path(__FILE__)}"
@@ -35,7 +66,7 @@ range = {
   start: { line: 50, character: 0 },
   end: { line: 75, character: 0 },
 }
-position = { line: 50, character: 8 }
+position = { line: 54, character: 8 }
 
 # The purpose of this fixture is not to make sense semantically, but to be syntatically complex. It also contains style
 # violations on purpose to ensure RuboCop finds at least some
@@ -102,6 +133,7 @@ FIXTURE = <<~RUBY
 
         validate   :safe_content
 
+        # source://mutex_m//mutex_m.rb#1
         scope :by_user, ->(user_id) { where(user_id: user_id) }
         scope :by_post, ->(post_id) { where(post_id: post_id) }
 
@@ -121,6 +153,7 @@ FIXTURE = <<~RUBY
       class User < ApplicationRecord
         extend T::Sig
 
+        # source://mutex_m//mutex_m.rb#1
         has_many :comments, dependent: :destroy
         has_many :favourites, dependent: :destroy, class_name: "Post"
 
@@ -141,6 +174,7 @@ FIXTURE = <<~RUBY
         has_many :taggings, dependent: :destroy
         has_many :posts, through: :taggings
 
+        # source://mutex_m//mutex_m.rb#1
         scope :by_name, ->(name) { where(name: name) }
       end
 
@@ -179,7 +213,12 @@ requests.each { |method, params| results[method] = avg_bench(method, params) }
 longest_key_length = requests.keys.max_by(&:length).length
 
 puts "Benchmark results in seconds (slowest at top)\n\n"
-puts results.sort_by { |_, v| -v }.map { |k, v| "#{k.rjust(longest_key_length)} #{v}" }.join("\n")
+puts results
+  .sort_by { |_method, (average, _std_dev)| -average }
+  .map { |k, (average, std_dev)|
+       "#{k.rjust(longest_key_length)} average: #{average.round(6)} std_dev: #{std_dev.round(6)}"
+     }
+  .join("\n")
 
 if File.exist?(CACHE_FILE_PATH)
   main_results = JSON.parse(File.read(CACHE_FILE_PATH))
@@ -188,13 +227,18 @@ if File.exist?(CACHE_FILE_PATH)
   puts "\n\n"
   puts "=" * 80
   puts "Comparison with main branch:\n\n"
-  results.each do |method, current|
-    ratio = main_results[method].nil? ? 1.0 : 1.0 - (current / main_results[method])
+  results.each do |method, (new_average, new_std_dev)|
+    current_average, _current_std_dev = main_results[method]
+    next if new_average.nil?
+
+    ratio = 1.0 - (new_average / current_average)
     absolute_ratio = ratio.abs
-    percentage = 100 * absolute_ratio
+    percentage = (100 * absolute_ratio).round(3)
     adjusted_method = method.rjust(longest_key_length)
 
-    if absolute_ratio < 0.15
+    # If the difference between the new average and the average of the main branch is less than the a standard deviation
+    # then we consider it unchanged. This is necessary to avoid flaky benchmarks on CI, where there's a lot of variance
+    if (new_average - current_average).abs < new_std_dev
       puts "#{adjusted_method} unchanged"
     elsif ratio.negative?
       puts "#{adjusted_method} slower by #{percentage} %"
@@ -205,7 +249,9 @@ if File.exist?(CACHE_FILE_PATH)
   end
 
   unless success
-    puts "\n\nAt least one benchmark is 15% slower than the main branch."
+    # If this phrase is changed, we have to update .github/workflows/benchmark.yml since this is used to determine
+    # whether to fail the build or not
+    puts "\n\nAt least one benchmark is slower than the main branch."
     exit(1)
   end
 end
