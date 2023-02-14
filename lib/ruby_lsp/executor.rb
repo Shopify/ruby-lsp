@@ -98,6 +98,8 @@ module RubyLsp
 
           nil
         end
+      when "textDocument/completion"
+        completion(uri, request.dig(:params, :position))
       end
     end
 
@@ -257,6 +259,13 @@ module RubyLsp
       )
     end
 
+    sig do
+      params(uri: String, position: Document::PositionShape).returns(T.nilable(T::Array[Interface::CompletionItem]))
+    end
+    def completion(uri, position)
+      Requests::PathCompletion.new(@store.get(uri), position).run
+    end
+
     sig { params(options: T::Hash[Symbol, T.untyped]).returns(Interface::InitializeResult) }
     def initialize_request(options)
       @store.clear
@@ -314,6 +323,13 @@ module RubyLsp
         Interface::InlayHintOptions.new(resolve_provider: false)
       end
 
+      completion_provider = if enabled_features.include?("completion")
+        Interface::CompletionOptions.new(
+          resolve_provider: false,
+          trigger_characters: ["/"],
+        )
+      end
+
       Interface::InitializeResult.new(
         capabilities: Interface::ServerCapabilities.new(
           text_document_sync: Interface::TextDocumentSyncOptions.new(
@@ -332,6 +348,7 @@ module RubyLsp
           document_on_type_formatting_provider: on_type_formatting_provider,
           diagnostic_provider: diagnostics_provider,
           inlay_hint_provider: inlay_hint_provider,
+          completion_provider: completion_provider,
         ),
       )
     end

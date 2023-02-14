@@ -62,9 +62,10 @@ module RubyLsp
         params(
           node: SyntaxTree::Node,
           position: Integer,
+          node_types: T::Array[T.class_of(SyntaxTree::Node)],
         ).returns([T.nilable(SyntaxTree::Node), T.nilable(SyntaxTree::Node)])
       end
-      def locate(node, position)
+      def locate(node, position, node_types: [])
         queue = T.let(node.child_nodes.compact, T::Array[T.nilable(SyntaxTree::Node)])
         closest = node
 
@@ -90,6 +91,8 @@ module RubyLsp
             parent = T.let(closest, SyntaxTree::Node)
             closest = candidate
           end
+
+          break if node_types.any? { |type| candidate.is_a?(type) }
         end
 
         [closest, parent]
