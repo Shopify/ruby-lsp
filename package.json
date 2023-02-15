@@ -127,7 +127,8 @@
             "inlayHint": true,
             "onTypeFormatting": true,
             "selectionRanges": true,
-            "semanticHighlighting": true
+            "semanticHighlighting": true,
+            "completion": true
           }
         },
         "rubyLsp.rubyVersionManager": {
