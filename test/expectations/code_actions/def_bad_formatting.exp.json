@@ -1,7 +1,113 @@
 {
     "params": {
         "start": 3,
-        "end": 4
+        "end": 4,
+        "context": {
+            "diagnostics": [
+                {
+                    "range": {
+                        "start": {
+                            "line": 2,
+                            "character": 0
+                        },
+                        "end": {
+                            "line": 3,
+                            "character": 0
+                        }
+                    },
+                    "message": "Layout/EmptyLines: Extra blank line detected.",
+                    "data": {
+                        "correctable": true,
+                        "code_action": {
+                            "title": "Autocorrect Layout/EmptyLines",
+                            "kind": "quickfix",
+                            "isPreferred": true,
+                            "edit": {
+                                "documentChanges": [
+                                    {
+                                        "textDocument": {
+                                            "uri": "file:///fake",
+                                            "version": null
+                                        },
+                                        "edits": [
+                                            {
+                                                "range": {
+                                                    "start": {
+                                                        "line": 2,
+                                                        "character": 0
+                                                    },
+                                                    "end": {
+                                                        "line": 3,
+                                                        "character": 0
+                                                    }
+                                                },
+                                                "newText": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "code": "Layout/EmptyLines",
+                    "severity": 3,
+                    "source": "RuboCop"
+                },
+                {
+                    "range": {
+                        "start": {
+                            "line": 3,
+                            "character": 0
+                        },
+                        "end": {
+                            "line": 3,
+                            "character": 0
+                        }
+                    },
+                    "message": "Layout/IndentationWidth: Use 2 (not 0) spaces for indentation.",
+                    "data": {
+                        "correctable": true,
+                        "code_action": {
+                            "title": "Autocorrect Layout/IndentationWidth",
+                            "kind": "quickfix",
+                            "isPreferred": true,
+                            "edit": {
+                                "documentChanges": [
+                                    {
+                                        "textDocument": {
+                                            "uri": "file:///fake",
+                                            "version": null
+                                        },
+                                        "edits": [
+                                            {
+                                                "range": {
+                                                    "start": {
+                                                        "line": 3,
+                                                        "character": 0
+                                                    },
+                                                    "end": {
+                                                        "line": 3,
+                                                        "character": 0
+                                                    }
+                                                },
+                                                "newText": "  "
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "code": "Layout/IndentationWidth",
+                    "severity": 3,
+                    "source": "RuboCop"
+                }
+            ],
+            "only": [
+                "quickfix"
+            ],
+            "triggerKind": 1
+        }
     },
     "result": [
         {

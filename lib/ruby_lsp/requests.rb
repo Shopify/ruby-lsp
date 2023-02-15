@@ -41,7 +41,6 @@ module RubyLsp
       autoload :SemanticTokenEncoder, "ruby_lsp/requests/support/semantic_token_encoder"
       autoload :Annotation, "ruby_lsp/requests/support/annotation"
       autoload :Sorbet, "ruby_lsp/requests/support/sorbet"
-      autoload :SyntaxErrorDiagnostic, "ruby_lsp/requests/support/syntax_error_diagnostic"
       autoload :HighlightTarget, "ruby_lsp/requests/support/highlight_target"
       autoload :RailsDocumentClient, "ruby_lsp/requests/support/rails_document_client"
       autoload :PrefixTree, "ruby_lsp/requests/support/prefix_tree"

@@ -21,17 +21,4 @@ class DiagnosticsTest < Minitest::Test
 
     assert_nil(RubyLsp::Requests::Diagnostics.new("file:///some/other/folder/file.rb", document).run)
   end
-
-  private
-
-  def syntax_error_diagnostics(edits)
-    edits.map do |edit|
-      LanguageServer::Protocol::Interface::Diagnostic.new(
-        message: "Syntax error",
-        source: "SyntaxTree",
-        severity: LanguageServer::Protocol::Constant::DiagnosticSeverity::ERROR,
-        range: edit[:range],
-      )
-    end
-  end
 end

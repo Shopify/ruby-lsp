@@ -14,7 +14,40 @@
       "severity": 3,
       "code": "Sorbet/TrueSigil",
       "source": "RuboCop",
-      "message": "Sorbet/TrueSigil: No Sorbet sigil found in file. Try a `typed: true` to start (you can also use `rubocop -a` to automatically add this)."
+      "message": "Sorbet/TrueSigil: No Sorbet sigil found in file. Try a `typed: true` to start (you can also use `rubocop -a` to automatically add this).",
+      "data": {
+        "correctable": true,
+        "code_action": {
+          "title": "Autocorrect Sorbet/TrueSigil",
+          "kind": "quickfix",
+          "isPreferred": true,
+          "edit": {
+            "documentChanges": [
+              {
+                "textDocument": {
+                  "uri": "file:///fake",
+                  "version": null
+                },
+                "edits": [
+                  {
+                    "range": {
+                      "start": {
+                        "line": 0,
+                        "character": 0
+                      },
+                      "end": {
+                        "line": 0,
+                        "character": 0
+                      }
+                    },
+                    "newText": "# typed: true\n"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
     },
     {
       "range": {
@@ -30,7 +63,40 @@
       "severity": 3,
       "code": "Style/FrozenStringLiteralComment",
       "source": "RuboCop",
-      "message": "Style/FrozenStringLiteralComment: Missing frozen string literal comment."
+      "message": "Style/FrozenStringLiteralComment: Missing frozen string literal comment.",
+      "data": {
+        "correctable": true,
+        "code_action": {
+          "title": "Autocorrect Style/FrozenStringLiteralComment",
+          "kind": "quickfix",
+          "isPreferred": true,
+          "edit": {
+            "documentChanges": [
+              {
+                "textDocument": {
+                  "uri": "file:///fake",
+                  "version": null
+                },
+                "edits": [
+                  {
+                    "range": {
+                      "start": {
+                        "line": 0,
+                        "character": 0
+                      },
+                      "end": {
+                        "line": 0,
+                        "character": 0
+                      }
+                    },
+                    "newText": "# frozen_string_literal: true\n"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
     },
     {
       "range": {
@@ -46,7 +112,40 @@
       "severity": 3,
       "code": "Layout/EmptyLinesAroundMethodBody",
       "source": "RuboCop",
-      "message": "Layout/EmptyLinesAroundMethodBody: Extra empty line detected at method body beginning."
+      "message": "Layout/EmptyLinesAroundMethodBody: Extra empty line detected at method body beginning.",
+      "data": {
+        "correctable": true,
+        "code_action": {
+          "title": "Autocorrect Layout/EmptyLinesAroundMethodBody",
+          "kind": "quickfix",
+          "isPreferred": true,
+          "edit": {
+            "documentChanges": [
+              {
+                "textDocument": {
+                  "uri": "file:///fake",
+                  "version": null
+                },
+                "edits": [
+                  {
+                    "range": {
+                      "start": {
+                        "line": 1,
+                        "character": 0
+                      },
+                      "end": {
+                        "line": 2,
+                        "character": 0
+                      }
+                    },
+                    "newText": ""
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
     },
     {
       "range": {
@@ -62,7 +161,40 @@
       "severity": 3,
       "code": "Layout/EmptyLines",
       "source": "RuboCop",
-      "message": "Layout/EmptyLines: Extra blank line detected."
+      "message": "Layout/EmptyLines: Extra blank line detected.",
+      "data": {
+        "correctable": true,
+        "code_action": {
+          "title": "Autocorrect Layout/EmptyLines",
+          "kind": "quickfix",
+          "isPreferred": true,
+          "edit": {
+            "documentChanges": [
+              {
+                "textDocument": {
+                  "uri": "file:///fake",
+                  "version": null
+                },
+                "edits": [
+                  {
+                    "range": {
+                      "start": {
+                        "line": 2,
+                        "character": 0
+                      },
+                      "end": {
+                        "line": 3,
+                        "character": 0
+                      }
+                    },
+                    "newText": ""
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
     },
     {
       "range": {
@@ -78,7 +210,40 @@
       "severity": 3,
       "code": "Layout/IndentationWidth",
       "source": "RuboCop",
-      "message": "Layout/IndentationWidth: Use 2 (not 0) spaces for indentation."
+      "message": "Layout/IndentationWidth: Use 2 (not 0) spaces for indentation.",
+      "data": {
+        "correctable": true,
+        "code_action": {
+          "title": "Autocorrect Layout/IndentationWidth",
+          "kind": "quickfix",
+          "isPreferred": true,
+          "edit": {
+            "documentChanges": [
+              {
+                "textDocument": {
+                  "uri": "file:///fake",
+                  "version": null
+                },
+                "edits": [
+                  {
+                    "range": {
+                      "start": {
+                        "line": 3,
+                        "character": 0
+                      },
+                      "end": {
+                        "line": 3,
+                        "character": 0
+                      }
+                    },
+                    "newText": "  "
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
     }
   ]
 }
