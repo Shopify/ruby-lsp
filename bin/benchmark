@@ -68,6 +68,48 @@ range = {
 }
 position = { line: 54, character: 8 }
 
+code_action_params = base_params.merge(
+  range: range,
+  context: {
+    diagnostics: [
+      {
+        range: {
+          start: { line: 56, character: 0 },
+          end: { line: 52, character: 0 },
+        },
+        message: "Layout/EmptyLines: Extra blank line detected.",
+        data: {
+          correctable: true,
+          code_action: {
+            title: "Autocorrect Layout/EmptyLines",
+            kind: "quickfix",
+            isPreferred: true,
+            edit: {
+              documentChanges: [
+                {
+                  textDocument: { uri: FILE_URI, version: nil },
+                  edits: [
+                    {
+                      range: {
+                        start: { line: 52, character: 0 },
+                        end: { line: 55, character: 0 },
+                      },
+                      newText: "",
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        code: "Layout/EmptyLines",
+        severity: 3,
+        source: "RuboCop",
+      },
+    ],
+  },
+)
+
 # The purpose of this fixture is not to make sense semantically, but to be syntatically complex. It also contains style
 # violations on purpose to ensure RuboCop finds at least some
 FIXTURE = <<~RUBY
@@ -203,7 +245,7 @@ requests = {
   "textDocument/selectionRange" => base_params.merge(positions: [position]),
   "textDocument/documentHighlight" => base_params.merge(position: position),
   "textDocument/hover" => base_params.merge(position: position),
-  "textDocument/codeAction" => base_params.merge(range: range),
+  "textDocument/codeAction" => code_action_params,
   "textDocument/onTypeFormatting" => base_params.merge(position: { line: 1, character: 31 }, ch: "\n"),
 }
 
