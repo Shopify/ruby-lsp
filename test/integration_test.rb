@@ -165,7 +165,45 @@ class IntegrationTest < Minitest::Test
       "textDocument/codeAction",
       {
         textDocument: { uri: "file://#{__FILE__}" },
-        range: { start: { line: 0 }, end: { line: 1 } },
+        range: { start: { line: 2 }, end: { line: 4 } },
+        context: {
+          diagnostics: [
+            {
+              range: {
+                start: { line: 2, character: 0 },
+                end: { line: 2, character: 0 },
+              },
+              message: "Layout/EmptyLines: Extra blank line detected.",
+              data: {
+                correctable: true,
+                code_action: {
+                  title: "Autocorrect Layout/EmptyLines",
+                  kind: "quickfix",
+                  isPreferred: true,
+                  edit: {
+                    documentChanges: [
+                      {
+                        textDocument: { uri: "file://#{__FILE__}", version: nil },
+                        edits: [
+                          {
+                            range: {
+                              start: { line: 2, character: 0 },
+                              end: { line: 3, character: 0 },
+                            },
+                            newText: "",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                },
+              },
+              code: "Layout/EmptyLines",
+              severity: 3,
+              source: "RuboCop",
+            },
+          ],
+        },
       },
     )
     quickfix = response[:result].first

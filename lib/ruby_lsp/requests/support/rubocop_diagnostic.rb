@@ -19,30 +19,13 @@ module RubyLsp
           T::Hash[Symbol, Integer],
         )
 
-        sig { returns(T::Array[LanguageServer::Protocol::Interface::TextEdit]) }
-        attr_reader :replacements
-
         sig { params(offense: RuboCop::Cop::Offense, uri: String).void }
         def initialize(offense, uri)
           @offense = offense
           @uri = uri
-          @replacements = T.let(
-            offense.correctable? ? offense_replacements : [],
-            T::Array[LanguageServer::Protocol::Interface::TextEdit],
-          )
         end
 
-        sig { returns(T::Boolean) }
-        def correctable?
-          @offense.correctable?
-        end
-
-        sig { params(range: T::Range[Integer]).returns(T::Boolean) }
-        def in_range?(range)
-          range.cover?(@offense.line - 1)
-        end
-
-        sig { returns(LanguageServer::Protocol::Interface::CodeAction) }
+        sig { returns(Interface::CodeAction) }
         def to_lsp_code_action
           LanguageServer::Protocol::Interface::CodeAction.new(
             title: "Autocorrect #{@offense.cop_name}",
@@ -54,7 +37,7 @@ module RubyLsp
                     uri: @uri,
                     version: nil,
                   ),
-                  edits: @replacements,
+                  edits: @offense.correctable? ? offense_replacements : [],
                 ),
               ],
             ),
@@ -86,6 +69,10 @@ module RubyLsp
                 character: @offense.last_column,
               ),
             ),
+            data: {
+              correctable: @offense.correctable?,
+              code_action: to_lsp_code_action,
+            },
           )
         end
 

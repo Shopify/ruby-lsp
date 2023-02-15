@@ -20,12 +20,25 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     end
 
     assert_empty(stdout)
-    T.must(result).map(&:to_lsp_diagnostic).to_json
+    T.must(result).map(&:to_lsp_diagnostic)
   end
 
   def assert_expectations(source, expected)
-    actual = run_expectations(source)
-    assert_equal(map_diagnostics(json_expectations(expected)), JSON.parse(actual.to_json))
+    actual = T.let(run_expectations(source), T::Array[LanguageServer::Protocol::Interface::Diagnostic])
+
+    # Sanitize the URI keys so that it matches file:///fake and not a real path in the user machine
+    actual.each do |diagnostic|
+      attributes = diagnostic.attributes
+
+      text_document_identifier = attributes[:data][:code_action]
+        .attributes[:edit]
+        .attributes[:documentChanges][0]
+        .attributes[:textDocument]
+
+      text_document_identifier.instance_variable_set(:@attributes, { uri: "file:///fake", version: nil })
+    end
+
+    assert_equal(JSON.parse(map_diagnostics(json_expectations(expected))), JSON.parse(actual.to_json))
   end
 
   private
@@ -47,6 +60,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
             character: diagnostic["range"]["end"]["character"],
           ),
         ),
+        data: diagnostic["data"],
       )
     end.to_json
   end

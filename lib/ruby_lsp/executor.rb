@@ -83,7 +83,7 @@ module RubyLsp
       when "textDocument/inlayHint"
         inlay_hint(uri, request.dig(:params, :range))
       when "textDocument/codeAction"
-        code_action(uri, request.dig(:params, :range))
+        code_action(uri, request.dig(:params, :range), request.dig(:params, :context))
       when "textDocument/diagnostic"
         begin
           diagnostic(uri)
@@ -225,13 +225,19 @@ module RubyLsp
       Requests::InlayHints.new(document, start_line..end_line).run
     end
 
-    sig { params(uri: String, range: Document::RangeShape).returns(T.nilable(T::Array[Interface::CodeAction])) }
-    def code_action(uri, range)
+    sig do
+      params(
+        uri: String,
+        range: Document::RangeShape,
+        context: T::Hash[Symbol, T.untyped],
+      ).returns(T.nilable(T::Array[Interface::CodeAction]))
+    end
+    def code_action(uri, range, context)
       start_line = range.dig(:start, :line)
       end_line = range.dig(:end, :line)
       document = @store.get(uri)
 
-      Requests::CodeActions.new(uri, document, start_line..end_line).run
+      Requests::CodeActions.new(uri, document, start_line..end_line, context).run
     end
 
     sig { params(uri: String).returns(T.nilable(Interface::FullDocumentDiagnosticReport)) }

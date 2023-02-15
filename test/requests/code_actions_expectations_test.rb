@@ -13,23 +13,15 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
     result = T.let(nil, T.nilable(T::Array[LanguageServer::Protocol::Interface::CodeAction]))
 
     stdout, _ = capture_io do
-      result = T.unsafe(RubyLsp::Requests::CodeActions).new(
+      result = RubyLsp::Requests::CodeActions.new(
         "file://#{__FILE__}",
         document,
         params[:start]..params[:end],
+        params[:context],
       ).run
     end
 
     assert_empty(stdout)
-
-    # RuboCop needs a real URI to work, but we can't put that in an expectation file since it changes between each
-    # developer's machine. To workaround it, we run using a real URI and then force set the result URIs to a fake one
-    T.must(result).each do |action|
-      action.attributes[:edit].attributes[:documentChanges].each do |changes|
-        changes.attributes[:textDocument].instance_variable_set(:@attributes, { uri: "file:///fake", version: nil })
-      end
-    end
-
     result
   end
 
@@ -41,7 +33,7 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
   private
 
   def default_args
-    { start: 0, end: 1 }
+    { start: 0, end: 1, context: { diagnostics: [] } }
   end
 
   def map_actions(diagnostics)
