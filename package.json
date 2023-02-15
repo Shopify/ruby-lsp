@@ -108,6 +108,11 @@
               "description": "Enable semantic highlighting, which highlights code based on Ruby's understanding of it",
               "type": "boolean",
               "default": true
+            },
+            "completion": {
+              "description": "Enable completion, which provides suggestions for code completion",
+              "type": "boolean",
+              "default": true
             }
           },
           "default": {
