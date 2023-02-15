@@ -7,7 +7,11 @@ jobs:
     runs-on: ubuntu-latest
     name: Benchmark
     steps:
-      - uses: actions/checkout@v3
+      # Setup the main branch to run benchmarks there as a baseline for comparison
+      - name: Checkout to main
+        uses: actions/checkout@v3
+        with:
+          ref: main
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -15,26 +19,46 @@ jobs:
           ruby-version: 3.2
           bundler-cache: true
 
-      # Restore the cached benchmark results from the main branch to compare it with the current branch
-      - name: Restore main benchmark results
-        id: restore-main-results
-        uses: actions/cache/restore@v3
+      - name: Main benchmark
+        id: main-benchmark
+        run: |
+         bin/benchmark
+
+      # Setup the PR's branch to run benchmarks and compare with main results
+      - name: Checkout to branch
+        uses: actions/checkout@v3
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2
+          bundler-cache: true
+
+      - name: Branch benchmark
+        id: benchmark
+        run: |
+          result=$(bin/benchmark) || true
+          echo "REPORT=$(echo "$result" | tr '\n' '#')" >> $GITHUB_OUTPUT
+
+      # Post the results as a comment on the PR
+      - name: Comment report
+        uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
         with:
-          path: |
-            /tmp/ruby_lsp_benchmark_results.json
-          key: main-benchmark-results
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '```#${{ steps.benchmark.outputs.REPORT }}#```'.split("#").join("\n"),
+            });
 
-      # Run the benchmark. The script reads the cache and compares the results between the PR's branch and main
-      - name: Benchmark
-        run: bin/benchmark
-
-      # Only cache benchmark results from the main branch
-      - name: Save main benchmark results
-        id: save-main-results
-        uses: actions/cache/save@v3
-        if: github.ref_name == 'main'
-        with:
-          path: |
-            /tmp/ruby_lsp_benchmark_results.json
-          key: main-benchmark-results
+      # Fail the job based on the benchmark output
+      - name: Finalize job
+        run: |
+          if [[ "${{ steps.benchmark.outputs.REPORT }}" == *"At least one benchmark is slower than the main branch"* ]]; then
+            exit 1
+          else
+            exit 0
+          fi
