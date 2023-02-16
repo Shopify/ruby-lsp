@@ -46,6 +46,22 @@ class PathCompletionTest < Minitest::Test
     assert_equal(path_completions("ruby_lsp/requests/").to_json, result.to_json)
   end
 
+  def test_completion_does_not_fail_when_there_are_syntax_errors
+    document = RubyLsp::Document.new(+<<~RUBY)
+      require "ruby_lsp/requests/"
+
+      def foo
+    RUBY
+
+    position = {
+      line: 0,
+      character: 21,
+    }
+
+    result = RubyLsp::Requests::PathCompletion.new(document, position).run
+    assert_empty(result)
+  end
+
   private
 
   def path_completions(path_stem)

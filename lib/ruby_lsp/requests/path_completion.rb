@@ -21,17 +21,20 @@ module RubyLsp
         super(document)
 
         @tree = T.let(Support::PrefixTree.new(collect_load_path_files), Support::PrefixTree)
-
-        char_position = document.create_scanner.find_char_position(position)
-        @target = T.let(find(char_position), T.nilable(SyntaxTree::TStringContent))
+        @position = position
       end
 
-      sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::CompletionItem], Object)) }
+      sig { override.returns(T.all(T::Array[Interface::CompletionItem], Object)) }
       def run
-        # no @target means the we are not inside a `require` call
-        return [] unless @target
+        # We can't verify if we're inside a require when there are syntax errors
+        return [] if @document.syntax_error?
 
-        text = @target.value
+        char_position = @document.create_scanner.find_char_position(@position)
+        target = T.let(find(char_position), T.nilable(SyntaxTree::TStringContent))
+        # no target means the we are not inside a `require` call
+        return [] unless target
+
+        text = target.value
         @tree.search(text).sort.map! do |path|
           build_completion(path, path.delete_prefix(text))
         end
@@ -73,14 +76,12 @@ module RubyLsp
         end
       end
 
-      sig do
-        params(label: String, insert_text: String).returns(LanguageServer::Protocol::Interface::CompletionItem)
-      end
+      sig { params(label: String, insert_text: String).returns(Interface::CompletionItem) }
       def build_completion(label, insert_text)
-        LanguageServer::Protocol::Interface::CompletionItem.new(
+        Interface::CompletionItem.new(
           label: label,
           insert_text: insert_text,
-          kind: LanguageServer::Protocol::Constant::CompletionItemKind::REFERENCE,
+          kind: Constant::CompletionItemKind::REFERENCE,
         )
       end
     end

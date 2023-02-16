@@ -21,9 +21,10 @@ module RubyLsp
       @encoding = T.let(encoding, String)
       @source = T.let(source, String)
       @unparsed_edits = T.let([], T::Array[EditShape])
+      @syntax_error = T.let(false, T::Boolean)
       @tree = T.let(SyntaxTree.parse(@source), T.nilable(SyntaxTree::Node))
     rescue SyntaxTree::Parser::ParseError
-      # Do not raise if we failed to parse
+      @syntax_error = true
     end
 
     sig { params(other: Document).returns(T::Boolean) }
@@ -68,14 +69,15 @@ module RubyLsp
       return if @unparsed_edits.empty?
 
       @tree = SyntaxTree.parse(@source)
+      @syntax_error = false
       @unparsed_edits.clear
     rescue SyntaxTree::Parser::ParseError
-      # Do nothing if we fail parse
+      @syntax_error = true
     end
 
     sig { returns(T::Boolean) }
     def syntax_error?
-      @unparsed_edits.any?
+      @syntax_error
     end
 
     sig { returns(T::Boolean) }

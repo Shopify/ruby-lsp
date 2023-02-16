@@ -267,17 +267,29 @@ class DocumentTest < Minitest::Test
     RUBY
   end
 
-  def test_unparsed_edits_indicates_when_edits_are_present
+  def test_failing_to_parse_indicates_syntax_error
     document = RubyLsp::Document.new(+<<~RUBY)
       def foo
       end
     RUBY
 
-    refute(document.syntax_error?)
+    refute_predicate(document, :syntax_error?)
 
-    document.push_edits([{ range: { start: { line: 0, character: 7 }, end: { line: 0, character: 7 } }, text: "\n  " }])
+    document.push_edits([{
+      range: { start: { line: 0, character: 7 }, end: { line: 0, character: 7 } },
+      text: "\n  def",
+    }])
+    document.parse
 
-    assert(document.syntax_error?)
+    assert_predicate(document, :syntax_error?)
+  end
+
+  def test_files_opened_with_syntax_errors_are_properly_marked
+    document = RubyLsp::Document.new(+<<~RUBY)
+      def foo
+    RUBY
+
+    assert_predicate(document, :syntax_error?)
   end
 
   private
