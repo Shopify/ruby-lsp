@@ -24,7 +24,7 @@ module RubyLsp
         @position = position
       end
 
-      sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::CompletionItem], Object)) }
+      sig { override.returns(T.all(T::Array[Interface::CompletionItem], Object)) }
       def run
         # We can't verify if we're inside a require when there are syntax errors
         return [] if @document.syntax_error?
@@ -76,14 +76,12 @@ module RubyLsp
         end
       end
 
-      sig do
-        params(label: String, insert_text: String).returns(LanguageServer::Protocol::Interface::CompletionItem)
-      end
+      sig { params(label: String, insert_text: String).returns(Interface::CompletionItem) }
       def build_completion(label, insert_text)
-        LanguageServer::Protocol::Interface::CompletionItem.new(
+        Interface::CompletionItem.new(
           label: label,
           insert_text: insert_text,
-          kind: LanguageServer::Protocol::Constant::CompletionItemKind::REFERENCE,
+          kind: Constant::CompletionItemKind::REFERENCE,
         )
       end
     end
