@@ -37,6 +37,9 @@ module RubyLsp
       case request[:method]
       when "initialize"
         initialize_request(request.dig(:params))
+      when "initialized"
+        warn("Ruby LSP is ready")
+        VOID
       when "textDocument/didOpen"
         text_document_did_open(uri, request.dig(:params, :textDocument, :text))
       when "textDocument/didClose"
