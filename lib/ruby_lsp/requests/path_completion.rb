@@ -80,7 +80,13 @@ module RubyLsp
       def build_completion(label, insert_text)
         Interface::CompletionItem.new(
           label: label,
-          insert_text: insert_text,
+          text_edit: Interface::TextEdit.new(
+            range: Interface::Range.new(
+              start: @position,
+              end: @position,
+            ),
+            new_text: insert_text,
+          ),
           kind: Constant::CompletionItemKind::REFERENCE,
         )
       end

@@ -5,45 +5,112 @@ require "test_helper"
 
 class PathCompletionTest < Minitest::Test
   def test_completion_command
-    document = RubyLsp::Document.new(+<<~RUBY)
-      require "ruby_lsp/requests/"
+    prefix = "foo/"
+
+    document = RubyLsp::Document.new(<<~RUBY)
+      require "#{prefix}"
     RUBY
 
     position = {
       line: 0,
-      character: 21,
+      character: document.source.rindex('"') || 0,
     }
 
-    result = RubyLsp::Requests::PathCompletion.new(document, position).run
-    assert_equal(path_completions("ruby_lsp/requests/").to_json, result.to_json)
+    result = with_file_structure do
+      RubyLsp::Requests::PathCompletion.new(document, position).run
+    end
+
+    expected = [
+      path_completion("foo/bar", prefix, position),
+      path_completion("foo/baz", prefix, position),
+      path_completion("foo/quux", prefix, position),
+      path_completion("foo/support/bar", prefix, position),
+      path_completion("foo/support/baz", prefix, position),
+      path_completion("foo/support/quux", prefix, position),
+    ]
+
+    assert_equal(expected.to_json, result.to_json)
   end
 
   def test_completion_call
+    prefix = "foo/"
+
     document = RubyLsp::Document.new(+<<~RUBY)
-      require("ruby_lsp/requests/")
+      require("#{prefix}")
     RUBY
 
     position = {
       line: 0,
-      character: 21,
+      character: document.source.rindex('"') || 0,
     }
 
-    result = RubyLsp::Requests::PathCompletion.new(document, position).run
-    assert_equal(path_completions("ruby_lsp/requests/").to_json, result.to_json)
+    result = with_file_structure do
+      RubyLsp::Requests::PathCompletion.new(document, position).run
+    end
+
+    expected = [
+      path_completion("foo/bar", prefix, position),
+      path_completion("foo/baz", prefix, position),
+      path_completion("foo/quux", prefix, position),
+      path_completion("foo/support/bar", prefix, position),
+      path_completion("foo/support/baz", prefix, position),
+      path_completion("foo/support/quux", prefix, position),
+    ]
+
+    assert_equal(expected.to_json, result.to_json)
   end
 
   def test_completion_command_call
+    prefix = "foo/"
+
     document = RubyLsp::Document.new(+<<~RUBY)
-      Kernel.require "ruby_lsp/requests/"
+      Kernel.require "#{prefix}"
     RUBY
 
     position = {
       line: 0,
-      character: 28,
+      character: document.source.rindex('"') || 0,
     }
 
-    result = RubyLsp::Requests::PathCompletion.new(document, position).run
-    assert_equal(path_completions("ruby_lsp/requests/").to_json, result.to_json)
+    result = with_file_structure do
+      RubyLsp::Requests::PathCompletion.new(document, position).run
+    end
+
+    expected = [
+      path_completion("foo/bar", prefix, position),
+      path_completion("foo/baz", prefix, position),
+      path_completion("foo/quux", prefix, position),
+      path_completion("foo/support/bar", prefix, position),
+      path_completion("foo/support/baz", prefix, position),
+      path_completion("foo/support/quux", prefix, position),
+    ]
+
+    assert_equal(expected.to_json, result.to_json)
+  end
+
+  def test_completion_with_partial_path
+    prefix = "foo/suppo"
+
+    document = RubyLsp::Document.new(+<<~RUBY)
+      require "#{prefix}"
+    RUBY
+
+    position = {
+      line: 0,
+      character: document.source.rindex('"') || 0,
+    }
+
+    result = with_file_structure do
+      RubyLsp::Requests::PathCompletion.new(document, position).run
+    end
+
+    expected = [
+      path_completion("foo/support/bar", prefix, position),
+      path_completion("foo/support/baz", prefix, position),
+      path_completion("foo/support/quux", prefix, position),
+    ]
+
+    assert_equal(expected.to_json, result.to_json)
   end
 
   def test_completion_does_not_fail_when_there_are_syntax_errors
@@ -64,16 +131,47 @@ class PathCompletionTest < Minitest::Test
 
   private
 
-  def path_completions(path_stem)
-    root = File.dirname(Bundler.default_gemfile) + "/lib"
+  def with_file_structure(&block)
+    Dir.mktmpdir("path_completion_test") do |tmpdir|
+      $LOAD_PATH << tmpdir
 
-    Dir["#{path_stem}**/*.rb", base: root].sort.map do |path|
-      path.delete_suffix!(".rb")
-      LanguageServer::Protocol::Interface::CompletionItem.new(
-        label: path,
-        insert_text: path.delete_prefix(path_stem),
-        kind: LanguageServer::Protocol::Constant::CompletionItemKind::REFERENCE,
-      )
+      # Set up folder structure like this
+      # <tmpdir>
+      # |-- foo
+      # |   |-- bar.rb
+      # |   |-- baz.rb
+      # |   |-- quux.rb
+      # |   |-- support
+      # |       |-- bar.rb
+      # |       |-- baz.rb
+      # |       |-- quux.rb
+      FileUtils.mkdir_p(tmpdir + "/foo/support")
+      FileUtils.touch([
+        tmpdir + "/foo/bar.rb",
+        tmpdir + "/foo/baz.rb",
+        tmpdir + "/foo/quux.rb",
+        tmpdir + "/foo/support/bar.rb",
+        tmpdir + "/foo/support/baz.rb",
+        tmpdir + "/foo/support/quux.rb",
+      ])
+
+      return block.call
+    ensure
+      $LOAD_PATH.delete(tmpdir)
     end
+  end
+
+  def path_completion(path, prefix, position)
+    LanguageServer::Protocol::Interface::CompletionItem.new(
+      label: path,
+      text_edit: LanguageServer::Protocol::Interface::TextEdit.new(
+        range: LanguageServer::Protocol::Interface::Range.new(
+          start: position,
+          end: position,
+        ),
+        new_text: path.delete_prefix(prefix),
+      ),
+      kind: LanguageServer::Protocol::Constant::CompletionItemKind::REFERENCE,
+    )
   end
 end
