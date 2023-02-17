@@ -36,6 +36,19 @@ class FormattingTest < Minitest::Test
     end
   end
 
+  def test_syntax_tree_formatting_ignores_syntax_invalid_documents
+    with_uninstalled_rubocop do
+      require "ruby_lsp/requests"
+      document = RubyLsp::Document.new("def foo")
+      assert_nil(RubyLsp::Requests::Formatting.new("file://#{__FILE__}", document).run)
+    end
+  end
+
+  def test_rubocop_formatting_ignores_syntax_invalid_documents
+    document = RubyLsp::Document.new("def foo")
+    assert_nil(RubyLsp::Requests::Formatting.new("file://#{__FILE__}", document).run)
+  end
+
   def test_returns_nil_if_document_is_already_formatted
     document = RubyLsp::Document.new(+<<~RUBY)
       # typed: strict
