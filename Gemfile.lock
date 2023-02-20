@@ -49,7 +49,7 @@ GEM
       nokogiri (>= 1.5.9)
     method_source (1.0.0)
     minitest (5.17.0)
-    minitest-reporters (1.5.0)
+    minitest-reporters (1.6.0)
       ansi
       builder
       minitest (>= 5.0)
@@ -171,7 +171,7 @@ DEPENDENCIES
   bundler (~> 2.4.2)
   debug (~> 1.7)
   minitest (~> 5.17)
-  minitest-reporters (~> 1.5)
+  minitest-reporters (~> 1.6)
   mocha (~> 2.0)
   railties (~> 7.0)
   rake (~> 13.0)
