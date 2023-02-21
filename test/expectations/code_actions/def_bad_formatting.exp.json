@@ -1,7 +1,13 @@
 {
     "params": {
-        "start": 3,
-        "end": 4,
+        "range": {
+            "start": { "line": 3, "character": 0 },
+            "end": { "line": 3, "character": 0 }
+        },
+        "textDocument": {
+            "uri": "file:///fake",
+            "version": null
+        },
         "context": {
             "diagnostics": [
                 {
@@ -110,6 +116,23 @@
         }
     },
     "result": [
+        {
+            "title": "Refactor: Extract variable",
+            "kind": "refactor.extract",
+            "data": {
+                "range": {
+                    "start": {
+                        "line": 3,
+                        "character": 0
+                    },
+                    "end": {
+                        "line": 3,
+                        "character": 0
+                    }
+                },
+                "uri": "file:///fake"
+            }
+        },
         {
             "title": "Autocorrect Layout/IndentationWidth",
             "kind": "quickfix",

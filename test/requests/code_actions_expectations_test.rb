@@ -14,9 +14,9 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
 
     stdout, _ = capture_io do
       result = RubyLsp::Requests::CodeActions.new(
-        "file://#{__FILE__}",
+        "file:///fake",
         document,
-        params[:start]..params[:end],
+        params[:range],
         params[:context],
       ).run
     end
@@ -33,29 +33,55 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
   private
 
   def default_args
-    { start: 0, end: 1, context: { diagnostics: [] } }
+    {
+      range: {
+        start: { line: 0, character: 0 }, end: { line: 1, character: 1 },
+      },
+      context: {
+        diagnostics: [],
+      },
+    }
   end
 
-  def map_actions(diagnostics)
-    response = diagnostics.map do |diagnostic|
-      LanguageServer::Protocol::Interface::CodeAction.new(
-        title: diagnostic["title"],
-        kind: LanguageServer::Protocol::Constant::CodeActionKind::QUICK_FIX,
-        edit: LanguageServer::Protocol::Interface::WorkspaceEdit.new(
-          document_changes: [
-            LanguageServer::Protocol::Interface::TextDocumentEdit.new(
-              text_document: LanguageServer::Protocol::Interface::OptionalVersionedTextDocumentIdentifier.new(
-                uri: "file:///fake",
-                version: nil,
-              ),
-              edits: diagnostic["edit"]["documentChanges"].first["edits"],
-            ),
-          ],
-        ),
-        is_preferred: true,
-      )
-    end
+  def map_actions(expectation)
+    quickfixes = expectation
+      .select { |action| action["kind"] == "quickfix" }
+      .map { |action| code_action_for_diagnostic(action) }
+    refactors = expectation
+      .select { |action| action["kind"].start_with?("refactor") }
+      .map { |action| code_action_for_refactor(action) }
+    result = [*quickfixes, *refactors]
 
-    JSON.parse(response.to_json)
+    JSON.parse(result.to_json)
+  end
+
+  def code_action_for_diagnostic(diagnostic)
+    LanguageServer::Protocol::Interface::CodeAction.new(
+      title: diagnostic["title"],
+      kind: LanguageServer::Protocol::Constant::CodeActionKind::QUICK_FIX,
+      edit: LanguageServer::Protocol::Interface::WorkspaceEdit.new(
+        document_changes: [
+          LanguageServer::Protocol::Interface::TextDocumentEdit.new(
+            text_document: LanguageServer::Protocol::Interface::OptionalVersionedTextDocumentIdentifier.new(
+              uri: "file:///fake",
+              version: nil,
+            ),
+            edits: diagnostic["edit"]["documentChanges"].first["edits"],
+          ),
+        ],
+      ),
+      is_preferred: true,
+    )
+  end
+
+  def code_action_for_refactor(refactor)
+    LanguageServer::Protocol::Interface::CodeAction.new(
+      title: refactor["title"],
+      kind: LanguageServer::Protocol::Constant::CodeActionKind::REFACTOR_EXTRACT,
+      data: {
+        range: refactor.dig("data", "range"),
+        uri: refactor.dig("data", "uri"),
+      },
+    )
   end
 end
