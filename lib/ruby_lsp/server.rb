@@ -56,6 +56,7 @@ module RubyLsp
           # We return zero if shutdown has already been received or one otherwise as per the recommendation in the spec
           # https://microsoft.github.io/language-server-protocol/specification/#exit
           status = @store.empty? ? 0 : 1
+          warn("Shutdown complete with status #{status}")
           exit(status)
         else
           # Default case: push the request to the queue to be executed by the worker
