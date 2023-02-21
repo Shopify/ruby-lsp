@@ -255,7 +255,7 @@ module RubyLsp
           message: "window/showMessage",
           params: Interface::ShowMessageParams.new(
             type: Constant::MessageType::ERROR,
-            message: "Invalid selection for extract refactor",
+            message: "Invalid selection for Extract Variable refactor",
           ),
         )
         raise Requests::CodeActionResolve::CodeActionError

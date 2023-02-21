@@ -117,7 +117,7 @@
     },
     "result": [
         {
-            "title": "Refactor: Extract variable",
+            "title": "Refactor: Extract Variable",
             "kind": "refactor.extract",
             "data": {
                 "range": {
