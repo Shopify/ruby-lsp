@@ -227,7 +227,7 @@ class IntegrationTest < Minitest::Test
         },
       },
     )
-    assert_equal("Refactor: Extract variable", response[:result][:title])
+    assert_equal("Refactor: Extract Variable", response[:result][:title])
   end
 
   def test_document_did_close

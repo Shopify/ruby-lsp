@@ -65,7 +65,7 @@ module RubyLsp
       sig { params(range: Document::RangeShape, uri: String).returns(Interface::CodeAction) }
       def refactor_code_action(range, uri)
         Interface::CodeAction.new(
-          title: "Refactor: Extract variable",
+          title: "Refactor: Extract Variable",
           kind: Constant::CodeActionKind::REFACTOR_EXTRACT,
           data: {
             range: range,

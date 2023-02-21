@@ -13,7 +13,7 @@ module RubyLsp
     #
     # ```ruby
     # # Before:
-    # 1 + 1 # Select the text and use Refactor: Extract variable
+    # 1 + 1 # Select the text and use Refactor: Extract Variable
     #
     # # After:
     # new_variable = 1 + 1
@@ -52,7 +52,7 @@ module RubyLsp
         source_line_indentation = T.must(T.must(@document.source.lines[source_range.dig(:start, :line)])[/\A */]).size
 
         Interface::CodeAction.new(
-          title: "Refactor: Extract variable",
+          title: "Refactor: Extract Variable",
           edit: Interface::WorkspaceEdit.new(
             document_changes: [
               Interface::TextDocumentEdit.new(
