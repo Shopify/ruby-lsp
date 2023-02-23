@@ -5,6 +5,9 @@ module RubyLsp
   # Used to indicate that a request shouldn't return a response
   VOID = T.let(Object.new.freeze, Object)
 
+  # This freeze is not redundant since the interpolated string is mutable
+  WORKSPACE_URI = T.let("file://#{Dir.pwd}".freeze, String) # rubocop:disable Style/RedundantFreeze
+
   # A notification to be sent to the client
   class Notification
     extend T::Sig
