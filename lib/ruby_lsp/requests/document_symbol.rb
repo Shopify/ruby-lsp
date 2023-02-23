@@ -92,109 +92,111 @@ module RubyLsp
         @root.children
       end
 
-      sig { override.params(node: SyntaxTree::ClassDeclaration).void }
-      def visit_class(node)
-        symbol = create_document_symbol(
-          name: full_constant_name(node.constant),
-          kind: :class,
-          range_node: node,
-          selection_range_node: node.constant,
-        )
+      visit_methods do
+        sig { override.params(node: SyntaxTree::ClassDeclaration).void }
+        def visit_class(node)
+          symbol = create_document_symbol(
+            name: full_constant_name(node.constant),
+            kind: :class,
+            range_node: node,
+            selection_range_node: node.constant,
+          )
 
-        @stack << symbol
-        visit(node.bodystmt)
-        @stack.pop
-      end
+          @stack << symbol
+          visit(node.bodystmt)
+          @stack.pop
+        end
 
-      sig { override.params(node: SyntaxTree::Command).void }
-      def visit_command(node)
-        return unless ATTR_ACCESSORS.include?(node.message.value)
+        sig { override.params(node: SyntaxTree::Command).void }
+        def visit_command(node)
+          return unless ATTR_ACCESSORS.include?(node.message.value)
 
-        node.arguments.parts.each do |argument|
-          next unless argument.is_a?(SyntaxTree::SymbolLiteral)
+          node.arguments.parts.each do |argument|
+            next unless argument.is_a?(SyntaxTree::SymbolLiteral)
 
+            create_document_symbol(
+              name: argument.value.value,
+              kind: :field,
+              range_node: argument,
+              selection_range_node: argument.value,
+            )
+          end
+        end
+
+        sig { override.params(node: SyntaxTree::ConstPathField).void }
+        def visit_const_path_field(node)
           create_document_symbol(
-            name: argument.value.value,
-            kind: :field,
-            range_node: argument,
-            selection_range_node: argument.value,
+            name: node.constant.value,
+            kind: :constant,
+            range_node: node,
+            selection_range_node: node.constant,
           )
         end
-      end
 
-      sig { override.params(node: SyntaxTree::ConstPathField).void }
-      def visit_const_path_field(node)
-        create_document_symbol(
-          name: node.constant.value,
-          kind: :constant,
-          range_node: node,
-          selection_range_node: node.constant,
-        )
-      end
+        sig { override.params(node: SyntaxTree::DefNode).void }
+        def visit_def(node)
+          if node.target&.value&.value == "self"
+            name = "self.#{node.name.value}"
+            kind = :method
+          else
+            name = node.name.value
+            kind = name == "initialize" ? :constructor : :method
+          end
 
-      sig { override.params(node: SyntaxTree::DefNode).void }
-      def visit_def(node)
-        if node.target&.value&.value == "self"
-          name = "self.#{node.name.value}"
-          kind = :method
-        else
-          name = node.name.value
-          kind = name == "initialize" ? :constructor : :method
+          symbol = create_document_symbol(
+            name: name,
+            kind: kind,
+            range_node: node,
+            selection_range_node: node.name,
+          )
+
+          @stack << symbol
+          visit(node.bodystmt)
+          @stack.pop
         end
 
-        symbol = create_document_symbol(
-          name: name,
-          kind: kind,
-          range_node: node,
-          selection_range_node: node.name,
-        )
+        sig { override.params(node: SyntaxTree::ModuleDeclaration).void }
+        def visit_module(node)
+          symbol = create_document_symbol(
+            name: full_constant_name(node.constant),
+            kind: :module,
+            range_node: node,
+            selection_range_node: node.constant,
+          )
 
-        @stack << symbol
-        visit(node.bodystmt)
-        @stack.pop
-      end
-
-      sig { override.params(node: SyntaxTree::ModuleDeclaration).void }
-      def visit_module(node)
-        symbol = create_document_symbol(
-          name: full_constant_name(node.constant),
-          kind: :module,
-          range_node: node,
-          selection_range_node: node.constant,
-        )
-
-        @stack << symbol
-        visit(node.bodystmt)
-        @stack.pop
-      end
-
-      sig { override.params(node: SyntaxTree::TopConstField).void }
-      def visit_top_const_field(node)
-        create_document_symbol(
-          name: node.constant.value,
-          kind: :constant,
-          range_node: node,
-          selection_range_node: node.constant,
-        )
-      end
-
-      sig { override.params(node: SyntaxTree::VarField).void }
-      def visit_var_field(node)
-        kind = case node.value
-        when SyntaxTree::Const
-          :constant
-        when SyntaxTree::CVar, SyntaxTree::IVar
-          :variable
-        else
-          return
+          @stack << symbol
+          visit(node.bodystmt)
+          @stack.pop
         end
 
-        create_document_symbol(
-          name: node.value.value,
-          kind: kind,
-          range_node: node,
-          selection_range_node: node.value,
-        )
+        sig { override.params(node: SyntaxTree::TopConstField).void }
+        def visit_top_const_field(node)
+          create_document_symbol(
+            name: node.constant.value,
+            kind: :constant,
+            range_node: node,
+            selection_range_node: node.constant,
+          )
+        end
+
+        sig { override.params(node: SyntaxTree::VarField).void }
+        def visit_var_field(node)
+          kind = case node.value
+          when SyntaxTree::Const
+            :constant
+          when SyntaxTree::CVar, SyntaxTree::IVar
+            :variable
+          else
+            return
+          end
+
+          create_document_symbol(
+            name: node.value.value,
+            kind: kind,
+            range_node: node,
+            selection_range_node: node.value,
+          )
+        end
       end
 
       private

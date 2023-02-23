@@ -22,9 +22,6 @@ jobs:
       - name: Check if documentation is up to date
         run: bundle exec rake check_docs
 
-      - name: Check if all requests are using valid visits
-        run: bundle exec rake check_visit_overrides
-
       - name: Typecheck
         run: bundle exec srb tc
 

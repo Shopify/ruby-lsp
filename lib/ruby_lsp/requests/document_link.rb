@@ -86,21 +86,23 @@ module RubyLsp
         @links
       end
 
-      sig { override.params(node: SyntaxTree::Comment).void }
-      def visit_comment(node)
-        match = node.value.match(%r{source://.*#\d+$})
-        return unless match
+      visit_methods do
+        sig { override.params(node: SyntaxTree::Comment).void }
+        def visit_comment(node)
+          match = node.value.match(%r{source://.*#\d+$})
+          return unless match
 
-        uri = T.cast(URI(match[0]), URI::Source)
-        gem_version = T.must(resolve_version(uri))
-        file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, uri.path)
-        return if file_path.nil?
+          uri = T.cast(URI(match[0]), URI::Source)
+          gem_version = T.must(resolve_version(uri))
+          file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, uri.path)
+          return if file_path.nil?
 
-        @links << LanguageServer::Protocol::Interface::DocumentLink.new(
-          range: range_from_syntax_tree_node(node),
-          target: "file://#{file_path}##{uri.line_number}",
-          tooltip: "Jump to #{file_path}##{uri.line_number}",
-        )
+          @links << LanguageServer::Protocol::Interface::DocumentLink.new(
+            range: range_from_syntax_tree_node(node),
+            target: "file://#{file_path}##{uri.line_number}",
+            tooltip: "Jump to #{file_path}##{uri.line_number}",
+          )
+        end
       end
 
       private

@@ -35,21 +35,23 @@ module RubyLsp
         @hints
       end
 
-      sig { override.params(node: SyntaxTree::Rescue).void }
-      def visit_rescue(node)
-        return unless node.exception.nil?
+      visit_methods do
+        sig { override.params(node: SyntaxTree::Rescue).void }
+        def visit_rescue(node)
+          return unless node.exception.nil?
 
-        loc = node.location
-        return unless visible?(node, @range)
+          loc = node.location
+          return unless visible?(node, @range)
 
-        @hints << LanguageServer::Protocol::Interface::InlayHint.new(
-          position: { line: loc.start_line - 1, character: loc.start_column + RESCUE_STRING_LENGTH },
-          label: "StandardError",
-          padding_left: true,
-          tooltip: "StandardError is implied in a bare rescue",
-        )
+          @hints << LanguageServer::Protocol::Interface::InlayHint.new(
+            position: { line: loc.start_line - 1, character: loc.start_column + RESCUE_STRING_LENGTH },
+            label: "StandardError",
+            padding_left: true,
+            tooltip: "StandardError is implied in a bare rescue",
+          )
 
-        super
+          super
+        end
       end
     end
   end

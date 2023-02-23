@@ -136,155 +136,157 @@ module RubyLsp
         @encoder.encode(@tokens)
       end
 
-      sig { override.params(node: SyntaxTree::CallNode).void }
-      def visit_call(node)
-        return super unless visible?(node, @range)
+      visit_methods do
+        sig { override.params(node: SyntaxTree::CallNode).void }
+        def visit_call(node)
+          return super unless visible?(node, @range)
 
-        visit(node.receiver)
+          visit(node.receiver)
 
-        message = node.message
-        if message != :call && !special_method?(message.value)
-          type = Support::Sorbet.annotation?(node) ? :type : :method
+          message = node.message
+          if message != :call && !special_method?(message.value)
+            type = Support::Sorbet.annotation?(node) ? :type : :method
 
-          add_token(message.location, type)
+            add_token(message.location, type)
+          end
+
+          visit(node.arguments)
         end
 
-        visit(node.arguments)
-      end
+        sig { override.params(node: SyntaxTree::Command).void }
+        def visit_command(node)
+          return super unless visible?(node, @range)
 
-      sig { override.params(node: SyntaxTree::Command).void }
-      def visit_command(node)
-        return super unless visible?(node, @range)
+          unless special_method?(node.message.value)
+            add_token(node.message.location, :method)
+          end
+          visit(node.arguments)
+        end
 
-        unless special_method?(node.message.value)
+        sig { override.params(node: SyntaxTree::CommandCall).void }
+        def visit_command_call(node)
+          return super unless visible?(node, @range)
+
+          visit(node.receiver)
           add_token(node.message.location, :method)
-        end
-        visit(node.arguments)
-      end
-
-      sig { override.params(node: SyntaxTree::CommandCall).void }
-      def visit_command_call(node)
-        return super unless visible?(node, @range)
-
-        visit(node.receiver)
-        add_token(node.message.location, :method)
-        visit(node.arguments)
-      end
-
-      sig { override.params(node: SyntaxTree::Const).void }
-      def visit_const(node)
-        return super unless visible?(node, @range)
-
-        add_token(node.location, :namespace)
-      end
-
-      sig { override.params(node: SyntaxTree::DefNode).void }
-      def visit_def(node)
-        return super unless visible?(node, @range)
-
-        add_token(node.name.location, :method, [:declaration])
-        visit(node.params)
-        visit(node.bodystmt)
-        visit(node.target) if node.target
-        visit(node.operator) if node.operator
-      end
-
-      sig { override.params(node: SyntaxTree::Kw).void }
-      def visit_kw(node)
-        return super unless visible?(node, @range)
-
-        case node.value
-        when "self"
-          add_token(node.location, :variable, [:default_library])
-        end
-      end
-
-      sig { override.params(node: SyntaxTree::Params).void }
-      def visit_params(node)
-        return super unless visible?(node, @range)
-
-        node.keywords.each do |keyword,|
-          location = keyword.location
-          add_token(location_without_colon(location), :parameter)
+          visit(node.arguments)
         end
 
-        node.requireds.each do |required|
-          add_token(required.location, :parameter)
+        sig { override.params(node: SyntaxTree::Const).void }
+        def visit_const(node)
+          return super unless visible?(node, @range)
+
+          add_token(node.location, :namespace)
         end
 
-        rest = node.keyword_rest
-        if rest && !rest.is_a?(SyntaxTree::ArgsForward)
-          name = rest.name
-          add_token(name.location, :parameter) if name
+        sig { override.params(node: SyntaxTree::DefNode).void }
+        def visit_def(node)
+          return super unless visible?(node, @range)
+
+          add_token(node.name.location, :method, [:declaration])
+          visit(node.params)
+          visit(node.bodystmt)
+          visit(node.target) if node.target
+          visit(node.operator) if node.operator
         end
 
-        super
-      end
+        sig { override.params(node: SyntaxTree::Kw).void }
+        def visit_kw(node)
+          return super unless visible?(node, @range)
 
-      sig { override.params(node: SyntaxTree::Field).void }
-      def visit_field(node)
-        return super unless visible?(node, @range)
-
-        add_token(node.name.location, :method)
-
-        super
-      end
-
-      sig { override.params(node: SyntaxTree::VarField).void }
-      def visit_var_field(node)
-        return super unless visible?(node, @range)
-
-        value = node.value
-
-        case value
-        when SyntaxTree::Ident
-          type = type_for_local(value)
-          add_token(value.location, type)
-        else
-          visit(value)
+          case node.value
+          when "self"
+            add_token(node.location, :variable, [:default_library])
+          end
         end
-      end
 
-      sig { override.params(node: SyntaxTree::VarRef).void }
-      def visit_var_ref(node)
-        return super unless visible?(node, @range)
+        sig { override.params(node: SyntaxTree::Params).void }
+        def visit_params(node)
+          return super unless visible?(node, @range)
 
-        value = node.value
+          node.keywords.each do |keyword,|
+            location = keyword.location
+            add_token(location_without_colon(location), :parameter)
+          end
 
-        case value
-        when SyntaxTree::Ident
-          type = type_for_local(value)
-          add_token(value.location, type)
-        else
-          visit(value)
+          node.requireds.each do |required|
+            add_token(required.location, :parameter)
+          end
+
+          rest = node.keyword_rest
+          if rest && !rest.is_a?(SyntaxTree::ArgsForward)
+            name = rest.name
+            add_token(name.location, :parameter) if name
+          end
+
+          super
         end
-      end
 
-      sig { override.params(node: SyntaxTree::VCall).void }
-      def visit_vcall(node)
-        return super unless visible?(node, @range)
+        sig { override.params(node: SyntaxTree::Field).void }
+        def visit_field(node)
+          return super unless visible?(node, @range)
 
-        return if special_method?(node.value.value)
+          add_token(node.name.location, :method)
 
-        type = Support::Sorbet.annotation?(node) ? :type : :method
-        add_token(node.value.location, type)
-      end
+          super
+        end
 
-      sig { override.params(node: SyntaxTree::ClassDeclaration).void }
-      def visit_class(node)
-        return super unless visible?(node, @range)
+        sig { override.params(node: SyntaxTree::VarField).void }
+        def visit_var_field(node)
+          return super unless visible?(node, @range)
 
-        add_token(node.constant.location, :class, [:declaration])
-        add_token(node.superclass.location, :class) if node.superclass
-        visit(node.bodystmt)
-      end
+          value = node.value
 
-      sig { override.params(node: SyntaxTree::ModuleDeclaration).void }
-      def visit_module(node)
-        return super unless visible?(node, @range)
+          case value
+          when SyntaxTree::Ident
+            type = type_for_local(value)
+            add_token(value.location, type)
+          else
+            visit(value)
+          end
+        end
 
-        add_token(node.constant.location, :class, [:declaration])
-        visit(node.bodystmt)
+        sig { override.params(node: SyntaxTree::VarRef).void }
+        def visit_var_ref(node)
+          return super unless visible?(node, @range)
+
+          value = node.value
+
+          case value
+          when SyntaxTree::Ident
+            type = type_for_local(value)
+            add_token(value.location, type)
+          else
+            visit(value)
+          end
+        end
+
+        sig { override.params(node: SyntaxTree::VCall).void }
+        def visit_vcall(node)
+          return super unless visible?(node, @range)
+
+          return if special_method?(node.value.value)
+
+          type = Support::Sorbet.annotation?(node) ? :type : :method
+          add_token(node.value.location, type)
+        end
+
+        sig { override.params(node: SyntaxTree::ClassDeclaration).void }
+        def visit_class(node)
+          return super unless visible?(node, @range)
+
+          add_token(node.constant.location, :class, [:declaration])
+          add_token(node.superclass.location, :class) if node.superclass
+          visit(node.bodystmt)
+        end
+
+        sig { override.params(node: SyntaxTree::ModuleDeclaration).void }
+        def visit_module(node)
+          return super unless visible?(node, @range)
+
+          add_token(node.constant.location, :class, [:declaration])
+          visit(node.bodystmt)
+        end
       end
 
       sig { params(location: SyntaxTree::Location, type: Symbol, modifiers: T::Array[Symbol]).void }
