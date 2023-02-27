@@ -110,13 +110,27 @@ code of conduct.
 
 Interactive debugging works for both running the extension or tests. In the debug panel, select whether to run the extension in development mode or run tests, set up some breakpoints and start with F5.
 
-### Logging
+### Tracing LSP requests and responses
 
-To enable logging, add an entry to `settings.json`:
+LSP server tracing can be controlled through the `ruby lsp.trace.server` config key in the `.vscode/settings.json` config file.
 
-```
-  "ruby lsp.trace.server": "messages",
-```
+Possible values are:
+
+- `off`: no tracing
+- `messages`: display requests and responses notifications
+- `verbose`: display each request and response as JSON
+
+### Debugging using VS Code
+
+The `launch.json` contains a 'Minitest - current file' configuration for the debugger.
+
+1. Add a breakpoint using the VS Code UI.
+1. Open the relevant test file.
+1. Open the **Run and Debug** panel on the sidebar.
+1. Ensure `Minitest - current file` is selected in the top dropdown.
+1. Press `F5` OR click the green triangle next to the top dropdown. VS Code will then run the test file with debugger activated.
+1. When the breakpoint is triggered, the process will pause and VS Code will connect to the debugger and activate the debugger UI.
+1. Open the Debug Console view to use the debugger's REPL.
 
 ## License
 
