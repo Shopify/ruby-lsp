@@ -110,6 +110,14 @@ code of conduct.
 
 Interactive debugging works for both running the extension or tests. In the debug panel, select whether to run the extension in development mode or run tests, set up some breakpoints and start with F5.
 
+### Logging
+
+To enable logging, add an entry to `settings.json`:
+
+```
+  "ruby lsp.trace.server": "messages",
+```
+
 ## License
 
 This extension is available as open source under the terms of the
