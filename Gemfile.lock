@@ -138,7 +138,7 @@ GEM
       thor (>= 0.19.2)
     syntax_tree (6.0.0)
       prettier_print (>= 1.2.0)
-    tapioca (0.10.5)
+    tapioca (0.11.1)
       bundler (>= 1.17.3)
       netrc (>= 0.11.0)
       parallel (>= 1.21.0)
@@ -182,7 +182,7 @@ DEPENDENCIES
   rubocop-sorbet (~> 0.7)
   ruby-lsp!
   sorbet-static-and-runtime
-  tapioca (~> 0.10)
+  tapioca (~> 0.11)
   yard (~> 0.9)
 
 BUNDLED WITH
