@@ -9,6 +9,8 @@ export interface TelemetryEvent {
   errorMessage?: string;
   backtrace?: string;
   params?: string;
+  rubyVersion: string;
+  yjitEnabled: boolean;
 }
 
 export interface TelemetryApi {

@@ -141,7 +141,13 @@ export default class Client {
 
     await this.statusItem.updateStatus(ServerCommand.Start);
 
-    this.client.onTelemetry(this.telemetry.sendEvent.bind(this.telemetry));
+    this.client.onTelemetry((event) =>
+      this.telemetry.sendEvent({
+        ...event,
+        rubyVersion: this.ruby.rubyVersion,
+        yjitEnabled: this.ruby.yjitEnabled,
+      })
+    );
     await this.client.start();
   }
 
