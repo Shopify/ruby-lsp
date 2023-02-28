@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 
-import * as Bundler from "./bundler";
 import { Ruby } from "./ruby";
 
 export enum ServerCommand {
@@ -25,6 +24,7 @@ export class StatusItem {
   private selector: vscode.DocumentSelector;
   private serverStatus: vscode.LanguageStatusItem;
   private yjitStatus: vscode.LanguageStatusItem;
+  private rubyVersionStatus: vscode.LanguageStatusItem;
   private experimentalFeaturesStatus: vscode.LanguageStatusItem;
 
   constructor(context: vscode.ExtensionContext, ruby: Ruby) {
@@ -52,30 +52,27 @@ export class StatusItem {
       this.selector
     );
 
-    this.createYjitStatus(this.ruby);
-    this.createRubyStatus(this.ruby);
-
+    this.refreshYjitStatus();
+    this.rubyVersionStatus = this.createRubyStatus();
     this.experimentalFeaturesStatus = this.createExperimentalFeaturesStatus();
-
     this.registerCommands();
   }
 
-  public async updateStatus(status: ServerCommand) {
+  public async refresh(status: ServerCommand, ruby: Ruby) {
+    this.ruby = ruby;
+    this.rubyVersionStatus.text = `Using Ruby ${this.ruby.rubyVersion}`;
+    this.refreshYjitStatus();
     this.serverStatus.severity = vscode.LanguageStatusSeverity.Information;
 
     switch (status) {
       case ServerCommand.Start: {
         this.serverStatus.text = "Ruby LSP: Running...";
         this.serverStatus.command!.arguments = [STARTED_SERVER_OPTIONS];
-
-        this.activateGemOutdatedButton();
-
         break;
       }
       case ServerCommand.Stop: {
         this.serverStatus.text = "Ruby LSP: Stopped";
         this.serverStatus.command!.arguments = [STOPPED_SERVER_OPTIONS];
-
         break;
       }
       case ServerCommand.Restart: {
@@ -86,75 +83,13 @@ export class StatusItem {
     }
   }
 
-  public async installGems(): Promise<boolean> {
-    if (await Bundler.bundleCheck()) return false;
-
-    this.updateStatus(ServerCommand.Restart);
-
-    const status: vscode.LanguageStatusItem = this.createStatusItem(
-      "installGems",
-      "Ruby LSP: The gems in the bundle are not installed.",
-      vscode.LanguageStatusSeverity.Error
-    );
-
-    status.command = {
-      title: "Run bundle install",
-      command: "rubyLsp.installGems",
-      arguments: [status],
-    };
-    return true;
-  }
-
-  public async addMissingGem(): Promise<boolean> {
-    if (!(await Bundler.isGemMissing())) return false;
-
-    this.updateStatus(ServerCommand.Restart);
-
-    const status: vscode.LanguageStatusItem = this.createStatusItem(
-      "addMissingGem",
-      "Ruby LSP: Bundle Add",
-      vscode.LanguageStatusSeverity.Error
-    );
-
-    status.command = {
-      title: "Run bundle add and install",
-      command: "rubyLsp.addMissingGem",
-      arguments: [status],
-    };
-
-    return true;
-  }
-
-  private async activateGemOutdatedButton() {
-    const gemOutdated = await Bundler.isGemOutdated();
-
-    if (!gemOutdated) return;
-
-    const status: vscode.LanguageStatusItem = this.createStatusItem(
-      "updateGem",
-      "Ruby LSP: The gem is not up-to-date",
-      vscode.LanguageStatusSeverity.Warning
-    );
-
-    status.command = {
-      title: "Update",
-      command: "rubyLsp.updateOutdatedGem",
-      arguments: [status],
-    };
-  }
-
-  private createYjitStatus(ruby: Ruby) {
-    const useYjit = vscode.workspace.getConfiguration("rubyLsp").get("yjit");
-
-    let [major, minor]: number[] = [0, 0];
-
-    if (this.ruby.rubyVersion) {
-      [major, minor] = this.ruby.rubyVersion.split(".").map(Number);
-    }
-
+  private refreshYjitStatus() {
     this.yjitStatus.name = "Ruby LSP Status";
+    const useYjit: boolean | undefined = vscode.workspace
+      .getConfiguration("rubyLsp")
+      .get("yjit");
 
-    if (useYjit && ruby.yjitEnabled && [major, minor] >= [3, 2]) {
+    if (useYjit && this.ruby.supportsYjit) {
       this.yjitStatus.text = "YJIT enabled";
 
       this.yjitStatus.command = {
@@ -163,7 +98,8 @@ export class StatusItem {
       };
     } else {
       this.yjitStatus.text = "YJIT disabled";
-      if ([major, minor] >= [3, 2] && ruby.yjitEnabled) {
+
+      if (this.ruby.supportsYjit) {
         this.yjitStatus.command = {
           title: "Enable",
           command: "rubyLsp.toggleYjit",
@@ -172,11 +108,13 @@ export class StatusItem {
     }
   }
 
-  private createRubyStatus(ruby: Ruby) {
+  private createRubyStatus() {
     const rubyVersion: vscode.LanguageStatusItem =
       vscode.languages.createLanguageStatusItem("rubyVersion", this.selector);
     rubyVersion.name = "Ruby LSP Status";
-    rubyVersion.text = `Using Ruby ${ruby.rubyVersion}`;
+    rubyVersion.text = `Using Ruby ${this.ruby.rubyVersion}`;
+
+    return rubyVersion;
   }
 
   private createStatusItem(
@@ -239,71 +177,6 @@ export class StatusItem {
             await vscode.commands.executeCommand(result.description);
         }
       )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand("rubyLsp.addMissingGem", (status) => {
-        status.text = "Ruby LSP: Adding gem...";
-        status.busy = true;
-        Bundler.addGem()
-          .then(() => status.dispose())
-          .catch(() => {});
-      })
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        "rubyLsp.updateOutdatedGem",
-        async (status) => {
-          status.text = "Ruby LSP: Updating Ruby LSP...";
-          status.busy = true;
-
-          const result = await Bundler.updateGem();
-
-          if (result.stderr.length > 0) {
-            status.text = "Ruby LSP: Update failed";
-            status.command = {
-              title: "Try again",
-              command: "rubyLsp.updateOutdatedGem",
-            };
-
-            if (
-              result.stderr.includes(
-                "Bundler attempted to update ruby-lsp but its version stayed the same"
-              )
-            ) {
-              vscode.window.showWarningMessage(
-                "Could not update the ruby-lsp gem. Is the version in the Gemfile pinned?"
-              );
-            } else {
-              vscode.window.showErrorMessage("Failed to update gem.");
-            }
-          } else {
-            status.dispose();
-          }
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand("rubyLsp.installGems", (status) => {
-        status.text = "Ruby LSP: Installing gems...";
-        status.busy = true;
-        Bundler.bundleInstall()
-          .then(() => {
-            status.dispose();
-            this.addMissingGem();
-            vscode.commands.executeCommand(ServerCommand.Restart);
-          })
-          .catch(() => {
-            status.dispose();
-            this.createStatusItem(
-              "installFail",
-              "Ruby LSP: Failed to install gems.",
-              vscode.LanguageStatusSeverity.Error
-            );
-          });
-      })
     );
 
     this.context.subscriptions.push(

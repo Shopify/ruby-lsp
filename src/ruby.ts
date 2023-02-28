@@ -9,6 +9,7 @@ const asyncExec = promisify(exec);
 export class Ruby {
   public rubyVersion?: string;
   public yjitEnabled?: boolean;
+  public supportsYjit?: boolean;
   private workingFolder: string;
   private versionManager?: string;
 
@@ -45,7 +46,7 @@ export class Ruby {
 
       await this.fetchRubyInfo();
     } catch (error: any) {
-      vscode.window.showErrorMessage(
+      await vscode.window.showErrorMessage(
         `Failed to activate ${this.versionManager} environment: ${error.message}`
       );
     }
@@ -85,6 +86,9 @@ export class Ruby {
 
     this.rubyVersion = rubyVersion;
     this.yjitEnabled = yjitIsDefined === "constant";
+
+    const [major, minor, _patch] = this.rubyVersion.split(".").map(Number);
+    this.supportsYjit = this.yjitEnabled && [major, minor] >= [3, 2];
   }
 
   private async readRubyVersion() {
