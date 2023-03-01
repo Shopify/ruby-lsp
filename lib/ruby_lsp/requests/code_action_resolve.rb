@@ -30,6 +30,7 @@ module RubyLsp
       class Error < ::T::Enum
         enums do
           EmptySelection = new
+          InvalidTargetRange = new
         end
       end
 
@@ -45,11 +46,44 @@ module RubyLsp
         source_range = @code_action.dig(:data, :range)
         return Error::EmptySelection if source_range[:start] == source_range[:end]
 
+        return Error::InvalidTargetRange if @document.syntax_error?
+
         scanner = @document.create_scanner
         start_index = scanner.find_char_position(source_range[:start])
         end_index = scanner.find_char_position(source_range[:end])
-        extraction_source = T.must(@document.source[start_index...end_index])
-        source_line_indentation = T.must(T.must(@document.source.lines[source_range.dig(:start, :line)])[/\A */]).size
+        extracted_source = T.must(@document.source[start_index...end_index])
+
+        # Find the closest statements node, so that we place the refactor in a valid position
+        closest_statements = locate(T.must(@document.tree), start_index, node_types: [SyntaxTree::Statements]).first
+        return Error::InvalidTargetRange if closest_statements.nil?
+
+        # Find the node with the end line closest to the requested position, so that we can place the refactor
+        # immediately after that closest node
+        closest_node = closest_statements.child_nodes.compact.min_by do |node|
+          distance = source_range.dig(:start, :line) - (node.location.end_line - 1)
+          distance <= 0 ? Float::INFINITY : distance
+        end
+
+        # When trying to extract the first node inside of a statements block, then we can just select one line above it
+        target_line = if closest_node == closest_statements.child_nodes.first
+          closest_node.location.start_line - 1
+        else
+          closest_node.location.end_line
+        end
+
+        lines = @document.source.lines
+        indentation = T.must(T.must(lines[target_line - 1])[/\A */]).size
+
+        target_range = {
+          start: { line: target_line, character: indentation },
+          end: { line: target_line, character: indentation },
+        }
+
+        variable_source = if T.must(lines[target_line]).strip.empty?
+          "\n#{" " * indentation}#{NEW_VARIABLE_NAME} = #{extracted_source}"
+        else
+          "#{NEW_VARIABLE_NAME} = #{extracted_source}\n#{" " * indentation}"
+        end
 
         Interface::CodeAction.new(
           title: "Refactor: Extract Variable",
@@ -60,7 +94,10 @@ module RubyLsp
                   uri: @code_action.dig(:data, :uri),
                   version: nil,
                 ),
-                edits: edits_to_extract_variable(source_range, extraction_source, source_line_indentation),
+                edits: [
+                  create_text_edit(source_range, NEW_VARIABLE_NAME),
+                  create_text_edit(target_range, variable_source),
+                ],
               ),
             ],
           ),
@@ -68,22 +105,6 @@ module RubyLsp
       end
 
       private
-
-      sig do
-        params(range: Document::RangeShape, source: String, indentation: Integer)
-          .returns(T::Array[Interface::TextEdit])
-      end
-      def edits_to_extract_variable(range, source, indentation)
-        target_range = {
-          start: { line: range.dig(:start, :line), character: indentation },
-          end: { line: range.dig(:start, :line), character: indentation },
-        }
-
-        [
-          create_text_edit(range, NEW_VARIABLE_NAME),
-          create_text_edit(target_range, "#{NEW_VARIABLE_NAME} = #{source}\n#{" " * indentation}"),
-        ]
-      end
 
       sig { params(range: Document::RangeShape, new_text: String).returns(Interface::TextEdit) }
       def create_text_edit(range, new_text)

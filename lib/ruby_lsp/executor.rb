@@ -259,6 +259,15 @@ module RubyLsp
           ),
         )
         raise Requests::CodeActionResolve::CodeActionError
+      when Requests::CodeActionResolve::Error::InvalidTargetRange
+        @notifications << Notification.new(
+          message: "window/showMessage",
+          params: Interface::ShowMessageParams.new(
+            type: Constant::MessageType::ERROR,
+            message: "Couldn't find an appropriate location to place extracted refactor",
+          ),
+        )
+        raise Requests::CodeActionResolve::CodeActionError
       else
         result
       end
