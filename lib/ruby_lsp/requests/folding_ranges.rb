@@ -82,7 +82,7 @@ module RubyLsp
 
       sig { override.params(node: T.nilable(SyntaxTree::Node)).void }
       def visit(node)
-        return unless handle_partial_range(node)
+        return unless handle_partial_range?(node)
 
         case node
         when *SIMPLE_FOLDABLES
@@ -162,7 +162,7 @@ module RubyLsp
       end
 
       sig { params(node: T.nilable(SyntaxTree::Node)).returns(T::Boolean) }
-      def handle_partial_range(node)
+      def handle_partial_range?(node)
         kind = partial_range_kind(node)
 
         if kind.nil?
