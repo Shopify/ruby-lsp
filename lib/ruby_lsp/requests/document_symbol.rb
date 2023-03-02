@@ -106,8 +106,36 @@ module RubyLsp
         @stack.pop
       end
 
+      sig { override.params(node: SyntaxTree::MethodAddBlock).void }
+      def visit_method_add_block(node)
+        # TODO: extract commonality with parse_test
+
+        return unless node.call.message.value == "test" && node.call.arguments.is_a?(SyntaxTree::ArgParen)
+
+        full_name = node.call.arguments.arguments.parts.first.parts.map do |part|
+          case part
+          when SyntaxTree::TStringContent
+            part.value
+          when SyntaxTree::StringEmbExpr
+            "{ }"
+          end
+        end.join("")
+
+        create_document_symbol(
+          name: full_name,
+          kind: :method,
+          range_node: node, # TODO: check
+          selection_range_node: node, # TODO: check
+        )
+      end
+
       sig { override.params(node: SyntaxTree::Command).void }
       def visit_command(node)
+        if node.message.value == "test"
+          parse_test(node)
+          return
+        end
+
         return unless ATTR_ACCESSORS.include?(node.message.value)
 
         node.arguments.parts.each do |argument|
@@ -219,6 +247,33 @@ module RubyLsp
         T.must(@stack.last).children << symbol
 
         symbol
+      end
+
+      sig { params(node: SyntaxTree::Command).void }
+      def parse_test(node)
+        return unless node.block
+
+        argument = node.arguments.parts.first
+        return unless argument.is_a?(SyntaxTree::StringLiteral) && node.arguments.parts.size == 1
+
+        name_node = argument.parts.first
+        return unless name_node
+
+        full_name = argument.parts.map do |part|
+          case part
+          when SyntaxTree::TStringContent
+            part.value
+          when SyntaxTree::StringEmbExpr
+            "{ }"
+          end
+        end.join("")
+
+        create_document_symbol(
+          name: full_name,
+          kind: :method,
+          range_node: node, # TODO: check
+          selection_range_node: argument.parts.first, # TODO: check
+        )
       end
     end
   end
