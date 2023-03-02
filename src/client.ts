@@ -26,13 +26,13 @@ export default class Client {
   private telemetry: Telemetry;
   private ruby: Ruby;
   private statusItem: StatusItem;
+  private outputChannel = vscode.window.createOutputChannel(LSP_NAME);
 
   constructor(
     context: vscode.ExtensionContext,
     telemetry: Telemetry,
     ruby: Ruby
   ) {
-    const outputChannel = vscode.window.createOutputChannel(LSP_NAME);
     this.workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
     this.telemetry = telemetry;
     this.ruby = ruby;
@@ -56,7 +56,7 @@ export default class Client {
     this.clientOptions = {
       documentSelector: [{ scheme: "file", language: "ruby" }],
       diagnosticCollectionName: LSP_NAME,
-      outputChannel,
+      outputChannel: this.outputChannel,
       revealOutputChannelOn: RevealOutputChannelOn.Never,
       initializationOptions: {
         enabledFeatures: this.listOfEnabledFeatures(),
@@ -159,21 +159,24 @@ export default class Client {
   }
 
   async restart() {
-    await this.stop();
-    await this.start();
+    try {
+      await this.stop();
+      await this.start();
+    } catch (error: any) {
+      this.outputChannel.appendLine(
+        `Error restarting the server: ${error.message}`
+      );
+    }
   }
 
   private registerCommands() {
     this.context.subscriptions.push(
-      vscode.commands.registerCommand("ruby-lsp.start", async () => {
-        await this.start();
-      }),
-      vscode.commands.registerCommand("ruby-lsp.restart", async () => {
-        await this.restart();
-      }),
-      vscode.commands.registerCommand("ruby-lsp.stop", async () => {
-        await this.stop();
-      })
+      vscode.commands.registerCommand("ruby-lsp.start", this.start.bind(this)),
+      vscode.commands.registerCommand(
+        "ruby-lsp.restart",
+        this.restart.bind(this)
+      ),
+      vscode.commands.registerCommand("ruby-lsp.stop", this.stop.bind(this))
     );
   }
 
@@ -204,15 +207,9 @@ export default class Client {
     );
     this.context.subscriptions.push(watcher);
 
-    watcher.onDidChange(async () => {
-      await this.restart();
-    });
-    watcher.onDidCreate(async () => {
-      await this.restart();
-    });
-    watcher.onDidDelete(async () => {
-      await this.restart();
-    });
+    watcher.onDidChange(this.restart.bind(this));
+    watcher.onDidCreate(this.restart.bind(this));
+    watcher.onDidDelete(this.restart.bind(this));
   }
 
   private listOfEnabledFeatures(): string[] {
