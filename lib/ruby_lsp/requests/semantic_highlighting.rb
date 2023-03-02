@@ -160,6 +160,7 @@ module RubyLsp
           add_token(node.message.location, :method)
         end
         visit(node.arguments)
+        visit(node.block)
       end
 
       sig { override.params(node: SyntaxTree::CommandCall).void }
@@ -169,6 +170,7 @@ module RubyLsp
         visit(node.receiver)
         add_token(node.message.location, :method)
         visit(node.arguments)
+        visit(node.block)
       end
 
       sig { override.params(node: SyntaxTree::Const).void }
