@@ -38,4 +38,10 @@ class WidgetTest < ActiveSupport::TestCase
   end
 
   test "no block"
+
+  test() { assert true }
+
+  test(nil) { assert true }
+
+  test(foo) { assert true }
 end

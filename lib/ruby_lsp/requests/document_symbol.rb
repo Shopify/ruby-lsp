@@ -112,7 +112,14 @@ module RubyLsp
 
         return unless node.call.message.value == "test" && node.call.arguments.is_a?(SyntaxTree::ArgParen)
 
-        full_name = node.call.arguments.arguments.parts.first.parts.map do |part|
+        arg_paren = node.call.arguments
+        args = arg_paren.arguments
+        return unless args
+
+        arg = args.parts.first
+        return unless arg.is_a?(SyntaxTree::StringLiteral)
+
+        full_name = arg.parts.map do |part|
           case part
           when SyntaxTree::TStringContent
             part.value
