@@ -89,14 +89,15 @@ module RubyLsp
           # If the node's start character is already past the position, then we should've found the closest node already
           break if position < loc.start_char
 
+          # If there are node types to filter by, and the current node is not one of those types, then skip it
+          next if node_types.any? && node_types.none? { |type| candidate.is_a?(type) }
+
           # If the current node is narrower than or equal to the previous closest node, then it is more precise
           closest_loc = closest.location
           if loc.end_char - loc.start_char <= closest_loc.end_char - closest_loc.start_char
             parent = T.let(closest, SyntaxTree::Node)
             closest = candidate
           end
-
-          break if node_types.any? { |type| candidate.is_a?(type) }
         end
 
         [closest, parent]

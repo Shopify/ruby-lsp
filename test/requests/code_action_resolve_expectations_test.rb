@@ -60,7 +60,7 @@ class CodeActionResolveExpectationsTest < ExpectationsTestRunner
               uri: "file:///fake",
               version: nil,
             ),
-            edits: build_text_edits(expectation["edit"]["documentChanges"][0]["edits"]),
+            edits: build_text_edits(expectation.dig("edit", "documentChanges", 0, "edits") || []),
           ),
         ],
       ),
