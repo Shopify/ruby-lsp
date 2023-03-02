@@ -4,6 +4,17 @@
       "startLine": 0,
       "endLine": 2,
       "kind": "region"
+    },
+    {
+      "startLine": 5,
+      "endLine": 9,
+      "kind": "region"
+    },
+    {
+      "startLine": 8,
+      "endLine": 9,
+      "kind": "region"
     }
-  ]
+  ],
+  "params": []
 }

@@ -24,7 +24,6 @@ module RubyLsp
           SyntaxTree::BlockNode,
           SyntaxTree::Case,
           SyntaxTree::ClassDeclaration,
-          SyntaxTree::Command,
           SyntaxTree::For,
           SyntaxTree::HashLiteral,
           SyntaxTree::Heredoc,
@@ -100,6 +99,11 @@ module RubyLsp
             add_call_range(node)
             return
           end
+        when SyntaxTree::Command
+          unless same_lines_for_command_and_block?(node)
+            location = node.location
+            add_lines_range(location.start_line, location.end_line - 1)
+          end
         when SyntaxTree::DefNode
           add_def_range(node)
         when SyntaxTree::StringConcat
@@ -108,6 +112,17 @@ module RubyLsp
         end
 
         super
+      end
+
+      # This is to prevent duplicate ranges
+      sig { params(node: SyntaxTree::Command).returns(T::Boolean) }
+      def same_lines_for_command_and_block?(node)
+        node_block = node.block
+        return false unless node_block
+
+        location = node.location
+        block_location = node_block.location
+        block_location.start_line == location.start_line && block_location.end_line == location.end_line
       end
 
       class PartialRange
