@@ -6,12 +6,21 @@ import * as vscode from "vscode";
 
 const asyncExec = promisify(exec);
 
+export enum VersionManager {
+  Asdf = "asdf",
+  Chruby = "chruby",
+  Rbenv = "rbenv",
+  Rvm = "rvm",
+  Shadowenv = "shadowenv",
+  None = "none",
+}
+
 export class Ruby {
   public rubyVersion?: string;
   public yjitEnabled?: boolean;
   public supportsYjit?: boolean;
   private workingFolder: string;
-  private versionManager?: string;
+  private versionManager?: VersionManager;
 
   constructor() {
     this.workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
@@ -36,7 +45,7 @@ export class Ruby {
         case "rvm":
           await this.activate("rvm-auto-ruby");
           break;
-        case "none":
+        case VersionManager.None:
           break;
         default:
           await this.activateShadowenv();

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { Ruby } from "./ruby";
+import { Ruby, VersionManager } from "./ruby";
 
 export enum ServerCommand {
   Start = "ruby-lsp.start",
@@ -113,6 +113,10 @@ export class StatusItem {
       vscode.languages.createLanguageStatusItem("rubyVersion", this.selector);
     rubyVersion.name = "Ruby LSP Status";
     rubyVersion.text = `Using Ruby ${this.ruby.rubyVersion}`;
+    rubyVersion.command = {
+      title: "Change version manager",
+      command: "rubyLsp.selectRubyVersionManager",
+    };
 
     return rubyVersion;
   }
@@ -199,6 +203,22 @@ export class StatusItem {
           this.experimentalFeaturesStatus.text = message;
           this.experimentalFeaturesStatus.command!.title =
             experimentalFeaturesEnabled ? "Enable" : "Disable";
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        "rubyLsp.selectRubyVersionManager",
+        async () => {
+          const options = Object.values(VersionManager);
+          const manager = await vscode.window.showQuickPick(options);
+
+          if (manager !== undefined) {
+            vscode.workspace
+              .getConfiguration("rubyLsp")
+              .update("rubyVersionManager", manager, true, true);
+          }
         }
       )
     );
