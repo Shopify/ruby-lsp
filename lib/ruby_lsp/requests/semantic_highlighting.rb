@@ -262,6 +262,20 @@ module RubyLsp
         end
       end
 
+      # All block locals are variables. E.g.: [].each do |x; block_local|
+      sig { override.params(node: SyntaxTree::BlockVar).void }
+      def visit_block_var(node)
+        node.locals.each { |local| add_token(local.location, :variable) }
+        super
+      end
+
+      # All lambda locals are variables. E.g.: ->(x; lambda_local) {}
+      sig { override.params(node: SyntaxTree::LambdaVar).void }
+      def visit_lambda_var(node)
+        node.locals.each { |local| add_token(local.location, :variable) }
+        super
+      end
+
       sig { override.params(node: SyntaxTree::VCall).void }
       def visit_vcall(node)
         return super unless visible?(node, @range)
