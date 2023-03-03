@@ -2,20 +2,25 @@ import * as vscode from "vscode";
 
 import { Ruby, VersionManager } from "./ruby";
 
-export enum ServerCommand {
-  Start = "ruby-lsp.start",
-  Stop = "ruby-lsp.stop",
-  Restart = "ruby-lsp.restart",
+// Lists every Command in the Ruby LSP
+export enum Command {
+  Start = "rubyLsp.start",
+  Stop = "rubyLsp.stop",
+  Restart = "rubyLsp.restart",
+  ToggleExperimentalFeatures = "rubyLsp.toggleExperimentalFeatures",
+  ServerOptions = "rubyLsp.serverOptions",
+  ToggleYjit = "rubyLsp.toggleYjit",
+  SelectVersionManager = "rubyLsp.selectRubyVersionManager",
 }
 
 const STOPPED_SERVER_OPTIONS = [
-  { label: "Ruby LSP: Start", description: "ruby-lsp.start" },
-  { label: "Ruby LSP: Restart", description: "ruby-lsp.restart" },
+  { label: "Ruby LSP: Start", description: Command.Start },
+  { label: "Ruby LSP: Restart", description: Command.Restart },
 ];
 
 const STARTED_SERVER_OPTIONS = [
-  { label: "Ruby LSP: Stop", description: "ruby-lsp.stop" },
-  { label: "Ruby LSP: Restart", description: "ruby-lsp.restart" },
+  { label: "Ruby LSP: Stop", description: Command.Stop },
+  { label: "Ruby LSP: Restart", description: Command.Restart },
 ];
 
 export class StatusItem {
@@ -43,7 +48,7 @@ export class StatusItem {
 
     this.serverStatus.command = {
       title: "Configure",
-      command: "rubyLsp.serverOptions",
+      command: Command.ServerOptions,
       arguments: [STARTED_SERVER_OPTIONS],
     };
 
@@ -58,24 +63,24 @@ export class StatusItem {
     this.registerCommands();
   }
 
-  public async refresh(status: ServerCommand, ruby: Ruby) {
+  public async refresh(status: Command, ruby: Ruby) {
     this.ruby = ruby;
     this.rubyVersionStatus.text = `Using Ruby ${this.ruby.rubyVersion}`;
     this.refreshYjitStatus();
     this.serverStatus.severity = vscode.LanguageStatusSeverity.Information;
 
     switch (status) {
-      case ServerCommand.Start: {
+      case Command.Start: {
         this.serverStatus.text = "Ruby LSP: Running...";
         this.serverStatus.command!.arguments = [STARTED_SERVER_OPTIONS];
         break;
       }
-      case ServerCommand.Stop: {
+      case Command.Stop: {
         this.serverStatus.text = "Ruby LSP: Stopped";
         this.serverStatus.command!.arguments = [STOPPED_SERVER_OPTIONS];
         break;
       }
-      case ServerCommand.Restart: {
+      case Command.Restart: {
         this.serverStatus.text = "Ruby LSP: Error";
         this.serverStatus.severity = vscode.LanguageStatusSeverity.Error;
         this.serverStatus.command!.arguments = [STOPPED_SERVER_OPTIONS];
@@ -94,7 +99,7 @@ export class StatusItem {
 
       this.yjitStatus.command = {
         title: "Disable",
-        command: "rubyLsp.toggleYjit",
+        command: Command.ToggleYjit,
       };
     } else {
       this.yjitStatus.text = "YJIT disabled";
@@ -102,7 +107,7 @@ export class StatusItem {
       if (this.ruby.supportsYjit) {
         this.yjitStatus.command = {
           title: "Enable",
-          command: "rubyLsp.toggleYjit",
+          command: Command.ToggleYjit,
         };
       }
     }
@@ -115,7 +120,7 @@ export class StatusItem {
     rubyVersion.text = `Using Ruby ${this.ruby.rubyVersion}`;
     rubyVersion.command = {
       title: "Change version manager",
-      command: "rubyLsp.selectRubyVersionManager",
+      command: Command.SelectVersionManager,
     };
 
     return rubyVersion;
@@ -152,7 +157,7 @@ export class StatusItem {
     status.text = message;
     status.command = {
       title: experimentalFeaturesEnabled ? "Disable" : "Enable",
-      command: "rubyLsp.toggleExperimentalFeatures",
+      command: Command.ToggleExperimentalFeatures,
     };
 
     return status;
@@ -160,7 +165,7 @@ export class StatusItem {
 
   private registerCommands() {
     this.context.subscriptions.push(
-      vscode.commands.registerCommand("rubyLsp.toggleYjit", async () => {
+      vscode.commands.registerCommand(Command.ToggleYjit, async () => {
         const lspConfig = vscode.workspace.getConfiguration("rubyLsp");
         const yjitEnabled = lspConfig.get("yjit");
         lspConfig.update("yjit", !yjitEnabled, true, true);
@@ -171,7 +176,7 @@ export class StatusItem {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
-        "rubyLsp.serverOptions",
+        Command.ServerOptions,
         async (options: [{ label: string; description: string }]) => {
           const result = await vscode.window.showQuickPick(options, {
             placeHolder: "Select server action",
@@ -185,7 +190,7 @@ export class StatusItem {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
-        "rubyLsp.toggleExperimentalFeatures",
+        Command.ToggleExperimentalFeatures,
         async () => {
           const lspConfig = vscode.workspace.getConfiguration("rubyLsp");
           const experimentalFeaturesEnabled = lspConfig.get(
@@ -209,7 +214,7 @@ export class StatusItem {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
-        "rubyLsp.selectRubyVersionManager",
+        Command.SelectVersionManager,
         async () => {
           const options = Object.values(VersionManager);
           const manager = await vscode.window.showQuickPick(options);

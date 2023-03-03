@@ -25,15 +25,15 @@
   "contributes": {
     "commands": [
       {
-        "command": "ruby-lsp.start",
+        "command": "rubyLsp.start",
         "title": "Ruby LSP: Start"
       },
       {
-        "command": "ruby-lsp.restart",
+        "command": "rubyLsp.restart",
         "title": "Ruby LSP: Restart"
       },
       {
-        "command": "ruby-lsp.stop",
+        "command": "rubyLsp.stop",
         "title": "Ruby LSP: Stop"
       }
     ],

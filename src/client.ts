@@ -13,7 +13,7 @@ import {
 
 import { Telemetry } from "./telemetry";
 import { Ruby } from "./ruby";
-import { StatusItem, ServerCommand } from "./status";
+import { StatusItem, Command } from "./status";
 
 const LSP_NAME = "Ruby LSP";
 const asyncExec = promisify(exec);
@@ -150,7 +150,7 @@ export default class Client {
       this.clientOptions
     );
 
-    await this.statusItem.refresh(ServerCommand.Start, this.ruby);
+    await this.statusItem.refresh(Command.Start, this.ruby);
 
     this.client.onTelemetry((event) =>
       this.telemetry.sendEvent({
@@ -164,7 +164,7 @@ export default class Client {
 
   async stop(): Promise<void> {
     if (this.client) {
-      await this.statusItem.refresh(ServerCommand.Stop, this.ruby);
+      await this.statusItem.refresh(Command.Stop, this.ruby);
       return this.client.stop();
     }
   }
@@ -186,12 +186,9 @@ export default class Client {
 
   private registerCommands() {
     this.context.subscriptions.push(
-      vscode.commands.registerCommand("ruby-lsp.start", this.start.bind(this)),
-      vscode.commands.registerCommand(
-        "ruby-lsp.restart",
-        this.restart.bind(this)
-      ),
-      vscode.commands.registerCommand("ruby-lsp.stop", this.stop.bind(this))
+      vscode.commands.registerCommand(Command.Start, this.start.bind(this)),
+      vscode.commands.registerCommand(Command.Restart, this.restart.bind(this)),
+      vscode.commands.registerCommand(Command.Stop, this.stop.bind(this))
     );
   }
 

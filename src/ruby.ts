@@ -33,16 +33,16 @@ export class Ruby {
 
     try {
       switch (this.versionManager) {
-        case "asdf":
+        case VersionManager.Asdf:
           await this.activate("asdf exec ruby");
           break;
-        case "chruby":
+        case VersionManager.Chruby:
           await this.activateChruby();
           break;
-        case "rbenv":
+        case VersionManager.Rbenv:
           await this.activate("rbenv exec ruby");
           break;
-        case "rvm":
+        case VersionManager.Rvm:
           await this.activate("rvm-auto-ruby");
           break;
         case VersionManager.None:
