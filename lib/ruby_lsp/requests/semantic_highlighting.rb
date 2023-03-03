@@ -238,13 +238,12 @@ module RubyLsp
 
         value = node.value
 
-        case value
-        when SyntaxTree::Ident
+        if value.is_a?(SyntaxTree::Ident)
           type = type_for_local(value)
           add_token(value.location, type)
-        else
-          visit(value)
         end
+
+        super
       end
 
       sig { override.params(node: SyntaxTree::VarRef).void }
