@@ -82,7 +82,9 @@ class FormattingTest < Minitest::Test
   def with_uninstalled_rubocop(&block)
     rubocop_paths = $LOAD_PATH.select { |path| path.include?("gems/rubocop") }
     rubocop_paths.each { |path| $LOAD_PATH.delete(path) }
-    $LOADED_FEATURES.delete_if { |path| path.include?("ruby_lsp/requests") || path.include?("gems/rubocop") }
+    $LOADED_FEATURES.delete_if do |path|
+      path.include?("ruby_lsp/requests") || path.include?("gems/rubocop") || path.include?("rubocop/cop/ruby_lsp")
+    end
     unload_constants
 
     block.call
@@ -91,6 +93,7 @@ class FormattingTest < Minitest::Test
     $LOADED_FEATURES.delete_if { |path| path.include?("ruby_lsp/requests") }
     RubyLsp.send(:remove_const, :Requests)
     require "ruby_lsp/requests"
+    require "rubocop/cop/ruby_lsp/use_language_server_aliases"
   end
 
   def unload_constants

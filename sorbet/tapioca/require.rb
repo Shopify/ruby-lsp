@@ -6,3 +6,4 @@
 require "language_server-protocol"
 require "syntax_tree"
 require "mocha/minitest"
+require "rubocop/minitest/assert_offense"

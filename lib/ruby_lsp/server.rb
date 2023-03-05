@@ -2,9 +2,11 @@
 # frozen_string_literal: true
 
 module RubyLsp
+  # rubocop:disable RubyLsp/UseLanguageServerAliases
   Interface = LanguageServer::Protocol::Interface
   Constant = LanguageServer::Protocol::Constant
   Transport = LanguageServer::Protocol::Transport
+  # rubocop:enable RubyLsp/UseLanguageServerAliases
 
   class Server
     extend T::Sig

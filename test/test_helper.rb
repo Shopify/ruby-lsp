@@ -5,6 +5,8 @@ $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 $VERBOSE = nil unless ENV["VERBOSE"] || ENV["CI"]
 
 require_relative "../lib/ruby_lsp/internal"
+require_relative "../lib/rubocop/cop/ruby_lsp/use_language_server_aliases"
+
 require "minitest/autorun"
 require "minitest/reporters"
 require "tempfile"
