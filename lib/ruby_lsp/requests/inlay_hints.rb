@@ -25,11 +25,11 @@ module RubyLsp
       def initialize(document, range)
         super(document)
 
-        @hints = T.let([], T::Array[LanguageServer::Protocol::Interface::InlayHint])
+        @hints = T.let([], T::Array[Interface::InlayHint])
         @range = range
       end
 
-      sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::InlayHint], Object)) }
+      sig { override.returns(T.all(T::Array[Interface::InlayHint], Object)) }
       def run
         visit(@document.tree) if @document.parsed?
         @hints
@@ -42,7 +42,7 @@ module RubyLsp
         loc = node.location
         return unless visible?(node, @range)
 
-        @hints << LanguageServer::Protocol::Interface::InlayHint.new(
+        @hints << Interface::InlayHint.new(
           position: { line: loc.start_line - 1, character: loc.start_column + RESCUE_STRING_LENGTH },
           label: "StandardError",
           padding_left: true,

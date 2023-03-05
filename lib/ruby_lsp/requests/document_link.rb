@@ -77,10 +77,10 @@ module RubyLsp
         # in the URI
         version_match = /(?<=%40)[\d.]+(?=\.rbi$)/.match(uri)
         @gem_version = T.let(version_match && version_match[0], T.nilable(String))
-        @links = T.let([], T::Array[LanguageServer::Protocol::Interface::DocumentLink])
+        @links = T.let([], T::Array[Interface::DocumentLink])
       end
 
-      sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::DocumentLink], Object)) }
+      sig { override.returns(T.all(T::Array[Interface::DocumentLink], Object)) }
       def run
         visit(@document.tree) if @document.parsed?
         @links
@@ -96,7 +96,7 @@ module RubyLsp
         file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, uri.path)
         return if file_path.nil?
 
-        @links << LanguageServer::Protocol::Interface::DocumentLink.new(
+        @links << Interface::DocumentLink.new(
           range: range_from_syntax_tree_node(node),
           target: "file://#{file_path}##{uri.line_number}",
           tooltip: "Jump to #{file_path}##{uri.line_number}",

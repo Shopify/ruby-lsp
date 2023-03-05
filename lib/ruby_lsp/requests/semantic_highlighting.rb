@@ -122,7 +122,7 @@ module RubyLsp
       sig do
         override.returns(
           T.any(
-            LanguageServer::Protocol::Interface::SemanticTokens,
+            Interface::SemanticTokens,
             T.all(T::Array[SemanticToken], Object),
           ),
         )

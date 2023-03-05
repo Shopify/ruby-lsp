@@ -36,16 +36,16 @@ module RubyLsp
         nodes.each { |node| visit(node) }
       end
 
-      sig { params(node: SyntaxTree::Node).returns(LanguageServer::Protocol::Interface::Range) }
+      sig { params(node: SyntaxTree::Node).returns(Interface::Range) }
       def range_from_syntax_tree_node(node)
         loc = node.location
 
-        LanguageServer::Protocol::Interface::Range.new(
-          start: LanguageServer::Protocol::Interface::Position.new(
+        Interface::Range.new(
+          start: Interface::Position.new(
             line: loc.start_line - 1,
             character: loc.start_column,
           ),
-          end: LanguageServer::Protocol::Interface::Position.new(line: loc.end_line - 1, character: loc.end_column),
+          end: Interface::Position.new(line: loc.end_line - 1, character: loc.end_column),
         )
       end
 

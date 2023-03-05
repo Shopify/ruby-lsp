@@ -7,8 +7,8 @@ module RubyLsp
       class HighlightTarget
         extend T::Sig
 
-        READ = LanguageServer::Protocol::Constant::DocumentHighlightKind::READ
-        WRITE = LanguageServer::Protocol::Constant::DocumentHighlightKind::WRITE
+        READ = Constant::DocumentHighlightKind::READ
+        WRITE = Constant::DocumentHighlightKind::WRITE
 
         class HighlightMatch
           extend T::Sig

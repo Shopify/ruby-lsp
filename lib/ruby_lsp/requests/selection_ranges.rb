@@ -100,12 +100,12 @@ module RubyLsp
       end
       def create_selection_range(location, parent = nil)
         RubyLsp::Requests::Support::SelectionRange.new(
-          range: LanguageServer::Protocol::Interface::Range.new(
-            start: LanguageServer::Protocol::Interface::Position.new(
+          range: Interface::Range.new(
+            start: Interface::Position.new(
               line: location.start_line - 1,
               character: location.start_column,
             ),
-            end: LanguageServer::Protocol::Interface::Position.new(
+            end: Interface::Position.new(
               line: location.end_line - 1,
               character: location.end_column,
             ),
