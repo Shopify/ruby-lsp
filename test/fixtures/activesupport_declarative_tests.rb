@@ -1,20 +1,19 @@
 class WidgetTest < ActiveSupport::TestCase
-  test "it does something" do
-    a = 1
-    assert true
+  test "empty test" do
   end
 
-  test("interpolation before #{1+1} after") do
+  test "basic test" do
     assert true
   end
-
-  test("single line") { assert true }
 
   test "interpolation before #{1+1} after" do
     assert true
   end
 
-  test "empty test" do
+  test("single line block") { assert true }
+
+  test("interpolation with parens, before #{1+1} after") do
+    assert true
   end
 
   # the remaining should not be treated as test methods

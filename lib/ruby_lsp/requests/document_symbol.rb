@@ -117,7 +117,6 @@ module RubyLsp
         name_node = args.parts.first
         return unless name_node.is_a?(SyntaxTree::StringLiteral)
 
-        # T.reveal_type(name_node)
         add_test(name_node, node)
       end
 
