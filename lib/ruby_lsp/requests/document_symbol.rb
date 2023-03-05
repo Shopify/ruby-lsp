@@ -108,32 +108,17 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::MethodAddBlock).void }
       def visit_method_add_block(node)
-        # TODO: extract commonality with parse_test
-
         return unless node.call.message.value == "test" && node.call.arguments.is_a?(SyntaxTree::ArgParen)
 
         arg_paren = node.call.arguments
         args = arg_paren.arguments
         return unless args
 
-        arg = args.parts.first
-        return unless arg.is_a?(SyntaxTree::StringLiteral)
+        name_node = args.parts.first
+        return unless name_node.is_a?(SyntaxTree::StringLiteral)
 
-        full_name = arg.parts.map do |part|
-          case part
-          when SyntaxTree::TStringContent
-            part.value
-          when SyntaxTree::StringEmbExpr
-            "{ }"
-          end
-        end.join("")
-
-        create_document_symbol(
-          name: full_name,
-          kind: :method,
-          range_node: node, # TODO: check
-          selection_range_node: node, # TODO: check
-        )
+        # T.reveal_type(name_node)
+        add_test(name_node, node)
       end
 
       sig { override.params(node: SyntaxTree::Command).void }
@@ -256,17 +241,24 @@ module RubyLsp
         symbol
       end
 
-      sig { params(node: SyntaxTree::Command).void }
-      def parse_test(node)
-        return unless node.block
+      sig { params(command_node: SyntaxTree::Command).void }
+      def parse_test(command_node)
+        return unless command_node.block && command_node.arguments.parts.one?
 
-        argument = node.arguments.parts.first
-        return unless argument.is_a?(SyntaxTree::StringLiteral) && node.arguments.parts.size == 1
+        name_node = command_node.arguments.parts.first
+        return unless name_node.is_a?(SyntaxTree::StringLiteral) && name_node.parts.first
 
-        name_node = argument.parts.first
-        return unless name_node
+        add_test(name_node, command_node)
+      end
 
-        full_name = argument.parts.map do |part|
+      sig do
+        params(
+          name_node: SyntaxTree::StringLiteral,
+          test_node: SyntaxTree::Node,
+        ).returns(LanguageServer::Protocol::Interface::DocumentSymbol)
+      end
+      def add_test(name_node, test_node)
+        full_name = name_node.parts.map do |part|
           case part
           when SyntaxTree::TStringContent
             part.value
@@ -278,8 +270,8 @@ module RubyLsp
         create_document_symbol(
           name: full_name,
           kind: :method,
-          range_node: node, # TODO: check
-          selection_range_node: argument.parts.first, # TODO: check
+          range_node: test_node,
+          selection_range_node: name_node,
         )
       end
     end
