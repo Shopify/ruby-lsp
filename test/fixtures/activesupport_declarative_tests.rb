@@ -31,6 +31,9 @@ class WidgetTest < ActiveSupport::TestCase
   test do
   end
 
+  test nil do
+  end
+
   test "a", "b" do
   end
 
@@ -38,6 +41,8 @@ class WidgetTest < ActiveSupport::TestCase
   end
 
   test "no block"
+
+  test
 
   test() { assert true }
 
