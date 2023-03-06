@@ -36,7 +36,6 @@ export class Ruby {
           await this.activate("rvm-auto-ruby");
           break;
         case "none":
-          await this.activate("ruby");
           break;
         default:
           await this.activateShadowenv();
