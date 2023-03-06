@@ -2,17 +2,17 @@ name: Publish
 
 on:
   release:
-    types: [created]
+    types: [published]
 
 jobs:
   release:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         name: Checkout
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         name: Use Node.js 17.x
         with:
           node-version: "17"
@@ -21,10 +21,20 @@ jobs:
       - name: 📦 Install dependencies
         run: yarn --frozen-lockfile
 
-      - name: 🔨 Package
-        run: yarn run package
-
+      # Stable releases
       - name: Publish extension in the marketplace
-        run: node_modules/.bin/vsce publish --packagePath vscode-ruby-lsp.vsix
+        if: "!github.event.release.prerelease"
+        run: |
+          yarn run package
+          node_modules/.bin/vsce publish --packagePath vscode-ruby-lsp.vsix
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      # Preview releases
+      - name: Package and publish preview extension in the marketplace
+        if: "github.event.release.prerelease"
+        run: |
+          yarn run package_preview
+          node_modules/.bin/vsce publish --pre-release --packagePath vscode-ruby-lsp.vsix
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
