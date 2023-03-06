@@ -238,13 +238,12 @@ module RubyLsp
 
         value = node.value
 
-        case value
-        when SyntaxTree::Ident
+        if value.is_a?(SyntaxTree::Ident)
           type = type_for_local(value)
           add_token(value.location, type)
-        else
-          visit(value)
         end
+
+        super
       end
 
       sig { override.params(node: SyntaxTree::VarRef).void }
@@ -262,14 +261,63 @@ module RubyLsp
         end
       end
 
+      # All block locals are variables. E.g.: [].each do |x; block_local|
+      sig { override.params(node: SyntaxTree::BlockVar).void }
+      def visit_block_var(node)
+        node.locals.each { |local| add_token(local.location, :variable) }
+        super
+      end
+
+      # All lambda locals are variables. E.g.: ->(x; lambda_local) {}
+      sig { override.params(node: SyntaxTree::LambdaVar).void }
+      def visit_lambda_var(node)
+        node.locals.each { |local| add_token(local.location, :variable) }
+        super
+      end
+
       sig { override.params(node: SyntaxTree::VCall).void }
       def visit_vcall(node)
         return super unless visible?(node, @range)
 
-        return if special_method?(node.value.value)
+        # A VCall may exist as a local in the current_scope. This happens when used named capture groups in a regexp
+        ident = node.value
+        value = ident.value
+        local = current_scope.find_local(value)
+        return if local.nil? && special_method?(value)
 
-        type = Support::Sorbet.annotation?(node) ? :type : :method
+        type = if local
+          :variable
+        elsif Support::Sorbet.annotation?(node)
+          :type
+        else
+          :method
+        end
+
         add_token(node.value.location, type)
+      end
+
+      sig { override.params(node: SyntaxTree::Binary).void }
+      def visit_binary(node)
+        # It's important to visit the regexp first in the WithScope module
+        super
+
+        # You can only capture local variables with regexp by using the =~ operator
+        return unless node.operator == :=~
+
+        left = node.left
+        parts = left.parts
+
+        if left.is_a?(SyntaxTree::RegexpLiteral) && parts.one? && parts.first.is_a?(SyntaxTree::TStringContent)
+          content = parts.first
+
+          # For each capture name we find in the regexp, look for a local in the current_scope
+          Regexp.new(content.value, Regexp::FIXEDENCODING).names.each do |name|
+            local = current_scope.find_local(name)
+            next unless local
+
+            local.definitions.each { |definition| add_token(definition, :variable) }
+          end
+        end
       end
 
       sig { override.params(node: SyntaxTree::ClassDeclaration).void }

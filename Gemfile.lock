@@ -4,7 +4,7 @@ PATH
     ruby-lsp (0.4.1)
       language_server-protocol (~> 3.17.0)
       sorbet-runtime
-      syntax_tree (>= 6, < 7)
+      syntax_tree (>= 6.0.2, < 7)
 
 GEM
   remote: https://rubygems.org/
