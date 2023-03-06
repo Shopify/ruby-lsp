@@ -45,8 +45,9 @@ group :development do
 end
 ```
 
-If using VS Code, install the [Ruby LSP extension](https://github.com/Shopify/vscode-ruby-lsp) to get the extra features in
-the editor.
+If using VS Code, install the [Ruby LSP extension](https://github.com/Shopify/vscode-ruby-lsp) to get the extra features
+in the editor. See [editors](https://github.com/Shopify/ruby-lsp/blob/main/EDITORS.md) for community instructions on
+setting up the Ruby LSP in different editors.
 
 See the [documentation](https://shopify.github.io/ruby-lsp) for more in-depth details about the
 [supported features](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html).
