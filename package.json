@@ -212,7 +212,7 @@
   "scripts": {
     "vscode:prepublish": "yarn run esbuild-base --minify",
     "package": "vsce package --out vscode-ruby-lsp.vsix",
-    "package_preview": "vsce package --pre-release --out vscode-ruby-lsp.vsix",
+    "package_prerelease": "vsce package --pre-release --out vscode-ruby-lsp.vsix",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",

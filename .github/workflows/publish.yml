@@ -30,11 +30,11 @@ jobs:
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
-      # Preview releases
-      - name: Package and publish preview extension in the marketplace
+      # Prereleases
+      - name: Package and publish prerelease extension in the marketplace
         if: "github.event.release.prerelease"
         run: |
-          yarn run package_preview
+          yarn run package_prerelease
           node_modules/.bin/vsce publish --pre-release --packagePath vscode-ruby-lsp.vsix
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
