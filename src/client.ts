@@ -227,7 +227,7 @@ export default class Client {
 
   private getEnv() {
     // eslint-disable-next-line no-process-env
-    const env = process.env;
+    const env = { ...process.env };
     const useYjit = vscode.workspace.getConfiguration("rubyLsp").get("yjit");
 
     Object.keys(env).forEach((key) => {
