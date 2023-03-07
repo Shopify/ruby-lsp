@@ -35,6 +35,8 @@ export class Ruby {
         case "rvm":
           await this.activate("rvm-auto-ruby");
           break;
+        case "none":
+          break;
         default:
           await this.activateShadowenv();
           await this.delay(500);

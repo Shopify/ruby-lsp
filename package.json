@@ -139,7 +139,8 @@
             "chruby",
             "asdf",
             "rbenv",
-            "rvm"
+            "rvm",
+            "none"
           ],
           "default": "shadowenv"
         },
