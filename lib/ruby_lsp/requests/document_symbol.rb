@@ -108,7 +108,7 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::Command).void }
       def visit_command(node)
-        return unless ATTR_ACCESSORS.include?(node.message.value)
+        return visit(node.arguments) unless ATTR_ACCESSORS.include?(node.message.value)
 
         node.arguments.parts.each do |argument|
           next unless argument.is_a?(SyntaxTree::SymbolLiteral)
