@@ -10,10 +10,12 @@ Companion VS Code extension for the [Ruby LSP gem](https://github.com/Shopify/ru
 
 ## Usage
 
-Search for `ruby-lsp` in the extensions tab and click install. Please check the configuration section for further
-instructions.
+Search for `ruby-lsp` in the extensions tab and click install. If using a Ruby version manager, please refer to
+[Ruby version managers](#ruby-version-managers).
 
 ### Configuration
+
+#### Enable or disable features
 
 The Ruby LSP has all its features enabled by default, but disabling specific features is supported by changing the
 following configuration (definition of all available values can be found in the
@@ -31,6 +33,8 @@ following configuration (definition of all available values can be found in the
   "codeActions": true
 }
 ```
+
+#### Ruby version managers
 
 To boot the server properly, the Ruby version manager must be configured, which defaults to using shadowenv.
 Check the [package.json](https://github.com/Shopify/vscode-ruby-lsp/blob/main/package.json) for currently supported
@@ -62,6 +66,44 @@ Available commands are listed below and can always be found in the `Ruby LSP` pr
 
 This extension provides convenience snippets for Ruby. Find the full list
 [here](https://github.com/Shopify/vscode-ruby-lsp/blob/main/snippets.json).
+
+### Troubleshooting
+
+To verify if the Ruby LSP has been activated properly, you can
+
+- Check if any of the features are working, such as format on save or file outline
+- Open VS Code's `Output` panel, select the `Ruby LSP` channel and verify if `Ruby LSP is ready` was printed
+
+If the Ruby LSP is failing to start, follow these steps
+
+1. Double-check that the right [Ruby version manager](#ruby-version-managers) is configured
+2. Double-check that all of the requirements for the version manager are present. For example, `chruby` requires a
+   `.ruby-version` file to exist in the project's top level
+3. If using v0.2.0 of this extension or above, double-check that the `ruby-lsp` gem is not present in the project's main
+   `Gemfile`
+4. Reload the VS Code window by opening the command palette and selecting `Developer: Reload window`
+
+If these steps don't fix the initialization issue, attempt to manually install gems using the Ruby LSP's custom
+`Gemfile` by running.
+
+```shell
+BUNDLE_GEMFILE=/path/to/your/project/.ruby-lsp/Gemfile bundle install
+```
+
+If after these steps the Ruby LSP is still not initializing properly, please report the issue
+[here](https://github.com/Shopify/vscode-ruby-lsp/issues/new).
+
+### Migrating from bundle
+
+If you previously included the `ruby-lsp` gem in the bundle (as part of the project's `Gemfile` or `gemspec`) then
+follow these steps to migrate to newer versions of the Ruby LSP - for which the gem no longer needs to be added to the
+bundle.
+
+1. Warn developers working on the project that they'll need to update to the latest Ruby LSP extension (older versions
+   require the `ruby-lsp` gem in the bundle and therefore won't work if it is removed)
+2. Remove the `ruby-lsp` from the bundle (remove the entry from the project's `Gemfile`)
+3. Run bundle to make sure `Gemfile.lock` is updated
+4. [Restart](#commands) the Ruby LSP extension or restart VS Code to allow Ruby LSP to use the new setup
 
 ### Telemetry
 
