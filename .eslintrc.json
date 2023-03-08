@@ -1,0 +1,22 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "extends": ["plugin:@shopify/typescript", "plugin:@shopify/prettier"],
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "project": "tsconfig.json"
+      }
+    }
+  },
+  "rules": {
+    "consistent-return": "off",
+    "no-warning-comments": "off",
+    "no-console": "warn",
+    "@shopify/no-debugger": "warn",
+    "no-template-curly-in-string": "warn",
+    "eqeqeq": "error",
+    "no-invalid-this": "error",
+    "no-lonely-if": "error"
+  }
+}

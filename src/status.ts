@@ -63,7 +63,7 @@ export class StatusItem {
     this.registerCommands();
   }
 
-  public async refresh(status: Command, ruby: Ruby) {
+  public refresh(status: Command, ruby: Ruby) {
     this.ruby = ruby;
     this.rubyVersionStatus.text = `Using Ruby ${this.ruby.rubyVersion}`;
     this.refreshYjitStatus();
@@ -165,7 +165,7 @@ export class StatusItem {
 
   private registerCommands() {
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(Command.ToggleYjit, async () => {
+      vscode.commands.registerCommand(Command.ToggleYjit, () => {
         const lspConfig = vscode.workspace.getConfiguration("rubyLsp");
         const yjitEnabled = lspConfig.get("yjit");
         lspConfig.update("yjit", !yjitEnabled, true, true);
