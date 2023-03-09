@@ -13,7 +13,7 @@ import {
 
 import { Telemetry } from "./telemetry";
 import { Ruby } from "./ruby";
-import { StatusItem, Command } from "./status";
+import { StatusItems, Command, ServerState, ClientInterface } from "./status";
 
 const LSP_NAME = "Ruby LSP";
 const asyncExec = promisify(exec);
@@ -22,15 +22,16 @@ interface EnabledFeatures {
   [key: string]: boolean;
 }
 
-export default class Client {
+export default class Client implements ClientInterface {
   private client: LanguageClient | undefined;
-  private context: vscode.ExtensionContext;
+  private _context: vscode.ExtensionContext;
   private workingFolder: string;
   private clientOptions: LanguageClientOptions;
   private telemetry: Telemetry;
-  private ruby: Ruby;
-  private statusItem: StatusItem;
+  private _ruby: Ruby;
+  private statusItems: StatusItems;
   private outputChannel = vscode.window.createOutputChannel(LSP_NAME);
+  private _state: ServerState = ServerState.Starting;
 
   constructor(
     context: vscode.ExtensionContext,
@@ -39,7 +40,7 @@ export default class Client {
   ) {
     this.workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
     this.telemetry = telemetry;
-    this.ruby = ruby;
+    this._ruby = ruby;
 
     this.clientOptions = {
       documentSelector: [{ scheme: "file", language: "ruby" }],
@@ -107,13 +108,16 @@ export default class Client {
       },
     };
 
-    this.context = context;
-    this.statusItem = new StatusItem(this.context, this.ruby);
+    this._context = context;
+    this.statusItems = new StatusItems(this);
     this.registerCommands();
     this.registerAutoRestarts();
   }
 
   async start() {
+    this._state = ServerState.Starting;
+    this.statusItems.refresh();
+
     await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
@@ -150,21 +154,25 @@ export default class Client {
       this.clientOptions
     );
 
-    await this.statusItem.refresh(Command.Start, this.ruby);
-
     this.client.onTelemetry((event) =>
       this.telemetry.sendEvent({
         ...event,
-        rubyVersion: this.ruby.rubyVersion,
-        yjitEnabled: this.ruby.yjitEnabled,
+        rubyVersion: this._ruby.rubyVersion,
+        yjitEnabled: this._ruby.yjitEnabled,
       })
     );
+
     await this.client.start();
+
+    this._state = ServerState.Running;
+    this.statusItems.refresh();
   }
 
   async stop(): Promise<void> {
     if (this.client) {
-      await this.statusItem.refresh(Command.Stop, this.ruby);
+      this._state = ServerState.Stopped;
+      this.statusItems.refresh();
+
       return this.client.stop();
     }
   }
@@ -178,14 +186,29 @@ export default class Client {
         await this.start();
       }
     } catch (error: any) {
+      this._state = ServerState.Error;
+      this.statusItems.refresh();
+
       this.outputChannel.appendLine(
         `Error restarting the server: ${error.message}`
       );
     }
   }
 
+  get ruby(): Ruby {
+    return this._ruby;
+  }
+
+  get context(): vscode.ExtensionContext {
+    return this._context;
+  }
+
+  get state(): ServerState {
+    return this._state;
+  }
+
   private registerCommands() {
-    this.context.subscriptions.push(
+    this._context.subscriptions.push(
       vscode.commands.registerCommand(Command.Start, this.start.bind(this)),
       vscode.commands.registerCommand(Command.Restart, this.restart.bind(this)),
       vscode.commands.registerCommand(Command.Stop, this.stop.bind(this))
@@ -276,7 +299,7 @@ export default class Client {
 
         // Re-activate Ruby if the version manager changed
         if (event.affectsConfiguration("rubyLsp.rubyVersionManager")) {
-          await this.ruby.activateRuby();
+          await this._ruby.activateRuby();
         }
 
         await this.restart();
@@ -288,7 +311,7 @@ export default class Client {
     const watcher = vscode.workspace.createFileSystemWatcher(
       new vscode.RelativePattern(this.workingFolder, pattern)
     );
-    this.context.subscriptions.push(watcher);
+    this._context.subscriptions.push(watcher);
 
     watcher.onDidChange(this.restart.bind(this));
     watcher.onDidCreate(this.restart.bind(this));
@@ -329,12 +352,12 @@ export default class Client {
       );
     }
 
-    if (!this.ruby.rubyVersion) {
+    if (!this._ruby.rubyVersion) {
       return env;
     }
 
     // Enabling YJIT only provides a performance benefit on Ruby 3.2.0 and above
-    const yjitEnabled = useYjit && this.ruby.supportsYjit;
+    const yjitEnabled = useYjit && this._ruby.supportsYjit;
 
     if (!yjitEnabled) {
       return env;
