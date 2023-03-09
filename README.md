@@ -95,6 +95,8 @@ If after these steps the Ruby LSP is still not initializing properly, please rep
 
 ### Migrating from bundle
 
+**Note**: The following applies only to v0.2.0 or newer of the extension.
+
 If you previously included the `ruby-lsp` gem in the bundle (as part of the project's `Gemfile` or `gemspec`) then
 follow these steps to migrate to newer versions of the Ruby LSP - for which the gem no longer needs to be added to the
 bundle.
