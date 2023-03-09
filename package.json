@@ -135,14 +135,15 @@
           "description": "The Ruby version manager to use",
           "type": "string",
           "enum": [
-            "shadowenv",
-            "chruby",
             "asdf",
+            "auto",
+            "chruby",
+            "none",
             "rbenv",
             "rvm",
-            "none"
+            "shadowenv"
           ],
-          "default": "shadowenv"
+          "default": "auto"
         },
         "rubyLsp.yjit": {
           "description": "Use YJIT to speed up the Ruby LSP server",

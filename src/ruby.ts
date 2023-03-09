@@ -1,6 +1,8 @@
 import { exec } from "child_process";
 import { promisify } from "util";
 import { readFile } from "fs/promises";
+import path from "path";
+import fs from "fs";
 
 import * as vscode from "vscode";
 
@@ -8,6 +10,7 @@ const asyncExec = promisify(exec);
 
 export enum VersionManager {
   Asdf = "asdf",
+  Auto = "auto",
   Chruby = "chruby",
   Rbenv = "rbenv",
   Rvm = "rvm",
@@ -21,6 +24,8 @@ export class Ruby {
   public supportsYjit?: boolean;
   private workingFolder: string;
   private versionManager?: VersionManager;
+  // eslint-disable-next-line no-process-env
+  private shell = process.env.SHELL;
 
   constructor() {
     this.workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
@@ -30,6 +35,11 @@ export class Ruby {
     this.versionManager = vscode.workspace
       .getConfiguration("rubyLsp")
       .get("rubyVersionManager")!;
+
+    // If the version manager is auto, discover the actual manager before trying to activate anything
+    if (this.versionManager === VersionManager.Auto) {
+      await this.discoverVersionManager();
+    }
 
     try {
       switch (this.versionManager) {
@@ -74,8 +84,7 @@ export class Ruby {
 
   private async activate(ruby: string) {
     const result = await asyncExec(
-      // eslint-disable-next-line no-process-env
-      `${process.env.SHELL} -lic '${ruby} --disable-gems -rjson -e "printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, JSON.dump(ENV.to_h))"'`,
+      `${this.shell} -lic '${ruby} --disable-gems -rjson -e "printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, JSON.dump(ENV.to_h))"'`,
       { cwd: this.workingFolder }
     );
 
@@ -87,6 +96,10 @@ export class Ruby {
   }
 
   private async fetchRubyInfo() {
+    if (this.versionManager === VersionManager.Auto) {
+      return;
+    }
+
     const rubyInfo = await asyncExec(
       "ruby --disable-gems -e 'puts \"#{RUBY_VERSION},#{defined?(RubyVM::YJIT)}\"'"
     );
@@ -114,6 +127,43 @@ export class Ruby {
       } else {
         throw error;
       }
+    }
+  }
+
+  private async discoverVersionManager() {
+    // For shadowenv, it wouldn't be enough to check for the executable's existence. We need to check if the project has
+    // created a .shadowenv.d folder
+    if (fs.existsSync(path.join(this.workingFolder, ".shadowenv.d"))) {
+      this.versionManager = VersionManager.Shadowenv;
+      return;
+    }
+
+    const managers = [
+      VersionManager.Asdf,
+      VersionManager.Chruby,
+      VersionManager.Rbenv,
+      VersionManager.Rvm,
+    ];
+
+    for (const tool of managers) {
+      const exists = await this.toolExists(tool);
+
+      if (exists) {
+        this.versionManager = tool;
+        return;
+      }
+    }
+
+    // If we can't find a version manager, just return None
+    this.versionManager = VersionManager.None;
+  }
+
+  private async toolExists(tool: string) {
+    try {
+      await asyncExec(`${this.shell} -lic '${tool} --version'`);
+      return true;
+    } catch {
+      return false;
     }
   }
 

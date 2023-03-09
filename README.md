@@ -36,16 +36,23 @@ following configuration (definition of all available values can be found in the
 
 #### Ruby version managers
 
-To boot the server properly, the Ruby version manager must be configured, which defaults to using shadowenv.
-Check the [package.json](https://github.com/Shopify/vscode-ruby-lsp/blob/main/package.json) for currently supported
-managers.
+To boot the server properly, the Ruby LSP uses a version manager to activate the right environment variables that point
+Bundler to the Ruby and gem paths. This is especially necessary when switching between projects that use different Ruby
+versions - since those paths change and need to be reactivated.
 
-The Ruby LSP uses the Ruby version manager to reactivate the required Ruby version and to select the correct gem and
-Bundler paths, which is necessary when switching between projects using different Ruby versions. Use the extension's
-`rubyLsp.rubyVersionManager` setting to control which version manager is used.
+By default, the Ruby LSP will attempt to automatically determine which version manager it should use, checking which ones are available
+(`auto` option). If that fails, then the version manager must be manually configured in VS Code's settings.
 
 ```jsonc
-"rubyLsp.rubyVersionManager": "chruby" // The handle for the version manager (e.g.: chruby, shadowenv)
+// Available options are
+// "auto" (select version manager automatically)
+// "none" (do not use a version manager)
+// "asdf"
+// "chruby"
+// "rbenv"
+// "rvm"
+// "shadowenv"
+"rubyLsp.rubyVersionManager": "chruby"
 ```
 
 To make sure that the Ruby LSP can find the version manager scripts, make sure that they are loaded in the shell's
