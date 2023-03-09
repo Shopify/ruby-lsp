@@ -251,10 +251,12 @@ export default class Client {
     // Copy the current `Gemfile.lock` to the `.ruby-lsp` directory to make sure we're using the right versions of
     // RuboCop and related extensions. Because we do this in every initialization, we always use the latest version of
     // the Ruby LSP
-    fs.cpSync(
-      path.join(this.workingFolder, "Gemfile.lock"),
-      path.join(this.workingFolder, ".ruby-lsp", "Gemfile.lock")
-    );
+    if (fs.existsSync(path.join(this.workingFolder, "Gemfile.lock"))) {
+      fs.cpSync(
+        path.join(this.workingFolder, "Gemfile.lock"),
+        path.join(this.workingFolder, ".ruby-lsp", "Gemfile.lock")
+      );
+    }
 
     await asyncExec(`BUNDLE_GEMFILE=${customGemfilePath} bundle install`, {
       cwd: this.workingFolder,
