@@ -18,6 +18,7 @@ export enum Command {
   ServerOptions = "rubyLsp.serverOptions",
   ToggleYjit = "rubyLsp.toggleYjit",
   SelectVersionManager = "rubyLsp.selectRubyVersionManager",
+  ToggleFeatures = "rubyLsp.toggleFeatures",
 }
 
 const STOPPED_SERVER_OPTIONS = [
@@ -241,6 +242,82 @@ export class YjitStatus extends StatusItem {
   }
 }
 
+export class FeaturesStatus extends StatusItem {
+  private descriptions: { [key: string]: string } = {};
+
+  constructor(client: ClientInterface) {
+    super("features", client);
+    this.item.name = "Ruby LSP Features";
+    this.item.command = {
+      title: "Manage",
+      command: Command.ToggleFeatures,
+    };
+    this.refresh();
+
+    // Extract feature descriptions from our package.json
+    const enabledFeaturesProperties =
+      vscode.extensions.getExtension("Shopify.ruby-lsp")!.packageJSON
+        .contributes.configuration.properties["rubyLsp.enabledFeatures"]
+        .properties;
+
+    Object.entries(enabledFeaturesProperties).forEach(
+      ([key, value]: [string, any]) => {
+        this.descriptions[key] = value.description;
+      }
+    );
+  }
+
+  refresh(): void {
+    const configuration = vscode.workspace.getConfiguration("rubyLsp");
+    const features: { [key: string]: boolean } =
+      configuration.get("enabledFeatures")!;
+    const enabledFeatures = Object.keys(features).filter(
+      (key) => features[key]
+    );
+
+    this.item.text = `${enabledFeatures.length}/${
+      Object.keys(features).length
+    } features enabled`;
+  }
+
+  registerCommand(): void {
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(Command.ToggleFeatures, async () => {
+        const configuration = vscode.workspace.getConfiguration("rubyLsp");
+        const features: { [key: string]: boolean } =
+          configuration.get("enabledFeatures")!;
+        const allFeatures = Object.keys(features);
+        const options: vscode.QuickPickItem[] = allFeatures.map((label) => {
+          return {
+            label,
+            picked: features[label],
+            description: this.descriptions[label],
+          };
+        });
+
+        const toggledFeatures = await vscode.window.showQuickPick(options, {
+          canPickMany: true,
+          placeHolder: "Select the features you would like to enable",
+        });
+
+        if (toggledFeatures !== undefined) {
+          // The `picked` property is only used to determine if the checkbox is checked initially. When we receive the
+          // response back from the QuickPick, we need to use inclusion to check if the feature was selected
+          allFeatures.forEach((feature) => {
+            features[feature] = toggledFeatures.some(
+              (selected) => selected.label === feature
+            );
+          });
+
+          await vscode.workspace
+            .getConfiguration("rubyLsp")
+            .update("enabledFeatures", features, true, true);
+        }
+      })
+    );
+  }
+}
+
 export class StatusItems {
   private items: StatusItem[] = [];
 
@@ -250,6 +327,7 @@ export class StatusItems {
       new ServerStatus(client),
       new ExperimentalFeaturesStatus(client),
       new YjitStatus(client),
+      new FeaturesStatus(client),
     ];
   }
 

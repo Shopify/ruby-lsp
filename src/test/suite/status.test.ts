@@ -13,6 +13,7 @@ import {
   StatusItem,
   ServerState,
   ClientInterface,
+  FeaturesStatus,
 } from "../../status";
 
 suite("StatusItems", () => {
@@ -178,6 +179,61 @@ suite("StatusItems", () => {
 
       assert.strictEqual(status.item.text, "YJIT disabled");
       assert.strictEqual(status.item.command, undefined);
+    });
+  });
+
+  suite("FeaturesStatus", () => {
+    const configuration = vscode.workspace.getConfiguration("rubyLsp");
+    const originalFeatures: { [key: string]: boolean } =
+      configuration.get("enabledFeatures")!;
+    const numberOfFeatures = Object.keys(originalFeatures).length;
+
+    beforeEach(() => {
+      ruby = {} as Ruby;
+      status = new FeaturesStatus({
+        context,
+        ruby,
+        state: ServerState.Running,
+      });
+    });
+
+    afterEach(() => {
+      configuration.update("enabledFeatures", originalFeatures, true, true);
+    });
+
+    test("Status is initialized with the right values", async () => {
+      assert.strictEqual(
+        status.item.text,
+        `${numberOfFeatures}/${numberOfFeatures} features enabled`
+      );
+      assert.strictEqual(status.item.name, "Ruby LSP Features");
+      assert.strictEqual(status.item.command?.title, "Manage");
+      assert.strictEqual(status.item.command?.command, Command.ToggleFeatures);
+      assert.strictEqual(context.subscriptions.length, 1);
+    });
+
+    test("Refresh updates number of features", () => {
+      // eslint-disable-next-line promise/catch-or-return
+      vscode.workspace
+        .getConfiguration("rubyLsp")
+        .update("enabledFeatures", { completion: false }, true, true)
+        .then(() => {
+          // The assertion depends on the resolution of the update promise. Awaiting leads to race conditions
+          const currentConfig: { [key: string]: boolean } =
+            configuration.get("enabledFeatures")!;
+
+          Object.keys(originalFeatures).forEach((key) => {
+            const expected =
+              key === "completion" ? false : originalFeatures[key];
+            assert.strictEqual(currentConfig[key], expected);
+          });
+
+          status.refresh();
+          assert.strictEqual(
+            status.item.text,
+            `${numberOfFeatures - 1}/${numberOfFeatures} features enabled`
+          );
+        });
     });
   });
 });
