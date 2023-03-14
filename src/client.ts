@@ -43,6 +43,8 @@ export default class Client implements ClientInterface {
     this.telemetry = telemetry;
     this._ruby = ruby;
 
+    const configuration = vscode.workspace.getConfiguration("rubyLsp");
+
     this.clientOptions = {
       documentSelector: [{ scheme: "file", language: "ruby" }],
       diagnosticCollectionName: LSP_NAME,
@@ -50,9 +52,10 @@ export default class Client implements ClientInterface {
       revealOutputChannelOn: RevealOutputChannelOn.Never,
       initializationOptions: {
         enabledFeatures: this.listOfEnabledFeatures(),
-        experimentalFeaturesEnabled: vscode.workspace
-          .getConfiguration("rubyLsp")
-          .get("enableExperimentalFeatures"),
+        experimentalFeaturesEnabled: configuration.get(
+          "enableExperimentalFeatures"
+        ),
+        formatter: configuration.get("formatter"),
       },
       middleware: {
         provideOnTypeFormattingEdits: async (

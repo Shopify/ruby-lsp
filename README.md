@@ -59,6 +59,18 @@ To make sure that the Ruby LSP can find the version manager scripts, make sure t
 configuration script (e.g.: ~/.bashrc, ~/.zshrc) and that the SHELL environment variable is set and pointing to the
 default shell.
 
+#### Configuring a formatter
+
+The tool to be used for formatting files can be configured with the following setting.
+
+```jsonc
+// Available options
+//    auto: automatically detect the formatter based on the app's bundle
+//    none: do not use a formatter (disables format on save and related diagnostics)
+//    all other options are the name of the formatter (e.g.: rubocop or syntax_tree)
+"rubyLsp.formatter": "auto"
+```
+
 ### Commands
 
 Available commands are listed below and can always be found in the `Ruby LSP` prefix.

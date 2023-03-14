@@ -153,6 +153,17 @@
           "description": "Use YJIT to speed up the Ruby LSP server",
           "type": "boolean",
           "default": true
+        },
+        "rubyLsp.formatter": {
+          "description": "Which tool the Ruby LSP should use for formatting files",
+          "type": "string",
+          "enum": [
+            "auto",
+            "rubocop",
+            "syntax_tree",
+            "none"
+          ],
+          "default": "auto"
         }
       }
     },
