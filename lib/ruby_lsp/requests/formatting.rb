@@ -22,14 +22,23 @@ module RubyLsp
     # ```
     class Formatting < BaseRequest
       class Error < StandardError; end
+      class InvalidFormatter < StandardError; end
 
       extend T::Sig
 
-      sig { params(uri: String, document: Document).void }
-      def initialize(uri, document)
+      sig { params(uri: String, document: Document, formatter: String).void }
+      def initialize(uri, document, formatter: "auto")
         super(document)
 
         @uri = uri
+        @formatter = T.let(
+          if formatter == "auto"
+            defined?(Support::RuboCopFormattingRunner) ? "rubocop" : "syntax_tree"
+          else
+            formatter
+          end,
+          String,
+        )
       end
 
       sig { override.returns(T.nilable(T.all(T::Array[Interface::TextEdit], Object))) }
@@ -60,10 +69,13 @@ module RubyLsp
 
       sig { returns(T.nilable(String)) }
       def formatted_file
-        if defined?(Support::RuboCopFormattingRunner)
+        case @formatter
+        when "rubocop"
           Support::RuboCopFormattingRunner.instance.run(@uri, @document)
-        else
+        when "syntax_tree"
           SyntaxTree.format(@document.source)
+        else
+          raise InvalidFormatter, "Unknown formatter: #{@formatter}"
         end
       end
     end

@@ -12,10 +12,14 @@ module RubyLsp
     sig { params(encoding: String).void }
     attr_writer :encoding
 
+    sig { returns(String) }
+    attr_accessor :formatter
+
     sig { void }
     def initialize
       @state = T.let({}, T::Hash[String, Document])
       @encoding = T.let("utf-8", String)
+      @formatter = T.let("auto", String)
     end
 
     sig { params(uri: String).returns(Document) }
