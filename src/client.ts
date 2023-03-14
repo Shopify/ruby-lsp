@@ -49,6 +49,9 @@ export default class Client implements ClientInterface {
       revealOutputChannelOn: RevealOutputChannelOn.Never,
       initializationOptions: {
         enabledFeatures: this.listOfEnabledFeatures(),
+        experimentalFeaturesEnabled: vscode.workspace
+          .getConfiguration("rubyLsp")
+          .get("enableExperimentalFeatures"),
       },
       middleware: {
         provideOnTypeFormattingEdits: async (
@@ -321,14 +324,8 @@ export default class Client implements ClientInterface {
   private listOfEnabledFeatures(): string[] {
     const configuration = vscode.workspace.getConfiguration("rubyLsp");
     const features: EnabledFeatures = configuration.get("enabledFeatures")!;
-    const allFeatures = Object.keys(features);
 
-    // If enableExperimentalFeatures is true, all features are enabled
-    if (configuration.get("enableExperimentalFeatures")) {
-      return allFeatures;
-    }
-
-    return allFeatures.filter((key) => features[key]);
+    return Object.keys(features).filter((key) => features[key]);
   }
 
   private getEnv() {
