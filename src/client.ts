@@ -27,7 +27,6 @@ export default class Client implements ClientInterface {
   private client: LanguageClient | undefined;
   private _context: vscode.ExtensionContext;
   private workingFolder: string;
-  private clientOptions: LanguageClientOptions;
   private telemetry: Telemetry;
   private _ruby: Ruby;
   private statusItems: StatusItems;
@@ -42,10 +41,29 @@ export default class Client implements ClientInterface {
     this.workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
     this.telemetry = telemetry;
     this._ruby = ruby;
+    this._context = context;
+    this.statusItems = new StatusItems(this);
+    this.registerCommands();
+    this.registerAutoRestarts();
+  }
+
+  async start() {
+    this._state = ServerState.Starting;
+    this.statusItems.refresh();
+
+    await this.setupCustomGemfile();
+
+    const executable: Executable = {
+      command: "bundle",
+      args: ["exec", "ruby-lsp"],
+      options: {
+        cwd: this.workingFolder,
+        env: this.ruby.env,
+      },
+    };
 
     const configuration = vscode.workspace.getConfiguration("rubyLsp");
-
-    this.clientOptions = {
+    const clientOptions: LanguageClientOptions = {
       documentSelector: [{ scheme: "file", language: "ruby" }],
       diagnosticCollectionName: LSP_NAME,
       outputChannel: this.outputChannel,
@@ -115,31 +133,10 @@ export default class Client implements ClientInterface {
       },
     };
 
-    this._context = context;
-    this.statusItems = new StatusItems(this);
-    this.registerCommands();
-    this.registerAutoRestarts();
-  }
-
-  async start() {
-    this._state = ServerState.Starting;
-    this.statusItems.refresh();
-
-    await this.setupCustomGemfile();
-
-    const executable: Executable = {
-      command: "bundle",
-      args: ["exec", "ruby-lsp"],
-      options: {
-        cwd: this.workingFolder,
-        env: this.ruby.env,
-      },
-    };
-
     this.client = new LanguageClient(
       LSP_NAME,
       { run: executable, debug: executable },
-      this.clientOptions
+      clientOptions
     );
 
     this.client.onTelemetry((event) =>
@@ -297,9 +294,6 @@ export default class Client implements ClientInterface {
     // configuration and restart the server
     vscode.workspace.onDidChangeConfiguration(async (event) => {
       if (event.affectsConfiguration("rubyLsp")) {
-        this.clientOptions.initializationOptions.enabledFeatures =
-          this.listOfEnabledFeatures();
-
         // Re-activate Ruby if the version manager changed
         if (event.affectsConfiguration("rubyLsp.rubyVersionManager")) {
           await this._ruby.activateRuby();
