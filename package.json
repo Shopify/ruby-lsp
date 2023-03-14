@@ -240,7 +240,7 @@
     "@typescript-eslint/parser": "^5.54.1",
     "@vscode/test-electron": "^2.3.0",
     "esbuild": "^0.17.11",
-    "eslint": "^8.35.0",
+    "eslint": "^8.36.0",
     "eslint-import-resolver-typescript": "^3.5.3",
     "glob": "^9.0.1",
     "mocha": "^10.2.0",
