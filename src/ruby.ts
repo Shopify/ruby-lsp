@@ -90,7 +90,7 @@ export class Ruby {
 
   private async activateChruby() {
     const rubyVersion = await this.readRubyVersion();
-    await this.activate(`chruby-exec "${rubyVersion}" -- ruby`);
+    await this.activate(`chruby "${rubyVersion}" && ruby`);
   }
 
   private async activate(ruby: string) {
