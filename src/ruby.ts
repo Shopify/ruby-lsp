@@ -26,9 +26,16 @@ export class Ruby {
   private versionManager?: VersionManager;
   // eslint-disable-next-line no-process-env
   private shell = process.env.SHELL;
+  private _env: NodeJS.ProcessEnv = {};
 
-  constructor() {
-    this.workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
+  constructor(
+    workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath
+  ) {
+    this.workingFolder = workingFolder;
+  }
+
+  get env() {
+    return this._env;
   }
 
   async activateRuby() {
@@ -60,10 +67,14 @@ export class Ruby {
         default:
           await this.activateShadowenv();
           await this.delay(500);
+          // eslint-disable-next-line no-process-env
+          this._env = { ...process.env };
           break;
       }
 
       await this.fetchRubyInfo();
+      this.deleteGcEnvironmentVariables();
+      this.setupBundlePath();
     } catch (error: any) {
       await vscode.window.showErrorMessage(
         `Failed to activate ${this.versionManager} environment: ${error.message}`
@@ -91,15 +102,11 @@ export class Ruby {
     const envJson = result.stdout.match(
       /RUBY_ENV_ACTIVATE(.*)RUBY_ENV_ACTIVATE/
     )![1];
-    // eslint-disable-next-line no-process-env
-    process.env = JSON.parse(envJson);
+
+    this._env = JSON.parse(envJson);
   }
 
   private async fetchRubyInfo() {
-    if (this.versionManager === VersionManager.Auto) {
-      return;
-    }
-
     const rubyInfo = await asyncExec(
       "ruby --disable-gems -e 'puts \"#{RUBY_VERSION},#{defined?(RubyVM::YJIT)}\"'"
     );
@@ -111,6 +118,38 @@ export class Ruby {
 
     const [major, minor, _patch] = this.rubyVersion.split(".").map(Number);
     this.supportsYjit = this.yjitEnabled && [major, minor] >= [3, 2];
+
+    const useYjit = vscode.workspace.getConfiguration("rubyLsp").get("yjit");
+
+    if (this.supportsYjit && useYjit) {
+      // RUBYOPT may be empty or it may contain bundler paths. In the second case, we must concat to avoid accidentally
+      // removing the paths from the env variable
+      if (this._env.RUBYOPT) {
+        this._env.RUBYOPT.concat(" --yjit");
+      } else {
+        this._env.RUBYOPT = "--yjit";
+      }
+    }
+  }
+
+  private deleteGcEnvironmentVariables() {
+    Object.keys(this._env).forEach((key) => {
+      if (key.startsWith("RUBY_GC")) {
+        delete this._env[key];
+      }
+    });
+  }
+
+  private setupBundlePath() {
+    // Use our custom Gemfile to allow RuboCop and extensions to work without having to add ruby-lsp to the bundle. Note
+    // that we can't do this for the ruby-lsp repository itself otherwise the gem is activated twice
+    if (!this.workingFolder.endsWith("ruby-lsp")) {
+      this._env.BUNDLE_GEMFILE = path.join(
+        this.workingFolder,
+        ".ruby-lsp",
+        "Gemfile"
+      );
+    }
   }
 
   private async readRubyVersion() {

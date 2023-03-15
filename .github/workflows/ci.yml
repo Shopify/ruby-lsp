@@ -7,13 +7,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: Build
-        uses: actions/setup-node@v2
+      - name: Set up Node
+        uses: actions/setup-node@v3
         with:
           node-version: "17"
           cache: "yarn"
+
+      # We need some Ruby installed for the environment activation tests
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
 
       - name: 📦 Install dependencies
         run: yarn --frozen-lockfile

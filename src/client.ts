@@ -139,15 +139,12 @@ export default class Client implements ClientInterface {
       }
     );
 
-    // We need to get the environment again every time we start in case the user changed the environment manager
-    const env = this.getEnv();
-
     const executable: Executable = {
       command: "bundle",
       args: ["exec", "ruby-lsp"],
       options: {
         cwd: this.workingFolder,
-        env,
+        env: this.ruby.env,
       },
     };
 
@@ -326,49 +323,6 @@ export default class Client implements ClientInterface {
     const features: EnabledFeatures = configuration.get("enabledFeatures")!;
 
     return Object.keys(features).filter((key) => features[key]);
-  }
-
-  private getEnv() {
-    // eslint-disable-next-line no-process-env
-    const env = { ...process.env };
-    const useYjit = vscode.workspace.getConfiguration("rubyLsp").get("yjit");
-
-    Object.keys(env).forEach((key) => {
-      if (key.startsWith("RUBY_GC")) {
-        delete env[key];
-      }
-    });
-
-    // Use our custom Gemfile to allow RuboCop and extensions to work without having to add ruby-lsp to the bundle. Note
-    // that we can't do this for the ruby-lsp repository itself otherwise the gem is activated twice
-    if (!this.workingFolder.endsWith("ruby-lsp")) {
-      env.BUNDLE_GEMFILE = path.join(
-        this.workingFolder,
-        ".ruby-lsp",
-        "Gemfile"
-      );
-    }
-
-    if (!this._ruby.rubyVersion) {
-      return env;
-    }
-
-    // Enabling YJIT only provides a performance benefit on Ruby 3.2.0 and above
-    const yjitEnabled = useYjit && this._ruby.supportsYjit;
-
-    if (!yjitEnabled) {
-      return env;
-    }
-
-    // RUBYOPT may be empty or it may contain bundler paths. In the second case, we must concat to avoid accidentally
-    // removing the paths from the env variable
-    if (env.RUBYOPT) {
-      env.RUBYOPT.concat(" --yjit");
-    } else {
-      env.RUBYOPT = "--yjit";
-    }
-
-    return env;
   }
 
   // Leave this function for a while to assist users migrating from the old version of the extension
