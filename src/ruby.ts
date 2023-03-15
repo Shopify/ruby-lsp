@@ -107,7 +107,8 @@ export class Ruby {
 
   private async fetchRubyInfo() {
     const rubyInfo = await asyncExec(
-      "ruby --disable-gems -e 'puts \"#{RUBY_VERSION},#{defined?(RubyVM::YJIT)}\"'"
+      "ruby --disable-gems -e 'puts \"#{RUBY_VERSION},#{defined?(RubyVM::YJIT)}\"'",
+      { env: this._env }
     );
 
     const [rubyVersion, yjitIsDefined] = rubyInfo.stdout.trim().split(",");
