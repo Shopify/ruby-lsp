@@ -14,6 +14,7 @@ export enum Command {
   Start = "rubyLsp.start",
   Stop = "rubyLsp.stop",
   Restart = "rubyLsp.restart",
+  Update = "rubyLsp.update",
   ToggleExperimentalFeatures = "rubyLsp.toggleExperimentalFeatures",
   ServerOptions = "rubyLsp.serverOptions",
   ToggleYjit = "rubyLsp.toggleYjit",

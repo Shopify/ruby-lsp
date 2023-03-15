@@ -17,6 +17,7 @@ import { StatusItems, Command, ServerState, ClientInterface } from "./status";
 
 const LSP_NAME = "Ruby LSP";
 const asyncExec = promisify(exec);
+const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 interface EnabledFeatures {
   [key: string]: boolean;
@@ -121,23 +122,7 @@ export default class Client implements ClientInterface {
     this._state = ServerState.Starting;
     this.statusItems.refresh();
 
-    await vscode.window.withProgress(
-      {
-        location: vscode.ProgressLocation.Notification,
-        title: "Setting up the bundle",
-      },
-      async (_progress) => {
-        try {
-          await this.setupCustomGemfile();
-        } catch {
-          // The progress dialog can't be closed by the user, so we have to guarantee that we catch errors
-          vscode.window.showErrorMessage(
-            "Failed to setup the bundle. \
-              See [Troubleshooting](https://github.com/Shopify/vscode-ruby-lsp#troubleshooting) for instructions"
-          );
-        }
-      }
-    );
+    await this.setupCustomGemfile();
 
     const executable: Executable = {
       command: "bundle",
@@ -211,7 +196,11 @@ export default class Client implements ClientInterface {
     this._context.subscriptions.push(
       vscode.commands.registerCommand(Command.Start, this.start.bind(this)),
       vscode.commands.registerCommand(Command.Restart, this.restart.bind(this)),
-      vscode.commands.registerCommand(Command.Stop, this.stop.bind(this))
+      vscode.commands.registerCommand(Command.Stop, this.stop.bind(this)),
+      vscode.commands.registerCommand(
+        Command.Update,
+        this.updateServer.bind(this)
+      )
     );
   }
 
@@ -271,19 +260,28 @@ export default class Client implements ClientInterface {
 
     fs.writeFileSync(customGemfilePath, gemfile.join("\n"));
 
-    // Copy the current `Gemfile.lock` to the `.ruby-lsp` directory to make sure we're using the right versions of
-    // RuboCop and related extensions. Because we do this in every initialization, we always use the latest version of
-    // the Ruby LSP
-    if (fs.existsSync(path.join(this.workingFolder, "Gemfile.lock"))) {
-      fs.cpSync(
-        path.join(this.workingFolder, "Gemfile.lock"),
-        path.join(this.workingFolder, ".ruby-lsp", "Gemfile.lock")
-      );
-    }
+    const lastUpdatedAt: number | undefined = this._context.workspaceState.get(
+      "rubyLsp.lastBundleInstall"
+    );
+    const gemfileLockPath = path.join(this.workingFolder, "Gemfile.lock");
+    const customGemfileLockPath = path.join(
+      this.workingFolder,
+      ".ruby-lsp",
+      "Gemfile.lock"
+    );
 
-    await asyncExec(`BUNDLE_GEMFILE=${customGemfilePath} bundle install`, {
-      cwd: this.workingFolder,
-    });
+    // Copy the Gemfile.lock and install gems to get `ruby-lsp` updates if
+    // - it's been more than a day since the last time we checked for updates
+    // - the Gemfile.lock has changed and we haven't yet updated .ruby-lsp/Gemfile.lock
+    // - the gems aren't installed
+    if (
+      lastUpdatedAt === undefined ||
+      Date.now() - lastUpdatedAt > ONE_DAY_IN_MS ||
+      this.gemfilesAreOutOfSync(gemfileLockPath, customGemfileLockPath) ||
+      !(await this.gemsAreInstalled(customGemfilePath))
+    ) {
+      await this.updateServer();
+    }
   }
 
   private registerAutoRestarts() {
@@ -353,5 +351,90 @@ export default class Client implements ClientInterface {
       // The LSP is not in the bundle, which is what we want
       return false;
     }
+  }
+
+  private async gemsAreInstalled(customGemfilePath: string): Promise<boolean> {
+    try {
+      await asyncExec(`BUNDLE_GEMFILE=${customGemfilePath} bundle check`, {
+        cwd: this.workingFolder,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private gemfilesAreOutOfSync(
+    gemfileLockPath: string,
+    customGemfileLockPath: string
+  ): boolean {
+    // If there's no top level Gemfile.lock, there's nothing to sync
+    if (!fs.existsSync(gemfileLockPath)) {
+      return false;
+    }
+
+    // If there's no custom Gemfile.lock, then it hasn't been created yet and we must sync
+    if (!fs.existsSync(customGemfileLockPath)) {
+      return true;
+    }
+
+    // If the last modified time of the top level Gemfile.lock is greater than the custom Gemfile.lock, then changes
+    // were made and we have to sync
+    const lastModifiedAt = fs.statSync(gemfileLockPath).mtimeMs;
+    const customLastModifiedAt = fs.statSync(customGemfileLockPath).mtimeMs;
+    return lastModifiedAt > customLastModifiedAt;
+  }
+
+  private async updateServer(): Promise<void> {
+    const gemfileLockPath = path.join(this.workingFolder, "Gemfile.lock");
+    const customGemfileLockPath = path.join(
+      this.workingFolder,
+      ".ruby-lsp",
+      "Gemfile.lock"
+    );
+
+    // Copy the current `Gemfile.lock` to the `.ruby-lsp` directory to make sure we're using the right versions of
+    // RuboCop and related extensions. Because we do this in every initialization, we always use the latest version of
+    // the Ruby LSP
+    if (fs.existsSync(gemfileLockPath)) {
+      fs.cpSync(gemfileLockPath, customGemfileLockPath);
+    }
+
+    const customGemfilePath = path.join(
+      this.workingFolder,
+      ".ruby-lsp",
+      "Gemfile"
+    );
+
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Setting up the bundle",
+      },
+      async (_progress) => {
+        try {
+          await asyncExec(
+            `BUNDLE_GEMFILE=${customGemfilePath} bundle install`,
+            {
+              cwd: this.workingFolder,
+            }
+          );
+        } catch (error: any) {
+          this._state = ServerState.Error;
+          this.statusItems.refresh();
+          // The progress dialog can't be closed by the user, so we have to guarantee that we catch errors
+          vscode.window.showErrorMessage(
+            `Failed to setup the bundle: ${error.message} \
+              See [Troubleshooting](https://github.com/Shopify/vscode-ruby-lsp#troubleshooting) for instructions`
+          );
+        }
+      }
+    );
+
+    // Update the last time we checked for updates
+    this._context.workspaceState.update(
+      "rubyLsp.lastBundleInstall",
+      Date.now()
+    );
   }
 }

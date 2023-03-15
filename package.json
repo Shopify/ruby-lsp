@@ -35,6 +35,10 @@
       {
         "command": "rubyLsp.stop",
         "title": "Ruby LSP: Stop"
+      },
+      {
+        "command": "rubyLsp.update",
+        "title": "Ruby LSP: Update language server gem"
       }
     ],
     "configuration": {
