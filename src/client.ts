@@ -234,7 +234,8 @@ export default class Client implements ClientInterface {
 
     // Only try to evaluate the top level Gemfile if there is one. Otherwise, we'll just create our own Gemfile
     if (fs.existsSync(path.join(this.workingFolder, "Gemfile"))) {
-      gemfile.push('eval_gemfile "../Gemfile"');
+      // For eval_gemfile, the paths must be absolute or else using the `path:` option for `gem` will fail
+      gemfile.push('eval_gemfile(File.expand_path("../Gemfile", __dir__))');
 
       // If the `ruby-lsp` exists in the bundle, add it to the custom Gemfile commented out
       if (await this.migrateFromIncludingInBundle()) {
@@ -339,6 +340,7 @@ export default class Client implements ClientInterface {
         )} bundle show ruby-lsp`,
         {
           cwd: this.workingFolder,
+          env: this.ruby.env,
         }
       );
 
@@ -357,6 +359,7 @@ export default class Client implements ClientInterface {
     try {
       await asyncExec(`BUNDLE_GEMFILE=${customGemfilePath} bundle check`, {
         cwd: this.workingFolder,
+        env: this.ruby.env,
       });
       return true;
     } catch {
@@ -417,6 +420,7 @@ export default class Client implements ClientInterface {
             `BUNDLE_GEMFILE=${customGemfilePath} bundle install`,
             {
               cwd: this.workingFolder,
+              env: this.ruby.env,
             }
           );
         } catch (error: any) {
