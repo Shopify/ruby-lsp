@@ -1,6 +1,5 @@
 import { exec } from "child_process";
 import { promisify } from "util";
-import { readFile } from "fs/promises";
 import path from "path";
 import fs from "fs";
 
@@ -153,20 +152,27 @@ export class Ruby {
   }
 
   private async readRubyVersion() {
-    try {
-      const version = await readFile(
-        `${this.workingFolder}/.ruby-version`,
-        "utf8"
-      );
+    let dir = this.workingFolder;
 
-      return version.trim();
-    } catch (error: any) {
-      if (error.code === "ENOENT") {
-        throw new Error("No .ruby-version file was found");
-      } else {
-        throw error;
+    while (fs.existsSync(dir)) {
+      const versionFile = `${dir}/.ruby-version`;
+      dir = path.dirname(dir);
+
+      if (!fs.existsSync(versionFile)) {
+        continue;
       }
+
+      const version = fs.readFileSync(versionFile, "utf8");
+      const trimmedVersion = version.trim();
+
+      if (trimmedVersion === "") {
+        continue;
+      }
+
+      return trimmedVersion;
     }
+
+    throw new Error("No .ruby-version file was found");
   }
 
   private async discoverVersionManager() {
