@@ -435,8 +435,10 @@ export default class Client implements ClientInterface {
         {
           location: vscode.ProgressLocation.Notification,
           title: "Setting up the bundle",
+          cancellable: true,
         },
-        (progress) => this.bundleInstall(customGemfilePath, { progress })
+        (progress, token) =>
+          this.bundleInstall(customGemfilePath, { progress, token })
       );
     } catch (error: any) {
       this.state = ServerState.Error;
@@ -456,15 +458,25 @@ export default class Client implements ClientInterface {
     bundleGemfile?: string,
     options?: {
       progress?: vscode.Progress<{ message?: string }>;
+      token?: vscode.CancellationToken;
     }
   ) {
     const env = { ...this.ruby.env, BUNDLE_GEMFILE: bundleGemfile };
 
     return new Promise<void>((resolve, reject) => {
+      const abortController = new AbortController();
+
+      if (options?.token) {
+        options.token.onCancellationRequested(() => {
+          abortController.abort();
+        });
+      }
+
       this.outputChannel.appendLine(">> Running `bundle install`...");
 
       const install = spawn("bundle", ["install"], {
         cwd: this.workingFolder,
+        signal: abortController.signal,
         env,
       });
 
@@ -503,6 +515,12 @@ export default class Client implements ClientInterface {
         } else {
           reject(new Error(`bundle install exited with code ${code}`));
         }
+      });
+
+      install.on("error", (error) => {
+        stdout.close();
+        stderr.close();
+        reject(error);
       });
     });
   }
