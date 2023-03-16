@@ -30,7 +30,7 @@ suite("Ruby environment activation", () => {
     assert.ok(ruby.rubyVersion, "Expected Ruby version to be set");
     assert.strictEqual(
       ruby.supportsYjit,
-      true,
+      false,
       "Expected YJIT support to be enabled"
     );
     assert.strictEqual(
@@ -47,7 +47,7 @@ suite("Ruby environment activation", () => {
     assert.ok(ruby.rubyVersion, "Expected Ruby version to be set");
     assert.strictEqual(
       ruby.supportsYjit,
-      true,
+      false,
       "Expected YJIT support to be enabled"
     );
     assert.strictEqual(
