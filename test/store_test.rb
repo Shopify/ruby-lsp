@@ -6,11 +6,11 @@ require "test_helper"
 class StoreTest < Minitest::Test
   def setup
     @store = RubyLsp::Store.new
-    @store.set("/foo/bar.rb", "def foo; end")
+    @store.set("/foo/bar.rb", "def foo; end", 1)
   end
 
   def test_get
-    assert_equal(RubyLsp::Document.new("def foo; end"), @store.get("/foo/bar.rb"))
+    assert_equal(RubyLsp::Document.new("def foo; end", 1, "file:///foo/bar.rb"), @store.get("/foo/bar.rb"))
   end
 
   def test_reads_from_file_if_missing_in_store
@@ -18,7 +18,7 @@ class StoreTest < Minitest::Test
     file.write("def great_code; end")
     file.rewind
 
-    assert_equal(RubyLsp::Document.new("def great_code; end"), @store.get(file.path))
+    assert_equal(RubyLsp::Document.new("def great_code; end", 1, "file://foo.rb"), @store.get(file.path))
   ensure
     file&.close
     file&.unlink
@@ -36,6 +36,7 @@ class StoreTest < Minitest::Test
     @store.push_edits(
       file.path,
       [{ range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } }, text: " ; end" }],
+      2,
     )
 
     document = @store.get(file.path)
@@ -79,7 +80,7 @@ class StoreTest < Minitest::Test
     assert_equal(1, counter)
 
     # After the entry in the storage is updated, the cache is invalidated
-    @store.set("/foo/bar.rb", "def bar; end")
+    @store.set("/foo/bar.rb", "def bar; end", 1)
     5.times do
       @store.cache_fetch("/foo/bar.rb", :folding_ranges) do
         counter += 1
@@ -91,50 +92,60 @@ class StoreTest < Minitest::Test
 
   def test_push_edits
     uri = "/foo/bar.rb"
-    @store.set(uri, +"def bar; end")
+    @store.set(uri, +"def bar; end", 1)
 
     # Write puts 'a' in incremental edits
     @store.push_edits(
       uri,
       [{ range: { start: { line: 0, character: 8 }, end: { line: 0, character: 8 } }, text: " " }],
+      2,
     )
     @store.push_edits(
       uri,
       [{ range: { start: { line: 0, character: 9 }, end: { line: 0, character: 9 } }, text: "p" }],
+      3,
     )
     @store.push_edits(
       uri,
       [{ range: { start: { line: 0, character: 10 }, end: { line: 0, character: 10 } }, text: "u" }],
+      4,
     )
     @store.push_edits(
       uri,
       [{ range: { start: { line: 0, character: 11 }, end: { line: 0, character: 11 } }, text: "t" }],
+      5,
     )
     @store.push_edits(
       uri,
       [{ range: { start: { line: 0, character: 12 }, end: { line: 0, character: 12 } }, text: "s" }],
+      6,
     )
     @store.push_edits(
       uri,
       [{ range: { start: { line: 0, character: 13 }, end: { line: 0, character: 13 } }, text: " " }],
+      7,
     )
     @store.push_edits(
       uri,
       [{ range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } }, text: "'" }],
+      8,
     )
     @store.push_edits(
       uri,
       [{ range: { start: { line: 0, character: 15 }, end: { line: 0, character: 15 } }, text: "a" }],
+      9,
     )
     @store.push_edits(
       uri,
       [{ range: { start: { line: 0, character: 16 }, end: { line: 0, character: 16 } }, text: "'" }],
+      10,
     )
     @store.push_edits(
       uri,
       [{ range: { start: { line: 0, character: 17 }, end: { line: 0, character: 17 } }, text: ";" }],
+      11,
     )
 
-    assert_equal(RubyLsp::Document.new("def bar; puts 'a'; end"), @store.get(uri))
+    assert_equal(RubyLsp::Document.new("def bar; puts 'a'; end", 1, "file://foo.rb"), @store.get(uri))
   end
 end

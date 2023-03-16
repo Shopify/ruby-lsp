@@ -5,7 +5,7 @@ require "test_helper"
 
 class FormattingTest < Minitest::Test
   def setup
-    @document = RubyLsp::Document.new(+<<~RUBY)
+    @document = RubyLsp::Document.new(+<<~RUBY, 1, "file://#{__FILE__}")
       class Foo
       def foo
       end
@@ -69,18 +69,18 @@ class FormattingTest < Minitest::Test
   def test_syntax_tree_formatting_ignores_syntax_invalid_documents
     with_uninstalled_rubocop do
       require "ruby_lsp/requests"
-      document = RubyLsp::Document.new("def foo")
+      document = RubyLsp::Document.new("def foo", 1, "file://#{__FILE__}")
       assert_nil(RubyLsp::Requests::Formatting.new("file://#{__FILE__}", document).run)
     end
   end
 
   def test_rubocop_formatting_ignores_syntax_invalid_documents
-    document = RubyLsp::Document.new("def foo")
+    document = RubyLsp::Document.new("def foo", 1, "file://#{__FILE__}")
     assert_nil(RubyLsp::Requests::Formatting.new("file://#{__FILE__}", document).run)
   end
 
   def test_returns_nil_if_document_is_already_formatted
-    document = RubyLsp::Document.new(+<<~RUBY)
+    document = RubyLsp::Document.new(+<<~RUBY, 1, "file://#{__FILE__}")
       # typed: strict
       # frozen_string_literal: true
 

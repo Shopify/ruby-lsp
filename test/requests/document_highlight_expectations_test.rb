@@ -9,7 +9,7 @@ class DocumentHighlightExpectationsTest < ExpectationsTestRunner
 
   def test_when_document_is_not_parsed
     broken_source = "class Foo"
-    document = RubyLsp::Document.new(broken_source)
+    document = RubyLsp::Document.new(broken_source, 1, "file:///fake.rb")
     result = RubyLsp::Requests::DocumentHighlight.new(document, { line: 0, character: 0 }).run
     assert_empty(result)
   end
