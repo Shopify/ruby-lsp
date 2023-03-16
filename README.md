@@ -65,7 +65,7 @@ The tool to be used for formatting files can be configured with the following se
 
 ```jsonc
 // Available options
-//    auto: automatically detect the formatter based on the app's bundle
+//    auto: automatically detect the formatter based on the app's bundle (default)
 //    none: do not use a formatter (disables format on save and related diagnostics)
 //    all other options are the name of the formatter (e.g.: rubocop or syntax_tree)
 "rubyLsp.formatter": "auto"
