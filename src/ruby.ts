@@ -156,21 +156,26 @@ export class Ruby {
     let dir = this.workingFolder;
 
     while (fs.existsSync(dir)) {
-      const versionFile = `${dir}/.ruby-version`;
-      dir = path.dirname(dir);
+      const versionFile = path.join(dir, ".ruby-version");
 
-      if (!fs.existsSync(versionFile)) {
-        continue;
+      if (fs.existsSync(versionFile)) {
+        const version = fs.readFileSync(versionFile, "utf8");
+        const trimmedVersion = version.trim();
+
+        if (trimmedVersion !== "") {
+          return trimmedVersion;
+        }
       }
 
-      const version = fs.readFileSync(versionFile, "utf8");
-      const trimmedVersion = version.trim();
+      const parent = path.dirname(dir);
 
-      if (trimmedVersion === "") {
-        continue;
+      // When we hit the root path (e.g. /), parent will be the same as dir.
+      // We don't want to loop forever in this case, so we break out of the loop.
+      if (parent === dir) {
+        break;
       }
 
-      return trimmedVersion;
+      dir = parent;
     }
 
     throw new Error("No .ruby-version file was found");
