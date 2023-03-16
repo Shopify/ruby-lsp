@@ -25,12 +25,12 @@ interface EnabledFeatures {
 
 export default class Client implements ClientInterface {
   private client: LanguageClient | undefined;
-  private _context: vscode.ExtensionContext;
   private workingFolder: string;
   private telemetry: Telemetry;
-  private _ruby: Ruby;
   private statusItems: StatusItems;
   private outputChannel = vscode.window.createOutputChannel(LSP_NAME);
+  #context: vscode.ExtensionContext;
+  #ruby: Ruby;
   #state: ServerState = ServerState.Starting;
 
   constructor(
@@ -40,15 +40,15 @@ export default class Client implements ClientInterface {
   ) {
     this.workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
     this.telemetry = telemetry;
-    this._ruby = ruby;
-    this._context = context;
+    this.#context = context;
+    this.#ruby = ruby;
     this.statusItems = new StatusItems(this);
     this.registerCommands();
     this.registerAutoRestarts();
   }
 
   async start() {
-    if (this._ruby.error) {
+    if (this.ruby.error) {
       this.state = ServerState.Error;
       return;
     }
@@ -154,8 +154,8 @@ export default class Client implements ClientInterface {
     this.client.onTelemetry((event) =>
       this.telemetry.sendEvent({
         ...event,
-        rubyVersion: this._ruby.rubyVersion,
-        yjitEnabled: this._ruby.yjitEnabled,
+        rubyVersion: this.ruby.rubyVersion,
+        yjitEnabled: this.ruby.yjitEnabled,
       })
     );
 
@@ -190,11 +190,19 @@ export default class Client implements ClientInterface {
   }
 
   get ruby(): Ruby {
-    return this._ruby;
+    return this.#ruby;
+  }
+
+  private set ruby(ruby: Ruby) {
+    this.#ruby = ruby;
   }
 
   get context(): vscode.ExtensionContext {
-    return this._context;
+    return this.#context;
+  }
+
+  private set context(context: vscode.ExtensionContext) {
+    this.#context = context;
   }
 
   get state(): ServerState {
@@ -207,7 +215,7 @@ export default class Client implements ClientInterface {
   }
 
   private registerCommands() {
-    this._context.subscriptions.push(
+    this.context.subscriptions.push(
       vscode.commands.registerCommand(Command.Start, this.start.bind(this)),
       vscode.commands.registerCommand(Command.Restart, this.restart.bind(this)),
       vscode.commands.registerCommand(Command.Stop, this.stop.bind(this)),
@@ -276,7 +284,7 @@ export default class Client implements ClientInterface {
 
     fs.writeFileSync(customGemfilePath, gemfile.join("\n"));
 
-    const lastUpdatedAt: number | undefined = this._context.workspaceState.get(
+    const lastUpdatedAt: number | undefined = this.context.workspaceState.get(
       "rubyLsp.lastBundleInstall"
     );
     const gemfileLockPath = path.join(this.workingFolder, "Gemfile.lock");
@@ -310,7 +318,7 @@ export default class Client implements ClientInterface {
       if (event.affectsConfiguration("rubyLsp")) {
         // Re-activate Ruby if the version manager changed
         if (event.affectsConfiguration("rubyLsp.rubyVersionManager")) {
-          await this._ruby.activateRuby();
+          await this.ruby.activateRuby();
         }
 
         await this.restart();
@@ -322,7 +330,7 @@ export default class Client implements ClientInterface {
     const watcher = vscode.workspace.createFileSystemWatcher(
       new vscode.RelativePattern(this.workingFolder, pattern)
     );
-    this._context.subscriptions.push(watcher);
+    this.context.subscriptions.push(watcher);
 
     watcher.onDidChange(this.restart.bind(this));
     watcher.onDidCreate(this.restart.bind(this));
@@ -441,10 +449,7 @@ export default class Client implements ClientInterface {
     );
 
     // Update the last time we checked for updates
-    this._context.workspaceState.update(
-      "rubyLsp.lastBundleInstall",
-      Date.now()
-    );
+    this.context.workspaceState.update("rubyLsp.lastBundleInstall", Date.now());
   }
 
   private async bundleInstall(bundleGemfile?: string) {
