@@ -208,6 +208,7 @@ export default class Client implements ClientInterface {
     // If we're working on the ruby-lsp itself, we can't create a custom Gemfile or we'd be trying to activate the same
     // gem twice
     if (this.workingFolder.endsWith("ruby-lsp")) {
+      await this.bundleInstall();
       return;
     }
 
@@ -416,13 +417,7 @@ export default class Client implements ClientInterface {
       },
       async (_progress) => {
         try {
-          await asyncExec(
-            `BUNDLE_GEMFILE=${customGemfilePath} bundle install`,
-            {
-              cwd: this.workingFolder,
-              env: this.ruby.env,
-            }
-          );
+          await this.bundleInstall(customGemfilePath);
         } catch (error: any) {
           this._state = ServerState.Error;
           this.statusItems.refresh();
@@ -440,5 +435,20 @@ export default class Client implements ClientInterface {
       "rubyLsp.lastBundleInstall",
       Date.now()
     );
+  }
+
+  private async bundleInstall(bundleGemfile?: string) {
+    let command;
+
+    if (bundleGemfile) {
+      command = `BUNDLE_GEMFILE=${bundleGemfile} bundle install`;
+    } else {
+      command = "bundle install";
+    }
+
+    await asyncExec(command, {
+      cwd: this.workingFolder,
+      env: this.ruby.env,
+    });
   }
 }
