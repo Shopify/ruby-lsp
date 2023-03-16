@@ -1,7 +1,8 @@
 import path from "path";
 import fs from "fs";
+import readline from "readline";
 import { promisify } from "util";
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 
 import * as vscode from "vscode";
 import {
@@ -429,41 +430,71 @@ export default class Client implements ClientInterface {
       "Gemfile"
     );
 
-    await vscode.window.withProgress(
-      {
-        location: vscode.ProgressLocation.Notification,
-        title: "Setting up the bundle",
-      },
-      async (_progress) => {
-        try {
-          await this.bundleInstall(customGemfilePath);
-        } catch (error: any) {
-          this.state = ServerState.Error;
-          // The progress dialog can't be closed by the user, so we have to guarantee that we catch errors
-          vscode.window.showErrorMessage(
-            `Failed to setup the bundle: ${error.message} \
-              See [Troubleshooting](https://github.com/Shopify/vscode-ruby-lsp#troubleshooting) for instructions`
-          );
-        }
-      }
-    );
+    try {
+      await vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: "Setting up the bundle",
+        },
+        () => this.bundleInstall(customGemfilePath)
+      );
+    } catch (error: any) {
+      this.state = ServerState.Error;
+
+      // The progress dialog can't be closed by the user, so we have to guarantee that we catch errors
+      await vscode.window.showErrorMessage(
+        `Failed to setup the bundle: ${error.message}. \
+            See [Troubleshooting](https://github.com/Shopify/vscode-ruby-lsp#troubleshooting) for instructions`
+      );
+    }
 
     // Update the last time we checked for updates
     this.context.workspaceState.update("rubyLsp.lastBundleInstall", Date.now());
   }
 
   private async bundleInstall(bundleGemfile?: string) {
-    let command;
+    const env = { ...this.ruby.env, BUNDLE_GEMFILE: bundleGemfile };
 
-    if (bundleGemfile) {
-      command = `BUNDLE_GEMFILE=${bundleGemfile} bundle install`;
-    } else {
-      command = "bundle install";
-    }
+    return new Promise<void>((resolve, reject) => {
+      this.outputChannel.appendLine(">> Running `bundle install`...");
 
-    await asyncExec(command, {
-      cwd: this.workingFolder,
-      env: this.ruby.env,
+      const install = spawn("bundle", ["install"], {
+        cwd: this.workingFolder,
+        env,
+      });
+
+      const stdout = readline
+        .createInterface({
+          input: install.stdout,
+          terminal: false,
+        })
+        .on("line", (line) => {
+          this.outputChannel.appendLine(`BUNDLER> ${line}`);
+        });
+
+      const stderr = readline
+        .createInterface({
+          input: install.stderr,
+          terminal: false,
+        })
+        .on("line", (line) => {
+          this.outputChannel.appendLine(`ERROR> ${line}`);
+        });
+
+      install.on("close", (code) => {
+        stdout.close();
+        stderr.close();
+
+        this.outputChannel.appendLine(
+          `>> \`bundle install\` exited with code ${code}`
+        );
+
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error(`bundle install exited with code ${code}`));
+        }
+      });
     });
   }
 }
