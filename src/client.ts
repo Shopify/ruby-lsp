@@ -436,7 +436,7 @@ export default class Client implements ClientInterface {
           location: vscode.ProgressLocation.Notification,
           title: "Setting up the bundle",
         },
-        () => this.bundleInstall(customGemfilePath)
+        (progress) => this.bundleInstall(customGemfilePath, { progress })
       );
     } catch (error: any) {
       this.state = ServerState.Error;
@@ -452,7 +452,12 @@ export default class Client implements ClientInterface {
     this.context.workspaceState.update("rubyLsp.lastBundleInstall", Date.now());
   }
 
-  private async bundleInstall(bundleGemfile?: string) {
+  private async bundleInstall(
+    bundleGemfile?: string,
+    options?: {
+      progress?: vscode.Progress<{ message?: string }>;
+    }
+  ) {
     const env = { ...this.ruby.env, BUNDLE_GEMFILE: bundleGemfile };
 
     return new Promise<void>((resolve, reject) => {
@@ -470,6 +475,10 @@ export default class Client implements ClientInterface {
         })
         .on("line", (line) => {
           this.outputChannel.appendLine(`BUNDLER> ${line}`);
+
+          if (options?.progress) {
+            options.progress.report({ message: line });
+          }
         });
 
       const stderr = readline
