@@ -5,7 +5,7 @@ type: nodejs
 up:
   - node:
       yarn: true
-      version: 17.5.0
+      version: 18.15.0
 
 commands:
   package: "yarn run package"

@@ -12,7 +12,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
-          node-version: "17"
+          node-version: "18"
           cache: "yarn"
 
       # We need some Ruby installed for the environment activation tests
