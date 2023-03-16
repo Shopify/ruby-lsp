@@ -65,9 +65,6 @@ export class Ruby {
           break;
         default:
           await this.activateShadowenv();
-          await this.delay(500);
-          // eslint-disable-next-line no-process-env
-          this._env = { ...process.env };
           break;
       }
 
@@ -82,9 +79,27 @@ export class Ruby {
   }
 
   private async activateShadowenv() {
-    await vscode.extensions
-      .getExtension("shopify.vscode-shadowenv")
-      ?.activate();
+    const extension = vscode.extensions.getExtension(
+      "shopify.vscode-shadowenv"
+    );
+
+    if (!extension) {
+      throw new Error(
+        "The Ruby LSP version manager is configured to be shadowenv, but the shadowenv extension is not installed"
+      );
+    }
+
+    if (!fs.existsSync(path.join(this.workingFolder, ".shadowenv.d"))) {
+      throw new Error(
+        "The Ruby LSP version manager is configured to be shadowenv, \
+        but no .shadowenv.d directory was found in the workspace"
+      );
+    }
+
+    await extension.activate();
+    await this.delay(500);
+    // eslint-disable-next-line no-process-env
+    this._env = { ...process.env };
   }
 
   private async activateChruby() {
