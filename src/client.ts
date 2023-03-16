@@ -31,7 +31,7 @@ export default class Client implements ClientInterface {
   private _ruby: Ruby;
   private statusItems: StatusItems;
   private outputChannel = vscode.window.createOutputChannel(LSP_NAME);
-  private _state: ServerState = ServerState.Starting;
+  #state: ServerState = ServerState.Starting;
 
   constructor(
     context: vscode.ExtensionContext,
@@ -49,13 +49,11 @@ export default class Client implements ClientInterface {
 
   async start() {
     if (this._ruby.error) {
-      this._state = ServerState.Error;
-      this.statusItems.refresh();
+      this.state = ServerState.Error;
       return;
     }
 
-    this._state = ServerState.Starting;
-    this.statusItems.refresh();
+    this.state = ServerState.Starting;
 
     await this.setupCustomGemfile();
 
@@ -163,14 +161,12 @@ export default class Client implements ClientInterface {
 
     await this.client.start();
 
-    this._state = ServerState.Running;
-    this.statusItems.refresh();
+    this.state = ServerState.Running;
   }
 
   async stop(): Promise<void> {
     if (this.client) {
-      this._state = ServerState.Stopped;
-      this.statusItems.refresh();
+      this.state = ServerState.Stopped;
 
       return this.client.stop();
     }
@@ -185,8 +181,7 @@ export default class Client implements ClientInterface {
         await this.start();
       }
     } catch (error: any) {
-      this._state = ServerState.Error;
-      this.statusItems.refresh();
+      this.state = ServerState.Error;
 
       this.outputChannel.appendLine(
         `Error restarting the server: ${error.message}`
@@ -203,7 +198,12 @@ export default class Client implements ClientInterface {
   }
 
   get state(): ServerState {
-    return this._state;
+    return this.#state;
+  }
+
+  private set state(state: ServerState) {
+    this.#state = state;
+    this.statusItems.refresh();
   }
 
   private registerCommands() {
@@ -430,8 +430,7 @@ export default class Client implements ClientInterface {
         try {
           await this.bundleInstall(customGemfilePath);
         } catch (error: any) {
-          this._state = ServerState.Error;
-          this.statusItems.refresh();
+          this.state = ServerState.Error;
           // The progress dialog can't be closed by the user, so we have to guarantee that we catch errors
           vscode.window.showErrorMessage(
             `Failed to setup the bundle: ${error.message} \
