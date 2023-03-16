@@ -26,6 +26,7 @@ export class Ruby {
   // eslint-disable-next-line no-process-env
   private shell = process.env.SHELL;
   private _env: NodeJS.ProcessEnv = {};
+  private _error = false;
 
   constructor(
     workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath
@@ -35,6 +36,10 @@ export class Ruby {
 
   get env() {
     return this._env;
+  }
+
+  get error() {
+    return this._error;
   }
 
   async activateRuby() {
@@ -71,7 +76,10 @@ export class Ruby {
       await this.fetchRubyInfo();
       this.deleteGcEnvironmentVariables();
       this.setupBundlePath();
+      this._error = false;
     } catch (error: any) {
+      this._error = true;
+
       await vscode.window.showErrorMessage(
         `Failed to activate ${this.versionManager} environment: ${error.message}`
       );

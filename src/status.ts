@@ -64,16 +64,29 @@ export abstract class StatusItem {
 export class RubyVersionStatus extends StatusItem {
   constructor(client: ClientInterface) {
     super("rubyVersion", client);
-    this.item.text = `Using Ruby ${client.ruby.rubyVersion}`;
     this.item.name = "Ruby LSP Status";
     this.item.command = {
       title: "Change version manager",
       command: Command.SelectVersionManager,
     };
+
+    if (client.ruby.error) {
+      this.item.text = "Failed to activate Ruby";
+      this.item.severity = vscode.LanguageStatusSeverity.Error;
+    } else {
+      this.item.text = `Using Ruby ${client.ruby.rubyVersion}`;
+      this.item.severity = vscode.LanguageStatusSeverity.Information;
+    }
   }
 
   refresh(): void {
-    this.item.text = `Using Ruby ${this.client.ruby.rubyVersion}`;
+    if (this.client.ruby.error) {
+      this.item.text = "Failed to activate Ruby";
+      this.item.severity = vscode.LanguageStatusSeverity.Error;
+    } else {
+      this.item.text = `Using Ruby ${this.client.ruby.rubyVersion}`;
+      this.item.severity = vscode.LanguageStatusSeverity.Information;
+    }
   }
 
   registerCommand(): void {

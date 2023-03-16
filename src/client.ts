@@ -48,6 +48,12 @@ export default class Client implements ClientInterface {
   }
 
   async start() {
+    if (this._ruby.error) {
+      this._state = ServerState.Error;
+      this.statusItems.refresh();
+      return;
+    }
+
     this._state = ServerState.Starting;
     this.statusItems.refresh();
 
