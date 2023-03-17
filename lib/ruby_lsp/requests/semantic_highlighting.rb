@@ -72,7 +72,7 @@ module RubyLsp
           Module.instance_methods(false),
           Kernel.instance_methods(false),
           Kernel.methods(false),
-          *(Bundler::Dsl.instance_methods(false) if defined?(Bundler)),
+          Bundler::Dsl.instance_methods(false),
           Module.private_instance_methods(false),
         ].flatten.map(&:to_s),
         T::Array[String],
