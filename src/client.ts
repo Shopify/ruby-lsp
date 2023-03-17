@@ -1,7 +1,8 @@
 import path from "path";
 import fs from "fs";
+import readline from "readline";
 import { promisify } from "util";
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 
 import * as vscode from "vscode";
 import {
@@ -55,7 +56,19 @@ export default class Client implements ClientInterface {
 
     this.state = ServerState.Starting;
 
-    await this.setupCustomGemfile();
+    try {
+      await this.setupCustomGemfile();
+    } catch (error: any) {
+      this.state = ServerState.Error;
+
+      // The progress dialog can't be closed by the user, so we have to guarantee that we catch errors
+      vscode.window.showErrorMessage(
+        `Failed to setup the bundle: ${error.message}. \
+            See [Troubleshooting](https://github.com/Shopify/vscode-ruby-lsp#troubleshooting) for instructions`
+      );
+
+      return;
+    }
 
     const executableOptions = {
       cwd: this.workingFolder,
@@ -433,37 +446,84 @@ export default class Client implements ClientInterface {
       {
         location: vscode.ProgressLocation.Notification,
         title: "Setting up the bundle",
+        cancellable: true,
       },
-      async (_progress) => {
-        try {
-          await this.bundleInstall(customGemfilePath);
-        } catch (error: any) {
-          this.state = ServerState.Error;
-          // The progress dialog can't be closed by the user, so we have to guarantee that we catch errors
-          vscode.window.showErrorMessage(
-            `Failed to setup the bundle: ${error.message} \
-              See [Troubleshooting](https://github.com/Shopify/vscode-ruby-lsp#troubleshooting) for instructions`
-          );
-        }
-      }
+      (progress, token) =>
+        this.bundleInstall(customGemfilePath, { progress, token })
     );
 
     // Update the last time we checked for updates
     this.context.workspaceState.update("rubyLsp.lastBundleInstall", Date.now());
   }
 
-  private async bundleInstall(bundleGemfile?: string) {
-    let command;
-
-    if (bundleGemfile) {
-      command = `BUNDLE_GEMFILE=${bundleGemfile} bundle install`;
-    } else {
-      command = "bundle install";
+  private async bundleInstall(
+    bundleGemfile?: string,
+    options?: {
+      progress?: vscode.Progress<{ message?: string }>;
+      token?: vscode.CancellationToken;
     }
+  ) {
+    const env = { ...this.ruby.env, BUNDLE_GEMFILE: bundleGemfile };
 
-    await asyncExec(command, {
-      cwd: this.workingFolder,
-      env: this.ruby.env,
+    return new Promise<void>((resolve, reject) => {
+      const abortController = new AbortController();
+
+      if (options?.token) {
+        options.token.onCancellationRequested(() => {
+          abortController.abort();
+        });
+      }
+
+      this.outputChannel.appendLine(">> Running `bundle install`...");
+
+      const install = spawn("bundle", ["install"], {
+        cwd: this.workingFolder,
+        signal: abortController.signal,
+        env,
+      });
+
+      const stdout = readline
+        .createInterface({
+          input: install.stdout,
+          terminal: false,
+        })
+        .on("line", (line) => {
+          this.outputChannel.appendLine(`BUNDLER> ${line}`);
+
+          if (options?.progress) {
+            options.progress.report({ message: line });
+          }
+        });
+
+      const stderr = readline
+        .createInterface({
+          input: install.stderr,
+          terminal: false,
+        })
+        .on("line", (line) => {
+          this.outputChannel.appendLine(`ERROR> ${line}`);
+        });
+
+      install.on("close", (code) => {
+        stdout.close();
+        stderr.close();
+
+        this.outputChannel.appendLine(
+          `>> \`bundle install\` exited with code ${code}`
+        );
+
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error(`bundle install exited with code ${code}`));
+        }
+      });
+
+      install.on("error", (error) => {
+        stdout.close();
+        stderr.close();
+        reject(error);
+      });
     });
   }
 }
