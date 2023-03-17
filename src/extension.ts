@@ -13,7 +13,6 @@ export async function activate(context: vscode.ExtensionContext) {
   const telemetry = new Telemetry(context);
   client = new Client(context, telemetry, ruby);
 
-  // Adding this delay guarantees that the Ruby environment is activated before trying to start the server
   await client.start();
 }
 

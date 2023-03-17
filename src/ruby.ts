@@ -26,6 +26,7 @@ export class Ruby {
   // eslint-disable-next-line no-process-env
   private shell = process.env.SHELL;
   private _env: NodeJS.ProcessEnv = {};
+  private _error = false;
 
   constructor(
     workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath
@@ -35,6 +36,10 @@ export class Ruby {
 
   get env() {
     return this._env;
+  }
+
+  get error() {
+    return this._error;
   }
 
   async activateRuby() {
@@ -65,16 +70,16 @@ export class Ruby {
           break;
         default:
           await this.activateShadowenv();
-          await this.delay(500);
-          // eslint-disable-next-line no-process-env
-          this._env = { ...process.env };
           break;
       }
 
       await this.fetchRubyInfo();
       this.deleteGcEnvironmentVariables();
       this.setupBundlePath();
+      this._error = false;
     } catch (error: any) {
+      this._error = true;
+
       await vscode.window.showErrorMessage(
         `Failed to activate ${this.versionManager} environment: ${error.message}`
       );
@@ -82,9 +87,27 @@ export class Ruby {
   }
 
   private async activateShadowenv() {
-    await vscode.extensions
-      .getExtension("shopify.vscode-shadowenv")
-      ?.activate();
+    const extension = vscode.extensions.getExtension(
+      "shopify.vscode-shadowenv"
+    );
+
+    if (!extension) {
+      throw new Error(
+        "The Ruby LSP version manager is configured to be shadowenv, but the shadowenv extension is not installed"
+      );
+    }
+
+    if (!fs.existsSync(path.join(this.workingFolder, ".shadowenv.d"))) {
+      throw new Error(
+        "The Ruby LSP version manager is configured to be shadowenv, \
+        but no .shadowenv.d directory was found in the workspace"
+      );
+    }
+
+    await extension.activate();
+    await this.delay(500);
+    // eslint-disable-next-line no-process-env
+    this._env = { ...process.env };
   }
 
   private async activateChruby() {
