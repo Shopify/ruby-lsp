@@ -322,9 +322,23 @@ module RubyLsp
       formatter = options.dig(:initializationOptions, :formatter)
       @store.formatter = formatter unless formatter.nil?
 
-      enabled_features = options.dig(:initializationOptions, :enabledFeatures) || []
+      configured_features = options.dig(:initializationOptions, :enabledFeatures)
 
-      document_symbol_provider = if enabled_features.include?("documentSymbols")
+      enabled_features = case configured_features
+      when Array
+        # If the configuration is using an array, then absent features are disabled and present ones are enabled. That's
+        # why we use `false` as the default value
+        Hash.new(false).merge!(configured_features.to_h { |feature| [feature, true] })
+      when Hash
+        # If the configuration is already a hash, merge it with a default value of `true`. That way clients don't have
+        # to opt-in to every single feature
+        Hash.new(true).merge!(configured_features)
+      else
+        # If no configuration was passed by the client, just enable every feature
+        Hash.new(true)
+      end
+
+      document_symbol_provider = if enabled_features["documentSymbols"]
         Interface::DocumentSymbolClientCapabilities.new(
           hierarchical_document_symbol_support: true,
           symbol_kind: {
@@ -333,19 +347,19 @@ module RubyLsp
         )
       end
 
-      document_link_provider = if enabled_features.include?("documentLink")
+      document_link_provider = if enabled_features["documentLink"]
         Interface::DocumentLinkOptions.new(resolve_provider: false)
       end
 
-      hover_provider = if enabled_features.include?("hover")
+      hover_provider = if enabled_features["hover"]
         Interface::HoverClientCapabilities.new(dynamic_registration: false)
       end
 
-      folding_ranges_provider = if enabled_features.include?("foldingRanges")
+      folding_ranges_provider = if enabled_features["foldingRanges"]
         Interface::FoldingRangeClientCapabilities.new(line_folding_only: true)
       end
 
-      semantic_tokens_provider = if enabled_features.include?("semanticHighlighting")
+      semantic_tokens_provider = if enabled_features["semanticHighlighting"]
         Interface::SemanticTokensRegistrationOptions.new(
           document_selector: { scheme: "file", language: "ruby" },
           legend: Interface::SemanticTokensLegend.new(
@@ -357,29 +371,29 @@ module RubyLsp
         )
       end
 
-      diagnostics_provider = if enabled_features.include?("diagnostics")
+      diagnostics_provider = if enabled_features["diagnostics"]
         {
           interFileDependencies: false,
           workspaceDiagnostics: false,
         }
       end
 
-      on_type_formatting_provider = if enabled_features.include?("onTypeFormatting")
+      on_type_formatting_provider = if enabled_features["onTypeFormatting"]
         Interface::DocumentOnTypeFormattingOptions.new(
           first_trigger_character: "{",
           more_trigger_character: ["\n", "|"],
         )
       end
 
-      code_action_provider = if enabled_features.include?("codeActions")
+      code_action_provider = if enabled_features["codeActions"]
         Interface::CodeActionOptions.new(resolve_provider: true)
       end
 
-      inlay_hint_provider = if enabled_features.include?("inlayHint")
+      inlay_hint_provider = if enabled_features["inlayHint"]
         Interface::InlayHintOptions.new(resolve_provider: false)
       end
 
-      completion_provider = if enabled_features.include?("completion")
+      completion_provider = if enabled_features["completion"]
         Interface::CompletionOptions.new(
           resolve_provider: false,
           trigger_characters: ["/"],
@@ -392,14 +406,14 @@ module RubyLsp
             change: Constant::TextDocumentSyncKind::INCREMENTAL,
             open_close: true,
           ),
-          selection_range_provider: enabled_features.include?("selectionRanges"),
+          selection_range_provider: enabled_features["selectionRanges"],
           hover_provider: hover_provider,
           document_symbol_provider: document_symbol_provider,
           document_link_provider: document_link_provider,
           folding_range_provider: folding_ranges_provider,
           semantic_tokens_provider: semantic_tokens_provider,
-          document_formatting_provider: enabled_features.include?("formatting") && formatter != "none",
-          document_highlight_provider: enabled_features.include?("documentHighlights"),
+          document_formatting_provider: enabled_features["formatting"] && formatter != "none",
+          document_highlight_provider: enabled_features["documentHighlights"],
           code_action_provider: code_action_provider,
           document_on_type_formatting_provider: on_type_formatting_provider,
           diagnostic_provider: diagnostics_provider,
