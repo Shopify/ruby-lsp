@@ -66,6 +66,16 @@ module RubyLsp
       when "textDocument/formatting"
         begin
           formatting(uri)
+        rescue Requests::Formatting::InvalidFormatter => error
+          @notifications << Notification.new(
+            message: "window/showMessage",
+            params: Interface::ShowMessageParams.new(
+              type: Constant::MessageType::ERROR,
+              message: "Configuration error: #{error.message}",
+            ),
+          )
+
+          nil
         rescue StandardError => error
           @notifications << Notification.new(
             message: "window/showMessage",
@@ -197,7 +207,7 @@ module RubyLsp
 
     sig { params(uri: String).returns(T.nilable(T::Array[Interface::TextEdit])) }
     def formatting(uri)
-      Requests::Formatting.new(uri, @store.get(uri)).run
+      Requests::Formatting.new(uri, @store.get(uri), formatter: @store.formatter).run
     end
 
     sig do
@@ -309,6 +319,9 @@ module RubyLsp
     def initialize_request(options)
       @store.clear
       @store.encoding = options.dig(:capabilities, :general, :positionEncodings)
+      formatter = options.dig(:initializationOptions, :formatter)
+      @store.formatter = formatter unless formatter.nil?
+
       enabled_features = options.dig(:initializationOptions, :enabledFeatures) || []
 
       document_symbol_provider = if enabled_features.include?("documentSymbols")
@@ -385,7 +398,7 @@ module RubyLsp
           document_link_provider: document_link_provider,
           folding_range_provider: folding_ranges_provider,
           semantic_tokens_provider: semantic_tokens_provider,
-          document_formatting_provider: enabled_features.include?("formatting"),
+          document_formatting_provider: enabled_features.include?("formatting") && formatter != "none",
           document_highlight_provider: enabled_features.include?("documentHighlights"),
           code_action_provider: code_action_provider,
           document_on_type_formatting_provider: on_type_formatting_provider,

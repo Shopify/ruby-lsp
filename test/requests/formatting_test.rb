@@ -66,6 +66,17 @@ class FormattingTest < Minitest::Test
     assert_nil(RubyLsp::Requests::Formatting.new("file:///some/other/folder/file.rb", @document).run)
   end
 
+  def test_allows_specifying_formatter
+    SyntaxTree.expects(:format).with(@document.source).once
+    formatted_document("syntax_tree")
+  end
+
+  def test_raises_on_invalid_formatter
+    assert_raises(RubyLsp::Requests::Formatting::InvalidFormatter) do
+      formatted_document("invalid")
+    end
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)
@@ -89,8 +100,8 @@ class FormattingTest < Minitest::Test
     # Constants are already unloaded
   end
 
-  def formatted_document
+  def formatted_document(formatter = "auto")
     require "ruby_lsp/requests"
-    RubyLsp::Requests::Formatting.new("file://#{__FILE__}", @document).run&.first&.new_text
+    RubyLsp::Requests::Formatting.new("file://#{__FILE__}", @document, formatter: formatter).run&.first&.new_text
   end
 end
