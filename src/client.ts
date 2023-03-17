@@ -56,7 +56,19 @@ export default class Client implements ClientInterface {
 
     this.state = ServerState.Starting;
 
-    await this.setupCustomGemfile();
+    try {
+      await this.setupCustomGemfile();
+    } catch (error: any) {
+      this.state = ServerState.Error;
+
+      // The progress dialog can't be closed by the user, so we have to guarantee that we catch errors
+      vscode.window.showErrorMessage(
+        `Failed to setup the bundle: ${error.message}. \
+            See [Troubleshooting](https://github.com/Shopify/vscode-ruby-lsp#troubleshooting) for instructions`
+      );
+
+      return;
+    }
 
     const executableOptions = {
       cwd: this.workingFolder,
@@ -430,25 +442,15 @@ export default class Client implements ClientInterface {
       "Gemfile"
     );
 
-    try {
-      await vscode.window.withProgress(
-        {
-          location: vscode.ProgressLocation.Notification,
-          title: "Setting up the bundle",
-          cancellable: true,
-        },
-        (progress, token) =>
-          this.bundleInstall(customGemfilePath, { progress, token })
-      );
-    } catch (error: any) {
-      this.state = ServerState.Error;
-
-      // The progress dialog can't be closed by the user, so we have to guarantee that we catch errors
-      await vscode.window.showErrorMessage(
-        `Failed to setup the bundle: ${error.message}. \
-            See [Troubleshooting](https://github.com/Shopify/vscode-ruby-lsp#troubleshooting) for instructions`
-      );
-    }
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Setting up the bundle",
+        cancellable: true,
+      },
+      (progress, token) =>
+        this.bundleInstall(customGemfilePath, { progress, token })
+    );
 
     // Update the last time we checked for updates
     this.context.workspaceState.update("rubyLsp.lastBundleInstall", Date.now());
