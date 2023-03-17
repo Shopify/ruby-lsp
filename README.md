@@ -115,7 +115,25 @@ To add a new expectations test runner for a new request handler:
 
 ## Debugging
 
-Refer to the [Debugging section in the VS Code extension README](https://github.com/Shopify/vscode-ruby-lsp#debugging).
+### Debugging Tests
+
+1. Open the test file.
+2. Set a breakpoint(s) on lines by clicking next to their numbers.
+3. Open VS Code's `Run and Debug` panel.
+4. At the top of the panel, select `Minitset - current file` and click the green triangle (or press F5).
+
+### Debugging Running Ruby LSP Process
+
+1. Open the `vscode-ruby-lsp` project in VS Code.
+2. [`vscode-ruby-lsp`] Open VS Code's `Run and Debug` panel.
+3. [`vscode-ruby-lsp`] Select `Run Extension` and click the green triangle (or press F5).
+4. [`vscode-ruby-lsp`] Now VS Code will:
+    - Open another workspace as the `Extension Development Host`.
+    - Run `vscode-ruby-lsp` extension in debug mode, which will start a new `ruby-lsp` process with the `--debug` flag.
+5. Open `ruby-lsp` in VS Code.
+6. [`ruby-lsp`] Run `bin/rdbg -A` to connect to the running `ruby-lsp` process.
+7. [`ruby-lsp`] Use commands like `b <file>:<line>` or `b Class#method` to set breakpoints and type `c` to continue the process.
+8. In your `Extension Development Host` project (e.g. [`Tapioca`](https://github.com/Shopify/tapioca)), trigger the request that will hit the breakpoint.
 
 ## Spell Checking
 
