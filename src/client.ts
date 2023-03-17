@@ -53,13 +53,21 @@ export default class Client implements ClientInterface {
 
     await this.setupCustomGemfile();
 
+    const executableOptions = {
+      cwd: this.workingFolder,
+      env: this.ruby.env,
+    };
+
     const executable: Executable = {
       command: "bundle",
       args: ["exec", "ruby-lsp"],
-      options: {
-        cwd: this.workingFolder,
-        env: this.ruby.env,
-      },
+      options: executableOptions,
+    };
+
+    const debugExecutable: Executable = {
+      command: "bundle",
+      args: ["exec", "ruby-lsp", "--debug"],
+      options: executableOptions,
     };
 
     const configuration = vscode.workspace.getConfiguration("rubyLsp");
@@ -135,7 +143,7 @@ export default class Client implements ClientInterface {
 
     this.client = new LanguageClient(
       LSP_NAME,
-      { run: executable, debug: executable },
+      { run: executable, debug: debugExecutable },
       clientOptions
     );
 
