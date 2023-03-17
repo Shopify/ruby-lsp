@@ -25,13 +25,13 @@ interface EnabledFeatures {
 
 export default class Client implements ClientInterface {
   private client: LanguageClient | undefined;
-  private _context: vscode.ExtensionContext;
   private workingFolder: string;
   private telemetry: Telemetry;
-  private _ruby: Ruby;
   private statusItems: StatusItems;
   private outputChannel = vscode.window.createOutputChannel(LSP_NAME);
-  private _state: ServerState = ServerState.Starting;
+  #context: vscode.ExtensionContext;
+  #ruby: Ruby;
+  #state: ServerState = ServerState.Starting;
 
   constructor(
     context: vscode.ExtensionContext,
@@ -40,22 +40,20 @@ export default class Client implements ClientInterface {
   ) {
     this.workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
     this.telemetry = telemetry;
-    this._ruby = ruby;
-    this._context = context;
+    this.#context = context;
+    this.#ruby = ruby;
     this.statusItems = new StatusItems(this);
     this.registerCommands();
     this.registerAutoRestarts();
   }
 
   async start() {
-    if (this._ruby.error) {
-      this._state = ServerState.Error;
-      this.statusItems.refresh();
+    if (this.ruby.error) {
+      this.state = ServerState.Error;
       return;
     }
 
-    this._state = ServerState.Starting;
-    this.statusItems.refresh();
+    this.state = ServerState.Starting;
 
     await this.setupCustomGemfile();
 
@@ -156,21 +154,19 @@ export default class Client implements ClientInterface {
     this.client.onTelemetry((event) =>
       this.telemetry.sendEvent({
         ...event,
-        rubyVersion: this._ruby.rubyVersion,
-        yjitEnabled: this._ruby.yjitEnabled,
+        rubyVersion: this.ruby.rubyVersion,
+        yjitEnabled: this.ruby.yjitEnabled,
       })
     );
 
     await this.client.start();
 
-    this._state = ServerState.Running;
-    this.statusItems.refresh();
+    this.state = ServerState.Running;
   }
 
   async stop(): Promise<void> {
     if (this.client) {
-      this._state = ServerState.Stopped;
-      this.statusItems.refresh();
+      this.state = ServerState.Stopped;
 
       return this.client.stop();
     }
@@ -185,8 +181,7 @@ export default class Client implements ClientInterface {
         await this.start();
       }
     } catch (error: any) {
-      this._state = ServerState.Error;
-      this.statusItems.refresh();
+      this.state = ServerState.Error;
 
       this.outputChannel.appendLine(
         `Error restarting the server: ${error.message}`
@@ -195,19 +190,32 @@ export default class Client implements ClientInterface {
   }
 
   get ruby(): Ruby {
-    return this._ruby;
+    return this.#ruby;
+  }
+
+  private set ruby(ruby: Ruby) {
+    this.#ruby = ruby;
   }
 
   get context(): vscode.ExtensionContext {
-    return this._context;
+    return this.#context;
+  }
+
+  private set context(context: vscode.ExtensionContext) {
+    this.#context = context;
   }
 
   get state(): ServerState {
-    return this._state;
+    return this.#state;
+  }
+
+  private set state(state: ServerState) {
+    this.#state = state;
+    this.statusItems.refresh();
   }
 
   private registerCommands() {
-    this._context.subscriptions.push(
+    this.context.subscriptions.push(
       vscode.commands.registerCommand(Command.Start, this.start.bind(this)),
       vscode.commands.registerCommand(Command.Restart, this.restart.bind(this)),
       vscode.commands.registerCommand(Command.Stop, this.stop.bind(this)),
@@ -276,7 +284,7 @@ export default class Client implements ClientInterface {
 
     fs.writeFileSync(customGemfilePath, gemfile.join("\n"));
 
-    const lastUpdatedAt: number | undefined = this._context.workspaceState.get(
+    const lastUpdatedAt: number | undefined = this.context.workspaceState.get(
       "rubyLsp.lastBundleInstall"
     );
     const gemfileLockPath = path.join(this.workingFolder, "Gemfile.lock");
@@ -310,7 +318,7 @@ export default class Client implements ClientInterface {
       if (event.affectsConfiguration("rubyLsp")) {
         // Re-activate Ruby if the version manager changed
         if (event.affectsConfiguration("rubyLsp.rubyVersionManager")) {
-          await this._ruby.activateRuby();
+          await this.ruby.activateRuby();
         }
 
         await this.restart();
@@ -322,7 +330,7 @@ export default class Client implements ClientInterface {
     const watcher = vscode.workspace.createFileSystemWatcher(
       new vscode.RelativePattern(this.workingFolder, pattern)
     );
-    this._context.subscriptions.push(watcher);
+    this.context.subscriptions.push(watcher);
 
     watcher.onDidChange(this.restart.bind(this));
     watcher.onDidCreate(this.restart.bind(this));
@@ -430,8 +438,7 @@ export default class Client implements ClientInterface {
         try {
           await this.bundleInstall(customGemfilePath);
         } catch (error: any) {
-          this._state = ServerState.Error;
-          this.statusItems.refresh();
+          this.state = ServerState.Error;
           // The progress dialog can't be closed by the user, so we have to guarantee that we catch errors
           vscode.window.showErrorMessage(
             `Failed to setup the bundle: ${error.message} \
@@ -442,10 +449,7 @@ export default class Client implements ClientInterface {
     );
 
     // Update the last time we checked for updates
-    this._context.workspaceState.update(
-      "rubyLsp.lastBundleInstall",
-      Date.now()
-    );
+    this.context.workspaceState.update("rubyLsp.lastBundleInstall", Date.now());
   }
 
   private async bundleInstall(bundleGemfile?: string) {
