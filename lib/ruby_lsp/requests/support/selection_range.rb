@@ -4,7 +4,7 @@
 module RubyLsp
   module Requests
     module Support
-      class SelectionRange < LanguageServer::Protocol::Interface::SelectionRange
+      class SelectionRange < Interface::SelectionRange
         extend T::Sig
 
         sig { params(position: Document::PositionShape).returns(T::Boolean) }

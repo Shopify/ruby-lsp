@@ -66,12 +66,12 @@ module RubyLsp
       class SymbolHierarchyRoot
         extend T::Sig
 
-        sig { returns(T::Array[LanguageServer::Protocol::Interface::DocumentSymbol]) }
+        sig { returns(T::Array[Interface::DocumentSymbol]) }
         attr_reader :children
 
         sig { void }
         def initialize
-          @children = T.let([], T::Array[LanguageServer::Protocol::Interface::DocumentSymbol])
+          @children = T.let([], T::Array[Interface::DocumentSymbol])
         end
       end
 
@@ -82,11 +82,11 @@ module RubyLsp
         @root = T.let(SymbolHierarchyRoot.new, SymbolHierarchyRoot)
         @stack = T.let(
           [@root],
-          T::Array[T.any(SymbolHierarchyRoot, LanguageServer::Protocol::Interface::DocumentSymbol)],
+          T::Array[T.any(SymbolHierarchyRoot, Interface::DocumentSymbol)],
         )
       end
 
-      sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::DocumentSymbol], Object)) }
+      sig { override.returns(T.all(T::Array[Interface::DocumentSymbol], Object)) }
       def run
         visit(@document.tree) if @document.parsed?
         @root.children
@@ -205,10 +205,10 @@ module RubyLsp
           kind: Symbol,
           range_node: SyntaxTree::Node,
           selection_range_node: SyntaxTree::Node,
-        ).returns(LanguageServer::Protocol::Interface::DocumentSymbol)
+        ).returns(Interface::DocumentSymbol)
       end
       def create_document_symbol(name:, kind:, range_node:, selection_range_node:)
-        symbol = LanguageServer::Protocol::Interface::DocumentSymbol.new(
+        symbol = Interface::DocumentSymbol.new(
           name: name,
           kind: SYMBOL_KIND[kind],
           range: range_from_syntax_tree_node(range_node),

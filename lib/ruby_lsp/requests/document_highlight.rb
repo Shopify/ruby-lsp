@@ -29,14 +29,14 @@ module RubyLsp
       def initialize(document, position)
         super(document)
 
-        @highlights = T.let([], T::Array[LanguageServer::Protocol::Interface::DocumentHighlight])
+        @highlights = T.let([], T::Array[Interface::DocumentHighlight])
         return unless document.parsed?
 
         position = document.create_scanner.find_char_position(position)
         @target = T.let(find(T.must(document.tree), position), T.nilable(Support::HighlightTarget))
       end
 
-      sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::DocumentHighlight], Object)) }
+      sig { override.returns(T.all(T::Array[Interface::DocumentHighlight], Object)) }
       def run
         # no @target means the target is not highlightable
         visit(@document.tree) if @document.parsed? && @target
@@ -90,7 +90,7 @@ module RubyLsp
       sig { params(match: Support::HighlightTarget::HighlightMatch).void }
       def add_highlight(match)
         range = range_from_syntax_tree_node(match.node)
-        @highlights << LanguageServer::Protocol::Interface::DocumentHighlight.new(range: range, kind: match.type)
+        @highlights << Interface::DocumentHighlight.new(range: range, kind: match.type)
       end
     end
   end

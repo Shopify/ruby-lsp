@@ -36,7 +36,7 @@ module RubyLsp
         @position = T.let(document.create_scanner.find_char_position(position), Integer)
       end
 
-      sig { override.returns(T.nilable(LanguageServer::Protocol::Interface::Hover)) }
+      sig { override.returns(T.nilable(Interface::Hover)) }
       def run
         return unless @document.parsed?
 
@@ -60,18 +60,18 @@ module RubyLsp
       private
 
       sig do
-        params(name: String, node: SyntaxTree::Node).returns(T.nilable(LanguageServer::Protocol::Interface::Hover))
+        params(name: String, node: SyntaxTree::Node).returns(T.nilable(Interface::Hover))
       end
       def generate_rails_document_link_hover(name, node)
         urls = Support::RailsDocumentClient.generate_rails_document_urls(name)
 
         return if urls.empty?
 
-        contents = LanguageServer::Protocol::Interface::MarkupContent.new(
+        contents = Interface::MarkupContent.new(
           kind: "markdown",
           value: urls.join("\n\n"),
         )
-        LanguageServer::Protocol::Interface::Hover.new(
+        Interface::Hover.new(
           range: range_from_syntax_tree_node(node),
           contents: contents,
         )

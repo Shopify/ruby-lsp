@@ -16,7 +16,7 @@ module RubyLsp
         sig do
           params(
             tokens: T::Array[SemanticHighlighting::SemanticToken],
-          ).returns(LanguageServer::Protocol::Interface::SemanticTokens)
+          ).returns(Interface::SemanticTokens)
         end
         def encode(tokens)
           delta = tokens
@@ -27,7 +27,7 @@ module RubyLsp
               compute_delta(token)
             end
 
-          LanguageServer::Protocol::Interface::SemanticTokens.new(data: delta)
+          Interface::SemanticTokens.new(data: delta)
         end
 
         # The delta array is computed according to the LSP specification:

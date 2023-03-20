@@ -63,11 +63,11 @@ module RubyLsp
       def initialize(document)
         super
 
-        @ranges = T.let([], T::Array[LanguageServer::Protocol::Interface::FoldingRange])
+        @ranges = T.let([], T::Array[Interface::FoldingRange])
         @partial_range = T.let(nil, T.nilable(PartialRange))
       end
 
-      sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::FoldingRange], Object)) }
+      sig { override.returns(T.all(T::Array[Interface::FoldingRange], Object)) }
       def run
         if @document.parsed?
           visit(@document.tree)
@@ -161,9 +161,9 @@ module RubyLsp
           node.is_a?(SyntaxTree::Comment) && @end_line + 1 != node.location.start_line - 1
         end
 
-        sig { returns(LanguageServer::Protocol::Interface::FoldingRange) }
+        sig { returns(Interface::FoldingRange) }
         def to_range
-          LanguageServer::Protocol::Interface::FoldingRange.new(
+          Interface::FoldingRange.new(
             start_line: @start_line,
             end_line: @end_line,
             kind: @kind,
@@ -291,7 +291,7 @@ module RubyLsp
       def add_lines_range(start_line, end_line)
         return if start_line >= end_line
 
-        @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
+        @ranges << Interface::FoldingRange.new(
           start_line: start_line - 1,
           end_line: end_line - 1,
           kind: "region",
