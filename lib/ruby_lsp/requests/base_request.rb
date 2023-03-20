@@ -28,6 +28,14 @@ module RubyLsp
       sig { abstract.returns(Object) }
       def run; end
 
+      # Syntax Tree implements `visit_all` using `map` instead of `each` for users who want to use the pattern
+      # `result = visitor.visit(tree)`. However, we don't use that pattern and should avoid producing a new array for
+      # every single node visited
+      sig { params(nodes: T::Array[SyntaxTree::Node]).void }
+      def visit_all(nodes)
+        nodes.each { |node| visit(node) }
+      end
+
       sig { params(node: SyntaxTree::Node).returns(LanguageServer::Protocol::Interface::Range) }
       def range_from_syntax_tree_node(node)
         loc = node.location
