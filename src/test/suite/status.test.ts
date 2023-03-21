@@ -35,7 +35,7 @@ suite("StatusItems", () => {
 
   suite("RubyVersionStatus", () => {
     beforeEach(() => {
-      ruby = { rubyVersion: "3.2.0" } as Ruby;
+      ruby = { rubyVersion: "3.2.0", versionManager: "shadowenv" } as Ruby;
       client = {
         context,
         ruby,
@@ -45,7 +45,7 @@ suite("StatusItems", () => {
     });
 
     test("Status is initialized with the right values", async () => {
-      assert.strictEqual(status.item.text, "Using Ruby 3.2.0");
+      assert.strictEqual(status.item.text, "Using Ruby 3.2.0 with shadowenv");
       assert.strictEqual(status.item.name, "Ruby LSP Status");
       assert.strictEqual(status.item.command?.title, "Change version manager");
       assert.strictEqual(
@@ -56,11 +56,11 @@ suite("StatusItems", () => {
     });
 
     test("Refresh updates version string", async () => {
-      assert.strictEqual(status.item.text, "Using Ruby 3.2.0");
+      assert.strictEqual(status.item.text, "Using Ruby 3.2.0 with shadowenv");
 
       client.ruby.rubyVersion = "3.2.1";
       status.refresh();
-      assert.strictEqual(status.item.text, "Using Ruby 3.2.1");
+      assert.strictEqual(status.item.text, "Using Ruby 3.2.1 with shadowenv");
     });
   });
 

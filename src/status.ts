@@ -74,7 +74,7 @@ export class RubyVersionStatus extends StatusItem {
       this.item.text = "Failed to activate Ruby";
       this.item.severity = vscode.LanguageStatusSeverity.Error;
     } else {
-      this.item.text = `Using Ruby ${client.ruby.rubyVersion}`;
+      this.item.text = `Using Ruby ${client.ruby.rubyVersion} with ${client.ruby.versionManager}`;
       this.item.severity = vscode.LanguageStatusSeverity.Information;
     }
   }
@@ -84,7 +84,7 @@ export class RubyVersionStatus extends StatusItem {
       this.item.text = "Failed to activate Ruby";
       this.item.severity = vscode.LanguageStatusSeverity.Error;
     } else {
-      this.item.text = `Using Ruby ${this.client.ruby.rubyVersion}`;
+      this.item.text = `Using Ruby ${this.client.ruby.rubyVersion} with ${this.client.ruby.versionManager}`;
       this.item.severity = vscode.LanguageStatusSeverity.Information;
     }
   }
@@ -94,13 +94,14 @@ export class RubyVersionStatus extends StatusItem {
       vscode.commands.registerCommand(
         Command.SelectVersionManager,
         async () => {
+          const configuration = vscode.workspace.getConfiguration("rubyLsp");
           const options = Object.values(VersionManager);
-          const manager = await vscode.window.showQuickPick(options);
+          const manager = await vscode.window.showQuickPick(options, {
+            placeHolder: `Current: ${configuration.get("rubyVersionManager")}`,
+          });
 
           if (manager !== undefined) {
-            vscode.workspace
-              .getConfiguration("rubyLsp")
-              .update("rubyVersionManager", manager, true, true);
+            configuration.update("rubyVersionManager", manager, true, true);
           }
         }
       )
