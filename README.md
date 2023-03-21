@@ -6,33 +6,26 @@
 
 # Ruby LSP (VS Code extension)
 
-Companion VS Code extension for the [Ruby LSP gem](https://github.com/Shopify/ruby-lsp).
+The Ruby LSP is an extension that provides performant rich features for Ruby. It connects to the
+[ruby-lsp](https://github.com/Shopify/ruby-lsp) language server gem to analyze Ruby code and enhance the user
+experience.
 
 ## Usage
 
-Search for `ruby-lsp` in the extensions tab and click install. If using a Ruby version manager, please refer to
-[Ruby version managers](#ruby-version-managers).
+Search for `Shopify.ruby-lsp` in the extensions tab and click install.
+
+By default, the Ruby LSP will generate a `.ruby-lsp` folder with a custom bundle that includes the server gem.
+Additionally, it will attempt to use available version managers to select the correct Ruby version for any given
+project. Refer to configuration for more options.
 
 ### Configuration
 
 #### Enable or disable features
 
-The Ruby LSP has all its features enabled by default, but disabling specific features is supported by changing the
-following configuration (definition of all available values can be found in the
-[package.json](https://github.com/Shopify/vscode-ruby-lsp/blob/main/package.json)).
+The Ruby LSP has all its features enabled by default, but disabling specific features is supported. To do so, open the
+language status center right next to the language mode Ruby and select `Manage` right next to enabled features.
 
-```jsonc
-"rubyLsp.enabledFeatures": {
-  "documentHighlights": true,
-  "documentSymbols": true,
-  "foldingRanges": true,
-  "selectionRanges": true,
-  "semanticHighlighting": true,
-  "formatting": true,
-  "diagnostics": true,
-  "codeActions": true
-}
-```
+![Ruby LSP status center](extras/ruby_lsp_status_center.png)
 
 #### Ruby version managers
 
@@ -40,8 +33,9 @@ To boot the server properly, the Ruby LSP uses a version manager to activate the
 Bundler to the Ruby and gem paths. This is especially necessary when switching between projects that use different Ruby
 versions - since those paths change and need to be reactivated.
 
-By default, the Ruby LSP will attempt to automatically determine which version manager it should use, checking which ones are available
-(`auto` option). If that fails, then the version manager must be manually configured in VS Code's settings.
+By default, the Ruby LSP will attempt to automatically determine which version manager it should use, checking which
+ones are available (`auto` option). If that fails, then the version manager must be manually configured. You can do so
+by clicking `Change version manager` in the language status center or by changing your VS Code user settings.
 
 ```jsonc
 // Available options are
@@ -71,22 +65,39 @@ The tool to be used for formatting files can be configured with the following se
 "rubyLsp.formatter": "auto"
 ```
 
+## Features
+
+![Ruby LSP demo](extras/ruby_lsp_demo.gif)
+
+The Ruby LSP features include
+
+- Semantic highlighting
+- Symbol search and code outline
+- RuboCop errors and warnings (diagnostics)
+- Format on save (with RuboCop or Syntax Tree)
+- Format on type
+- Require path completion
+
+See more features in the [ruby-lsp server documentation](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html)
+
 ### Commands
 
-Available commands are listed below and can always be found in the `Ruby LSP` prefix.
+Available commands are listed below and can always be found by searching for the `Ruby LSP` prefix in the command
+palette (Default hotkey: CMD + SHIFT + P).
 
-| Command           | Description                 |
-| ----------------- | --------------------------- |
-| Ruby LSP: Start   | Start the Ruby LSP server   |
-| Ruby LSP: Restart | Restart the Ruby LSP server |
-| Ruby LSP: Stop    | Stop the Ruby LSP server    |
+| Command                              | Description                                             |
+| ------------------------------------ | ------------------------------------------------------- |
+| Ruby LSP: Start                      | Start the Ruby LSP server                               |
+| Ruby LSP: Restart                    | Restart the Ruby LSP server                             |
+| Ruby LSP: Stop                       | Stop the Ruby LSP server                                |
+| Ruby LSP: Update language server gem | Updates the `ruby-lsp` server gem to the latest version |
 
 ### Snippets
 
-This extension provides convenience snippets for Ruby. Find the full list
-[here](https://github.com/Shopify/vscode-ruby-lsp/blob/main/snippets.json).
+This extension provides convenience snippets for common Ruby constructs, such as blocks, classes, methods or even unit
+test boilerplates. Find the full list [here](https://github.com/Shopify/vscode-ruby-lsp/blob/main/snippets.json).
 
-### Troubleshooting
+## Troubleshooting
 
 To verify if the Ruby LSP has been activated properly, you can
 
@@ -112,9 +123,9 @@ BUNDLE_GEMFILE=/path/to/your/project/.ruby-lsp/Gemfile bundle install
 If after these steps the Ruby LSP is still not initializing properly, please report the issue
 [here](https://github.com/Shopify/vscode-ruby-lsp/issues/new).
 
-### Migrating from bundle
+## Migrating from bundle
 
-**Note**: The following applies only to v0.2.0 or newer of the extension.
+**Note**: The following applies if migrating from a version earlier than v0.2.0.
 
 If you previously included the `ruby-lsp` gem in the bundle (as part of the project's `Gemfile` or `gemspec`) then
 follow these steps to migrate to newer versions of the Ruby LSP - for which the gem no longer needs to be added to the
@@ -126,16 +137,18 @@ bundle.
 3. Run bundle to make sure `Gemfile.lock` is updated
 4. [Restart](#commands) the Ruby LSP extension or restart VS Code to allow Ruby LSP to use the new setup
 
-### Telemetry
+## Telemetry
 
 On its own, the Ruby LSP does not collect any telemetry by default, but it does support hooking up to a private metrics
 service if desired.
 
-In order to receive metrics requests, a private plugin must export the `ruby-lsp.getPrivateTelemetryApi` command, which should
-return an object that implements the `TelemetryApi` interface defined [here](https://github.com/Shopify/vscode-ruby-lsp/blob/main/src/telemetry.ts).
+In order to receive metrics requests, a private plugin must export the `ruby-lsp.getPrivateTelemetryApi` command, which
+should return an object that implements the `TelemetryApi` interface defined
+[here](https://github.com/Shopify/vscode-ruby-lsp/blob/main/src/telemetry.ts).
 
-Fields included by default are defined in `TelemetryEvent` [here](https://github.com/Shopify/vscode-ruby-lsp/blob/main/src/telemetry.ts).
-The exported API object can add any other data of interest and publish it to a private service.
+Fields included by default are defined in `TelemetryEvent`
+[here](https://github.com/Shopify/vscode-ruby-lsp/blob/main/src/telemetry.ts). The exported API object can add any
+other data of interest and publish it to a private service.
 
 For example,
 
@@ -171,11 +184,13 @@ code of conduct.
 
 ### Debugging
 
-Interactive debugging works for both running the extension or tests. In the debug panel, select whether to run the extension in development mode or run tests, set up some breakpoints and start with F5.
+Interactive debugging works for both running the extension or tests. In the debug panel, select whether to run the
+extension in development mode or run tests, set up some breakpoints and start with F5.
 
 ### Tracing LSP requests and responses
 
-LSP server tracing can be controlled through the `ruby lsp.trace.server` config key in the `.vscode/settings.json` config file.
+LSP server tracing can be controlled through the `ruby lsp.trace.server` config key in the `.vscode/settings.json`
+config file.
 
 Possible values are:
 
@@ -183,7 +198,7 @@ Possible values are:
 - `messages`: display requests and responses notifications
 - `verbose`: display each request and response as JSON
 
-### Debugging using VS Code
+### Debugging the server using VS Code
 
 The `launch.json` contains a 'Minitest - current file' configuration for the debugger.
 
