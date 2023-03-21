@@ -12,3 +12,4 @@ node_modules
 out/test/**
 .prettierignore
 *.vsix
+extras/**
