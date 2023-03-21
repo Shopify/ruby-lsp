@@ -224,7 +224,24 @@
         ],
         "configuration": "./languages/erb.json"
       }
-    ]
+    ],
+    "configurationDefaults": {
+      "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/.ruby-lsp": true
+      },
+      "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/*.code-search": true,
+        "**/.ruby-lsp": true
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "yarn run esbuild-base --minify",
