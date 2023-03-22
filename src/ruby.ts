@@ -22,7 +22,7 @@ export class Ruby {
   public yjitEnabled?: boolean;
   public supportsYjit?: boolean;
   private workingFolder: string;
-  private versionManager?: VersionManager;
+  #versionManager?: VersionManager;
   // eslint-disable-next-line no-process-env
   private shell = process.env.SHELL;
   private _env: NodeJS.ProcessEnv = {};
@@ -32,6 +32,14 @@ export class Ruby {
     workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath
   ) {
     this.workingFolder = workingFolder;
+  }
+
+  get versionManager() {
+    return this.#versionManager;
+  }
+
+  private set versionManager(versionManager: VersionManager | undefined) {
+    this.#versionManager = versionManager;
   }
 
   get env() {
