@@ -38,6 +38,7 @@ suite("Ruby environment activation", () => {
       "fake/some/project/.ruby-lsp/Gemfile",
       "Expected BUNDLE_GEMFILE to be set"
     );
+    assert.strictEqual(ruby.env.BUNDLE_PATH__SYSTEM, "true");
   });
 
   test("Activate fetches Ruby information when working on the Ruby LSP", async () => {
@@ -55,5 +56,6 @@ suite("Ruby environment activation", () => {
       undefined,
       "Expected BUNDLE_GEMFILE to not be set for the ruby-lsp folder"
     );
+    assert.strictEqual(ruby.env.BUNDLE_PATH__SYSTEM, undefined);
   });
 });

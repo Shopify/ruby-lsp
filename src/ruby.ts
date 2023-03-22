@@ -180,6 +180,10 @@ export class Ruby {
         ".ruby-lsp",
         "Gemfile"
       );
+
+      // We must use the default system path for bundler in case someone has BUNDLE_PATH configured. Otherwise, we end
+      // up with all gems installed inside of the `.ruby-lsp` folder, which may lead to all sorts of errors
+      this._env.BUNDLE_PATH__SYSTEM = "true";
     }
   }
 
