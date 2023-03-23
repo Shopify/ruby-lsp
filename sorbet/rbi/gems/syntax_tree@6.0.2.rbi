@@ -97,7 +97,7 @@ end
 #
 #     collection[]
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#567
+# source://syntax_tree//lib/syntax_tree/node.rb#568
 class SyntaxTree::ARef < ::SyntaxTree::Node
   # @return [ARef] a new instance of ARef
   #
@@ -148,7 +148,7 @@ end
 #
 #     collection[index] = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#645
+# source://syntax_tree//lib/syntax_tree/node.rb#646
 class SyntaxTree::ARefField < ::SyntaxTree::Node
   # @return [ARefField] a new instance of ARefField
   #
@@ -204,7 +204,7 @@ end
 # symbols (note that this includes dynamic symbols like
 # :"left-#{middle}-right").
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#458
+# source://syntax_tree//lib/syntax_tree/node.rb#460
 class SyntaxTree::AliasNode < ::SyntaxTree::Node
   # @return [AliasNode] a new instance of AliasNode
   #
@@ -280,7 +280,7 @@ end
 #
 #     method(&expression)
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#886
+# source://syntax_tree//lib/syntax_tree/node.rb#887
 class SyntaxTree::ArgBlock < ::SyntaxTree::Node
   # @return [ArgBlock] a new instance of ArgBlock
   #
@@ -330,7 +330,7 @@ end
 #
 #     method()
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#727
+# source://syntax_tree//lib/syntax_tree/node.rb#729
 class SyntaxTree::ArgParen < ::SyntaxTree::Node
   # @return [ArgParen] a new instance of ArgParen
   #
@@ -384,7 +384,7 @@ end
 #
 #     method(*arguments)
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#938
+# source://syntax_tree//lib/syntax_tree/node.rb#939
 class SyntaxTree::ArgStar < ::SyntaxTree::Node
   # @return [ArgStar] a new instance of ArgStar
   #
@@ -428,7 +428,7 @@ end
 #
 #     method(first, second, third)
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#820
+# source://syntax_tree//lib/syntax_tree/node.rb#821
 class SyntaxTree::Args < ::SyntaxTree::Node
   # @return [Args] a new instance of Args
   #
@@ -488,7 +488,7 @@ end
 # The ArgsForward node appears in both the caller (the request method calls)
 # and the callee (the get and post definitions).
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#1003
+# source://syntax_tree//lib/syntax_tree/node.rb#1004
 class SyntaxTree::ArgsForward < ::SyntaxTree::Node
   # @return [ArgsForward] a new instance of ArgsForward
   #
@@ -531,7 +531,7 @@ end
 #     []
 #     [one, two, three]
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#1052
+# source://syntax_tree//lib/syntax_tree/node.rb#1055
 class SyntaxTree::ArrayLiteral < ::SyntaxTree::Node
   # @return [ArrayLiteral] a new instance of ArrayLiteral
   #
@@ -695,7 +695,7 @@ end
 # and an optional array of positional matches that occur after the splat.
 # All of the in clauses above would create an AryPtn node.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#1278
+# source://syntax_tree//lib/syntax_tree/node.rb#1279
 class SyntaxTree::AryPtn < ::SyntaxTree::Node
   # @return [AryPtn] a new instance of AryPtn
   #
@@ -779,7 +779,7 @@ end
 #
 #     variable = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#1414
+# source://syntax_tree//lib/syntax_tree/node.rb#1416
 class SyntaxTree::Assign < ::SyntaxTree::Node
   # @return [Assign] a new instance of Assign
   #
@@ -850,7 +850,7 @@ end
 #
 # In the above example, the would be two Assoc nodes.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#1493
+# source://syntax_tree//lib/syntax_tree/node.rb#1494
 class SyntaxTree::Assoc < ::SyntaxTree::Node
   # @return [Assoc] a new instance of Assoc
   #
@@ -904,7 +904,7 @@ end
 #
 #     { **pairs }
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#1571
+# source://syntax_tree//lib/syntax_tree/node.rb#1572
 class SyntaxTree::AssocSplat < ::SyntaxTree::Node
   # @return [AssocSplat] a new instance of AssocSplat
   #
@@ -953,7 +953,7 @@ end
 # Interestingly, the BEGIN keyword doesn't allow the do and end keywords for
 # the block. Only braces are permitted.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#175
+# source://syntax_tree//lib/syntax_tree/node.rb#176
 class SyntaxTree::BEGINBlock < ::SyntaxTree::Node
   # @return [BEGINBlock] a new instance of BEGINBlock
   #
@@ -1002,7 +1002,7 @@ end
 #
 #     $1
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#1624
+# source://syntax_tree//lib/syntax_tree/node.rb#1625
 class SyntaxTree::Backref < ::SyntaxTree::Node
   # @return [Backref] a new instance of Backref
   #
@@ -1045,7 +1045,7 @@ end
 # for an XStringLiteral, but could also be found as the name of a method being
 # defined.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#1674
+# source://syntax_tree//lib/syntax_tree/node.rb#1675
 class SyntaxTree::Backtick < ::SyntaxTree::Node
   # @return [Backtick] a new instance of Backtick
   #
@@ -1090,7 +1090,7 @@ end
 #
 #     method(key1: value1, key2: value2)
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#1830
+# source://syntax_tree//lib/syntax_tree/node.rb#1831
 class SyntaxTree::BareAssocHash < ::SyntaxTree::Node
   # @return [BareAssocHash] a new instance of BareAssocHash
   #
@@ -1249,12 +1249,13 @@ class SyntaxTree::BasicVisitor::VisitMethodsChecker::Status < ::Struct
   #
   # @param value [Object] the value to set the attribute checking to.
   # @return [Object] the newly set value
+  #
+  # source://syntax_tree//lib/syntax_tree/basic_visitor.rb#46
   def checking=(_); end
 
   class << self
     def [](*_arg0); end
     def inspect; end
-    def keyword_init?; end
     def members; end
     def new(*_arg0); end
   end
@@ -1266,7 +1267,7 @@ end
 #       value
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#1895
+# source://syntax_tree//lib/syntax_tree/node.rb#1896
 class SyntaxTree::Begin < ::SyntaxTree::Node
   # @return [Begin] a new instance of Begin
   #
@@ -1315,7 +1316,7 @@ end
 #
 #     array << value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2025
+# source://syntax_tree//lib/syntax_tree/node.rb#2029
 class SyntaxTree::Binary < ::SyntaxTree::Node
   # @return [Binary] a new instance of Binary
   #
@@ -1368,7 +1369,7 @@ end
 #
 #     def method(&block); end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2222
+# source://syntax_tree//lib/syntax_tree/node.rb#2223
 class SyntaxTree::BlockArg < ::SyntaxTree::Node
   # @return [BlockArg] a new instance of BlockArg
   #
@@ -1415,7 +1416,7 @@ end
 #
 #     method { |value| }
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4291
+# source://syntax_tree//lib/syntax_tree/node.rb#4292
 class SyntaxTree::BlockNode < ::SyntaxTree::Node
   # @return [BlockNode] a new instance of BlockNode
   #
@@ -1537,7 +1538,7 @@ end
 #     method do |positional, optional = value, keyword:, &block; local|
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2136
+# source://syntax_tree//lib/syntax_tree/node.rb#2137
 class SyntaxTree::BlockVar < ::SyntaxTree::Node
   # @return [BlockVar] a new instance of BlockVar
   #
@@ -1608,7 +1609,7 @@ end
 # doesn't necessarily know where it started. So the parent node needs to
 # report back down into this one where it goes.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2273
+# source://syntax_tree//lib/syntax_tree/node.rb#2274
 class SyntaxTree::BodyStmt < ::SyntaxTree::Node
   # @return [BodyStmt] a new instance of BodyStmt
   #
@@ -1683,7 +1684,7 @@ end
 #
 #     break 1
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2626
+# source://syntax_tree//lib/syntax_tree/node.rb#2627
 class SyntaxTree::Break < ::SyntaxTree::Node
   # @return [Break] a new instance of Break
   #
@@ -1729,7 +1730,7 @@ end
 # In the example above, the CHAR node represents the string literal "a". You
 # can use control characters with this as well, as in ?\C-a.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#248
+# source://syntax_tree//lib/syntax_tree/node.rb#249
 class SyntaxTree::CHAR < ::SyntaxTree::Node
   # @return [CHAR] a new instance of CHAR
   #
@@ -1768,11 +1769,386 @@ class SyntaxTree::CHAR < ::SyntaxTree::Node
   def value; end
 end
 
+# Syntax Tree ships with the `stree` CLI, which can be used to inspect and
+# manipulate Ruby code. This module is responsible for powering that CLI.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#9
+module SyntaxTree::CLI
+  class << self
+    # Run the CLI over the given array of strings that make up the arguments
+    # passed to the invocation.
+    #
+    # source://syntax_tree//lib/syntax_tree/cli.rb#476
+    def run(argv); end
+
+    private
+
+    # Take a line of Ruby source and colorize the output.
+    #
+    # source://syntax_tree//lib/syntax_tree/cli.rb#630
+    def colorize_line(line); end
+
+    # These are the options we're going to pass into IRB::Color.colorize_code.
+    # Since we support multiple versions of IRB, we're going to need to do
+    # some reflection to make sure we always pass valid options.
+    #
+    # source://syntax_tree//lib/syntax_tree/cli.rb#638
+    def colorize_options; end
+
+    # Highlights a snippet from a source and parse error.
+    #
+    # source://syntax_tree//lib/syntax_tree/cli.rb#606
+    def highlight_error(error, source); end
+
+    # Processes each item in the queue with the given action. Returns whether
+    # or not any errors were encountered.
+    #
+    # source://syntax_tree//lib/syntax_tree/cli.rb#562
+    def process_queue(queue, action); end
+  end
+end
+
+# An action of the CLI that prints out the AST for the given source.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#121
+class SyntaxTree::CLI::AST < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#122
+  def run(item); end
+end
+
+# The parent action class for the CLI that implements the basics.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#103
+class SyntaxTree::CLI::Action
+  # @return [Action] a new instance of Action
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#106
+  def initialize(options); end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#116
+  def failure; end
+
+  # Returns the value of attribute options.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#104
+  def options; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#110
+  def run(item); end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#113
+  def success; end
+end
+
+# An action of the CLI that ensures that the filepath is formatted as
+# expected.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#129
+class SyntaxTree::CLI::Check < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#152
+  def failure; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#133
+  def run(item); end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#148
+  def success; end
+end
+
+# source://syntax_tree//lib/syntax_tree/cli.rb#130
+class SyntaxTree::CLI::Check::UnformattedError < ::StandardError; end
+
+# A utility wrapper around colored strings in the output.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#11
+class SyntaxTree::CLI::Color
+  # @return [Color] a new instance of Color
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#14
+  def initialize(value, code); end
+
+  # Returns the value of attribute code.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#12
+  def code; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#19
+  def to_s; end
+
+  # Returns the value of attribute value.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#12
+  def value; end
+
+  class << self
+    # source://syntax_tree//lib/syntax_tree/cli.rb#23
+    def bold(value); end
+
+    # source://syntax_tree//lib/syntax_tree/cli.rb#27
+    def gray(value); end
+
+    # source://syntax_tree//lib/syntax_tree/cli.rb#31
+    def red(value); end
+
+    # source://syntax_tree//lib/syntax_tree/cli.rb#35
+    def yellow(value); end
+  end
+end
+
+# We allow a minimal configuration file to act as additional command line
+# arguments to the CLI. Each line of the config file should be a new
+# argument, as in:
+#
+#     --plugins=plugin/single_quote
+#     --print-width=100
+#
+# When invoking the CLI, we will read this config file and then parse it if
+# it exists in the current working directory.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#455
+class SyntaxTree::CLI::ConfigFile
+  # @return [ConfigFile] a new instance of ConfigFile
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#460
+  def initialize; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#468
+  def arguments; end
+
+  # @return [Boolean]
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#464
+  def exists?; end
+
+  # Returns the value of attribute filepath.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#458
+  def filepath; end
+end
+
+# source://syntax_tree//lib/syntax_tree/cli.rb#456
+SyntaxTree::CLI::ConfigFile::FILENAME = T.let(T.unsafe(nil), String)
+
+# An action of the CLI that formats the source twice to check if the first
+# format is not idempotent.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#159
+class SyntaxTree::CLI::Debug < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#191
+  def failure; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#163
+  def run(item); end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#187
+  def success; end
+end
+
+# source://syntax_tree//lib/syntax_tree/cli.rb#160
+class SyntaxTree::CLI::Debug::NonIdempotentFormatError < ::StandardError; end
+
+# An action of the CLI that prints out the doc tree IR for the given source.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#197
+class SyntaxTree::CLI::Doc < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#198
+  def run(item); end
+end
+
+# An action of the CLI that outputs a pattern-matching Ruby expression that
+# would match the first expression of the input given.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#211
+class SyntaxTree::CLI::Expr < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#212
+  def run(item); end
+end
+
+# An item of work that corresponds to a file to be processed.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#41
+class SyntaxTree::CLI::FileItem
+  # @return [FileItem] a new instance of FileItem
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#44
+  def initialize(filepath); end
+
+  # Returns the value of attribute filepath.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#42
+  def filepath; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#48
+  def handler; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#52
+  def source; end
+
+  # @return [Boolean]
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#56
+  def writable?; end
+end
+
+# An action of the CLI that formats the input source and prints it out.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#225
+class SyntaxTree::CLI::Format < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#226
+  def run(item); end
+end
+
+# The help message displayed if the input arguments are not correctly
+# ordered or formatted.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#323
+SyntaxTree::CLI::HELP = T.let(T.unsafe(nil), String)
+
+# An action of the CLI that converts the source into its equivalent JSON
+# representation.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#240
+class SyntaxTree::CLI::Json < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#241
+  def run(item); end
+end
+
+# An action of the CLI that outputs a pattern-matching Ruby expression that
+# would match the input given.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#249
+class SyntaxTree::CLI::Match < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#250
+  def run(item); end
+end
+
+# This represents all of the options that can be passed to the CLI. It is
+# responsible for parsing the list and then returning the file paths at the
+# end.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#377
+class SyntaxTree::CLI::Options
+  # @return [Options] a new instance of Options
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#384
+  def initialize; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#392
+  def formatter_options; end
+
+  # Returns the value of attribute ignore_files.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#378
+  def ignore_files; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#397
+  def parse(arguments); end
+
+  # Returns the value of attribute plugins.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#378
+  def plugins; end
+
+  # Returns the value of attribute print_width.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#378
+  def print_width; end
+
+  # Returns the value of attribute scripts.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#378
+  def scripts; end
+
+  # Returns the value of attribute target_ruby_version.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#378
+  def target_ruby_version; end
+
+  private
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#403
+  def parser; end
+end
+
+# An item of work that correspond to the content passed in via stdin.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#84
+class SyntaxTree::CLI::STDINItem
+  # source://syntax_tree//lib/syntax_tree/cli.rb#89
+  def filepath; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#85
+  def handler; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#93
+  def source; end
+
+  # @return [Boolean]
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#97
+  def writable?; end
+end
+
+# An item of work that corresponds to a script content passed via the
+# command line.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#63
+class SyntaxTree::CLI::ScriptItem
+  # @return [ScriptItem] a new instance of ScriptItem
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#66
+  def initialize(source); end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#74
+  def filepath; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#70
+  def handler; end
+
+  # Returns the value of attribute source.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#64
+  def source; end
+
+  # @return [Boolean]
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#78
+  def writable?; end
+end
+
+# An action of the CLI that searches for the given pattern matching pattern
+# in the given files.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#257
+class SyntaxTree::CLI::Search < ::SyntaxTree::CLI::Action
+  # @return [Search] a new instance of Search
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#260
+  def initialize(query); end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#273
+  def run(item); end
+
+  # Returns the value of attribute search.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#258
+  def search; end
+end
+
+# An action of the CLI that formats the input source and writes the
+# formatted output back to the file.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#295
+class SyntaxTree::CLI::Write < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#296
+  def run(item); end
+end
+
 # CVar represents the use of a class variable.
 #
 #     @@variable
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4030
+# source://syntax_tree//lib/syntax_tree/node.rb#4031
 class SyntaxTree::CVar < ::SyntaxTree::Node
   # @return [CVar] a new instance of CVar
   #
@@ -1870,7 +2246,7 @@ end
 #
 #     receiver.message
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2934
+# source://syntax_tree//lib/syntax_tree/node.rb#2935
 class SyntaxTree::CallNode < ::SyntaxTree::Node
   # @return [CallNode] a new instance of CallNode
   #
@@ -1969,7 +2345,7 @@ end
 #       "number"
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3107
+# source://syntax_tree//lib/syntax_tree/node.rb#3108
 class SyntaxTree::Case < ::SyntaxTree::Node
   # @return [Case] a new instance of Case
   #
@@ -2050,7 +2426,7 @@ end
 #     class Child < method
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3303
+# source://syntax_tree//lib/syntax_tree/node.rb#3305
 class SyntaxTree::ClassDeclaration < ::SyntaxTree::Node
   # @return [ClassDeclaration] a new instance of ClassDeclaration
   #
@@ -2107,7 +2483,7 @@ end
 
 # Comma represents the use of the , operator.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3401
+# source://syntax_tree//lib/syntax_tree/node.rb#3402
 class SyntaxTree::Comma < ::SyntaxTree::Node
   # @return [Comma] a new instance of Comma
   #
@@ -2144,7 +2520,7 @@ end
 #
 #     method argument
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3439
+# source://syntax_tree//lib/syntax_tree/node.rb#3440
 class SyntaxTree::Command < ::SyntaxTree::Node
   # @return [Command] a new instance of Command
   #
@@ -2206,7 +2582,7 @@ end
 #
 #     object.method argument
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3551
+# source://syntax_tree//lib/syntax_tree/node.rb#3552
 class SyntaxTree::CommandCall < ::SyntaxTree::Node
   # @return [CommandCall] a new instance of CommandCall
   #
@@ -2277,7 +2653,7 @@ end
 #
 #     # comment
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3709
+# source://syntax_tree//lib/syntax_tree/node.rb#3710
 class SyntaxTree::Comment < ::SyntaxTree::Node
   # @return [Comment] a new instance of Comment
   #
@@ -2400,7 +2776,7 @@ end
 #
 #     :Constant
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3796
+# source://syntax_tree//lib/syntax_tree/node.rb#3797
 class SyntaxTree::Const < ::SyntaxTree::Node
   # @return [Const] a new instance of Const
   #
@@ -2445,7 +2821,7 @@ end
 #
 #     object::Const = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3849
+# source://syntax_tree//lib/syntax_tree/node.rb#3850
 class SyntaxTree::ConstPathField < ::SyntaxTree::Node
   # @return [ConstPathField] a new instance of ConstPathField
   #
@@ -2493,7 +2869,7 @@ end
 #
 #     object::Const
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3913
+# source://syntax_tree//lib/syntax_tree/node.rb#3914
 class SyntaxTree::ConstPathRef < ::SyntaxTree::Node
   # @return [ConstPathRef] a new instance of ConstPathRef
   #
@@ -2543,7 +2919,7 @@ end
 #     class Container
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3979
+# source://syntax_tree//lib/syntax_tree/node.rb#3980
 class SyntaxTree::ConstRef < ::SyntaxTree::Node
   # @return [ConstRef] a new instance of ConstRef
   #
@@ -3374,7 +3750,7 @@ end
 #     def method(param) result end
 #     def object.method(param) result end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4082
+# source://syntax_tree//lib/syntax_tree/node.rb#4083
 class SyntaxTree::DefNode < ::SyntaxTree::Node
   # @return [DefNode] a new instance of DefNode
   #
@@ -3450,7 +3826,7 @@ end
 #
 #     defined?(variable)
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4228
+# source://syntax_tree//lib/syntax_tree/node.rb#4229
 class SyntaxTree::Defined < ::SyntaxTree::Node
   # @return [Defined] a new instance of Defined
   #
@@ -3498,7 +3874,7 @@ end
 #
 #     { "#{key}": value }
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4642
+# source://syntax_tree//lib/syntax_tree/node.rb#4644
 class SyntaxTree::DynaSymbol < ::SyntaxTree::Node
   # @return [DynaSymbol] a new instance of DynaSymbol
   #
@@ -3562,7 +3938,7 @@ end
 # Interestingly, the END keyword doesn't allow the do and end keywords for the
 # block. Only braces are permitted.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#310
+# source://syntax_tree//lib/syntax_tree/node.rb#311
 class SyntaxTree::ENDBlock < ::SyntaxTree::Node
   # @return [ENDBlock] a new instance of ENDBlock
   #
@@ -3612,7 +3988,7 @@ end
 #     else
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4771
+# source://syntax_tree//lib/syntax_tree/node.rb#4772
 class SyntaxTree::Else < ::SyntaxTree::Node
   # @return [Else] a new instance of Else
   #
@@ -3662,7 +4038,7 @@ end
 #     elsif other_variable
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4844
+# source://syntax_tree//lib/syntax_tree/node.rb#4845
 class SyntaxTree::Elsif < ::SyntaxTree::Node
   # @return [Elsif] a new instance of Elsif
   #
@@ -3718,7 +4094,7 @@ end
 #     second line
 #     =end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4934
+# source://syntax_tree//lib/syntax_tree/node.rb#4935
 class SyntaxTree::EmbDoc < ::SyntaxTree::Node
   # @return [EmbDoc] a new instance of EmbDoc
   #
@@ -3787,7 +4163,7 @@ end
 #
 #     "Hello, #{person}!"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5017
+# source://syntax_tree//lib/syntax_tree/node.rb#5018
 class SyntaxTree::EmbExprBeg < ::SyntaxTree::Node
   # @return [EmbExprBeg] a new instance of EmbExprBeg
   #
@@ -3824,7 +4200,7 @@ end
 #
 #     "Hello, #{person}!"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5058
+# source://syntax_tree//lib/syntax_tree/node.rb#5059
 class SyntaxTree::EmbExprEnd < ::SyntaxTree::Node
   # @return [EmbExprEnd] a new instance of EmbExprEnd
   #
@@ -3863,7 +4239,7 @@ end
 #
 # In the example above, an EmbVar node represents the # because it forces
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5101
+# source://syntax_tree//lib/syntax_tree/node.rb#5102
 class SyntaxTree::EmbVar < ::SyntaxTree::Node
   # @return [EmbVar] a new instance of EmbVar
   #
@@ -3903,7 +4279,7 @@ end
 #     __END__
 #     some other content that is not executed by the program
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#386
+# source://syntax_tree//lib/syntax_tree/node.rb#387
 class SyntaxTree::EndContent < ::SyntaxTree::Node
   # @return [EndContent] a new instance of EndContent
   #
@@ -3949,7 +4325,7 @@ end
 #     ensure
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5143
+# source://syntax_tree//lib/syntax_tree/node.rb#5144
 class SyntaxTree::Ensure < ::SyntaxTree::Node
   # @return [Ensure] a new instance of Ensure
   #
@@ -4004,7 +4380,7 @@ end
 # position typically represents a rest-type parameter, but in this case is
 # used to indicate that a trailing comma was used.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5218
+# source://syntax_tree//lib/syntax_tree/node.rb#5219
 class SyntaxTree::ExcessedComma < ::SyntaxTree::Node
   # @return [ExcessedComma] a new instance of ExcessedComma
   #
@@ -4048,7 +4424,7 @@ end
 #
 #     object.variable = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5270
+# source://syntax_tree//lib/syntax_tree/node.rb#5271
 class SyntaxTree::Field < ::SyntaxTree::Node
   # @return [Field] a new instance of Field
   #
@@ -4605,7 +4981,7 @@ end
 #
 #     1.0
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5342
+# source://syntax_tree//lib/syntax_tree/node.rb#5343
 class SyntaxTree::FloatLiteral < ::SyntaxTree::Node
   # @return [FloatLiteral] a new instance of FloatLiteral
   #
@@ -4687,7 +5063,7 @@ end
 #     in [*, 7, *]
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5396
+# source://syntax_tree//lib/syntax_tree/node.rb#5397
 class SyntaxTree::FndPtn < ::SyntaxTree::Node
   # @return [FndPtn] a new instance of FndPtn
   #
@@ -4747,7 +5123,7 @@ end
 #     for value in list do
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5494
+# source://syntax_tree//lib/syntax_tree/node.rb#5496
 class SyntaxTree::For < ::SyntaxTree::Node
   # @return [For] a new instance of For
   #
@@ -4800,7 +5176,7 @@ end
 # A slightly enhanced PP that knows how to format recursively including
 # comments.
 #
-# source://syntax_tree//lib/syntax_tree/formatter.rb#6
+# source://syntax_tree//lib/syntax_tree/formatter.rb#9
 class SyntaxTree::Formatter < ::PrettierPrint
   # @return [Formatter] a new instance of Formatter
   #
@@ -4950,7 +5326,7 @@ end
 #
 #     $variable
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5578
+# source://syntax_tree//lib/syntax_tree/node.rb#5579
 class SyntaxTree::GVar < ::SyntaxTree::Node
   # @return [GVar] a new instance of GVar
   #
@@ -5040,7 +5416,7 @@ end
 #
 #     { key => value }
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5629
+# source://syntax_tree//lib/syntax_tree/node.rb#5632
 class SyntaxTree::HashLiteral < ::SyntaxTree::Node
   # @return [HashLiteral] a new instance of HashLiteral
   #
@@ -5126,7 +5502,7 @@ end
 #       contents
 #     DOC
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5752
+# source://syntax_tree//lib/syntax_tree/node.rb#5753
 class SyntaxTree::Heredoc < ::SyntaxTree::Node
   # @return [Heredoc] a new instance of Heredoc
   #
@@ -5195,7 +5571,7 @@ SyntaxTree::Heredoc::SEPARATOR = T.let(T.unsafe(nil), PrettierPrint::Breakable)
 #
 # In the example above the HeredocBeg node represents <<~DOC.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5864
+# source://syntax_tree//lib/syntax_tree/node.rb#5865
 class SyntaxTree::HeredocBeg < ::SyntaxTree::Node
   # @return [HeredocBeg] a new instance of HeredocBeg
   #
@@ -5242,7 +5618,7 @@ end
 #
 # In the example above the HeredocEnd node represents the closing DOC.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5918
+# source://syntax_tree//lib/syntax_tree/node.rb#5919
 class SyntaxTree::HeredocEnd < ::SyntaxTree::Node
   # @return [HeredocEnd] a new instance of HeredocEnd
   #
@@ -5288,7 +5664,7 @@ end
 #     in { key: }
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5972
+# source://syntax_tree//lib/syntax_tree/node.rb#5973
 class SyntaxTree::HshPtn < ::SyntaxTree::Node
   # @return [HshPtn] a new instance of HshPtn
   #
@@ -5394,7 +5770,7 @@ end
 #
 #     @variable
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6851
+# source://syntax_tree//lib/syntax_tree/node.rb#6852
 class SyntaxTree::IVar < ::SyntaxTree::Node
   # @return [IVar] a new instance of IVar
   #
@@ -5438,7 +5814,7 @@ end
 #
 #     value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6157
+# source://syntax_tree//lib/syntax_tree/node.rb#6158
 class SyntaxTree::Ident < ::SyntaxTree::Node
   # @return [Ident] a new instance of Ident
   #
@@ -5482,7 +5858,7 @@ end
 #     if predicate
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6447
+# source://syntax_tree//lib/syntax_tree/node.rb#6448
 class SyntaxTree::IfNode < ::SyntaxTree::Node
   # @return [IfNode] a new instance of IfNode
   #
@@ -5542,7 +5918,7 @@ end
 #
 #     predicate ? truthy : falsy
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6520
+# source://syntax_tree//lib/syntax_tree/node.rb#6521
 class SyntaxTree::IfOp < ::SyntaxTree::Node
   # @return [IfOp] a new instance of IfOp
   #
@@ -5603,7 +5979,7 @@ end
 #
 #     1i
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6656
+# source://syntax_tree//lib/syntax_tree/node.rb#6657
 class SyntaxTree::Imaginary < ::SyntaxTree::Node
   # @return [Imaginary] a new instance of Imaginary
   #
@@ -5649,7 +6025,7 @@ end
 #     in pattern
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6710
+# source://syntax_tree//lib/syntax_tree/node.rb#6711
 class SyntaxTree::In < ::SyntaxTree::Node
   # @return [In] a new instance of In
   #
@@ -6080,7 +6456,7 @@ end
 #
 #     1
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6795
+# source://syntax_tree//lib/syntax_tree/node.rb#6796
 class SyntaxTree::Int < ::SyntaxTree::Node
   # @return [Int] a new instance of Int
   #
@@ -6172,7 +6548,7 @@ end
 #
 # then the contents of the symbol node will contain a Kw node.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6911
+# source://syntax_tree//lib/syntax_tree/node.rb#6912
 class SyntaxTree::Kw < ::SyntaxTree::Node
   # @return [Kw] a new instance of Kw
   #
@@ -6221,7 +6597,7 @@ end
 #
 #     def method(**kwargs) end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6964
+# source://syntax_tree//lib/syntax_tree/node.rb#6965
 class SyntaxTree::KwRestParam < ::SyntaxTree::Node
   # @return [KwRestParam] a new instance of KwRestParam
   #
@@ -6262,7 +6638,7 @@ end
 
 # LBrace represents the use of a left brace, i.e., {.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7306
+# source://syntax_tree//lib/syntax_tree/node.rb#7307
 class SyntaxTree::LBrace < ::SyntaxTree::Node
   # @return [LBrace] a new instance of LBrace
   #
@@ -6314,7 +6690,7 @@ end
 
 # LBracket represents the use of a left bracket, i.e., [.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7363
+# source://syntax_tree//lib/syntax_tree/node.rb#7364
 class SyntaxTree::LBracket < ::SyntaxTree::Node
   # @return [LBracket] a new instance of LBracket
   #
@@ -6366,7 +6742,7 @@ end
 
 # LParen represents the use of a left parenthesis, i.e., (.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7420
+# source://syntax_tree//lib/syntax_tree/node.rb#7421
 class SyntaxTree::LParen < ::SyntaxTree::Node
   # @return [LParen] a new instance of LParen
   #
@@ -6430,7 +6806,7 @@ end
 #
 # In this case "key:" would be the body of the label.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7025
+# source://syntax_tree//lib/syntax_tree/node.rb#7026
 class SyntaxTree::Label < ::SyntaxTree::Node
   # @return [Label] a new instance of Label
   #
@@ -6477,7 +6853,7 @@ end
 # hash key. This node is important for determining the type of quote being
 # used by the label.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7079
+# source://syntax_tree//lib/syntax_tree/node.rb#7080
 class SyntaxTree::LabelEnd < ::SyntaxTree::Node
   # @return [LabelEnd] a new instance of LabelEnd
   #
@@ -6512,7 +6888,7 @@ end
 #
 #     ->(value) { value * 2 }
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7118
+# source://syntax_tree//lib/syntax_tree/node.rb#7119
 class SyntaxTree::Lambda < ::SyntaxTree::Node
   # @return [Lambda] a new instance of Lambda
   #
@@ -6564,7 +6940,7 @@ end
 #     -> (positional, optional = value, keyword:, &block; local) do
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7243
+# source://syntax_tree//lib/syntax_tree/node.rb#7244
 class SyntaxTree::LambdaVar < ::SyntaxTree::Node
   # @return [LambdaVar] a new instance of LambdaVar
   #
@@ -6665,7 +7041,7 @@ end
 # information, see the spec here:
 # https://github.com/microsoft/language-server-protocol/issues/956.
 #
-# source://syntax_tree//lib/syntax_tree/language_server.rb#18
+# source://syntax_tree//lib/syntax_tree/language_server.rb#19
 class SyntaxTree::LanguageServer::InlayHints < ::SyntaxTree::Visitor
   # @return [InlayHints] a new instance of InlayHints
   #
@@ -6896,7 +7272,7 @@ end
 #
 #     first, = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7490
+# source://syntax_tree//lib/syntax_tree/node.rb#7491
 class SyntaxTree::MAssign < ::SyntaxTree::Node
   # @return [MAssign] a new instance of MAssign
   #
@@ -6945,7 +7321,7 @@ end
 #
 #     first, second, third = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7628
+# source://syntax_tree//lib/syntax_tree/node.rb#7634
 class SyntaxTree::MLHS < ::SyntaxTree::Node
   # @return [MLHS] a new instance of MLHS
   #
@@ -7008,7 +7384,7 @@ end
 #
 #     (left, right) = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7694
+# source://syntax_tree//lib/syntax_tree/node.rb#7695
 class SyntaxTree::MLHSParen < ::SyntaxTree::Node
   # @return [MLHSParen] a new instance of MLHSParen
   #
@@ -7066,7 +7442,7 @@ end
 #
 #     values = first, second, third
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7859
+# source://syntax_tree//lib/syntax_tree/node.rb#7860
 class SyntaxTree::MRHS < ::SyntaxTree::Node
   # @return [MRHS] a new instance of MRHS
   #
@@ -7358,7 +7734,7 @@ end
 #
 #     method {}
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7553
+# source://syntax_tree//lib/syntax_tree/node.rb#7554
 class SyntaxTree::MethodAddBlock < ::SyntaxTree::Node
   # @return [MethodAddBlock] a new instance of MethodAddBlock
   #
@@ -7410,7 +7786,7 @@ end
 #     module Namespace
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7769
+# source://syntax_tree//lib/syntax_tree/node.rb#7770
 class SyntaxTree::ModuleDeclaration < ::SyntaxTree::Node
   # @return [ModuleDeclaration] a new instance of ModuleDeclaration
   #
@@ -7958,7 +8334,7 @@ end
 #
 #     next(value)
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7923
+# source://syntax_tree//lib/syntax_tree/node.rb#7924
 class SyntaxTree::Next < ::SyntaxTree::Node
   # @return [Next] a new instance of Next
   #
@@ -8056,7 +8432,7 @@ end
 #
 #     not value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11060
+# source://syntax_tree//lib/syntax_tree/node.rb#11061
 class SyntaxTree::Not < ::SyntaxTree::Node
   # @return [Not] a new instance of Not
   #
@@ -8111,7 +8487,7 @@ end
 #
 # In the example above, the Op node represents the + operator.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7975
+# source://syntax_tree//lib/syntax_tree/node.rb#7976
 class SyntaxTree::Op < ::SyntaxTree::Node
   # @return [Op] a new instance of Op
   #
@@ -8160,7 +8536,7 @@ end
 #
 #     variable += value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8028
+# source://syntax_tree//lib/syntax_tree/node.rb#8030
 class SyntaxTree::OpAssign < ::SyntaxTree::Node
   # @return [OpAssign] a new instance of OpAssign
   #
@@ -8227,7 +8603,7 @@ SyntaxTree::PATTERNS = T.let(T.unsafe(nil), Array)
 #
 #     def method(param) end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8186
+# source://syntax_tree//lib/syntax_tree/node.rb#8188
 class SyntaxTree::Params < ::SyntaxTree::Node
   # @return [Params] a new instance of Params
   #
@@ -8410,7 +8786,7 @@ end
 #
 #     (1 + 2)
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8464
+# source://syntax_tree//lib/syntax_tree/node.rb#8465
 class SyntaxTree::Paren < ::SyntaxTree::Node
   # @return [Paren] a new instance of Paren
   #
@@ -8503,7 +8879,7 @@ SyntaxTree::Parentheses::NODES = T.let(T.unsafe(nil), Array)
 # Parser is a subclass of the Ripper library that subscribes to the stream of
 # tokens and nodes coming from the parser and builds up a syntax tree.
 #
-# source://syntax_tree//lib/syntax_tree/parser.rb#6
+# source://syntax_tree//lib/syntax_tree/parser.rb#8
 class SyntaxTree::Parser < ::Ripper
   # @return [Parser] a new instance of Parser
   #
@@ -10260,7 +10636,7 @@ end
 # Period represents the use of the +.+ operator. It is usually found in method
 # calls.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8536
+# source://syntax_tree//lib/syntax_tree/node.rb#8537
 class SyntaxTree::Period < ::SyntaxTree::Node
   # @return [Period] a new instance of Period
   #
@@ -10305,7 +10681,7 @@ end
 #     in ^(statement)
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#1958
+# source://syntax_tree//lib/syntax_tree/node.rb#1959
 class SyntaxTree::PinnedBegin < ::SyntaxTree::Node
   # @return [PinnedBegin] a new instance of PinnedBegin
   #
@@ -10354,7 +10730,7 @@ end
 # This can be a plain local variable like the example above. It can also be a
 # a class variable, a global variable, or an instance variable.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11644
+# source://syntax_tree//lib/syntax_tree/node.rb#11645
 class SyntaxTree::PinnedVarRef < ::SyntaxTree::Node
   # @return [PinnedVarRef] a new instance of PinnedVarRef
   #
@@ -10442,7 +10818,7 @@ end
 
 # Program represents the overall syntax tree.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8584
+# source://syntax_tree//lib/syntax_tree/node.rb#8585
 class SyntaxTree::Program < ::SyntaxTree::Node
   # @return [Program] a new instance of Program
   #
@@ -10485,7 +10861,7 @@ end
 #
 #     %i[one two three]
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8640
+# source://syntax_tree//lib/syntax_tree/node.rb#8641
 class SyntaxTree::QSymbols < ::SyntaxTree::Node
   # @return [QSymbols] a new instance of QSymbols
   #
@@ -10537,7 +10913,7 @@ end
 # these kinds of arrays can start with a lot of different delimiter types
 # (e.g., %i| or %i<).
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8723
+# source://syntax_tree//lib/syntax_tree/node.rb#8724
 class SyntaxTree::QSymbolsBeg < ::SyntaxTree::Node
   # @return [QSymbolsBeg] a new instance of QSymbolsBeg
   #
@@ -10572,7 +10948,7 @@ end
 #
 #     %w[one two three]
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8762
+# source://syntax_tree//lib/syntax_tree/node.rb#8763
 class SyntaxTree::QWords < ::SyntaxTree::Node
   # @return [QWords] a new instance of QWords
   #
@@ -10624,7 +11000,7 @@ end
 # kinds of arrays can start with a lot of different delimiter types (e.g.,
 # %w| or %w<).
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8841
+# source://syntax_tree//lib/syntax_tree/node.rb#8842
 class SyntaxTree::QWordsBeg < ::SyntaxTree::Node
   # @return [QWordsBeg] a new instance of QWordsBeg
   #
@@ -10695,7 +11071,7 @@ SyntaxTree::Quotes::PAIRS = T.let(T.unsafe(nil), Hash)
 #     value in pattern
 #     value => pattern
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3189
+# source://syntax_tree//lib/syntax_tree/node.rb#3190
 class SyntaxTree::RAssign < ::SyntaxTree::Node
   # @return [RAssign] a new instance of RAssign
   #
@@ -10747,7 +11123,7 @@ end
 
 # RBrace represents the use of a right brace, i.e., +++.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8928
+# source://syntax_tree//lib/syntax_tree/node.rb#8929
 class SyntaxTree::RBrace < ::SyntaxTree::Node
   # @return [RBrace] a new instance of RBrace
   #
@@ -10780,7 +11156,7 @@ end
 
 # RBracket represents the use of a right bracket, i.e., +]+.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8964
+# source://syntax_tree//lib/syntax_tree/node.rb#8965
 class SyntaxTree::RBracket < ::SyntaxTree::Node
   # @return [RBracket] a new instance of RBracket
   #
@@ -10813,7 +11189,7 @@ end
 
 # RParen represents the use of a right parenthesis, i.e., +)+.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9734
+# source://syntax_tree//lib/syntax_tree/node.rb#9735
 class SyntaxTree::RParen < ::SyntaxTree::Node
   # @return [RParen] a new instance of RParen
   #
@@ -10856,7 +11232,7 @@ end
 #
 # One of the sides of the expression may be nil, but not both.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4519
+# source://syntax_tree//lib/syntax_tree/node.rb#4520
 class SyntaxTree::RangeNode < ::SyntaxTree::Node
   # @return [RangeNode] a new instance of RangeNode
   #
@@ -10909,7 +11285,7 @@ end
 #
 #     1r
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8880
+# source://syntax_tree//lib/syntax_tree/node.rb#8881
 class SyntaxTree::RationalLiteral < ::SyntaxTree::Node
   # @return [RationalLiteral] a new instance of RationalLiteral
   #
@@ -10952,7 +11328,7 @@ end
 #
 #     redo
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9003
+# source://syntax_tree//lib/syntax_tree/node.rb#9004
 class SyntaxTree::Redo < ::SyntaxTree::Node
   # @return [Redo] a new instance of Redo
   #
@@ -10995,7 +11371,7 @@ end
 #
 #     %r{.+}
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9099
+# source://syntax_tree//lib/syntax_tree/node.rb#9100
 class SyntaxTree::RegexpBeg < ::SyntaxTree::Node
   # @return [RegexpBeg] a new instance of RegexpBeg
   #
@@ -11033,7 +11409,7 @@ end
 # In the example above, a RegexpContent node represents everything contained
 # within the forward slashes.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9048
+# source://syntax_tree//lib/syntax_tree/node.rb#9049
 class SyntaxTree::RegexpContent < ::SyntaxTree::Node
   # @return [RegexpContent] a new instance of RegexpContent
   #
@@ -11080,7 +11456,7 @@ end
 #
 #     %r{.+}m
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9144
+# source://syntax_tree//lib/syntax_tree/node.rb#9145
 class SyntaxTree::RegexpEnd < ::SyntaxTree::Node
   # @return [RegexpEnd] a new instance of RegexpEnd
   #
@@ -11115,7 +11491,7 @@ end
 #
 #     /.+/
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9183
+# source://syntax_tree//lib/syntax_tree/node.rb#9184
 class SyntaxTree::RegexpLiteral < ::SyntaxTree::Node
   # @return [RegexpLiteral] a new instance of RegexpLiteral
   #
@@ -11191,7 +11567,7 @@ end
 #     rescue
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9391
+# source://syntax_tree//lib/syntax_tree/node.rb#9392
 class SyntaxTree::Rescue < ::SyntaxTree::Node
   # @return [Rescue] a new instance of Rescue
   #
@@ -11254,7 +11630,7 @@ end
 #     rescue Exception => exception
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9316
+# source://syntax_tree//lib/syntax_tree/node.rb#9317
 class SyntaxTree::RescueEx < ::SyntaxTree::Node
   # @return [RescueEx] a new instance of RescueEx
   #
@@ -11303,7 +11679,7 @@ end
 #
 #     expression rescue value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9514
+# source://syntax_tree//lib/syntax_tree/node.rb#9515
 class SyntaxTree::RescueMod < ::SyntaxTree::Node
   # @return [RescueMod] a new instance of RescueMod
   #
@@ -11352,7 +11728,7 @@ end
 #
 #     def method(*rest) end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9591
+# source://syntax_tree//lib/syntax_tree/node.rb#9592
 class SyntaxTree::RestParam < ::SyntaxTree::Node
   # @return [RestParam] a new instance of RestParam
   #
@@ -11395,7 +11771,7 @@ end
 #
 #     retry
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9643
+# source://syntax_tree//lib/syntax_tree/node.rb#9644
 class SyntaxTree::Retry < ::SyntaxTree::Node
   # @return [Retry] a new instance of Retry
   #
@@ -11433,7 +11809,7 @@ end
 #
 #     return value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9686
+# source://syntax_tree//lib/syntax_tree/node.rb#9687
 class SyntaxTree::ReturnNode < ::SyntaxTree::Node
   # @return [ReturnNode] a new instance of ReturnNode
   #
@@ -11479,7 +11855,7 @@ end
 #     class << self
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9776
+# source://syntax_tree//lib/syntax_tree/node.rb#9777
 class SyntaxTree::SClass < ::SyntaxTree::Node
   # @return [SClass] a new instance of SClass
   #
@@ -11550,7 +11926,7 @@ end
 # propagate that onto void_stmt nodes inside the stmts in order to make sure
 # all comments get printed appropriately.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9850
+# source://syntax_tree//lib/syntax_tree/node.rb#9851
 class SyntaxTree::Statements < ::SyntaxTree::Node
   # @return [Statements] a new instance of Statements
   #
@@ -11615,7 +11991,7 @@ end
 #     "first" \
 #       "second"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10107
+# source://syntax_tree//lib/syntax_tree/node.rb#10109
 class SyntaxTree::StringConcat < ::SyntaxTree::Node
   # @return [StringConcat] a new instance of StringConcat
   #
@@ -11664,7 +12040,7 @@ end
 #
 #     "string"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10034
+# source://syntax_tree//lib/syntax_tree/node.rb#10036
 class SyntaxTree::StringContent < ::SyntaxTree::Node
   # @return [StringContent] a new instance of StringContent
   #
@@ -11710,7 +12086,7 @@ end
 #
 #     "#@variable"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10173
+# source://syntax_tree//lib/syntax_tree/node.rb#10174
 class SyntaxTree::StringDVar < ::SyntaxTree::Node
   # @return [StringDVar] a new instance of StringDVar
   #
@@ -11755,7 +12131,7 @@ end
 #
 #     "string #{expression}"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10228
+# source://syntax_tree//lib/syntax_tree/node.rb#10229
 class SyntaxTree::StringEmbExpr < ::SyntaxTree::Node
   # @return [StringEmbExpr] a new instance of StringEmbExpr
   #
@@ -11798,7 +12174,7 @@ end
 #
 #     "string"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10301
+# source://syntax_tree//lib/syntax_tree/node.rb#10303
 class SyntaxTree::StringLiteral < ::SyntaxTree::Node
   # @return [StringLiteral] a new instance of StringLiteral
   #
@@ -11848,7 +12224,7 @@ end
 #
 #     super(value)
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10397
+# source://syntax_tree//lib/syntax_tree/node.rb#10398
 class SyntaxTree::Super < ::SyntaxTree::Node
   # @return [Super] a new instance of Super
   #
@@ -11904,7 +12280,7 @@ end
 # contain ":'" or ":\"". In the case of %s symbols, it will contain the start
 # of the symbol including the %s and the delimiter.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10469
+# source://syntax_tree//lib/syntax_tree/node.rb#10470
 class SyntaxTree::SymBeg < ::SyntaxTree::Node
   # @return [SymBeg] a new instance of SymBeg
   #
@@ -11940,7 +12316,7 @@ end
 #
 #     :symbol
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10509
+# source://syntax_tree//lib/syntax_tree/node.rb#10511
 class SyntaxTree::SymbolContent < ::SyntaxTree::Node
   # @return [SymbolContent] a new instance of SymbolContent
   #
@@ -11977,7 +12353,7 @@ end
 #
 #     :symbol
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10550
+# source://syntax_tree//lib/syntax_tree/node.rb#10552
 class SyntaxTree::SymbolLiteral < ::SyntaxTree::Node
   # @return [SymbolLiteral] a new instance of SymbolLiteral
   #
@@ -12021,7 +12397,7 @@ end
 #
 #     %I[one two three]
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10604
+# source://syntax_tree//lib/syntax_tree/node.rb#10605
 class SyntaxTree::Symbols < ::SyntaxTree::Node
   # @return [Symbols] a new instance of Symbols
   #
@@ -12074,7 +12450,7 @@ end
 # kinds of arrays can start with a lot of different delimiter types
 # (e.g., %I| or %I<).
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10684
+# source://syntax_tree//lib/syntax_tree/node.rb#10685
 class SyntaxTree::SymbolsBeg < ::SyntaxTree::Node
   # @return [SymbolsBeg] a new instance of SymbolsBeg
   #
@@ -12112,7 +12488,7 @@ end
 #
 # In the example above the TLamBeg represents the +{+ operator.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10765
+# source://syntax_tree//lib/syntax_tree/node.rb#10766
 class SyntaxTree::TLamBeg < ::SyntaxTree::Node
   # @return [TLamBeg] a new instance of TLamBeg
   #
@@ -12149,7 +12525,7 @@ end
 #
 # In the example above the TLambda represents the +->+ operator.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10724
+# source://syntax_tree//lib/syntax_tree/node.rb#10725
 class SyntaxTree::TLambda < ::SyntaxTree::Node
   # @return [TLambda] a new instance of TLambda
   #
@@ -12190,7 +12566,7 @@ end
 #
 #     %q{string}
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10917
+# source://syntax_tree//lib/syntax_tree/node.rb#10918
 class SyntaxTree::TStringBeg < ::SyntaxTree::Node
   # @return [TStringBeg] a new instance of TStringBeg
   #
@@ -12230,7 +12606,7 @@ end
 # In the example above, TStringContent represents the +string+ token contained
 # within the string.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10960
+# source://syntax_tree//lib/syntax_tree/node.rb#10961
 class SyntaxTree::TStringContent < ::SyntaxTree::Node
   # @return [TStringContent] a new instance of TStringContent
   #
@@ -12284,7 +12660,7 @@ end
 #
 #     %q{string}
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11021
+# source://syntax_tree//lib/syntax_tree/node.rb#11022
 class SyntaxTree::TStringEnd < ::SyntaxTree::Node
   # @return [TStringEnd] a new instance of TStringEnd
   #
@@ -12346,7 +12722,7 @@ end
 #
 #     ::Constant = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10806
+# source://syntax_tree//lib/syntax_tree/node.rb#10807
 class SyntaxTree::TopConstField < ::SyntaxTree::Node
   # @return [TopConstField] a new instance of TopConstField
   #
@@ -12390,7 +12766,7 @@ end
 #
 #     ::Constant
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10859
+# source://syntax_tree//lib/syntax_tree/node.rb#10860
 class SyntaxTree::TopConstRef < ::SyntaxTree::Node
   # @return [TopConstRef] a new instance of TopConstRef
   #
@@ -12456,7 +12832,7 @@ end
 #
 #     !value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11144
+# source://syntax_tree//lib/syntax_tree/node.rb#11145
 class SyntaxTree::Unary < ::SyntaxTree::Node
   # @return [Unary] a new instance of Unary
   #
@@ -12504,7 +12880,7 @@ end
 #
 #     undef method
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11207
+# source://syntax_tree//lib/syntax_tree/node.rb#11210
 class SyntaxTree::Undef < ::SyntaxTree::Node
   # @return [Undef] a new instance of Undef
   #
@@ -12571,7 +12947,7 @@ end
 #     unless predicate
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11291
+# source://syntax_tree//lib/syntax_tree/node.rb#11292
 class SyntaxTree::UnlessNode < ::SyntaxTree::Node
   # @return [UnlessNode] a new instance of UnlessNode
   #
@@ -12632,7 +13008,7 @@ end
 #     until predicate
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11437
+# source://syntax_tree//lib/syntax_tree/node.rb#11438
 class SyntaxTree::UntilNode < ::SyntaxTree::Node
   # @return [UntilNode] a new instance of UntilNode
   #
@@ -12686,7 +13062,7 @@ end
 #
 #     variable
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11699
+# source://syntax_tree//lib/syntax_tree/node.rb#11700
 class SyntaxTree::VCall < ::SyntaxTree::Node
   # @return [VCall] a new instance of VCall
   #
@@ -12743,7 +13119,7 @@ SyntaxTree::VERSION = T.let(T.unsafe(nil), String)
 #
 # In the example above, the VarField node represents the +variable+ token.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11505
+# source://syntax_tree//lib/syntax_tree/node.rb#11506
 class SyntaxTree::VarField < ::SyntaxTree::Node
   # @return [VarField] a new instance of VarField
   #
@@ -12791,7 +13167,7 @@ end
 # keyword (like +self+, +nil+, +true+, or +false+), or a numbered block
 # variable.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11564
+# source://syntax_tree//lib/syntax_tree/node.rb#11565
 class SyntaxTree::VarRef < ::SyntaxTree::Node
   # @return [VarRef] a new instance of VarRef
   #
@@ -12845,7 +13221,7 @@ end
 # and handle a subset of nodes. By defining your own subclass, you can
 # explicitly handle a node type by defining a visit_* method.
 #
-# source://syntax_tree//lib/syntax_tree/visitor.rb#7
+# source://syntax_tree//lib/syntax_tree/visitor.rb#8
 class SyntaxTree::Visitor < ::SyntaxTree::BasicVisitor
   # Visit a BEGINBlock node.
   #
@@ -13602,7 +13978,7 @@ end
 #
 #     ;;
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11758
+# source://syntax_tree//lib/syntax_tree/node.rb#11759
 class SyntaxTree::VoidStmt < ::SyntaxTree::Node
   # @return [VoidStmt] a new instance of VoidStmt
   #
@@ -13642,7 +14018,7 @@ end
 #     when predicate
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11802
+# source://syntax_tree//lib/syntax_tree/node.rb#11803
 class SyntaxTree::When < ::SyntaxTree::Node
   # @return [When] a new instance of When
   #
@@ -13712,7 +14088,7 @@ end
 #     while predicate
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11918
+# source://syntax_tree//lib/syntax_tree/node.rb#11919
 class SyntaxTree::WhileNode < ::SyntaxTree::Node
   # @return [WhileNode] a new instance of WhileNode
   #
@@ -13965,7 +14341,7 @@ end
 # In the example above, there would be two Word nodes within a parent Words
 # node.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11987
+# source://syntax_tree//lib/syntax_tree/node.rb#11989
 class SyntaxTree::Word < ::SyntaxTree::Node
   # @return [Word] a new instance of Word
   #
@@ -14014,7 +14390,7 @@ end
 #
 #     %W[one two three]
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#12043
+# source://syntax_tree//lib/syntax_tree/node.rb#12044
 class SyntaxTree::Words < ::SyntaxTree::Node
   # @return [Words] a new instance of Words
   #
@@ -14067,7 +14443,7 @@ end
 # Note that these kinds of arrays can start with a lot of different delimiter
 # types (e.g., %W| or %W<).
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#12123
+# source://syntax_tree//lib/syntax_tree/node.rb#12124
 class SyntaxTree::WordsBeg < ::SyntaxTree::Node
   # @return [WordsBeg] a new instance of WordsBeg
   #
@@ -14102,7 +14478,7 @@ end
 #
 #     `ls`
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#12162
+# source://syntax_tree//lib/syntax_tree/node.rb#12164
 class SyntaxTree::XString < ::SyntaxTree::Node
   # @return [XString] a new instance of XString
   #
@@ -14138,7 +14514,7 @@ end
 #
 #     `ls`
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#12202
+# source://syntax_tree//lib/syntax_tree/node.rb#12204
 class SyntaxTree::XStringLiteral < ::SyntaxTree::Node
   # @return [XStringLiteral] a new instance of XStringLiteral
   #
@@ -15005,7 +15381,7 @@ SyntaxTree::YARV::CheckType::TYPE_UNDEF = T.let(T.unsafe(nil), Integer)
 #
 #     RubyVM::InstructionSequence.compile("1 + 2").to_a
 #
-# source://syntax_tree//lib/syntax_tree/yarv/compiler.rb#47
+# source://syntax_tree//lib/syntax_tree/yarv/compiler.rb#51
 class SyntaxTree::YARV::Compiler < ::SyntaxTree::BasicVisitor
   # @return [Compiler] a new instance of Compiler
   #
@@ -15470,7 +15846,7 @@ end
 # the stack. It is only used when the entire structure can be represented
 # at compile-time, as opposed to constructed at run-time.
 #
-# source://syntax_tree//lib/syntax_tree/yarv/compiler.rb#114
+# source://syntax_tree//lib/syntax_tree/yarv/compiler.rb#116
 class SyntaxTree::YARV::Compiler::RubyVisitor < ::SyntaxTree::BasicVisitor
   # source://syntax_tree//lib/syntax_tree/yarv/compiler.rb#268
   def visit_BEGIN(_node); end
@@ -22314,11 +22690,11 @@ class SyntaxTree::YARV::VM
   # source://syntax_tree//lib/syntax_tree/yarv/vm.rb#532
   def local_set(index, level, value); end
 
-  # source://forwardable/1.3.3/forwardable.rb#231
-  def pop(*args, **_arg1, &block); end
+  # source://forwardable/1.3.1/forwardable.rb#226
+  def pop(*args, &block); end
 
-  # source://forwardable/1.3.3/forwardable.rb#231
-  def push(*args, **_arg1, &block); end
+  # source://forwardable/1.3.1/forwardable.rb#226
+  def push(*args, &block); end
 
   # source://syntax_tree//lib/syntax_tree/yarv/vm.rb#598
   def require(filepath); end
@@ -22578,13 +22954,13 @@ class SyntaxTree::YARV::VM::Stack
   def initialize(events); end
 
   # source://syntax_tree//lib/syntax_tree/yarv/vm.rb#196
-  def [](*_arg0, **_arg1, &_arg2); end
+  def [](*_arg0, &_arg1); end
 
   # source://syntax_tree//lib/syntax_tree/yarv/vm.rb#200
-  def []=(*_arg0, **_arg1, &_arg2); end
+  def []=(*_arg0, &_arg1); end
 
   # source://syntax_tree//lib/syntax_tree/yarv/vm.rb#172
-  def concat(*_arg0, **_arg1, &_arg2); end
+  def concat(*_arg0, &_arg1); end
 
   # Returns the value of attribute events.
   #
@@ -22598,13 +22974,13 @@ class SyntaxTree::YARV::VM::Stack
   def length; end
 
   # source://syntax_tree//lib/syntax_tree/yarv/vm.rb#188
-  def pop(*_arg0, **_arg1, &_arg2); end
+  def pop(*_arg0, &_arg1); end
 
   # source://syntax_tree//lib/syntax_tree/yarv/vm.rb#184
-  def push(*_arg0, **_arg1, &_arg2); end
+  def push(*_arg0, &_arg1); end
 
   # source://syntax_tree//lib/syntax_tree/yarv/vm.rb#192
-  def slice!(*_arg0, **_arg1, &_arg2); end
+  def slice!(*_arg0, &_arg1); end
 
   # Returns the value of attribute values.
   #
@@ -22637,7 +23013,7 @@ end
 #
 #     yield value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#12256
+# source://syntax_tree//lib/syntax_tree/node.rb#12257
 class SyntaxTree::YieldNode < ::SyntaxTree::Node
   # @return [YieldNode] a new instance of YieldNode
   #
@@ -22680,7 +23056,7 @@ end
 #
 #     super
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#12326
+# source://syntax_tree//lib/syntax_tree/node.rb#12327
 class SyntaxTree::ZSuper < ::SyntaxTree::Node
   # @return [ZSuper] a new instance of ZSuper
   #
