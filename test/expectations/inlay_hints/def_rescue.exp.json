@@ -1,0 +1,13 @@
+{
+    "result": [
+        {
+            "position": {
+                "line": 2,
+                "character": 6
+            },
+            "label": "StandardError",
+            "paddingLeft": true,
+            "tooltip": "StandardError is implied in a bare rescue"
+        }
+    ]
+}
