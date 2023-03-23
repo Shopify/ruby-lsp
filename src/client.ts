@@ -242,7 +242,7 @@ export default class Client implements ClientInterface {
   private async setupCustomGemfile() {
     // If we're working on the ruby-lsp itself, we can't create a custom Gemfile or we'd be trying to activate the same
     // gem twice
-    if (this.workingFolder.endsWith("ruby-lsp")) {
+    if (path.basename(this.workingFolder) === "ruby-lsp") {
       await this.bundleInstall();
       return;
     }
@@ -360,7 +360,7 @@ export default class Client implements ClientInterface {
   // Leave this function for a while to assist users migrating from the old version of the extension
   private async migrateFromIncludingInBundle(): Promise<boolean> {
     // When working on the Ruby LSP itself, it's always included in the bundle
-    if (this.workingFolder.endsWith("ruby-lsp")) {
+    if (path.basename(this.workingFolder) === "ruby-lsp") {
       return false;
     }
 

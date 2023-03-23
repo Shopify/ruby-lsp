@@ -174,7 +174,7 @@ export class Ruby {
   private setupBundlePath() {
     // Use our custom Gemfile to allow RuboCop and extensions to work without having to add ruby-lsp to the bundle. Note
     // that we can't do this for the ruby-lsp repository itself otherwise the gem is activated twice
-    if (!this.workingFolder.endsWith("ruby-lsp")) {
+    if (path.basename(this.workingFolder) !== "ruby-lsp") {
       this._env.BUNDLE_GEMFILE = path.join(
         this.workingFolder,
         ".ruby-lsp",
