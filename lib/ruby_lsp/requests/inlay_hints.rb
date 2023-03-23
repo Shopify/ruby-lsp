@@ -37,7 +37,7 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::Rescue).void }
       def visit_rescue(node)
-        return unless node.exception.nil?
+        return unless node.exception.nil? || node.exception.exceptions.nil?
 
         loc = node.location
         return unless visible?(node, @range)
