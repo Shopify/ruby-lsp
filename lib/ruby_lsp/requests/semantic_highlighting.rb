@@ -305,6 +305,7 @@ module RubyLsp
         return unless node.operator == :=~
 
         left = node.left
+        # The regexp needs to be on the left hand side of the =~ for local variable capture
         return unless left.is_a?(SyntaxTree::RegexpLiteral)
 
         parts = left.parts
