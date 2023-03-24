@@ -305,6 +305,8 @@ module RubyLsp
         return unless node.operator == :=~
 
         left = node.left
+        return unless left.is_a?(SyntaxTree::RegexpLiteral)
+
         parts = left.parts
 
         if left.is_a?(SyntaxTree::RegexpLiteral) && parts.one? && parts.first.is_a?(SyntaxTree::TStringContent)
