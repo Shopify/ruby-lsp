@@ -5,7 +5,7 @@ require "test_helper"
 
 class DocumentTest < Minitest::Test
   def test_valid_incremental_edits
-    document = RubyLsp::Document.new(+<<~RUBY, 1, "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
       def foo
       end
     RUBY
@@ -13,38 +13,38 @@ class DocumentTest < Minitest::Test
     # Write puts 'a' in incremental edits
     document.push_edits(
       [{ range: { start: { line: 0, character: 7 }, end: { line: 0, character: 7 } }, text: "\n  " }],
-      2,
+      version: 2,
     )
     document.push_edits(
       [{ range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } }, text: "p" }],
-      3,
+      version: 3,
     )
     document.push_edits(
       [{ range: { start: { line: 1, character: 3 }, end: { line: 1, character: 3 } }, text: "u" }],
-      4,
+      version: 4,
     )
     document.push_edits(
       [{ range: { start: { line: 1, character: 4 }, end: { line: 1, character: 4 } }, text: "t" }],
-      5,
+      version: 5,
     )
     document.push_edits(
       [{ range: { start: { line: 1, character: 5 }, end: { line: 1, character: 5 } }, text: "s" }],
-      6,
+      version: 6,
     )
     document.push_edits(
       [{ range: { start: { line: 1, character: 6 }, end: { line: 1, character: 6 } }, text: " " }],
-      7,
+      version: 7,
     )
     document.push_edits(
       [{ range: { start: { line: 1, character: 7 }, end: { line: 1, character: 7 } }, text: "'" }],
-      8,
+      version: 8,
     )
     document.push_edits(
       [{ range: { start: { line: 1, character: 8 }, end: { line: 1, character: 8 } }, text: "a" }],
-      9,
+      version: 9,
     )
     document.push_edits(
-      [{ range: { start: { line: 1, character: 9 }, end: { line: 1, character: 9 } }, text: "'" }], 10
+      [{ range: { start: { line: 1, character: 9 }, end: { line: 1, character: 9 } }, text: "'" }], version: 10
     )
 
     assert_equal(<<~RUBY, document.source)
@@ -55,14 +55,17 @@ class DocumentTest < Minitest::Test
   end
 
   def test_deletion_full_node
-    document = RubyLsp::Document.new(+<<~RUBY, 1, "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
       def foo
         puts 'a' # comment
       end
     RUBY
 
     # Delete puts 'a' in incremental edits
-    document.push_edits([{ range: { start: { line: 1, character: 2 }, end: { line: 1, character: 11 } }, text: "" }], 2)
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 2 }, end: { line: 1, character: 11 } }, text: "" }],
+      version: 2,
+    )
 
     assert_equal(<<~RUBY, document.source)
       def foo
@@ -72,14 +75,17 @@ class DocumentTest < Minitest::Test
   end
 
   def test_deletion_single_character
-    document = RubyLsp::Document.new(+<<~RUBY, 1, "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
       def foo
         puts 'a'
       end
     RUBY
 
     # Delete puts 'a' in incremental edits
-    document.push_edits([{ range: { start: { line: 1, character: 8 }, end: { line: 1, character: 9 } }, text: "" }], 2)
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 8 }, end: { line: 1, character: 9 } }, text: "" }],
+      version: 2,
+    )
 
     assert_equal(<<~RUBY, document.source)
       def foo
@@ -89,21 +95,27 @@ class DocumentTest < Minitest::Test
   end
 
   def test_add_delete_single_character
-    document = RubyLsp::Document.new(+"", 1, "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +"", version: 1, uri: "file:///foo.rb")
 
     # Add a
-    document.push_edits([{ range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } }, text: "a" }], 2)
+    document.push_edits(
+      [{ range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } }, text: "a" }],
+      version: 2,
+    )
 
     assert_equal("a", document.source)
 
     # Delete a
-    document.push_edits([{ range: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } }, text: "" }], 3)
+    document.push_edits(
+      [{ range: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } }, text: "" }],
+      version: 3,
+    )
 
     assert_empty(document.source)
   end
 
   def test_replace
-    document = RubyLsp::Document.new(+"puts 'a'", 1, "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +"puts 'a'", version: 1, uri: "file:///foo.rb")
 
     # Replace for puts 'b'
     document.push_edits(
@@ -111,14 +123,14 @@ class DocumentTest < Minitest::Test
         range: { start: { line: 0, character: 0 }, end: { line: 0, character: 8 } },
         text: "puts 'b'",
       }],
-      2,
+      version: 2,
     )
 
     assert_equal("puts 'b'", document.source)
   end
 
   def test_new_line_and_char_addition
-    document = RubyLsp::Document.new(+<<~RUBY, 1, "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
       # frozen_string_literal: true
 
       class Foo
@@ -134,7 +146,7 @@ class DocumentTest < Minitest::Test
         rangeLength: 0,
         text: "\n    ",
       }],
-      2,
+      version: 2,
     )
     document.push_edits(
       [{
@@ -142,7 +154,7 @@ class DocumentTest < Minitest::Test
         rangeLength: 0,
         text: "a",
       }],
-      3,
+      version: 3,
     )
 
     assert_equal(<<~RUBY, document.source)
@@ -157,7 +169,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_multi_cursor_edit
-    document = RubyLsp::Document.new(+<<~RUBY, 1, "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
       # frozen_string_literal: true
 
 
@@ -170,84 +182,84 @@ class DocumentTest < Minitest::Test
         { range: { start: { line: 3, character: 0 }, end: { line: 3, character: 0 } }, text: "p" },
         { range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } }, text: "p" },
       ],
-      2,
+      version: 2,
     )
     document.push_edits(
       [
         { range: { start: { line: 3, character: 1 }, end: { line: 3, character: 1 } }, text: "u" },
         { range: { start: { line: 1, character: 1 }, end: { line: 1, character: 1 } }, text: "u" },
       ],
-      3,
+      version: 3,
     )
     document.push_edits(
       [
         { range: { start: { line: 3, character: 2 }, end: { line: 3, character: 2 } }, text: "t" },
         { range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } }, text: "t" },
       ],
-      4,
+      version: 4,
     )
     document.push_edits(
       [
         { range: { start: { line: 3, character: 3 }, end: { line: 3, character: 3 } }, text: "s" },
         { range: { start: { line: 1, character: 3 }, end: { line: 1, character: 3 } }, text: "s" },
       ],
-      5,
+      version: 5,
     )
     document.push_edits(
       [
         { range: { start: { line: 3, character: 4 }, end: { line: 3, character: 4 } }, text: " " },
         { range: { start: { line: 1, character: 4 }, end: { line: 1, character: 4 } }, text: " " },
       ],
-      6,
+      version: 6,
     )
     document.push_edits(
       [
         { range: { start: { line: 3, character: 5 }, end: { line: 3, character: 5 } }, text: "'" },
         { range: { start: { line: 1, character: 5 }, end: { line: 1, character: 5 } }, text: "'" },
       ],
-      7,
+      version: 7,
     )
     document.push_edits(
       [
         { range: { start: { line: 3, character: 6 }, end: { line: 3, character: 6 } }, text: "h" },
         { range: { start: { line: 1, character: 6 }, end: { line: 1, character: 6 } }, text: "h" },
       ],
-      8,
+      version: 8,
     )
     document.push_edits(
       [
         { range: { start: { line: 3, character: 7 }, end: { line: 3, character: 7 } }, text: "e" },
         { range: { start: { line: 1, character: 7 }, end: { line: 1, character: 7 } }, text: "e" },
       ],
-      9,
+      version: 9,
     )
     document.push_edits(
       [
         { range: { start: { line: 3, character: 8 }, end: { line: 3, character: 8 } }, text: "l" },
         { range: { start: { line: 1, character: 8 }, end: { line: 1, character: 8 } }, text: "l" },
       ],
-      10,
+      version: 10,
     )
     document.push_edits(
       [
         { range: { start: { line: 3, character: 9 }, end: { line: 3, character: 9 } }, text: "l" },
         { range: { start: { line: 1, character: 9 }, end: { line: 1, character: 9 } }, text: "l" },
       ],
-      11,
+      version: 11,
     )
     document.push_edits(
       [
         { range: { start: { line: 3, character: 10 }, end: { line: 3, character: 10 } }, text: "o" },
         { range: { start: { line: 1, character: 10 }, end: { line: 1, character: 10 } }, text: "o" },
       ],
-      12,
+      version: 12,
     )
     document.push_edits(
       [
         { range: { start: { line: 3, character: 11 }, end: { line: 3, character: 11 } }, text: "'" },
         { range: { start: { line: 1, character: 11 }, end: { line: 1, character: 11 } }, text: "'" },
       ],
-      13,
+      version: 13,
     )
 
     assert_equal(<<~RUBY, document.source)
@@ -259,25 +271,46 @@ class DocumentTest < Minitest::Test
   end
 
   def test_pushing_edits_to_document_with_unicode
-    document = RubyLsp::Document.new(+<<~RUBY, 1, "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
       chars = ["億"]
     RUBY
 
     # Write puts 'a' in incremental edits
     document.push_edits(
       [{ range: { start: { line: 0, character: 13 }, end: { line: 0, character: 13 } }, text: "\n" }],
-      2,
+      version: 2,
     )
-    document.push_edits([{ range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } }, text: "p" }], 3)
-    document.push_edits([{ range: { start: { line: 1, character: 1 }, end: { line: 1, character: 1 } }, text: "u" }], 4)
-    document.push_edits([{ range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } }, text: "t" }], 5)
-    document.push_edits([{ range: { start: { line: 1, character: 3 }, end: { line: 1, character: 3 } }, text: "s" }], 6)
-    document.push_edits([{ range: { start: { line: 1, character: 4 }, end: { line: 1, character: 4 } }, text: " " }], 7)
-    document.push_edits([{ range: { start: { line: 1, character: 5 }, end: { line: 1, character: 5 } }, text: "'" }], 8)
-    document.push_edits([{ range: { start: { line: 1, character: 6 }, end: { line: 1, character: 6 } }, text: "a" }], 9)
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } }, text: "p" }],
+      version: 3,
+    )
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 1 }, end: { line: 1, character: 1 } }, text: "u" }],
+      version: 4,
+    )
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } }, text: "t" }],
+      version: 5,
+    )
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 3 }, end: { line: 1, character: 3 } }, text: "s" }],
+      version: 6,
+    )
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 4 }, end: { line: 1, character: 4 } }, text: " " }],
+      version: 7,
+    )
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 5 }, end: { line: 1, character: 5 } }, text: "'" }],
+      version: 8,
+    )
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 6 }, end: { line: 1, character: 6 } }, text: "a" }],
+      version: 9,
+    )
     document.push_edits(
       [{ range: { start: { line: 1, character: 7 }, end: { line: 1, character: 7 } }, text: "'" }],
-      10,
+      version: 10,
     )
 
     assert_equal(<<~RUBY, document.source)
@@ -287,7 +320,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_parsed_returns_true_when_parsed_successfully
-    document = RubyLsp::Document.new(+<<~RUBY, 1, "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
       # frozen_string_literal: true
       puts 'hello'
     RUBY
@@ -296,7 +329,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_parsed_returns_false_when_parsing_fails
-    document = RubyLsp::Document.new(+<<~RUBY, 1, "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
       class Foo
     RUBY
 
@@ -304,7 +337,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_document_handle_4_byte_unicode_characters
-    document = RubyLsp::Document.new(+<<~RUBY, 1, "file:///foo.rb", "utf-16")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb", encoding: "utf-16")
       class Foo
         a = "👋"
       end
@@ -314,7 +347,7 @@ class DocumentTest < Minitest::Test
       [
         { range: { start: { line: 1, character: 9 }, end: { line: 1, character: 9 } }, text: "s" },
       ],
-      2,
+      version: 2,
     )
 
     document.parse
@@ -328,23 +361,39 @@ class DocumentTest < Minitest::Test
 
     document.push_edits(
       [{ range: { start: { line: 1, character: 11 }, end: { line: 1, character: 11 } }, text: "\n" }],
-      3,
+      version: 3,
     )
     document.push_edits(
       [{ range: { start: { line: 2, character: 0 }, end: { line: 2, character: 0 } }, text: "  p" }],
-      4,
+      version: 4,
     )
-    document.push_edits([{ range: { start: { line: 2, character: 3 }, end: { line: 2, character: 3 } }, text: "u" }], 5)
-    document.push_edits([{ range: { start: { line: 2, character: 4 }, end: { line: 2, character: 4 } }, text: "t" }], 6)
-    document.push_edits([{ range: { start: { line: 2, character: 5 }, end: { line: 2, character: 5 } }, text: "s" }], 7)
-    document.push_edits([{ range: { start: { line: 2, character: 6 }, end: { line: 2, character: 6 } }, text: " " }], 8)
-    document.push_edits([{ range: { start: { line: 2, character: 7 }, end: { line: 2, character: 7 } }, text: "'" }], 9)
+    document.push_edits(
+      [{ range: { start: { line: 2, character: 3 }, end: { line: 2, character: 3 } }, text: "u" }],
+      version: 5,
+    )
+    document.push_edits(
+      [{ range: { start: { line: 2, character: 4 }, end: { line: 2, character: 4 } }, text: "t" }],
+      version: 6,
+    )
+    document.push_edits(
+      [{ range: { start: { line: 2, character: 5 }, end: { line: 2, character: 5 } }, text: "s" }],
+      version: 7,
+    )
+    document.push_edits(
+      [{ range: { start: { line: 2, character: 6 }, end: { line: 2, character: 6 } }, text: " " }],
+      version: 8,
+    )
+    document.push_edits(
+      [{ range: { start: { line: 2, character: 7 }, end: { line: 2, character: 7 } }, text: "'" }],
+      version: 9,
+    )
     document.push_edits(
       [{ range: { start: { line: 2, character: 8 }, end: { line: 2, character: 8 } }, text: "a" }],
-      10,
+      version: 10,
     )
     document.push_edits(
-      [{ range: { start: { line: 2, character: 9 }, end: { line: 2, character: 9 } }, text: "'" }], 11
+      [{ range: { start: { line: 2, character: 9 }, end: { line: 2, character: 9 } }, text: "'" }],
+      version: 11,
     )
 
     document.parse
@@ -359,7 +408,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_failing_to_parse_indicates_syntax_error
-    document = RubyLsp::Document.new(+<<~RUBY, 1, "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
       def foo
       end
     RUBY
@@ -371,7 +420,7 @@ class DocumentTest < Minitest::Test
         range: { start: { line: 0, character: 7 }, end: { line: 0, character: 7 } },
         text: "\n  def",
       }],
-      2,
+      version: 2,
     )
     document.parse
 
@@ -379,7 +428,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_files_opened_with_syntax_errors_are_properly_marked
-    document = RubyLsp::Document.new(+<<~RUBY, 1, "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
       def foo
     RUBY
 

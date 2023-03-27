@@ -22,7 +22,7 @@ module RubyLsp
     attr_reader :uri
 
     sig { params(source: String, version: Integer, uri: String, encoding: String).void }
-    def initialize(source, version, uri, encoding = "utf-8")
+    def initialize(source:, version:, uri:, encoding: "utf-8")
       @cache = T.let({}, T::Hash[Symbol, T.untyped])
       @encoding = T.let(encoding, String)
       @source = T.let(source, String)
@@ -57,7 +57,7 @@ module RubyLsp
     end
 
     sig { params(edits: T::Array[EditShape], version: Integer).void }
-    def push_edits(edits, version)
+    def push_edits(edits, version:)
       edits.each do |edit|
         range = edit[:range]
         scanner = create_scanner

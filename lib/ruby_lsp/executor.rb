@@ -159,13 +159,13 @@ module RubyLsp
 
     sig { params(uri: String, content_changes: T::Array[Document::EditShape], version: Integer).returns(Object) }
     def text_document_did_change(uri, content_changes, version)
-      @store.push_edits(uri, content_changes, version)
+      @store.push_edits(uri: uri, edits: content_changes, version: version)
       VOID
     end
 
     sig { params(uri: String, text: String, version: Integer).returns(Object) }
     def text_document_did_open(uri, text, version)
-      @store.set(uri, text, version)
+      @store.set(uri: uri, source: text, version: version)
       VOID
     end
 
