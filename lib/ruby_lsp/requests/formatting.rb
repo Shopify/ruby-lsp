@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "ruby_lsp/requests/support/rubocop_formatting_runner"
+require "ruby_lsp/requests/support/syntax_tree_formatting_runner"
 
 module RubyLsp
   module Requests
@@ -73,7 +74,7 @@ module RubyLsp
         when "rubocop"
           Support::RuboCopFormattingRunner.instance.run(@uri, @document)
         when "syntax_tree"
-          SyntaxTree.format(@document.source)
+          Support::SyntaxTreeFormattingRunner.instance.run(@uri, @document)
         else
           raise InvalidFormatter, "Unknown formatter: #{@formatter}"
         end
