@@ -15,11 +15,19 @@ module RubyLsp
     sig { returns(String) }
     attr_reader :source
 
-    sig { params(source: String, encoding: String).void }
-    def initialize(source, encoding = "utf-8")
+    sig { returns(Integer) }
+    attr_reader :version
+
+    sig { returns(String) }
+    attr_reader :uri
+
+    sig { params(source: String, version: Integer, uri: String, encoding: String).void }
+    def initialize(source:, version:, uri:, encoding: "utf-8")
       @cache = T.let({}, T::Hash[Symbol, T.untyped])
       @encoding = T.let(encoding, String)
       @source = T.let(source, String)
+      @version = T.let(version, Integer)
+      @uri = T.let(uri, String)
       @unparsed_edits = T.let([], T::Array[EditShape])
       @syntax_error = T.let(false, T::Boolean)
       @tree = T.let(SyntaxTree.parse(@source), T.nilable(SyntaxTree::Node))
@@ -48,8 +56,8 @@ module RubyLsp
       result
     end
 
-    sig { params(edits: T::Array[EditShape]).void }
-    def push_edits(edits)
+    sig { params(edits: T::Array[EditShape], version: Integer).void }
+    def push_edits(edits, version:)
       edits.each do |edit|
         range = edit[:range]
         scanner = create_scanner
@@ -60,6 +68,7 @@ module RubyLsp
         @source[start_position...end_position] = edit[:text]
       end
 
+      @version = version
       @unparsed_edits.concat(edits)
       @cache.clear
     end

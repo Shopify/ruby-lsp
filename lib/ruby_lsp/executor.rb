@@ -41,7 +41,11 @@ module RubyLsp
         warn("Ruby LSP is ready")
         VOID
       when "textDocument/didOpen"
-        text_document_did_open(uri, request.dig(:params, :textDocument, :text))
+        text_document_did_open(
+          uri,
+          request.dig(:params, :textDocument, :text),
+          request.dig(:params, :textDocument, :version),
+        )
       when "textDocument/didClose"
         @notifications << Notification.new(
           message: "textDocument/publishDiagnostics",
@@ -50,7 +54,11 @@ module RubyLsp
 
         text_document_did_close(uri)
       when "textDocument/didChange"
-        text_document_did_change(uri, request.dig(:params, :contentChanges))
+        text_document_did_change(
+          uri,
+          request.dig(:params, :contentChanges),
+          request.dig(:params, :textDocument, :version),
+        )
       when "textDocument/foldingRange"
         folding_range(uri)
       when "textDocument/documentLink"
@@ -149,15 +157,15 @@ module RubyLsp
       end
     end
 
-    sig { params(uri: String, content_changes: T::Array[Document::EditShape]).returns(Object) }
-    def text_document_did_change(uri, content_changes)
-      @store.push_edits(uri, content_changes)
+    sig { params(uri: String, content_changes: T::Array[Document::EditShape], version: Integer).returns(Object) }
+    def text_document_did_change(uri, content_changes, version)
+      @store.push_edits(uri: uri, edits: content_changes, version: version)
       VOID
     end
 
-    sig { params(uri: String, text: String).returns(Object) }
-    def text_document_did_open(uri, text)
-      @store.set(uri, text)
+    sig { params(uri: String, text: String, version: Integer).returns(Object) }
+    def text_document_did_open(uri, text, version)
+      @store.set(uri: uri, source: text, version: version)
       VOID
     end
 

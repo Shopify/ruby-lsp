@@ -8,7 +8,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::SemanticHighlighting, "semantic_highlighting"
 
   def run_expectations(source)
-    document = RubyLsp::Document.new(source)
+    document = RubyLsp::Document.new(source: source, version: 1, uri: "file:///fake.rb")
     range = @__params&.any? ? @__params.first : nil
 
     if range

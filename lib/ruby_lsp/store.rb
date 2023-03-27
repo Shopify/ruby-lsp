@@ -27,19 +27,19 @@ module RubyLsp
       document = @state[uri]
       return document unless document.nil?
 
-      set(uri, File.binread(CGI.unescape(URI.parse(uri).path)))
+      set(uri: uri, source: File.binread(CGI.unescape(URI.parse(uri).path)), version: 0)
       T.must(@state[uri])
     end
 
-    sig { params(uri: String, content: String).void }
-    def set(uri, content)
-      document = Document.new(content, @encoding)
+    sig { params(uri: String, source: String, version: Integer).void }
+    def set(uri:, source:, version:)
+      document = Document.new(source: source, version: version, uri: uri, encoding: @encoding)
       @state[uri] = document
     end
 
-    sig { params(uri: String, edits: T::Array[Document::EditShape]).void }
-    def push_edits(uri, edits)
-      T.must(@state[uri]).push_edits(edits)
+    sig { params(uri: String, edits: T::Array[Document::EditShape], version: Integer).void }
+    def push_edits(uri:, edits:, version:)
+      T.must(@state[uri]).push_edits(edits, version: version)
     end
 
     sig { void }
