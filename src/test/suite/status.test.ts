@@ -93,6 +93,16 @@ suite("StatusItems", () => {
       );
     });
 
+    test("Refresh when server is running", async () => {
+      client.state = ServerState.Running;
+      status.refresh();
+      assert.strictEqual(status.item.text, "Ruby LSP: Running");
+      assert.strictEqual(
+        status.item.severity,
+        vscode.LanguageStatusSeverity.Information
+      );
+    });
+
     test("Refresh when server is stopping", async () => {
       client.state = ServerState.Stopped;
       status.refresh();

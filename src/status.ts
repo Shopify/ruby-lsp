@@ -124,7 +124,12 @@ export class ServerStatus extends StatusItem {
 
   refresh(): void {
     switch (this.client.state) {
-      case ServerState.Running:
+      case ServerState.Running: {
+        this.item.text = "Ruby LSP: Running";
+        this.item.command!.arguments = [STARTED_SERVER_OPTIONS];
+        this.item.severity = vscode.LanguageStatusSeverity.Information;
+        break;
+      }
       case ServerState.Starting: {
         this.item.text = "Ruby LSP: Starting";
         this.item.command!.arguments = [STARTED_SERVER_OPTIONS];
