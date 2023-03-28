@@ -134,7 +134,9 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::DefNode).void }
       def visit_def(node)
-        if node.target&.value&.value == "self"
+        target = node.target
+
+        if target.is_a?(SyntaxTree::VarRef) && target.value.is_a?(SyntaxTree::Kw) && target.value.value == "self"
           name = "self.#{node.name.value}"
           kind = :method
         else
@@ -180,7 +182,8 @@ module RubyLsp
 
       sig { override.params(node: SyntaxTree::VarField).void }
       def visit_var_field(node)
-        kind = case node.value
+        value = node.value
+        kind = case value
         when SyntaxTree::Const
           :constant
         when SyntaxTree::CVar, SyntaxTree::IVar
@@ -190,10 +193,10 @@ module RubyLsp
         end
 
         create_document_symbol(
-          name: node.value.value,
+          name: value.value,
           kind: kind,
           range_node: node,
-          selection_range_node: node.value,
+          selection_range_node: value,
         )
       end
 

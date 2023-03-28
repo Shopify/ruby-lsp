@@ -143,7 +143,7 @@ module RubyLsp
         visit(node.receiver)
 
         message = node.message
-        if message != :call && !special_method?(message.value)
+        if !message.is_a?(Symbol) && !special_method?(message.value)
           type = Support::Sorbet.annotation?(node) ? :type : :method
 
           add_token(message.location, type)
@@ -168,7 +168,8 @@ module RubyLsp
         return super unless visible?(node, @range)
 
         visit(node.receiver)
-        add_token(node.message.location, :method)
+        message = node.message
+        add_token(message.location, :method) unless message.is_a?(Symbol)
         visit(node.arguments)
         visit(node.block)
       end
@@ -205,7 +206,7 @@ module RubyLsp
       def visit_params(node)
         return super unless visible?(node, @range)
 
-        node.keywords.each do |keyword,|
+        node.keywords.each do |keyword, *|
           location = keyword.location
           add_token(location_without_colon(location), :parameter)
         end
@@ -215,7 +216,7 @@ module RubyLsp
         end
 
         rest = node.keyword_rest
-        if rest && !rest.is_a?(SyntaxTree::ArgsForward)
+        if rest && !rest.is_a?(SyntaxTree::ArgsForward) && !rest.is_a?(Symbol)
           name = rest.name
           add_token(name.location, :parameter) if name
         end
@@ -238,9 +239,14 @@ module RubyLsp
 
         value = node.value
 
-        if value.is_a?(SyntaxTree::Ident)
+        case value
+        when SyntaxTree::Ident
           type = type_for_local(value)
           add_token(value.location, type)
+        when Symbol
+          # do nothing
+        else
+          visit(value)
         end
 
         super
@@ -256,6 +262,8 @@ module RubyLsp
         when SyntaxTree::Ident
           type = type_for_local(value)
           add_token(value.location, type)
+        when Symbol
+          # do nothing
         else
           visit(value)
         end
@@ -309,17 +317,17 @@ module RubyLsp
         return unless left.is_a?(SyntaxTree::RegexpLiteral)
 
         parts = left.parts
+        return unless parts.one?
 
-        if left.is_a?(SyntaxTree::RegexpLiteral) && parts.one? && parts.first.is_a?(SyntaxTree::TStringContent)
-          content = parts.first
+        content = parts.first
+        return unless content.is_a?(SyntaxTree::TStringContent)
 
-          # For each capture name we find in the regexp, look for a local in the current_scope
-          Regexp.new(content.value, Regexp::FIXEDENCODING).names.each do |name|
-            local = current_scope.find_local(name)
-            next unless local
+        # For each capture name we find in the regexp, look for a local in the current_scope
+        Regexp.new(content.value, Regexp::FIXEDENCODING).names.each do |name|
+          local = current_scope.find_local(name)
+          next unless local
 
-            local.definitions.each { |definition| add_token(definition, :variable) }
-          end
+          local.definitions.each { |definition| add_token(definition, :variable) }
         end
       end
 
@@ -328,7 +336,10 @@ module RubyLsp
         return super unless visible?(node, @range)
 
         add_token(node.constant.location, :class, [:declaration])
-        add_token(node.superclass.location, :class) if node.superclass
+
+        superclass = node.superclass
+        add_token(superclass.location, :class) if superclass
+
         visit(node.bodystmt)
       end
 
