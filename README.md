@@ -10,6 +10,9 @@ The Ruby LSP is an extension that provides performant rich features for Ruby. It
 [ruby-lsp](https://github.com/Shopify/ruby-lsp) language server gem to analyze Ruby code and enhance the user
 experience.
 
+Want to discuss Ruby developer experience? Consider joining the public
+[Ruby DX Slack workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-1s6f4y15t-v9jedZ9YUPQLM91TEJ4Gew).
+
 ## Usage
 
 Search for `Shopify.ruby-lsp` in the extensions tab and click install.
