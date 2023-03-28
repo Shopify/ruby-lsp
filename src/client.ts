@@ -274,13 +274,7 @@ export default class Client implements ClientInterface {
       gemfile.push('eval_gemfile(File.expand_path("../Gemfile", __dir__))');
 
       // If the `ruby-lsp` exists in the bundle, add it to the custom Gemfile commented out
-      if (await this.migrateFromIncludingInBundle()) {
-        gemfile.push(
-          "# Uncomment the following line after following the instructions"
-        );
-        gemfile.push(
-          "# at https://github.com/Shopify/vscode-ruby-lsp#migrating-from-bundle"
-        );
+      if (await this.rubyLspIsInBundle()) {
         // If it is already in the bundle, add the gem commented out to avoid conflicts
         gemfile.push(`# ${gemEntry}`);
       } else {
@@ -357,11 +351,10 @@ export default class Client implements ClientInterface {
     return Object.keys(features).filter((key) => features[key]);
   }
 
-  // Leave this function for a while to assist users migrating from the old version of the extension
-  private async migrateFromIncludingInBundle(): Promise<boolean> {
+  private async rubyLspIsInBundle(): Promise<boolean> {
     // When working on the Ruby LSP itself, it's always included in the bundle
     if (path.basename(this.workingFolder) === "ruby-lsp") {
-      return false;
+      return true;
     }
 
     try {
@@ -376,14 +369,8 @@ export default class Client implements ClientInterface {
           env: this.ruby.env,
         }
       );
-
-      vscode.window.showInformationMessage(
-        "The Ruby LSP no longer requires being a part of the bundle. Please follow the instructions \
-         at [migrating from bundle](https://github.com/Shopify/vscode-ruby-lsp#migrating-from-bundle)"
-      );
       return true;
     } catch (error) {
-      // The LSP is not in the bundle, which is what we want
       return false;
     }
   }
