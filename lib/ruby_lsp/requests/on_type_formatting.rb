@@ -25,6 +25,7 @@ module RubyLsp
         ],
         T::Array[Regexp],
       )
+      FROZEN_STRING = "frozen_string_literal: true"
 
       sig { params(document: Document, position: Document::PositionShape, trigger_character: String).void }
       def initialize(document, position, trigger_character)
@@ -50,7 +51,7 @@ module RubyLsp
         when "|"
           handle_pipe if @document.syntax_error?
         when "\n"
-          if (comment_match = @previous_line.match(/^#(\s*)/))
+          if (comment_match = @previous_line.match(/^#(\s*)/)) && !@previous_line.include?(FROZEN_STRING)
             handle_comment_line(T.must(comment_match[1]))
           elsif @document.syntax_error?
             handle_statement_end

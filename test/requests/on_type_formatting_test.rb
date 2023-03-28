@@ -174,6 +174,21 @@ class OnTypeFormattingTest < Minitest::Test
     assert_equal(expected_edits.to_json, T.must(edits).to_json)
   end
 
+  def test_comment_continuation_when_inserting_new_line_after_magic_comment
+    document = RubyLsp::Document.new(source: +"", version: 1, uri: "file:///fake.rb")
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "# frozen_string_literal: true",
+      }],
+      version: 2,
+    )
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 29 }, "\n").run
+    assert_empty(edits)
+  end
+
   def test_breaking_line_between_keyword_and_more_content
     document = RubyLsp::Document.new(source: +"", version: 1, uri: "file:///fake.rb")
 
