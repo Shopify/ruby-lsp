@@ -146,7 +146,7 @@ module RubyLsp
     sig { params(uri: String).returns(T::Array[Interface::DocumentLink]) }
     def document_link(uri)
       @store.cache_fetch(uri, :document_link) do |document|
-        RubyLsp::Requests::DocumentLink.new(uri, document).run
+        RubyLsp::Requests::DocumentLink.new(document).run
       end
     end
 
@@ -215,7 +215,7 @@ module RubyLsp
 
     sig { params(uri: String).returns(T.nilable(T::Array[Interface::TextEdit])) }
     def formatting(uri)
-      Requests::Formatting.new(uri, @store.get(uri), formatter: @store.formatter).run
+      Requests::Formatting.new(@store.get(uri), formatter: @store.formatter).run
     end
 
     sig do
@@ -258,7 +258,7 @@ module RubyLsp
     def code_action(uri, range, context)
       document = @store.get(uri)
 
-      Requests::CodeActions.new(uri, document, range, context).run
+      Requests::CodeActions.new(document, range, context).run
     end
 
     sig { params(params: T::Hash[Symbol, T.untyped]).returns(Interface::CodeAction) }
@@ -294,7 +294,7 @@ module RubyLsp
     sig { params(uri: String).returns(T.nilable(Interface::FullDocumentDiagnosticReport)) }
     def diagnostic(uri)
       response = @store.cache_fetch(uri, :diagnostics) do |document|
-        Requests::Diagnostics.new(uri, document).run
+        Requests::Diagnostics.new(document).run
       end
 
       Interface::FullDocumentDiagnosticReport.new(kind: "full", items: response.map(&:to_lsp_diagnostic)) if response

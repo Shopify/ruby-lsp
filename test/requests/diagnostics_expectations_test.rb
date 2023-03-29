@@ -8,13 +8,13 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Diagnostics, "diagnostics"
 
   def run_expectations(source)
-    document = RubyLsp::Document.new(source: source, version: 1, uri: "file:///fake.rb")
-    RubyLsp::Requests::Diagnostics.new("file://#{__FILE__}", document).run
+    document = RubyLsp::Document.new(source: source, version: 1, uri: "file://#{__FILE__}")
+    RubyLsp::Requests::Diagnostics.new(document).run
     result = T.let(nil, T.nilable(T::Array[RubyLsp::Requests::Support::RuboCopDiagnostic]))
 
     stdout, _ = capture_io do
       result = T.cast(
-        RubyLsp::Requests::Diagnostics.new("file://#{__FILE__}", document).run,
+        RubyLsp::Requests::Diagnostics.new(document).run,
         T::Array[RubyLsp::Requests::Support::RuboCopDiagnostic],
       )
     end

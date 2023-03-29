@@ -8,7 +8,7 @@ class DiagnosticsTest < Minitest::Test
     fixture_path = File.expand_path("../fixtures/def_multiline_params.rb", __dir__)
     document = RubyLsp::Document.new(source: File.read(fixture_path), version: 1, uri: "file://#{fixture_path}")
 
-    result = RubyLsp::Requests::Diagnostics.new("file://#{fixture_path}", document).run
+    result = RubyLsp::Requests::Diagnostics.new(document).run
     assert_empty(result)
   end
 
@@ -19,6 +19,6 @@ class DiagnosticsTest < Minitest::Test
       end
     RUBY
 
-    assert_nil(RubyLsp::Requests::Diagnostics.new("file:///some/other/folder/file.rb", document).run)
+    assert_nil(RubyLsp::Requests::Diagnostics.new(document).run)
   end
 end

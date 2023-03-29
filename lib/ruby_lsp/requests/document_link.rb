@@ -69,13 +69,13 @@ module RubyLsp
         end
       end
 
-      sig { params(uri: String, document: Document).void }
-      def initialize(uri, document)
+      sig { params(document: Document).void }
+      def initialize(document)
         super(document)
 
         # Match the version based on the version in the RBI file name. Notice that the `@` symbol is sanitized to `%40`
         # in the URI
-        version_match = /(?<=%40)[\d.]+(?=\.rbi$)/.match(uri)
+        version_match = /(?<=%40)[\d.]+(?=\.rbi$)/.match(document.uri)
         @gem_version = T.let(version_match && version_match[0], T.nilable(String))
         @links = T.let([], T::Array[Interface::DocumentLink])
       end

@@ -43,7 +43,7 @@ class FormattingTest < Minitest::Test
     TXT
 
     with_syntax_tree_config_file(config_contents) do
-      @document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///fake.rb")
+      @document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file://#{__FILE__}")
         class Foo
         def foo
         {one: "#{"a" * 50}", two: "#{"b" * 50}"}
@@ -70,13 +70,13 @@ class FormattingTest < Minitest::Test
     with_uninstalled_rubocop do
       require "ruby_lsp/requests"
       document = RubyLsp::Document.new(source: "def foo", version: 1, uri: "file://#{__FILE__}")
-      assert_nil(RubyLsp::Requests::Formatting.new("file://#{__FILE__}", document).run)
+      assert_nil(RubyLsp::Requests::Formatting.new(document).run)
     end
   end
 
   def test_rubocop_formatting_ignores_syntax_invalid_documents
     document = RubyLsp::Document.new(source: "def foo", version: 1, uri: "file://#{__FILE__}")
-    assert_nil(RubyLsp::Requests::Formatting.new("file://#{__FILE__}", document).run)
+    assert_nil(RubyLsp::Requests::Formatting.new(document).run)
   end
 
   def test_returns_nil_if_document_is_already_formatted
@@ -89,11 +89,17 @@ class FormattingTest < Minitest::Test
         end
       end
     RUBY
-    assert_nil(RubyLsp::Requests::Formatting.new("file://#{__FILE__}", document).run)
+    assert_nil(RubyLsp::Requests::Formatting.new(document).run)
   end
 
   def test_returns_nil_if_document_is_not_in_project_folder
-    assert_nil(RubyLsp::Requests::Formatting.new("file:///some/other/folder/file.rb", @document).run)
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///fake.rb")
+      class Foo
+      def foo
+      end
+      end
+    RUBY
+    assert_nil(RubyLsp::Requests::Formatting.new(document).run)
   end
 
   def test_allows_specifying_formatter
@@ -142,7 +148,7 @@ class FormattingTest < Minitest::Test
 
   def formatted_document(formatter = "auto")
     require "ruby_lsp/requests"
-    RubyLsp::Requests::Formatting.new("file://#{__FILE__}", @document, formatter: formatter).run&.first&.new_text
+    RubyLsp::Requests::Formatting.new(@document, formatter: formatter).run&.first&.new_text
   end
 
   def with_syntax_tree_config_file(contents)

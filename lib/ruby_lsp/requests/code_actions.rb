@@ -21,16 +21,15 @@ module RubyLsp
 
       sig do
         params(
-          uri: String,
           document: Document,
           range: Document::RangeShape,
           context: T::Hash[Symbol, T.untyped],
         ).void
       end
-      def initialize(uri, document, range, context)
+      def initialize(document, range, context)
         super(document)
 
-        @uri = uri
+        @uri = T.let(document.uri, String)
         @range = range
         @context = context
       end
