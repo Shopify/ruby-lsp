@@ -123,6 +123,8 @@ module RubyLsp
         end
       when "textDocument/completion"
         completion(uri, request.dig(:params, :position))
+      when "textDocument/codeLens"
+        code_lens(uri)
       end
     end
 
@@ -130,6 +132,13 @@ module RubyLsp
     def folding_range(uri)
       @store.cache_fetch(uri, :folding_ranges) do |document|
         Requests::FoldingRanges.new(document).run
+      end
+    end
+
+    sig { params(uri: String).returns(T::Array[Interface::CodeLens]) }
+    def code_lens(uri)
+      @store.cache_fetch(uri, :code_lens) do |document|
+        Requests::CodeLens.new(document).run
       end
     end
 
@@ -331,6 +340,7 @@ module RubyLsp
       @store.formatter = formatter unless formatter.nil?
 
       configured_features = options.dig(:initializationOptions, :enabledFeatures)
+      experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled)
 
       enabled_features = case configured_features
       when Array
@@ -357,6 +367,10 @@ module RubyLsp
 
       document_link_provider = if enabled_features["documentLink"]
         Interface::DocumentLinkOptions.new(resolve_provider: false)
+      end
+
+      code_lens_provider = if experimental_features
+        Interface::CodeLensOptions.new(resolve_provider: false)
       end
 
       hover_provider = if enabled_features["hover"]
@@ -427,6 +441,7 @@ module RubyLsp
           diagnostic_provider: diagnostics_provider,
           inlay_hint_provider: inlay_hint_provider,
           completion_provider: completion_provider,
+          code_lens_provider: code_lens_provider,
         ),
       )
     end

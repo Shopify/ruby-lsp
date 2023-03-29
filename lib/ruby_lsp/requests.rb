@@ -18,6 +18,7 @@ module RubyLsp
   # - {RubyLsp::Requests::DocumentHighlight}
   # - {RubyLsp::Requests::InlayHints}
   # - {RubyLsp::Requests::PathCompletion}
+  # - {RubyLsp::Requests::CodeLens}
 
   module Requests
     autoload :BaseRequest, "ruby_lsp/requests/base_request"
@@ -35,6 +36,7 @@ module RubyLsp
     autoload :DocumentHighlight, "ruby_lsp/requests/document_highlight"
     autoload :InlayHints, "ruby_lsp/requests/inlay_hints"
     autoload :PathCompletion, "ruby_lsp/requests/path_completion"
+    autoload :CodeLens, "ruby_lsp/requests/code_lens"
 
     # :nodoc:
     module Support

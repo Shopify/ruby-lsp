@@ -1,0 +1,31 @@
+{
+  "result": [
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 0
+        },
+        "end": {
+          "line": 10,
+          "character": 3
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fake.rb",
+          "Test",
+          "bundle exec ruby -Itest /fake.rb"
+        ]
+      },
+      "data": {
+        "type": "test"
+      }
+    }
+  ],
+  "params": [
+
+  ]
+}
