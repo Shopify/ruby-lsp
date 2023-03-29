@@ -117,6 +117,11 @@
               "description": "Enable completion, which provides suggestions for code completion",
               "type": "boolean",
               "default": true
+            },
+            "codeLens": {
+              "description": "Enable code lens, which generates clickable text above tests to run them in the terminal",
+              "type": "boolean",
+              "default": false
             }
           },
           "default": {
@@ -132,7 +137,8 @@
             "onTypeFormatting": true,
             "selectionRanges": true,
             "semanticHighlighting": true,
-            "completion": true
+            "completion": true,
+            "codeLens": false
           }
         },
         "rubyLsp.rubyVersionManager": {

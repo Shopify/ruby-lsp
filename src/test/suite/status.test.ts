@@ -196,6 +196,9 @@ suite("StatusItems", () => {
     const configuration = vscode.workspace.getConfiguration("rubyLsp");
     const originalFeatures: { [key: string]: boolean } =
       configuration.get("enabledFeatures")!;
+    const numberOfExperimentalFeatures = Object.values(originalFeatures).filter(
+      (feature) => feature === false
+    ).length;
     const numberOfFeatures = Object.keys(originalFeatures).length;
 
     beforeEach(() => {
@@ -214,7 +217,9 @@ suite("StatusItems", () => {
     test("Status is initialized with the right values", async () => {
       assert.strictEqual(
         status.item.text,
-        `${numberOfFeatures}/${numberOfFeatures} features enabled`
+        `${
+          numberOfFeatures - numberOfExperimentalFeatures
+        }/${numberOfFeatures} features enabled`
       );
       assert.strictEqual(status.item.name, "Ruby LSP Features");
       assert.strictEqual(status.item.command?.title, "Manage");
@@ -241,7 +246,9 @@ suite("StatusItems", () => {
           status.refresh();
           assert.strictEqual(
             status.item.text,
-            `${numberOfFeatures - 1}/${numberOfFeatures} features enabled`
+            `${
+              numberOfFeatures - numberOfExperimentalFeatures - 1
+            }/${numberOfFeatures} features enabled`
           );
         });
     });
