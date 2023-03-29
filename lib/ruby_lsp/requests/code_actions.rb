@@ -49,7 +49,9 @@ module RubyLsp
           code_action if diagnostic.dig(:data, :correctable) && cover?(range)
         end
 
-        code_actions << refactor_code_action(@range, @uri)
+        # Only add refactor actions if there's a non empty selection in the editor
+        code_actions << refactor_code_action(@range, @uri) unless @range.dig(:start) == @range.dig(:end)
+        code_actions
       end
 
       private
