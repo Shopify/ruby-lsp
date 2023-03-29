@@ -27,11 +27,11 @@ module RubyLsp
 
       extend T::Sig
 
-      sig { params(uri: String, document: Document, formatter: String).void }
-      def initialize(uri, document, formatter: "auto")
+      sig { params(document: Document, formatter: String).void }
+      def initialize(document, formatter: "auto")
         super(document)
 
-        @uri = uri
+        @uri = T.let(document.uri, String)
         @formatter = T.let(
           if formatter == "auto"
             defined?(Support::RuboCopFormattingRunner) ? "rubocop" : "syntax_tree"

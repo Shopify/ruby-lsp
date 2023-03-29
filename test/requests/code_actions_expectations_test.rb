@@ -14,7 +14,6 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
 
     stdout, _ = capture_io do
       result = RubyLsp::Requests::CodeActions.new(
-        "file:///fake",
         document,
         params[:range],
         params[:context],
