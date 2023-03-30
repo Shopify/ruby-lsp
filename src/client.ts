@@ -30,6 +30,10 @@ export default class Client implements ClientInterface {
   private telemetry: Telemetry;
   private statusItems: StatusItems;
   private outputChannel = vscode.window.createOutputChannel(LSP_NAME);
+  private bundleInstallCancellationSource:
+    | vscode.CancellationTokenSource
+    | undefined;
+
   #context: vscode.ExtensionContext;
   #ruby: Ruby;
   #state: ServerState = ServerState.Starting;
@@ -435,8 +439,23 @@ export default class Client implements ClientInterface {
         title: "Setting up the bundle",
         cancellable: true,
       },
-      (progress, token) =>
-        this.bundleInstall(customGemfilePath, { progress, token })
+      (progress, token) => {
+        if (this.bundleInstallCancellationSource) {
+          this.bundleInstallCancellationSource.cancel();
+        }
+
+        this.bundleInstallCancellationSource =
+          new vscode.CancellationTokenSource();
+
+        token.onCancellationRequested(() => {
+          this.bundleInstallCancellationSource!.cancel();
+        });
+
+        return this.bundleInstall(customGemfilePath, {
+          progress,
+          token: this.bundleInstallCancellationSource.token,
+        });
+      }
     );
 
     // Update the last time we checked for updates
