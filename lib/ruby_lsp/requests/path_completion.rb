@@ -63,13 +63,19 @@ module RubyLsp
 
         case matched
         when SyntaxTree::Command, SyntaxTree::CallNode, SyntaxTree::CommandCall
-          return unless matched.message.value == "require"
+          message = matched.message
+          return if message.is_a?(Symbol)
+          return unless message.value == "require"
 
           args = matched.arguments
           args = args.arguments if args.is_a?(SyntaxTree::ArgParen)
+          return if args.nil? || args.is_a?(SyntaxTree::ArgsForward)
 
-          path_node = args.parts.first.parts.first
-          return unless path_node
+          argument = args.parts.first
+          return unless argument.is_a?(SyntaxTree::StringLiteral)
+
+          path_node = argument.parts.first
+          return unless path_node.is_a?(SyntaxTree::TStringContent)
           return unless (path_node.location.start_char..path_node.location.end_char).cover?(position)
 
           path_node

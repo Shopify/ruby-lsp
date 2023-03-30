@@ -63,7 +63,8 @@ module RubyLsp
             when SyntaxTree::VCall
               ANNOTATIONS[node.value.value]
             when SyntaxTree::CallNode
-              ANNOTATIONS[node.message.value]
+              message = node.message
+              ANNOTATIONS[message.value] unless message.is_a?(Symbol)
             else
               T.absurd(node)
             end
@@ -84,21 +85,10 @@ module RubyLsp
           end
 
           sig do
-            params(node: T.nilable(T.any(
-              SyntaxTree::VarRef,
-              SyntaxTree::CallNode,
-              SyntaxTree::VCall,
-              SyntaxTree::Ident,
-              SyntaxTree::Backtick,
-              SyntaxTree::Const,
-              SyntaxTree::Op,
-              Symbol,
-            ))).returns(T.nilable(String))
+            params(node: T.nilable(SyntaxTree::Node)).returns(T.nilable(String))
           end
           def node_name(node)
             case node
-            when NilClass
-              nil
             when SyntaxTree::VarRef
               node.value.value
             when SyntaxTree::CallNode
@@ -107,8 +97,8 @@ module RubyLsp
               node_name(node.value)
             when SyntaxTree::Ident, SyntaxTree::Backtick, SyntaxTree::Const, SyntaxTree::Op
               node.value
-            when Symbol
-              node.to_s
+            when NilClass, SyntaxTree::Node
+              nil
             else
               T.absurd(node)
             end

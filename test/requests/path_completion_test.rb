@@ -129,6 +129,20 @@ class PathCompletionTest < Minitest::Test
     assert_empty(result)
   end
 
+  def test_completion_is_not_trigered_if_argument_is_not_a_string
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///fake.rb")
+      require foo
+    RUBY
+
+    position = {
+      line: 0,
+      character: document.source.rindex("f") || 0,
+    }
+
+    result = RubyLsp::Requests::PathCompletion.new(document, position).run
+    assert_empty(result)
+  end
+
   private
 
   def with_file_structure(&block)
