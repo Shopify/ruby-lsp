@@ -12,7 +12,7 @@ class ExpectationsTestRunner < Minitest::Test
         module ExpectationsRunnerMethods
           def run_expectations(source)
             params = @__params&.any? ? @__params : default_args
-            document = RubyLsp::Document.new(source)
+            document = RubyLsp::Document.new(source: source, version: 1, uri: "file:///fake.rb")
             #{handler_class}.new(document, *params).run
           end
 

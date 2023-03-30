@@ -21,16 +21,15 @@ module RubyLsp
 
       sig do
         params(
-          uri: String,
           document: Document,
           range: Document::RangeShape,
           context: T::Hash[Symbol, T.untyped],
         ).void
       end
-      def initialize(uri, document, range, context)
+      def initialize(document, range, context)
         super(document)
 
-        @uri = uri
+        @uri = T.let(document.uri, String)
         @range = range
         @context = context
       end
@@ -49,7 +48,9 @@ module RubyLsp
           code_action if diagnostic.dig(:data, :correctable) && cover?(range)
         end
 
-        code_actions << refactor_code_action(@range, @uri)
+        # Only add refactor actions if there's a non empty selection in the editor
+        code_actions << refactor_code_action(@range, @uri) unless @range.dig(:start) == @range.dig(:end)
+        code_actions
       end
 
       private

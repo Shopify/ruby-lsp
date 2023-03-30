@@ -7,7 +7,7 @@ class PathCompletionTest < Minitest::Test
   def test_completion_command
     prefix = "foo/"
 
-    document = RubyLsp::Document.new(<<~RUBY)
+    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: "file:///fake.rb")
       require "#{prefix}"
     RUBY
 
@@ -35,7 +35,7 @@ class PathCompletionTest < Minitest::Test
   def test_completion_call
     prefix = "foo/"
 
-    document = RubyLsp::Document.new(+<<~RUBY)
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///fake.rb")
       require("#{prefix}")
     RUBY
 
@@ -63,7 +63,7 @@ class PathCompletionTest < Minitest::Test
   def test_completion_command_call
     prefix = "foo/"
 
-    document = RubyLsp::Document.new(+<<~RUBY)
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///fake.rb")
       Kernel.require "#{prefix}"
     RUBY
 
@@ -91,7 +91,7 @@ class PathCompletionTest < Minitest::Test
   def test_completion_with_partial_path
     prefix = "foo/suppo"
 
-    document = RubyLsp::Document.new(+<<~RUBY)
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///fake.rb")
       require "#{prefix}"
     RUBY
 
@@ -114,7 +114,7 @@ class PathCompletionTest < Minitest::Test
   end
 
   def test_completion_does_not_fail_when_there_are_syntax_errors
-    document = RubyLsp::Document.new(+<<~RUBY)
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///fake.rb")
       require "ruby_lsp/requests/"
 
       def foo
@@ -123,6 +123,20 @@ class PathCompletionTest < Minitest::Test
     position = {
       line: 0,
       character: 21,
+    }
+
+    result = RubyLsp::Requests::PathCompletion.new(document, position).run
+    assert_empty(result)
+  end
+
+  def test_completion_is_not_trigered_if_argument_is_not_a_string
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///fake.rb")
+      require foo
+    RUBY
+
+    position = {
+      line: 0,
+      character: document.source.rindex("f") || 0,
     }
 
     result = RubyLsp::Requests::PathCompletion.new(document, position).run

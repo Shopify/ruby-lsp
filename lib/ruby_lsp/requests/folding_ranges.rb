@@ -63,11 +63,11 @@ module RubyLsp
       def initialize(document)
         super
 
-        @ranges = T.let([], T::Array[LanguageServer::Protocol::Interface::FoldingRange])
+        @ranges = T.let([], T::Array[Interface::FoldingRange])
         @partial_range = T.let(nil, T.nilable(PartialRange))
       end
 
-      sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::FoldingRange], Object)) }
+      sig { override.returns(T.all(T::Array[Interface::FoldingRange], Object)) }
       def run
         if @document.parsed?
           visit(@document.tree)
@@ -161,9 +161,9 @@ module RubyLsp
           node.is_a?(SyntaxTree::Comment) && @end_line + 1 != node.location.start_line - 1
         end
 
-        sig { returns(LanguageServer::Protocol::Interface::FoldingRange) }
+        sig { returns(Interface::FoldingRange) }
         def to_range
-          LanguageServer::Protocol::Interface::FoldingRange.new(
+          Interface::FoldingRange.new(
             start_line: @start_line,
             end_line: @end_line,
             kind: @kind,
@@ -220,7 +220,8 @@ module RubyLsp
 
       sig { params(node: T.any(SyntaxTree::CallNode, SyntaxTree::CommandCall)).void }
       def add_call_range(node)
-        receiver = T.let(node.receiver, SyntaxTree::Node)
+        receiver = T.let(node.receiver, T.nilable(SyntaxTree::Node))
+
         loop do
           case receiver
           when SyntaxTree::CallNode
@@ -255,9 +256,10 @@ module RubyLsp
       def add_def_range(node)
         # For an endless method with no arguments, `node.params` returns `nil` for Ruby 3.0, but a `Syntax::Params`
         # for Ruby 3.1
-        return unless node.params
+        params = node.params
+        return unless params
 
-        params_location = node.params.location
+        params_location = params.location
 
         if params_location.start_line < params_location.end_line
           add_lines_range(params_location.end_line, node.location.end_line - 1)
@@ -276,7 +278,9 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::Node, statements: SyntaxTree::Statements).void }
       def add_statements_range(node, statements)
-        add_lines_range(node.location.start_line, statements.body.last.location.end_line) unless statements.empty?
+        return if statements.empty?
+
+        add_lines_range(node.location.start_line, T.must(statements.body.last).location.end_line)
       end
 
       sig { params(node: SyntaxTree::StringConcat).void }
@@ -291,7 +295,7 @@ module RubyLsp
       def add_lines_range(start_line, end_line)
         return if start_line >= end_line
 
-        @ranges << LanguageServer::Protocol::Interface::FoldingRange.new(
+        @ranges << Interface::FoldingRange.new(
           start_line: start_line - 1,
           end_line: end_line - 1,
           kind: "region",

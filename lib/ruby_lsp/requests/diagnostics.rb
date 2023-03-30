@@ -21,11 +21,11 @@ module RubyLsp
     class Diagnostics < BaseRequest
       extend T::Sig
 
-      sig { params(uri: String, document: Document).void }
-      def initialize(uri, document)
+      sig { params(document: Document).void }
+      def initialize(document)
         super(document)
 
-        @uri = uri
+        @uri = T.let(document.uri, String)
       end
 
       sig { override.returns(T.nilable(T.all(T::Array[Support::RuboCopDiagnostic], Object))) }

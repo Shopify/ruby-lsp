@@ -1,8 +1,14 @@
 {
     "params": {
         "range": {
-            "start": { "line": 3, "character": 0 },
-            "end": { "line": 3, "character": 0 }
+            "start": {
+                "line": 3,
+                "character": 0
+            },
+            "end": {
+                "line": 3,
+                "character": 0
+            }
         },
         "textDocument": {
             "uri": "file:///fake",
@@ -116,23 +122,6 @@
         }
     },
     "result": [
-        {
-            "title": "Refactor: Extract Variable",
-            "kind": "refactor.extract",
-            "data": {
-                "range": {
-                    "start": {
-                        "line": 3,
-                        "character": 0
-                    },
-                    "end": {
-                        "line": 3,
-                        "character": 0
-                    }
-                },
-                "uri": "file:///fake"
-            }
-        },
         {
             "title": "Autocorrect Layout/IndentationWidth",
             "kind": "quickfix",

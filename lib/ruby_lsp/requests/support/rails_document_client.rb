@@ -67,12 +67,13 @@ module RubyLsp
             return unless RAILTIES_VERSION
 
             warn("Fetching Rails Documents...")
-            # If the version's doc is not found, e.g. Rails main, it'll be redirected
-            # In this case, we just fetch the latest doc
-            response = if Gem::Version.new(RAILTIES_VERSION).prerelease?
-              Net::HTTP.get_response(URI("#{RAILS_DOC_HOST}/js/search_index.js"))
-            else
-              Net::HTTP.get_response(URI("#{RAILS_DOC_HOST}/v#{RAILTIES_VERSION}/js/search_index.js"))
+
+            response = Net::HTTP.get_response(URI("#{RAILS_DOC_HOST}/v#{RAILTIES_VERSION}/js/search_index.js"))
+
+            if response.code == "302"
+              # If the version's doc is not found, e.g. Rails main, it'll be redirected
+              # In this case, we just fetch the latest doc
+              response = Net::HTTP.get_response(URI("#{RAILS_DOC_HOST}/js/search_index.js"))
             end
 
             if response.code == "200"

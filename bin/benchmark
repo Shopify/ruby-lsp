@@ -37,7 +37,7 @@ def avg_bench(method, params)
   results = (0...ITERATIONS).map do
     # Create a new store every time to prevent caching
     store = RubyLsp::Store.new
-    store.set(FILE_URI, FIXTURE)
+    store.set(uri: FILE_URI, source: FIXTURE, version: 1)
     # Parse ahead of time or else one of the requests will do it
     store.get(FILE_URI).parse
 

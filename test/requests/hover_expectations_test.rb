@@ -16,7 +16,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
   end
 
   def test_search_index_being_nil
-    document = RubyLsp::Document.new("belongs_to :foo")
+    document = RubyLsp::Document.new(source: "belongs_to :foo", version: 1, uri: "file:///fake.rb")
 
     RubyLsp::Requests::Support::RailsDocumentClient.stubs(search_index: nil)
     RubyLsp::Requests::Hover.new(document, { character: 0, line: 0 }).run
@@ -32,7 +32,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
   end
 
   def run_expectations(source)
-    document = RubyLsp::Document.new(source)
+    document = RubyLsp::Document.new(source: source, version: 1, uri: "file:///fake.rb")
     js_content = File.read(File.join(TEST_FIXTURES_DIR, "rails_search_index.js"))
     fake_response = FakeHTTPResponse.new("200", js_content)
 

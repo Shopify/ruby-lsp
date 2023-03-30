@@ -5,6 +5,7 @@ require:
  - rubocop-sorbet
  - rubocop-minitest
  - rubocop-rake
+ - ./lib/rubocop/cop/ruby_lsp/use_language_server_aliases
 
 AllCops:
   NewCops: disable
@@ -19,6 +20,10 @@ AllCops:
 Naming/FileName:
   Exclude:
   - "lib/ruby-lsp.rb"
+
+RubyLsp/UseLanguageServerAliases:
+  Exclude:
+    - "test/**/*.rb"
 
 Sorbet/FalseSigil:
   Enabled: false

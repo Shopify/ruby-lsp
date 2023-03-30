@@ -7,8 +7,8 @@ module RubyLsp
       class HighlightTarget
         extend T::Sig
 
-        READ = LanguageServer::Protocol::Constant::DocumentHighlightKind::READ
-        WRITE = LanguageServer::Protocol::Constant::DocumentHighlightKind::WRITE
+        READ = Constant::DocumentHighlightKind::READ
+        WRITE = Constant::DocumentHighlightKind::WRITE
 
         class HighlightMatch
           extend T::Sig
@@ -84,10 +84,11 @@ module RubyLsp
                SyntaxTree::KwRestParam, SyntaxTree::BlockArg
             node.name&.value
           when SyntaxTree::VarField, SyntaxTree::VarRef, SyntaxTree::VCall
-            node.value&.value
+            value = node.value
+            value.value unless value.nil? || value.is_a?(Symbol)
           when SyntaxTree::CallNode, SyntaxTree::Command, SyntaxTree::CommandCall
             message = node.message
-            message != :call ? message.value : nil
+            message.value unless message.is_a?(Symbol)
           when SyntaxTree::ClassDeclaration, SyntaxTree::ModuleDeclaration
             node.constant.constant.value
           end
