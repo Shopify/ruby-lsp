@@ -35,7 +35,8 @@ module RubyLsp
       # fall under the else branch which just pushes requests to the queue
       @reader.read do |request|
         case request[:method]
-        when "initialize", "initialized", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange"
+        when "initialize", "initialized", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange",
+              "textDocument/formatting", "textDocument/onTypeFormatting", "codeAction/resolve"
           result = Executor.new(@store).execute(request)
           finalize_request(result, request)
         when "$/cancelRequest"
