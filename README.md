@@ -44,6 +44,7 @@ See the [documentation](https://shopify.github.io/ruby-lsp) for more in-depth de
 ## Learn More
 
 * [RubyConf 2022: Improving the development experience with language servers](https://www.youtube.com/watch?v=kEfXPTm1aCI) ([Vinicius Stock](https://github.com/vinistock))
+* [Remote Ruby: Ruby Language Server with Vinicius Stock](https://remoteruby.com/221)
 
 ## Contributing
 
