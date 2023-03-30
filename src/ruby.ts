@@ -148,7 +148,15 @@ export class Ruby {
     this.yjitEnabled = yjitIsDefined === "constant";
 
     const [major, minor, _patch] = this.rubyVersion.split(".").map(Number);
-    this.supportsYjit = this.yjitEnabled && [major, minor] >= [3, 2];
+
+    if ((major === 2 && minor < 7) || major < 2) {
+      throw new Error(
+        "The Ruby LSP requires Ruby 2.7 or newer to run. Please upgrade your Ruby version"
+      );
+    }
+
+    this.supportsYjit =
+      this.yjitEnabled && (major > 3 || (major === 3 && minor >= 2));
 
     const useYjit = vscode.workspace.getConfiguration("rubyLsp").get("yjit");
 
