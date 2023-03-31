@@ -442,6 +442,7 @@ export default class Client implements ClientInterface {
       (progress, token) => {
         if (this.bundleInstallCancellationSource) {
           this.bundleInstallCancellationSource.cancel();
+          this.bundleInstallCancellationSource.dispose();
         }
 
         this.bundleInstallCancellationSource =
@@ -449,6 +450,7 @@ export default class Client implements ClientInterface {
 
         token.onCancellationRequested(() => {
           this.bundleInstallCancellationSource!.cancel();
+          this.bundleInstallCancellationSource!.dispose();
         });
 
         return this.bundleInstall(customGemfilePath, {
