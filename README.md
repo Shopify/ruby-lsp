@@ -70,6 +70,16 @@ The tool to be used for formatting files can be configured with the following se
 "rubyLsp.formatter": "auto"
 ```
 
+#### Using a custom Gemfile
+
+If you are working on a project using an older version of Ruby not supported by Ruby LSP, then you will need you specify a separate `Gemfile` for development tools. You can include the `ruby-lsp` in it and point to that Gemfile by using the following configuration:
+
+**Note**: when using this, gems will not be installed automatically and neither will `ruby-lsp` upgrades.
+
+```jsonc
+"rubyLsp.bundleGemfile": "relative/path/to/Gemfile"
+```
+
 ## Features
 
 ![Ruby LSP demo](extras/ruby_lsp_demo.gif)

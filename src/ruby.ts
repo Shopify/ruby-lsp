@@ -183,11 +183,29 @@ export class Ruby {
     // Use our custom Gemfile to allow RuboCop and extensions to work without having to add ruby-lsp to the bundle. Note
     // that we can't do this for the ruby-lsp repository itself otherwise the gem is activated twice
     if (path.basename(this.workingFolder) !== "ruby-lsp") {
-      this._env.BUNDLE_GEMFILE = path.join(
-        this.workingFolder,
-        ".ruby-lsp",
-        "Gemfile"
-      );
+      const customBundleGemfile: string = vscode.workspace
+        .getConfiguration("rubyLsp")
+        .get("bundleGemfile")!;
+
+      if (customBundleGemfile.length === 0) {
+        this._env.BUNDLE_GEMFILE = path.join(
+          this.workingFolder,
+          ".ruby-lsp",
+          "Gemfile"
+        );
+      } else {
+        const absoluteBundlePath = path.resolve(
+          path.join(this.workingFolder, customBundleGemfile)
+        );
+
+        if (!fs.existsSync(absoluteBundlePath)) {
+          throw new Error(
+            `The configured bundle gemfile ${absoluteBundlePath} does not exist`
+          );
+        }
+
+        this._env.BUNDLE_GEMFILE = absoluteBundlePath;
+      }
 
       // We must use the default system path for bundler in case someone has BUNDLE_PATH configured. Otherwise, we end
       // up with all gems installed inside of the `.ruby-lsp` folder, which may lead to all sorts of errors
