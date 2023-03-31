@@ -7,7 +7,7 @@
           "character": 0
         },
         "end": {
-          "line": 10,
+          "line": 14,
           "character": 3
         }
       },
@@ -18,6 +18,78 @@
           "/fake.rb",
           "Test",
           "bundle exec ruby -Itest /fake.rb"
+        ]
+      },
+      "data": {
+        "type": "test"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 2
+        },
+        "end": {
+          "line": 3,
+          "character": 22
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fake.rb:4",
+          "test_public",
+          "bundle exec ruby -Itest /fake.rb --name test_public"
+        ]
+      },
+      "data": {
+        "type": "test"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 9
+        },
+        "end": {
+          "line": 7,
+          "character": 37
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fake.rb:8",
+          "test_public_command",
+          "bundle exec ruby -Itest /fake.rb --name test_public_command"
+        ]
+      },
+      "data": {
+        "type": "test"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 2
+        },
+        "end": {
+          "line": 13,
+          "character": 28
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fake.rb:14",
+          "test_public_vcall",
+          "bundle exec ruby -Itest /fake.rb --name test_public_vcall"
         ]
       },
       "data": {
