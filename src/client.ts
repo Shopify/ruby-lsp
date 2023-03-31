@@ -356,18 +356,14 @@ export default class Client implements ClientInterface {
   }
 
   private async rubyLspIsInBundle(): Promise<boolean> {
-    // When working on the Ruby LSP itself, it's always included in the bundle
-    if (path.basename(this.workingFolder) === "ruby-lsp") {
-      return true;
-    }
-
     try {
-      // If bundle show succeeds, it means the ruby-lsp gem is a part of the bundle
+      // exit with an error if ruby-lsp not a dependency or is a transitive dependency.
+      // exit with success if ruby-lsp is a direct dependency.
       await asyncExec(
         `BUNDLE_GEMFILE=${path.join(
           this.workingFolder,
           "Gemfile"
-        )} bundle show ruby-lsp`,
+        )} bundle exec ruby -e "exit 1 unless Bundler.locked_gems.dependencies.key?('ruby-lsp')"`,
         {
           cwd: this.workingFolder,
           env: this.ruby.env,
