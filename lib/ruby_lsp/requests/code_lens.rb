@@ -21,6 +21,8 @@ module RubyLsp
     # ```
 
     class CodeLens < BaseRequest
+      BASE_COMMAND = T.let(File.exist?("Gemfile.lock") ? "bundle exec ruby" : "ruby", String)
+
       sig do
         params(
           document: Document,
@@ -42,11 +44,7 @@ module RubyLsp
       def visit_class(node)
         class_name = node.constant.constant.value
         if class_name.end_with?("Test")
-          if ENV["BUNDLE_GEMFILE"]
-            add_code_lens(node, [@path, class_name, "bundle exec ruby -Itest " + @path])
-          else
-            add_code_lens(node, [@path, class_name, "ruby -Itest " + @path])
-          end
+          add_code_lens(node, [@path, class_name, BASE_COMMAND + " -Itest " + @path])
         end
       end
 
