@@ -19,11 +19,11 @@ class ExecutorTest < Minitest::Test
     }).response
 
     hash = JSON.parse(response.to_json)
-    capabitilies = hash["capabilities"]
+    capabilities = hash["capabilities"]
 
     # TextSynchronization + semanticHighlighting
-    assert_equal(2, capabitilies.length)
-    assert_includes(capabitilies, "semanticTokensProvider")
+    assert_equal(2, capabilities.length)
+    assert_includes(capabilities, "semanticTokensProvider")
   end
 
   def test_initialize_enabled_features_with_hash
@@ -36,10 +36,10 @@ class ExecutorTest < Minitest::Test
     }).response
 
     hash = JSON.parse(response.to_json)
-    capabitilies = hash["capabilities"]
+    capabilities = hash["capabilities"]
 
     # Only semantic highlighting is turned off because all others default to true when configuring with a hash
-    refute_includes(capabitilies, "semanticTokensProvider")
+    refute_includes(capabilities, "semanticTokensProvider")
   end
 
   def test_initialize_enabled_features_with_no_configuration
@@ -52,9 +52,9 @@ class ExecutorTest < Minitest::Test
     }).response
 
     hash = JSON.parse(response.to_json)
-    capabitilies = hash["capabilities"]
+    capabilities = hash["capabilities"]
 
     # All features are enabled by default
-    assert_includes(capabitilies, "semanticTokensProvider")
+    assert_includes(capabilities, "semanticTokensProvider")
   end
 end
