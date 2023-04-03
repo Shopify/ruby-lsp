@@ -32,8 +32,7 @@ module RubyLsp
         @highlights = T.let([], T::Array[Interface::DocumentHighlight])
         return unless document.parsed?
 
-        position = document.create_scanner.find_char_position(position)
-        @target = T.let(find(T.must(document.tree), position), T.nilable(Support::HighlightTarget))
+        @target = T.let(find(position), T.nilable(Support::HighlightTarget))
       end
 
       sig { override.returns(T.all(T::Array[Interface::DocumentHighlight], Object)) }
@@ -68,12 +67,11 @@ module RubyLsp
 
       sig do
         params(
-          node: SyntaxTree::Node,
-          position: Integer,
+          position: Document::PositionShape,
         ).returns(T.nilable(Support::HighlightTarget))
       end
-      def find(node, position)
-        matched, parent = locate(node, position)
+      def find(position)
+        matched, parent = @document.locate_node(position)
 
         return unless matched && parent
         return unless matched.is_a?(SyntaxTree::Ident) || DIRECT_HIGHLIGHTS.include?(matched.class)

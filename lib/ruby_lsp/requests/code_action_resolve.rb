@@ -54,7 +54,9 @@ module RubyLsp
         extracted_source = T.must(@document.source[start_index...end_index])
 
         # Find the closest statements node, so that we place the refactor in a valid position
-        closest_statements = locate(T.must(@document.tree), start_index, node_types: [SyntaxTree::Statements]).first
+        closest_statements = @document
+          .locate(T.must(@document.tree), start_index, node_types: [SyntaxTree::Statements])
+          .first
         return Error::InvalidTargetRange if closest_statements.nil?
 
         # Find the node with the end line closest to the requested position, so that we can place the refactor

@@ -29,8 +29,7 @@ module RubyLsp
         # We can't verify if we're inside a require when there are syntax errors
         return [] if @document.syntax_error?
 
-        char_position = @document.create_scanner.find_char_position(@position)
-        target = T.let(find(char_position), T.nilable(SyntaxTree::TStringContent))
+        target = T.let(find, T.nilable(SyntaxTree::TStringContent))
         # no target means the we are not inside a `require` call
         return [] unless target
 
@@ -51,11 +50,12 @@ module RubyLsp
         end
       end
 
-      sig { params(position: Integer).returns(T.nilable(SyntaxTree::TStringContent)) }
-      def find(position)
-        matched, parent = locate(
+      sig { returns(T.nilable(SyntaxTree::TStringContent)) }
+      def find
+        char_position = @document.create_scanner.find_char_position(@position)
+        matched, parent = @document.locate(
           T.must(@document.tree),
-          position,
+          char_position,
           node_types: [SyntaxTree::Command, SyntaxTree::CommandCall, SyntaxTree::CallNode],
         )
 
@@ -76,7 +76,7 @@ module RubyLsp
 
           path_node = argument.parts.first
           return unless path_node.is_a?(SyntaxTree::TStringContent)
-          return unless (path_node.location.start_char..path_node.location.end_char).cover?(position)
+          return unless (path_node.location.start_char..path_node.location.end_char).cover?(char_position)
 
           path_node
         end
