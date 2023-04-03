@@ -125,7 +125,7 @@ export class Ruby {
 
   private async activate(ruby: string) {
     const result = await asyncExec(
-      `${this.shell} -lic '${ruby} --disable-gems -rjson -e "printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, JSON.dump(ENV.to_h))"'`,
+      `${this.shell} -ic '${ruby} --disable-gems -rjson -e "printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, JSON.dump(ENV.to_h))"'`,
       { cwd: this.workingFolder }
     );
 
