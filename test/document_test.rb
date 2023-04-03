@@ -435,6 +435,44 @@ class DocumentTest < Minitest::Test
     assert_predicate(document, :syntax_error?)
   end
 
+  def test_locate
+    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: "file:///foo/bar.rb")
+      class Post < ActiveRecord::Base
+        scope :published do
+          # find posts that are published
+          where(published: true)
+        end
+      end
+    RUBY
+
+    # Locate the `ActiveRecord` module
+    found, parent = document.locate_node({ line: 0, character: 19 })
+    assert_instance_of(SyntaxTree::Const, found)
+    assert_equal("ActiveRecord", T.cast(found, SyntaxTree::Const).value)
+
+    assert_instance_of(SyntaxTree::VarRef, parent)
+    assert_equal("ActiveRecord", T.cast(parent, SyntaxTree::VarRef).value.value)
+
+    # Locate the `Base` class
+    found, parent = T.cast(
+      document.locate_node({ line: 0, character: 27 }),
+      [SyntaxTree::Const, SyntaxTree::ConstPathRef],
+    )
+    assert_instance_of(SyntaxTree::Const, found)
+    assert_equal("Base", found.value)
+
+    assert_instance_of(SyntaxTree::ConstPathRef, parent)
+    assert_equal("Base", parent.constant.value)
+    assert_equal("ActiveRecord", T.cast(parent.parent, SyntaxTree::VarRef).value.value)
+
+    # Locate the `where` invocation
+    found, parent = T.cast(document.locate_node({ line: 3, character: 4 }), [SyntaxTree::Ident, SyntaxTree::CallNode])
+    assert_instance_of(SyntaxTree::Ident, found)
+    assert_equal("where", found.value)
+
+    assert_instance_of(SyntaxTree::CallNode, parent)
+  end
+
   private
 
   def assert_error_edit(actual, error_range)
