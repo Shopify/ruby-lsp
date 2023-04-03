@@ -25,6 +25,7 @@ class IntegrationTest < Minitest::Test
     "codeActions" => :codeActionProvider,
     "diagnostics" => :diagnosticProvider,
     "hover" => :hoverProvider,
+    "codeLens" => :codeLensProvider,
   }.freeze
 
   def setup
@@ -268,8 +269,18 @@ class IntegrationTest < Minitest::Test
     assert_equal({ startLine: 0, endLine: 1, kind: "region" }, response[:result].first)
   end
 
+  def test_code_lens
+    initialize_lsp(["codeLens"], experimental_features_enabled: true)
+    open_file_with("class Foo\n\nend")
+
+    assert_telemetry("textDocument/didOpen")
+
+    response = make_request("textDocument/codeLens", { textDocument: { uri: "file://#{__FILE__}" } })
+    assert_empty(response[:result])
+  end
+
   def test_request_with_telemetry
-    initialize_lsp(["foldingRanges"], telemetry_enabled: true)
+    initialize_lsp(["foldingRanges"])
     open_file_with("class Foo\n\nend")
 
     send_request("textDocument/foldingRange", { textDocument: { uri: "file://#{__FILE__}" } })
@@ -393,13 +404,13 @@ class IntegrationTest < Minitest::Test
     @stdin.write("Content-Length: #{json.length}\r\n\r\n#{json}")
   end
 
-  def initialize_lsp(enabled_features, telemetry_enabled: false)
+  def initialize_lsp(enabled_features, experimental_features_enabled: false)
     response = make_request(
       "initialize",
       {
         initializationOptions: {
           enabledFeatures: enabled_features,
-          telemetryEnabled: telemetry_enabled,
+          experimentalFeaturesEnabled: experimental_features_enabled,
         },
       },
     )[:result]
