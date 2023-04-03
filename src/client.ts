@@ -34,6 +34,7 @@ export default class Client implements ClientInterface {
     | vscode.CancellationTokenSource
     | undefined;
 
+  private terminal: vscode.Terminal | undefined;
   #context: vscode.ExtensionContext;
   #ruby: Ruby;
   #state: ServerState = ServerState.Starting;
@@ -50,6 +51,9 @@ export default class Client implements ClientInterface {
     this.statusItems = new StatusItems(this);
     this.registerCommands();
     this.registerAutoRestarts();
+    vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
+      if (terminal === this.terminal) this.terminal = undefined;
+    });
   }
 
   async start() {
@@ -239,8 +243,18 @@ export default class Client implements ClientInterface {
       vscode.commands.registerCommand(
         Command.Update,
         this.updateServer.bind(this)
-      )
+      ),
+      vscode.commands.registerCommand(Command.RunTest, this.runTest.bind(this))
     );
+  }
+
+  private runTest(_path: string, _name: string, command: string) {
+    if (this.terminal === undefined) {
+      this.terminal = vscode.window.createTerminal({ name: "Run test" });
+    }
+
+    this.terminal.show();
+    this.terminal.sendText(command);
   }
 
   private async setupCustomGemfile() {
