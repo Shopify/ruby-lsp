@@ -48,6 +48,7 @@ module RubyLsp
       autoload :HighlightTarget, "ruby_lsp/requests/support/highlight_target"
       autoload :RailsDocumentClient, "ruby_lsp/requests/support/rails_document_client"
       autoload :PrefixTree, "ruby_lsp/requests/support/prefix_tree"
+      autoload :Common, "ruby_lsp/requests/support/common"
     end
   end
 end
