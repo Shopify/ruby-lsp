@@ -20,7 +20,7 @@ module RubyLsp
   class EventEmitter < SyntaxTree::Visitor
     extend T::Sig
 
-    sig { params(listeners: Listener).void }
+    sig { params(listeners: Listener[T.untyped]).void }
     def initialize(*listeners)
       @listeners = listeners
 

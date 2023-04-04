@@ -19,6 +19,9 @@ module RubyLsp
     # ```
     class Hover < Listener
       extend T::Sig
+      extend T::Generic
+
+      ResponseType = type_member { { fixed: T.nilable(Interface::Hover) } }
 
       ALLOWED_TARGETS = T.let(
         [
@@ -29,12 +32,12 @@ module RubyLsp
         T::Array[T.class_of(SyntaxTree::Node)],
       )
 
-      sig { override.returns(T.nilable(Interface::Hover)) }
+      sig { override.returns(ResponseType) }
       attr_reader :response
 
       sig { void }
       def initialize
-        @response = T.let(nil, T.nilable(Interface::Hover))
+        @response = T.let(nil, ResponseType)
         super()
       end
 

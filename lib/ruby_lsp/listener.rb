@@ -7,13 +7,16 @@ module RubyLsp
   class Listener
     extend T::Sig
     extend T::Helpers
+    extend T::Generic
     include Requests::Support::Common
+
+    ResponseType = type_member
 
     abstract!
 
     # Override this method with an attr_reader that returns the response of your listener. The listener should
     # accumulate results in a @response variable and then provide the reader so that it is accessible
-    sig { abstract.returns(Object) }
+    sig { abstract.returns(ResponseType) }
     def response; end
 
     sig { overridable.params(node: SyntaxTree::Command).void }
