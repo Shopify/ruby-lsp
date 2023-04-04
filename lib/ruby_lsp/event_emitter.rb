@@ -24,6 +24,14 @@ module RubyLsp
     def initialize(*listeners)
       @listeners = listeners
 
+      # Create a map of event name to listeners that have registered it, so that we avoid unnecessary invocations
+      @event_to_listener_map = T.let(
+        listeners.each_with_object(Hash.new { |h, k| h[k] = [] }) do |listener, hash|
+          listener.class.events&.each { |event| hash[event] << listener }
+        end,
+        T::Hash[Symbol, T::Array[Listener[T.untyped]]],
+      )
+
       super()
     end
 
@@ -33,11 +41,11 @@ module RubyLsp
     def emit_for_target(node)
       case node
       when SyntaxTree::Command
-        @listeners.each { |listener| listener.on_command(node) }
+        @event_to_listener_map[:on_command]&.each { |listener| T.unsafe(listener).on_command(node) }
       when SyntaxTree::CallNode
-        @listeners.each { |listener| listener.on_call(node) }
+        @event_to_listener_map[:on_call]&.each { |listener| T.unsafe(listener).on_call(node) }
       when SyntaxTree::ConstPathRef
-        @listeners.each { |listener| listener.on_const_path_ref(node) }
+        @event_to_listener_map[:on_const_path_ref]&.each { |listener| T.unsafe(listener).on_const_path_ref(node) }
       end
     end
   end

@@ -14,18 +14,26 @@ module RubyLsp
 
     abstract!
 
+    class << self
+      extend T::Sig
+
+      sig { returns(T.nilable(T::Array[Symbol])) }
+      attr_reader :events
+
+      # All listener events must be defined inside of a `listener_events` block. This is to ensure we know which events
+      # have been registered. Defining an event outside of this block will simply not register it and it'll never be
+      # invoked
+      sig { params(block: T.proc.void).void }
+      def listener_events(&block)
+        current_methods = instance_methods
+        block.call
+        @events = T.let(instance_methods - current_methods, T.nilable(T::Array[Symbol]))
+      end
+    end
+
     # Override this method with an attr_reader that returns the response of your listener. The listener should
     # accumulate results in a @response variable and then provide the reader so that it is accessible
     sig { abstract.returns(ResponseType) }
     def response; end
-
-    sig { overridable.params(node: SyntaxTree::Command).void }
-    def on_command(node); end
-
-    sig { overridable.params(node: SyntaxTree::CallNode).void }
-    def on_call(node); end
-
-    sig { overridable.params(node: SyntaxTree::ConstPathRef).void }
-    def on_const_path_ref(node); end
   end
 end

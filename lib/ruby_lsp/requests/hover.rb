@@ -41,23 +41,25 @@ module RubyLsp
         super()
       end
 
-      sig { override.params(node: SyntaxTree::Command).void }
-      def on_command(node)
-        message = node.message
-        @response = generate_rails_document_link_hover(message.value, message)
-      end
+      listener_events do
+        sig { params(node: SyntaxTree::Command).void }
+        def on_command(node)
+          message = node.message
+          @response = generate_rails_document_link_hover(message.value, message)
+        end
 
-      sig { override.params(node: SyntaxTree::ConstPathRef).void }
-      def on_const_path_ref(node)
-        @response = generate_rails_document_link_hover(full_constant_name(node), node)
-      end
+        sig { params(node: SyntaxTree::ConstPathRef).void }
+        def on_const_path_ref(node)
+          @response = generate_rails_document_link_hover(full_constant_name(node), node)
+        end
 
-      sig { override.params(node: SyntaxTree::CallNode).void }
-      def on_call(node)
-        message = node.message
-        return if message.is_a?(Symbol)
+        sig { params(node: SyntaxTree::CallNode).void }
+        def on_call(node)
+          message = node.message
+          return if message.is_a?(Symbol)
 
-        @response = generate_rails_document_link_hover(message.value, message)
+          @response = generate_rails_document_link_hover(message.value, message)
+        end
       end
 
       private
