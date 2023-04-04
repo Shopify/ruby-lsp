@@ -4,10 +4,13 @@
 module RubyLsp
   # EventEmitter is an intermediary between our requests and Syntax Tree visitors. It's used to visit the document's AST
   # and emit events that the requests can listen to for providing functionality. Usages:
+  #
   # - For positional requests, locate the target node and use `emit_for_target` to fire events for each listener
   # - For nonpositional requests, use `visit` to go through the AST, which will fire events for each listener as nodes
   # are found
+  #
   # = Example
+  #
   # ```ruby
   # target_node = document.locate_node(position)
   # listener = Requests::Hover.new

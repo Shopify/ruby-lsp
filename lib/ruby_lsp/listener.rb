@@ -11,6 +11,8 @@ module RubyLsp
 
     abstract!
 
+    # Override this method with an attr_reader that returns the response of your listener. The listener should
+    # accumulate results in a @response variable and then provide the reader so that it is accessible
     sig { abstract.returns(Object) }
     def response; end
 
