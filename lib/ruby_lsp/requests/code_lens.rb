@@ -94,15 +94,6 @@ module RubyLsp
           data: { type: "test" },
         )
       end
-
-      sig { returns(String) }
-      def test_command
-        if ENV["BUNDLE_GEMFILE"]
-          "bundle exec ruby -Itest "
-        else
-          "ruby -Itest "
-        end
-      end
     end
   end
 end
