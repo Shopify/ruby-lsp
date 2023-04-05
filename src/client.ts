@@ -202,7 +202,16 @@ export default class Client implements ClientInterface {
   }
 
   async restart() {
+    // If the server is already starting/restarting we should try to do it again. One scenario where that may happen is
+    // when doing git pull, which may trigger a restart for two watchers: .rubocop.yml and Gemfile.lock. In those cases,
+    // we only want to restart once and not twice to avoid leading to a duplicate process
+    if (this.state === ServerState.Starting) {
+      return;
+    }
+
     try {
+      this.state = ServerState.Starting;
+
       if (this.client?.isRunning()) {
         await this.stop();
         await this.start();
