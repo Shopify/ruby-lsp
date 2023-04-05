@@ -169,9 +169,16 @@ module RubyLsp
         target = parent
       end
 
-      listener = RubyLsp::Requests::Hover.new
-      EventEmitter.new(listener).emit_for_target(target)
-      listener.response
+      # Instantiate all listeners
+      base_listener = Requests::Hover.new
+      listeners = Requests::Hover.listeners.map(&:new)
+
+      # Emit events for all listeners
+      T.unsafe(EventEmitter).new(base_listener, *listeners).emit_for_target(target)
+
+      # Merge all responses into a single hover
+      listeners.each { |ext| base_listener.merge_response!(ext) }
+      base_listener.response
     end
 
     sig { params(uri: String).returns(T::Array[Interface::DocumentLink]) }
