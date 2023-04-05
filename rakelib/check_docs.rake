@@ -7,6 +7,7 @@ task :check_docs do
   require "language_server-protocol"
   require "syntax_tree"
   require "logger"
+  require "ruby_lsp/internal"
   require "ruby_lsp/requests/base_request"
   require "ruby_lsp/requests/support/rubocop_diagnostics_runner"
   require "ruby_lsp/requests/support/rubocop_formatting_runner"

@@ -17,8 +17,11 @@ module RubyLsp
     #   before_save :do_something # when hovering on before_save, the link will be rendered
     # end
     # ```
-    class Hover < BaseRequest
+    class Hover < Listener
       extend T::Sig
+      extend T::Generic
+
+      ResponseType = type_member { { fixed: T.nilable(Interface::Hover) } }
 
       ALLOWED_TARGETS = T.let(
         [
@@ -29,53 +32,45 @@ module RubyLsp
         T::Array[T.class_of(SyntaxTree::Node)],
       )
 
-      sig { params(document: Document, position: Document::PositionShape).void }
-      def initialize(document, position)
-        super(document)
+      sig { override.returns(ResponseType) }
+      attr_reader :response
 
-        @position = T.let(document.create_scanner.find_char_position(position), Integer)
+      sig { void }
+      def initialize
+        @response = T.let(nil, ResponseType)
+        super()
       end
 
-      sig { override.returns(T.nilable(Interface::Hover)) }
-      def run
-        return unless @document.parsed?
+      listener_events do
+        sig { params(node: SyntaxTree::Command).void }
+        def on_command(node)
+          message = node.message
+          @response = generate_rails_document_link_hover(message.value, message)
+        end
 
-        target, parent = locate(T.must(@document.tree), @position)
-        target = parent if !ALLOWED_TARGETS.include?(target.class) && ALLOWED_TARGETS.include?(parent.class)
+        sig { params(node: SyntaxTree::ConstPathRef).void }
+        def on_const_path_ref(node)
+          @response = generate_rails_document_link_hover(full_constant_name(node), node)
+        end
 
-        case target
-        when SyntaxTree::Command
-          message = target.message
-          generate_rails_document_link_hover(message.value, message)
-        when SyntaxTree::CallNode
-          message = target.message
+        sig { params(node: SyntaxTree::CallNode).void }
+        def on_call(node)
+          message = node.message
           return if message.is_a?(Symbol)
 
-          generate_rails_document_link_hover(message.value, message)
-        when SyntaxTree::ConstPathRef
-          constant_name = full_constant_name(target)
-          generate_rails_document_link_hover(constant_name, target)
+          @response = generate_rails_document_link_hover(message.value, message)
         end
       end
 
       private
 
-      sig do
-        params(name: String, node: SyntaxTree::Node).returns(T.nilable(Interface::Hover))
-      end
+      sig { params(name: String, node: SyntaxTree::Node).returns(T.nilable(Interface::Hover)) }
       def generate_rails_document_link_hover(name, node)
         urls = Support::RailsDocumentClient.generate_rails_document_urls(name)
-
         return if urls.empty?
 
-        contents = Interface::MarkupContent.new(
-          kind: "markdown",
-          value: urls.join("\n\n"),
-        )
-        Interface::Hover.new(
-          range: range_from_syntax_tree_node(node),
-          contents: contents,
-        )
+        contents = Interface::MarkupContent.new(kind: "markdown", value: urls.join("\n\n"))
+        Interface::Hover.new(range: range_from_syntax_tree_node(node), contents: contents)
       end
     end
   end

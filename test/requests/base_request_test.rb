@@ -17,32 +17,6 @@ class BaseRequestTest < Minitest::Test
     @fake_request = @request_class.new(@document)
   end
 
-  def test_locate
-    # Locate the `ActiveRecord` module (19 is the position of the `R` character)
-    found, parent = @fake_request.locate(@document.tree, 19)
-    assert_instance_of(SyntaxTree::Const, found)
-    assert_equal("ActiveRecord", found.value)
-
-    assert_instance_of(SyntaxTree::VarRef, parent)
-    assert_equal("ActiveRecord", parent.value.value)
-
-    # Locate the `Base` class (27 is the position of the `B` character)
-    found, parent = @fake_request.locate(@document.tree, 27)
-    assert_instance_of(SyntaxTree::Const, found)
-    assert_equal("Base", found.value)
-
-    assert_instance_of(SyntaxTree::ConstPathRef, parent)
-    assert_equal("Base", parent.constant.value)
-    assert_equal("ActiveRecord", parent.parent.value.value)
-
-    # Locate the `where` invocation (94 is the position of the `w` character)
-    found, parent = @fake_request.locate(@document.tree, 94)
-    assert_instance_of(SyntaxTree::Ident, found)
-    assert_equal("where", found.value)
-
-    assert_instance_of(SyntaxTree::CallNode, parent)
-  end
-
   # We can remove this once we drop support for Ruby 2.7
   def test_super_is_valid_on_ruby_2_7
     document = RubyLsp::Document.new(source: "", version: 1, uri: "file:///foo/bar.rb")

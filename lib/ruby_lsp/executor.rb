@@ -149,7 +149,20 @@ module RubyLsp
       ).returns(T.nilable(Interface::Hover))
     end
     def hover(uri, position)
-      RubyLsp::Requests::Hover.new(@store.get(uri), position).run
+      document = @store.get(uri)
+      document.parse
+      return if document.syntax_error?
+
+      target, parent = document.locate_node(position)
+
+      if !Requests::Hover::ALLOWED_TARGETS.include?(target.class) &&
+          Requests::Hover::ALLOWED_TARGETS.include?(parent.class)
+        target = parent
+      end
+
+      listener = RubyLsp::Requests::Hover.new
+      EventEmitter.new(listener).emit_for_target(target)
+      listener.response
     end
 
     sig { params(uri: String).returns(T::Array[Interface::DocumentLink]) }

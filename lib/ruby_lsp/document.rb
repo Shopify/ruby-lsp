@@ -99,6 +99,61 @@ module RubyLsp
       Scanner.new(@source, @encoding)
     end
 
+    sig do
+      params(
+        position: PositionShape,
+        node_types: T::Array[T.class_of(SyntaxTree::Node)],
+      ).returns([T.nilable(SyntaxTree::Node), T.nilable(SyntaxTree::Node)])
+    end
+    def locate_node(position, node_types: [])
+      return [nil, nil] unless parsed?
+
+      locate(T.must(@tree), create_scanner.find_char_position(position))
+    end
+
+    sig do
+      params(
+        node: SyntaxTree::Node,
+        char_position: Integer,
+        node_types: T::Array[T.class_of(SyntaxTree::Node)],
+      ).returns([T.nilable(SyntaxTree::Node), T.nilable(SyntaxTree::Node)])
+    end
+    def locate(node, char_position, node_types: [])
+      queue = T.let(node.child_nodes.compact, T::Array[T.nilable(SyntaxTree::Node)])
+      closest = node
+      parent = T.let(nil, T.nilable(SyntaxTree::Node))
+
+      until queue.empty?
+        candidate = queue.shift
+
+        # Skip nil child nodes
+        next if candidate.nil?
+
+        # Add the next child_nodes to the queue to be processed
+        queue.concat(candidate.child_nodes)
+
+        # Skip if the current node doesn't cover the desired position
+        loc = candidate.location
+        next unless (loc.start_char...loc.end_char).cover?(char_position)
+
+        # If the node's start character is already past the position, then we should've found the closest node
+        # already
+        break if char_position < loc.start_char
+
+        # If there are node types to filter by, and the current node is not one of those types, then skip it
+        next if node_types.any? && node_types.none? { |type| candidate.class == type }
+
+        # If the current node is narrower than or equal to the previous closest node, then it is more precise
+        closest_loc = closest.location
+        if loc.end_char - loc.start_char <= closest_loc.end_char - closest_loc.start_char
+          parent = closest
+          closest = candidate
+        end
+      end
+
+      [closest, parent]
+    end
+
     class Scanner
       extend T::Sig
 
