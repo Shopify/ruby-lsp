@@ -1,31 +1,13 @@
 import * as assert from "assert";
 
-import { before, after } from "mocha";
-import * as vscode from "vscode";
-
-import { Ruby } from "../../ruby";
+import { Ruby, VersionManager } from "../../ruby";
 
 suite("Ruby environment activation", () => {
   let ruby: Ruby;
-  const configuration = vscode.workspace.getConfiguration("rubyLsp");
-  const currentManager = configuration.get("rubyVersionManager")!;
-
-  before(async () => {
-    await configuration.update("rubyVersionManager", "none", true, true);
-  });
-
-  after(async () => {
-    await configuration.update(
-      "rubyVersionManager",
-      currentManager,
-      true,
-      true
-    );
-  });
 
   test("Activate fetches Ruby information when outside of Ruby LSP", async () => {
     ruby = new Ruby("fake/some/project");
-    await ruby.activateRuby();
+    await ruby.activateRuby(VersionManager.None);
 
     assert.ok(ruby.rubyVersion, "Expected Ruby version to be set");
     assert.strictEqual(
@@ -43,7 +25,7 @@ suite("Ruby environment activation", () => {
 
   test("Activate fetches Ruby information when working on the Ruby LSP", async () => {
     ruby = new Ruby("/fake/ruby-lsp");
-    await ruby.activateRuby();
+    await ruby.activateRuby(VersionManager.None);
 
     assert.ok(ruby.rubyVersion, "Expected Ruby version to be set");
     assert.strictEqual(

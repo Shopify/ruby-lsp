@@ -50,10 +50,12 @@ export class Ruby {
     return this._error;
   }
 
-  async activateRuby() {
-    this.versionManager = vscode.workspace
+  async activateRuby(
+    versionManager: VersionManager = vscode.workspace
       .getConfiguration("rubyLsp")
-      .get("rubyVersionManager")!;
+      .get("rubyVersionManager")!
+  ) {
+    this.versionManager = versionManager;
 
     // If the version manager is auto, discover the actual manager before trying to activate anything
     if (this.versionManager === VersionManager.Auto) {
