@@ -178,6 +178,65 @@
         }
       }
     },
+    "breakpoints": [
+      {
+        "language": "ruby"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "ruby_lsp",
+        "label": "Ruby LSP debug client",
+        "languages": [
+          "ruby"
+        ],
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "program"
+            ],
+            "properties": {
+              "program": {
+                "type": "string",
+                "description": "The program to debug"
+              }
+            }
+          },
+          "attach": {}
+        },
+        "configurationSnippets": [
+          {
+            "label": "Debug a Ruby program",
+            "description": "New configuration for debugging a Ruby program",
+            "body": {
+              "type": "ruby_lsp",
+              "request": "launch",
+              "name": "Debug program",
+              "program": "ruby ${file}"
+            }
+          },
+          {
+            "label": "Debug a Minitest / Test Unit file",
+            "description": "New configuration for debugging a Minitest / Test Unit file",
+            "body": {
+              "type": "ruby_lsp",
+              "request": "launch",
+              "name": "Debug test file",
+              "program": "ruby -Itest ${relativeFile}"
+            }
+          },
+          {
+            "label": "Attach the debugger to a running Ruby process",
+            "description": "New configuration for attaching the debugger to a process that was started with the debugger",
+            "body": {
+              "type": "ruby_lsp",
+              "request": "attach",
+              "name": "Attach to a debuggee"
+            }
+          }
+        ]
+      }
+    ],
     "snippets": [
       {
         "language": "ruby",
