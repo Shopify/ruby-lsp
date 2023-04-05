@@ -5,6 +5,7 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip bm]')"
     name: Benchmark
     steps:
       # Setup the main branch to run benchmarks there as a baseline for comparison
