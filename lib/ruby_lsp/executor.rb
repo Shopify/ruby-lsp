@@ -38,6 +38,15 @@ module RubyLsp
       when "initialize"
         initialize_request(request.dig(:params))
       when "initialized"
+        errors = Extension.load_extensions.map(&:message)
+        @notifications << Notification.new(
+          message: "window/showMessage",
+          params: Interface::ShowMessageParams.new(
+            type: Constant::MessageType::ERROR,
+            message: "Error loading extensions: #{errors.join(", ")}",
+          ),
+        ) if errors.any?
+
         warn("Ruby LSP is ready")
         VOID
       when "textDocument/didOpen"
