@@ -302,6 +302,8 @@ export default class Client implements ClientInterface {
 
     const gemEntry =
       'gem "ruby-lsp", require: false, group: :development, source: "https://rubygems.org"';
+    const debugEntry =
+      'gem "debug", require: false, group: :development, platforms: :mri, source: "https://rubygems.org"';
 
     // Only try to evaluate the top level Gemfile if there is one. Otherwise, we'll just create our own Gemfile
     if (fs.existsSync(path.join(this.workingFolder, "Gemfile"))) {
@@ -309,16 +311,22 @@ export default class Client implements ClientInterface {
       gemfile.push('eval_gemfile(File.expand_path("../Gemfile", __dir__))');
 
       // If the `ruby-lsp` exists in the bundle, add it to the custom Gemfile commented out
-      if (await this.rubyLspIsInBundle()) {
+      if (await this.projectHasDependency("ruby-lsp")) {
         // If it is already in the bundle, add the gem commented out to avoid conflicts
         gemfile.push(`# ${gemEntry}`);
       } else {
         // If it's not a part of the bundle, add it to the custom Gemfile
         gemfile.push(gemEntry);
       }
+
+      // If debug is not in the bundle, add it to allow debugging
+      if (!(await this.projectHasDependency("debug"))) {
+        gemfile.push(debugEntry);
+      }
     } else {
-      // If no Gemfile exists, add the `ruby-lsp` gem to the custom Gemfile
+      // If no Gemfile exists, add the `ruby-lsp` and `debug` to the custom Gemfile
       gemfile.push(gemEntry);
+      gemfile.push(debugEntry);
     }
 
     // Add an empty line at the end of the file
@@ -386,15 +394,15 @@ export default class Client implements ClientInterface {
     return Object.keys(features).filter((key) => features[key]);
   }
 
-  private async rubyLspIsInBundle(): Promise<boolean> {
+  private async projectHasDependency(gemName: string): Promise<boolean> {
     try {
-      // exit with an error if ruby-lsp not a dependency or is a transitive dependency.
-      // exit with success if ruby-lsp is a direct dependency.
+      // exit with an error if gemName not a dependency or is a transitive dependency.
+      // exit with success if gemName is a direct dependency.
       await asyncExec(
         `BUNDLE_GEMFILE=${path.join(
           this.workingFolder,
           "Gemfile"
-        )} bundle exec ruby -e "exit 1 unless Bundler.locked_gems.dependencies.key?('ruby-lsp')"`,
+        )} bundle exec ruby -e "exit 1 unless Bundler.locked_gems.dependencies.key?('${gemName}')"`,
         {
           cwd: this.workingFolder,
           env: this.ruby.env,
