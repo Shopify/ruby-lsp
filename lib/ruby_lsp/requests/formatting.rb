@@ -39,10 +39,8 @@ module RubyLsp
         @formatter = T.let(
           if formatter == "auto"
             if defined?(Support::RuboCopFormattingRunner)
-              warn("Using RuboCop for formatting")
               "rubocop"
             elsif syntax_tree_as_direct_dependency?
-              warn("Using Syntax Tree for formatting")
               "syntax_tree"
             else
               "none"
