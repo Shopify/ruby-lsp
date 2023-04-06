@@ -5,11 +5,21 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "rdbg",
-            "name": "Minitest - current file",
+            "type": "ruby_lsp",
+            "name": "Debug",
             "request": "launch",
-            "script": "-Itest ${file}",
-            "askParameters": true
+            "program": "ruby ${file}",
+        },
+        {
+            "type": "ruby_lsp",
+            "request": "launch",
+            "name": "Debug test file",
+            "program": "ruby -Itest ${relativeFile}"
+        },
+        {
+            "type": "ruby_lsp",
+            "request": "attach",
+            "name": "Attach to existing server",
         }
     ]
 }
