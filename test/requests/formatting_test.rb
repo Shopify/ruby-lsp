@@ -13,7 +13,9 @@ class FormattingTest < Minitest::Test
     RUBY
   end
 
-  def test_formats_with_rubocop_when_present
+  def test_formats_with_rubocop_when_present_and_syntax_tree_not_present
+    stub_syntax_tree(present: false)
+
     assert_equal(<<~RUBY, formatted_document)
       # typed: true
       # frozen_string_literal: true
@@ -25,7 +27,9 @@ class FormattingTest < Minitest::Test
     RUBY
   end
 
-  def test_formats_with_syntax_tree_when_rubocop_is_not_present
+  def test_formats_with_syntax_tree_when_present_and_rubocop_not_present
+    stub_syntax_tree(present: true)
+
     with_uninstalled_rubocop do
       assert_equal(<<~RUBY, formatted_document)
         class Foo
@@ -33,6 +37,28 @@ class FormattingTest < Minitest::Test
           end
         end
       RUBY
+    end
+  end
+
+  def test_formats_with_rubocop_when_present_and_syntax_tree_also_present
+    stub_syntax_tree(present: true)
+
+    assert_equal(<<~RUBY, formatted_document)
+      # typed: true
+      # frozen_string_literal: true
+
+      class Foo
+        def foo
+        end
+      end
+    RUBY
+  end
+
+  def test_does_not_format_with_neither_syntax_tree_nor_rubocop_are_present
+    stub_syntax_tree(present: false)
+
+    with_uninstalled_rubocop do
+      assert_nil(formatted_document)
     end
   end
 
@@ -166,5 +192,12 @@ class FormattingTest < Minitest::Test
     return unless defined?(RubyLsp::Requests::Support::SyntaxTreeFormattingRunner)
 
     T.unsafe(Singleton).__init__(RubyLsp::Requests::Support::SyntaxTreeFormattingRunner)
+  end
+
+  def stub_syntax_tree(present:)
+    parser = stub("lockfile_parser")
+    Bundler::LockfileParser.stubs(:new).returns(parser)
+    result = present ? { "syntax_tree" => "..." } : {}
+    parser.stubs(:dependencies).returns(result)
   end
 end

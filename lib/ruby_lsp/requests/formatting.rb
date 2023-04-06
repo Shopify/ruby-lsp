@@ -12,7 +12,11 @@ module RubyLsp
     # request uses RuboCop to fix auto-correctable offenses in the document. This requires enabling format on save and
     # registering the ruby-lsp as the Ruby formatter.
     #
-    # If RuboCop is not available, the request will fall back to SyntaxTree.
+    # The `rubyLsp.formatter` setting specifies which formatter to use.
+    # If set to `auto`` then it behaves as follows:
+    # * It will use RuboCop if it is part of the bundle.
+    # * If RuboCop is not available, and `syntax_tree` is a direct dependency, it will use that.
+    # * Otherwise, no formatting will be applied.
     #
     # # Example
     #
@@ -34,7 +38,15 @@ module RubyLsp
         @uri = T.let(document.uri, String)
         @formatter = T.let(
           if formatter == "auto"
-            defined?(Support::RuboCopFormattingRunner) ? "rubocop" : "syntax_tree"
+            if defined?(Support::RuboCopFormattingRunner)
+              warn("Using RuboCop for formatting")
+              "rubocop"
+            elsif syntax_tree_as_direct_dependency?
+              warn("Using Syntax Tree for formatting")
+              "syntax_tree"
+            else
+              "none"
+            end
           else
             formatter
           end,
@@ -48,6 +60,8 @@ module RubyLsp
         return unless @uri.sub("file://", "").start_with?(Dir.pwd)
 
         return if @document.syntax_error?
+
+        return if @formatter == "none"
 
         formatted_text = formatted_file
         return unless formatted_text
@@ -71,6 +85,7 @@ module RubyLsp
       sig { returns(T.nilable(String)) }
       def formatted_file
         case @formatter
+        when "none"
         when "rubocop"
           Support::RuboCopFormattingRunner.instance.run(@uri, @document)
         when "syntax_tree"
@@ -78,6 +93,11 @@ module RubyLsp
         else
           raise InvalidFormatter, "Unknown formatter: #{@formatter}"
         end
+      end
+
+      sig { returns(T::Boolean) }
+      def syntax_tree_as_direct_dependency?
+        Bundler::LockfileParser.new(Bundler.read_file(Bundler.default_lockfile)).dependencies.key?("syntax_tree")
       end
     end
   end
