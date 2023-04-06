@@ -27,10 +27,13 @@ export class Ruby {
   private shell = process.env.SHELL;
   private _env: NodeJS.ProcessEnv = {};
   private _error = false;
+  private context: vscode.ExtensionContext;
 
   constructor(
+    context: vscode.ExtensionContext,
     workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath
   ) {
+    this.context = context;
     this.workingFolder = workingFolder;
   }
 
@@ -90,6 +93,12 @@ export class Ruby {
       this._error = false;
     } catch (error: any) {
       this._error = true;
+
+      // When running tests, we need to throw the error or else activation may silently fail and it's very difficult to
+      // debug
+      if (this.context.extensionMode === vscode.ExtensionMode.Test) {
+        throw error;
+      }
 
       await vscode.window.showErrorMessage(
         `Failed to activate ${this.versionManager} environment: ${error.message}`

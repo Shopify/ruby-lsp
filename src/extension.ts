@@ -7,7 +7,7 @@ import { Ruby } from "./ruby";
 let client: Client;
 
 export async function activate(context: vscode.ExtensionContext) {
-  const ruby = new Ruby();
+  const ruby = new Ruby(context);
   await ruby.activateRuby();
 
   const telemetry = new Telemetry(context);
