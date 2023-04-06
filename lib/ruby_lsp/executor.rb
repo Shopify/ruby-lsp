@@ -348,7 +348,16 @@ module RubyLsp
     sig { params(options: T::Hash[Symbol, T.untyped]).returns(Interface::InitializeResult) }
     def initialize_request(options)
       @store.clear
-      @store.encoding = options.dig(:capabilities, :general, :positionEncodings)
+
+      encodings = options.dig(:capabilities, :general, :positionEncodings)
+      @store.encoding = if encodings.nil? || encodings.empty?
+        Constant::PositionEncodingKind::UTF16
+      elsif encodings.include?(Constant::PositionEncodingKind::UTF8)
+        Constant::PositionEncodingKind::UTF8
+      else
+        encodings.first
+      end
+
       formatter = options.dig(:initializationOptions, :formatter)
       @store.formatter = formatter unless formatter.nil?
 
@@ -441,6 +450,7 @@ module RubyLsp
             change: Constant::TextDocumentSyncKind::INCREMENTAL,
             open_close: true,
           ),
+          position_encoding: @store.encoding,
           selection_range_provider: enabled_features["selectionRanges"],
           hover_provider: hover_provider,
           document_symbol_provider: document_symbol_provider,

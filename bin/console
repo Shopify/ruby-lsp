@@ -6,14 +6,4 @@ require "bundler/setup"
 require_relative "../lib/ruby_lsp/internal"
 require "irb"
 
-extend T::Sig
-
-sig { params(source: String).returns(RubyLsp::Document) }
-def new_doc(source)
-  RubyLsp::Document.new(source)
-end
-
-@source = T.let(File.read(File.expand_path("../lib/ruby_lsp/server.rb", __dir__)), String)
-@document = T.let(new_doc(@source), RubyLsp::Document)
-
 IRB.start(__FILE__)

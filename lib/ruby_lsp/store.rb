@@ -9,8 +9,8 @@ module RubyLsp
   class Store
     extend T::Sig
 
-    sig { params(encoding: String).void }
-    attr_writer :encoding
+    sig { returns(String) }
+    attr_accessor :encoding
 
     sig { returns(String) }
     attr_accessor :formatter
@@ -18,7 +18,7 @@ module RubyLsp
     sig { void }
     def initialize
       @state = T.let({}, T::Hash[String, Document])
-      @encoding = T.let("utf-8", String)
+      @encoding = T.let(Constant::PositionEncodingKind::UTF8, String)
       @formatter = T.let("auto", String)
     end
 

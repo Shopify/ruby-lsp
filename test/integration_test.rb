@@ -426,7 +426,7 @@ class IntegrationTest < Minitest::Test
     end
 
     enabled_providers = enabled_features.map { |feature| FEATURE_TO_PROVIDER[feature] }
-    assert_equal([:textDocumentSync, *enabled_providers], response[:capabilities].keys)
+    assert_equal([:positionEncoding, :textDocumentSync, *enabled_providers], response[:capabilities].keys)
   end
 
   def open_file_with(content)

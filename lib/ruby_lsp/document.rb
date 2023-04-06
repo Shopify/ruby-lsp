@@ -22,7 +22,7 @@ module RubyLsp
     attr_reader :uri
 
     sig { params(source: String, version: Integer, uri: String, encoding: String).void }
-    def initialize(source:, version:, uri:, encoding: "utf-8")
+    def initialize(source:, version:, uri:, encoding: Constant::PositionEncodingKind::UTF8)
       @cache = T.let({}, T::Hash[Symbol, T.untyped])
       @encoding = T.let(encoding, String)
       @source = T.let(source, String)
@@ -182,7 +182,11 @@ module RubyLsp
         # The final position is the beginning of the line plus the requested column. If the encoding is UTF-16, we also
         # need to adjust for surrogate pairs
         requested_position = @pos + position[:character]
-        requested_position -= utf_16_character_position_correction(@pos, requested_position) if @encoding == "utf-16"
+
+        if @encoding == Constant::PositionEncodingKind::UTF16
+          requested_position -= utf_16_character_position_correction(@pos, requested_position)
+        end
+
         requested_position
       end
 
