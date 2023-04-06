@@ -25,6 +25,10 @@ module RubyLsp
     # puts "Hello" # --> formatting: fixes the indentation on save
     # end
     # ```
+
+    SYNTAX_TREE_AS_DIRECT_DEPENDENCY = Bundler::LockfileParser.new(Bundler.read_file(Bundler.default_lockfile))
+      .dependencies.key?("syntax_tree")
+
     class Formatting < BaseRequest
       class Error < StandardError; end
       class InvalidFormatter < StandardError; end
@@ -40,7 +44,7 @@ module RubyLsp
           if formatter == "auto"
             if defined?(Support::RuboCopFormattingRunner)
               "rubocop"
-            elsif syntax_tree_as_direct_dependency?
+            elsif SYNTAX_TREE_AS_DIRECT_DEPENDENCY
               "syntax_tree"
             else
               "none"
@@ -90,11 +94,6 @@ module RubyLsp
         else
           raise InvalidFormatter, "Unknown formatter: #{@formatter}"
         end
-      end
-
-      sig { returns(T::Boolean) }
-      def syntax_tree_as_direct_dependency?
-        Bundler::LockfileParser.new(Bundler.read_file(Bundler.default_lockfile)).dependencies.key?("syntax_tree")
       end
     end
   end
