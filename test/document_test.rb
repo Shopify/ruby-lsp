@@ -473,6 +473,18 @@ class DocumentTest < Minitest::Test
     assert_instance_of(SyntaxTree::CallNode, parent)
   end
 
+  def test_reparsing_without_new_edits_does_nothing
+    document = RubyLsp::Document.new(source: +"", version: 1, uri: "file:///foo/bar.rb")
+    document.push_edits(
+      [{ range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } }, text: "def foo" }],
+      version: 2,
+    )
+
+    document.parse
+    assert_predicate(document, :syntax_error?)
+    assert_empty(document.instance_variable_get(:@unparsed_edits))
+  end
+
   private
 
   def assert_error_edit(actual, error_range)
