@@ -83,7 +83,6 @@ module RubyLsp
       sig { returns(T.nilable(String)) }
       def formatted_file
         case @formatter
-        when "none"
         when "rubocop"
           Support::RuboCopFormattingRunner.instance.run(@uri, @document)
         when "syntax_tree"
