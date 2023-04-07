@@ -298,4 +298,19 @@ if File.exist?(CACHE_FILE_PATH)
   end
 end
 
+requests_benchmarked = RubyLsp::Requests::BaseRequest.subclasses.concat(RubyLsp::Listener.subclasses)
+
+Dir["#{Dir.pwd}/lib/ruby_lsp/requests/*.rb"].each { |file| require(file) }
+
+all_requests = RubyLsp::Requests::BaseRequest.subclasses.concat(RubyLsp::Listener.subclasses)
+
+missing_benchmarks = all_requests - requests_benchmarked
+
+if missing_benchmarks.any?
+  puts "\n\n"
+  puts "=" * 80
+  puts "Missing benchmarks:\n\n"
+  puts missing_benchmarks.map(&:to_s)
+end
+
 File.write(CACHE_FILE_PATH, results.to_json)
