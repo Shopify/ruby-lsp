@@ -42,14 +42,14 @@
                             "range": {
                                 "start": {
                                     "line": 4,
-                                    "character": 0
+                                    "character": 2
                                 },
                                 "end": {
                                     "line": 4,
-                                    "character": 0
+                                    "character": 2
                                 }
                             },
-                            "newText": "new_variable = a = 2\n"
+                            "newText": "new_variable = a = 2\n  "
                         }
                     ]
                 }

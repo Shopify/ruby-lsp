@@ -54,9 +54,8 @@ module RubyLsp
         extracted_source = T.must(@document.source[start_index...end_index])
 
         # Find the closest statements node, so that we place the refactor in a valid position
-        closest_statements = @document
+        closest_statements, parent_statements = @document
           .locate(T.must(@document.tree), start_index, node_types: [SyntaxTree::Statements])
-          .first
         return Error::InvalidTargetRange if closest_statements.nil?
 
         # Find the node with the end line closest to the requested position, so that we can place the refactor
@@ -66,25 +65,51 @@ module RubyLsp
           distance <= 0 ? Float::INFINITY : distance
         end
 
-        # When trying to extract the first node inside of a statements block, then we can just select one line above it
-        target_line = if closest_node == closest_statements.child_nodes.first
-          closest_node.location.start_line - 1
+        # Find the parent expression of the closest node
+        parent_expression = parent_statements.child_nodes.compact.find do |node|
+          loc = node.location
+          loc.start_line - 1 <= source_range.dig(:start, :line) && loc.end_line - 1 >= source_range.dig(:end, :line)
+        end if parent_statements
+
+        closest_node_loc = closest_node.location
+        # If the parent expression is a single line block, then we have to extract it inside of the oneline block
+        if parent_expression.is_a?(SyntaxTree::MethodAddBlock) &&
+            parent_expression.location.start_line == parent_expression.location.end_line
+
+          variable_source = " #{NEW_VARIABLE_NAME} = #{extracted_source};"
+          character = source_range.dig(:start, :character) - 1
+          target_range = {
+            start: { line: closest_node_loc.end_line - 1, character: character },
+            end: { line: closest_node_loc.end_line - 1, character: character },
+          }
         else
-          closest_node.location.end_line
-        end
+          # If the closest node covers the requested location, then we're extracting a statement nested inside of it. In
+          # that case, we want to place the extraction at the start of the closest node (one line above). Otherwise, we
+          # want to place the extract right below the closest node
+          if closest_node_loc.start_line - 1 <= source_range.dig(
+            :start,
+            :line,
+          ) && closest_node_loc.end_line - 1 >= source_range.dig(:end, :line)
+            indentation_line = closest_node_loc.start_line - 1
+            target_line = indentation_line
+          else
+            target_line = closest_node_loc.end_line
+            indentation_line = closest_node_loc.end_line - 1
+          end
 
-        lines = @document.source.lines
-        indentation = T.must(T.must(lines[target_line - 1])[/\A */]).size
+          lines = @document.source.lines
+          indentation = T.must(T.must(lines[indentation_line])[/\A */]).size
 
-        target_range = {
-          start: { line: target_line, character: indentation },
-          end: { line: target_line, character: indentation },
-        }
+          target_range = {
+            start: { line: target_line, character: indentation },
+            end: { line: target_line, character: indentation },
+          }
 
-        variable_source = if T.must(lines[target_line]).strip.empty?
-          "\n#{" " * indentation}#{NEW_VARIABLE_NAME} = #{extracted_source}"
-        else
-          "#{NEW_VARIABLE_NAME} = #{extracted_source}\n#{" " * indentation}"
+          variable_source = if T.must(lines[target_line]).strip.empty?
+            "\n#{" " * indentation}#{NEW_VARIABLE_NAME} = #{extracted_source}"
+          else
+            "#{NEW_VARIABLE_NAME} = #{extracted_source}\n#{" " * indentation}"
+          end
         end
 
         Interface::CodeAction.new(

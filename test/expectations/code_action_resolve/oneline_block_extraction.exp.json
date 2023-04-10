@@ -4,12 +4,12 @@
         "data": {
             "range": {
                 "start": {
-                    "line": 1,
-                    "character": 6
+                    "line": 0,
+                    "character": 13
                 },
                 "end": {
-                    "line": 1,
-                    "character": 7
+                    "line": 0,
+                    "character": 18
                 }
             },
             "uri": "file:///fake"
@@ -28,12 +28,12 @@
                         {
                             "range": {
                                 "start": {
-                                    "line": 1,
-                                    "character": 6
+                                    "line": 0,
+                                    "character": 13
                                 },
                                 "end": {
-                                    "line": 1,
-                                    "character": 7
+                                    "line": 0,
+                                    "character": 18
                                 }
                             },
                             "newText": "new_variable"
@@ -41,15 +41,15 @@
                         {
                             "range": {
                                 "start": {
-                                    "line": 1,
-                                    "character": 2
+                                    "line": 0,
+                                    "character": 12
                                 },
                                 "end": {
-                                    "line": 1,
-                                    "character": 2
+                                    "line": 0,
+                                    "character": 12
                                 }
                             },
-                            "newText": "new_variable = 1\n  "
+                            "newText": " new_variable = i + 1;"
                         }
                     ]
                 }

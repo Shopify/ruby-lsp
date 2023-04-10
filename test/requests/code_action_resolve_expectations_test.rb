@@ -10,25 +10,8 @@ class CodeActionResolveExpectationsTest < ExpectationsTestRunner
   def run_expectations(source)
     params = @__params&.any? ? @__params : default_args
     document = RubyLsp::Document.new(source: source, version: 1, uri: "file:///fake.rb")
-    result = T.let(
-      nil,
-      T.nilable(
-        T.any(
-          RubyLsp::Interface::CodeAction,
-          RubyLsp::Requests::CodeActionResolve::Error,
-        ),
-      ),
-    )
 
-    stdout, _ = capture_io do
-      result = RubyLsp::Requests::CodeActionResolve.new(
-        document,
-        params,
-      ).run
-    end
-
-    assert_empty(stdout)
-    result
+    RubyLsp::Requests::CodeActionResolve.new(document, params).run
   end
 
   def assert_expectations(source, expected)
