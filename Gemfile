@@ -10,7 +10,7 @@ gem "minitest", "~> 5.18"
 gem "minitest-reporters", "~> 1.6"
 gem "mocha", "~> 2.0"
 gem "rake", "~> 13.0"
-gem "rubocop", "~> 1.48"
+gem "rubocop", "~> 1.49"
 gem "rubocop-shopify", "~> 2.12", require: false
 gem "rubocop-minitest", "~> 0.30.0", require: false
 gem "rubocop-rake", "~> 0.6.0", require: false
