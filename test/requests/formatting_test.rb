@@ -196,6 +196,6 @@ class FormattingTest < Minitest::Test
 
   def stub_syntax_tree(present:)
     result = present ? { "syntax_tree" => "..." } : {}
-    Bundler::locked_gems.stubs(:dependencies).returns(result)
+    Bundler.locked_gems.stubs(:dependencies).returns(result)
   end
 end
