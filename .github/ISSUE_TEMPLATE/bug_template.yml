@@ -1,0 +1,40 @@
+---
+name: Ruby LSP bug
+description: File a bug report about the Ruby LSP
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Thank you for filing a bug report! Please answer the following questions to help us understand the issue.
+  - type: input
+    attributes:
+      label: Ruby version
+      description: The Ruby version being used to run the LSP
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Code snippet
+      description: A code snippet that reproduces the issue
+      placeholder: >
+        If applicable, please include the smallest code snippet that reproduces the issue.
+  - type: textarea
+    attributes:
+      label: Description
+      description: Reproduction steps and an explanation of the observed behavior
+      placeholder: >
+        Before submitting the issue report, please try updating the ruby-lsp gem first. If the bug is related to a
+        feature that involves automatically changing code, such as refactors or formatting, please include an example of
+        the resulting code. You may want to include a screenshot or GIF of the issue.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected output
+      description: A description of the expected behavior
+      placeholder: >
+        Describe what you expected to happen.
+    validations:
+      required: true
