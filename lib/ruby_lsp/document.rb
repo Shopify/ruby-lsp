@@ -77,9 +77,9 @@ module RubyLsp
     def parse
       return if @unparsed_edits.empty?
 
+      @unparsed_edits.clear
       @tree = SyntaxTree.parse(@source)
       @syntax_error = false
-      @unparsed_edits.clear
     rescue SyntaxTree::Parser::ParseError
       @syntax_error = true
     end
