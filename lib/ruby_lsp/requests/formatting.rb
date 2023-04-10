@@ -28,8 +28,7 @@ module RubyLsp
 
     class Formatting < BaseRequest
 
-      SYNTAX_TREE_AS_DIRECT_DEPENDENCY = Bundler::LockfileParser.new(Bundler.read_file(Bundler.default_lockfile))
-        .dependencies.key?("syntax_tree")
+      SYNTAX_TREE_AS_DIRECT_DEPENDENCY = Bundler.locked_gems.dependencies.key?("syntax_tree")
 
       class Error < StandardError; end
       class InvalidFormatter < StandardError; end
