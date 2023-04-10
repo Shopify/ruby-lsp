@@ -21,7 +21,7 @@ class UseLanguageServerAliasesTest < Minitest::Test
     assert_offense(<<~RUBY)
       module RubyLsp
         sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::FoldingRange], Object)) }
-                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use constant alias `Interface`.
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ RubyLsp/UseLanguageServerAliases: Use constant alias `Interface`.
       end
     RUBY
 
@@ -42,7 +42,7 @@ class UseLanguageServerAliasesTest < Minitest::Test
     assert_offense(<<~RUBY)
       module RubyLsp
         sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Transport::FoldingRange], Object)) }
-                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use constant alias `Transport`.
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ RubyLsp/UseLanguageServerAliases: Use constant alias `Transport`.
       end
     RUBY
 
@@ -63,7 +63,7 @@ class UseLanguageServerAliasesTest < Minitest::Test
     assert_offense(<<~RUBY)
       module RubyLsp
         sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Constant::FoldingRange], Object)) }
-                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use constant alias `Constant`.
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ RubyLsp/UseLanguageServerAliases: Use constant alias `Constant`.
       end
     RUBY
 
@@ -84,11 +84,11 @@ class UseLanguageServerAliasesTest < Minitest::Test
     assert_offense(<<~RUBY)
       module RubyLsp
         sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::FoldingRange], Object)) }
-                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use constant alias `Interface`.
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ RubyLsp/UseLanguageServerAliases: Use constant alias `Interface`.
         sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Transport::FoldingRange], Object)) }
-                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use constant alias `Transport`.
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ RubyLsp/UseLanguageServerAliases: Use constant alias `Transport`.
         sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Constant::FoldingRange], Object)) }
-                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use constant alias `Constant`.
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ RubyLsp/UseLanguageServerAliases: Use constant alias `Constant`.
       end
     RUBY
 
@@ -113,7 +113,7 @@ class UseLanguageServerAliasesTest < Minitest::Test
     assert_offense(<<~RUBY)
       module RubyLsp
         sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::FoldingRange], Object)) }
-                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use constant alias `Interface`.
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ RubyLsp/UseLanguageServerAliases: Use constant alias `Interface`.
       end
       sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Transport::FoldingRange], Object)) }
     RUBY
