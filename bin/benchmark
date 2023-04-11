@@ -247,6 +247,9 @@ requests = {
   "textDocument/hover" => base_params.merge(position: position),
   "textDocument/codeAction" => code_action_params,
   "textDocument/onTypeFormatting" => base_params.merge(position: { line: 1, character: 31 }, ch: "\n"),
+  "codeAction/resolve" => base_params.merge(data: { range: range, uri: FILE_URI }),
+  "textDocument/completion" => base_params.merge(position: position),
+  "textDocument/codeLens" => base_params,
 }
 
 results = {}
