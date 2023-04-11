@@ -21,7 +21,7 @@ end
 require_relative "../lib/ruby_lsp/internal"
 
 if ARGV.include?("--debug")
-  sockets_dir = "/tmp/ruby-lsp-debug-sockets"
+  sockets_dir = "#{Etc.systmpdir}/ruby-lsp-debug-sockets"
   Dir.mkdir(sockets_dir) unless Dir.exist?(sockets_dir)
   # ruby-debug-ENV["USER"] is an implicit naming pattern in ruby/debug
   # if it's not present, rdbg will not find the socket
