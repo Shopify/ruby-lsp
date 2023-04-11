@@ -28,7 +28,11 @@ if ARGV.include?("--debug")
   socket_identifier = "ruby-debug-#{ENV["USER"]}-#{File.basename(Dir.pwd)}.sock"
   ENV["RUBY_DEBUG_SOCK_PATH"] = "#{sockets_dir}/#{socket_identifier}"
 
-  require "debug/open_nonstop"
+  begin
+    require "debug/open_nonstop"
+  rescue LoadError
+    warn("You need to install the debug gem to use the --debug flag")
+  end
 end
 
 RubyLsp::Server.new.start
