@@ -74,6 +74,16 @@ module RubyLsp
       when "textDocument/formatting"
         begin
           formatting(uri)
+        rescue Requests::Formatter::NoFormatter => error
+          @notifications << Notification.new(
+            message: "window/statusUpdate",
+            params: Interface::ShowMessageParams.new(
+              type: Constant::MessageType::ERROR,
+              message: "hello from lsp",
+            ),
+          )
+
+          nil
         rescue Requests::Formatting::InvalidFormatter => error
           @notifications << Notification.new(
             message: "window/showMessage",

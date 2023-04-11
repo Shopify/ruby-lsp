@@ -27,11 +27,11 @@ module RubyLsp
     # ```
 
     class Formatting < BaseRequest
-
       SYNTAX_TREE_AS_DIRECT_DEPENDENCY = Bundler.locked_gems.dependencies.key?("syntax_tree")
 
       class Error < StandardError; end
       class InvalidFormatter < StandardError; end
+      class NoFormatter < StandardError; end
 
       extend T::Sig
 
@@ -47,7 +47,7 @@ module RubyLsp
             elsif SYNTAX_TREE_AS_DIRECT_DEPENDENCY
               "syntax_tree"
             else
-              "none"
+              raise NoFormatter, "No formatter found. Please add RuboCop or Syntax Tree to the bundle"
             end
           else
             formatter

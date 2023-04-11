@@ -58,7 +58,7 @@ class FormattingTest < Minitest::Test
     stub_syntax_tree(present: false)
 
     with_uninstalled_rubocop do
-      assert_nil(formatted_document)
+      assert_raises(NoFormatter) { formatted_document }
     end
   end
 
@@ -96,7 +96,7 @@ class FormattingTest < Minitest::Test
     with_uninstalled_rubocop do
       require "ruby_lsp/requests"
       document = RubyLsp::Document.new(source: "def foo", version: 1, uri: "file://#{__FILE__}")
-      assert_nil(RubyLsp::Requests::Formatting.new(document).run)
+      assert_raises(NoFormatter) { RubyLsp::Requests::Formatting.new(document).run }
     end
   end
 
