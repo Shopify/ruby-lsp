@@ -1,0 +1,40 @@
+---
+name: Ruby LSP feature proposal
+description: Propose a new feature for the Ruby LSP
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Thank you for proposing a new feature! Please answer the following questions to help us the proposal.
+  - type: checkboxes
+    attributes:
+      label: I have checked that this feature is not already implemented
+      description: Supported features can be found [here](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html)
+      options:
+        - label: This feature does not exist
+          required: true
+  - type: textarea
+    attributes:
+      label: Use case
+      description: Describe why this feature would be useful
+      placeholder: >
+        Do not describe the feature or implementation details. Focus on explaining why this feature would be useful, the
+        problems that it solves and why current features are not sufficient.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Description
+      description: Describe the feature you are proposing
+      placeholder: >
+        Explain the feature you want to be able to use in editors, not the implementation details.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Implementation
+      description: Do you have a suggestion of how this feature could be implemented?
+      placeholder: >
+        Explain how we could implement the proposed feature.
