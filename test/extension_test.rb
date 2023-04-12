@@ -5,43 +5,57 @@ require "test_helper"
 
 module RubyLsp
   class ExtensionTest < Minitest::Test
-    def test_registering_an_extension_invokes_activate_on_initialized
-      extension = Class.new(Extension) do
-        class << self
-          attr_reader :activated
+    def setup
+      @extension = Class.new(Extension) do
+        attr_reader :activated
 
-          def activate
-            @activated = true
-          end
+        def activate
+          @activated = true
+        end
+
+        def name
+          "My extension"
         end
       end
+    end
 
+    def teardown
+      Extension.extensions.clear
+    end
+
+    def test_registering_an_extension_invokes_activate_on_initialized
       Executor.new(RubyLsp::Store.new).execute({ method: "initialized" })
-      assert_predicate(extension, :activated)
+
+      extension_instance = T.must(Extension.extensions.find { |ext| ext.is_a?(@extension) })
+      assert_predicate(extension_instance, :activated)
     end
 
     def test_extensions_are_automatically_tracked
-      extension = Class.new(Extension) do
-        class << self
-          def activate; end
-        end
-      end
-
-      assert_includes(Extension.extensions, extension)
+      assert(
+        Extension.extensions.any? { |ext| ext.is_a?(@extension) },
+        "Expected extension to be automatically tracked",
+      )
     end
 
     def test_load_extensions_returns_errors
       Class.new(Extension) do
-        class << self
-          def activate
-            raise StandardError, "Failed to activate"
-          end
+        def activate
+          raise StandardError, "Failed to activate"
+        end
+
+        def name
+          "My extension"
         end
       end
 
-      error = T.must(Extension.load_extensions.first)
-      assert_instance_of(StandardError, error)
-      assert_equal("Failed to activate", error.message)
+      Extension.load_extensions
+      error_extension = T.must(Extension.extensions.find(&:error?))
+
+      assert_predicate(error_extension, :error?)
+      assert_equal(<<~MESSAGE, error_extension.formatted_errors)
+        My extension:
+          Failed to activate
+      MESSAGE
     end
   end
 end

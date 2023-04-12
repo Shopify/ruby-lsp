@@ -38,14 +38,21 @@ module RubyLsp
       when "initialize"
         initialize_request(request.dig(:params))
       when "initialized"
-        errors = Extension.load_extensions.map(&:message)
-        @notifications << Notification.new(
-          message: "window/showMessage",
-          params: Interface::ShowMessageParams.new(
-            type: Constant::MessageType::ERROR,
-            message: "Error loading extensions: #{errors.join(", ")}",
-          ),
-        ) if errors.any?
+        Extension.load_extensions
+
+        errored_extensions = Extension.extensions.select(&:error?)
+
+        if errored_extensions.any?
+          @notifications << Notification.new(
+            message: "window/showMessage",
+            params: Interface::ShowMessageParams.new(
+              type: Constant::MessageType::WARNING,
+              message: "Error loading extensions:\n\n#{errored_extensions.map(&:formatted_errors).join("\n\n")}",
+            ),
+          )
+
+          warn(errored_extensions.map(&:backtraces).join("\n\n"))
+        end
 
         warn("Ruby LSP is ready")
         VOID
