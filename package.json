@@ -341,14 +341,14 @@
     "@typescript-eslint/eslint-plugin": "^5.57.1",
     "@typescript-eslint/parser": "^5.58.0",
     "@vscode/test-electron": "^2.3.0",
+    "@vscode/vsce": "^2.19.0",
     "esbuild": "^0.17.16",
     "eslint": "^8.38.0",
     "eslint-import-resolver-typescript": "^3.5.5",
     "glob": "^10.0.0",
     "mocha": "^10.2.0",
     "prettier": "^2.8.7",
-    "typescript": "^5.0.4",
-    "vsce": "^2.15.0"
+    "typescript": "^5.0.4"
   },
   "dependencies": {
     "vscode-languageclient": "^8.1.0"
