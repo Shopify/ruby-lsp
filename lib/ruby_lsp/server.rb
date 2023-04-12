@@ -23,6 +23,7 @@ module RubyLsp
       @jobs = T.let({}, T::Hash[T.any(String, Integer), Job])
       @mutex = T.let(Mutex.new, Mutex)
       @worker = T.let(new_worker, Thread)
+      @current_request_id = T.let(1, Integer)
 
       Thread.main.priority = 1
     end
@@ -54,7 +55,7 @@ module RubyLsp
           @worker.join
           @store.clear
 
-          finalize_request(Result.new(response: nil, notifications: []), request)
+          finalize_request(Result.new(response: nil, messages: []), request)
         when "exit"
           # We return zero if shutdown has already been received or one otherwise as per the recommendation in the spec
           # https://microsoft.github.io/language-server-protocol/specification/#exit
@@ -88,7 +89,7 @@ module RubyLsp
 
           result = if job.cancelled
             # We need to return nil to the client even if the request was cancelled
-            Result.new(response: nil, notifications: [])
+            Result.new(response: nil, messages: [])
           else
             Executor.new(@store).execute(request)
           end
@@ -105,9 +106,6 @@ module RubyLsp
         error = result.error
         response = result.response
 
-        # If the response include any notifications, go through them and publish each one
-        result.notifications.each { |n| @writer.write(method: n.message, params: n.params) }
-
         if error
           @writer.write(
             id: request[:id],
@@ -119,6 +117,17 @@ module RubyLsp
           )
         elsif response != VOID
           @writer.write(id: request[:id], result: response)
+        end
+
+        # If the response include any messages, go through them and publish each one
+        result.messages.each do |n|
+          case n
+          when Notification
+            @writer.write(method: n.message, params: n.params)
+          when Request
+            @writer.write(id: @current_request_id, method: n.message, params: n.params)
+            @current_request_id += 1
+          end
         end
 
         request_time = result.request_time

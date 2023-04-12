@@ -11,7 +11,7 @@ module RubyLsp
       # Requests that mutate the store must be run sequentially! Parallel requests only receive a temporary copy of the
       # store
       @store = store
-      @notifications = T.let([], T::Array[Notification])
+      @messages = T.let([], T::Array[Message])
     end
 
     sig { params(request: T::Hash[Symbol, T.untyped]).returns(Result) }
@@ -25,7 +25,7 @@ module RubyLsp
         error = e
       end
 
-      Result.new(response: response, error: error, request_time: request_time, notifications: @notifications)
+      Result.new(response: response, error: error, request_time: request_time, messages: @messages)
     end
 
     private
@@ -43,7 +43,7 @@ module RubyLsp
         errored_extensions = Extension.extensions.select(&:error?)
 
         if errored_extensions.any?
-          @notifications << Notification.new(
+          @messages << Notification.new(
             message: "window/showMessage",
             params: Interface::ShowMessageParams.new(
               type: Constant::MessageType::WARNING,
@@ -63,7 +63,7 @@ module RubyLsp
           request.dig(:params, :textDocument, :version),
         )
       when "textDocument/didClose"
-        @notifications << Notification.new(
+        @messages << Notification.new(
           message: "textDocument/publishDiagnostics",
           params: Interface::PublishDiagnosticsParams.new(uri: uri, diagnostics: []),
         )
@@ -91,7 +91,7 @@ module RubyLsp
         begin
           formatting(uri)
         rescue Requests::Formatting::InvalidFormatter => error
-          @notifications << Notification.new(
+          @messages << Notification.new(
             message: "window/showMessage",
             params: Interface::ShowMessageParams.new(
               type: Constant::MessageType::ERROR,
@@ -101,7 +101,7 @@ module RubyLsp
 
           nil
         rescue StandardError => error
-          @notifications << Notification.new(
+          @messages << Notification.new(
             message: "window/showMessage",
             params: Interface::ShowMessageParams.new(
               type: Constant::MessageType::ERROR,
@@ -127,7 +127,7 @@ module RubyLsp
         begin
           diagnostic(uri)
         rescue StandardError => error
-          @notifications << Notification.new(
+          @messages << Notification.new(
             message: "window/showMessage",
             params: Interface::ShowMessageParams.new(
               type: Constant::MessageType::ERROR,
@@ -314,7 +314,7 @@ module RubyLsp
 
       case result
       when Requests::CodeActionResolve::Error::EmptySelection
-        @notifications << Notification.new(
+        @messages << Notification.new(
           message: "window/showMessage",
           params: Interface::ShowMessageParams.new(
             type: Constant::MessageType::ERROR,
@@ -323,7 +323,7 @@ module RubyLsp
         )
         raise Requests::CodeActionResolve::CodeActionError
       when Requests::CodeActionResolve::Error::InvalidTargetRange
-        @notifications << Notification.new(
+        @messages << Notification.new(
           message: "window/showMessage",
           params: Interface::ShowMessageParams.new(
             type: Constant::MessageType::ERROR,
