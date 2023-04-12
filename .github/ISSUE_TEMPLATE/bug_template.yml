@@ -25,8 +25,7 @@ body:
       label: Project has a bundle
       description: The project where the Ruby LSP is being used has a Gemfile.lock
       options:
-        - label: Project has a bundle
-          required: true
+        - label: Has bundle
   - type: dropdown
     attributes:
       label: Ruby version manager being used
@@ -34,7 +33,7 @@ body:
       options:
         - asdf
         - chruby
-        - none
+        - no manager
         - rbenv
         - rvm
         - shadowenv
