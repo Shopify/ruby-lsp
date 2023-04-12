@@ -314,6 +314,7 @@ if missing_benchmarks.any?
   puts "=" * 80
   puts "Missing benchmarks:\n\n"
   puts missing_benchmarks.map(&:to_s)
+  exit(1)
 end
 
 File.write(CACHE_FILE_PATH, results.to_json)
