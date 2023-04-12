@@ -31,7 +31,7 @@ RubyLsp::Requests::Support::RailsDocumentClient.send(:search_index)
 RubyLsp::Requests::DocumentLink.gem_paths
 
 ITERATIONS = 1000
-CACHE_FILE_PATH = "/tmp/ruby_lsp_benchmark_results.json"
+CACHE_FILE_PATH = "#{Etc.systmpdir}/ruby_lsp_benchmark_results.json"
 
 def avg_bench(method, params)
   results = (0...ITERATIONS).map do
