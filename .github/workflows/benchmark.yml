@@ -58,7 +58,11 @@ jobs:
       # Fail the job based on the benchmark output
       - name: Finalize job
         run: |
-          if [[ "${{ steps.benchmark.outputs.REPORT }}" == *"At least one benchmark is slower than the main branch"* ]]; then
+          REPORT="${{ steps.benchmark.outputs.REPORT }}"
+          IS_SLOWER=$(grep "At least one benchmark is slower than the main branch" <<< "$REPORT")
+          IS_MISSING=$(grep "Missing benchmarks" <<< "$REPORT")
+
+          if [[ $IS_SLOWER || $IS_MISSING ]]; then
             exit 1
           else
             exit 0

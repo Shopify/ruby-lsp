@@ -247,6 +247,9 @@ requests = {
   "textDocument/hover" => base_params.merge(position: position),
   "textDocument/codeAction" => code_action_params,
   "textDocument/onTypeFormatting" => base_params.merge(position: { line: 1, character: 31 }, ch: "\n"),
+  "codeAction/resolve" => base_params.merge(data: { range: range, uri: FILE_URI }),
+  "textDocument/completion" => base_params.merge(position: position),
+  "textDocument/codeLens" => base_params,
 }
 
 results = {}
@@ -296,6 +299,22 @@ if File.exist?(CACHE_FILE_PATH)
     puts "\n\nAt least one benchmark is slower than the main branch."
     exit(1)
   end
+end
+
+requests_benchmarked = RubyLsp::Requests::BaseRequest.subclasses.concat(RubyLsp::Listener.subclasses)
+
+Dir["#{Dir.pwd}/lib/ruby_lsp/requests/*.rb"].each { |file| require(file) }
+
+all_requests = RubyLsp::Requests::BaseRequest.subclasses.concat(RubyLsp::Listener.subclasses)
+
+missing_benchmarks = all_requests - requests_benchmarked
+
+if missing_benchmarks.any?
+  puts "\n\n"
+  puts "=" * 80
+  puts "Missing benchmarks:\n\n"
+  puts missing_benchmarks.map(&:to_s)
+  exit(1)
 end
 
 File.write(CACHE_FILE_PATH, results.to_json)
