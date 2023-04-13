@@ -9,7 +9,7 @@ module RubyLsp
   # - For nonpositional requests, use `visit` to go through the AST, which will fire events for each listener as nodes
   # are found
   #
-  # = Example
+  # # Example
   #
   # ```ruby
   # target_node = document.locate_node(position)
