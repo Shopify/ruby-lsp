@@ -9,8 +9,11 @@ module RubyLsp
   WORKSPACE_URI = T.let("file://#{Dir.pwd}".freeze, String) # rubocop:disable Style/RedundantFreeze
 
   # A notification to be sent to the client
-  class Notification
+  class Message
     extend T::Sig
+    extend T::Helpers
+
+    abstract!
 
     sig { returns(String) }
     attr_reader :message
@@ -25,6 +28,9 @@ module RubyLsp
     end
   end
 
+  class Notification < Message; end
+  class Request < Message; end
+
   # The final result of running a request before its IO is finalized
   class Result
     extend T::Sig
@@ -32,8 +38,8 @@ module RubyLsp
     sig { returns(T.untyped) }
     attr_reader :response
 
-    sig { returns(T::Array[Notification]) }
-    attr_reader :notifications
+    sig { returns(T::Array[Message]) }
+    attr_reader :messages
 
     sig { returns(T.nilable(Exception)) }
     attr_reader :error
@@ -44,14 +50,14 @@ module RubyLsp
     sig do
       params(
         response: T.untyped,
-        notifications: T::Array[Notification],
+        messages: T::Array[Message],
         error: T.nilable(Exception),
         request_time: T.nilable(Float),
       ).void
     end
-    def initialize(response:, notifications:, error: nil, request_time: nil)
+    def initialize(response:, messages:, error: nil, request_time: nil)
       @response = response
-      @notifications = notifications
+      @messages = messages
       @error = error
       @request_time = request_time
     end

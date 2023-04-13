@@ -337,6 +337,7 @@ class IntegrationTest < Minitest::Test
     File.write(".rubocop.yml", "\nInvalidCop:\n  Enabled: true", mode: "a")
 
     make_request("textDocument/diagnostic", { textDocument: { uri: "file://#{__FILE__}" } })
+    read_response("textDocument/diagnostic")
     response = read_response("window/showMessage")
 
     assert_equal("window/showMessage", response.dig(:method))
