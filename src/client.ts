@@ -460,6 +460,9 @@ export default class Client implements ClientInterface {
     // the Ruby LSP
     if (fs.existsSync(gemfileLockPath)) {
       fs.cpSync(gemfileLockPath, customGemfileLockPath);
+    } else if (fs.existsSync(customGemfileLockPath)) {
+      // Remove the .ruby-lsp/Gemfile.lock if there's no top-level Gemfile.lock
+      fs.rmSync(customGemfileLockPath);
     }
 
     const customGemfilePath = path.join(
