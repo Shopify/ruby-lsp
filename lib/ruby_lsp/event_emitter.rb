@@ -46,6 +46,8 @@ module RubyLsp
         @event_to_listener_map[:on_call]&.each { |listener| T.unsafe(listener).on_call(node) }
       when SyntaxTree::ConstPathRef
         @event_to_listener_map[:on_const_path_ref]&.each { |listener| T.unsafe(listener).on_const_path_ref(node) }
+      when SyntaxTree::Const
+        @event_to_listener_map[:on_const]&.each { |listener| T.unsafe(listener).on_const(node) }
       end
     end
   end

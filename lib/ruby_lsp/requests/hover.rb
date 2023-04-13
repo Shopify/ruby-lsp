@@ -41,6 +41,21 @@ module RubyLsp
         super()
       end
 
+      # Merges responses from other hover listeners
+      sig { params(other: Listener[ResponseType]).returns(T.self_type) }
+      def merge_response!(other)
+        other_response = other.response
+        return self unless other_response
+
+        if @response.nil?
+          @response = other.response
+        else
+          @response.contents.value << other_response.contents.value << "\n\n"
+        end
+
+        self
+      end
+
       listener_events do
         sig { params(node: SyntaxTree::Command).void }
         def on_command(node)

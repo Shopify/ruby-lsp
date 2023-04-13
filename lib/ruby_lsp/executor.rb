@@ -38,6 +38,22 @@ module RubyLsp
       when "initialize"
         initialize_request(request.dig(:params))
       when "initialized"
+        Extension.load_extensions
+
+        errored_extensions = Extension.extensions.select(&:error?)
+
+        if errored_extensions.any?
+          @notifications << Notification.new(
+            message: "window/showMessage",
+            params: Interface::ShowMessageParams.new(
+              type: Constant::MessageType::WARNING,
+              message: "Error loading extensions:\n\n#{errored_extensions.map(&:formatted_errors).join("\n\n")}",
+            ),
+          )
+
+          warn(errored_extensions.map(&:backtraces).join("\n\n"))
+        end
+
         warn("Ruby LSP is ready")
         VOID
       when "textDocument/didOpen"
@@ -160,9 +176,16 @@ module RubyLsp
         target = parent
       end
 
-      listener = RubyLsp::Requests::Hover.new
-      EventEmitter.new(listener).emit_for_target(target)
-      listener.response
+      # Instantiate all listeners
+      base_listener = Requests::Hover.new
+      listeners = Requests::Hover.listeners.map(&:new)
+
+      # Emit events for all listeners
+      T.unsafe(EventEmitter).new(base_listener, *listeners).emit_for_target(target)
+
+      # Merge all responses into a single hover
+      listeners.each { |ext| base_listener.merge_response!(ext) }
+      base_listener.response
     end
 
     sig { params(uri: String).returns(T::Array[Interface::DocumentLink]) }

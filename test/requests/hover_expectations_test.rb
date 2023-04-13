@@ -51,7 +51,50 @@ class HoverExpectationsTest < ExpectationsTestRunner
     }).response
   end
 
+  def test_after_request_hook
+    create_hover_hook_class
+    js_content = File.read(File.join(TEST_FIXTURES_DIR, "rails_search_index.js"))
+    fake_response = FakeHTTPResponse.new("200", js_content)
+    Net::HTTP.stubs(get_response: fake_response)
+
+    store = RubyLsp::Store.new
+    store.set(uri: "file:///fake.rb", source: <<~RUBY, version: 1)
+      class Post
+        belongs_to :user
+      end
+    RUBY
+
+    response = RubyLsp::Executor.new(store).execute({
+      method: "textDocument/hover",
+      params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 1, character: 2 } },
+    }).response
+
+    assert_match("Method from middleware: belongs_to", response.contents.value)
+    assert_match("[Rails Document: `ActiveRecord::Associations::ClassMethods#belongs_to`]", response.contents.value)
+  ensure
+    RubyLsp::Requests::Hover.listeners.clear
+  end
+
   private
+
+  def create_hover_hook_class
+    Class.new(RubyLsp::Listener) do
+      attr_reader :response
+
+      RubyLsp::Requests::Hover.add_listener(self)
+
+      listener_events do
+        def on_command(node)
+          T.bind(self, RubyLsp::Listener[T.untyped])
+          contents = RubyLsp::Interface::MarkupContent.new(
+            kind: "markdown",
+            value: "Method from middleware: #{node.message.value}",
+          )
+          @response = RubyLsp::Interface::Hover.new(range: range_from_syntax_tree_node(node), contents: contents)
+        end
+      end
+    end
+  end
 
   def substitute(original)
     original.gsub("RAILTIES_VERSION", Gem::Specification.find_by_name("railties").version.to_s)

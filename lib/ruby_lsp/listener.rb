@@ -20,6 +20,16 @@ module RubyLsp
       sig { returns(T.nilable(T::Array[Symbol])) }
       attr_reader :events
 
+      sig { returns(T::Array[T.class_of(Listener)]) }
+      def listeners
+        @listeners ||= T.let([], T.nilable(T::Array[T.class_of(Listener)]))
+      end
+
+      sig { params(listener: T.class_of(Listener)).void }
+      def add_listener(listener)
+        listeners << listener
+      end
+
       # All listener events must be defined inside of a `listener_events` block. This is to ensure we know which events
       # have been registered. Defining an event outside of this block will simply not register it and it'll never be
       # invoked
