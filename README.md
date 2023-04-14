@@ -123,7 +123,7 @@ To add a new expectations test runner for a new request handler:
 3. [`vscode-ruby-lsp`] Select `Run Extension` and click the green triangle (or press F5).
 4. [`vscode-ruby-lsp`] Now VS Code will:
     - Open another workspace as the `Extension Development Host`.
-    - Run `vscode-ruby-lsp` extension in debug mode, which will start a new `ruby-lsp` process with the `--debug` flag.
+    - Run `vscode-ruby-lsp` extension in debug mode, which will start a new `ruby-lsp` process with the `--debug` flag. Note that debugging is not available on Windows.
 5. Open `ruby-lsp` in VS Code.
 6. [`ruby-lsp`] Run `bin/rdbg -A` to connect to the running `ruby-lsp` process.
 7. [`ruby-lsp`] Use commands like `b <file>:<line>` or `b Class#method` to set breakpoints and type `c` to continue the process.
