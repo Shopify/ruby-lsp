@@ -59,7 +59,7 @@ jobs:
       - name: Finalize job
         run: |
           report="${{ steps.benchmark.outputs.REPORT }}"
-          if [[ "$report" == *"At least one benchmark is slower than the main branch"* || "$report" == *"Missing benchmarks"*]]; then
+          if [[ "$report" == *"At least one benchmark is slower than the main branch"* ]] || [[ "$report" == *"Missing benchmarks"* ]]; then
             exit 1
           else
             exit 0
