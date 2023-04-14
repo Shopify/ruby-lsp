@@ -7,7 +7,6 @@ $VERBOSE = nil
 
 require "bundler/setup"
 require "sorbet-runtime"
-require "tmpdir"
 
 # Disable any Sorbet checks
 begin

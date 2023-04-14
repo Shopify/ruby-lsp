@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 ENV["BUNDLE_GEMFILE"] ||= File.expand_path("../Gemfile", __dir__)
+require "tmpdir"
 
 # This is to match the directory vscode-ruby-lsp specifies for creating sockets.
 # It's required for attaching to a running LSP server process once it's activated in debug mode.
