@@ -48,6 +48,7 @@ GEM
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     method_source (1.0.0)
+    mini_portile2 (2.8.1)
     minitest (5.18.0)
     minitest-reporters (1.6.0)
       ansi
@@ -57,11 +58,8 @@ GEM
     mocha (2.0.2)
       ruby2_keywords (>= 0.0.5)
     netrc (0.11.0)
-    nokogiri (1.14.3-arm64-darwin)
-      racc (~> 1.4)
-    nokogiri (1.14.3-x86_64-darwin)
-      racc (~> 1.4)
-    nokogiri (1.14.3-x86_64-linux)
+    nokogiri (1.14.3)
+      mini_portile2 (~> 2.8.0)
       racc (~> 1.4)
     parallel (1.22.1)
     parser (3.2.2.0)
@@ -162,6 +160,8 @@ GEM
 
 PLATFORMS
   arm64-darwin
+  x64-mingw-ucrt
+  x64-mingw32
   x86_64-darwin
   x86_64-linux
 
