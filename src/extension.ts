@@ -22,6 +22,10 @@ export async function activate(context: vscode.ExtensionContext) {
 export async function deactivate(): Promise<void> {
   if (client) {
     await client.stop();
+<<<<<<< HEAD
+=======
+    client.dispose();
+>>>>>>> 2499083 (Add test controller)
   }
 
   if (debug) {

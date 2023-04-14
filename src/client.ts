@@ -10,11 +10,13 @@ import {
   LanguageClient,
   Executable,
   RevealOutputChannelOn,
+  CodeLens,
 } from "vscode-languageclient/node";
 
 import { Telemetry } from "./telemetry";
 import { Ruby } from "./ruby";
 import { StatusItems, Command, ServerState, ClientInterface } from "./status";
+import { TestController } from "./testController";
 
 const LSP_NAME = "Ruby LSP";
 const asyncExec = promisify(exec);
@@ -35,6 +37,7 @@ export default class Client implements ClientInterface {
     | undefined;
 
   private terminal: vscode.Terminal | undefined;
+  private testController: TestController;
   #context: vscode.ExtensionContext;
   #ruby: Ruby;
   #state: ServerState = ServerState.Starting;
@@ -51,6 +54,11 @@ export default class Client implements ClientInterface {
     this.statusItems = new StatusItems(this);
     this.registerCommands();
     this.registerAutoRestarts();
+    this.testController = new TestController(
+      context,
+      this.workingFolder,
+      this.ruby
+    );
     vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
       if (terminal === this.terminal) this.terminal = undefined;
     });
@@ -117,6 +125,18 @@ export default class Client implements ClientInterface {
         formatter: configuration.get("formatter"),
       },
       middleware: {
+        provideCodeLenses: async (document, token, next) => {
+          if (this.client) {
+            const response = await next(document, token);
+
+            if (response) {
+              this.testController.createTestItems(response as CodeLens[]);
+            }
+
+            return response;
+          }
+          return null;
+        },
         provideOnTypeFormattingEdits: async (
           document,
           position,
@@ -228,6 +248,12 @@ export default class Client implements ClientInterface {
         `Error restarting the server: ${error.message}`
       );
     }
+  }
+
+  dispose() {
+    this.testController.dispose();
+    this.client?.dispose();
+    this.outputChannel.dispose();
   }
 
   get ruby(): Ruby {
