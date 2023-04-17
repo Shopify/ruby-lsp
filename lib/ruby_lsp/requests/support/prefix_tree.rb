@@ -16,6 +16,11 @@ module RubyLsp
           end
         end
 
+        sig { void }
+        def clear
+          @root = Node.new("")
+        end
+
         sig { params(prefix: String).returns(T::Array[String]) }
         def search(prefix)
           node = T.let(@root, Node)
@@ -30,7 +35,10 @@ module RubyLsp
           node.collect
         end
 
-        private
+        sig { params(items: T::Enumerable[String]).void }
+        def insert_all(items)
+          items.each { |item| insert(item) }
+        end
 
         sig { params(item: String).void }
         def insert(item)

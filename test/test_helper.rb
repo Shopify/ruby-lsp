@@ -22,9 +22,8 @@ else
   Minitest::Reporters::DefaultReporter.new(color: true)
 end
 Minitest::Reporters.use!(minitest_reporter)
+Minitest::Test.make_my_diffs_pretty!
 
-module Minitest
-  class Test
-    Minitest::Test.make_my_diffs_pretty!
-  end
-end
+# Eager load the Index to avoid constant reloading issues with Sorbet
+RubyLsp::Index.instance
+T::Utils.run_all_sig_blocks

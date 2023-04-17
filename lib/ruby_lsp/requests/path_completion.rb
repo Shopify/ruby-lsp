@@ -20,7 +20,6 @@ module RubyLsp
       def initialize(document, position)
         super(document)
 
-        @tree = T.let(Support::PrefixTree.new(collect_load_path_files), Support::PrefixTree)
         @position = position
       end
 
@@ -34,21 +33,12 @@ module RubyLsp
         return [] unless target
 
         text = target.value
-        @tree.search(text).sort.map! do |path|
+        Index.instance.prefix_tree.search(text).sort!.map! do |path|
           build_completion(path, path.delete_prefix(text))
         end
       end
 
       private
-
-      sig { returns(T::Array[String]) }
-      def collect_load_path_files
-        $LOAD_PATH.flat_map do |p|
-          Dir.glob("**/*.rb", base: p)
-        end.map! do |result|
-          result.delete_suffix!(".rb")
-        end
-      end
 
       sig { returns(T.nilable(SyntaxTree::TStringContent)) }
       def find

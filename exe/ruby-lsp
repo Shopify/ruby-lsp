@@ -20,6 +20,8 @@ end
 
 require_relative "../lib/ruby_lsp/internal"
 
+T::Utils.run_all_sig_blocks
+
 if ARGV.include?("--debug")
   if ["x64-mingw-ucrt", "x64-mingw32"].include?(RUBY_PLATFORM)
     puts "Debugging is not supported on Windows"

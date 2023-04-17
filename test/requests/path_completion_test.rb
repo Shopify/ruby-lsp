@@ -160,17 +160,35 @@ class PathCompletionTest < Minitest::Test
       # |       |-- baz.rb
       # |       |-- quux.rb
       FileUtils.mkdir_p(tmpdir + "/foo/support")
-      FileUtils.touch([
+      files = [
         tmpdir + "/foo/bar.rb",
         tmpdir + "/foo/baz.rb",
         tmpdir + "/foo/quux.rb",
         tmpdir + "/foo/support/bar.rb",
         tmpdir + "/foo/support/baz.rb",
         tmpdir + "/foo/support/quux.rb",
-      ])
+      ]
+
+      changes = files.map do |file|
+        FileUtils.touch(file)
+        {
+          uri: "file://#{file}",
+          type: RubyLsp::Constant::FileChangeType::CREATED,
+        }
+      end
+      RubyLsp::Index.instance.synchronize(changes)
 
       return block.call
     ensure
+      changes = T.unsafe(files).map do |file|
+        FileUtils.rm(file)
+        {
+          uri: "file://#{file}",
+          type: RubyLsp::Constant::FileChangeType::DELETED,
+        }
+      end
+      RubyLsp::Index.instance.synchronize(changes)
+
       $LOAD_PATH.delete(tmpdir)
     end
   end

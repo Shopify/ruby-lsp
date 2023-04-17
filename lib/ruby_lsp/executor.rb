@@ -54,6 +54,9 @@ module RubyLsp
           warn(errored_extensions.map(&:backtraces).join("\n\n"))
         end
 
+        # Initialize instance to index the codebase
+        Index.instance.build
+
         warn("Ruby LSP is ready")
         VOID
       when "textDocument/didOpen"
@@ -141,7 +144,15 @@ module RubyLsp
         completion(uri, request.dig(:params, :position))
       when "textDocument/codeLens"
         code_lens(uri)
+      when "workspace/didChangeWatchedFiles"
+        did_change_watched_files(request.dig(:params, :changes))
       end
+    end
+
+    sig { params(changes: T::Array[{ uri: String, type: Integer }]).returns(Object) }
+    def did_change_watched_files(changes)
+      Index.instance.synchronize(changes)
+      VOID
     end
 
     sig { params(uri: String).returns(T::Array[Interface::FoldingRange]) }
@@ -467,6 +478,34 @@ module RubyLsp
         )
       end
 
+      # Dynamically registered capabilities
+      file_watching_caps = options.dig(:capabilities, :workspace, :didChangeWatchedFiles)
+
+      # Not every client supports dynamic registration or file watching
+      if file_watching_caps&.dig(:dynamicRegistration) && file_watching_caps&.dig(:relativePatternSupport)
+        @messages << Request.new(
+          message: "client/registerCapability",
+          params: Interface::RegistrationParams.new(
+            registrations: [
+              # Register watching Ruby files
+              Interface::Registration.new(
+                id: "workspace/didChangeWatchedFiles",
+                method: "workspace/didChangeWatchedFiles",
+                register_options: Interface::DidChangeWatchedFilesRegistrationOptions.new(
+                  watchers: [
+                    Interface::FileSystemWatcher.new(
+                      glob_pattern: "**/*.rb",
+                      kind: Constant::WatchKind::CREATE | Constant::WatchKind::CHANGE | Constant::WatchKind::DELETE,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        )
+      end
+
+      # Statically registered capabilities
       Interface::InitializeResult.new(
         capabilities: Interface::ServerCapabilities.new(
           text_document_sync: Interface::TextDocumentSyncOptions.new(

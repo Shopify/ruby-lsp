@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "syntax_tree/cli"
-require "singleton"
 
 module RubyLsp
   module Requests

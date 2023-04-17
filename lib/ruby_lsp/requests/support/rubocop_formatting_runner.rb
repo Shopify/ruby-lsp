@@ -5,7 +5,6 @@ require "ruby_lsp/requests/support/rubocop_runner"
 return unless defined?(RubyLsp::Requests::Support::RuboCopRunner)
 
 require "cgi"
-require "singleton"
 
 module RubyLsp
   module Requests
