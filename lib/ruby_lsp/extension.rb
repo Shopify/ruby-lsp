@@ -49,7 +49,7 @@ module RubyLsp
           require File.expand_path(extension)
         rescue => e
           warn(e.message)
-          warn(e.backtrace.to_s)
+          warn(e.backtrace.to_s) # rubocop:disable Lint/RedundantStringCoercion
         end
 
         # Activate each one of the discovered extensions. If any problems occur in the extensions, we don't want to
