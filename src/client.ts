@@ -523,6 +523,7 @@ export default class Client implements ClientInterface {
       this.outputChannel.appendLine(">> Running `bundle install`...");
 
       const install = spawn("bundle", ["install"], {
+        shell: true,
         cwd: this.workingFolder,
         signal: abortController.signal,
         env,
