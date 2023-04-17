@@ -48,7 +48,6 @@ jobs:
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |
-            const GITHUB_ACTIONS_USER_ID = 41898282
             const BODY_COMMENT = '```#${{ steps.benchmark.outputs.REPORT }}#```'.split("#").join("\n")
 
             const { data: issueComments } = await github.rest.issues.listComments({
@@ -57,10 +56,9 @@ jobs:
               issue_number: context.issue.number,
             });
 
-            commentToUpdate = issueComments.find(comment => {
-              const { body, user: { id } } = comment
-              return id === GITHUB_ACTIONS_USER_ID && body.includes("Benchmark results")
-            })
+            commentToUpdate = issueComments.find((comment) =>
+              comment.body.includes("Benchmark results in seconds (slowest at top)")
+            );
 
             if (commentToUpdate) {
               await github.rest.issues.updateComment({
