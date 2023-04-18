@@ -136,10 +136,10 @@ export class Ruby {
   }
 
   private async activate(ruby: string) {
-    const result = await asyncExec(
-      `${this.shell} -ic '${ruby} --disable-gems -rjson -e "printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, JSON.dump(ENV.to_h))"'`,
-      { cwd: this.workingFolder }
-    );
+    let command = this.shell ? `${this.shell} -ic ` : "";
+    command += `'${ruby} --disable-gems -rjson -e "printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, JSON.dump(ENV.to_h))"'`;
+
+    const result = await asyncExec(command, { cwd: this.workingFolder });
 
     const envJson = result.stdout.match(
       /RUBY_ENV_ACTIVATE(.*)RUBY_ENV_ACTIVATE/
@@ -284,7 +284,9 @@ export class Ruby {
 
   private async toolExists(tool: string) {
     try {
-      await asyncExec(`${this.shell} -lic '${tool} --version'`);
+      let command = this.shell ? `${this.shell} -ic ` : "";
+      command += `'${tool} --version'`;
+      await asyncExec(command, { cwd: this.workingFolder });
       return true;
     } catch {
       return false;
