@@ -11,6 +11,7 @@ const asyncExec = promisify(exec);
 
 export class TestController {
   private testController: vscode.TestController;
+  private testCommands: WeakMap<vscode.TestItem, string>;
   private testRunProfile: vscode.TestRunProfile;
   private workingFolder: string;
   private ruby: Ruby;
@@ -28,6 +29,8 @@ export class TestController {
       "Ruby Tests"
     );
 
+    this.testCommands = new WeakMap<vscode.TestItem, string>();
+
     this.testRunProfile = this.testController.createRunProfile(
       "Run",
       vscode.TestRunProfileKind.Run,
@@ -36,6 +39,8 @@ export class TestController {
       },
       true
     );
+
+    vscode.commands.executeCommand("testing.clearTestResults");
 
     context.subscriptions.push(
       this.testController,
@@ -51,6 +56,7 @@ export class TestController {
   createTestItems(response: CodeLens[]) {
     this.testController.items.forEach((test) => {
       this.testController.items.delete(test.id);
+      this.testCommands.delete(test);
     });
 
     let classTest: vscode.TestItem;
@@ -68,7 +74,8 @@ export class TestController {
           uri
         );
 
-        testItem.description = command;
+        this.testCommands.set(testItem, command);
+
         testItem.range = new vscode.Range(
           new vscode.Position(location.start_line, location.start_column),
           new vscode.Position(location.end_line, location.end_column)
@@ -91,7 +98,7 @@ export class TestController {
     request: vscode.TestRunRequest,
     token: vscode.CancellationToken
   ) {
-    const run = this.testController.createTestRun(request, undefined, false);
+    const run = this.testController.createTestRun(request, undefined, true);
     const queue: vscode.TestItem[] = [];
 
     if (request.include) {
@@ -107,16 +114,28 @@ export class TestController {
         continue;
       }
 
-      const start = Date.now();
-      try {
-        await this.assertTestPasses(test);
-        run.passed(test, Date.now() - start);
-      } catch (err: any) {
-        run.failed(
-          test,
-          new vscode.TestMessage(err.message),
-          Date.now() - start
-        );
+      if (test.id.startsWith("test_")) {
+        const start = Date.now();
+        try {
+          await this.assertTestPasses(test);
+          run.passed(test, Date.now() - start);
+        } catch (err: any) {
+          const messageArr = err.message.split("\n");
+
+          // Minitest and test/unit outputs are formatted differently so we need to slice the message
+          // differently to get an output format that only contains essential information
+          // If the first element of the message array is "", we know the output is a Minitest output
+          const testMessage =
+            messageArr[0] === ""
+              ? messageArr.slice(10, messageArr.length - 2).join("\n")
+              : messageArr.slice(4, messageArr.length - 9).join("\n");
+
+          run.failed(
+            test,
+            new vscode.TestMessage(testMessage),
+            Date.now() - start
+          );
+        }
       }
 
       test.children.forEach((test) => queue.push(test));
@@ -128,20 +147,12 @@ export class TestController {
 
   async assertTestPasses(test: vscode.TestItem) {
     try {
-      await asyncExec(test.description!, {
+      await asyncExec(this.testCommands.get(test)!, {
         cwd: this.workingFolder,
         env: this.ruby.env,
       });
     } catch (error: any) {
-      const errorArr = error.stdout.split("\n");
-
-      if (errorArr[0] === "") {
-        // Minitest
-        throw new Error(errorArr.slice(10, errorArr.length - 2).join("\n"));
-      } else {
-        // test-unit
-        throw new Error(errorArr.slice(4, errorArr.length - 9).join("\n"));
-      }
+      throw new Error(error.stdout);
     }
   }
 
@@ -161,8 +172,9 @@ export class TestController {
       vscode.window.showInformationMessage("Cancelled the progress");
     });
 
-    const testRun = new vscode.TestRunRequest([test]);
-    this.runHandler(testRun, tokenSource.token);
+    const testRun = new vscode.TestRunRequest([test], [], this.testRunProfile);
+
+    this.testRunProfile.runHandler(testRun, tokenSource.token);
   }
 
   findTestById(testItems: vscode.TestItemCollection, testId: string) {
