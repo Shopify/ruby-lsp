@@ -80,6 +80,10 @@ module RubyLsp
 
       sig { void }
       def handle_statement_end
+        # If a keyword occurs in a line which appears be a comment or a string, we will not try to format it, since
+        # it could be a coincidental match. This approach is not perfect, but it should cover most cases.
+        return if @previous_line.start_with?(/["'#]/)
+
         return unless END_REGEXES.any? { |regex| regex.match?(@previous_line) }
 
         indents = " " * @indentation
