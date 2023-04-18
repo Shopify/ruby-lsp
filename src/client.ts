@@ -195,9 +195,8 @@ export default class Client implements ClientInterface {
 
   async stop(): Promise<void> {
     if (this.client) {
+      await this.client.stop();
       this.state = ServerState.Stopped;
-
-      return this.client.stop();
     }
   }
 
@@ -206,6 +205,10 @@ export default class Client implements ClientInterface {
     // when doing git pull, which may trigger a restart for two watchers: .rubocop.yml and Gemfile.lock. In those cases,
     // we only want to restart once and not twice to avoid leading to a duplicate process
     if (this.state === ServerState.Starting) {
+      return;
+    }
+
+    if (this.rebaseInProgress()) {
       return;
     }
 
@@ -572,5 +575,17 @@ export default class Client implements ClientInterface {
         reject(error);
       });
     });
+  }
+
+  // If the `.git` folder exists and `.git/rebase-merge` or `.git/rebase-apply` exists, then we're in the middle of a
+  // rebase
+  private rebaseInProgress() {
+    const gitFolder = path.join(this.workingFolder, ".git");
+
+    return (
+      fs.existsSync(gitFolder) &&
+      (fs.existsSync(path.join(gitFolder, "rebase-merge")) ||
+        fs.existsSync(path.join(gitFolder, "rebase-apply")))
+    );
   }
 }
