@@ -23,7 +23,32 @@ module RubyLsp
       @jobs = T.let({}, T::Hash[T.any(String, Integer), Job])
       @mutex = T.let(Mutex.new, Mutex)
       @worker = T.let(new_worker, Thread)
-      @current_request_id = T.let(1, Integer)
+
+      # The messages queue includes requests and notifications to be sent to the client
+      @message_queue = T.let(Thread::Queue.new, Thread::Queue)
+
+      # Create a thread to watch the messages queue and send them to the client
+      @message_dispatcher = T.let(
+        Thread.new do
+          current_request_id = 1
+
+          loop do
+            message = @message_queue.pop
+            break if message.nil?
+
+            @mutex.synchronize do
+              case message
+              when Notification
+                @writer.write(method: message.message, params: message.params)
+              when Request
+                @writer.write(id: current_request_id, method: message.message, params: message.params)
+                current_request_id += 1
+              end
+            end
+          end
+        end,
+        Thread,
+      )
 
       Thread.main.priority = 1
     end
@@ -38,7 +63,7 @@ module RubyLsp
         case request[:method]
         when "initialize", "initialized", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange",
               "textDocument/formatting", "textDocument/onTypeFormatting", "codeAction/resolve"
-          result = Executor.new(@store).execute(request)
+          result = Executor.new(@store, @message_queue).execute(request)
           finalize_request(result, request)
         when "$/cancelRequest"
           # Cancel the job if it's still in the queue
@@ -46,6 +71,7 @@ module RubyLsp
         when "shutdown"
           warn("Shutting down Ruby LSP...")
 
+          @message_queue.close
           # Close the queue so that we can no longer receive items
           @job_queue.close
           # Clear any remaining jobs so that the thread can terminate
@@ -53,9 +79,10 @@ module RubyLsp
           @jobs.clear
           # Wait until the thread is finished
           @worker.join
+          @message_dispatcher.join
           @store.clear
 
-          finalize_request(Result.new(response: nil, messages: []), request)
+          finalize_request(Result.new(response: nil), request)
         when "exit"
           # We return zero if shutdown has already been received or one otherwise as per the recommendation in the spec
           # https://microsoft.github.io/language-server-protocol/specification/#exit
@@ -89,9 +116,9 @@ module RubyLsp
 
           result = if job.cancelled
             # We need to return nil to the client even if the request was cancelled
-            Result.new(response: nil, messages: [])
+            Result.new(response: nil)
           else
-            Executor.new(@store).execute(request)
+            Executor.new(@store, @message_queue).execute(request)
           end
 
           finalize_request(result, request)
@@ -117,17 +144,6 @@ module RubyLsp
           )
         elsif response != VOID
           @writer.write(id: request[:id], result: response)
-        end
-
-        # If the response include any messages, go through them and publish each one
-        result.messages.each do |n|
-          case n
-          when Notification
-            @writer.write(method: n.message, params: n.params)
-          when Request
-            @writer.write(id: @current_request_id, method: n.message, params: n.params)
-            @current_request_id += 1
-          end
         end
 
         request_time = result.request_time

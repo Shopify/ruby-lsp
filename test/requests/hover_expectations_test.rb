@@ -16,14 +16,17 @@ class HoverExpectationsTest < ExpectationsTestRunner
   end
 
   def test_search_index_being_nil
+    message_queue = Thread::Queue.new
     store = RubyLsp::Store.new
     store.set(uri: "file:///fake.rb", source: "belongs_to :foo", version: 1)
 
     RubyLsp::Requests::Support::RailsDocumentClient.stubs(search_index: nil)
-    RubyLsp::Executor.new(store).execute({
+    RubyLsp::Executor.new(store, message_queue).execute({
       method: "textDocument/hover",
       params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 0, character: 0 } },
     }).response
+  ensure
+    T.must(message_queue).close
   end
 
   class FakeHTTPResponse
@@ -36,6 +39,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
   end
 
   def run_expectations(source)
+    message_queue = Thread::Queue.new
     js_content = File.read(File.join(TEST_FIXTURES_DIR, "rails_search_index.js"))
     fake_response = FakeHTTPResponse.new("200", js_content)
 
@@ -45,13 +49,16 @@ class HoverExpectationsTest < ExpectationsTestRunner
     store = RubyLsp::Store.new
     store.set(uri: "file:///fake.rb", source: source, version: 1)
 
-    RubyLsp::Executor.new(store).execute({
+    RubyLsp::Executor.new(store, message_queue).execute({
       method: "textDocument/hover",
       params: { textDocument: { uri: "file:///fake.rb" }, position: position },
     }).response
+  ensure
+    T.must(message_queue).close
   end
 
   def test_after_request_hook
+    message_queue = Thread::Queue.new
     create_hover_hook_class
     js_content = File.read(File.join(TEST_FIXTURES_DIR, "rails_search_index.js"))
     fake_response = FakeHTTPResponse.new("200", js_content)
@@ -64,7 +71,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    response = RubyLsp::Executor.new(store).execute({
+    response = RubyLsp::Executor.new(store, message_queue).execute({
       method: "textDocument/hover",
       params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 1, character: 2 } },
     }).response
@@ -73,6 +80,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
     assert_match("[Rails Document: `ActiveRecord::Associations::ClassMethods#belongs_to`]", response.contents.value)
   ensure
     RubyLsp::Requests::Hover.listeners.clear
+    T.must(message_queue).close
   end
 
   private

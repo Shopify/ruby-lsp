@@ -38,9 +38,6 @@ module RubyLsp
     sig { returns(T.untyped) }
     attr_reader :response
 
-    sig { returns(T::Array[Message]) }
-    attr_reader :messages
-
     sig { returns(T.nilable(Exception)) }
     attr_reader :error
 
@@ -50,14 +47,12 @@ module RubyLsp
     sig do
       params(
         response: T.untyped,
-        messages: T::Array[Message],
         error: T.nilable(Exception),
         request_time: T.nilable(Float),
       ).void
     end
-    def initialize(response:, messages:, error: nil, request_time: nil)
+    def initialize(response:, error: nil, request_time: nil)
       @response = response
-      @messages = messages
       @error = error
       @request_time = request_time
     end

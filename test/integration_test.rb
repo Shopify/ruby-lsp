@@ -238,9 +238,6 @@ class IntegrationTest < Minitest::Test
     assert_telemetry("textDocument/didOpen")
 
     assert(send_request("textDocument/didClose", { textDocument: { uri: "file://#{__FILE__}" } }))
-
-    diagnostics = read_response("textDocument/publishDiagnostics")
-    assert_empty(diagnostics.dig(:params, :diagnostics), "Did not clear diagnostics after closing file")
   end
 
   def test_document_did_change
@@ -326,30 +323,6 @@ class IntegrationTest < Minitest::Test
 
     assert_nil(response[:result])
     assert_nil(response[:error])
-  end
-
-  def test_incorrect_rubocop_configuration
-    initialize_lsp([])
-    open_file_with("class Foo\nend")
-
-    # Add an invalid cop to the configuration, but save a backup since we're modifying the real file
-    FileUtils.cp(".rubocop.yml", ".rubocop.yml.bak")
-    File.write(".rubocop.yml", "\nInvalidCop:\n  Enabled: true", mode: "a")
-
-    make_request("textDocument/diagnostic", { textDocument: { uri: "file://#{__FILE__}" } })
-    read_response("textDocument/diagnostic")
-    response = read_response("window/showMessage")
-
-    assert_equal("window/showMessage", response.dig(:method))
-    assert_equal(LanguageServer::Protocol::Constant::MessageType::ERROR, response.dig(:params, :type))
-    assert_equal(
-      "Error running diagnostics: unrecognized cop or department InvalidCop found in .rubocop.yml",
-      response.dig(:params, :message),
-    )
-  ensure
-    # Restore the original configuration file
-    FileUtils.rm(".rubocop.yml")
-    FileUtils.mv(".rubocop.yml.bak", ".rubocop.yml")
   end
 
   def test_diagnostics

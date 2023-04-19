@@ -34,6 +34,7 @@ ITERATIONS = 1000
 CACHE_FILE_PATH = "/tmp/ruby_lsp_benchmark_results.json"
 
 def avg_bench(method, params)
+  message_queue = Thread::Queue.new
   results = (0...ITERATIONS).map do
     # Create a new store every time to prevent caching
     store = RubyLsp::Store.new
@@ -43,12 +44,13 @@ def avg_bench(method, params)
 
     GC.disable
     result = Benchmark.measure do
-      RubyLsp::Executor.new(store).execute({
+      RubyLsp::Executor.new(store, message_queue).execute({
         method: method,
         params: params,
       })
     end.utime
     GC.enable
+    message_queue.close
     result
   end
 

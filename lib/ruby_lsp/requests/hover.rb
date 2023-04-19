@@ -35,10 +35,11 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :response
 
-      sig { void }
-      def initialize
+      sig { params(message_queue: Thread::Queue).void }
+      def initialize(message_queue)
         @response = T.let(nil, ResponseType)
-        super()
+
+        super
       end
 
       # Merges responses from other hover listeners
