@@ -64,7 +64,6 @@ export class Debugger
         request: "launch",
         // eslint-disable-next-line no-template-curly-in-string
         program: "ruby ${file}",
-        env: this.ruby.env,
       },
       {
         type: "ruby_lsp",
@@ -72,13 +71,11 @@ export class Debugger
         request: "launch",
         // eslint-disable-next-line no-template-curly-in-string
         program: "ruby -Itest ${relativeFile}",
-        env: this.ruby.env,
       },
       {
         type: "ruby_lsp",
         name: "Debug",
         request: "attach",
-        env: this.ruby.env,
       },
     ];
   }
@@ -141,6 +138,7 @@ export class Debugger
     session: vscode.DebugSession
   ): Promise<vscode.DebugAdapterDescriptor | undefined> {
     let initialMessage = "";
+    let initialized = false;
     const sockPath = this.socketPath();
 
     return new Promise((resolve, reject) => {
@@ -156,6 +154,7 @@ export class Debugger
           session.configuration.program,
         ],
         {
+          shell: true,
           env: this.ruby.env,
           cwd: this.workingFolder,
         }
@@ -166,14 +165,17 @@ export class Debugger
         // Print whatever data we get in stderr in the debug console since it might be relevant for the user
         this.console.append(message);
 
+        if (!initialized) {
+          initialMessage += message;
+        }
+
         // When stderr includes a complete wait for debugger connection message, then we're done initializing and can
         // resolve the promise. If we try to resolve earlier, VS Code will simply fail to connect
         if (
           initialMessage.includes("DEBUGGER: wait for debugger connection...")
         ) {
+          initialized = true;
           resolve(new vscode.DebugAdapterNamedPipeServer(sockPath));
-        } else {
-          initialMessage += message;
         }
       });
 
@@ -192,11 +194,8 @@ export class Debugger
       // code zero here is because debug actually exits with 1 if the user cancels the debug session, which is not
       // actually an error
       this.debugProcess.on("exit", (code) => {
-        if (code && code > 1) {
-          const message = `
-          Debuggee failed to launch "${session.configuration.program}" with exit status ${code}. This may indicate an
-          issue with your launch configurations.`;
-
+        if (code) {
+          const message = `Debugger exited with status ${code}`;
           this.console.append(message);
           reject(new Error(message));
         }
@@ -221,9 +220,10 @@ export class Debugger
       .sort();
 
     if (existingSockets.length > 0) {
-      socketIndex = Number(
-        existingSockets[existingSockets.length - 1].match(/-(\d+).sock$/)![1]
-      );
+      socketIndex =
+        Number(
+          existingSockets[existingSockets.length - 1].match(/-(\d+).sock$/)![1]
+        ) + 1;
     }
 
     return `${socketsDir}/${prefix}-${socketIndex}.sock`;

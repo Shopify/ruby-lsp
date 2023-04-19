@@ -21,10 +21,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
 export async function deactivate(): Promise<void> {
   if (client) {
-    return client.stop();
+    await client.stop();
   }
 
   if (debug) {
-    return debug.dispose();
+    debug.dispose();
   }
 }
