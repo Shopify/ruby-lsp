@@ -84,7 +84,19 @@ module RubyLsp
       when "textDocument/selectionRange"
         selection_range(uri, request.dig(:params, :positions))
       when "textDocument/documentSymbol"
-        document_symbol(uri)
+        document = @store.get(uri)
+
+        # If the response has already been cached by another request, return it
+        cached_response = document.cache_get(request[:method])
+        return cached_response if cached_response
+
+        # Run listeners for the document
+        listener = Requests::DocumentSymbol.new(@message_queue)
+        EventEmitter.new(listener).visit(document.tree) if document.parsed?
+
+        # Store all responses retrieve in this round of visits in the cache. The last one we save must always be the one
+        # related to the request we're receiving since that's the response we want to return to the editor
+        document.cache_set(request[:method], listener.response)
       when "textDocument/semanticTokens/full"
         semantic_tokens_full(uri)
       when "textDocument/semanticTokens/range"
@@ -148,14 +160,14 @@ module RubyLsp
 
     sig { params(uri: String).returns(T::Array[Interface::FoldingRange]) }
     def folding_range(uri)
-      @store.cache_fetch(uri, :folding_ranges) do |document|
+      @store.cache_fetch(uri, "textDocument/foldingRange") do |document|
         Requests::FoldingRanges.new(document).run
       end
     end
 
     sig { params(uri: String).returns(T::Array[Interface::CodeLens]) }
     def code_lens(uri)
-      @store.cache_fetch(uri, :code_lens) do |document|
+      @store.cache_fetch(uri, "textDocument/codeLens") do |document|
         Requests::CodeLens.new(document).run
       end
     end
@@ -191,15 +203,8 @@ module RubyLsp
 
     sig { params(uri: String).returns(T::Array[Interface::DocumentLink]) }
     def document_link(uri)
-      @store.cache_fetch(uri, :document_link) do |document|
+      @store.cache_fetch(uri, "textDocument/documentLink") do |document|
         RubyLsp::Requests::DocumentLink.new(document).run
-      end
-    end
-
-    sig { params(uri: String).returns(T::Array[Interface::DocumentSymbol]) }
-    def document_symbol(uri)
-      @store.cache_fetch(uri, :document_symbol) do |document|
-        Requests::DocumentSymbol.new(document).run
       end
     end
 
@@ -228,7 +233,7 @@ module RubyLsp
       ).returns(T.nilable(T::Array[T.nilable(Requests::Support::SelectionRange)]))
     end
     def selection_range(uri, positions)
-      ranges = @store.cache_fetch(uri, :selection_ranges) do |document|
+      ranges = @store.cache_fetch(uri, "textDocument/selectionRange") do |document|
         Requests::SelectionRanges.new(document).run
       end
 
@@ -248,7 +253,7 @@ module RubyLsp
 
     sig { params(uri: String).returns(Interface::SemanticTokens) }
     def semantic_tokens_full(uri)
-      @store.cache_fetch(uri, :semantic_highlighting) do |document|
+      @store.cache_fetch(uri, "textDocument/semanticTokens/full") do |document|
         T.cast(
           Requests::SemanticHighlighting.new(
             document,
@@ -342,7 +347,7 @@ module RubyLsp
 
     sig { params(uri: String).returns(T.nilable(Interface::FullDocumentDiagnosticReport)) }
     def diagnostic(uri)
-      response = @store.cache_fetch(uri, :diagnostics) do |document|
+      response = @store.cache_fetch(uri, "textDocument/diagnostic") do |document|
         Requests::Diagnostics.new(document).run
       end
 

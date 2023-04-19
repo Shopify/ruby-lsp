@@ -19,11 +19,18 @@ module RubyLsp
       @message_queue = message_queue
     end
 
+    @event_to_listener_map = T.let(Hash.new { |h, k| h[k] = [] }, T::Hash[Symbol, T::Array[T.class_of(Listener)]])
+
+    sig { params(event: Symbol).returns(T.nilable(T::Boolean)) }
+    def registered_for_event?(event)
+      Listener.event_to_listener_map[event]&.include?(self.class)
+    end
+
     class << self
       extend T::Sig
 
-      sig { returns(T.nilable(T::Array[Symbol])) }
-      attr_reader :events
+      sig { returns(T::Hash[Symbol, T::Array[T.class_of(Listener)]]) }
+      attr_reader :event_to_listener_map
 
       sig { returns(T::Array[T.class_of(Listener)]) }
       def listeners
@@ -42,7 +49,10 @@ module RubyLsp
       def listener_events(&block)
         current_methods = instance_methods
         block.call
-        @events = T.let(instance_methods - current_methods, T.nilable(T::Array[Symbol]))
+
+        (instance_methods - current_methods).each do |event|
+          T.must(Listener.event_to_listener_map[event]) << self
+        end
       end
     end
 

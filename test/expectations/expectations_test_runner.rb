@@ -8,12 +8,30 @@ class ExpectationsTestRunner < Minitest::Test
 
   class << self
     def expectations_tests(handler_class, expectation_suffix)
+      execute_request = if handler_class < RubyLsp::Listener
+        <<~RUBY
+          listener = #{handler_class}.new(@message_queue)
+          RubyLsp::EventEmitter.new(listener).visit(document.tree)
+          listener.response
+        RUBY
+      else
+        "#{handler_class}.new(document, *params).run"
+      end
+
       class_eval(<<~RB, __FILE__, __LINE__ + 1)
         module ExpectationsRunnerMethods
+          def setup
+            @message_queue = Thread::Queue.new
+          end
+
+          def teardown
+            @message_queue.close
+          end
+
           def run_expectations(source)
             params = @__params&.any? ? @__params : default_args
             document = RubyLsp::Document.new(source: source, version: 1, uri: "file:///fake.rb")
-            #{handler_class}.new(document, *params).run
+            #{execute_request}
           end
 
           def assert_expectations(source, expected)

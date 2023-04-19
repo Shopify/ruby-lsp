@@ -23,7 +23,7 @@ module RubyLsp
 
     sig { params(source: String, version: Integer, uri: String, encoding: String).void }
     def initialize(source:, version:, uri:, encoding: Constant::PositionEncodingKind::UTF8)
-      @cache = T.let({}, T::Hash[Symbol, T.untyped])
+      @cache = T.let({}, T::Hash[String, T.untyped])
       @encoding = T.let(encoding, String)
       @source = T.let(source, String)
       @version = T.let(version, Integer)
@@ -40,10 +40,11 @@ module RubyLsp
       @source == other.source
     end
 
+    # TODO: remove this method once all nonpositional requests have been migrated to the listener pattern
     sig do
       type_parameters(:T)
         .params(
-          request_name: Symbol,
+          request_name: String,
           block: T.proc.params(document: Document).returns(T.type_parameter(:T)),
         ).returns(T.type_parameter(:T))
     end
@@ -54,6 +55,16 @@ module RubyLsp
       result = block.call(self)
       @cache[request_name] = result
       result
+    end
+
+    sig { type_parameters(:T).params(request_name: String, value: T.type_parameter(:T)).returns(T.type_parameter(:T)) }
+    def cache_set(request_name, value)
+      @cache[request_name] = value
+    end
+
+    sig { params(request_name: String).returns(T.untyped) }
+    def cache_get(request_name)
+      @cache[request_name]
     end
 
     sig { params(edits: T::Array[EditShape], version: Integer).void }
