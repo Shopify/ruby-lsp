@@ -485,6 +485,14 @@ class DocumentTest < Minitest::Test
     assert_empty(document.instance_variable_get(:@unparsed_edits))
   end
 
+  def test_cache_set_and_get
+    document = RubyLsp::Document.new(source: +"", version: 1, uri: "file:///foo/bar.rb")
+    value = [1, 2, 3]
+
+    assert_equal(value, document.cache_set("textDocument/semanticHighlighting", value))
+    assert_equal(value, document.cache_get("textDocument/semanticHighlighting"))
+  end
+
   private
 
   def assert_error_edit(actual, error_range)
