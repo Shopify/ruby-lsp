@@ -84,19 +84,7 @@ module RubyLsp
       when "textDocument/selectionRange"
         selection_range(uri, request.dig(:params, :positions))
       when "textDocument/documentSymbol"
-        document = @store.get(uri)
-
-        # If the response has already been cached by another request, return it
-        cached_response = document.cache_get(request[:method])
-        return cached_response if cached_response
-
-        # Run listeners for the document
-        listener = Requests::DocumentSymbol.new(@message_queue)
-        EventEmitter.new(listener).visit(document.tree) if document.parsed?
-
-        # Store all responses retrieved in this round of visits in the cache. The last one we save must always be the
-        # one related to the request we're receiving since that's the response we want to return to the editor
-        document.cache_set(request[:method], listener.response)
+        document_symbol(uri)
       when "textDocument/semanticTokens/full"
         semantic_tokens_full(uri)
       when "textDocument/semanticTokens/range"
@@ -216,6 +204,13 @@ module RubyLsp
     def document_link(uri)
       @store.cache_fetch(uri, "textDocument/documentLink") do |document|
         RubyLsp::Requests::DocumentLink.new(document).run
+      end
+    end
+
+    sig { params(uri: String).returns(T::Array[Interface::DocumentSymbol]) }
+    def document_symbol(uri)
+      @store.cache_fetch(uri, :document_symbol) do |document|
+        Requests::DocumentSymbol.new(document).run
       end
     end
 

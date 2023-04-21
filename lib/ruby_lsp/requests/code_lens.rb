@@ -113,45 +113,64 @@ module RubyLsp
         self
       end
 
+      class << self
+        include RubyLsp::Requests::Support::Common
+
+        sig do
+          params(
+            node: SyntaxTree::Node,
+            path: String,
+            name: String,
+            test_command: String,
+            type: String,
+          ).returns(Interface::CodeLens)
+        end
+        def create_code_lens(node, path:, name:, test_command:, type:)
+          title = type == "test" ? "Run" : "Debug"
+          command = type == "test" ? "rubyLsp.runTest" : "rubyLsp.debugTest"
+          range = range_from_syntax_tree_node(node)
+          arguments = [
+            path,
+            name,
+            test_command,
+            {
+              start_line: node.location.start_line - 1,
+              start_column: node.location.start_column,
+              end_line: node.location.end_line - 1,
+              end_column: node.location.end_column,
+            },
+          ]
+
+          Interface::CodeLens.new(
+            range: range,
+            command: Interface::Command.new(
+              title: title,
+              command: command,
+              arguments: arguments,
+            ),
+            data: { type: type },
+          )
+        end
+      end
+
       private
 
       sig { params(node: SyntaxTree::Node, name: String, command: String).void }
       def add_code_lens(node, name:, command:)
-        range = range_from_syntax_tree_node(node)
-        arguments = [
-          @path,
-          name,
-          command,
-          {
-            start_line: node.location.start_line - 1,
-            start_column: node.location.start_column,
-            end_line: node.location.end_line - 1,
-            end_column: node.location.end_column,
-          },
-        ]
-
-        @response << Interface::CodeLens.new(
-          range: range_from_syntax_tree_node(node),
-          command: Interface::Command.new(
-            title: "Run",
-            command: "rubyLsp.runTest",
-            arguments: arguments,
-          ),
-          data: {
-            type: "test",
-          },
+        @response << RubyLsp::Requests::CodeLens.create_code_lens(
+          node,
+          path: @path,
+          name: name,
+          test_command: command,
+          type: "test",
         )
 
-        @results << Interface::CodeLens.new(
-          range: range,
-          command: Interface::Command.new(
-            title: "Debug",
-            command: "rubyLsp.debugTest",
-            arguments: arguments,
-          ),
-          data: {
-            type: "debug",
-          },
+        @response << RubyLsp::Requests::CodeLens.create_code_lens(
+          node,
+          path: @path,
+          name: name,
+          test_command: command,
+          type: "debug",
         )
       end
     end
