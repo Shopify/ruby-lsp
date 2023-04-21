@@ -107,6 +107,12 @@ module RubyLsp
         end
       end
 
+      sig { params(other: Listener[ResponseType]).returns(T.self_type) }
+      def merge_response!(other)
+        @response.concat(other.response)
+        self
+      end
+
       private
 
       sig { params(node: SyntaxTree::Node, name: String, command: String).void }
