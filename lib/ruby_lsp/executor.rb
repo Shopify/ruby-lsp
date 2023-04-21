@@ -170,9 +170,17 @@ module RubyLsp
     def code_lens(uri)
       @store.cache_fetch(uri, "textDocument/codeLens") do |document|
         document.parse
-        listener = Requests::CodeLens.new(document.uri, @message_queue)
-        EventEmitter.new(listener).visit(document.tree) if document.parsed?
-        listener.response
+
+        # Instantiate all listeners
+        base_listener = Requests::CodeLens.new(document.uri, @message_queue)
+        listeners = Requests::CodeLens.listeners.map { |l| l.new(document.uri, @message_queue) }
+
+        # Emit events for all listeners
+        T.unsafe(EventEmitter).new(base_listener, *listeners).visit(document.tree) if document.parsed?
+
+        # Merge all responses into a single hover
+        listeners.each { |ext| base_listener.merge_response!(ext) }
+        base_listener.response
       end
     end
 
