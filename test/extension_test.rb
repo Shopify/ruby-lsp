@@ -24,10 +24,13 @@ module RubyLsp
     end
 
     def test_registering_an_extension_invokes_activate_on_initialized
-      Executor.new(RubyLsp::Store.new).execute({ method: "initialized" })
+      message_queue = Thread::Queue.new
+      Executor.new(RubyLsp::Store.new, message_queue).execute({ method: "initialized" })
 
       extension_instance = T.must(Extension.extensions.find { |ext| ext.is_a?(@extension) })
       assert_predicate(extension_instance, :activated)
+    ensure
+      T.must(message_queue).close
     end
 
     def test_extensions_are_automatically_tracked

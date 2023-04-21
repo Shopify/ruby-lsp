@@ -14,6 +14,11 @@ module RubyLsp
 
     abstract!
 
+    sig { params(message_queue: Thread::Queue).void }
+    def initialize(message_queue)
+      @message_queue = message_queue
+    end
+
     class << self
       extend T::Sig
 
