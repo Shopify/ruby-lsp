@@ -23,13 +23,13 @@ module RubyLsp
       response = T.let(nil, T.untyped)
       error = T.let(nil, T.nilable(Exception))
 
-      request_time = Benchmark.realtime do
+      begin
         response = run(request)
       rescue StandardError, LoadError => e
         error = e
       end
 
-      Result.new(response: response, error: error, request_time: request_time)
+      Result.new(response: response, error: error)
     end
 
     private

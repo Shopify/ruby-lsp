@@ -153,55 +153,17 @@ module RubyLsp
             error: {
               code: Constant::ErrorCodes::INTERNAL_ERROR,
               message: error.inspect,
-              data: request.to_json,
+              data: {
+                errorClass: error.class.name,
+                errorMessage: error.message,
+                backtrace: error.backtrace&.map { |bt| bt.sub(/^#{Dir.home}/, "~") }&.join("\n"),
+              },
             },
           )
         elsif response != VOID
           @writer.write(id: request[:id], result: response)
         end
-
-        request_time = result.request_time
-        if request_time
-          @writer.write(method: "telemetry/event", params: telemetry_params(request, request_time, error))
-        end
       end
-    end
-
-    sig do
-      params(
-        request: T::Hash[Symbol, T.untyped],
-        request_time: Float,
-        error: T.nilable(Exception),
-      ).returns(T::Hash[Symbol, T.any(String, Float)])
-    end
-    def telemetry_params(request, request_time, error)
-      uri = request.dig(:params, :textDocument, :uri)
-      params = {
-        request: request[:method],
-        lspVersion: RubyLsp::VERSION,
-        requestTime: request_time,
-      }
-
-      if error
-        params[:errorClass] = error.class.name
-        params[:errorMessage] = error.message
-
-        log_params = request[:params]
-        params[:params] = log_params.reject { |k, _| k == :textDocument }.to_json if log_params
-
-        backtrace = error.backtrace
-        params[:backtrace] = backtrace.map { |bt| bt.sub(/^#{Dir.home}/, "~") }.join("\n") if backtrace
-      end
-
-      if uri
-        home = URI::Generic.from_path(path: Dir.home)
-
-        parsed_uri = URI(uri)
-        path = parsed_uri.path
-        params[:uri] = path ? path.sub(T.must(home.path), "~") : parsed_uri.opaque
-      end
-
-      params
     end
   end
 end
