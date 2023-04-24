@@ -66,30 +66,28 @@ export class TestController {
     });
 
     response.forEach((res) => {
-      if (res.data.type === "test") {
-        const [_, name, command, location] = res.command!.arguments!;
-        const testItem: vscode.TestItem = this.testController.createTestItem(
-          name,
-          name,
-          uri
-        );
+      const [_, name, command, location] = res.command!.arguments!;
+      const testItem: vscode.TestItem = this.testController.createTestItem(
+        name,
+        name,
+        uri
+      );
 
-        this.testCommands.set(testItem, command);
+      this.testCommands.set(testItem, command);
 
-        testItem.range = new vscode.Range(
-          new vscode.Position(location.start_line, location.start_column),
-          new vscode.Position(location.end_line, location.end_column)
-        );
+      testItem.range = new vscode.Range(
+        new vscode.Position(location.start_line, location.start_column),
+        new vscode.Position(location.end_line, location.end_column)
+      );
 
-        // Add test methods as children to the test class so it appears nested in Test explorer
-        // and running the test class will run all of the test methods
-        if (name.startsWith("test_")) {
-          classTest.children.add(testItem);
-        } else {
-          classTest = testItem;
-          classTest.canResolveChildren = true;
-          this.testController.items.add(testItem);
-        }
+      // Add test methods as children to the test class so it appears nested in Test explorer
+      // and running the test class will run all of the test methods
+      if (name.startsWith("test_")) {
+        classTest.children.add(testItem);
+      } else {
+        classTest = testItem;
+        classTest.canResolveChildren = true;
+        this.testController.items.add(testItem);
       }
     });
   }

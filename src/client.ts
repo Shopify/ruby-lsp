@@ -36,7 +36,6 @@ export default class Client implements ClientInterface {
     | vscode.CancellationTokenSource
     | undefined;
 
-  private terminal: vscode.Terminal | undefined;
   private testController: TestController;
   #context: vscode.ExtensionContext;
   #ruby: Ruby;
@@ -45,23 +44,17 @@ export default class Client implements ClientInterface {
   constructor(
     context: vscode.ExtensionContext,
     telemetry: Telemetry,
-    ruby: Ruby
+    ruby: Ruby,
+    testController: TestController
   ) {
     this.workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
     this.telemetry = telemetry;
+    this.testController = testController;
     this.#context = context;
     this.#ruby = ruby;
     this.statusItems = new StatusItems(this);
     this.registerCommands();
     this.registerAutoRestarts();
-    this.testController = new TestController(
-      context,
-      this.workingFolder,
-      this.ruby
-    );
-    vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
-      if (terminal === this.terminal) this.terminal = undefined;
-    });
   }
 
   async start() {
@@ -126,16 +119,21 @@ export default class Client implements ClientInterface {
       },
       middleware: {
         provideCodeLenses: async (document, token, next) => {
-          if (this.client) {
-            const response = await next(document, token);
-
-            if (response) {
-              this.testController.createTestItems(response as CodeLens[]);
-            }
-
-            return response;
+          if (!this.client) {
+            return null;
           }
-          return null;
+
+          const response = await next(document, token);
+
+          if (response) {
+            this.testController.createTestItems(
+              response.filter(
+                (codeLens) => (codeLens as CodeLens).data.type === "test"
+              ) as CodeLens[]
+            );
+          }
+
+          return response;
         },
         provideOnTypeFormattingEdits: async (
           document,
@@ -251,7 +249,6 @@ export default class Client implements ClientInterface {
   }
 
   dispose() {
-    this.testController.dispose();
     this.client?.dispose();
     this.outputChannel.dispose();
   }
@@ -290,21 +287,11 @@ export default class Client implements ClientInterface {
         Command.Update,
         this.updateServer.bind(this)
       ),
-      vscode.commands.registerCommand(Command.RunTest, this.runTest.bind(this)),
       vscode.commands.registerCommand(
         Command.DebugTest,
         this.debugTest.bind(this)
       )
     );
-  }
-
-  private runTest(_path: string, _name: string, command: string) {
-    if (this.terminal === undefined) {
-      this.terminal = vscode.window.createTerminal({ name: "Run test" });
-    }
-
-    this.terminal.show();
-    this.terminal.sendText(command);
   }
 
   private debugTest(_path: string, _name: string, command: string) {
