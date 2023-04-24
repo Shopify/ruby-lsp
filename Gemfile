@@ -14,7 +14,7 @@ gem "minitest-reporters", "~> 1.6"
 gem "mocha", "~> 2.0"
 gem "rake", "~> 13.0"
 gem "rubocop", "~> 1.50"
-gem "rubocop-shopify", "~> 2.12", require: false
+gem "rubocop-shopify", "~> 2.13", require: false
 gem "rubocop-minitest", "~> 0.30.0", require: false
 gem "rubocop-rake", "~> 0.6.0", require: false
 gem "rubocop-sorbet", "~> 0.7", require: false

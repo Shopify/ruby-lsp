@@ -108,8 +108,8 @@ GEM
       rubocop (>= 1.39, < 2.0)
     rubocop-rake (0.6.0)
       rubocop (~> 1.0)
-    rubocop-shopify (2.12.0)
-      rubocop (~> 1.44)
+    rubocop-shopify (2.13.0)
+      rubocop (~> 1.50)
     rubocop-sorbet (0.7.0)
       rubocop (>= 0.90.0)
     ruby-progressbar (1.13.0)
@@ -176,7 +176,7 @@ DEPENDENCIES
   rubocop (~> 1.50)
   rubocop-minitest (~> 0.30.0)
   rubocop-rake (~> 0.6.0)
-  rubocop-shopify (~> 2.12)
+  rubocop-shopify (~> 2.13)
   rubocop-sorbet (~> 0.7)
   ruby-lsp!
   sorbet-static-and-runtime
