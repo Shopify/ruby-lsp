@@ -151,9 +151,14 @@
             "none",
             "rbenv",
             "rvm",
-            "shadowenv"
+            "shadowenv",
+            "custom"
           ],
           "default": "auto"
+        },
+        "rubyLsp.customRubyCommand": {
+          "description": "A shell command to activate the right Ruby version or add a custom Ruby bin folder to the PATH. Only used if rubyVersionManager is set to 'custom'",
+          "type": "string"
         },
         "rubyLsp.yjit": {
           "description": "Use YJIT to speed up the Ruby LSP server",

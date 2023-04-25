@@ -15,6 +15,7 @@ export enum VersionManager {
   Rvm = "rvm",
   Shadowenv = "shadowenv",
   None = "none",
+  Custom = "custom",
 }
 
 export class Ruby {
@@ -78,6 +79,9 @@ export class Ruby {
           break;
         case VersionManager.Rvm:
           await this.activate("rvm-auto-ruby");
+          break;
+        case VersionManager.Custom:
+          await this.activateCustomRuby();
           break;
         case VersionManager.None:
           await this.activate("ruby");
@@ -297,5 +301,20 @@ export class Ruby {
     return new Promise((resolve) => {
       setTimeout(resolve, mseconds);
     });
+  }
+
+  private async activateCustomRuby() {
+    const configuration = vscode.workspace.getConfiguration("rubyLsp");
+    const customCommand: string | undefined =
+      configuration.get("customRubyCommand");
+
+    if (customCommand === undefined) {
+      throw new Error(
+        "The customRubyCommand configuration must be set when 'custom' is selected as the version manager. \
+        See the [README](https://github.com/Shopify/vscode-ruby-lsp#custom-activation) for instructions."
+      );
+    }
+
+    await this.activate(`${customCommand} && ruby`);
   }
 }
