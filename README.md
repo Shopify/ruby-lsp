@@ -136,7 +136,7 @@ BUNDLE_GEMFILE=/path/to/your/project/.ruby-lsp/Gemfile bundle install
 ```
 
 If after these steps the Ruby LSP is still not initializing properly, please report the issue
-[here](https://github.com/Shopify/vscode-ruby-lsp/issues/new?assignees=&labels=bug&template=bug_template.yml).
+[here](https://github.com/Shopify/vscode-ruby-lsp/issues/new?labels=bug&template=bug_template.yml).
 
 ## Migrating from bundle
 
