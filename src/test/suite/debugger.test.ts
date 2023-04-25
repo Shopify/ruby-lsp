@@ -19,7 +19,6 @@ suite("Debugger", () => {
           request: "launch",
           // eslint-disable-next-line no-template-curly-in-string
           program: "ruby ${file}",
-          env: ruby.env,
         },
         {
           type: "ruby_lsp",
@@ -27,13 +26,11 @@ suite("Debugger", () => {
           request: "launch",
           // eslint-disable-next-line no-template-curly-in-string
           program: "ruby -Itest ${relativeFile}",
-          env: ruby.env,
         },
         {
           type: "ruby_lsp",
           name: "Debug",
           request: "attach",
-          env: ruby.env,
         },
       ],
       configs
