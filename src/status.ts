@@ -21,6 +21,7 @@ export enum Command {
   SelectVersionManager = "rubyLsp.selectRubyVersionManager",
   ToggleFeatures = "rubyLsp.toggleFeatures",
   RunTest = "rubyLsp.runTest",
+  DebugTest = "rubyLsp.debugTest",
 }
 
 const STOPPED_SERVER_OPTIONS = [
