@@ -166,7 +166,6 @@ module RubyLsp
     end
     def hover(uri, position)
       document = @store.get(uri)
-      document.parse
       return if document.syntax_error?
 
       target, parent = document.locate_node(position)

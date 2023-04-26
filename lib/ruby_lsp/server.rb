@@ -61,8 +61,7 @@ module RubyLsp
       # fall under the else branch which just pushes requests to the queue
       @reader.read do |request|
         case request[:method]
-        when "initialize", "initialized", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange",
-              "textDocument/formatting", "textDocument/onTypeFormatting", "codeAction/resolve"
+        when "initialize", "initialized", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange"
           result = Executor.new(@store, @message_queue).execute(request)
           finalize_request(result, request)
         when "$/cancelRequest"
@@ -93,8 +92,17 @@ module RubyLsp
           # Default case: push the request to the queue to be executed by the worker
           job = Job.new(request: request, cancelled: false)
 
-          # Remember a handle to the job, so that we can cancel it
-          @mutex.synchronize { @jobs[request[:id]] = job }
+          @mutex.synchronize do
+            # Remember a handle to the job, so that we can cancel it
+            @jobs[request[:id]] = job
+
+            # We must parse the document under a mutex lock or else we might switch threads and accept text edits in the
+            # source. Altering the source reference during parsing will put the parser in an invalid internal state,
+            # since it started parsing with one source but then it changed in the middle
+            uri = request.dig(:params, :textDocument, :uri)
+            @store.get(uri).parse if uri
+          end
+
           @job_queue << job
         end
       end
