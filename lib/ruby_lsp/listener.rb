@@ -14,9 +14,10 @@ module RubyLsp
 
     abstract!
 
-    sig { params(message_queue: Thread::Queue).void }
-    def initialize(message_queue)
+    sig { params(uri: String, message_queue: Thread::Queue).void }
+    def initialize(uri, message_queue)
       @message_queue = message_queue
+      @uri = uri
     end
 
     @event_to_listener_map = T.let(Hash.new { |h, k| h[k] = [] }, T::Hash[Symbol, T::Array[T.class_of(Listener)]])

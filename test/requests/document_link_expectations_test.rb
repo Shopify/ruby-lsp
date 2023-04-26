@@ -21,8 +21,15 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
   end
 
   def run_expectations(source)
-    document = RubyLsp::Document.new(source: source, version: 1, uri: "file://#{@_path}")
-    RubyLsp::Requests::DocumentLink.new(document).run
+    message_queue = Thread::Queue.new
+    uri = "file://#{@_path}"
+    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+
+    listener = RubyLsp::Requests::DocumentLink.new(uri, message_queue)
+    RubyLsp::EventEmitter.new(listener).visit(document.tree)
+    listener.response
+  ensure
+    T.must(message_queue).close
   end
 
   private
