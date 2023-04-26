@@ -14,6 +14,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
+    document.parse
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 8 }, "\n").run
     expected_edits = [
@@ -39,6 +40,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
+    document.parse
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 11 }, "{").run
     expected_edits = [
@@ -64,6 +66,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
+    document.parse
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 11 }, "|").run
     expected_edits = [
@@ -89,6 +92,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
+    document.parse
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 11 }, "|").run
     assert_empty(T.must(edits))
@@ -104,6 +108,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
+    document.parse
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 14 }, "\n").run
     expected_edits = [
@@ -129,6 +134,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
+    document.parse
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 5 }, "\n").run
     assert_empty(edits)
@@ -146,6 +152,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
+    document.parse
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 14 }, "\n").run
     expected_edits = [
@@ -174,6 +181,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
+    document.parse
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 7 }, "\n").run
     expected_edits = [
@@ -199,6 +207,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
+    document.parse
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").run
     expected_edits = [
