@@ -33,6 +33,36 @@
     {
       "range": {
         "start": {
+          "line": 0,
+          "character": 0
+        },
+        "end": {
+          "line": 18,
+          "character": 3
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fake.rb",
+          "Test",
+          "bundle exec ruby -Itest /fake.rb",
+          {
+            "start_line": 0,
+            "start_column": 0,
+            "end_line": 18,
+            "end_column": 3
+          }
+        ]
+      },
+      "data": {
+        "type": "debug"
+      }
+    },
+    {
+      "range": {
+        "start": {
           "line": 5,
           "character": 2
         },
@@ -58,6 +88,36 @@
       },
       "data": {
         "type": "test"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 2
+        },
+        "end": {
+          "line": 5,
+          "character": 22
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fake.rb",
+          "test_public",
+          "bundle exec ruby -Itest /fake.rb --name test_public",
+          {
+            "start_line": 5,
+            "start_column": 2,
+            "end_line": 5,
+            "end_column": 22
+          }
+        ]
+      },
+      "data": {
+        "type": "debug"
       }
     },
     {
@@ -93,6 +153,36 @@
     {
       "range": {
         "start": {
+          "line": 9,
+          "character": 9
+        },
+        "end": {
+          "line": 9,
+          "character": 37
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fake.rb",
+          "test_public_command",
+          "bundle exec ruby -Itest /fake.rb --name test_public_command",
+          {
+            "start_line": 9,
+            "start_column": 9,
+            "end_line": 9,
+            "end_column": 37
+          }
+        ]
+      },
+      "data": {
+        "type": "debug"
+      }
+    },
+    {
+      "range": {
+        "start": {
           "line": 11,
           "character": 9
         },
@@ -123,6 +213,36 @@
     {
       "range": {
         "start": {
+          "line": 11,
+          "character": 9
+        },
+        "end": {
+          "line": 11,
+          "character": 37
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fake.rb",
+          "test_another_public",
+          "bundle exec ruby -Itest /fake.rb --name test_another_public",
+          {
+            "start_line": 11,
+            "start_column": 9,
+            "end_line": 11,
+            "end_column": 37
+          }
+        ]
+      },
+      "data": {
+        "type": "debug"
+      }
+    },
+    {
+      "range": {
+        "start": {
           "line": 17,
           "character": 2
         },
@@ -148,6 +268,36 @@
       },
       "data": {
         "type": "test"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 17,
+          "character": 2
+        },
+        "end": {
+          "line": 17,
+          "character": 28
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fake.rb",
+          "test_public_vcall",
+          "bundle exec ruby -Itest /fake.rb --name test_public_vcall",
+          {
+            "start_line": 17,
+            "start_column": 2,
+            "end_line": 17,
+            "end_column": 28
+          }
+        ]
+      },
+      "data": {
+        "type": "debug"
       }
     }
   ],
