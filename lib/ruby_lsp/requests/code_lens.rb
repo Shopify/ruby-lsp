@@ -110,24 +110,41 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::Node, name: String, command: String).void }
       def add_code_lens(node, name:, command:)
+        range = range_from_syntax_tree_node(node)
+        arguments = [
+          @path,
+          name,
+          command,
+          {
+            start_line: node.location.start_line - 1,
+            start_column: node.location.start_column,
+            end_line: node.location.end_line - 1,
+            end_column: node.location.end_column,
+          },
+        ]
+
         @results << Interface::CodeLens.new(
-          range: range_from_syntax_tree_node(node),
+          range: range,
           command: Interface::Command.new(
             title: "Run",
             command: "rubyLsp.runTest",
-            arguments: [
-              @path,
-              name,
-              command,
-              {
-                start_line: node.location.start_line - 1,
-                start_column: node.location.start_column,
-                end_line: node.location.end_line - 1,
-                end_column: node.location.end_column,
-              },
-            ],
+            arguments: arguments,
           ),
-          data: { type: "test" },
+          data: {
+            type: "test",
+          },
+        )
+
+        @results << Interface::CodeLens.new(
+          range: range,
+          command: Interface::Command.new(
+            title: "Debug",
+            command: "rubyLsp.debugTest",
+            arguments: arguments,
+          ),
+          data: {
+            type: "debug",
+          },
         )
       end
     end
