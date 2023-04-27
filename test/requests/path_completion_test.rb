@@ -169,7 +169,7 @@ class PathCompletionTest < Minitest::Test
         tmpdir + "/foo/support/quux.rb",
       ])
 
-      return block.call
+      return yield
     ensure
       $LOAD_PATH.delete(tmpdir)
     end

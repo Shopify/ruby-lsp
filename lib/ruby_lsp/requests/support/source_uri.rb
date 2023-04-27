@@ -62,7 +62,7 @@ module URI
     def check_host(v)
       return true unless v
 
-      if /[A-Za-z][A-Za-z0-9\-_]*/ !~ v
+      unless /[A-Za-z][A-Za-z0-9\-_]*/.match?(v)
         raise InvalidComponentError,
           "bad component(expected gem name): #{v}"
       end

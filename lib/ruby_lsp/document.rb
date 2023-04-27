@@ -51,7 +51,7 @@ module RubyLsp
       cached = @cache[request_name]
       return cached if cached
 
-      result = block.call(self)
+      result = yield(self)
       @cache[request_name] = result
       result
     end

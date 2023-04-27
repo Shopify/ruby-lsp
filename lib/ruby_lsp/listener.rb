@@ -41,7 +41,7 @@ module RubyLsp
       sig { params(block: T.proc.void).void }
       def listener_events(&block)
         current_methods = instance_methods
-        block.call
+        yield
         @events = T.let(instance_methods - current_methods, T.nilable(T::Array[Symbol]))
       end
     end

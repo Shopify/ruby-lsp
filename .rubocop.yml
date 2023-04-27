@@ -5,6 +5,7 @@ require:
  - rubocop-sorbet
  - rubocop-minitest
  - rubocop-rake
+ - rubocop-performance
  - ./lib/rubocop/cop/ruby_lsp/use_language_server_aliases
 
 AllCops:
@@ -16,6 +17,8 @@ AllCops:
   - "features/**/*"
   - "test/fixtures/**/*"
   - "test/expectations/**/*"
+  - "bin/tapioca"
+  - "bin/rubocop"
 
 Naming/FileName:
   Exclude:
