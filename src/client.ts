@@ -10,11 +10,13 @@ import {
   LanguageClient,
   Executable,
   RevealOutputChannelOn,
+  CodeLens,
 } from "vscode-languageclient/node";
 
 import { Telemetry } from "./telemetry";
 import { Ruby } from "./ruby";
 import { StatusItems, Command, ServerState, ClientInterface } from "./status";
+import { TestController } from "./testController";
 
 const LSP_NAME = "Ruby LSP";
 const asyncExec = promisify(exec);
@@ -34,7 +36,7 @@ export default class Client implements ClientInterface {
     | vscode.CancellationTokenSource
     | undefined;
 
-  private terminal: vscode.Terminal | undefined;
+  private testController: TestController;
   #context: vscode.ExtensionContext;
   #ruby: Ruby;
   #state: ServerState = ServerState.Starting;
@@ -42,18 +44,17 @@ export default class Client implements ClientInterface {
   constructor(
     context: vscode.ExtensionContext,
     telemetry: Telemetry,
-    ruby: Ruby
+    ruby: Ruby,
+    testController: TestController
   ) {
     this.workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
     this.telemetry = telemetry;
+    this.testController = testController;
     this.#context = context;
     this.#ruby = ruby;
     this.statusItems = new StatusItems(this);
     this.registerCommands();
     this.registerAutoRestarts();
-    vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
-      if (terminal === this.terminal) this.terminal = undefined;
-    });
   }
 
   async start() {
@@ -117,6 +118,23 @@ export default class Client implements ClientInterface {
         formatter: configuration.get("formatter"),
       },
       middleware: {
+        provideCodeLenses: async (document, token, next) => {
+          if (!this.client) {
+            return null;
+          }
+
+          const response = await next(document, token);
+
+          if (response) {
+            this.testController.createTestItems(
+              response.filter(
+                (codeLens) => (codeLens as CodeLens).data.type === "test"
+              ) as CodeLens[]
+            );
+          }
+
+          return response;
+        },
         provideOnTypeFormattingEdits: async (
           document,
           position,
@@ -230,6 +248,11 @@ export default class Client implements ClientInterface {
     }
   }
 
+  dispose() {
+    this.client?.dispose();
+    this.outputChannel.dispose();
+  }
+
   get ruby(): Ruby {
     return this.#ruby;
   }
@@ -264,21 +287,11 @@ export default class Client implements ClientInterface {
         Command.Update,
         this.updateServer.bind(this)
       ),
-      vscode.commands.registerCommand(Command.RunTest, this.runTest.bind(this)),
       vscode.commands.registerCommand(
         Command.DebugTest,
         this.debugTest.bind(this)
       )
     );
-  }
-
-  private runTest(_path: string, _name: string, command: string) {
-    if (this.terminal === undefined) {
-      this.terminal = vscode.window.createTerminal({ name: "Run test" });
-    }
-
-    this.terminal.show();
-    this.terminal.sendText(command);
   }
 
   private debugTest(_path: string, _name: string, command: string) {
