@@ -94,8 +94,8 @@ module RubyLsp
         listener = Requests::DocumentSymbol.new(@message_queue)
         EventEmitter.new(listener).visit(document.tree) if document.parsed?
 
-        # Store all responses retrieve in this round of visits in the cache. The last one we save must always be the one
-        # related to the request we're receiving since that's the response we want to return to the editor
+        # Store all responses retrieved in this round of visits in the cache. The last one we save must always be the
+        # one related to the request we're receiving since that's the response we want to return to the editor
         document.cache_set(request[:method], listener.response)
       when "textDocument/semanticTokens/full"
         semantic_tokens_full(uri)
