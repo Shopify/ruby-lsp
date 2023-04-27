@@ -385,6 +385,7 @@ class IntegrationTest < Minitest::Test
         initializationOptions: {
           enabledFeatures: enabled_features,
           experimentalFeaturesEnabled: experimental_features_enabled,
+          formatter: "rubocop",
         },
       },
     )[:result]

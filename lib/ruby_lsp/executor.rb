@@ -54,6 +54,8 @@ module RubyLsp
           warn(errored_extensions.map(&:backtraces).join("\n\n"))
         end
 
+        check_formatter_is_available
+
         warn("Ruby LSP is ready")
         VOID
       when "textDocument/didOpen"
@@ -259,6 +261,9 @@ module RubyLsp
 
     sig { params(uri: String).returns(T.nilable(T::Array[Interface::TextEdit])) }
     def formatting(uri)
+      # If formatter is set to `auto` but no supported formatting gem is found, don't attempt to format
+      return if @store.formatter == "none"
+
       Requests::Formatting.new(@store.get(uri), formatter: @store.formatter).run
     end
 
@@ -381,7 +386,11 @@ module RubyLsp
       end
 
       formatter = options.dig(:initializationOptions, :formatter)
-      @store.formatter = formatter unless formatter.nil?
+      @store.formatter = if formatter == "auto"
+        detected_formatter
+      else
+        formatter
+      end
 
       configured_features = options.dig(:initializationOptions, :enabledFeatures)
       experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled)
@@ -489,6 +498,40 @@ module RubyLsp
           code_lens_provider: code_lens_provider,
         ),
       )
+    end
+
+    sig { returns(String) }
+    def detected_formatter
+      # NOTE: Intentionally no $ at end, since we want to match rubocop-shopify, etc.
+      if direct_dependency?(/^rubocop/)
+        "rubocop"
+      elsif direct_dependency?(/^syntax_tree$/)
+        "syntax_tree"
+      else
+        "none"
+      end
+    end
+
+    sig { params(gem_pattern: Regexp).returns(T::Boolean) }
+    def direct_dependency?(gem_pattern)
+      Bundler.locked_gems.dependencies.keys.grep(gem_pattern).any?
+    end
+
+    sig { void }
+    def check_formatter_is_available
+      # Warn of an unavailable `formatter` setting, e.g. `rubocop` on a project which doesn't have RuboCop.
+      # Syntax Tree will always be available via Ruby LSP so we don't need to check for it.
+      return unless @store.formatter == "rubocop"
+
+      unless defined?(Support::RuboCopFormattingRunner)
+        @message_queue << Notification.new(
+          message: "window/showMessage",
+          params: Interface::ShowMessageParams.new(
+            type: Constant::MessageType::ERROR,
+            message: "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the bundle.",
+          ),
+        )
+      end
     end
   end
 end
