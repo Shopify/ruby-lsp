@@ -29,7 +29,7 @@ module RubyLsp
         # We can't verify if we're inside a require when there are syntax errors
         return [] if @document.syntax_error?
 
-        target = T.let(find, T.nilable(SyntaxTree::TStringContent))
+        target = find
         # no target means the we are not inside a `require` call
         return [] unless target
 
