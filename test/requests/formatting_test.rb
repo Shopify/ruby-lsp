@@ -75,6 +75,22 @@ class FormattingTest < Minitest::Test
     assert_nil(RubyLsp::Requests::Formatting.new(document, formatter: "syntax_tree").run)
   end
 
+  def test_syntax_tree_formatting_returns_nil_if_file_matches_ignore_files_options_from_streerc
+    config_contents = <<~TXT
+      --ignore-files=#{Pathname.new(__FILE__).relative_path_from(Dir.pwd)}
+    TXT
+
+    with_syntax_tree_config_file(config_contents) do
+      @document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file://#{__FILE__}")
+        class Foo
+        def foo
+        end
+        end
+      RUBY
+      assert_nil(formatted_document("syntax_tree"))
+    end
+  end
+
   def test_rubocop_formatting_ignores_syntax_invalid_documents
     document = RubyLsp::Document.new(source: "def foo", version: 1, uri: "file://#{__FILE__}")
     assert_nil(RubyLsp::Requests::Formatting.new(document, formatter: "rubocop").run)
