@@ -35,6 +35,10 @@ module RubyLsp
         @listeners.each { |l| T.unsafe(l).on_command(node) if l.registered_for_event?(:on_command) }
       when SyntaxTree::CallNode
         @listeners.each { |l| T.unsafe(l).on_call(node) if l.registered_for_event?(:on_call) }
+      when SyntaxTree::TStringContent
+        @listeners.each do |l|
+          T.unsafe(l).on_tstring_content(node) if l.registered_for_event?(:on_tstring_content)
+        end
       when SyntaxTree::ConstPathRef
         @listeners.each { |l| T.unsafe(l).on_const_path_ref(node) if l.registered_for_event?(:on_const_path_ref) }
       when SyntaxTree::Const

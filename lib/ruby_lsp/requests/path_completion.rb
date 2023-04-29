@@ -13,29 +13,29 @@ module RubyLsp
     # ```ruby
     # require "ruby_lsp/requests" # --> completion: suggests `base_request`, `code_actions`, ...
     # ```
-    class PathCompletion < BaseRequest
+    class PathCompletion < Listener
       extend T::Sig
+      extend T::Generic
 
-      sig { params(document: Document, position: Document::PositionShape).void }
-      def initialize(document, position)
-        super(document)
+      ResponseType = type_member { { fixed: T::Array[Interface::CompletionItem] } }
+
+      sig { override.returns(ResponseType) }
+      attr_reader :response
+
+      sig { params(uri: String, message_queue: Thread::Queue).void }
+      def initialize(uri, message_queue)
+        super
+        @response = T.let([], ResponseType)
 
         @tree = T.let(Support::PrefixTree.new(collect_load_path_files), Support::PrefixTree)
-        @position = position
       end
 
-      sig { override.returns(T.all(T::Array[Interface::CompletionItem], Object)) }
-      def run
-        # We can't verify if we're inside a require when there are syntax errors
-        return [] if @document.syntax_error?
-
-        target = find
-        # no target means the we are not inside a `require` call
-        return [] unless target
-
-        text = target.value
-        @tree.search(text).sort.map! do |path|
-          build_completion(path, path.delete_prefix(text))
+      listener_events do
+        sig { params(node: SyntaxTree::TStringContent).void }
+        def on_tstring_content(node)
+          @tree.search(node.value).sort.each do |path|
+            @response << build_completion(path, node)
+          end
         end
       end
 
@@ -50,48 +50,13 @@ module RubyLsp
         end
       end
 
-      sig { returns(T.nilable(SyntaxTree::TStringContent)) }
-      def find
-        char_position = @document.create_scanner.find_char_position(@position)
-        matched, parent = @document.locate(
-          T.must(@document.tree),
-          char_position,
-          node_types: [SyntaxTree::Command, SyntaxTree::CommandCall, SyntaxTree::CallNode],
-        )
-
-        return unless matched && parent
-
-        case matched
-        when SyntaxTree::Command, SyntaxTree::CallNode, SyntaxTree::CommandCall
-          message = matched.message
-          return if message.is_a?(Symbol)
-          return unless message.value == "require"
-
-          args = matched.arguments
-          args = args.arguments if args.is_a?(SyntaxTree::ArgParen)
-          return if args.nil? || args.is_a?(SyntaxTree::ArgsForward)
-
-          argument = args.parts.first
-          return unless argument.is_a?(SyntaxTree::StringLiteral)
-
-          path_node = argument.parts.first
-          return unless path_node.is_a?(SyntaxTree::TStringContent)
-          return unless (path_node.location.start_char..path_node.location.end_char).cover?(char_position)
-
-          path_node
-        end
-      end
-
-      sig { params(label: String, insert_text: String).returns(Interface::CompletionItem) }
-      def build_completion(label, insert_text)
+      sig { params(label: String, node: SyntaxTree::TStringContent).returns(Interface::CompletionItem) }
+      def build_completion(label, node)
         Interface::CompletionItem.new(
           label: label,
           text_edit: Interface::TextEdit.new(
-            range: Interface::Range.new(
-              start: @position,
-              end: @position,
-            ),
-            new_text: insert_text,
+            range: range_from_syntax_tree_node(node),
+            new_text: label,
           ),
           kind: Constant::CompletionItemKind::REFERENCE,
         )
