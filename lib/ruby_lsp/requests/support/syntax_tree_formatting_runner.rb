@@ -27,7 +27,7 @@ module RubyLsp
 
         sig { params(uri: String, document: Document).returns(T.nilable(String)) }
         def run(uri, document)
-          relative_path = Pathname.new(uri).relative_path_from(RubyLsp::WORKSPACE_URI)
+          relative_path = Pathname.new(URI(uri).path).relative_path_from(Pathname.new(URI(RubyLsp::WORKSPACE_URI).path))
           return if @options.ignore_files.any? { |pattern| File.fnmatch(pattern, relative_path) }
 
           SyntaxTree.format(
