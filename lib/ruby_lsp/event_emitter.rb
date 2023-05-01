@@ -88,5 +88,11 @@ module RubyLsp
       @listeners.each { |l| T.unsafe(l).on_var_field(node) if l.registered_for_event?(:on_var_field) }
       super
     end
+
+    sig { override.params(node: SyntaxTree::Comment).void }
+    def visit_comment(node)
+      @listeners.each { |l| T.unsafe(l).on_comment(node) if l.registered_for_event?(:on_comment) }
+      super
+    end
   end
 end

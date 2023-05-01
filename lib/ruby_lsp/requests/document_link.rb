@@ -18,8 +18,11 @@ module RubyLsp
     # def format(source, maxwidth = T.unsafe(nil))
     # end
     # ```
-    class DocumentLink < BaseRequest
+    class DocumentLink < Listener
       extend T::Sig
+      extend T::Generic
+
+      ResponseType = type_member { { fixed: T::Array[Interface::DocumentLink] } }
 
       GEM_TO_VERSION_MAP = T.let(
         [*::Gem::Specification.default_stubs, *::Gem::Specification.stubs].map! do |s|
@@ -69,38 +72,37 @@ module RubyLsp
         end
       end
 
-      sig { params(document: Document).void }
-      def initialize(document)
-        super(document)
+      sig { override.returns(ResponseType) }
+      attr_reader :response
+
+      sig { params(uri: String, message_queue: Thread::Queue).void }
+      def initialize(uri, message_queue)
+        super
 
         # Match the version based on the version in the RBI file name. Notice that the `@` symbol is sanitized to `%40`
         # in the URI
-        version_match = /(?<=%40)[\d.]+(?=\.rbi$)/.match(document.uri)
+        version_match = /(?<=%40)[\d.]+(?=\.rbi$)/.match(uri)
         @gem_version = T.let(version_match && version_match[0], T.nilable(String))
-        @links = T.let([], T::Array[Interface::DocumentLink])
+        @response = T.let([], T::Array[Interface::DocumentLink])
       end
 
-      sig { override.returns(T.all(T::Array[Interface::DocumentLink], Object)) }
-      def run
-        visit(@document.tree) if @document.parsed?
-        @links
-      end
+      listener_events do
+        sig { params(node: SyntaxTree::Comment).void }
+        def on_comment(node)
+          match = node.value.match(%r{source://.*#\d+$})
+          return unless match
 
-      sig { override.params(node: SyntaxTree::Comment).void }
-      def visit_comment(node)
-        match = node.value.match(%r{source://.*#\d+$})
-        return unless match
+          uri = T.cast(URI(T.must(match[0])), URI::Source)
+          gem_version = T.must(resolve_version(uri))
+          file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, uri.path)
+          return if file_path.nil?
 
-        uri = T.cast(URI(T.must(match[0])), URI::Source)
-        gem_version = T.must(resolve_version(uri))
-        file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, uri.path)
-        return if file_path.nil?
-
-        @links << Interface::DocumentLink.new(
-          range: range_from_syntax_tree_node(node),
-          target: "file://#{file_path}##{uri.line_number}",
-          tooltip: "Jump to #{file_path}##{uri.line_number}",
-        )
+          @response << Interface::DocumentLink.new(
+            range: range_from_syntax_tree_node(node),
+            target: "file://#{file_path}##{uri.line_number}",
+            tooltip: "Jump to #{file_path}##{uri.line_number}",
+          )
+        end
       end
 
       private

@@ -81,8 +81,8 @@ module RubyLsp
       sig { override.returns(T::Array[Interface::DocumentSymbol]) }
       attr_reader :response
 
-      sig { params(message_queue: Thread::Queue).void }
-      def initialize(message_queue)
+      sig { params(uri: String, message_queue: Thread::Queue).void }
+      def initialize(uri, message_queue)
         super
 
         @root = T.let(SymbolHierarchyRoot.new, SymbolHierarchyRoot)

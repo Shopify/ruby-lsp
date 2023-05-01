@@ -79,11 +79,9 @@ module RubyLsp
         )
       when "textDocument/foldingRange"
         folding_range(uri)
-      when "textDocument/documentLink"
-        document_link(uri)
       when "textDocument/selectionRange"
         selection_range(uri, request.dig(:params, :positions))
-      when "textDocument/documentSymbol"
+      when "textDocument/documentSymbol", "textDocument/documentLink"
         document = @store.get(uri)
 
         # If the response has already been cached by another request, return it
@@ -91,12 +89,15 @@ module RubyLsp
         return cached_response if cached_response
 
         # Run listeners for the document
-        listener = Requests::DocumentSymbol.new(@message_queue)
-        EventEmitter.new(listener).visit(document.tree) if document.parsed?
+        document_symbol = Requests::DocumentSymbol.new(uri, @message_queue)
+        document_link = Requests::DocumentLink.new(uri, @message_queue)
+        EventEmitter.new(document_symbol, document_link).visit(document.tree) if document.parsed?
 
-        # Store all responses retrieved in this round of visits in the cache. The last one we save must always be the
-        # one related to the request we're receiving since that's the response we want to return to the editor
-        document.cache_set(request[:method], listener.response)
+        # Store all responses retrieve in this round of visits in the cache and then return the response for the request
+        # we actually received
+        document.cache_set("textDocument/documentSymbol", document_symbol.response)
+        document.cache_set("textDocument/documentLink", document_link.response)
+        document.cache_get(request[:method])
       when "textDocument/semanticTokens/full"
         semantic_tokens_full(uri)
       when "textDocument/semanticTokens/range"
@@ -190,8 +191,8 @@ module RubyLsp
       end
 
       # Instantiate all listeners
-      base_listener = Requests::Hover.new(@message_queue)
-      listeners = Requests::Hover.listeners.map { |l| l.new(@message_queue) }
+      base_listener = Requests::Hover.new(uri, @message_queue)
+      listeners = Requests::Hover.listeners.map { |l| l.new(uri, @message_queue) }
 
       # Emit events for all listeners
       T.unsafe(EventEmitter).new(base_listener, *listeners).emit_for_target(target)
@@ -199,13 +200,6 @@ module RubyLsp
       # Merge all responses into a single hover
       listeners.each { |ext| base_listener.merge_response!(ext) }
       base_listener.response
-    end
-
-    sig { params(uri: String).returns(T::Array[Interface::DocumentLink]) }
-    def document_link(uri)
-      @store.cache_fetch(uri, "textDocument/documentLink") do |document|
-        RubyLsp::Requests::DocumentLink.new(document).run
-      end
     end
 
     sig { params(uri: String, content_changes: T::Array[Document::EditShape], version: Integer).returns(Object) }
