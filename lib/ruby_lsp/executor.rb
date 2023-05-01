@@ -522,7 +522,7 @@ module RubyLsp
       # Syntax Tree will always be available via Ruby LSP so we don't need to check for it.
       return unless @store.formatter == "rubocop"
 
-      unless defined?(Support::RuboCopFormattingRunner)
+      unless defined?(RubyLsp::Requests::Support::RuboCopRunner)
         @message_queue << Notification.new(
           message: "window/showMessage",
           params: Interface::ShowMessageParams.new(

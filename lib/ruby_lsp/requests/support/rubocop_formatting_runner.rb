@@ -1,7 +1,6 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "ruby_lsp/requests/support/rubocop_runner"
 return unless defined?(RubyLsp::Requests::Support::RuboCopRunner)
 
 require "cgi"
