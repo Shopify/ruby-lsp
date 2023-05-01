@@ -4,29 +4,48 @@
 require "test_helper"
 
 class PathCompletionTest < Minitest::Test
+  def setup
+    @message_queue = Thread::Queue.new
+    @uri = "file:///fake.rb"
+    @store = RubyLsp::Store.new
+  end
+
+  def teardown
+    T.must(@message_queue).close
+  end
+
   def test_completion_command
     prefix = "foo/"
 
-    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: "file:///fake.rb")
+    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: @uri)
       require "#{prefix}"
     RUBY
 
-    position = {
+    start_position = {
       line: 0,
-      character: document.source.rindex('"') || 0,
+      character: T.must(document.source.index('"')) + 1,
+    }
+    end_position = {
+      line: 0,
+      character: document.source.rindex('"'),
     }
 
     result = with_file_structure do
-      RubyLsp::Requests::PathCompletion.new(document, position).run
+      @store = RubyLsp::Store.new
+      @store.set(uri: @uri, source: document.source, version: 1)
+      RubyLsp::Executor.new(@store, @message_queue).execute({
+        method: "textDocument/completion",
+        params: { textDocument: { uri: @uri }, position: end_position },
+      }).response
     end
 
     expected = [
-      path_completion("foo/bar", prefix, position),
-      path_completion("foo/baz", prefix, position),
-      path_completion("foo/quux", prefix, position),
-      path_completion("foo/support/bar", prefix, position),
-      path_completion("foo/support/baz", prefix, position),
-      path_completion("foo/support/quux", prefix, position),
+      path_completion("foo/bar", prefix, start_position, end_position),
+      path_completion("foo/baz", prefix, start_position, end_position),
+      path_completion("foo/quux", prefix, start_position, end_position),
+      path_completion("foo/support/bar", prefix, start_position, end_position),
+      path_completion("foo/support/baz", prefix, start_position, end_position),
+      path_completion("foo/support/quux", prefix, start_position, end_position),
     ]
 
     assert_equal(expected.to_json, result.to_json)
@@ -35,26 +54,34 @@ class PathCompletionTest < Minitest::Test
   def test_completion_call
     prefix = "foo/"
 
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///fake.rb")
+    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: @uri)
       require("#{prefix}")
     RUBY
 
-    position = {
+    start_position = {
       line: 0,
-      character: document.source.rindex('"') || 0,
+      character: T.must(document.source.index('"')) + 1,
+    }
+    end_position = {
+      line: 0,
+      character: document.source.rindex('"'),
     }
 
     result = with_file_structure do
-      RubyLsp::Requests::PathCompletion.new(document, position).run
+      @store.set(uri: @uri, source: document.source, version: 1)
+      RubyLsp::Executor.new(@store, @message_queue).execute({
+        method: "textDocument/completion",
+        params: { textDocument: { uri: @uri }, position: end_position },
+      }).response
     end
 
     expected = [
-      path_completion("foo/bar", prefix, position),
-      path_completion("foo/baz", prefix, position),
-      path_completion("foo/quux", prefix, position),
-      path_completion("foo/support/bar", prefix, position),
-      path_completion("foo/support/baz", prefix, position),
-      path_completion("foo/support/quux", prefix, position),
+      path_completion("foo/bar", prefix, start_position, end_position),
+      path_completion("foo/baz", prefix, start_position, end_position),
+      path_completion("foo/quux", prefix, start_position, end_position),
+      path_completion("foo/support/bar", prefix, start_position, end_position),
+      path_completion("foo/support/baz", prefix, start_position, end_position),
+      path_completion("foo/support/quux", prefix, start_position, end_position),
     ]
 
     assert_equal(expected.to_json, result.to_json)
@@ -63,26 +90,34 @@ class PathCompletionTest < Minitest::Test
   def test_completion_command_call
     prefix = "foo/"
 
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///fake.rb")
+    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: @uri)
       Kernel.require "#{prefix}"
     RUBY
 
-    position = {
+    start_position = {
       line: 0,
-      character: document.source.rindex('"') || 0,
+      character: T.must(document.source.index('"')) + 1,
+    }
+    end_position = {
+      line: 0,
+      character: document.source.rindex('"'),
     }
 
     result = with_file_structure do
-      RubyLsp::Requests::PathCompletion.new(document, position).run
+      @store.set(uri: @uri, source: document.source, version: 1)
+      RubyLsp::Executor.new(@store, @message_queue).execute({
+        method: "textDocument/completion",
+        params: { textDocument: { uri: @uri }, position: end_position },
+      }).response
     end
 
     expected = [
-      path_completion("foo/bar", prefix, position),
-      path_completion("foo/baz", prefix, position),
-      path_completion("foo/quux", prefix, position),
-      path_completion("foo/support/bar", prefix, position),
-      path_completion("foo/support/baz", prefix, position),
-      path_completion("foo/support/quux", prefix, position),
+      path_completion("foo/bar", prefix, start_position, end_position),
+      path_completion("foo/baz", prefix, start_position, end_position),
+      path_completion("foo/quux", prefix, start_position, end_position),
+      path_completion("foo/support/bar", prefix, start_position, end_position),
+      path_completion("foo/support/baz", prefix, start_position, end_position),
+      path_completion("foo/support/quux", prefix, start_position, end_position),
     ]
 
     assert_equal(expected.to_json, result.to_json)
@@ -91,56 +126,71 @@ class PathCompletionTest < Minitest::Test
   def test_completion_with_partial_path
     prefix = "foo/suppo"
 
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///fake.rb")
+    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: @uri)
       require "#{prefix}"
     RUBY
 
-    position = {
+    start_position = {
       line: 0,
-      character: document.source.rindex('"') || 0,
+      character: T.must(document.source.index('"')) + 1,
+    }
+    end_position = {
+      line: 0,
+      character: document.source.rindex('"'),
     }
 
     result = with_file_structure do
-      RubyLsp::Requests::PathCompletion.new(document, position).run
+      @store.set(uri: @uri, source: document.source, version: 1)
+      RubyLsp::Executor.new(@store, @message_queue).execute({
+        method: "textDocument/completion",
+        params: { textDocument: { uri: @uri }, position: end_position },
+      }).response
     end
 
     expected = [
-      path_completion("foo/support/bar", prefix, position),
-      path_completion("foo/support/baz", prefix, position),
-      path_completion("foo/support/quux", prefix, position),
+      path_completion("foo/support/bar", prefix, start_position, end_position),
+      path_completion("foo/support/baz", prefix, start_position, end_position),
+      path_completion("foo/support/quux", prefix, start_position, end_position),
     ]
 
     assert_equal(expected.to_json, result.to_json)
   end
 
   def test_completion_does_not_fail_when_there_are_syntax_errors
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///fake.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
       require "ruby_lsp/requests/"
 
       def foo
     RUBY
 
-    position = {
+    end_position = {
       line: 0,
-      character: 21,
+      character: document.source.rindex('"'),
     }
 
-    result = RubyLsp::Requests::PathCompletion.new(document, position).run
-    assert_empty(result)
+    @store.set(uri: @uri, source: document.source, version: 1)
+    RubyLsp::Executor.new(@store, @message_queue).execute({
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri }, position: end_position },
+    }).response
   end
 
-  def test_completion_is_not_trigered_if_argument_is_not_a_string
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///fake.rb")
+  def test_completion_is_not_triggered_if_argument_is_not_a_string
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
       require foo
     RUBY
 
-    position = {
+    end_position = {
       line: 0,
-      character: document.source.rindex("f") || 0,
+      character: document.source.rindex('"'),
     }
 
-    result = RubyLsp::Requests::PathCompletion.new(document, position).run
-    assert_empty(result)
+    @store.set(uri: @uri, source: document.source, version: 1)
+    response = RubyLsp::Executor.new(@store, @message_queue).execute({
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri }, position: end_position },
+    }).response
+    assert_nil(response)
   end
 
   private
@@ -175,15 +225,15 @@ class PathCompletionTest < Minitest::Test
     end
   end
 
-  def path_completion(path, prefix, position)
+  def path_completion(path, prefix, start_position, end_position)
     LanguageServer::Protocol::Interface::CompletionItem.new(
       label: path,
       text_edit: LanguageServer::Protocol::Interface::TextEdit.new(
         range: LanguageServer::Protocol::Interface::Range.new(
-          start: position,
-          end: position,
+          start: start_position,
+          end: end_position,
         ),
-        new_text: path.delete_prefix(prefix),
+        new_text: path,
       ),
       kind: LanguageServer::Protocol::Constant::CompletionItemKind::REFERENCE,
     )

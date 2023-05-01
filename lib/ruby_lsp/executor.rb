@@ -368,7 +368,43 @@ module RubyLsp
       params(uri: String, position: Document::PositionShape).returns(T.nilable(T::Array[Interface::CompletionItem]))
     end
     def completion(uri, position)
-      Requests::PathCompletion.new(@store.get(uri), position).run
+      document = @store.get(uri)
+      return unless document.parsed?
+
+      char_position = document.create_scanner.find_char_position(position)
+      matched, parent = document.locate(
+        T.must(document.tree),
+        char_position,
+        node_types: [SyntaxTree::Command, SyntaxTree::CommandCall, SyntaxTree::CallNode],
+      )
+
+      return unless matched && parent
+
+      target = case matched
+      when SyntaxTree::Command, SyntaxTree::CallNode, SyntaxTree::CommandCall
+        message = matched.message
+        return if message.is_a?(Symbol)
+        return unless message.value == "require"
+
+        args = matched.arguments
+        args = args.arguments if args.is_a?(SyntaxTree::ArgParen)
+        return if args.nil? || args.is_a?(SyntaxTree::ArgsForward)
+
+        argument = args.parts.first
+        return unless argument.is_a?(SyntaxTree::StringLiteral)
+
+        path_node = argument.parts.first
+        return unless path_node.is_a?(SyntaxTree::TStringContent)
+        return unless (path_node.location.start_char..path_node.location.end_char).cover?(char_position)
+
+        path_node
+      end
+
+      return unless target
+
+      listener = Requests::PathCompletion.new(uri, @message_queue)
+      EventEmitter.new(listener).emit_for_target(target)
+      listener.response
     end
 
     sig { params(options: T::Hash[Symbol, T.untyped]).returns(Interface::InitializeResult) }
