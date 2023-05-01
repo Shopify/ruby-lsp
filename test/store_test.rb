@@ -78,7 +78,7 @@ class StoreTest < Minitest::Test
     counter = 0
 
     5.times do
-      @store.cache_fetch("/foo/bar.rb", :folding_ranges) do
+      @store.cache_fetch("/foo/bar.rb", "textDocument/foldingRange") do
         counter += 1
       end
     end
@@ -88,7 +88,7 @@ class StoreTest < Minitest::Test
     # After the entry in the storage is updated, the cache is invalidated
     @store.set(uri: "/foo/bar.rb", source: "def bar; end", version: 1)
     5.times do
-      @store.cache_fetch("/foo/bar.rb", :folding_ranges) do
+      @store.cache_fetch("/foo/bar.rb", "textDocument/foldingRange") do
         counter += 1
       end
     end

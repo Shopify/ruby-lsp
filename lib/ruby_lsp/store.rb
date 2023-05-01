@@ -61,7 +61,7 @@ module RubyLsp
       type_parameters(:T)
         .params(
           uri: String,
-          request_name: Symbol,
+          request_name: String,
           block: T.proc.params(document: Document).returns(T.type_parameter(:T)),
         ).returns(T.type_parameter(:T))
     end
