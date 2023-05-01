@@ -299,7 +299,6 @@ if File.exist?(CACHE_FILE_PATH)
     # If this phrase is changed, we have to update .github/workflows/benchmark.yml since this is used to determine
     # whether to fail the build or not
     puts "\n\nAt least one benchmark is slower than the main branch."
-    exit(1)
   end
 end
 
