@@ -10,6 +10,10 @@ class PathCompletionTest < Minitest::Test
     @store = RubyLsp::Store.new
   end
 
+  def teardown
+    T.must(@message_queue).close
+  end
+
   def test_completion_command
     prefix = "foo/"
 
@@ -45,8 +49,6 @@ class PathCompletionTest < Minitest::Test
     ]
 
     assert_equal(expected.to_json, result.to_json)
-  ensure
-    T.must(@message_queue).close
   end
 
   def test_completion_call
@@ -83,8 +85,6 @@ class PathCompletionTest < Minitest::Test
     ]
 
     assert_equal(expected.to_json, result.to_json)
-  ensure
-    T.must(@message_queue).close
   end
 
   def test_completion_command_call
@@ -121,8 +121,6 @@ class PathCompletionTest < Minitest::Test
     ]
 
     assert_equal(expected.to_json, result.to_json)
-  ensure
-    T.must(@message_queue).close
   end
 
   def test_completion_with_partial_path
@@ -156,8 +154,6 @@ class PathCompletionTest < Minitest::Test
     ]
 
     assert_equal(expected.to_json, result.to_json)
-  ensure
-    T.must(@message_queue).close
   end
 
   def test_completion_does_not_fail_when_there_are_syntax_errors
@@ -177,8 +173,6 @@ class PathCompletionTest < Minitest::Test
       method: "textDocument/completion",
       params: { textDocument: { uri: @uri }, position: end_position },
     }).response
-  ensure
-    T.must(@message_queue).close
   end
 
   def test_completion_is_not_triggered_if_argument_is_not_a_string
@@ -197,8 +191,6 @@ class PathCompletionTest < Minitest::Test
       params: { textDocument: { uri: @uri }, position: end_position },
     }).response
     assert_nil(response)
-  ensure
-    T.must(@message_queue).close
   end
 
   private
