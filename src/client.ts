@@ -426,16 +426,17 @@ export default class Client implements ClientInterface {
 
   private async projectHasDependency(gemName: string): Promise<boolean> {
     try {
+      // We can't include `BUNDLE_GEMFILE` here, because we want to check if the project's bundle includes the
+      // dependency and not our custom bundle
+      const { BUNDLE_GEMFILE, ...withoutBundleGemfileEnv } = this.ruby.env;
+
       // exit with an error if gemName not a dependency or is a transitive dependency.
       // exit with success if gemName is a direct dependency.
       await asyncExec(
-        `BUNDLE_GEMFILE=${path.join(
-          this.workingFolder,
-          "Gemfile"
-        )} bundle exec ruby -e "exit 1 unless Bundler.locked_gems.dependencies.key?('${gemName}')"`,
+        `ruby -rbundler -e "exit 1 unless Bundler.locked_gems.dependencies.key?('${gemName}')"`,
         {
           cwd: this.workingFolder,
-          env: this.ruby.env,
+          env: withoutBundleGemfileEnv,
         }
       );
       return true;
