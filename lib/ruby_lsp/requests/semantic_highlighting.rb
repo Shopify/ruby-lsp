@@ -3,7 +3,7 @@
 
 module RubyLsp
   module Requests
-    # ![Semantic highlighting demo](../../misc/semantic_highlighting.gif)
+    # ![Semantic highlighting demo](../../semantic_highlighting.gif)
     #
     # The [semantic
     # highlighting](https://microsoft.github.io/language-server-protocol/specification#textDocument_semanticTokens)

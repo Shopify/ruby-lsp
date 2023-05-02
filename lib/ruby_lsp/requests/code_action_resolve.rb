@@ -3,7 +3,7 @@
 
 module RubyLsp
   module Requests
-    # ![Code action resolve demo](../../misc/code_action_resolve.gif)
+    # ![Code action resolve demo](../../code_action_resolve.gif)
     #
     # The [code action resolve](https://microsoft.github.io/language-server-protocol/specification#codeAction_resolve)
     # request is used to to resolve the edit field for a given code action, if it is not already provided in the

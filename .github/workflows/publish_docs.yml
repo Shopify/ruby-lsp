@@ -23,7 +23,7 @@ jobs:
           git config user.email github-actions@github.com
 
       - name: Generate documentation
-        run: bundle exec rake yard
+        run: bundle exec rake rdoc
 
       - name: Commit to gh-pages
         run: |

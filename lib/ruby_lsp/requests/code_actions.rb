@@ -3,7 +3,7 @@
 
 module RubyLsp
   module Requests
-    # ![Code actions demo](../../misc/code_actions.gif)
+    # ![Code actions demo](../../code_actions.gif)
     #
     # The [code actions](https://microsoft.github.io/language-server-protocol/specification#textDocument_codeAction)
     # request informs the editor of RuboCop quick fixes that can be applied. These are accessible by hovering over a

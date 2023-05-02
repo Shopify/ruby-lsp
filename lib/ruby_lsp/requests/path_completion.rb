@@ -3,7 +3,7 @@
 
 module RubyLsp
   module Requests
-    # ![Path completion demo](../../misc/path_completion.gif)
+    # ![Path completion demo](../../path_completion.gif)
     #
     # The [completion](https://microsoft.github.io/language-server-protocol/specification#textDocument_completion)
     # request looks up Ruby files in the $LOAD_PATH to suggest path completion inside `require` statements.

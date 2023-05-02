@@ -5,7 +5,7 @@ require "ruby_lsp/requests/support/rubocop_diagnostics_runner"
 
 module RubyLsp
   module Requests
-    # ![Diagnostics demo](../../misc/diagnostics.gif)
+    # ![Diagnostics demo](../../diagnostics.gif)
     #
     # The
     # [diagnostics](https://microsoft.github.io/language-server-protocol/specification#textDocument_publishDiagnostics)

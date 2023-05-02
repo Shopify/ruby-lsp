@@ -3,7 +3,7 @@
 
 module RubyLsp
   module Requests
-    # ![Document symbol demo](../../misc/document_symbol.gif)
+    # ![Document symbol demo](../../document_symbol.gif)
     #
     # The [document
     # symbol](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentSymbol) request

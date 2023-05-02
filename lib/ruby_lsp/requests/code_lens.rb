@@ -3,7 +3,7 @@
 
 module RubyLsp
   module Requests
-    # ![Code lens demo](../../misc/code_lens.gif)
+    # ![Code lens demo](../../code_lens.gif)
     #
     # This feature is currently experimental. Clients will need to pass `experimentalFeaturesEnabled`
     # in the initialization options to enable it.
@@ -19,7 +19,6 @@ module RubyLsp
     # class Test < Minitest::Test
     # end
     # ```
-
     class CodeLens < Listener
       extend T::Sig
       extend T::Generic

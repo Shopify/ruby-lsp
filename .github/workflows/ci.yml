@@ -21,7 +21,7 @@ jobs:
           bundler-cache: true
 
       - name: Check if documentation is up to date
-        run: bundle exec rake check_docs
+        run: bundle exec rake ruby_lsp:check_docs
 
       - name: Check if all requests are using valid visits
         run: bundle exec rake check_visit_overrides

@@ -3,7 +3,7 @@
 
 module RubyLsp
   module Requests
-    # ![Inlay hint demo](../../misc/inlay_hint.gif)
+    # ![Inlay hint demo](../../inlay_hint.gif)
     #
     # [Inlay hints](https://microsoft.github.io/language-server-protocol/specification#textDocument_inlayHint)
     # are labels added directly in the code that explicitly show the user something that might
