@@ -81,8 +81,8 @@ module RubyLsp
       sig { override.returns(T::Array[Interface::DocumentSymbol]) }
       attr_reader :response
 
-      sig { params(uri: String, message_queue: Thread::Queue).void }
-      def initialize(uri, message_queue)
+      sig { params(emitter: EventEmitter, message_queue: Thread::Queue).void }
+      def initialize(emitter, message_queue)
         super
 
         @root = T.let(SymbolHierarchyRoot.new, SymbolHierarchyRoot)
@@ -91,121 +91,133 @@ module RubyLsp
           [@root],
           T::Array[T.any(SymbolHierarchyRoot, Interface::DocumentSymbol)],
         )
+
+        emitter.register(
+          self,
+          :on_class,
+          :after_class,
+          :on_command,
+          :on_const_path_field,
+          :on_def,
+          :after_def,
+          :on_module,
+          :after_module,
+          :on_top_const_field,
+          :on_var_field,
+        )
       end
 
-      listener_events do
-        sig { params(node: SyntaxTree::ClassDeclaration).void }
-        def on_class(node)
-          @stack << create_document_symbol(
-            name: full_constant_name(node.constant),
-            kind: :class,
-            range_node: node,
-            selection_range_node: node.constant,
-          )
-        end
+      sig { params(node: SyntaxTree::ClassDeclaration).void }
+      def on_class(node)
+        @stack << create_document_symbol(
+          name: full_constant_name(node.constant),
+          kind: :class,
+          range_node: node,
+          selection_range_node: node.constant,
+        )
+      end
 
-        sig { params(node: SyntaxTree::ClassDeclaration).void }
-        def after_class(node)
-          @stack.pop
-        end
+      sig { params(node: SyntaxTree::ClassDeclaration).void }
+      def after_class(node)
+        @stack.pop
+      end
 
-        sig { params(node: SyntaxTree::Command).void }
-        def on_command(node)
-          return unless ATTR_ACCESSORS.include?(node.message.value)
+      sig { params(node: SyntaxTree::Command).void }
+      def on_command(node)
+        return unless ATTR_ACCESSORS.include?(node.message.value)
 
-          node.arguments.parts.each do |argument|
-            next unless argument.is_a?(SyntaxTree::SymbolLiteral)
-
-            create_document_symbol(
-              name: argument.value.value,
-              kind: :field,
-              range_node: argument,
-              selection_range_node: argument.value,
-            )
-          end
-        end
-
-        sig { params(node: SyntaxTree::ConstPathField).void }
-        def on_const_path_field(node)
-          create_document_symbol(
-            name: node.constant.value,
-            kind: :constant,
-            range_node: node,
-            selection_range_node: node.constant,
-          )
-        end
-
-        sig { params(node: SyntaxTree::DefNode).void }
-        def on_def(node)
-          target = node.target
-
-          if target.is_a?(SyntaxTree::VarRef) && target.value.is_a?(SyntaxTree::Kw) && target.value.value == "self"
-            name = "self.#{node.name.value}"
-            kind = :method
-          else
-            name = node.name.value
-            kind = name == "initialize" ? :constructor : :method
-          end
-
-          symbol = create_document_symbol(
-            name: name,
-            kind: kind,
-            range_node: node,
-            selection_range_node: node.name,
-          )
-
-          @stack << symbol
-        end
-
-        sig { params(node: SyntaxTree::DefNode).void }
-        def after_def(node)
-          @stack.pop
-        end
-
-        sig { params(node: SyntaxTree::ModuleDeclaration).void }
-        def on_module(node)
-          @stack << create_document_symbol(
-            name: full_constant_name(node.constant),
-            kind: :module,
-            range_node: node,
-            selection_range_node: node.constant,
-          )
-        end
-
-        sig { params(node: SyntaxTree::ModuleDeclaration).void }
-        def after_module(node)
-          @stack.pop
-        end
-
-        sig { params(node: SyntaxTree::TopConstField).void }
-        def on_top_const_field(node)
-          create_document_symbol(
-            name: node.constant.value,
-            kind: :constant,
-            range_node: node,
-            selection_range_node: node.constant,
-          )
-        end
-
-        sig { params(node: SyntaxTree::VarField).void }
-        def on_var_field(node)
-          value = node.value
-          kind = case value
-          when SyntaxTree::Const
-            :constant
-          when SyntaxTree::CVar, SyntaxTree::IVar
-            :variable
-          else
-            return
-          end
+        node.arguments.parts.each do |argument|
+          next unless argument.is_a?(SyntaxTree::SymbolLiteral)
 
           create_document_symbol(
-            name: value.value,
-            kind: kind,
-            range_node: node,
-            selection_range_node: value,
+            name: argument.value.value,
+            kind: :field,
+            range_node: argument,
+            selection_range_node: argument.value,
           )
         end
+      end
+
+      sig { params(node: SyntaxTree::ConstPathField).void }
+      def on_const_path_field(node)
+        create_document_symbol(
+          name: node.constant.value,
+          kind: :constant,
+          range_node: node,
+          selection_range_node: node.constant,
+        )
+      end
+
+      sig { params(node: SyntaxTree::DefNode).void }
+      def on_def(node)
+        target = node.target
+
+        if target.is_a?(SyntaxTree::VarRef) && target.value.is_a?(SyntaxTree::Kw) && target.value.value == "self"
+          name = "self.#{node.name.value}"
+          kind = :method
+        else
+          name = node.name.value
+          kind = name == "initialize" ? :constructor : :method
+        end
+
+        symbol = create_document_symbol(
+          name: name,
+          kind: kind,
+          range_node: node,
+          selection_range_node: node.name,
+        )
+
+        @stack << symbol
+      end
+
+      sig { params(node: SyntaxTree::DefNode).void }
+      def after_def(node)
+        @stack.pop
+      end
+
+      sig { params(node: SyntaxTree::ModuleDeclaration).void }
+      def on_module(node)
+        @stack << create_document_symbol(
+          name: full_constant_name(node.constant),
+          kind: :module,
+          range_node: node,
+          selection_range_node: node.constant,
+        )
+      end
+
+      sig { params(node: SyntaxTree::ModuleDeclaration).void }
+      def after_module(node)
+        @stack.pop
+      end
+
+      sig { params(node: SyntaxTree::TopConstField).void }
+      def on_top_const_field(node)
+        create_document_symbol(
+          name: node.constant.value,
+          kind: :constant,
+          range_node: node,
+          selection_range_node: node.constant,
+        )
+      end
+
+      sig { params(node: SyntaxTree::VarField).void }
+      def on_var_field(node)
+        value = node.value
+        kind = case value
+        when SyntaxTree::Const
+          :constant
+        when SyntaxTree::CVar, SyntaxTree::IVar
+          :variable
+        else
+          return
+        end
+
+        create_document_symbol(
+          name: value.value,
+          kind: kind,
+          range_node: node,
+          selection_range_node: value,
+        )
       end
 
       private

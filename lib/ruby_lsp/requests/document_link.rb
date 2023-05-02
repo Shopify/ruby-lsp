@@ -75,34 +75,34 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :response
 
-      sig { params(uri: String, message_queue: Thread::Queue).void }
-      def initialize(uri, message_queue)
-        super
+      sig { params(uri: String, emitter: EventEmitter, message_queue: Thread::Queue).void }
+      def initialize(uri, emitter, message_queue)
+        super(emitter, message_queue)
 
         # Match the version based on the version in the RBI file name. Notice that the `@` symbol is sanitized to `%40`
         # in the URI
         version_match = /(?<=%40)[\d.]+(?=\.rbi$)/.match(uri)
         @gem_version = T.let(version_match && version_match[0], T.nilable(String))
         @response = T.let([], T::Array[Interface::DocumentLink])
+
+        emitter.register(self, :on_comment)
       end
 
-      listener_events do
-        sig { params(node: SyntaxTree::Comment).void }
-        def on_comment(node)
-          match = node.value.match(%r{source://.*#\d+$})
-          return unless match
+      sig { params(node: SyntaxTree::Comment).void }
+      def on_comment(node)
+        match = node.value.match(%r{source://.*#\d+$})
+        return unless match
 
-          uri = T.cast(URI(T.must(match[0])), URI::Source)
-          gem_version = T.must(resolve_version(uri))
-          file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, uri.path)
-          return if file_path.nil?
+        uri = T.cast(URI(T.must(match[0])), URI::Source)
+        gem_version = T.must(resolve_version(uri))
+        file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, uri.path)
+        return if file_path.nil?
 
-          @response << Interface::DocumentLink.new(
-            range: range_from_syntax_tree_node(node),
-            target: "file://#{file_path}##{uri.line_number}",
-            tooltip: "Jump to #{file_path}##{uri.line_number}",
-          )
-        end
+        @response << Interface::DocumentLink.new(
+          range: range_from_syntax_tree_node(node),
+          target: "file://#{file_path}##{uri.line_number}",
+          tooltip: "Jump to #{file_path}##{uri.line_number}",
+        )
       end
 
       private

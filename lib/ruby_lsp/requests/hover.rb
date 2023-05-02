@@ -35,11 +35,12 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :response
 
-      sig { params(uri: String, message_queue: Thread::Queue).void }
-      def initialize(uri, message_queue)
-        @response = T.let(nil, ResponseType)
-
+      sig { params(emitter: EventEmitter, message_queue: Thread::Queue).void }
+      def initialize(emitter, message_queue)
         super
+
+        @response = T.let(nil, ResponseType)
+        emitter.register(self, :on_command, :on_const_path_ref, :on_call)
       end
 
       # Merges responses from other hover listeners
@@ -57,25 +58,23 @@ module RubyLsp
         self
       end
 
-      listener_events do
-        sig { params(node: SyntaxTree::Command).void }
-        def on_command(node)
-          message = node.message
-          @response = generate_rails_document_link_hover(message.value, message)
-        end
+      sig { params(node: SyntaxTree::Command).void }
+      def on_command(node)
+        message = node.message
+        @response = generate_rails_document_link_hover(message.value, message)
+      end
 
-        sig { params(node: SyntaxTree::ConstPathRef).void }
-        def on_const_path_ref(node)
-          @response = generate_rails_document_link_hover(full_constant_name(node), node)
-        end
+      sig { params(node: SyntaxTree::ConstPathRef).void }
+      def on_const_path_ref(node)
+        @response = generate_rails_document_link_hover(full_constant_name(node), node)
+      end
 
-        sig { params(node: SyntaxTree::CallNode).void }
-        def on_call(node)
-          message = node.message
-          return if message.is_a?(Symbol)
+      sig { params(node: SyntaxTree::CallNode).void }
+      def on_call(node)
+        message = node.message
+        return if message.is_a?(Symbol)
 
-          @response = generate_rails_document_link_hover(message.value, message)
-        end
+        @response = generate_rails_document_link_hover(message.value, message)
       end
 
       private
