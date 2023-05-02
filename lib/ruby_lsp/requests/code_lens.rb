@@ -113,51 +113,47 @@ module RubyLsp
         self
       end
 
-      class << self
-        include RubyLsp::Requests::Support::Common
-
-        sig do
-          params(
-            node: SyntaxTree::Node,
-            path: String,
-            name: String,
-            test_command: String,
-            type: String,
-          ).returns(Interface::CodeLens)
-        end
-        def create_code_lens(node, path:, name:, test_command:, type:)
-          title = type == "test" ? "Run" : "Debug"
-          command = type == "test" ? "rubyLsp.runTest" : "rubyLsp.debugTest"
-          range = range_from_syntax_tree_node(node)
-          arguments = [
-            path,
-            name,
-            test_command,
-            {
-              start_line: node.location.start_line - 1,
-              start_column: node.location.start_column,
-              end_line: node.location.end_line - 1,
-              end_column: node.location.end_column,
-            },
-          ]
-
-          Interface::CodeLens.new(
-            range: range,
-            command: Interface::Command.new(
-              title: title,
-              command: command,
-              arguments: arguments,
-            ),
-            data: { type: type },
-          )
-        end
-      end
-
       private
+
+      sig do
+        params(
+          node: SyntaxTree::Node,
+          path: String,
+          name: String,
+          test_command: String,
+          type: String,
+        ).returns(Interface::CodeLens)
+      end
+      def create_code_lens(node, path:, name:, test_command:, type:)
+        title = type == "test" ? "Run" : "Debug"
+        command = type == "test" ? "rubyLsp.runTest" : "rubyLsp.debugTest"
+        range = range_from_syntax_tree_node(node)
+        arguments = [
+          path,
+          name,
+          test_command,
+          {
+            start_line: node.location.start_line - 1,
+            start_column: node.location.start_column,
+            end_line: node.location.end_line - 1,
+            end_column: node.location.end_column,
+          },
+        ]
+
+        Interface::CodeLens.new(
+          range: range,
+          command: Interface::Command.new(
+            title: title,
+            command: command,
+            arguments: arguments,
+          ),
+          data: { type: type },
+        )
+      end
 
       sig { params(node: SyntaxTree::Node, name: String, command: String).void }
       def add_code_lens(node, name:, command:)
-        @response << RubyLsp::Requests::CodeLens.create_code_lens(
+        @response << create_code_lens(
           node,
           path: @path,
           name: name,
@@ -165,7 +161,7 @@ module RubyLsp
           type: "test",
         )
 
-        @response << RubyLsp::Requests::CodeLens.create_code_lens(
+        @response << create_code_lens(
           node,
           path: @path,
           name: name,
