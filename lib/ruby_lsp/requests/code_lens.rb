@@ -19,7 +19,6 @@ module RubyLsp
     # class Test < Minitest::Test
     # end
     # ```
-
     class CodeLens < Listener
       extend T::Sig
       extend T::Generic
