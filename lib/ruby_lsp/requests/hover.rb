@@ -3,7 +3,7 @@
 
 module RubyLsp
   module Requests
-    # ![Hover demo](../../misc/rails_document_link_hover.gif)
+    # ![Hover demo](../../rails_document_link_hover.gif)
     #
     # The [hover request](https://microsoft.github.io/language-server-protocol/specification#textDocument_hover)
     # renders a clickable link to the code's official documentation.

@@ -3,7 +3,7 @@
 
 module RubyLsp
   module Requests
-    # ![Folding ranges demo](../../misc/folding_ranges.gif)
+    # ![Folding ranges demo](../../folding_ranges.gif)
     #
     # The [folding ranges](https://microsoft.github.io/language-server-protocol/specification#textDocument_foldingRange)
     # request informs the editor of the ranges where and how code can be folded.

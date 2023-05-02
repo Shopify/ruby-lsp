@@ -5,7 +5,7 @@ require "ruby_lsp/requests/support/source_uri"
 
 module RubyLsp
   module Requests
-    # ![Document link demo](../../misc/document_link.gif)
+    # ![Document link demo](../../document_link.gif)
     #
     # The [document link](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentLink)
     # makes `# source://PATH_TO_FILE#line` comments in a Ruby/RBI file clickable if the file exists.

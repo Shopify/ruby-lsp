@@ -4,21 +4,21 @@
 module RubyLsp
   # Supported features
   #
-  # - {RubyLsp::Requests::DocumentSymbol}
-  # - {RubyLsp::Requests::DocumentLink}
-  # - {RubyLsp::Requests::Hover}
-  # - {RubyLsp::Requests::FoldingRanges}
-  # - {RubyLsp::Requests::SelectionRanges}
-  # - {RubyLsp::Requests::SemanticHighlighting}
-  # - {RubyLsp::Requests::Formatting}
-  # - {RubyLsp::Requests::OnTypeFormatting}
-  # - {RubyLsp::Requests::Diagnostics}
-  # - {RubyLsp::Requests::CodeActions}
-  # - {RubyLsp::Requests::CodeActionResolve}
-  # - {RubyLsp::Requests::DocumentHighlight}
-  # - {RubyLsp::Requests::InlayHints}
-  # - {RubyLsp::Requests::PathCompletion}
-  # - {RubyLsp::Requests::CodeLens}
+  # - [DocumentSymbol](rdoc-ref:RubyLsp::Requests::DocumentSymbol)
+  # - [DocumentLink](rdoc-ref:RubyLsp::Requests::DocumentLink)
+  # - [Hover](rdoc-ref:RubyLsp::Requests::Hover)
+  # - [FoldingRange](rdoc-ref:RubyLsp::Requests::FoldingRanges)
+  # - [SelectionRange](rdoc-ref:RubyLsp::Requests::SelectionRanges)
+  # - [SemanticHighlighting](rdoc-ref:RubyLsp::Requests::SemanticHighlighting)
+  # - [Formatting](rdoc-ref:RubyLsp::Requests::Formatting)
+  # - [OnTypeFormatting](rdoc-ref:RubyLsp::Requests::OnTypeFormatting)
+  # - [Diagnostic](rdoc-ref:RubyLsp::Requests::Diagnostics)
+  # - [CodeAction](rdoc-ref:RubyLsp::Requests::CodeActions)
+  # - [CodeActionResolve](rdoc-ref:RubyLsp::Requests::CodeActionResolve)
+  # - [DocumentHighlight](rdoc-ref:RubyLsp::Requests::DocumentHighlight)
+  # - [InlayHint](rdoc-ref:RubyLsp::Requests::InlayHints)
+  # - [PathCompletion](rdoc-ref:RubyLsp::Requests::PathCompletion)
+  # - [CodeLens](rdoc-ref:RubyLsp::Requests::CodeLens)
 
   module Requests
     autoload :BaseRequest, "ruby_lsp/requests/base_request"
