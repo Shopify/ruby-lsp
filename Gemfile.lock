@@ -61,10 +61,14 @@ GEM
     nokogiri (1.14.3)
       mini_portile2 (~> 2.8.0)
       racc (~> 1.4)
+    nokogiri (1.14.3-arm64-darwin)
+      racc (~> 1.4)
     parallel (1.23.0)
     parser (3.2.2.0)
       ast (~> 2.4.1)
     prettier_print (1.2.1)
+    psych (5.0.1)
+      stringio
     racc (1.6.2)
     rack (2.2.6.4)
     rack-test (2.1.0)
@@ -88,6 +92,8 @@ GEM
       parser (>= 2.6.4.0)
       sorbet-runtime (>= 0.5.9204)
       unparser
+    rdoc (6.5.0)
+      psych (>= 4.0.0)
     regexp_parser (2.8.0)
     reline (0.3.3)
       io-console (~> 0.5)
@@ -134,6 +140,7 @@ GEM
       sorbet (>= 0.5.10187)
       sorbet-runtime (>= 0.5.9204)
       thor (>= 0.19.2)
+    stringio (3.0.4)
     syntax_tree (6.1.1)
       prettier_print (>= 1.2.0)
     tapioca (0.11.5)
@@ -173,6 +180,7 @@ DEPENDENCIES
   mocha (~> 2.0)
   railties (~> 7.0)
   rake (~> 13.0)
+  rdoc
   rubocop (~> 1.50)
   rubocop-minitest (~> 0.30.0)
   rubocop-rake (~> 0.6.0)
@@ -181,7 +189,6 @@ DEPENDENCIES
   ruby-lsp!
   sorbet-static-and-runtime
   tapioca (~> 0.11)
-  yard (~> 0.9)
 
 BUNDLED WITH
    2.4.7
