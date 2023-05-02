@@ -14,6 +14,7 @@ import {
   ServerState,
   ClientInterface,
   FeaturesStatus,
+  FormatterStatus,
 } from "../../status";
 
 suite("StatusItems", () => {
@@ -21,6 +22,7 @@ suite("StatusItems", () => {
   let context: vscode.ExtensionContext;
   let status: StatusItem;
   let client: ClientInterface;
+  let formatter: string;
 
   beforeEach(() => {
     context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
@@ -40,6 +42,7 @@ suite("StatusItems", () => {
         context,
         ruby,
         state: ServerState.Running,
+        formatter: "none",
       };
       status = new RubyVersionStatus(client);
     });
@@ -67,7 +70,7 @@ suite("StatusItems", () => {
   suite("ServerStatus", () => {
     beforeEach(() => {
       ruby = {} as Ruby;
-      client = { context, ruby, state: ServerState.Running };
+      client = { context, ruby, state: ServerState.Running, formatter: "none" };
       status = new ServerStatus(client);
     });
 
@@ -130,6 +133,7 @@ suite("StatusItems", () => {
       client = {
         context,
         ruby,
+        formatter,
         state: ServerState.Running,
       };
       status = new ExperimentalFeaturesStatus(client);
@@ -150,7 +154,7 @@ suite("StatusItems", () => {
   suite("YjitStatus when Ruby supports it", () => {
     beforeEach(() => {
       ruby = { supportsYjit: true } as Ruby;
-      client = { context, ruby, state: ServerState.Running };
+      client = { context, ruby, state: ServerState.Running, formatter: "none" };
       status = new YjitStatus(client);
     });
 
@@ -174,7 +178,7 @@ suite("StatusItems", () => {
   suite("YjitStatus when Ruby does not support it", () => {
     beforeEach(() => {
       ruby = { supportsYjit: false } as Ruby;
-      client = { context, ruby, state: ServerState.Running };
+      client = { context, ruby, state: ServerState.Running, formatter: "none" };
       status = new YjitStatus(client);
     });
 
@@ -206,6 +210,7 @@ suite("StatusItems", () => {
       status = new FeaturesStatus({
         context,
         ruby,
+        formatter,
         state: ServerState.Running,
       });
     });
@@ -251,6 +256,27 @@ suite("StatusItems", () => {
             }/${numberOfFeatures} features enabled`
           );
         });
+    });
+  });
+
+  suite("FormatterStatus", () => {
+    beforeEach(() => {
+      ruby = {} as Ruby;
+      client = {
+        context,
+        ruby,
+        state: ServerState.Running,
+        formatter: "auto",
+      };
+      status = new FormatterStatus(client);
+    });
+
+    test("Status is initialized with the right values", async () => {
+      assert.strictEqual(status.item.text, "Using formatter: auto");
+      assert.strictEqual(status.item.name, "Formatter");
+      assert.strictEqual(status.item.command?.title, "Help");
+      assert.strictEqual(status.item.command?.command, Command.FormatterHelp);
+      assert.strictEqual(context.subscriptions.length, 1);
     });
   });
 });
