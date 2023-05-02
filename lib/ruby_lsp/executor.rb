@@ -213,20 +213,6 @@ module RubyLsp
       base_listener.response
     end
 
-    # sig { params(uri: String).returns(T::Array[Interface::DocumentLink]) }
-    # def document_link(uri)
-    #   @store.cache_fetch(uri, "textDocument/documentLink") do |document|
-    #     RubyLsp::Requests::DocumentLink.new(document).run
-    #   end
-    # end
-
-    # sig { params(uri: String).returns(T::Array[Interface::DocumentSymbol]) }
-    # def document_symbol(uri)
-    #   @store.cache_fetch(uri, :document_symbol) do |document|
-    #     Requests::DocumentSymbol.new(document).run
-    #   end
-    # end
-
     sig { params(uri: String, content_changes: T::Array[Document::EditShape], version: Integer).returns(Object) }
     def text_document_did_change(uri, content_changes, version)
       @store.push_edits(uri: uri, edits: content_changes, version: version)
