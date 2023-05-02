@@ -119,6 +119,8 @@ module RubyLsp
       def add_code_lens(node, name:, command:)
         @response << create_code_lens(
           node,
+          title: "Run",
+          command_name: "rubyLsp.runTest",
           path: @path,
           name: name,
           test_command: command,
@@ -127,10 +129,22 @@ module RubyLsp
 
         @response << create_code_lens(
           node,
+          title: "Debug",
+          command_name: "rubyLsp.debugTest",
           path: @path,
           name: name,
           test_command: command,
           type: "debug",
+        )
+
+        @response << create_code_lens(
+          node,
+          title: "Run In Terminal",
+          command_name: "rubyLsp.runTestInTerminal",
+          path: @path,
+          name: name,
+          test_command: command,
+          type: "test_in_terminal",
         )
       end
     end
