@@ -20,131 +20,157 @@ module RubyLsp
     # end
     # ```
 
-    class CodeLens < BaseRequest
+    class CodeLens < Listener
+      extend T::Sig
+      extend T::Generic
+
+      ResponseType = type_member { { fixed: T::Array[Interface::CodeLens] } }
+
       BASE_COMMAND = T.let((File.exist?("Gemfile.lock") ? "bundle exec ruby" : "ruby") + " -Itest ", String)
       ACCESS_MODIFIERS = T.let(["public", "private", "protected"], T::Array[String])
 
-      sig do
-        params(
-          document: Document,
-        ).void
-      end
-      def initialize(document)
-        super(document)
-        @results = T.let([], T::Array[Interface::CodeLens])
-        @path = T.let(document.uri.delete_prefix("file://"), String)
-        @modifier = T.let("public", String)
+      sig { override.returns(ResponseType) }
+      attr_reader :response
+
+      sig { params(uri: String, message_queue: Thread::Queue).void }
+      def initialize(uri, message_queue)
+        super
+
+        @response = T.let([], ResponseType)
+        @path = T.let(uri.delete_prefix("file://"), String)
+        @visibility = T.let("public", String)
+        @prev_visibility = T.let("public", String)
       end
 
-      sig { override.returns(T.all(T::Array[Interface::CodeLens], Object)) }
-      def run
-        visit(@document.tree) if @document.parsed?
-        @results
-      end
-
-      sig { override.params(node: SyntaxTree::ClassDeclaration).void }
-      def visit_class(node)
-        class_name = node.constant.constant.value
-        if class_name.end_with?("Test")
-          add_code_lens(node, name: class_name, command: BASE_COMMAND + @path)
+      listener_events do
+        sig { params(node: SyntaxTree::ClassDeclaration).void }
+        def on_class(node)
+          class_name = node.constant.constant.value
+          if class_name.end_with?("Test")
+            add_code_lens(node, name: class_name, command: BASE_COMMAND + @path)
+          end
         end
-        visit(node.bodystmt)
-      end
 
-      sig { override.params(node: SyntaxTree::DefNode).void }
-      def visit_def(node)
-        if @modifier == "public"
-          method_name = node.name.value
-          if method_name.start_with?("test_")
-            add_code_lens(
-              node,
-              name: method_name,
-              command: BASE_COMMAND + @path + " --name " + method_name,
-            )
+        sig { params(node: SyntaxTree::DefNode).void }
+        def on_def(node)
+          if @visibility == "public"
+            method_name = node.name.value
+            if method_name.start_with?("test_")
+              add_code_lens(
+                node,
+                name: method_name,
+                command: BASE_COMMAND + @path + " --name " + method_name,
+              )
+            end
+          end
+        end
+
+        sig { params(node: SyntaxTree::Command).void }
+        def on_command(node)
+          if ACCESS_MODIFIERS.include?(node.message.value) && node.arguments.parts.any?
+            @prev_visibility = @visibility
+            @visibility = node.message.value
+          end
+        end
+
+        sig { params(node: SyntaxTree::Command).void }
+        def after_command(node)
+          @visibility = @prev_visibility
+        end
+
+        sig { params(node: SyntaxTree::CallNode).void }
+        def on_call(node)
+          ident = node.message if node.message.is_a?(SyntaxTree::Ident)
+
+          if ident
+            ident_value = T.cast(ident, SyntaxTree::Ident).value
+            if ACCESS_MODIFIERS.include?(ident_value)
+              @prev_visibility = @visibility
+              @visibility = ident_value
+            end
+          end
+        end
+
+        sig { params(node: SyntaxTree::CallNode).void }
+        def after_call(node)
+          @visibility = @prev_visibility
+        end
+
+        sig { params(node: SyntaxTree::VCall).void }
+        def on_vcall(node)
+          vcall_value = node.value.value
+
+          if ACCESS_MODIFIERS.include?(vcall_value)
+            @prev_visibility = vcall_value
+            @visibility = vcall_value
           end
         end
       end
 
-      sig { override.params(node: SyntaxTree::Command).void }
-      def visit_command(node)
-        if node.message.value == "public"
-          with_visiblity("public", node)
-        end
+      sig { params(other: Listener[ResponseType]).returns(T.self_type) }
+      def merge_response!(other)
+        @response.concat(other.response)
+        self
       end
 
-      sig { override.params(node: SyntaxTree::CallNode).void }
-      def visit_call(node)
-        ident = node.message if node.message.is_a?(SyntaxTree::Ident)
+      class << self
+        include RubyLsp::Requests::Support::Common
 
-        if ident
-          if T.cast(ident, SyntaxTree::Ident).value == "public"
-            with_visiblity("public", node)
-          end
+        sig do
+          params(
+            node: SyntaxTree::Node,
+            path: String,
+            name: String,
+            test_command: String,
+            type: String,
+          ).returns(Interface::CodeLens)
         end
-      end
+        def create_code_lens(node, path:, name:, test_command:, type:)
+          title = type == "test" ? "Run" : "Debug"
+          command = type == "test" ? "rubyLsp.runTest" : "rubyLsp.debugTest"
+          range = range_from_syntax_tree_node(node)
+          arguments = [
+            path,
+            name,
+            test_command,
+            {
+              start_line: node.location.start_line - 1,
+              start_column: node.location.start_column,
+              end_line: node.location.end_line - 1,
+              end_column: node.location.end_column,
+            },
+          ]
 
-      sig { override.params(node: SyntaxTree::VCall).void }
-      def visit_vcall(node)
-        vcall_value = node.value.value
-
-        if ACCESS_MODIFIERS.include?(vcall_value)
-          @modifier = vcall_value
+          Interface::CodeLens.new(
+            range: range,
+            command: Interface::Command.new(
+              title: title,
+              command: command,
+              arguments: arguments,
+            ),
+            data: { type: type },
+          )
         end
       end
 
       private
 
-      sig do
-        params(
-          visibility: String,
-          node: T.any(SyntaxTree::CallNode, SyntaxTree::Command),
-        ).void
-      end
-      def with_visiblity(visibility, node)
-        current_visibility = @modifier
-        @modifier = visibility
-        visit(node.arguments)
-      ensure
-        @modifier = T.must(current_visibility)
-      end
-
       sig { params(node: SyntaxTree::Node, name: String, command: String).void }
       def add_code_lens(node, name:, command:)
-        range = range_from_syntax_tree_node(node)
-        arguments = [
-          @path,
-          name,
-          command,
-          {
-            start_line: node.location.start_line - 1,
-            start_column: node.location.start_column,
-            end_line: node.location.end_line - 1,
-            end_column: node.location.end_column,
-          },
-        ]
-
-        @results << Interface::CodeLens.new(
-          range: range,
-          command: Interface::Command.new(
-            title: "Run",
-            command: "rubyLsp.runTest",
-            arguments: arguments,
-          ),
-          data: {
-            type: "test",
-          },
+        @response << RubyLsp::Requests::CodeLens.create_code_lens(
+          node,
+          path: @path,
+          name: name,
+          test_command: command,
+          type: "test",
         )
 
-        @results << Interface::CodeLens.new(
-          range: range,
-          command: Interface::Command.new(
-            title: "Debug",
-            command: "rubyLsp.debugTest",
-            arguments: arguments,
-          ),
-          data: {
-            type: "debug",
-          },
+        @response << RubyLsp::Requests::CodeLens.create_code_lens(
+          node,
+          path: @path,
+          name: name,
+          test_command: command,
+          type: "debug",
         )
       end
     end

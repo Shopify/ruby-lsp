@@ -66,6 +66,20 @@ module RubyLsp
     def visit_command(node)
       @listeners.each { |l| T.unsafe(l).on_command(node) if l.registered_for_event?(:on_command) }
       super
+      @listeners.each { |l| T.unsafe(l).after_command(node) if l.registered_for_event?(:after_command) }
+    end
+
+    sig { override.params(node: SyntaxTree::CallNode).void }
+    def visit_call(node)
+      @listeners.each { |l| T.unsafe(l).on_call(node) if l.registered_for_event?(:on_call) }
+      super
+      @listeners.each { |l| T.unsafe(l).after_call(node) if l.registered_for_event?(:after_call) }
+    end
+
+    sig { override.params(node: SyntaxTree::VCall).void }
+    def visit_vcall(node)
+      @listeners.each { |l| T.unsafe(l).on_vcall(node) if l.registered_for_event?(:on_vcall) }
+      super
     end
 
     sig { override.params(node: SyntaxTree::ConstPathField).void }
