@@ -21,6 +21,7 @@ export enum Command {
   SelectVersionManager = "rubyLsp.selectRubyVersionManager",
   ToggleFeatures = "rubyLsp.toggleFeatures",
   RunTest = "rubyLsp.runTest",
+  RunTestInTerminal = "rubyLsp.runTestInTerminal",
   DebugTest = "rubyLsp.debugTest",
 }
 
