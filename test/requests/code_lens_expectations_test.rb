@@ -33,8 +33,8 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     assert_equal(response.size, 4)
     assert_match("Run", response[0].command.title)
-    assert_match("Debug", response[1].command.title)
-    assert_match("Run In Terminal", response[2].command.title)
+    assert_match("Run In Terminal", response[1].command.title)
+    assert_match("Debug", response[2].command.title)
     assert_match("Run Test", response[3].command.title)
   ensure
     RubyLsp::Requests::Hover.listeners.clear
