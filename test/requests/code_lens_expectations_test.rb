@@ -25,7 +25,8 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     }).response
 
     assert_match("Run", response.first.command.title)
-    assert_match("Run Test", response[2].command.title)
+    assert_match("Debug", response[1].command.title)
+    assert_match("Run In Terminal", response[2].command.title)
   ensure
     RubyLsp::Requests::Hover.listeners.clear
     T.must(message_queue).close
