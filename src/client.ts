@@ -310,22 +310,8 @@ export default class Client implements ClientInterface {
       vscode.commands.registerCommand(
         Command.Update,
         this.updateServer.bind(this)
-      ),
-      vscode.commands.registerCommand(
-        Command.DebugTest,
-        this.debugTest.bind(this)
       )
     );
-  }
-
-  private debugTest(_path: string, _name: string, command: string) {
-    return vscode.debug.startDebugging(undefined, {
-      type: "ruby_lsp",
-      name: "Debug",
-      request: "launch",
-      program: command,
-      env: this.ruby.env,
-    });
   }
 
   private async setupCustomGemfile() {

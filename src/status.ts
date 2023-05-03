@@ -22,6 +22,7 @@ export enum Command {
   ToggleFeatures = "rubyLsp.toggleFeatures",
   FormatterHelp = "rubyLsp.formatterHelp",
   RunTest = "rubyLsp.runTest",
+  RunTestInTerminal = "rubyLsp.runTestInTerminal",
   DebugTest = "rubyLsp.debugTest",
 }
 

@@ -14,6 +14,7 @@ export class TestController {
   private testCommands: WeakMap<vscode.TestItem, string>;
   private testRunProfile: vscode.TestRunProfile;
   private workingFolder: string;
+  private terminal: vscode.Terminal | undefined;
   private ruby: Ruby;
 
   constructor(
@@ -41,6 +42,9 @@ export class TestController {
     );
 
     vscode.commands.executeCommand("testing.clearTestResults");
+    vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
+      if (terminal === this.terminal) this.terminal = undefined;
+    });
 
     context.subscriptions.push(
       this.testController,
@@ -49,6 +53,14 @@ export class TestController {
         (_path, name, _command) => {
           this.runOnClick(name);
         }
+      ),
+      vscode.commands.registerCommand(
+        Command.RunTestInTerminal,
+        this.runTestInTerminal.bind(this)
+      ),
+      vscode.commands.registerCommand(
+        Command.DebugTest,
+        this.debugTest.bind(this)
       )
     );
   }
@@ -90,6 +102,24 @@ export class TestController {
         this.testController.items.add(testItem);
       }
     });
+  }
+
+  debugTest(_path: string, _name: string, command: string) {
+    return vscode.debug.startDebugging(undefined, {
+      type: "ruby_lsp",
+      name: "Debug",
+      request: "launch",
+      program: command,
+      env: this.ruby.env,
+    });
+  }
+
+  runTestInTerminal(_path: string, _name: string, command: string) {
+    if (this.terminal === undefined) {
+      this.terminal = vscode.window.createTerminal({ name: "Run test" });
+    }
+    this.terminal.show();
+    this.terminal.sendText(command);
   }
 
   async runHandler(
