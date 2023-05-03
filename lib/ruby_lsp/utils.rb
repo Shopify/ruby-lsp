@@ -6,7 +6,7 @@ module RubyLsp
   VOID = T.let(Object.new.freeze, Object)
 
   # This freeze is not redundant since the interpolated string is mutable
-  WORKSPACE_URI = T.let(URI("file://#{Dir.pwd}".freeze), URI::Generic)
+  WORKSPACE_URI = T.let(URI("file://#{Dir.pwd}".freeze), URI::Generic) # rubocop:disable Style/RedundantFreeze
 
   # A notification to be sent to the client
   class Message
