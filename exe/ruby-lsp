@@ -20,7 +20,32 @@ end
 
 require_relative "../lib/ruby_lsp/internal"
 
-if ARGV.include?("--debug")
+require "optparse"
+
+options = {}
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: ruby-lsp [options]"
+
+  opts.on("--debug", "Enable debugging") do
+    options[:verbose] = true
+  end
+
+  opts.on("-h", "--help", "Print this help") do
+    puts opts.help
+    exit(0)
+  end
+end
+
+options = begin
+  parser.parse!
+rescue OptionParser::InvalidOption => e
+  warn(e)
+  warn("")
+  warn(parser.help)
+  exit(1)
+end
+
+if options[:verbose]
   if ["x64-mingw-ucrt", "x64-mingw32"].include?(RUBY_PLATFORM)
     puts "Debugging is not supported on Windows"
     exit 1
