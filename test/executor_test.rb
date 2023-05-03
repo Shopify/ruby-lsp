@@ -174,6 +174,44 @@ class ExecutorTest < Minitest::Test
     assert_equal("none", @store.formatter)
   end
 
+  def test_shows_error_if_formatter_set_to_rubocop_but_rubocop_not_available
+    with_uninstalled_rubocop do
+      executor = RubyLsp::Executor.new(@store, @message_queue)
+
+      executor.execute(method: "initialize", params: { initializationOptions: { formatter: "rubocop" } })
+      executor.execute(method: "initialized")
+
+      assert_equal("rubocop", @store.formatter)
+      refute_empty(@message_queue)
+      notification = T.must(@message_queue.pop)
+      assert_equal("window/showMessage", notification.message)
+      assert_equal(
+        "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the bundle.",
+        T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
+      )
+    end
+  end
+
+  def with_uninstalled_rubocop(&block)
+    rubocop_paths = $LOAD_PATH.select { |path| path.include?("gems/rubocop") }
+    rubocop_paths.each { |path| $LOAD_PATH.delete(path) }
+
+    $LOADED_FEATURES.delete_if { |path| path.include?("ruby_lsp/requests/support/rubocop_runner") }
+
+    unload_rubocop_runner
+    block.call
+  ensure
+    $LOAD_PATH.unshift(*rubocop_paths)
+    unload_rubocop_runner
+    require "ruby_lsp/requests/support/rubocop_runner"
+  end
+
+  def unload_rubocop_runner
+    RubyLsp::Requests::Support.send(:remove_const, :RuboCopRunner)
+  rescue NameError
+    # Depending on which tests have run prior to this one, `RuboCopRunner` may or may not be defined
+  end
+
   private
 
   def stub_dependencies(rubocop:, syntax_tree:)
