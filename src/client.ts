@@ -40,6 +40,7 @@ export default class Client implements ClientInterface {
   #context: vscode.ExtensionContext;
   #ruby: Ruby;
   #state: ServerState = ServerState.Starting;
+  #formatter: string;
 
   constructor(
     context: vscode.ExtensionContext,
@@ -52,6 +53,7 @@ export default class Client implements ClientInterface {
     this.testController = testController;
     this.#context = context;
     this.#ruby = ruby;
+    this.#formatter = "";
     this.statusItems = new StatusItems(this);
     this.registerCommands();
     this.registerAutoRestarts();
@@ -207,6 +209,7 @@ export default class Client implements ClientInterface {
     );
 
     await this.client.start();
+    await this.determineFormatter();
 
     this.state = ServerState.Running;
   }
@@ -259,6 +262,27 @@ export default class Client implements ClientInterface {
 
   private set ruby(ruby: Ruby) {
     this.#ruby = ruby;
+  }
+
+  get formatter(): string {
+    return this.#formatter;
+  }
+
+  async determineFormatter() {
+    const configuration = vscode.workspace.getConfiguration("rubyLsp");
+    const configuredFormatter: string = configuration.get("formatter")!;
+
+    if (configuredFormatter === "auto") {
+      if (await this.projectHasDependency(/^rubocop/)) {
+        this.#formatter = "rubocop";
+      } else if (await this.projectHasDependency(/^syntax_tree$/)) {
+        this.#formatter = "syntax_tree";
+      } else {
+        this.#formatter = "none";
+      }
+    } else {
+      this.#formatter = configuredFormatter;
+    }
   }
 
   get context(): vscode.ExtensionContext {
@@ -341,7 +365,7 @@ export default class Client implements ClientInterface {
       gemfile.push('eval_gemfile(File.expand_path("../Gemfile", __dir__))');
 
       // If the `ruby-lsp` exists in the bundle, add it to the custom Gemfile commented out
-      if (await this.projectHasDependency("ruby-lsp")) {
+      if (await this.projectHasDependency(/^ruby-lsp$/)) {
         // If it is already in the bundle, add the gem commented out to avoid conflicts
         gemfile.push(`# ${gemEntry}`);
       } else {
@@ -350,7 +374,7 @@ export default class Client implements ClientInterface {
       }
 
       // If debug is not in the bundle, add it to allow debugging
-      if (!(await this.projectHasDependency("debug"))) {
+      if (!(await this.projectHasDependency(/^debug$/))) {
         gemfile.push(debugEntry);
       }
     } else {
@@ -424,7 +448,7 @@ export default class Client implements ClientInterface {
     return Object.keys(features).filter((key) => features[key]);
   }
 
-  private async projectHasDependency(gemName: string): Promise<boolean> {
+  private async projectHasDependency(gemName: RegExp): Promise<boolean> {
     try {
       // We can't include `BUNDLE_GEMFILE` here, because we want to check if the project's bundle includes the
       // dependency and not our custom bundle
@@ -433,7 +457,7 @@ export default class Client implements ClientInterface {
       // exit with an error if gemName not a dependency or is a transitive dependency.
       // exit with success if gemName is a direct dependency.
       await asyncExec(
-        `ruby -rbundler -e "exit 1 unless Bundler.locked_gems.dependencies.key?('${gemName}')"`,
+        `ruby -rbundler -e "exit 1 unless Bundler.locked_gems.dependencies.keys.grep(${gemName}).any?"`,
         {
           cwd: this.workingFolder,
           env: withoutBundleGemfileEnv,

@@ -212,6 +212,13 @@ vscode.commands.registerCommand(
 );
 ```
 
+## Formatting
+
+When `rubyLsp.formatter` is set to `auto`, Ruby LSP tries to determine which formatter to use.
+
+If the bundle has a **direct** dependency on a supported formatter, such as `rubocop` or `syntax_tree`, that will be used.
+Otherwise, formatting will be disabled and you will need add one to the bundle.
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/Shopify/vscode-ruby-lsp.
