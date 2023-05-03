@@ -81,7 +81,7 @@ module RubyLsp
         folding_range(uri)
       when "textDocument/selectionRange"
         selection_range(uri, request.dig(:params, :positions))
-      when "textDocument/documentSymbol", "textDocument/documentLink"
+      when "textDocument/documentSymbol", "textDocument/documentLink", "textDocument/codeLens"
         document = @store.get(uri)
 
         # If the response has already been cached by another request, return it
@@ -91,12 +91,24 @@ module RubyLsp
         # Run listeners for the document
         document_symbol = Requests::DocumentSymbol.new(uri, @message_queue)
         document_link = Requests::DocumentLink.new(uri, @message_queue)
-        EventEmitter.new(document_symbol, document_link).visit(document.tree) if document.parsed?
+        code_lens = Requests::CodeLens.new(uri, @message_queue)
+        code_lens_extensions_listeners = Requests::CodeLens.listeners.map { |l| l.new(document.uri, @message_queue) }
+        if document.parsed?
+          T.unsafe(EventEmitter).new(
+            document_symbol,
+            document_link,
+            code_lens,
+            *code_lens_extensions_listeners,
+          ).visit(document.tree)
+        end
+
+        code_lens_extensions_listeners.each { |ext| code_lens.merge_response!(ext) }
 
         # Store all responses retrieve in this round of visits in the cache and then return the response for the request
         # we actually received
         document.cache_set("textDocument/documentSymbol", document_symbol.response)
         document.cache_set("textDocument/documentLink", document_link.response)
+        document.cache_set("textDocument/codeLens", code_lens.response)
         document.cache_get(request[:method])
       when "textDocument/semanticTokens/full"
         semantic_tokens_full(uri)
@@ -154,8 +166,6 @@ module RubyLsp
         end
       when "textDocument/completion"
         completion(uri, request.dig(:params, :position))
-      when "textDocument/codeLens"
-        code_lens(uri)
       end
     end
 
@@ -163,24 +173,6 @@ module RubyLsp
     def folding_range(uri)
       @store.cache_fetch(uri, "textDocument/foldingRange") do |document|
         Requests::FoldingRanges.new(document).run
-      end
-    end
-
-    sig { params(uri: String).returns(T::Array[Interface::CodeLens]) }
-    def code_lens(uri)
-      @store.cache_fetch(uri, "textDocument/codeLens") do |document|
-        document.parse
-
-        # Instantiate all listeners
-        base_listener = Requests::CodeLens.new(document.uri, @message_queue)
-        listeners = Requests::CodeLens.listeners.map { |l| l.new(document.uri, @message_queue) }
-
-        # Emit events for all listeners
-        T.unsafe(EventEmitter).new(base_listener, *listeners).visit(document.tree) if document.parsed?
-
-        # Merge all responses into a single hover
-        listeners.each { |ext| base_listener.merge_response!(ext) }
-        base_listener.response
       end
     end
 
