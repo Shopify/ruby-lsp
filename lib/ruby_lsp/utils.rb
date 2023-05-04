@@ -1,5 +1,6 @@
 # typed: strict
 # frozen_string_literal: true
+require "uri"
 
 module RubyLsp
   # Used to indicate that a request shouldn't return a response
