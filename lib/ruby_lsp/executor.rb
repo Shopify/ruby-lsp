@@ -287,13 +287,18 @@ module RubyLsp
       Requests::DocumentHighlight.new(@store.get(uri), position).run
     end
 
-    sig { params(uri: String, range: Document::RangeShape).returns(T::Array[Interface::InlayHint]) }
+    sig { params(uri: String, range: Document::RangeShape).returns(T.nilable(T::Array[Interface::InlayHint])) }
     def inlay_hint(uri, range)
       document = @store.get(uri)
+      return if document.syntax_error?
+
       start_line = range.dig(:start, :line)
       end_line = range.dig(:end, :line)
 
-      Requests::InlayHints.new(document, start_line..end_line).run
+      emitter = EventEmitter.new
+      listener = Requests::InlayHints.new(start_line..end_line, emitter, @message_queue)
+      emitter.visit(document.tree)
+      listener.response
     end
 
     sig do
