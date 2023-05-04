@@ -116,5 +116,11 @@ module RubyLsp
       @listeners[:on_comment]&.each { |l| T.unsafe(l).on_comment(node) }
       super
     end
+
+    sig { override.params(node: SyntaxTree::Rescue).void }
+    def visit_rescue(node)
+      @listeners[:on_rescue]&.each { |l| T.unsafe(l).on_rescue(node) }
+      super
+    end
   end
 end

@@ -18,39 +18,41 @@ module RubyLsp
     #   puts "handle some rescue"
     # end
     # ```
-    class InlayHints < BaseRequest
+    class InlayHints < Listener
+      extend T::Sig
+      extend T::Generic
+
+      ResponseType = type_member { { fixed: T::Array[Interface::InlayHint] } }
+
       RESCUE_STRING_LENGTH = T.let("rescue".length, Integer)
 
-      sig { params(document: Document, range: T::Range[Integer]).void }
-      def initialize(document, range)
-        super(document)
+      sig { override.returns(ResponseType) }
+      attr_reader :response
 
-        @hints = T.let([], T::Array[Interface::InlayHint])
+      sig { params(range: T::Range[Integer], emitter: EventEmitter, message_queue: Thread::Queue).void }
+      def initialize(range, emitter, message_queue)
+        super(emitter, message_queue)
+
+        @response = T.let([], ResponseType)
         @range = range
+
+        emitter.register(self, :on_rescue)
       end
 
-      sig { override.returns(T.all(T::Array[Interface::InlayHint], Object)) }
-      def run
-        visit(@document.tree) if @document.parsed?
-        @hints
-      end
-
-      sig { override.params(node: SyntaxTree::Rescue).void }
-      def visit_rescue(node)
+      sig { params(node: SyntaxTree::Rescue).void }
+      def on_rescue(node)
         exception = node.exception
         return unless exception.nil? || exception.exceptions.nil?
 
         loc = node.location
         return unless visible?(node, @range)
 
-        @hints << Interface::InlayHint.new(
+        @response << Interface::InlayHint.new(
           position: { line: loc.start_line - 1, character: loc.start_column + RESCUE_STRING_LENGTH },
           label: "StandardError",
           padding_left: true,
           tooltip: "StandardError is implied in a bare rescue",
         )
-
-        super
       end
     end
   end
