@@ -53,7 +53,7 @@ are expected to adhere to the
 code of conduct.
 
 If you wish to contribute, see [CONTRIBUTING](CONTRIBUTING.md) for development instructions and check out our pinned
-[roadmap issue](https://github.com/Shopify/ruby-lsp/issues) for a list of tasks to get started.
+[roadmap issue](https://github.com/Shopify/ruby-lsp/issues/691) for a list of tasks to get started.
 
 ## License
 
