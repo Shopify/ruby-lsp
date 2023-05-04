@@ -52,7 +52,8 @@ are expected to adhere to the
 [Contributor Covenant](CODE_OF_CONDUCT.md)
 code of conduct.
 
-See [CONTRIBUTING](CONTRIBUTING.md) for development instructions.
+If you wish to contribute, see [CONTRIBUTING](CONTRIBUTING.md) for development instructions and check out our pinned
+[roadmap issue](https://github.com/Shopify/ruby-lsp/issues) for a list of tasks to get started.
 
 ## License
 
