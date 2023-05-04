@@ -39,6 +39,9 @@ end
 See the [documentation](https://shopify.github.io/ruby-lsp) for more in-depth details about the
 [supported features](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html).
 
+For creating rich themes for Ruby using the semantic highlighting information, see the [semantic highlighting
+documentation](SEMANTIC_HIGHLIGHTING.md).
+
 ## Learn More
 
 * [RubyConf 2022: Improving the development experience with language servers](https://www.youtube.com/watch?v=kEfXPTm1aCI) ([Vinicius Stock](https://github.com/vinistock))
