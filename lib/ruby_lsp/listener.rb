@@ -14,24 +14,14 @@ module RubyLsp
 
     abstract!
 
-    sig { params(uri: String, message_queue: Thread::Queue).void }
-    def initialize(uri, message_queue)
+    sig { params(emitter: EventEmitter, message_queue: Thread::Queue).void }
+    def initialize(emitter, message_queue)
+      @emitter = emitter
       @message_queue = message_queue
-      @uri = uri
-    end
-
-    @event_to_listener_map = T.let(Hash.new { |h, k| h[k] = [] }, T::Hash[Symbol, T::Array[T.class_of(Listener)]])
-
-    sig { params(event: Symbol).returns(T.nilable(T::Boolean)) }
-    def registered_for_event?(event)
-      Listener.event_to_listener_map[event]&.include?(self.class)
     end
 
     class << self
       extend T::Sig
-
-      sig { returns(T::Hash[Symbol, T::Array[T.class_of(Listener)]]) }
-      attr_reader :event_to_listener_map
 
       sig { returns(T::Array[T.class_of(Listener)]) }
       def listeners
@@ -41,19 +31,6 @@ module RubyLsp
       sig { params(listener: T.class_of(Listener)).void }
       def add_listener(listener)
         listeners << listener
-      end
-
-      # All listener events must be defined inside of a `listener_events` block. This is to ensure we know which events
-      # have been registered. Defining an event outside of this block will simply not register it and it'll never be
-      # invoked
-      sig { params(block: T.proc.void).void }
-      def listener_events(&block)
-        current_methods = instance_methods
-        block.call
-
-        (instance_methods - current_methods).each do |event|
-          T.must(Listener.event_to_listener_map[event]) << self
-        end
       end
     end
 

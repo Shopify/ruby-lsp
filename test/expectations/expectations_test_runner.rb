@@ -10,8 +10,9 @@ class ExpectationsTestRunner < Minitest::Test
     def expectations_tests(handler_class, expectation_suffix)
       execute_request = if handler_class < RubyLsp::Listener
         <<~RUBY
-          listener = #{handler_class}.new(document.uri, @message_queue)
-          RubyLsp::EventEmitter.new(listener).visit(document.tree)
+          emitter = RubyLsp::EventEmitter.new
+          listener = #{handler_class}.new(emitter, @message_queue)
+          emitter.visit(document.tree)
           listener.response
         RUBY
       else

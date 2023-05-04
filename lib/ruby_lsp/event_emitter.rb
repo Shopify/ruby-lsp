@@ -13,17 +13,23 @@ module RubyLsp
   #
   # ```ruby
   # target_node = document.locate_node(position)
-  # listener = Requests::Hover.new
-  # EventEmitter.new(listener).emit_for_target(target_node)
+  # emitter = EventEmitter.new
+  # listener = Requests::Hover.new(emitter, @message_queue)
+  # emitter.emit_for_target(target_node)
   # listener.response
   # ```
   class EventEmitter < SyntaxTree::Visitor
     extend T::Sig
 
-    sig { params(listeners: Listener[T.untyped]).void }
-    def initialize(*listeners)
-      @listeners = listeners
+    sig { void }
+    def initialize
+      @listeners = T.let(Hash.new { |h, k| h[k] = [] }, T::Hash[Symbol, T::Array[Listener[T.untyped]]])
       super()
+    end
+
+    sig { params(listener: Listener[T.untyped], events: Symbol).void }
+    def register(listener, *events)
+      events.each { |event| T.must(@listeners[event]) << listener }
     end
 
     # Emit events for a specific node. This is similar to the regular `visit` method, but avoids going deeper into the
@@ -32,17 +38,15 @@ module RubyLsp
     def emit_for_target(node)
       case node
       when SyntaxTree::Command
-        @listeners.each { |l| T.unsafe(l).on_command(node) if l.registered_for_event?(:on_command) }
+        @listeners[:on_command]&.each { |l| T.unsafe(l).on_command(node) }
       when SyntaxTree::CallNode
-        @listeners.each { |l| T.unsafe(l).on_call(node) if l.registered_for_event?(:on_call) }
+        @listeners[:on_call]&.each { |l| T.unsafe(l).on_call(node) }
       when SyntaxTree::TStringContent
-        @listeners.each do |l|
-          T.unsafe(l).on_tstring_content(node) if l.registered_for_event?(:on_tstring_content)
-        end
+        @listeners[:on_tstring_content]&.each { |l| T.unsafe(l).on_tstring_content(node) }
       when SyntaxTree::ConstPathRef
-        @listeners.each { |l| T.unsafe(l).on_const_path_ref(node) if l.registered_for_event?(:on_const_path_ref) }
+        @listeners[:on_const_path_ref]&.each { |l| T.unsafe(l).on_const_path_ref(node) }
       when SyntaxTree::Const
-        @listeners.each { |l| T.unsafe(l).on_const(node) if l.registered_for_event?(:on_const) }
+        @listeners[:on_const]&.each { |l| T.unsafe(l).on_const(node) }
       end
     end
 
@@ -50,66 +54,66 @@ module RubyLsp
     # we need both an `on_*` and `after_*` event. This is because some requests must know when we exit the scope
     sig { override.params(node: SyntaxTree::ClassDeclaration).void }
     def visit_class(node)
-      @listeners.each { |l| T.unsafe(l).on_class(node) if l.registered_for_event?(:on_class) }
+      @listeners[:on_class]&.each { |l| T.unsafe(l).on_class(node) }
       super
-      @listeners.each { |l| T.unsafe(l).after_class(node) if l.registered_for_event?(:after_class) }
+      @listeners[:after_class]&.each { |l| T.unsafe(l).after_class(node) }
     end
 
     sig { override.params(node: SyntaxTree::ModuleDeclaration).void }
     def visit_module(node)
-      @listeners.each { |l| T.unsafe(l).on_module(node) if l.registered_for_event?(:on_module) }
+      @listeners[:on_module]&.each { |l| T.unsafe(l).on_module(node) }
       super
-      @listeners.each { |l| T.unsafe(l).after_module(node) if l.registered_for_event?(:after_module) }
+      @listeners[:after_module]&.each { |l| T.unsafe(l).after_module(node) }
     end
 
     sig { override.params(node: SyntaxTree::Command).void }
     def visit_command(node)
-      @listeners.each { |l| T.unsafe(l).on_command(node) if l.registered_for_event?(:on_command) }
+      @listeners[:on_command]&.each { |l| T.unsafe(l).on_command(node) }
       super
-      @listeners.each { |l| T.unsafe(l).after_command(node) if l.registered_for_event?(:after_command) }
+      @listeners[:after_command]&.each { |l| T.unsafe(l).after_command(node) }
     end
 
     sig { override.params(node: SyntaxTree::CallNode).void }
     def visit_call(node)
-      @listeners.each { |l| T.unsafe(l).on_call(node) if l.registered_for_event?(:on_call) }
+      @listeners[:on_call]&.each { |l| T.unsafe(l).on_call(node) }
       super
-      @listeners.each { |l| T.unsafe(l).after_call(node) if l.registered_for_event?(:after_call) }
+      @listeners[:after_call]&.each { |l| T.unsafe(l).after_call(node) }
     end
 
     sig { override.params(node: SyntaxTree::VCall).void }
     def visit_vcall(node)
-      @listeners.each { |l| T.unsafe(l).on_vcall(node) if l.registered_for_event?(:on_vcall) }
+      @listeners[:on_vcall]&.each { |l| T.unsafe(l).on_vcall(node) }
       super
     end
 
     sig { override.params(node: SyntaxTree::ConstPathField).void }
     def visit_const_path_field(node)
-      @listeners.each { |l| T.unsafe(l).on_const_path_field(node) if l.registered_for_event?(:on_const_path_field) }
+      @listeners[:on_const_path_field]&.each { |l| T.unsafe(l).on_const_path_field(node) }
       super
     end
 
     sig { override.params(node: SyntaxTree::TopConstField).void }
     def visit_top_const_field(node)
-      @listeners.each { |l| T.unsafe(l).on_top_const_field(node) if l.registered_for_event?(:on_top_const_field) }
+      @listeners[:on_top_const_field]&.each { |l| T.unsafe(l).on_top_const_field(node) }
       super
     end
 
     sig { override.params(node: SyntaxTree::DefNode).void }
     def visit_def(node)
-      @listeners.each { |l| T.unsafe(l).on_def(node) if l.registered_for_event?(:on_def) }
+      @listeners[:on_def]&.each { |l| T.unsafe(l).on_def(node) }
       super
-      @listeners.each { |l| T.unsafe(l).after_def(node) if l.registered_for_event?(:after_def) }
+      @listeners[:after_def]&.each { |l| T.unsafe(l).after_def(node) }
     end
 
     sig { override.params(node: SyntaxTree::VarField).void }
     def visit_var_field(node)
-      @listeners.each { |l| T.unsafe(l).on_var_field(node) if l.registered_for_event?(:on_var_field) }
+      @listeners[:on_var_field]&.each { |l| T.unsafe(l).on_var_field(node) }
       super
     end
 
     sig { override.params(node: SyntaxTree::Comment).void }
     def visit_comment(node)
-      @listeners.each { |l| T.unsafe(l).on_comment(node) if l.registered_for_event?(:on_comment) }
+      @listeners[:on_comment]&.each { |l| T.unsafe(l).on_comment(node) }
       super
     end
   end

@@ -31,78 +31,78 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :response
 
-      sig { params(uri: String, message_queue: Thread::Queue).void }
-      def initialize(uri, message_queue)
-        super
+      sig { params(uri: String, emitter: EventEmitter, message_queue: Thread::Queue).void }
+      def initialize(uri, emitter, message_queue)
+        super(emitter, message_queue)
 
         @response = T.let([], ResponseType)
-        @path = T.let(uri.delete_prefix("file://"), String)
+        @path = T.let(T.must(URI(uri).path), String)
         @visibility = T.let("public", String)
         @prev_visibility = T.let("public", String)
+
+        emitter.register(self, :on_class, :on_def, :on_command, :after_command, :on_call, :after_call, :on_vcall)
       end
 
-      listener_events do
-        sig { params(node: SyntaxTree::ClassDeclaration).void }
-        def on_class(node)
-          class_name = node.constant.constant.value
-          if class_name.end_with?("Test")
-            add_code_lens(node, name: class_name, command: BASE_COMMAND + @path)
+      sig { params(node: SyntaxTree::ClassDeclaration).void }
+      def on_class(node)
+        class_name = node.constant.constant.value
+        if class_name.end_with?("Test")
+          add_code_lens(node, name: class_name, command: BASE_COMMAND + @path)
+        end
+      end
+
+      sig { params(node: SyntaxTree::DefNode).void }
+      def on_def(node)
+        if @visibility == "public"
+          method_name = node.name.value
+          if method_name.start_with?("test_")
+            add_code_lens(
+              node,
+              name: method_name,
+              command: BASE_COMMAND + @path + " --name " + method_name,
+            )
           end
         end
+      end
 
-        sig { params(node: SyntaxTree::DefNode).void }
-        def on_def(node)
-          if @visibility == "public"
-            method_name = node.name.value
-            if method_name.start_with?("test_")
-              add_code_lens(
-                node,
-                name: method_name,
-                command: BASE_COMMAND + @path + " --name " + method_name,
-              )
-            end
-          end
+      sig { params(node: SyntaxTree::Command).void }
+      def on_command(node)
+        if ACCESS_MODIFIERS.include?(node.message.value) && node.arguments.parts.any?
+          @prev_visibility = @visibility
+          @visibility = node.message.value
         end
+      end
 
-        sig { params(node: SyntaxTree::Command).void }
-        def on_command(node)
-          if ACCESS_MODIFIERS.include?(node.message.value) && node.arguments.parts.any?
+      sig { params(node: SyntaxTree::Command).void }
+      def after_command(node)
+        @visibility = @prev_visibility
+      end
+
+      sig { params(node: SyntaxTree::CallNode).void }
+      def on_call(node)
+        ident = node.message if node.message.is_a?(SyntaxTree::Ident)
+
+        if ident
+          ident_value = T.cast(ident, SyntaxTree::Ident).value
+          if ACCESS_MODIFIERS.include?(ident_value)
             @prev_visibility = @visibility
-            @visibility = node.message.value
+            @visibility = ident_value
           end
         end
+      end
 
-        sig { params(node: SyntaxTree::Command).void }
-        def after_command(node)
-          @visibility = @prev_visibility
-        end
+      sig { params(node: SyntaxTree::CallNode).void }
+      def after_call(node)
+        @visibility = @prev_visibility
+      end
 
-        sig { params(node: SyntaxTree::CallNode).void }
-        def on_call(node)
-          ident = node.message if node.message.is_a?(SyntaxTree::Ident)
+      sig { params(node: SyntaxTree::VCall).void }
+      def on_vcall(node)
+        vcall_value = node.value.value
 
-          if ident
-            ident_value = T.cast(ident, SyntaxTree::Ident).value
-            if ACCESS_MODIFIERS.include?(ident_value)
-              @prev_visibility = @visibility
-              @visibility = ident_value
-            end
-          end
-        end
-
-        sig { params(node: SyntaxTree::CallNode).void }
-        def after_call(node)
-          @visibility = @prev_visibility
-        end
-
-        sig { params(node: SyntaxTree::VCall).void }
-        def on_vcall(node)
-          vcall_value = node.value.value
-
-          if ACCESS_MODIFIERS.include?(vcall_value)
-            @prev_visibility = vcall_value
-            @visibility = vcall_value
-          end
+        if ACCESS_MODIFIERS.include?(vcall_value)
+          @prev_visibility = vcall_value
+          @visibility = vcall_value
         end
       end
 

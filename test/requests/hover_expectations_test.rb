@@ -91,15 +91,19 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
       RubyLsp::Requests::Hover.add_listener(self)
 
-      listener_events do
-        def on_command(node)
-          T.bind(self, RubyLsp::Listener[T.untyped])
-          contents = RubyLsp::Interface::MarkupContent.new(
-            kind: "markdown",
-            value: "Method from middleware: #{node.message.value}",
-          )
-          @response = RubyLsp::Interface::Hover.new(range: range_from_syntax_tree_node(node), contents: contents)
-        end
+      def initialize(emitter, message_queue)
+        super
+
+        emitter.register(self, :on_command)
+      end
+
+      def on_command(node)
+        T.bind(self, RubyLsp::Listener[T.untyped])
+        contents = RubyLsp::Interface::MarkupContent.new(
+          kind: "markdown",
+          value: "Method from middleware: #{node.message.value}",
+        )
+        @response = RubyLsp::Interface::Hover.new(range: range_from_syntax_tree_node(node), contents: contents)
       end
     end
   end
