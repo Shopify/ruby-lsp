@@ -26,7 +26,7 @@ options = {}
 parser = OptionParser.new do |opts|
   opts.banner = "Usage: ruby-lsp [options]"
 
-  opts.on("--debug", "Enable debugging") do
+  opts.on("--debug", "Launch the Ruby LSP with a debugger attached") do
     options[:verbose] = true
   end
 
