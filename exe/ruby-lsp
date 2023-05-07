@@ -32,6 +32,8 @@ parser = OptionParser.new do |opts|
 
   opts.on("-h", "--help", "Print this help") do
     puts opts.help
+    puts
+    puts "See https://shopify.github.io/ruby-lsp/ for more information"
     exit(0)
   end
 end
