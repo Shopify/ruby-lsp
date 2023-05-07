@@ -31,7 +31,7 @@ parser = OptionParser.new do |opts|
     exit(0)
   end
 
-  opts.on("--debug", "Enable debugging") do
+  opts.on("--debug", "Launch the Ruby LSP with a debugger attached") do
     options[:debug] = true
   end
 
