@@ -27,7 +27,8 @@
         ]
       },
       "data": {
-        "type": "test"
+        "type": "test",
+        "test_library": "minitest"
       }
     },
     {
@@ -57,7 +58,8 @@
         ]
       },
       "data": {
-        "type": "test_in_terminal"
+        "type": "test_in_terminal",
+        "test_library": "minitest"
       }
     },
     {
@@ -87,7 +89,8 @@
         ]
       },
       "data": {
-        "type": "debug"
+        "type": "debug",
+        "test_library": "minitest"
       }
     },
     {
@@ -117,7 +120,8 @@
         ]
       },
       "data": {
-        "type": "test"
+        "type": "test",
+        "test_library": "minitest"
       }
     },
     {
@@ -147,7 +151,8 @@
         ]
       },
       "data": {
-        "type": "test_in_terminal"
+        "type": "test_in_terminal",
+        "test_library": "minitest"
       }
     },
     {
@@ -177,7 +182,8 @@
         ]
       },
       "data": {
-        "type": "debug"
+        "type": "debug",
+        "test_library": "minitest"
       }
     },
     {
@@ -207,7 +213,8 @@
         ]
       },
       "data": {
-        "type": "test"
+        "type": "test",
+        "test_library": "minitest"
       }
     },
     {
@@ -237,7 +244,8 @@
         ]
       },
       "data": {
-        "type": "test_in_terminal"
+        "type": "test_in_terminal",
+        "test_library": "minitest"
       }
     },
     {
@@ -267,7 +275,8 @@
         ]
       },
       "data": {
-        "type": "debug"
+        "type": "debug",
+        "test_library": "minitest"
       }
     },
     {
@@ -297,7 +306,8 @@
         ]
       },
       "data": {
-        "type": "test"
+        "type": "test",
+        "test_library": "minitest"
       }
     },
     {
@@ -327,7 +337,8 @@
         ]
       },
       "data": {
-        "type": "test_in_terminal"
+        "type": "test_in_terminal",
+        "test_library": "minitest"
       }
     },
     {
@@ -357,7 +368,8 @@
         ]
       },
       "data": {
-        "type": "debug"
+        "type": "debug",
+        "test_library": "minitest"
       }
     },
     {
@@ -387,7 +399,8 @@
         ]
       },
       "data": {
-        "type": "test"
+        "type": "test",
+        "test_library": "minitest"
       }
     },
     {
@@ -417,7 +430,8 @@
         ]
       },
       "data": {
-        "type": "test_in_terminal"
+        "type": "test_in_terminal",
+        "test_library": "minitest"
       }
     },
     {
@@ -447,11 +461,10 @@
         ]
       },
       "data": {
-        "type": "debug"
+        "type": "debug",
+        "test_library": "minitest"
       }
     }
   ],
-  "params": [
-
-  ]
+  "params": []
 }
