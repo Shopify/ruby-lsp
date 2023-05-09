@@ -119,7 +119,7 @@
               "default": true
             },
             "codeLens": {
-              "description": "Enable code lens, which generates clickable text above tests to run them in the terminal",
+              "description": "Enable code lens, which generates clickable text to enrich editor experience (run tests, open Gem pages, ...)",
               "type": "boolean",
               "default": false
             }
