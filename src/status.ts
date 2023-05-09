@@ -24,6 +24,7 @@ export enum Command {
   RunTest = "rubyLsp.runTest",
   RunTestInTerminal = "rubyLsp.runTestInTerminal",
   DebugTest = "rubyLsp.debugTest",
+  OpenGem = "rubyLsp.openGem",
 }
 
 const STOPPED_SERVER_OPTIONS = [
