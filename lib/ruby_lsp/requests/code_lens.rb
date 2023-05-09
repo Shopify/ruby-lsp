@@ -156,6 +156,7 @@ module RubyLsp
         )
       end
 
+      sig { params(node: SyntaxTree::Command, homepage: String).void }
       def add_open_gem_code_lens(node, homepage:)
         range = range_from_syntax_tree_node(node)
 
