@@ -1,0 +1,29 @@
+{
+  "params": [],
+  "result": [
+    {
+      "range": {
+        "start": { "line": 0, "character": 0 },
+        "end": { "line": 0, "character": 37 }
+      },
+      "command": {
+        "title": "Open",
+        "command": "rubyLsp.openGem",
+        "arguments": ["https://github.com/ruby/debug"]
+      },
+      "data": { "type": "browser" }
+    },
+    {
+      "range": {
+        "start": { "line": 1, "character": 0 },
+        "end": { "line": 1, "character": 21 }
+      },
+      "command": {
+        "title": "Open",
+        "command": "rubyLsp.openGem",
+        "arguments": ["https://github.com/ruby/rake"]
+      },
+      "data": { "type": "browser" }
+    }
+  ]
+}

@@ -3,14 +3,12 @@
 
 require "test_helper"
 require "expectations/expectations_test_runner"
-
 class CodeLensExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::CodeLens, "code_lens"
 
   def run_expectations(source)
-    uri = "file:///fake.rb"
+    uri = "file://#{@_path}"
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
-
     emitter = RubyLsp::EventEmitter.new
     listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue)
     emitter.visit(document.tree)
