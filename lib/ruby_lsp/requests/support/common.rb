@@ -82,7 +82,7 @@ module RubyLsp
               command: command_name,
               arguments: arguments,
             ),
-            data: { type: type },
+            data: { type: type, test_library: "minitest" },
           )
         end
       end
