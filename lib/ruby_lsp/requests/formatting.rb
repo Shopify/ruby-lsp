@@ -13,7 +13,7 @@ module RubyLsp
     # registering the ruby-lsp as the Ruby formatter.
     #
     # The `rubyLsp.formatter` setting specifies which formatter to use.
-    # If set to `auto`` then it behaves as follows:
+    # If set to `auto` then it behaves as follows:
     # * It will use RuboCop if it is part of the bundle.
     # * If RuboCop is not available, and `syntax_tree` is a direct dependency, it will use that.
     # * Otherwise, no formatting will be applied.
