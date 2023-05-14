@@ -3,7 +3,7 @@ name: ruby-lsp
 type: ruby
 
 up:
-  - ruby: '3.2.1'
+  - ruby: '3.3.0-preview1'
   - bundler:
       gemfile: Gemfile
 
