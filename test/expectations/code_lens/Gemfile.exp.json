@@ -7,8 +7,8 @@
         "end": { "line": 0, "character": 37 }
       },
       "command": {
-        "title": "Open",
-        "command": "rubyLsp.openGem",
+        "title": "Open Homepage",
+        "command": "rubyLsp.openGemHomepage",
         "arguments": ["https://github.com/ruby/debug"]
       },
       "data": { "type": "browser" }
@@ -19,9 +19,21 @@
         "end": { "line": 1, "character": 21 }
       },
       "command": {
-        "title": "Open",
-        "command": "rubyLsp.openGem",
+        "title": "Open Homepage",
+        "command": "rubyLsp.openGemHomepage",
         "arguments": ["https://github.com/ruby/rake"]
+      },
+      "data": { "type": "browser" }
+    },
+    {
+      "range": {
+        "start": { "line": 2, "character": 0 },
+        "end": { "line": 2, "character": 51 }
+      },
+      "command": {
+        "title": "Open Homepage",
+        "command": "rubyLsp.openGemHomepage",
+        "arguments": ["https://docs.rubocop.org/rubocop-minitest/"]
       },
       "data": { "type": "browser" }
     }

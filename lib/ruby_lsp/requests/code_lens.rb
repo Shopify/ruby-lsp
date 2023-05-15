@@ -73,12 +73,10 @@ module RubyLsp
           @prev_visibility = @visibility
           @visibility = node.message.value
         elsif @path.include?("Gemfile") && node.message.value.include?("gem") && node.arguments.parts.any?
-          gem_name = node.arguments.parts.map(&:child_nodes).flatten.first.value
-          spec = Gem::Specification.stubs.find { |gem| gem.name == gem_name }&.to_spec
+          homepage = resolve_gem_homepage(node)
+          return unless homepage
 
-          return if spec.nil? || spec.homepage.nil?
-
-          add_open_gem_code_lens(node, homepage: spec.homepage)
+          add_open_gem_homepage_code_lens(node, homepage: homepage)
         end
       end
 
@@ -156,15 +154,24 @@ module RubyLsp
         )
       end
 
+      sig { params(node: SyntaxTree::Command).returns(T.nilable(String)) }
+      def resolve_gem_homepage(node)
+        gem_name = node.arguments.parts.flat_map(&:child_nodes).first.value
+        spec = Gem::Specification.stubs.find { |gem| gem.name == gem_name }&.to_spec
+        return if spec.nil?
+
+        spec.homepage || spec.metadata.fetch("homepage_uri", nil)
+      end
+
       sig { params(node: SyntaxTree::Command, homepage: String).void }
-      def add_open_gem_code_lens(node, homepage:)
+      def add_open_gem_homepage_code_lens(node, homepage:)
         range = range_from_syntax_tree_node(node)
 
         @response << Interface::CodeLens.new(
           range: range,
           command: Interface::Command.new(
-            title: "Open",
-            command: "rubyLsp.openGem",
+            title: "Open Homepage",
+            command: "rubyLsp.openGemHomepage",
             arguments: [homepage],
           ),
           data: { type: "browser" },
