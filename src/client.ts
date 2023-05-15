@@ -314,8 +314,8 @@ export default class Client implements ClientInterface {
         this.updateServer.bind(this)
       ),
       vscode.commands.registerCommand(
-        Command.OpenGem,
-        this.openGemHomepage.bind(this)
+        Command.OpenLink,
+        this.openLink.bind(this)
       )
     );
   }
@@ -633,7 +633,7 @@ export default class Client implements ClientInterface {
     );
   }
 
-  private openGemHomepage(homepage: string) {
-    vscode.env.openExternal(vscode.Uri.parse(homepage));
+  private openLink(link: string) {
+    vscode.env.openExternal(vscode.Uri.parse(link));
   }
 }
