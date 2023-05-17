@@ -16,4 +16,6 @@ class Test < Minitest::Test
   public
 
   def test_public_vcall; end
+
+  def test_with_q?; end
 end

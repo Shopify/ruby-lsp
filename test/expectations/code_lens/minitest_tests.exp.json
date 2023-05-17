@@ -7,7 +7,7 @@
           "character": 0
         },
         "end": {
-          "line": 18,
+          "line": 20,
           "character": 3
         }
       },
@@ -21,7 +21,7 @@
           {
             "start_line": 0,
             "start_column": 0,
-            "end_line": 18,
+            "end_line": 20,
             "end_column": 3
           }
         ]
@@ -38,7 +38,7 @@
           "character": 0
         },
         "end": {
-          "line": 18,
+          "line": 20,
           "character": 3
         }
       },
@@ -52,7 +52,7 @@
           {
             "start_line": 0,
             "start_column": 0,
-            "end_line": 18,
+            "end_line": 20,
             "end_column": 3
           }
         ]
@@ -69,7 +69,7 @@
           "character": 0
         },
         "end": {
-          "line": 18,
+          "line": 20,
           "character": 3
         }
       },
@@ -83,7 +83,7 @@
           {
             "start_line": 0,
             "start_column": 0,
-            "end_line": 18,
+            "end_line": 20,
             "end_column": 3
           }
         ]
@@ -457,6 +457,99 @@
             "start_column": 2,
             "end_line": 17,
             "end_column": 28
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 19,
+          "character": 2
+        },
+        "end": {
+          "line": 19,
+          "character": 23
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fake.rb",
+          "test_with_q?",
+          "bundle exec ruby -Itest /fake.rb --name test_with_q\\?",
+          {
+            "start_line": 19,
+            "start_column": 2,
+            "end_line": 19,
+            "end_column": 23
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 19,
+          "character": 2
+        },
+        "end": {
+          "line": 19,
+          "character": 23
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fake.rb",
+          "test_with_q?",
+          "bundle exec ruby -Itest /fake.rb --name test_with_q\\?",
+          {
+            "start_line": 19,
+            "start_column": 2,
+            "end_line": 19,
+            "end_column": 23
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 19,
+          "character": 2
+        },
+        "end": {
+          "line": 19,
+          "character": 23
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fake.rb",
+          "test_with_q?",
+          "bundle exec ruby -Itest /fake.rb --name test_with_q\\?",
+          {
+            "start_line": 19,
+            "start_column": 2,
+            "end_line": 19,
+            "end_column": 23
           }
         ]
       },
