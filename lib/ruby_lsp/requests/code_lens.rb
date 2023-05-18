@@ -1,6 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "shellwords"
+
 module RubyLsp
   module Requests
     # ![Code lens demo](../../code_lens.gif)
