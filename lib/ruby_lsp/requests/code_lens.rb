@@ -1,6 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "shellwords"
+
 module RubyLsp
   module Requests
     # ![Code lens demo](../../code_lens.gif)
@@ -59,7 +61,7 @@ module RubyLsp
             add_code_lens(
               node,
               name: method_name,
-              command: BASE_COMMAND + @path + " --name " + method_name,
+              command: BASE_COMMAND + @path + " --name " + Shellwords.escape(method_name),
             )
           end
         end
