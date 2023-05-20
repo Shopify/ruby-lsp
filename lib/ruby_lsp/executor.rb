@@ -421,7 +421,7 @@ module RubyLsp
       end
 
       formatter = options.dig(:initializationOptions, :formatter)
-      @store.formatter = if formatter == "auto"
+      @store.formatter = if formatter == "auto" || formatter == '' || formatter.nil?
         detected_formatter
       else
         formatter
