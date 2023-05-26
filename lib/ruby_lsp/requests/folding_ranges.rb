@@ -1,6 +1,12 @@
 # typed: strict
 # frozen_string_literal: true
 
+# when SyntaxTree::CallNode
+# when  SyntaxTree::CommandCall
+# when SyntaxTree::Command
+# when SyntaxTree::DefNode
+# when SyntaxTree::StringConcat
+
 module RubyLsp
   module Requests
     # ![Folding ranges demo](../../folding_ranges.gif)
@@ -15,15 +21,18 @@ module RubyLsp
     #   puts "Hello"
     # end # <-- folding range end
     # ```
-    class FoldingRanges < BaseRequest
+    class FoldingRanges < Listener
       extend T::Sig
 
       SIMPLE_FOLDABLES = T.let(
         [
           SyntaxTree::ArrayLiteral,
+          SyntaxTree::Begin,
           SyntaxTree::BlockNode,
           SyntaxTree::Case,
           SyntaxTree::ClassDeclaration,
+          SyntaxTree::Else,
+          SyntaxTree::Ensure,
           SyntaxTree::For,
           SyntaxTree::HashLiteral,
           SyntaxTree::Heredoc,
@@ -33,9 +42,6 @@ module RubyLsp
           SyntaxTree::UnlessNode,
           SyntaxTree::UntilNode,
           SyntaxTree::WhileNode,
-          SyntaxTree::Else,
-          SyntaxTree::Ensure,
-          SyntaxTree::Begin,
         ].freeze,
         T::Array[T.class_of(SyntaxTree::Node)],
       )
@@ -59,59 +65,144 @@ module RubyLsp
         )
       end
 
-      sig { params(document: Document).void }
-      def initialize(document)
+      sig { params(uri: String, emitter: EventEmitter, message_queue: Thread::Queue).void }
+      def initialize(uri, emitter, message_queue)
         super
 
         @ranges = T.let([], T::Array[Interface::FoldingRange])
         @partial_range = T.let(nil, T.nilable(PartialRange))
+
+        T.unsafe(emitter).register(
+          self,
+          *SIMPLE_FOLDABLES,
+          *NODES_WITH_STATEMENTS,
+          SyntaxTree::CallNode,
+          SyntaxTree::Command,
+          SyntaxTree::CommandCall,
+          SyntaxTree::DefNode,
+          SyntaxTree::StringConcat,
+        )
       end
 
-      sig { override.returns(T.all(T::Array[Interface::FoldingRange], Object)) }
-      def run
-        if @document.parsed?
-          visit(@document.tree)
-          emit_partial_range
-        end
-
-        @ranges
-      end
+      # sig { override.returns(T.all(T::Array[Interface::FoldingRange], Object)) }
+      # def run
+      #   if @document.parsed?
+      #     visit(@document.tree)
+      #     emit_partial_range
+      #   end
+      #
+      #   @ranges
+      # end
 
       private
 
-      sig { override.params(node: T.nilable(SyntaxTree::Node)).void }
-      def visit(node)
+      # sig { override.params(node: T.nilable(SyntaxTree::Node)).void }
+      # def visit(node)
+      #   return unless handle_partial_range(node)
+      #
+      # case node
+      # when *SIMPLE_FOLDABLES
+      #   location = T.must(node).location
+      #   add_lines_range(location.start_line, location.end_line - 1)
+      # when *NODES_WITH_STATEMENTS
+      #   add_statements_range(T.must(node), T.cast(node, StatementNode).statements)
+      # when SyntaxTree::CallNode, SyntaxTree::CommandCall
+      #   # If there is a receiver, it may be a chained invocation,
+      #   # so we need to process it in special way.
+      #   if node.receiver.nil?
+      #     location = node.location
+      #     add_lines_range(location.start_line, location.end_line - 1)
+      #   else
+      #     add_call_range(node)
+      #     return
+      #   end
+      # when SyntaxTree::Command
+      #   unless same_lines_for_command_and_block?(node)
+      #     location = node.location
+      #     add_lines_range(location.start_line, location.end_line - 1)
+      #   end
+      # when SyntaxTree::DefNode
+      #   add_def_range(node)
+      # when SyntaxTree::StringConcat
+      #   add_string_concat(node)
+      #   return
+      # end
+      # super
+      # end
+
+      # TODO: proper types
+      sig { params(node: T.untyped).void }
+      def on_simple_foldable(node)
         return unless handle_partial_range(node)
 
-        case node
-        when *SIMPLE_FOLDABLES
-          location = T.must(node).location
-          add_lines_range(location.start_line, location.end_line - 1)
-        when *NODES_WITH_STATEMENTS
-          add_statements_range(T.must(node), T.cast(node, StatementNode).statements)
-        when SyntaxTree::CallNode, SyntaxTree::CommandCall
-          # If there is a receiver, it may be a chained invocation,
-          # so we need to process it in special way.
-          if node.receiver.nil?
-            location = node.location
-            add_lines_range(location.start_line, location.end_line - 1)
-          else
-            add_call_range(node)
-            return
-          end
-        when SyntaxTree::Command
-          unless same_lines_for_command_and_block?(node)
-            location = node.location
-            add_lines_range(location.start_line, location.end_line - 1)
-          end
-        when SyntaxTree::DefNode
-          add_def_range(node)
-        when SyntaxTree::StringConcat
-          add_string_concat(node)
-          return
-        end
+        location = T.must(node).location
+        add_lines_range(location.start_line, location.end_line - 1)
+      end
+      alias_method :on_array_literal, :on_simple_foldable
+      alias_method :on_begin, :on_simple_foldable
+      alias_method :on_block_node, :on_simple_foldable
+      alias_method :on_case, :on_simple_foldable
+      alias_method :on_class_declaration, :on_simple_foldable
+      alias_method :on_else, :on_simple_foldable
+      alias_method :on_ensure, :on_simple_foldable
+      alias_method :on_for, :on_simple_foldable
+      alias_method :on_hash_literal, :on_simple_foldable
+      alias_method :on_heredoc, :on_simple_foldable
+      alias_method :on_if_node, :on_simple_foldable
+      alias_method :on_module_declaration, :on_simple_foldable
+      alias_method :on_s_class, :on_simple_foldable
+      alias_method :on_unless_node, :on_simple_foldable
+      alias_method :on_until_node, :on_simple_foldable
+      alias_method :on_while_node, :on_simple_foldable
 
-        super
+      # TODO: proper types
+      sig { params(node: T.untyped).void }
+      def on_call(node)
+        return unless handle_partial_range(node)
+
+        # If there is a receiver, it may be a chained invocation,
+        # so we need to process it in special way.
+        if node.receiver.nil?
+          location = node.location
+          add_lines_range(location.start_line, location.end_line - 1)
+        else
+          add_call_range(node)
+          # return ?
+        end
+      end
+      alias_method :on_command_call, :on_call
+
+      # TODO: add aliases for others in NODES_WITH_STATEMENTS
+      sig { params(node: T.untyped).void }
+      def on_elsif(node)
+        return unless handle_partial_range(node)
+
+        add_statements_range(T.must(node), T.cast(node, StatementNode).statements)
+      end
+
+      sig { params(node: SyntaxTree::Command).void }
+      def on_command(node)
+        return unless handle_partial_range(node)
+
+        unless same_lines_for_command_and_block?(node)
+          location = node.location
+          add_lines_range(location.start_line, location.end_line - 1)
+        end
+      end
+
+      sig { params(node: SyntaxTree::StringConcat).void }
+      def on_string_concat(node)
+        return unless handle_partial_range(node)
+
+        add_string_concat(node)
+        # return ?
+      end
+
+      sig { params(node: SyntaxTree::DefNode).void }
+      def on_def_node(node)
+        return unless handle_partial_range(node)
+
+        add_def_range(node)
       end
 
       # This is to prevent duplicate ranges

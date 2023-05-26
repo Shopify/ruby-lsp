@@ -37,16 +37,62 @@ module RubyLsp
     sig { params(node: T.nilable(SyntaxTree::Node)).void }
     def emit_for_target(node)
       case node
-      when SyntaxTree::Command
-        @listeners[:on_command]&.each { |l| T.unsafe(l).on_command(node) }
+      when SyntaxTree::ArrayLiteral
+        @listeners[:on_array_literal]&.each { |l| T.unsafe(l).on_array_literal(node) }
+      when SyntaxTree::Begin
+        @listeners[:on_begin]&.each { |l| T.unsafe(l).on_begin(node) }
+      when SyntaxTree::BlockNode
+        @listeners[:on_block_node]&.each { |l| T.unsafe(l).on_block_node(node) }
+      when SyntaxTree::Case
+        @listeners[:on_case]&.each { |l| T.unsafe(l).on_case(node) }
+      when SyntaxTree::ClassDeclaration
+        @listeners[:on_class]&.each { |l| T.unsafe(l).on_class(node) }
       when SyntaxTree::CallNode
         @listeners[:on_call]&.each { |l| T.unsafe(l).on_call(node) }
-      when SyntaxTree::TStringContent
-        @listeners[:on_tstring_content]&.each { |l| T.unsafe(l).on_tstring_content(node) }
-      when SyntaxTree::ConstPathRef
-        @listeners[:on_const_path_ref]&.each { |l| T.unsafe(l).on_const_path_ref(node) }
+      when SyntaxTree::Command
+        @listeners[:on_command]&.each { |l| T.unsafe(l).on_command(node) }
+      when SyntaxTree::CommandCall
+        @listeners[:on_command_call]&.each { |l| T.unsafe(l).on_command_call(node) }
       when SyntaxTree::Const
         @listeners[:on_const]&.each { |l| T.unsafe(l).on_const(node) }
+      when SyntaxTree::ConstPathRef
+        @listeners[:on_const_path_ref]&.each { |l| T.unsafe(l).on_const_path_ref(node) }
+      when SyntaxTree::DefNode
+        @listeners[:on_def_node]&.each { |l| T.unsafe(l).on_def_node(node) }
+      when SyntaxTree::Else
+        @listeners[:on_else]&.each { |l| T.unsafe(l).on_else(node) }
+      when SyntaxTree::Ensure
+        @listeners[:on_ensure]&.each { |l| T.unsafe(l).on_ensure(node) }
+      when SyntaxTree::For
+        @listeners[:on_for]&.each { |l| T.unsafe(l).on_for(node) }
+      when SyntaxTree::HashLiteral
+        @listeners[:on_hash_literal]&.each { |l| T.unsafe(l).on_hash_literal(node) }
+      when SyntaxTree::Heredoc
+        @listeners[:on_heredoc]&.each { |l| T.unsafe(l).on_heredoc(node) }
+      when SyntaxTree::IfNode
+        @listeners[:on_if_node]&.each { |l| T.unsafe(l).on_if_node(node) }
+      when SyntaxTree::ModuleDeclaration
+        @listeners[:on_module]&.each { |l| T.unsafe(l).on_module(node) }
+      when SyntaxTree::SClass
+        @listeners[:on_sclass]&.each { |l| T.unsafe(l).on_sclass(node) }
+      when SyntaxTree::StringConcat
+        @listeners[:on_string_concat]&.each { |l| T.unsafe(l).on_string_concat(node) }
+      when SyntaxTree::TStringContent
+        @listeners[:on_tstring_content]&.each { |l| T.unsafe(l).on_tstring_content(node) }
+      when SyntaxTree::UnlessNode
+        @listeners[:on_unless_node]&.each { |l| T.unsafe(l).on_unless_node(node) }
+      when SyntaxTree::UntilNode
+        @listeners[:on_until_node]&.each { |l| T.unsafe(l).on_until_node(node) }
+      when SyntaxTree::WhileNode
+        @listeners[:on_while_node]&.each { |l| T.unsafe(l).on_while_node(node) }
+      when SyntaxTree::Elsif
+        @listeners[:on_elsif]&.each { |l| T.unsafe(l).on_elsif(node) }
+      when SyntaxTree::In
+        @listeners[:on_in]&.each { |l| T.unsafe(l).on_in(node) }
+      when SyntaxTree::Rescue
+        @listeners[:on_rescue]&.each { |l| T.unsafe(l).on_rescue(node) }
+      when SyntaxTree::When
+        @listeners[:on_when]&.each { |l| T.unsafe(l).on_when(node) }
       end
     end
 
