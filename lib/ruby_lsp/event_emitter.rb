@@ -168,5 +168,108 @@ module RubyLsp
       @listeners[:on_rescue]&.each { |l| T.unsafe(l).on_rescue(node) }
       super
     end
+
+    # TODO: array_literal?
+    sig { override.params(node: SyntaxTree::ArrayLiteral).void }
+    def visit_array(node)
+      @listeners[:on_array_literal]&.each { |l| T.unsafe(l).on_array_literal(node) }
+      super
+    end
+
+    sig { override.params(node: SyntaxTree::Begin).void }
+    def visit_begin(node)
+      @listeners[:on_begin]&.each { |l| T.unsafe(l).on_begin(node) }
+      super
+    end
+
+    sig { override.params(node: SyntaxTree::BlockNode).void }
+    def visit_block(node)
+      @listeners[:on_block_node]&.each { |l| T.unsafe(l).on_block_node(node) }
+      super
+    end
+
+    sig { override.params(node: SyntaxTree::Case).void }
+    def visit_case(node)
+      @listeners[:on_case]&.each { |l| T.unsafe(l).on_case(node) }
+      super
+    end
+
+    sig { override.params(node: SyntaxTree::Else).void }
+    def visit_else(node)
+      @listeners[:on_else]&.each { |l| T.unsafe(l).on_else(node) }
+      super
+    end
+
+    sig { override.params(node: SyntaxTree::Ensure).void }
+    def visit_ensure(node)
+      @listeners[:on_ensure]&.each { |l| T.unsafe(l).on_ensure(node) }
+      super
+    end
+
+    sig { override.params(node: SyntaxTree::For).void }
+    def visit_for(node)
+      @listeners[:on_for]&.each { |l| T.unsafe(l).on_for(node) }
+      super
+    end
+
+    sig { override.params(node: SyntaxTree::HashLiteral).void }
+    def visit_hash(node)
+      @listeners[:on_hash_literal]&.each { |l| T.unsafe(l).on_hash_literal(node) }
+      super
+    end
+
+    sig { override.params(node: SyntaxTree::Heredoc).void }
+    def visit_heredoc(node)
+      @listeners[:on_heredoc]&.each { |l| T.unsafe(l).on_heredoc(node) }
+      super
+    end
+
+    sig { override.params(node: SyntaxTree::IfNode).void }
+    def visit_if(node)
+      @listeners[:on_if_node]&.each { |l| T.unsafe(l).on_if_node(node) }
+      super
+    end
+
+    sig { override.params(node: SyntaxTree::SClass).void }
+    def visit_sclass(node)
+      @listeners[:on_s_class]&.each { |l| T.unsafe(l).on_s_class(node) }
+      super
+    end
+
+    sig { override.params(node: SyntaxTree::UnlessNode).void }
+    def visit_unless(node)
+      @listeners[:on_unless_node]&.each { |l| T.unsafe(l).on_unless_node(node) }
+      super
+    end
+
+    sig { override.params(node: SyntaxTree::UntilNode).void }
+    def visit_until(node)
+      @listeners[:on_until_node]&.each { |l| T.unsafe(l).on_until_node(node) }
+      super
+    end
+
+    sig { override.params(node: SyntaxTree::WhileNode).void }
+    def visit_while(node)
+      @listeners[:on_while_node]&.each { |l| T.unsafe(l).on_while_node(node) }
+      super
+    end
+
+    sig { override.params(node: SyntaxTree::Elsif).void }
+    def visit_elsif(node)
+      @listeners[:on_elsif]&.each { |l| T.unsafe(l).on_elsif(node) }
+      super
+    end
+
+    sig { override.params(node: SyntaxTree::In).void }
+    def visit_in(node)
+      @listeners[:on_in]&.each { |l| T.unsafe(l).on_in(node) }
+      super
+    end
+
+    sig { override.params(node: SyntaxTree::When).void }
+    def visit_when(node)
+      @listeners[:on_when]&.each { |l| T.unsafe(l).on_when(node) }
+      super
+    end
   end
 end

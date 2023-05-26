@@ -77,15 +77,33 @@ module RubyLsp
         @response = T.let([], ResponseType)
         @partial_range = T.let(nil, T.nilable(PartialRange))
 
-        T.unsafe(emitter).register(
+        emitter.register(
           self,
-          *SIMPLE_FOLDABLES,
-          *NODES_WITH_STATEMENTS,
-          SyntaxTree::CallNode,
-          SyntaxTree::Command,
-          SyntaxTree::CommandCall,
-          SyntaxTree::DefNode,
-          SyntaxTree::StringConcat,
+          :on_array_literal,
+          :on_begin,
+          :on_block_node,
+          :on_case,
+          :on_class_declaration,
+          :on_else,
+          :on_ensure,
+          :on_for,
+          :on_hash_literal,
+          :on_heredoc,
+          :on_if_node,
+          :on_module_declaration,
+          :on_sclass,
+          :on_unless_node,
+          :on_until_node,
+          :on_while_node,
+          :on_elsif,
+          :on_in,
+          :on_rescue,
+          :on_when,
+          :on_call_node,
+          :on_command,
+          :on_command_call,
+          :on_def,
+          :on_string_concat,
         )
       end
 
@@ -99,7 +117,7 @@ module RubyLsp
       #   @ranges
       # end
 
-      private
+      # private
 
       sig { params(node: T.nilable(SyntaxTree::Node)).void }
       def visit(node)
@@ -208,7 +226,7 @@ module RubyLsp
       end
 
       sig { params(node: SyntaxTree::DefNode).void }
-      def on_def_node(node)
+      def on_def(node)
         return unless handle_partial_range(node)
 
         add_def_range(node)
