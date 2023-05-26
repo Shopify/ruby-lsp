@@ -96,46 +96,47 @@ module RubyLsp
 
       private
 
-      # sig { override.params(node: T.nilable(SyntaxTree::Node)).void }
-      # def visit(node)
-      #   return unless handle_partial_range(node)
-      #
-      # case node
-      # when *SIMPLE_FOLDABLES
-      #   location = T.must(node).location
-      #   add_lines_range(location.start_line, location.end_line - 1)
-      # when *NODES_WITH_STATEMENTS
-      #   add_statements_range(T.must(node), T.cast(node, StatementNode).statements)
-      # when SyntaxTree::CallNode, SyntaxTree::CommandCall
-      #   # If there is a receiver, it may be a chained invocation,
-      #   # so we need to process it in special way.
-      #   if node.receiver.nil?
-      #     location = node.location
-      #     add_lines_range(location.start_line, location.end_line - 1)
-      #   else
-      #     add_call_range(node)
-      #     return
-      #   end
-      # when SyntaxTree::Command
-      #   unless same_lines_for_command_and_block?(node)
-      #     location = node.location
-      #     add_lines_range(location.start_line, location.end_line - 1)
-      #   end
-      # when SyntaxTree::DefNode
-      #   add_def_range(node)
-      # when SyntaxTree::StringConcat
-      #   add_string_concat(node)
-      #   return
-      # end
-      # super
-      # end
+      sig { params(node: T.nilable(SyntaxTree::Node)).void }
+      def visit(node)
+        return unless handle_partial_range(node)
+
+        #
+        # case node
+        # when *SIMPLE_FOLDABLES
+        #   location = T.must(node).location
+        #   add_lines_range(location.start_line, location.end_line - 1)
+        # when *NODES_WITH_STATEMENTS
+        #   add_statements_range(T.must(node), T.cast(node, StatementNode).statements)
+        # when SyntaxTree::CallNode, SyntaxTree::CommandCall
+        #   # If there is a receiver, it may be a chained invocation,
+        #   # so we need to process it in special way.
+        #   if node.receiver.nil?
+        #     location = node.location
+        #     add_lines_range(location.start_line, location.end_line - 1)
+        #   else
+        #     add_call_range(node)
+        #     return
+        #   end
+        # when SyntaxTree::Command
+        #   unless same_lines_for_command_and_block?(node)
+        #     location = node.location
+        #     add_lines_range(location.start_line, location.end_line - 1)
+        #   end
+        # when SyntaxTree::DefNode
+        #   add_def_range(node)
+        # when SyntaxTree::StringConcat
+        #   add_string_concat(node)
+        #   return
+        # end
+        super
+      end
 
       # TODO: proper types
       sig { params(node: T.untyped).void }
       def on_simple_foldable(node)
         return unless handle_partial_range(node)
 
-        location = T.must(node).location
+        location = node.location
         add_lines_range(location.start_line, location.end_line - 1)
       end
       alias_method :on_array_literal, :on_simple_foldable
@@ -172,13 +173,16 @@ module RubyLsp
       end
       alias_method :on_command_call, :on_call
 
-      # TODO: add aliases for others in NODES_WITH_STATEMENTS
-      sig { params(node: T.untyped).void }
-      def on_elsif(node)
+      sig { params(node: StatementNode).void }
+      def on_statement_node(node)
         return unless handle_partial_range(node)
 
-        add_statements_range(T.must(node), T.cast(node, StatementNode).statements)
+        add_statements_range(node, node.statements)
       end
+      alias_method :on_elsif, :on_statement_node
+      alias_method :on_in, :on_statement_node
+      alias_method :on_rescue, :on_statement_node
+      alias_method :on_when, :on_statement_node
 
       sig { params(node: SyntaxTree::Command).void }
       def on_command(node)
