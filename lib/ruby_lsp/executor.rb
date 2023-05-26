@@ -81,7 +81,8 @@ module RubyLsp
         folding_range(uri)
       when "textDocument/selectionRange"
         selection_range(uri, request.dig(:params, :positions))
-      when "textDocument/documentSymbol", "textDocument/documentLink", "textDocument/codeLens"
+      when "textDocument/documentSymbol", "textDocument/documentLink", "textDocument/codeLens",
+           "textDocument/semanticTokens/full"
         document = @store.get(uri)
 
         # If the response has already been cached by another request, return it
@@ -96,6 +97,7 @@ module RubyLsp
         code_lens_extensions_listeners = Requests::CodeLens.listeners.map do |l|
           T.unsafe(l).new(document.uri, emitter, @message_queue)
         end
+        semantic_highlighting = Requests::SemanticHighlighting.new(emitter, @message_queue)
         emitter.visit(document.tree) if document.parsed?
 
         code_lens_extensions_listeners.each { |ext| code_lens.merge_response!(ext) }
@@ -105,9 +107,11 @@ module RubyLsp
         document.cache_set("textDocument/documentSymbol", document_symbol.response)
         document.cache_set("textDocument/documentLink", document_link.response)
         document.cache_set("textDocument/codeLens", code_lens.response)
+        document.cache_set(
+          "textDocument/semanticTokens/full",
+          Requests::Support::SemanticTokenEncoder.new.encode(semantic_highlighting.response),
+        )
         document.cache_get(request[:method])
-      when "textDocument/semanticTokens/full"
-        semantic_tokens_full(uri)
       when "textDocument/semanticTokens/range"
         semantic_tokens_range(uri, request.dig(:params, :range))
       when "textDocument/formatting"
@@ -245,19 +249,6 @@ module RubyLsp
       end
     end
 
-    sig { params(uri: String).returns(Interface::SemanticTokens) }
-    def semantic_tokens_full(uri)
-      @store.cache_fetch(uri, "textDocument/semanticTokens/full") do |document|
-        T.cast(
-          Requests::SemanticHighlighting.new(
-            document,
-            encoder: Requests::Support::SemanticTokenEncoder.new,
-          ).run,
-          Interface::SemanticTokens,
-        )
-      end
-    end
-
     sig { params(uri: String).returns(T.nilable(T::Array[Interface::TextEdit])) }
     def formatting(uri)
       # If formatter is set to `auto` but no supported formatting gem is found, don't attempt to format
@@ -359,14 +350,15 @@ module RubyLsp
       start_line = range.dig(:start, :line)
       end_line = range.dig(:end, :line)
 
-      T.cast(
-        Requests::SemanticHighlighting.new(
-          document,
-          range: start_line..end_line,
-          encoder: Requests::Support::SemanticTokenEncoder.new,
-        ).run,
-        Interface::SemanticTokens,
+      emitter = EventEmitter.new
+      listener = Requests::SemanticHighlighting.new(
+        emitter,
+        @message_queue,
+        range: start_line..end_line,
       )
+      emitter.visit(document.tree) if document.parsed?
+
+      Requests::Support::SemanticTokenEncoder.new.encode(listener.response)
     end
 
     sig do
