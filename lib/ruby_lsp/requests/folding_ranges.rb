@@ -21,8 +21,23 @@ module RubyLsp
     #   puts "Hello"
     # end # <-- folding range end
     # ```
+
+    # TODO: explain why had to move this
+    StatementNode = T.type_alias do
+      T.any(
+        SyntaxTree::Elsif,
+        SyntaxTree::In,
+        SyntaxTree::Rescue,
+        SyntaxTree::When,
+      )
+    end
     class FoldingRanges < Listener
       extend T::Sig
+
+      ResponseType = type_member { { fixed: T::Array[Interface::FoldingRange] } }
+
+      sig { override.returns(ResponseType) }
+      attr_reader :response
 
       SIMPLE_FOLDABLES = T.let(
         [
@@ -56,20 +71,10 @@ module RubyLsp
         T::Array[T.class_of(SyntaxTree::Node)],
       )
 
-      StatementNode = T.type_alias do
-        T.any(
-          SyntaxTree::Elsif,
-          SyntaxTree::In,
-          SyntaxTree::Rescue,
-          SyntaxTree::When,
-        )
-      end
-
-      sig { params(uri: String, emitter: EventEmitter, message_queue: Thread::Queue).void }
-      def initialize(uri, emitter, message_queue)
+      sig { params(emitter: EventEmitter, message_queue: Thread::Queue).void }
+      def initialize(emitter, message_queue)
         super
-
-        @ranges = T.let([], T::Array[Interface::FoldingRange])
+        @response = T.let([], ResponseType)
         @partial_range = T.let(nil, T.nilable(PartialRange))
 
         T.unsafe(emitter).register(
@@ -309,7 +314,7 @@ module RubyLsp
       def emit_partial_range
         return if @partial_range.nil?
 
-        @ranges << @partial_range.to_range if @partial_range.multiline?
+        @response << @partial_range.to_range if @partial_range.multiline?
         @partial_range = nil
       end
 
@@ -390,7 +395,7 @@ module RubyLsp
       def add_lines_range(start_line, end_line)
         return if start_line >= end_line
 
-        @ranges << Interface::FoldingRange.new(
+        @response << Interface::FoldingRange.new(
           start_line: start_line - 1,
           end_line: end_line - 1,
           kind: "region",

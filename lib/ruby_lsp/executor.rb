@@ -77,11 +77,10 @@ module RubyLsp
           request.dig(:params, :contentChanges),
           request.dig(:params, :textDocument, :version),
         )
-      when "textDocument/foldingRange"
-        folding_range(uri)
       when "textDocument/selectionRange"
         selection_range(uri, request.dig(:params, :positions))
-      when "textDocument/documentSymbol", "textDocument/documentLink", "textDocument/codeLens"
+      when "textDocument/documentSymbol", "textDocument/documentLink", "textDocument/codeLens",
+        "textDocument/foldingRange"
         document = @store.get(uri)
 
         # If the response has already been cached by another request, return it
@@ -92,6 +91,7 @@ module RubyLsp
         emitter = EventEmitter.new
         document_symbol = Requests::DocumentSymbol.new(emitter, @message_queue)
         document_link = Requests::DocumentLink.new(uri, emitter, @message_queue)
+        folding_ranges = Requests::FoldingRanges.new(emitter, @message_queue)
         code_lens = Requests::CodeLens.new(uri, emitter, @message_queue)
         code_lens_extensions_listeners = Requests::CodeLens.listeners.map do |l|
           T.unsafe(l).new(document.uri, emitter, @message_queue)
@@ -105,6 +105,7 @@ module RubyLsp
         document.cache_set("textDocument/documentSymbol", document_symbol.response)
         document.cache_set("textDocument/documentLink", document_link.response)
         document.cache_set("textDocument/codeLens", code_lens.response)
+        document.cache_set("textDocument/foldingRange", folding_ranges.response)
         document.cache_get(request[:method])
       when "textDocument/semanticTokens/full"
         semantic_tokens_full(uri)
@@ -162,13 +163,6 @@ module RubyLsp
         end
       when "textDocument/completion"
         completion(uri, request.dig(:params, :position))
-      end
-    end
-
-    sig { params(uri: String).returns(T::Array[Interface::FoldingRange]) }
-    def folding_range(uri)
-      @store.cache_fetch(uri, "textDocument/foldingRange") do |document|
-        Requests::FoldingRanges.new(document).run
       end
     end
 
