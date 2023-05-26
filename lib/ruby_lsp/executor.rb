@@ -420,8 +420,8 @@ module RubyLsp
         encodings.first
       end
 
-      formatter = options.dig(:initializationOptions, :formatter)
-      @store.formatter = if formatter == "auto" || formatter == '' || formatter.nil?
+      formatter = options.dig(:initializationOptions, :formatter) || 'auto'
+      @store.formatter = if formatter == "auto"
         detected_formatter
       else
         formatter
