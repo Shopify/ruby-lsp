@@ -13,6 +13,8 @@ export class TestController {
   private testController: vscode.TestController;
   private testCommands: WeakMap<vscode.TestItem, string>;
   private testRunProfile: vscode.TestRunProfile;
+  private testDebugProfile: vscode.TestRunProfile;
+  private debugTag: vscode.TestTag = new vscode.TestTag("debug");
   private workingFolder: string;
   private terminal: vscode.Terminal | undefined;
   private ruby: Ruby;
@@ -39,6 +41,16 @@ export class TestController {
         this.runHandler(request, token);
       },
       true
+    );
+
+    this.testDebugProfile = this.testController.createRunProfile(
+      "Debug",
+      vscode.TestRunProfileKind.Debug,
+      (request, token) => {
+        this.debugHandler(request, token);
+      },
+      false,
+      this.debugTag
     );
 
     vscode.commands.executeCommand("testing.clearTestResults");
@@ -95,6 +107,7 @@ export class TestController {
       // Add test methods as children to the test class so it appears nested in Test explorer
       // and running the test class will run all of the test methods
       if (name.startsWith("test_")) {
+        testItem.tags = [this.debugTag];
         classTest.children.add(testItem);
       } else {
         classTest = testItem;
@@ -104,7 +117,13 @@ export class TestController {
     });
   }
 
-  debugTest(_path: string, _name: string, command: string) {
+  dispose() {
+    this.testRunProfile.dispose();
+    this.testDebugProfile.dispose();
+    this.testController.dispose();
+  }
+
+  private debugTest(_path: string, _name: string, command: string) {
     return vscode.debug.startDebugging(undefined, {
       type: "ruby_lsp",
       name: "Debug",
@@ -114,7 +133,7 @@ export class TestController {
     });
   }
 
-  runTestInTerminal(_path: string, _name: string, command: string) {
+  private runTestInTerminal(_path: string, _name: string, command: string) {
     if (this.terminal === undefined) {
       this.terminal = vscode.window.createTerminal({ name: "Run test" });
     }
@@ -122,7 +141,20 @@ export class TestController {
     this.terminal.sendText(command);
   }
 
-  async runHandler(
+  private async debugHandler(
+    request: vscode.TestRunRequest,
+    _token: vscode.CancellationToken
+  ) {
+    const run = this.testController.createTestRun(request, undefined, true);
+    const test = request.include![0];
+
+    const start = Date.now();
+    await this.debugTest("", "", this.testCommands.get(test)!);
+    run.passed(test, Date.now() - start);
+    run.end();
+  }
+
+  private async runHandler(
     request: vscode.TestRunRequest,
     token: vscode.CancellationToken
   ) {
@@ -173,7 +205,7 @@ export class TestController {
     run.end();
   }
 
-  async assertTestPasses(test: vscode.TestItem) {
+  private async assertTestPasses(test: vscode.TestItem) {
     try {
       await asyncExec(this.testCommands.get(test)!, {
         cwd: this.workingFolder,
@@ -184,7 +216,7 @@ export class TestController {
     }
   }
 
-  async runOnClick(testId: string) {
+  private async runOnClick(testId: string) {
     const test = this.findTestById(this.testController.items, testId);
 
     if (!test) return;
@@ -205,7 +237,7 @@ export class TestController {
     this.testRunProfile.runHandler(testRun, tokenSource.token);
   }
 
-  findTestById(testItems: vscode.TestItemCollection, testId: string) {
+  private findTestById(testItems: vscode.TestItemCollection, testId: string) {
     let testItem = testItems.get(testId);
 
     if (testItem) return testItem;
@@ -216,10 +248,5 @@ export class TestController {
     });
 
     return testItem;
-  }
-
-  dispose() {
-    this.testRunProfile.dispose();
-    this.testController.dispose();
   }
 }
