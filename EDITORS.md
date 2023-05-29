@@ -7,7 +7,7 @@ Code, use the official [Ruby LSP extension](https://github.com/Shopify/vscode-ru
 new H2 header in this file containing the instructions. -->
 
 - [Emacs LSP Mode](https://emacs-lsp.github.io/lsp-mode/page/lsp-ruby-lsp/)
-- [Emacs Eglot](#Emacs Eglot)
+- [Emacs Eglot](#Emacs-Eglot)
 
 ## Emacs Eglot
 
