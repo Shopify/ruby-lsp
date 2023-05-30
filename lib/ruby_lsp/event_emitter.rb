@@ -119,6 +119,14 @@ module RubyLsp
       @listeners[:after_command]&.each { |l| T.unsafe(l).after_command(node) }
     end
 
+    sig { override.params(node: SyntaxTree::CommandCall).void }
+    def visit_command_call(node)
+      @listeners[:on_command_call]&.each { |l| T.unsafe(l).on_command_call(node) }
+      super
+      # TODO: need 'after'?
+      @listeners[:after_command_call]&.each { |l| T.unsafe(l).after_command_call(node) }
+    end
+
     sig { override.params(node: SyntaxTree::CallNode).void }
     def visit_call(node)
       @listeners[:on_call]&.each { |l| T.unsafe(l).on_call(node) }
@@ -232,7 +240,7 @@ module RubyLsp
 
     sig { override.params(node: SyntaxTree::SClass).void }
     def visit_sclass(node)
-      @listeners[:on_s_class]&.each { |l| T.unsafe(l).on_s_class(node) }
+      @listeners[:on_sclass]&.each { |l| T.unsafe(l).on_sclass(node) }
       super
     end
 

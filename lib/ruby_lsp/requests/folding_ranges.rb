@@ -84,13 +84,14 @@ module RubyLsp
           :on_block_node,
           :on_case,
           :on_class_declaration,
+          :on_comment,
           :on_else,
           :on_ensure,
           :on_for,
           :on_hash_literal,
           :on_heredoc,
           :on_if_node,
-          :on_module_declaration,
+          :on_module, # or on_module_declaration?
           :on_sclass,
           :on_unless_node,
           :on_until_node,
@@ -151,7 +152,7 @@ module RubyLsp
         #   add_string_concat(node)
         #   return
         # end
-        super
+        # super
       end
 
       # TODO: proper types
@@ -173,8 +174,8 @@ module RubyLsp
       alias_method :on_hash_literal, :on_simple_foldable
       alias_method :on_heredoc, :on_simple_foldable
       alias_method :on_if_node, :on_simple_foldable
-      alias_method :on_module_declaration, :on_simple_foldable
-      alias_method :on_s_class, :on_simple_foldable
+      alias_method :on_module, :on_simple_foldable
+      alias_method :on_sclass, :on_simple_foldable
       alias_method :on_unless_node, :on_simple_foldable
       alias_method :on_until_node, :on_simple_foldable
       alias_method :on_while_node, :on_simple_foldable
@@ -215,6 +216,11 @@ module RubyLsp
           location = node.location
           add_lines_range(location.start_line, location.end_line - 1)
         end
+      end
+
+      sig { params(node: SyntaxTree::Comment).void }
+      def on_comment(node)
+        # TODO
       end
 
       sig { params(node: SyntaxTree::StringConcat).void }
