@@ -1,41 +1,65 @@
 {
-  "params": [],
   "result": [
     {
       "range": {
-        "start": { "line": 0, "character": 0 },
-        "end": { "line": 0, "character": 37 }
+        "start": {
+          "line": 0,
+          "character": 0
+        },
+        "end": {
+          "line": 0,
+          "character": 21
+        }
       },
       "command": {
-        "title": "Open Homepage",
-        "command": "rubyLsp.openGemHomepage",
-        "arguments": ["https://github.com/ruby/debug"]
-      },
-      "data": { "type": "browser" }
-    },
-    {
-      "range": {
-        "start": { "line": 1, "character": 0 },
-        "end": { "line": 1, "character": 21 }
-      },
-      "command": {
-        "title": "Open Homepage",
-        "command": "rubyLsp.openGemHomepage",
+        "title": "Open remote",
+        "command": "rubyLsp.openLink",
         "arguments": ["https://github.com/ruby/rake"]
       },
-      "data": { "type": "browser" }
+      "data": {
+        "type": "link"
+      }
     },
     {
       "range": {
-        "start": { "line": 2, "character": 0 },
-        "end": { "line": 2, "character": 51 }
+        "start": {
+          "line": 1,
+          "character": 0
+        },
+        "end": {
+          "line": 1,
+          "character": 51
+        }
       },
       "command": {
-        "title": "Open Homepage",
-        "command": "rubyLsp.openGemHomepage",
-        "arguments": ["https://docs.rubocop.org/rubocop-minitest/"]
+        "title": "Open remote",
+        "command": "rubyLsp.openLink",
+        "arguments": ["https://github.com/rubocop/rubocop-minitest"]
       },
-      "data": { "type": "browser" }
+      "data": {
+        "type": "link"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 2
+        },
+        "end": {
+          "line": 5,
+          "character": 39
+        }
+      },
+      "command": {
+        "title": "Open remote",
+        "command": "rubyLsp.openLink",
+        "arguments": ["https://github.com/ruby/debug"]
+      },
+      "data": {
+        "type": "link"
+      }
     }
-  ]
+  ],
+  "params": []
 }
