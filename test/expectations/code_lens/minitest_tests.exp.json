@@ -480,9 +480,9 @@
         "title": "Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fake.rb",
+          "/fixtures/minitest_tests.rb",
           "test_with_q?",
-          "bundle exec ruby -Itest /fake.rb --name test_with_q\\?",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name test_with_q\\?",
           {
             "start_line": 19,
             "start_column": 2,
@@ -511,9 +511,9 @@
         "title": "Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fake.rb",
+          "/fixtures/minitest_tests.rb",
           "test_with_q?",
-          "bundle exec ruby -Itest /fake.rb --name test_with_q\\?",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name test_with_q\\?",
           {
             "start_line": 19,
             "start_column": 2,
@@ -542,9 +542,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fake.rb",
+          "/fixtures/minitest_tests.rb",
           "test_with_q?",
-          "bundle exec ruby -Itest /fake.rb --name test_with_q\\?",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name test_with_q\\?",
           {
             "start_line": 19,
             "start_column": 2,
