@@ -65,7 +65,7 @@ GEM
     parser (3.2.2.1)
       ast (~> 2.4.1)
     prettier_print (1.2.1)
-    psych (5.0.1)
+    psych (5.1.0)
       stringio
     racc (1.6.2)
     rack (2.2.7)
@@ -139,7 +139,7 @@ GEM
       sorbet (>= 0.5.10187)
       sorbet-runtime (>= 0.5.9204)
       thor (>= 0.19.2)
-    stringio (3.0.4)
+    stringio (3.0.6)
     syntax_tree (6.1.1)
       prettier_print (>= 1.2.0)
     tapioca (0.11.6)
@@ -177,6 +177,7 @@ DEPENDENCIES
   minitest (~> 5.18)
   minitest-reporters (~> 1.6)
   mocha (~> 2.0)
+  psych (~> 5.1)
   railties (~> 7.0)
   rake (~> 13.0)
   rdoc
