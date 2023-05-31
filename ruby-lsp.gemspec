@@ -21,5 +21,5 @@ Gem::Specification.new do |s|
   s.add_dependency("sorbet-runtime")
   s.add_dependency("syntax_tree", ">= 6.1.1", "< 7")
 
-  s.required_ruby_version = ">= 2.7.3"
+  s.required_ruby_version = ">= 3.0"
 end
