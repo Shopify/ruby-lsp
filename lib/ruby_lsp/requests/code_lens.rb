@@ -42,7 +42,17 @@ module RubyLsp
         @visibility = T.let("public", String)
         @prev_visibility = T.let("public", String)
 
-        emitter.register(self, :on_class, :on_def, :on_command, :after_command, :on_call, :after_call, :on_vcall)
+        emitter.register(
+          self,
+          :on_class,
+          :after_class,
+          :on_def,
+          :on_command,
+          :after_command,
+          :on_call,
+          :after_call,
+          :on_vcall,
+        )
       end
 
       sig { params(node: SyntaxTree::ClassDeclaration).void }
@@ -51,6 +61,12 @@ module RubyLsp
         if class_name.end_with?("Test")
           add_code_lens(node, name: class_name, command: BASE_COMMAND + @path)
         end
+      end
+
+      sig { params(node: SyntaxTree::ClassDeclaration).void }
+      def after_class(node)
+        @prev_visibility = "public"
+        @visibility = "public"
       end
 
       sig { params(node: SyntaxTree::DefNode).void }

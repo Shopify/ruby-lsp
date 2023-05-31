@@ -18,4 +18,10 @@ class Test < Minitest::Test
   def test_public_vcall; end
 
   def test_with_q?; end
+
+  private
+end
+
+class AnotherTest < Minitest::Test
+  def test_public; end
 end
