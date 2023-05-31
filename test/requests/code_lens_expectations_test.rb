@@ -8,7 +8,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::CodeLens, "code_lens"
 
   def run_expectations(source)
-    uri = "file:///fake.rb"
+    uri = "file://#{@_path}"
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new

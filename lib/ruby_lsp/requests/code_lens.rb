@@ -69,9 +69,15 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::Command).void }
       def on_command(node)
-        if ACCESS_MODIFIERS.include?(node.message.value) && node.arguments.parts.any?
+        node_message = node.message.value
+        if ACCESS_MODIFIERS.include?(node_message) && node.arguments.parts.any?
           @prev_visibility = @visibility
-          @visibility = node.message.value
+          @visibility = node_message
+        elsif @path.include?("Gemfile") && node_message.include?("gem") && node.arguments.parts.any?
+          remote = resolve_gem_remote(node)
+          return unless remote
+
+          add_open_gem_remote_code_lens(node, remote)
         end
       end
 
@@ -146,6 +152,32 @@ module RubyLsp
           name: name,
           test_command: command,
           type: "debug",
+        )
+      end
+
+      sig { params(node: SyntaxTree::Command).returns(T.nilable(String)) }
+      def resolve_gem_remote(node)
+        gem_name = node.arguments.parts.flat_map(&:child_nodes).first.value
+        spec = Gem::Specification.stubs.find { |gem| gem.name == gem_name }&.to_spec
+        return if spec.nil?
+
+        [spec.homepage, spec.metadata["source_code_uri"]].compact.find do |page|
+          page.start_with?("https://github.com", "https://gitlab.com")
+        end
+      end
+
+      sig { params(node: SyntaxTree::Command, remote: String).void }
+      def add_open_gem_remote_code_lens(node, remote)
+        range = range_from_syntax_tree_node(node)
+
+        @response << Interface::CodeLens.new(
+          range: range,
+          command: Interface::Command.new(
+            title: "Open remote",
+            command: "rubyLsp.openLink",
+            arguments: [remote],
+          ),
+          data: { type: "link" },
         )
       end
     end
