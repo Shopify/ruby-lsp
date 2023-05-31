@@ -39,8 +39,8 @@ module RubyLsp
 
         @response = T.let([], ResponseType)
         @path = T.let(T.must(URI(uri).path), String)
-        @visibility = T.let("public", String)
-        @prev_visibility = T.let("public", String)
+        # visibility_stack is a stack of [current_visibility, previous_visibility]
+        @visibility_stack = T.let([["public", "public"]], T::Array[T::Array[T.nilable(String)]])
 
         emitter.register(
           self,
@@ -57,6 +57,7 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::ClassDeclaration).void }
       def on_class(node)
+        @visibility_stack.push(["public", "public"])
         class_name = node.constant.constant.value
         if class_name.end_with?("Test")
           add_code_lens(node, name: class_name, command: BASE_COMMAND + @path)
@@ -65,13 +66,13 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::ClassDeclaration).void }
       def after_class(node)
-        @prev_visibility = "public"
-        @visibility = "public"
+        @visibility_stack.pop
       end
 
       sig { params(node: SyntaxTree::DefNode).void }
       def on_def(node)
-        if @visibility == "public"
+        visibility, _ = @visibility_stack.last
+        if visibility == "public"
           method_name = node.name.value
           if method_name.start_with?("test_")
             add_code_lens(
@@ -87,8 +88,8 @@ module RubyLsp
       def on_command(node)
         node_message = node.message.value
         if ACCESS_MODIFIERS.include?(node_message) && node.arguments.parts.any?
-          @prev_visibility = @visibility
-          @visibility = node_message
+          visibility, _ = @visibility_stack.pop
+          @visibility_stack.push([node_message, visibility])
         elsif @path.include?("Gemfile") && node_message.include?("gem") && node.arguments.parts.any?
           remote = resolve_gem_remote(node)
           return unless remote
@@ -99,7 +100,8 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::Command).void }
       def after_command(node)
-        @visibility = @prev_visibility
+        _, prev_visibility = @visibility_stack.pop
+        @visibility_stack.push([prev_visibility, prev_visibility])
       end
 
       sig { params(node: SyntaxTree::CallNode).void }
@@ -109,15 +111,16 @@ module RubyLsp
         if ident
           ident_value = T.cast(ident, SyntaxTree::Ident).value
           if ACCESS_MODIFIERS.include?(ident_value)
-            @prev_visibility = @visibility
-            @visibility = ident_value
+            visibility, _ = @visibility_stack.pop
+            @visibility_stack.push([ident_value, visibility])
           end
         end
       end
 
       sig { params(node: SyntaxTree::CallNode).void }
       def after_call(node)
-        @visibility = @prev_visibility
+        _, prev_visibility = @visibility_stack.pop
+        @visibility_stack.push([prev_visibility, prev_visibility])
       end
 
       sig { params(node: SyntaxTree::VCall).void }
@@ -125,8 +128,8 @@ module RubyLsp
         vcall_value = node.value.value
 
         if ACCESS_MODIFIERS.include?(vcall_value)
-          @prev_visibility = vcall_value
-          @visibility = vcall_value
+          @visibility_stack.pop
+          @visibility_stack.push([vcall_value, vcall_value])
         end
       end
 

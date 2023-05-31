@@ -1,0 +1,656 @@
+{
+  "result": [
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 0
+        },
+        "end": {
+          "line": 20,
+          "character": 3
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "ParentTest",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb",
+          {
+            "start_line": 0,
+            "start_column": 0,
+            "end_line": 20,
+            "end_column": 3
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 0
+        },
+        "end": {
+          "line": 20,
+          "character": 3
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "ParentTest",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb",
+          {
+            "start_line": 0,
+            "start_column": 0,
+            "end_line": 20,
+            "end_column": 3
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 0
+        },
+        "end": {
+          "line": 20,
+          "character": 3
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "ParentTest",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb",
+          {
+            "start_line": 0,
+            "start_column": 0,
+            "end_line": 20,
+            "end_column": 3
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 1,
+          "character": 2
+        },
+        "end": {
+          "line": 1,
+          "character": 22
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          {
+            "start_line": 1,
+            "start_column": 2,
+            "end_line": 1,
+            "end_column": 22
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 1,
+          "character": 2
+        },
+        "end": {
+          "line": 1,
+          "character": 22
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          {
+            "start_line": 1,
+            "start_column": 2,
+            "end_line": 1,
+            "end_column": 22
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 1,
+          "character": 2
+        },
+        "end": {
+          "line": 1,
+          "character": 22
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          {
+            "start_line": 1,
+            "start_column": 2,
+            "end_line": 1,
+            "end_column": 22
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 2
+        },
+        "end": {
+          "line": 9,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "FirstChildTest",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb",
+          {
+            "start_line": 5,
+            "start_column": 2,
+            "end_line": 9,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 2
+        },
+        "end": {
+          "line": 9,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "FirstChildTest",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb",
+          {
+            "start_line": 5,
+            "start_column": 2,
+            "end_line": 9,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 2
+        },
+        "end": {
+          "line": 9,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "FirstChildTest",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb",
+          {
+            "start_line": 5,
+            "start_column": 2,
+            "end_line": 9,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 4
+        },
+        "end": {
+          "line": 6,
+          "character": 24
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          {
+            "start_line": 6,
+            "start_column": 4,
+            "end_line": 6,
+            "end_column": 24
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 4
+        },
+        "end": {
+          "line": 6,
+          "character": 24
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          {
+            "start_line": 6,
+            "start_column": 4,
+            "end_line": 6,
+            "end_column": 24
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 4
+        },
+        "end": {
+          "line": 6,
+          "character": 24
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          {
+            "start_line": 6,
+            "start_column": 4,
+            "end_line": 6,
+            "end_column": 24
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 2
+        },
+        "end": {
+          "line": 15,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "SecondChildTest",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb",
+          {
+            "start_line": 13,
+            "start_column": 2,
+            "end_line": 15,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 2
+        },
+        "end": {
+          "line": 15,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "SecondChildTest",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb",
+          {
+            "start_line": 13,
+            "start_column": 2,
+            "end_line": 15,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 2
+        },
+        "end": {
+          "line": 15,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "SecondChildTest",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb",
+          {
+            "start_line": 13,
+            "start_column": 2,
+            "end_line": 15,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 14,
+          "character": 4
+        },
+        "end": {
+          "line": 14,
+          "character": 24
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          {
+            "start_line": 14,
+            "start_column": 4,
+            "end_line": 14,
+            "end_column": 24
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 14,
+          "character": 4
+        },
+        "end": {
+          "line": 14,
+          "character": 24
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          {
+            "start_line": 14,
+            "start_column": 4,
+            "end_line": 14,
+            "end_column": 24
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 14,
+          "character": 4
+        },
+        "end": {
+          "line": 14,
+          "character": 24
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          {
+            "start_line": 14,
+            "start_column": 4,
+            "end_line": 14,
+            "end_column": 24
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 19,
+          "character": 2
+        },
+        "end": {
+          "line": 19,
+          "character": 28
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "test_public_again",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public_again",
+          {
+            "start_line": 19,
+            "start_column": 2,
+            "end_line": 19,
+            "end_column": 28
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 19,
+          "character": 2
+        },
+        "end": {
+          "line": 19,
+          "character": 28
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "test_public_again",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public_again",
+          {
+            "start_line": 19,
+            "start_column": 2,
+            "end_line": 19,
+            "end_column": 28
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "test_library": "minitest"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 19,
+          "character": 2
+        },
+        "end": {
+          "line": 19,
+          "character": 28
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/nested_minitest_tests.rb",
+          "test_public_again",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public_again",
+          {
+            "start_line": 19,
+            "start_column": 2,
+            "end_line": 19,
+            "end_column": 28
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "test_library": "minitest"
+      }
+    }
+  ],
+  "params": []
+}
