@@ -128,11 +128,13 @@ export default class Client implements ClientInterface {
           const response = await next(document, token);
 
           if (response) {
-            this.testController.createTestItems(
-              response.filter(
-                (codeLens) => (codeLens as CodeLens).data.type === "test"
-              ) as CodeLens[]
-            );
+            const testLenses = response.filter(
+              (codeLens) => (codeLens as CodeLens).data.type === "test"
+            ) as CodeLens[];
+
+            if (testLenses.length) {
+              this.testController.createTestItems(testLenses);
+            }
           }
 
           return response;
@@ -310,6 +312,10 @@ export default class Client implements ClientInterface {
       vscode.commands.registerCommand(
         Command.Update,
         this.updateServer.bind(this)
+      ),
+      vscode.commands.registerCommand(
+        Command.OpenLink,
+        this.openLink.bind(this)
       )
     );
   }
@@ -625,5 +631,9 @@ export default class Client implements ClientInterface {
       (fs.existsSync(path.join(gitFolder, "rebase-merge")) ||
         fs.existsSync(path.join(gitFolder, "rebase-apply")))
     );
+  }
+
+  private openLink(link: string) {
+    vscode.env.openExternal(vscode.Uri.parse(link));
   }
 }
