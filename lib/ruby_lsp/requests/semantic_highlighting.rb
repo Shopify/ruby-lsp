@@ -347,7 +347,7 @@ module RubyLsp
       def visit_module(node)
         return super unless visible?(node, @range)
 
-        add_token(node.constant.location, :class, [:declaration])
+        add_token(node.constant.location, :namespace, [:declaration])
         visit(node.bodystmt)
       end
 

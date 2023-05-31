@@ -39,6 +39,9 @@ end
 See the [documentation](https://shopify.github.io/ruby-lsp) for more in-depth details about the
 [supported features](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html).
 
+For creating rich themes for Ruby using the semantic highlighting information, see the [semantic highlighting
+documentation](SEMANTIC_HIGHLIGHTING.md).
+
 ## Learn More
 
 * [RubyConf 2022: Improving the development experience with language servers](https://www.youtube.com/watch?v=kEfXPTm1aCI) ([Vinicius Stock](https://github.com/vinistock))
@@ -52,7 +55,8 @@ are expected to adhere to the
 [Contributor Covenant](CODE_OF_CONDUCT.md)
 code of conduct.
 
-See [CONTRIBUTING](CONTRIBUTING.md) for development instructions.
+If you wish to contribute, see [CONTRIBUTING](CONTRIBUTING.md) for development instructions and check out our pinned
+[roadmap issue](https://github.com/Shopify/ruby-lsp/issues) for a list of tasks to get started.
 
 ## License
 

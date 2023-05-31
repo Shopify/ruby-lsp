@@ -30,7 +30,9 @@ module RubyLsp
 
       sig { override.returns(T.nilable(T.all(T::Array[Support::RuboCopDiagnostic], Object))) }
       def run
+        # Running RuboCop is slow, so to avoid excessive runs we only do so if the file is syntactically valid
         return if @document.syntax_error?
+
         return unless defined?(Support::RuboCopDiagnosticsRunner)
 
         # Don't try to run RuboCop diagnostics for files outside the current working directory

@@ -89,18 +89,14 @@ module RubyLsp
         return cached_response if cached_response
 
         # Run listeners for the document
-        document_symbol = Requests::DocumentSymbol.new(uri, @message_queue)
-        document_link = Requests::DocumentLink.new(uri, @message_queue)
-        code_lens = Requests::CodeLens.new(uri, @message_queue)
-        code_lens_extensions_listeners = Requests::CodeLens.listeners.map { |l| l.new(document.uri, @message_queue) }
-        if document.parsed?
-          T.unsafe(EventEmitter).new(
-            document_symbol,
-            document_link,
-            code_lens,
-            *code_lens_extensions_listeners,
-          ).visit(document.tree)
+        emitter = EventEmitter.new
+        document_symbol = Requests::DocumentSymbol.new(emitter, @message_queue)
+        document_link = Requests::DocumentLink.new(uri, emitter, @message_queue)
+        code_lens = Requests::CodeLens.new(uri, emitter, @message_queue)
+        code_lens_extensions_listeners = Requests::CodeLens.listeners.map do |l|
+          T.unsafe(l).new(document.uri, emitter, @message_queue)
         end
+        emitter.visit(document.tree) if document.parsed?
 
         code_lens_extensions_listeners.each { |ext| code_lens.merge_response!(ext) }
 
@@ -194,11 +190,12 @@ module RubyLsp
       end
 
       # Instantiate all listeners
-      base_listener = Requests::Hover.new(document.uri, @message_queue)
-      listeners = Requests::Hover.listeners.map { |l| l.new(document.uri, @message_queue) }
+      emitter = EventEmitter.new
+      base_listener = Requests::Hover.new(emitter, @message_queue)
+      listeners = Requests::Hover.listeners.map { |l| l.new(emitter, @message_queue) }
 
       # Emit events for all listeners
-      T.unsafe(EventEmitter).new(base_listener, *listeners).emit_for_target(target)
+      emitter.emit_for_target(target)
 
       # Merge all responses into a single hover
       listeners.each { |ext| base_listener.merge_response!(ext) }
@@ -290,13 +287,18 @@ module RubyLsp
       Requests::DocumentHighlight.new(@store.get(uri), position).run
     end
 
-    sig { params(uri: String, range: Document::RangeShape).returns(T::Array[Interface::InlayHint]) }
+    sig { params(uri: String, range: Document::RangeShape).returns(T.nilable(T::Array[Interface::InlayHint])) }
     def inlay_hint(uri, range)
       document = @store.get(uri)
+      return if document.syntax_error?
+
       start_line = range.dig(:start, :line)
       end_line = range.dig(:end, :line)
 
-      Requests::InlayHints.new(document, start_line..end_line).run
+      emitter = EventEmitter.new
+      listener = Requests::InlayHints.new(start_line..end_line, emitter, @message_queue)
+      emitter.visit(document.tree)
+      listener.response
     end
 
     sig do
@@ -405,8 +407,9 @@ module RubyLsp
 
       return unless target
 
-      listener = Requests::PathCompletion.new(uri, @message_queue)
-      EventEmitter.new(listener).emit_for_target(target)
+      emitter = EventEmitter.new
+      listener = Requests::PathCompletion.new(emitter, @message_queue)
+      emitter.emit_for_target(target)
       listener.response
     end
 
@@ -423,7 +426,7 @@ module RubyLsp
         encodings.first
       end
 
-      formatter = options.dig(:initializationOptions, :formatter)
+      formatter = options.dig(:initializationOptions, :formatter) || "auto"
       @store.formatter = if formatter == "auto"
         detected_formatter
       else

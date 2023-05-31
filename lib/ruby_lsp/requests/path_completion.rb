@@ -22,20 +22,19 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :response
 
-      sig { params(uri: String, message_queue: Thread::Queue).void }
-      def initialize(uri, message_queue)
+      sig { params(emitter: EventEmitter, message_queue: Thread::Queue).void }
+      def initialize(emitter, message_queue)
         super
         @response = T.let([], ResponseType)
-
         @tree = T.let(Support::PrefixTree.new(collect_load_path_files), Support::PrefixTree)
+
+        emitter.register(self, :on_tstring_content)
       end
 
-      listener_events do
-        sig { params(node: SyntaxTree::TStringContent).void }
-        def on_tstring_content(node)
-          @tree.search(node.value).sort.each do |path|
-            @response << build_completion(path, node)
-          end
+      sig { params(node: SyntaxTree::TStringContent).void }
+      def on_tstring_content(node)
+        @tree.search(node.value).sort.each do |path|
+          @response << build_completion(path, node)
         end
       end
 

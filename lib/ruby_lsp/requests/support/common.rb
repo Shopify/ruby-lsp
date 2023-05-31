@@ -5,6 +5,8 @@ module RubyLsp
   module Requests
     module Support
       module Common
+        # WARNING: Methods in this class may be used by Ruby LSP extensions such as https://github.com/Shopify/ruby-lsp-rails,
+        # or extensions by created by developers outside of Shopify, so be cautious of changing anything.
         extend T::Sig
 
         sig { params(node: SyntaxTree::Node).returns(Interface::Range) }
@@ -82,7 +84,7 @@ module RubyLsp
               command: command_name,
               arguments: arguments,
             ),
-            data: { type: type },
+            data: { type: type, test_library: "minitest" },
           )
         end
       end
