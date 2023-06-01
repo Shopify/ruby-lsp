@@ -8,6 +8,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::SemanticHighlighting, "semantic_highlighting"
 
   def run_expectations(source)
+    message_queue = Thread::Queue.new
     document = RubyLsp::Document.new(source: source, version: 1, uri: "file:///fake.rb")
     range = @__params&.any? ? @__params.first : nil
 
@@ -17,11 +18,17 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
       processed_range = start_line..end_line
     end
 
-    RubyLsp::Requests::SemanticHighlighting.new(
-      document,
+    emitter = RubyLsp::EventEmitter.new
+    listener = RubyLsp::Requests::SemanticHighlighting.new(
+      emitter,
+      message_queue,
       range: processed_range,
-      encoder: RubyLsp::Requests::Support::SemanticTokenEncoder.new,
-    ).run
+    )
+
+    emitter.visit(document.tree)
+    RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode(listener.response)
+  ensure
+    T.must(message_queue).close
   end
 
   def assert_expectations(source, expected)
