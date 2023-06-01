@@ -2,7 +2,12 @@ import * as assert from "assert";
 
 import * as vscode from "vscode";
 
-import { Telemetry, TelemetryApi, TelemetryEvent } from "../../telemetry";
+import {
+  Telemetry,
+  TelemetryApi,
+  TelemetryEvent,
+  ConfigurationEvent,
+} from "../../telemetry";
 
 class FakeApi implements TelemetryApi {
   public sentEvents: TelemetryEvent[];
@@ -64,5 +69,33 @@ suite("Telemetry", () => {
 
     await telemetry.sendEvent(event);
     assert.strictEqual(api.sentEvents[0], event);
+  });
+
+  test("Send configuration events emits telemetry for relevant configurations", async () => {
+    const api = new FakeApi();
+    const telemetry = new Telemetry(
+      {
+        extensionMode: vscode.ExtensionMode.Production,
+        globalState: {
+          get: () => undefined,
+          update: () => Promise.resolve(),
+        } as unknown,
+      } as vscode.ExtensionContext,
+      api
+    );
+
+    await telemetry.sendConfigurationEvents();
+    const featureConfigurations = vscode.workspace
+      .getConfiguration("rubyLsp")
+      .get("enabledFeatures")!;
+
+    const expectedNumberOfEvents =
+      5 + Object.keys(featureConfigurations).length;
+
+    assert.strictEqual(api.sentEvents.length, expectedNumberOfEvents);
+
+    api.sentEvents.forEach((event) => {
+      assert.strictEqual(typeof (event as ConfigurationEvent).value, "string");
+    });
   });
 });
