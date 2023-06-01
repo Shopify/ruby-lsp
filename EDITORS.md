@@ -16,7 +16,7 @@ new H2 header in this file containing the instructions. -->
 (with-eval-after-load 'eglot
  (add-to-list 'eglot-server-programs '((ruby-mode ruby-ts-mode) "ruby-lsp")))
  ```
-Or if you want to run it with bundle:
+Or if you want to run it with bundler:
 ```el
 (with-eval-after-load 'eglot
  (add-to-list 'eglot-server-programs '((ruby-mode ruby-ts-mode) "bundle" "exec" "ruby-lsp")))
