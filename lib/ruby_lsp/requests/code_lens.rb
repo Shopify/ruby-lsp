@@ -62,7 +62,7 @@ module RubyLsp
         class_name = node.constant.constant.value
         if class_name.end_with?("Test")
           @class_stack.push(class_name)
-          add_code_lens(node, name: class_name, command: generate_test_command(class_name: class_name))
+          add_test_code_lens(node, name: class_name, command: generate_test_command(class_name: class_name))
         end
       end
 
@@ -79,7 +79,7 @@ module RubyLsp
           method_name = node.name.value
           if method_name.start_with?("test_")
             class_name = T.must(@class_stack.last)
-            add_code_lens(
+            add_test_code_lens(
               node,
               name: method_name,
               command: generate_test_command(method_name: method_name, class_name: class_name),
@@ -146,35 +146,41 @@ module RubyLsp
       private
 
       sig { params(node: SyntaxTree::Node, name: String, command: String).void }
-      def add_code_lens(node, name:, command:)
+      def add_test_code_lens(node, name:, command:)
+        arguments = [
+          @path,
+          name,
+          command,
+          {
+            start_line: node.location.start_line - 1,
+            start_column: node.location.start_column,
+            end_line: node.location.end_line - 1,
+            end_column: node.location.end_column,
+          },
+        ]
+
         @response << create_code_lens(
           node,
           title: "Run",
           command_name: "rubyLsp.runTest",
-          path: @path,
-          name: name,
-          test_command: command,
-          type: "test",
+          arguments: arguments,
+          data: { type: "test", test_library: "minitest" },
         )
 
         @response << create_code_lens(
           node,
           title: "Run In Terminal",
           command_name: "rubyLsp.runTestInTerminal",
-          path: @path,
-          name: name,
-          test_command: command,
-          type: "test_in_terminal",
+          arguments: arguments,
+          data: { type: "test_in_terminal", test_library: "minitest" },
         )
 
         @response << create_code_lens(
           node,
           title: "Debug",
           command_name: "rubyLsp.debugTest",
-          path: @path,
-          name: name,
-          test_command: command,
-          type: "debug",
+          arguments: arguments,
+          data: { type: "debug", test_library: "minitest" },
         )
       end
 
@@ -204,15 +210,11 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::Command, remote: String).void }
       def add_open_gem_remote_code_lens(node, remote)
-        range = range_from_syntax_tree_node(node)
-
-        @response << Interface::CodeLens.new(
-          range: range,
-          command: Interface::Command.new(
-            title: "Open remote",
-            command: "rubyLsp.openLink",
-            arguments: [remote],
-          ),
+        @response << create_code_lens(
+          node,
+          title: "Open remote",
+          command_name: "rubyLsp.openLink",
+          arguments: [remote],
           data: { type: "link" },
         )
       end

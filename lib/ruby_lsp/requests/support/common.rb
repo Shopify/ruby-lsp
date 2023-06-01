@@ -57,25 +57,12 @@ module RubyLsp
             node: SyntaxTree::Node,
             title: String,
             command_name: String,
-            path: String,
-            name: String,
-            test_command: String,
-            type: String,
+            arguments: T.nilable(T::Array[T.untyped]),
+            data: T.nilable(T::Hash[T.untyped, T.untyped]),
           ).returns(Interface::CodeLens)
         end
-        def create_code_lens(node, title:, command_name:, path:, name:, test_command:, type:)
+        def create_code_lens(node, title:, command_name:, arguments:, data:)
           range = range_from_syntax_tree_node(node)
-          arguments = [
-            path,
-            name,
-            test_command,
-            {
-              start_line: node.location.start_line - 1,
-              start_column: node.location.start_column,
-              end_line: node.location.end_line - 1,
-              end_column: node.location.end_column,
-            },
-          ]
 
           Interface::CodeLens.new(
             range: range,
@@ -84,7 +71,7 @@ module RubyLsp
               command: command_name,
               arguments: arguments,
             ),
-            data: { type: type, test_library: "minitest" },
+            data: data,
           )
         end
       end
