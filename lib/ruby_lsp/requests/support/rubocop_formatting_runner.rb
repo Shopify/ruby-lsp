@@ -13,6 +13,7 @@ module RubyLsp
       class RuboCopFormattingRunner
         extend T::Sig
         include Singleton
+        include Support::FormatterRunner
 
         sig { void }
         def initialize
@@ -20,7 +21,7 @@ module RubyLsp
           @runner = T.let(RuboCopRunner.new("-a"), RuboCopRunner)
         end
 
-        sig { params(uri: String, document: Document).returns(String) }
+        sig { override.params(uri: String, document: Document).returns(String) }
         def run(uri, document)
           filename = CGI.unescape(URI.parse(uri).path)
 

@@ -29,6 +29,29 @@ module RubyLsp
       class Error < StandardError; end
       class InvalidFormatter < StandardError; end
 
+      @formatters = T.let(
+        {
+          "syntax_tree" => Support::SyntaxTreeFormattingRunner.instance,
+        },
+        T::Hash[String, Support::FormatterRunner],
+      )
+
+      class << self
+        extend T::Sig
+
+        sig { returns(T::Hash[String, Support::FormatterRunner]) }
+        attr_reader :formatters
+
+        sig { params(identifier: String, instance: Support::FormatterRunner).void }
+        def register_formatter(identifier, instance)
+          @formatters[identifier] = instance
+        end
+      end
+
+      if defined?(Support::RuboCopFormattingRunner)
+        register_formatter("rubocop", Support::RuboCopFormattingRunner.instance)
+      end
+
       extend T::Sig
 
       sig { params(document: Document, formatter: String).void }
@@ -41,6 +64,8 @@ module RubyLsp
 
       sig { override.returns(T.nilable(T.all(T::Array[Interface::TextEdit], Object))) }
       def run
+        return if @formatter == "none"
+
         # Don't try to format files outside the current working directory
         return unless @uri.sub("file://", "").start_with?(Dir.pwd)
 
@@ -67,16 +92,10 @@ module RubyLsp
 
       sig { returns(T.nilable(String)) }
       def formatted_file
-        case @formatter
-        when "rubocop"
-          if defined?(Support::RuboCopFormattingRunner)
-            Support::RuboCopFormattingRunner.instance.run(@uri, @document)
-          end
-        when "syntax_tree"
-          Support::SyntaxTreeFormattingRunner.instance.run(@uri, @document)
-        else
-          raise InvalidFormatter, "Unknown formatter: #{@formatter}"
-        end
+        formatter_runner = Formatting.formatters[@formatter]
+        raise InvalidFormatter, "Formatter is not available: #{@formatter}" unless formatter_runner
+
+        formatter_runner.run(@uri, @document)
       end
     end
   end

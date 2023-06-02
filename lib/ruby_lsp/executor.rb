@@ -543,6 +543,8 @@ module RubyLsp
       return unless @store.formatter == "rubocop"
 
       unless defined?(RubyLsp::Requests::Support::RuboCopRunner)
+        @store.formatter = "none"
+
         @message_queue << Notification.new(
           message: "window/showMessage",
           params: Interface::ShowMessageParams.new(

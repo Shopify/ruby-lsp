@@ -11,6 +11,7 @@ module RubyLsp
       class SyntaxTreeFormattingRunner
         extend T::Sig
         include Singleton
+        include Support::FormatterRunner
 
         sig { void }
         def initialize
@@ -25,7 +26,7 @@ module RubyLsp
             )
         end
 
-        sig { params(uri: String, document: Document).returns(T.nilable(String)) }
+        sig { override.params(uri: String, document: Document).returns(T.nilable(String)) }
         def run(uri, document)
           relative_path = Pathname.new(URI(uri).path).relative_path_from(T.must(WORKSPACE_URI.path))
           return if @options.ignore_files.any? { |pattern| File.fnmatch(pattern, relative_path) }
