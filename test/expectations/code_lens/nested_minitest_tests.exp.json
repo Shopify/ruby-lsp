@@ -110,7 +110,7 @@
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
           "test_public",
-          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name /ParentTest\\#test_public/",
           {
             "start_line": 1,
             "start_column": 2,
@@ -141,7 +141,7 @@
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
           "test_public",
-          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name /ParentTest\\#test_public/",
           {
             "start_line": 1,
             "start_column": 2,
@@ -172,7 +172,7 @@
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
           "test_public",
-          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name /ParentTest\\#test_public/",
           {
             "start_line": 1,
             "start_column": 2,
@@ -296,7 +296,7 @@
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
           "test_public",
-          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name /FirstChildTest\\#test_public/",
           {
             "start_line": 6,
             "start_column": 4,
@@ -327,7 +327,7 @@
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
           "test_public",
-          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name /FirstChildTest\\#test_public/",
           {
             "start_line": 6,
             "start_column": 4,
@@ -358,7 +358,7 @@
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
           "test_public",
-          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name /FirstChildTest\\#test_public/",
           {
             "start_line": 6,
             "start_column": 4,
@@ -482,7 +482,7 @@
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
           "test_public",
-          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name /SecondChildTest\\#test_public/",
           {
             "start_line": 14,
             "start_column": 4,
@@ -513,7 +513,7 @@
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
           "test_public",
-          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name /SecondChildTest\\#test_public/",
           {
             "start_line": 14,
             "start_column": 4,
@@ -544,7 +544,7 @@
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
           "test_public",
-          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name /SecondChildTest\\#test_public/",
           {
             "start_line": 14,
             "start_column": 4,
@@ -575,7 +575,7 @@
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
           "test_public_again",
-          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public_again",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name /ParentTest\\#test_public_again/",
           {
             "start_line": 19,
             "start_column": 2,
@@ -606,7 +606,7 @@
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
           "test_public_again",
-          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public_again",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name /ParentTest\\#test_public_again/",
           {
             "start_line": 19,
             "start_column": 2,
@@ -637,7 +637,7 @@
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
           "test_public_again",
-          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name test_public_again",
+          "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name /ParentTest\\#test_public_again/",
           {
             "start_line": 19,
             "start_column": 2,

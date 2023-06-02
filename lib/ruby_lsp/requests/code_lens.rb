@@ -41,6 +41,7 @@ module RubyLsp
         @path = T.let(T.must(URI(uri).path), String)
         # visibility_stack is a stack of [current_visibility, previous_visibility]
         @visibility_stack = T.let([["public", "public"]], T::Array[T::Array[T.nilable(String)]])
+        @class_stack = T.let([], T::Array[String])
 
         emitter.register(
           self,
@@ -60,13 +61,15 @@ module RubyLsp
         @visibility_stack.push(["public", "public"])
         class_name = node.constant.constant.value
         if class_name.end_with?("Test")
-          add_code_lens(node, name: class_name, command: BASE_COMMAND + @path)
+          @class_stack.push(class_name)
+          add_code_lens(node, name: class_name, command: generate_test_command(class_name: class_name))
         end
       end
 
       sig { params(node: SyntaxTree::ClassDeclaration).void }
       def after_class(node)
         @visibility_stack.pop
+        @class_stack.pop
       end
 
       sig { params(node: SyntaxTree::DefNode).void }
@@ -78,7 +81,7 @@ module RubyLsp
             add_code_lens(
               node,
               name: method_name,
-              command: BASE_COMMAND + @path + " --name " + Shellwords.escape(method_name),
+              command: generate_test_command(method_name: method_name, class_name: @class_stack.last),
             )
           end
         end
@@ -183,6 +186,17 @@ module RubyLsp
         [spec.homepage, spec.metadata["source_code_uri"]].compact.find do |page|
           page.start_with?("https://github.com", "https://gitlab.com")
         end
+      end
+
+      sig { params(class_name: T.nilable(String), method_name: T.nilable(String)).returns(String) }
+      def generate_test_command(class_name:, method_name: nil)
+        command = BASE_COMMAND + @path
+
+        if method_name
+          command += " --name " + "/#{Shellwords.escape(T.must(class_name) + "#" + method_name)}/"
+        end
+
+        command
       end
 
       sig { params(node: SyntaxTree::Command, remote: String).void }
