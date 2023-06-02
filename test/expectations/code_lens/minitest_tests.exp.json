@@ -17,7 +17,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test/",
           {
             "start_line": 0,
             "start_column": 0,
@@ -48,7 +48,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test/",
           {
             "start_line": 0,
             "start_column": 0,
@@ -79,7 +79,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test/",
           {
             "start_line": 0,
             "start_column": 0,
@@ -575,7 +575,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "AnotherTest",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /AnotherTest/",
           {
             "start_line": 24,
             "start_column": 0,
@@ -606,7 +606,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "AnotherTest",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /AnotherTest/",
           {
             "start_line": 24,
             "start_column": 0,
@@ -637,7 +637,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "AnotherTest",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /AnotherTest/",
           {
             "start_line": 24,
             "start_column": 0,
@@ -745,5 +745,7 @@
       }
     }
   ],
-  "params": []
+  "params": [
+
+  ]
 }

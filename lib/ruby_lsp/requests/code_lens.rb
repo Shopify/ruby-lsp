@@ -78,10 +78,11 @@ module RubyLsp
         if visibility == "public"
           method_name = node.name.value
           if method_name.start_with?("test_")
+            class_name = T.must(@class_stack.last)
             add_code_lens(
               node,
               name: method_name,
-              command: generate_test_command(method_name: method_name, class_name: @class_stack.last),
+              command: generate_test_command(method_name: method_name, class_name: class_name),
             )
           end
         end
@@ -188,12 +189,14 @@ module RubyLsp
         end
       end
 
-      sig { params(class_name: T.nilable(String), method_name: T.nilable(String)).returns(String) }
+      sig { params(class_name: String, method_name: T.nilable(String)).returns(String) }
       def generate_test_command(class_name:, method_name: nil)
         command = BASE_COMMAND + @path
 
-        if method_name
-          command += " --name " + "/#{Shellwords.escape(T.must(class_name) + "#" + method_name)}/"
+        command += if method_name
+          " --name " + "/#{Shellwords.escape(class_name + "#" + method_name)}/"
+        else
+          " --name " + "/#{Shellwords.escape(class_name)}/"
         end
 
         command
