@@ -60,7 +60,7 @@ module RubyLsp
         @visibility_stack.push(["public", "public"])
         class_name = node.constant.constant.value
         if class_name.end_with?("Test")
-          add_code_lens(node, name: class_name, command: BASE_COMMAND + @path)
+          add_code_lens(node, name: class_name, command: generate_test_command)
         end
       end
 
@@ -78,7 +78,7 @@ module RubyLsp
             add_code_lens(
               node,
               name: method_name,
-              command: BASE_COMMAND + @path + " --name " + Shellwords.escape(method_name),
+              command: generate_test_command(method_name: method_name),
             )
           end
         end
@@ -183,6 +183,17 @@ module RubyLsp
         [spec.homepage, spec.metadata["source_code_uri"]].compact.find do |page|
           page.start_with?("https://github.com", "https://gitlab.com")
         end
+      end
+
+      sig { params(method_name: T.nilable(String)).returns(String) }
+      def generate_test_command(method_name: nil)
+        command = BASE_COMMAND + @path
+
+        if method_name
+          command += " --name " + Shellwords.escape(method_name)
+        end
+
+        command
       end
 
       sig { params(node: SyntaxTree::Command, remote: String).void }
