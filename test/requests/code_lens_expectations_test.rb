@@ -12,9 +12,35 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new
-    listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue)
+    listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue, "minitest")
     emitter.visit(document.tree)
     listener.response
+  end
+
+  def test_command_generation_for_test_unit
+    source = <<~RUBY
+      class FooTest < Test::Unit::TestCase
+        def test_bar; end
+      end
+    RUBY
+    uri = "file:///fake.rb"
+
+    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+
+    emitter = RubyLsp::EventEmitter.new
+    listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue, "test-unit")
+    emitter.visit(document.tree)
+    response = listener.response
+
+    assert_equal(6, response.size)
+
+    assert_equal("Run In Terminal", T.must(response[1]).command.title)
+    assert_equal("bundle exec ruby -Itest /fake.rb --testcase /FooTest/", T.must(response[1]).command.arguments[2])
+    assert_equal("Run In Terminal", T.must(response[4]).command.title)
+    assert_equal(
+      "bundle exec ruby -Itest /fake.rb --testcase /FooTest/ --name test_bar",
+      T.must(response[4]).command.arguments[2],
+    )
   end
 
   def test_after_request_hook
