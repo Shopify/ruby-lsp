@@ -62,7 +62,12 @@ module RubyLsp
         class_name = node.constant.constant.value
         if class_name.end_with?("Test")
           @class_stack.push(class_name)
-          add_test_code_lens(node, name: class_name, command: generate_test_command(class_name: class_name))
+          add_test_code_lens(
+            node,
+            name: class_name,
+            command: generate_test_command(class_name: class_name),
+            kind: :group,
+          )
         end
       end
 
@@ -83,6 +88,7 @@ module RubyLsp
               node,
               name: method_name,
               command: generate_test_command(method_name: method_name, class_name: class_name),
+              kind: :example,
             )
           end
         end
@@ -145,8 +151,8 @@ module RubyLsp
 
       private
 
-      sig { params(node: SyntaxTree::Node, name: String, command: String).void }
-      def add_test_code_lens(node, name:, command:)
+      sig { params(node: SyntaxTree::Node, name: String, command: String, kind: Symbol).void }
+      def add_test_code_lens(node, name:, command:, kind:)
         arguments = [
           @path,
           name,
@@ -164,7 +170,7 @@ module RubyLsp
           title: "Run",
           command_name: "rubyLsp.runTest",
           arguments: arguments,
-          data: { type: "test", test_library: "minitest" },
+          data: { type: "test", kind: kind },
         )
 
         @response << create_code_lens(
@@ -172,7 +178,7 @@ module RubyLsp
           title: "Run In Terminal",
           command_name: "rubyLsp.runTestInTerminal",
           arguments: arguments,
-          data: { type: "test_in_terminal", test_library: "minitest" },
+          data: { type: "test_in_terminal", kind: kind },
         )
 
         @response << create_code_lens(
@@ -180,7 +186,7 @@ module RubyLsp
           title: "Debug",
           command_name: "rubyLsp.debugTest",
           arguments: arguments,
-          data: { type: "debug", test_library: "minitest" },
+          data: { type: "debug", kind: kind },
         )
       end
 
