@@ -42,7 +42,7 @@ module RubyLsp
       # Find all classes that inherit from BaseRequest or Listener, which are the ones we want to make sure are
       # documented
       features = ObjectSpace.each_object(Class).filter_map do |k|
-        klass = T.cast(k, Class)
+        klass = T.cast(k, T::Class[T.anything])
         klass if klass < RubyLsp::Requests::BaseRequest || klass < RubyLsp::Listener
       end
 
