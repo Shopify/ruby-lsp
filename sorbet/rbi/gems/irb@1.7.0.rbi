@@ -5,6 +5,8 @@
 # Please instead update this file by running `bin/tapioca gem irb`.
 
 # An output formatter used internally by the lexer.
+#
+# source://irb//lib/irb/notifier.rb#11
 module IRB::Notifier
   private
 
@@ -17,7 +19,7 @@ module IRB::Notifier
   # expressions will be sent directly to STDOUT without any additional
   # formatting.
   #
-  # source://irb//irb/notifier.rb#37
+  # source://irb//lib/irb/notifier.rb#31
   def def_notifier(prefix = T.unsafe(nil), output_method = T.unsafe(nil)); end
 
   class << self
@@ -30,7 +32,7 @@ module IRB::Notifier
     # expressions will be sent directly to STDOUT without any additional
     # formatting.
     #
-    # source://irb//irb/notifier.rb#37
+    # source://irb//lib/irb/notifier.rb#31
     def def_notifier(prefix = T.unsafe(nil), output_method = T.unsafe(nil)); end
   end
 end
@@ -38,19 +40,21 @@ end
 # An abstract class, or superclass, for CompositeNotifier and
 # LeveledNotifier to inherit. It provides several wrapper methods for the
 # OutputMethod object used by the Notifier.
+#
+# source://irb//lib/irb/notifier.rb#39
 class IRB::Notifier::AbstractNotifier
   # Creates a new Notifier object
   #
   # @return [AbstractNotifier] a new instance of AbstractNotifier
   #
-  # source://irb//irb/notifier.rb#47
+  # source://irb//lib/irb/notifier.rb#41
   def initialize(prefix, base_notifier); end
 
   # Execute the given block if notifications are enabled.
   #
   # @yield [@base_notifier]
   #
-  # source://irb//irb/notifier.rb#105
+  # source://irb//lib/irb/notifier.rb#99
   def exec_if; end
 
   # A wrapper method used to determine whether notifications are enabled.
@@ -59,14 +63,14 @@ class IRB::Notifier::AbstractNotifier
   #
   # @return [Boolean]
   #
-  # source://irb//irb/notifier.rb#59
+  # source://irb//lib/irb/notifier.rb#53
   def notify?; end
 
   # Same as #ppx, except it uses the #prefix given during object
   # initialization.
   # See OutputMethod#ppx for more detail.
   #
-  # source://irb//irb/notifier.rb#88
+  # source://irb//lib/irb/notifier.rb#82
   def pp(*objs); end
 
   # Same as #pp, except it concatenates the given +prefix+ with the #prefix
@@ -74,33 +78,33 @@ class IRB::Notifier::AbstractNotifier
   #
   # See OutputMethod#ppx for more detail.
   #
-  # source://irb//irb/notifier.rb#98
+  # source://irb//lib/irb/notifier.rb#92
   def ppx(prefix, *objs); end
 
   # The +prefix+ for this Notifier, which is appended to all objects being
   # inspected during output.
   #
-  # source://irb//irb/notifier.rb#54
+  # source://irb//lib/irb/notifier.rb#48
   def prefix; end
 
   # See OutputMethod#print for more detail.
   #
-  # source://irb//irb/notifier.rb#64
+  # source://irb//lib/irb/notifier.rb#58
   def print(*opts); end
 
   # See OutputMethod#printf for more detail.
   #
-  # source://irb//irb/notifier.rb#74
+  # source://irb//lib/irb/notifier.rb#68
   def printf(format, *opts); end
 
   # See OutputMethod#printn for more detail.
   #
-  # source://irb//irb/notifier.rb#69
+  # source://irb//lib/irb/notifier.rb#63
   def printn(*opts); end
 
   # See OutputMethod#puts for more detail.
   #
-  # source://irb//irb/notifier.rb#79
+  # source://irb//lib/irb/notifier.rb#73
   def puts(*objs); end
 end
 
@@ -114,13 +118,15 @@ end
 # create a new composite notifier. Using the first composite notifier
 # object you create, sibling notifiers can be initialized with
 # #def_notifier.
+#
+# source://irb//lib/irb/notifier.rb#114
 class IRB::Notifier::CompositeNotifier < ::IRB::Notifier::AbstractNotifier
   # Create a new composite notifier object with the given +prefix+, and
   # +base_notifier+ to use for output.
   #
   # @return [CompositeNotifier] a new instance of CompositeNotifier
   #
-  # source://irb//irb/notifier.rb#123
+  # source://irb//lib/irb/notifier.rb#117
   def initialize(prefix, base_notifier); end
 
   # Creates a new LeveledNotifier in the composite #notifiers group.
@@ -130,12 +136,12 @@ class IRB::Notifier::CompositeNotifier < ::IRB::Notifier::AbstractNotifier
   #
   # This method returns the newly created instance.
   #
-  # source://irb//irb/notifier.rb#139
+  # source://irb//lib/irb/notifier.rb#133
   def def_notifier(level, prefix = T.unsafe(nil)); end
 
   # Returns the leveled notifier for this object
   #
-  # source://irb//irb/notifier.rb#146
+  # source://irb//lib/irb/notifier.rb#140
   def level; end
 
   # Sets the leveled notifier for this object.
@@ -153,12 +159,12 @@ class IRB::Notifier::CompositeNotifier < ::IRB::Notifier::AbstractNotifier
   # found in the existing #notifiers Array, or an instance of
   # AbstractNotifier
   #
-  # source://irb//irb/notifier.rb#163
+  # source://irb//lib/irb/notifier.rb#157
   def level=(value); end
 
   # Returns the leveled notifier for this object
   #
-  # source://irb//irb/notifier.rb#146
+  # source://irb//lib/irb/notifier.rb#140
   def level_notifier; end
 
   # Sets the leveled notifier for this object.
@@ -176,31 +182,35 @@ class IRB::Notifier::CompositeNotifier < ::IRB::Notifier::AbstractNotifier
   # found in the existing #notifiers Array, or an instance of
   # AbstractNotifier
   #
-  # source://irb//irb/notifier.rb#163
+  # source://irb//lib/irb/notifier.rb#157
   def level_notifier=(value); end
 
   # List of notifiers in the group
   #
-  # source://irb//irb/notifier.rb#131
+  # source://irb//lib/irb/notifier.rb#125
   def notifiers; end
 end
 
+# source://irb//lib/irb/notifier.rb#12
 class IRB::Notifier::ErrUndefinedNotifier < ::StandardError
   # @return [ErrUndefinedNotifier] a new instance of ErrUndefinedNotifier
   #
-  # source://irb//irb/notifier.rb#19
+  # source://irb//lib/irb/notifier.rb#13
   def initialize(val); end
 end
 
+# source://irb//lib/irb/notifier.rb#17
 class IRB::Notifier::ErrUnrecognizedLevel < ::StandardError
   # @return [ErrUnrecognizedLevel] a new instance of ErrUnrecognizedLevel
   #
-  # source://irb//irb/notifier.rb#24
+  # source://irb//lib/irb/notifier.rb#18
   def initialize(val); end
 end
 
 # A leveled notifier is comparable to the composite group from
 # CompositeNotifier#notifiers.
+#
+# source://irb//lib/irb/notifier.rb#175
 class IRB::Notifier::LeveledNotifier < ::IRB::Notifier::AbstractNotifier
   include ::Comparable
 
@@ -213,7 +223,7 @@ class IRB::Notifier::LeveledNotifier < ::IRB::Notifier::AbstractNotifier
   #
   # @return [LeveledNotifier] a new instance of LeveledNotifier
   #
-  # source://irb//irb/notifier.rb#190
+  # source://irb//lib/irb/notifier.rb#184
   def initialize(base, level, prefix); end
 
   # Compares the level of this notifier object with the given +other+
@@ -221,12 +231,12 @@ class IRB::Notifier::LeveledNotifier < ::IRB::Notifier::AbstractNotifier
   #
   # See the Comparable module for more information.
   #
-  # source://irb//irb/notifier.rb#203
+  # source://irb//lib/irb/notifier.rb#197
   def <=>(other); end
 
   # The current level of this notifier object
   #
-  # source://irb//irb/notifier.rb#197
+  # source://irb//lib/irb/notifier.rb#191
   def level; end
 
   # Whether to output messages to the output method, depending on the level
@@ -234,7 +244,7 @@ class IRB::Notifier::LeveledNotifier < ::IRB::Notifier::AbstractNotifier
   #
   # @return [Boolean]
   #
-  # source://irb//irb/notifier.rb#209
+  # source://irb//lib/irb/notifier.rb#203
   def notify?; end
 end
 
@@ -243,12 +253,14 @@ end
 #
 # This notifier is used as the +zero+ index, or level +0+, for
 # CompositeNotifier#notifiers, and will not output messages of any sort.
+#
+# source://irb//lib/irb/notifier.rb#213
 class IRB::Notifier::NoMsgNotifier < ::IRB::Notifier::LeveledNotifier
   # Creates a new notifier that should not be used to output messages.
   #
   # @return [NoMsgNotifier] a new instance of NoMsgNotifier
   #
-  # source://irb//irb/notifier.rb#221
+  # source://irb//lib/irb/notifier.rb#215
   def initialize; end
 
   # Ensures notifications are ignored, see AbstractNotifier#notify? for
@@ -256,13 +268,15 @@ class IRB::Notifier::NoMsgNotifier < ::IRB::Notifier::LeveledNotifier
   #
   # @return [Boolean]
   #
-  # source://irb//irb/notifier.rb#229
+  # source://irb//lib/irb/notifier.rb#223
   def notify?; end
 end
 
 # An abstract output class for IO in irb. This is mainly used internally by
 # IRB::Notifier. You can define your own output method to use with Irb.new,
 # or Context.new
+#
+# source://irb//lib/irb/output-method.rb#11
 class IRB::OutputMethod
   # Returns an array of the given +format+ and +opts+ to be used by
   # Kernel#sprintf, if there was a successful Regexp match in the given
@@ -275,14 +289,14 @@ class IRB::OutputMethod
   #     #<length modifier>(hh|h|l|ll|L|q|j|z|t)
   #     <conversion specifier>[diouxXeEfgGcsb%]
   #
-  # source://irb//irb/output-method.rb#54
+  # source://irb//lib/irb/output-method.rb#48
   def parse_printf_format(format, opts); end
 
   # Prints the given +objs+ calling Object#inspect on each.
   #
   # See #puts for more detail.
   #
-  # source://irb//irb/output-method.rb#70
+  # source://irb//lib/irb/output-method.rb#64
   def pp(*objs); end
 
   # Prints the given +objs+ calling Object#inspect on each and appending the
@@ -290,7 +304,7 @@ class IRB::OutputMethod
   #
   # See #puts for more detail.
   #
-  # source://irb//irb/output-method.rb#78
+  # source://irb//lib/irb/output-method.rb#72
   def ppx(prefix, *objs); end
 
   # Open this method to implement your own output method, raises a
@@ -298,30 +312,31 @@ class IRB::OutputMethod
   #
   # @raise [NotImplementedError]
   #
-  # source://irb//irb/output-method.rb#26
+  # source://irb//lib/irb/output-method.rb#20
   def print(*opts); end
 
   # Extends IO#printf to format the given +opts+ for Kernel#sprintf using
   # #parse_printf_format
   #
-  # source://irb//irb/output-method.rb#37
+  # source://irb//lib/irb/output-method.rb#31
   def printf(format, *opts); end
 
   # Prints the given +opts+, with a newline delimiter.
   #
-  # source://irb//irb/output-method.rb#31
+  # source://irb//lib/irb/output-method.rb#25
   def printn(*opts); end
 
   # Calls #print on each element in the given +objs+, followed by a newline
   # character.
   #
-  # source://irb//irb/output-method.rb#60
+  # source://irb//lib/irb/output-method.rb#54
   def puts(*objs); end
 end
 
+# source://irb//lib/irb/output-method.rb#12
 class IRB::OutputMethod::NotImplementedError < ::StandardError
   # @return [NotImplementedError] a new instance of NotImplementedError
   #
-  # source://irb//irb/output-method.rb#19
+  # source://irb//lib/irb/output-method.rb#13
   def initialize(val); end
 end
