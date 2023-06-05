@@ -204,6 +204,13 @@
               "program": {
                 "type": "string",
                 "description": "The program to debug"
+              },
+              "env": {
+                "type": "object",
+                "description": "Environment variables defined as a key value pair. Example: { \"BACKTRACE\": \"1\" }",
+                "additionalProperties": {
+                  "type": "string"
+                }
               }
             }
           },

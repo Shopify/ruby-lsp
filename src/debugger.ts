@@ -88,8 +88,16 @@ export class Debugger
     debugConfiguration: vscode.DebugConfiguration,
     _token?: vscode.CancellationToken
   ): vscode.ProviderResult<vscode.DebugConfiguration> {
-    // If the user has their own debug launch configurations, we still need to inject the Ruby environment
-    debugConfiguration.env = this.ruby.env;
+    if (debugConfiguration.env) {
+      // If the user has their own debug launch configurations, we still need to inject the Ruby environment
+      debugConfiguration.env = Object.assign(
+        debugConfiguration.env,
+        this.ruby.env
+      );
+    } else {
+      debugConfiguration.env = this.ruby.env;
+    }
+
     return debugConfiguration;
   }
 
@@ -140,6 +148,7 @@ export class Debugger
     let initialMessage = "";
     let initialized = false;
     const sockPath = this.socketPath();
+    const configuration = session.configuration;
 
     return new Promise((resolve, reject) => {
       this.debugProcess = spawn(
@@ -151,11 +160,11 @@ export class Debugger
           "--command",
           `--sock-path=${sockPath}`,
           "--",
-          session.configuration.program,
+          configuration.program,
         ],
         {
           shell: true,
-          env: this.ruby.env,
+          env: configuration.env,
           cwd: this.workingFolder,
         }
       );
