@@ -93,7 +93,8 @@ module RubyLsp
         emitter = EventEmitter.new
         document_symbol = Requests::DocumentSymbol.new(emitter, @message_queue)
         document_link = Requests::DocumentLink.new(uri, emitter, @message_queue)
-        code_lens = Requests::CodeLens.new(uri, emitter, @message_queue, "minitest")
+        test_library = detected_test_library
+        code_lens = Requests::CodeLens.new(uri, emitter, @message_queue, test_library)
         code_lens_extensions_listeners = Requests::CodeLens.listeners.map do |l|
           T.unsafe(l).new(document.uri, emitter, @message_queue)
         end
@@ -542,6 +543,20 @@ module RubyLsp
         "syntax_tree"
       else
         "none"
+      end
+    end
+
+    sig { returns(String) }
+    def detected_test_library
+      if direct_dependency?(/^minitest/)
+        "minitest"
+      elsif direct_dependency?(/^test-unit/)
+        "test-unit"
+      elsif direct_dependency?(/^rspec/)
+        "rspec"
+      else
+        warn("WARNING: No test library detected. Assuming minitest.")
+        "minitest"
       end
     end
 
