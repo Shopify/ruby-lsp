@@ -35,7 +35,7 @@ jobs:
         run: bundle exec srb tc
 
       - name: Lint Ruby files
-        run: bin/rubocop
+        run: bundle exec rubocop
 
       - name: Run tests
-        run: bin/test
+        run: bundle exec rake
