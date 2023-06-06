@@ -1,6 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "ruby_lsp/requests/support/dependency_detector"
+
 module RubyLsp
   # This class dispatches a request execution to the right request class. No IO should happen anywhere here!
   class Executor
@@ -93,7 +95,7 @@ module RubyLsp
         emitter = EventEmitter.new
         document_symbol = Requests::DocumentSymbol.new(emitter, @message_queue)
         document_link = Requests::DocumentLink.new(uri, emitter, @message_queue)
-        test_library = detected_test_library
+        test_library = DependencyDetector.detected_test_library
         code_lens = Requests::CodeLens.new(uri, emitter, @message_queue, test_library)
         code_lens_extensions_listeners = Requests::CodeLens.listeners.map do |l|
           T.unsafe(l).new(document.uri, emitter, @message_queue)
@@ -421,7 +423,7 @@ module RubyLsp
 
       formatter = options.dig(:initializationOptions, :formatter) || "auto"
       @store.formatter = if formatter == "auto"
-        detected_formatter
+        DependencyDetector.detected_formatter
       else
         formatter
       end
@@ -532,37 +534,6 @@ module RubyLsp
           code_lens_provider: code_lens_provider,
         ),
       )
-    end
-
-    sig { returns(String) }
-    def detected_formatter
-      # NOTE: Intentionally no $ at end, since we want to match rubocop-shopify, etc.
-      if direct_dependency?(/^rubocop/)
-        "rubocop"
-      elsif direct_dependency?(/^syntax_tree$/)
-        "syntax_tree"
-      else
-        "none"
-      end
-    end
-
-    sig { returns(String) }
-    def detected_test_library
-      if direct_dependency?(/^minitest/)
-        "minitest"
-      elsif direct_dependency?(/^test-unit/)
-        "test-unit"
-      elsif direct_dependency?(/^rspec/)
-        "rspec"
-      else
-        warn("WARNING: No test library detected. Assuming minitest.")
-        "minitest"
-      end
-    end
-
-    sig { params(gem_pattern: Regexp).returns(T::Boolean) }
-    def direct_dependency?(gem_pattern)
-      Bundler.locked_gems.dependencies.keys.grep(gem_pattern).any?
     end
 
     sig { void }
