@@ -54,4 +54,21 @@ suite("Debugger", () => {
     assert.strictEqual(ruby.env, configs.env);
     debug.dispose();
   });
+
+  test("Resolve configuration injects Ruby environment and allows users custom environment", () => {
+    const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
+    const ruby = { env: { bogus: "hello!" } } as unknown as Ruby;
+    const debug = new Debugger(context, ruby, "fake");
+    const configs: any = debug.resolveDebugConfiguration!(undefined, {
+      type: "ruby_lsp",
+      name: "Debug",
+      request: "launch",
+      // eslint-disable-next-line no-template-curly-in-string
+      program: "ruby ${file}",
+      env: { parallel: "1" },
+    });
+
+    assert.deepEqual({ parallel: "1", ...ruby.env }, configs.env);
+    debug.dispose();
+  });
 });
