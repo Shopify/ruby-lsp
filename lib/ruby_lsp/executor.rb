@@ -561,7 +561,7 @@ module RubyLsp
           message: "window/showMessage",
           params: Interface::ShowMessageParams.new(
             type: Constant::MessageType::ERROR,
-            message: "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the bundle.",
+            message: "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the Gemfile or gemspec.",
           ),
         )
       end

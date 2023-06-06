@@ -186,7 +186,7 @@ class ExecutorTest < Minitest::Test
       notification = T.must(@message_queue.pop)
       assert_equal("window/showMessage", notification.message)
       assert_equal(
-        "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the bundle.",
+        "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the Gemfile or gemspec.",
         T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
       )
     end
