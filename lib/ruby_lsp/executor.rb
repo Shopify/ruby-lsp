@@ -85,7 +85,7 @@ module RubyLsp
       when "textDocument/selectionRange"
         selection_range(uri, request.dig(:params, :positions))
       when "textDocument/documentSymbol", "textDocument/documentLink", "textDocument/codeLens",
-           "textDocument/semanticTokens/full"
+           "textDocument/semanticTokens/full", "textDocument/foldingRange"
         document = @store.get(uri)
 
         # If the response has already been cached by another request, return it
@@ -97,7 +97,7 @@ module RubyLsp
         document_symbol = Requests::DocumentSymbol.new(emitter, @message_queue)
         document_link = Requests::DocumentLink.new(uri, emitter, @message_queue)
         code_lens = Requests::CodeLens.new(uri, emitter, @message_queue, @test_library)
-
+        folding_ranges = Requests::FoldingRanges.new(emitter, @message_queue)
         semantic_highlighting = Requests::SemanticHighlighting.new(emitter, @message_queue)
         emitter.visit(document.tree) if document.parsed?
 
@@ -112,6 +112,7 @@ module RubyLsp
           "textDocument/semanticTokens/full",
           Requests::Support::SemanticTokenEncoder.new.encode(semantic_highlighting.response),
         )
+        document.cache_set("textDocument/foldingRange", folding_ranges.response)
         document.cache_get(request[:method])
       when "textDocument/semanticTokens/range"
         semantic_tokens_range(uri, request.dig(:params, :range))
@@ -185,13 +186,6 @@ module RubyLsp
       base_listener = Requests::Definition.new(uri, emitter, @message_queue)
       emitter.emit_for_target(target)
       base_listener.response
-    end
-
-    sig { params(uri: String).returns(T::Array[Interface::FoldingRange]) }
-    def folding_range(uri)
-      @store.cache_fetch(uri, "textDocument/foldingRange") do |document|
-        Requests::FoldingRanges.new(document).run
-      end
     end
 
     sig do

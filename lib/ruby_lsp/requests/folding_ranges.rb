@@ -15,8 +15,11 @@ module RubyLsp
     #   puts "Hello"
     # end # <-- folding range end
     # ```
-    class FoldingRanges < BaseRequest
+    class FoldingRanges < Listener
       extend T::Sig
+
+      sig { override.returns(ResponseType) }
+      attr_reader :response
 
       SIMPLE_FOLDABLES = T.let(
         [
@@ -60,27 +63,24 @@ module RubyLsp
         )
       end
 
-      sig { params(document: Document).void }
-      def initialize(document)
+      sig { params(emitter: EventEmitter, message_queue: Thread::Queue).void }
+      def initialize(emitter, message_queue)
         super
-
-        @ranges = T.let([], T::Array[Interface::FoldingRange])
+        @response = T.let([], ResponseType)
         @partial_range = T.let(nil, T.nilable(PartialRange))
+
+        emitter.register(self, :on_visit)
       end
 
-      sig { override.returns(T.all(T::Array[Interface::FoldingRange], Object)) }
-      def run
-        if @document.parsed?
-          visit(@document.tree)
-          emit_partial_range
-        end
-
-        @ranges
+      sig { params(node: T.nilable(SyntaxTree::Node)).returns(T.untyped) } # TODO: fix sig
+      def on_visit(node)
+        visit(node)
+        emit_partial_range
       end
 
       private
 
-      sig { override.params(node: T.nilable(SyntaxTree::Node)).void }
+      sig { params(node: T.nilable(SyntaxTree::Node)).void }
       def visit(node)
         return unless handle_partial_range(node)
 
@@ -98,7 +98,7 @@ module RubyLsp
             add_lines_range(location.start_line, location.end_line - 1)
           else
             add_call_range(node)
-            return
+            nil
           end
         when SyntaxTree::Command
           unless same_lines_for_command_and_block?(node)
@@ -109,10 +109,8 @@ module RubyLsp
           add_def_range(node)
         when SyntaxTree::StringConcat
           add_string_concat(node)
-          return
+          nil
         end
-
-        super
       end
 
       # This is to prevent duplicate ranges
@@ -215,7 +213,7 @@ module RubyLsp
       def emit_partial_range
         return if @partial_range.nil?
 
-        @ranges << @partial_range.to_range if @partial_range.multiline?
+        @response << @partial_range.to_range if @partial_range.multiline?
         @partial_range = nil
       end
 
@@ -296,7 +294,7 @@ module RubyLsp
       def add_lines_range(start_line, end_line)
         return if start_line >= end_line
 
-        @ranges << Interface::FoldingRange.new(
+        @response << Interface::FoldingRange.new(
           start_line: start_line - 1,
           end_line: end_line - 1,
           kind: "region",
