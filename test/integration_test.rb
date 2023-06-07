@@ -29,6 +29,8 @@ class IntegrationTest < Minitest::Test
   }.freeze
 
   def setup
+    skip("Skipping for Windows: https://github.com/Shopify/ruby-lsp/issues/751") if ENV["RUNNER_OS"] == "Windows"
+
     # Start a new Ruby LSP server in a separate process and set the IOs to binary mode
     @stdin, @stdout, @stderr, @wait_thr = Open3.popen3("bundle exec ruby-lsp")
   end
