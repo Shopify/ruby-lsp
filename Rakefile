@@ -24,6 +24,6 @@ require "rubocop/rake_task"
 
 RuboCop::RakeTask.new
 
-RubyLsp::CheckDocs.new(FileList["#{__dir__}/lib/ruby_lsp/**/*.rb"])
+RubyLsp::CheckDocs.new(FileList["#{__dir__}/lib/ruby_lsp/**/*.rb"], FileList["#{__dir__}/misc/**/*.gif"])
 
 task default: [:test]

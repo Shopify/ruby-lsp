@@ -17,12 +17,13 @@ module RubyLsp
   class CheckDocs < Rake::TaskLib
     extend T::Sig
 
-    sig { params(require_files: Rake::FileList).void }
-    def initialize(require_files)
+    sig { params(require_files: Rake::FileList, gif_files: Rake::FileList).void }
+    def initialize(require_files, gif_files)
       super()
 
       @name = T.let("ruby_lsp:check_docs", String)
       @file_list = require_files
+      @gif_list = gif_files
       define_task
     end
 
@@ -32,6 +33,13 @@ module RubyLsp
     def define_task
       desc("Checks if all Ruby LSP listeners are documented")
       task(@name) { run_task }
+    end
+
+    sig { params(request_path: String).returns(T::Boolean) }
+    def gif_exists?(request_path)
+      request_gif = request_path.split("/").pop.gsub(".rb", ".gif")
+
+      @gif_list.any? { |gif_path| gif_path.include?(request_gif) }
     end
 
     sig { void }
@@ -86,7 +94,7 @@ module RubyLsp
             # end
             # ```
           DOCS
-        elsif !/\[.* demo\]\(.*\.gif\)/.match?(documentation)
+        elsif !/\[.* demo\]\(.*\.gif\)/.match?(documentation) || !gif_exists?(file_path)
           T.must(missing_docs[class_name]) << <<~DOCS
             Missing demonstration GIF. Each request and extension must be documented with a GIF that shows the feature
             working. For example:
