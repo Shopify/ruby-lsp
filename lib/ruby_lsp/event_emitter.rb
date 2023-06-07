@@ -53,6 +53,12 @@ module RubyLsp
 
     # Visit dispatchers are below. Notice that for nodes that create a new scope (e.g.: classes, modules, method defs)
     # we need both an `on_*` and `after_*` event. This is because some requests must know when we exit the scope
+    sig { override.params(node: T.nilable(SyntaxTree::Node)).void }
+    def visit(node)
+      @listeners[:on_node]&.each { |l| T.unsafe(l).on_node(node) }
+      super
+    end
+
     sig { override.params(node: SyntaxTree::ClassDeclaration).void }
     def visit_class(node)
       @listeners[:on_class]&.each { |l| T.unsafe(l).on_class(node) }

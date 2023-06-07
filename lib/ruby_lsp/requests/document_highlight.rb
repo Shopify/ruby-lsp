@@ -22,34 +22,38 @@ module RubyLsp
     #   FOO # should be highlighted as "read"
     # end
     # ```
-    class DocumentHighlight < BaseRequest
+    class DocumentHighlight < Listener
       extend T::Sig
 
-      sig { params(document: Document, position: Document::PositionShape).void }
-      def initialize(document, position)
-        super(document)
+      ResponseType = type_member { { fixed: T::Array[Interface::DocumentHighlight] } }
 
-        @highlights = T.let([], T::Array[Interface::DocumentHighlight])
-        return unless document.parsed?
+      sig { override.returns(ResponseType) }
+      attr_reader :response
 
-        @target = T.let(find(position), T.nilable(Support::HighlightTarget))
+      sig do
+        params(
+          target: T.nilable(SyntaxTree::Node),
+          parent: T.nilable(SyntaxTree::Node),
+          emitter: EventEmitter,
+          message_queue: Thread::Queue,
+        ).void
+      end
+      def initialize(target, parent, emitter, message_queue)
+        super(emitter, message_queue)
+
+        @response = T.let([], T::Array[Interface::DocumentHighlight])
+
+        @target = T.let(find(target, parent), T.nilable(Support::HighlightTarget))
+
+        emitter.register(self, :on_node) if @target
       end
 
-      sig { override.returns(T.all(T::Array[Interface::DocumentHighlight], Object)) }
-      def run
-        # no @target means the target is not highlightable
-        visit(@document.tree) if @document.parsed? && @target
-        @highlights
-      end
-
-      sig { override.params(node: T.nilable(SyntaxTree::Node)).void }
-      def visit(node)
+      sig { params(node: T.nilable(SyntaxTree::Node)).void }
+      def on_node(node)
         return if node.nil?
 
         match = T.must(@target).highlight_type(node)
         add_highlight(match) if match
-
-        super
       end
 
       private
@@ -67,12 +71,11 @@ module RubyLsp
 
       sig do
         params(
-          position: Document::PositionShape,
+          matched: T.nilable(SyntaxTree::Node),
+          parent: T.nilable(SyntaxTree::Node),
         ).returns(T.nilable(Support::HighlightTarget))
       end
-      def find(position)
-        matched, parent = @document.locate_node(position)
-
+      def find(matched, parent)
         return unless matched && parent
         return unless matched.is_a?(SyntaxTree::Ident) || DIRECT_HIGHLIGHTS.include?(matched.class)
 
@@ -88,7 +91,7 @@ module RubyLsp
       sig { params(match: Support::HighlightTarget::HighlightMatch).void }
       def add_highlight(match)
         range = range_from_syntax_tree_node(match.node)
-        @highlights << Interface::DocumentHighlight.new(range: range, kind: match.type)
+        @response << Interface::DocumentHighlight.new(range: range, kind: match.type)
       end
     end
   end

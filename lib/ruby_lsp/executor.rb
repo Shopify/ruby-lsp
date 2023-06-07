@@ -275,10 +275,17 @@ module RubyLsp
       params(
         uri: String,
         position: Document::PositionShape,
-      ).returns(T::Array[Interface::DocumentHighlight])
+      ).returns(T.nilable(T::Array[Interface::DocumentHighlight]))
     end
     def document_highlight(uri, position)
-      Requests::DocumentHighlight.new(@store.get(uri), position).run
+      document = @store.get(uri)
+      return if document.syntax_error?
+
+      target, parent = document.locate_node(position)
+      emitter = EventEmitter.new
+      listener = Requests::DocumentHighlight.new(target, parent, emitter, @message_queue)
+      emitter.visit(document.tree)
+      listener.response
     end
 
     sig { params(uri: String, range: Document::RangeShape).returns(T.nilable(T::Array[Interface::InlayHint])) }
