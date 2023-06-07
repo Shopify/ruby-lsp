@@ -37,7 +37,7 @@ module RubyLsp
 
     sig { params(request_path: String).returns(T::Boolean) }
     def gif_exists?(request_path)
-      request_gif = request_path.split("/").pop.gsub(".rb", ".gif")
+      request_gif = request_path.gsub(".rb", ".gif").split("/").pop
 
       @gif_list.any? { |gif_path| gif_path.include?(request_gif) }
     end
