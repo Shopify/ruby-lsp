@@ -74,12 +74,6 @@ class ExpectationsTestRunner < Minitest::Test
         elsif expectation_path && File.file?(expectation_path)
           class_eval(<<~RB, __FILE__, __LINE__ + 1)
             def test_#{expectation_suffix}__#{test_name}
-              if RUBY_PLATFORM.match?(/(mswin|mingw)/) && "#{expectation_suffix}" == "diagnostics"
-                if "#{test_name}" == "if_inside_else" || "#{test_name}" == "def_bad_formatting"
-                  skip "Skipping on Windows: https://github.com/Shopify/ruby-lsp/issues/751"
-                end
-              end
-
               @_path = "#{path}"
               source = File.read(@_path)
               expected = File.read("#{expectation_path}")
