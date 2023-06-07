@@ -78,7 +78,7 @@ module RubyLsp
         emit_partial_range
       end
 
-      private
+      # private
 
       sig { params(node: T.nilable(SyntaxTree::Node)).void }
       def visit(node)
@@ -213,7 +213,9 @@ module RubyLsp
       def emit_partial_range
         return if @partial_range.nil?
 
-        @response << @partial_range.to_range if @partial_range.multiline?
+        if @partial_range.multiline?
+          @response << @partial_range.to_range
+        end
         @partial_range = nil
       end
 
