@@ -33,10 +33,11 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :response
 
-      sig { params(uri: String, emitter: EventEmitter, message_queue: Thread::Queue).void }
-      def initialize(uri, emitter, message_queue)
+      sig { params(uri: String, emitter: EventEmitter, message_queue: Thread::Queue, test_library: String).void }
+      def initialize(uri, emitter, message_queue, test_library)
         super(emitter, message_queue)
 
+        @test_library = T.let(test_library, String)
         @response = T.let([], ResponseType)
         @path = T.let(T.must(URI(uri).path), String)
         # visibility_stack is a stack of [current_visibility, previous_visibility]
@@ -205,10 +206,19 @@ module RubyLsp
       def generate_test_command(class_name:, method_name: nil)
         command = BASE_COMMAND + @path
 
-        command += if method_name
-          " --name " + "/#{Shellwords.escape(class_name + "#" + method_name)}/"
-        else
-          " --name " + "/#{Shellwords.escape(class_name)}/"
+        case @test_library
+        when "minitest"
+          command += if method_name
+            " --name " + "/#{Shellwords.escape(class_name + "#" + method_name)}/"
+          else
+            " --name " + "/#{Shellwords.escape(class_name)}/"
+          end
+        when "test-unit"
+          command += " --testcase " + "/#{Shellwords.escape(class_name)}/"
+
+          if method_name
+            command += " --name " + Shellwords.escape(method_name)
+          end
         end
 
         command
