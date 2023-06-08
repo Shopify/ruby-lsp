@@ -13,6 +13,7 @@ module RubyLsp
       # Requests that mutate the store must be run sequentially! Parallel requests only receive a temporary copy of the
       # store
       @store = store
+      @test_library = T.let(DependencyDetector.detected_test_library, String)
       @message_queue = message_queue
     end
 
@@ -95,8 +96,7 @@ module RubyLsp
         emitter = EventEmitter.new
         document_symbol = Requests::DocumentSymbol.new(emitter, @message_queue)
         document_link = Requests::DocumentLink.new(uri, emitter, @message_queue)
-        test_library = DependencyDetector.detected_test_library
-        code_lens = Requests::CodeLens.new(uri, emitter, @message_queue, test_library)
+        code_lens = Requests::CodeLens.new(uri, emitter, @message_queue, @test_library)
         code_lens_extensions_listeners = Requests::CodeLens.listeners.map do |l|
           T.unsafe(l).new(document.uri, emitter, @message_queue)
         end
