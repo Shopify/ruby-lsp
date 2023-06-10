@@ -97,6 +97,13 @@ export class TestController {
         uri
       );
 
+      if (res.data?.kind) {
+        testItem.tags = [new vscode.TestTag(res.data.kind)];
+      } else if (name.startsWith("test_")) {
+        // Older Ruby LSP versions may not include 'kind' so we try infer it from the name.
+        testItem.tags = [new vscode.TestTag("example")];
+      }
+
       this.testCommands.set(testItem, command);
 
       testItem.range = new vscode.Range(
@@ -106,8 +113,9 @@ export class TestController {
 
       // Add test methods as children to the test class so it appears nested in Test explorer
       // and running the test class will run all of the test methods
-      if (name.startsWith("test_")) {
-        testItem.tags = [this.debugTag];
+
+      if (testItem.tags.find((tag) => tag.id === "example")) {
+        testItem.tags = [...testItem.tags, this.debugTag];
         classTest.children.add(testItem);
       } else {
         classTest = testItem;
@@ -174,7 +182,7 @@ export class TestController {
         continue;
       }
 
-      if (test.id.startsWith("test_")) {
+      if (test.tags.find((tag) => tag.id === "example")) {
         const start = Date.now();
         try {
           await this.assertTestPasses(test);
