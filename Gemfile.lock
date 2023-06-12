@@ -55,7 +55,7 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
-    mocha (2.0.2)
+    mocha (2.0.4)
       ruby2_keywords (>= 0.0.5)
     netrc (0.11.0)
     nokogiri (1.15.2)
