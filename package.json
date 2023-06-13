@@ -351,7 +351,7 @@
     "@types/node": "20.x",
     "@types/vscode": "^1.63.0",
     "@typescript-eslint/eslint-plugin": "^5.59.9",
-    "@typescript-eslint/parser": "^5.59.9",
+    "@typescript-eslint/parser": "^5.59.11",
     "@vscode/test-electron": "^2.3.2",
     "@vscode/vsce": "^2.19.0",
     "esbuild": "^0.17.19",
