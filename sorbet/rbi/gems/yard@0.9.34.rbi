@@ -100,11 +100,6 @@ end
 # source://yard//lib/yard/rubygems/backports/source_index.rb#363
 Gem::Cache = Gem::SourceIndex
 
-Gem::ConfigMap = T.let(T.unsafe(nil), Hash)
-Gem::KERNEL_WARN_IGNORES_INTERNAL_ENTRIES = T.let(T.unsafe(nil), TrueClass)
-Gem::RbConfigPriorities = T.let(T.unsafe(nil), Array)
-Gem::RubyGemsVersion = T.let(T.unsafe(nil), String)
-
 # The SourceIndex object indexes all the gems available from a
 # particular source (e.g. a list of gem directories, or a remote
 # source).  A SourceIndex maps a gem full name to a gem
@@ -286,9 +281,6 @@ class Gem::SourceIndex
     def load_specification(file_name); end
   end
 end
-
-Gem::UNTAINT = T.let(T.unsafe(nil), Proc)
-Gem::UnsatisfiableDepedencyError = Gem::UnsatisfiableDependencyError
 
 # source://yard//lib/yard/parser/ruby/legacy/irb/slex.rb#17
 class IRB::SLex
@@ -496,54 +488,48 @@ RUBY19 = T.let(T.unsafe(nil), TrueClass)
 
 # @private
 #
-# source://yard//lib/yard/server/rack_adapter.rb#85
+# source://yard//lib/yard/server/rack_adapter.rb#93
 class Rack::Request
-  # source://rack/2.2.6.2/lib/rack/request.rb#26
+  # source://rack/2.2.7/lib/rack/request.rb#26
   def initialize(env); end
 
-  # source://rack/2.2.6.2/lib/rack/request.rb#40
+  # source://rack/2.2.7/lib/rack/request.rb#40
   def delete_param(k); end
 
-  # source://rack/2.2.6.2/lib/rack/request.rb#31
+  # source://rack/2.2.7/lib/rack/request.rb#31
   def params; end
 
-  # source://rack/2.2.6.2/lib/rack/request.rb#31
+  # source://rack/2.2.7/lib/rack/request.rb#31
   def query; end
 
-  # source://rack/2.2.6.2/lib/rack/request.rb#35
+  # source://rack/2.2.7/lib/rack/request.rb#35
   def update_param(k, v); end
 
   # Returns the value of attribute version_supplied.
   #
-  # source://yard//lib/yard/server/rack_adapter.rb#86
+  # source://yard//lib/yard/server/rack_adapter.rb#94
   def version_supplied; end
 
   # Sets the attribute version_supplied
   #
   # @param value the value to set the attribute version_supplied to.
   #
-  # source://yard//lib/yard/server/rack_adapter.rb#86
+  # source://yard//lib/yard/server/rack_adapter.rb#94
   def version_supplied=(_arg0); end
 
   # @return [Boolean]
   #
-  # source://yard//lib/yard/server/rack_adapter.rb#88
+  # source://yard//lib/yard/server/rack_adapter.rb#96
   def xhr?; end
 
   class << self
-    # source://rack/2.2.6.2/lib/rack/request.rb#16
+    # source://rack/2.2.7/lib/rack/request.rb#16
     def ip_filter; end
 
-    # source://rack/2.2.6.2/lib/rack/request.rb#16
+    # source://rack/2.2.7/lib/rack/request.rb#16
     def ip_filter=(_arg0); end
   end
 end
-
-# source://rack/2.2.6.2/lib/rack/request.rb#20
-Rack::Request::ALLOWED_SCHEMES = T.let(T.unsafe(nil), Array)
-
-# source://rack/2.2.6.2/lib/rack/request.rb#21
-Rack::Request::SCHEME_WHITELIST = T.let(T.unsafe(nil), Array)
 
 # source://yard//lib/yard/core_ext/string.rb#2
 class String
@@ -648,31 +634,6 @@ class SymbolHash < ::Hash
     def [](*hsh); end
   end
 end
-
-# @private
-#
-# source://yard//lib/yard/server/webrick_adapter.rb#42
-class WEBrick::HTTPRequest
-  # Returns the value of attribute version_supplied.
-  #
-  # source://yard//lib/yard/server/webrick_adapter.rb#43
-  def version_supplied; end
-
-  # Sets the attribute version_supplied
-  #
-  # @param value the value to set the attribute version_supplied to.
-  #
-  # source://yard//lib/yard/server/webrick_adapter.rb#43
-  def version_supplied=(_arg0); end
-
-  # @return [Boolean]
-  #
-  # source://yard//lib/yard/server/webrick_adapter.rb#44
-  def xhr?; end
-end
-
-# source://webrick/1.7.0/lib/webrick/httprequest.rb#449
-WEBrick::HTTPRequest::MAX_HEADER_LENGTH = T.let(T.unsafe(nil), Integer)
 
 # Gem::YARDoc provides methods to generate YARDoc and yri data for installed gems
 # upon gem installation.
@@ -2183,7 +2144,7 @@ class YARD::CLI::Yardoc < ::YARD::CLI::YardoptsCommand
 
   # Generates output for objects
   #
-  # @param checksums [Hash, nil] if supplied, a list of checkums for files.
+  # @param checksums [Hash, nil] if supplied, a list of checksums for files.
   # @return [void]
   # @since 0.5.1
   #
@@ -2604,7 +2565,7 @@ class YARD::CodeObjects::Base
   # @see Docstring#add_tag
   # @since 0.8.4
   #
-  # source://yard//lib/yard/code_objects/base.rb#557
+  # source://yard//lib/yard/code_objects/base.rb#560
   def add_tag(*tags); end
 
   # The non-localized documentation string associated with the object
@@ -2713,7 +2674,7 @@ class YARD::CodeObjects::Base
   # @return [String] the rendered template
   # @see Templates::Engine#render
   #
-  # source://yard//lib/yard/code_objects/base.rb#501
+  # source://yard//lib/yard/code_objects/base.rb#504
   def format(options = T.unsafe(nil)); end
 
   # @return [String] the group this object is associated with
@@ -2733,7 +2694,7 @@ class YARD::CodeObjects::Base
   # @return [Boolean]
   # @see Docstring#has_tag?
   #
-  # source://yard//lib/yard/code_objects/base.rb#552
+  # source://yard//lib/yard/code_objects/base.rb#555
   def has_tag?(name); end
 
   # @return [Integer] the object's hash value (for equality checking)
@@ -2745,7 +2706,7 @@ class YARD::CodeObjects::Base
   #
   # @return [String] a string describing the object
   #
-  # source://yard//lib/yard/code_objects/base.rb#509
+  # source://yard//lib/yard/code_objects/base.rb#512
   def inspect; end
 
   # Returns the line the object was first parsed at (or nil)
@@ -2787,7 +2748,7 @@ class YARD::CodeObjects::Base
   #   for {Registry.root}). If obj is nil, the object is unregistered
   #   from the Registry.
   #
-  # source://yard//lib/yard/code_objects/base.rb#518
+  # source://yard//lib/yard/code_objects/base.rb#521
   def namespace=(obj); end
 
   # The namespace the object is defined in. If the object is in the
@@ -2804,7 +2765,7 @@ class YARD::CodeObjects::Base
   #   for {Registry.root}). If obj is nil, the object is unregistered
   #   from the Registry.
   #
-  # source://yard//lib/yard/code_objects/base.rb#518
+  # source://yard//lib/yard/code_objects/base.rb#521
   def parent=(obj); end
 
   # Represents the unique path of the object. The default implementation
@@ -2817,19 +2778,19 @@ class YARD::CodeObjects::Base
   # @return [String] the unique path of the object
   # @see #sep
   #
-  # source://yard//lib/yard/code_objects/base.rb#449
+  # source://yard//lib/yard/code_objects/base.rb#452
   def path; end
 
   # @param other [Base, String] another code object (or object path)
   # @return [String] the shortest relative path from this object to +other+
   # @since 0.5.3
   #
-  # source://yard//lib/yard/code_objects/base.rb#471
+  # source://yard//lib/yard/code_objects/base.rb#474
   def relative_path(other); end
 
   # @return [Boolean] whether or not this object is a RootObject
   #
-  # source://yard//lib/yard/code_objects/base.rb#563
+  # source://yard//lib/yard/code_objects/base.rb#566
   def root?; end
 
   # Override this method with a custom component separator. For instance,
@@ -2840,7 +2801,7 @@ class YARD::CodeObjects::Base
   # @return [String] the component that separates the namespace path
   #   and the name (default is {NSEP})
   #
-  # source://yard//lib/yard/code_objects/base.rb#572
+  # source://yard//lib/yard/code_objects/base.rb#575
   def sep; end
 
   # The one line signature representing an object. For a method, this will
@@ -2896,14 +2857,14 @@ class YARD::CodeObjects::Base
   #
   # @see Docstring#tag
   #
-  # source://yard//lib/yard/code_objects/base.rb#544
+  # source://yard//lib/yard/code_objects/base.rb#547
   def tag(name); end
 
   # Gets a list of tags from the {#docstring}
   #
   # @see Docstring#tags
   #
-  # source://yard//lib/yard/code_objects/base.rb#548
+  # source://yard//lib/yard/code_objects/base.rb#551
   def tags(name = T.unsafe(nil)); end
 
   # @note Override this method if your object has a special title that does
@@ -2912,7 +2873,7 @@ class YARD::CodeObjects::Base
   # @return [String] the display title for an object
   # @see 0.8.4
   #
-  # source://yard//lib/yard/code_objects/base.rb#464
+  # source://yard//lib/yard/code_objects/base.rb#467
   def title; end
 
   # @return [nil] this object does not turn into an array
@@ -2930,7 +2891,7 @@ class YARD::CodeObjects::Base
   # @return [String] the unique path of the object
   # @see #sep
   #
-  # source://yard//lib/yard/code_objects/base.rb#449
+  # source://yard//lib/yard/code_objects/base.rb#452
   def to_s; end
 
   # Default type is the lowercase class name without the "Object" suffix.
@@ -2961,7 +2922,7 @@ class YARD::CodeObjects::Base
   # @see #copy_to
   # @since 0.8.0
   #
-  # source://yard//lib/yard/code_objects/base.rb#583
+  # source://yard//lib/yard/code_objects/base.rb#586
   def copyable_attributes; end
 
   private
@@ -2971,10 +2932,10 @@ class YARD::CodeObjects::Base
   # @param source [String] the source code to format
   # @return [String] formatted source
   #
-  # source://yard//lib/yard/code_objects/base.rb#595
+  # source://yard//lib/yard/code_objects/base.rb#598
   def format_source(source); end
 
-  # source://yard//lib/yard/code_objects/base.rb#602
+  # source://yard//lib/yard/code_objects/base.rb#605
   def translate_docstring(locale); end
 
   class << self
@@ -4825,7 +4786,7 @@ YARD::Docstring::META_MATCH = T.let(T.unsafe(nil), Regexp)
 #
 # == Subclassing Notes
 #
-# The DocstringParser can be subclassed and subtituted during parsing by
+# The DocstringParser can be subclassed and substituted during parsing by
 # setting the {Docstring.default_parser} attribute with the name of the
 # subclass. This allows developers to change the way docstrings are
 # parsed, allowing for completely different docstring syntaxes.
@@ -6905,7 +6866,7 @@ class YARD::Handlers::Ruby::MixinHandler < ::YARD::Handlers::Ruby::Base
   # source://yard//lib/yard/handlers/ruby/mixin_handler.rb#25
   def process_mixin(mixin); end
 
-  # source://yard//lib/yard/handlers/ruby/mixin_handler.rb#43
+  # source://yard//lib/yard/handlers/ruby/mixin_handler.rb#50
   def recipient(mixin); end
 end
 
@@ -7130,7 +7091,7 @@ class YARD::I18n::Locale
   def name; end
 
   # @param message [String] the translation target message.
-  # @return [String] translated message. If tarnslation isn't
+  # @return [String] translated message. If translation isn't
   #   registered, the +message+ is returned.
   # @since 0.8.2
   #
@@ -7159,7 +7120,7 @@ end
 #
 # source://yard//lib/yard/i18n/message.rb#10
 class YARD::I18n::Message
-  # Creates a trasnlate target message for message ID +id+.
+  # Creates a translate target message for message ID +id+.
   #
   # @param id [String] the message ID of the translate target message.
   # @return [Message] a new instance of Message
@@ -7200,7 +7161,7 @@ class YARD::I18n::Message
   # source://yard//lib/yard/i18n/message.rb#19
   def comments; end
 
-  # @return [String] the message ID of the trnslation target message.
+  # @return [String] the message ID of the translation target message.
   # @since 0.8.1
   #
   # source://yard//lib/yard/i18n/message.rb#12
@@ -7258,7 +7219,7 @@ class YARD::I18n::Messages
   # source://yard//lib/yard/i18n/messages.rb#20
   def each(&block); end
 
-  # Registers a {Message}, the mssage ID of which is +id+. If
+  # Registers a {Message}, the message ID of which is +id+. If
   # corresponding +Message+ is already registered, the previously
   # registered object is returned.
   #
@@ -7360,7 +7321,7 @@ class YARD::I18n::PotGenerator
   #
   # Locations of the +Message+ are used to generate the reference
   # line that is started with "#: ". +relative_base_path+ passed
-  # when the generater is created is prepended to each path in location.
+  # when the generator is created is prepended to each path in location.
   #
   # Comments of the +Message+ are used to generate the
   # translator-comment line that is started with "# ".
@@ -7829,7 +7790,7 @@ class YARD::Options
   #
   # @example Setting an option with Hash syntax
   #   options[:format] = :html # equivalent to: options.format = :html
-  # @param key [Symbol, String] the optin to set
+  # @param key [Symbol, String] the option to set
   # @param value [Object] the value to set for the option
   # @return [Object] the value being set
   #
@@ -10188,490 +10149,490 @@ class YARD::Parser::Ruby::RipperParser < ::Ripper
   # source://yard//lib/yard/parser/ruby/ruby_parser.rb#29
   def frozen_string_line; end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_BEGIN(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_CHAR(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_END(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on___end__(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_alias(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_alias_error(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_arg_ambiguous(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_arg_paren(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#156
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#162
   def on_args_add(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#156
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#162
   def on_args_add_block(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#156
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#162
   def on_args_add_star(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_args_forward(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#149
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#155
   def on_args_new(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_aryptn(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_assign(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_assign_error(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_assoc_splat(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_backref(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#193
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#199
   def on_backtick(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_begin(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_binary(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_block_var(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_blockarg(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_brace_block(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_break(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_call(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_case(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_class(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_class_name_error(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_comma(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_command(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_command_call(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_const(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_const_path_field(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_const_ref(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_cvar(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_def(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_defined(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_defs(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_do_block(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_dot2(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_dot3(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_else(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_elsif(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#193
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#199
   def on_embexpr_beg(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_embexpr_end(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_embvar(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_ensure(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_excessed_comma(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_fcall(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_field(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_float(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_fndptn(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_for(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_gvar(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#193
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#199
   def on_heredoc_beg(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_heredoc_dedent(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_heredoc_end(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_hshptn(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_ident(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_if(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#443
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#449
   def on_if_mod(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_ifop(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#216
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#222
   def on_ignored_nl(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_ignored_sp(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_imaginary(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_in(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_int(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_ivar(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#203
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#209
   def on_kw(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_kwrest_param(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_label_end(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#193
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#199
   def on_lbrace(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#193
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#199
   def on_lparen(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_magic_comment(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_massign(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#156
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#162
   def on_method_add_arg(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#156
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#162
   def on_method_add_block(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#156
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#162
   def on_mlhs_add(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#156
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#162
   def on_mlhs_add_post(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#156
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#162
   def on_mlhs_add_star(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#149
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#155
   def on_mlhs_new(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_mlhs_paren(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_module(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#156
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#162
   def on_mrhs_add(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#156
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#162
   def on_mrhs_add_star(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#149
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#155
   def on_mrhs_new(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_mrhs_new_from_args(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_next(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#216
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#222
   def on_nl(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_nokw_param(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#203
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#209
   def on_op(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_opassign(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_operator_ambiguous(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_param_error(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_paren(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_period(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#468
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#474
   def on_qsymbols_add(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#193
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#199
   def on_qsymbols_beg(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#456
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#462
   def on_qsymbols_new(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#468
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#474
   def on_qwords_add(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#193
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#199
   def on_qwords_beg(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#456
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#462
   def on_qwords_new(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_rational(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_rbrace(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_redo(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#156
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#162
   def on_regexp_add(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#193
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#199
   def on_regexp_beg(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_regexp_end(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_regexp_literal(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#149
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#155
   def on_regexp_new(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_rescue_mod(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_rest_param(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_retry(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_return(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_return0(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_rparen(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_sclass(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_semicolon(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#156
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#162
   def on_stmts_add(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#149
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#155
   def on_stmts_new(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#156
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#162
   def on_string_add(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_string_concat(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_string_dvar(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_string_embexpr(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_super(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#193
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#199
   def on_symbeg(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_symbol(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_symbol_literal(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#468
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#474
   def on_symbols_add(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#193
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#199
   def on_symbols_beg(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#456
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#462
   def on_symbols_new(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#193
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#199
   def on_tlambda(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_tlambeg(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_top_const_field(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#193
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#199
   def on_tstring_beg(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_tstring_content(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_tstring_end(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_undef(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_unless(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#443
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#449
   def on_unless_mod(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_until(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#443
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#449
   def on_until_mod(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_var_alias(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_var_field(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_var_ref(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#171
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#177
   def on_vcall(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_when(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_while(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#443
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#449
   def on_while_mod(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#156
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#162
   def on_word_add(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#149
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#155
   def on_word_new(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#468
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#474
   def on_words_add(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#193
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#199
   def on_words_beg(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#456
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#462
   def on_words_new(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#182
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#188
   def on_words_sep(tok); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#156
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#162
   def on_xstring_add(list, item); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_xstring_literal(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#149
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#155
   def on_xstring_new(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_yield(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_yield0(*args); end
 
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#164
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#170
   def on_zsuper(*args); end
 
   # @since 0.5.6
@@ -10698,195 +10659,195 @@ class YARD::Parser::Ruby::RipperParser < ::Ripper
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#661
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#667
   def add_comment(line, node = T.unsafe(nil), before_node = T.unsafe(nil), into = T.unsafe(nil)); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#265
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#271
   def add_token(token, data); end
 
   # @return [Boolean]
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#605
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#611
   def comment_starts_line?(charno); end
 
   # @raise [ParserSyntaxError]
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#600
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#606
   def compile_error(msg); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#687
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#693
   def freeze_tree(node = T.unsafe(nil)); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#614
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#620
   def insert_comments; end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#371
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#377
   def on_aref(*args); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#379
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#385
   def on_aref_field(*args); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#385
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#391
   def on_array(other); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#346
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#352
   def on_assoc_new(*args); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#358
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#364
   def on_assoclist_from_args(*args); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#354
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#360
   def on_bare_assoc_hash(*args); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#341
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#347
   def on_body_stmt(*args); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#341
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#347
   def on_bodystmt(*args); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#536
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#542
   def on_comment(comment); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#435
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#441
   def on_const_path_ref(*args); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#413
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#419
   def on_dyna_symbol(sym); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#586
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#592
   def on_embdoc(text); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#580
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#586
   def on_embdoc_beg(text); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#591
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#597
   def on_embdoc_end(text); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#350
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#356
   def on_hash(*args); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#528
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#534
   def on_label(data); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#491
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#497
   def on_lambda(*args); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#403
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#409
   def on_lbracket(tok); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#509
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#515
   def on_params(*args); end
 
   # @raise [ParserSyntaxError]
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#600
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#606
   def on_parse_error(msg); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#337
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#343
   def on_program(*args); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#408
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#414
   def on_rbracket(tok); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#500
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#506
   def on_rescue(exc, *args); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#226
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#232
   def on_sp(tok); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#495
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#501
   def on_string_content(*args); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#478
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#484
   def on_string_literal(*args); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#423
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#429
   def on_top_const_ref(*args); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#362
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#368
   def on_unary(op, val); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#505
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#511
   def on_void_stmt; end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#231
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#237
   def visit_event(node); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#245
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#251
   def visit_event_arr(node); end
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#253
+  # source://yard//lib/yard/parser/ruby/ruby_parser.rb#259
   def visit_ns_token(token, data, ast_token = T.unsafe(nil)); end
 end
 
@@ -10894,6 +10855,11 @@ end
 #
 # source://yard//lib/yard/parser/ruby/ruby_parser.rb#133
 YARD::Parser::Ruby::RipperParser::AST_TOKENS = T.let(T.unsafe(nil), Array)
+
+# @since 0.5.6
+#
+# source://yard//lib/yard/parser/ruby/ruby_parser.rb#136
+YARD::Parser::Ruby::RipperParser::COMMENT_SKIP_NODE_TYPES = T.let(T.unsafe(nil), Array)
 
 # @since 0.5.6
 #
@@ -12000,7 +11966,7 @@ class YARD::RegistryResolver
   #
   # @since 0.9.1
   #
-  # source://yard//lib/yard/registry_resolver.rb#180
+  # source://yard//lib/yard/registry_resolver.rb#181
   def collect_namespaces(object); end
 
   # Performs a lexical lookup from a namespace for a path and a type hint.
@@ -12021,20 +11987,20 @@ class YARD::RegistryResolver
   #   occurrences of separator tokens
   # @since 0.9.1
   #
-  # source://yard//lib/yard/registry_resolver.rb#205
+  # source://yard//lib/yard/registry_resolver.rb#206
   def split_on_separators_match; end
 
   # @return [Regexp] the regexp match of the default separator
   # @since 0.9.1
   #
-  # source://yard//lib/yard/registry_resolver.rb#193
+  # source://yard//lib/yard/registry_resolver.rb#194
   def starts_with_default_separator_match; end
 
   # @return [Regexp] the regexp that matches strings starting with
   #   a separator
   # @since 0.9.1
   #
-  # source://yard//lib/yard/registry_resolver.rb#199
+  # source://yard//lib/yard/registry_resolver.rb#200
   def starts_with_separator_match; end
 
   # return [Boolean] if the obj's type matches the provided type.
@@ -12741,6 +12707,16 @@ class YARD::Server::Adapter
   end
 end
 
+# @since 0.6.0
+#
+# source://yard//lib/yard/server/http_utils.rb#16
+YARD::Server::CR = T.let(T.unsafe(nil), String)
+
+# @since 0.6.0
+#
+# source://yard//lib/yard/server/http_utils.rb#18
+YARD::Server::CRLF = T.let(T.unsafe(nil), String)
+
 # Commands implement specific kinds of server responses which are routed
 # to by the {Router} class. To implement a custom command, subclass {Commands::Base}.
 #
@@ -12902,7 +12878,7 @@ class YARD::Server::Commands::Base
   #   def run
   #   self.body = 'ERROR! The System is down!'
   #   self.status = 500
-  #   self.headers['Conten-Type'] = 'text/plain'
+  #   self.headers['Content-Type'] = 'text/plain'
   #   end
   #   end
   # @raise [NotImplementedError]
@@ -13348,7 +13324,7 @@ end
 #
 # source://yard//lib/yard/server/commands/root_request_command.rb#6
 class YARD::Server::Commands::RootRequestCommand < ::YARD::Server::Commands::Base
-  include ::WEBrick::HTTPUtils
+  include ::YARD::Server::HTTPUtils
   include ::YARD::Server::Commands::StaticFileHelpers
 
   # @since 0.6.0
@@ -13427,7 +13403,7 @@ end
 #
 # source://yard//lib/yard/server/commands/static_file_command.rb#6
 class YARD::Server::Commands::StaticFileCommand < ::YARD::Server::Commands::LibraryCommand
-  include ::WEBrick::HTTPUtils
+  include ::YARD::Server::HTTPUtils
   include ::YARD::Server::Commands::StaticFileHelpers
 
   # @since 0.6.0
@@ -13451,9 +13427,9 @@ YARD::Server::Commands::StaticFileCommand::STATIC_PATHS = T.let(T.unsafe(nil), A
 #
 # @since 0.6.0
 #
-# source://yard//lib/yard/server/commands/static_file_helpers.rb#9
+# source://yard//lib/yard/server/commands/static_file_helpers.rb#8
 module YARD::Server::Commands::StaticFileHelpers
-  include ::WEBrick::HTTPUtils
+  include ::YARD::Server::HTTPUtils
 
   # Serves an empty favicon.
   #
@@ -13462,7 +13438,7 @@ module YARD::Server::Commands::StaticFileHelpers
   # @return [Boolean]
   # @since 0.6.0
   #
-  # source://yard//lib/yard/server/commands/static_file_helpers.rb#15
+  # source://yard//lib/yard/server/commands/static_file_helpers.rb#14
   def favicon?; end
 
   # Attempts to route a path to a static template file.
@@ -13471,20 +13447,20 @@ module YARD::Server::Commands::StaticFileHelpers
   # @return [void]
   # @since 0.6.0
   #
-  # source://yard//lib/yard/server/commands/static_file_helpers.rb#27
+  # source://yard//lib/yard/server/commands/static_file_helpers.rb#26
   def static_template_file?; end
 
   private
 
   # @since 0.6.0
   #
-  # source://yard//lib/yard/server/commands/static_file_helpers.rb#43
+  # source://yard//lib/yard/server/commands/static_file_helpers.rb#42
   def find_file(adapter, url); end
 
   class << self
     # @since 0.6.0
     #
-    # source://yard//lib/yard/server/commands/static_file_helpers.rb#43
+    # source://yard//lib/yard/server/commands/static_file_helpers.rb#42
     def find_file(adapter, url); end
   end
 end
@@ -13623,6 +13599,470 @@ end
 #
 # source://yard//lib/yard/server/adapter.rb#6
 class YARD::Server::FinishRequest < ::RuntimeError; end
+
+# HTTPUtils provides utility methods for working with the HTTP protocol.
+#
+# This module is generally used internally by WEBrick
+#
+# @since 0.6.0
+#
+# source://yard//lib/yard/server/http_utils.rb#25
+module YARD::Server::HTTPUtils
+  private
+
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#443
+  def _escape(str, regex); end
+
+  # :stopdoc:
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#441
+  def _make_regex(str); end
+
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#442
+  def _make_regex!(str); end
+
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#449
+  def _unescape(str, regex); end
+
+  # Removes quotes and escapes from +str+
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#223
+  def dequote(str); end
+
+  # Escapes HTTP reserved and unwise characters in +str+
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#467
+  def escape(str); end
+
+  # Escapes 8 bit characters in +str+
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#508
+  def escape8bit(str); end
+
+  # Escapes form reserved characters in +str+
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#481
+  def escape_form(str); end
+
+  # Escapes path +str+
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#497
+  def escape_path(str); end
+
+  # Loads Apache-compatible mime.types in +file+.
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#112
+  def load_mime_types(file); end
+
+  # Returns the mime type of +filename+ from the list in +mime_tab+.  If no
+  # mime type was found application/octet-stream is returned.
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#134
+  def mime_type(filename, mime_tab); end
+
+  # Normalizes a request path.  Raises an exception if the path cannot be
+  # normalized.
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#31
+  def normalize_path(path); end
+
+  # Parses form data in +io+ with the given +boundary+
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#395
+  def parse_form_data(io, boundary); end
+
+  # Parses an HTTP header +raw+ into a hash of header fields with an Array
+  # of values.
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#145
+  def parse_header(raw); end
+
+  # Parses the query component of a URI in +str+
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#371
+  def parse_query(str); end
+
+  # Parses q values in +value+ as used in Accept headers.
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#202
+  def parse_qvalues(value); end
+
+  # Parses a Range header value +ranges_specifier+
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#184
+  def parse_range_header(ranges_specifier); end
+
+  # Quotes and escapes quotes in +str+
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#233
+  def quote(str); end
+
+  # Splits a header value +str+ according to HTTP specification.
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#175
+  def split_header_value(str); end
+
+  # Unescapes HTTP reserved and unwise characters in +str+
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#474
+  def unescape(str); end
+
+  # Unescapes form reserved characters in +str+
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#490
+  def unescape_form(str); end
+
+  class << self
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#443
+    def _escape(str, regex); end
+
+    # :stopdoc:
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#441
+    def _make_regex(str); end
+
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#442
+    def _make_regex!(str); end
+
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#449
+    def _unescape(str, regex); end
+
+    # Removes quotes and escapes from +str+
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#223
+    def dequote(str); end
+
+    # Escapes HTTP reserved and unwise characters in +str+
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#467
+    def escape(str); end
+
+    # Escapes 8 bit characters in +str+
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#508
+    def escape8bit(str); end
+
+    # Escapes form reserved characters in +str+
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#481
+    def escape_form(str); end
+
+    # Escapes path +str+
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#497
+    def escape_path(str); end
+
+    # Loads Apache-compatible mime.types in +file+.
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#112
+    def load_mime_types(file); end
+
+    # Returns the mime type of +filename+ from the list in +mime_tab+.  If no
+    # mime type was found application/octet-stream is returned.
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#134
+    def mime_type(filename, mime_tab); end
+
+    # Normalizes a request path.  Raises an exception if the path cannot be
+    # normalized.
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#31
+    def normalize_path(path); end
+
+    # Parses form data in +io+ with the given +boundary+
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#395
+    def parse_form_data(io, boundary); end
+
+    # Parses an HTTP header +raw+ into a hash of header fields with an Array
+    # of values.
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#145
+    def parse_header(raw); end
+
+    # Parses the query component of a URI in +str+
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#371
+    def parse_query(str); end
+
+    # Parses q values in +value+ as used in Accept headers.
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#202
+    def parse_qvalues(value); end
+
+    # Parses a Range header value +ranges_specifier+
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#184
+    def parse_range_header(ranges_specifier); end
+
+    # Quotes and escapes quotes in +str+
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#233
+    def quote(str); end
+
+    # Splits a header value +str+ according to HTTP specification.
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#175
+    def split_header_value(str); end
+
+    # Unescapes HTTP reserved and unwise characters in +str+
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#474
+    def unescape(str); end
+
+    # Unescapes form reserved characters in +str+
+    #
+    # @since 0.6.0
+    #
+    # source://yard//lib/yard/server/http_utils.rb#490
+    def unescape_form(str); end
+  end
+end
+
+# Default mime types
+#
+# @since 0.6.0
+#
+# source://yard//lib/yard/server/http_utils.rb#47
+YARD::Server::HTTPUtils::DefaultMimeTypes = T.let(T.unsafe(nil), Hash)
+
+# @since 0.6.0
+#
+# source://yard//lib/yard/server/http_utils.rb#459
+YARD::Server::HTTPUtils::ESCAPED = T.let(T.unsafe(nil), Regexp)
+
+# Stores multipart form data.  FormData objects are created when
+# WEBrick::HTTPUtils.parse_form_data is called.
+#
+# @since 0.6.0
+#
+# source://yard//lib/yard/server/http_utils.rb#242
+class YARD::Server::HTTPUtils::FormData < ::String
+  # Creates a new FormData object.
+  #
+  # +args+ is an Array of form data entries.  One FormData will be created
+  # for each entry.
+  #
+  # This is called by WEBrick::HTTPUtils.parse_form_data for you
+  #
+  # @return [FormData] a new instance of FormData
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#267
+  def initialize(*args); end
+
+  # Adds +str+ to this FormData which may be the body, a header or a
+  # header entry.
+  #
+  # This is called by WEBrick::HTTPUtils.parse_form_data for you
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#300
+  def <<(str); end
+
+  # Retrieves the header at the first entry in +key+
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#286
+  def [](*key); end
+
+  # Adds +data+ at the end of the chain of entries
+  #
+  # This is called by WEBrick::HTTPUtils.parse_form_data for you.
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#320
+  def append_data(data); end
+
+  # Yields each entry in this FormData
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#335
+  def each_data; end
+
+  # The filename of the form data part
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#254
+  def filename; end
+
+  # The filename of the form data part
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#254
+  def filename=(_arg0); end
+
+  # Returns all the FormData as an Array
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#347
+  def list; end
+
+  # The name of the form data part
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#249
+  def name; end
+
+  # The name of the form data part
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#249
+  def name=(_arg0); end
+
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#256
+  def next_data=(_arg0); end
+
+  # Returns all the FormData as an Array
+  # A FormData will behave like an Array
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#347
+  def to_ary; end
+
+  # This FormData's body
+  #
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#363
+  def to_s; end
+
+  protected
+
+  # @since 0.6.0
+  #
+  # source://yard//lib/yard/server/http_utils.rb#256
+  def next_data; end
+end
+
+# @since 0.6.0
+#
+# source://yard//lib/yard/server/http_utils.rb#244
+YARD::Server::HTTPUtils::FormData::EmptyHeader = T.let(T.unsafe(nil), Hash)
+
+# @since 0.6.0
+#
+# source://yard//lib/yard/server/http_utils.rb#243
+YARD::Server::HTTPUtils::FormData::EmptyRawHeader = T.let(T.unsafe(nil), Array)
+
+# @since 0.6.0
+#
+# source://yard//lib/yard/server/http_utils.rb#458
+YARD::Server::HTTPUtils::NONASCII = T.let(T.unsafe(nil), Regexp)
+
+# @since 0.6.0
+#
+# source://yard//lib/yard/server/http_utils.rb#456
+YARD::Server::HTTPUtils::UNESCAPED = T.let(T.unsafe(nil), Regexp)
+
+# @since 0.6.0
+#
+# source://yard//lib/yard/server/http_utils.rb#457
+YARD::Server::HTTPUtils::UNESCAPED_FORM = T.let(T.unsafe(nil), Regexp)
+
+# @since 0.6.0
+#
+# source://yard//lib/yard/server/http_utils.rb#460
+YARD::Server::HTTPUtils::UNESCAPED_PCHAR = T.let(T.unsafe(nil), Regexp)
+
+# @since 0.6.0
+#
+# source://yard//lib/yard/server/http_utils.rb#17
+YARD::Server::LF = T.let(T.unsafe(nil), String)
 
 # This exception is raised when {LibraryVersion#prepare!} fails, or discovers
 # that the library is not "prepared" to be served by
@@ -13944,32 +14384,32 @@ class YARD::Server::NotFoundError < ::RuntimeError; end
 #
 # @since 0.6.0
 #
-# source://yard//lib/yard/server/rack_adapter.rb#44
+# source://yard//lib/yard/server/rack_adapter.rb#52
 class YARD::Server::RackAdapter < ::YARD::Server::Adapter
-  include ::WEBrick::HTTPUtils
+  include ::YARD::Server::HTTPUtils
 
   # Responds to Rack requests and builds a response with the {Router}.
   #
   # @return [Array(Numeric,Hash,Array)] the Rack-style response
   # @since 0.6.0
   #
-  # source://yard//lib/yard/server/rack_adapter.rb#49
+  # source://yard//lib/yard/server/rack_adapter.rb#57
   def call(env); end
 
-  # Starts the +Rack::Server+. This method will pass control to the server and
+  # Starts the Rack server. This method will pass control to the server and
   # block.
   #
   # @return [void]
   # @since 0.6.0
   #
-  # source://yard//lib/yard/server/rack_adapter.rb#62
+  # source://yard//lib/yard/server/rack_adapter.rb#70
   def start; end
 
   private
 
   # @since 0.6.0
   #
-  # source://yard//lib/yard/server/rack_adapter.rb#71
+  # source://yard//lib/yard/server/rack_adapter.rb#79
   def print_start_message(server); end
 end
 
@@ -13984,7 +14424,7 @@ end
 #   at the example below.
 # @since 0.6.0
 #
-# source://yard//lib/yard/server/rack_adapter.rb#17
+# source://yard//lib/yard/server/rack_adapter.rb#25
 class YARD::Server::RackMiddleware
   # Creates a new Rack-based middleware for serving YARD documentation.
   #
@@ -13996,14 +14436,17 @@ class YARD::Server::RackMiddleware
   # @return [RackMiddleware] a new instance of RackMiddleware
   # @since 0.6.0
   #
-  # source://yard//lib/yard/server/rack_adapter.rb#27
+  # source://yard//lib/yard/server/rack_adapter.rb#35
   def initialize(app, opts = T.unsafe(nil)); end
 
   # @since 0.6.0
   #
-  # source://yard//lib/yard/server/rack_adapter.rb#33
+  # source://yard//lib/yard/server/rack_adapter.rb#41
   def call(env); end
 end
+
+# source://yard//lib/yard/server/rack_adapter.rb#12
+YARD::Server::RackServer = Rack::Server
 
 # A router class implements the logic used to recognize a request for a specific
 # URL and run specific {Commands::Base commands}.
@@ -14225,50 +14668,6 @@ module YARD::Server::StaticCaching
   def check_static_cache; end
 end
 
-# The main adapter to initialize a WEBrick server.
-#
-# @since 0.6.0
-#
-# source://yard//lib/yard/server/webrick_adapter.rb#7
-class YARD::Server::WebrickAdapter < ::YARD::Server::Adapter
-  # Initializes a WEBrick server. If {Adapter#server_options} contains a
-  # +:daemonize+ key set to true, the server will be daemonized.
-  #
-  # @since 0.6.0
-  #
-  # source://yard//lib/yard/server/webrick_adapter.rb#10
-  def start; end
-end
-
-# The main WEBrick servlet implementation, accepting only GET requests.
-#
-# @since 0.6.0
-#
-# source://yard//lib/yard/server/webrick_adapter.rb#20
-class YARD::Server::WebrickServlet < ::WEBrick::HTTPServlet::AbstractServlet
-  # @return [WebrickServlet] a new instance of WebrickServlet
-  # @since 0.6.0
-  #
-  # source://yard//lib/yard/server/webrick_adapter.rb#23
-  def initialize(server, adapter); end
-
-  # @since 0.6.0
-  #
-  # source://yard//lib/yard/server/webrick_adapter.rb#21
-  def adapter; end
-
-  # @since 0.6.0
-  #
-  # source://yard//lib/yard/server/webrick_adapter.rb#21
-  def adapter=(_arg0); end
-
-  # @private
-  # @since 0.6.0
-  #
-  # source://yard//lib/yard/server/webrick_adapter.rb#29
-  def do_GET(request, response); end
-end
-
 # Stubs marshal dumps and acts a delegate class for an object by path
 #
 # @private
@@ -14305,7 +14704,7 @@ YARD::TEMPLATE_ROOT = T.let(T.unsafe(nil), String)
 
 # Namespace for Tag components
 #
-# source://yard//lib/yard/autoload.rb#247
+# source://yard//lib/yard/autoload.rb#248
 module YARD::Tags; end
 
 # Defines an attribute with a given name, using indented block data as the
@@ -15782,10 +16181,10 @@ class YARD::Tags::Tag
   def initialize(tag_name, text, types = T.unsafe(nil), name = T.unsafe(nil)); end
 
   # Provides a plain English summary of the type specification, or nil
-  # if no types are provided or parseable.
+  # if no types are provided or parsable.
   #
   # @return [String] a plain English description of the associated types
-  # @return [nil] if no types are provided or not parseable
+  # @return [nil] if no types are provided or not parsable
   #
   # source://yard//lib/yard/tags/tag.rb#65
   def explain_types; end
@@ -15861,22 +16260,22 @@ class YARD::Tags::TagFormatError < ::RuntimeError; end
 class YARD::Tags::TypesExplainer
   class << self
     # Provides a plain English summary of the type specification, or nil
-    # if no types are provided or parseable.
+    # if no types are provided or parsable.
     #
     # @param types [Array<String>] a list of types to parse and summarize
     # @return [String] a plain English description of the associated types
-    # @return [nil] if no types are provided or not parseable
+    # @return [nil] if no types are provided or not parsable
     #
     # source://yard//lib/yard/tags/types_explainer.rb#9
     def explain(*types); end
 
     # Provides a plain English summary of the type specification, or nil
-    # if no types are provided or parseable.
+    # if no types are provided or parsable.
     #
     # @param types [Array<String>] a list of types to parse and summarize
-    # @raise [SyntaxError] if the types are not parseable
+    # @raise [SyntaxError] if the types are not parsable
     # @return [String] a plain English description of the associated types
-    # @return [nil] if no types are provided or not parseable
+    # @return [nil] if no types are provided or not parsable
     #
     # source://yard//lib/yard/tags/types_explainer.rb#17
     def explain!(*types); end
@@ -16039,7 +16438,7 @@ end
 
 # Namespace for templating system
 #
-# source://yard//lib/yard/autoload.rb#270
+# source://yard//lib/yard/autoload.rb#271
 module YARD::Templates; end
 
 # This module manages all creation, handling and rendering of {Template}
@@ -16192,7 +16591,7 @@ end
 
 # Namespace for template helpers
 #
-# source://yard//lib/yard/autoload.rb#271
+# source://yard//lib/yard/autoload.rb#272
 module YARD::Templates::Helpers; end
 
 # The base helper module included in all templates.
@@ -16827,7 +17226,7 @@ end
 
 # Namespace for markup providers
 #
-# source://yard//lib/yard/autoload.rb#272
+# source://yard//lib/yard/autoload.rb#273
 module YARD::Templates::Helpers::Markup; end
 
 # source://yard//lib/yard/templates/helpers/markup/rdoc_markdown.rb#13

@@ -231,7 +231,7 @@ class YARDSorbet::Handlers::StructPropHandler < ::YARD::Handlers::Ruby::Base
   def make_prop(name); end
 
   # source://yard-sorbet//lib/yard-sorbet/handlers/struct_prop_handler.rb#60
-  sig { returns(T::Array[T.untyped]) }
+  sig { returns(T::Array[::YARD::Parser::Ruby::AstNode]) }
   def params; end
 
   # Register the field explicitly as an attribute.
@@ -322,66 +322,53 @@ module YARDSorbet::SigToYARD
   class << self
     # @see https://yardoc.org/types.html
     #
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#22
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#23
     sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(T::Array[::String]) }
     def convert(node); end
 
     private
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#55
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#61
     sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(::String) }
     def build_generic_type(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#64
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#70
     sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(T::Array[::String]) }
     def convert_aref(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#76
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#82
     sig { params(node: ::YARD::Parser::Ruby::AstNode).returns([::String]) }
     def convert_array(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#84
-    sig { params(node: ::YARD::Parser::Ruby::MethodCallNode).returns(T::Array[::String]) }
-    def convert_call(node); end
-
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#89
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#90
     sig { params(node: ::YARD::Parser::Ruby::AstNode).returns([::String]) }
     def convert_collection(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#96
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#97
     sig { params(node: ::YARD::Parser::Ruby::AstNode).returns([::String]) }
     def convert_hash(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#104
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#105
     sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(T::Array[::String]) }
     def convert_list(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#28
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#31
     sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(T::Array[::String]) }
     def convert_node(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#37
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#43
     sig { params(node: ::YARD::Parser::Ruby::AstNode).returns(T::Array[::String]) }
     def convert_node_type(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#109
-    sig { params(node_source: ::String).returns([::String]) }
-    def convert_ref(node_source); end
-
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#114
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#110
     sig { params(node: ::YARD::Parser::Ruby::MethodCallNode).returns(T::Array[::String]) }
     def convert_t_method(node); end
 
-    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#125
+    # source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#121
     sig { params(node: ::YARD::Parser::Ruby::AstNode).returns([::String]) }
     def convert_unknown(node); end
   end
 end
-
-# Map of common types to YARD conventions (in order to reduce allocations)
-#
-# source://yard-sorbet//lib/yard-sorbet/sig_to_yard.rb#10
-YARDSorbet::SigToYARD::REF_TYPES = T.let(T.unsafe(nil), Hash)
 
 # Used to store the details of a `T::Struct` `prop` definition
 #
@@ -394,7 +381,7 @@ class YARDSorbet::TStructProp < ::T::Struct
   const :types, T::Array[::String]
 
   class << self
-    # source://sorbet-runtime/0.5.10626/lib/types/struct.rb#13
+    # source://sorbet-runtime/0.5.10875/lib/types/struct.rb#13
     def inherited(s); end
   end
 end

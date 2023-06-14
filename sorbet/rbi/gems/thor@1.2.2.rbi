@@ -693,7 +693,7 @@ module Thor::Actions
   # flag<Regexp|String>:: the regexp or string to be replaced
   # replacement<String>:: the replacement, can be also given as a block
   # config<Hash>:: give :verbose => false to not log the status, and
-  #                :force => true, to force the replacement regardles of runner behavior.
+  #                :force => true, to force the replacement regardless of runner behavior.
   #
   # ==== Example
   #
@@ -871,7 +871,7 @@ module Thor::Actions
   #     run('ln -s ~/edge rails')
   #   end
   #
-  # source://thor//lib/thor/actions.rb#248
+  # source://thor//lib/thor/actions.rb#249
   def run(command, config = T.unsafe(nil)); end
 
   # Executes a ruby script (taking into account WIN32 platform quirks).
@@ -880,7 +880,7 @@ module Thor::Actions
   # command<String>:: the command to be executed.
   # config<Hash>:: give :verbose => false to not log the status.
   #
-  # source://thor//lib/thor/actions.rb#285
+  # source://thor//lib/thor/actions.rb#286
   def run_ruby_script(command, config = T.unsafe(nil)); end
 
   # Holds source paths in instance so they can be manipulated.
@@ -924,7 +924,7 @@ module Thor::Actions
   #   thor :list, :all => true, :substring => 'rails'
   #   #=> thor list --all --substring=rails
   #
-  # source://thor//lib/thor/actions.rb#308
+  # source://thor//lib/thor/actions.rb#309
   def thor(command, *args); end
 
   # Uncomment all lines matching a given regex.  It will leave the space
@@ -945,12 +945,12 @@ module Thor::Actions
 
   protected
 
-  # source://thor//lib/thor/actions.rb#329
+  # source://thor//lib/thor/actions.rb#330
   def _cleanup_options_and_set(options, key); end
 
   # Allow current root to be shared between invocations.
   #
-  # source://thor//lib/thor/actions.rb#325
+  # source://thor//lib/thor/actions.rb#326
   def _shared_configuration; end
 
   private
@@ -1297,10 +1297,10 @@ end
 # source://thor//lib/thor/actions/inject_into_file.rb#24
 Thor::Actions::WARNINGS = T.let(T.unsafe(nil), Hash)
 
-# source://thor//lib/thor/error.rb#60
+# source://thor//lib/thor/error.rb#68
 class Thor::AmbiguousCommandError < ::Thor::Error; end
 
-# source://thor//lib/thor/error.rb#62
+# source://thor//lib/thor/error.rb#70
 Thor::AmbiguousTaskError = Thor::AmbiguousCommandError
 
 # source://thor//lib/thor/parser/argument.rb#2
@@ -1982,12 +1982,12 @@ module Thor::Base::ClassMethods
   # SIGNATURE: Sets the baseclass. This is where the superclass lookup
   # finishes.
   #
-  # source://thor//lib/thor/base.rb#679
+  # source://thor//lib/thor/base.rb#678
   def baseclass; end
 
   # The basename of the program invoking the thor class.
   #
-  # source://thor//lib/thor/base.rb#673
+  # source://thor//lib/thor/base.rb#672
   def basename; end
 
   # Build an option and adds it to the given scope.
@@ -1997,7 +1997,7 @@ module Thor::Base::ClassMethods
   # options<Hash>:: Described in both class_option and method_option.
   # scope<Hash>:: Options hash that is being built up
   #
-  # source://thor//lib/thor/base.rb#590
+  # source://thor//lib/thor/base.rb#589
   def build_option(name, options, scope); end
 
   # Receives a hash of options, parse them and add to the scope. This is a
@@ -2008,7 +2008,7 @@ module Thor::Base::ClassMethods
   # ==== Parameters
   # Hash[Symbol => Object]
   #
-  # source://thor//lib/thor/base.rb#601
+  # source://thor//lib/thor/base.rb#600
   def build_options(options, scope); end
 
   # Prints the class options per group. If an option does not belong to
@@ -2020,65 +2020,65 @@ module Thor::Base::ClassMethods
   # SIGNATURE: Creates a new command if valid_command? is true. This method is
   # called when a new method is added to the class.
   #
-  # source://thor//lib/thor/base.rb#684
+  # source://thor//lib/thor/base.rb#683
   def create_command(meth); end
 
   # SIGNATURE: Creates a new command if valid_command? is true. This method is
   # called when a new method is added to the class.
   #
-  # source://thor//lib/thor/base.rb#684
+  # source://thor//lib/thor/base.rb#683
   def create_task(meth); end
 
   # SIGNATURE: The hook invoked by start.
   #
   # @raise [NotImplementedError]
   #
-  # source://thor//lib/thor/base.rb#694
+  # source://thor//lib/thor/base.rb#693
   def dispatch(command, given_args, given_opts, config); end
 
   # Finds a command with the given name. If the command belongs to the current
   # class, just return it, otherwise dup it and add the fresh copy to the
   # current command hash.
   #
-  # source://thor//lib/thor/base.rb#610
+  # source://thor//lib/thor/base.rb#609
   def find_and_refresh_command(name); end
 
   # Finds a command with the given name. If the command belongs to the current
   # class, just return it, otherwise dup it and add the fresh copy to the
   # current command hash.
   #
-  # source://thor//lib/thor/base.rb#610
+  # source://thor//lib/thor/base.rb#609
   def find_and_refresh_task(name); end
 
   # Retrieves a value from superclass. If it reaches the baseclass,
   # returns default.
   #
-  # source://thor//lib/thor/base.rb#651
+  # source://thor//lib/thor/base.rb#650
   def from_superclass(method, default = T.unsafe(nil)); end
 
-  # Everytime someone inherits from a Thor class, register the klass
+  # Every time someone inherits from a Thor class, register the klass
   # and file into baseclass.
   #
-  # source://thor//lib/thor/base.rb#623
+  # source://thor//lib/thor/base.rb#622
   def inherited(klass); end
 
   # SIGNATURE: Defines behavior when the initialize method is added to the
   # class.
   #
-  # source://thor//lib/thor/base.rb#690
+  # source://thor//lib/thor/base.rb#689
   def initialize_added; end
 
   # Raises an error if the word given is a Thor reserved word.
   #
   # @return [Boolean]
   #
-  # source://thor//lib/thor/base.rb#579
+  # source://thor//lib/thor/base.rb#578
   def is_thor_reserved_word?(word, type); end
 
   # Fire this callback whenever a method is added. Added methods are
   # tracked as commands by invoking the create_command method.
   #
-  # source://thor//lib/thor/base.rb#631
+  # source://thor//lib/thor/base.rb#630
   def method_added(meth); end
 
   # Receives a set of options and print them.
@@ -2241,8 +2241,14 @@ class Thor::CoreExt::HashWithIndifferentAccess < ::Hash
   def method_missing(method, *args); end
 end
 
-# source://thor//lib/thor/error.rb#2
-Thor::Correctable = DidYouMean::Correctable
+# source://thor//lib/thor/error.rb#14
+module Thor::Correctable
+  # source://thor//lib/thor/error.rb#19
+  def corrections; end
+
+  # source://thor//lib/thor/error.rb#15
+  def to_s; end
+end
 
 # A dynamic command that handles method missing scenarios.
 #
@@ -2267,7 +2273,7 @@ Thor::DynamicTask = Thor::DynamicCommand
 # overwrites a thor keyword, SHOULD NOT raise a Thor::Error. This way, we
 # ensure that developer errors are shown with full backtrace.
 #
-# source://thor//lib/thor/error.rb#23
+# source://thor//lib/thor/error.rb#31
 class Thor::Error < ::StandardError; end
 
 # Thor has a special class called Thor::Group. The main difference to Thor class
@@ -2605,7 +2611,7 @@ end
 
 # Raised when a command was found, but not invoked properly.
 #
-# source://thor//lib/thor/error.rb#65
+# source://thor//lib/thor/error.rb#73
 class Thor::InvocationError < ::Thor::Error; end
 
 # source://thor//lib/thor/line_editor/basic.rb#2
@@ -2718,7 +2724,7 @@ class Thor::LineEditor::Readline::PathCompletion
   def text; end
 end
 
-# source://thor//lib/thor/error.rb#101
+# source://thor//lib/thor/error.rb#109
 class Thor::MalformattedArgumentError < ::Thor::InvocationError; end
 
 # source://thor//lib/thor/nested_context.rb#2
@@ -2763,10 +2769,13 @@ class Thor::Option < ::Thor::Argument
   # source://thor//lib/thor/parser/option.rb#3
   def aliases; end
 
-  # source://thor//lib/thor/parser/option.rb#105
+  # source://thor//lib/thor/parser/option.rb#99
+  def aliases_for_usage; end
+
+  # source://thor//lib/thor/parser/option.rb#109
   def array?; end
 
-  # source://thor//lib/thor/parser/option.rb#105
+  # source://thor//lib/thor/parser/option.rb#109
   def boolean?; end
 
   # Returns the value of attribute group.
@@ -2774,7 +2783,7 @@ class Thor::Option < ::Thor::Argument
   # source://thor//lib/thor/parser/option.rb#3
   def group; end
 
-  # source://thor//lib/thor/parser/option.rb#105
+  # source://thor//lib/thor/parser/option.rb#109
   def hash?; end
 
   # Returns the value of attribute hide.
@@ -2790,7 +2799,7 @@ class Thor::Option < ::Thor::Argument
   # source://thor//lib/thor/parser/option.rb#3
   def lazy_default; end
 
-  # source://thor//lib/thor/parser/option.rb#105
+  # source://thor//lib/thor/parser/option.rb#109
   def numeric?; end
 
   # Returns the value of attribute repeatable.
@@ -2798,7 +2807,7 @@ class Thor::Option < ::Thor::Argument
   # source://thor//lib/thor/parser/option.rb#3
   def repeatable; end
 
-  # source://thor//lib/thor/parser/option.rb#105
+  # source://thor//lib/thor/parser/option.rb#109
   def string?; end
 
   # source://thor//lib/thor/parser/option.rb#75
@@ -2809,23 +2818,23 @@ class Thor::Option < ::Thor::Argument
 
   protected
 
-  # source://thor//lib/thor/parser/option.rb#155
+  # source://thor//lib/thor/parser/option.rb#159
   def dasherize(str); end
 
   # @return [Boolean]
   #
-  # source://thor//lib/thor/parser/option.rb#147
+  # source://thor//lib/thor/parser/option.rb#151
   def dasherized?; end
 
-  # source://thor//lib/thor/parser/option.rb#151
+  # source://thor//lib/thor/parser/option.rb#155
   def undasherize(str); end
 
   # @raise [ArgumentError]
   #
-  # source://thor//lib/thor/parser/option.rb#113
+  # source://thor//lib/thor/parser/option.rb#117
   def validate!; end
 
-  # source://thor//lib/thor/parser/option.rb#118
+  # source://thor//lib/thor/parser/option.rb#122
   def validate_default_type!; end
 
   class << self
@@ -3010,7 +3019,7 @@ module Thor::RakeCompat
   end
 end
 
-# source://thor//lib/thor/error.rb#98
+# source://thor//lib/thor/error.rb#106
 class Thor::RequiredArgumentMissingError < ::Thor::InvocationError; end
 
 # source://thor//lib/thor/util.rb#4
@@ -3679,84 +3688,84 @@ Thor::Task = Thor::Command
 
 # Raised when a command was not found.
 #
-# source://thor//lib/thor/error.rb#27
+# source://thor//lib/thor/error.rb#35
 class Thor::UndefinedCommandError < ::Thor::Error
-  include ::DidYouMean::Correctable
+  include ::Thor::Correctable
 
   # @return [UndefinedCommandError] a new instance of UndefinedCommandError
   #
-  # source://thor//lib/thor/error.rb#46
+  # source://thor//lib/thor/error.rb#54
   def initialize(command, all_commands, namespace); end
 
   # Returns the value of attribute all_commands.
   #
-  # source://thor//lib/thor/error.rb#44
+  # source://thor//lib/thor/error.rb#52
   def all_commands; end
 
   # Returns the value of attribute command.
   #
-  # source://thor//lib/thor/error.rb#44
+  # source://thor//lib/thor/error.rb#52
   def command; end
 end
 
-# source://thor//lib/thor/error.rb#28
+# source://thor//lib/thor/error.rb#36
 class Thor::UndefinedCommandError::SpellChecker
   # @return [SpellChecker] a new instance of SpellChecker
   #
-  # source://thor//lib/thor/error.rb#31
+  # source://thor//lib/thor/error.rb#39
   def initialize(error); end
 
-  # source://thor//lib/thor/error.rb#35
+  # source://thor//lib/thor/error.rb#43
   def corrections; end
 
   # Returns the value of attribute error.
   #
-  # source://thor//lib/thor/error.rb#29
+  # source://thor//lib/thor/error.rb#37
   def error; end
 
-  # source://thor//lib/thor/error.rb#39
+  # source://thor//lib/thor/error.rb#47
   def spell_checker; end
 end
 
-# source://thor//lib/thor/error.rb#58
+# source://thor//lib/thor/error.rb#66
 Thor::UndefinedTaskError = Thor::UndefinedCommandError
 
-# source://thor//lib/thor/error.rb#68
+# source://thor//lib/thor/error.rb#76
 class Thor::UnknownArgumentError < ::Thor::Error
-  include ::DidYouMean::Correctable
+  include ::Thor::Correctable
 
   # @return [UnknownArgumentError] a new instance of UnknownArgumentError
   #
-  # source://thor//lib/thor/error.rb#88
+  # source://thor//lib/thor/error.rb#96
   def initialize(switches, unknown); end
 
   # Returns the value of attribute switches.
   #
-  # source://thor//lib/thor/error.rb#86
+  # source://thor//lib/thor/error.rb#94
   def switches; end
 
   # Returns the value of attribute unknown.
   #
-  # source://thor//lib/thor/error.rb#86
+  # source://thor//lib/thor/error.rb#94
   def unknown; end
 end
 
-# source://thor//lib/thor/error.rb#69
+# source://thor//lib/thor/error.rb#77
 class Thor::UnknownArgumentError::SpellChecker
   # @return [SpellChecker] a new instance of SpellChecker
   #
-  # source://thor//lib/thor/error.rb#72
+  # source://thor//lib/thor/error.rb#80
   def initialize(error); end
 
-  # source://thor//lib/thor/error.rb#76
+  # source://thor//lib/thor/error.rb#84
   def corrections; end
 
   # Returns the value of attribute error.
   #
-  # source://thor//lib/thor/error.rb#70
+  # source://thor//lib/thor/error.rb#78
   def error; end
 
-  # source://thor//lib/thor/error.rb#81
+  # source://thor//lib/thor/error.rb#89
   def spell_checker; end
 end
 

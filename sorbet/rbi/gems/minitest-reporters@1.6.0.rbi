@@ -7,73 +7,73 @@
 # source://minitest-reporters//lib/minitest/reporters.rb#3
 module Minitest
   class << self
-    # source://minitest/5.17.0/lib/minitest.rb#173
+    # source://minitest/5.18.0/lib/minitest.rb#173
     def __run(reporter, options); end
 
-    # source://minitest/5.17.0/lib/minitest.rb#94
+    # source://minitest/5.18.0/lib/minitest.rb#94
     def after_run(&block); end
 
-    # source://minitest/5.17.0/lib/minitest.rb#66
+    # source://minitest/5.18.0/lib/minitest.rb#66
     def autorun; end
 
-    # source://minitest/5.17.0/lib/minitest.rb#19
+    # source://minitest/5.18.0/lib/minitest.rb#19
     def backtrace_filter; end
 
-    # source://minitest/5.17.0/lib/minitest.rb#19
+    # source://minitest/5.18.0/lib/minitest.rb#19
     def backtrace_filter=(_arg0); end
 
-    # source://minitest/5.17.0/lib/minitest.rb#18
+    # source://minitest/5.18.0/lib/minitest.rb#18
     def cattr_accessor(name); end
 
-    # source://minitest/5.17.0/lib/minitest.rb#1059
+    # source://minitest/5.18.0/lib/minitest.rb#1059
     def clock_time; end
 
-    # source://minitest/5.17.0/lib/minitest.rb#19
+    # source://minitest/5.18.0/lib/minitest.rb#19
     def extensions; end
 
-    # source://minitest/5.17.0/lib/minitest.rb#19
+    # source://minitest/5.18.0/lib/minitest.rb#19
     def extensions=(_arg0); end
 
-    # source://minitest/5.17.0/lib/minitest.rb#264
+    # source://minitest/5.18.0/lib/minitest.rb#264
     def filter_backtrace(bt); end
 
-    # source://minitest/5.17.0/lib/minitest.rb#19
+    # source://minitest/5.18.0/lib/minitest.rb#19
     def info_signal; end
 
-    # source://minitest/5.17.0/lib/minitest.rb#19
+    # source://minitest/5.18.0/lib/minitest.rb#19
     def info_signal=(_arg0); end
 
-    # source://minitest/5.17.0/lib/minitest.rb#98
+    # source://minitest/5.18.0/lib/minitest.rb#98
     def init_plugins(options); end
 
-    # source://minitest/5.17.0/lib/minitest.rb#105
+    # source://minitest/5.18.0/lib/minitest.rb#105
     def load_plugins; end
 
-    # source://minitest/5.17.0/lib/minitest.rb#19
+    # source://minitest/5.18.0/lib/minitest.rb#19
     def parallel_executor; end
 
-    # source://minitest/5.17.0/lib/minitest.rb#19
+    # source://minitest/5.18.0/lib/minitest.rb#19
     def parallel_executor=(_arg0); end
 
-    # source://minitest/5.17.0/lib/minitest.rb#186
+    # source://minitest/5.18.0/lib/minitest.rb#186
     def process_args(args = T.unsafe(nil)); end
 
-    # source://minitest/5.17.0/lib/minitest.rb#19
+    # source://minitest/5.18.0/lib/minitest.rb#19
     def reporter; end
 
-    # source://minitest/5.17.0/lib/minitest.rb#19
+    # source://minitest/5.18.0/lib/minitest.rb#19
     def reporter=(_arg0); end
 
-    # source://minitest/5.17.0/lib/minitest.rb#140
+    # source://minitest/5.18.0/lib/minitest.rb#140
     def run(args = T.unsafe(nil)); end
 
-    # source://minitest/5.17.0/lib/minitest.rb#1050
+    # source://minitest/5.18.0/lib/minitest.rb#1050
     def run_one_method(klass, method_name); end
 
-    # source://minitest/5.17.0/lib/minitest.rb#19
+    # source://minitest/5.18.0/lib/minitest.rb#19
     def seed; end
 
-    # source://minitest/5.17.0/lib/minitest.rb#19
+    # source://minitest/5.18.0/lib/minitest.rb#19
     def seed=(_arg0); end
   end
 end
@@ -412,12 +412,12 @@ class Minitest::Reporters::HtmlReporter < ::Minitest::Reporters::BaseReporter
   #
   # @return [HtmlReporter] a new instance of HtmlReporter
   #
-  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#57
+  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#60
   def initialize(args = T.unsafe(nil)); end
 
   # Trims off the number prefix on test names when using Minitest Specs
   #
-  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#45
+  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#48
   def friendly_name(test); end
 
   # The number of tests that passed
@@ -427,7 +427,7 @@ class Minitest::Reporters::HtmlReporter < ::Minitest::Reporters::BaseReporter
 
   # The percentage of tests that failed
   #
-  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#40
+  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#43
   def percent_errors_failures; end
 
   # The percentage of tests that passed, calculated in a way that avoids rounding errors
@@ -436,16 +436,22 @@ class Minitest::Reporters::HtmlReporter < ::Minitest::Reporters::BaseReporter
   def percent_passes; end
 
   # The percentage of tests that were skipped
+  # Keeping old method name with typo for backwards compatibility in custom templates (for now)
   #
   # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#35
   def percent_skipps; end
 
+  # The percentage of tests that were skipped
+  #
+  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#35
+  def percent_skips; end
+
   # Called by the framework to generate the report
   #
-  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#88
+  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#91
   def report; end
 
-  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#79
+  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#82
   def start; end
 
   # The title of the report
@@ -459,46 +465,46 @@ class Minitest::Reporters::HtmlReporter < ::Minitest::Reporters::BaseReporter
   # Test suites which have failing tests are given highest order
   # Tests suites which have skipped tests are given second highest priority
   #
-  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#139
+  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#142
   def compare_suites(suite_a, suite_b); end
 
-  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#128
+  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#131
   def compare_suites_by_name(suite_a, suite_b); end
 
   # Tests are first ordered by evaluating the results of the tests, then by tests names
   # Tess which fail are given highest order
   # Tests which are skipped are given second highest priority
   #
-  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#154
+  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#157
   def compare_tests(test_a, test_b); end
 
-  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#132
+  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#135
   def compare_tests_by_name(test_a, test_b); end
 
-  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#124
+  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#127
   def html_file; end
 
   # taken from the JUnit reporter
   #
-  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#204
+  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#207
   def location(exception); end
 
   # based on message_for(test) from the JUnit reporter
   #
-  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#187
+  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#190
   def message_for(test); end
 
   # based on analyze_suite from the JUnit reporter
   #
-  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#172
+  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#175
   def summarize_suite(suite, tests); end
 
   # @return [Boolean]
   #
-  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#167
+  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#170
   def test_fail_or_error?(test); end
 
-  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#213
+  # source://minitest-reporters//lib/minitest/reporters/html_reporter.rb#216
   def total_time_to_hms; end
 end
 
@@ -928,27 +934,39 @@ class Minitest::Reporters::SpecReporter < ::Minitest::Reporters::BaseReporter
   include ::Minitest::Reporters::ANSI::Code
   include ::Minitest::RelativePosition
 
-  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#29
+  # The constructor takes an `options` hash
+  #
+  # @option options
+  # @param options [Hash]
+  # @return [SpecReporter] a new instance of SpecReporter
+  #
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#18
+  def initialize(options = T.unsafe(nil)); end
+
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#50
   def record(test); end
 
-  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#19
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#29
   def report; end
 
-  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#13
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#23
   def start; end
 
   protected
 
-  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#41
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#62
   def after_suite(_suite); end
 
-  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#37
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#58
   def before_suite(suite); end
 
-  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#53
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#66
+  def print_failure(name, tests); end
+
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#76
   def record_print_failures_if_any(test); end
 
-  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#45
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#83
   def record_print_status(test); end
 end
 
@@ -981,6 +999,3 @@ end
 
 # source://minitest-reporters//lib/minitest/reporters/version.rb#3
 Minitest::Reporters::VERSION = T.let(T.unsafe(nil), String)
-
-# source://minitest/5.17.0/lib/minitest.rb#12
-Minitest::VERSION = T.let(T.unsafe(nil), String)
