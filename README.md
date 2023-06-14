@@ -46,6 +46,7 @@ documentation](SEMANTIC_HIGHLIGHTING.md).
 
 * [RubyConf 2022: Improving the development experience with language servers](https://www.youtube.com/watch?v=kEfXPTm1aCI) ([Vinicius Stock](https://github.com/vinistock))
 * [Remote Ruby: Ruby Language Server with Vinicius Stock](https://remoteruby.com/221)
+* [RubyKaigi 2023: Code indexing - How language servers understand our code](https://www.youtube.com/watch?v=ks3tQojSJLU) ([Vinicius Stock](https://github.com/vinistock))
 
 ## Contributing
 
