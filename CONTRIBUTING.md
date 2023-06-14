@@ -1,5 +1,21 @@
 # CONTRIBUTING
 
+## Manually testing a change
+
+There are a few options for manually testing changes to Ruby LSP:
+
+You can test against Ruby LSP's own code if using VS Code, and you have the `ruby-lsp` project open. Choose 'Ruby LSP: Restart' from the command menu and the VS Code extension will detect that you are working on `ruby-lsp`, and use the locally checked out code instead of the installed extension.
+
+The other way is to use a separate project, and add a Gemfile entry pointing to your local checkout of `ruby-lsp`, e.g.:
+
+```
+gem "ruby-lsp", path: "../../Shopify/ruby-lsp"
+```
+
+With both approaches, there is a risk of 'breaking' your local development experience, so keep an eye on the Ruby LSP output panel for exceptions as your make changes.
+
+You can also refer to the advice about [Debugging and Tracing](https://github.com/Shopify/vscode-ruby-lsp#debugging).
+
 ## Running the test suite
 
 The test suite can be executed by running
