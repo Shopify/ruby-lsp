@@ -62,8 +62,9 @@ GEM
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     parallel (1.23.0)
-    parser (3.2.2.1)
+    parser (3.2.2.3)
       ast (~> 2.4.1)
+      racc
     prettier_print (1.2.1)
     psych (5.1.0)
       stringio
@@ -93,14 +94,14 @@ GEM
       unparser
     rdoc (6.5.0)
       psych (>= 4.0.0)
-    regexp_parser (2.8.0)
+    regexp_parser (2.8.1)
     reline (0.3.5)
       io-console (~> 0.5)
     rexml (3.2.5)
-    rubocop (1.52.0)
+    rubocop (1.52.1)
       json (~> 2.3)
       parallel (~> 1.10)
-      parser (>= 3.2.0.0)
+      parser (>= 3.2.2.3)
       rainbow (>= 2.2.2, < 4.0)
       regexp_parser (>= 1.8, < 3.0)
       rexml (>= 3.2.5, < 4.0)
