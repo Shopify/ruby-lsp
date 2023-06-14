@@ -10,12 +10,6 @@ module RuboCop; end
 # source://rubocop-sorbet//lib/rubocop/cop/sorbet/binding_constants_without_type_alias.rb#6
 module RuboCop::Cop; end
 
-# source://rubocop/1.43.0/lib/rubocop/cop/mixin/allowed_methods.rb#38
-RuboCop::Cop::IgnoredMethods = RuboCop::Cop::AllowedMethods
-
-# source://rubocop/1.43.0/lib/rubocop/cop/mixin/allowed_pattern.rb#54
-RuboCop::Cop::IgnoredPattern = RuboCop::Cop::AllowedPattern
-
 # source://rubocop-sorbet//lib/rubocop/cop/sorbet/binding_constants_without_type_alias.rb#7
 module RuboCop::Cop::Sorbet; end
 
@@ -225,9 +219,40 @@ class RuboCop::Cop::Sorbet::ConstantsFromStrings < ::RuboCop::Cop::Cop
   def on_send(node); end
 end
 
+# This cop checks for blank lines after signatures.
+#
+# It also suggests an autocorrect
+#
+# @example
+#
+#   # bad
+#   sig { void }
+#
+#   def foo; end
+#
+#   # good
+#   sig { void }
+#   def foo; end
+#
+# source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/empty_line_after_sig.rb#23
+class RuboCop::Cop::Sorbet::EmptyLineAfterSig < ::RuboCop::Cop::Sorbet::SignatureCop
+  include ::RuboCop::Cop::RangeHelp
+
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/empty_line_after_sig.rb#33
+  def autocorrect(node); end
+
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/empty_line_after_sig.rb#26
+  def on_signature(node); end
+
+  private
+
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/empty_line_after_sig.rb#48
+  def next_method(node); end
+end
+
 # This cop checks that the Sorbet sigil comes as the first magic comment in the file.
 #
-# The expected order for magic comments is: typed, (en)?coding, warn_indent then frozen_string_literal.
+# The expected order for magic comments is: (en)?coding, typed, warn_indent then frozen_string_literal.
 #
 # For example, the following bad ordering:
 #
@@ -241,7 +266,7 @@ end
 # class Foo; end
 # ```
 #
-# Only `typed`, `(en)?coding`, `warn_indent` and `frozen_string_literal` magic comments are considered,
+# Only `(en)?coding`, `typed`, `warn_indent` and `frozen_string_literal` magic comments are considered,
 # other comments or magic comments are left in the same place.
 #
 # source://rubocop-sorbet//lib/rubocop/cop/sorbet/sigils/enforce_sigil_order.rb#30
@@ -504,7 +529,7 @@ RuboCop::Cop::Sorbet::ForbidIncludeConstLiteral::MSG = T.let(T.unsafe(nil), Stri
 #
 # Options:
 #
-# * `AllowedPaths`: A list of the paths where RBI files are allowed (default: ["sorbet/rbi/**"])
+# * `AllowedPaths`: A list of the paths where RBI files are allowed (default: ["rbi/**", "sorbet/rbi/**"])
 #
 # @example
 #   # bad
@@ -512,19 +537,20 @@ RuboCop::Cop::Sorbet::ForbidIncludeConstLiteral::MSG = T.let(T.unsafe(nil), Stri
 #   # other_file.rbi
 #
 #   # good
+#   # rbi/external_interface.rbi
 #   # sorbet/rbi/some_file.rbi
 #   # sorbet/rbi/any/path/for/file.rbi
 #
-# source://rubocop-sorbet//lib/rubocop/cop/sorbet/rbi/forbid_rbi_outside_of_allowed_paths.rb#22
+# source://rubocop-sorbet//lib/rubocop/cop/sorbet/rbi/forbid_rbi_outside_of_allowed_paths.rb#23
 class RuboCop::Cop::Sorbet::ForbidRBIOutsideOfAllowedPaths < ::RuboCop::Cop::Cop
   include ::RuboCop::Cop::RangeHelp
 
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/rbi/forbid_rbi_outside_of_allowed_paths.rb#25
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/rbi/forbid_rbi_outside_of_allowed_paths.rb#26
   def investigate(processed_source); end
 
   private
 
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/rbi/forbid_rbi_outside_of_allowed_paths.rb#57
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/rbi/forbid_rbi_outside_of_allowed_paths.rb#58
   def allowed_paths; end
 end
 
@@ -581,40 +607,43 @@ class RuboCop::Cop::Sorbet::ForbidTUntyped < ::RuboCop::Cop::Cop
 end
 
 # This cop disallows use of `T.untyped` or `T.nilable(T.untyped)`
-# as a prop type for `T::Struct`.
+# as a prop type for `T::Struct` or `T::ImmutableStruct`.
 #
 # @example
 #
 #   # bad
-#   class SomeClass
+#   class SomeClass < T::Struct
 #   const :foo, T.untyped
 #   prop :bar, T.nilable(T.untyped)
 #   end
 #
 #   # good
-#   class SomeClass
+#   class SomeClass < T::Struct
 #   const :foo, Integer
 #   prop :bar, T.nilable(String)
 #   end
 #
 # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_untyped_struct_props.rb#25
 class RuboCop::Cop::Sorbet::ForbidUntypedStructProps < ::RuboCop::Cop::Cop
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_untyped_struct_props.rb#48
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_untyped_struct_props.rb#52
   def on_class(node); end
 
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_untyped_struct_props.rb#40
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_untyped_struct_props.rb#44
   def subclass_of_t_struct?(param0 = T.unsafe(nil)); end
 
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_untyped_struct_props.rb#36
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_untyped_struct_props.rb#32
+  def t_immutable_struct(param0 = T.unsafe(nil)); end
+
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_untyped_struct_props.rb#40
   def t_nilable_untyped(param0 = T.unsafe(nil)); end
 
   # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_untyped_struct_props.rb#28
   def t_struct(param0 = T.unsafe(nil)); end
 
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_untyped_struct_props.rb#32
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_untyped_struct_props.rb#36
   def t_untyped(param0 = T.unsafe(nil)); end
 
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_untyped_struct_props.rb#44
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_untyped_struct_props.rb#48
   def untyped_props(param0); end
 end
 
@@ -731,6 +760,42 @@ end
 # source://rubocop-sorbet//lib/rubocop/cop/sorbet/one_ancestor_per_line.rb#25
 RuboCop::Cop::Sorbet::OneAncestorPerLine::MSG = T.let(T.unsafe(nil), String)
 
+# Forbids the use of redundant `extend T::Sig`. Only for use in
+# applications that monkey patch `Module.include(T::Sig)` globally,
+# which would make it redundant.
+#
+# @example
+#   # bad
+#   class Example
+#   extend T::Sig
+#   sig { void }
+#   def no_op; end
+#   end
+#
+#   # good
+#   class Example
+#   sig { void }
+#   def no_op; end
+#   end
+#
+# source://rubocop-sorbet//lib/rubocop/cop/sorbet/redundant_extend_t_sig.rb#28
+class RuboCop::Cop::Sorbet::RedundantExtendTSig < ::RuboCop::Cop::Cop
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/redundant_extend_t_sig.rb#42
+  def autocorrect(node); end
+
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/redundant_extend_t_sig.rb#32
+  def extend_t_sig?(param0 = T.unsafe(nil)); end
+
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/redundant_extend_t_sig.rb#36
+  def on_send(node); end
+end
+
+# source://rubocop-sorbet//lib/rubocop/cop/sorbet/redundant_extend_t_sig.rb#29
+RuboCop::Cop::Sorbet::RedundantExtendTSig::MSG = T.let(T.unsafe(nil), String)
+
+# source://rubocop-sorbet//lib/rubocop/cop/sorbet/redundant_extend_t_sig.rb#30
+RuboCop::Cop::Sorbet::RedundantExtendTSig::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
+
 # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#15
 class RuboCop::Cop::Sorbet::SignatureBuildOrder < ::RuboCop::Cop::Sorbet::SignatureCop
   # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#54
@@ -775,22 +840,19 @@ RuboCop::Cop::Sorbet::SignatureBuildOrder::ORDER = T.let(T.unsafe(nil), Hash)
 #
 # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_cop.rb#11
 class RuboCop::Cop::Sorbet::SignatureCop < ::RuboCop::Cop::Cop
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_cop.rb#26
-  def allowed_recv(recv); end
-
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_cop.rb#33
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_cop.rb#30
   def on_block(node); end
 
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_cop.rb#37
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_cop.rb#34
   def on_signature(_); end
 
   # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_cop.rb#14
   def signature?(param0 = T.unsafe(nil)); end
 
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_cop.rb#18
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_cop.rb#22
   def with_runtime?(param0 = T.unsafe(nil)); end
 
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_cop.rb#22
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_cop.rb#26
   def without_runtime?(param0 = T.unsafe(nil)); end
 end
 
@@ -951,12 +1013,6 @@ class RuboCop::Cop::Style::MutableConstant < ::RuboCop::Cop::Base
   include ::RuboCop::Cop::Sorbet::MutableConstantSorbetAwareBehaviour
 end
 
-# source://rubocop/1.43.0/lib/rubocop/ast_aliases.rb#5
-RuboCop::NodePattern = RuboCop::AST::NodePattern
-
-# source://rubocop/1.43.0/lib/rubocop/ast_aliases.rb#6
-RuboCop::ProcessedSource = RuboCop::AST::ProcessedSource
-
 # source://rubocop-sorbet//lib/rubocop/sorbet/version.rb#3
 module RuboCop::Sorbet; end
 
@@ -985,6 +1041,3 @@ RuboCop::Sorbet::PROJECT_ROOT = T.let(T.unsafe(nil), Pathname)
 
 # source://rubocop-sorbet//lib/rubocop/sorbet/version.rb#4
 RuboCop::Sorbet::VERSION = T.let(T.unsafe(nil), String)
-
-# source://rubocop/1.43.0/lib/rubocop/ast_aliases.rb#7
-RuboCop::Token = RuboCop::AST::Token

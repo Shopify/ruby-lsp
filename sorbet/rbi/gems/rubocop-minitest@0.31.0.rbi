@@ -22,18 +22,13 @@ module RuboCop::Cop::ArgumentRangeHelper
 
   # @api private
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/argument_range_helper.rb#25
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/argument_range_helper.rb#19
   def all_arguments_range(node); end
 
   # @api private
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/argument_range_helper.rb#18
-  def first_and_second_arguments_range(node); end
-
-  # @api private
-  #
   # source://rubocop-minitest//lib/rubocop/cop/mixin/argument_range_helper.rb#12
-  def first_argument_range(node); end
+  def first_and_second_arguments_range(node); end
 end
 
 # Common functionality for `AssertInDelta` and `RefuteInDelta` cops.
@@ -65,7 +60,7 @@ end
 # source://rubocop-minitest//lib/rubocop/cop/mixin/in_delta_mixin.rb#8
 RuboCop::Cop::InDeltaMixin::MSG = T.let(T.unsafe(nil), String)
 
-# source://rubocop-minitest//lib/rubocop/cop/mixin/nil_assertion_handleable.rb#5
+# source://rubocop-minitest//lib/rubocop/cop/mixin/instance_of_assertion_handleable.rb#5
 module RuboCop::Cop::Minitest; end
 
 # Enforces the test to use `assert_empty` instead of using `assert(object.empty?)`.
@@ -274,45 +269,29 @@ RuboCop::Cop::Minitest::AssertIncludes::RESTRICT_ON_SEND = T.let(T.unsafe(nil), 
 #   assert(object.instance_of?(Class))
 #   assert(object.instance_of?(Class), 'message')
 #
+#   # bad
+#   assert_equal(Class, object.class)
+#   assert_equal(Class, object.class, 'message')
+#
 #   # good
 #   assert_instance_of(Class, object)
 #   assert_instance_of(Class, object, 'message')
 #
-# source://rubocop-minitest//lib/rubocop/cop/minitest/assert_instance_of.rb#18
+# source://rubocop-minitest//lib/rubocop/cop/minitest/assert_instance_of.rb#22
 class RuboCop::Cop::Minitest::AssertInstanceOf < ::RuboCop::Cop::Base
   include ::RuboCop::Cop::RangeHelp
   include ::RuboCop::Cop::ArgumentRangeHelper
-  extend ::RuboCop::Cop::MinitestCopRule
+  include ::RuboCop::Cop::Minitest::InstanceOfAssertionHandleable
   extend ::RuboCop::Cop::AutoCorrector
 
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#58
-  def autocorrect(corrector, node, arguments); end
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/assert_instance_of.rb#28
+  def instance_of_assertion?(param0 = T.unsafe(nil)); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#46
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/assert_instance_of.rb#35
   def on_send(node); end
-
-  private
-
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#110
-  def correct_receiver(receiver); end
-
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#106
-  def enclosed_in_redundant_parentheses?(node); end
-
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#92
-  def new_arguments(arguments); end
-
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#78
-  def offense_message(arguments); end
-
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#72
-  def peel_redundant_parentheses_from(arguments); end
 end
 
-# source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#43
-RuboCop::Cop::Minitest::AssertInstanceOf::MSG = T.let(T.unsafe(nil), String)
-
-# source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#44
+# source://rubocop-minitest//lib/rubocop/cop/minitest/assert_instance_of.rb#26
 RuboCop::Cop::Minitest::AssertInstanceOf::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
 
 # Enforces the test to use `assert_kind_of(Class, object)`
@@ -1064,29 +1043,29 @@ class RuboCop::Cop::Minitest::GlobalExpectations < ::RuboCop::Cop::Base
   include ::RuboCop::Cop::ConfigurableEnforcedStyle
   extend ::RuboCop::Cop::AutoCorrector
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#118
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#120
   def block_receiver?(param0 = T.unsafe(nil)); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#106
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#108
   def on_send(node); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#122
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#124
   def value_receiver?(param0 = T.unsafe(nil)); end
 
   private
 
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#126
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#128
   def method_allowed?(method); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#130
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#132
   def preferred_method; end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#134
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#136
   def preferred_receiver(node); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#145
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#147
   def register_offense(node, method); end
 end
 
@@ -1095,17 +1074,49 @@ RuboCop::Cop::Minitest::GlobalExpectations::BLOCK_MATCHERS = T.let(T.unsafe(nil)
 
 # There are aliases for the `_` method - `expect` and `value`
 #
-# source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#104
+# source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#106
 RuboCop::Cop::Minitest::GlobalExpectations::DSL_METHODS = T.let(T.unsafe(nil), Array)
 
 # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#88
 RuboCop::Cop::Minitest::GlobalExpectations::MSG = T.let(T.unsafe(nil), String)
 
-# source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#101
+# source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#103
 RuboCop::Cop::Minitest::GlobalExpectations::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
 
 # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#90
 RuboCop::Cop::Minitest::GlobalExpectations::VALUE_MATCHERS = T.let(T.unsafe(nil), Array)
+
+# Common functionality for `Minitest/AssertInstanceOf` and `Minitest/RefuteInstanceOf` cops.
+#
+# @api private
+#
+# source://rubocop-minitest//lib/rubocop/cop/mixin/instance_of_assertion_handleable.rb#8
+module RuboCop::Cop::Minitest::InstanceOfAssertionHandleable
+  include ::RuboCop::Cop::RangeHelp
+  include ::RuboCop::Cop::ArgumentRangeHelper
+
+  private
+
+  # @api private
+  #
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/instance_of_assertion_handleable.rb#30
+  def build_required_arguments(node, method_name, first_capture, second_capture); end
+
+  # @api private
+  #
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/instance_of_assertion_handleable.rb#15
+  def investigate(node, assertion_type); end
+
+  # @api private
+  #
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/instance_of_assertion_handleable.rb#38
+  def replacement_range(node, method_name); end
+end
+
+# @api private
+#
+# source://rubocop-minitest//lib/rubocop/cop/mixin/instance_of_assertion_handleable.rb#11
+RuboCop::Cop::Minitest::InstanceOfAssertionHandleable::MSG = T.let(T.unsafe(nil), String)
 
 # Checks that lifecycle hooks are declared in the order in which they will be executed.
 #
@@ -1211,7 +1222,8 @@ RuboCop::Cop::Minitest::LiteralAsActualArgument::MSG = T.let(T.unsafe(nil), Stri
 # source://rubocop-minitest//lib/rubocop/cop/minitest/literal_as_actual_argument.rb#25
 RuboCop::Cop::Minitest::LiteralAsActualArgument::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
 
-# Checks if test cases contain too many assertion calls.
+# Checks if test cases contain too many assertion calls. If conditional code with assertions
+# is used, the branch with maximum assertions is counted.
 # The maximum allowed assertion calls is configurable.
 #
 # @example Max: 1
@@ -1234,23 +1246,29 @@ RuboCop::Cop::Minitest::LiteralAsActualArgument::RESTRICT_ON_SEND = T.let(T.unsa
 #   end
 #   end
 #
-# source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#29
+# source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#30
 class RuboCop::Cop::Minitest::MultipleAssertions < ::RuboCop::Cop::Base
   include ::RuboCop::Cop::ConfigurableMax
   include ::RuboCop::Cop::VisibilityHelp
   include ::RuboCop::Cop::DefNode
   include ::RuboCop::Cop::MinitestExplorationHelpers
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#35
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#36
   def on_class(class_node); end
 
   private
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#52
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#53
+  def assertions_count(node); end
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#72
+  def assertions_count_in_branches(branches); end
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#76
   def max_assertions; end
 end
 
-# source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#33
+# source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#34
 RuboCop::Cop::Minitest::MultipleAssertions::MSG = T.let(T.unsafe(nil), String)
 
 # Common functionality for `AssertNil` and `RefuteNil` cops.
@@ -1316,6 +1334,35 @@ end
 
 # source://rubocop-minitest//lib/rubocop/cop/minitest/no_assertions.rb#25
 RuboCop::Cop::Minitest::NoAssertions::MSG = T.let(T.unsafe(nil), String)
+
+# Checks if test class contains any test cases.
+#
+# @example
+#   # bad
+#   class FooTest < Minitest::Test
+#   def do_something
+#   end
+#   end
+#
+#   # good
+#   class FooTest < Minitest::Test
+#   def test_something
+#   assert true
+#   end
+#   end
+#
+# source://rubocop-minitest//lib/rubocop/cop/minitest/no_test_cases.rb#22
+class RuboCop::Cop::Minitest::NoTestCases < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::VisibilityHelp
+  include ::RuboCop::Cop::DefNode
+  include ::RuboCop::Cop::MinitestExplorationHelpers
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/no_test_cases.rb#27
+  def on_class(node); end
+end
+
+# source://rubocop-minitest//lib/rubocop/cop/minitest/no_test_cases.rb#25
+RuboCop::Cop::Minitest::NoTestCases::MSG = T.let(T.unsafe(nil), String)
 
 # Detects non `public` (marked as `private` or `protected`) test methods.
 # Minitest runs only test methods which are `public`.
@@ -1629,45 +1676,29 @@ RuboCop::Cop::Minitest::RefuteIncludes::RESTRICT_ON_SEND = T.let(T.unsafe(nil), 
 #   refute(object.instance_of?(Class))
 #   refute(object.instance_of?(Class), 'message')
 #
+#   # bad
+#   refute_equal(Class, object.class)
+#   refute_equal(Class, object.class, 'message')
+#
 #   # good
 #   refute_instance_of(Class, object)
 #   refute_instance_of(Class, object, 'message')
 #
-# source://rubocop-minitest//lib/rubocop/cop/minitest/refute_instance_of.rb#18
+# source://rubocop-minitest//lib/rubocop/cop/minitest/refute_instance_of.rb#22
 class RuboCop::Cop::Minitest::RefuteInstanceOf < ::RuboCop::Cop::Base
   include ::RuboCop::Cop::RangeHelp
   include ::RuboCop::Cop::ArgumentRangeHelper
-  extend ::RuboCop::Cop::MinitestCopRule
+  include ::RuboCop::Cop::Minitest::InstanceOfAssertionHandleable
   extend ::RuboCop::Cop::AutoCorrector
 
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#58
-  def autocorrect(corrector, node, arguments); end
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_instance_of.rb#28
+  def instance_of_assertion?(param0 = T.unsafe(nil)); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#46
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_instance_of.rb#35
   def on_send(node); end
-
-  private
-
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#110
-  def correct_receiver(receiver); end
-
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#106
-  def enclosed_in_redundant_parentheses?(node); end
-
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#92
-  def new_arguments(arguments); end
-
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#78
-  def offense_message(arguments); end
-
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#72
-  def peel_redundant_parentheses_from(arguments); end
 end
 
-# source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#43
-RuboCop::Cop::Minitest::RefuteInstanceOf::MSG = T.let(T.unsafe(nil), String)
-
-# source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#44
+# source://rubocop-minitest//lib/rubocop/cop/minitest/refute_instance_of.rb#26
 RuboCop::Cop::Minitest::RefuteInstanceOf::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
 
 # Enforces the use of `refute_kind_of(Class, object)`
@@ -1975,6 +2006,42 @@ RuboCop::Cop::Minitest::RefuteSame::MSG = T.let(T.unsafe(nil), String)
 
 # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#44
 RuboCop::Cop::Minitest::RefuteSame::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
+
+# Enforces the use of `skip` instead of `return` in test methods.
+#
+# @example
+#   # bad
+#   def test_something
+#   return if condition?
+#   assert_equal(42, something)
+#   end
+#
+#   # good
+#   def test_something
+#   skip if condition?
+#   assert_equal(42, something)
+#   end
+#
+# source://rubocop-minitest//lib/rubocop/cop/minitest/return_in_test_method.rb#21
+class RuboCop::Cop::Minitest::ReturnInTestMethod < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::VisibilityHelp
+  include ::RuboCop::Cop::DefNode
+  include ::RuboCop::Cop::MinitestExplorationHelpers
+  extend ::RuboCop::Cop::AutoCorrector
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/return_in_test_method.rb#27
+  def on_return(node); end
+
+  private
+
+  # @return [Boolean]
+  #
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/return_in_test_method.rb#38
+  def inside_block?(node); end
+end
+
+# source://rubocop-minitest//lib/rubocop/cop/minitest/return_in_test_method.rb#25
+RuboCop::Cop::Minitest::ReturnInTestMethod::MSG = T.let(T.unsafe(nil), String)
 
 # Checks that `ensure` call even if `skip`. It is unexpected that `ensure` will be called when skipping test.
 # If conditional `skip` is used, it checks that `ensure` is also called conditionally.

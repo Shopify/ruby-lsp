@@ -482,7 +482,7 @@ module LanguageServer::Protocol::Constant::FoldingRangeKind; end
 # source://language_server-protocol//lib/language_server/protocol/constant/folding_range_kind.rb#12
 LanguageServer::Protocol::Constant::FoldingRangeKind::COMMENT = T.let(T.unsafe(nil), String)
 
-# Folding range for a imports or includes
+# Folding range for imports or includes
 #
 # source://language_server-protocol//lib/language_server/protocol/constant/folding_range_kind.rb#16
 LanguageServer::Protocol::Constant::FoldingRangeKind::IMPORTS = T.let(T.unsafe(nil), String)
@@ -667,7 +667,7 @@ LanguageServer::Protocol::Constant::PositionEncodingKind::UTF16 = T.let(T.unsafe
 # source://language_server-protocol//lib/language_server/protocol/constant/position_encoding_kind.rb#28
 LanguageServer::Protocol::Constant::PositionEncodingKind::UTF32 = T.let(T.unsafe(nil), String)
 
-# Character offsets count UTF-8 code units.
+# Character offsets count UTF-8 code units (e.g bytes).
 #
 # source://language_server-protocol//lib/language_server/protocol/constant/position_encoding_kind.rb#13
 LanguageServer::Protocol::Constant::PositionEncodingKind::UTF8 = T.let(T.unsafe(nil), String)
@@ -958,7 +958,7 @@ LanguageServer::Protocol::Constant::TextDocumentSyncKind::FULL = T.let(T.unsafe(
 
 # Documents are synced by sending the full content on open.
 # After that only incremental updates to the document are
-# send.
+# sent.
 #
 # source://language_server-protocol//lib/language_server/protocol/constant/text_document_sync_kind.rb#23
 LanguageServer::Protocol::Constant::TextDocumentSyncKind::INCREMENTAL = T.let(T.unsafe(nil), Integer)
@@ -7119,7 +7119,7 @@ class LanguageServer::Protocol::Interface::InlayHint
   # source://language_server-protocol//lib/language_server/protocol/interface/inlay_hint.rb#110
   def attributes; end
 
-  # A data entry field that is preserved on a inlay hint between
+  # A data entry field that is preserved on an inlay hint between
   # a `textDocument/inlayHint` and a `inlayHint/resolve` request.
   #
   # @return [LSPAny]
@@ -7226,7 +7226,7 @@ class LanguageServer::Protocol::Interface::InlayHintClientCapabilities
   # source://language_server-protocol//lib/language_server/protocol/interface/inlay_hint_client_capabilities.rb#21
   def dynamic_registration; end
 
-  # Indicates which properties a client can resolve lazily on a inlay
+  # Indicates which properties a client can resolve lazily on an inlay
   # hint.
   #
   # @return [{ properties: string[]; }]
@@ -7862,7 +7862,7 @@ class LanguageServer::Protocol::Interface::LinkedEditingRangeClientCapabilities
   # source://language_server-protocol//lib/language_server/protocol/interface/linked_editing_range_client_capabilities.rb#24
   def attributes; end
 
-  # Whether implementation supports dynamic registration.
+  # Whether the implementation supports dynamic registration.
   # If this is set to `true` the client supports the new
   # `(TextDocumentRegistrationOptions & StaticRegistrationOptions)`
   # return value for the corresponding server capability as well.
@@ -9801,7 +9801,7 @@ class LanguageServer::Protocol::Interface::RenameClientCapabilities
   # source://language_server-protocol//lib/language_server/protocol/interface/rename_client_capabilities.rb#20
   def dynamic_registration; end
 
-  # Whether th client honors the change annotations in
+  # Whether the client honors the change annotations in
   # text edits and resource operations returned via the
   # rename request's workspace edit by for example presenting
   # the workspace edit in the user interface and asking
@@ -11312,7 +11312,7 @@ class LanguageServer::Protocol::Interface::ShowDocumentClientCapabilities
   def to_json(*args); end
 end
 
-# Params to show a document.
+# Params to show a resource.
 #
 # source://language_server-protocol//lib/language_server/protocol/interface/show_document_params.rb#7
 class LanguageServer::Protocol::Interface::ShowDocumentParams
@@ -11327,7 +11327,7 @@ class LanguageServer::Protocol::Interface::ShowDocumentParams
   def attributes; end
 
   # Indicates to show the resource in an external program.
-  # To show for example `https://code.visualstudio.com/`
+  # To show, for example, `https://code.visualstudio.com/`
   # in the default WEB browser set `external` to `true`.
   #
   # @return [boolean]
@@ -11361,7 +11361,7 @@ class LanguageServer::Protocol::Interface::ShowDocumentParams
   # source://language_server-protocol//lib/language_server/protocol/interface/show_document_params.rb#65
   def to_json(*args); end
 
-  # The document uri to show.
+  # The uri to show.
   #
   # @return [string]
   #
@@ -11933,7 +11933,7 @@ class LanguageServer::Protocol::Interface::SymbolInformation
   # the range usually spans more then the actual symbol's name and does
   # normally include things like visibility modifiers.
   #
-  # The range doesn't have to denote a node range in the sense of a abstract
+  # The range doesn't have to denote a node range in the sense of an abstract
   # syntax tree. It can therefore not be used to re-construct a hierarchy of
   # the symbols.
   #

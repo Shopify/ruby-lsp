@@ -2170,9 +2170,6 @@ class Rake::PseudoStatus
   def to_i; end
 end
 
-# source://rdoc/6.5.0/rdoc/task.rb#326
-Rake::RDocTask = RDoc::Task
-
 # Error indicating a recursion overflow error in task selection.
 #
 # source://rake//lib/rake/rule_recursion_overflow_error.rb#5

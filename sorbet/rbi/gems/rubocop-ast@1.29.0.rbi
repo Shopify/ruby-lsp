@@ -420,18 +420,18 @@ class RuboCop::AST::Builder < ::Parser::Builders::Default
   #
   # @return [Node] the generated node
   #
-  # source://rubocop-ast//lib/rubocop/ast/builder.rb#97
+  # source://rubocop-ast//lib/rubocop/ast/builder.rb#98
   def n(type, children, source_map); end
 
   # TODO: Figure out what to do about literal encoding handling...
   # More details here https://github.com/whitequark/parser/issues/283
   #
-  # source://rubocop-ast//lib/rubocop/ast/builder.rb#103
+  # source://rubocop-ast//lib/rubocop/ast/builder.rb#104
   def string_value(token); end
 
   private
 
-  # source://rubocop-ast//lib/rubocop/ast/builder.rb#109
+  # source://rubocop-ast//lib/rubocop/ast/builder.rb#110
   def node_klass(type); end
 end
 
@@ -1106,9 +1106,9 @@ class RuboCop::AST::ConstNode < ::RuboCop::AST::Node
   def short_name; end
 end
 
-# A node extension for `send` nodes. This will be used in place of a plain
+# A node extension for `csend` nodes. This will be used in place of a plain
 # node when the builder constructs the AST, making its methods available
-# to all `send` nodes within RuboCop.
+# to all `csend` nodes within RuboCop.
 #
 # source://rubocop-ast//lib/rubocop/ast/node/csend_node.rb#8
 class RuboCop::AST::CsendNode < ::RuboCop::AST::SendNode
@@ -1310,8 +1310,8 @@ module RuboCop::AST::Ext::Range
   #     :bar
   #   ]
   #
-  #   node.loc.begin.line_span                         # => 1..1
-  #   node.loc.expression.line_span(exclude_end: true) # => 1...4
+  #   node.loc.begin.line_span                       # => 1..1
+  #   node.source_range.line_span(exclude_end: true) # => 1...4
   #
   # @return [Range] the range of line numbers for the node
   #
@@ -1898,9 +1898,9 @@ class RuboCop::AST::IntNode < ::RuboCop::AST::Node
   include ::RuboCop::AST::NumericNode
 end
 
-# A node extension for `kwsplat` nodes. This will be used in place of a
-# plain  node when the builder constructs the AST, making its methods
-# available to all `kwsplat` nodes within RuboCop.
+# A node extension for `kwsplat` and `forwarded_kwrestarg` nodes. This will be used in
+# place of a plain node when the builder constructs the AST, making its methods available to
+# all `kwsplat` and `forwarded_kwrestarg` nodes within RuboCop.
 #
 # source://rubocop-ast//lib/rubocop/ast/node/keyword_splat_node.rb#8
 class RuboCop::AST::KeywordSplatNode < ::RuboCop::AST::Node
@@ -1921,6 +1921,13 @@ class RuboCop::AST::KeywordSplatNode < ::RuboCop::AST::Node
   #
   # source://rubocop-ast//lib/rubocop/ast/node/keyword_splat_node.rb#18
   def hash_rocket?; end
+
+  # This provides `forwarded_kwrestarg` node to return true to be compatible with `kwsplat` node.
+  #
+  # @return [true]
+  #
+  # source://rubocop-ast//lib/rubocop/ast/node/keyword_splat_node.rb#48
+  def kwsplat_type?; end
 
   # Custom destructuring method. This is used to normalize the branches
   # for `pair` and `kwsplat` nodes, to add duck typing to `hash` elements.
@@ -2026,10 +2033,10 @@ module RuboCop::AST::MethodDispatchNode
   #
   # @return [Boolean] whether the dispatched method is an access modifier
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#53
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#64
   def access_modifier?; end
 
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#262
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#273
   def adjacent_def_modifier?(param0 = T.unsafe(nil)); end
 
   # Checks whether this node is an arithmetic operation
@@ -2037,14 +2044,14 @@ module RuboCop::AST::MethodDispatchNode
   # @return [Boolean] whether the dispatched method is an arithmetic
   #   operation
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#164
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#175
   def arithmetic_operation?; end
 
   # Checks whether the dispatched method is a setter method.
   #
   # @return [Boolean] whether the dispatched method is a setter
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#96
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#107
   def assignment?; end
 
   # Checks whether the dispatched method is a bare access modifier that
@@ -2053,10 +2060,10 @@ module RuboCop::AST::MethodDispatchNode
   # @return [Boolean] whether the dispatched method is a bare
   #   access modifier
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#62
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#73
   def bare_access_modifier?; end
 
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#267
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#278
   def bare_access_modifier_declaration?(param0 = T.unsafe(nil)); end
 
   # Checks whether this is a binary operation.
@@ -2066,14 +2073,14 @@ module RuboCop::AST::MethodDispatchNode
   #   foo + bar
   # @return [Boolean] whether this method is a binary operation
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#237
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#248
   def binary_operation?; end
 
   # Whether this method dispatch has an explicit block.
   #
   # @return [Boolean] whether the dispatched method has a block
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#156
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#167
   def block_literal?; end
 
   # The `block` or `numblock` node associated with this method dispatch, if any.
@@ -2081,7 +2088,7 @@ module RuboCop::AST::MethodDispatchNode
   # @return [BlockNode, nil] the `block` or `numblock` node associated with this method
   #   call or `nil`
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#35
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#46
   def block_node; end
 
   # Checks whether the name of the dispatched method matches the argument
@@ -2090,7 +2097,7 @@ module RuboCop::AST::MethodDispatchNode
   # @param name [Symbol, String] the method name to check for
   # @return [Boolean] whether the method name matches the argument
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#89
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#100
   def command?(name); end
 
   # Checks whether the *explicit* receiver of this method dispatch is a
@@ -2099,7 +2106,7 @@ module RuboCop::AST::MethodDispatchNode
   # @return [Boolean] whether the receiver of this method dispatch
   #   is a `const` node
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#141
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#152
   def const_receiver?; end
 
   # Checks if this node is part of a chain of `def` or `defs` modifiers.
@@ -2111,7 +2118,7 @@ module RuboCop::AST::MethodDispatchNode
   #   private def foo; end
   # @return [Node | nil] returns the `def|defs` node this is a modifier for,
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#188
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#199
   def def_modifier(node = T.unsafe(nil)); end
 
   # Checks if this node is part of a chain of `def` or `defs` modifiers.
@@ -2123,7 +2130,7 @@ module RuboCop::AST::MethodDispatchNode
   #   private def foo; end
   # @return [Boolean] whether the `def|defs` node is a modifier or not.
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#176
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#187
   def def_modifier?(node = T.unsafe(nil)); end
 
   # Checks whether the dispatched method uses a dot to connect the
@@ -2134,7 +2141,7 @@ module RuboCop::AST::MethodDispatchNode
   #
   # @return [Boolean] whether the method was called with a connecting dot
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#108
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#119
   def dot?; end
 
   # Checks whether the dispatched method uses a double colon to connect the
@@ -2142,7 +2149,7 @@ module RuboCop::AST::MethodDispatchNode
   #
   # @return [Boolean] whether the method was called with a connecting dot
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#116
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#127
   def double_colon?; end
 
   # Checks whether the method dispatch is the implicit form of `#call`,
@@ -2150,10 +2157,10 @@ module RuboCop::AST::MethodDispatchNode
   #
   # @return [Boolean] whether the method is the implicit form of `#call`
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#149
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#160
   def implicit_call?; end
 
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#246
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#257
   def in_macro_scope?(param0 = T.unsafe(nil)); end
 
   # Checks whether this is a lambda. Some versions of parser parses
@@ -2161,7 +2168,7 @@ module RuboCop::AST::MethodDispatchNode
   #
   # @return [Boolean] whether this method is a lambda
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#202
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#213
   def lambda?; end
 
   # Checks whether this is a lambda literal (stabby lambda.)
@@ -2171,7 +2178,7 @@ module RuboCop::AST::MethodDispatchNode
   #   -> (foo) { bar }
   # @return [Boolean] whether this method is a lambda literal
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#213
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#224
   def lambda_literal?; end
 
   # Checks whether the dispatched method is a macro method. A macro method
@@ -2181,7 +2188,7 @@ module RuboCop::AST::MethodDispatchNode
   # @note This does not include DSLs that use nested blocks, like RSpec
   # @return [Boolean] whether the dispatched method is a macro method
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#46
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#57
   def macro?; end
 
   # The name of the dispatched method as a symbol.
@@ -2197,10 +2204,10 @@ module RuboCop::AST::MethodDispatchNode
   # @return [Boolean] whether the dispatched method is a non-bare
   #   access modifier
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#71
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#82
   def non_bare_access_modifier?; end
 
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#272
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#283
   def non_bare_access_modifier_declaration?(param0 = T.unsafe(nil)); end
 
   # The receiving node of the method dispatch.
@@ -2215,22 +2222,29 @@ module RuboCop::AST::MethodDispatchNode
   #
   # @return [Boolean] whether the method was called with a connecting dot
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#124
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#135
   def safe_navigation?; end
+
+  # The source range for the method name or keyword that dispatches this call.
+  #
+  # @return [Parser::Source::Range] the source range for the method name or keyword
+  #
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#34
+  def selector; end
 
   # Checks whether the *explicit* receiver of this method dispatch is
   # `self`.
   #
   # @return [Boolean] whether the receiver of this method dispatch is `self`
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#132
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#143
   def self_receiver?; end
 
   # Checks whether the dispatched method is a setter method.
   #
   # @return [Boolean] whether the dispatched method is a setter
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#96
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#107
   def setter_method?; end
 
   # Checks whether the dispatched method is a bare `private` or `protected`
@@ -2239,7 +2253,7 @@ module RuboCop::AST::MethodDispatchNode
   # @return [Boolean] whether the dispatched method is a bare
   #   `private` or `protected` access modifier
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#80
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#91
   def special_modifier?; end
 
   # Checks whether this is a unary operation.
@@ -2249,7 +2263,7 @@ module RuboCop::AST::MethodDispatchNode
   #   -foo
   # @return [Boolean] whether this method is a unary operation
   #
-  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#224
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/method_dispatch_node.rb#235
   def unary_operation?; end
 end
 
@@ -2636,7 +2650,7 @@ class RuboCop::AST::Node < ::Parser::AST::Node
   # source://rubocop-ast//lib/rubocop/ast/node.rb#512
   def class_constructor?(param0 = T.unsafe(nil)); end
 
-  # source://rubocop-ast//lib/rubocop/ast/node.rb#524
+  # source://rubocop-ast//lib/rubocop/ast/node.rb#530
   def class_definition?(param0 = T.unsafe(nil)); end
 
   # source://rubocop-ast//lib/rubocop/ast/node.rb#111
@@ -2942,7 +2956,7 @@ class RuboCop::AST::Node < ::Parser::AST::Node
   # source://rubocop-ast//lib/rubocop/ast/node.rb#111
   def mlhs_type?; end
 
-  # source://rubocop-ast//lib/rubocop/ast/node.rb#531
+  # source://rubocop-ast//lib/rubocop/ast/node.rb#537
   def module_definition?(param0 = T.unsafe(nil)); end
 
   # source://rubocop-ast//lib/rubocop/ast/node.rb#111
@@ -2960,7 +2974,7 @@ class RuboCop::AST::Node < ::Parser::AST::Node
   # source://rubocop-ast//lib/rubocop/ast/node.rb#375
   def mutable_literal?; end
 
-  # source://rubocop-ast//lib/rubocop/ast/node.rb#665
+  # source://rubocop-ast//lib/rubocop/ast/node.rb#671
   def new_class_or_module_block?(param0 = T.unsafe(nil)); end
 
   # source://rubocop-ast//lib/rubocop/ast/node.rb#111
@@ -3080,7 +3094,7 @@ class RuboCop::AST::Node < ::Parser::AST::Node
   #
   # @return [Boolean]
   #
-  # source://rubocop-ast//lib/rubocop/ast/node.rb#576
+  # source://rubocop-ast//lib/rubocop/ast/node.rb#582
   def pure?; end
 
   # @return [Boolean]
@@ -3218,7 +3232,7 @@ class RuboCop::AST::Node < ::Parser::AST::Node
 
   # @deprecated Use `:class_constructor?`
   #
-  # source://rubocop-ast//lib/rubocop/ast/node.rb#519
+  # source://rubocop-ast//lib/rubocop/ast/node.rb#525
   def struct_constructor?(param0 = T.unsafe(nil)); end
 
   # source://rubocop-ast//lib/rubocop/ast/node.rb#111
@@ -3267,7 +3281,7 @@ class RuboCop::AST::Node < ::Parser::AST::Node
   #
   # @return [Boolean]
   #
-  # source://rubocop-ast//lib/rubocop/ast/node.rb#545
+  # source://rubocop-ast//lib/rubocop/ast/node.rb#551
   def value_used?; end
 
   # @return [Boolean]
@@ -3302,12 +3316,12 @@ class RuboCop::AST::Node < ::Parser::AST::Node
 
   # @return [Boolean]
   #
-  # source://rubocop-ast//lib/rubocop/ast/node.rb#604
+  # source://rubocop-ast//lib/rubocop/ast/node.rb#610
   def begin_value_used?; end
 
   # @return [Boolean]
   #
-  # source://rubocop-ast//lib/rubocop/ast/node.rb#615
+  # source://rubocop-ast//lib/rubocop/ast/node.rb#621
   def case_if_value_used?; end
 
   # source://rubocop-ast//lib/rubocop/ast/node.rb#305
@@ -3315,24 +3329,24 @@ class RuboCop::AST::Node < ::Parser::AST::Node
 
   # @return [Boolean]
   #
-  # source://rubocop-ast//lib/rubocop/ast/node.rb#609
+  # source://rubocop-ast//lib/rubocop/ast/node.rb#615
   def for_value_used?; end
 
-  # source://rubocop-ast//lib/rubocop/ast/node.rb#651
+  # source://rubocop-ast//lib/rubocop/ast/node.rb#657
   def parent_module_name_for_block(ancestor); end
 
-  # source://rubocop-ast//lib/rubocop/ast/node.rb#639
+  # source://rubocop-ast//lib/rubocop/ast/node.rb#645
   def parent_module_name_for_sclass(sclass_node); end
 
-  # source://rubocop-ast//lib/rubocop/ast/node.rb#626
+  # source://rubocop-ast//lib/rubocop/ast/node.rb#632
   def parent_module_name_part(node); end
 
-  # source://rubocop-ast//lib/rubocop/ast/node.rb#594
+  # source://rubocop-ast//lib/rubocop/ast/node.rb#600
   def visit_ancestors(types); end
 
   # @return [Boolean]
   #
-  # source://rubocop-ast//lib/rubocop/ast/node.rb#621
+  # source://rubocop-ast//lib/rubocop/ast/node.rb#627
   def while_until_value_used?; end
 end
 
@@ -4632,6 +4646,9 @@ class RuboCop::AST::NodePattern::Node < ::Parser::AST::Node
   # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#19
   def rest?; end
 
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#78
+  def source_range; end
+
   # @return [Boolean] returns whether it matches a variable number of elements
   #
   # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#58
@@ -4643,67 +4660,67 @@ end
 
 # Node class for `<int str ...>`
 #
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#176
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#180
 class RuboCop::AST::NodePattern::Node::AnyOrder < ::RuboCop::AST::NodePattern::Node
   include ::RuboCop::AST::NodePattern::Node::ForbidInSeqHead
 
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#194
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#198
   def arity; end
 
   # @return [Boolean]
   #
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#186
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#190
   def ends_with_rest?; end
 
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#190
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#194
   def rest_node; end
 
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#182
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#186
   def term_nodes; end
 end
 
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#179
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#183
 RuboCop::AST::NodePattern::Node::AnyOrder::ARITIES = T.let(T.unsafe(nil), Hash)
 
 # Node class for `$something`
 #
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#93
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#97
 class RuboCop::AST::NodePattern::Node::Capture < ::RuboCop::AST::NodePattern::Node
   # source://forwardable/1.3.3/forwardable.rb#231
   def arity(*args, **_arg1, &block); end
 
   # @return [Boolean]
   #
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#97
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#101
   def capture?; end
 
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#105
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#109
   def in_sequence_head; end
 
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#101
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#105
   def nb_captures; end
 
   # source://forwardable/1.3.3/forwardable.rb#231
   def rest?(*args, **_arg1, &block); end
 end
 
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#82
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#86
 module RuboCop::AST::NodePattern::Node::ForbidInSeqHead
   # @raise [NodePattern::Invalid]
   #
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#83
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#87
   def in_sequence_head; end
 end
 
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#136
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#140
 RuboCop::AST::NodePattern::Node::FunctionCall = RuboCop::AST::NodePattern::Node::Predicate
 
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#78
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#82
 RuboCop::AST::NodePattern::Node::INT_TO_RANGE = T.let(T.unsafe(nil), Hash)
 
 # Registry
 #
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#246
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#250
 RuboCop::AST::NodePattern::Node::MAP = T.let(T.unsafe(nil), Hash)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#12
@@ -4711,83 +4728,83 @@ RuboCop::AST::NodePattern::Node::MATCHES_WITHIN_SET = T.let(T.unsafe(nil), Set)
 
 # Node class for `predicate?(:arg, :list)`
 #
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#127
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#131
 class RuboCop::AST::NodePattern::Node::Predicate < ::RuboCop::AST::NodePattern::Node
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#132
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#136
   def arg_list; end
 
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#128
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#132
   def method_name; end
 end
 
 # Node class for `int+`
 #
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#139
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#143
 class RuboCop::AST::NodePattern::Node::Repetition < ::RuboCop::AST::NodePattern::Node
   include ::RuboCop::AST::NodePattern::Node::ForbidInSeqHead
 
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#152
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#156
   def arity; end
 
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#142
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#146
   def operator; end
 end
 
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#146
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#150
 RuboCop::AST::NodePattern::Node::Repetition::ARITIES = T.let(T.unsafe(nil), Hash)
 
 # Node class for `...`
 #
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#158
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#162
 class RuboCop::AST::NodePattern::Node::Rest < ::RuboCop::AST::NodePattern::Node
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#166
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#170
   def arity; end
 
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#170
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#174
   def in_sequence_head; end
 
   # @return [Boolean]
   #
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#162
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#166
   def rest?; end
 end
 
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#159
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#163
 RuboCop::AST::NodePattern::Node::Rest::ARITY = T.let(T.unsafe(nil), Range)
 
 # Node class for `(type first second ...)`
 #
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#114
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#118
 class RuboCop::AST::NodePattern::Node::Sequence < ::RuboCop::AST::NodePattern::Node
   include ::RuboCop::AST::NodePattern::Node::ForbidInSeqHead
 
   # @return [Sequence] a new instance of Sequence
   #
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#117
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#121
   def initialize(type, children = T.unsafe(nil), properties = T.unsafe(nil)); end
 end
 
 # A list (potentially empty) of nodes; part of a Union
 #
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#202
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#206
 class RuboCop::AST::NodePattern::Node::Subsequence < ::RuboCop::AST::NodePattern::Node
   include ::RuboCop::AST::NodePattern::Node::ForbidInSeqHead
 
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#205
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#209
   def arity; end
 
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#210
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#214
   def in_sequence_head; end
 end
 
 # Node class for `{ ... }`
 #
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#220
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#224
 class RuboCop::AST::NodePattern::Node::Union < ::RuboCop::AST::NodePattern::Node
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#221
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#225
   def arity; end
 
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#228
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/node.rb#232
   def in_sequence_head; end
 end
 
@@ -4987,15 +5004,15 @@ RuboCop::AST::NodePattern::Parser::Racc_token_to_s_table = T.let(T.unsafe(nil), 
 class RuboCop::AST::NodePattern::Parser::WithMeta < ::RuboCop::AST::NodePattern::Parser
   # Returns the value of attribute comments.
   #
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/with_meta.rb#99
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/with_meta.rb#98
   def comments; end
 
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/with_meta.rb#101
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/with_meta.rb#100
   def do_parse; end
 
   # Returns the value of attribute tokens.
   #
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/with_meta.rb#99
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/with_meta.rb#98
   def tokens; end
 end
 
@@ -5026,7 +5043,7 @@ class RuboCop::AST::NodePattern::Parser::WithMeta::Builder < ::RuboCop::AST::Nod
   # source://rubocop-ast//lib/rubocop/ast/node_pattern/with_meta.rb#71
   def n(type, children, source_map); end
 
-  # source://rubocop-ast//lib/rubocop/ast/node_pattern/with_meta.rb#86
+  # source://rubocop-ast//lib/rubocop/ast/node_pattern/with_meta.rb#85
   def source_map(token_or_range, begin_t: T.unsafe(nil), end_t: T.unsafe(nil), operator_t: T.unsafe(nil), selector_t: T.unsafe(nil)); end
 end
 
@@ -5100,6 +5117,9 @@ RuboCop::AST::NodePattern::Sets::SET_ANY_ALL_NORETURN_ETC = T.let(T.unsafe(nil),
 RuboCop::AST::NodePattern::Sets::SET_ANY_EMPTY = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
+RuboCop::AST::NodePattern::Sets::SET_ANY_EMPTY_NONE_ETC = T.let(T.unsafe(nil), Set)
+
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET_ATTR_READER_ATTR_WRITER_ATTR_ACCESSOR = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
@@ -5127,6 +5147,9 @@ RuboCop::AST::NodePattern::Sets::SET_CLASS_MODULE = T.let(T.unsafe(nil), Set)
 RuboCop::AST::NodePattern::Sets::SET_CLASS_MODULE_STRUCT = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
+RuboCop::AST::NodePattern::Sets::SET_CLONE_DUP_FREEZE = T.let(T.unsafe(nil), Set)
+
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET_CONSTANTIZE_CONSTANTS_CONST_GET = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
@@ -5145,6 +5168,9 @@ RuboCop::AST::NodePattern::Sets::SET_EACH_WITH_INDEX_WITH_INDEX = T.let(T.unsafe
 RuboCop::AST::NodePattern::Sets::SET_EACH_WITH_OBJECT_WITH_OBJECT = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
+RuboCop::AST::NodePattern::Sets::SET_ENV = T.let(T.unsafe(nil), Set)
+
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET_ESCAPE_ENCODE_UNESCAPE_DECODE = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
@@ -5154,6 +5180,15 @@ RuboCop::AST::NodePattern::Sets::SET_EXIST_EXISTS = T.let(T.unsafe(nil), Set)
 RuboCop::AST::NodePattern::Sets::SET_FILETEST_FILE_DIR_SHELL = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
+RuboCop::AST::NodePattern::Sets::SET_FILE_DIR = T.let(T.unsafe(nil), Set)
+
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
+RuboCop::AST::NodePattern::Sets::SET_FILE_FILETEST = T.let(T.unsafe(nil), Set)
+
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
+RuboCop::AST::NodePattern::Sets::SET_FILE_TEMPFILE_STRINGIO = T.let(T.unsafe(nil), Set)
+
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET_FIRST_LAST__ETC = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
@@ -5161,6 +5196,9 @@ RuboCop::AST::NodePattern::Sets::SET_FIXNUM_BIGNUM = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET_FORMAT_SPRINTF_PRINTF = T.let(T.unsafe(nil), Set)
+
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
+RuboCop::AST::NodePattern::Sets::SET_GETHOSTBYADDR_GETHOSTBYNAME = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET_GSUB_GSUB = T.let(T.unsafe(nil), Set)
@@ -5193,7 +5231,13 @@ RuboCop::AST::NodePattern::Sets::SET_LOAD_RESTORE = T.let(T.unsafe(nil), Set)
 RuboCop::AST::NodePattern::Sets::SET_MAP_COLLECT = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
+RuboCop::AST::NodePattern::Sets::SET_MODULE_FUNCTION_RUBY2_KEYWORDS = T.let(T.unsafe(nil), Set)
+
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET_NEW_ = T.let(T.unsafe(nil), Set)
+
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
+RuboCop::AST::NodePattern::Sets::SET_NEW_COMPILE = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET_NEW_OPEN = T.let(T.unsafe(nil), Set)
@@ -5229,13 +5273,19 @@ RuboCop::AST::NodePattern::Sets::SET_RAISE_FAIL = T.let(T.unsafe(nil), Set)
 RuboCop::AST::NodePattern::Sets::SET_RAISE_FAIL_THROW_ETC = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
+RuboCop::AST::NodePattern::Sets::SET_READ_BINREAD = T.let(T.unsafe(nil), Set)
+
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET_REDUCE_INJECT = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
-RuboCop::AST::NodePattern::Sets::SET_REJECT_REJECT = T.let(T.unsafe(nil), Set)
+RuboCop::AST::NodePattern::Sets::SET_REJECT_DELETE_IF_REJECT = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET_REQUIRE_REQUIRE_RELATIVE = T.let(T.unsafe(nil), Set)
+
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
+RuboCop::AST::NodePattern::Sets::SET_SELECT_FILTER_FIND_ALL = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET_SELECT_SELECT = T.let(T.unsafe(nil), Set)
@@ -5260,9 +5310,6 @@ RuboCop::AST::NodePattern::Sets::SET_SUCC_PRED_NEXT = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET_TASK_NAMESPACE = T.let(T.unsafe(nil), Set)
-
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
-RuboCop::AST::NodePattern::Sets::SET_TEMPFILE_STRINGIO = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET_TO_ENUM_ENUM_FOR = T.let(T.unsafe(nil), Set)
@@ -5319,6 +5366,9 @@ RuboCop::AST::NodePattern::Sets::SET___6 = T.let(T.unsafe(nil), Set)
 RuboCop::AST::NodePattern::Sets::SET___7 = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
+RuboCop::AST::NodePattern::Sets::SET___8 = T.let(T.unsafe(nil), Set)
+
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET___EQL_ETC = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
@@ -5331,6 +5381,9 @@ RuboCop::AST::NodePattern::Sets::SET___METHOD_____CALLEE__ = T.let(T.unsafe(nil)
 RuboCop::AST::NodePattern::Sets::SET____ = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
+RuboCop::AST::NodePattern::Sets::SET____2 = T.let(T.unsafe(nil), Set)
+
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET____ETC = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
@@ -5338,6 +5391,9 @@ RuboCop::AST::NodePattern::Sets::SET____ETC_2 = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET____ETC_3 = T.let(T.unsafe(nil), Set)
+
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
+RuboCop::AST::NodePattern::Sets::SET____ETC_4 = T.let(T.unsafe(nil), Set)
 
 # source://rubocop-ast//lib/rubocop/ast/node_pattern/sets.rb#10
 RuboCop::AST::NodePattern::Sets::SET_____2 = T.let(T.unsafe(nil), Set)
@@ -5859,13 +5915,13 @@ class RuboCop::AST::ProcessedSource
   # source://rubocop-ast//lib/rubocop/ast/processed_source.rb#190
   def comment_index; end
 
-  # source://rubocop-ast//lib/rubocop/ast/processed_source.rb#275
+  # source://rubocop-ast//lib/rubocop/ast/processed_source.rb#278
   def create_parser(ruby_version); end
 
-  # source://rubocop-ast//lib/rubocop/ast/processed_source.rb#291
+  # source://rubocop-ast//lib/rubocop/ast/processed_source.rb#294
   def first_token_index(range_or_node); end
 
-  # source://rubocop-ast//lib/rubocop/ast/processed_source.rb#296
+  # source://rubocop-ast//lib/rubocop/ast/processed_source.rb#299
   def last_token_index(range_or_node); end
 
   # source://rubocop-ast//lib/rubocop/ast/processed_source.rb#196
@@ -5874,7 +5930,7 @@ class RuboCop::AST::ProcessedSource
   # source://rubocop-ast//lib/rubocop/ast/processed_source.rb#230
   def parser_class(ruby_version); end
 
-  # source://rubocop-ast//lib/rubocop/ast/processed_source.rb#301
+  # source://rubocop-ast//lib/rubocop/ast/processed_source.rb#304
   def source_range(range_or_node); end
 
   # source://rubocop-ast//lib/rubocop/ast/processed_source.rb#213
@@ -6948,12 +7004,3 @@ class RuboCop::AST::YieldNode < ::RuboCop::AST::Node
   # source://rubocop-ast//lib/rubocop/ast/node/yield_node.rb#16
   def node_parts; end
 end
-
-# source://rubocop/1.43.0/lib/rubocop/ast_aliases.rb#5
-RuboCop::NodePattern = RuboCop::AST::NodePattern
-
-# source://rubocop/1.43.0/lib/rubocop/ast_aliases.rb#6
-RuboCop::ProcessedSource = RuboCop::AST::ProcessedSource
-
-# source://rubocop/1.43.0/lib/rubocop/ast_aliases.rb#7
-RuboCop::Token = RuboCop::AST::Token

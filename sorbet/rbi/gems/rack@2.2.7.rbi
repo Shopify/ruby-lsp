@@ -1576,30 +1576,6 @@ end
 # source://rack//lib/rack/handler.rb#48
 Rack::Handler::SERVER_NAMES = T.let(T.unsafe(nil), Array)
 
-# source://rack//lib/rack/handler/webrick.rb#25
-class Rack::Handler::WEBrick < ::WEBrick::HTTPServlet::AbstractServlet
-  # @return [WEBrick] a new instance of WEBrick
-  #
-  # source://rack//lib/rack/handler/webrick.rb#61
-  def initialize(server, app); end
-
-  # source://rack//lib/rack/handler/webrick.rb#66
-  def service(req, res); end
-
-  class << self
-    # @yield [@server]
-    #
-    # source://rack//lib/rack/handler/webrick.rb#26
-    def run(app, **options); end
-
-    # source://rack//lib/rack/handler/webrick.rb#54
-    def shutdown; end
-
-    # source://rack//lib/rack/handler/webrick.rb#44
-    def valid_options; end
-  end
-end
-
 # Rack::Head returns an empty body for all HEAD requests. It leaves
 # all other requests unchanged.
 #
@@ -2297,149 +2273,152 @@ Rack::Multipart::MULTIPART_CONTENT_TYPE = T.let(T.unsafe(nil), Regexp)
 # source://rack//lib/rack/multipart/parser.rb#7
 class Rack::Multipart::MultipartPartLimitError < ::Errno::EMFILE; end
 
-# source://rack//lib/rack/multipart/parser.rb#9
+# source://rack//lib/rack/multipart/parser.rb#8
+class Rack::Multipart::MultipartTotalPartLimitError < ::StandardError; end
+
+# source://rack//lib/rack/multipart/parser.rb#10
 class Rack::Multipart::Parser
   # @return [Parser] a new instance of Parser
   #
-  # source://rack//lib/rack/multipart/parser.rb#167
+  # source://rack//lib/rack/multipart/parser.rb#178
   def initialize(boundary, tempfile, bufsize, query_parser); end
 
-  # source://rack//lib/rack/multipart/parser.rb#185
+  # source://rack//lib/rack/multipart/parser.rb#196
   def on_read(content); end
 
-  # source://rack//lib/rack/multipart/parser.rb#191
+  # source://rack//lib/rack/multipart/parser.rb#202
   def result; end
 
   # Returns the value of attribute state.
   #
-  # source://rack//lib/rack/multipart/parser.rb#165
+  # source://rack//lib/rack/multipart/parser.rb#176
   def state; end
 
   private
 
-  # source://rack//lib/rack/multipart/parser.rb#283
+  # source://rack//lib/rack/multipart/parser.rb#294
   def consume_boundary; end
 
-  # source://rack//lib/rack/multipart/parser.rb#281
+  # source://rack//lib/rack/multipart/parser.rb#292
   def full_boundary; end
 
-  # source://rack//lib/rack/multipart/parser.rb#293
+  # source://rack//lib/rack/multipart/parser.rb#304
   def get_filename(head); end
 
-  # source://rack//lib/rack/multipart/parser.rb#229
+  # source://rack//lib/rack/multipart/parser.rb#240
   def handle_consume_token; end
 
-  # source://rack//lib/rack/multipart/parser.rb#358
+  # source://rack//lib/rack/multipart/parser.rb#369
   def handle_empty_content!(content); end
 
-  # source://rack//lib/rack/multipart/parser.rb#220
+  # source://rack//lib/rack/multipart/parser.rb#231
   def handle_fast_forward; end
 
-  # source://rack//lib/rack/multipart/parser.rb#262
+  # source://rack//lib/rack/multipart/parser.rb#273
   def handle_mime_body; end
 
-  # source://rack//lib/rack/multipart/parser.rb#239
+  # source://rack//lib/rack/multipart/parser.rb#250
   def handle_mime_head; end
 
-  # source://rack//lib/rack/multipart/parser.rb#203
+  # source://rack//lib/rack/multipart/parser.rb#214
   def run_parser; end
 
-  # source://rack//lib/rack/multipart/parser.rb#330
+  # source://rack//lib/rack/multipart/parser.rb#341
   def tag_multipart_encoding(filename, content_type, name, body); end
 
   class << self
-    # source://rack//lib/rack/multipart/parser.rb#63
+    # source://rack//lib/rack/multipart/parser.rb#64
     def parse(io, content_length, content_type, tmpfile, bufsize, qp); end
 
-    # source://rack//lib/rack/multipart/parser.rb#56
+    # source://rack//lib/rack/multipart/parser.rb#57
     def parse_boundary(content_type); end
   end
 end
 
-# source://rack//lib/rack/multipart/parser.rb#18
+# source://rack//lib/rack/multipart/parser.rb#19
 Rack::Multipart::Parser::BOUNDARY_REGEX = T.let(T.unsafe(nil), Regexp)
 
-# source://rack//lib/rack/multipart/parser.rb#12
+# source://rack//lib/rack/multipart/parser.rb#13
 Rack::Multipart::Parser::BUFSIZE = T.let(T.unsafe(nil), Integer)
 
-# source://rack//lib/rack/multipart/parser.rb#20
+# source://rack//lib/rack/multipart/parser.rb#21
 class Rack::Multipart::Parser::BoundedIO
   # @return [BoundedIO] a new instance of BoundedIO
   #
-  # source://rack//lib/rack/multipart/parser.rb#21
+  # source://rack//lib/rack/multipart/parser.rb#22
   def initialize(io, content_length); end
 
-  # source://rack//lib/rack/multipart/parser.rb#27
+  # source://rack//lib/rack/multipart/parser.rb#28
   def read(size, outbuf = T.unsafe(nil)); end
 
-  # source://rack//lib/rack/multipart/parser.rb#48
+  # source://rack//lib/rack/multipart/parser.rb#49
   def rewind; end
 end
 
-# source://rack//lib/rack/multipart/parser.rb#328
+# source://rack//lib/rack/multipart/parser.rb#339
 Rack::Multipart::Parser::CHARSET = T.let(T.unsafe(nil), String)
 
-# source://rack//lib/rack/multipart/parser.rb#84
+# source://rack//lib/rack/multipart/parser.rb#85
 class Rack::Multipart::Parser::Collector
   include ::Enumerable
 
   # @return [Collector] a new instance of Collector
   #
-  # source://rack//lib/rack/multipart/parser.rb#120
+  # source://rack//lib/rack/multipart/parser.rb#121
   def initialize(tempfile); end
 
-  # source://rack//lib/rack/multipart/parser.rb#126
+  # source://rack//lib/rack/multipart/parser.rb#127
   def each; end
 
-  # source://rack//lib/rack/multipart/parser.rb#146
+  # source://rack//lib/rack/multipart/parser.rb#147
   def on_mime_body(mime_index, content); end
 
-  # source://rack//lib/rack/multipart/parser.rb#150
+  # source://rack//lib/rack/multipart/parser.rb#151
   def on_mime_finish(mime_index); end
 
-  # source://rack//lib/rack/multipart/parser.rb#130
+  # source://rack//lib/rack/multipart/parser.rb#131
   def on_mime_head(mime_index, head, filename, content_type, name); end
 
   private
 
-  # source://rack//lib/rack/multipart/parser.rb#155
-  def check_open_files; end
+  # source://rack//lib/rack/multipart/parser.rb#156
+  def check_part_limits; end
 end
 
-# source://rack//lib/rack/multipart/parser.rb#108
+# source://rack//lib/rack/multipart/parser.rb#109
 class Rack::Multipart::Parser::Collector::BufferPart < ::Rack::Multipart::Parser::Collector::MimePart
-  # source://rack//lib/rack/multipart/parser.rb#110
+  # source://rack//lib/rack/multipart/parser.rb#111
   def close; end
 
   # @return [Boolean]
   #
-  # source://rack//lib/rack/multipart/parser.rb#109
+  # source://rack//lib/rack/multipart/parser.rb#110
   def file?; end
 end
 
-# source://rack//lib/rack/multipart/parser.rb#85
+# source://rack//lib/rack/multipart/parser.rb#86
 class Rack::Multipart::Parser::Collector::MimePart < ::Struct
   # @yield [data]
   #
-  # source://rack//lib/rack/multipart/parser.rb#86
+  # source://rack//lib/rack/multipart/parser.rb#87
   def get_data; end
 end
 
-# source://rack//lib/rack/multipart/parser.rb#113
+# source://rack//lib/rack/multipart/parser.rb#114
 class Rack::Multipart::Parser::Collector::TempfilePart < ::Rack::Multipart::Parser::Collector::MimePart
-  # source://rack//lib/rack/multipart/parser.rb#115
+  # source://rack//lib/rack/multipart/parser.rb#116
   def close; end
 
   # @return [Boolean]
   #
-  # source://rack//lib/rack/multipart/parser.rb#114
+  # source://rack//lib/rack/multipart/parser.rb#115
   def file?; end
 end
 
-# source://rack//lib/rack/multipart/parser.rb#54
+# source://rack//lib/rack/multipart/parser.rb#55
 Rack::Multipart::Parser::EMPTY = T.let(T.unsafe(nil), Rack::Multipart::Parser::MultipartInfo)
 
-# source://rack//lib/rack/multipart/parser.rb#53
+# source://rack//lib/rack/multipart/parser.rb#54
 class Rack::Multipart::Parser::MultipartInfo < ::Struct
   # Returns the value of attribute params
   #
@@ -2472,10 +2451,10 @@ class Rack::Multipart::Parser::MultipartInfo < ::Struct
   end
 end
 
-# source://rack//lib/rack/multipart/parser.rb#14
+# source://rack//lib/rack/multipart/parser.rb#15
 Rack::Multipart::Parser::TEMPFILE_FACTORY = T.let(T.unsafe(nil), Proc)
 
-# source://rack//lib/rack/multipart/parser.rb#13
+# source://rack//lib/rack/multipart/parser.rb#14
 Rack::Multipart::Parser::TEXT_PLAIN = T.let(T.unsafe(nil), String)
 
 # source://rack//lib/rack/multipart.rb#28
@@ -2999,13 +2978,13 @@ class Rack::Request
   # source://rack//lib/rack/request.rb#35
   def update_param(k, v); end
 
-  # source://yard/0.9.28/lib/yard/server/rack_adapter.rb#86
+  # source://yard/0.9.34/lib/yard/server/rack_adapter.rb#94
   def version_supplied; end
 
-  # source://yard/0.9.28/lib/yard/server/rack_adapter.rb#86
+  # source://yard/0.9.34/lib/yard/server/rack_adapter.rb#94
   def version_supplied=(_arg0); end
 
-  # source://yard/0.9.28/lib/yard/server/rack_adapter.rb#88
+  # source://yard/0.9.34/lib/yard/server/rack_adapter.rb#96
   def xhr?; end
 
   class << self
@@ -5119,13 +5098,13 @@ end
 module Rack::Utils
   private
 
-  # source://rack//lib/rack/utils.rb#226
+  # source://rack//lib/rack/utils.rb#237
   def add_cookie_to_header(header, key, value); end
 
   # Adds a cookie that will *remove* a cookie from the client.  Hence the
   # strange method name.
   #
-  # source://rack//lib/rack/utils.rb#309
+  # source://rack//lib/rack/utils.rb#320
   def add_remove_cookie_to_header(header, key, value = T.unsafe(nil)); end
 
   # Return best accept value to use, based on the algorithm
@@ -5133,31 +5112,31 @@ module Rack::Utils
   # matches (same specificity and quality), the value returned
   # is arbitrary.
   #
-  # source://rack//lib/rack/utils.rb#148
+  # source://rack//lib/rack/utils.rb#159
   def best_q_match(q_value_header, available_mimes); end
 
-  # source://rack//lib/rack/utils.rb#115
+  # source://rack//lib/rack/utils.rb#126
   def build_nested_query(value, prefix = T.unsafe(nil)); end
 
-  # source://rack//lib/rack/utils.rb#105
+  # source://rack//lib/rack/utils.rb#116
   def build_query(params); end
 
   # Parses the "Range:" header, if present, into an array of Range objects.
   # Returns nil if the header is missing or syntactically invalid.
   # Returns an empty array if none of the ranges are satisfiable.
   #
-  # source://rack//lib/rack/utils.rb#341
+  # source://rack//lib/rack/utils.rb#352
   def byte_ranges(env, size); end
 
-  # source://rack//lib/rack/utils.rb#595
+  # source://rack//lib/rack/utils.rb#606
   def clean_path_info(path_info); end
 
   # :nocov:
   #
-  # source://rack//lib/rack/utils.rb#86
+  # source://rack//lib/rack/utils.rb#97
   def clock_time; end
 
-  # source://rack//lib/rack/utils.rb#302
+  # source://rack//lib/rack/utils.rb#313
   def delete_cookie_header!(header, key, value = T.unsafe(nil)); end
 
   # URI escapes. (CGI style space to +)
@@ -5167,7 +5146,7 @@ module Rack::Utils
 
   # Escape ampersands, brackets and quotes to their HTML/XML entities.
   #
-  # source://rack//lib/rack/utils.rb#173
+  # source://rack//lib/rack/utils.rb#184
   def escape_html(string); end
 
   # Like URI escaping, but with %20 instead of +. Strictly speaking this is
@@ -5176,25 +5155,25 @@ module Rack::Utils
   # source://rack//lib/rack/utils.rb#44
   def escape_path(s); end
 
-  # source://rack//lib/rack/utils.rb#346
+  # source://rack//lib/rack/utils.rb#357
   def get_byte_ranges(http_range, size); end
 
-  # source://rack//lib/rack/utils.rb#272
+  # source://rack//lib/rack/utils.rb#283
   def make_delete_cookie_header(header, key, value); end
 
-  # source://rack//lib/rack/utils.rb#209
+  # source://rack//lib/rack/utils.rb#220
   def parse_cookies(env); end
 
-  # source://rack//lib/rack/utils.rb#213
+  # source://rack//lib/rack/utils.rb#224
   def parse_cookies_header(header); end
 
-  # source://rack//lib/rack/utils.rb#101
+  # source://rack//lib/rack/utils.rb#112
   def parse_nested_query(qs, d = T.unsafe(nil)); end
 
-  # source://rack//lib/rack/utils.rb#97
+  # source://rack//lib/rack/utils.rb#108
   def parse_query(qs, d = T.unsafe(nil), &unescaper); end
 
-  # source://rack//lib/rack/utils.rb#133
+  # source://rack//lib/rack/utils.rb#144
   def q_values(q_value_header); end
 
   # Modified version of stdlib time.rb Time#rfc2822 to use '%d-%b-%Y' instead
@@ -5206,10 +5185,10 @@ module Rack::Utils
   # Do not use %a and %b from Time.strptime, it would use localized names for
   # weekday and month.
   #
-  # source://rack//lib/rack/utils.rb#332
+  # source://rack//lib/rack/utils.rb#343
   def rfc2109(time); end
 
-  # source://rack//lib/rack/utils.rb#319
+  # source://rack//lib/rack/utils.rb#330
   def rfc2822(time); end
 
   # Constant time string comparison.
@@ -5219,16 +5198,16 @@ module Rack::Utils
   # on variable length plaintext strings because it could leak length info
   # via timing attacks.
   #
-  # source://rack//lib/rack/utils.rb#381
+  # source://rack//lib/rack/utils.rb#392
   def secure_compare(a, b); end
 
-  # source://rack//lib/rack/utils.rb#177
+  # source://rack//lib/rack/utils.rb#188
   def select_best_encoding(available_encodings, accept_encoding); end
 
-  # source://rack//lib/rack/utils.rb#267
+  # source://rack//lib/rack/utils.rb#278
   def set_cookie_header!(header, key, value); end
 
-  # source://rack//lib/rack/utils.rb#585
+  # source://rack//lib/rack/utils.rb#596
   def status_code(status); end
 
   # Unescapes a URI escaped string with +encoding+. +encoding+ will be the
@@ -5243,17 +5222,17 @@ module Rack::Utils
   # source://rack//lib/rack/utils.rb#50
   def unescape_path(s); end
 
-  # source://rack//lib/rack/utils.rb#612
+  # source://rack//lib/rack/utils.rb#623
   def valid_path?(path); end
 
   class << self
-    # source://rack//lib/rack/utils.rb#226
+    # source://rack//lib/rack/utils.rb#237
     def add_cookie_to_header(header, key, value); end
 
     # Adds a cookie that will *remove* a cookie from the client.  Hence the
     # strange method name.
     #
-    # source://rack//lib/rack/utils.rb#309
+    # source://rack//lib/rack/utils.rb#320
     def add_remove_cookie_to_header(header, key, value = T.unsafe(nil)); end
 
     # Return best accept value to use, based on the algorithm
@@ -5261,26 +5240,26 @@ module Rack::Utils
     # matches (same specificity and quality), the value returned
     # is arbitrary.
     #
-    # source://rack//lib/rack/utils.rb#148
+    # source://rack//lib/rack/utils.rb#159
     def best_q_match(q_value_header, available_mimes); end
 
-    # source://rack//lib/rack/utils.rb#115
+    # source://rack//lib/rack/utils.rb#126
     def build_nested_query(value, prefix = T.unsafe(nil)); end
 
-    # source://rack//lib/rack/utils.rb#105
+    # source://rack//lib/rack/utils.rb#116
     def build_query(params); end
 
     # Parses the "Range:" header, if present, into an array of Range objects.
     # Returns nil if the header is missing or syntactically invalid.
     # Returns an empty array if none of the ranges are satisfiable.
     #
-    # source://rack//lib/rack/utils.rb#341
+    # source://rack//lib/rack/utils.rb#352
     def byte_ranges(env, size); end
 
-    # source://rack//lib/rack/utils.rb#595
+    # source://rack//lib/rack/utils.rb#606
     def clean_path_info(path_info); end
 
-    # source://rack//lib/rack/utils.rb#86
+    # source://rack//lib/rack/utils.rb#97
     def clock_time; end
 
     # Returns the value of attribute default_query_parser.
@@ -5295,7 +5274,7 @@ module Rack::Utils
     # source://rack//lib/rack/utils.rb#29
     def default_query_parser=(_arg0); end
 
-    # source://rack//lib/rack/utils.rb#302
+    # source://rack//lib/rack/utils.rb#313
     def delete_cookie_header!(header, key, value = T.unsafe(nil)); end
 
     # URI escapes. (CGI style space to +)
@@ -5305,7 +5284,7 @@ module Rack::Utils
 
     # Escape ampersands, brackets and quotes to their HTML/XML entities.
     #
-    # source://rack//lib/rack/utils.rb#173
+    # source://rack//lib/rack/utils.rb#184
     def escape_html(string); end
 
     # Like URI escaping, but with %20 instead of +. Strictly speaking this is
@@ -5314,49 +5293,75 @@ module Rack::Utils
     # source://rack//lib/rack/utils.rb#44
     def escape_path(s); end
 
-    # source://rack//lib/rack/utils.rb#346
+    # source://rack//lib/rack/utils.rb#357
     def get_byte_ranges(http_range, size); end
 
-    # source://rack//lib/rack/utils.rb#77
+    # source://rack//lib/rack/utils.rb#88
     def key_space_limit; end
 
-    # source://rack//lib/rack/utils.rb#81
+    # source://rack//lib/rack/utils.rb#92
     def key_space_limit=(v); end
 
-    # source://rack//lib/rack/utils.rb#272
+    # source://rack//lib/rack/utils.rb#283
     def make_delete_cookie_header(header, key, value); end
 
-    # Returns the value of attribute multipart_part_limit.
+    # Returns the value of attribute multipart_file_limit.
     #
-    # source://rack//lib/rack/utils.rb#61
+    # source://rack//lib/rack/utils.rb#63
+    def multipart_file_limit; end
+
+    # Sets the attribute multipart_file_limit
+    #
+    # @param value the value to set the attribute multipart_file_limit to.
+    #
+    # source://rack//lib/rack/utils.rb#63
+    def multipart_file_limit=(_arg0); end
+
+    # Returns the value of attribute multipart_file_limit.
+    # multipart_part_limit is the original name of multipart_file_limit, but
+    # the limit only counts parts with filenames.
+    #
+    # source://rack//lib/rack/utils.rb#63
     def multipart_part_limit; end
 
-    # Sets the attribute multipart_part_limit
+    # Sets the attribute multipart_file_limit
     #
-    # @param value the value to set the attribute multipart_part_limit to.
+    # @param value the value to set the attribute multipart_file_limit to.
     #
-    # source://rack//lib/rack/utils.rb#61
+    # source://rack//lib/rack/utils.rb#63
     def multipart_part_limit=(_arg0); end
 
-    # source://rack//lib/rack/utils.rb#69
+    # Returns the value of attribute multipart_total_part_limit.
+    #
+    # source://rack//lib/rack/utils.rb#61
+    def multipart_total_part_limit; end
+
+    # Sets the attribute multipart_total_part_limit
+    #
+    # @param value the value to set the attribute multipart_total_part_limit to.
+    #
+    # source://rack//lib/rack/utils.rb#61
+    def multipart_total_part_limit=(_arg0); end
+
+    # source://rack//lib/rack/utils.rb#80
     def param_depth_limit; end
 
-    # source://rack//lib/rack/utils.rb#73
+    # source://rack//lib/rack/utils.rb#84
     def param_depth_limit=(v); end
 
-    # source://rack//lib/rack/utils.rb#209
+    # source://rack//lib/rack/utils.rb#220
     def parse_cookies(env); end
 
-    # source://rack//lib/rack/utils.rb#213
+    # source://rack//lib/rack/utils.rb#224
     def parse_cookies_header(header); end
 
-    # source://rack//lib/rack/utils.rb#101
+    # source://rack//lib/rack/utils.rb#112
     def parse_nested_query(qs, d = T.unsafe(nil)); end
 
-    # source://rack//lib/rack/utils.rb#97
+    # source://rack//lib/rack/utils.rb#108
     def parse_query(qs, d = T.unsafe(nil), &unescaper); end
 
-    # source://rack//lib/rack/utils.rb#133
+    # source://rack//lib/rack/utils.rb#144
     def q_values(q_value_header); end
 
     # Modified version of stdlib time.rb Time#rfc2822 to use '%d-%b-%Y' instead
@@ -5368,10 +5373,10 @@ module Rack::Utils
     # Do not use %a and %b from Time.strptime, it would use localized names for
     # weekday and month.
     #
-    # source://rack//lib/rack/utils.rb#332
+    # source://rack//lib/rack/utils.rb#343
     def rfc2109(time); end
 
-    # source://rack//lib/rack/utils.rb#319
+    # source://rack//lib/rack/utils.rb#330
     def rfc2822(time); end
 
     # Constant time string comparison.
@@ -5381,16 +5386,16 @@ module Rack::Utils
     # on variable length plaintext strings because it could leak length info
     # via timing attacks.
     #
-    # source://rack//lib/rack/utils.rb#381
+    # source://rack//lib/rack/utils.rb#392
     def secure_compare(a, b); end
 
-    # source://rack//lib/rack/utils.rb#177
+    # source://rack//lib/rack/utils.rb#188
     def select_best_encoding(available_encodings, accept_encoding); end
 
-    # source://rack//lib/rack/utils.rb#267
+    # source://rack//lib/rack/utils.rb#278
     def set_cookie_header!(header, key, value); end
 
-    # source://rack//lib/rack/utils.rb#585
+    # source://rack//lib/rack/utils.rb#596
     def status_code(status); end
 
     # Unescapes a URI escaped string with +encoding+. +encoding+ will be the
@@ -5407,7 +5412,7 @@ module Rack::Utils
 
     # @return [Boolean]
     #
-    # source://rack//lib/rack/utils.rb#612
+    # source://rack//lib/rack/utils.rb#623
     def valid_path?(path); end
   end
 end
@@ -5421,40 +5426,40 @@ Rack::Utils::COMMON_SEP = T.let(T.unsafe(nil), Hash)
 # would be the request environment. The second of which would be the rack
 # application that the request would be forwarded to.
 #
-# source://rack//lib/rack/utils.rb#396
+# source://rack//lib/rack/utils.rb#407
 class Rack::Utils::Context
   # @return [Context] a new instance of Context
   #
-  # source://rack//lib/rack/utils.rb#399
+  # source://rack//lib/rack/utils.rb#410
   def initialize(app_f, app_r); end
 
   # Returns the value of attribute app.
   #
-  # source://rack//lib/rack/utils.rb#397
+  # source://rack//lib/rack/utils.rb#408
   def app; end
 
-  # source://rack//lib/rack/utils.rb#404
+  # source://rack//lib/rack/utils.rb#415
   def call(env); end
 
-  # source://rack//lib/rack/utils.rb#412
+  # source://rack//lib/rack/utils.rb#423
   def context(env, app = T.unsafe(nil)); end
 
   # Returns the value of attribute for.
   #
-  # source://rack//lib/rack/utils.rb#397
+  # source://rack//lib/rack/utils.rb#408
   def for; end
 
-  # source://rack//lib/rack/utils.rb#408
+  # source://rack//lib/rack/utils.rb#419
   def recontext(app); end
 end
 
 # source://rack//lib/rack/utils.rb#21
 Rack::Utils::DEFAULT_SEP = T.let(T.unsafe(nil), Regexp)
 
-# source://rack//lib/rack/utils.rb#161
+# source://rack//lib/rack/utils.rb#172
 Rack::Utils::ESCAPE_HTML = T.let(T.unsafe(nil), Hash)
 
-# source://rack//lib/rack/utils.rb#170
+# source://rack//lib/rack/utils.rb#181
 Rack::Utils::ESCAPE_HTML_PATTERN = T.let(T.unsafe(nil), Regexp)
 
 # Every standard HTTP code mapped to the appropriate message.
@@ -5463,7 +5468,7 @@ Rack::Utils::ESCAPE_HTML_PATTERN = T.let(T.unsafe(nil), Regexp)
 #     ruby -ne 'm = /^(\d{3}),(?!Unassigned|\(Unused\))([^,]+)/.match($_) and \
 #               puts "#{m[1]} => \x27#{m[2].strip}\x27,"'
 #
-# source://rack//lib/rack/utils.rb#512
+# source://rack//lib/rack/utils.rb#523
 Rack::Utils::HTTP_STATUS_CODES = T.let(T.unsafe(nil), Hash)
 
 # A case-insensitive Hash that preserves the original case of a
@@ -5471,90 +5476,90 @@ Rack::Utils::HTTP_STATUS_CODES = T.let(T.unsafe(nil), Hash)
 #
 # @api private
 #
-# source://rack//lib/rack/utils.rb#421
+# source://rack//lib/rack/utils.rb#432
 class Rack::Utils::HeaderHash < ::Hash
   # @api private
   # @return [HeaderHash] a new instance of HeaderHash
   #
-  # source://rack//lib/rack/utils.rb#430
+  # source://rack//lib/rack/utils.rb#441
   def initialize(hash = T.unsafe(nil)); end
 
   # @api private
   #
-  # source://rack//lib/rack/utils.rb#460
+  # source://rack//lib/rack/utils.rb#471
   def [](k); end
 
   # @api private
   #
-  # source://rack//lib/rack/utils.rb#464
+  # source://rack//lib/rack/utils.rb#475
   def []=(k, v); end
 
   # on clear, we need to clear @names hash
   #
   # @api private
   #
-  # source://rack//lib/rack/utils.rb#443
+  # source://rack//lib/rack/utils.rb#454
   def clear; end
 
   # @api private
   #
-  # source://rack//lib/rack/utils.rb#471
+  # source://rack//lib/rack/utils.rb#482
   def delete(k); end
 
   # @api private
   #
-  # source://rack//lib/rack/utils.rb#448
+  # source://rack//lib/rack/utils.rb#459
   def each; end
 
   # @api private
   # @return [Boolean]
   #
-  # source://rack//lib/rack/utils.rb#477
+  # source://rack//lib/rack/utils.rb#488
   def has_key?(k); end
 
   # @api private
   # @return [Boolean]
   #
-  # source://rack//lib/rack/utils.rb#477
+  # source://rack//lib/rack/utils.rb#488
   def include?(k); end
 
   # @api private
   # @return [Boolean]
   #
-  # source://rack//lib/rack/utils.rb#477
+  # source://rack//lib/rack/utils.rb#488
   def key?(k); end
 
   # @api private
   # @return [Boolean]
   #
-  # source://rack//lib/rack/utils.rb#477
+  # source://rack//lib/rack/utils.rb#488
   def member?(k); end
 
   # @api private
   #
-  # source://rack//lib/rack/utils.rb#490
+  # source://rack//lib/rack/utils.rb#501
   def merge(other); end
 
   # @api private
   #
-  # source://rack//lib/rack/utils.rb#485
+  # source://rack//lib/rack/utils.rb#496
   def merge!(other); end
 
   # @api private
   #
-  # source://rack//lib/rack/utils.rb#495
+  # source://rack//lib/rack/utils.rb#506
   def replace(other); end
 
   # @api private
   #
-  # source://rack//lib/rack/utils.rb#454
+  # source://rack//lib/rack/utils.rb#465
   def to_hash; end
 
   protected
 
   # @api private
   #
-  # source://rack//lib/rack/utils.rb#502
+  # source://rack//lib/rack/utils.rb#513
   def names; end
 
   private
@@ -5563,13 +5568,13 @@ class Rack::Utils::HeaderHash < ::Hash
   #
   # @api private
   #
-  # source://rack//lib/rack/utils.rb#437
+  # source://rack//lib/rack/utils.rb#448
   def initialize_copy(other); end
 
   class << self
     # @api private
     #
-    # source://rack//lib/rack/utils.rb#422
+    # source://rack//lib/rack/utils.rb#433
     def [](headers); end
   end
 end
@@ -5580,10 +5585,10 @@ Rack::Utils::InvalidParameterError = Rack::QueryParser::InvalidParameterError
 # source://rack//lib/rack/utils.rb#23
 Rack::Utils::KeySpaceConstrainedParams = Rack::QueryParser::Params
 
-# source://rack//lib/rack/utils.rb#610
+# source://rack//lib/rack/utils.rb#621
 Rack::Utils::NULL_BYTE = T.let(T.unsafe(nil), String)
 
-# source://rack//lib/rack/utils.rb#593
+# source://rack//lib/rack/utils.rb#604
 Rack::Utils::PATH_SEPS = T.let(T.unsafe(nil), Regexp)
 
 # source://rack//lib/rack/utils.rb#19
@@ -5597,34 +5602,13 @@ Rack::Utils::RFC2822_MONTH_NAME = T.let(T.unsafe(nil), Array)
 
 # Responses with HTTP status codes that should not have an entity body
 #
-# source://rack//lib/rack/utils.rb#579
+# source://rack//lib/rack/utils.rb#590
 Rack::Utils::STATUS_WITH_NO_ENTITY_BODY = T.let(T.unsafe(nil), Hash)
 
-# source://rack//lib/rack/utils.rb#581
+# source://rack//lib/rack/utils.rb#592
 Rack::Utils::SYMBOL_TO_STATUS_CODE = T.let(T.unsafe(nil), Hash)
 
 # The Rack protocol version number implemented.
 #
 # source://rack//lib/rack/version.rb#16
 Rack::VERSION = T.let(T.unsafe(nil), Array)
-
-# This monkey patch allows for applications to perform their own chunking
-# through WEBrick::HTTPResponse if rack is set to true.
-#
-# source://rack//lib/rack/handler/webrick.rb#8
-class WEBrick::HTTPResponse
-  # Returns the value of attribute rack.
-  #
-  # source://rack//lib/rack/handler/webrick.rb#9
-  def rack; end
-
-  # Sets the attribute rack
-  #
-  # @param value the value to set the attribute rack to.
-  #
-  # source://rack//lib/rack/handler/webrick.rb#9
-  def rack=(_arg0); end
-
-  # source://rack//lib/rack/handler/webrick.rb#12
-  def setup_header; end
-end
