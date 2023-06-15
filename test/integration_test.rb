@@ -358,7 +358,9 @@ class IntegrationTest < Minitest::Test
   end
 
   def read_response(request)
-    Timeout.timeout(5) do
+    timeout_amount = ENV["CI"] ? 20 : 5
+
+    Timeout.timeout(timeout_amount) do
       # Read headers until line breaks
       headers = @stdout.gets("\r\n\r\n")
       # Read the response content based on the length received in the headers
