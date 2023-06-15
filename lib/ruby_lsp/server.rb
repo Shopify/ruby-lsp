@@ -27,6 +27,9 @@ module RubyLsp
       # The messages queue includes requests and notifications to be sent to the client
       @message_queue = T.let(Thread::Queue.new, Thread::Queue)
 
+      # The executor is responsible for executing requests
+      @executor = T.let(Executor.new(@store, @message_queue), Executor)
+
       # Create a thread to watch the messages queue and send them to the client
       @message_dispatcher = T.let(
         Thread.new do
@@ -62,7 +65,7 @@ module RubyLsp
       @reader.read do |request|
         case request[:method]
         when "initialize", "initialized", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange"
-          result = Executor.new(@store, @message_queue).execute(request)
+          result = @executor.execute(request)
           finalize_request(result, request)
         when "$/cancelRequest"
           # Cancel the job if it's still in the queue
@@ -126,7 +129,7 @@ module RubyLsp
             # We need to return nil to the client even if the request was cancelled
             Result.new(response: nil)
           else
-            Executor.new(@store, @message_queue).execute(request)
+            @executor.execute(request)
           end
 
           finalize_request(result, request)
