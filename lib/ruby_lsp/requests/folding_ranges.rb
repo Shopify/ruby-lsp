@@ -52,6 +52,7 @@ module RubyLsp
 
       StatementNode = T.type_alias do
         T.any(
+          SyntaxTree::IfNode,
           SyntaxTree::Elsif,
           SyntaxTree::In,
           SyntaxTree::Rescue,
