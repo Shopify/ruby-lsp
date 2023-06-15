@@ -53,7 +53,7 @@ module RubyLsp
 
     sig { override.params(node: T.nilable(SyntaxTree::Node)).void }
     def visit(node)
-      @listeners[:on_visit]&.each { |l| T.unsafe(l).on_visit(node) }
+      @listeners[:on_node]&.each { |l| T.unsafe(l).on_node(node) }
       super
     end
 

@@ -69,11 +69,11 @@ module RubyLsp
         @response = T.let([], ResponseType)
         @partial_range = T.let(nil, T.nilable(PartialRange))
 
-        emitter.register(self, :on_visit)
+        emitter.register(self, :on_node)
       end
 
       sig { params(node: T.nilable(SyntaxTree::Node)).returns(T.untyped) } # TODO: fix sig
-      def on_visit(node)
+      def on_node(node)
         visit(node)
         emit_partial_range
       end
