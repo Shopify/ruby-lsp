@@ -181,7 +181,7 @@ class ExecutorTest < Minitest::Test
       executor.execute(method: "initialize", params: { initializationOptions: { formatter: "rubocop" } })
       executor.execute(method: "initialized")
 
-      assert_equal("rubocop", @store.formatter)
+      assert_equal("none", @store.formatter)
       refute_empty(@message_queue)
       notification = T.must(@message_queue.pop)
       assert_equal("window/showMessage", notification.message)

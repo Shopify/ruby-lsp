@@ -137,6 +137,25 @@ class FormattingTest < Minitest::Test
     end
   end
 
+  def test_using_a_custom_formatter
+    require "singleton"
+    formatter_class = Class.new do
+      include Singleton
+      include RubyLsp::Requests::Support::FormatterRunner
+
+      def run(uri, document)
+        "#{document.source}\n# formatter by my-custom-formatter"
+      end
+    end
+
+    RubyLsp::Requests::Formatting.register_formatter("my-custom-formatter", T.unsafe(formatter_class).instance)
+    assert_includes(formatted_document("my-custom-formatter"), "# formatter by my-custom-formatter")
+  end
+
+  def test_returns_nil_when_formatter_is_none
+    assert_nil(formatted_document("none"))
+  end
+
   private
 
   def formatted_document(formatter)
@@ -159,5 +178,9 @@ class FormattingTest < Minitest::Test
     return unless defined?(RubyLsp::Requests::Support::SyntaxTreeFormattingRunner)
 
     T.unsafe(Singleton).__init__(RubyLsp::Requests::Support::SyntaxTreeFormattingRunner)
+    RubyLsp::Requests::Formatting.register_formatter(
+      "syntax_tree",
+      RubyLsp::Requests::Support::SyntaxTreeFormattingRunner.instance,
+    )
   end
 end
