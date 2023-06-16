@@ -39,7 +39,7 @@ module RubyLsp
     def gif_exists?(request_path)
       request_gif = request_path.gsub(".rb", ".gif").split("/").last
 
-      @gif_list.any? { |gif_path| gif_path.include?(request_gif) }
+      @gif_list.any? { |gif_path| gif_path.end_with?(request_gif) }
     end
 
     sig { void }
@@ -94,12 +94,20 @@ module RubyLsp
             # end
             # ```
           DOCS
-        elsif !/\[.* demo\]\(.*\.gif\)/.match?(documentation) || !gif_exists?(file_path)
+        elsif !/\[.* demo\]\(.*\.gif\)/.match?(documentation)
           T.must(missing_docs[class_name]) << <<~DOCS
             Missing demonstration GIF. Each request and extension must be documented with a GIF that shows the feature
             working. For example:
 
             # [Inlay hint demo](../../inlay_hint.gif)
+          DOCS
+        elsif !gif_exists?(file_path)
+          T.must(missing_docs[class_name]) << <<~DOCS
+            The GIF for the request documentation does not exist. Make sure to add it in the `misc/` folder,
+            with the same naming as the request. For example:
+
+            # code_lens.rb
+            # code_lens.gif
           DOCS
         end
       end
