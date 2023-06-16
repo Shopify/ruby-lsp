@@ -27,7 +27,6 @@ module RubyLsp
           SyntaxTree::For,
           SyntaxTree::HashLiteral,
           SyntaxTree::Heredoc,
-          SyntaxTree::IfNode,
           SyntaxTree::ModuleDeclaration,
           SyntaxTree::SClass,
           SyntaxTree::UnlessNode,
@@ -42,6 +41,7 @@ module RubyLsp
 
       NODES_WITH_STATEMENTS = T.let(
         [
+          SyntaxTree::IfNode,
           SyntaxTree::Elsif,
           SyntaxTree::In,
           SyntaxTree::Rescue,
@@ -52,6 +52,7 @@ module RubyLsp
 
       StatementNode = T.type_alias do
         T.any(
+          SyntaxTree::IfNode,
           SyntaxTree::Elsif,
           SyntaxTree::In,
           SyntaxTree::Rescue,
