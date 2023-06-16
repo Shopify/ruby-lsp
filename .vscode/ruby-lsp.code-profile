@@ -1,0 +1,7 @@
+{
+  "name":"ruby-lsp",
+  "settings":
+    "{\"settings\":\"{\\n  \\\"workbench.colorTheme\\\": \\\"Spinel\\\",\\n  \\\"editor.fontSize\\\": 16,\\n  \\\"window.zoomLevel\\\": 1,\\n}\\n\"}",
+  "extensions":
+    "[{\"identifier\":{\"id\":\"shopify.ruby-extensions-pack\",\"uuid\":\"430af273-c0cc-4565-a417-6ee1991bbf4c\"},\"displayName\":\"Ruby\"}]"
+}
