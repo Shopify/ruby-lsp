@@ -6,13 +6,15 @@ require "objspace"
 
 module RubyLsp
   # This rake task checks that all requests or extensions are fully documented. Add the rake task to your Rakefile and
-  # specify the absolute path for all files that must be required in order to discover all listeners
+  # specify the absolute path for all files that must be required in order to discover all listeners and their
+  # related GIFs
   #
   #   # Rakefile
   #   request_files = FileList.new("#{__dir__}/lib/ruby_lsp/requests/*.rb") do |fl|
   #     fl.exclude(/base_request\.rb/)
   #   end
-  #   RubyLsp::CheckDocs.new(request_files)
+  #   gif_files = FileList.new("#{__dir__}/**/*.gif")
+  #   RubyLsp::CheckDocs.new(request_files, gif_files)
   #   # Run with bundle exec rake ruby_lsp:check_docs
   class CheckDocs < Rake::TaskLib
     extend T::Sig
@@ -103,11 +105,11 @@ module RubyLsp
           DOCS
         elsif !gif_exists?(file_path)
           T.must(missing_docs[class_name]) << <<~DOCS
-            The GIF for the request documentation does not exist. Make sure to add it in the `misc/` folder,
+            The GIF for the request documentation does not exist. Make sure to add it,
             with the same naming as the request. For example:
 
-            # code_lens.rb
-            # code_lens.gif
+            # lib/ruby_lsp/requests/code_lens.rb
+            # foo/bar/code_lens.gif
           DOCS
         end
       end
