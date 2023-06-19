@@ -5,3 +5,6 @@ gem "foogem"
 group :development do
   gem "debug", "~> 1.7", require: false
 end
+
+# Make sure we don't break as the user is typing
+gem ""
