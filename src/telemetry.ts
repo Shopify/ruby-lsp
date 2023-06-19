@@ -19,7 +19,12 @@ export interface ConfigurationEvent {
   value: string;
 }
 
-export type TelemetryEvent = RequestEvent | ConfigurationEvent;
+export interface CodeLensEvent {
+  type: "test" | "debug" | "test_in_terminal" | "link";
+  lspVersion: string;
+}
+
+export type TelemetryEvent = RequestEvent | ConfigurationEvent | CodeLensEvent;
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -35,6 +40,7 @@ class DevelopmentApi implements TelemetryApi {
 }
 
 export class Telemetry {
+  public serverVersion?: string;
   private api?: TelemetryApi;
   private context: vscode.ExtensionContext;
 
@@ -101,6 +107,10 @@ export class Telemetry {
       "rubyLsp.lastConfigurationTelemetry",
       Date.now()
     );
+  }
+
+  async sendCodeLensEvent(type: CodeLensEvent["type"]) {
+    await this.sendEvent({ type, lspVersion: this.serverVersion! });
   }
 
   private async initialize(): Promise<boolean> {

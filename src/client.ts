@@ -210,6 +210,7 @@ export default class Client implements ClientInterface {
       })
     );
 
+    this.telemetry.serverVersion = await this.getServerVersion();
     await this.client.start();
     await this.determineFormatter();
 
@@ -621,6 +622,21 @@ export default class Client implements ClientInterface {
     });
   }
 
+  private async getServerVersion(): Promise<string> {
+    const result = await asyncExec(
+      `BUNDLE_GEMFILE=${path.join(
+        this.workingFolder,
+        "Gemfile"
+      )} bundle exec ruby -e "require 'ruby-lsp'; print RubyLsp::VERSION"`,
+      {
+        cwd: this.workingFolder,
+        env: this.ruby.env,
+      }
+    );
+
+    return result.stdout;
+  }
+
   // If the `.git` folder exists and `.git/rebase-merge` or `.git/rebase-apply` exists, then we're in the middle of a
   // rebase
   private rebaseInProgress() {
@@ -633,7 +649,8 @@ export default class Client implements ClientInterface {
     );
   }
 
-  private openLink(link: string) {
+  private async openLink(link: string) {
+    await this.telemetry.sendCodeLensEvent("link");
     vscode.env.openExternal(vscode.Uri.parse(link));
   }
 }

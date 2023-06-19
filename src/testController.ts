@@ -6,6 +6,7 @@ import { CodeLens } from "vscode-languageclient/node";
 
 import { Ruby } from "./ruby";
 import { Command } from "./status";
+import { Telemetry } from "./telemetry";
 
 const asyncExec = promisify(exec);
 
@@ -18,14 +19,17 @@ export class TestController {
   private workingFolder: string;
   private terminal: vscode.Terminal | undefined;
   private ruby: Ruby;
+  private telemetry: Telemetry;
 
   constructor(
     context: vscode.ExtensionContext,
     workingFolder: string,
-    ruby: Ruby
+    ruby: Ruby,
+    telemetry: Telemetry
   ) {
     this.workingFolder = workingFolder;
     this.ruby = ruby;
+    this.telemetry = telemetry;
 
     this.testController = vscode.tests.createTestController(
       "rubyTests",
@@ -141,7 +145,13 @@ export class TestController {
     });
   }
 
-  private runTestInTerminal(_path: string, _name: string, command: string) {
+  private async runTestInTerminal(
+    _path: string,
+    _name: string,
+    command: string
+  ) {
+    await this.telemetry.sendCodeLensEvent("test_in_terminal");
+
     if (this.terminal === undefined) {
       this.terminal = vscode.window.createTerminal({ name: "Run test" });
     }
@@ -153,6 +163,7 @@ export class TestController {
     request: vscode.TestRunRequest,
     _token: vscode.CancellationToken
   ) {
+    await this.telemetry.sendCodeLensEvent("debug");
     const run = this.testController.createTestRun(request, undefined, true);
     const test = request.include![0];
 
@@ -166,6 +177,7 @@ export class TestController {
     request: vscode.TestRunRequest,
     token: vscode.CancellationToken
   ) {
+    await this.telemetry.sendCodeLensEvent("test");
     const run = this.testController.createTestRun(request, undefined, true);
     const queue: vscode.TestItem[] = [];
 
