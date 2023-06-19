@@ -25,3 +25,7 @@ end
 class AnotherTest < Minitest::Test
   def test_public; end
 end
+
+class Foo
+  def test_public; end
+end

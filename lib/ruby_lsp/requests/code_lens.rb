@@ -80,11 +80,13 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::DefNode).void }
       def on_def(node)
+        class_name = @class_stack.last
+        return unless class_name
+
         visibility, _ = @visibility_stack.last
         if visibility == "public"
           method_name = node.name.value
           if method_name.start_with?("test_")
-            class_name = T.must(@class_stack.last)
             add_test_code_lens(
               node,
               name: method_name,
