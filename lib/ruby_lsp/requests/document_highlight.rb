@@ -43,7 +43,18 @@ module RubyLsp
 
         @response = T.let([], T::Array[Interface::DocumentHighlight])
 
-        @target = T.let(find(target, parent), T.nilable(Support::HighlightTarget))
+        return unless target && parent
+
+        highlight_target =
+          case target
+          when *DIRECT_HIGHLIGHTS
+            Support::HighlightTarget.new(target)
+          when SyntaxTree::Ident
+            relevant_node = parent.is_a?(SyntaxTree::Params) ? target : parent
+            Support::HighlightTarget.new(relevant_node)
+          end
+
+        @target = T.let(highlight_target, T.nilable(Support::HighlightTarget))
 
         emitter.register(self, :on_node) if @target
       end
@@ -68,25 +79,6 @@ module RubyLsp
         ],
         T::Array[T.class_of(SyntaxTree::Node)],
       )
-
-      sig do
-        params(
-          matched: T.nilable(SyntaxTree::Node),
-          parent: T.nilable(SyntaxTree::Node),
-        ).returns(T.nilable(Support::HighlightTarget))
-      end
-      def find(matched, parent)
-        return unless matched && parent
-        return unless matched.is_a?(SyntaxTree::Ident) || DIRECT_HIGHLIGHTS.include?(matched.class)
-
-        case matched
-        when *DIRECT_HIGHLIGHTS
-          Support::HighlightTarget.new(matched)
-        when SyntaxTree::Ident
-          relevant_node = parent.is_a?(SyntaxTree::Params) ? matched : parent
-          Support::HighlightTarget.new(relevant_node)
-        end
-      end
 
       sig { params(match: Support::HighlightTarget::HighlightMatch).void }
       def add_highlight(match)
