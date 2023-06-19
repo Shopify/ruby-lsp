@@ -193,8 +193,10 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::Command).returns(T.nilable(String)) }
       def resolve_gem_remote(node)
-        gem_name = node.arguments.parts.flat_map(&:child_nodes).first.value
-        spec = Gem::Specification.stubs.find { |gem| gem.name == gem_name }&.to_spec
+        gem_statement = node.arguments.parts.flat_map(&:child_nodes).first
+        return unless gem_statement
+
+        spec = Gem::Specification.stubs.find { |gem| gem.name == gem_statement.value }&.to_spec
         return if spec.nil?
 
         [spec.homepage, spec.metadata["source_code_uri"]].compact.find do |page|
