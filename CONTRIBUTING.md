@@ -106,6 +106,14 @@ the live process, go under `Run and Debug`, select `Attach to existing server` a
 press F5)
 4. Add breakpoints and perform the actions necessary for triggering the requests you wish to debug
 
+## Screen Captures
+
+We include animated screen captures to illustrate Ruby LSP features.
+For recording new captures, use [LICEcap](https://www.cockos.com/licecap/).
+For consistency, install the Ruby LSP profile included with this repo.
+Configure LICEcap to record at 24fps, at 640 x 480.
+If appropriate, you can adjust the height of the capture, but keep the width at 640.
+
 ## Spell Checking
 
 VS Code users will be prompted to enable the [Code Spell
