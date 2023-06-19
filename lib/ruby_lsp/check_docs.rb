@@ -6,23 +6,26 @@ require "objspace"
 
 module RubyLsp
   # This rake task checks that all requests or extensions are fully documented. Add the rake task to your Rakefile and
-  # specify the absolute path for all files that must be required in order to discover all listeners
+  # specify the absolute path for all files that must be required in order to discover all listeners and their
+  # related GIFs
   #
   #   # Rakefile
   #   request_files = FileList.new("#{__dir__}/lib/ruby_lsp/requests/*.rb") do |fl|
   #     fl.exclude(/base_request\.rb/)
   #   end
-  #   RubyLsp::CheckDocs.new(request_files)
+  #   gif_files = FileList.new("#{__dir__}/**/*.gif")
+  #   RubyLsp::CheckDocs.new(request_files, gif_files)
   #   # Run with bundle exec rake ruby_lsp:check_docs
   class CheckDocs < Rake::TaskLib
     extend T::Sig
 
-    sig { params(require_files: Rake::FileList).void }
-    def initialize(require_files)
+    sig { params(require_files: Rake::FileList, gif_files: Rake::FileList).void }
+    def initialize(require_files, gif_files)
       super()
 
       @name = T.let("ruby_lsp:check_docs", String)
       @file_list = require_files
+      @gif_list = gif_files
       define_task
     end
 
@@ -32,6 +35,13 @@ module RubyLsp
     def define_task
       desc("Checks if all Ruby LSP listeners are documented")
       task(@name) { run_task }
+    end
+
+    sig { params(request_path: String).returns(T::Boolean) }
+    def gif_exists?(request_path)
+      request_gif = request_path.gsub(".rb", ".gif").split("/").last
+
+      @gif_list.any? { |gif_path| gif_path.end_with?(request_gif) }
     end
 
     sig { void }
@@ -92,6 +102,14 @@ module RubyLsp
             working. For example:
 
             # [Inlay hint demo](../../inlay_hint.gif)
+          DOCS
+        elsif !gif_exists?(file_path)
+          T.must(missing_docs[class_name]) << <<~DOCS
+            The GIF for the request documentation does not exist. Make sure to add it,
+            with the same naming as the request. For example:
+
+            # lib/ruby_lsp/requests/code_lens.rb
+            # foo/bar/code_lens.gif
           DOCS
         end
       end
