@@ -29,6 +29,7 @@ module RubyLsp
 
       BASE_COMMAND = T.let((File.exist?("Gemfile.lock") ? "bundle exec ruby" : "ruby") + " -Itest ", String)
       ACCESS_MODIFIERS = T.let(["public", "private", "protected"], T::Array[String])
+      SUPPORTED_TEST_LIBRARIES = T.let(["minitest", "test-unit"], T::Array[String])
 
       sig { override.returns(ResponseType) }
       attr_reader :response
@@ -156,6 +157,9 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::Node, name: String, command: String, kind: Symbol).void }
       def add_test_code_lens(node, name:, command:, kind:)
+        # don't add code lenses if the test library is not supported or unknown
+        return unless SUPPORTED_TEST_LIBRARIES.include?(@test_library)
+
         arguments = [
           @path,
           name,
