@@ -42,6 +42,15 @@ See the [documentation](https://shopify.github.io/ruby-lsp) for more in-depth de
 For creating rich themes for Ruby using the semantic highlighting information, see the [semantic highlighting
 documentation](SEMANTIC_HIGHLIGHTING.md).
 
+### Extensions
+
+The Ruby LSP provides a server extension system that allows other gems to enhance the base functionality with more
+editor features. This is the mechanism that powers extensions like
+
+- [Ruby LSP Rails](https://github.com/Shopify/ruby-lsp-rails)
+
+For instructions on how to create extensions, see the [server extensions documentation](SERVER_EXTENSIONS.md).
+
 ## Learn More
 
 * [RubyConf 2022: Improving the development experience with language servers](https://www.youtube.com/watch?v=kEfXPTm1aCI) ([Vinicius Stock](https://github.com/vinistock))
