@@ -199,10 +199,13 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::Command).returns(T.nilable(String)) }
       def resolve_gem_remote(node)
-        gem_statement = node.arguments.parts.flat_map(&:child_nodes).first
-        return unless gem_statement
+        gem_statement = node.arguments.parts.first
+        return unless gem_statement.is_a?(SyntaxTree::StringLiteral)
 
-        spec = Gem::Specification.stubs.find { |gem| gem.name == gem_statement.value }&.to_spec
+        gem_name = gem_statement.parts.first
+        return unless gem_name.is_a?(SyntaxTree::TStringContent)
+
+        spec = Gem::Specification.stubs.find { |gem| gem.name == gem_name.value }&.to_spec
         return if spec.nil?
 
         [spec.homepage, spec.metadata["source_code_uri"]].compact.find do |page|
