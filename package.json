@@ -355,7 +355,7 @@
     "@vscode/test-electron": "^2.3.3",
     "@vscode/vsce": "^2.19.0",
     "esbuild": "^0.18.2",
-    "eslint": "^8.42.0",
+    "eslint": "^8.43.0",
     "eslint-import-resolver-typescript": "^3.5.5",
     "glob": "^10.2.7",
     "mocha": "^10.2.0",
