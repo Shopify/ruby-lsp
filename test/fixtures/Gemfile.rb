@@ -8,3 +8,5 @@ end
 
 # Make sure we don't break as the user is typing
 gem ""
+
+gem something_that_isnt_a_string
