@@ -43,6 +43,42 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     )
   end
 
+  def test_no_code_lens_for_unknown_test_framework
+    source = <<~RUBY
+      class FooTest < Test::Unit::TestCase
+        def test_bar; end
+      end
+    RUBY
+    uri = "file:///fake.rb"
+
+    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+
+    emitter = RubyLsp::EventEmitter.new
+    listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue, "unknown")
+    emitter.visit(document.tree)
+    response = listener.response
+
+    assert_equal(0, response.size)
+  end
+
+  def test_no_code_lens_for_rspec
+    source = <<~RUBY
+      class FooTest < Test::Unit::TestCase
+        def test_bar; end
+      end
+    RUBY
+    uri = "file:///fake.rb"
+
+    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+
+    emitter = RubyLsp::EventEmitter.new
+    listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue, "rspec")
+    emitter.visit(document.tree)
+    response = listener.response
+
+    assert_equal(0, response.size)
+  end
+
   def test_after_request_hook
     message_queue = Thread::Queue.new
     create_code_lens_hook_class
