@@ -97,13 +97,9 @@ module RubyLsp
         document_symbol = Requests::DocumentSymbol.new(emitter, @message_queue)
         document_link = Requests::DocumentLink.new(uri, emitter, @message_queue)
         code_lens = Requests::CodeLens.new(uri, emitter, @message_queue, @test_library)
-        code_lens_extensions_listeners = Requests::CodeLens.listeners.map do |l|
-          T.unsafe(l).new(document.uri, emitter, @message_queue)
-        end
+
         semantic_highlighting = Requests::SemanticHighlighting.new(emitter, @message_queue)
         emitter.visit(document.tree) if document.parsed?
-
-        code_lens_extensions_listeners.each { |ext| code_lens.merge_response!(ext) }
 
         # Store all responses retrieve in this round of visits in the cache and then return the response for the request
         # we actually received
