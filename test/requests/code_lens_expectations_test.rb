@@ -58,7 +58,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     emitter.visit(document.tree)
     response = listener.response
 
-    assert_equal(0, response.size)
+    assert_empty(response)
   end
 
   def test_no_code_lens_for_rspec
@@ -76,7 +76,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     emitter.visit(document.tree)
     response = listener.response
 
-    assert_equal(0, response.size)
+    assert_empty(response)
   end
 
   def test_after_request_hook
