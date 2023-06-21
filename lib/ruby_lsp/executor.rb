@@ -130,7 +130,7 @@ module RubyLsp
           )
 
           nil
-        rescue StandardError => error
+        rescue StandardError, LoadError => error
           @message_queue << Notification.new(
             message: "window/showMessage",
             params: Interface::ShowMessageParams.new(
@@ -156,7 +156,7 @@ module RubyLsp
       when "textDocument/diagnostic"
         begin
           diagnostic(uri)
-        rescue StandardError => error
+        rescue StandardError, LoadError => error
           @message_queue << Notification.new(
             message: "window/showMessage",
             params: Interface::ShowMessageParams.new(
