@@ -99,7 +99,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     assert_match("Debug", response[2].command.title)
     assert_match("Run Test", response[3].command.title)
   ensure
-    RubyLsp::Requests::Hover.listeners.clear
+    RubyLsp::Requests::CodeLens.listeners.clear
     T.must(message_queue).close
   end
 
