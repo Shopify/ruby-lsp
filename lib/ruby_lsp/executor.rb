@@ -209,15 +209,12 @@ module RubyLsp
 
       # Instantiate all listeners
       emitter = EventEmitter.new
-      base_listener = Requests::Hover.new(emitter, @message_queue)
-      listeners = Requests::Hover.listeners.map { |l| l.new(emitter, @message_queue) }
+      hover = Requests::Hover.new(emitter, @message_queue)
 
       # Emit events for all listeners
       emitter.emit_for_target(target)
 
-      # Merge all responses into a single hover
-      listeners.each { |ext| base_listener.merge_response!(ext) }
-      base_listener.response
+      hover.response
     end
 
     sig { params(uri: String, content_changes: T::Array[Document::EditShape], version: Integer).returns(Object) }
