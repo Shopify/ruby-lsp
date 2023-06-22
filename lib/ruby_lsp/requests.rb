@@ -41,6 +41,7 @@ module RubyLsp
     # :nodoc:
     module Support
       autoload :RuboCopDiagnostic, "ruby_lsp/requests/support/rubocop_diagnostic"
+      autoload :FlogDiagnostic, "ruby_lsp/requests/support/flog_diagnostic"
       autoload :SelectionRange, "ruby_lsp/requests/support/selection_range"
       autoload :SemanticTokenEncoder, "ruby_lsp/requests/support/semantic_token_encoder"
       autoload :Annotation, "ruby_lsp/requests/support/annotation"

@@ -22,6 +22,7 @@ gem "sorbet-static-and-runtime", platforms: NON_WINDOWS_PLATFORMS
 gem "tapioca", "~> 0.11", require: false, platforms: NON_WINDOWS_PLATFORMS
 gem "rdoc", require: false
 gem "psych", "~> 5.1", require: false
+gem "flog"
 
 # The Rails documentation link only activates when railties is detected.
 gem "railties", "~> 7.0", require: false

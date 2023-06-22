@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "ruby_lsp/requests/support/rubocop_diagnostics_runner"
+require "ruby_lsp/requests/support/flog_diagnostics_runner"
 
 module RubyLsp
   module Requests
@@ -28,17 +29,22 @@ module RubyLsp
         @uri = T.let(document.uri, String)
       end
 
-      sig { override.returns(T.nilable(T.all(T::Array[Support::RuboCopDiagnostic], Object))) }
+      sig { override.returns(T.nilable(T.all(T::Array[Interface::Diagnostic], Object))) }
       def run
         # Running RuboCop is slow, so to avoid excessive runs we only do so if the file is syntactically valid
         return if @document.syntax_error?
 
-        return unless defined?(Support::RuboCopDiagnosticsRunner)
-
-        # Don't try to run RuboCop diagnostics for files outside the current working directory
+        # Don't try to run diagnostics for files outside the current working directory
         return unless URI(@uri).path&.start_with?(T.must(WORKSPACE_URI.path))
 
-        Support::RuboCopDiagnosticsRunner.instance.run(@uri, @document)
+        results = []
+        if defined?(Support::RuboCopDiagnosticsRunner)
+          results.concat(Support::RuboCopDiagnosticsRunner.instance.run(@uri, @document))
+        end
+        if defined?(Support::FlogDiagnosticsRunner)
+          results.concat(Support::FlogDiagnosticsRunner.instance.run(@uri, @document))
+        end
+        results
       end
     end
   end

@@ -351,7 +351,7 @@ module RubyLsp
         Requests::Diagnostics.new(document).run
       end
 
-      Interface::FullDocumentDiagnosticReport.new(kind: "full", items: response.map(&:to_lsp_diagnostic)) if response
+      Interface::FullDocumentDiagnosticReport.new(kind: "full", items: response) if response
     end
 
     sig { params(uri: String, range: Document::RangeShape).returns(Interface::SemanticTokens) }

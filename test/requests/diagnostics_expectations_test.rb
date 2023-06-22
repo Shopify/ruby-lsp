@@ -25,7 +25,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     end
 
     assert_empty(stdout)
-    T.must(result).map(&:to_lsp_diagnostic)
+    T.must(result)
   end
 
   def assert_expectations(source, expected)
@@ -34,6 +34,8 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     # Sanitize the URI keys so that it matches file:///fake and not a real path in the user machine
     actual.each do |diagnostic|
       attributes = diagnostic.attributes
+
+      next unless attributes[:data][:code_action]
 
       text_document_identifier = attributes[:data][:code_action]
         .attributes[:edit]
@@ -52,7 +54,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     diagnostics.map do |diagnostic|
       LanguageServer::Protocol::Interface::Diagnostic.new(
         message: diagnostic["message"],
-        source: "RuboCop",
+        source: diagnostic["source"],
         code: diagnostic["code"],
         severity: diagnostic["severity"],
         range: LanguageServer::Protocol::Interface::Range.new(

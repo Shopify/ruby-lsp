@@ -122,6 +122,63 @@
           }
         }
       }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 0
+        },
+        "end": {
+          "line": 9,
+          "character": 0
+        }
+      },
+      "severity": 2,
+      "code": "Flog",
+      "source": "flog",
+      "message": "Score of 23.08 for method DiagnosticsExpectationsTest#run_expectations",
+      "data": {
+        "correctable": false
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 30,
+          "character": 0
+        },
+        "end": {
+          "line": 30,
+          "character": 0
+        }
+      },
+      "severity": 2,
+      "code": "Flog",
+      "source": "flog",
+      "message": "Score of 37.76 for method DiagnosticsExpectationsTest#assert_expectations",
+      "data": {
+        "correctable": false
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 52,
+          "character": 0
+        },
+        "end": {
+          "line": 52,
+          "character": 0
+        }
+      },
+      "severity": 2,
+      "code": "Flog",
+      "source": "flog",
+      "message": "Score of 43.42 for method DiagnosticsExpectationsTest#map_diagnostics",
+      "data": {
+        "correctable": false
+      }
     }
   ]
 }
