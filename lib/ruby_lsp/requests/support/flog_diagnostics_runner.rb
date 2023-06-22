@@ -33,14 +33,14 @@ module RubyLsp
 
           flog.totals.filter_map do |method_name, score|
             # TODO: make this configurable
-            next unless score > 10
+            next if score <= 10
 
             location = flog.method_locations[method_name]
             next unless location
 
             # location is of the form filename:start_line-end_line
             filename, range = location.split(":")
-            start_line, end_line = range.split("-")
+            start_line, _end_line = range.split("-")
             Interface::Diagnostic.new(
               range: Interface::Range.new(
                 start: Interface::Position.new(line: start_line.to_i - 1, character: 0),
