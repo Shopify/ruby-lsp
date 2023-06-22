@@ -10,11 +10,13 @@ require_relative "../lib/rubocop/cop/ruby_lsp/use_language_server_aliases"
 require "minitest/autorun"
 require "minitest/reporters"
 require "tempfile"
-require "debug"
 require "mocha/minitest"
 
-sorbet_paths = Gem.loaded_specs["sorbet-runtime"].full_require_paths.freeze
-DEBUGGER__::CONFIG[:skip_path] = Array(DEBUGGER__::CONFIG[:skip_path]) + sorbet_paths
+unless RUBY_ENGINE == "truffleruby" || RUBY_PLATFORM =~ /mingw|mswin/
+  require "debug"
+  sorbet_paths = Gem.loaded_specs["sorbet-runtime"].full_require_paths.freeze
+  DEBUGGER__::CONFIG[:skip_path] = Array(DEBUGGER__::CONFIG[:skip_path]) + sorbet_paths
+end
 
 minitest_reporter = if ENV["SPEC_REPORTER"]
   Minitest::Reporters::SpecReporter.new(color: true)
