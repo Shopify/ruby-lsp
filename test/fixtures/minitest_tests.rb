@@ -24,6 +24,12 @@ end
 
 class AnotherTest < Minitest::Test
   def test_public; end
+
+  # shouldn't block code lenses below
+  class Bar
+  end
+
+  def test_public_2; end
 end
 
 class Foo
