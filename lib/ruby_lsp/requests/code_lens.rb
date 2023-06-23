@@ -62,8 +62,9 @@ module RubyLsp
       def on_class(node)
         @visibility_stack.push(["public", "public"])
         class_name = node.constant.constant.value
+        @class_stack.push(class_name)
+
         if class_name.end_with?("Test")
-          @class_stack.push(class_name)
           add_test_code_lens(
             node,
             name: class_name,
@@ -82,7 +83,7 @@ module RubyLsp
       sig { params(node: SyntaxTree::DefNode).void }
       def on_def(node)
         class_name = @class_stack.last
-        return unless class_name
+        return unless class_name&.end_with?("Test")
 
         visibility, _ = @visibility_stack.last
         if visibility == "public"
