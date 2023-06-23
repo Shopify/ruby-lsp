@@ -25,7 +25,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     end
 
     assert_empty(stdout)
-    T.must(result).map(&:to_lsp_diagnostic)
+    T.must(result)
   end
 
   def assert_expectations(source, expected)

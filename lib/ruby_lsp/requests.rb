@@ -49,6 +49,7 @@ module RubyLsp
       autoload :RailsDocumentClient, "ruby_lsp/requests/support/rails_document_client"
       autoload :PrefixTree, "ruby_lsp/requests/support/prefix_tree"
       autoload :Common, "ruby_lsp/requests/support/common"
+      autoload :DiagnosticsRunner, "ruby_lsp/requests/support/diagnostics_runner"
       autoload :FormatterRunner, "ruby_lsp/requests/support/formatter_runner"
     end
   end

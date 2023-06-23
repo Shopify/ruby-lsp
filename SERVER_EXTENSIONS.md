@@ -175,6 +175,44 @@ class MyFormatterRunner
 end
 ```
 
+### Registering diagnostics providers
+
+Gems may also provide a diagnostic provider to be used by the Ruby LSP. To do that, the extension must create a diagnostic runner
+and register it.
+
+```ruby
+class MyDiagnosticsRubyLspExtension < RubyLsp::Extension
+  def name
+    "My Diagnostics"
+  end
+
+  def activate
+    # The first argument is an identifier users can pick to enable these diagnostics. To use these diagnostics, users must
+    # have rubyLsp.diagnostics configured to include "my_diagnostics"
+    # The second argument is a singleton instance that implements the `DiagnosticsRunner` interface (see below)
+    RubyLsp::Requests::Diagnostics.register_diagnostics("my_diagnostics", MyDiagnosticsRunner.instance)
+  end
+end
+
+# Custom diagnostic runner
+class MyDiagnosticsRunner
+  # Make it a singleton class
+  include Singleton
+  # If using Sorbet to develop the extension, then include this interface to make sure the class is properly implemented
+  include RubyLsp::Requests::Support::DiagnosticsRunner
+
+  # Use the initialize method to perform any sort of ahead of time work. For example, reading configurations for your
+  # diagnostic provider since they are unlikely to change between requests
+  def initialize
+  end
+
+  # The main part of the interface is implementing the run method. It receives the URI and the document being analyzed.
+  # IMPORTANT: This method must return an array of Interface::Diagnostic items
+  def run(uri, document)
+  end
+end
+```
+
 ### Sending notifications to the client
 
 Sometimes, requests may want to send asynchronous information to the client. For example, a slow request may want to

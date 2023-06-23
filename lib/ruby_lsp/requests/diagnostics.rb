@@ -21,6 +21,29 @@ module RubyLsp
     class Diagnostics < BaseRequest
       extend T::Sig
 
+      @diagnostics_runners = T.let(
+        {
+          "rubocop" => Support::RuboCopDiagnosticsRunner.instance,
+        },
+        T::Hash[String, Support::DiagnosticsRunner],
+      )
+
+      class << self
+        extend T::Sig
+
+        sig { returns(T::Hash[String, Support::DiagnosticsRunner]) }
+        attr_reader :diagnostics_runners
+
+        sig { params(identifier: String, instance: Support::DiagnosticsRunner).void }
+        def register_diagnostic_provider(identifier, instance)
+          @diagnostics_runners[identifier] = instance
+        end
+      end
+
+      if defined?(Support::RuboCopDiagnosticsRunner)
+        register_diagnostic_provider("rubocop", Support::RuboCopDiagnosticsRunner.instance)
+      end
+
       sig { params(document: Document).void }
       def initialize(document)
         super(document)
@@ -28,17 +51,20 @@ module RubyLsp
         @uri = T.let(document.uri, String)
       end
 
-      sig { override.returns(T.nilable(T.all(T::Array[Support::RuboCopDiagnostic], Object))) }
+      sig { override.returns(T.nilable(T.all(T::Array[Interface::Diagnostic], Object))) }
       def run
-        # Running RuboCop is slow, so to avoid excessive runs we only do so if the file is syntactically valid
+        # Running diagnostics is slow, so to avoid excessive runs we only do so if the file is syntactically valid
         return if @document.syntax_error?
 
-        return unless defined?(Support::RuboCopDiagnosticsRunner)
-
-        # Don't try to run RuboCop diagnostics for files outside the current working directory
+        # Don't try to run diagnostics for files outside the current working directory
         return unless URI(@uri).path&.start_with?(T.must(WORKSPACE_URI.path))
 
-        Support::RuboCopDiagnosticsRunner.instance.run(@uri, @document)
+        # TODO: Handle configuration for diagnostics runners
+        results = []
+        Diagnostics.diagnostics_runners.each do |_identifier, runner|
+          results.concat(runner.run(@uri, @document))
+        end
+        results
       end
     end
   end

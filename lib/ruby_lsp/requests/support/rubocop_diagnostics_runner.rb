@@ -13,20 +13,21 @@ module RubyLsp
       class RuboCopDiagnosticsRunner
         extend T::Sig
         include Singleton
+        include Support::DiagnosticsRunner
 
         sig { void }
         def initialize
           @runner = T.let(RuboCopRunner.new, RuboCopRunner)
         end
 
-        sig { params(uri: String, document: Document).returns(T::Array[Support::RuboCopDiagnostic]) }
+        sig { override.params(uri: String, document: Document).returns(T::Array[Interface::Diagnostic]) }
         def run(uri, document)
           filename = CGI.unescape(URI.parse(uri).path)
           # Invoke RuboCop with just this file in `paths`
           @runner.run(filename, document.source)
 
           @runner.offenses.map do |offense|
-            Support::RuboCopDiagnostic.new(offense, uri)
+            Support::RuboCopDiagnostic.new(offense, uri).to_lsp_diagnostic
           end
         end
       end
