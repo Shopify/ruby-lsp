@@ -22,9 +22,7 @@ module RubyLsp
       extend T::Sig
 
       @diagnostics_runners = T.let(
-        {
-          "rubocop" => Support::RuboCopDiagnosticsRunner.instance,
-        },
+        {},
         T::Hash[String, Support::DiagnosticsRunner],
       )
 
