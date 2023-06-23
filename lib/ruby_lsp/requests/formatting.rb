@@ -67,7 +67,7 @@ module RubyLsp
         return if @formatter == "none"
 
         # Don't try to format files outside the current working directory
-        return unless @uri.sub("file://", "").start_with?(Dir.pwd)
+        return unless URI(@uri).path&.start_with?(T.must(WORKSPACE_URI.path))
 
         return if @document.syntax_error?
 
