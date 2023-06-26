@@ -88,10 +88,10 @@ module RubyLsp
         current_line = @lines[@position[:line]]
         next_line = @lines[@position[:line] + 1]
 
-        if current_line.nil? || current_line.blank?
+        if current_line.nil? || current_line.strip.empty?
           add_edit_with_text(" \n#{indents}end")
           move_cursor_to(@position[:line], @indentation + 2)
-        elsif next_line.nil? || next_line.blank?
+        elsif next_line.nil? || next_line.strip.empty?
           add_edit_with_text("#{indents}end", { line: @position[:line] + 1, character: @position[:character] })
           move_cursor_to(@position[:line], @indentation + 3)
         end
