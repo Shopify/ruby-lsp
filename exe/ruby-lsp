@@ -1,6 +1,19 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+# When we're running without bundler, then we need to make sure the custom bundle is fully configured and re-execute
+# using `BUNDLE_GEMFILE=.ruby-lsp/Gemfile bundle exec ruby-lsp` so that we have access to the gems that are a part of
+# the application's bundle
+if ENV["BUNDLE_GEMFILE"].nil? && File.exist?("Gemfile.lock")
+  require_relative "../lib/ruby_lsp/setup_bundler"
+
+  # In some cases, like when the `ruby-lsp` is already a part of the bundle, we don't generate `.ruby-lsp/Gemfile`.
+  # However, we still want to run the server with `bundle exec`. We need to make sure we're pointing to the right
+  # `Gemfile`
+  bundle_gemfile = File.exist?(".ruby-lsp/Gemfile") ? ".ruby-lsp/Gemfile" : "Gemfile"
+  exit exec("BUNDLE_GEMFILE=#{bundle_gemfile} bundle exec ruby-lsp #{ARGV.join(" ")}")
+end
+
 require "sorbet-runtime"
 
 begin
