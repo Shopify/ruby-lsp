@@ -137,7 +137,7 @@ export class TestController {
       name: "Debug",
       request: "launch",
       program: command,
-      env: this.ruby.env,
+      env: { ...this.ruby.env, DISABLE_SPRING: "1" },
     });
   }
 
