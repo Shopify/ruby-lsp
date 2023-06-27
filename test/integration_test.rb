@@ -41,10 +41,22 @@ class IntegrationTest < Minitest::Test
     make_request("shutdown")
     send_request("exit")
 
-    # Make sure IOs are closed
-    @stdin.close
-    @stdout.close
-    @stderr.close
+    # Give the server some time to process the "shutdown" and "exit" messages before
+    # closing the streams. Otherwise, it's possible the server misses one or both of them
+    # depending on what it's currently processing. This is wrapped in a timeout in case
+    # the server fails to process the messages.
+    begin
+      Timeout.timeout(60) do
+        sleep(0.010) while @wait_thr.alive?
+      end
+    rescue Timeout::Error
+      raise "The LSP server failed to shut down cleanly."
+    ensure
+      # Make sure IOs are closed
+      @stdin.close
+      @stdout.close
+      @stderr.close
+    end
 
     # Make sure the exit status is zero
     assert_equal(0, @wait_thr.value)
