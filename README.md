@@ -115,6 +115,8 @@ The Ruby LSP features include
 - Format on save (with RuboCop or Syntax Tree)
 - Format on type
 - Require path completion
+- Debugging support
+- Running and debugging tests through VS Code's UI
 
 See more features in the [ruby-lsp server documentation](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html)
 
