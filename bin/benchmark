@@ -252,6 +252,7 @@ requests = {
   "codeAction/resolve" => base_params.merge(data: { range: range, uri: FILE_URI }),
   "textDocument/completion" => base_params.merge(position: { line: 5, character: 24 }),
   "textDocument/codeLens" => base_params,
+  "textDocument/definition" => base_params.merge(position: { line: 4, character: 20 }),
 }
 
 results = {}

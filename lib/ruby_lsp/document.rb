@@ -119,7 +119,7 @@ module RubyLsp
     def locate_node(position, node_types: [])
       return [nil, nil] unless parsed?
 
-      locate(T.must(@tree), create_scanner.find_char_position(position))
+      locate(T.must(@tree), create_scanner.find_char_position(position), node_types: node_types)
     end
 
     sig do

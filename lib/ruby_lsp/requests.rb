@@ -19,6 +19,7 @@ module RubyLsp
   # - [InlayHint](rdoc-ref:RubyLsp::Requests::InlayHints)
   # - [PathCompletion](rdoc-ref:RubyLsp::Requests::PathCompletion)
   # - [CodeLens](rdoc-ref:RubyLsp::Requests::CodeLens)
+  # - [Definition](rdoc-ref:RubyLsp::Requests::Definition)
 
   module Requests
     autoload :BaseRequest, "ruby_lsp/requests/base_request"
@@ -37,6 +38,7 @@ module RubyLsp
     autoload :InlayHints, "ruby_lsp/requests/inlay_hints"
     autoload :PathCompletion, "ruby_lsp/requests/path_completion"
     autoload :CodeLens, "ruby_lsp/requests/code_lens"
+    autoload :Definition, "ruby_lsp/requests/definition"
 
     # :nodoc:
     module Support

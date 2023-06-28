@@ -26,6 +26,7 @@ class IntegrationTest < Minitest::Test
     "diagnostics" => :diagnosticProvider,
     "hover" => :hoverProvider,
     "codeLens" => :codeLensProvider,
+    "definition" => :definitionProvider,
   }.freeze
 
   def setup
@@ -91,6 +92,21 @@ class IntegrationTest < Minitest::Test
 
     assert_nil(response[:result])
     assert_nil(response[:error])
+  end
+
+  def test_definition
+    initialize_lsp(["definition"])
+    open_file_with("require 'ruby_lsp/utils'")
+
+    assert_telemetry("textDocument/didOpen")
+
+    response = make_request(
+      "textDocument/definition",
+      { textDocument: { uri: "file://#{__FILE__}" }, position: { line: 0, character: 20 } },
+    )
+
+    assert_nil(response[:error])
+    assert(response[:result][:uri].end_with?("ruby_lsp/utils.rb"))
   end
 
   def test_document_highlight_with_syntax_error
