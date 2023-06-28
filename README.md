@@ -103,6 +103,38 @@ If you are working on a project using an older version of Ruby not supported by 
 "rubyLsp.bundleGemfile": "relative/path/to/Gemfile"
 ```
 
+#### Configuring VS Code debugger
+
+To configure the VS Code debugger, you can use the "Debug: Add configuration..." command to create a
+`launch.json` file in the `.vscode` folder of your project.
+
+This command would generate the following configuration:
+
+```jsonc
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "ruby_lsp",
+      "name": "Debug",
+      "request": "launch",
+      "program": "ruby ${file}"
+    },
+    {
+      "type": "ruby_lsp",
+      "request": "launch",
+      "name": "Debug test file",
+      "program": "ruby -Itest ${relativeFile}"
+    },
+    {
+      "type": "ruby_lsp",
+      "request": "attach",
+      "name": "Attach to existing server"
+    }
+  ]
+}
+```
+
 ## Features
 
 ![Ruby LSP demo](extras/ruby_lsp_demo.gif)
@@ -115,6 +147,8 @@ The Ruby LSP features include
 - Format on save (with RuboCop or Syntax Tree)
 - Format on type
 - Require path completion
+- Debugging support
+- Running and debugging tests through VS Code's UI
 
 See more features in the [ruby-lsp server documentation](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html)
 

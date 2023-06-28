@@ -218,7 +218,7 @@
         },
         "configurationSnippets": [
           {
-            "label": "Debug a Ruby program",
+            "label": "Ruby: Debug program",
             "description": "New configuration for debugging a Ruby program",
             "body": {
               "type": "ruby_lsp",
@@ -228,7 +228,7 @@
             }
           },
           {
-            "label": "Debug a Minitest / Test Unit file",
+            "label": "Ruby: Debug a Minitest / Test Unit file",
             "description": "New configuration for debugging a Minitest / Test Unit file",
             "body": {
               "type": "ruby_lsp",
@@ -238,7 +238,7 @@
             }
           },
           {
-            "label": "Attach the debugger to a running Ruby process",
+            "label": "Ruby: Attach the debugger to a running process",
             "description": "New configuration for attaching the debugger to a process that was started with the debugger",
             "body": {
               "type": "ruby_lsp",
