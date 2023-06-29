@@ -9,12 +9,6 @@ class SetupBundlerTest < Minitest::Test
     refute_path_exists(".ruby-lsp")
   end
 
-  def test_does_nothing_if_there_is_no_bundle
-    Bundler::SharedHelpers.expects(:in_bundle?).returns(false)
-    run_script
-    refute_path_exists(".ruby-lsp")
-  end
-
   def test_does_nothing_if_both_ruby_lsp_and_debug_are_in_the_bundle
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({ "ruby-lsp" => true, "debug" => true })
     run_script
@@ -78,6 +72,7 @@ class SetupBundlerTest < Minitest::Test
 
     command = +""
     command << "BUNDLE_PATH=#{File.expand_path(path, Dir.pwd)} " if path
-    command << "BUNDLE_GEMFILE=.ruby-lsp/Gemfile bundle install --quiet"
+    command << "BUNDLE_GEMFILE=.ruby-lsp/Gemfile bundle install "
+    command << "1>&2"
   end
 end

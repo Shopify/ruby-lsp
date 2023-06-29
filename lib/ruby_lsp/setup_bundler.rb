@@ -10,10 +10,10 @@ require "pathname"
 # exact locked versions of dependencies.
 
 # Do not setup a custom bundle if we're working on the Ruby LSP, since it's already included by default
-return if Pathname.new(Dir.pwd).basename == "ruby-lsp"
-
-# Do not seutp a custom bundle if the application doesn't have one already (no Gemfile)
-return unless Bundler::SharedHelpers.in_bundle?
+if Pathname.new(Dir.pwd).basename == "ruby-lsp"
+  warn("Ruby LSP> Skipping custom bundle setup since we're working on the Ruby LSP itself")
+  return
+end
 
 # We need to parse the Gemfile.lock manually here. If we try to do `bundler/setup` to use something more convenient, we
 # may end up with issues when the globally installed `ruby-lsp` version mismatches the one included in the `Gemfile`
@@ -28,7 +28,10 @@ if gemspec_path
 end
 
 # Do not setup a custom bundle if both `ruby-lsp` and `debug` are already in the Gemfile
-return if dependencies["ruby-lsp"] && dependencies["debug"]
+if dependencies["ruby-lsp"] && dependencies["debug"]
+  warn("Ruby LSP> Skipping custom bundle setup since both `ruby-lsp` and `debug` are already in the Gemfile")
+  return
+end
 
 # Automatically create and ignore the .ruby-lsp folder for users
 FileUtils.mkdir(".ruby-lsp") unless Dir.exist?(".ruby-lsp")
@@ -58,6 +61,7 @@ end
 # If .ruby-lsp/Gemfile.lock already exists and the top level Gemfile.lock hasn't been modified since it was last
 # updated, then we're ready to boot the server
 if File.exist?(".ruby-lsp/Gemfile.lock") && File.stat(".ruby-lsp/Gemfile.lock").mtime > File.stat("Gemfile.lock").mtime
+  warn("Ruby LSP> Skipping custom bundle setup since .ruby-lsp/Gemfile.lock already exists and is up to date")
   return
 end
 
@@ -70,7 +74,13 @@ FileUtils.cp("Gemfile.lock", ".ruby-lsp/Gemfile.lock")
 path = Bundler.settings["path"]
 
 command = +""
+# Use the absolute `BUNDLE_PATH` to prevent accidentally creating unwanted folders under `.ruby-lsp`
 command << "BUNDLE_PATH=#{File.expand_path(path, Dir.pwd)} " if path
-command << "BUNDLE_GEMFILE=.ruby-lsp/Gemfile bundle install --quiet"
+# Install gems using the custom bundle
+command << "BUNDLE_GEMFILE=.ruby-lsp/Gemfile bundle install "
+# Redirect stdout to stderr to prevent going into an infinite loop. The extension might confuse stdout output with
+# responses
+command << "1>&2"
 
+warn("Ruby LSP> Running bundle install for the custom bundle. This may take a while...")
 system(command)
