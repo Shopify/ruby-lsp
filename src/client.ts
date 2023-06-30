@@ -623,11 +623,23 @@ export default class Client implements ClientInterface {
   }
 
   private async getServerVersion(): Promise<string> {
-    const result = await asyncExec(
-      `BUNDLE_GEMFILE=${path.join(
+    let bundleGemfile;
+
+    if (fs.existsSync(path.join(this.workingFolder, ".ruby-lsp", "Gemfile"))) {
+      bundleGemfile = `BUNDLE_GEMFILE=${path.join(
+        this.workingFolder,
+        ".ruby-lsp",
+        "Gemfile"
+      )}`;
+    } else {
+      bundleGemfile = `BUNDLE_GEMFILE=${path.join(
         this.workingFolder,
         "Gemfile"
-      )} bundle exec ruby -e "require 'ruby-lsp'; print RubyLsp::VERSION"`,
+      )}`;
+    }
+
+    const result = await asyncExec(
+      `${bundleGemfile} bundle exec ruby -e "require 'ruby-lsp'; print RubyLsp::VERSION"`,
       {
         cwd: this.workingFolder,
         env: this.ruby.env,
