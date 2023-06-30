@@ -7,7 +7,6 @@ Below you can find user-contributed configurations for less common version manag
 [rtx](https://github.com/jdxcode/rtx) is a Rust clone compatible with asdf. You can use it by adding the following
 snippet to your user configuration JSON
 
-
 ```json
 {
   "rubyLsp.rubyVersionManager": "custom",
