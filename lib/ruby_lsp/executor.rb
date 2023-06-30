@@ -436,7 +436,9 @@ module RubyLsp
       end
 
       configured_features = options.dig(:initializationOptions, :enabledFeatures)
-      experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled)
+
+      # Uncomment the line below and use the variable to gate features behind the experimental flag
+      # experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled)
 
       enabled_features = case configured_features
       when Array
@@ -465,7 +467,7 @@ module RubyLsp
         Interface::DocumentLinkOptions.new(resolve_provider: false)
       end
 
-      code_lens_provider = if experimental_features
+      code_lens_provider = if enabled_features["codeLens"]
         Interface::CodeLensOptions.new(resolve_provider: false)
       end
 
