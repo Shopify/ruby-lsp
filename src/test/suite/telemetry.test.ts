@@ -7,6 +7,7 @@ import {
   TelemetryApi,
   TelemetryEvent,
   ConfigurationEvent,
+  CodeLensEvent,
 } from "../../telemetry";
 
 class FakeApi implements TelemetryApi {
@@ -97,5 +98,26 @@ suite("Telemetry", () => {
     api.sentEvents.forEach((event) => {
       assert.strictEqual(typeof (event as ConfigurationEvent).value, "string");
     });
+  });
+
+  test("Send code lens event includes configured server version", async () => {
+    const api = new FakeApi();
+    const telemetry = new Telemetry(
+      {
+        extensionMode: vscode.ExtensionMode.Production,
+        globalState: {
+          get: () => undefined,
+          update: () => Promise.resolve(),
+        } as unknown,
+      } as vscode.ExtensionContext,
+      api
+    );
+
+    telemetry.serverVersion = "1.0.0";
+    await telemetry.sendCodeLensEvent("test");
+
+    const codeLensEvent = api.sentEvents[0] as CodeLensEvent;
+    assert.strictEqual(codeLensEvent.type, "test");
+    assert.strictEqual(codeLensEvent.lspVersion, "1.0.0");
   });
 });

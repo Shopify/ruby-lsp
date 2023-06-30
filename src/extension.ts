@@ -20,7 +20,8 @@ export async function activate(context: vscode.ExtensionContext) {
   testController = new TestController(
     context,
     vscode.workspace.workspaceFolders![0].uri.fsPath,
-    ruby
+    ruby,
+    telemetry
   );
 
   client = new Client(context, telemetry, ruby, testController);
