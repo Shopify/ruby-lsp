@@ -15,6 +15,8 @@ export async function activate(context: vscode.ExtensionContext) {
   await ruby.activateRuby();
 
   const telemetry = new Telemetry(context);
+  await telemetry.sendConfigurationEvents();
+
   testController = new TestController(
     context,
     vscode.workspace.workspaceFolders![0].uri.fsPath,
