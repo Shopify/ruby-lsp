@@ -70,6 +70,8 @@ module RubyLsp
         when "$/cancelRequest"
           # Cancel the job if it's still in the queue
           @mutex.synchronize { @jobs[request[:params][:id]]&.cancel }
+        when "$/setTrace"
+          VOID
         when "shutdown"
           warn("Shutting down Ruby LSP...")
 
