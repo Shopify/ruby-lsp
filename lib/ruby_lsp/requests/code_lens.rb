@@ -31,6 +31,9 @@ module RubyLsp
       ACCESS_MODIFIERS = T.let(["public", "private", "protected"], T::Array[String])
       SUPPORTED_TEST_LIBRARIES = T.let(["minitest", "test-unit"], T::Array[String])
 
+      sig { override.returns(ResponseType) }
+      attr_reader :response
+
       sig { params(uri: String, emitter: EventEmitter, message_queue: Thread::Queue, test_library: String).void }
       def initialize(uri, emitter, message_queue, test_library)
         super(emitter, message_queue)
@@ -71,12 +74,6 @@ module RubyLsp
         @external_listeners.each do |l|
           merge_response!(l)
         end
-      end
-
-      sig { override.returns(ResponseType) }
-      def response
-        merge_external_listeners_responses!
-        @response
       end
 
       sig { params(node: SyntaxTree::ClassDeclaration).void }

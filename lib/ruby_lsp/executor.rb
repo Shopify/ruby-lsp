@@ -101,6 +101,8 @@ module RubyLsp
         semantic_highlighting = Requests::SemanticHighlighting.new(emitter, @message_queue)
         emitter.visit(document.tree) if document.parsed?
 
+        code_lens.merge_external_listeners_responses!
+
         # Store all responses retrieve in this round of visits in the cache and then return the response for the request
         # we actually received
         document.cache_set("textDocument/documentSymbol", document_symbol.response)
@@ -214,6 +216,7 @@ module RubyLsp
       # Emit events for all listeners
       emitter.emit_for_target(target)
 
+      hover.merge_external_listeners_responses!
       hover.response
     end
 

@@ -32,6 +32,9 @@ module RubyLsp
         T::Array[T.class_of(SyntaxTree::Node)],
       )
 
+      sig { override.returns(ResponseType) }
+      attr_reader :response
+
       sig { params(emitter: EventEmitter, message_queue: Thread::Queue).void }
       def initialize(emitter, message_queue)
         super
@@ -70,12 +73,6 @@ module RubyLsp
         end
 
         self
-      end
-
-      sig { override.returns(ResponseType) }
-      def response
-        merge_external_listeners_responses!
-        @response
       end
 
       sig { params(node: SyntaxTree::Command).void }
