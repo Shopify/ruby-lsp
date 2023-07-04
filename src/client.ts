@@ -624,8 +624,17 @@ export default class Client implements ClientInterface {
 
   private async getServerVersion(): Promise<string> {
     let bundleGemfile;
+    const customBundleGemfile: string = vscode.workspace
+      .getConfiguration("rubyLsp")
+      .get("bundleGemfile")!;
 
-    if (fs.existsSync(path.join(this.workingFolder, ".ruby-lsp", "Gemfile"))) {
+    // If a custom Gemfile was configured outside of the project, use that. Otherwise, prefer our custom bundle over the
+    // app's bundle
+    if (customBundleGemfile.length > 0) {
+      bundleGemfile = `BUNDLE_GEMFILE=${customBundleGemfile}`;
+    } else if (
+      fs.existsSync(path.join(this.workingFolder, ".ruby-lsp", "Gemfile"))
+    ) {
       bundleGemfile = `BUNDLE_GEMFILE=${path.join(
         this.workingFolder,
         ".ruby-lsp",
