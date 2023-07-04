@@ -169,7 +169,22 @@ module RubyLsp
         end
       when "textDocument/completion"
         completion(uri, request.dig(:params, :position))
+      when "textDocument/definition"
+        definition(uri, request.dig(:params, :position))
       end
+    end
+
+    sig { params(uri: String, position: Document::PositionShape).returns(T.nilable(Interface::Location)) }
+    def definition(uri, position)
+      document = @store.get(uri)
+      return if document.syntax_error?
+
+      target, _parent = document.locate_node(position, node_types: [SyntaxTree::Command])
+
+      emitter = EventEmitter.new
+      base_listener = Requests::Definition.new(uri, emitter, @message_queue)
+      emitter.emit_for_target(target)
+      base_listener.response
     end
 
     sig { params(uri: String).returns(T::Array[Interface::FoldingRange]) }
@@ -539,6 +554,7 @@ module RubyLsp
           inlay_hint_provider: inlay_hint_provider,
           completion_provider: completion_provider,
           code_lens_provider: code_lens_provider,
+          definition_provider: enabled_features["definition"],
         ),
       )
     end
