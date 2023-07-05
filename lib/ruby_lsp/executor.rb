@@ -97,13 +97,11 @@ module RubyLsp
         document_symbol = Requests::DocumentSymbol.new(emitter, @message_queue)
         document_link = Requests::DocumentLink.new(uri, emitter, @message_queue)
         code_lens = Requests::CodeLens.new(uri, emitter, @message_queue, @test_library)
-        code_lens_extensions_listeners = Requests::CodeLens.listeners.map do |l|
-          T.unsafe(l).new(document.uri, emitter, @message_queue)
-        end
+
         semantic_highlighting = Requests::SemanticHighlighting.new(emitter, @message_queue)
         emitter.visit(document.tree) if document.parsed?
 
-        code_lens_extensions_listeners.each { |ext| code_lens.merge_response!(ext) }
+        code_lens.merge_external_listeners_responses!
 
         # Store all responses retrieve in this round of visits in the cache and then return the response for the request
         # we actually received
@@ -213,15 +211,13 @@ module RubyLsp
 
       # Instantiate all listeners
       emitter = EventEmitter.new
-      base_listener = Requests::Hover.new(emitter, @message_queue)
-      listeners = Requests::Hover.listeners.map { |l| l.new(emitter, @message_queue) }
+      hover = Requests::Hover.new(emitter, @message_queue)
 
       # Emit events for all listeners
       emitter.emit_for_target(target)
 
-      # Merge all responses into a single hover
-      listeners.each { |ext| base_listener.merge_response!(ext) }
-      base_listener.response
+      hover.merge_external_listeners_responses!
+      hover.response
     end
 
     sig { params(uri: String, content_changes: T::Array[Document::EditShape], version: Integer).returns(Object) }

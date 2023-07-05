@@ -39,8 +39,25 @@ module RubyLsp
       def initialize(emitter, message_queue)
         super
 
+        @external_listeners = T.let([], T::Array[RubyLsp::Listener[ResponseType]])
         @response = T.let(nil, ResponseType)
         emitter.register(self, :on_command, :on_const_path_ref, :on_call)
+
+        register_external_listeners!
+      end
+
+      sig { void }
+      def register_external_listeners!
+        self.class.listeners.each do |l|
+          @external_listeners << T.unsafe(l).new(@emitter, @message_queue)
+        end
+      end
+
+      sig { void }
+      def merge_external_listeners_responses!
+        @external_listeners.each do |l|
+          merge_response!(l)
+        end
       end
 
       # Merges responses from other hover listeners
