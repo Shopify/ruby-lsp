@@ -211,7 +211,7 @@ export default class Client implements ClientInterface {
         (baseFolder === "ruby-lsp" || baseFolder === "ruby-lsp-rails")
       ) {
         vscode.window.showErrorMessage(
-          `Ruby LSP error ${event.errorClass}:${event.errorMessage}`
+          `Ruby LSP error ${event.errorClass}: ${event.errorMessage}`
         );
       } else {
         this.telemetry.sendEvent({
