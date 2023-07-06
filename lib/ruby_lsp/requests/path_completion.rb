@@ -26,28 +26,22 @@ module RubyLsp
       def initialize(emitter, message_queue)
         super
         @response = T.let([], ResponseType)
-        @tree = T.let(Support::PrefixTree.new(collect_load_path_files), Support::PrefixTree)
 
         emitter.register(self, :on_tstring_content)
       end
 
       sig { params(node: SyntaxTree::TStringContent).void }
       def on_tstring_content(node)
-        @tree.search(node.value).sort.each do |path|
-          @response << build_completion(path, node)
+        paths = $LOAD_PATH.flat_map do |p|
+          Dir.glob("#{node.value}**/*.rb", base: p).map! do |path|
+            path.delete_suffix(".rb")
+          end
         end
+        paths.sort!
+        paths.each { |path| @response << build_completion(path, node) }
       end
 
       private
-
-      sig { returns(T::Array[String]) }
-      def collect_load_path_files
-        $LOAD_PATH.flat_map do |p|
-          Dir.glob("**/*.rb", base: p)
-        end.map! do |result|
-          result.delete_suffix!(".rb")
-        end
-      end
 
       sig { params(label: String, node: SyntaxTree::TStringContent).returns(Interface::CompletionItem) }
       def build_completion(label, node)
