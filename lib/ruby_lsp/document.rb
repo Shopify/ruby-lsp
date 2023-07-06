@@ -114,10 +114,10 @@ module RubyLsp
       params(
         position: PositionShape,
         node_types: T::Array[T.class_of(SyntaxTree::Node)],
-      ).returns([T.nilable(SyntaxTree::Node), T.nilable(SyntaxTree::Node)])
+      ).returns([T.nilable(SyntaxTree::Node), T.nilable(SyntaxTree::Node), T::Array[String]])
     end
     def locate_node(position, node_types: [])
-      return [nil, nil] unless parsed?
+      return [nil, nil, []] unless parsed?
 
       locate(T.must(@tree), create_scanner.find_char_position(position), node_types: node_types)
     end
@@ -127,12 +127,13 @@ module RubyLsp
         node: SyntaxTree::Node,
         char_position: Integer,
         node_types: T::Array[T.class_of(SyntaxTree::Node)],
-      ).returns([T.nilable(SyntaxTree::Node), T.nilable(SyntaxTree::Node)])
+      ).returns([T.nilable(SyntaxTree::Node), T.nilable(SyntaxTree::Node), T::Array[String]])
     end
     def locate(node, char_position, node_types: [])
       queue = T.let(node.child_nodes.compact, T::Array[T.nilable(SyntaxTree::Node)])
       closest = node
       parent = T.let(nil, T.nilable(SyntaxTree::Node))
+      nesting = T.let([], T::Array[T.any(SyntaxTree::ClassDeclaration, SyntaxTree::ModuleDeclaration)])
 
       until queue.empty?
         candidate = queue.shift
@@ -140,8 +141,10 @@ module RubyLsp
         # Skip nil child nodes
         next if candidate.nil?
 
-        # Add the next child_nodes to the queue to be processed
-        queue.concat(candidate.child_nodes)
+        # Add the next child_nodes to the queue to be processed. The order here is important! We want to move in the
+        # same order as the visiting mechanism, which means searching the child nodes before moving on to the next
+        # sibling
+        queue.unshift(*candidate.child_nodes)
 
         # Skip if the current node doesn't cover the desired position
         loc = candidate.location
@@ -160,9 +163,20 @@ module RubyLsp
           parent = closest
           closest = candidate
         end
+
+        # If the candidate starts after the end of the previous nesting level, then we've exited that nesting level and
+        # need to pop the stack
+        previous_level = nesting.last
+        nesting.pop if previous_level && candidate.start_char > previous_level.end_char
+
+        # Keep track of the nesting where we found the target. This is used to determine the fully qualified name of the
+        # target when it is a constant
+        if candidate.is_a?(SyntaxTree::ClassDeclaration) || candidate.is_a?(SyntaxTree::ModuleDeclaration)
+          nesting << candidate
+        end
       end
 
-      [closest, parent]
+      [closest, parent, nesting.map { |n| n.constant.constant.value }]
     end
 
     class Scanner

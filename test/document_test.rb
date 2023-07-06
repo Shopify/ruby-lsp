@@ -456,7 +456,7 @@ class DocumentTest < Minitest::Test
     # Locate the `Base` class
     found, parent = T.cast(
       document.locate_node({ line: 0, character: 27 }),
-      [SyntaxTree::Const, SyntaxTree::ConstPathRef],
+      [SyntaxTree::Const, SyntaxTree::ConstPathRef, T::Array[String]],
     )
     assert_instance_of(SyntaxTree::Const, found)
     assert_equal("Base", found.value)
@@ -466,11 +466,40 @@ class DocumentTest < Minitest::Test
     assert_equal("ActiveRecord", T.cast(parent.parent, SyntaxTree::VarRef).value.value)
 
     # Locate the `where` invocation
-    found, parent = T.cast(document.locate_node({ line: 3, character: 4 }), [SyntaxTree::Ident, SyntaxTree::CallNode])
+    found, parent = T.cast(
+      document.locate_node({ line: 3, character: 4 }),
+      [SyntaxTree::Ident, SyntaxTree::CallNode, T::Array[String]],
+    )
     assert_instance_of(SyntaxTree::Ident, found)
     assert_equal("where", found.value)
 
     assert_instance_of(SyntaxTree::CallNode, parent)
+  end
+
+  def test_locate_returns_nesting
+    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: "file:///foo/bar.rb")
+      module Foo
+        class Other
+          def do_it
+            Hello
+          end
+        end
+
+        class Bar
+          def baz
+            Qux
+          end
+        end
+      end
+    RUBY
+
+    found, _parent, nesting = document.locate_node({ line: 9, character: 6 })
+    assert_equal("Qux", T.cast(found, SyntaxTree::Const).value)
+    assert_equal(["Foo", "Bar"], nesting)
+
+    found, _parent, nesting = document.locate_node({ line: 3, character: 6 })
+    assert_equal("Hello", T.cast(found, SyntaxTree::Const).value)
+    assert_equal(["Foo", "Other"], nesting)
   end
 
   def test_reparsing_without_new_edits_does_nothing
