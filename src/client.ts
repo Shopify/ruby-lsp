@@ -202,13 +202,25 @@ export default class Client implements ClientInterface {
       clientOptions
     );
 
-    this.client.onTelemetry((event) =>
-      this.telemetry.sendEvent({
-        ...event,
-        rubyVersion: this.ruby.rubyVersion,
-        yjitEnabled: this.ruby.yjitEnabled,
-      })
-    );
+    const baseFolder = path.basename(this.workingFolder);
+
+    this.client.onTelemetry((event) => {
+      // If an error occurs in the ruby-lsp or ruby-lsp-rails projects, don't send telemetry, but show an error message
+      if (
+        event.errorMessage &&
+        (baseFolder === "ruby-lsp" || baseFolder === "ruby-lsp-rails")
+      ) {
+        vscode.window.showErrorMessage(
+          `Ruby LSP error ${event.errorClass}: ${event.errorMessage}`
+        );
+      } else {
+        this.telemetry.sendEvent({
+          ...event,
+          rubyVersion: this.ruby.rubyVersion,
+          yjitEnabled: this.ruby.yjitEnabled,
+        });
+      }
+    });
 
     this.telemetry.serverVersion = await this.getServerVersion();
     await this.client.start();
