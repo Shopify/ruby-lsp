@@ -502,6 +502,22 @@ class DocumentTest < Minitest::Test
     assert_equal(["Foo", "Other"], nesting)
   end
 
+  def test_locate_returns_correct_nesting_when_specifying_target_classes
+    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: "file:///foo/bar.rb")
+      module Foo
+        class Bar
+          def baz
+            Qux
+          end
+        end
+      end
+    RUBY
+
+    found, _parent, nesting = document.locate_node({ line: 3, character: 6 }, node_types: [SyntaxTree::Const])
+    assert_equal("Qux", T.cast(found, SyntaxTree::Const).value)
+    assert_equal(["Foo", "Bar"], nesting)
+  end
+
   def test_reparsing_without_new_edits_does_nothing
     document = RubyLsp::Document.new(source: +"", version: 1, uri: "file:///foo/bar.rb")
     document.push_edits(

@@ -154,16 +154,6 @@ module RubyLsp
         # already
         break if char_position < loc.start_char
 
-        # If there are node types to filter by, and the current node is not one of those types, then skip it
-        next if node_types.any? && node_types.none? { |type| candidate.class == type }
-
-        # If the current node is narrower than or equal to the previous closest node, then it is more precise
-        closest_loc = closest.location
-        if loc.end_char - loc.start_char <= closest_loc.end_char - closest_loc.start_char
-          parent = closest
-          closest = candidate
-        end
-
         # If the candidate starts after the end of the previous nesting level, then we've exited that nesting level and
         # need to pop the stack
         previous_level = nesting.last
@@ -173,6 +163,16 @@ module RubyLsp
         # target when it is a constant
         if candidate.is_a?(SyntaxTree::ClassDeclaration) || candidate.is_a?(SyntaxTree::ModuleDeclaration)
           nesting << candidate
+        end
+
+        # If there are node types to filter by, and the current node is not one of those types, then skip it
+        next if node_types.any? && node_types.none? { |type| candidate.class == type }
+
+        # If the current node is narrower than or equal to the previous closest node, then it is more precise
+        closest_loc = closest.location
+        if loc.end_char - loc.start_char <= closest_loc.end_char - closest_loc.start_char
+          parent = closest
+          closest = candidate
         end
       end
 
