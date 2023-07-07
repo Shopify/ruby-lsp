@@ -26,6 +26,8 @@ interface EnabledFeatures {
   [key: string]: boolean;
 }
 
+type SyntaxTreeResponse = { ast: string } | null;
+
 export default class Client implements ClientInterface {
   private client: LanguageClient | undefined;
   private workingFolder: string;
@@ -329,6 +331,10 @@ export default class Client implements ClientInterface {
       vscode.commands.registerCommand(
         Command.OpenLink,
         this.openLink.bind(this)
+      ),
+      vscode.commands.registerCommand(
+        Command.ShowSyntaxTree,
+        this.showSyntaxTree.bind(this)
       )
     );
   }
@@ -685,5 +691,38 @@ export default class Client implements ClientInterface {
   private async openLink(link: string) {
     await this.telemetry.sendCodeLensEvent("link");
     vscode.env.openExternal(vscode.Uri.parse(link));
+  }
+
+  private async showSyntaxTree() {
+    const activeEditor = vscode.window.activeTextEditor;
+
+    if (this.client && activeEditor) {
+      const document = activeEditor.document;
+
+      if (document.languageId !== "ruby") {
+        vscode.window.showErrorMessage("Show syntax tree: not a Ruby file");
+        return;
+      }
+
+      const response: SyntaxTreeResponse = await this.client.sendRequest(
+        "rubyLsp/textDocument/showSyntaxTree",
+        { textDocument: { uri: activeEditor.document.uri.toString() } }
+      );
+
+      if (response) {
+        const document = await vscode.workspace.openTextDocument(
+          vscode.Uri.from({
+            scheme: "ruby-lsp",
+            path: "show-syntax-tree",
+            query: response.ast,
+          })
+        );
+
+        await vscode.window.showTextDocument(document, {
+          viewColumn: vscode.ViewColumn.Beside,
+          preserveFocus: true,
+        });
+      }
+    }
   }
 }
