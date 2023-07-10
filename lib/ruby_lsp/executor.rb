@@ -169,6 +169,8 @@ module RubyLsp
         completion(uri, request.dig(:params, :position))
       when "textDocument/definition"
         definition(uri, request.dig(:params, :position))
+      when "rubyLsp/textDocument/showSyntaxTree"
+        { ast: Requests::ShowSyntaxTree.new(@store.get(uri)).run }
       end
     end
 

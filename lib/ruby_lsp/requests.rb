@@ -20,6 +20,7 @@ module RubyLsp
   # - [PathCompletion](rdoc-ref:RubyLsp::Requests::PathCompletion)
   # - [CodeLens](rdoc-ref:RubyLsp::Requests::CodeLens)
   # - [Definition](rdoc-ref:RubyLsp::Requests::Definition)
+  # - [ShowSyntaxTree](rdoc-ref:RubyLsp::Requests::ShowSyntaxTree)
 
   module Requests
     autoload :BaseRequest, "ruby_lsp/requests/base_request"
@@ -39,6 +40,7 @@ module RubyLsp
     autoload :PathCompletion, "ruby_lsp/requests/path_completion"
     autoload :CodeLens, "ruby_lsp/requests/code_lens"
     autoload :Definition, "ruby_lsp/requests/definition"
+    autoload :ShowSyntaxTree, "ruby_lsp/requests/show_syntax_tree"
 
     # :nodoc:
     module Support
