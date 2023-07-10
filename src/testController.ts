@@ -138,6 +138,9 @@ export class TestController {
   }
 
   private debugTest(_path: string, _name: string, command: string) {
+    // eslint-disable-next-line no-param-reassign
+    command ??= this.testCommands.get(this.findTestByActiveLine()!) || "";
+
     return vscode.debug.startDebugging(undefined, {
       type: "ruby_lsp",
       name: "Debug",
