@@ -25,6 +25,7 @@ export enum Command {
   RunTestInTerminal = "rubyLsp.runTestInTerminal",
   DebugTest = "rubyLsp.debugTest",
   OpenLink = "rubyLsp.openLink",
+  ShowSyntaxTree = "rubyLsp.showSyntaxTree",
 }
 
 const STOPPED_SERVER_OPTIONS = [

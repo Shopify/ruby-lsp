@@ -39,6 +39,10 @@
       {
         "command": "rubyLsp.update",
         "title": "Ruby LSP: Update language server gem"
+      },
+      {
+        "command": "rubyLsp.showSyntaxTree",
+        "title": "Ruby LSP: Show syntax tree"
       }
     ],
     "configuration": {
