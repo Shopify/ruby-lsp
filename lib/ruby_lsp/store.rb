@@ -9,17 +9,23 @@ module RubyLsp
   class Store
     extend T::Sig
 
+    ExtensionStore = T.type_alias { T::Hash[String, { activated: T::Boolean }] }
+
     sig { returns(String) }
     attr_accessor :encoding
 
     sig { returns(String) }
     attr_accessor :formatter
 
+    sig { returns(ExtensionStore) }
+    attr_accessor :server_extensions
+
     sig { void }
     def initialize
       @state = T.let({}, T::Hash[String, Document])
       @encoding = T.let(Constant::PositionEncodingKind::UTF8, String)
       @formatter = T.let("auto", String)
+      @server_extensions = T.let({}, ExtensionStore)
     end
 
     sig { params(uri: String).returns(Document) }

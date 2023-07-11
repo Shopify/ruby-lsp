@@ -16,7 +16,7 @@ end
 
 require_relative "../lib/ruby_lsp/internal"
 
-RubyLsp::Extension.load_extensions
+RubyLsp::Extension.load_extensions({})
 
 T::Utils.run_all_sig_blocks
 

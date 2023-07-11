@@ -51,7 +51,7 @@ module RubyLsp
         end
       end
 
-      Extension.load_extensions
+      Extension.load_extensions({})
       error_extension = T.must(Extension.extensions.find(&:error?))
 
       assert_predicate(error_extension, :error?)
@@ -59,6 +59,21 @@ module RubyLsp
         My extension:
           Failed to activate
       MESSAGE
+    end
+
+    def test_load_extensions_does_not_activated_disabled_extensions
+      Class.new(Extension) do
+        def activate
+          RubyLsp::Requests::Hover.add_listener(Class.new(RubyLsp::Listener))
+        end
+
+        def name
+          "My extension"
+        end
+      end
+
+      Extension.load_extensions({ "My extension" => { activated: false } })
+      assert_empty(RubyLsp::Requests::Hover.listeners)
     end
   end
 end

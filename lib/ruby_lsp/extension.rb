@@ -41,8 +41,8 @@ module RubyLsp
       end
 
       # Discovers and loads all extensions. Returns the list of activated extensions
-      sig { returns(T::Array[Extension]) }
-      def load_extensions
+      sig { params(extension_store: Store::ExtensionStore).returns(T::Array[Extension]) }
+      def load_extensions(extension_store)
         # Require all extensions entry points, which should be placed under
         # `some_gem/lib/ruby_lsp/your_gem_name/extension.rb`
         Gem.find_files("ruby_lsp/**/extension.rb").each do |extension|
@@ -55,7 +55,11 @@ module RubyLsp
         # Activate each one of the discovered extensions. If any problems occur in the extensions, we don't want to
         # fail to boot the server
         extensions.each do |extension|
-          extension.activate
+          activated = extension_store.dig(extension.name, :activated)
+
+          # If `activated` is `true`, the user explicitly enabled the server extension. If it's `nil`, there's no
+          # configuration for it and we default to enabled. The only case we don't activate is if it's `false`
+          extension.activate if activated || activated.nil?
           nil
         rescue => e
           extension.add_error(e)

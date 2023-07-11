@@ -41,7 +41,7 @@ module RubyLsp
       when "initialize"
         initialize_request(request.dig(:params))
       when "initialized"
-        Extension.load_extensions
+        Extension.load_extensions(@store.server_extensions)
 
         errored_extensions = Extension.extensions.select(&:error?)
 
@@ -449,6 +449,9 @@ module RubyLsp
       else
         formatter
       end
+
+      server_extensions = options.dig(:initializationOptions, :serverExtensions)
+      @store.server_extensions = server_extensions if server_extensions
 
       configured_features = options.dig(:initializationOptions, :enabledFeatures)
 
