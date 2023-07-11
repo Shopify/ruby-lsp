@@ -192,6 +192,30 @@ class ExecutorTest < Minitest::Test
     end
   end
 
+  def test_registered_extensions_returns_name_and_errors
+    Class.new(RubyLsp::Extension) do
+      attr_reader :activated
+
+      def activate
+      end
+
+      def name
+        "My extension"
+      end
+    end
+
+    RubyLsp::Extension.load_extensions({})
+    response = @executor.execute({ method: "rubyLsp/workspace/registeredExtensions" }).response
+
+    begin
+      assert_includes(response, { name: "My extension", errors: [] })
+    ensure
+      RubyLsp::Extension.extensions.clear
+    end
+  end
+
+  private
+
   def with_uninstalled_rubocop(&block)
     rubocop_paths = $LOAD_PATH.select { |path| path.include?("gems/rubocop") }
     rubocop_paths.each { |path| $LOAD_PATH.delete(path) }
@@ -211,8 +235,6 @@ class ExecutorTest < Minitest::Test
   rescue NameError
     # Depending on which tests have run prior to this one, `RuboCopRunner` may or may not be defined
   end
-
-  private
 
   def stub_dependencies(rubocop:, syntax_tree:)
     dependencies = {}

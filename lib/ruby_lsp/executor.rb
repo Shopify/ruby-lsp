@@ -171,6 +171,8 @@ module RubyLsp
         definition(uri, request.dig(:params, :position))
       when "rubyLsp/textDocument/showSyntaxTree"
         { ast: Requests::ShowSyntaxTree.new(@store.get(uri)).run }
+      when "rubyLsp/workspace/registeredExtensions"
+        Extension.extensions.map(&:to_hash)
       end
     end
 

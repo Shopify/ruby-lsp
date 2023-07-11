@@ -100,5 +100,13 @@ module RubyLsp
     # Extensions should override the `name` method to return the extension name
     sig { abstract.returns(String) }
     def name; end
+
+    sig { returns(T::Hash[Symbol, T.untyped]) }
+    def to_hash
+      {
+        name: name,
+        errors: @errors.map(&:message),
+      }
+    end
   end
 end
