@@ -94,7 +94,9 @@ module RubyLsp
         return unless match
 
         uri = T.cast(URI(T.must(match[0])), URI::Source)
-        gem_version = T.must(resolve_version(uri))
+        gem_version = resolve_version(uri)
+        return if gem_version.nil?
+
         file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, uri.path)
         return if file_path.nil?
 
