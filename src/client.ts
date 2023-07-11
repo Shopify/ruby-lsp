@@ -10,6 +10,7 @@ import {
   Executable,
   RevealOutputChannelOn,
   CodeLens,
+  Range,
 } from "vscode-languageclient/node";
 
 import { Telemetry } from "./telemetry";
@@ -488,9 +489,36 @@ export default class Client implements ClientInterface {
         return;
       }
 
+      const selection = activeEditor.selection;
+      let range: Range | undefined;
+
+      // Anchor is the first point and active is the last point in the selection. If both are the same, nothing is
+      // selected
+      if (!selection.active.isEqual(selection.anchor)) {
+        // If you start selecting from below and go up, then the selection is reverted
+        if (selection.isReversed) {
+          range = Range.create(
+            selection.active.line,
+            selection.active.character,
+            selection.anchor.line,
+            selection.anchor.character,
+          );
+        } else {
+          range = Range.create(
+            selection.anchor.line,
+            selection.anchor.character,
+            selection.active.line,
+            selection.active.character,
+          );
+        }
+      }
+
       const response: SyntaxTreeResponse = await this.client.sendRequest(
         "rubyLsp/textDocument/showSyntaxTree",
-        { textDocument: { uri: activeEditor.document.uri.toString() } },
+        {
+          textDocument: { uri: activeEditor.document.uri.toString() },
+          range,
+        },
       );
 
       if (response) {
