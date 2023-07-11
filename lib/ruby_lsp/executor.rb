@@ -170,8 +170,13 @@ module RubyLsp
       when "textDocument/definition"
         definition(uri, request.dig(:params, :position))
       when "rubyLsp/textDocument/showSyntaxTree"
-        { ast: Requests::ShowSyntaxTree.new(@store.get(uri)).run }
+        show_syntax_tree(uri, request.dig(:params, :range))
       end
+    end
+
+    sig { params(uri: String, range: T.nilable(Document::RangeShape)).returns({ ast: String }) }
+    def show_syntax_tree(uri, range)
+      { ast: Requests::ShowSyntaxTree.new(@store.get(uri), range).run }
     end
 
     sig { params(uri: String, position: Document::PositionShape).returns(T.nilable(Interface::Location)) }
