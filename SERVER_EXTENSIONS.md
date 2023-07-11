@@ -62,9 +62,13 @@ module RubyLsp
     class Extension < ::RubyLsp::Extension
       extend T::Sig
 
-      # Performs any activation that needs to happen once when the language server is booted
+      # Performs any activation that needs to happen once when the language server is booted in addition to registering
+      # listeners and request enhancements
       sig { override.void }
       def activate
+        # Register the MyGem::Hover listener to enhance hover functionality
+        # IMPORTANT: listener and request enhancement registration must be done inside `activate`
+        ::RubyLsp::Requests::Hover.add_listener(MyGem::Hover)
       end
 
       # Returns the name of the extension
@@ -97,9 +101,6 @@ module RubyLsp
       extend T::Generic
 
       ResponseType = type_member { { fixed: T.nilable(::RubyLsp::Interface::Hover) } }
-
-      # Register this listener class in the hover request
-      ::RubyLsp::Requests::Hover.add_listener(self)
 
       sig { override.returns(ResponseType) }
       attr_reader :response
