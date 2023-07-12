@@ -62,9 +62,34 @@ module RubyLsp
 
       sig { void }
       def handle_pipe
-        return unless /((?<=do)|(?<={))\s+\|/.match?(@previous_line)
+        current_line = @lines[@position[:line]]
+        return unless /((?<=do)|(?<={))\s+\|/.match?(current_line)
 
-        add_edit_with_text("|")
+        line = T.must(current_line)
+
+        # If the current character is a pipe and both previous ones are pipes too, then we autocompleted a pipe and the
+        # user inserted a third one. In this case, we need to avoid adding a fourth and remove the previous one
+        if line[@position[:character] - 2] == "|" &&
+            line[@position[:character] - 1] == "|" &&
+            line[@position[:character]] == "|"
+
+          @edits << Interface::TextEdit.new(
+            range: Interface::Range.new(
+              start: Interface::Position.new(
+                line: @position[:line],
+                character: @position[:character],
+              ),
+              end: Interface::Position.new(
+                line: @position[:line],
+                character: @position[:character] + 1,
+              ),
+            ),
+            new_text: "",
+          )
+        else
+          add_edit_with_text("|")
+        end
+
         move_cursor_to(@position[:line], @position[:character])
       end
 

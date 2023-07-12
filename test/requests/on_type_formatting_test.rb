@@ -68,14 +68,14 @@ class OnTypeFormattingTest < Minitest::Test
     )
     document.parse
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 11 }, "|").run
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 12 }, "|").run
     expected_edits = [
       {
-        range: { start: { line: 0, character: 11 }, end: { line: 0, character: 11 } },
+        range: { start: { line: 0, character: 12 }, end: { line: 0, character: 12 } },
         newText: "|",
       },
       {
-        range: { start: { line: 0, character: 11 }, end: { line: 0, character: 11 } },
+        range: { start: { line: 0, character: 12 }, end: { line: 0, character: 12 } },
         newText: "$0",
       },
     ]
@@ -94,8 +94,64 @@ class OnTypeFormattingTest < Minitest::Test
     )
     document.parse
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 11 }, "|").run
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 2 }, "|").run
     assert_empty(T.must(edits))
+  end
+
+  def test_pipe_is_removed_if_user_adds_manually_after_completion
+    document = RubyLsp::Document.new(source: +"", version: 1, uri: "file:///fake.rb")
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "[].each do |",
+      }],
+      version: 2,
+    )
+    document.parse
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 12 }, end: { line: 0, character: 12 } },
+        text: "|",
+      }],
+      version: 3,
+    )
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 12 }, "|").run
+    expected_edits = [
+      {
+        range: { start: { line: 0, character: 12 }, end: { line: 0, character: 12 } },
+        newText: "|",
+      },
+      {
+        range: { start: { line: 0, character: 12 }, end: { line: 0, character: 12 } },
+        newText: "$0",
+      },
+    ]
+    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal("[].each do ||", document.source)
+
+    # Push the third pipe manually after the completion happened
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 13 }, end: { line: 0, character: 13 } },
+        text: "|",
+      }],
+      version: 3,
+    )
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 13 }, "|").run
+    expected_edits = [
+      {
+        range: { start: { line: 0, character: 13 }, end: { line: 0, character: 14 } },
+        newText: "",
+      },
+      {
+        range: { start: { line: 0, character: 13 }, end: { line: 0, character: 13 } },
+        newText: "$0",
+      },
+    ]
+    assert_equal(expected_edits.to_json, T.must(edits).to_json)
   end
 
   def test_comment_continuation
