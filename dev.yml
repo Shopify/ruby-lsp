@@ -23,7 +23,8 @@ commands:
       bundle exec rake check_visit_overrides &&
       bundle exec srb tc &&
       bin/rubocop &&
-      bin/test"
+      bin/test &&
+      bundle exec exe/ruby-lsp-check"
   test:
     syntax:
       argument: file
