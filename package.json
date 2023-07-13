@@ -35,23 +35,28 @@
     "commands": [
       {
         "command": "rubyLsp.start",
-        "title": "Ruby LSP: Start"
+        "title": "Start",
+        "category": "Ruby LSP"
       },
       {
         "command": "rubyLsp.restart",
-        "title": "Ruby LSP: Restart"
+        "title": "Restart",
+        "category": "Ruby LSP"
       },
       {
         "command": "rubyLsp.stop",
-        "title": "Ruby LSP: Stop"
+        "title": "Stop",
+        "category": "Ruby LSP"
       },
       {
         "command": "rubyLsp.update",
-        "title": "Ruby LSP: Update language server gem"
+        "title": "Update language server gem",
+        "category": "Ruby LSP"
       },
       {
         "command": "rubyLsp.showSyntaxTree",
-        "title": "Ruby LSP: Show syntax tree"
+        "title": "Show syntax tree",
+        "category": "Ruby LSP"
       }
     ],
     "configuration": {
