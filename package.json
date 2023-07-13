@@ -15,7 +15,8 @@
   },
   "categories": [
     "Programming Languages",
-    "Snippets"
+    "Snippets",
+    "Testing"
   ],
   "activationEvents": [
     "onLanguage:ruby",
