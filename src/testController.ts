@@ -10,6 +10,8 @@ import { Telemetry } from "./telemetry";
 
 const asyncExec = promisify(exec);
 
+const TERMINAL_NAME = "Ruby LSP: Run test";
+
 export class TestController {
   private testController: vscode.TestController;
   private testCommands: WeakMap<vscode.TestItem, string>;
@@ -153,10 +155,23 @@ export class TestController {
     await this.telemetry.sendCodeLensEvent("test_in_terminal");
 
     if (this.terminal === undefined) {
-      this.terminal = vscode.window.createTerminal({ name: "Run test" });
+      this.terminal = this.getTerminal();
     }
+
     this.terminal.show();
     this.terminal.sendText(command);
+  }
+
+  private getTerminal() {
+    const previousTerminal = vscode.window.terminals.find(
+      (terminal) => terminal.name === TERMINAL_NAME
+    );
+
+    return previousTerminal
+      ? previousTerminal
+      : vscode.window.createTerminal({
+          name: TERMINAL_NAME,
+        });
   }
 
   private async debugHandler(
