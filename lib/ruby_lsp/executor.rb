@@ -309,7 +309,6 @@ module RubyLsp
     sig { params(uri: URI::Generic, range: Document::RangeShape).returns(T.nilable(T::Array[Interface::InlayHint])) }
     def inlay_hint(uri, range)
       document = @store.get(uri)
-      return if document.syntax_error?
 
       start_line = range.dig(:start, :line)
       end_line = range.dig(:end, :line)

@@ -57,4 +57,129 @@ module YARP
     sig { returns(ConstantPathNode) }
     def constant_path; end
   end
+<<<<<<< HEAD
+||||||| parent of 9e19894 (Migrate inlay hint)
+
+  class DefNode
+    sig { returns(String) }
+    def name; end
+
+    sig { returns(T.nilable(YARP::Node)) }
+    def receiver; end
+
+    sig { returns(Location) }
+    def name_loc; end
+  end
+
+  class CallNode
+    sig { returns(String) }
+    def name; end
+
+    sig { returns(T.nilable(ArgumentsNode)) }
+    def arguments; end
+
+    sig { returns(T.nilable(YARP::Node)) }
+    def receiver; end
+  end
+
+  class ArgumentsNode
+    sig { returns(T::Array[YARP::Node]) }
+    def arguments; end
+  end
+
+  class StringNode
+    sig { returns(String) }
+    def content; end
+  end
+
+  class ConstantPathWriteNode
+    sig { returns(YARP::Node) }
+    def target; end
+  end
+
+  class SymbolNode
+    sig { returns(String) }
+    def value; end
+  end
+
+  class InstanceVariableWriteNode
+    sig { returns(String) }
+    def name; end
+
+    sig { returns(Location) }
+    def name_loc; end
+  end
+
+  class ClassVariableWriteNode
+    sig { returns(String) }
+    def name; end
+
+    sig { returns(Location) }
+    def name_loc; end
+  end
+=======
+
+  class DefNode
+    sig { returns(String) }
+    def name; end
+
+    sig { returns(T.nilable(YARP::Node)) }
+    def receiver; end
+
+    sig { returns(Location) }
+    def name_loc; end
+  end
+
+  class CallNode
+    sig { returns(String) }
+    def name; end
+
+    sig { returns(T.nilable(ArgumentsNode)) }
+    def arguments; end
+
+    sig { returns(T.nilable(YARP::Node)) }
+    def receiver; end
+  end
+
+  class ArgumentsNode
+    sig { returns(T::Array[YARP::Node]) }
+    def arguments; end
+  end
+
+  class StringNode
+    sig { returns(String) }
+    def content; end
+  end
+
+  class ConstantPathWriteNode
+    sig { returns(YARP::Node) }
+    def target; end
+  end
+
+  class SymbolNode
+    sig { returns(String) }
+    def value; end
+  end
+
+  class InstanceVariableWriteNode
+    sig { returns(String) }
+    def name; end
+
+    sig { returns(Location) }
+    def name_loc; end
+  end
+
+  class ClassVariableWriteNode
+    sig { returns(String) }
+    def name; end
+
+    sig { returns(Location) }
+    def name_loc; end
+  end
+
+  class RescueNode
+    sig { returns(T::Array[YARP::Node]) }
+    def exceptions; end
+  end
+>>>>>>> 9e19894 (Migrate inlay hint)
 end
