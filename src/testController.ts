@@ -255,7 +255,7 @@ export class TestController {
   }
 
   private async runOnClick(testId: string) {
-    const test = this.findTestById(this.testController.items, testId);
+    const test = this.findTestById(testId);
 
     if (!test) return;
 
@@ -275,13 +275,16 @@ export class TestController {
     this.testRunProfile.runHandler(testRun, tokenSource.token);
   }
 
-  private findTestById(testItems: vscode.TestItemCollection, testId: string) {
+  private findTestById(
+    testId: string,
+    testItems: vscode.TestItemCollection = this.testController.items
+  ) {
     let testItem = testItems.get(testId);
 
     if (testItem) return testItem;
 
     testItems.forEach((test) => {
-      const childTestItem = this.findTestById(test.children, testId);
+      const childTestItem = this.findTestById(testId, test.children);
       if (childTestItem) testItem = childTestItem;
     });
 
