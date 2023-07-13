@@ -290,4 +290,32 @@ export class TestController {
 
     return testItem;
   }
+
+  private findTestByActiveLine(
+    editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor,
+    testItems: vscode.TestItemCollection = this.testController.items
+  ): vscode.TestItem | undefined {
+    if (!editor) {
+      return;
+    }
+
+    const line = editor.selection.active.line;
+    let testItem: vscode.TestItem | undefined;
+
+    testItems.forEach((test) => {
+      if (testItem) return;
+
+      if (test.children.size > 0) {
+        testItem = this.findTestByActiveLine(editor, test.children);
+      } else if (
+        test.uri?.toString() === editor.document.uri.toString() &&
+        test.range?.start.line! <= line &&
+        test.range?.end.line! >= line
+      ) {
+        testItem = test;
+      }
+    });
+
+    return testItem;
+  }
 }
