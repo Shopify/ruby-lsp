@@ -155,6 +155,9 @@ export class TestController {
     _name: string,
     command: string
   ) {
+    // eslint-disable-next-line no-param-reassign
+    command ??= this.testCommands.get(this.findTestByActiveLine()!) || "";
+
     await this.telemetry.sendCodeLensEvent("test_in_terminal");
 
     if (this.terminal === undefined) {
@@ -279,6 +282,10 @@ export class TestController {
     testId: string,
     testItems: vscode.TestItemCollection = this.testController.items
   ) {
+    if (!testId) {
+      return this.findTestByActiveLine();
+    }
+
     let testItem = testItems.get(testId);
 
     if (testItem) return testItem;
