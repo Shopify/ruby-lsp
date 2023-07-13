@@ -23,6 +23,15 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "menus": {
+      "editor/context": [
+        {
+          "when": "resourceLangId == ruby",
+          "command": "workbench.action.terminal.runSelectedText",
+          "group": "9_cutcopypaste"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "rubyLsp.start",
