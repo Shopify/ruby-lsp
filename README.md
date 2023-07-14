@@ -27,7 +27,11 @@ The gem can be installed by doing
 gem install ruby-lsp
 ```
 
-If you decide to add the gem to the bundle, it is not necessary to require it.
+**NOTE**: starting with v0.7.0, it is no longer recommended to add the `ruby-lsp` to the bundle. The gem will generate a
+custom bundle in `.ruby-lsp/Gemfile` which is used to identify the versions of dependencies that should be used for the
+application (e.g.: the correct RuboCop version).
+
+For older versions, if you decide to add the gem to the bundle, it is not necessary to require it.
 ```ruby
 group :development do
   gem "ruby-lsp", require: false

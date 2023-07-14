@@ -11,15 +11,11 @@ new H2 header in this file containing the instructions. -->
 
 ## Emacs Eglot
 
-[Eglot](https://github.com/joaotavora/eglot) runs solargraph server by default. To set it up with ruby-lsp you need to put that in your init file:
+[Eglot](https://github.com/joaotavora/eglot) runs solargraph server by default. To set it up with ruby-lsp you need to
+put that in your init file:
 ```el
 (with-eval-after-load 'eglot
  (add-to-list 'eglot-server-programs '((ruby-mode ruby-ts-mode) "ruby-lsp")))
  ```
-Or if you want to run it with bundler:
-```el
-(with-eval-after-load 'eglot
- (add-to-list 'eglot-server-programs '((ruby-mode ruby-ts-mode) "bundle" "exec" "ruby-lsp")))
-```
- 
+
 When you run `eglot` command it will run `ruby-lsp` process for you.
