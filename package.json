@@ -134,7 +134,7 @@
             "codeLens": {
               "description": "Enable code lens, which generates clickable text to enrich editor experience (run tests, open Gem pages, ...)",
               "type": "boolean",
-              "default": false
+              "default": true
             },
             "definition": {
               "description": "Enable go to definition, which navigates to the definition of the symbol under the cursor",
@@ -156,7 +156,7 @@
             "selectionRanges": true,
             "semanticHighlighting": true,
             "completion": true,
-            "codeLens": false,
+            "codeLens": true,
             "definition": true
           }
         },
