@@ -138,8 +138,12 @@ export class Ruby {
   }
 
   private async activate(ruby: string) {
-    let command = this.shell ? `${this.shell} -ic ` : "";
-    command += `'${ruby} -rjson -e "printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, JSON.dump(ENV.to_h))"'`;
+    let command = this.shell ? `${this.shell} -ic '` : "";
+    command += `${ruby} -rjson -e "printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, JSON.dump(ENV.to_h))"`;
+
+    if (this.shell) {
+      command += "'";
+    }
 
     const result = await asyncExec(command, { cwd: this.workingFolder });
 
@@ -276,8 +280,13 @@ export class Ruby {
 
   private async toolExists(tool: string) {
     try {
-      let command = this.shell ? `${this.shell} -ic ` : "";
-      command += `'${tool} --version'`;
+      let command = this.shell ? `${this.shell} -ic '` : "";
+      command += `${tool} --version`;
+
+      if (this.shell) {
+        command += "'";
+      }
+
       await asyncExec(command, { cwd: this.workingFolder });
       return true;
     } catch {
