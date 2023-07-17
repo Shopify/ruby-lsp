@@ -6,6 +6,7 @@
 # the application's bundle
 if ENV["BUNDLE_GEMFILE"].nil? && File.exist?("Gemfile.lock")
   require_relative "../lib/ruby_lsp/setup_bundler"
+  RubyLsp::SetupBundler.new(Dir.pwd).setup!
 
   # In some cases, like when the `ruby-lsp` is already a part of the bundle, we don't generate `.ruby-lsp/Gemfile`.
   # However, we still want to run the server with `bundle exec`. We need to make sure we're pointing to the right
