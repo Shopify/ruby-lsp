@@ -58,6 +58,24 @@
         "command": "rubyLsp.showSyntaxTree",
         "title": "Show syntax tree",
         "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.runTest",
+        "title": "Run current test",
+        "category": "Ruby LSP",
+        "when": "editorActive && editorLangId == ruby"
+      },
+      {
+        "command": "rubyLsp.runTestInTerminal",
+        "title": "Run current test in terminal",
+        "category": "Ruby LSP",
+        "when": "editorActive && editorLangId == ruby"
+      },
+      {
+        "command": "rubyLsp.debugTest",
+        "title": "Debug current test",
+        "category": "Ruby LSP",
+        "when": "editorActive && editorLangId == ruby"
       }
     ],
     "configuration": {
