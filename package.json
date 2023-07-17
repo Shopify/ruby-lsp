@@ -55,8 +55,13 @@
         "category": "Ruby LSP"
       },
       {
-        "command": "rubyLsp.showSyntaxTree",
-        "title": "Show syntax tree",
+        "command": "rubyLsp.selectRubyVersionManager",
+        "title": "Select Ruby version manager",
+        "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.toggleFeatures",
+        "title": "Toggle features",
         "category": "Ruby LSP"
       },
       {
@@ -76,6 +81,11 @@
         "title": "Debug current test",
         "category": "Ruby LSP",
         "when": "editorActive && editorLangId == ruby"
+      },
+      {
+        "command": "rubyLsp.showSyntaxTree",
+        "title": "Show syntax tree",
+        "category": "Ruby LSP"
       }
     ],
     "configuration": {
