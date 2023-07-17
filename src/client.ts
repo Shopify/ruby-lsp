@@ -11,6 +11,7 @@ import {
   RevealOutputChannelOn,
   CodeLens,
   Range,
+  ExecutableOptions,
 } from "vscode-languageclient/node";
 
 import { Telemetry } from "./telemetry";
@@ -78,9 +79,10 @@ export default class Client implements ClientInterface {
       return;
     }
 
-    const executableOptions = {
+    const executableOptions: ExecutableOptions = {
       cwd: this.workingFolder,
       env: this.ruby.env,
+      shell: true,
     };
 
     const executable: Executable = {
