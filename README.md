@@ -59,27 +59,10 @@ To make sure that the Ruby LSP can find the version manager scripts, make sure t
 configuration script (e.g.: ~/.bashrc, ~/.zshrc) and that the SHELL environment variable is set and pointing to the
 default shell.
 
-##### Custom activation
-
-If you're using a different version manager than the ones listed above or if you're manually inserting the Ruby
-executable into the PATH, you will probably need to define custom activation so that the extension can find the correct
-Ruby.
-
-For these cases, set `rubyLsp.rubyVersionManager` to `"custom"` and then set `rubyLsp.customRubyCommand` to a shell
-command that will activate the right Ruby version or simply add the Ruby bin folder to the PATH. Some examples:
-
-```jsonc
-{
-  // Don't forget to set the manager to custom when using this option
-  "rubyLsp.rubyVersionManager": "custom",
-
-  // Using a different version manager than the ones included by default
-  "rubyLsp.customRubyCommand": "my_custom_version_manager activate",
-
-  // Adding a custom Ruby bin folder to the PATH
-  "rubyLsp.customRubyCommand": "PATH=/path/to/ruby/bin:$PATH"
-}
-```
+> [!NOTE]
+>
+> For manager-specific notes and how to set up custom activation for managers that are not listed above,
+> please see [version managers](VERSION_MANAGERS.md).
 
 See [version managers](VERSION_MANAGERS.md) for user-contributed configuration examples.
 
