@@ -88,11 +88,11 @@ GEM
       zeitwerk (~> 2.5)
     rainbow (3.1.1)
     rake (13.0.6)
-    rbi (0.0.16)
+    rbi (0.0.17)
       ast
-      parser (>= 2.6.4.0)
+      parser (>= 3.0.0)
       sorbet-runtime (>= 0.5.9204)
-      unparser
+      unparser (>= 0.5.6)
     rdoc (6.5.0)
       psych (>= 4.0.0)
     regexp_parser (2.8.1)
@@ -147,7 +147,7 @@ GEM
     stringio (3.0.6)
     syntax_tree (6.1.1)
       prettier_print (>= 1.2.0)
-    tapioca (0.11.7)
+    tapioca (0.11.8)
       bundler (>= 2.2.25)
       netrc (>= 0.11.0)
       parallel (>= 1.21.0)
