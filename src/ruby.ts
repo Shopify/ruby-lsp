@@ -111,16 +111,6 @@ export class Ruby {
   }
 
   private async activateShadowenv() {
-    const extension = vscode.extensions.getExtension(
-      "shopify.vscode-shadowenv"
-    );
-
-    if (!extension) {
-      throw new Error(
-        "The Ruby LSP version manager is configured to be shadowenv, but the shadowenv extension is not installed"
-      );
-    }
-
     if (!fs.existsSync(path.join(this.workingFolder, ".shadowenv.d"))) {
       throw new Error(
         "The Ruby LSP version manager is configured to be shadowenv, \
@@ -128,10 +118,18 @@ export class Ruby {
       );
     }
 
-    await extension.activate();
-    await this.delay(500);
+    const result = await asyncExec("shadowenv hook --json", {
+      cwd: this.workingFolder,
+    });
+
     // eslint-disable-next-line no-process-env
-    this._env = { ...process.env };
+    const env = { ...process.env, ...JSON.parse(result.stdout).exported };
+
+    // The only reason we set the process environment here is to allow other extensions that don't perform activation
+    // work properly
+    // eslint-disable-next-line no-process-env
+    process.env = env;
+    this._env = env;
   }
 
   private async activateChruby() {
@@ -295,12 +293,6 @@ export class Ruby {
     } catch {
       return false;
     }
-  }
-
-  private async delay(mseconds: number) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, mseconds);
-    });
   }
 
   private async activateCustomRuby() {
