@@ -17,6 +17,14 @@ module RubyLsp
     def initialize(project_path)
       @project_path = project_path
       @dependencies = T.let(load_dependencies, T::Hash[String, T.untyped])
+      @custom_bundle_dependencies = T.let(
+        if File.exist?(".ruby-lsp/Gemfile.lock")
+          Bundler::LockfileParser.new(Bundler.read_file(".ruby-lsp/Gemfile.lock")).dependencies
+        else
+          {}
+        end,
+        T::Hash[String, T.untyped],
+      )
     end
 
     sig { void }
@@ -31,6 +39,11 @@ module RubyLsp
       # Do not setup a custom bundle if both `ruby-lsp` and `debug` are already in the Gemfile
       if @dependencies["ruby-lsp"] && @dependencies["debug"]
         warn("Ruby LSP> Skipping custom bundle setup since both `ruby-lsp` and `debug` are already in the Gemfile")
+
+        # If the user decided to add the `ruby-lsp` and `debug` to their Gemfile after having already run the Ruby LSP,
+        # then we need to remove the `.ruby-lsp` folder, otherwise we will run `bundle install` for the top level and
+        # try to execute the Ruby LSP using the custom bundle, which will fail since the gems are not installed there
+        FileUtils.rm_r(".ruby-lsp") if Dir.exist?(".ruby-lsp")
         run_bundle_install
         return
       end
@@ -112,7 +125,13 @@ module RubyLsp
       command << "BUNDLE_PATH=#{File.expand_path(path, Dir.pwd)} " if path
       command << "BUNDLE_GEMFILE=#{bundle_gemfile} " if bundle_gemfile
 
-      if @dependencies["ruby-lsp"] && @dependencies["debug"]
+      # If both `ruby-lsp` and `debug` are already in the Gemfile, then we shouldn't try to upgrade them or else we'll
+      # produce undesired source control changes. If the custom bundle was just created and either `ruby-lsp` or `debug`
+      # weren't a part of the Gemfile, then we need to run `bundle install` for the first time to generate the
+      # Gemfile.lock with them included or else Bundler will complain that they're missing. We can only update if the
+      # custom `.ruby-lsp/Gemfile.lock` already exists and includes both gems
+      if (@dependencies["ruby-lsp"] && @dependencies["debug"]) ||
+          @custom_bundle_dependencies["ruby-lsp"].nil? || @custom_bundle_dependencies["debug"].nil?
         # Install gems using the custom bundle
         command << "bundle install "
       else
