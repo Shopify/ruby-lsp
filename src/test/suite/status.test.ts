@@ -53,7 +53,7 @@ suite("StatusItems", () => {
       assert.strictEqual(status.item.command?.title, "Change version manager");
       assert.strictEqual(
         status.item.command?.command,
-        Command.SelectVersionManager
+        Command.SelectVersionManager,
       );
       assert.strictEqual(context.subscriptions.length, 1);
     });
@@ -79,7 +79,7 @@ suite("StatusItems", () => {
       assert.strictEqual(status.item.name, "Ruby LSP Status");
       assert.strictEqual(
         status.item.severity,
-        vscode.LanguageStatusSeverity.Information
+        vscode.LanguageStatusSeverity.Information,
       );
       assert.strictEqual(status.item.command?.title, "Configure");
       assert.strictEqual(status.item.command?.command, Command.ServerOptions);
@@ -92,7 +92,7 @@ suite("StatusItems", () => {
       assert.strictEqual(status.item.text, "Ruby LSP: Starting");
       assert.strictEqual(
         status.item.severity,
-        vscode.LanguageStatusSeverity.Information
+        vscode.LanguageStatusSeverity.Information,
       );
     });
 
@@ -102,7 +102,7 @@ suite("StatusItems", () => {
       assert.strictEqual(status.item.text, "Ruby LSP: Running");
       assert.strictEqual(
         status.item.severity,
-        vscode.LanguageStatusSeverity.Information
+        vscode.LanguageStatusSeverity.Information,
       );
     });
 
@@ -112,7 +112,7 @@ suite("StatusItems", () => {
       assert.strictEqual(status.item.text, "Ruby LSP: Stopped");
       assert.strictEqual(
         status.item.severity,
-        vscode.LanguageStatusSeverity.Information
+        vscode.LanguageStatusSeverity.Information,
       );
     });
 
@@ -122,7 +122,7 @@ suite("StatusItems", () => {
       assert.strictEqual(status.item.text, "Ruby LSP: Error");
       assert.strictEqual(
         status.item.severity,
-        vscode.LanguageStatusSeverity.Error
+        vscode.LanguageStatusSeverity.Error,
       );
     });
   });
@@ -145,7 +145,7 @@ suite("StatusItems", () => {
       assert.strictEqual(status.item.command?.title, "Enable");
       assert.strictEqual(
         status.item.command?.command,
-        Command.ToggleExperimentalFeatures
+        Command.ToggleExperimentalFeatures,
       );
       assert.strictEqual(context.subscriptions.length, 1);
     });
@@ -201,7 +201,7 @@ suite("StatusItems", () => {
     const originalFeatures: { [key: string]: boolean } =
       configuration.get("enabledFeatures")!;
     const numberOfExperimentalFeatures = Object.values(originalFeatures).filter(
-      (feature) => feature === false
+      (feature) => feature === false,
     ).length;
     const numberOfFeatures = Object.keys(originalFeatures).length;
 
@@ -224,7 +224,7 @@ suite("StatusItems", () => {
         status.item.text,
         `${
           numberOfFeatures - numberOfExperimentalFeatures
-        }/${numberOfFeatures} features enabled`
+        }/${numberOfFeatures} features enabled`,
       );
       assert.strictEqual(status.item.name, "Ruby LSP Features");
       assert.strictEqual(status.item.command?.title, "Manage");
@@ -253,7 +253,7 @@ suite("StatusItems", () => {
             status.item.text,
             `${
               numberOfFeatures - numberOfExperimentalFeatures - 1
-            }/${numberOfFeatures} features enabled`
+            }/${numberOfFeatures} features enabled`,
           );
         });
     });

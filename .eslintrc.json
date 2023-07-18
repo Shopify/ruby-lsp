@@ -17,6 +17,7 @@
     "no-template-curly-in-string": "warn",
     "eqeqeq": "error",
     "no-invalid-this": "error",
-    "no-lonely-if": "error"
+    "no-lonely-if": "error",
+    "max-len": ["error", { "code": 120 }]
   }
 }

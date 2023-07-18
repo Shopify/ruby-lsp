@@ -48,7 +48,7 @@ export default class Client implements ClientInterface {
     context: vscode.ExtensionContext,
     telemetry: Telemetry,
     ruby: Ruby,
-    testController: TestController
+    testController: TestController,
   ) {
     this.workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
     this.telemetry = telemetry;
@@ -70,8 +70,8 @@ export default class Client implements ClientInterface {
     this.state = ServerState.Starting;
 
     try {
-      // When using a custom bundle path that is not our default, then we shouldn't create the .ruby-lsp folder or try to
-      // install gems
+      // When using a custom bundle path that is not our default, then we shouldn't create the .ruby-lsp folder or try
+      // to install gems
       const customBundleGemfile: string = vscode.workspace
         .getConfiguration("rubyLsp")
         .get("bundleGemfile")!;
@@ -85,7 +85,7 @@ export default class Client implements ClientInterface {
       // The progress dialog can't be closed by the user, so we have to guarantee that we catch errors
       vscode.window.showErrorMessage(
         `Failed to setup the bundle: ${error.message}. \
-            See [Troubleshooting](https://github.com/Shopify/vscode-ruby-lsp#troubleshooting) for instructions`
+            See [Troubleshooting](https://github.com/Shopify/vscode-ruby-lsp#troubleshooting) for instructions`,
       );
 
       return;
@@ -117,7 +117,7 @@ export default class Client implements ClientInterface {
       initializationOptions: {
         enabledFeatures: this.listOfEnabledFeatures(),
         experimentalFeaturesEnabled: configuration.get(
-          "enableExperimentalFeatures"
+          "enableExperimentalFeatures",
         ),
         formatter: configuration.get("formatter"),
       },
@@ -131,7 +131,7 @@ export default class Client implements ClientInterface {
 
           if (response) {
             const testLenses = response.filter(
-              (codeLens) => (codeLens as CodeLens).data.type === "test"
+              (codeLens) => (codeLens as CodeLens).data.type === "test",
             ) as CodeLens[];
 
             if (testLenses.length) {
@@ -147,7 +147,7 @@ export default class Client implements ClientInterface {
           ch,
           options,
           token,
-          _next
+          _next,
         ) => {
           if (this.client) {
             const response: vscode.TextEdit[] | null =
@@ -159,7 +159,7 @@ export default class Client implements ClientInterface {
                   ch,
                   options,
                 },
-                token
+                token,
               );
 
             if (!response) {
@@ -168,7 +168,7 @@ export default class Client implements ClientInterface {
 
             // Find the $0 anchor to move the cursor
             const cursorPosition = response.find(
-              (edit) => edit.newText === "$0"
+              (edit) => edit.newText === "$0",
             );
 
             if (!cursorPosition) {
@@ -186,8 +186,8 @@ export default class Client implements ClientInterface {
               new vscode.SnippetString(cursorPosition.newText),
               new vscode.Selection(
                 cursorPosition.range.start,
-                cursorPosition.range.end
-              )
+                cursorPosition.range.end,
+              ),
             );
 
             return null;
@@ -201,7 +201,7 @@ export default class Client implements ClientInterface {
     this.client = new LanguageClient(
       LSP_NAME,
       { run: executable, debug: debugExecutable },
-      clientOptions
+      clientOptions,
     );
 
     const baseFolder = path.basename(this.workingFolder);
@@ -213,7 +213,7 @@ export default class Client implements ClientInterface {
         (baseFolder === "ruby-lsp" || baseFolder === "ruby-lsp-rails")
       ) {
         vscode.window.showErrorMessage(
-          `Ruby LSP error ${event.errorClass}: ${event.errorMessage}`
+          `Ruby LSP error ${event.errorClass}: ${event.errorMessage}`,
         );
       } else {
         this.telemetry.sendEvent({
@@ -263,7 +263,7 @@ export default class Client implements ClientInterface {
       this.state = ServerState.Error;
 
       this.outputChannel.appendLine(
-        `Error restarting the server: ${error.message}`
+        `Error restarting the server: ${error.message}`,
       );
     }
   }
@@ -326,16 +326,16 @@ export default class Client implements ClientInterface {
       vscode.commands.registerCommand(Command.Stop, this.stop.bind(this)),
       vscode.commands.registerCommand(
         Command.Update,
-        this.updateServer.bind(this)
+        this.updateServer.bind(this),
       ),
       vscode.commands.registerCommand(
         Command.OpenLink,
-        this.openLink.bind(this)
+        this.openLink.bind(this),
       ),
       vscode.commands.registerCommand(
         Command.ShowSyntaxTree,
-        this.showSyntaxTree.bind(this)
-      )
+        this.showSyntaxTree.bind(this),
+      ),
     );
   }
 
@@ -400,13 +400,13 @@ export default class Client implements ClientInterface {
     fs.writeFileSync(customGemfilePath, gemfile.join("\n"));
 
     const lastUpdatedAt: number | undefined = this.context.workspaceState.get(
-      "rubyLsp.lastBundleInstall"
+      "rubyLsp.lastBundleInstall",
     );
     const gemfileLockPath = path.join(this.workingFolder, "Gemfile.lock");
     const customGemfileLockPath = path.join(
       this.workingFolder,
       ".ruby-lsp",
-      "Gemfile.lock"
+      "Gemfile.lock",
     );
 
     // Copy the Gemfile.lock and install gems to get `ruby-lsp` updates if
@@ -443,7 +443,7 @@ export default class Client implements ClientInterface {
 
   private createRestartWatcher(pattern: string) {
     const watcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(this.workingFolder, pattern)
+      new vscode.RelativePattern(this.workingFolder, pattern),
     );
     this.context.subscriptions.push(watcher);
 
@@ -472,7 +472,7 @@ export default class Client implements ClientInterface {
         {
           cwd: this.workingFolder,
           env: withoutBundleGemfileEnv,
-        }
+        },
       );
       return true;
     } catch (error) {
@@ -494,7 +494,7 @@ export default class Client implements ClientInterface {
 
   private gemfilesAreOutOfSync(
     gemfileLockPath: string,
-    customGemfileLockPath: string
+    customGemfileLockPath: string,
   ): boolean {
     // If there's no top level Gemfile.lock, there's nothing to sync
     if (!fs.existsSync(gemfileLockPath)) {
@@ -518,7 +518,7 @@ export default class Client implements ClientInterface {
     const customGemfileLockPath = path.join(
       this.workingFolder,
       ".ruby-lsp",
-      "Gemfile.lock"
+      "Gemfile.lock",
     );
 
     // Copy the current `Gemfile.lock` to the `.ruby-lsp` directory to make sure we're using the right versions of
@@ -534,7 +534,7 @@ export default class Client implements ClientInterface {
     const customGemfilePath = path.join(
       this.workingFolder,
       ".ruby-lsp",
-      "Gemfile"
+      "Gemfile",
     );
 
     await vscode.window.withProgress(
@@ -561,7 +561,7 @@ export default class Client implements ClientInterface {
           progress,
           token: this.bundleInstallCancellationSource.token,
         });
-      }
+      },
     );
 
     // Update the last time we checked for updates
@@ -573,7 +573,7 @@ export default class Client implements ClientInterface {
     options?: {
       progress?: vscode.Progress<{ message?: string }>;
       token?: vscode.CancellationToken;
-    }
+    },
   ) {
     const env = { ...this.ruby.env, BUNDLE_GEMFILE: bundleGemfile };
 
@@ -622,7 +622,7 @@ export default class Client implements ClientInterface {
         stderr.close();
 
         this.outputChannel.appendLine(
-          `>> \`bundle install\` exited with code ${code}`
+          `>> \`bundle install\` exited with code ${code}`,
         );
 
         if (code === 0) {
@@ -656,12 +656,12 @@ export default class Client implements ClientInterface {
       bundleGemfile = `BUNDLE_GEMFILE=${path.join(
         this.workingFolder,
         ".ruby-lsp",
-        "Gemfile"
+        "Gemfile",
       )}`;
     } else {
       bundleGemfile = `BUNDLE_GEMFILE=${path.join(
         this.workingFolder,
-        "Gemfile"
+        "Gemfile",
       )}`;
     }
 
@@ -670,7 +670,7 @@ export default class Client implements ClientInterface {
       {
         cwd: this.workingFolder,
         env: this.ruby.env,
-      }
+      },
     );
 
     return result.stdout;
@@ -706,7 +706,7 @@ export default class Client implements ClientInterface {
 
       const response: SyntaxTreeResponse = await this.client.sendRequest(
         "rubyLsp/textDocument/showSyntaxTree",
-        { textDocument: { uri: activeEditor.document.uri.toString() } }
+        { textDocument: { uri: activeEditor.document.uri.toString() } },
       );
 
       if (response) {
@@ -715,7 +715,7 @@ export default class Client implements ClientInterface {
             scheme: "ruby-lsp",
             path: "show-syntax-tree",
             query: response.ast,
-          })
+          }),
         );
 
         await vscode.window.showTextDocument(document, {

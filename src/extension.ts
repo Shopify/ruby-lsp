@@ -22,7 +22,7 @@ export async function activate(context: vscode.ExtensionContext) {
     context,
     vscode.workspace.workspaceFolders![0].uri.fsPath,
     ruby,
-    telemetry
+    telemetry,
   );
 
   client = new Client(context, telemetry, ruby, testController);
@@ -32,7 +32,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   vscode.workspace.registerTextDocumentContentProvider(
     "ruby-lsp",
-    new DocumentProvider()
+    new DocumentProvider(),
   );
 }
 
