@@ -70,8 +70,8 @@ export default class Client implements ClientInterface {
     this.state = ServerState.Starting;
 
     try {
-      // When using a custom bundle path that is not our default, then we shouldn't create the .ruby-lsp folder or try to
-      // install gems
+      // When using a custom bundle path that is not our default, then we shouldn't create the .ruby-lsp folder or try
+      // to install gems
       const customBundleGemfile: string = vscode.workspace
         .getConfiguration("rubyLsp")
         .get("bundleGemfile")!;

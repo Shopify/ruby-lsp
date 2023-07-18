@@ -141,6 +141,7 @@ export class Ruby {
 
   private async activate(ruby: string) {
     let command = this.shell ? `${this.shell} -ic ` : "";
+    // eslint-disable-next-line max-len
     command += `'${ruby} --disable-gems -rjson -e "printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, JSON.dump(ENV.to_h))"'`;
 
     const result = await asyncExec(command, { cwd: this.workingFolder });
