@@ -18,6 +18,16 @@ class SetupBundlerTest < Minitest::Test
     refute_path_exists(".ruby-lsp")
   end
 
+  def test_removes_ruby_lsp_folder_if_both_gems_were_added_to_the_bundle
+    Object.any_instance.expects(:system).with(bundle_install_command(update: false))
+    Bundler::LockfileParser.any_instance.expects(:dependencies).returns({ "ruby-lsp" => true, "debug" => true })
+    FileUtils.mkdir(".ruby-lsp")
+    run_script
+    refute_path_exists(".ruby-lsp")
+  ensure
+    FileUtils.rm_r(".ruby-lsp") if Dir.exist?(".ruby-lsp")
+  end
+
   def test_creates_custom_bundle
     Object.any_instance.expects(:system).with(bundle_install_command(".ruby-lsp/Gemfile"))
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({})

@@ -31,6 +31,11 @@ module RubyLsp
       # Do not setup a custom bundle if both `ruby-lsp` and `debug` are already in the Gemfile
       if @dependencies["ruby-lsp"] && @dependencies["debug"]
         warn("Ruby LSP> Skipping custom bundle setup since both `ruby-lsp` and `debug` are already in the Gemfile")
+
+        # If the user decided to add the `ruby-lsp` and `debug` to their Gemfile after having already run the Ruby LSP,
+        # then we need to remove the `.ruby-lsp` folder, otherwise we will run `bundle install` for the top level and
+        # try to execute the Ruby LSP using the custom bundle, which will fail since the gems are not installed there
+        FileUtils.rm_r(".ruby-lsp") if Dir.exist?(".ruby-lsp")
         run_bundle_install
         return
       end
