@@ -2,21 +2,24 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "ruby_lsp/setup_bundler"
 
 class SetupBundlerTest < Minitest::Test
   def test_does_nothing_when_running_in_the_ruby_lsp
-    run_script
+    Object.any_instance.expects(:system).with(bundle_install_command(update: false))
+    run_script("/some/path/ruby-lsp")
     refute_path_exists(".ruby-lsp")
   end
 
   def test_does_nothing_if_both_ruby_lsp_and_debug_are_in_the_bundle
+    Object.any_instance.expects(:system).with(bundle_install_command(update: false))
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({ "ruby-lsp" => true, "debug" => true })
     run_script
     refute_path_exists(".ruby-lsp")
   end
 
   def test_creates_custom_bundle
-    Object.any_instance.expects(:system).with(bundle_install_command)
+    Object.any_instance.expects(:system).with(bundle_install_command(".ruby-lsp/Gemfile"))
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({})
     run_script
 
@@ -30,7 +33,7 @@ class SetupBundlerTest < Minitest::Test
   end
 
   def test_copies_gemfile_lock_when_modified
-    Object.any_instance.expects(:system).with(bundle_install_command)
+    Object.any_instance.expects(:system).with(bundle_install_command(".ruby-lsp/Gemfile"))
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({})
     FileUtils.mkdir(".ruby-lsp")
     FileUtils.touch(".ruby-lsp/Gemfile.lock")
@@ -45,9 +48,20 @@ class SetupBundlerTest < Minitest::Test
     FileUtils.rm_r(".ruby-lsp")
   end
 
+  def test_does_not_copy_gemfile_lock_when_not_modified
+    Object.any_instance.expects(:system).with(bundle_install_command(".ruby-lsp/Gemfile"))
+    Bundler::LockfileParser.any_instance.expects(:dependencies).returns({})
+    FileUtils.mkdir(".ruby-lsp")
+    FileUtils.cp("Gemfile.lock", ".ruby-lsp/Gemfile.lock")
+
+    run_script
+  ensure
+    FileUtils.rm_r(".ruby-lsp")
+  end
+
   def test_uses_absolute_bundle_path_for_bundle_install
     Bundler.settings.set_global("path", "vendor/bundle")
-    Object.any_instance.expects(:system).with(bundle_install_command)
+    Object.any_instance.expects(:system).with(bundle_install_command(".ruby-lsp/Gemfile"))
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({})
     run_script
   ensure
@@ -60,19 +74,21 @@ class SetupBundlerTest < Minitest::Test
 
   # This method runs the script and then immediately unloads it. This allows us to make assertions against the effects
   # of running the script multiple times
-  def run_script
-    path = File.expand_path("../lib/ruby_lsp/setup_bundler.rb", __dir__)
-    require path
-  ensure
-    $LOADED_FEATURES.delete(path)
+  def run_script(path = "/fake/project/path")
+    RubyLsp::SetupBundler.new(path).setup!
   end
 
-  def bundle_install_command
+  def bundle_install_command(bundle_gemfile = nil, update: true)
     path = Bundler.settings["path"]
 
     command = +""
     command << "BUNDLE_PATH=#{File.expand_path(path, Dir.pwd)} " if path
-    command << "BUNDLE_GEMFILE=.ruby-lsp/Gemfile bundle install "
+    command << "BUNDLE_GEMFILE=#{bundle_gemfile} " if bundle_gemfile
+    command << if update
+      "bundle update ruby-lsp debug "
+    else
+      "bundle install "
+    end
     command << "1>&2"
   end
 end
