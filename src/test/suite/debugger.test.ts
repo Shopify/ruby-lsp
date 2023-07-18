@@ -33,7 +33,7 @@ suite("Debugger", () => {
           request: "attach",
         },
       ],
-      configs
+      configs,
     );
 
     debug.dispose();

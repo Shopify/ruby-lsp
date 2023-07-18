@@ -242,7 +242,7 @@ class MyApi implements TemeletryApi {
 // Register the command to return an object of the API
 vscode.commands.registerCommand(
   "ruby-lsp.getPrivateTelemetryApi",
-  () => new MyApi()
+  () => new MyApi(),
 );
 ```
 

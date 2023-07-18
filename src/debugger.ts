@@ -20,7 +20,7 @@ export class Debugger
   constructor(
     context: vscode.ExtensionContext,
     ruby: Ruby,
-    workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath
+    workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath,
   ) {
     this.ruby = ruby;
     this.subscriptions = [
@@ -36,7 +36,7 @@ export class Debugger
   // process that was already booted with the debugger
   async createDebugAdapterDescriptor(
     session: vscode.DebugSession,
-    _executable: vscode.DebugAdapterExecutable
+    _executable: vscode.DebugAdapterExecutable,
   ): Promise<vscode.DebugAdapterDescriptor | undefined> {
     if (session.configuration.request === "launch") {
       return this.spawnDebuggeeForLaunch(session);
@@ -46,16 +46,16 @@ export class Debugger
       return new Promise((_resolve, reject) =>
         reject(
           new Error(
-            `Unknown request type: ${session.configuration.request}. Please review your launch configurations`
-          )
-        )
+            `Unknown request type: ${session.configuration.request}. Please review your launch configurations`,
+          ),
+        ),
       );
     }
   }
 
   provideDebugConfigurations?(
     _folder: vscode.WorkspaceFolder | undefined,
-    _token?: vscode.CancellationToken
+    _token?: vscode.CancellationToken,
   ): vscode.ProviderResult<vscode.DebugConfiguration[]> {
     return [
       {
@@ -86,13 +86,13 @@ export class Debugger
   resolveDebugConfiguration?(
     _folder: vscode.WorkspaceFolder | undefined,
     debugConfiguration: vscode.DebugConfiguration,
-    _token?: vscode.CancellationToken
+    _token?: vscode.CancellationToken,
   ): vscode.ProviderResult<vscode.DebugConfiguration> {
     if (debugConfiguration.env) {
       // If the user has their own debug launch configurations, we still need to inject the Ruby environment
       debugConfiguration.env = Object.assign(
         debugConfiguration.env,
-        this.ruby.env
+        this.ruby.env,
       );
     } else {
       debugConfiguration.env = this.ruby.env;
@@ -134,8 +134,8 @@ export class Debugger
           } else {
             resolve(
               new vscode.DebugAdapterNamedPipeServer(
-                path.join(socketsDir, selectedSocket)
-              )
+                path.join(socketsDir, selectedSocket),
+              ),
             );
           }
         });
@@ -143,7 +143,7 @@ export class Debugger
   }
 
   private spawnDebuggeeForLaunch(
-    session: vscode.DebugSession
+    session: vscode.DebugSession,
   ): Promise<vscode.DebugAdapterDescriptor | undefined> {
     let initialMessage = "";
     let initialized = false;
@@ -166,7 +166,7 @@ export class Debugger
           shell: true,
           env: configuration.env,
           cwd: this.workingFolder,
-        }
+        },
       );
 
       this.debugProcess.stderr.on("data", (data) => {
@@ -231,7 +231,7 @@ export class Debugger
     if (existingSockets.length > 0) {
       socketIndex =
         Number(
-          existingSockets[existingSockets.length - 1].match(/-(\d+).sock$/)![1]
+          existingSockets[existingSockets.length - 1].match(/-(\d+).sock$/)![1],
         ) + 1;
     }
 

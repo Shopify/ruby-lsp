@@ -32,7 +32,7 @@ export class Ruby {
 
   constructor(
     context: vscode.ExtensionContext,
-    workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath
+    workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath,
   ) {
     this.context = context;
     this.workingFolder = workingFolder;
@@ -57,7 +57,7 @@ export class Ruby {
   async activateRuby(
     versionManager: VersionManager = vscode.workspace
       .getConfiguration("rubyLsp")
-      .get("rubyVersionManager")!
+      .get("rubyVersionManager")!,
   ) {
     this.versionManager = versionManager;
 
@@ -105,26 +105,26 @@ export class Ruby {
       }
 
       await vscode.window.showErrorMessage(
-        `Failed to activate ${this.versionManager} environment: ${error.message}`
+        `Failed to activate ${this.versionManager} environment: ${error.message}`,
       );
     }
   }
 
   private async activateShadowenv() {
     const extension = vscode.extensions.getExtension(
-      "shopify.vscode-shadowenv"
+      "shopify.vscode-shadowenv",
     );
 
     if (!extension) {
       throw new Error(
-        "The Ruby LSP version manager is configured to be shadowenv, but the shadowenv extension is not installed"
+        "The Ruby LSP version manager is configured to be shadowenv, but the shadowenv extension is not installed",
       );
     }
 
     if (!fs.existsSync(path.join(this.workingFolder, ".shadowenv.d"))) {
       throw new Error(
         "The Ruby LSP version manager is configured to be shadowenv, \
-        but no .shadowenv.d directory was found in the workspace"
+        but no .shadowenv.d directory was found in the workspace",
       );
     }
 
@@ -146,7 +146,7 @@ export class Ruby {
     const result = await asyncExec(command, { cwd: this.workingFolder });
 
     const envJson = result.stdout.match(
-      /RUBY_ENV_ACTIVATE(.*)RUBY_ENV_ACTIVATE/
+      /RUBY_ENV_ACTIVATE(.*)RUBY_ENV_ACTIVATE/,
     )![1];
 
     this._env = JSON.parse(envJson);
@@ -155,7 +155,7 @@ export class Ruby {
   private async fetchRubyInfo() {
     const rubyInfo = await asyncExec(
       "ruby --disable-gems -e 'puts \"#{RUBY_VERSION},#{defined?(RubyVM::YJIT)}\"'",
-      { env: this._env }
+      { env: this._env },
     );
 
     const [rubyVersion, yjitIsDefined] = rubyInfo.stdout.trim().split(",");
@@ -167,7 +167,7 @@ export class Ruby {
 
     if ((major === 2 && minor < 7) || major < 2) {
       throw new Error(
-        "The Ruby LSP requires Ruby 2.7 or newer to run. Please upgrade your Ruby version"
+        "The Ruby LSP requires Ruby 2.7 or newer to run. Please upgrade your Ruby version",
       );
     }
 
@@ -207,16 +207,16 @@ export class Ruby {
         this._env.BUNDLE_GEMFILE = path.join(
           this.workingFolder,
           ".ruby-lsp",
-          "Gemfile"
+          "Gemfile",
         );
       } else {
         const absoluteBundlePath = path.resolve(
-          path.join(this.workingFolder, customBundleGemfile)
+          path.join(this.workingFolder, customBundleGemfile),
         );
 
         if (!fs.existsSync(absoluteBundlePath)) {
           throw new Error(
-            `The configured bundle gemfile ${absoluteBundlePath} does not exist`
+            `The configured bundle gemfile ${absoluteBundlePath} does not exist`,
           );
         }
 
@@ -311,7 +311,7 @@ export class Ruby {
     if (customCommand === undefined) {
       throw new Error(
         "The customRubyCommand configuration must be set when 'custom' is selected as the version manager. \
-        See the [README](https://github.com/Shopify/vscode-ruby-lsp#custom-activation) for instructions."
+        See the [README](https://github.com/Shopify/vscode-ruby-lsp#custom-activation) for instructions.",
       );
     }
 
