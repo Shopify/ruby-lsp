@@ -139,8 +139,7 @@ export class Ruby {
 
   private async activate(ruby: string) {
     let command = this.shell ? `${this.shell} -ic ` : "";
-    // eslint-disable-next-line max-len
-    command += `'${ruby} --disable-gems -rjson -e "printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, JSON.dump(ENV.to_h))"'`;
+    command += `'${ruby} -rjson -e "printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, JSON.dump(ENV.to_h))"'`;
 
     const result = await asyncExec(command, { cwd: this.workingFolder });
 
@@ -153,7 +152,7 @@ export class Ruby {
 
   private async fetchRubyInfo() {
     const rubyInfo = await asyncExec(
-      "ruby --disable-gems -e 'puts \"#{RUBY_VERSION},#{defined?(RubyVM::YJIT)}\"'",
+      "ruby -e 'puts \"#{RUBY_VERSION},#{defined?(RubyVM::YJIT)}\"'",
       { env: this._env },
     );
 
