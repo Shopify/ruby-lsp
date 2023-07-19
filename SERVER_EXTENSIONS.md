@@ -4,7 +4,7 @@
 > The Ruby LSP server extensions system is currently experimental and subject to changes in the API
 
 Need help writing extensions? Consider joining the #ruby-lsp-extensions channel in the [Ruby DX Slack
-workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-1s6f4y15t-v9jedZ9YUPQLM91TEJ4Gew).
+workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-1zjp7lmgk-zL7bGvze8gj5hFaYS~r5vg).
 
 ## Motivation and goals
 
