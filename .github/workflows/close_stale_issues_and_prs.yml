@@ -1,0 +1,19 @@
+name: 'Close stale issues & pull requests'
+on:
+  schedule:
+    - cron: '30 12 * * *'
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v8
+        with:
+          days-before-stale: 60
+          days-before-close: 14
+          exempt-issue-labels: pinned
+          exempt-pr-labels: pinned
