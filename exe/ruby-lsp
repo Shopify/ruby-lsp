@@ -3,8 +3,8 @@
 
 # We should make sure that, if we're running on a bundler project, that it has a Gemfile.lock
 if File.exist?("Gemfile") && !File.exist?("Gemfile.lock")
-  warn("You are missing your Gemfile.lock. Run `bundle install` and restart the server")
-  exit(1)
+  warn("Project contains a Gemfile, but no Gemfile.lock. Run `bundle install` to lock gems and restart the server")
+  exit(78)
 end
 
 # When we're running without bundler, then we need to make sure the custom bundle is fully configured and re-execute
