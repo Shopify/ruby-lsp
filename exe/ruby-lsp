@@ -1,6 +1,12 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+# We should make sure that, if we're running on a bundler project, that it has a Gemfile.lock
+if File.exist?("Gemfile") && !File.exist?("Gemfile.lock")
+  warn("You are missing your Gemfile.lock. Run `bundle install` and restart the server")
+  exit(1)
+end
+
 # When we're running without bundler, then we need to make sure the custom bundle is fully configured and re-execute
 # using `BUNDLE_GEMFILE=.ruby-lsp/Gemfile bundle exec ruby-lsp` so that we have access to the gems that are a part of
 # the application's bundle
