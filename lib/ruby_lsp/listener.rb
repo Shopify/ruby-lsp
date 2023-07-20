@@ -18,25 +18,26 @@ module RubyLsp
     def initialize(emitter, message_queue)
       @emitter = emitter
       @message_queue = message_queue
-    end
-
-    class << self
-      extend T::Sig
-
-      sig { returns(T::Array[T.class_of(Listener)]) }
-      def listeners
-        @listeners ||= T.let([], T.nilable(T::Array[T.class_of(Listener)]))
-      end
-
-      sig { params(listener: T.class_of(Listener)).void }
-      def add_listener(listener)
-        listeners << listener
-      end
+      @external_listeners = T.let([], T::Array[RubyLsp::Listener[ResponseType]])
     end
 
     # Override this method with an attr_reader that returns the response of your listener. The listener should
     # accumulate results in a @response variable and then provide the reader so that it is accessible
     sig { abstract.returns(ResponseType) }
     def response; end
+
+    # Merge responses from all external listeners into the base listener's response. We do this to return a single
+    # response to the editor including the results of all extensions
+    sig { void }
+    def merge_external_listeners_responses!
+      @external_listeners.each { |l| merge_response!(l) }
+    end
+
+    # Does nothing by default. Requests that accept extensions should override this method to define how to merge
+    # responses coming from external listeners
+    sig { overridable.params(other: Listener[T.untyped]).returns(T.self_type) }
+    def merge_response!(other)
+      self
+    end
   end
 end

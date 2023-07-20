@@ -67,6 +67,11 @@ module RubyLsp
       def activate
       end
 
+      # Performs any cleanup when shutting down the server, like terminating a subprocess
+      sig { override.void }
+      def deactivate
+      end
+
       # Returns the name of the extension
       sig { override.returns(String) }
       def name
@@ -79,9 +84,9 @@ end
 
 ### Enhancing features
 
-All Ruby LSP requests are listeners that handle specific node types. To enhance a request, the extension must create and
-register a listener that will collect extra results that will be automatically appended to the base language server
-response.
+All Ruby LSP requests are listeners that handle specific node types. To enhance a request, the extension must create a
+listener that will collect extra results that will be automatically appended to the base language server response.
+Additionally, `Extension` has to implement a factory method that instantiates the listener.
 
 For example: to add a message on hover saying "Hello!" on top of the base hover behavior of the Ruby LSP, we can use the
 following listener implementation.
@@ -91,15 +96,42 @@ following listener implementation.
 
 module RubyLsp
   module MyGem
+    class Extension < ::RubyLsp::Extension
+      extend T::Sig
+
+      sig { override.void }
+      def activate
+        @config = SomeConfiguration.new
+      end
+
+      sig { override.void }
+      def deactivate
+      end
+
+      sig { override.returns(String) }
+      def name
+        "Ruby LSP My Gem"
+      end
+
+      sig do
+        override.params(
+          emitter: EventEmitter,
+          message_queue: Thread::Queue,
+        ).returns(T.nilable(Listener[T.nilable(Interface::Hover)]))
+      end
+      def create_hover_listener(emitter, message_queue)
+        # Use the listener factory methods to instantiate listeners with parameters sent by the LSP combined with any
+        # pre-computed information in the extension. These factory methods are invoked on every request
+        Hover.new(@config, emitter, message_queue)
+      end
+    end
+
     # All listeners have to inherit from ::RubyLsp::Listener
     class Hover < ::RubyLsp::Listener
       extend T::Sig
       extend T::Generic
 
       ResponseType = type_member { { fixed: T.nilable(::RubyLsp::Interface::Hover) } }
-
-      # Register this listener class in the hover request
-      ::RubyLsp::Requests::Hover.add_listener(self)
 
       sig { override.returns(ResponseType) }
       attr_reader :response
@@ -109,11 +141,12 @@ module RubyLsp
       # below).
       # Additionally, listeners are instantiated with a message_queue to push notifications (not used in this example).
       # See "Sending notifications to the client" for more information.
-      sig { params(emitter: RubyLsp::EventEmitter, message_queue: Thread::Queue).void }
-      def initialize(emitter, message_queue)
+      sig { params(config: SomeConfiguration, emitter: RubyLsp::EventEmitter, message_queue: Thread::Queue).void }
+      def initialize(config, emitter, message_queue)
         super
 
         @response = T.let(nil, ResponseType)
+        @config = config
 
         # Register that this listener will handle `on_const` events (i.e.: whenever a constant is found in the code)
         emitter.register(self, :on_const)

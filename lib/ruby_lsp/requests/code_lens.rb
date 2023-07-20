@@ -36,7 +36,9 @@ module RubyLsp
         super(emitter, message_queue)
 
         @uri = T.let(uri, String)
-        @external_listeners = T.let([], T::Array[RubyLsp::Listener[ResponseType]])
+        @external_listeners.concat(
+          Extension.extensions.filter_map { |ext| ext.create_code_lens_listener(uri, emitter, message_queue) },
+        )
         @test_library = T.let(test_library, String)
         @response = T.let([], ResponseType)
         @path = T.let(T.must(URI(uri).path), String)
@@ -55,22 +57,6 @@ module RubyLsp
           :after_call,
           :on_vcall,
         )
-
-        register_external_listeners!
-      end
-
-      sig { void }
-      def register_external_listeners!
-        self.class.listeners.each do |l|
-          @external_listeners << T.unsafe(l).new(@uri, @emitter, @message_queue)
-        end
-      end
-
-      sig { void }
-      def merge_external_listeners_responses!
-        @external_listeners.each do |l|
-          merge_response!(l)
-        end
       end
 
       sig { params(node: SyntaxTree::ClassDeclaration).void }
@@ -163,7 +149,7 @@ module RubyLsp
         end
       end
 
-      sig { params(other: Listener[ResponseType]).returns(T.self_type) }
+      sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
       def merge_response!(other)
         @response.concat(other.response)
         self
