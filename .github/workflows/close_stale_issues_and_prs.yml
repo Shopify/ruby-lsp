@@ -18,4 +18,4 @@ jobs:
           exempt-issue-labels: pinned
           exempt-pr-labels: pinned
           stale-issue-message: This issue is being marked as stale because there was no activity in the last 2 months
-          stale-pr-messasge: This pull request is being marked as stale because there was no activity in the last 2 months
+          stale-pr-message: This pull request is being marked as stale because there was no activity in the last 2 months
