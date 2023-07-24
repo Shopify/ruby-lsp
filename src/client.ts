@@ -438,27 +438,20 @@ export default class Client implements ClientInterface {
     // If a custom Gemfile was configured outside of the project, use that. Otherwise, prefer our custom bundle over the
     // app's bundle
     if (customBundleGemfile.length > 0) {
-      bundleGemfile = `BUNDLE_GEMFILE=${customBundleGemfile}`;
+      bundleGemfile = customBundleGemfile;
     } else if (
       fs.existsSync(path.join(this.workingFolder, ".ruby-lsp", "Gemfile"))
     ) {
-      bundleGemfile = `BUNDLE_GEMFILE=${path.join(
-        this.workingFolder,
-        ".ruby-lsp",
-        "Gemfile",
-      )}`;
+      bundleGemfile = path.join(this.workingFolder, ".ruby-lsp", "Gemfile");
     } else {
-      bundleGemfile = `BUNDLE_GEMFILE=${path.join(
-        this.workingFolder,
-        "Gemfile",
-      )}`;
+      bundleGemfile = path.join(this.workingFolder, "Gemfile");
     }
 
     const result = await asyncExec(
-      `${bundleGemfile} bundle exec ruby -e "require 'ruby-lsp'; print RubyLsp::VERSION"`,
+      `bundle exec ruby -e "require 'ruby-lsp'; print RubyLsp::VERSION"`,
       {
         cwd: this.workingFolder,
-        env: this.ruby.env,
+        env: { ...this.ruby.env, BUNDLE_GEMFILE: bundleGemfile },
       },
     );
 
