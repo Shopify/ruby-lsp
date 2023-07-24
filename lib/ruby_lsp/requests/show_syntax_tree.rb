@@ -7,7 +7,7 @@ module RubyLsp
     #
     # Show syntax tree is a custom [LSP
     # request](https://microsoft.github.io/language-server-protocol/specification#requestMessage) that displays the AST
-    # for the current document in a new tab.
+    # for the current document or for the current selection in a new tab.
     #
     # # Example
     #
@@ -20,13 +20,56 @@ module RubyLsp
     class ShowSyntaxTree < BaseRequest
       extend T::Sig
 
+      sig { params(document: Document, range: T.nilable(Document::RangeShape)).void }
+      def initialize(document, range)
+        super(document)
+
+        @range = range
+      end
+
       sig { override.returns(String) }
       def run
         return "Document contains syntax error" if @document.syntax_error?
+        return ast_for_range if @range
 
         output_string = +""
         PP.pp(@document.tree, output_string)
         output_string
+      end
+
+      private
+
+      sig { returns(String) }
+      def ast_for_range
+        range = T.must(@range)
+
+        scanner = @document.create_scanner
+        start_char = scanner.find_char_position(range[:start])
+        end_char = scanner.find_char_position(range[:end])
+
+        queue = T.cast(@document.tree, SyntaxTree::Program).statements.body
+        found_nodes = []
+
+        until queue.empty?
+          node = queue.shift
+          next unless node
+
+          loc = node.location
+
+          # If the node is fully covered by the selection, then we found one of the nodes to be displayed and don't want
+          # to continue descending into its children
+          if (start_char..end_char).cover?(loc.start_char..loc.end_char)
+            found_nodes << node
+          else
+            queue.unshift(*node.child_nodes)
+          end
+        end
+
+        found_nodes.map do |node|
+          output_string = +""
+          PP.pp(node, output_string)
+          output_string
+        end.join("\n")
       end
     end
   end

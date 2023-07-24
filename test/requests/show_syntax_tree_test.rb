@@ -38,4 +38,29 @@ class ShowSyntaxTreeTest < Minitest::Test
       (program (statements ((assign (var_field (ident "foo")) (int "123")))))
     AST
   end
+
+  def test_returns_ast_for_a_selection
+    store = RubyLsp::Store.new
+    store.set(uri: "file:///fake.rb", source: <<~RUBY, version: 1)
+      foo = 123
+      bar = 456
+      hello = 123
+    RUBY
+    document = store.get("file:///fake.rb")
+    document.parse
+
+    response = RubyLsp::Executor.new(store, @message_queue).execute({
+      method: "rubyLsp/textDocument/showSyntaxTree",
+      params: {
+        textDocument: { uri: "file:///fake.rb" },
+        range: { start: { line: 0, character: 0 }, end: { line: 1, character: 9 } },
+      },
+    }).response
+
+    assert_equal(<<~AST, response[:ast])
+      (assign (var_field (ident "foo")) (int "123"))
+
+      (assign (var_field (ident "bar")) (int "456"))
+    AST
+  end
 end
