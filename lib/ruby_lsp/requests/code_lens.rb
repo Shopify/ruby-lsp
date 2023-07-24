@@ -7,9 +7,6 @@ module RubyLsp
   module Requests
     # ![Code lens demo](../../code_lens.gif)
     #
-    # This feature is currently experimental. Clients will need to pass `experimentalFeaturesEnabled`
-    # in the initialization options to enable it.
-    #
     # The
     # [code lens](https://microsoft.github.io/language-server-protocol/specification#textDocument_codeLens)
     # request informs the editor of runnable commands such as tests
