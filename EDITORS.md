@@ -22,6 +22,7 @@ put that in your init file:
 When you run `eglot` command it will run `ruby-lsp` process for you.
 
 ## Neovim LSP
+
 The [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/ruby_ls.lua)
 plugin has support for Ruby LSP.
 
