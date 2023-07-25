@@ -26,7 +26,7 @@ module RubyLsp
           params(node: T.any(SyntaxTree::ConstPathRef, SyntaxTree::ConstRef, SyntaxTree::TopConstRef)).returns(String)
         end
         def full_constant_name(node)
-          name = +node.constant.value
+          name = node.constant.value.dup
           constant = T.let(node, SyntaxTree::Node)
 
           while constant.is_a?(SyntaxTree::ConstPathRef)
