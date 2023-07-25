@@ -62,5 +62,14 @@ class ShowSyntaxTreeTest < Minitest::Test
 
       (assign (var_field (ident "bar")) (int "456"))
     AST
+
+    response = RubyLsp::Executor.new(store, @message_queue).execute({
+      method: "rubyLsp/textDocument/showSyntaxTree",
+      params: {
+        textDocument: { uri: "file:///fake.rb" },
+        range: { start: { line: 1, character: 0 }, end: { line: 1, character: 9 } },
+      },
+    }).response
+    refute_empty(response[:ast])
   end
 end

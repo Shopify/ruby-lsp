@@ -47,7 +47,7 @@ module RubyLsp
         start_char = scanner.find_char_position(range[:start])
         end_char = scanner.find_char_position(range[:end])
 
-        queue = T.cast(@document.tree, SyntaxTree::Program).statements.body
+        queue = T.cast(@document.tree, SyntaxTree::Program).statements.body.dup
         found_nodes = []
 
         until queue.empty?
