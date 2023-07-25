@@ -163,9 +163,9 @@ export class Ruby {
 
     const [major, minor, _patch] = this.rubyVersion.split(".").map(Number);
 
-    if ((major === 2 && minor < 7) || major < 2) {
+    if (major < 3) {
       throw new Error(
-        "The Ruby LSP requires Ruby 2.7 or newer to run. Please upgrade your Ruby version",
+        "The Ruby LSP requires Ruby 3.0 or newer to run. Please upgrade your Ruby version",
       );
     }
 

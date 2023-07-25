@@ -211,9 +211,11 @@ export default class Client implements ClientInterface {
       }
     });
 
-    this.telemetry.serverVersion = await this.getServerVersion();
     await this.client.start();
+
+    // We cannot inquire anything related to the bundle before the custom bundle logic in the server runs
     await this.determineFormatter();
+    this.telemetry.serverVersion = await this.getServerVersion();
 
     this.state = ServerState.Running;
   }
