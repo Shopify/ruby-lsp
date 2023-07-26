@@ -42,7 +42,7 @@ module RubyLsp
         @external_listeners = T.let([], T::Array[RubyLsp::Listener[ResponseType]])
         @test_library = T.let(test_library, String)
         @response = T.let([], ResponseType)
-        @path = T.let(T.must(URI(uri).path), String)
+        @path = T.let(T.must(URI(URI::Parser.new.escape(uri)).path), String)
         # visibility_stack is a stack of [current_visibility, previous_visibility]
         @visibility_stack = T.let([["public", "public"]], T::Array[T::Array[T.nilable(String)]])
         @class_stack = T.let([], T::Array[String])
