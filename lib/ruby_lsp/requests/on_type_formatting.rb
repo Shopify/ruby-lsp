@@ -67,12 +67,10 @@ module RubyLsp
 
         line = T.must(current_line)
 
-        # If the current character is a pipe and both previous ones are pipes too, then we autocompleted a pipe and the
-        # user inserted a third one. In this case, we need to avoid adding a fourth and remove the previous one
-        if line[@position[:character] - 2] == "|" &&
-            line[@position[:character] - 1] == "|" &&
-            line[@position[:character]] == "|"
-
+        # If the user inserts the closing pipe manually to the end of the block argument, we need to avoid adding
+        # an additional one and remove the previous one.  This also helps to remove the user who accidentally
+        # inserts another pipe after the autocompleted one.
+        if line[..@position[:character]] =~ /(do|{)\s+\|[^|]*?\|\|$/
           @edits << Interface::TextEdit.new(
             range: Interface::Range.new(
               start: Interface::Position.new(

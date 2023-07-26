@@ -154,6 +154,39 @@ class OnTypeFormattingTest < Minitest::Test
     assert_equal(expected_edits.to_json, T.must(edits).to_json)
   end
 
+  def test_pipe_is_removed_if_user_adds_manually_after_block_argument
+    document = RubyLsp::Document.new(source: +"", version: 1, uri: "file:///fake.rb")
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "[].each do |elem|",
+      }],
+      version: 2,
+    )
+    document.parse
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 17 }, end: { line: 0, character: 17 } },
+        text: "|",
+      }],
+      version: 3,
+    )
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 17 }, "|").run
+    expected_edits = [
+      {
+        range: { start: { line: 0, character: 17 }, end: { line: 0, character: 18 } },
+        newText: "",
+      },
+      {
+        range: { start: { line: 0, character: 17 }, end: { line: 0, character: 17 } },
+        newText: "$0",
+      },
+    ]
+    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+  end
+
   def test_comment_continuation
     document = RubyLsp::Document.new(source: +"", version: 1, uri: "file:///fake.rb")
 
