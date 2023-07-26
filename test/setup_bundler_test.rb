@@ -80,6 +80,17 @@ class SetupBundlerTest < Minitest::Test
     FileUtils.rm_r(".ruby-lsp")
   end
 
+  def test_works_in_path_with_spaces
+    Bundler.settings.set_global("path", "vendor/bundle")
+    Object.any_instance.expects(:system).with(bundle_install_command(".ruby-lsp/Gemfile"))
+    Bundler::LockfileParser.any_instance.expects(:dependencies).returns({})
+    run_script("/some/path/with spaces")
+  ensure
+    # We need to revert the changes to the bundler config or else this actually changes ~/.bundle/config
+    Bundler.settings.set_global("path", nil)
+    FileUtils.rm_r(".ruby-lsp")
+  end
+
   private
 
   # This method runs the script and then immediately unloads it. This allows us to make assertions against the effects

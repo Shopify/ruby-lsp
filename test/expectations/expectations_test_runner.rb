@@ -83,7 +83,7 @@ class ExpectationsTestRunner < Minitest::Test
           RB
         else
           class_eval(<<~RB, __FILE__, __LINE__ + 1)
-            def test_#{expectation_suffix}__#{test_name}__does_not_raise
+            def test_#{expectation_suffix}__#{test_name.gsub(' ','_')}__does_not_raise
               @_path = "#{path}"
               source = File.read(@_path)
               run_expectations(source)

@@ -7,12 +7,20 @@ class StoreTest < Minitest::Test
   def setup
     @store = RubyLsp::Store.new
     @store.set(uri: "/foo/bar.rb", source: "def foo; end", version: 1)
+    @store.set(uri: "/path/with%20spaces/bar.rb", source: "def bar; end", version: 1)
   end
 
   def test_get
     assert_equal(
       RubyLsp::Document.new(source: "def foo; end", version: 1, uri: "file:///foo/bar.rb"),
       @store.get("/foo/bar.rb"),
+    )
+  end
+
+  def test_get_with_spaces
+    assert_equal(
+      RubyLsp::Document.new(source: "def bar; end", version: 1, uri: "file:///path/with%20spaces/bar.rb"),
+      @store.get("/path/with%20spaces/bar.rb"),
     )
   end
 
@@ -69,6 +77,7 @@ class StoreTest < Minitest::Test
 
   def test_delete
     @store.delete("/foo/bar.rb")
+    @store.delete("/path/with%20spaces/bar.rb")
 
     assert_empty(@store.instance_variable_get(:@state))
   end
