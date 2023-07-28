@@ -224,7 +224,8 @@ export class TestController {
       if (test.tags.find((tag) => tag.id === "example")) {
         const start = Date.now();
         try {
-          await this.assertTestPasses(test);
+          const output: string = await this.assertTestPasses(test);
+          run.appendOutput(output, undefined, test);
           run.passed(test, Date.now() - start);
         } catch (err: any) {
           const messageArr = err.message.split("\n");
@@ -232,16 +233,17 @@ export class TestController {
           // Minitest and test/unit outputs are formatted differently so we need to slice the message
           // differently to get an output format that only contains essential information
           // If the first element of the message array is "", we know the output is a Minitest output
-          const testMessage =
+          const summary =
             messageArr[0] === ""
               ? messageArr.slice(10, messageArr.length - 2).join("\n")
               : messageArr.slice(4, messageArr.length - 9).join("\n");
 
-          run.failed(
-            test,
-            new vscode.TestMessage(testMessage),
-            Date.now() - start,
-          );
+          const messages = [
+            new vscode.TestMessage(err.message),
+            new vscode.TestMessage(summary),
+          ];
+
+          run.failed(test, messages, Date.now() - start);
         }
       }
 
@@ -254,10 +256,11 @@ export class TestController {
 
   private async assertTestPasses(test: vscode.TestItem) {
     try {
-      await asyncExec(this.testCommands.get(test)!, {
+      const result = await asyncExec(this.testCommands.get(test)!, {
         cwd: this.workingFolder,
         env: this.ruby.env,
       });
+      return result.stdout;
     } catch (error: any) {
       throw new Error(error.stdout);
     }
