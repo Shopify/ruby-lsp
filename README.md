@@ -261,6 +261,8 @@ are expected to adhere to the
 [Contributor Covenant](https://github.com/Shopify/vscode-ruby-lsp/blob/main/CODE_OF_CONDUCT.md)
 code of conduct.
 
+Before contributing, please make sure to [sign the Contributor License Agreement](https://cla.shopify.com).
+
 ### Debugging
 
 Interactive debugging works for both running the extension or tests. In the debug panel, select whether to run the
@@ -288,10 +290,6 @@ The `launch.json` contains a 'Minitest - current file' configuration for the deb
 1. Press `F5` OR click the green triangle next to the top dropdown. VS Code will then run the test file with debugger activated.
 1. When the breakpoint is triggered, the process will pause and VS Code will connect to the debugger and activate the debugger UI.
 1. Open the Debug Console view to use the debugger's REPL.
-
-## Contibuting
-
-Before contributing, please make sure to [sign the Contributor License Agreement](https://cla.shopify.com).
 
 ## License
 
