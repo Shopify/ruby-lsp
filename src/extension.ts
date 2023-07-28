@@ -5,6 +5,7 @@ import { Telemetry } from "./telemetry";
 import { Ruby } from "./ruby";
 import { Debugger } from "./debugger";
 import { TestController } from "./testController";
+import DocumentProvider from "./documentProvider";
 
 let client: Client;
 let debug: Debugger;
@@ -21,13 +22,18 @@ export async function activate(context: vscode.ExtensionContext) {
     context,
     vscode.workspace.workspaceFolders![0].uri.fsPath,
     ruby,
-    telemetry
+    telemetry,
   );
 
   client = new Client(context, telemetry, ruby, testController);
 
   await client.start();
   debug = new Debugger(context, ruby);
+
+  vscode.workspace.registerTextDocumentContentProvider(
+    "ruby-lsp",
+    new DocumentProvider(),
+  );
 }
 
 export async function deactivate(): Promise<void> {

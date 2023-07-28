@@ -29,7 +29,7 @@ suite("Telemetry", () => {
       {
         extensionMode: vscode.ExtensionMode.Production,
       } as vscode.ExtensionContext,
-      api
+      api,
     );
     const event: TelemetryEvent = {
       request: "textDocument/foldingRanges",
@@ -52,7 +52,7 @@ suite("Telemetry", () => {
     const api = new FakeApi();
     vscode.commands.registerCommand(
       "ruby-lsp.getPrivateTelemetryApi",
-      () => api
+      () => api,
     );
     const telemetry = new Telemetry({
       extensionMode: vscode.ExtensionMode.Production,
@@ -82,7 +82,7 @@ suite("Telemetry", () => {
           update: () => Promise.resolve(),
         } as unknown,
       } as vscode.ExtensionContext,
-      api
+      api,
     );
 
     await telemetry.sendConfigurationEvents();
@@ -110,7 +110,7 @@ suite("Telemetry", () => {
           update: () => Promise.resolve(),
         } as unknown,
       } as vscode.ExtensionContext,
-      api
+      api,
     );
 
     telemetry.serverVersion = "1.0.0";

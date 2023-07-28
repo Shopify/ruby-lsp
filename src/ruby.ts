@@ -32,7 +32,7 @@ export class Ruby {
 
   constructor(
     context: vscode.ExtensionContext,
-    workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath
+    workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath,
   ) {
     this.context = context;
     this.workingFolder = workingFolder;
@@ -57,7 +57,7 @@ export class Ruby {
   async activateRuby(
     versionManager: VersionManager = vscode.workspace
       .getConfiguration("rubyLsp")
-      .get("rubyVersionManager")!
+      .get("rubyVersionManager")!,
   ) {
     this.versionManager = versionManager;
 
@@ -105,33 +105,31 @@ export class Ruby {
       }
 
       await vscode.window.showErrorMessage(
-        `Failed to activate ${this.versionManager} environment: ${error.message}`
+        `Failed to activate ${this.versionManager} environment: ${error.message}`,
       );
     }
   }
 
   private async activateShadowenv() {
-    const extension = vscode.extensions.getExtension(
-      "shopify.vscode-shadowenv"
-    );
-
-    if (!extension) {
-      throw new Error(
-        "The Ruby LSP version manager is configured to be shadowenv, but the shadowenv extension is not installed"
-      );
-    }
-
     if (!fs.existsSync(path.join(this.workingFolder, ".shadowenv.d"))) {
       throw new Error(
         "The Ruby LSP version manager is configured to be shadowenv, \
-        but no .shadowenv.d directory was found in the workspace"
+        but no .shadowenv.d directory was found in the workspace",
       );
     }
 
-    await extension.activate();
-    await this.delay(500);
+    const result = await asyncExec("shadowenv hook --json", {
+      cwd: this.workingFolder,
+    });
+
     // eslint-disable-next-line no-process-env
-    this._env = { ...process.env };
+    const env = { ...process.env, ...JSON.parse(result.stdout).exported };
+
+    // The only reason we set the process environment here is to allow other extensions that don't perform activation
+    // work properly
+    // eslint-disable-next-line no-process-env
+    process.env = env;
+    this._env = env;
   }
 
   private async activateChruby() {
@@ -141,12 +139,12 @@ export class Ruby {
 
   private async activate(ruby: string) {
     let command = this.shell ? `${this.shell} -ic ` : "";
-    command += `'${ruby} --disable-gems -rjson -e "printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, JSON.dump(ENV.to_h))"'`;
+    command += `'${ruby} -rjson -e "printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, JSON.dump(ENV.to_h))"'`;
 
     const result = await asyncExec(command, { cwd: this.workingFolder });
 
     const envJson = result.stdout.match(
-      /RUBY_ENV_ACTIVATE(.*)RUBY_ENV_ACTIVATE/
+      /RUBY_ENV_ACTIVATE(.*)RUBY_ENV_ACTIVATE/,
     )![1];
 
     this._env = JSON.parse(envJson);
@@ -154,8 +152,8 @@ export class Ruby {
 
   private async fetchRubyInfo() {
     const rubyInfo = await asyncExec(
-      "ruby --disable-gems -e 'puts \"#{RUBY_VERSION},#{defined?(RubyVM::YJIT)}\"'",
-      { env: this._env }
+      "ruby -e 'puts \"#{RUBY_VERSION},#{defined?(RubyVM::YJIT)}\"'",
+      { env: this._env },
     );
 
     const [rubyVersion, yjitIsDefined] = rubyInfo.stdout.trim().split(",");
@@ -165,9 +163,9 @@ export class Ruby {
 
     const [major, minor, _patch] = this.rubyVersion.split(".").map(Number);
 
-    if ((major === 2 && minor < 7) || major < 2) {
+    if (major < 3) {
       throw new Error(
-        "The Ruby LSP requires Ruby 2.7 or newer to run. Please upgrade your Ruby version"
+        "The Ruby LSP requires Ruby 3.0 or newer to run. Please upgrade your Ruby version",
       );
     }
 
@@ -196,37 +194,27 @@ export class Ruby {
   }
 
   private setupBundlePath() {
-    // Use our custom Gemfile to allow RuboCop and extensions to work without having to add ruby-lsp to the bundle. Note
-    // that we can't do this for the ruby-lsp repository itself otherwise the gem is activated twice
-    if (path.basename(this.workingFolder) !== "ruby-lsp") {
-      const customBundleGemfile: string = vscode.workspace
-        .getConfiguration("rubyLsp")
-        .get("bundleGemfile")!;
+    // Some users like to define a completely separate Gemfile for development tools. We allow them to use
+    // `rubyLsp.bundleGemfile` to configure that and need to inject it into the environment
+    const customBundleGemfile: string = vscode.workspace
+      .getConfiguration("rubyLsp")
+      .get("bundleGemfile")!;
 
-      if (customBundleGemfile.length === 0) {
-        this._env.BUNDLE_GEMFILE = path.join(
-          this.workingFolder,
-          ".ruby-lsp",
-          "Gemfile"
-        );
-      } else {
-        const absoluteBundlePath = path.resolve(
-          path.join(this.workingFolder, customBundleGemfile)
-        );
-
-        if (!fs.existsSync(absoluteBundlePath)) {
-          throw new Error(
-            `The configured bundle gemfile ${absoluteBundlePath} does not exist`
-          );
-        }
-
-        this._env.BUNDLE_GEMFILE = absoluteBundlePath;
-      }
-
-      // We must use the default system path for bundler in case someone has BUNDLE_PATH configured. Otherwise, we end
-      // up with all gems installed inside of the `.ruby-lsp` folder, which may lead to all sorts of errors
-      this._env.BUNDLE_PATH__SYSTEM = "true";
+    if (customBundleGemfile.length === 0) {
+      return;
     }
+
+    const absoluteBundlePath = path.resolve(
+      path.join(this.workingFolder, customBundleGemfile),
+    );
+
+    if (!fs.existsSync(absoluteBundlePath)) {
+      throw new Error(
+        `The configured bundle gemfile ${absoluteBundlePath} does not exist`,
+      );
+    }
+
+    this._env.BUNDLE_GEMFILE = absoluteBundlePath;
   }
 
   private async readRubyVersion() {
@@ -297,12 +285,6 @@ export class Ruby {
     }
   }
 
-  private async delay(mseconds: number) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, mseconds);
-    });
-  }
-
   private async activateCustomRuby() {
     const configuration = vscode.workspace.getConfiguration("rubyLsp");
     const customCommand: string | undefined =
@@ -311,7 +293,7 @@ export class Ruby {
     if (customCommand === undefined) {
       throw new Error(
         "The customRubyCommand configuration must be set when 'custom' is selected as the version manager. \
-        See the [README](https://github.com/Shopify/vscode-ruby-lsp#custom-activation) for instructions."
+        See the [README](https://github.com/Shopify/vscode-ruby-lsp#custom-activation) for instructions.",
       );
     }
 

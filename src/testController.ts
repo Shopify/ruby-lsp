@@ -10,6 +10,8 @@ import { Telemetry } from "./telemetry";
 
 const asyncExec = promisify(exec);
 
+const TERMINAL_NAME = "Ruby LSP: Run test";
+
 export class TestController {
   private testController: vscode.TestController;
   private testCommands: WeakMap<vscode.TestItem, string>;
@@ -25,7 +27,7 @@ export class TestController {
     context: vscode.ExtensionContext,
     workingFolder: string,
     ruby: Ruby,
-    telemetry: Telemetry
+    telemetry: Telemetry,
   ) {
     this.workingFolder = workingFolder;
     this.ruby = ruby;
@@ -33,7 +35,7 @@ export class TestController {
 
     this.testController = vscode.tests.createTestController(
       "rubyTests",
-      "Ruby Tests"
+      "Ruby Tests",
     );
 
     this.testCommands = new WeakMap<vscode.TestItem, string>();
@@ -44,7 +46,7 @@ export class TestController {
       (request, token) => {
         this.runHandler(request, token);
       },
-      true
+      true,
     );
 
     this.testDebugProfile = this.testController.createRunProfile(
@@ -54,7 +56,7 @@ export class TestController {
         this.debugHandler(request, token);
       },
       false,
-      this.debugTag
+      this.debugTag,
     );
 
     vscode.commands.executeCommand("testing.clearTestResults");
@@ -68,16 +70,16 @@ export class TestController {
         Command.RunTest,
         (_path, name, _command) => {
           this.runOnClick(name);
-        }
+        },
       ),
       vscode.commands.registerCommand(
         Command.RunTestInTerminal,
-        this.runTestInTerminal.bind(this)
+        this.runTestInTerminal.bind(this),
       ),
       vscode.commands.registerCommand(
         Command.DebugTest,
-        this.debugTest.bind(this)
-      )
+        this.debugTest.bind(this),
+      ),
     );
   }
 
@@ -98,7 +100,7 @@ export class TestController {
       const testItem: vscode.TestItem = this.testController.createTestItem(
         name,
         name,
-        uri
+        uri,
       );
 
       if (res.data?.kind) {
@@ -112,7 +114,7 @@ export class TestController {
 
       testItem.range = new vscode.Range(
         new vscode.Position(location.start_line, location.start_column),
-        new vscode.Position(location.end_line, location.end_column)
+        new vscode.Position(location.end_line, location.end_column),
       );
 
       // Add test methods as children to the test class so it appears nested in Test explorer
@@ -136,6 +138,9 @@ export class TestController {
   }
 
   private debugTest(_path: string, _name: string, command: string) {
+    // eslint-disable-next-line no-param-reassign
+    command ??= this.testCommands.get(this.findTestByActiveLine()!) || "";
+
     return vscode.debug.startDebugging(undefined, {
       type: "ruby_lsp",
       name: "Debug",
@@ -148,20 +153,36 @@ export class TestController {
   private async runTestInTerminal(
     _path: string,
     _name: string,
-    command: string
+    command: string,
   ) {
+    // eslint-disable-next-line no-param-reassign
+    command ??= this.testCommands.get(this.findTestByActiveLine()!) || "";
+
     await this.telemetry.sendCodeLensEvent("test_in_terminal");
 
     if (this.terminal === undefined) {
-      this.terminal = vscode.window.createTerminal({ name: "Run test" });
+      this.terminal = this.getTerminal();
     }
+
     this.terminal.show();
     this.terminal.sendText(command);
   }
 
+  private getTerminal() {
+    const previousTerminal = vscode.window.terminals.find(
+      (terminal) => terminal.name === TERMINAL_NAME,
+    );
+
+    return previousTerminal
+      ? previousTerminal
+      : vscode.window.createTerminal({
+          name: TERMINAL_NAME,
+        });
+  }
+
   private async debugHandler(
     request: vscode.TestRunRequest,
-    _token: vscode.CancellationToken
+    _token: vscode.CancellationToken,
   ) {
     await this.telemetry.sendCodeLensEvent("debug");
     const run = this.testController.createTestRun(request, undefined, true);
@@ -175,7 +196,7 @@ export class TestController {
 
   private async runHandler(
     request: vscode.TestRunRequest,
-    token: vscode.CancellationToken
+    token: vscode.CancellationToken,
   ) {
     await this.telemetry.sendCodeLensEvent("test");
     const run = this.testController.createTestRun(request, undefined, true);
@@ -213,7 +234,7 @@ export class TestController {
           run.failed(
             test,
             new vscode.TestMessage(testMessage),
-            Date.now() - start
+            Date.now() - start,
           );
         }
       }
@@ -237,7 +258,7 @@ export class TestController {
   }
 
   private async runOnClick(testId: string) {
-    const test = this.findTestById(this.testController.items, testId);
+    const test = this.findTestById(testId);
 
     if (!test) return;
 
@@ -257,14 +278,49 @@ export class TestController {
     this.testRunProfile.runHandler(testRun, tokenSource.token);
   }
 
-  private findTestById(testItems: vscode.TestItemCollection, testId: string) {
+  private findTestById(
+    testId: string,
+    testItems: vscode.TestItemCollection = this.testController.items,
+  ) {
+    if (!testId) {
+      return this.findTestByActiveLine();
+    }
+
     let testItem = testItems.get(testId);
 
     if (testItem) return testItem;
 
     testItems.forEach((test) => {
-      const childTestItem = this.findTestById(test.children, testId);
+      const childTestItem = this.findTestById(testId, test.children);
       if (childTestItem) testItem = childTestItem;
+    });
+
+    return testItem;
+  }
+
+  private findTestByActiveLine(
+    editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor,
+    testItems: vscode.TestItemCollection = this.testController.items,
+  ): vscode.TestItem | undefined {
+    if (!editor) {
+      return;
+    }
+
+    const line = editor.selection.active.line;
+    let testItem: vscode.TestItem | undefined;
+
+    testItems.forEach((test) => {
+      if (testItem) return;
+
+      if (test.children.size > 0) {
+        testItem = this.findTestByActiveLine(editor, test.children);
+      } else if (
+        test.uri?.toString() === editor.document.uri.toString() &&
+        test.range?.start.line! <= line &&
+        test.range?.end.line! >= line
+      ) {
+        testItem = test;
+      }
     });
 
     return testItem;

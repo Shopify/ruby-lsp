@@ -97,7 +97,7 @@ export class Telemetry {
           namespace: "rubyLsp.enabledFeatures",
           field,
           value: value.toString(),
-        })
+        }),
       );
     });
 
@@ -105,7 +105,7 @@ export class Telemetry {
 
     this.context.globalState.update(
       "rubyLsp.lastConfigurationTelemetry",
-      Date.now()
+      Date.now(),
     );
   }
 
@@ -117,7 +117,7 @@ export class Telemetry {
     try {
       if (!this.api) {
         this.api = await vscode.commands.executeCommand(
-          "ruby-lsp.getPrivateTelemetryApi"
+          "ruby-lsp.getPrivateTelemetryApi",
         );
       }
 

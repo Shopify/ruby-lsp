@@ -1,8 +1,7 @@
 import path from "path";
 import fs from "fs";
-import readline from "readline";
 import { promisify } from "util";
-import { exec, spawn } from "child_process";
+import { exec } from "child_process";
 
 import * as vscode from "vscode";
 import {
@@ -11,6 +10,7 @@ import {
   Executable,
   RevealOutputChannelOn,
   CodeLens,
+  Range,
 } from "vscode-languageclient/node";
 
 import { Telemetry } from "./telemetry";
@@ -20,11 +20,12 @@ import { TestController } from "./testController";
 
 const LSP_NAME = "Ruby LSP";
 const asyncExec = promisify(exec);
-const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 interface EnabledFeatures {
   [key: string]: boolean;
 }
+
+type SyntaxTreeResponse = { ast: string } | null;
 
 export default class Client implements ClientInterface {
   private client: LanguageClient | undefined;
@@ -32,10 +33,6 @@ export default class Client implements ClientInterface {
   private telemetry: Telemetry;
   private statusItems: StatusItems;
   private outputChannel = vscode.window.createOutputChannel(LSP_NAME);
-  private bundleInstallCancellationSource:
-    | vscode.CancellationTokenSource
-    | undefined;
-
   private testController: TestController;
   #context: vscode.ExtensionContext;
   #ruby: Ruby;
@@ -46,7 +43,7 @@ export default class Client implements ClientInterface {
     context: vscode.ExtensionContext,
     telemetry: Telemetry,
     ruby: Ruby,
-    testController: TestController
+    testController: TestController,
   ) {
     this.workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath;
     this.telemetry = telemetry;
@@ -68,22 +65,14 @@ export default class Client implements ClientInterface {
     this.state = ServerState.Starting;
 
     try {
-      // When using a custom bundle path that is not our default, then we shouldn't create the .ruby-lsp folder or try to
-      // install gems
-      const customBundleGemfile: string = vscode.workspace
-        .getConfiguration("rubyLsp")
-        .get("bundleGemfile")!;
-
-      if (customBundleGemfile.length === 0) {
-        await this.setupCustomGemfile();
-      }
+      await this.installOrUpdateServer();
     } catch (error: any) {
       this.state = ServerState.Error;
 
       // The progress dialog can't be closed by the user, so we have to guarantee that we catch errors
       vscode.window.showErrorMessage(
         `Failed to setup the bundle: ${error.message}. \
-            See [Troubleshooting](https://github.com/Shopify/vscode-ruby-lsp#troubleshooting) for instructions`
+            See [Troubleshooting](https://github.com/Shopify/vscode-ruby-lsp#troubleshooting) for instructions`,
       );
 
       return;
@@ -95,14 +84,14 @@ export default class Client implements ClientInterface {
     };
 
     const executable: Executable = {
-      command: "bundle",
-      args: ["exec", "ruby-lsp"],
+      command: "ruby-lsp",
+      args: [],
       options: executableOptions,
     };
 
     const debugExecutable: Executable = {
-      command: "bundle",
-      args: ["exec", "ruby-lsp", "--debug"],
+      command: "ruby-lsp",
+      args: ["--debug"],
       options: executableOptions,
     };
 
@@ -115,7 +104,7 @@ export default class Client implements ClientInterface {
       initializationOptions: {
         enabledFeatures: this.listOfEnabledFeatures(),
         experimentalFeaturesEnabled: configuration.get(
-          "enableExperimentalFeatures"
+          "enableExperimentalFeatures",
         ),
         formatter: configuration.get("formatter"),
       },
@@ -129,7 +118,7 @@ export default class Client implements ClientInterface {
 
           if (response) {
             const testLenses = response.filter(
-              (codeLens) => (codeLens as CodeLens).data.type === "test"
+              (codeLens) => (codeLens as CodeLens).data.type === "test",
             ) as CodeLens[];
 
             if (testLenses.length) {
@@ -145,7 +134,7 @@ export default class Client implements ClientInterface {
           ch,
           options,
           token,
-          _next
+          _next,
         ) => {
           if (this.client) {
             const response: vscode.TextEdit[] | null =
@@ -157,7 +146,7 @@ export default class Client implements ClientInterface {
                   ch,
                   options,
                 },
-                token
+                token,
               );
 
             if (!response) {
@@ -166,7 +155,7 @@ export default class Client implements ClientInterface {
 
             // Find the $0 anchor to move the cursor
             const cursorPosition = response.find(
-              (edit) => edit.newText === "$0"
+              (edit) => edit.newText === "$0",
             );
 
             if (!cursorPosition) {
@@ -184,8 +173,8 @@ export default class Client implements ClientInterface {
               new vscode.SnippetString(cursorPosition.newText),
               new vscode.Selection(
                 cursorPosition.range.start,
-                cursorPosition.range.end
-              )
+                cursorPosition.range.end,
+              ),
             );
 
             return null;
@@ -199,20 +188,34 @@ export default class Client implements ClientInterface {
     this.client = new LanguageClient(
       LSP_NAME,
       { run: executable, debug: debugExecutable },
-      clientOptions
+      clientOptions,
     );
 
-    this.client.onTelemetry((event) =>
-      this.telemetry.sendEvent({
-        ...event,
-        rubyVersion: this.ruby.rubyVersion,
-        yjitEnabled: this.ruby.yjitEnabled,
-      })
-    );
+    const baseFolder = path.basename(this.workingFolder);
 
-    this.telemetry.serverVersion = await this.getServerVersion();
+    this.client.onTelemetry((event) => {
+      // If an error occurs in the ruby-lsp or ruby-lsp-rails projects, don't send telemetry, but show an error message
+      if (
+        event.errorMessage &&
+        (baseFolder === "ruby-lsp" || baseFolder === "ruby-lsp-rails")
+      ) {
+        vscode.window.showErrorMessage(
+          `Ruby LSP error ${event.errorClass}: ${event.errorMessage}`,
+        );
+      } else {
+        this.telemetry.sendEvent({
+          ...event,
+          rubyVersion: this.ruby.rubyVersion,
+          yjitEnabled: this.ruby.yjitEnabled,
+        });
+      }
+    });
+
     await this.client.start();
+
+    // We cannot inquire anything related to the bundle before the custom bundle logic in the server runs
     await this.determineFormatter();
+    this.telemetry.serverVersion = await this.getServerVersion();
 
     this.state = ServerState.Running;
   }
@@ -249,7 +252,7 @@ export default class Client implements ClientInterface {
       this.state = ServerState.Error;
 
       this.outputChannel.appendLine(
-        `Error restarting the server: ${error.message}`
+        `Error restarting the server: ${error.message}`,
       );
     }
   }
@@ -312,97 +315,17 @@ export default class Client implements ClientInterface {
       vscode.commands.registerCommand(Command.Stop, this.stop.bind(this)),
       vscode.commands.registerCommand(
         Command.Update,
-        this.updateServer.bind(this)
+        this.installOrUpdateServer.bind(this),
       ),
       vscode.commands.registerCommand(
         Command.OpenLink,
-        this.openLink.bind(this)
-      )
+        this.openLink.bind(this),
+      ),
+      vscode.commands.registerCommand(
+        Command.ShowSyntaxTree,
+        this.showSyntaxTree.bind(this),
+      ),
     );
-  }
-
-  private async setupCustomGemfile() {
-    // If we're working on the ruby-lsp itself, we can't create a custom Gemfile or we'd be trying to activate the same
-    // gem twice
-    if (path.basename(this.workingFolder) === "ruby-lsp") {
-      await this.bundleInstall();
-      return;
-    }
-
-    // Create the .ruby-lsp directory if it doesn't exist
-    const rubyLspDirectory = path.join(this.workingFolder, ".ruby-lsp");
-
-    if (!fs.existsSync(rubyLspDirectory)) {
-      fs.mkdirSync(rubyLspDirectory);
-    }
-
-    // Ignore the .ruby-lsp directory automatically
-    fs.writeFileSync(path.join(rubyLspDirectory, ".gitignore"), "*");
-
-    // Generate the custom Gemfile that includes the `ruby-lsp`
-    const customGemfilePath = path.join(rubyLspDirectory, "Gemfile");
-    const gemfile = [
-      "# This custom gemfile is automatically generated by the Ruby LSP extension.",
-      "# It should be automatically git ignored, but in any case: do not commit it to your repository.",
-      "",
-    ];
-
-    const gemEntry =
-      'gem "ruby-lsp", require: false, group: :development, source: "https://rubygems.org"';
-    const debugEntry =
-      'gem "debug", require: false, group: :development, platforms: :mri, source: "https://rubygems.org"';
-
-    // Only try to evaluate the top level Gemfile if there is one. Otherwise, we'll just create our own Gemfile
-    if (fs.existsSync(path.join(this.workingFolder, "Gemfile"))) {
-      // For eval_gemfile, the paths must be absolute or else using the `path:` option for `gem` will fail
-      gemfile.push('eval_gemfile(File.expand_path("../Gemfile", __dir__))');
-
-      // If the `ruby-lsp` exists in the bundle, add it to the custom Gemfile commented out
-      if (await this.projectHasDependency(/^ruby-lsp$/)) {
-        // If it is already in the bundle, add the gem commented out to avoid conflicts
-        gemfile.push(`# ${gemEntry}`);
-      } else {
-        // If it's not a part of the bundle, add it to the custom Gemfile
-        gemfile.push(gemEntry);
-      }
-
-      // If debug is not in the bundle, add it to allow debugging
-      if (!(await this.projectHasDependency(/^debug$/))) {
-        gemfile.push(debugEntry);
-      }
-    } else {
-      // If no Gemfile exists, add the `ruby-lsp` and `debug` to the custom Gemfile
-      gemfile.push(gemEntry);
-      gemfile.push(debugEntry);
-    }
-
-    // Add an empty line at the end of the file
-    gemfile.push("");
-
-    fs.writeFileSync(customGemfilePath, gemfile.join("\n"));
-
-    const lastUpdatedAt: number | undefined = this.context.workspaceState.get(
-      "rubyLsp.lastBundleInstall"
-    );
-    const gemfileLockPath = path.join(this.workingFolder, "Gemfile.lock");
-    const customGemfileLockPath = path.join(
-      this.workingFolder,
-      ".ruby-lsp",
-      "Gemfile.lock"
-    );
-
-    // Copy the Gemfile.lock and install gems to get `ruby-lsp` updates if
-    // - it's been more than a day since the last time we checked for updates
-    // - the Gemfile.lock has changed and we haven't yet updated .ruby-lsp/Gemfile.lock
-    // - the gems aren't installed
-    if (
-      lastUpdatedAt === undefined ||
-      Date.now() - lastUpdatedAt > ONE_DAY_IN_MS ||
-      this.gemfilesAreOutOfSync(gemfileLockPath, customGemfileLockPath) ||
-      !(await this.gemsAreInstalled(customGemfilePath))
-    ) {
-      await this.updateServer();
-    }
   }
 
   private registerAutoRestarts() {
@@ -425,7 +348,7 @@ export default class Client implements ClientInterface {
 
   private createRestartWatcher(pattern: string) {
     const watcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(this.workingFolder, pattern)
+      new vscode.RelativePattern(this.workingFolder, pattern),
     );
     this.context.subscriptions.push(watcher);
 
@@ -454,7 +377,7 @@ export default class Client implements ClientInterface {
         {
           cwd: this.workingFolder,
           env: withoutBundleGemfileEnv,
-        }
+        },
       );
       return true;
     } catch (error) {
@@ -462,176 +385,79 @@ export default class Client implements ClientInterface {
     }
   }
 
-  private async gemsAreInstalled(customGemfilePath: string): Promise<boolean> {
-    try {
-      await asyncExec(`BUNDLE_GEMFILE=${customGemfilePath} bundle check`, {
+  private async installOrUpdateServer(): Promise<void> {
+    const oneDayInMs = 24 * 60 * 60 * 1000;
+    const lastUpdatedAt: number | undefined = this.context.workspaceState.get(
+      "rubyLsp.lastGemUpdate",
+    );
+
+    const { stdout } = await asyncExec("gem list ruby-lsp", {
+      cwd: this.workingFolder,
+      env: this.ruby.env,
+    });
+
+    // If the gem is not yet installed, install it
+    if (!stdout.includes("ruby-lsp")) {
+      await asyncExec("gem install ruby-lsp", {
         cwd: this.workingFolder,
         env: this.ruby.env,
       });
-      return true;
-    } catch {
-      return false;
-    }
-  }
 
-  private gemfilesAreOutOfSync(
-    gemfileLockPath: string,
-    customGemfileLockPath: string
-  ): boolean {
-    // If there's no top level Gemfile.lock, there's nothing to sync
-    if (!fs.existsSync(gemfileLockPath)) {
-      return false;
+      this.context.workspaceState.update("rubyLsp.lastGemUpdate", Date.now());
+      return;
     }
 
-    // If there's no custom Gemfile.lock, then it hasn't been created yet and we must sync
-    if (!fs.existsSync(customGemfileLockPath)) {
-      return true;
-    }
-
-    // If the last modified time of the top level Gemfile.lock is greater than the custom Gemfile.lock, then changes
-    // were made and we have to sync
-    const lastModifiedAt = fs.statSync(gemfileLockPath).mtimeMs;
-    const customLastModifiedAt = fs.statSync(customGemfileLockPath).mtimeMs;
-    return lastModifiedAt > customLastModifiedAt;
-  }
-
-  private async updateServer(): Promise<void> {
-    const gemfileLockPath = path.join(this.workingFolder, "Gemfile.lock");
-    const customGemfileLockPath = path.join(
-      this.workingFolder,
-      ".ruby-lsp",
-      "Gemfile.lock"
-    );
-
-    // Copy the current `Gemfile.lock` to the `.ruby-lsp` directory to make sure we're using the right versions of
-    // RuboCop and related extensions. Because we do this in every initialization, we always use the latest version of
-    // the Ruby LSP
-    if (fs.existsSync(gemfileLockPath)) {
-      fs.cpSync(gemfileLockPath, customGemfileLockPath);
-    } else if (fs.existsSync(customGemfileLockPath)) {
-      // Remove the .ruby-lsp/Gemfile.lock if there's no top-level Gemfile.lock
-      fs.rmSync(customGemfileLockPath);
-    }
-
-    const customGemfilePath = path.join(
-      this.workingFolder,
-      ".ruby-lsp",
-      "Gemfile"
-    );
-
-    await vscode.window.withProgress(
-      {
-        location: vscode.ProgressLocation.Notification,
-        title: "Setting up the bundle",
-        cancellable: true,
-      },
-      (progress, token) => {
-        if (this.bundleInstallCancellationSource) {
-          this.bundleInstallCancellationSource.cancel();
-          this.bundleInstallCancellationSource.dispose();
-        }
-
-        this.bundleInstallCancellationSource =
-          new vscode.CancellationTokenSource();
-
-        token.onCancellationRequested(() => {
-          this.bundleInstallCancellationSource!.cancel();
-          this.bundleInstallCancellationSource!.dispose();
+    // If we haven't updated the gem in the last 24 hours, update it
+    if (
+      lastUpdatedAt === undefined ||
+      Date.now() - lastUpdatedAt > oneDayInMs
+    ) {
+      try {
+        await asyncExec("gem update ruby-lsp", {
+          cwd: this.workingFolder,
+          env: this.ruby.env,
         });
-
-        return this.bundleInstall(customGemfilePath, {
-          progress,
-          token: this.bundleInstallCancellationSource.token,
-        });
-      }
-    );
-
-    // Update the last time we checked for updates
-    this.context.workspaceState.update("rubyLsp.lastBundleInstall", Date.now());
-  }
-
-  private async bundleInstall(
-    bundleGemfile?: string,
-    options?: {
-      progress?: vscode.Progress<{ message?: string }>;
-      token?: vscode.CancellationToken;
-    }
-  ) {
-    const env = { ...this.ruby.env, BUNDLE_GEMFILE: bundleGemfile };
-
-    return new Promise<void>((resolve, reject) => {
-      const abortController = new AbortController();
-
-      if (options?.token) {
-        options.token.onCancellationRequested(() => {
-          abortController.abort();
-        });
-      }
-
-      this.outputChannel.appendLine(">> Running `bundle install`...");
-
-      const install = spawn("bundle", ["install"], {
-        shell: true,
-        cwd: this.workingFolder,
-        signal: abortController.signal,
-        env,
-      });
-
-      const stdout = readline
-        .createInterface({
-          input: install.stdout,
-          terminal: false,
-        })
-        .on("line", (line) => {
-          this.outputChannel.appendLine(`BUNDLER> ${line}`);
-
-          if (options?.progress) {
-            options.progress.report({ message: line });
-          }
-        });
-
-      const stderr = readline
-        .createInterface({
-          input: install.stderr,
-          terminal: false,
-        })
-        .on("line", (line) => {
-          this.outputChannel.appendLine(`ERROR> ${line}`);
-        });
-
-      install.on("close", (code) => {
-        stdout.close();
-        stderr.close();
-
+        this.context.workspaceState.update("rubyLsp.lastGemUpdate", Date.now());
+      } catch (error) {
+        // If we fail to update the global installation of `ruby-lsp`, we don't want to prevent the server from starting
         this.outputChannel.appendLine(
-          `>> \`bundle install\` exited with code ${code}`
+          `Failed to update global ruby-lsp gem: ${error}`,
         );
-
-        if (code === 0) {
-          resolve();
-        } else {
-          reject(new Error(`bundle install exited with code ${code}`));
-        }
-      });
-
-      install.on("error", (error) => {
-        stdout.close();
-        stderr.close();
-        reject(error);
-      });
-    });
+      }
+    }
   }
 
   private async getServerVersion(): Promise<string> {
-    const result = await asyncExec(
-      `BUNDLE_GEMFILE=${path.join(
+    let bundleGemfile;
+    const customBundleGemfile: string = vscode.workspace
+      .getConfiguration("rubyLsp")
+      .get("bundleGemfile")!;
+
+    // If a custom Gemfile was configured outside of the project, use that. Otherwise, prefer our custom bundle over the
+    // app's bundle
+    if (customBundleGemfile.length > 0) {
+      bundleGemfile = `BUNDLE_GEMFILE=${customBundleGemfile}`;
+    } else if (
+      fs.existsSync(path.join(this.workingFolder, ".ruby-lsp", "Gemfile"))
+    ) {
+      bundleGemfile = `BUNDLE_GEMFILE=${path.join(
         this.workingFolder,
-        "Gemfile"
-      )} bundle exec ruby -e "require 'ruby-lsp'; print RubyLsp::VERSION"`,
+        ".ruby-lsp",
+        "Gemfile",
+      )}`;
+    } else {
+      bundleGemfile = `BUNDLE_GEMFILE=${path.join(
+        this.workingFolder,
+        "Gemfile",
+      )}`;
+    }
+
+    const result = await asyncExec(
+      `${bundleGemfile} bundle exec ruby -e "require 'ruby-lsp'; print RubyLsp::VERSION"`,
       {
         cwd: this.workingFolder,
         env: this.ruby.env,
-      }
+      },
     );
 
     return result.stdout;
@@ -652,5 +478,65 @@ export default class Client implements ClientInterface {
   private async openLink(link: string) {
     await this.telemetry.sendCodeLensEvent("link");
     vscode.env.openExternal(vscode.Uri.parse(link));
+  }
+
+  private async showSyntaxTree() {
+    const activeEditor = vscode.window.activeTextEditor;
+
+    if (this.client && activeEditor) {
+      const document = activeEditor.document;
+
+      if (document.languageId !== "ruby") {
+        vscode.window.showErrorMessage("Show syntax tree: not a Ruby file");
+        return;
+      }
+
+      const selection = activeEditor.selection;
+      let range: Range | undefined;
+
+      // Anchor is the first point and active is the last point in the selection. If both are the same, nothing is
+      // selected
+      if (!selection.active.isEqual(selection.anchor)) {
+        // If you start selecting from below and go up, then the selection is reverted
+        if (selection.isReversed) {
+          range = Range.create(
+            selection.active.line,
+            selection.active.character,
+            selection.anchor.line,
+            selection.anchor.character,
+          );
+        } else {
+          range = Range.create(
+            selection.anchor.line,
+            selection.anchor.character,
+            selection.active.line,
+            selection.active.character,
+          );
+        }
+      }
+
+      const response: SyntaxTreeResponse = await this.client.sendRequest(
+        "rubyLsp/textDocument/showSyntaxTree",
+        {
+          textDocument: { uri: activeEditor.document.uri.toString() },
+          range,
+        },
+      );
+
+      if (response) {
+        const document = await vscode.workspace.openTextDocument(
+          vscode.Uri.from({
+            scheme: "ruby-lsp",
+            path: "show-syntax-tree",
+            query: response.ast,
+          }),
+        );
+
+        await vscode.window.showTextDocument(document, {
+          viewColumn: vscode.ViewColumn.Beside,
+          preserveFocus: true,
+        });
+      }
+    }
   }
 }

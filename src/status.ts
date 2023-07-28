@@ -25,6 +25,7 @@ export enum Command {
   RunTestInTerminal = "rubyLsp.runTestInTerminal",
   DebugTest = "rubyLsp.debugTest",
   OpenLink = "rubyLsp.openLink",
+  ShowSyntaxTree = "rubyLsp.showSyntaxTree",
 }
 
 const STOPPED_SERVER_OPTIONS = [
@@ -109,8 +110,8 @@ export class RubyVersionStatus extends StatusItem {
           if (manager !== undefined) {
             configuration.update("rubyVersionManager", manager, true, true);
           }
-        }
-      )
+        },
+      ),
     );
   }
 }
@@ -168,8 +169,8 @@ export class ServerStatus extends StatusItem {
 
           if (result !== undefined)
             await vscode.commands.executeCommand(result.description);
-        }
-      )
+        },
+      ),
     );
   }
 }
@@ -202,13 +203,13 @@ export class ExperimentalFeaturesStatus extends StatusItem {
         async () => {
           const lspConfig = vscode.workspace.getConfiguration("rubyLsp");
           const experimentalFeaturesEnabled = lspConfig.get(
-            "enableExperimentalFeatures"
+            "enableExperimentalFeatures",
           );
           await lspConfig.update(
             "enableExperimentalFeatures",
             !experimentalFeaturesEnabled,
             true,
-            true
+            true,
           );
           const message = experimentalFeaturesEnabled
             ? "Experimental features disabled"
@@ -217,8 +218,8 @@ export class ExperimentalFeaturesStatus extends StatusItem {
           this.item.command!.title = experimentalFeaturesEnabled
             ? "Enable"
             : "Disable";
-        }
-      )
+        },
+      ),
     );
   }
 }
@@ -263,7 +264,7 @@ export class YjitStatus extends StatusItem {
         lspConfig.update("yjit", !yjitEnabled, true, true);
         this.item.text = yjitEnabled ? "YJIT disabled" : "YJIT enabled";
         this.item.command!.title = yjitEnabled ? "Enable" : "Disable";
-      })
+      }),
     );
   }
 }
@@ -289,7 +290,7 @@ export class FeaturesStatus extends StatusItem {
     Object.entries(enabledFeaturesProperties).forEach(
       ([key, value]: [string, any]) => {
         this.descriptions[key] = value.description;
-      }
+      },
     );
   }
 
@@ -298,7 +299,7 @@ export class FeaturesStatus extends StatusItem {
     const features: { [key: string]: boolean } =
       configuration.get("enabledFeatures")!;
     const enabledFeatures = Object.keys(features).filter(
-      (key) => features[key]
+      (key) => features[key],
     );
 
     this.item.text = `${enabledFeatures.length}/${
@@ -331,7 +332,7 @@ export class FeaturesStatus extends StatusItem {
           // response back from the QuickPick, we need to use inclusion to check if the feature was selected
           allFeatures.forEach((feature) => {
             features[feature] = toggledFeatures.some(
-              (selected) => selected.label === feature
+              (selected) => selected.label === feature,
             );
           });
 
@@ -339,7 +340,7 @@ export class FeaturesStatus extends StatusItem {
             .getConfiguration("rubyLsp")
             .update("enabledFeatures", features, true, true);
         }
-      })
+      }),
     );
   }
 }
@@ -365,10 +366,10 @@ export class FormatterStatus extends StatusItem {
       vscode.commands.registerCommand(Command.FormatterHelp, () => {
         vscode.env.openExternal(
           vscode.Uri.parse(
-            "https://github.com/Shopify/vscode-ruby-lsp#formatting"
-          )
+            "https://github.com/Shopify/vscode-ruby-lsp#formatting",
+          ),
         );
-      })
+      }),
     );
   }
 }
