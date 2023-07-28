@@ -289,6 +289,10 @@ The `launch.json` contains a 'Minitest - current file' configuration for the deb
 1. When the breakpoint is triggered, the process will pause and VS Code will connect to the debugger and activate the debugger UI.
 1. Open the Debug Console view to use the debugger's REPL.
 
+## Contibuting
+
+Before contributing, please make sure to [sign the Contributor License Agreement](https://cla.shopify.com).
+
 ## License
 
 This extension is available as open source under the terms of the
