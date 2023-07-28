@@ -201,19 +201,25 @@ export class TestController {
     await this.telemetry.sendCodeLensEvent("test");
     const run = this.testController.createTestRun(request, undefined, true);
     const queue: vscode.TestItem[] = [];
+    const enqueue = (test: vscode.TestItem) => {
+      queue.push(test);
+      run.enqueued(test);
+    };
 
     if (request.include) {
-      request.include.forEach((test) => queue.push(test));
+      request.include.forEach(enqueue);
     } else {
-      this.testController.items.forEach((test) => queue.push(test));
+      this.testController.items.forEach(enqueue);
     }
 
     while (queue.length > 0 && !token.isCancellationRequested) {
       const test = queue.pop()!;
 
       if (request.exclude?.includes(test)) {
+        run.skipped(test);
         continue;
       }
+      run.started(test);
 
       if (test.tags.find((tag) => tag.id === "example")) {
         const start = Date.now();
@@ -239,7 +245,7 @@ export class TestController {
         }
       }
 
-      test.children.forEach((test) => queue.push(test));
+      test.children.forEach(enqueue);
     }
 
     // Make sure to end the run after all tests have been executed
