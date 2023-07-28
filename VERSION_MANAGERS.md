@@ -10,6 +10,6 @@ snippet to your user configuration JSON
 ```json
 {
   "rubyLsp.rubyVersionManager": "custom",
-  "rubyLsp.customRubyCommand": "eval \"$(rtx env -s bash|zsh)\"",
+  "rubyLsp.customRubyCommand": "eval \"$(rtx env -s zsh)\"", // Instructions for zsh, change for bash or fish
 }
 ```
