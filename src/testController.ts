@@ -242,8 +242,13 @@ export class TestController {
             new vscode.TestMessage(err.message),
             new vscode.TestMessage(summary),
           ];
+          const duration = Date.now() - start;
 
-          run.failed(test, messages, Date.now() - start);
+          if (messageArr.find((elem: string) => elem === "F")) {
+            run.failed(test, messages, duration);
+          } else {
+            run.errored(test, messages, duration);
+          }
         }
       }
 
