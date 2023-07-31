@@ -9,7 +9,7 @@ NON_WINDOWS_PLATFORMS = [:ruby] # C Ruby (MRI), Rubinius or TruffleRuby, but NOT
 
 gem "bundler", "~> 2.4.2"
 gem "debug", "~> 1.8", require: false
-gem "minitest", "~> 5.18"
+gem "minitest", "~> 5.19"
 gem "minitest-reporters", "~> 1.6"
 gem "mocha", "~> 2.1"
 gem "rake", "~> 13.0"
