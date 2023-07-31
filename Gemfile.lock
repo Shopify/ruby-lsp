@@ -49,7 +49,7 @@ GEM
       nokogiri (>= 1.12.0)
     method_source (1.0.0)
     mini_portile2 (2.8.2)
-    minitest (5.18.1)
+    minitest (5.19.0)
     minitest-reporters (1.6.1)
       ansi
       builder
@@ -179,7 +179,7 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 2.4.2)
   debug (~> 1.8)
-  minitest (~> 5.18)
+  minitest (~> 5.19)
   minitest-reporters (~> 1.6)
   mocha (~> 2.1)
   psych (~> 5.1)
