@@ -261,6 +261,8 @@ are expected to adhere to the
 [Contributor Covenant](https://github.com/Shopify/vscode-ruby-lsp/blob/main/CODE_OF_CONDUCT.md)
 code of conduct.
 
+Before contributing, please make sure to [sign the Contributor License Agreement](https://cla.shopify.com).
+
 ### Debugging
 
 Interactive debugging works for both running the extension or tests. In the debug panel, select whether to run the
