@@ -25,9 +25,9 @@ if ENV["BUNDLE_GEMFILE"].nil? && File.exist?("Gemfile.lock")
   # SetupBundler to install the gems
   path = Bundler.settings["path"]
 
-  command = +"BUNDLE_GEMFILE=#{bundle_gemfile} bundle exec ruby-lsp #{ARGV.join(" ")}"
-  command.prepend("BUNDLE_PATH=#{File.expand_path(path, Dir.pwd)} ") if path
-  exit exec(command)
+  env = { "BUNDLE_GEMFILE" => bundle_gemfile }
+  env["BUNDLE_PATH"] = File.expand_path(path, Dir.pwd) if path
+  exit exec(env, "bundle exec ruby-lsp #{ARGV.join(" ")}")
 end
 
 require "sorbet-runtime"
