@@ -55,7 +55,7 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
-    mocha (2.0.4)
+    mocha (2.1.0)
       ruby2_keywords (>= 0.0.5)
     netrc (0.11.0)
     nokogiri (1.15.2)
@@ -181,7 +181,7 @@ DEPENDENCIES
   debug (~> 1.8)
   minitest (~> 5.18)
   minitest-reporters (~> 1.6)
-  mocha (~> 2.0)
+  mocha (~> 2.1)
   psych (~> 5.1)
   railties (~> 7.0)
   rake (~> 13.0)
