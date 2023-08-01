@@ -4,6 +4,7 @@
 require "sorbet-runtime"
 require "bundler"
 require "fileutils"
+require "pathname"
 
 # This file is a script that will configure a custom bundle for the Ruby LSP. The custom bundle allows developers to use
 # the Ruby LSP without including the gem in their application's Gemfile while at the same time giving us access to the
@@ -13,107 +14,133 @@ module RubyLsp
   class SetupBundler
     extend T::Sig
 
+    class BundleNotLocked < StandardError; end
+
     sig { params(project_path: String).void }
     def initialize(project_path)
       @project_path = project_path
-      @dependencies = T.let(load_dependencies, T::Hash[String, T.untyped])
-      @custom_bundle_dependencies = T.let(
-        if File.exist?(".ruby-lsp/Gemfile.lock")
-          Bundler::LockfileParser.new(Bundler.read_file(".ruby-lsp/Gemfile.lock")).dependencies
-        else
-          {}
+
+      # Custom bundle paths
+      @custom_dir = T.let(Pathname.new(".ruby-lsp").expand_path(Dir.pwd), Pathname)
+      @custom_gemfile = T.let(@custom_dir + "Gemfile", Pathname)
+      @custom_lockfile = T.let(@custom_dir + "Gemfile.lock", Pathname)
+
+      # Regular bundle paths
+      @gemfile = T.let(
+        begin
+          Bundler.default_gemfile
+        rescue Bundler::GemfileNotFound
+          nil
         end,
-        T::Hash[String, T.untyped],
+        T.nilable(Pathname),
       )
+      @lockfile = T.let(@gemfile ? Bundler.default_lockfile : nil, T.nilable(Pathname))
+
+      @dependencies = T.let(load_dependencies, T::Hash[String, T.untyped])
+      @custom_bundle_dependencies = T.let(custom_bundle_dependencies, T::Hash[String, T.untyped])
     end
 
-    sig { void }
+    # Setups up the custom bundle and returns the `BUNDLE_GEMFILE` and `BUNDLE_PATH` that should be used for running the
+    # server
+    sig { returns([String, T.nilable(String)]) }
     def setup!
-      # Do not setup a custom bundle if we're working on the Ruby LSP, since it's already included by default
-      if File.basename(@project_path) == "ruby-lsp"
-        warn("Ruby LSP> Skipping custom bundle setup since we're working on the Ruby LSP itself")
-        run_bundle_install
-        return
-      end
+      raise BundleNotLocked if @gemfile&.exist? && !@lockfile&.exist?
 
       # Do not setup a custom bundle if both `ruby-lsp` and `debug` are already in the Gemfile
       if @dependencies["ruby-lsp"] && @dependencies["debug"]
-        warn("Ruby LSP> Skipping custom bundle setup since both `ruby-lsp` and `debug` are already in the Gemfile")
+        warn("Ruby LSP> Skipping custom bundle setup since both `ruby-lsp` and `debug` are already in #{@gemfile}")
 
         # If the user decided to add the `ruby-lsp` and `debug` to their Gemfile after having already run the Ruby LSP,
         # then we need to remove the `.ruby-lsp` folder, otherwise we will run `bundle install` for the top level and
         # try to execute the Ruby LSP using the custom bundle, which will fail since the gems are not installed there
-        FileUtils.rm_r(".ruby-lsp") if Dir.exist?(".ruby-lsp")
-        run_bundle_install
-        return
+        @custom_dir.rmtree if @custom_dir.exist?
+        return run_bundle_install
       end
 
       # Automatically create and ignore the .ruby-lsp folder for users
-      FileUtils.mkdir(".ruby-lsp") unless Dir.exist?(".ruby-lsp")
-      File.write(".ruby-lsp/.gitignore", "*") unless File.exist?(".ruby-lsp/.gitignore")
+      @custom_dir.mkpath unless @custom_dir.exist?
+      ignore_file = @custom_dir + ".gitignore"
+      ignore_file.write("*") unless ignore_file.exist?
 
-      # Write the custom `.ruby-lsp/Gemfile` if it doesn't exist or if the content doesn't match
-      content = custom_gemfile_content
+      write_custom_gemfile
 
-      unless File.exist?(".ruby-lsp/Gemfile") && File.read(".ruby-lsp/Gemfile") == content
-        File.write(".ruby-lsp/Gemfile", content)
+      unless @gemfile&.exist? && @lockfile&.exist?
+        warn("Ruby LSP> Skipping lockfile copies because there's no top level bundle")
+        return run_bundle_install(@custom_gemfile)
       end
 
       # If .ruby-lsp/Gemfile.lock already exists and the top level Gemfile.lock hasn't been modified since it was last
       # updated, then we're ready to boot the server
-      if File.exist?(".ruby-lsp/Gemfile.lock") &&
-          File.stat(".ruby-lsp/Gemfile.lock").mtime > File.stat("Gemfile.lock").mtime
-        warn("Ruby LSP> Skipping custom bundle setup since .ruby-lsp/Gemfile.lock already exists and is up to date")
-        run_bundle_install(".ruby-lsp/Gemfile")
-        return
+      if @custom_lockfile.exist? && @custom_lockfile.stat.mtime > @lockfile.stat.mtime
+        warn("Ruby LSP> Skipping custom bundle setup since #{@custom_lockfile} already exists and is up to date")
+        return run_bundle_install(@custom_gemfile)
       end
 
-      FileUtils.cp("Gemfile.lock", ".ruby-lsp/Gemfile.lock")
-      run_bundle_install(".ruby-lsp/Gemfile")
+      FileUtils.cp(@lockfile.to_s, @custom_lockfile.to_s)
+      run_bundle_install(@custom_gemfile)
     end
 
     private
 
-    sig { returns(String) }
-    def custom_gemfile_content
+    sig { returns(T::Hash[String, T.untyped]) }
+    def custom_bundle_dependencies
+      return {} unless @custom_lockfile.exist?
+
+      ENV["BUNDLE_GEMFILE"] = @custom_gemfile.to_s
+      Bundler::LockfileParser.new(@custom_lockfile.read).dependencies
+    ensure
+      ENV.delete("BUNDLE_GEMFILE")
+    end
+
+    sig { void }
+    def write_custom_gemfile
       parts = [
         "# This custom gemfile is automatically generated by the Ruby LSP.",
         "# It should be automatically git ignored, but in any case: do not commit it to your repository.",
         "",
-        "eval_gemfile(File.expand_path(\"../Gemfile\", __dir__))",
       ]
 
+      # If there's a top level Gemfile, we want to evaluate from the custom bundle. We get the source from the top level
+      # Gemfile, so if there isn't one we need to add a default source
+      if @gemfile&.exist?
+        parts << "eval_gemfile(File.expand_path(\"../Gemfile\", __dir__))"
+      else
+        parts.unshift('source "https://rubygems.org"')
+      end
+
       unless @dependencies["ruby-lsp"]
-        parts << 'gem "ruby-lsp", require: false, group: :development, source: "https://rubygems.org"'
+        parts << 'gem "ruby-lsp", require: false, group: :development'
       end
 
       unless @dependencies["debug"]
-        parts << 'gem "debug", require: false, group: :development, platforms: :mri, source: "https://rubygems.org"'
+        parts << 'gem "debug", require: false, group: :development, platforms: :mri'
       end
 
-      parts.join("\n")
+      content = parts.join("\n")
+      @custom_gemfile.write(content) unless @custom_gemfile.exist? && @custom_gemfile.read == content
     end
 
     sig { returns(T::Hash[String, T.untyped]) }
     def load_dependencies
+      return {} unless @lockfile&.exist?
+
       # We need to parse the Gemfile.lock manually here. If we try to do `bundler/setup` to use something more
       # convenient, we may end up with issues when the globally installed `ruby-lsp` version mismatches the one included
       # in the `Gemfile`
-      dependencies = Bundler::LockfileParser.new(Bundler.read_file("Gemfile.lock")).dependencies
+      dependencies = Bundler::LockfileParser.new(@lockfile.read).dependencies
 
       # When working on a gem, the `ruby-lsp` might be listed as a dependency in the gemspec. We need to make sure we
-      # check those as well or else we may get version mismatch errors
-      gemspec_path = Dir.glob("*.gemspec").first
-      if gemspec_path
-        gemspec_dependencies = Bundler.load_gemspec(gemspec_path).dependencies.to_h { |dep| [dep.name, dep] }
-        dependencies.merge!(gemspec_dependencies)
+      # check those as well or else we may get version mismatch errors. Notice that bundler allows more than one
+      # gemspec, so we need to make sure we go through all of them
+      Dir.glob("{,*}.gemspec").each do |path|
+        dependencies.merge!(Bundler.load_gemspec(path).dependencies.to_h { |dep| [dep.name, dep] })
       end
 
       dependencies
     end
 
-    sig { params(bundle_gemfile: T.untyped).void }
-    def run_bundle_install(bundle_gemfile = nil)
+    sig { params(bundle_gemfile: T.nilable(Pathname)).returns([String, T.nilable(String)]) }
+    def run_bundle_install(bundle_gemfile = @gemfile)
       # If the user has a custom bundle path configured, we need to ensure that we will use the absolute and not
       # relative version of it when running `bundle install`. This is necessary to avoid installing the gems under the
       # `.ruby-lsp` folder, which is not the user's intention. For example, if the path is configured as `vendor`, we
@@ -122,7 +149,7 @@ module RubyLsp
 
       # Use the absolute `BUNDLE_PATH` to prevent accidentally creating unwanted folders under `.ruby-lsp`
       env = {}
-      env["BUNDLE_GEMFILE"] = bundle_gemfile if bundle_gemfile
+      env["BUNDLE_GEMFILE"] = bundle_gemfile.to_s
       env["BUNDLE_PATH"] = File.expand_path(path, Dir.pwd) if path
 
       # If both `ruby-lsp` and `debug` are already in the Gemfile, then we shouldn't try to upgrade them or else we'll
@@ -150,6 +177,7 @@ module RubyLsp
       # Add bundle update
       warn("Ruby LSP> Running bundle install for the custom bundle. This may take a while...")
       system(env, command)
+      [bundle_gemfile.to_s, path]
     end
   end
 end

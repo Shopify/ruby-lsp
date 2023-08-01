@@ -1,32 +1,21 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# We should make sure that, if we're running on a bundler project, that it has a Gemfile.lock
-if File.exist?("Gemfile") && !File.exist?("Gemfile.lock")
-  warn("Project contains a Gemfile, but no Gemfile.lock. Run `bundle install` to lock gems and restart the server")
-  exit(78)
-end
-
 # When we're running without bundler, then we need to make sure the custom bundle is fully configured and re-execute
 # using `BUNDLE_GEMFILE=.ruby-lsp/Gemfile bundle exec ruby-lsp` so that we have access to the gems that are a part of
 # the application's bundle
-if ENV["BUNDLE_GEMFILE"].nil? && File.exist?("Gemfile.lock")
+if ENV["BUNDLE_GEMFILE"].nil?
   require_relative "../lib/ruby_lsp/setup_bundler"
-  RubyLsp::SetupBundler.new(Dir.pwd).setup!
 
-  # In some cases, like when the `ruby-lsp` is already a part of the bundle, we don't generate `.ruby-lsp/Gemfile`.
-  # However, we still want to run the server with `bundle exec`. We need to make sure we're pointing to the right
-  # `Gemfile`
-  bundle_gemfile = File.exist?(".ruby-lsp/Gemfile") ? ".ruby-lsp/Gemfile" : "Gemfile"
-
-  # In addition to BUNDLE_GEMFILE, we also need to make sure that BUNDLE_PATH is absolute and not relative. For example,
-  # if BUNDLE_PATH is `vendor/bundle`, we want the top level `vendor/bundle` and not `.ruby-lsp/vendor/bundle`.
-  # Expanding to get the absolute path ensures we're pointing to the correct folder, which is the same one we use in
-  # SetupBundler to install the gems
-  path = Bundler.settings["path"]
+  begin
+    bundle_gemfile, bundle_path = RubyLsp::SetupBundler.new(Dir.pwd).setup!
+  rescue RubyLsp::SetupBundler::BundleNotLocked
+    warn("Project contains a Gemfile, but no Gemfile.lock. Run `bundle install` to lock gems and restart the server")
+    exit(78)
+  end
 
   env = { "BUNDLE_GEMFILE" => bundle_gemfile }
-  env["BUNDLE_PATH"] = File.expand_path(path, Dir.pwd) if path
+  env["BUNDLE_PATH"] = bundle_path if bundle_path
   exit exec(env, "bundle exec ruby-lsp #{ARGV.join(" ")}")
 end
 
