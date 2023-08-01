@@ -211,7 +211,15 @@ export default class Client implements ClientInterface {
       }
     });
 
-    await this.client.start();
+    try {
+      await this.client.start();
+    } catch (error: any) {
+      this.state = ServerState.Error;
+      this.outputChannel.appendLine(
+        `Error restarting the server: ${error.message}`,
+      );
+      return;
+    }
 
     // We cannot inquire anything related to the bundle before the custom bundle logic in the server runs
     await this.determineFormatter();
