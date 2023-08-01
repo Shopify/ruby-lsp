@@ -97,7 +97,7 @@ export default class Client implements ClientInterface {
 
     const configuration = vscode.workspace.getConfiguration("rubyLsp");
     const clientOptions: LanguageClientOptions = {
-      documentSelector: [{ scheme: "file", language: "ruby" }],
+      documentSelector: [{ language: "ruby" }],
       diagnosticCollectionName: LSP_NAME,
       outputChannel: this.outputChannel,
       revealOutputChannelOn: RevealOutputChannelOn.Never,
