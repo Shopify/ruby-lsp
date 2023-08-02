@@ -25,7 +25,7 @@ module RubyLsp
       def initialize(document)
         super(document)
 
-        @uri = T.let(document.uri, String)
+        @uri = T.let(document.uri, URI::Generic)
       end
 
       sig { override.returns(T.nilable(T.all(T::Array[Support::RuboCopDiagnostic], Object))) }
@@ -36,7 +36,8 @@ module RubyLsp
         return unless defined?(Support::RuboCopDiagnosticsRunner)
 
         # Don't try to run RuboCop diagnostics for files outside the current working directory
-        return unless URI(@uri).path&.start_with?(T.must(WORKSPACE_URI.path))
+        path = @uri.path
+        return unless path.nil? || path.start_with?(T.must(WORKSPACE_URI.path))
 
         Support::RuboCopDiagnosticsRunner.instance.run(@uri, @document)
       end

@@ -10,7 +10,7 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
   def run_expectations(source)
     message_queue = Thread::Queue.new
     params = @__params&.any? ? @__params : default_args
-    uri = "file://#{@_path}"
+    uri = URI("file://#{@_path}")
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new

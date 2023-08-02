@@ -6,7 +6,7 @@ require "test_helper"
 class PathCompletionTest < Minitest::Test
   def setup
     @message_queue = Thread::Queue.new
-    @uri = "file:///fake.rb"
+    @uri = URI("file:///fake.rb")
     @store = RubyLsp::Store.new
   end
 
@@ -35,7 +35,7 @@ class PathCompletionTest < Minitest::Test
       @store.set(uri: @uri, source: document.source, version: 1)
       RubyLsp::Executor.new(@store, @message_queue).execute({
         method: "textDocument/completion",
-        params: { textDocument: { uri: @uri }, position: end_position },
+        params: { textDocument: { uri: @uri.to_s }, position: end_position },
       }).response
     end
 
@@ -71,7 +71,7 @@ class PathCompletionTest < Minitest::Test
       @store.set(uri: @uri, source: document.source, version: 1)
       RubyLsp::Executor.new(@store, @message_queue).execute({
         method: "textDocument/completion",
-        params: { textDocument: { uri: @uri }, position: end_position },
+        params: { textDocument: { uri: @uri.to_s }, position: end_position },
       }).response
     end
 
@@ -107,7 +107,7 @@ class PathCompletionTest < Minitest::Test
       @store.set(uri: @uri, source: document.source, version: 1)
       RubyLsp::Executor.new(@store, @message_queue).execute({
         method: "textDocument/completion",
-        params: { textDocument: { uri: @uri }, position: end_position },
+        params: { textDocument: { uri: @uri.to_s }, position: end_position },
       }).response
     end
 
@@ -143,7 +143,7 @@ class PathCompletionTest < Minitest::Test
       @store.set(uri: @uri, source: document.source, version: 1)
       RubyLsp::Executor.new(@store, @message_queue).execute({
         method: "textDocument/completion",
-        params: { textDocument: { uri: @uri }, position: end_position },
+        params: { textDocument: { uri: @uri.to_s }, position: end_position },
       }).response
     end
 
@@ -171,7 +171,7 @@ class PathCompletionTest < Minitest::Test
     @store.set(uri: @uri, source: document.source, version: 1)
     RubyLsp::Executor.new(@store, @message_queue).execute({
       method: "textDocument/completion",
-      params: { textDocument: { uri: @uri }, position: end_position },
+      params: { textDocument: { uri: @uri.to_s }, position: end_position },
     }).response
   end
 
@@ -188,7 +188,7 @@ class PathCompletionTest < Minitest::Test
     @store.set(uri: @uri, source: document.source, version: 1)
     response = RubyLsp::Executor.new(@store, @message_queue).execute({
       method: "textDocument/completion",
-      params: { textDocument: { uri: @uri }, position: end_position },
+      params: { textDocument: { uri: @uri.to_s }, position: end_position },
     }).response
     assert_nil(response)
   end

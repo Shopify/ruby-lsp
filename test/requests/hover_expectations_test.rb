@@ -18,7 +18,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
   def test_search_index_being_nil
     message_queue = Thread::Queue.new
     store = RubyLsp::Store.new
-    store.set(uri: "file:///fake.rb", source: "belongs_to :foo", version: 1)
+    store.set(uri: URI("file:///fake.rb"), source: "belongs_to :foo", version: 1)
 
     RubyLsp::Requests::Support::RailsDocumentClient.stubs(search_index: nil)
     RubyLsp::Executor.new(store, message_queue).execute({
@@ -47,7 +47,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
     Net::HTTP.stubs(get_response: fake_response)
     store = RubyLsp::Store.new
-    store.set(uri: "file:///fake.rb", source: source, version: 1)
+    store.set(uri: URI("file:///fake.rb"), source: source, version: 1)
 
     RubyLsp::Executor.new(store, message_queue).execute({
       method: "textDocument/hover",
@@ -65,7 +65,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
     Net::HTTP.stubs(get_response: fake_response)
 
     store = RubyLsp::Store.new
-    store.set(uri: "file:///fake.rb", source: <<~RUBY, version: 1)
+    store.set(uri: URI("file:///fake.rb"), source: <<~RUBY, version: 1)
       class Post
         belongs_to :user
       end

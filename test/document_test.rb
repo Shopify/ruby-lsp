@@ -5,7 +5,7 @@ require "test_helper"
 
 class DocumentTest < Minitest::Test
   def test_valid_incremental_edits
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
       def foo
       end
     RUBY
@@ -55,7 +55,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_deletion_full_node
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
       def foo
         puts 'a' # comment
       end
@@ -75,7 +75,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_deletion_single_character
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
       def foo
         puts 'a'
       end
@@ -95,7 +95,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_add_delete_single_character
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///foo.rb"))
 
     # Add a
     document.push_edits(
@@ -115,7 +115,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_replace
-    document = RubyLsp::Document.new(source: +"puts 'a'", version: 1, uri: "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +"puts 'a'", version: 1, uri: URI("file:///foo.rb"))
 
     # Replace for puts 'b'
     document.push_edits(
@@ -130,7 +130,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_new_line_and_char_addition
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
       # frozen_string_literal: true
 
       class Foo
@@ -169,7 +169,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_multi_cursor_edit
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
       # frozen_string_literal: true
 
 
@@ -271,7 +271,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_pushing_edits_to_document_with_unicode
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
       chars = ["億"]
     RUBY
 
@@ -320,7 +320,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_parsed_returns_true_when_parsed_successfully
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
       # frozen_string_literal: true
       puts 'hello'
     RUBY
@@ -329,7 +329,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_parsed_returns_false_when_parsing_fails
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
       class Foo
     RUBY
 
@@ -337,7 +337,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_document_handle_4_byte_unicode_characters
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb", encoding: "utf-16")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"), encoding: "utf-16")
       class Foo
         a = "👋"
       end
@@ -408,7 +408,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_failing_to_parse_indicates_syntax_error
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
       def foo
       end
     RUBY
@@ -428,7 +428,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_files_opened_with_syntax_errors_are_properly_marked
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///foo.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
       def foo
     RUBY
 
@@ -436,7 +436,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_locate
-    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: "file:///foo/bar.rb")
+    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
       class Post < ActiveRecord::Base
         scope :published do
           # find posts that are published
@@ -477,7 +477,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_locate_returns_nesting
-    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: "file:///foo/bar.rb")
+    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
       module Foo
         class Other
           def do_it
@@ -503,7 +503,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_locate_returns_correct_nesting_when_specifying_target_classes
-    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: "file:///foo/bar.rb")
+    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
       module Foo
         class Bar
           def baz
@@ -519,7 +519,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_reparsing_without_new_edits_does_nothing
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: "file:///foo/bar.rb")
+    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///foo/bar.rb"))
     document.push_edits(
       [{ range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } }, text: "def foo" }],
       version: 2,
@@ -531,7 +531,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_cache_set_and_get
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: "file:///foo/bar.rb")
+    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///foo/bar.rb"))
     value = [1, 2, 3]
 
     assert_equal(value, document.cache_set("textDocument/semanticHighlighting", value))

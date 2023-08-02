@@ -127,11 +127,12 @@ class ExecutorTest < Minitest::Test
   end
 
   def test_did_close_clears_diagnostics
-    @store.set(uri: "file:///foo.rb", source: "", version: 1)
+    uri = URI("file:///foo.rb")
+    @store.set(uri: uri, source: "", version: 1)
     @executor.execute({
       method: "textDocument/didClose",
       params: {
-        textDocument: { uri: "file:///foo.rb" },
+        textDocument: { uri: uri.to_s },
       },
     })
 
@@ -139,7 +140,7 @@ class ExecutorTest < Minitest::Test
     assert_equal("textDocument/publishDiagnostics", notification.message)
     assert_empty(T.cast(notification.params, RubyLsp::Interface::PublishDiagnosticsParams).diagnostics)
   ensure
-    @store.delete("file:///foo.rb")
+    @store.delete(uri)
   end
 
   def test_detects_rubocop_if_direct_dependency

@@ -7,6 +7,7 @@ require "language_server-protocol"
 require "benchmark"
 require "bundler"
 require "uri"
+require "cgi"
 
 require "ruby-lsp"
 require "ruby_lsp/utils"

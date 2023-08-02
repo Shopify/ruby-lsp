@@ -18,16 +18,16 @@ module RubyLsp
     sig { returns(Integer) }
     attr_reader :version
 
-    sig { returns(String) }
+    sig { returns(URI::Generic) }
     attr_reader :uri
 
-    sig { params(source: String, version: Integer, uri: String, encoding: String).void }
+    sig { params(source: String, version: Integer, uri: URI::Generic, encoding: String).void }
     def initialize(source:, version:, uri:, encoding: Constant::PositionEncodingKind::UTF8)
       @cache = T.let({}, T::Hash[String, T.untyped])
       @encoding = T.let(encoding, String)
       @source = T.let(source, String)
       @version = T.let(version, Integer)
-      @uri = T.let(uri, String)
+      @uri = T.let(uri, URI::Generic)
       @unparsed_edits = T.let([], T::Array[EditShape])
       @syntax_error = T.let(false, T::Boolean)
       @tree = T.let(SyntaxTree.parse(@source), T.nilable(SyntaxTree::Node))

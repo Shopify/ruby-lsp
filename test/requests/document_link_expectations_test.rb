@@ -22,7 +22,7 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
 
   def run_expectations(source)
     message_queue = Thread::Queue.new
-    uri = "file://#{@_path}"
+    uri = URI("file://#{@_path}")
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new

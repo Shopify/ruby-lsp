@@ -109,7 +109,7 @@ module RubyLsp
     # Creates a new CodeLens listener. This method is invoked on every CodeLens request
     sig do
       overridable.params(
-        uri: String,
+        uri: URI::Generic,
         emitter: EventEmitter,
         message_queue: Thread::Queue,
       ).returns(T.nilable(Listener[T::Array[Interface::CodeLens]]))

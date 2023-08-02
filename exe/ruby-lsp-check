@@ -30,13 +30,13 @@ message_queue = Thread::Queue.new
 executor = RubyLsp::Executor.new(store, message_queue)
 
 files.each_with_index do |file, index|
-  uri = "file://#{file}"
+  uri = URI("file://#{file}")
   store.set(uri: uri, source: File.read(file), version: 1)
 
   # Executing any of the automatic requests will execute all of them, so here we just pick one
   result = executor.execute({
     method: "textDocument/documentSymbol",
-    params: { textDocument: { uri: uri } },
+    params: { textDocument: { uri: uri.to_s } },
   })
 
   error = result.error

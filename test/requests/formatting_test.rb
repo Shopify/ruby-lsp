@@ -5,7 +5,7 @@ require "test_helper"
 
 class FormattingTest < Minitest::Test
   def setup
-    @document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file://#{__FILE__}")
+    @document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file://#{__FILE__}"))
       class Foo
       def foo
       end
@@ -35,7 +35,7 @@ class FormattingTest < Minitest::Test
   end
 
   def test_does_not_format_with_formatter_is_none
-    document = RubyLsp::Document.new(source: "def foo", version: 1, uri: "file://#{__FILE__}")
+    document = RubyLsp::Document.new(source: "def foo", version: 1, uri: URI("file://#{__FILE__}"))
     assert_nil(RubyLsp::Requests::Formatting.new(document, formatter: "none").run)
   end
 
@@ -46,7 +46,7 @@ class FormattingTest < Minitest::Test
     TXT
 
     with_syntax_tree_config_file(config_contents) do
-      @document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file://#{__FILE__}")
+      @document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file://#{__FILE__}"))
         class Foo
         def foo
         {one: "#{"a" * 50}", two: "#{"b" * 50}"}
@@ -71,7 +71,7 @@ class FormattingTest < Minitest::Test
 
   def test_syntax_tree_formatting_ignores_syntax_invalid_documents
     require "ruby_lsp/requests"
-    document = RubyLsp::Document.new(source: "def foo", version: 1, uri: "file://#{__FILE__}")
+    document = RubyLsp::Document.new(source: "def foo", version: 1, uri: URI("file://#{__FILE__}"))
     assert_nil(RubyLsp::Requests::Formatting.new(document, formatter: "syntax_tree").run)
   end
 
@@ -81,7 +81,7 @@ class FormattingTest < Minitest::Test
     TXT
 
     with_syntax_tree_config_file(config_contents) do
-      @document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file://#{__FILE__}")
+      @document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file://#{__FILE__}"))
         class Foo
         def foo
         end
@@ -92,12 +92,12 @@ class FormattingTest < Minitest::Test
   end
 
   def test_rubocop_formatting_ignores_syntax_invalid_documents
-    document = RubyLsp::Document.new(source: "def foo", version: 1, uri: "file://#{__FILE__}")
+    document = RubyLsp::Document.new(source: "def foo", version: 1, uri: URI("file://#{__FILE__}"))
     assert_nil(RubyLsp::Requests::Formatting.new(document, formatter: "rubocop").run)
   end
 
   def test_returns_nil_if_document_is_already_formatted
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file://#{__FILE__}")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file://#{__FILE__}"))
       # typed: strict
       # frozen_string_literal: true
 
@@ -110,7 +110,7 @@ class FormattingTest < Minitest::Test
   end
 
   def test_returns_nil_if_document_is_not_in_project_folder
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: "file:///fake.rb")
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///fake.rb"))
       class Foo
       def foo
       end
