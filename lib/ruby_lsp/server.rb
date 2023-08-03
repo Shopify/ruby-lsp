@@ -86,6 +86,7 @@ module RubyLsp
           @message_dispatcher.join
           @store.clear
 
+          Extension.extensions.each(&:deactivate)
           finalize_request(Result.new(response: nil), request)
         when "exit"
           # We return zero if shutdown has already been received or one otherwise as per the recommendation in the spec
