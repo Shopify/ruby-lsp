@@ -81,6 +81,8 @@ command that will activate the right Ruby version or simply add the Ruby bin fol
 }
 ```
 
+See [version managers](VERSION_MANAGERS.md) for user-contributed configuration examples.
+
 #### Configuring a formatter
 
 The tool to be used for formatting files can be configured with the following setting.
