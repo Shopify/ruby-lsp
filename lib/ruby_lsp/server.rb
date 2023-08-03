@@ -106,7 +106,7 @@ module RubyLsp
             # source. Altering the source reference during parsing will put the parser in an invalid internal state,
             # since it started parsing with one source but then it changed in the middle
             uri = request.dig(:params, :textDocument, :uri)
-            @store.get(uri).parse if uri
+            @store.get(URI(uri)).parse if uri
           end
 
           @job_queue << job

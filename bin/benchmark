@@ -62,8 +62,8 @@ def avg_bench(method, params)
   [average, standard_deviation]
 end
 
-FILE_URI = "file://#{File.expand_path(__FILE__)}"
-base_params = { textDocument: { uri: FILE_URI } }
+FILE_URI = URI("file://#{File.expand_path(__FILE__)}")
+base_params = { textDocument: { uri: FILE_URI.to_s } }
 range = {
   start: { line: 50, character: 0 },
   end: { line: 75, character: 0 },
@@ -89,7 +89,7 @@ code_action_params = base_params.merge(
             edit: {
               documentChanges: [
                 {
-                  textDocument: { uri: FILE_URI, version: nil },
+                  textDocument: { uri: FILE_URI.to_s, version: nil },
                   edits: [
                     {
                       range: {
@@ -249,7 +249,7 @@ requests = {
   "textDocument/hover" => base_params.merge(position: position),
   "textDocument/codeAction" => code_action_params,
   "textDocument/onTypeFormatting" => base_params.merge(position: { line: 1, character: 31 }, ch: "\n"),
-  "codeAction/resolve" => base_params.merge(data: { range: range, uri: FILE_URI }),
+  "codeAction/resolve" => base_params.merge(data: { range: range, uri: FILE_URI.to_s }),
   "textDocument/completion" => base_params.merge(position: { line: 5, character: 24 }),
   "textDocument/codeLens" => base_params,
   "textDocument/definition" => base_params.merge(position: { line: 4, character: 20 }),

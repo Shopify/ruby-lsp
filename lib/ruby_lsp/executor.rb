@@ -35,7 +35,7 @@ module RubyLsp
 
     sig { params(request: T::Hash[Symbol, T.untyped]).returns(T.untyped) }
     def run(request)
-      uri = request.dig(:params, :textDocument, :uri)
+      uri = URI(request.dig(:params, :textDocument, :uri).to_s)
 
       case request[:method]
       when "initialize"
@@ -70,7 +70,7 @@ module RubyLsp
       when "textDocument/didClose"
         @message_queue << Notification.new(
           message: "textDocument/publishDiagnostics",
-          params: Interface::PublishDiagnosticsParams.new(uri: uri, diagnostics: []),
+          params: Interface::PublishDiagnosticsParams.new(uri: uri.to_s, diagnostics: []),
         )
 
         text_document_did_close(uri)
@@ -174,12 +174,12 @@ module RubyLsp
       end
     end
 
-    sig { params(uri: String, range: T.nilable(Document::RangeShape)).returns({ ast: String }) }
+    sig { params(uri: URI::Generic, range: T.nilable(Document::RangeShape)).returns({ ast: String }) }
     def show_syntax_tree(uri, range)
       { ast: Requests::ShowSyntaxTree.new(@store.get(uri), range).run }
     end
 
-    sig { params(uri: String, position: Document::PositionShape).returns(T.nilable(Interface::Location)) }
+    sig { params(uri: URI::Generic, position: Document::PositionShape).returns(T.nilable(Interface::Location)) }
     def definition(uri, position)
       document = @store.get(uri)
       return if document.syntax_error?
@@ -192,7 +192,7 @@ module RubyLsp
       base_listener.response
     end
 
-    sig { params(uri: String).returns(T::Array[Interface::FoldingRange]) }
+    sig { params(uri: URI::Generic).returns(T::Array[Interface::FoldingRange]) }
     def folding_range(uri)
       @store.cache_fetch(uri, "textDocument/foldingRange") do |document|
         Requests::FoldingRanges.new(document).run
@@ -201,7 +201,7 @@ module RubyLsp
 
     sig do
       params(
-        uri: String,
+        uri: URI::Generic,
         position: Document::PositionShape,
       ).returns(T.nilable(Interface::Hover))
     end
@@ -227,19 +227,19 @@ module RubyLsp
       hover.response
     end
 
-    sig { params(uri: String, content_changes: T::Array[Document::EditShape], version: Integer).returns(Object) }
+    sig { params(uri: URI::Generic, content_changes: T::Array[Document::EditShape], version: Integer).returns(Object) }
     def text_document_did_change(uri, content_changes, version)
       @store.push_edits(uri: uri, edits: content_changes, version: version)
       VOID
     end
 
-    sig { params(uri: String, text: String, version: Integer).returns(Object) }
+    sig { params(uri: URI::Generic, text: String, version: Integer).returns(Object) }
     def text_document_did_open(uri, text, version)
       @store.set(uri: uri, source: text, version: version)
       VOID
     end
 
-    sig { params(uri: String).returns(Object) }
+    sig { params(uri: URI::Generic).returns(Object) }
     def text_document_did_close(uri)
       @store.delete(uri)
       VOID
@@ -247,7 +247,7 @@ module RubyLsp
 
     sig do
       params(
-        uri: String,
+        uri: URI::Generic,
         positions: T::Array[Document::PositionShape],
       ).returns(T.nilable(T::Array[T.nilable(Requests::Support::SelectionRange)]))
     end
@@ -270,7 +270,7 @@ module RubyLsp
       end
     end
 
-    sig { params(uri: String).returns(T.nilable(T::Array[Interface::TextEdit])) }
+    sig { params(uri: URI::Generic).returns(T.nilable(T::Array[Interface::TextEdit])) }
     def formatting(uri)
       # If formatter is set to `auto` but no supported formatting gem is found, don't attempt to format
       return if @store.formatter == "none"
@@ -280,7 +280,7 @@ module RubyLsp
 
     sig do
       params(
-        uri: String,
+        uri: URI::Generic,
         position: Document::PositionShape,
         character: String,
       ).returns(T::Array[Interface::TextEdit])
@@ -291,7 +291,7 @@ module RubyLsp
 
     sig do
       params(
-        uri: String,
+        uri: URI::Generic,
         position: Document::PositionShape,
       ).returns(T.nilable(T::Array[Interface::DocumentHighlight]))
     end
@@ -306,7 +306,7 @@ module RubyLsp
       listener.response
     end
 
-    sig { params(uri: String, range: Document::RangeShape).returns(T.nilable(T::Array[Interface::InlayHint])) }
+    sig { params(uri: URI::Generic, range: Document::RangeShape).returns(T.nilable(T::Array[Interface::InlayHint])) }
     def inlay_hint(uri, range)
       document = @store.get(uri)
       return if document.syntax_error?
@@ -322,7 +322,7 @@ module RubyLsp
 
     sig do
       params(
-        uri: String,
+        uri: URI::Generic,
         range: Document::RangeShape,
         context: T::Hash[Symbol, T.untyped],
       ).returns(T.nilable(T::Array[Interface::CodeAction]))
@@ -335,7 +335,7 @@ module RubyLsp
 
     sig { params(params: T::Hash[Symbol, T.untyped]).returns(Interface::CodeAction) }
     def code_action_resolve(params)
-      uri = params.dig(:data, :uri)
+      uri = URI(params.dig(:data, :uri))
       document = @store.get(uri)
       result = Requests::CodeActionResolve.new(document, params).run
 
@@ -363,7 +363,7 @@ module RubyLsp
       end
     end
 
-    sig { params(uri: String).returns(T.nilable(Interface::FullDocumentDiagnosticReport)) }
+    sig { params(uri: URI::Generic).returns(T.nilable(Interface::FullDocumentDiagnosticReport)) }
     def diagnostic(uri)
       response = @store.cache_fetch(uri, "textDocument/diagnostic") do |document|
         Requests::Diagnostics.new(document).run
@@ -372,7 +372,7 @@ module RubyLsp
       Interface::FullDocumentDiagnosticReport.new(kind: "full", items: response.map(&:to_lsp_diagnostic)) if response
     end
 
-    sig { params(uri: String, range: Document::RangeShape).returns(Interface::SemanticTokens) }
+    sig { params(uri: URI::Generic, range: Document::RangeShape).returns(Interface::SemanticTokens) }
     def semantic_tokens_range(uri, range)
       document = @store.get(uri)
       start_line = range.dig(:start, :line)
@@ -390,7 +390,10 @@ module RubyLsp
     end
 
     sig do
-      params(uri: String, position: Document::PositionShape).returns(T.nilable(T::Array[Interface::CompletionItem]))
+      params(
+        uri: URI::Generic,
+        position: Document::PositionShape,
+      ).returns(T.nilable(T::Array[Interface::CompletionItem]))
     end
     def completion(uri, position)
       document = @store.get(uri)

@@ -12,7 +12,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     position = @__params&.first || { character: 0, line: 0 }
 
     store = RubyLsp::Store.new
-    store.set(uri: "file:///folder/fake.rb", source: source, version: 1)
+    store.set(uri: URI("file:///folder/fake.rb"), source: source, version: 1)
 
     response = RubyLsp::Executor.new(store, message_queue).execute({
       method: "textDocument/definition",

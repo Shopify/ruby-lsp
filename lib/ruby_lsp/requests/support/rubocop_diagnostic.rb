@@ -19,7 +19,7 @@ module RubyLsp
           T::Hash[Symbol, Integer],
         )
 
-        sig { params(offense: RuboCop::Cop::Offense, uri: String).void }
+        sig { params(offense: RuboCop::Cop::Offense, uri: URI::Generic).void }
         def initialize(offense, uri)
           @offense = offense
           @uri = uri
@@ -34,7 +34,7 @@ module RubyLsp
               document_changes: [
                 Interface::TextDocumentEdit.new(
                   text_document: Interface::OptionalVersionedTextDocumentIdentifier.new(
-                    uri: @uri,
+                    uri: @uri.to_s,
                     version: nil,
                   ),
                   edits: @offense.correctable? ? offense_replacements : [],

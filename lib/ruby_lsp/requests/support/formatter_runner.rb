@@ -10,7 +10,7 @@ module RubyLsp
 
         interface!
 
-        sig { abstract.params(uri: String, document: Document).returns(T.nilable(String)) }
+        sig { abstract.params(uri: URI::Generic, document: Document).returns(T.nilable(String)) }
         def run(uri, document); end
       end
     end

@@ -8,7 +8,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::CodeLens, "code_lens"
 
   def run_expectations(source)
-    uri = "file://#{@_path}"
+    uri = URI("file://#{@_path}")
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new
@@ -23,7 +23,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
         def test_bar; end
       end
     RUBY
-    uri = "file:///fake.rb"
+    uri = URI("file:///fake.rb")
 
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
@@ -49,7 +49,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
         def test_bar; end
       end
     RUBY
-    uri = "file:///fake.rb"
+    uri = URI("file:///fake.rb")
 
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
@@ -67,7 +67,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
         def test_bar; end
       end
     RUBY
-    uri = "file:///fake.rb"
+    uri = URI("file:///fake.rb")
 
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
@@ -84,7 +84,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     create_code_lens_extension
 
     store = RubyLsp::Store.new
-    store.set(uri: "file:///fake.rb", source: <<~RUBY, version: 1)
+    store.set(uri: URI("file:///fake.rb"), source: <<~RUBY, version: 1)
       class Test < Minitest::Test; end
     RUBY
 

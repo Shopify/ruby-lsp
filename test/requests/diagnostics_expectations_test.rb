@@ -13,7 +13,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
       skip("Skipping on Windows: https://github.com/Shopify/ruby-lsp/issues/751")
     end
 
-    document = RubyLsp::Document.new(source: source, version: 1, uri: "file://#{__FILE__}")
+    document = RubyLsp::Document.new(source: source, version: 1, uri: URI("file://#{__FILE__}"))
     RubyLsp::Requests::Diagnostics.new(document).run
     result = T.let(nil, T.nilable(T::Array[RubyLsp::Requests::Support::RuboCopDiagnostic]))
 
