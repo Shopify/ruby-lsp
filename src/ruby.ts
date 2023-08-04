@@ -122,8 +122,11 @@ export class Ruby {
       cwd: this.workingFolder,
     });
 
-    if (result.stdout === "") return;
-
+    if (result.stdout === "") {
+      // eslint-disable-next-line no-process-env
+      this._env = { ...process.env };
+      return;
+    };
     // eslint-disable-next-line no-process-env
     const env = { ...process.env, ...JSON.parse(result.stdout).exported };
 
