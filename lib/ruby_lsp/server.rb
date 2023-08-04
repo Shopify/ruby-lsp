@@ -193,7 +193,14 @@ module RubyLsp
         params[:backtrace] = backtrace.map { |bt| bt.sub(/^#{Dir.home}/, "~") }.join("\n") if backtrace
       end
 
-      params[:uri] = uri.sub(%r{.*://#{Dir.home}}, "~") if uri
+      if uri
+        home = URI::Generic.from_path(path: Dir.home)
+
+        parsed_uri = URI(uri)
+        path = parsed_uri.path
+        params[:uri] = path ? path.sub(T.must(home.path), "~") : parsed_uri.opaque
+      end
+
       params
     end
   end

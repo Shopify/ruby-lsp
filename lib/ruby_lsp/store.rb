@@ -22,7 +22,9 @@ module RubyLsp
 
     sig { params(uri: URI::Generic).returns(Document) }
     def get(uri)
-      path = unescaped_uri_path(uri)
+      path = uri.to_standardized_path
+      return T.must(@state[T.must(uri.opaque)]) unless path
+
       document = @state[path]
       return document unless document.nil?
 
@@ -33,12 +35,12 @@ module RubyLsp
     sig { params(uri: URI::Generic, source: String, version: Integer).void }
     def set(uri:, source:, version:)
       document = Document.new(source: source, version: version, uri: uri, encoding: @encoding)
-      @state[unescaped_uri_path(uri)] = document
+      @state[uri.storage_key] = document
     end
 
     sig { params(uri: URI::Generic, edits: T::Array[Document::EditShape], version: Integer).void }
     def push_edits(uri:, edits:, version:)
-      T.must(@state[unescaped_uri_path(uri)]).push_edits(edits, version: version)
+      T.must(@state[uri.storage_key]).push_edits(edits, version: version)
     end
 
     sig { void }
@@ -53,7 +55,7 @@ module RubyLsp
 
     sig { params(uri: URI::Generic).void }
     def delete(uri)
-      @state.delete(unescaped_uri_path(uri))
+      @state.delete(uri.storage_key)
     end
 
     sig do
@@ -66,18 +68,6 @@ module RubyLsp
     end
     def cache_fetch(uri, request_name, &block)
       get(uri).cache_fetch(request_name, &block)
-    end
-
-    private
-
-    sig { params(uri: URI::Generic).returns(String) }
-    def unescaped_uri_path(uri)
-      # When a file was written to disk, we get a file URI. If it's a temporary file, then the URI is
-      # `untitled:Untitled-1`, where the scheme is `untitled` and the opaque is the name of the temporary file (e.g.
-      # `Untitled-1`).
-      path = uri.path
-      path ||= uri.opaque
-      CGI.unescape(path)
     end
   end
 end

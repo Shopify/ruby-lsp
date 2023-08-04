@@ -10,6 +10,7 @@ require "uri"
 require "cgi"
 
 require "ruby-lsp"
+require "core_ext/uri"
 require "ruby_lsp/utils"
 require "ruby_lsp/server"
 require "ruby_lsp/executor"

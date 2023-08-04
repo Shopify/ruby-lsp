@@ -20,7 +20,7 @@ module RubyLsp
 
         sig { params(uri: URI::Generic, document: Document).returns(T::Array[Support::RuboCopDiagnostic]) }
         def run(uri, document)
-          filename = CGI.unescape(uri.path || uri.opaque)
+          filename = T.must(uri.to_standardized_path || uri.opaque)
           # Invoke RuboCop with just this file in `paths`
           @runner.run(filename, document.source)
 

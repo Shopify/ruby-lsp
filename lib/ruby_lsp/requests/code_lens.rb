@@ -41,7 +41,7 @@ module RubyLsp
         )
         @test_library = T.let(test_library, String)
         @response = T.let([], ResponseType)
-        @path = T.let(uri.path, T.nilable(String))
+        @path = T.let(uri.to_standardized_path, T.nilable(String))
         # visibility_stack is a stack of [current_visibility, previous_visibility]
         @visibility_stack = T.let([["public", "public"]], T::Array[T::Array[T.nilable(String)]])
         @class_stack = T.let([], T::Array[String])

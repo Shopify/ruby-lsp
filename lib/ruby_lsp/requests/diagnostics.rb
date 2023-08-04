@@ -36,8 +36,8 @@ module RubyLsp
         return unless defined?(Support::RuboCopDiagnosticsRunner)
 
         # Don't try to run RuboCop diagnostics for files outside the current working directory
-        path = @uri.path
-        return unless path.nil? || path.start_with?(T.must(WORKSPACE_URI.path))
+        path = @uri.to_standardized_path
+        return unless path.nil? || path.start_with?(T.must(WORKSPACE_URI.to_standardized_path))
 
         Support::RuboCopDiagnosticsRunner.instance.run(@uri, @document)
       end

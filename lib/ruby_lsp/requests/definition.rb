@@ -53,7 +53,7 @@ module RubyLsp
 
           if candidate
             @response = Interface::Location.new(
-              uri: "file://#{candidate}",
+              uri: URI::Generic.from_path(path: candidate).to_s,
               range: Interface::Range.new(
                 start: Interface::Position.new(line: 0, character: 0),
                 end: Interface::Position.new(line: 0, character: 0),
@@ -61,13 +61,13 @@ module RubyLsp
             )
           end
         when "require_relative"
-          path = @uri.path
+          path = @uri.to_standardized_path
           current_folder = path ? Pathname.new(CGI.unescape(path)).dirname : Dir.pwd
           candidate = File.expand_path(File.join(current_folder, required_file))
 
           if candidate
             @response = Interface::Location.new(
-              uri: "file://#{candidate}",
+              uri: URI::Generic.from_path(path: candidate).to_s,
               range: Interface::Range.new(
                 start: Interface::Position.new(line: 0, character: 0),
                 end: Interface::Position.new(line: 0, character: 0),
