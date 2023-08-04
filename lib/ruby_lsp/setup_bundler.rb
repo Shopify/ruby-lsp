@@ -37,7 +37,6 @@ module RubyLsp
       @lockfile = T.let(@gemfile ? Bundler.default_lockfile : nil, T.nilable(Pathname))
 
       @dependencies = T.let(load_dependencies, T::Hash[String, T.untyped])
-      @custom_bundle_dependencies = T.let(custom_bundle_dependencies, T::Hash[String, T.untyped])
     end
 
     # Setups up the custom bundle and returns the `BUNDLE_GEMFILE` and `BUNDLE_PATH` that should be used for running the
@@ -84,10 +83,17 @@ module RubyLsp
 
     sig { returns(T::Hash[String, T.untyped]) }
     def custom_bundle_dependencies
-      return {} unless @custom_lockfile.exist?
-
-      ENV["BUNDLE_GEMFILE"] = @custom_gemfile.to_s
-      Bundler::LockfileParser.new(@custom_lockfile.read).dependencies
+      @custom_bundle_dependencies ||= T.let(
+        begin
+          if @custom_lockfile.exist?
+            ENV["BUNDLE_GEMFILE"] = @custom_gemfile.to_s
+            Bundler::LockfileParser.new(@custom_lockfile.read).dependencies
+          else
+            {}
+          end
+        end,
+        T.nilable(T::Hash[String, T.untyped]),
+      )
     ensure
       ENV.delete("BUNDLE_GEMFILE")
     end
@@ -160,7 +166,7 @@ module RubyLsp
       command = +""
 
       if (@dependencies["ruby-lsp"] && @dependencies["debug"]) ||
-          @custom_bundle_dependencies["ruby-lsp"].nil? || @custom_bundle_dependencies["debug"].nil?
+          custom_bundle_dependencies["ruby-lsp"].nil? || custom_bundle_dependencies["debug"].nil?
         # Install gems using the custom bundle
         command << "bundle install "
       else
