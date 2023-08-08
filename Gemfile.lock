@@ -1,10 +1,21 @@
+GIT
+  remote: https://github.com/Shopify/yarp.git
+  revision: 44705a3f5d9d9fcd24cb6fe2ab85e80c936b386e
+  specs:
+    yarp (0.4.0)
+
 PATH
   remote: .
   specs:
     ruby-lsp (0.8.0)
       language_server-protocol (~> 3.17.0)
       sorbet-runtime
+<<<<<<< HEAD
       yarp
+||||||| parent of bad1fda (Remove syntax_tree, add YARP gem)
+      syntax_tree (>= 6.1.1, < 7)
+=======
+>>>>>>> bad1fda (Remove syntax_tree, add YARP gem)
 
 GEM
   remote: https://rubygems.org/
@@ -195,6 +206,7 @@ DEPENDENCIES
   ruby-lsp!
   sorbet-static-and-runtime
   tapioca (~> 0.11)
+  yarp!
 
 BUNDLED WITH
    2.4.10
