@@ -24,7 +24,7 @@ class SetupBundlerTest < Minitest::Test
 
   def test_creates_custom_bundle
     Object.any_instance.expects(:system).with(bundle_env(".ruby-lsp/Gemfile"), "bundle install 1>&2")
-    Bundler::LockfileParser.any_instance.expects(:dependencies).returns({})
+    Bundler::LockfileParser.any_instance.expects(:dependencies).returns({}).at_least_once
     run_script
 
     assert_path_exists(".ruby-lsp")
@@ -55,6 +55,41 @@ class SetupBundlerTest < Minitest::Test
     FileUtils.rm_r(".ruby-lsp")
   end
 
+  def test_loading_custom_bundle_dependencies_is_lazy
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "rdoc"
+        GEMFILE
+
+        capture_subprocess_io do
+          Bundler.with_unbundled_env do
+            # Run bundle install to generate the lockfile
+            system("bundle install")
+
+            # Run the script once to generate a custom bundle
+            run_script
+          end
+        end
+
+        # Update the modified timestamp for the lockfile
+        sleep(0.05)
+        FileUtils.touch("Gemfile.lock")
+
+        # At this point, the custom bundle includes the `ruby-lsp` in its lockfile, but that will be overwritten when we
+        # copy the top level lockfile. If custom bundle dependencies are eagerly evaluated, then we would think the
+        # ruby-lsp is a part of the custom lockfile and would try to run `bundle update ruby-lsp`, which would fail. If
+        # we evaluate lazily, then we only find dependencies after the lockfile was copied, and then run bundle install
+        # instead, which re-locks and adds the ruby-lsp
+        Object.any_instance.expects(:system).with(bundle_env(".ruby-lsp/Gemfile"), "bundle install 1>&2")
+        Bundler.with_unbundled_env do
+          run_script
+        end
+      end
+    end
+  end
+
   def test_does_not_copy_gemfile_lock_when_not_modified
     Object.any_instance.expects(:system).with(bundle_env(".ruby-lsp/Gemfile"), "bundle install 1>&2")
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({}).twice
@@ -69,7 +104,7 @@ class SetupBundlerTest < Minitest::Test
   def test_uses_absolute_bundle_path_for_bundle_install
     Bundler.settings.set_global("path", "vendor/bundle")
     Object.any_instance.expects(:system).with(bundle_env(".ruby-lsp/Gemfile"), "bundle install 1>&2")
-    Bundler::LockfileParser.any_instance.expects(:dependencies).returns({})
+    Bundler::LockfileParser.any_instance.expects(:dependencies).returns({}).at_least_once
     run_script
   ensure
     # We need to revert the changes to the bundler config or else this actually changes ~/.bundle/config
