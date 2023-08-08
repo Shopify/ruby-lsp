@@ -81,7 +81,8 @@ module RubyLsp
 
         # Match the version based on the version in the RBI file name. Notice that the `@` symbol is sanitized to `%40`
         # in the URI
-        version_match = uri.path ? /(?<=%40)[\d.]+(?=\.rbi$)/.match(CGI.unescape(uri.path)) : nil
+        path = uri.to_standardized_path
+        version_match = path ? /(?<=%40)[\d.]+(?=\.rbi$)/.match(path) : nil
         @gem_version = T.let(version_match && version_match[0], T.nilable(String))
         @response = T.let([], T::Array[Interface::DocumentLink])
 

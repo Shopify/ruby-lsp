@@ -6,7 +6,11 @@ require "test_helper"
 class DiagnosticsTest < Minitest::Test
   def test_empty_diagnostics_for_ignored_file
     fixture_path = File.expand_path("../fixtures/def_multiline_params.rb", __dir__)
-    document = RubyLsp::Document.new(source: File.read(fixture_path), version: 1, uri: URI("file://#{fixture_path}"))
+    document = RubyLsp::Document.new(
+      source: File.read(fixture_path),
+      version: 1,
+      uri: URI::Generic.from_path(path: fixture_path),
+    )
 
     result = RubyLsp::Requests::Diagnostics.new(document).run
     assert_empty(result)

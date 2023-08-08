@@ -67,8 +67,8 @@ module RubyLsp
         return if @formatter == "none"
 
         # Don't try to format files outside the current working directory
-        path = @uri.path
-        return unless path.nil? || path.start_with?(T.must(WORKSPACE_URI.path))
+        path = @uri.to_standardized_path
+        return unless path.nil? || path.start_with?(T.must(WORKSPACE_URI.to_standardized_path))
 
         return if @document.syntax_error?
 
