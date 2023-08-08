@@ -30,32 +30,14 @@ class SetupBundlerTest < Minitest::Test
     assert_path_exists(".ruby-lsp")
     assert_path_exists(".ruby-lsp/Gemfile")
     assert_path_exists(".ruby-lsp/Gemfile.lock")
+    assert_path_exists(".ruby-lsp/main_lockfile_hash")
     assert_match("ruby-lsp", File.read(".ruby-lsp/Gemfile"))
     assert_match("debug", File.read(".ruby-lsp/Gemfile"))
   ensure
     FileUtils.rm_r(".ruby-lsp")
   end
 
-  def test_copies_gemfile_lock_when_modified
-    Object.any_instance.expects(:system).with(bundle_env(".ruby-lsp/Gemfile"), "bundle install 1>&2")
-    Bundler::LockfileParser.any_instance.expects(:dependencies).returns({}).twice
-    FileUtils.mkdir(".ruby-lsp")
-    FileUtils.touch(".ruby-lsp/Gemfile.lock")
-    # Wait a little bit so that the modified timestamps don't match
-    sleep(0.05)
-    FileUtils.touch("Gemfile.lock")
-
-    FileUtils.expects(:cp).with(
-      File.expand_path("Gemfile.lock", Dir.pwd),
-      File.expand_path(".ruby-lsp/Gemfile.lock", Dir.pwd),
-    )
-
-    run_script
-  ensure
-    FileUtils.rm_r(".ruby-lsp")
-  end
-
-  def test_loading_custom_bundle_dependencies_is_lazy
+  def test_changing_lockfile_causes_custom_bundle_to_be_rebuilt
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
         File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
@@ -73,9 +55,20 @@ class SetupBundlerTest < Minitest::Test
           end
         end
 
-        # Update the modified timestamp for the lockfile
-        sleep(0.05)
-        FileUtils.touch("Gemfile.lock")
+        capture_subprocess_io do
+          Bundler.with_unbundled_env do
+            # Add a new dependency to the Gemfile
+            File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+              source "https://rubygems.org"
+              gem "rdoc"
+              gem "irb"
+            GEMFILE
+
+            # Run bundle install to generate the lockfile. This will generate a new lockfile that won't match the stored
+            # SHA
+            system("bundle install")
+          end
+        end
 
         # At this point, the custom bundle includes the `ruby-lsp` in its lockfile, but that will be overwritten when we
         # copy the top level lockfile. If custom bundle dependencies are eagerly evaluated, then we would think the
@@ -91,14 +84,40 @@ class SetupBundlerTest < Minitest::Test
   end
 
   def test_does_not_copy_gemfile_lock_when_not_modified
-    Object.any_instance.expects(:system).with(bundle_env(".ruby-lsp/Gemfile"), "bundle install 1>&2")
-    Bundler::LockfileParser.any_instance.expects(:dependencies).returns({}).twice
-    FileUtils.mkdir(".ruby-lsp")
-    FileUtils.cp("Gemfile.lock", ".ruby-lsp/Gemfile.lock")
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "rdoc"
+        GEMFILE
 
-    run_script
-  ensure
-    FileUtils.rm_r(".ruby-lsp")
+        capture_subprocess_io do
+          Bundler.with_unbundled_env do
+            # Run bundle install to generate the lockfile
+            system("bundle install")
+
+            # Run the script once to generate a custom bundle
+            run_script
+          end
+        end
+
+        FileUtils.touch("Gemfile.lock", mtime: Time.now + 10 * 60)
+
+        capture_subprocess_io do
+          Object.any_instance.expects(:system).with(
+            bundle_env(".ruby-lsp/Gemfile"),
+            "bundle update ruby-lsp debug 1>&2",
+          )
+
+          FileUtils.expects(:cp).never
+
+          Bundler.with_unbundled_env do
+            # Run the script again without having the lockfile modified
+            run_script
+          end
+        end
+      end
+    end
   end
 
   def test_uses_absolute_bundle_path_for_bundle_install
