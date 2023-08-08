@@ -510,10 +510,7 @@ class SorbetTest < Minitest::Test
   end
   def select_relevant_node(nodes)
     nodes.each do |node|
-      case node
-      when YARP::CallNode
-        return node
-      end
+      return node if node.is_a?(YARP::CallNode)
     end
 
     select_relevant_node(nodes.map(&:child_nodes).flatten.compact)
