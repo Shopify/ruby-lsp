@@ -12,6 +12,7 @@ import {
   CodeLens,
   Range,
   ExecutableOptions,
+  ServerOptions,
 } from "vscode-languageclient/node";
 
 import { Telemetry } from "./telemetry";
@@ -35,6 +36,10 @@ export default class Client implements ClientInterface {
   private statusItems: StatusItems;
   private outputChannel = vscode.window.createOutputChannel(LSP_NAME);
   private testController: TestController;
+  private customBundleGemfile: string = vscode.workspace
+    .getConfiguration("rubyLsp")
+    .get("bundleGemfile")!;
+
   #context: vscode.ExtensionContext;
   #ruby: Ruby;
   #state: ServerState = ServerState.Starting;
@@ -79,24 +84,6 @@ export default class Client implements ClientInterface {
 
       return;
     }
-
-    const executableOptions: ExecutableOptions = {
-      cwd: this.workingFolder,
-      env: this.ruby.env,
-      shell: true,
-    };
-
-    const executable: Executable = {
-      command: "ruby-lsp",
-      args: [],
-      options: executableOptions,
-    };
-
-    const debugExecutable: Executable = {
-      command: "ruby-lsp",
-      args: ["--debug"],
-      options: executableOptions,
-    };
 
     const configuration = vscode.workspace.getConfiguration("rubyLsp");
     const clientOptions: LanguageClientOptions = {
@@ -190,7 +177,7 @@ export default class Client implements ClientInterface {
 
     this.client = new LanguageClient(
       LSP_NAME,
-      { run: executable, debug: debugExecutable },
+      this.executables(),
       clientOptions,
     );
 
@@ -397,6 +384,12 @@ export default class Client implements ClientInterface {
   }
 
   private async installOrUpdateServer(): Promise<void> {
+    // If there's a user configured custom bundle to run the LSP, then we do not perform auto-updates and let the user
+    // manage that custom bundle themselves
+    if (this.hasUserDefinedCustomBundle()) {
+      return;
+    }
+
     const oneDayInMs = 24 * 60 * 60 * 1000;
     const lastUpdatedAt: number | undefined = this.context.workspaceState.get(
       "rubyLsp.lastGemUpdate",
@@ -440,14 +433,11 @@ export default class Client implements ClientInterface {
 
   private async getServerVersion(): Promise<string> {
     let bundleGemfile;
-    const customBundleGemfile: string = vscode.workspace
-      .getConfiguration("rubyLsp")
-      .get("bundleGemfile")!;
 
     // If a custom Gemfile was configured outside of the project, use that. Otherwise, prefer our custom bundle over the
     // app's bundle
-    if (customBundleGemfile.length > 0) {
-      bundleGemfile = customBundleGemfile;
+    if (this.hasUserDefinedCustomBundle()) {
+      bundleGemfile = this.customBundleGemfile;
     } else if (
       fs.existsSync(path.join(this.workingFolder, ".ruby-lsp", "Gemfile"))
     ) {
@@ -542,5 +532,50 @@ export default class Client implements ClientInterface {
         });
       }
     }
+  }
+
+  private executables(): ServerOptions {
+    let run: Executable;
+    let debug: Executable;
+
+    const executableOptions: ExecutableOptions = {
+      cwd: this.workingFolder,
+      env: this.ruby.env,
+      shell: true,
+    };
+
+    // If there's a user defined custom bundle, we run the LSP with `bundle exec` and just trust the user configured
+    // their bundle. Otherwise, we run the global install of the LSP and use our custom bundle logic in the server
+    if (this.hasUserDefinedCustomBundle()) {
+      run = {
+        command: "bundle",
+        args: ["exec", "ruby-lsp"],
+        options: executableOptions,
+      };
+
+      debug = {
+        command: "bundle",
+        args: ["exec", "ruby-lsp", "--debug"],
+        options: executableOptions,
+      };
+    } else {
+      run = {
+        command: "ruby-lsp",
+        args: [],
+        options: executableOptions,
+      };
+
+      debug = {
+        command: "ruby-lsp",
+        args: ["--debug"],
+        options: executableOptions,
+      };
+    }
+
+    return { run, debug };
+  }
+
+  private hasUserDefinedCustomBundle(): boolean {
+    return this.customBundleGemfile.length > 0;
   }
 }
