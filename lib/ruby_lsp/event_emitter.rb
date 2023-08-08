@@ -18,9 +18,8 @@ module RubyLsp
   # emitter.emit_for_target(target_node)
   # listener.response
   # ```
-  class EventEmitter < SyntaxTree::Visitor
+  class EventEmitter < YARP::Visitor
     extend T::Sig
-    include SyntaxTree::WithScope
 
     sig { void }
     def initialize
