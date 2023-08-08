@@ -5,6 +5,7 @@ require "sorbet-runtime"
 require "bundler"
 require "fileutils"
 require "pathname"
+require "digest"
 
 # This file is a script that will configure a custom bundle for the Ruby LSP. The custom bundle allows developers to use
 # the Ruby LSP without including the gem in their application's Gemfile while at the same time giving us access to the
@@ -24,6 +25,7 @@ module RubyLsp
       @custom_dir = T.let(Pathname.new(".ruby-lsp").expand_path(Dir.pwd), Pathname)
       @custom_gemfile = T.let(@custom_dir + "Gemfile", Pathname)
       @custom_lockfile = T.let(@custom_dir + "Gemfile.lock", Pathname)
+      @lockfile_hash_path = T.let(@custom_dir + "main_lockfile_hash", Pathname)
 
       # Regular bundle paths
       @gemfile = T.let(
@@ -68,14 +70,16 @@ module RubyLsp
         return run_bundle_install(@custom_gemfile)
       end
 
-      # If .ruby-lsp/Gemfile.lock already exists and the top level Gemfile.lock hasn't been modified since it was last
-      # updated, then we're ready to boot the server
-      if @custom_lockfile.exist? && @custom_lockfile.stat.mtime > @lockfile.stat.mtime
+      lockfile_contents = @lockfile.read
+      current_lockfile_hash = Digest::SHA256.hexdigest(lockfile_contents)
+
+      if @custom_lockfile.exist? && @lockfile_hash_path.exist? && @lockfile_hash_path.read == current_lockfile_hash
         warn("Ruby LSP> Skipping custom bundle setup since #{@custom_lockfile} already exists and is up to date")
         return run_bundle_install(@custom_gemfile)
       end
 
       FileUtils.cp(@lockfile.to_s, @custom_lockfile.to_s)
+      @lockfile_hash_path.write(current_lockfile_hash)
       run_bundle_install(@custom_gemfile)
     end
 
