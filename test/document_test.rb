@@ -324,6 +324,8 @@ class DocumentTest < Minitest::Test
       # frozen_string_literal: true
       puts 'hello'
     RUBY
+
+    assert_predicate(document, :parsed?)
   end
 
   def test_parsed_returns_true_when_parsing_fails
