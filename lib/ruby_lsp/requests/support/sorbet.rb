@@ -52,8 +52,7 @@ module RubyLsp
 
             receiver = node.receiver
 
-            unless (receiver && annotation[:receiver] && receiver.location.slice == "T") ||
-                (!receiver && !annotation[:receiver])
+            unless receiver_matches?(receiver, annotation)
               return false
             end
 
@@ -68,6 +67,14 @@ module RubyLsp
             else
               false
             end
+          end
+
+          private
+
+          sig { params(receiver: T.nilable(YARP::Node), annotation: T::Hash[Symbol, T.untyped]).returns(T::Boolean) }
+          def receiver_matches?(receiver, annotation)
+            (receiver && annotation[:receiver] && receiver.location.slice == "T") ||
+              (!receiver && !annotation[:receiver])
           end
         end
       end
