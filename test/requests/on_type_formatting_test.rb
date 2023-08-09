@@ -155,7 +155,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_pipe_is_removed_if_user_adds_manually_after_block_argument
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: "file:///fake.rb")
+    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
