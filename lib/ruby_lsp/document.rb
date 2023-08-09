@@ -100,6 +100,11 @@ module RubyLsp
       @parse_result.failure?
     end
 
+    sig { returns(T::Boolean) }
+    def parsed?
+      !@tree.nil?
+    end
+
     sig { returns(Scanner) }
     def create_scanner
       Scanner.new(@source, @encoding)
