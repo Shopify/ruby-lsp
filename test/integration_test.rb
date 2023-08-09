@@ -292,7 +292,7 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_code_lens
-    initialize_lsp(["codeLens"], experimental_features_enabled: true)
+    initialize_lsp(["codeLens"])
     open_file_with("class Foo\n\nend")
 
     assert_telemetry("textDocument/didOpen")

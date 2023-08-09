@@ -15,6 +15,7 @@ module RubyLsp
       @store = store
       @test_library = T.let(DependencyDetector.detected_test_library, String)
       @message_queue = message_queue
+      @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
     end
 
     sig { params(request: T::Hash[Symbol, T.untyped]).returns(Result) }
@@ -55,6 +56,14 @@ module RubyLsp
           )
 
           warn(errored_extensions.map(&:backtraces).join("\n\n"))
+        end
+
+        if @store.experimental_features
+          # The begin progress invocation happens during `initialize`, so that the notification is sent before we are
+          # stuck indexing files
+          RubyIndexer.load_configuration_file
+          @index.index_all
+          end_progress("indexing-progress")
         end
 
         check_formatter_is_available
@@ -169,9 +178,33 @@ module RubyLsp
         completion(uri, request.dig(:params, :position))
       when "textDocument/definition"
         definition(uri, request.dig(:params, :position))
+      when "workspace/didChangeWatchedFiles"
+        did_change_watched_files(request.dig(:params, :changes))
       when "rubyLsp/textDocument/showSyntaxTree"
         show_syntax_tree(uri, request.dig(:params, :range))
       end
+    end
+
+    sig { params(changes: T::Array[{ uri: String, type: Integer }]).returns(Object) }
+    def did_change_watched_files(changes)
+      changes.each do |change|
+        # File change events include folders, but we're only interested in files
+        uri = URI(change[:uri])
+        file_path = uri.to_standardized_path
+        next if file_path.nil? || File.directory?(file_path)
+
+        case change[:type]
+        when Constant::FileChangeType::CREATED
+          @index.index_single(file_path)
+        when Constant::FileChangeType::CHANGED
+          @index.delete(file_path)
+          @index.index_single(file_path)
+        when Constant::FileChangeType::DELETED
+          @index.delete(file_path)
+        end
+      end
+
+      VOID
     end
 
     sig { params(uri: URI::Generic, range: T.nilable(Document::RangeShape)).returns({ ast: String }) }
@@ -436,6 +469,37 @@ module RubyLsp
       listener.response
     end
 
+    sig { params(id: String, title: String).void }
+    def begin_progress(id, title)
+      return unless @store.supports_progress
+
+      @message_queue << Request.new(
+        message: "window/workDoneProgress/create",
+        params: Interface::WorkDoneProgressCreateParams.new(token: id),
+      )
+
+      @message_queue << Notification.new(
+        message: "$/progress",
+        params: Interface::ProgressParams.new(
+          token: id,
+          value: Interface::WorkDoneProgressBegin.new(kind: "begin", title: title),
+        ),
+      )
+    end
+
+    sig { params(id: String).void }
+    def end_progress(id)
+      return unless @store.supports_progress
+
+      @message_queue << Notification.new(
+        message: "$/progress",
+        params: Interface::ProgressParams.new(
+          token: id,
+          value: Interface::WorkDoneProgressEnd.new(kind: "end"),
+        ),
+      )
+    end
+
     sig { params(options: T::Hash[Symbol, T.untyped]).returns(Interface::InitializeResult) }
     def initialize_request(options)
       @store.clear
@@ -449,6 +513,7 @@ module RubyLsp
         encodings.first
       end
 
+      @store.supports_progress = options.dig(:capabilities, :window, :workDoneProgress) || true
       formatter = options.dig(:initializationOptions, :formatter) || "auto"
       @store.formatter = if formatter == "auto"
         DependencyDetector.detected_formatter
@@ -457,9 +522,7 @@ module RubyLsp
       end
 
       configured_features = options.dig(:initializationOptions, :enabledFeatures)
-
-      # Uncomment the line below and use the variable to gate features behind the experimental flag
-      # experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled)
+      @store.experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled) || false
 
       enabled_features = case configured_features
       when Array
@@ -539,6 +602,37 @@ module RubyLsp
           resolve_provider: false,
           trigger_characters: ["/"],
         )
+      end
+
+      if @store.experimental_features
+        # Dynamically registered capabilities
+        file_watching_caps = options.dig(:capabilities, :workspace, :didChangeWatchedFiles)
+
+        # Not every client supports dynamic registration or file watching
+        if file_watching_caps&.dig(:dynamicRegistration) && file_watching_caps&.dig(:relativePatternSupport)
+          @message_queue << Request.new(
+            message: "client/registerCapability",
+            params: Interface::RegistrationParams.new(
+              registrations: [
+                # Register watching Ruby files
+                Interface::Registration.new(
+                  id: "workspace/didChangeWatchedFiles",
+                  method: "workspace/didChangeWatchedFiles",
+                  register_options: Interface::DidChangeWatchedFilesRegistrationOptions.new(
+                    watchers: [
+                      Interface::FileSystemWatcher.new(
+                        glob_pattern: "**/*.rb",
+                        kind: Constant::WatchKind::CREATE | Constant::WatchKind::CHANGE | Constant::WatchKind::DELETE,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          )
+        end
+
+        begin_progress("indexing-progress", "Ruby LSP: indexing files")
       end
 
       Interface::InitializeResult.new(

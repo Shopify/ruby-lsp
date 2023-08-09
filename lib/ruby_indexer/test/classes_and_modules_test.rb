@@ -9,10 +9,6 @@ module RubyIndexer
       @index = Index.new
     end
 
-    def teardown
-      @index.clear
-    end
-
     def test_empty_statements_class
       index(<<~RUBY)
         class Foo
@@ -212,7 +208,7 @@ module RubyIndexer
     private
 
     def index(source)
-      RubyIndexer.index_single(@index, "/fake/path/foo.rb", source)
+      @index.index_single("/fake/path/foo.rb", source)
     end
 
     def assert_entry(expected_name, type, expected_location)

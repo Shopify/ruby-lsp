@@ -9,16 +9,12 @@ module RubyIndexer
       @index = Index.new
     end
 
-    def teardown
-      @index.clear
-    end
-
     def test_deleting_one_entry_for_a_class
-      RubyIndexer.index_single(@index, "/fake/path/foo.rb", <<~RUBY)
+      @index.index_single("/fake/path/foo.rb", <<~RUBY)
         class Foo
         end
       RUBY
-      RubyIndexer.index_single(@index, "/fake/path/other_foo.rb", <<~RUBY)
+      @index.index_single("/fake/path/other_foo.rb", <<~RUBY)
         class Foo
         end
       RUBY
@@ -32,7 +28,7 @@ module RubyIndexer
     end
 
     def test_deleting_all_entries_for_a_class
-      RubyIndexer.index_single(@index, "/fake/path/foo.rb", <<~RUBY)
+      @index.index_single("/fake/path/foo.rb", <<~RUBY)
         class Foo
         end
       RUBY
@@ -46,7 +42,7 @@ module RubyIndexer
     end
 
     def test_index_resolve
-      RubyIndexer.index_single(@index, "/fake/path/foo.rb", <<~RUBY)
+      @index.index_single("/fake/path/foo.rb", <<~RUBY)
         class Bar; end
 
         module Foo
@@ -80,7 +76,7 @@ module RubyIndexer
     end
 
     def test_accessing_with_colon_colon_prefix
-      RubyIndexer.index_single(@index, "/fake/path/foo.rb", <<~RUBY)
+      @index.index_single("/fake/path/foo.rb", <<~RUBY)
         class Bar; end
 
         module Foo

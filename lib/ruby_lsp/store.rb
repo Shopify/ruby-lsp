@@ -13,11 +13,19 @@ module RubyLsp
     sig { returns(String) }
     attr_accessor :formatter
 
+    sig { returns(T::Boolean) }
+    attr_accessor :supports_progress
+
+    sig { returns(T::Boolean) }
+    attr_accessor :experimental_features
+
     sig { void }
     def initialize
       @state = T.let({}, T::Hash[String, Document])
       @encoding = T.let(Constant::PositionEncodingKind::UTF8, String)
       @formatter = T.let("auto", String)
+      @supports_progress = T.let(true, T::Boolean)
+      @experimental_features = T.let(false, T::Boolean)
     end
 
     sig { params(uri: URI::Generic).returns(Document) }
