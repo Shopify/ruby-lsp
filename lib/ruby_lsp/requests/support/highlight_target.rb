@@ -62,9 +62,9 @@ module RubyLsp
             # when SyntaxTree::VarRef
             #   HighlightMatch.new(type: READ, node: other)
             when YARP::ClassNode, YARP::ModuleNode
-              HighlightMatch.new(type: WRITE, node: other.constant)
-            when SyntaxTree::ConstPathRef
-              HighlightMatch.new(type: READ, node: other.constant)
+              HighlightMatch.new(type: WRITE, node: other.location)
+            when YARP::ConstantPathNode
+              HighlightMatch.new(type: READ, node: other.location)
             when YARP::ParametersNode
               params = other.child_nodes.compact
               match = params.find { |param| value(param) == @value }
@@ -76,21 +76,20 @@ module RubyLsp
         sig { params(node: YARP::Node).returns(T.nilable(String)) }
         def value(node)
           case node
-          when SyntaxTree::ConstPathRef, YARP::ConstantPathNode # , SyntaxTree::TopConstField
-            node.constant.value
-          when SyntaxTree::GVar, SyntaxTree::IVar, SyntaxTree::Const, YARP::ClassVariableReadNode, SyntaxTree::Ident
-            node.value
-          when SyntaxTree::Field, YARP::DefNode, SyntaxTree::RestParam,
-               SyntaxTree::KwRestParam, YARP::BlockArgumentNode
+          when YARP::ConstantPathNode, YARP::ConstantPathNode # , SyntaxTree::TopConstField
+            node.location.slice
+          when YARP::GlobalVariableReadNode, YARP::InstanceVariableReadNode, YARP::ConstantReadNode, YARP::ClassVariableReadNode # , SyntaxTree::VarField,
+            node.location.slice
+          when YARP::DefNode, YARP::RestParameterNode,
+               YARP::KeywordRestParameterNode, YARP::BlockArgumentNode
             node.name&.value
-          when SyntaxTree::VarField, SyntaxTree::VarRef, SyntaxTree::VCall
-            value = node.value
-            value.value unless value.nil? || value.is_a?(Symbol)
+          # when SyntaxTree::VarField, SyntaxTree::VarRef, SyntaxTree::VCall
+          #   value = node.value
+          #   value.value unless value.nil? || value.is_a?(Symbol)
           when YARP::CallNode
-            message = node.message
-            message.value unless message.is_a?(Symbol)
+            node.message
           when YARP::ClassNode, YARP::ModuleNode,
-            node.constant.constant.value
+            node.location.slice
           end
         end
       end
