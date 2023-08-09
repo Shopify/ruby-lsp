@@ -319,14 +319,6 @@ class DocumentTest < Minitest::Test
     RUBY
   end
 
-  def test_parsed_returns_true_when_parsed_successfully
-    # We are just ensuring that no error is raised
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
-      # frozen_string_literal: true
-      puts 'hello'
-    RUBY
-  end
-
   def test_document_handle_4_byte_unicode_characters
     document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"), encoding: "utf-16")
       class Foo
