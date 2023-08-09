@@ -29,7 +29,6 @@ module RubyLsp
       @version = T.let(version, Integer)
       @uri = T.let(uri, URI::Generic)
       @unparsed_edits = T.let([], T::Array[EditShape])
-      @syntax_error = T.let(false, T::Boolean)
       @parse_result = T.let(YARP.parse(@source), YARP::ParseResult)
     end
 
