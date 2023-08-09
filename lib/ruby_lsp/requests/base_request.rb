@@ -4,7 +4,7 @@
 module RubyLsp
   module Requests
     # :nodoc:
-    class BaseRequest < SyntaxTree::Visitor
+    class BaseRequest < YARP::Visitor
       extend T::Sig
       extend T::Helpers
       include Support::Common
