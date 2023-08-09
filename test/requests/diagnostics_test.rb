@@ -27,7 +27,7 @@ class DiagnosticsTest < Minitest::Test
   end
 
   def test_returns_syntax_error_diagnostics
-    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: "file:///fake/file.rb")
+    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: URI("file:///fake/file.rb"))
       def foo
     RUBY
 
