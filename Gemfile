@@ -26,4 +26,4 @@ gem "psych", "~> 5.1", require: false
 # The Rails documentation link only activates when railties is detected.
 gem "railties", "~> 7.0", require: false
 
-gem "yarp", github: "Shopify/yarp"
+gem "yarp"
