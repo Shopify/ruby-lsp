@@ -100,11 +100,6 @@ module RubyLsp
       @parse_result.failure?
     end
 
-    sig { returns(T::Boolean) }
-    def parsed?
-      !!@parse_result.value
-    end
-
     sig { returns(Scanner) }
     def create_scanner
       Scanner.new(@source, @encoding)

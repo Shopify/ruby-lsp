@@ -320,20 +320,11 @@ class DocumentTest < Minitest::Test
   end
 
   def test_parsed_returns_true_when_parsed_successfully
+    # We are just ensuring that no error is raised
     document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
       # frozen_string_literal: true
       puts 'hello'
     RUBY
-
-    assert_predicate(document, :parsed?)
-  end
-
-  def test_parsed_returns_true_when_parsing_fails
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
-      class Foo
-    RUBY
-
-    assert_predicate(document, :parsed?)
   end
 
   def test_document_handle_4_byte_unicode_characters
@@ -351,7 +342,6 @@ class DocumentTest < Minitest::Test
     )
 
     document.parse
-    assert_predicate(document, :parsed?)
 
     assert_equal(<<~RUBY, document.source)
       class Foo
@@ -397,7 +387,6 @@ class DocumentTest < Minitest::Test
     )
 
     document.parse
-    assert_predicate(document, :parsed?)
 
     assert_equal(<<~RUBY, document.source)
       class Foo
