@@ -32,6 +32,7 @@ Sorbet/TrueSigil:
   Enabled: true
   Include:
     - "test/**/*.rb"
+    - "lib/ruby_indexer/test/**/*.rb"
   Exclude:
     - "**/*.rake"
     - "lib/**/*.rb"
@@ -43,6 +44,7 @@ Sorbet/StrictSigil:
   Exclude:
     - "**/*.rake"
     - "test/**/*.rb"
+    - "lib/ruby_indexer/test/**/*.rb"
     - "lib/ruby-lsp.rb"
 
 Style/StderrPuts:
