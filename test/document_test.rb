@@ -320,20 +320,11 @@ class DocumentTest < Minitest::Test
   end
 
   def test_parsed_returns_true_when_parsed_successfully
+    # We are just ensuring that no error is raised
     document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
       # frozen_string_literal: true
       puts 'hello'
     RUBY
-
-    assert_predicate(document, :parsed?)
-  end
-
-  def test_parsed_returns_false_when_parsing_fails
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
-      class Foo
-    RUBY
-
-    refute_predicate(document, :parsed?)
   end
 
   def test_document_handle_4_byte_unicode_characters
@@ -351,7 +342,6 @@ class DocumentTest < Minitest::Test
     )
 
     document.parse
-    assert_predicate(document, :parsed?)
 
     assert_equal(<<~RUBY, document.source)
       class Foo
@@ -397,7 +387,6 @@ class DocumentTest < Minitest::Test
     )
 
     document.parse
-    assert_predicate(document, :parsed?)
 
     assert_equal(<<~RUBY, document.source)
       class Foo
@@ -447,33 +436,33 @@ class DocumentTest < Minitest::Test
 
     # Locate the `ActiveRecord` module
     found, parent = document.locate_node({ line: 0, character: 19 })
-    assert_instance_of(SyntaxTree::Const, found)
-    assert_equal("ActiveRecord", T.cast(found, SyntaxTree::Const).value)
+    assert_instance_of(YARP::ConstantReadNode, found)
+    assert_equal("ActiveRecord", T.cast(found, YARP::ConstantReadNode).location.slice)
 
-    assert_instance_of(SyntaxTree::VarRef, parent)
-    assert_equal("ActiveRecord", T.cast(parent, SyntaxTree::VarRef).value.value)
+    assert_instance_of(YARP::ConstantPathNode, parent)
+    assert_equal("ActiveRecord", T.cast(parent, YARP::ConstantPathNode).child_nodes.first.location.slice)
 
     # Locate the `Base` class
     found, parent = T.cast(
       document.locate_node({ line: 0, character: 27 }),
-      [SyntaxTree::Const, SyntaxTree::ConstPathRef, T::Array[String]],
+      [YARP::ConstantReadNode, YARP::ConstantPathNode, T::Array[String]],
     )
-    assert_instance_of(SyntaxTree::Const, found)
-    assert_equal("Base", found.value)
+    assert_instance_of(YARP::ConstantReadNode, found)
+    assert_equal("Base", found.location.slice)
 
-    assert_instance_of(SyntaxTree::ConstPathRef, parent)
-    assert_equal("Base", parent.constant.value)
-    assert_equal("ActiveRecord", T.cast(parent.parent, SyntaxTree::VarRef).value.value)
+    assert_instance_of(YARP::ConstantPathNode, parent)
+    assert_equal("Base", parent.child_nodes[1].location.slice)
+    assert_equal("ActiveRecord", parent.child_nodes[0].location.slice)
 
     # Locate the `where` invocation
     found, parent = T.cast(
       document.locate_node({ line: 3, character: 4 }),
-      [SyntaxTree::Ident, SyntaxTree::CallNode, T::Array[String]],
+      [YARP::CallNode, YARP::StatementsNode, T::Array[String]],
     )
-    assert_instance_of(SyntaxTree::Ident, found)
-    assert_equal("where", found.value)
+    assert_instance_of(YARP::CallNode, found)
+    assert_equal("where", found.message_loc.slice)
 
-    assert_instance_of(SyntaxTree::CallNode, parent)
+    assert_instance_of(YARP::StatementsNode, parent)
   end
 
   def test_locate_returns_nesting
@@ -494,11 +483,11 @@ class DocumentTest < Minitest::Test
     RUBY
 
     found, _parent, nesting = document.locate_node({ line: 9, character: 6 })
-    assert_equal("Qux", T.cast(found, SyntaxTree::Const).value)
+    assert_equal("Qux", T.cast(found, YARP::ConstantReadNode).location.slice)
     assert_equal(["Foo", "Bar"], nesting)
 
     found, _parent, nesting = document.locate_node({ line: 3, character: 6 })
-    assert_equal("Hello", T.cast(found, SyntaxTree::Const).value)
+    assert_equal("Hello", T.cast(found, YARP::ConstantReadNode).location.slice)
     assert_equal(["Foo", "Other"], nesting)
   end
 
@@ -513,8 +502,8 @@ class DocumentTest < Minitest::Test
       end
     RUBY
 
-    found, _parent, nesting = document.locate_node({ line: 3, character: 6 }, node_types: [SyntaxTree::Const])
-    assert_equal("Qux", T.cast(found, SyntaxTree::Const).value)
+    found, _parent, nesting = document.locate_node({ line: 3, character: 6 }, node_types: [YARP::ConstantReadNode])
+    assert_equal("Qux", T.cast(found, YARP::ConstantReadNode).location.slice)
     assert_equal(["Foo", "Bar"], nesting)
   end
 
