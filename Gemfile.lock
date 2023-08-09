@@ -4,6 +4,7 @@ PATH
     ruby-lsp (0.8.0)
       language_server-protocol (~> 3.17.0)
       sorbet-runtime
+      yarp
 
 GEM
   remote: https://rubygems.org/
