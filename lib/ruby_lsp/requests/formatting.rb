@@ -58,7 +58,7 @@ module RubyLsp
       def initialize(document, formatter: "auto")
         super(document)
 
-        @uri = T.let(document.uri, String)
+        @uri = T.let(document.uri, URI::Generic)
         @formatter = formatter
       end
 
@@ -67,7 +67,8 @@ module RubyLsp
         return if @formatter == "none"
 
         # Don't try to format files outside the current working directory
-        return unless @uri.sub("file://", "").start_with?(Dir.pwd)
+        path = @uri.to_standardized_path
+        return unless path.nil? || path.start_with?(T.must(WORKSPACE_URI.to_standardized_path))
 
         return if @document.syntax_error?
 

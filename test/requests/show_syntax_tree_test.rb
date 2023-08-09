@@ -14,7 +14,7 @@ class ShowSyntaxTreeTest < Minitest::Test
 
   def test_returns_nil_if_document_has_syntax_error
     store = RubyLsp::Store.new
-    store.set(uri: "file:///fake.rb", source: "foo do", version: 1)
+    store.set(uri: URI("file:///fake.rb"), source: "foo do", version: 1)
     response = RubyLsp::Executor.new(store, @message_queue).execute({
       method: "rubyLsp/textDocument/showSyntaxTree",
       params: { textDocument: { uri: "file:///fake.rb" } },
@@ -25,8 +25,8 @@ class ShowSyntaxTreeTest < Minitest::Test
 
   def test_returns_ast_if_document_is_parsed
     store = RubyLsp::Store.new
-    store.set(uri: "file:///fake.rb", source: "foo = 123", version: 1)
-    document = store.get("file:///fake.rb")
+    store.set(uri: URI("file:///fake.rb"), source: "foo = 123", version: 1)
+    document = store.get(URI("file:///fake.rb"))
     document.parse
 
     response = RubyLsp::Executor.new(store, @message_queue).execute({
@@ -40,13 +40,14 @@ class ShowSyntaxTreeTest < Minitest::Test
   end
 
   def test_returns_ast_for_a_selection
+    uri = URI("file:///fake.rb")
     store = RubyLsp::Store.new
-    store.set(uri: "file:///fake.rb", source: <<~RUBY, version: 1)
+    store.set(uri: uri, source: <<~RUBY, version: 1)
       foo = 123
       bar = 456
       hello = 123
     RUBY
-    document = store.get("file:///fake.rb")
+    document = store.get(uri)
     document.parse
 
     response = RubyLsp::Executor.new(store, @message_queue).execute({
@@ -62,5 +63,14 @@ class ShowSyntaxTreeTest < Minitest::Test
 
       (assign (var_field (ident "bar")) (int "456"))
     AST
+
+    response = RubyLsp::Executor.new(store, @message_queue).execute({
+      method: "rubyLsp/textDocument/showSyntaxTree",
+      params: {
+        textDocument: { uri: "file:///fake.rb" },
+        range: { start: { line: 1, character: 0 }, end: { line: 1, character: 9 } },
+      },
+    }).response
+    refute_empty(response[:ast])
   end
 end

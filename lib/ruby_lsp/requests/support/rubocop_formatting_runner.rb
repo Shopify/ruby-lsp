@@ -3,7 +3,6 @@
 
 return unless defined?(RubyLsp::Requests::Support::RuboCopRunner)
 
-require "cgi"
 require "singleton"
 
 module RubyLsp
@@ -21,9 +20,9 @@ module RubyLsp
           @runner = T.let(RuboCopRunner.new("-a"), RuboCopRunner)
         end
 
-        sig { override.params(uri: String, document: Document).returns(String) }
+        sig { override.params(uri: URI::Generic, document: Document).returns(String) }
         def run(uri, document)
-          filename = CGI.unescape(URI.parse(uri).path)
+          filename = T.must(uri.to_standardized_path || uri.opaque)
 
           # Invoke RuboCop with just this file in `paths`
           @runner.run(filename, document.source)

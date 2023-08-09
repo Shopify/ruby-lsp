@@ -26,9 +26,10 @@ module RubyLsp
             )
         end
 
-        sig { override.params(uri: String, document: Document).returns(T.nilable(String)) }
+        sig { override.params(uri: URI::Generic, document: Document).returns(T.nilable(String)) }
         def run(uri, document)
-          relative_path = Pathname.new(URI(uri).path).relative_path_from(T.must(WORKSPACE_URI.path))
+          relative_path = Pathname.new(T.must(uri.to_standardized_path || uri.opaque))
+            .relative_path_from(T.must(WORKSPACE_URI.to_standardized_path))
           return if @options.ignore_files.any? { |pattern| File.fnmatch(pattern, relative_path) }
 
           SyntaxTree.format(

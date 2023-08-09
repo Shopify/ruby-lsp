@@ -86,6 +86,7 @@ module RubyLsp
           @message_dispatcher.join
           @store.clear
 
+          Extension.extensions.each(&:deactivate)
           finalize_request(Result.new(response: nil), request)
         when "exit"
           # We return zero if shutdown has already been received or one otherwise as per the recommendation in the spec
@@ -105,7 +106,7 @@ module RubyLsp
             # source. Altering the source reference during parsing will put the parser in an invalid internal state,
             # since it started parsing with one source but then it changed in the middle
             uri = request.dig(:params, :textDocument, :uri)
-            @store.get(uri).parse if uri
+            @store.get(URI(uri)).parse if uri
           end
 
           @job_queue << job
@@ -192,7 +193,14 @@ module RubyLsp
         params[:backtrace] = backtrace.map { |bt| bt.sub(/^#{Dir.home}/, "~") }.join("\n") if backtrace
       end
 
-      params[:uri] = uri.sub(%r{.*://#{Dir.home}}, "~") if uri
+      if uri
+        home = URI::Generic.from_path(path: Dir.home)
+
+        parsed_uri = URI(uri)
+        path = parsed_uri.path
+        params[:uri] = path ? path.sub(T.must(home.path), "~") : parsed_uri.opaque
+      end
+
       params
     end
   end

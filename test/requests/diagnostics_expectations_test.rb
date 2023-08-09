@@ -8,12 +8,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Diagnostics, "diagnostics"
 
   def run_expectations(source)
-    if RUBY_PLATFORM.match?(/(mswin|mingw)/) &&
-        (@_path == "test/fixtures/if_inside_else.rb" || @_path == "test/fixtures/def_bad_formatting.rb")
-      skip("Skipping on Windows: https://github.com/Shopify/ruby-lsp/issues/751")
-    end
-
-    document = RubyLsp::Document.new(source: source, version: 1, uri: "file://#{__FILE__}")
+    document = RubyLsp::Document.new(source: source, version: 1, uri: URI::Generic.from_path(path: __FILE__))
     RubyLsp::Requests::Diagnostics.new(document).run
     result = T.let(nil, T.nilable(T::Array[RubyLsp::Requests::Support::RuboCopDiagnostic]))
 
@@ -25,7 +20,9 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     end
 
     assert_empty(stdout)
-    T.must(result).map(&:to_lsp_diagnostic)
+
+    # On Windows, RuboCop will complain that the file is missing a carriage return at the end. We need to ignore these
+    T.must(result).map(&:to_lsp_diagnostic).reject { |diagnostic| diagnostic.code == "Layout/EndOfLine" }
   end
 
   def assert_expectations(source, expected)

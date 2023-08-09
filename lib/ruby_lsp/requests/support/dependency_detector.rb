@@ -38,7 +38,10 @@ module RubyLsp
 
       sig { params(gem_pattern: Regexp).returns(T::Boolean) }
       def direct_dependency?(gem_pattern)
-        Bundler.locked_gems.dependencies.keys.grep(gem_pattern).any?
+        Bundler.with_original_env { Bundler.default_gemfile } &&
+          Bundler.locked_gems.dependencies.keys.grep(gem_pattern).any?
+      rescue Bundler::GemfileNotFound
+        false
       end
     end
   end

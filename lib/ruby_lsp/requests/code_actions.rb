@@ -29,7 +29,7 @@ module RubyLsp
       def initialize(document, range, context)
         super(document)
 
-        @uri = T.let(document.uri, String)
+        @uri = T.let(document.uri, URI::Generic)
         @range = range
         @context = context
       end
@@ -63,14 +63,14 @@ module RubyLsp
           )
       end
 
-      sig { params(range: Document::RangeShape, uri: String).returns(Interface::CodeAction) }
+      sig { params(range: Document::RangeShape, uri: URI::Generic).returns(Interface::CodeAction) }
       def refactor_code_action(range, uri)
         Interface::CodeAction.new(
           title: "Refactor: Extract Variable",
           kind: Constant::CodeActionKind::REFACTOR_EXTRACT,
           data: {
             range: range,
-            uri: uri,
+            uri: uri.to_s,
           },
         )
       end

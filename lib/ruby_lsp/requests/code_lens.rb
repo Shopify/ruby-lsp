@@ -31,15 +31,17 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :response
 
-      sig { params(uri: String, emitter: EventEmitter, message_queue: Thread::Queue, test_library: String).void }
+      sig { params(uri: URI::Generic, emitter: EventEmitter, message_queue: Thread::Queue, test_library: String).void }
       def initialize(uri, emitter, message_queue, test_library)
         super(emitter, message_queue)
 
-        @uri = T.let(uri, String)
-        @external_listeners = T.let([], T::Array[RubyLsp::Listener[ResponseType]])
+        @uri = T.let(uri, URI::Generic)
+        @external_listeners.concat(
+          Extension.extensions.filter_map { |ext| ext.create_code_lens_listener(uri, emitter, message_queue) },
+        )
         @test_library = T.let(test_library, String)
         @response = T.let([], ResponseType)
-        @path = T.let(T.must(URI(uri).path), String)
+        @path = T.let(uri.to_standardized_path, T.nilable(String))
         # visibility_stack is a stack of [current_visibility, previous_visibility]
         @visibility_stack = T.let([["public", "public"]], T::Array[T::Array[T.nilable(String)]])
         @class_stack = T.let([], T::Array[String])
@@ -55,22 +57,6 @@ module RubyLsp
           :after_call,
           :on_vcall,
         )
-
-        register_external_listeners!
-      end
-
-      sig { void }
-      def register_external_listeners!
-        self.class.listeners.each do |l|
-          @external_listeners << T.unsafe(l).new(@uri, @emitter, @message_queue)
-        end
-      end
-
-      sig { void }
-      def merge_external_listeners_responses!
-        @external_listeners.each do |l|
-          merge_response!(l)
-        end
       end
 
       sig { params(node: SyntaxTree::ClassDeclaration).void }
@@ -120,7 +106,7 @@ module RubyLsp
         if ACCESS_MODIFIERS.include?(node_message) && node.arguments.parts.any?
           visibility, _ = @visibility_stack.pop
           @visibility_stack.push([node_message, visibility])
-        elsif @path.include?("Gemfile") && node_message.include?("gem") && node.arguments.parts.any?
+        elsif @path&.include?("Gemfile") && node_message.include?("gem") && node.arguments.parts.any?
           remote = resolve_gem_remote(node)
           return unless remote
 
@@ -163,7 +149,7 @@ module RubyLsp
         end
       end
 
-      sig { params(other: Listener[ResponseType]).returns(T.self_type) }
+      sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
       def merge_response!(other)
         @response.concat(other.response)
         self
@@ -174,7 +160,7 @@ module RubyLsp
       sig { params(node: SyntaxTree::Node, name: String, command: String, kind: Symbol).void }
       def add_test_code_lens(node, name:, command:, kind:)
         # don't add code lenses if the test library is not supported or unknown
-        return unless SUPPORTED_TEST_LIBRARIES.include?(@test_library)
+        return unless SUPPORTED_TEST_LIBRARIES.include?(@test_library) && @path
 
         arguments = [
           @path,
@@ -231,7 +217,7 @@ module RubyLsp
 
       sig { params(class_name: String, method_name: T.nilable(String)).returns(String) }
       def generate_test_command(class_name:, method_name: nil)
-        command = BASE_COMMAND + @path
+        command = BASE_COMMAND + T.must(@path)
 
         case @test_library
         when "minitest"

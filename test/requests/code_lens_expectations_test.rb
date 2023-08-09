@@ -8,7 +8,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::CodeLens, "code_lens"
 
   def run_expectations(source)
-    uri = "file://#{@_path}"
+    uri = URI("file://#{@_path}")
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new
@@ -23,7 +23,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
         def test_bar; end
       end
     RUBY
-    uri = "file:///fake.rb"
+    uri = URI("file:///fake.rb")
 
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
@@ -49,7 +49,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
         def test_bar; end
       end
     RUBY
-    uri = "file:///fake.rb"
+    uri = URI("file:///fake.rb")
 
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
@@ -67,7 +67,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
         def test_bar; end
       end
     RUBY
-    uri = "file:///fake.rb"
+    uri = URI("file:///fake.rb")
 
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
@@ -79,12 +79,12 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     assert_empty(response)
   end
 
-  def test_after_request_hook
+  def test_code_lens_extensions
     message_queue = Thread::Queue.new
-    create_code_lens_hook_class
+    create_code_lens_extension
 
     store = RubyLsp::Store.new
-    store.set(uri: "file:///fake.rb", source: <<~RUBY, version: 1)
+    store.set(uri: URI("file:///fake.rb"), source: <<~RUBY, version: 1)
       class Test < Minitest::Test; end
     RUBY
 
@@ -99,34 +99,43 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     assert_match("Debug", response[2].command.title)
     assert_match("Run Test", response[3].command.title)
   ensure
-    RubyLsp::Requests::CodeLens.listeners.clear
+    RubyLsp::Extension.extensions.clear
     T.must(message_queue).close
   end
 
   private
 
-  def create_code_lens_hook_class
-    Class.new(RubyLsp::Listener) do
-      attr_reader :response
+  def create_code_lens_extension
+    Class.new(RubyLsp::Extension) do
+      def activate; end
 
-      RubyLsp::Requests::CodeLens.add_listener(self)
-
-      def initialize(uri, emitter, message_queue)
-        super(emitter, message_queue)
-
-        emitter.register(self, :on_class)
+      def name
+        "CodeLensExtension"
       end
 
-      def on_class(node)
-        T.bind(self, RubyLsp::Listener[T.untyped])
+      def create_code_lens_listener(uri, emitter, message_queue)
+        klass = Class.new(RubyLsp::Listener) do
+          attr_reader :response
 
-        @response = [RubyLsp::Interface::CodeLens.new(
-          range: range_from_syntax_tree_node(node),
-          command: RubyLsp::Interface::Command.new(
-            title: "Run #{node.constant.constant.value}",
-            command: "rubyLsp.runTest",
-          ),
-        )]
+          def initialize(uri, emitter, message_queue)
+            super(emitter, message_queue)
+            emitter.register(self, :on_class)
+          end
+
+          def on_class(node)
+            T.bind(self, RubyLsp::Listener[T.untyped])
+
+            @response = [RubyLsp::Interface::CodeLens.new(
+              range: range_from_syntax_tree_node(node),
+              command: RubyLsp::Interface::Command.new(
+                title: "Run #{node.constant.constant.value}",
+                command: "rubyLsp.runTest",
+              ),
+            )]
+          end
+        end
+
+        T.unsafe(klass).new(uri, emitter, message_queue)
       end
     end
   end

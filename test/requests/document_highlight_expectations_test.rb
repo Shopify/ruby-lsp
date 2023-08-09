@@ -8,7 +8,7 @@ class DocumentHighlightExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::DocumentHighlight, "document_highlight"
 
   def run_expectations(source)
-    uri = "file://#{@_path}"
+    uri = URI("file://#{@_path}")
     params = @__params&.any? ? @__params : default_args
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
     target, parent = document.locate_node(params.first)

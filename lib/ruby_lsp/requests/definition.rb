@@ -25,7 +25,7 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :response
 
-      sig { params(uri: String, emitter: EventEmitter, message_queue: Thread::Queue).void }
+      sig { params(uri: URI::Generic, emitter: EventEmitter, message_queue: Thread::Queue).void }
       def initialize(uri, emitter, message_queue)
         super(emitter, message_queue)
 
@@ -53,7 +53,7 @@ module RubyLsp
 
           if candidate
             @response = Interface::Location.new(
-              uri: "file://#{candidate}",
+              uri: URI::Generic.from_path(path: candidate).to_s,
               range: Interface::Range.new(
                 start: Interface::Position.new(line: 0, character: 0),
                 end: Interface::Position.new(line: 0, character: 0),
@@ -61,13 +61,13 @@ module RubyLsp
             )
           end
         when "require_relative"
-          current_file = T.must(URI.parse(@uri).path)
-          current_folder = Pathname.new(current_file).dirname
+          path = @uri.to_standardized_path
+          current_folder = path ? Pathname.new(CGI.unescape(path)).dirname : Dir.pwd
           candidate = File.expand_path(File.join(current_folder, required_file))
 
           if candidate
             @response = Interface::Location.new(
-              uri: "file://#{candidate}",
+              uri: URI::Generic.from_path(path: candidate).to_s,
               range: Interface::Range.new(
                 start: Interface::Position.new(line: 0, character: 0),
                 end: Interface::Position.new(line: 0, character: 0),

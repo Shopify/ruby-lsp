@@ -6,24 +6,51 @@ require "test_helper"
 class StoreTest < Minitest::Test
   def setup
     @store = RubyLsp::Store.new
-    @store.set(uri: "/foo/bar.rb", source: "def foo; end", version: 1)
+    @store.set(uri: URI("/foo/bar.rb"), source: "def foo; end", version: 1)
   end
 
   def test_get
+    uri = URI("file:///foo/bar.rb")
     assert_equal(
-      RubyLsp::Document.new(source: "def foo; end", version: 1, uri: "file:///foo/bar.rb"),
-      @store.get("/foo/bar.rb"),
+      RubyLsp::Document.new(source: "def foo; end", version: 1, uri: uri),
+      @store.get(uri),
     )
+  end
+
+  def test_handling_uris_with_spaces
+    uri = URI("file:///foo%20bar/baz.rb")
+    @store.set(uri: uri, source: "def foo; end", version: 1)
+
+    assert_equal(
+      RubyLsp::Document.new(source: "def foo; end", version: 1, uri: uri),
+      @store.get(uri),
+    )
+  end
+
+  def test_reading_from_tempfile_can_handle_spaces
+    file = Tempfile.new("foo bar.rb")
+    file.write("def great_code; end")
+    file.rewind
+    uri = URI("file://#{file.path}")
+
+    assert_equal(
+      RubyLsp::Document.new(source: "def great_code; end", version: 1, uri: uri),
+      @store.get(uri),
+    )
+  ensure
+    file&.close
+    file&.unlink
   end
 
   def test_reads_from_file_if_missing_in_store
     file = Tempfile.new("foo.rb")
     file.write("def great_code; end")
     file.rewind
+    uri = URI("file://#{file.path}")
 
     assert_equal(
-      RubyLsp::Document.new(source: "def great_code; end", version: 1, uri: "file://foo.rb"),
-      @store.get(file.path),
+      RubyLsp::Document.new(source: "def great_code; end", version: 1, uri: uri),
+      @store.get(uri),
     )
   ensure
     file&.close
@@ -34,18 +61,19 @@ class StoreTest < Minitest::Test
     file = Tempfile.new("foo.rb")
     file.write("def great_code")
     file.rewind
-    document = @store.get(file.path)
+    uri = URI("file://#{file.path}")
+    document = @store.get(uri)
 
     refute_nil(document)
     assert_nil(document.tree)
 
     @store.push_edits(
-      uri: file.path,
+      uri: uri,
       edits: [{ range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } }, text: " ; end" }],
       version: 2,
     )
 
-    document = @store.get(file.path)
+    document = @store.get(uri)
     document.parse
     refute_nil(document)
     refute_nil(document.tree)
@@ -68,7 +96,7 @@ class StoreTest < Minitest::Test
   end
 
   def test_delete
-    @store.delete("/foo/bar.rb")
+    @store.delete(URI("file:///foo/bar.rb"))
 
     assert_empty(@store.instance_variable_get(:@state))
   end
@@ -76,9 +104,10 @@ class StoreTest < Minitest::Test
   def test_cache
     # Cache warms up the first time and then re-uses the previous result
     counter = 0
+    uri = URI("file:///foo/bar.rb")
 
     5.times do
-      @store.cache_fetch("/foo/bar.rb", "textDocument/foldingRange") do
+      @store.cache_fetch(uri, "textDocument/foldingRange") do
         counter += 1
       end
     end
@@ -86,9 +115,9 @@ class StoreTest < Minitest::Test
     assert_equal(1, counter)
 
     # After the entry in the storage is updated, the cache is invalidated
-    @store.set(uri: "/foo/bar.rb", source: "def bar; end", version: 1)
+    @store.set(uri: uri, source: "def bar; end", version: 1)
     5.times do
-      @store.cache_fetch("/foo/bar.rb", "textDocument/foldingRange") do
+      @store.cache_fetch(uri, "textDocument/foldingRange") do
         counter += 1
       end
     end
@@ -97,7 +126,7 @@ class StoreTest < Minitest::Test
   end
 
   def test_push_edits
-    uri = "/foo/bar.rb"
+    uri = URI("file:///foo/bar.rb")
     @store.set(uri: uri, source: +"def bar; end", version: 1)
 
     # Write puts 'a' in incremental edits
@@ -153,7 +182,7 @@ class StoreTest < Minitest::Test
     )
 
     assert_equal(
-      RubyLsp::Document.new(source: "def bar; puts 'a'; end", version: 1, uri: "file://foo.rb"),
+      RubyLsp::Document.new(source: "def bar; puts 'a'; end", version: 1, uri: URI("file://foo.rb")),
       @store.get(uri),
     )
   end

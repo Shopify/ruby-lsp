@@ -1,9 +1,0 @@
-#!/usr/bin/env ruby
-# typed: strict
-# frozen_string_literal: true
-
-require "bundler/setup"
-require_relative "../lib/ruby_lsp/internal"
-require "irb"
-
-IRB.start(__FILE__)

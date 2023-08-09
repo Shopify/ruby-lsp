@@ -75,13 +75,14 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :response
 
-      sig { params(uri: String, emitter: EventEmitter, message_queue: Thread::Queue).void }
+      sig { params(uri: URI::Generic, emitter: EventEmitter, message_queue: Thread::Queue).void }
       def initialize(uri, emitter, message_queue)
         super(emitter, message_queue)
 
         # Match the version based on the version in the RBI file name. Notice that the `@` symbol is sanitized to `%40`
         # in the URI
-        version_match = /(?<=%40)[\d.]+(?=\.rbi$)/.match(uri)
+        path = uri.to_standardized_path
+        version_match = path ? /(?<=%40)[\d.]+(?=\.rbi$)/.match(path) : nil
         @gem_version = T.let(version_match && version_match[0], T.nilable(String))
         @response = T.let([], T::Array[Interface::DocumentLink])
 
@@ -95,7 +96,7 @@ module RubyLsp
 
         uri = T.cast(URI(T.must(match[0])), URI::Source)
         gem_version = T.must(resolve_version(uri))
-        file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, uri.path)
+        file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, CGI.unescape(uri.path))
         return if file_path.nil?
 
         @response << Interface::DocumentLink.new(

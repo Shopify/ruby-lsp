@@ -97,8 +97,32 @@ module RubyLsp
     sig { abstract.void }
     def activate; end
 
+    # Each extension should implement `MyExtension#deactivate` and use to perform any clean up, like shutting down a
+    # child process
+    sig { abstract.void }
+    def deactivate; end
+
     # Extensions should override the `name` method to return the extension name
     sig { abstract.returns(String) }
     def name; end
+
+    # Creates a new CodeLens listener. This method is invoked on every CodeLens request
+    sig do
+      overridable.params(
+        uri: URI::Generic,
+        emitter: EventEmitter,
+        message_queue: Thread::Queue,
+      ).returns(T.nilable(Listener[T::Array[Interface::CodeLens]]))
+    end
+    def create_code_lens_listener(uri, emitter, message_queue); end
+
+    # Creates a new Hover listener. This method is invoked on every Hover request
+    sig do
+      overridable.params(
+        emitter: EventEmitter,
+        message_queue: Thread::Queue,
+      ).returns(T.nilable(Listener[T.nilable(Interface::Hover)]))
+    end
+    def create_hover_listener(emitter, message_queue); end
   end
 end

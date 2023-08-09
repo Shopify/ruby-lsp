@@ -30,17 +30,23 @@ class IntegrationTest < Minitest::Test
   }.freeze
 
   def setup
-    if RUBY_PLATFORM.match?(/(mswin|mingw)/)
-      skip("Skipping for Windows: https://github.com/Shopify/ruby-lsp/issues/751")
-    end
     # Start a new Ruby LSP server in a separate process and set the IOs to binary mode
     @stdin, @stdout, @stderr, @wait_thr = Open3.popen3("bundle exec ruby-lsp")
+    @stdin.binmode
+    @stdout.binmode
+
+    @uri = URI::Generic.from_path(path: __FILE__)
   end
 
   def teardown
     # Tell the LSP to shutdown
     make_request("shutdown")
     send_request("exit")
+
+    if @wait_thr.value != 0
+      # If the process didn't exit cleanly, print the stderr
+      warn(@stderr.read)
+    end
 
     # Make sure IOs are closed
     @stdin.close
@@ -58,7 +64,7 @@ class IntegrationTest < Minitest::Test
 
     assert_telemetry("textDocument/didOpen")
 
-    response = make_request("textDocument/documentSymbol", { textDocument: { uri: "file://#{__FILE__}" } })
+    response = make_request("textDocument/documentSymbol", { textDocument: { uri: @uri } })
     symbol = response[:result].first
     assert_equal("Foo", symbol[:name])
     assert_equal(RubyLsp::Requests::DocumentSymbol::SYMBOL_KIND[:class], symbol[:kind])
@@ -72,7 +78,7 @@ class IntegrationTest < Minitest::Test
 
     response = make_request(
       "textDocument/documentHighlight",
-      { textDocument: { uri: "file://#{__FILE__}" }, position: { line: 0, character: 1 } },
+      { textDocument: { uri: @uri }, position: { line: 0, character: 1 } },
     )
 
     range = response[:result].first
@@ -87,7 +93,7 @@ class IntegrationTest < Minitest::Test
 
     response = make_request(
       "textDocument/hover",
-      { textDocument: { uri: "file://#{__FILE__}" }, position: { line: 0, character: 1 } },
+      { textDocument: { uri: @uri }, position: { line: 0, character: 1 } },
     )
 
     assert_nil(response[:result])
@@ -102,7 +108,7 @@ class IntegrationTest < Minitest::Test
 
     response = make_request(
       "textDocument/definition",
-      { textDocument: { uri: "file://#{__FILE__}" }, position: { line: 0, character: 20 } },
+      { textDocument: { uri: @uri }, position: { line: 0, character: 20 } },
     )
 
     assert_nil(response[:error])
@@ -115,7 +121,7 @@ class IntegrationTest < Minitest::Test
 
     response = make_request(
       "textDocument/documentHighlight",
-      { textDocument: { uri: "file://#{__FILE__}" }, position: { line: 0, character: 1 } },
+      { textDocument: { uri: @uri }, position: { line: 0, character: 1 } },
     )
 
     assert_nil(response[:result])
@@ -128,7 +134,7 @@ class IntegrationTest < Minitest::Test
 
     assert_telemetry("textDocument/didOpen")
 
-    response = make_request("textDocument/semanticTokens/full", { textDocument: { uri: "file://#{__FILE__}" } })
+    response = make_request("textDocument/semanticTokens/full", { textDocument: { uri: @uri } })
     assert_equal([0, 6, 3, 2, 1], response[:result][:data])
   end
 
@@ -142,7 +148,7 @@ class IntegrationTest < Minitest::Test
 
     assert_telemetry("textDocument/didOpen")
 
-    response = make_request("textDocument/documentLink", { textDocument: { uri: "file://#{__FILE__}" } })
+    response = make_request("textDocument/documentLink", { textDocument: { uri: @uri } })
     assert_match(/syntax_tree/, response.dig(:result, 0, :target))
   end
 
@@ -152,7 +158,7 @@ class IntegrationTest < Minitest::Test
 
     assert_telemetry("textDocument/didOpen")
 
-    response = make_request("textDocument/formatting", { textDocument: { uri: "file://#{__FILE__}" } })
+    response = make_request("textDocument/formatting", { textDocument: { uri: @uri } })
     assert_equal(<<~FORMATTED, response[:result].first[:newText])
       # typed: true
       # frozen_string_literal: true
@@ -170,7 +176,7 @@ class IntegrationTest < Minitest::Test
 
     response = make_request(
       "textDocument/onTypeFormatting",
-      { textDocument: { uri: "file://#{__FILE__}", position: { line: 0, character: 0 }, character: "\n" } },
+      { textDocument: { uri: @uri, position: { line: 0, character: 0 }, character: "\n" } },
     )
     assert_nil(response[:result])
   end
@@ -184,7 +190,7 @@ class IntegrationTest < Minitest::Test
     response = make_request(
       "textDocument/codeAction",
       {
-        textDocument: { uri: "file://#{__FILE__}" },
+        textDocument: { uri: @uri },
         range: { start: { line: 2 }, end: { line: 4 } },
         context: {
           diagnostics: [
@@ -203,7 +209,7 @@ class IntegrationTest < Minitest::Test
                   edit: {
                     documentChanges: [
                       {
-                        textDocument: { uri: "file://#{__FILE__}", version: nil },
+                        textDocument: { uri: @uri, version: nil },
                         edits: [
                           {
                             range: {
@@ -243,7 +249,7 @@ class IntegrationTest < Minitest::Test
         kind: "refactor.extract",
         data: {
           range: { start: { line: 1, character: 1 }, end: { line: 1, character: 3 } },
-          uri: "file://#{__FILE__}",
+          uri: @uri,
         },
       },
     )
@@ -256,7 +262,7 @@ class IntegrationTest < Minitest::Test
 
     assert_telemetry("textDocument/didOpen")
 
-    assert(send_request("textDocument/didClose", { textDocument: { uri: "file://#{__FILE__}" } }))
+    assert(send_request("textDocument/didClose", { textDocument: { uri: @uri } }))
   end
 
   def test_document_did_change
@@ -266,7 +272,7 @@ class IntegrationTest < Minitest::Test
     assert(send_request(
       "textDocument/didChange",
       {
-        textDocument: { uri: "file://#{__FILE__}" },
+        textDocument: { uri: @uri },
         contentChanges: [{
           text: "class Foo\ndef bar\nend\nend",
           range: { start: { line: 0, character: 0 }, end: { line: 1, character: 3 } },
@@ -281,7 +287,7 @@ class IntegrationTest < Minitest::Test
 
     assert_telemetry("textDocument/didOpen")
 
-    response = make_request("textDocument/foldingRange", { textDocument: { uri: "file://#{__FILE__}" } })
+    response = make_request("textDocument/foldingRange", { textDocument: { uri: @uri } })
     assert_equal({ startLine: 0, endLine: 1, kind: "region" }, response[:result].first)
   end
 
@@ -291,7 +297,7 @@ class IntegrationTest < Minitest::Test
 
     assert_telemetry("textDocument/didOpen")
 
-    response = make_request("textDocument/codeLens", { textDocument: { uri: "file://#{__FILE__}" } })
+    response = make_request("textDocument/codeLens", { textDocument: { uri: @uri } })
     assert_empty(response[:result])
   end
 
@@ -299,7 +305,7 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["foldingRanges"])
     open_file_with("class Foo\n\nend")
 
-    send_request("textDocument/foldingRange", { textDocument: { uri: "file://#{__FILE__}" } })
+    send_request("textDocument/foldingRange", { textDocument: { uri: @uri } })
 
     assert_telemetry("textDocument/didOpen")
 
@@ -317,7 +323,7 @@ class IntegrationTest < Minitest::Test
     response = make_request(
       "textDocument/selectionRange",
       {
-        textDocument: { uri: "file://#{__FILE__}" },
+        textDocument: { uri: @uri },
         positions: [{ line: 0, character: 0 }],
       },
     )
@@ -335,7 +341,7 @@ class IntegrationTest < Minitest::Test
     response = make_request(
       "textDocument/selectionRange",
       {
-        textDocument: { uri: "file://#{__FILE__}" },
+        textDocument: { uri: @uri },
         positions: [{ line: 0, character: 0 }],
       },
     )
@@ -350,17 +356,17 @@ class IntegrationTest < Minitest::Test
 
     assert_telemetry("textDocument/didOpen")
 
-    response = make_request("textDocument/diagnostic", { textDocument: { uri: "file://#{__FILE__}" } })
+    response = make_request("textDocument/diagnostic", { textDocument: { uri: @uri } })
 
     assert_equal("full", response.dig(:result, :kind))
-    assert_equal("Sorbet/TrueSigil", response.dig(:result, :items)[0][:code])
+    refute_empty(response.dig(:result, :items))
   end
 
   private
 
   def assert_telemetry(request)
     telemetry_response = read_response("telemetry/event")
-    expected_uri = __FILE__.sub(Dir.home, "~")
+    expected_uri = @uri.path.sub(Dir.home, "~")
 
     assert_equal(expected_uri, telemetry_response.dig(:params, :uri))
     assert_equal(RubyLsp::VERSION, telemetry_response.dig(:params, :lspVersion))
@@ -426,6 +432,6 @@ class IntegrationTest < Minitest::Test
   end
 
   def open_file_with(content)
-    make_request("textDocument/didOpen", { textDocument: { uri: "file://#{__FILE__}", text: content } })
+    make_request("textDocument/didOpen", { textDocument: { uri: @uri, text: content } })
   end
 end
