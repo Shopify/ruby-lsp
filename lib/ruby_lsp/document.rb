@@ -102,7 +102,7 @@ module RubyLsp
 
     sig { returns(T::Boolean) }
     def parsed?
-      !@parse_result.value.nil?
+      !!@parse_result.value
     end
 
     sig { returns(Scanner) }
