@@ -9,9 +9,6 @@ module RubyLsp
     RangeShape = T.type_alias { { start: PositionShape, end: PositionShape } }
     EditShape = T.type_alias { { range: RangeShape, text: String } }
 
-    sig { returns(YARP::Node) }
-    attr_reader :tree
-
     sig { returns(YARP::ParseResult) }
     attr_reader :parse_result
 
@@ -34,7 +31,11 @@ module RubyLsp
       @unparsed_edits = T.let([], T::Array[EditShape])
       @syntax_error = T.let(false, T::Boolean)
       @parse_result = T.let(YARP.parse(@source), YARP::ParseResult)
-      @tree = T.let(@parse_result.value, YARP::Node)
+    end
+
+    sig { returns(YARP::Node) }
+    def tree
+      @parse_result.value
     end
 
     sig { params(other: Document).returns(T::Boolean) }
@@ -92,7 +93,6 @@ module RubyLsp
 
       @unparsed_edits.clear
       @parse_result = YARP.parse(@source)
-      @tree = @parse_result.value
     end
 
     sig { returns(T::Boolean) }
@@ -102,7 +102,7 @@ module RubyLsp
 
     sig { returns(T::Boolean) }
     def parsed?
-      !@tree.nil?
+      !@parse_result.value.nil?
     end
 
     sig { returns(Scanner) }
@@ -117,7 +117,7 @@ module RubyLsp
       ).returns([T.nilable(YARP::Node), T.nilable(YARP::Node), T::Array[String]])
     end
     def locate_node(position, node_types: [])
-      locate(@tree, create_scanner.find_char_position(position), node_types: node_types)
+      locate(@parse_result.value, create_scanner.find_char_position(position), node_types: node_types)
     end
 
     sig do
