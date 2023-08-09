@@ -70,7 +70,7 @@ module RubyLsp
         # If the user inserts the closing pipe manually to the end of the block argument, we need to avoid adding
         # an additional one and remove the previous one.  This also helps to remove the user who accidentally
         # inserts another pipe after the autocompleted one.
-        if line[..@position[:character]] =~ /(do|{)\s+\|[^|]*?\|\|$/
+        if line[..@position[:character]] =~ /(do|{)\s+\|[^|]*\|\|$/
           @edits << Interface::TextEdit.new(
             range: Interface::Range.new(
               start: Interface::Position.new(
