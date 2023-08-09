@@ -50,16 +50,11 @@ module RubyLsp
 
             return false unless annotation
 
-            receiver = node.receiver
-
-            unless receiver_matches?(receiver, annotation)
-              return false
-            end
+            return false unless receiver_matches?(node.receiver, annotation)
 
             arity = node.arguments&.arguments&.size || 0
-            annotation_arity = annotation[:arity]
 
-            arity_matches?(arity, annotation_arity)
+            arity_matches?(arity, annotation[:arity])
           end
 
           private
