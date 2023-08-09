@@ -195,7 +195,6 @@ DEPENDENCIES
   ruby-lsp!
   sorbet-static-and-runtime
   tapioca (~> 0.11)
-  yarp
 
 BUNDLED WITH
    2.4.10
