@@ -48,7 +48,7 @@ module RubyLsp
           def annotation?(node)
             annotation = ANNOTATIONS[node.name]
 
-            return false if annotation.nil?
+            return false unless annotation
 
             receiver = node.receiver
 
