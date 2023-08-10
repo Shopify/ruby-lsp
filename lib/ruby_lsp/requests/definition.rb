@@ -20,18 +20,41 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
-      ResponseType = type_member { { fixed: T.nilable(Interface::Location) } }
+      ResponseType = type_member { { fixed: T.nilable(T.any(T::Array[Interface::Location], Interface::Location)) } }
 
       sig { override.returns(ResponseType) }
       attr_reader :response
 
-      sig { params(uri: URI::Generic, emitter: EventEmitter, message_queue: Thread::Queue).void }
-      def initialize(uri, emitter, message_queue)
+      HAS_TYPECHECKER = T.let(DependencyDetector.typechecker?, T::Boolean)
+
+      sig do
+        params(
+          uri: URI::Generic,
+          nesting: T::Array[String],
+          index: RubyIndexer::Index,
+          emitter: EventEmitter,
+          message_queue: Thread::Queue,
+        ).void
+      end
+      def initialize(uri, nesting, index, emitter, message_queue)
         super(emitter, message_queue)
 
         @uri = uri
+        @nesting = nesting
+        @index = index
         @response = T.let(nil, ResponseType)
-        emitter.register(self, :on_command)
+        emitter.register(self, :on_command, :on_const, :on_const_path_ref)
+      end
+
+      sig { params(node: SyntaxTree::ConstPathRef).void }
+      def on_const_path_ref(node)
+        name = full_constant_name(node)
+        find_in_index(name)
+      end
+
+      sig { params(node: SyntaxTree::Const).void }
+      def on_const(node)
+        find_in_index(node.value)
       end
 
       sig { params(node: SyntaxTree::Command).void }
@@ -78,6 +101,30 @@ module RubyLsp
       end
 
       private
+
+      sig { params(value: String).void }
+      def find_in_index(value)
+        entries = @index.resolve(value, @nesting)
+        return unless entries
+
+        workspace_path = T.must(WORKSPACE_URI.to_standardized_path)
+
+        @response = entries.filter_map do |entry|
+          location = entry.location
+          # If the project has Sorbet, then we only want to handle go to definition for constants defined in gems, as an
+          # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
+          # in the project, even if the files are typed false
+          next if HAS_TYPECHECKER && entry.file_path.start_with?(workspace_path)
+
+          Interface::Location.new(
+            uri: URI::Generic.from_path(path: entry.file_path).to_s,
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
+              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
+            ),
+          )
+        end
+      end
 
       sig { params(file: String).returns(T.nilable(String)) }
       def find_file_in_load_path(file)

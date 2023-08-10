@@ -212,15 +212,25 @@ module RubyLsp
       { ast: Requests::ShowSyntaxTree.new(@store.get(uri), range).run }
     end
 
-    sig { params(uri: URI::Generic, position: Document::PositionShape).returns(T.nilable(Interface::Location)) }
+    sig do
+      params(
+        uri: URI::Generic,
+        position: Document::PositionShape,
+      ).returns(T.nilable(T.any(T::Array[Interface::Location], Interface::Location)))
+    end
     def definition(uri, position)
       document = @store.get(uri)
       return if document.syntax_error?
 
-      target, _parent = document.locate_node(position, node_types: [SyntaxTree::Command])
+      target, parent, nesting = document.locate_node(
+        position,
+        node_types: [SyntaxTree::Command, SyntaxTree::Const, SyntaxTree::ConstPathRef],
+      )
+
+      target = parent if target.is_a?(SyntaxTree::Const) && parent.is_a?(SyntaxTree::ConstPathRef)
 
       emitter = EventEmitter.new
-      base_listener = Requests::Definition.new(uri, emitter, @message_queue)
+      base_listener = Requests::Definition.new(uri, nesting, @index, emitter, @message_queue)
       emitter.emit_for_target(target)
       base_listener.response
     end
