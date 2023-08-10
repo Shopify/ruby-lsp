@@ -233,6 +233,11 @@
           "description": "Relative path to the Gemfile to use for bundling the Ruby LSP server. Only necessary when using a separate Gemfile for the Ruby LSP",
           "type": "string",
           "default": ""
+        },
+        "rubyLsp.testTimeout": {
+          "description": "The amount of time in seconds to wait for a test to finish before timing out. Only used when running tests from the test explorer",
+          "type": "integer",
+          "default": 30
         }
       }
     },

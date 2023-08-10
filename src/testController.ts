@@ -22,6 +22,10 @@ export class TestController {
   private terminal: vscode.Terminal | undefined;
   private ruby: Ruby;
   private telemetry: Telemetry;
+  // We allow the timeout to be configured in seconds, but exec expects it in milliseconds
+  private testTimeout = vscode.workspace
+    .getConfiguration("rubyLsp")
+    .get("testTimeout") as number;
 
   constructor(
     context: vscode.ExtensionContext,
@@ -228,6 +232,19 @@ export class TestController {
           run.appendOutput(output, undefined, test);
           run.passed(test, Date.now() - start);
         } catch (err: any) {
+          const duration = Date.now() - start;
+
+          if (err.killed) {
+            run.errored(
+              test,
+              new vscode.TestMessage(
+                `Test timed out after ${this.testTimeout} seconds`,
+              ),
+              duration,
+            );
+            continue;
+          }
+
           const messageArr = err.message.split("\n");
 
           // Minitest and test/unit outputs are formatted differently so we need to slice the message
@@ -242,7 +259,6 @@ export class TestController {
             new vscode.TestMessage(err.message),
             new vscode.TestMessage(summary),
           ];
-          const duration = Date.now() - start;
 
           if (messageArr.find((elem: string) => elem === "F")) {
             run.failed(test, messages, duration);
@@ -264,10 +280,15 @@ export class TestController {
       const result = await asyncExec(this.testCommands.get(test)!, {
         cwd: this.workingFolder,
         env: this.ruby.env,
+        timeout: this.testTimeout * 1000,
       });
       return result.stdout;
     } catch (error: any) {
-      throw new Error(error.stdout);
+      if (error.killed) {
+        throw error;
+      } else {
+        throw new Error(error.stdout);
+      }
     }
   }
 
