@@ -19,22 +19,24 @@ module RubyIndexer
 
       # Holds references to where entries where discovered so that we can easily delete them
       # {
-      #  "/my/project/foo.rb" => ["Foo"],
-      #  "/my/project/bar.rb" => ["Foo::Bar"],
+      #  "/my/project/foo.rb" => [#<Entry::Class>, #<Entry::Class>],
+      #  "/my/project/bar.rb" => [#<Entry::Class>],
       # }
-      @files_to_entries = T.let({}, T::Hash[String, T::Array[String]])
+      @files_to_entries = T.let({}, T::Hash[String, T::Array[Entry]])
     end
 
     sig { params(path: String).void }
     def delete(path)
       # For each constant discovered in `path`, delete the associated entry from the index. If there are no entries
       # left, delete the constant from the index.
-      @files_to_entries[path]&.each do |fully_qualified_name|
-        entries = @entries[fully_qualified_name]
+      @files_to_entries[path]&.each do |entry|
+        entries = @entries[entry.name]
         next unless entries
 
-        entries.reject! { |entry| entry.file_path == path }
-        @entries.delete(fully_qualified_name) if entries.empty?
+        # Delete the specific entry from the list for this name
+        entries.delete(entry)
+        # If all entries were deleted, then remove the name from the hash
+        @entries.delete(entry.name) if entries.empty?
       end
 
       @files_to_entries.delete(path)
@@ -43,7 +45,7 @@ module RubyIndexer
     sig { params(entry: Entry).void }
     def <<(entry)
       (@entries[entry.name] ||= []) << entry
-      (@files_to_entries[entry.file_path] ||= []) << entry.name
+      (@files_to_entries[entry.file_path] ||= []) << entry
     end
 
     sig { params(fully_qualified_name: String).returns(T.nilable(T::Array[Entry])) }
