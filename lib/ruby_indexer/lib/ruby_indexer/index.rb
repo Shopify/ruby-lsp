@@ -98,14 +98,17 @@ module RubyIndexer
         @comments = comments
       end
 
-      class Module < Entry
+      class Namespace < Entry
         sig { returns(String) }
         def short_name
           T.must(@name.split("::").last)
         end
       end
 
-      class Class < Module
+      class Module < Namespace
+      end
+
+      class Class < Namespace
       end
     end
   end
