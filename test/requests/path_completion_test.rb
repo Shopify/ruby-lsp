@@ -33,10 +33,11 @@ class PathCompletionTest < Minitest::Test
     result = with_file_structure do
       @store = RubyLsp::Store.new
       @store.set(uri: @uri, source: document.source, version: 1)
-      RubyLsp::Executor.new(@store, @message_queue).execute({
+      @executor = RubyLsp::Executor.new(@store, @message_queue)
+      run_request(
         method: "textDocument/completion",
         params: { textDocument: { uri: @uri.to_s }, position: end_position },
-      }).response
+      )
     end
 
     expected = [
@@ -69,10 +70,11 @@ class PathCompletionTest < Minitest::Test
 
     result = with_file_structure do
       @store.set(uri: @uri, source: document.source, version: 1)
-      RubyLsp::Executor.new(@store, @message_queue).execute({
+      @executor = RubyLsp::Executor.new(@store, @message_queue)
+      run_request(
         method: "textDocument/completion",
         params: { textDocument: { uri: @uri.to_s }, position: end_position },
-      }).response
+      )
     end
 
     expected = [
@@ -105,10 +107,11 @@ class PathCompletionTest < Minitest::Test
 
     result = with_file_structure do
       @store.set(uri: @uri, source: document.source, version: 1)
-      RubyLsp::Executor.new(@store, @message_queue).execute({
+      @executor = RubyLsp::Executor.new(@store, @message_queue)
+      run_request(
         method: "textDocument/completion",
         params: { textDocument: { uri: @uri.to_s }, position: end_position },
-      }).response
+      )
     end
 
     expected = [
@@ -141,10 +144,11 @@ class PathCompletionTest < Minitest::Test
 
     result = with_file_structure do
       @store.set(uri: @uri, source: document.source, version: 1)
-      RubyLsp::Executor.new(@store, @message_queue).execute({
+      @executor = RubyLsp::Executor.new(@store, @message_queue)
+      run_request(
         method: "textDocument/completion",
         params: { textDocument: { uri: @uri.to_s }, position: end_position },
-      }).response
+      )
     end
 
     expected = [
@@ -169,10 +173,11 @@ class PathCompletionTest < Minitest::Test
     }
 
     @store.set(uri: @uri, source: document.source, version: 1)
-    RubyLsp::Executor.new(@store, @message_queue).execute({
+    @executor = RubyLsp::Executor.new(@store, @message_queue)
+    run_request(
       method: "textDocument/completion",
       params: { textDocument: { uri: @uri.to_s }, position: end_position },
-    }).response
+    )
   end
 
   def test_completion_is_not_triggered_if_argument_is_not_a_string
@@ -182,18 +187,27 @@ class PathCompletionTest < Minitest::Test
 
     end_position = {
       line: 0,
-      character: document.source.rindex('"'),
+      character: document.source.rindex("o"),
     }
 
     @store.set(uri: @uri, source: document.source, version: 1)
-    response = RubyLsp::Executor.new(@store, @message_queue).execute({
+    @executor = RubyLsp::Executor.new(@store, @message_queue)
+    result = run_request(
       method: "textDocument/completion",
       params: { textDocument: { uri: @uri.to_s }, position: end_position },
-    }).response
-    assert_nil(response)
+    )
+    assert_nil(result)
   end
 
   private
+
+  def run_request(method:, params: {})
+    result = @executor.execute({ method: method, params: params })
+    error = result.error
+    raise error if error
+
+    result.response
+  end
 
   def with_file_structure(&block)
     Dir.mktmpdir("path_completion_test") do |tmpdir|
