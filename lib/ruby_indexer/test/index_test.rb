@@ -78,5 +78,25 @@ module RubyIndexer
 
       assert_nil(@index.resolve("DoesNotExist", ["Foo"]))
     end
+
+    def test_accessing_with_colon_colon_prefix
+      RubyIndexer.index_single(@index, "/fake/path/foo.rb", <<~RUBY)
+        class Bar; end
+
+        module Foo
+          class Bar
+          end
+
+          class Baz
+            class Something
+            end
+          end
+        end
+      RUBY
+
+      entries = @index["::Foo::Baz::Something"]
+      refute_empty(entries)
+      assert_equal("Foo::Baz::Something", entries.first.name)
+    end
   end
 end

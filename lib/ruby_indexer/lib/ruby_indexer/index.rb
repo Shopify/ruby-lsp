@@ -50,7 +50,7 @@ module RubyIndexer
 
     sig { params(fully_qualified_name: String).returns(T.nilable(T::Array[Entry])) }
     def [](fully_qualified_name)
-      @entries[fully_qualified_name]
+      @entries[fully_qualified_name.delete_prefix("::")]
     end
 
     # Try to find the entry based on the nesting from the most specific to the least specific. For example, if we have
