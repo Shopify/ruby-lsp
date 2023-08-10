@@ -8,36 +8,41 @@ module RubyLsp
         class << self
           extend T::Sig
 
+          class Annotation < T::Struct
+            prop :arity, T.any(Integer, T::Range[Integer])
+            prop :receiver, T.nilable(T::Boolean)
+          end
+
           ANNOTATIONS = T.let(
             {
-              "abstract!" => { arity: 0 },
-              "absurd" => { arity: 1, receiver: true },
-              "all" => { arity: (2..), receiver: true },
-              "any" => { arity: (2..), receiver: true },
-              "assert_type!" => { arity: 2, receiver: true },
-              "attached_class" => { arity: 0, receiver: true },
-              "bind" => { arity: 2, receiver: true },
-              "cast" => { arity: 2, receiver: true },
-              "class_of" => { arity: 1, receiver: true },
-              "enums" => { arity: 0, receiver: false },
-              "interface!" => { arity: 0, receiver: false },
-              "let" => { arity: 2, receiver: true },
-              "mixes_in_class_methods" => { arity: 1, receiver: false },
-              "must" => { arity: 1, receiver: true },
-              "must_because" => { arity: 1, receiver: true },
-              "nilable" => { arity: 1, receiver: true },
-              "noreturn" => { arity: 0, receiver: true },
-              "requires_ancestor" => { arity: 0, receiver: false },
-              "reveal_type" => { arity: 1, receiver: true },
-              "sealed!" => { arity: 0, receiver: false },
-              "self_type" => { arity: 0, receiver: true },
-              "sig" => { arity: 0, receiver: false },
-              "type_member" => { arity: (0..1), receiver: false },
-              "type_template" => { arity: 0, receiver: false },
-              "unsafe" => { arity: 1, receiver: false },
-              "untyped" => { arity: 0, receiver: true },
+              "abstract!" => Annotation.new(arity: 0),
+              "absurd" => Annotation.new(arity: 1, receiver: true),
+              "all" => Annotation.new(arity: (2..), receiver: true),
+              "any" => Annotation.new(arity: (2..), receiver: true),
+              "assert_type!" => Annotation.new(arity: 2, receiver: true),
+              "attached_class" => Annotation.new(arity: 0, receiver: true),
+              "bind" => Annotation.new(arity: 2, receiver: true),
+              "cast" => Annotation.new(arity: 2, receiver: true),
+              "class_of" => Annotation.new(arity: 1, receiver: true),
+              "enums" => Annotation.new(arity: 0),
+              "interface!" => Annotation.new(arity: 0),
+              "let" => Annotation.new(arity: 2, receiver: true),
+              "mixes_in_class_methods" => Annotation.new(arity: 1),
+              "must" => Annotation.new(arity: 1, receiver: true),
+              "must_because" => Annotation.new(arity: 1, receiver: true),
+              "nilable" => Annotation.new(arity: 1, receiver: true),
+              "noreturn" => Annotation.new(arity: 0, receiver: true),
+              "requires_ancestor" => Annotation.new(arity: 0),
+              "reveal_type" => Annotation.new(arity: 1, receiver: true),
+              "sealed!" => Annotation.new(arity: 0),
+              "self_type" => Annotation.new(arity: 0, receiver: true),
+              "sig" => Annotation.new(arity: 0),
+              "type_member" => Annotation.new(arity: (0..1)),
+              "type_template" => Annotation.new(arity: 0),
+              "unsafe" => Annotation.new(arity: 1),
+              "untyped" => Annotation.new(arity: 0, receiver: true),
             },
-            T::Hash[String, { arity: T.any(Integer, T::Range[Integer]), receiver: T::Boolean }],
+            T::Hash[String, Annotation],
           )
 
           sig do
@@ -54,15 +59,15 @@ module RubyLsp
 
             arity = node.arguments&.arguments&.size || 0
 
-            arity_matches?(arity, annotation[:arity])
+            arity_matches?(arity, annotation.arity)
           end
 
           private
 
-          sig { params(receiver: T.nilable(YARP::Node), annotation: T::Hash[Symbol, T.untyped]).returns(T::Boolean) }
+          sig { params(receiver: T.nilable(YARP::Node), annotation: Annotation).returns(T::Boolean) }
           def receiver_matches?(receiver, annotation)
-            (receiver && annotation[:receiver] && receiver.location.slice == "T") ||
-              (!receiver && !annotation[:receiver])
+            (receiver && annotation.receiver && receiver.location.slice == "T") ||
+              (!receiver && !annotation.receiver)
           end
 
           sig { params(arity: Integer, annotation_arity: T.any(Integer, T::Range[Integer])).returns(T::Boolean) }
