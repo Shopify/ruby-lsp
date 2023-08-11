@@ -147,7 +147,7 @@ module RubyLsp
       def on_call(node)
         return unless visible?(node, @range)
 
-        message = node.location.slice
+        message = node.name
         if !special_method?(message)
           type = Support::Sorbet.annotation?(node) ? :type : :method
           add_token(node.location, type)
@@ -183,8 +183,9 @@ module RubyLsp
       sig { params(node: YARP::DefNode).void }
       def on_def(node)
         return unless visible?(node, @range)
+        # debugger
 
-        add_token(node.location, :method, [:declaration])
+        add_token(node.name_loc, :method, [:declaration])
       end
 
       sig { params(node: YARP::KeywordParameterNode).void }
@@ -331,7 +332,7 @@ module RubyLsp
 
       sig { params(location: YARP::Location, type: Symbol, modifiers: T::Array[Symbol]).void }
       def add_token(location, type, modifiers = [])
-        length = location.end_column - location.start_column
+        length = location.end_column - location.start_column + 1 # TODO: correct?
         modifiers_indices = modifiers.filter_map { |modifier| TOKEN_MODIFIERS[modifier] }
         @response.push(
           SemanticToken.new(
