@@ -83,7 +83,7 @@ module RubyLsp
       class SemanticToken
         extend T::Sig
 
-        sig { returns(SyntaxTree::Location) }
+        sig { returns(YARP::Location) }
         attr_reader :location
 
         sig { returns(Integer) }
@@ -95,7 +95,7 @@ module RubyLsp
         sig { returns(T::Array[Integer]) }
         attr_reader :modifier
 
-        sig { params(location: SyntaxTree::Location, length: Integer, type: Integer, modifier: T::Array[Integer]).void }
+        sig { params(location: YARP::Location, length: Integer, type: Integer, modifier: T::Array[Integer]).void }
         def initialize(location:, length:, type:, modifier:)
           @location = location
           @length = length
@@ -129,20 +129,21 @@ module RubyLsp
           :on_class,
           :on_command,
           :on_command_call,
-          :on_const,
+          :on_constant_path,
           :on_def,
           :on_field,
           :on_kw,
           :on_lambda_var,
           :on_module,
           :on_params,
+          :on_singleton_class,
           :on_var_field,
           :on_var_ref,
           :on_vcall,
         )
       end
 
-      sig { params(node: SyntaxTree::CallNode).void }
+      sig { params(node: YARP::CallNode).void }
       def on_call(node)
         return unless visible?(node, @range)
 
@@ -153,23 +154,23 @@ module RubyLsp
         end
       end
 
-      sig { params(node: SyntaxTree::Command).void }
-      def on_command(node)
-        return unless visible?(node, @range)
+      # sig { params(node: SyntaxTree::Command).void }
+      # def on_command(node)
+      #   return unless visible?(node, @range)
 
-        add_token(node.message.location, :method) unless special_method?(node.message.value)
-      end
+      #   add_token(node.message.location, :method) unless special_method?(node.message.value)
+      # end
 
-      sig { params(node: SyntaxTree::CommandCall).void }
-      def on_command_call(node)
-        return unless visible?(node, @range)
+      # sig { params(node: SyntaxTree::CommandCall).void }
+      # def on_command_call(node)
+      #   return unless visible?(node, @range)
 
-        message = node.message
-        add_token(message.location, :method) unless message.is_a?(Symbol)
-      end
+      #   message = node.message
+      #   add_token(message.location, :method) unless message.is_a?(Symbol)
+      # end
 
-      sig { params(node: SyntaxTree::Const).void }
-      def on_const(node)
+      sig { params(node: YARP::ConstantPathNode).void }
+      def on_constant_path(node)
         return unless visible?(node, @range)
         # When finding a module or class definition, we will have already pushed a token related to this constant. We
         # need to look at the previous two tokens and if they match this locatione exactly, avoid pushing another token
@@ -179,15 +180,15 @@ module RubyLsp
         add_token(node.location, :namespace)
       end
 
-      sig { params(node: SyntaxTree::DefNode).void }
+      sig { params(node: YARP::DefNode).void }
       def on_def(node)
         return unless visible?(node, @range)
 
         add_token(node.name.location, :method, [:declaration])
       end
 
-      sig { params(node: SyntaxTree::Kw).void }
-      def on_kw(node)
+      sig { params(node: YARP::KeywordParameterNode).void }
+      def on_keyword_parameter(node)
         return unless visible?(node, @range)
 
         case node.value
@@ -196,7 +197,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: SyntaxTree::Params).void }
+      sig { params(node: YARP::ParametersNode).void }
       def on_params(node)
         return unless visible?(node, @range)
 
@@ -210,7 +211,7 @@ module RubyLsp
         end
 
         rest = node.keyword_rest
-        if rest && !rest.is_a?(SyntaxTree::ArgsForward) && !rest.is_a?(Symbol)
+        if rest && !rest.is_a?(YARP::ForwardingArgumentsNode) && !rest.is_a?(Symbol)
           name = rest.name
           add_token(name.location, :parameter) if name
         end
@@ -250,7 +251,7 @@ module RubyLsp
       end
 
       # All block locals are variables. E.g.: [].each do |x; block_local|
-      sig { params(node: SyntaxTree::BlockVar).void }
+      sig { params(node: YARP::BlockNode).void }
       def on_block_var(node)
         node.locals.each { |local| add_token(local.location, :variable) }
       end
@@ -306,7 +307,12 @@ module RubyLsp
         end
       end
 
-      sig { params(node: SyntaxTree::ClassDeclaration).void }
+      sig { params(node: YARP::SingletonClassNode).void }
+      def on_singleton_class(node)
+        debugger
+      end
+
+      sig { params(node: YARP::ClassNode).void }
       def on_class(node)
         return unless visible?(node, @range)
 

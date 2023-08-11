@@ -24,8 +24,8 @@ module RubyLsp
 
       request_time = Benchmark.realtime do
         response = run(request)
-      rescue StandardError, LoadError => e
-        error = e
+      # rescue StandardError, LoadError => e
+      #   error = e
       end
 
       Result.new(response: response, error: error, request_time: request_time)
