@@ -34,19 +34,19 @@ module RubyLsp
 
     # Emit events for a specific node. This is similar to the regular `visit` method, but avoids going deeper into the
     # tree for performance
-    sig { params(node: T.nilable(SyntaxTree::Node)).void }
+    sig { params(node: T.nilable(YARP::Node)).void }
     def emit_for_target(node)
       case node
-      when SyntaxTree::Command
-        @listeners[:on_command]&.each { |l| T.unsafe(l).on_command(node) }
-      when SyntaxTree::CallNode
+      when YARP::CallNode
         @listeners[:on_call]&.each { |l| T.unsafe(l).on_call(node) }
-      when SyntaxTree::TStringContent
-        @listeners[:on_tstring_content]&.each { |l| T.unsafe(l).on_tstring_content(node) }
-      when SyntaxTree::ConstPathRef
-        @listeners[:on_const_path_ref]&.each { |l| T.unsafe(l).on_const_path_ref(node) }
-      when SyntaxTree::Const
-        @listeners[:on_const]&.each { |l| T.unsafe(l).on_const(node) }
+      when YARP::ConstantPathNode
+        @listeners[:on_constant_path_node]&.each { |l| T.unsafe(l).on_constant_path_node(node) }
+      when YARP::StringNode
+        @listeners[:on_string_node]&.each { |l| T.unsafe(l).on_string_node(node) }
+      # when SyntaxTree::ConstPathRef
+      #   @listeners[:on_const_path_ref]&.each { |l| T.unsafe(l).on_const_path_ref(node) }
+      # when SyntaxTree::Const
+      #   @listeners[:on_const]&.each { |l| T.unsafe(l).on_const(node) }
       end
     end
 
@@ -58,129 +58,122 @@ module RubyLsp
       super
     end
 
-    sig { override.params(node: SyntaxTree::ClassDeclaration).void }
-    def visit_class(node)
+    sig { override.params(node: YARP::ClassNode).void }
+    def visit_class_node(node)
       @listeners[:on_class]&.each { |l| T.unsafe(l).on_class(node) }
       super
       @listeners[:after_class]&.each { |l| T.unsafe(l).after_class(node) }
     end
 
-    sig { override.params(node: SyntaxTree::ModuleDeclaration).void }
-    def visit_module(node)
+    sig { override.params(node: YARP::ModuleNode).void }
+    def visit_module_node(node)
       @listeners[:on_module]&.each { |l| T.unsafe(l).on_module(node) }
       super
       @listeners[:after_module]&.each { |l| T.unsafe(l).after_module(node) }
     end
 
-    sig { override.params(node: SyntaxTree::Command).void }
-    def visit_command(node)
-      @listeners[:on_command]&.each { |l| T.unsafe(l).on_command(node) }
-      super
-      @listeners[:after_command]&.each { |l| T.unsafe(l).after_command(node) }
-    end
-
-    sig { override.params(node: SyntaxTree::CommandCall).void }
-    def visit_command_call(node)
-      @listeners[:on_command_call]&.each { |l| T.unsafe(l).on_command_call(node) }
-      super
-    end
-
-    sig { override.params(node: SyntaxTree::CallNode).void }
-    def visit_call(node)
+    sig { override.params(node: YARP::CallNode).void }
+    def visit_call_node(node)
       @listeners[:on_call]&.each { |l| T.unsafe(l).on_call(node) }
       super
       @listeners[:after_call]&.each { |l| T.unsafe(l).after_call(node) }
     end
 
-    sig { override.params(node: SyntaxTree::VCall).void }
-    def visit_vcall(node)
-      @listeners[:on_vcall]&.each { |l| T.unsafe(l).on_vcall(node) }
+    sig { override.params(node: YARP::ConstantPathNode).void }
+    def visit_constant_path_node(node)
+      @listeners[:on_constant_path_node]&.each { |l| T.unsafe(l).on_constant_path_node(node) }
       super
     end
 
-    sig { override.params(node: SyntaxTree::ConstPathField).void }
-    def visit_const_path_field(node)
-      @listeners[:on_const_path_field]&.each { |l| T.unsafe(l).on_const_path_field(node) }
+    sig { override.params(node: YARP::ConstantPathWriteNode).void }
+    def visit_constant_path_write_node(node)
+      @listeners[:on_constant_path_write_node]&.each { |l| T.unsafe(l).on_constant_path_write_node(node) }
       super
     end
 
-    sig { override.params(node: SyntaxTree::TopConstField).void }
-    def visit_top_const_field(node)
-      @listeners[:on_top_const_field]&.each { |l| T.unsafe(l).on_top_const_field(node) }
-      super
-    end
-
-    sig { override.params(node: SyntaxTree::DefNode).void }
-    def visit_def(node)
+    sig { override.params(node: YARP::DefNode).void }
+    def visit_def_node(node)
       @listeners[:on_def]&.each { |l| T.unsafe(l).on_def(node) }
       super
       @listeners[:after_def]&.each { |l| T.unsafe(l).after_def(node) }
     end
 
-    sig { override.params(node: SyntaxTree::VarField).void }
-    def visit_var_field(node)
-      @listeners[:on_var_field]&.each { |l| T.unsafe(l).on_var_field(node) }
+    sig { override.params(node: YARP::InstanceVariableWriteNode).void }
+    def visit_instance_variable_write_node(node)
+      @listeners[:on_instance_variable_write_node]&.each { |l| T.unsafe(l).on_instance_variable_write_node(node) }
       super
     end
 
-    sig { override.params(node: SyntaxTree::Comment).void }
-    def visit_comment(node)
-      @listeners[:on_comment]&.each { |l| T.unsafe(l).on_comment(node) }
+    sig { override.params(node: YARP::ClassVariableWriteNode).void }
+    def visit_class_variable_write_node(node)
+      @listeners[:on_class_variable_write_node]&.each { |l| T.unsafe(l).on_class_variable_write_node(node) }
       super
     end
 
-    sig { override.params(node: SyntaxTree::Rescue).void }
-    def visit_rescue(node)
+    # sig { override.params(node: SyntaxTree::VarField).void }
+    # def visit_var_field(node)
+    #   @listeners[:on_var_field]&.each { |l| T.unsafe(l).on_var_field(node) }
+    #   super
+    # end
+
+    # sig { override.params(node: YARP::Comment).void }
+    # def visit_comment(node)
+    #   @listeners[:on_comment]&.each { |l| T.unsafe(l).on_comment(node) }
+    #   super
+    # end
+
+    sig { override.params(node: YARP::RescueNode).void }
+    def visit_rescue_node(node)
       @listeners[:on_rescue]&.each { |l| T.unsafe(l).on_rescue(node) }
       super
     end
 
-    sig { override.params(node: SyntaxTree::Kw).void }
-    def visit_kw(node)
-      @listeners[:on_kw]&.each { |l| T.unsafe(l).on_kw(node) }
-      super
-    end
+    # sig { override.params(node: SyntaxTree::Kw).void }
+    # def visit_kw(node)
+    #   @listeners[:on_kw]&.each { |l| T.unsafe(l).on_kw(node) }
+    #   super
+    # end
 
-    sig { override.params(node: SyntaxTree::Params).void }
-    def visit_params(node)
+    sig { override.params(node: YARP::ParametersNode).void }
+    def visit_parameters_node(node)
       @listeners[:on_params]&.each { |l| T.unsafe(l).on_params(node) }
       super
     end
 
-    sig { override.params(node: SyntaxTree::Field).void }
-    def visit_field(node)
-      @listeners[:on_field]&.each { |l| T.unsafe(l).on_field(node) }
-      super
-    end
+    # sig { override.params(node: SyntaxTree::Field).void }
+    # def visit_field(node)
+    #   @listeners[:on_field]&.each { |l| T.unsafe(l).on_field(node) }
+    #   super
+    # end
 
-    sig { override.params(node: SyntaxTree::VarRef).void }
-    def visit_var_ref(node)
-      @listeners[:on_var_ref]&.each { |l| T.unsafe(l).on_var_ref(node) }
-      super
-    end
+    # sig { override.params(node: SyntaxTree::VarRef).void }
+    # def visit_var_ref(node)
+    #   @listeners[:on_var_ref]&.each { |l| T.unsafe(l).on_var_ref(node) }
+    #   super
+    # end
 
-    sig { override.params(node: SyntaxTree::BlockVar).void }
-    def visit_block_var(node)
-      @listeners[:on_block_var]&.each { |l| T.unsafe(l).on_block_var(node) }
-      super
-    end
+    # sig { override.params(node: SyntaxTree::BlockVar).void }
+    # def visit_block_var(node)
+    #   @listeners[:on_block_var]&.each { |l| T.unsafe(l).on_block_var(node) }
+    #   super
+    # end
 
-    sig { override.params(node: SyntaxTree::LambdaVar).void }
-    def visit_lambda_var(node)
-      @listeners[:on_lambda_var]&.each { |l| T.unsafe(l).on_lambda_var(node) }
-      super
-    end
+    # sig { override.params(node: SyntaxTree::LambdaVar).void }
+    # def visit_lambda_var(node)
+    #   @listeners[:on_lambda_var]&.each { |l| T.unsafe(l).on_lambda_var(node) }
+    #   super
+    # end
 
-    sig { override.params(node: SyntaxTree::Binary).void }
-    def visit_binary(node)
-      super
-      @listeners[:after_binary]&.each { |l| T.unsafe(l).after_binary(node) }
-    end
+    # sig { override.params(node: SyntaxTree::Binary).void }
+    # def visit_binary(node)
+    #   super
+    #   @listeners[:after_binary]&.each { |l| T.unsafe(l).after_binary(node) }
+    # end
 
-    sig { override.params(node: SyntaxTree::Const).void }
-    def visit_const(node)
-      @listeners[:on_const]&.each { |l| T.unsafe(l).on_const(node) }
-      super
-    end
+    # sig { override.params(node: SyntaxTree::Const).void }
+    # def visit_const(node)
+    #   @listeners[:on_const]&.each { |l| T.unsafe(l).on_const(node) }
+    #   super
+    # end
   end
 end

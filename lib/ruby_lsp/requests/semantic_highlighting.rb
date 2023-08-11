@@ -147,10 +147,10 @@ module RubyLsp
       def on_call(node)
         return unless visible?(node, @range)
 
-        message = node.message
-        if !message.is_a?(Symbol) && !special_method?(message.value)
+        message = node.location.slice
+        if !special_method?(message)
           type = Support::Sorbet.annotation?(node) ? :type : :method
-          add_token(message.location, type)
+          add_token(node.location, type)
         end
       end
 
@@ -184,7 +184,7 @@ module RubyLsp
       def on_def(node)
         return unless visible?(node, @range)
 
-        add_token(node.name.location, :method, [:declaration])
+        add_token(node.location, :method, [:declaration])
       end
 
       sig { params(node: YARP::KeywordParameterNode).void }
@@ -212,8 +212,8 @@ module RubyLsp
 
         rest = node.keyword_rest
         if rest && !rest.is_a?(YARP::ForwardingArgumentsNode) && !rest.is_a?(Symbol)
-          name = rest.name
-          add_token(name.location, :parameter) if name
+          name = rest.location.slice
+          add_token(rest.location, :parameter) if name
         end
       end
 
@@ -316,22 +316,22 @@ module RubyLsp
       def on_class(node)
         return unless visible?(node, @range)
 
-        add_token(node.constant.location, :class, [:declaration])
+        add_token(node.location, :class, [:declaration])
 
         superclass = node.superclass
         add_token(superclass.location, :class) if superclass
       end
 
-      sig { params(node: SyntaxTree::ModuleDeclaration).void }
+      sig { params(node: YARP::ModuleNode).void }
       def on_module(node)
         return unless visible?(node, @range)
 
-        add_token(node.constant.location, :namespace, [:declaration])
+        add_token(node.location, :namespace, [:declaration])
       end
 
-      sig { params(location: SyntaxTree::Location, type: Symbol, modifiers: T::Array[Symbol]).void }
+      sig { params(location: YARP::Location, type: Symbol, modifiers: T::Array[Symbol]).void }
       def add_token(location, type, modifiers = [])
-        length = location.end_char - location.start_char
+        length = location.end_column - location.start_column
         modifiers_indices = modifiers.filter_map { |modifier| TOKEN_MODIFIERS[modifier] }
         @response.push(
           SemanticToken.new(
@@ -348,12 +348,12 @@ module RubyLsp
       # Exclude the ":" symbol at the end of a location
       # We use it on keyword parameters to be consistent
       # with the rest of the parameters
-      sig { params(location: T.untyped).returns(SyntaxTree::Location) }
+      sig { params(location: T.untyped).returns(YARP::Location) }
       def location_without_colon(location)
-        SyntaxTree::Location.new(
+        YARP::Location.new(
           start_line: location.start_line,
           start_column: location.start_column,
-          start_char: location.start_char,
+          start_char: location.start_column,
           end_char: location.end_char - 1,
           end_column: location.end_column - 1,
           end_line: location.end_line,
