@@ -1,9 +1,3 @@
-GIT
-  remote: https://github.com/Shopify/yarp.git
-  revision: 44705a3f5d9d9fcd24cb6fe2ab85e80c936b386e
-  specs:
-    yarp (0.4.0)
-
 PATH
   remote: .
   specs:
@@ -201,7 +195,6 @@ DEPENDENCIES
   ruby-lsp!
   sorbet-static-and-runtime
   tapioca (~> 0.11)
-  yarp!
 
 BUNDLED WITH
    2.4.10
