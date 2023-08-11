@@ -8,11 +8,6 @@ module RubyLsp
         class << self
           extend T::Sig
 
-          class Annotation < T::Struct
-            prop :arity, T.any(Integer, T::Range[Integer])
-            prop :receiver, T.nilable(T::Boolean)
-          end
-
           ANNOTATIONS = T.let(
             {
               "abstract!" => Annotation.new(arity: 0),
