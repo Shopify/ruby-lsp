@@ -9,7 +9,7 @@ module URI
       sig { params(path: String, scheme: String).returns(URI::Generic) }
       def from_path(path:, scheme: "file")
         # On Windows, if the path begins with the disk name, we need to add a leading slash to make it a valid URI
-        escaped_path = if /^[A-Z]:/.match?(path)
+        escaped_path = if /^[A-Z]:/i.match?(path)
           DEFAULT_PARSER.escape("/#{path}")
         else
           DEFAULT_PARSER.escape(path)
@@ -26,15 +26,15 @@ module URI
       parsed_path = path
       return unless parsed_path
 
+      unescaped_path = CGI.unescape(parsed_path)
+
       # On Windows, when we're getting the file system path back from the URI, we need to remove the leading forward
       # slash
-      actual_path = if %r{^/[A-Z]:}.match?(parsed_path)
-        parsed_path.delete_prefix("/")
+      if %r{^/[A-Z]:}i.match?(unescaped_path)
+        unescaped_path.delete_prefix("/")
       else
-        parsed_path
+        unescaped_path
       end
-
-      CGI.unescape(actual_path)
     end
 
     sig { returns(String) }
