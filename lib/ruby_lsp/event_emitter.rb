@@ -34,19 +34,15 @@ module RubyLsp
 
     # Emit events for a specific node. This is similar to the regular `visit` method, but avoids going deeper into the
     # tree for performance
-    sig { params(node: T.nilable(SyntaxTree::Node)).void }
+    sig { params(node: T.nilable(YARP::Node)).void }
     def emit_for_target(node)
       case node
-      when SyntaxTree::Command
-        @listeners[:on_command]&.each { |l| T.unsafe(l).on_command(node) }
-      when SyntaxTree::CallNode
+      when YARP::CallNode
         @listeners[:on_call]&.each { |l| T.unsafe(l).on_call(node) }
-      when SyntaxTree::TStringContent
-        @listeners[:on_tstring_content]&.each { |l| T.unsafe(l).on_tstring_content(node) }
-      when SyntaxTree::ConstPathRef
-        @listeners[:on_const_path_ref]&.each { |l| T.unsafe(l).on_const_path_ref(node) }
-      when SyntaxTree::Const
-        @listeners[:on_const]&.each { |l| T.unsafe(l).on_const(node) }
+      when YARP::ConstantPathNode
+        @listeners[:on_constant_path_node]&.each { |l| T.unsafe(l).on_constant_path_node(node) }
+      when YARP::StringNode
+        @listeners[:on_string_node]&.each { |l| T.unsafe(l).on_string_node(node) }
       end
     end
 

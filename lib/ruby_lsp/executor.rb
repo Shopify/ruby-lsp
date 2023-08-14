@@ -184,7 +184,7 @@ module RubyLsp
       document = @store.get(uri)
       return if document.syntax_error?
 
-      target, _parent = document.locate_node(position, node_types: [SyntaxTree::Command])
+      target, _parent = document.locate_node(position, node_types: [YARP::CallNode])
 
       emitter = EventEmitter.new
       base_listener = Requests::Definition.new(uri, emitter, @message_queue)
