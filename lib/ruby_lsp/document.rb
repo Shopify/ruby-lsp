@@ -32,7 +32,7 @@ module RubyLsp
       @parse_result = T.let(YARP.parse(@source), YARP::ParseResult)
     end
 
-    sig { returns(YARP::Node) }
+    sig { returns(YARP::ProgramNode) }
     def tree
       @parse_result.value
     end

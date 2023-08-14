@@ -7,7 +7,7 @@ module YARP
   end
 
   class ParseResult
-    sig { returns(YARP::Node) }
+    sig { returns(YARP::ProgramNode) }
     def value; end
 
     sig { returns(T::Boolean) }
