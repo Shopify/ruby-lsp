@@ -20,9 +20,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     end
 
     assert_empty(stdout)
-
-    # On Windows, RuboCop will complain that the file is missing a carriage return at the end. We need to ignore these
-    T.must(result).map(&:to_lsp_diagnostic).reject { |diagnostic| diagnostic.code == "Layout/EndOfLine" }
+    T.must(result)
   end
 
   def assert_expectations(source, expected)
