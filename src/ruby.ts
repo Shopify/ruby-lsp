@@ -211,9 +211,9 @@ export class Ruby {
       return;
     }
 
-    const absoluteBundlePath = path.resolve(
-      path.join(this.workingFolder, customBundleGemfile),
-    );
+    const absoluteBundlePath = path.isAbsolute(customBundleGemfile)
+      ? customBundleGemfile
+      : path.resolve(path.join(this.workingFolder, customBundleGemfile));
 
     if (!fs.existsSync(absoluteBundlePath)) {
       throw new Error(

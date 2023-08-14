@@ -230,7 +230,7 @@
           "default": "auto"
         },
         "rubyLsp.bundleGemfile": {
-          "description": "Relative path to the Gemfile to use for bundling the Ruby LSP server. Only necessary when using a separate Gemfile for the Ruby LSP",
+          "description": "Relative or absolute path to the Gemfile to use for bundling the Ruby LSP server. Only necessary when using a separate Gemfile for the Ruby LSP",
           "type": "string",
           "default": ""
         }
