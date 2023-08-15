@@ -4,10 +4,7 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
-      day: tuesday
-      time: "10:00"
-      timezone: America/New_York
     reviewers:
-      - "Shopify/sorbet"
+      - "Shopify/ruby-dev-exp"
     ignore:
       - dependency-name: "@types/vscode"
