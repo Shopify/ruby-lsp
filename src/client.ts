@@ -437,7 +437,9 @@ export default class Client implements ClientInterface {
     // If a custom Gemfile was configured outside of the project, use that. Otherwise, prefer our custom bundle over the
     // app's bundle
     if (this.hasUserDefinedCustomBundle()) {
-      bundleGemfile = this.customBundleGemfile;
+      bundleGemfile = path.isAbsolute(this.customBundleGemfile)
+        ? this.customBundleGemfile
+        : path.resolve(path.join(this.workingFolder, this.customBundleGemfile));
     } else if (
       fs.existsSync(path.join(this.workingFolder, ".ruby-lsp", "Gemfile"))
     ) {
