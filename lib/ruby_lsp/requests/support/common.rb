@@ -43,7 +43,7 @@ module RubyLsp
           name
         end
 
-        sig { params(node: T.nilable(SyntaxTree::Node), range: T.nilable(T::Range[Integer])).returns(T::Boolean) }
+        sig { params(node: T.nilable(YARP::Node), range: T.nilable(T::Range[Integer])).returns(T::Boolean) }
         def visible?(node, range)
           return true if range.nil?
           return false if node.nil?
