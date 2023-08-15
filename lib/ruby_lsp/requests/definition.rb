@@ -31,21 +31,21 @@ module RubyLsp
 
         @uri = uri
         @response = T.let(nil, ResponseType)
-        emitter.register(self, :on_command)
+        emitter.register(self, :on_call)
       end
 
-      sig { params(node: SyntaxTree::Command).void }
-      def on_command(node)
-        message = node.message.value
+      sig { params(node: YARP::CallNode).void }
+      def on_call(node)
+        message = node.name
         return unless message == "require" || message == "require_relative"
 
-        argument = node.arguments.parts.first
-        return unless argument.is_a?(SyntaxTree::StringLiteral)
+        arguments = node.arguments
+        return unless arguments
 
-        string = argument.parts.first
-        return unless string.is_a?(SyntaxTree::TStringContent)
+        argument = arguments.arguments.first
+        return unless argument.is_a?(YARP::StringNode)
 
-        required_file = "#{string.value}.rb"
+        required_file = "#{argument.content}.rb"
 
         case message
         when "require"
