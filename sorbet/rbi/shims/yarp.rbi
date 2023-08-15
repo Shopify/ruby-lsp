@@ -57,4 +57,9 @@ module YARP
     sig { returns(ConstantPathNode) }
     def constant_path; end
   end
+
+  class RescueNode
+    sig { returns(T::Array[YARP::Node]) }
+    def exceptions; end
+  end
 end
