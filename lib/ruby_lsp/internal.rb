@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "sorbet-runtime"
+require "syntax_tree"
 require "yarp"
 require "language_server-protocol"
 require "benchmark"
@@ -10,6 +11,7 @@ require "uri"
 require "cgi"
 
 require "ruby-lsp"
+require "ruby_indexer/ruby_indexer"
 require "core_ext/uri"
 require "ruby_lsp/utils"
 require "ruby_lsp/server"

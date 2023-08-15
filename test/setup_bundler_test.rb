@@ -124,7 +124,7 @@ class SetupBundlerTest < Minitest::Test
     Bundler.settings.set_global("path", "vendor/bundle")
     Object.any_instance.expects(:system).with(bundle_env(".ruby-lsp/Gemfile"), "bundle install 1>&2")
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({}).at_least_once
-    run_script
+    run_script(expected_path: File.expand_path("vendor/bundle", Dir.pwd))
   ensure
     # We need to revert the changes to the bundler config or else this actually changes ~/.bundle/config
     Bundler.settings.set_global("path", nil)
@@ -212,8 +212,10 @@ class SetupBundlerTest < Minitest::Test
 
   # This method runs the script and then immediately unloads it. This allows us to make assertions against the effects
   # of running the script multiple times
-  def run_script(path = "/fake/project/path")
-    RubyLsp::SetupBundler.new(path).setup!
+  def run_script(path = "/fake/project/path", expected_path: nil)
+    _bundle_gemfile, bundle_path = RubyLsp::SetupBundler.new(path).setup!
+
+    assert_equal(expected_path, bundle_path) if expected_path
   end
 
   def bundle_env(bundle_gemfile = "Gemfile")

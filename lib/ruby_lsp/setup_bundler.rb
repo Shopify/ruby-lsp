@@ -156,11 +156,12 @@ module RubyLsp
       # `.ruby-lsp` folder, which is not the user's intention. For example, if the path is configured as `vendor`, we
       # want to install it in the top level `vendor` and not `.ruby-lsp/vendor`
       path = Bundler.settings["path"]
+      expanded_path = File.expand_path(path, Dir.pwd) if path
 
       # Use the absolute `BUNDLE_PATH` to prevent accidentally creating unwanted folders under `.ruby-lsp`
       env = {}
       env["BUNDLE_GEMFILE"] = bundle_gemfile.to_s
-      env["BUNDLE_PATH"] = File.expand_path(path, Dir.pwd) if path
+      env["BUNDLE_PATH"] = expanded_path if expanded_path
 
       # If both `ruby-lsp` and `debug` are already in the Gemfile, then we shouldn't try to upgrade them or else we'll
       # produce undesired source control changes. If the custom bundle was just created and either `ruby-lsp` or `debug`
@@ -187,7 +188,7 @@ module RubyLsp
       # Add bundle update
       warn("Ruby LSP> Running bundle install for the custom bundle. This may take a while...")
       system(env, command)
-      [bundle_gemfile.to_s, path]
+      [bundle_gemfile.to_s, expanded_path]
     end
   end
 end
