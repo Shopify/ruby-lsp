@@ -36,10 +36,5 @@ module URI
         unescaped_path
       end
     end
-
-    sig { returns(String) }
-    def storage_key
-      T.must(to_standardized_path || opaque)
-    end
   end
 end
