@@ -414,7 +414,7 @@
     "@vscode/vsce": "^2.20.1",
     "esbuild": "^0.18.20",
     "eslint": "^8.46.0",
-    "eslint-import-resolver-typescript": "^3.5.5",
+    "eslint-import-resolver-typescript": "^3.6.0",
     "eslint-plugin-prettier": "^5.0.0",
     "glob": "^10.3.3",
     "mocha": "^10.2.0",
