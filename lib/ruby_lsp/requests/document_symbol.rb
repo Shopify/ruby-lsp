@@ -97,8 +97,8 @@ module RubyLsp
           :on_class,
           :after_class,
           :on_call,
-          :on_constant_path_write_node,
-          :on_constant_write_node,
+          :on_constant_path_write,
+          :on_constant_write,
           :on_def,
           :after_def,
           :on_module,
@@ -143,7 +143,7 @@ module RubyLsp
       end
 
       sig { params(node: YARP::ConstantPathWriteNode).void }
-      def on_constant_path_write_node(node)
+      def on_constant_path_write(node)
         create_document_symbol(
           name: node.target.location.slice,
           kind: :constant,
@@ -153,7 +153,7 @@ module RubyLsp
       end
 
       sig { params(node: YARP::ConstantWriteNode).void }
-      def on_constant_write_node(node)
+      def on_constant_write(node)
         create_document_symbol(
           name: node.name,
           kind: :constant,
