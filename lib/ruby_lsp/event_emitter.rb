@@ -87,7 +87,25 @@ module RubyLsp
 
     sig { override.params(node: YARP::ConstantPathWriteNode).void }
     def visit_constant_path_write_node(node)
-      @listeners[:on_constant_path_write_node]&.each { |l| T.unsafe(l).on_constant_path_write_node(node) }
+      @listeners[:on_constant_path_write]&.each { |l| T.unsafe(l).on_constant_path_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ConstantWriteNode).void }
+    def visit_constant_write_node(node)
+      @listeners[:on_constant_write]&.each { |l| T.unsafe(l).on_constant_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::InstanceVariableWriteNode).void }
+    def visit_instance_variable_write_node(node)
+      @listeners[:on_instance_variable_write]&.each { |l| T.unsafe(l).on_instance_variable_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ClassVariableWriteNode).void }
+    def visit_class_variable_write_node(node)
+      @listeners[:on_class_variable_write]&.each { |l| T.unsafe(l).on_class_variable_write(node) }
       super
     end
 

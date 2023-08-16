@@ -96,8 +96,9 @@ module RubyLsp
           self,
           :on_class,
           :after_class,
-          :on_command,
-          :on_const_path_field,
+          :on_call,
+          :on_constant_path_write,
+          :on_constant_write,
           :on_def,
           :after_def,
           :on_module,
@@ -138,8 +139,8 @@ module RubyLsp
         end
       end
 
-      sig { params(node: SyntaxTree::ConstPathField).void }
-      def on_const_path_field(node)
+      sig { params(node: YARP::ConstantPathWriteNode).void }
+      def on_constant_path_write(node)
         create_document_symbol(
           name: node.constant.value,
           kind: :constant,
@@ -148,7 +149,17 @@ module RubyLsp
         )
       end
 
-      sig { params(node: SyntaxTree::DefNode).void }
+      sig { params(node: YARP::ConstantWriteNode).void }
+      def on_constant_write(node)
+        create_document_symbol(
+          name: node.name,
+          kind: :constant,
+          range_node: node,
+          selection_range_node: node.name_loc,
+        )
+      end
+
+      sig { params(node: YARP::DefNode).void }
       def on_def(node)
         target = node.target
 
