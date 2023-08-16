@@ -17,9 +17,10 @@ module RubyLsp
 
     class BundleNotLocked < StandardError; end
 
-    sig { params(project_path: String).void }
-    def initialize(project_path)
+    sig { params(project_path: String, branch: T.nilable(String)).void }
+    def initialize(project_path, branch: nil)
       @project_path = project_path
+      @branch = branch
 
       # Custom bundle paths
       @custom_dir = T.let(Pathname.new(".ruby-lsp").expand_path(Dir.pwd), Pathname)
@@ -119,7 +120,9 @@ module RubyLsp
       end
 
       unless @dependencies["ruby-lsp"]
-        parts << 'gem "ruby-lsp", require: false, group: :development'
+        ruby_lsp_entry = +'gem "ruby-lsp", require: false, group: :development'
+        ruby_lsp_entry << ", github: \"Shopify/ruby-lsp\", branch: \"#{@branch}\"" if @branch
+        parts << ruby_lsp_entry
       end
 
       unless @dependencies["debug"]
