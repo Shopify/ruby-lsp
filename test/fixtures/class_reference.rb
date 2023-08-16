@@ -1,0 +1,1 @@
+emitter = RubyLsp::EventEmitter.new
