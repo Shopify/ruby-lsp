@@ -114,6 +114,9 @@ module RubyIndexer
 
       class Class < Namespace
       end
+
+      class Constant < Entry
+      end
     end
   end
 end
