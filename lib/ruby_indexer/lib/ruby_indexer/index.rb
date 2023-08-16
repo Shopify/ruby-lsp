@@ -5,9 +5,6 @@ module RubyIndexer
   class Index
     extend T::Sig
 
-    sig { returns(T::Hash[String, T::Array[Entry]]) }
-    attr_reader :entries
-
     sig { void }
     def initialize
       # Holds all entries in the index using the following format:
@@ -70,9 +67,16 @@ module RubyIndexer
       nil
     end
 
-    sig { void }
-    def clear
-      @entries.clear
+    sig { params(paths: T::Array[String]).void }
+    def index_all(paths: RubyIndexer.configuration.files_to_index)
+      paths.each { |path| index_single(path) }
+    end
+
+    sig { params(path: String, source: T.nilable(String)).void }
+    def index_single(path, source = nil)
+      content = source || File.read(path)
+      visitor = IndexVisitor.new(self, YARP.parse(content), path)
+      visitor.run
     end
 
     class Entry
