@@ -1,14 +1,10 @@
 # typed: true
 # frozen_string_literal: true
 
-require "test_helper"
+require_relative "test_case"
 
 module RubyIndexer
-  class IndexTest < Minitest::Test
-    def setup
-      @index = Index.new
-    end
-
+  class IndexTest < TestCase
     def test_deleting_one_entry_for_a_class
       @index.index_single("/fake/path/foo.rb", <<~RUBY)
         class Foo

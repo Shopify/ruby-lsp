@@ -1,18 +1,10 @@
 # typed: true
 # frozen_string_literal: true
 
-require "test_helper"
+require_relative "test_case"
 
 module RubyIndexer
-  class ConstantTest < Minitest::Test
-    def setup
-      @index = Index.new
-    end
-
-    def teardown
-      @index.clear
-    end
-
+  class ConstantTest < TestCase
     def test_constant_writes
       index(<<~RUBY)
         FOO = 1
@@ -110,33 +102,7 @@ module RubyIndexer
         self.class::FOO = 1
       RUBY
 
-      assert_empty(@index.entries)
-    end
-
-    private
-
-    def index(source)
-      RubyIndexer.index_single(@index, "/fake/path/foo.rb", source)
-    end
-
-    def assert_entry(expected_name, type, expected_location)
-      entries = @index[expected_name]
-      refute_empty(entries, "Expected #{expected_name} to be indexed")
-
-      entry = entries.first
-      assert_instance_of(type, entry, "Expected #{expected_name} to be a #{type}")
-
-      location = entry.location
-      location_string =
-        "#{entry.file_path}:#{location.start_line - 1}-#{location.start_column}" \
-          ":#{location.end_line - 1}-#{location.end_column}"
-
-      assert_equal(expected_location, location_string)
-    end
-
-    def refute_entry(expected_name)
-      entries = @index[expected_name]
-      assert_nil(entries, "Expected #{expected_name} to not be indexed")
+      assert_no_entry
     end
   end
 end

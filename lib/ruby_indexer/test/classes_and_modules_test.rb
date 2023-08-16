@@ -1,14 +1,10 @@
 # typed: true
 # frozen_string_literal: true
 
-require "test_helper"
+require_relative "test_case"
 
 module RubyIndexer
-  class ClassesAndModulesTest < Minitest::Test
-    def setup
-      @index = Index.new
-    end
-
+  class ClassesAndModulesTest < TestCase
     def test_empty_statements_class
       index(<<~RUBY)
         class Foo
@@ -203,32 +199,6 @@ module RubyIndexer
 
       second_foo_entry = @index["Foo"][1]
       assert_equal("# This is another Foo comment\n", second_foo_entry.comments.join)
-    end
-
-    private
-
-    def index(source)
-      @index.index_single("/fake/path/foo.rb", source)
-    end
-
-    def assert_entry(expected_name, type, expected_location)
-      entries = @index[expected_name]
-      refute_empty(entries, "Expected #{expected_name} to be indexed")
-
-      entry = entries.first
-      assert_instance_of(type, entry, "Expected #{expected_name} to be a #{type}")
-
-      location = entry.location
-      location_string =
-        "#{entry.file_path}:#{location.start_line - 1}-#{location.start_column}" \
-          ":#{location.end_line - 1}-#{location.end_column}"
-
-      assert_equal(expected_location, location_string)
-    end
-
-    def refute_entry(expected_name)
-      entries = @index[expected_name]
-      assert_nil(entries, "Expected #{expected_name} to not be indexed")
     end
   end
 end
