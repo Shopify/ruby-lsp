@@ -61,7 +61,7 @@ module RubyLsp
         if @store.experimental_features
           # The begin progress invocation happens during `initialize`, so that the notification is sent before we are
           # stuck indexing files
-          RubyIndexer.load_configuration_file
+          RubyIndexer.configuration.load_config
           @index.index_all
           end_progress("indexing-progress")
         end

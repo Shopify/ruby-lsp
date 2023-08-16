@@ -4,25 +4,31 @@
 require "test_helper"
 
 module RubyIndexer
-  class RubyIndexerTest < Minitest::Test
+  class ConfigurationTest < Minitest::Test
+    def setup
+      @config = Configuration.new
+    end
+
     def test_load_configuration_executes_configure_block
-      RubyIndexer.load_configuration_file
-      files_to_index = RubyIndexer.configuration.files_to_index
+      @config.load_config
+      files_to_index = @config.files_to_index
 
       assert(files_to_index.none? { |path| path.include?("test/fixtures") })
       assert(files_to_index.none? { |path| path.include?("minitest-reporters") })
     end
 
     def test_paths_are_unique
-      RubyIndexer.load_configuration_file
-      files_to_index = RubyIndexer.configuration.files_to_index
+      @config.load_config
+      files_to_index = @config.files_to_index
 
       assert_equal(files_to_index.uniq.length, files_to_index.length)
     end
 
     def test_configuration_raises_for_unknown_keys
+      Psych::Nodes::Document.any_instance.expects(:to_ruby).returns({ "unknown_config" => 123 })
+
       assert_raises(ArgumentError) do
-        RubyIndexer.configuration.apply_config({ "unknown" => 123 })
+        @config.load_config
       end
     end
   end

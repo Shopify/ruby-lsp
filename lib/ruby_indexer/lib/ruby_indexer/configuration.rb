@@ -5,6 +5,16 @@ module RubyIndexer
   class Configuration
     extend T::Sig
 
+    CONFIGURATION_SCHEMA = T.let(
+      {
+        "excluded_gems" => Array,
+        "included_gems" => Array,
+        "excluded_patterns" => Array,
+        "included_patterns" => Array,
+      }.freeze,
+      T::Hash[String, T::Class[Object]],
+    )
+
     sig { void }
     def initialize
       development_only_dependencies = Bundler.definition.dependencies.filter_map do |dependency|
@@ -17,21 +27,18 @@ module RubyIndexer
       @included_patterns = T.let(["#{Dir.pwd}/**/*.rb"], T::Array[String])
     end
 
-    sig { params(config: T::Hash[String, T.untyped]).void }
-    def apply_config(config)
-      excluded_gems = config.delete("excluded_gems")
-      @excluded_gems.concat(excluded_gems) if excluded_gems
+    sig { void }
+    def load_config
+      return unless File.exist?(".index.yml")
 
-      included_gems = config.delete("included_gems")
-      @included_gems.concat(included_gems) if included_gems
+      config = YAML.parse_file(".index.yml")
+      return unless config
 
-      excluded_patterns = config.delete("excluded_patterns")
-      @excluded_patterns.concat(excluded_patterns) if excluded_patterns
-
-      included_patterns = config.delete("included_patterns")
-      @included_patterns.concat(included_patterns) if included_patterns
-
-      raise ArgumentError, "Unknown configuration options: #{config.keys.join(", ")}" if config.any?
+      config_hash = config.to_ruby
+      validate_config!(config_hash)
+      apply_config(config_hash)
+    rescue Psych::SyntaxError => e
+      raise e, "Syntax error while loading .index.yml configuration: #{e.message}"
     end
 
     sig { returns(T::Array[String]) }
@@ -54,6 +61,31 @@ module RubyIndexer
       end
       files_to_index.uniq!
       files_to_index
+    end
+
+    private
+
+    sig { params(config: T::Hash[String, T.untyped]).void }
+    def validate_config!(config)
+      errors = config.filter_map do |key, value|
+        type = CONFIGURATION_SCHEMA[key]
+
+        if type.nil?
+          "Unknown configuration option: #{key}"
+        elsif !value.is_a?(type)
+          "Expected #{key} to be a #{type}, but got #{value.class}"
+        end
+      end
+
+      raise ArgumentError, errors.join("\n") if errors.any?
+    end
+
+    sig { params(config: T::Hash[String, T.untyped]).void }
+    def apply_config(config)
+      @excluded_gems.concat(config["excluded_gems"]) if config["excluded_gems"]
+      @included_gems.concat(config["included_gems"]) if config["included_gems"]
+      @excluded_patterns.concat(config["excluded_patterns"]) if config["excluded_patterns"]
+      @included_patterns.concat(config["included_patterns"]) if config["included_patterns"]
     end
   end
 end
