@@ -99,7 +99,7 @@ module RubyLsp
         code_lens = Requests::CodeLens.new(uri, emitter, @message_queue, @test_library)
 
         semantic_highlighting = Requests::SemanticHighlighting.new(emitter, @message_queue)
-        emitter.visit(document.tree) if document.parsed?
+        emitter.visit(document.tree)
 
         code_lens.merge_external_listeners_responses!
 

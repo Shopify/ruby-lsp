@@ -96,67 +96,81 @@ module RubyLsp
           self,
           :on_class,
           :after_class,
-          :on_command,
-          :on_const_path_field,
+          :on_call,
+          :on_constant_path_write_node,
+          :on_constant_write_node,
           :on_def,
           :after_def,
           :on_module,
           :after_module,
-          :on_top_const_field,
-          :on_var_field,
+          :on_instance_variable_write,
+          :on_class_variable_write,
         )
       end
 
-      sig { params(node: SyntaxTree::ClassDeclaration).void }
+      sig { params(node: YARP::ClassNode).void }
       def on_class(node)
         @stack << create_document_symbol(
-          name: full_constant_name(node.constant),
+          name: node.constant_path.location.slice,
           kind: :class,
           range_node: node,
-          selection_range_node: node.constant,
+          selection_range_node: node.constant_path,
         )
       end
 
-      sig { params(node: SyntaxTree::ClassDeclaration).void }
+      sig { params(node: YARP::ClassNode).void }
       def after_class(node)
         @stack.pop
       end
 
-      sig { params(node: SyntaxTree::Command).void }
-      def on_command(node)
-        return unless ATTR_ACCESSORS.include?(node.message.value)
+      sig { params(node: YARP::CallNode).void }
+      def on_call(node)
+        return unless ATTR_ACCESSORS.include?(node.name) && node.receiver.nil?
 
-        node.arguments.parts.each do |argument|
-          next unless argument.is_a?(SyntaxTree::SymbolLiteral)
+        arguments = node.arguments
+        return unless arguments
+
+        arguments.arguments.each do |argument|
+          next unless argument.is_a?(YARP::SymbolNode)
 
           create_document_symbol(
-            name: argument.value.value,
+            name: argument.value,
             kind: :field,
             range_node: argument,
-            selection_range_node: argument.value,
+            selection_range_node: argument,
           )
         end
       end
 
-      sig { params(node: SyntaxTree::ConstPathField).void }
-      def on_const_path_field(node)
+      sig { params(node: YARP::ConstantPathWriteNode).void }
+      def on_constant_path_write_node(node)
         create_document_symbol(
-          name: node.constant.value,
+          name: node.target.location.slice,
           kind: :constant,
           range_node: node,
-          selection_range_node: node.constant,
+          selection_range_node: node.target,
         )
       end
 
-      sig { params(node: SyntaxTree::DefNode).void }
-      def on_def(node)
-        target = node.target
+      sig { params(node: YARP::ConstantWriteNode).void }
+      def on_constant_write_node(node)
+        create_document_symbol(
+          name: node.name,
+          kind: :constant,
+          range_node: node,
+          selection_range_node: node.name_loc,
+        )
+      end
 
-        if target.is_a?(SyntaxTree::VarRef) && target.value.is_a?(SyntaxTree::Kw) && target.value.value == "self"
-          name = "self.#{node.name.value}"
+      sig { params(node: YARP::DefNode).void }
+      def on_def(node)
+        receiver = node.receiver
+
+        if receiver.is_a?(YARP::SelfNode)
+          name = "self.#{node.name}"
           kind = :method
         else
-          name = node.name.value
+          name = node.name
           kind = name == "initialize" ? :constructor : :method
         end
 
@@ -164,59 +178,49 @@ module RubyLsp
           name: name,
           kind: kind,
           range_node: node,
-          selection_range_node: node.name,
+          selection_range_node: node.name_loc,
         )
 
         @stack << symbol
       end
 
-      sig { params(node: SyntaxTree::DefNode).void }
+      sig { params(node: YARP::DefNode).void }
       def after_def(node)
         @stack.pop
       end
 
-      sig { params(node: SyntaxTree::ModuleDeclaration).void }
+      sig { params(node: YARP::ModuleNode).void }
       def on_module(node)
         @stack << create_document_symbol(
-          name: full_constant_name(node.constant),
+          name: node.constant_path.location.slice,
           kind: :module,
           range_node: node,
-          selection_range_node: node.constant,
+          selection_range_node: node.constant_path,
         )
       end
 
-      sig { params(node: SyntaxTree::ModuleDeclaration).void }
+      sig { params(node: YARP::ModuleNode).void }
       def after_module(node)
         @stack.pop
       end
 
-      sig { params(node: SyntaxTree::TopConstField).void }
-      def on_top_const_field(node)
+      sig { params(node: YARP::InstanceVariableWriteNode).void }
+      def on_instance_variable_write(node)
         create_document_symbol(
-          name: node.constant.value,
-          kind: :constant,
+          name: node.name,
+          kind: :variable,
           range_node: node,
-          selection_range_node: node.constant,
+          selection_range_node: node.name_loc,
         )
       end
 
-      sig { params(node: SyntaxTree::VarField).void }
-      def on_var_field(node)
-        value = node.value
-        kind = case value
-        when SyntaxTree::Const
-          :constant
-        when SyntaxTree::CVar, SyntaxTree::IVar
-          :variable
-        else
-          return
-        end
-
+      sig { params(node: YARP::ClassVariableWriteNode).void }
+      def on_class_variable_write(node)
         create_document_symbol(
-          name: value.value,
-          kind: kind,
+          name: node.name,
+          kind: :variable,
           range_node: node,
-          selection_range_node: value,
+          selection_range_node: node.name_loc,
         )
       end
 
@@ -226,16 +230,22 @@ module RubyLsp
         params(
           name: String,
           kind: Symbol,
-          range_node: SyntaxTree::Node,
-          selection_range_node: SyntaxTree::Node,
+          range_node: YARP::Node,
+          selection_range_node: T.any(YARP::Node, YARP::Location),
         ).returns(Interface::DocumentSymbol)
       end
       def create_document_symbol(name:, kind:, range_node:, selection_range_node:)
+        selection_range = if selection_range_node.is_a?(YARP::Node)
+           range_from_syntax_tree_node(selection_range_node)
+        else
+          range_from_location(selection_range_node)
+        end
+
         symbol = Interface::DocumentSymbol.new(
           name: name,
           kind: SYMBOL_KIND[kind],
           range: range_from_syntax_tree_node(range_node),
-          selection_range: range_from_syntax_tree_node(selection_range_node),
+          selection_range: selection_range,
           children: [],
         )
 
