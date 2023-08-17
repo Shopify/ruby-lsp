@@ -70,10 +70,8 @@ module RubyIndexer
       return unless node.target.parent.nil? || node.target.parent.is_a?(YARP::ConstantReadNode)
 
       name = node.target.location.slice
-      fully_qualified_name = name.start_with?("::") ? name.delete_prefix("::") : fully_qualify_name(name)
-
       comments = collect_comments(node)
-      @index << Index::Entry::Constant.new(fully_qualified_name, @file_path, node.location, comments)
+      @index << Index::Entry::Constant.new(fully_qualify_name(name), @file_path, node.location, comments)
     end
 
     sig { params(node: T.any(YARP::ClassNode, YARP::ModuleNode), klass: T.class_of(Index::Entry)).void }
@@ -84,11 +82,8 @@ module RubyIndexer
         return visit_child_nodes(node)
       end
 
-      fully_qualified_name = name.start_with?("::") ? name : fully_qualify_name(name)
-      name.delete_prefix!("::")
-
       comments = collect_comments(node)
-      @index << klass.new(fully_qualified_name, @file_path, node.location, comments)
+      @index << klass.new(fully_qualify_name(name), @file_path, node.location, comments)
       @stack << name
       visit_child_nodes(node)
       @stack.pop
@@ -113,9 +108,11 @@ module RubyIndexer
 
     sig { params(name: String).returns(String) }
     def fully_qualify_name(name)
-      return name if @stack.empty?
-
-      "#{@stack.join("::")}::#{name}"
+      if @stack.empty? || name.start_with?("::")
+        name
+      else
+        "#{@stack.join("::")}::#{name}"
+      end.delete_prefix("::")
     end
   end
 end
