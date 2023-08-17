@@ -238,6 +238,11 @@
           "description": "The amount of time in seconds to wait for a test to finish before timing out. Only used when running tests from the test explorer",
           "type": "integer",
           "default": 30
+        },
+        "rubyLsp.branch": {
+          "description": "Run the Ruby LSP server from the specified branch rather than using the released gem. Only supported if not using bundleGemfile",
+          "type": "string",
+          "default": ""
         }
       }
     },
