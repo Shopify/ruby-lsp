@@ -208,12 +208,30 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_creates_custom_bundle_with_specified_branch
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        bundle_gemfile = Pathname.new(".ruby-lsp").expand_path(Dir.pwd) + "Gemfile"
+        Object.any_instance.expects(:system).with(bundle_env(bundle_gemfile.to_s), "bundle install 1>&2")
+
+        Bundler.with_unbundled_env do
+          run_script(branch: "test-branch")
+        end
+
+        assert_path_exists(".ruby-lsp")
+        assert_path_exists(".ruby-lsp/Gemfile")
+        assert_match(%r{ruby-lsp.*github: "Shopify/ruby-lsp", branch: "test-branch"}, File.read(".ruby-lsp/Gemfile"))
+        assert_match("debug", File.read(".ruby-lsp/Gemfile"))
+      end
+    end
+  end
+
   private
 
   # This method runs the script and then immediately unloads it. This allows us to make assertions against the effects
   # of running the script multiple times
-  def run_script(path = "/fake/project/path", expected_path: nil)
-    _bundle_gemfile, bundle_path = RubyLsp::SetupBundler.new(path).setup!
+  def run_script(path = "/fake/project/path", branch: nil, expected_path: nil)
+    _bundle_gemfile, bundle_path = RubyLsp::SetupBundler.new(path, branch: branch).setup!
 
     assert_equal(expected_path, bundle_path) if expected_path
   end
