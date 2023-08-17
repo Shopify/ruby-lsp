@@ -22,13 +22,13 @@ export class Ruby {
   public rubyVersion?: string;
   public yjitEnabled?: boolean;
   public supportsYjit?: boolean;
-  private workingFolder: string;
+  private readonly workingFolder: string;
   #versionManager?: VersionManager;
   // eslint-disable-next-line no-process-env
-  private shell = process.env.SHELL;
+  private readonly shell = process.env.SHELL;
   private _env: NodeJS.ProcessEnv = {};
   private _error = false;
-  private context: vscode.ExtensionContext;
+  private readonly context: vscode.ExtensionContext;
 
   constructor(
     context: vscode.ExtensionContext,
@@ -136,7 +136,7 @@ export class Ruby {
   }
 
   private async activateChruby() {
-    const rubyVersion = await this.readRubyVersion();
+    const rubyVersion = this.readRubyVersion();
     await this.activate(`chruby "${rubyVersion}" && ruby`);
   }
 
@@ -150,8 +150,8 @@ export class Ruby {
 
     const result = await asyncExec(command, { cwd: this.workingFolder });
 
-    const envJson = result.stdout.match(
-      /RUBY_ENV_ACTIVATE(.*)RUBY_ENV_ACTIVATE/,
+    const envJson = /RUBY_ENV_ACTIVATE(.*)RUBY_ENV_ACTIVATE/.exec(
+      result.stdout,
     )![1];
 
     this._env = JSON.parse(envJson);
@@ -224,7 +224,7 @@ export class Ruby {
     this._env.BUNDLE_GEMFILE = absoluteBundlePath;
   }
 
-  private async readRubyVersion() {
+  private readRubyVersion() {
     let dir = this.workingFolder;
 
     while (fs.existsSync(dir)) {

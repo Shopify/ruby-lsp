@@ -13,17 +13,17 @@ const asyncExec = promisify(exec);
 const TERMINAL_NAME = "Ruby LSP: Run test";
 
 export class TestController {
-  private testController: vscode.TestController;
-  private testCommands: WeakMap<vscode.TestItem, string>;
-  private testRunProfile: vscode.TestRunProfile;
-  private testDebugProfile: vscode.TestRunProfile;
-  private debugTag: vscode.TestTag = new vscode.TestTag("debug");
-  private workingFolder: string;
+  private readonly testController: vscode.TestController;
+  private readonly testCommands: WeakMap<vscode.TestItem, string>;
+  private readonly testRunProfile: vscode.TestRunProfile;
+  private readonly testDebugProfile: vscode.TestRunProfile;
+  private readonly debugTag: vscode.TestTag = new vscode.TestTag("debug");
+  private readonly workingFolder: string;
   private terminal: vscode.Terminal | undefined;
-  private ruby: Ruby;
-  private telemetry: Telemetry;
+  private readonly ruby: Ruby;
+  private readonly telemetry: Telemetry;
   // We allow the timeout to be configured in seconds, but exec expects it in milliseconds
-  private testTimeout = vscode.workspace
+  private readonly testTimeout = vscode.workspace
     .getConfiguration("rubyLsp")
     .get("testTimeout") as number;
 
@@ -141,7 +141,7 @@ export class TestController {
     this.testController.dispose();
   }
 
-  private debugTest(_path: string, _name: string, command: string) {
+  private debugTest(_path: string, _name: string, command?: string) {
     // eslint-disable-next-line no-param-reassign
     command ??= this.testCommands.get(this.findTestByActiveLine()!) || "";
 
@@ -157,7 +157,7 @@ export class TestController {
   private async runTestInTerminal(
     _path: string,
     _name: string,
-    command: string,
+    command?: string,
   ) {
     // eslint-disable-next-line no-param-reassign
     command ??= this.testCommands.get(this.findTestByActiveLine()!) || "";
@@ -292,7 +292,7 @@ export class TestController {
     }
   }
 
-  private async runOnClick(testId: string) {
+  private runOnClick(testId: string) {
     const test = this.findTestById(testId);
 
     if (!test) return;

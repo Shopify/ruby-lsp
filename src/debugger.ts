@@ -11,11 +11,11 @@ export class Debugger
     vscode.DebugAdapterDescriptorFactory,
     vscode.DebugConfigurationProvider
 {
-  private workingFolder: string;
-  private ruby: Ruby;
+  private readonly workingFolder: string;
+  private readonly ruby: Ruby;
   private debugProcess?: ChildProcessWithoutNullStreams;
-  private console = vscode.debug.activeDebugConsole;
-  private subscriptions: vscode.Disposable[];
+  private readonly console = vscode.debug.activeDebugConsole;
+  private readonly subscriptions: vscode.Disposable[];
 
   constructor(
     context: vscode.ExtensionContext,
@@ -118,6 +118,7 @@ export class Debugger
       .map((file) => file)
       .filter((file) => file.endsWith(".sock"));
 
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     return new Promise((resolve, reject) => {
       if (sockets.length === 0) {
         reject(new Error("No debuggee processes found"));
@@ -231,7 +232,7 @@ export class Debugger
     if (existingSockets.length > 0) {
       socketIndex =
         Number(
-          existingSockets[existingSockets.length - 1].match(/-(\d+).sock$/)![1],
+          /-(\d+).sock$/.exec(existingSockets[existingSockets.length - 1])![1],
         ) + 1;
     }
 

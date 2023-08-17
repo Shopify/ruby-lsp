@@ -33,6 +33,7 @@ export interface TelemetryApi {
 }
 
 class DevelopmentApi implements TelemetryApi {
+  // eslint-disable-next-line @typescript-eslint/require-await
   async sendEvent(event: TelemetryEvent): Promise<void> {
     // eslint-disable-next-line no-console
     console.log(event);
@@ -42,7 +43,7 @@ class DevelopmentApi implements TelemetryApi {
 export class Telemetry {
   public serverVersion?: string;
   private api?: TelemetryApi;
-  private context: vscode.ExtensionContext;
+  private readonly context: vscode.ExtensionContext;
 
   constructor(context: vscode.ExtensionContext, api?: TelemetryApi) {
     this.context = context;

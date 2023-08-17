@@ -19,14 +19,15 @@ class FakeApi implements TelemetryApi {
     this.sentEvents = [];
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async sendEvent(event: TelemetryEvent): Promise<void> {
     this.sentEvents.push(event);
   }
 }
 
 suite("Client", () => {
-  let client: Client;
-  let testController: TestController;
+  let client: Client | undefined;
+  let testController: TestController | undefined;
   const managerConfig = vscode.workspace.getConfiguration("rubyLsp");
   const currentManager = managerConfig.get("rubyVersionManager");
   const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));

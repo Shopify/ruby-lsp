@@ -7,9 +7,9 @@ import { Debugger } from "./debugger";
 import { TestController } from "./testController";
 import DocumentProvider from "./documentProvider";
 
-let client: Client;
-let debug: Debugger;
-let testController: TestController;
+let client: Client | undefined;
+let debug: Debugger | undefined;
+let testController: TestController | undefined;
 
 export async function activate(context: vscode.ExtensionContext) {
   const ruby = new Ruby(context);

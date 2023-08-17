@@ -375,7 +375,7 @@ export class FormatterStatus extends StatusItem {
 }
 
 export class StatusItems {
-  private items: StatusItem[] = [];
+  private readonly items: StatusItem[] = [];
 
   constructor(client: ClientInterface) {
     this.items = [

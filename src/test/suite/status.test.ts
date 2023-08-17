@@ -47,18 +47,18 @@ suite("StatusItems", () => {
       status = new RubyVersionStatus(client);
     });
 
-    test("Status is initialized with the right values", async () => {
+    test("Status is initialized with the right values", () => {
       assert.strictEqual(status.item.text, "Using Ruby 3.2.0 with shadowenv");
       assert.strictEqual(status.item.name, "Ruby LSP Status");
       assert.strictEqual(status.item.command?.title, "Change version manager");
       assert.strictEqual(
-        status.item.command?.command,
+        status.item.command.command,
         Command.SelectVersionManager,
       );
       assert.strictEqual(context.subscriptions.length, 1);
     });
 
-    test("Refresh updates version string", async () => {
+    test("Refresh updates version string", () => {
       assert.strictEqual(status.item.text, "Using Ruby 3.2.0 with shadowenv");
 
       client.ruby.rubyVersion = "3.2.1";
@@ -74,7 +74,7 @@ suite("StatusItems", () => {
       status = new ServerStatus(client);
     });
 
-    test("Status is initialized with the right values", async () => {
+    test("Status is initialized with the right values", () => {
       assert.strictEqual(status.item.text, "Ruby LSP: Starting");
       assert.strictEqual(status.item.name, "Ruby LSP Status");
       assert.strictEqual(
@@ -82,11 +82,11 @@ suite("StatusItems", () => {
         vscode.LanguageStatusSeverity.Information,
       );
       assert.strictEqual(status.item.command?.title, "Configure");
-      assert.strictEqual(status.item.command?.command, Command.ServerOptions);
+      assert.strictEqual(status.item.command.command, Command.ServerOptions);
       assert.strictEqual(context.subscriptions.length, 1);
     });
 
-    test("Refresh when server is starting", async () => {
+    test("Refresh when server is starting", () => {
       client.state = ServerState.Starting;
       status.refresh();
       assert.strictEqual(status.item.text, "Ruby LSP: Starting");
@@ -96,7 +96,7 @@ suite("StatusItems", () => {
       );
     });
 
-    test("Refresh when server is running", async () => {
+    test("Refresh when server is running", () => {
       client.state = ServerState.Running;
       status.refresh();
       assert.strictEqual(status.item.text, "Ruby LSP: Running");
@@ -106,7 +106,7 @@ suite("StatusItems", () => {
       );
     });
 
-    test("Refresh when server is stopping", async () => {
+    test("Refresh when server is stopping", () => {
       client.state = ServerState.Stopped;
       status.refresh();
       assert.strictEqual(status.item.text, "Ruby LSP: Stopped");
@@ -116,7 +116,7 @@ suite("StatusItems", () => {
       );
     });
 
-    test("Refresh when server has errored", async () => {
+    test("Refresh when server has errored", () => {
       client.state = ServerState.Error;
       status.refresh();
       assert.strictEqual(status.item.text, "Ruby LSP: Error");
@@ -139,12 +139,12 @@ suite("StatusItems", () => {
       status = new ExperimentalFeaturesStatus(client);
     });
 
-    test("Status is initialized with the right values", async () => {
+    test("Status is initialized with the right values", () => {
       assert.strictEqual(status.item.text, "Experimental features disabled");
       assert.strictEqual(status.item.name, "Experimental features");
       assert.strictEqual(status.item.command?.title, "Enable");
       assert.strictEqual(
-        status.item.command?.command,
+        status.item.command.command,
         Command.ToggleExperimentalFeatures,
       );
       assert.strictEqual(context.subscriptions.length, 1);
@@ -158,15 +158,15 @@ suite("StatusItems", () => {
       status = new YjitStatus(client);
     });
 
-    test("Status is initialized with the right values", async () => {
+    test("Status is initialized with the right values", () => {
       assert.strictEqual(status.item.text, "YJIT enabled");
       assert.strictEqual(status.item.name, "YJIT");
       assert.strictEqual(status.item.command?.title, "Disable");
-      assert.strictEqual(status.item.command?.command, Command.ToggleYjit);
+      assert.strictEqual(status.item.command.command, Command.ToggleYjit);
       assert.strictEqual(context.subscriptions.length, 1);
     });
 
-    test("Refresh updates whether it's disabled or enabled", async () => {
+    test("Refresh updates whether it's disabled or enabled", () => {
       assert.strictEqual(status.item.text, "YJIT enabled");
 
       client.ruby.supportsYjit = false;
@@ -182,7 +182,7 @@ suite("StatusItems", () => {
       status = new YjitStatus(client);
     });
 
-    test("Refresh ignores YJIT configuration if Ruby doesn't support it", async () => {
+    test("Refresh ignores YJIT configuration if Ruby doesn't support it", () => {
       assert.strictEqual(status.item.text, "YJIT disabled");
       assert.strictEqual(status.item.command, undefined);
 
@@ -219,7 +219,7 @@ suite("StatusItems", () => {
       configuration.update("enabledFeatures", originalFeatures, true, true);
     });
 
-    test("Status is initialized with the right values", async () => {
+    test("Status is initialized with the right values", () => {
       assert.strictEqual(
         status.item.text,
         `${
@@ -228,7 +228,7 @@ suite("StatusItems", () => {
       );
       assert.strictEqual(status.item.name, "Ruby LSP Features");
       assert.strictEqual(status.item.command?.title, "Manage");
-      assert.strictEqual(status.item.command?.command, Command.ToggleFeatures);
+      assert.strictEqual(status.item.command.command, Command.ToggleFeatures);
       assert.strictEqual(context.subscriptions.length, 1);
     });
 
@@ -271,11 +271,11 @@ suite("StatusItems", () => {
       status = new FormatterStatus(client);
     });
 
-    test("Status is initialized with the right values", async () => {
+    test("Status is initialized with the right values", () => {
       assert.strictEqual(status.item.text, "Using formatter: auto");
       assert.strictEqual(status.item.name, "Formatter");
       assert.strictEqual(status.item.command?.title, "Help");
-      assert.strictEqual(status.item.command?.command, Command.FormatterHelp);
+      assert.strictEqual(status.item.command.command, Command.FormatterHelp);
       assert.strictEqual(context.subscriptions.length, 1);
     });
   });

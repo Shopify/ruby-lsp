@@ -17,6 +17,7 @@ class FakeApi implements TelemetryApi {
     this.sentEvents = [];
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async sendEvent(event: TelemetryEvent): Promise<void> {
     this.sentEvents.push(event);
   }

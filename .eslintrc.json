@@ -1,7 +1,14 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
-  "extends": ["plugin:@shopify/typescript", "plugin:@shopify/prettier"],
+  "extends": [
+    "plugin:@shopify/typescript",
+    "plugin:@shopify/typescript-type-checking",
+    "plugin:@shopify/prettier"
+  ],
+  "parserOptions": {
+    "project": "tsconfig.json"
+  },
   "settings": {
     "import/resolver": {
       "typescript": {
@@ -18,6 +25,11 @@
     "eqeqeq": "error",
     "no-invalid-this": "error",
     "no-lonely-if": "error",
-    "max-len": ["error", { "code": 120 }]
+    "max-len": [
+      "error",
+      {
+        "code": 120
+      }
+    ]
   }
 }

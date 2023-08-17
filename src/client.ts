@@ -31,12 +31,12 @@ type SyntaxTreeResponse = { ast: string } | null;
 
 export default class Client implements ClientInterface {
   private client: LanguageClient | undefined;
-  private workingFolder: string;
-  private telemetry: Telemetry;
-  private statusItems: StatusItems;
-  private outputChannel = vscode.window.createOutputChannel(LSP_NAME);
-  private testController: TestController;
-  private customBundleGemfile: string = vscode.workspace
+  private readonly workingFolder: string;
+  private readonly telemetry: Telemetry;
+  private readonly statusItems: StatusItems;
+  private readonly outputChannel = vscode.window.createOutputChannel(LSP_NAME);
+  private readonly testController: TestController;
+  private readonly customBundleGemfile: string = vscode.workspace
     .getConfiguration("rubyLsp")
     .get("bundleGemfile")!;
 
