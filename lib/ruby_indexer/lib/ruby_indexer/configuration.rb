@@ -12,7 +12,7 @@ module RubyIndexer
         "excluded_patterns" => Array,
         "included_patterns" => Array,
       }.freeze,
-      T::Hash[String, T::Class[Object]],
+      T::Hash[String, T.untyped],
     )
 
     sig { void }
