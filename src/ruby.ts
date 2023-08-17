@@ -29,6 +29,7 @@ export class Ruby {
   private _env: NodeJS.ProcessEnv = {};
   private _error = false;
   private readonly context: vscode.ExtensionContext;
+  private readonly customBundleGemfile?: string;
 
   constructor(
     context: vscode.ExtensionContext,
@@ -36,6 +37,16 @@ export class Ruby {
   ) {
     this.context = context;
     this.workingFolder = workingFolder;
+
+    const customBundleGemfile: string = vscode.workspace
+      .getConfiguration("rubyLsp")
+      .get("bundleGemfile")!;
+
+    if (customBundleGemfile.length > 0) {
+      this.customBundleGemfile = path.isAbsolute(customBundleGemfile)
+        ? customBundleGemfile
+        : path.resolve(path.join(this.workingFolder, customBundleGemfile));
+    }
   }
 
   get versionManager() {
@@ -118,9 +129,11 @@ export class Ruby {
       );
     }
 
-    const result = await asyncExec("shadowenv hook --json", {
-      cwd: this.workingFolder,
-    });
+    const cwd = this.customBundleGemfile
+      ? path.dirname(this.customBundleGemfile)
+      : this.workingFolder;
+
+    const result = await asyncExec("shadowenv hook --json", { cwd });
 
     if (result.stdout.trim() === "") {
       result.stdout = "{ }";
@@ -148,7 +161,14 @@ export class Ruby {
       command += "'";
     }
 
-    const result = await asyncExec(command, { cwd: this.workingFolder });
+    // If there's a custom bundle configured by the user, we need to activate the Ruby version in that folder, so that
+    // they can place configuration files such as `.ruby-version` there and use a different Ruby version than the
+    // project they are working on
+    const cwd = this.customBundleGemfile
+      ? path.dirname(this.customBundleGemfile)
+      : this.workingFolder;
+
+    const result = await asyncExec(command, { cwd });
 
     const envJson = /RUBY_ENV_ACTIVATE(.*)RUBY_ENV_ACTIVATE/.exec(
       result.stdout,
@@ -203,25 +223,17 @@ export class Ruby {
   private setupBundlePath() {
     // Some users like to define a completely separate Gemfile for development tools. We allow them to use
     // `rubyLsp.bundleGemfile` to configure that and need to inject it into the environment
-    const customBundleGemfile: string = vscode.workspace
-      .getConfiguration("rubyLsp")
-      .get("bundleGemfile")!;
-
-    if (customBundleGemfile.length === 0) {
+    if (!this.customBundleGemfile) {
       return;
     }
 
-    const absoluteBundlePath = path.isAbsolute(customBundleGemfile)
-      ? customBundleGemfile
-      : path.resolve(path.join(this.workingFolder, customBundleGemfile));
-
-    if (!fs.existsSync(absoluteBundlePath)) {
+    if (!fs.existsSync(this.customBundleGemfile)) {
       throw new Error(
-        `The configured bundle gemfile ${absoluteBundlePath} does not exist`,
+        `The configured bundle gemfile ${this.customBundleGemfile} does not exist`,
       );
     }
 
-    this._env.BUNDLE_GEMFILE = absoluteBundlePath;
+    this._env.BUNDLE_GEMFILE = this.customBundleGemfile;
   }
 
   private readRubyVersion() {
