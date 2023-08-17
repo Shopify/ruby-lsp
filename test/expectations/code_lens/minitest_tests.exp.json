@@ -1,4 +1,5 @@
 {
+  "params": [],
   "result": [
     {
       "range": {
@@ -837,6 +838,5 @@
         "kind": "example"
       }
     }
-  ],
-  "params": []
+  ]
 }

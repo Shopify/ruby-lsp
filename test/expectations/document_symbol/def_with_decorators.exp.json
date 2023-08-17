@@ -1,4 +1,5 @@
 {
+  "params": [],
   "result": [
     {
       "name": "foo",
@@ -23,9 +24,7 @@
           "character": 15
         }
       },
-      "children": [
-
-      ]
+      "children": []
     },
     {
       "name": "bar",
@@ -50,9 +49,7 @@
           "character": 18
         }
       },
-      "children": [
-
-      ]
+      "children": []
     },
     {
       "name": "baz",
@@ -77,12 +74,7 @@
           "character": 33
         }
       },
-      "children": [
-
-      ]
+      "children": []
     }
-  ],
-  "params": [
-
   ]
 }

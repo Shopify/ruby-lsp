@@ -1,4 +1,10 @@
 {
+  "params": [
+    {
+      "line": 1,
+      "character": 3
+    }
+  ],
   "result": {
     "contents": {
       "kind": "markdown",
@@ -14,11 +20,5 @@
         "character": 18
       }
     }
-  },
-  "params": [
-    {
-      "line": 1,
-      "character": 3
-    }
-  ]
+  }
 }

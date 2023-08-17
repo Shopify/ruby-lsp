@@ -1,4 +1,10 @@
 {
+    "params": [
+        {
+            "line": 0,
+            "character": 20
+        }
+    ],
     "result": {
         "uri": "file:///ruby_lsp/utils.rb",
         "range": {
@@ -11,11 +17,5 @@
                 "character": 0
             }
         }
-    },
-    "params": [
-        {
-            "line": 0,
-            "character": 20
-        }
-    ]
+    }
 }
