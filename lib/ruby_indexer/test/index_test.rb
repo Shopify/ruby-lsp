@@ -90,5 +90,33 @@ module RubyIndexer
       refute_empty(entries)
       assert_equal("Foo::Baz::Something", entries.first.name)
     end
+
+    def test_fuzzy_search
+      @index.index_single("/fake/path/foo.rb", <<~RUBY)
+        class Bar; end
+
+        module Foo
+          class Bar
+          end
+
+          class Baz
+            class Something
+            end
+          end
+        end
+      RUBY
+
+      result = @index.fuzzy_search("Bar")
+      assert_equal(1, result.length)
+      assert_equal(@index["Bar"].first, result.first)
+
+      result = @index.fuzzy_search("foobarsomeking")
+      assert_equal(5, result.length)
+      assert_equal(["Foo::Baz::Something", "Foo::Bar", "Foo::Baz", "Foo", "Bar"], result.map(&:name))
+
+      result = @index.fuzzy_search("FooBaz")
+      assert_equal(4, result.length)
+      assert_equal(["Foo::Baz", "Foo::Bar", "Foo", "Foo::Baz::Something"], result.map(&:name))
+    end
   end
 end
