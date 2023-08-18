@@ -28,12 +28,12 @@ module RubyLsp
         @response = T.let([], ResponseType)
         @tree = T.let(Support::PrefixTree.new(collect_load_path_files), Support::PrefixTree)
 
-        emitter.register(self, :on_tstring_content)
+        emitter.register(self, :on_string)
       end
 
-      sig { params(node: SyntaxTree::TStringContent).void }
-      def on_tstring_content(node)
-        @tree.search(node.value).sort.each do |path|
+      sig { params(node: YARP::StringNode).void }
+      def on_string(node)
+        @tree.search(node.content).sort.each do |path|
           @response << build_completion(path, node)
         end
       end
@@ -49,12 +49,13 @@ module RubyLsp
         end
       end
 
-      sig { params(label: String, node: SyntaxTree::TStringContent).returns(Interface::CompletionItem) }
+      sig { params(label: String, node: YARP::StringNode).returns(Interface::CompletionItem) }
       def build_completion(label, node)
+        # debugger
         Interface::CompletionItem.new(
           label: label,
           text_edit: Interface::TextEdit.new(
-            range: range_from_syntax_tree_node(node),
+            range: range_from_location(node.content_loc),
             new_text: label,
           ),
           kind: Constant::CompletionItemKind::REFERENCE,
