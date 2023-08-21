@@ -27,8 +27,8 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("FOO", Index::Entry::Constant, "/fake/path/foo.rb:0-0:0-8")
-      assert_entry("Bar::FOO", Index::Entry::Constant, "/fake/path/foo.rb:3-2:3-10")
+      assert_entry("FOO", Index::Entry::Constant, "/fake/path/foo.rb:0-0:0-2")
+      assert_entry("Bar::FOO", Index::Entry::Constant, "/fake/path/foo.rb:3-2:3-4")
     end
 
     def test_constant_path_writes
@@ -61,9 +61,9 @@ module RubyIndexer
         A::BAZ ||= 1
       RUBY
 
-      assert_entry("A::FOO", Index::Entry::Constant, "/fake/path/foo.rb:1-2:1-10")
-      assert_entry("BAR", Index::Entry::Constant, "/fake/path/foo.rb:2-2:2-12")
-      assert_entry("A::BAZ", Index::Entry::Constant, "/fake/path/foo.rb:5-0:5-11")
+      assert_entry("A::FOO", Index::Entry::Constant, "/fake/path/foo.rb:1-2:1-4")
+      assert_entry("BAR", Index::Entry::Constant, "/fake/path/foo.rb:2-2:2-6")
+      assert_entry("A::BAZ", Index::Entry::Constant, "/fake/path/foo.rb:5-0:5-5")
     end
 
     def test_comments_for_constants
