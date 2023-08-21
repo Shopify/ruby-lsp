@@ -27,6 +27,7 @@ class IntegrationTest < Minitest::Test
     "hover" => :hoverProvider,
     "codeLens" => :codeLensProvider,
     "definition" => :definitionProvider,
+    "workspaceSymbol" => :workspaceSymbolProvider,
   }.freeze
 
   def setup
@@ -362,11 +363,28 @@ class IntegrationTest < Minitest::Test
     refute_empty(response.dig(:result, :items))
   end
 
+  def test_workspace_symbol
+    initialize_lsp(["workspaceSymbol"], experimental_features_enabled: true)
+    open_file_with("class Foo\nend")
+    # Read the response for the progress indicator notifications
+    read_response("window/workDoneProgress/create")
+    read_response("$/progress")
+    read_response("textDocument/didOpen")
+
+    # Populate the index
+    send_request("initialized")
+    read_response("initialized")
+    # Read the response for the progress end notification
+    read_response("$/progress")
+
+    response = make_request("workspace/symbol", {})
+    refute_empty(response[:result])
+  end
+
   private
 
-  def assert_telemetry(request)
+  def assert_telemetry(request, expected_uri = @uri.path.sub(Dir.home, "~"))
     telemetry_response = read_response("telemetry/event")
-    expected_uri = @uri.path.sub(Dir.home, "~")
 
     assert_equal(expected_uri, telemetry_response.dig(:params, :uri))
     assert_equal(RubyLsp::VERSION, telemetry_response.dig(:params, :lspVersion))

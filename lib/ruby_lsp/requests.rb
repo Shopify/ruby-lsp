@@ -41,6 +41,7 @@ module RubyLsp
     autoload :CodeLens, "ruby_lsp/requests/code_lens"
     autoload :Definition, "ruby_lsp/requests/definition"
     autoload :ShowSyntaxTree, "ruby_lsp/requests/show_syntax_tree"
+    autoload :WorkspaceSymbol, "ruby_lsp/requests/workspace_symbol"
 
     # :nodoc:
     module Support

@@ -23,13 +23,13 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
     begin
       # We need to pretend that Sorbet is not a dependency or else we can't properly test
-      RubyLsp::Requests::Definition.const_set(:HAS_TYPECHECKER, false)
+      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
       response = executor.execute({
         method: "textDocument/definition",
         params: { textDocument: { uri: "file:///folder/fake.rb" }, position: position },
       }).response
     ensure
-      RubyLsp::Requests::Definition.const_set(:HAS_TYPECHECKER, true)
+      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
     end
 
     case response

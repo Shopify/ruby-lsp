@@ -25,8 +25,6 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :response
 
-      HAS_TYPECHECKER = T.let(DependencyDetector.typechecker?, T::Boolean)
-
       sig do
         params(
           uri: URI::Generic,
@@ -107,14 +105,18 @@ module RubyLsp
         entries = @index.resolve(value, @nesting)
         return unless entries
 
-        workspace_path = T.must(WORKSPACE_URI.to_standardized_path)
+        bundle_path = begin
+          Bundler.bundle_path.to_s
+        rescue Bundler::GemfileNotFound
+          nil
+        end
 
         @response = entries.filter_map do |entry|
           location = entry.location
           # If the project has Sorbet, then we only want to handle go to definition for constants defined in gems, as an
           # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
           # in the project, even if the files are typed false
-          next if HAS_TYPECHECKER && entry.file_path.start_with?(workspace_path)
+          next if DependencyDetector::HAS_TYPECHECKER && bundle_path && !entry.file_path.start_with?(bundle_path)
 
           Interface::Location.new(
             uri: URI::Generic.from_path(path: entry.file_path).to_s,
