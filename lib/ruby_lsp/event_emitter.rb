@@ -42,7 +42,7 @@ module RubyLsp
       when YARP::ConstantPathNode
         @listeners[:on_constant_path_node]&.each { |l| T.unsafe(l).on_constant_path_node(node) }
       when YARP::StringNode
-        @listeners[:on_string_node]&.each { |l| T.unsafe(l).on_string_node(node) }
+        @listeners[:on_string]&.each { |l| T.unsafe(l).on_string(node) }
       end
     end
 
