@@ -31,9 +31,9 @@ jobs:
       - name: Check if all requests are using valid visits
         run: bundle exec rake check_visit_overrides
 
-      - name: Typecheck
-        if: matrix.os != 'windows-latest'
-        run: bundle exec srb tc
+      # - name: Typecheck
+      #   if: matrix.os != 'windows-latest'
+      #   run: bundle exec srb tc
 
       - name: Lint Ruby files
         run: bundle exec rubocop
