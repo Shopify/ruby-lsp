@@ -15,6 +15,7 @@ module RubyIndexer
 
       assert(files_to_index.none? { |path| path.include?("test/fixtures") })
       assert(files_to_index.none? { |path| path.include?("minitest-reporters") })
+      assert(files_to_index.none? { |path| path == __FILE__ })
     end
 
     def test_paths_are_unique
