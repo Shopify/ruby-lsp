@@ -31,5 +31,25 @@ module RubyIndexer
         @config.load_config
       end
     end
+
+    def test_magic_comments_regex
+      regex = RubyIndexer.configuration.magic_comment_regex
+
+      [
+        "# frozen_string_literal:",
+        "# typed:",
+        "# compiled:",
+        "# encoding:",
+        "# shareable_constant_value:",
+        "# warn_indent:",
+        "# rubocop:",
+        "# nodoc:",
+        "# doc:",
+        "# coding:",
+        "# warn_past_scope:",
+      ].each do |comment|
+        assert_match(regex, comment)
+      end
+    end
   end
 end

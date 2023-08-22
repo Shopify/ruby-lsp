@@ -105,7 +105,12 @@ module RubyIndexer
         comment = @comments_by_line[line]
         break unless comment
 
-        comments.unshift(comment.location.slice)
+        comment_content = comment.location.slice.chomp
+        next if comment_content.match?(RubyIndexer.configuration.magic_comment_regex)
+
+        comment_content.delete_prefix!("#")
+        comment_content.delete_prefix!(" ")
+        comments.unshift(comment_content)
       end
 
       comments

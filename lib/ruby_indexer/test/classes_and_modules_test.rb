@@ -162,10 +162,10 @@ module RubyIndexer
       RUBY
 
       foo_entry = @index["Foo"].first
-      assert_equal("# This is a Foo comment\n# This is another Foo comment\n", foo_entry.comments.join)
+      assert_equal("This is a Foo comment\nThis is another Foo comment", foo_entry.comments.join("\n"))
 
       bar_entry = @index["Bar"].first
-      assert_equal("# This Bar comment has 1 line padding\n", bar_entry.comments.join)
+      assert_equal("This Bar comment has 1 line padding", bar_entry.comments.join("\n"))
     end
 
     def test_comments_can_be_attached_to_a_namespaced_class
@@ -179,10 +179,10 @@ module RubyIndexer
       RUBY
 
       foo_entry = @index["Foo"].first
-      assert_equal("# This is a Foo comment\n# This is another Foo comment\n", foo_entry.comments.join)
+      assert_equal("This is a Foo comment\nThis is another Foo comment", foo_entry.comments.join("\n"))
 
       bar_entry = @index["Foo::Bar"].first
-      assert_equal("# This is a Bar comment\n", bar_entry.comments.join)
+      assert_equal("This is a Bar comment", bar_entry.comments.join("\n"))
     end
 
     def test_comments_can_be_attached_to_a_reopened_class
@@ -195,10 +195,26 @@ module RubyIndexer
       RUBY
 
       first_foo_entry = @index["Foo"][0]
-      assert_equal("# This is a Foo comment\n", first_foo_entry.comments.join)
+      assert_equal("This is a Foo comment", first_foo_entry.comments.join("\n"))
 
       second_foo_entry = @index["Foo"][1]
-      assert_equal("# This is another Foo comment\n", second_foo_entry.comments.join)
+      assert_equal("This is another Foo comment", second_foo_entry.comments.join("\n"))
+    end
+
+    def test_comments_removes_the_leading_pound_and_space
+      index(<<~RUBY)
+        # This is a Foo comment
+        class Foo; end
+
+        #This is a Bar comment
+        class Bar; end
+      RUBY
+
+      first_foo_entry = @index["Foo"][0]
+      assert_equal("This is a Foo comment", first_foo_entry.comments.join("\n"))
+
+      second_foo_entry = @index["Bar"][0]
+      assert_equal("This is a Bar comment", second_foo_entry.comments.join("\n"))
     end
   end
 end

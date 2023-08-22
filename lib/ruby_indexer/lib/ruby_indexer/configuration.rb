@@ -11,6 +11,7 @@ module RubyIndexer
         "included_gems" => Array,
         "excluded_patterns" => Array,
         "included_patterns" => Array,
+        "excluded_magic_comments" => Array,
       }.freeze,
       T::Hash[String, T.untyped],
     )
@@ -25,6 +26,22 @@ module RubyIndexer
       @included_gems = T.let([], T::Array[String])
       @excluded_patterns = T.let(["*_test.rb"], T::Array[String])
       @included_patterns = T.let(["#{Dir.pwd}/**/*.rb"], T::Array[String])
+      @excluded_magic_comments = T.let(
+        [
+          "frozen_string_literal:",
+          "typed:",
+          "compiled:",
+          "encoding:",
+          "shareable_constant_value:",
+          "warn_indent:",
+          "rubocop:",
+          "nodoc:",
+          "doc:",
+          "coding:",
+          "warn_past_scope:",
+        ],
+        T::Array[String],
+      )
     end
 
     sig { void }
@@ -63,6 +80,11 @@ module RubyIndexer
       files_to_index
     end
 
+    sig { returns(Regexp) }
+    def magic_comment_regex
+      /^\s*#\s*#{@excluded_magic_comments.join("|")}/
+    end
+
     private
 
     sig { params(config: T::Hash[String, T.untyped]).void }
@@ -86,6 +108,7 @@ module RubyIndexer
       @included_gems.concat(config["included_gems"]) if config["included_gems"]
       @excluded_patterns.concat(config["excluded_patterns"]) if config["excluded_patterns"]
       @included_patterns.concat(config["included_patterns"]) if config["included_patterns"]
+      @excluded_magic_comments.concat(config["excluded_magic_comments"]) if config["excluded_magic_comments"]
     end
   end
 end

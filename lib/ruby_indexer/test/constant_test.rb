@@ -84,16 +84,16 @@ module RubyIndexer
       RUBY
 
       foo_comment = @index["FOO"].first.comments.join("\n")
-      assert_equal("# FOO comment\n", foo_comment)
+      assert_equal("FOO comment", foo_comment)
 
       a_foo_comment = @index["A::FOO"].first.comments.join("\n")
-      assert_equal("# A::FOO comment\n", a_foo_comment)
+      assert_equal("A::FOO comment", a_foo_comment)
 
       bar_comment = @index["BAR"].first.comments.join("\n")
-      assert_equal("# ::BAR comment\n", bar_comment)
+      assert_equal("::BAR comment", bar_comment)
 
       a_baz_comment = @index["A::BAZ"].first.comments.join("\n")
-      assert_equal("# A::BAZ comment\n", a_baz_comment)
+      assert_equal("A::BAZ comment", a_baz_comment)
     end
 
     def test_variable_path_constants_are_ignored
