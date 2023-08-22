@@ -180,6 +180,8 @@ module RubyLsp
         definition(uri, request.dig(:params, :position))
       when "workspace/didChangeWatchedFiles"
         did_change_watched_files(request.dig(:params, :changes))
+      when "workspace/symbol"
+        workspace_symbol(request.dig(:params, :query))
       when "rubyLsp/textDocument/showSyntaxTree"
         show_syntax_tree(uri, request.dig(:params, :range))
       end
@@ -205,6 +207,11 @@ module RubyLsp
       end
 
       VOID
+    end
+
+    sig { params(query: T.nilable(String)).returns(T::Array[Interface::WorkspaceSymbol]) }
+    def workspace_symbol(query)
+      Requests::WorkspaceSymbol.new(query, @index).run
     end
 
     sig { params(uri: URI::Generic, range: T.nilable(Document::RangeShape)).returns({ ast: String }) }
@@ -667,6 +674,7 @@ module RubyLsp
           completion_provider: completion_provider,
           code_lens_provider: code_lens_provider,
           definition_provider: enabled_features["definition"],
+          workspace_symbol_provider: enabled_features["workspaceSymbol"],
         ),
       )
     end

@@ -49,5 +49,7 @@ module RubyLsp
         false
       end
     end
+
+    HAS_TYPECHECKER = T.let(typechecker?, T::Boolean)
   end
 end
