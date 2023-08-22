@@ -5,6 +5,9 @@ module RubyIndexer
   class Index
     extend T::Sig
 
+    # The minimum Jaro-Winkler similarity score for an entry to be considered a match for a given fuzzy search query
+    ENTRY_SIMILARITY_THRESHOLD = 0.7
+
     sig { void }
     def initialize
       # Holds all entries in the index using the following format:
@@ -48,6 +51,21 @@ module RubyIndexer
     sig { params(fully_qualified_name: String).returns(T.nilable(T::Array[Entry])) }
     def [](fully_qualified_name)
       @entries[fully_qualified_name.delete_prefix("::")]
+    end
+
+    # Fuzzy searches index entries based on Jaro-Winkler similarity. If no query is provided, all entries are returned
+    sig { params(query: T.nilable(String)).returns(T::Array[Entry]) }
+    def fuzzy_search(query)
+      return @entries.flat_map { |_name, entries| entries } unless query
+
+      normalized_query = query.gsub("::", "").downcase
+
+      results = @entries.filter_map do |name, entries|
+        similarity = DidYouMean::JaroWinkler.distance(name.gsub("::", "").downcase, normalized_query)
+        [entries, -similarity] if similarity > ENTRY_SIMILARITY_THRESHOLD
+      end
+      results.sort_by!(&:last)
+      results.flat_map(&:first)
     end
 
     # Try to find the entry based on the nesting from the most specific to the least specific. For example, if we have
