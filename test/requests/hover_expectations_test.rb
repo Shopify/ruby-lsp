@@ -99,16 +99,16 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
           def initialize(emitter, message_queue)
             super
-            emitter.register(self, :on_command)
+            emitter.register(self, :on_call)
           end
 
-          def on_command(node)
+          def on_call(node)
             T.bind(self, RubyLsp::Listener[T.untyped])
             contents = RubyLsp::Interface::MarkupContent.new(
               kind: "markdown",
-              value: "Method from middleware: #{node.message.value}",
+              value: "Method from middleware: #{node.message}",
             )
-            @response = RubyLsp::Interface::Hover.new(range: range_from_syntax_tree_node(node), contents: contents)
+            @response = RubyLsp::Interface::Hover.new(range: range_from_location(node.location), contents: contents)
           end
         end
 
