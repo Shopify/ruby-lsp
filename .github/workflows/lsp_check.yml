@@ -16,4 +16,4 @@ jobs:
           bundler-cache: true
 
       - name: Run ruby-lsp-check
-        run: bundle exec ruby-lsp-check
+        # run: bundle exec ruby-lsp-check

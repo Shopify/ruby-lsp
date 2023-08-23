@@ -39,7 +39,7 @@ class ShowSyntaxTreeTest < Minitest::Test
                (6...6)
              ),
              0,
-             \"foo\"
+             "foo"
            )]
         )
       )
