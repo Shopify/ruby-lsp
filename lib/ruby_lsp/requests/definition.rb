@@ -44,8 +44,6 @@ module RubyLsp
         emitter.register(self, :on_call, :on_constant_path)
       end
 
-
-
       sig { params(node: YARP::CallNode).void }
       def on_call(node)
         message = node.name
@@ -93,7 +91,6 @@ module RubyLsp
       def on_constant_path(node)
         find_in_index(node.location.slice)
       end
-
 
       private
 
