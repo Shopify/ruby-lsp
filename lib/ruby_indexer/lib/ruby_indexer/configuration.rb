@@ -24,7 +24,7 @@ module RubyIndexer
 
       @excluded_gems = T.let(development_only_dependencies, T::Array[String])
       @included_gems = T.let([], T::Array[String])
-      @excluded_patterns = T.let(["*_test.rb"], T::Array[String])
+      @excluded_patterns = T.let(["**/*_test.rb"], T::Array[String])
       @included_patterns = T.let(["#{Dir.pwd}/**/*.rb"], T::Array[String])
       @excluded_magic_comments = T.let(
         [
