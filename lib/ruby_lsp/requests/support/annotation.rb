@@ -17,11 +17,30 @@ module RubyLsp
           @receiver = receiver
         end
 
-        sig { returns(T.any(Integer, T::Range[Integer])) }
-        attr_reader :arity
+        sig { params(node: YARP::CallNode).returns(T::Boolean) }
+        def match?(node)
+          receiver_matches?(node) && arity_matches?(node)
+        end
 
-        sig { returns(T::Boolean) }
-        attr_reader :receiver
+        private
+
+        sig { params(node: YARP::CallNode).returns(T::Boolean) }
+        def receiver_matches?(node)
+          node_receiver = node.receiver
+          (node_receiver && @receiver && node_receiver.location.slice == "T") || (!node_receiver && !@receiver)
+        end
+
+        sig { params(node: YARP::CallNode).returns(T::Boolean) }
+        def arity_matches?(node)
+          node_arity = node.arguments&.arguments&.size || 0
+
+          case @arity
+          when Integer
+            node_arity == @arity
+          when Range
+            @arity.cover?(node_arity)
+          end
+        end
       end
     end
   end

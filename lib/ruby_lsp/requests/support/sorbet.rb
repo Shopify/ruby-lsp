@@ -46,33 +46,7 @@ module RubyLsp
             ).returns(T::Boolean)
           end
           def annotation?(node)
-            annotation = ANNOTATIONS[node.name]
-
-            return false unless annotation
-
-            return false unless receiver_matches?(node.receiver, annotation)
-
-            arity = node.arguments&.arguments&.size || 0
-
-            arity_matches?(arity, annotation.arity)
-          end
-
-          private
-
-          sig { params(receiver: T.nilable(YARP::Node), annotation: Annotation).returns(T::Boolean) }
-          def receiver_matches?(receiver, annotation)
-            (receiver && annotation.receiver && receiver.location.slice == "T") ||
-              (!receiver && !annotation.receiver)
-          end
-
-          sig { params(arity: Integer, annotation_arity: T.any(Integer, T::Range[Integer])).returns(T::Boolean) }
-          def arity_matches?(arity, annotation_arity)
-            case annotation_arity
-            when Integer
-              arity == annotation_arity
-            when Range
-              annotation_arity.cover?(arity)
-            end
+            ANNOTATIONS[node.name]&.match?(node)
           end
         end
       end
