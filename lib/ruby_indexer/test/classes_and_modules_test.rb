@@ -1,18 +1,10 @@
 # typed: true
 # frozen_string_literal: true
 
-require "test_helper"
+require_relative "test_case"
 
 module RubyIndexer
-  class ClassesAndModulesTest < Minitest::Test
-    def setup
-      @index = Index.new
-    end
-
-    def teardown
-      @index.clear
-    end
-
+  class ClassesAndModulesTest < TestCase
     def test_empty_statements_class
       index(<<~RUBY)
         class Foo
@@ -170,10 +162,10 @@ module RubyIndexer
       RUBY
 
       foo_entry = @index["Foo"].first
-      assert_equal("# This is a Foo comment\n# This is another Foo comment\n", foo_entry.comments.join)
+      assert_equal("This is a Foo comment\nThis is another Foo comment", foo_entry.comments.join("\n"))
 
       bar_entry = @index["Bar"].first
-      assert_equal("# This Bar comment has 1 line padding\n", bar_entry.comments.join)
+      assert_equal("This Bar comment has 1 line padding", bar_entry.comments.join("\n"))
     end
 
     def test_comments_can_be_attached_to_a_namespaced_class
@@ -187,10 +179,10 @@ module RubyIndexer
       RUBY
 
       foo_entry = @index["Foo"].first
-      assert_equal("# This is a Foo comment\n# This is another Foo comment\n", foo_entry.comments.join)
+      assert_equal("This is a Foo comment\nThis is another Foo comment", foo_entry.comments.join("\n"))
 
       bar_entry = @index["Foo::Bar"].first
-      assert_equal("# This is a Bar comment\n", bar_entry.comments.join)
+      assert_equal("This is a Bar comment", bar_entry.comments.join("\n"))
     end
 
     def test_comments_can_be_attached_to_a_reopened_class
@@ -203,36 +195,26 @@ module RubyIndexer
       RUBY
 
       first_foo_entry = @index["Foo"][0]
-      assert_equal("# This is a Foo comment\n", first_foo_entry.comments.join)
+      assert_equal("This is a Foo comment", first_foo_entry.comments.join("\n"))
 
       second_foo_entry = @index["Foo"][1]
-      assert_equal("# This is another Foo comment\n", second_foo_entry.comments.join)
+      assert_equal("This is another Foo comment", second_foo_entry.comments.join("\n"))
     end
 
-    private
+    def test_comments_removes_the_leading_pound_and_space
+      index(<<~RUBY)
+        # This is a Foo comment
+        class Foo; end
 
-    def index(source)
-      RubyIndexer.index_single(@index, "/fake/path/foo.rb", source)
-    end
+        #This is a Bar comment
+        class Bar; end
+      RUBY
 
-    def assert_entry(expected_name, type, expected_location)
-      entries = @index[expected_name]
-      refute_empty(entries, "Expected #{expected_name} to be indexed")
+      first_foo_entry = @index["Foo"][0]
+      assert_equal("This is a Foo comment", first_foo_entry.comments.join("\n"))
 
-      entry = entries.first
-      assert_instance_of(type, entry, "Expected #{expected_name} to be a #{type}")
-
-      location = entry.location
-      location_string =
-        "#{entry.file_path}:#{location.start_line - 1}-#{location.start_column}" \
-          ":#{location.end_line - 1}-#{location.end_column}"
-
-      assert_equal(expected_location, location_string)
-    end
-
-    def refute_entry(expected_name)
-      entries = @index[expected_name]
-      assert_nil(entries, "Expected #{expected_name} to not be indexed")
+      second_foo_entry = @index["Bar"][0]
+      assert_equal("This is a Bar comment", second_foo_entry.comments.join("\n"))
     end
   end
 end

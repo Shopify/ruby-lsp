@@ -1,0 +1,23 @@
+{
+    "result": [
+        {
+            "uri": "file:///ruby_lsp/event_emitter.rb",
+            "range": {
+                "start": {
+                    "line": 20,
+                    "character": 2
+                },
+                "end": {
+                    "line": 179,
+                    "character": 4
+                }
+            }
+        }
+    ],
+    "params": [
+        {
+            "line": 0,
+            "character": 19
+        }
+    ]
+}

@@ -1,6 +1,46 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require "optparse"
+
+options = {}
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: ruby-lsp [options]"
+
+  opts.on("--version", "Print ruby-lsp version") do
+    require "ruby-lsp"
+    puts RubyLsp::VERSION
+    exit(0)
+  end
+
+  opts.on("--debug", "Launch the Ruby LSP with a debugger attached") do
+    options[:debug] = true
+  end
+
+  opts.on(
+    "--branch [BRANCH]",
+    "Launch the Ruby LSP using the specified branch rather than the release version",
+  ) do |branch|
+    options[:branch] = branch
+  end
+
+  opts.on("-h", "--help", "Print this help") do
+    puts opts.help
+    puts
+    puts "See https://shopify.github.io/ruby-lsp/ for more information"
+    exit(0)
+  end
+end
+
+begin
+  parser.parse
+rescue OptionParser::InvalidOption => e
+  warn(e)
+  warn("")
+  warn(parser.help)
+  exit(1)
+end
+
 # When we're running without bundler, then we need to make sure the custom bundle is fully configured and re-execute
 # using `BUNDLE_GEMFILE=.ruby-lsp/Gemfile bundle exec ruby-lsp` so that we have access to the gems that are a part of
 # the application's bundle
@@ -8,7 +48,7 @@ if ENV["BUNDLE_GEMFILE"].nil?
   require_relative "../lib/ruby_lsp/setup_bundler"
 
   begin
-    bundle_gemfile, bundle_path = RubyLsp::SetupBundler.new(Dir.pwd).setup!
+    bundle_gemfile, bundle_path = RubyLsp::SetupBundler.new(Dir.pwd, branch: options[:branch]).setup!
   rescue RubyLsp::SetupBundler::BundleNotLocked
     warn("Project contains a Gemfile, but no Gemfile.lock. Run `bundle install` to lock gems and restart the server")
     exit(78)
@@ -37,38 +77,6 @@ rescue
 end
 
 require_relative "../lib/ruby_lsp/internal"
-
-require "optparse"
-
-options = {}
-parser = OptionParser.new do |opts|
-  opts.banner = "Usage: ruby-lsp [options]"
-
-  opts.on("--version", "Print ruby-lsp version") do
-    puts RubyLsp::VERSION
-    exit(0)
-  end
-
-  opts.on("--debug", "Launch the Ruby LSP with a debugger attached") do
-    options[:debug] = true
-  end
-
-  opts.on("-h", "--help", "Print this help") do
-    puts opts.help
-    puts
-    puts "See https://shopify.github.io/ruby-lsp/ for more information"
-    exit(0)
-  end
-end
-
-begin
-  parser.parse!
-rescue OptionParser::InvalidOption => e
-  warn(e)
-  warn("")
-  warn(parser.help)
-  exit(1)
-end
 
 if options[:debug]
   if ["x64-mingw-ucrt", "x64-mingw32"].include?(RUBY_PLATFORM)

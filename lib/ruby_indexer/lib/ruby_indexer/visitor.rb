@@ -35,6 +35,17 @@ module RubyIndexer
         add_index_entry(node, Index::Entry::Class)
       when YARP::ModuleNode
         add_index_entry(node, Index::Entry::Module)
+      when YARP::ConstantWriteNode
+        add_constant(node)
+      when YARP::ConstantPathWriteNode
+        add_constant_with_path(node)
+      when YARP::OrWriteNode
+        case node.target
+        when YARP::ConstantWriteNode
+          add_constant(node.target)
+        when YARP::ConstantPathWriteNode
+          add_constant_with_path(node.target)
+        end
       end
     end
 
@@ -46,6 +57,22 @@ module RubyIndexer
 
     private
 
+    sig { params(node: YARP::ConstantWriteNode).void }
+    def add_constant(node)
+      comments = collect_comments(node)
+      @index << Index::Entry::Constant.new(fully_qualify_name(node.name), @file_path, node.location, comments)
+    end
+
+    sig { params(node: YARP::ConstantPathWriteNode).void }
+    def add_constant_with_path(node)
+      # ignore variable constants like `var::FOO` or `self.class::FOO`
+      return unless node.target.parent.nil? || node.target.parent.is_a?(YARP::ConstantReadNode)
+
+      name = node.target.location.slice
+      comments = collect_comments(node)
+      @index << Index::Entry::Constant.new(fully_qualify_name(name), @file_path, node.location, comments)
+    end
+
     sig { params(node: T.any(YARP::ClassNode, YARP::ModuleNode), klass: T.class_of(Index::Entry)).void }
     def add_index_entry(node, klass)
       name = node.constant_path.location.slice
@@ -54,11 +81,8 @@ module RubyIndexer
         return visit_child_nodes(node)
       end
 
-      fully_qualified_name = name.start_with?("::") ? name : fully_qualify_name(name)
-      name.delete_prefix!("::")
-
       comments = collect_comments(node)
-      @index << klass.new(fully_qualified_name, @file_path, node.location, comments)
+      @index << klass.new(fully_qualify_name(name), @file_path, node.location, comments)
       @stack << name
       visit_child_nodes(node)
       @stack.pop
@@ -75,7 +99,12 @@ module RubyIndexer
         comment = @comments_by_line[line]
         break unless comment
 
-        comments.unshift(comment.location.slice)
+        comment_content = comment.location.slice.chomp
+        next if comment_content.match?(RubyIndexer.configuration.magic_comment_regex)
+
+        comment_content.delete_prefix!("#")
+        comment_content.delete_prefix!(" ")
+        comments.unshift(comment_content)
       end
 
       comments
@@ -83,9 +112,11 @@ module RubyIndexer
 
     sig { params(name: String).returns(String) }
     def fully_qualify_name(name)
-      return name if @stack.empty?
-
-      "#{@stack.join("::")}::#{name}"
+      if @stack.empty? || name.start_with?("::")
+        name
+      else
+        "#{@stack.join("::")}::#{name}"
+      end.delete_prefix("::")
     end
   end
 end

@@ -36,6 +36,11 @@ module RubyLsp
         end
       end
 
+      sig { returns(T::Boolean) }
+      def typechecker?
+        direct_dependency?(/^sorbet/) || direct_dependency?(/^sorbet-static-and-runtime/)
+      end
+
       sig { params(gem_pattern: Regexp).returns(T::Boolean) }
       def direct_dependency?(gem_pattern)
         Bundler.with_original_env { Bundler.default_gemfile } &&
@@ -44,5 +49,7 @@ module RubyLsp
         false
       end
     end
+
+    HAS_TYPECHECKER = T.let(typechecker?, T::Boolean)
   end
 end

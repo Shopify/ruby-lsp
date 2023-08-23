@@ -5,8 +5,8 @@ module RubyIndexer
   class Index
     extend T::Sig
 
-    sig { returns(T::Hash[String, T::Array[Entry]]) }
-    attr_reader :entries
+    # The minimum Jaro-Winkler similarity score for an entry to be considered a match for a given fuzzy search query
+    ENTRY_SIMILARITY_THRESHOLD = 0.7
 
     sig { void }
     def initialize
@@ -53,6 +53,21 @@ module RubyIndexer
       @entries[fully_qualified_name.delete_prefix("::")]
     end
 
+    # Fuzzy searches index entries based on Jaro-Winkler similarity. If no query is provided, all entries are returned
+    sig { params(query: T.nilable(String)).returns(T::Array[Entry]) }
+    def fuzzy_search(query)
+      return @entries.flat_map { |_name, entries| entries } unless query
+
+      normalized_query = query.gsub("::", "").downcase
+
+      results = @entries.filter_map do |name, entries|
+        similarity = DidYouMean::JaroWinkler.distance(name.gsub("::", "").downcase, normalized_query)
+        [entries, -similarity] if similarity > ENTRY_SIMILARITY_THRESHOLD
+      end
+      results.sort_by!(&:last)
+      results.flat_map(&:first)
+    end
+
     # Try to find the entry based on the nesting from the most specific to the least specific. For example, if we have
     # the nesting as ["Foo", "Bar"] and the name as "Baz", we will try to find it in this order:
     # 1. Foo::Bar::Baz
@@ -70,9 +85,16 @@ module RubyIndexer
       nil
     end
 
-    sig { void }
-    def clear
-      @entries.clear
+    sig { params(paths: T::Array[String]).void }
+    def index_all(paths: RubyIndexer.configuration.files_to_index)
+      paths.each { |path| index_single(path) }
+    end
+
+    sig { params(path: String, source: T.nilable(String)).void }
+    def index_single(path, source = nil)
+      content = source || File.read(path)
+      visitor = IndexVisitor.new(self, YARP.parse(content), path)
+      visitor.run
     end
 
     class Entry
@@ -109,6 +131,9 @@ module RubyIndexer
       end
 
       class Class < Namespace
+      end
+
+      class Constant < Entry
       end
     end
   end

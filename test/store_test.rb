@@ -6,7 +6,7 @@ require "test_helper"
 class StoreTest < Minitest::Test
   def setup
     @store = RubyLsp::Store.new
-    @store.set(uri: URI("/foo/bar.rb"), source: "def foo; end", version: 1)
+    @store.set(uri: URI::Generic.from_path(path: "/foo/bar.rb"), source: "def foo; end", version: 1)
   end
 
   def test_get
@@ -25,6 +25,37 @@ class StoreTest < Minitest::Test
       RubyLsp::Document.new(source: "def foo; end", version: 1, uri: uri),
       @store.get(uri),
     )
+  end
+
+  def test_handling_uris_for_unsaved_files
+    uri = URI("untitled:Untitled-1")
+    @store.set(uri: uri, source: "def foo; end", version: 1)
+
+    assert_equal(
+      RubyLsp::Document.new(source: "def foo; end", version: 1, uri: uri),
+      @store.get(uri),
+    )
+
+    @store.delete(uri)
+    refute_includes(@store.instance_variable_get(:@state), uri.to_s)
+  end
+
+  def test_uris_with_different_schemes_do_not_collide
+    path = "/foo/bar.rb"
+    file_uri = URI("file://#{path}")
+    git_uri = URI("git://#{path}")
+    @store.set(uri: file_uri, source: "def foo; end", version: 1)
+    @store.set(uri: git_uri, source: "def foo; end", version: 1)
+
+    refute_same(@store.get(file_uri), @store.get(git_uri))
+
+    state = @store.instance_variable_get(:@state)
+    assert_includes(state, file_uri.to_s)
+    assert_includes(state, git_uri.to_s)
+
+    @store.delete(git_uri)
+    assert_includes(state, file_uri.to_s)
+    refute_includes(state, git_uri.to_s)
   end
 
   def test_reading_from_tempfile_can_handle_spaces

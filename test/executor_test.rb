@@ -108,6 +108,13 @@ class ExecutorTest < Minitest::Test
     assert_includes("utf-16", hash.dig("capabilities", "positionEncoding"))
   end
 
+  def test_initialized_populates_index
+    @store.experimental_features = true
+    @executor.execute({ method: "initialized", params: {} })
+    index = @executor.instance_variable_get(:@index)
+    refute_empty(index.instance_variable_get(:@entries))
+  end
+
   def test_rubocop_errors_push_window_notification
     @executor.expects(:formatting).raises(StandardError, "boom").once
 

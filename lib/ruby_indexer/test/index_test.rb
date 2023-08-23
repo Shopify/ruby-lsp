@@ -1,24 +1,16 @@
 # typed: true
 # frozen_string_literal: true
 
-require "test_helper"
+require_relative "test_case"
 
 module RubyIndexer
-  class IndexTest < Minitest::Test
-    def setup
-      @index = Index.new
-    end
-
-    def teardown
-      @index.clear
-    end
-
+  class IndexTest < TestCase
     def test_deleting_one_entry_for_a_class
-      RubyIndexer.index_single(@index, "/fake/path/foo.rb", <<~RUBY)
+      @index.index_single("/fake/path/foo.rb", <<~RUBY)
         class Foo
         end
       RUBY
-      RubyIndexer.index_single(@index, "/fake/path/other_foo.rb", <<~RUBY)
+      @index.index_single("/fake/path/other_foo.rb", <<~RUBY)
         class Foo
         end
       RUBY
@@ -32,7 +24,7 @@ module RubyIndexer
     end
 
     def test_deleting_all_entries_for_a_class
-      RubyIndexer.index_single(@index, "/fake/path/foo.rb", <<~RUBY)
+      @index.index_single("/fake/path/foo.rb", <<~RUBY)
         class Foo
         end
       RUBY
@@ -46,7 +38,7 @@ module RubyIndexer
     end
 
     def test_index_resolve
-      RubyIndexer.index_single(@index, "/fake/path/foo.rb", <<~RUBY)
+      @index.index_single("/fake/path/foo.rb", <<~RUBY)
         class Bar; end
 
         module Foo
@@ -80,7 +72,7 @@ module RubyIndexer
     end
 
     def test_accessing_with_colon_colon_prefix
-      RubyIndexer.index_single(@index, "/fake/path/foo.rb", <<~RUBY)
+      @index.index_single("/fake/path/foo.rb", <<~RUBY)
         class Bar; end
 
         module Foo
@@ -97,6 +89,34 @@ module RubyIndexer
       entries = @index["::Foo::Baz::Something"]
       refute_empty(entries)
       assert_equal("Foo::Baz::Something", entries.first.name)
+    end
+
+    def test_fuzzy_search
+      @index.index_single("/fake/path/foo.rb", <<~RUBY)
+        class Bar; end
+
+        module Foo
+          class Bar
+          end
+
+          class Baz
+            class Something
+            end
+          end
+        end
+      RUBY
+
+      result = @index.fuzzy_search("Bar")
+      assert_equal(1, result.length)
+      assert_equal(@index["Bar"].first, result.first)
+
+      result = @index.fuzzy_search("foobarsomeking")
+      assert_equal(5, result.length)
+      assert_equal(["Foo::Baz::Something", "Foo::Bar", "Foo::Baz", "Foo", "Bar"], result.map(&:name))
+
+      result = @index.fuzzy_search("FooBaz")
+      assert_equal(4, result.length)
+      assert_equal(["Foo::Baz", "Foo::Bar", "Foo", "Foo::Baz::Something"], result.map(&:name))
     end
   end
 end
