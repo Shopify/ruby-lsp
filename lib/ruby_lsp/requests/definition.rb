@@ -9,12 +9,13 @@ module RubyLsp
     # request](https://microsoft.github.io/language-server-protocol/specification#textDocument_definition) jumps to the
     # definition of the symbol under the cursor.
     #
-    # Currently, only jumping to required files is supported.
+    # Currently, only jumping to classes, modules and required files is supported.
     #
     # # Example
     #
     # ```ruby
     # require "some_gem/file" # <- Request go to definition on this string will take you to the file
+    # Product.new # <- Request go to definition on this class name will take you to its declaration.
     # ```
     class Definition < Listener
       extend T::Sig
