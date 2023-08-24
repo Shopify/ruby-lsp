@@ -1,4 +1,6 @@
 gem:
+  typed_overrides:
+    "psych": "false"
   # Add your `gem` command parameters here:
   #
   # exclude:
