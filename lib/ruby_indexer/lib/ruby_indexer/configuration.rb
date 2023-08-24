@@ -18,13 +18,16 @@ module RubyIndexer
 
     sig { void }
     def initialize
-      development_only_dependencies = Bundler.definition.dependencies.filter_map do |dependency|
+      excluded_gem_names = Bundler.definition.dependencies.filter_map do |dependency|
         dependency.name if dependency.groups == [:development]
       end
 
-      @excluded_gems = T.let(development_only_dependencies, T::Array[String])
+      @excluded_gems = T.let(excluded_gem_names, T::Array[String])
       @included_gems = T.let([], T::Array[String])
       @excluded_patterns = T.let(["**/*_test.rb"], T::Array[String])
+      path = Bundler.settings["path"]
+      @excluded_patterns << "#{File.expand_path(path, Dir.pwd)}/**/*.rb" if path
+
       @included_patterns = T.let(["#{Dir.pwd}/**/*.rb"], T::Array[String])
       @excluded_magic_comments = T.let(
         [
@@ -60,22 +63,71 @@ module RubyIndexer
 
     sig { returns(T::Array[String]) }
     def files_to_index
-      files_to_index = $LOAD_PATH.flat_map { |p| Dir.glob("#{p}/**/*.rb", base: p) }
+      excluded_gems = @excluded_gems - @included_gems
+      locked_gems = Bundler.locked_gems&.specs
 
-      @included_patterns.each do |pattern|
-        files_to_index.concat(Dir.glob(pattern, File::FNM_PATHNAME | File::FNM_EXTGLOB))
+      # NOTE: indexing the patterns (both included and excluded) needs to happen before indexing gems, otherwise we risk
+      # having duplicates if BUNDLE_PATH is set to a folder inside the project structure
+
+      # Add user specified patterns
+      files_to_index = @included_patterns.flat_map do |pattern|
+        Dir.glob(pattern, File::FNM_PATHNAME | File::FNM_EXTGLOB)
       end
 
-      excluded_gem_paths = (@excluded_gems - @included_gems).filter_map do |gem_name|
-        Gem::Specification.find_by_name(gem_name).full_gem_path
-      rescue Gem::MissingSpecError
-        warn("Gem #{gem_name} is excluded in .index.yml, but that gem was not found in the bundle")
-      end
-
+      # Remove user specified patterns
       files_to_index.reject! do |path|
-        @excluded_patterns.any? { |pattern| File.fnmatch?(pattern, path, File::FNM_PATHNAME | File::FNM_EXTGLOB) } ||
-          excluded_gem_paths.any? { |gem_path| File.fnmatch?("#{gem_path}/**/*.rb", path) }
+        @excluded_patterns.any? do |pattern|
+          File.fnmatch?(pattern, path, File::FNM_PATHNAME | File::FNM_EXTGLOB)
+        end
       end
+
+      # Add default gems to the list of files to be indexed
+      Dir.glob("#{RbConfig::CONFIG["rubylibdir"]}/*").each do |default_path|
+        # The default_path might be a Ruby file or a folder with the gem's name. For example:
+        #   bundler/
+        #   bundler.rb
+        #   psych/
+        #   psych.rb
+        pathname = Pathname.new(default_path)
+        short_name = pathname.basename.to_s.delete_suffix(".rb")
+
+        # If the gem name is excluded, then we skip it
+        next if excluded_gems.include?(short_name)
+
+        # If the default gem is also a part of the bundle, we skip indexing the default one and index only the one in
+        # the bundle, which won't be in `default_path`, but will be in `Bundler.bundle_path` instead
+        next if locked_gems&.any? do |locked_spec|
+          locked_spec.name == short_name &&
+            !Gem::Specification.find_by_name(short_name).full_gem_path.start_with?(RbConfig::CONFIG["rubylibprefix"])
+        end
+
+        if pathname.directory?
+          # If the default_path is a directory, we index all the Ruby files in it
+          files_to_index.concat(Dir.glob("#{default_path}/**/*.rb", File::FNM_PATHNAME | File::FNM_EXTGLOB))
+        else
+          # If the default_path is a Ruby file, we index it
+          files_to_index << default_path
+        end
+      end
+
+      # Add the locked gems to the list of files to be indexed
+      locked_gems&.each do |spec|
+        next if excluded_gems.include?(spec.name)
+
+        full_gem_path = Gem::Specification.find_by_name(spec.name).full_gem_path
+
+        # When working on a gem, it will be included in the locked_gems list. Since these are the project's own files,
+        # we have already included and handled exclude patterns for it and should not re-include or it'll lead to
+        # duplicates or accidentally ignoring exclude patterns
+        next if full_gem_path == Dir.pwd
+
+        files_to_index.concat(Dir.glob("#{full_gem_path}/**/*.rb"))
+      rescue Gem::MissingSpecError
+        # If a gem is scoped only to some specific platform, then its dependencies may not be installed either, but they
+        # are still listed in locked_gems. We can't index them because they are not installed for the platform, so we
+        # just ignore if they're missing
+      end
+
       files_to_index.uniq!
       files_to_index
     end
