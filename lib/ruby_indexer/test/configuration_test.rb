@@ -18,6 +18,50 @@ module RubyIndexer
       assert(files_to_index.none? { |path| path == __FILE__ })
     end
 
+    def test_files_to_index_does_not_include_default_gem_path_when_in_bundle
+      @config.load_config
+      files_to_index = @config.files_to_index
+
+      assert(files_to_index.none? { |path| path.start_with?("#{RbConfig::CONFIG["rubylibdir"]}/psych") })
+    end
+
+    def test_files_to_index_includes_default_gems
+      @config.load_config
+      files_to_index = @config.files_to_index
+
+      assert_includes(files_to_index, "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb")
+      assert_includes(files_to_index, "#{RbConfig::CONFIG["rubylibdir"]}/ipaddr.rb")
+      assert_includes(files_to_index, "#{RbConfig::CONFIG["rubylibdir"]}/abbrev.rb")
+    end
+
+    def test_files_to_index_includes_project_files
+      @config.load_config
+      files_to_index = @config.files_to_index
+
+      Dir.glob("#{Dir.pwd}/lib/**/*.rb").each do |path|
+        next if path.end_with?("_test.rb")
+
+        assert_includes(files_to_index, path)
+      end
+    end
+
+    def test_files_to_index_avoids_duplicates_if_bundle_path_is_inside_project
+      Bundler.settings.set_global("path", "vendor/bundle")
+      config = Configuration.new
+      config.load_config
+
+      assert_includes(config.instance_variable_get(:@excluded_patterns), "#{Dir.pwd}/vendor/bundle/**/*.rb")
+    ensure
+      Bundler.settings.set_global("path", nil)
+    end
+
+    def test_files_to_index_does_not_include_gems_own_installed_files
+      @config.load_config
+      files_to_index = @config.files_to_index
+
+      assert(files_to_index.none? { |path| path.start_with?(Bundler.bundle_path.join("gems", "ruby-lsp").to_s) })
+    end
+
     def test_paths_are_unique
       @config.load_config
       files_to_index = @config.files_to_index
