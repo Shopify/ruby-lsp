@@ -84,4 +84,11 @@ class WorkspaceSymbolTest < Minitest::Test
     assert_equal(RubyLsp::Constant::SymbolKind::CLASS, T.must(result).kind)
     assert_equal("Foo", T.must(result).container_name)
   end
+
+  def test_finds_default_gem_symbols
+    @index.index_single("#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb")
+
+    result = RubyLsp::Requests::WorkspaceSymbol.new("Pathname", @index).run
+    refute_empty(result)
+  end
 end

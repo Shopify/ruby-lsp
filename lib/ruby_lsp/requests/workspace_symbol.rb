@@ -38,7 +38,12 @@ module RubyLsp
         @index.fuzzy_search(@query).filter_map do |entry|
           # If the project is using Sorbet, we let Sorbet handle symbols defined inside the project itself and RBIs, but
           # we still return entries defined in gems to allow developers to jump directly to the source
-          next if DependencyDetector::HAS_TYPECHECKER && bundle_path && !entry.file_path.start_with?(bundle_path)
+          file_path = entry.file_path
+          if DependencyDetector::HAS_TYPECHECKER && bundle_path && !file_path.start_with?(bundle_path) &&
+              !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
+
+            next
+          end
 
           kind = kind_for_entry(entry)
           loc = entry.location
@@ -53,7 +58,7 @@ module RubyLsp
             container_name: T.must(container).join("::"),
             kind: kind,
             location: Interface::Location.new(
-              uri: URI::Generic.from_path(path: entry.file_path).to_s,
+              uri: URI::Generic.from_path(path: file_path).to_s,
               range:  Interface::Range.new(
                 start: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column),
                 end: Interface::Position.new(line: loc.end_line - 1, character: loc.end_column),
