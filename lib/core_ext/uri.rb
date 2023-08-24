@@ -26,7 +26,7 @@ module URI
       parsed_path = path
       return unless parsed_path
 
-      unescaped_path = CGI.unescape(parsed_path)
+      unescaped_path = DEFAULT_PARSER.unescape(parsed_path)
 
       # On Windows, when we're getting the file system path back from the URI, we need to remove the leading forward
       # slash
