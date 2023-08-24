@@ -24,9 +24,6 @@ require "benchmark"
 # Run signature blocks ahead of time
 T::Utils.run_all_sig_blocks
 
-# Fetch Rails documents ahead of time
-RubyLsp::Requests::Support::RailsDocumentClient.send(:search_index)
-
 # Build gem file paths ahead of time
 RubyLsp::Requests::DocumentLink.gem_paths
 

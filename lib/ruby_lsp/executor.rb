@@ -259,16 +259,20 @@ module RubyLsp
       document = @store.get(uri)
       return if document.syntax_error?
 
-      target, parent = document.locate_node(position)
+      target, parent, nesting = document.locate_node(
+        position,
+        node_types: Requests::Hover::ALLOWED_TARGETS,
+      )
 
-      if !Requests::Hover::ALLOWED_TARGETS.include?(target.class) &&
-          Requests::Hover::ALLOWED_TARGETS.include?(parent.class)
+      if (Requests::Hover::ALLOWED_TARGETS.include?(parent.class) &&
+          !Requests::Hover::ALLOWED_TARGETS.include?(target.class)) ||
+          (parent.is_a?(SyntaxTree::ConstPathRef) && target.is_a?(SyntaxTree::Const))
         target = parent
       end
 
       # Instantiate all listeners
       emitter = EventEmitter.new
-      hover = Requests::Hover.new(emitter, @message_queue)
+      hover = Requests::Hover.new(@index, nesting, emitter, @message_queue)
 
       # Emit events for all listeners
       emitter.emit_for_target(target)

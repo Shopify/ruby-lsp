@@ -2,67 +2,39 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "net/http" # for stubbing
 require "expectations/expectations_test_runner"
 
 class HoverExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Hover, "hover"
 
-  def assert_expectations(source, expected)
-    source = substitute(source)
-    actual = T.cast(run_expectations(source), T.nilable(LanguageServer::Protocol::Interface::Hover))
-    actual_json = actual ? JSON.parse(actual.to_json) : nil
-    assert_equal(json_expectations(substitute(expected)), actual_json)
-  end
-
-  def test_search_index_being_nil
-    message_queue = Thread::Queue.new
-    store = RubyLsp::Store.new
-    store.set(uri: URI("file:///fake.rb"), source: "belongs_to :foo", version: 1)
-
-    RubyLsp::Requests::Support::RailsDocumentClient.stubs(search_index: nil)
-    RubyLsp::Executor.new(store, message_queue).execute({
-      method: "textDocument/hover",
-      params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 0, character: 0 } },
-    }).response
-  ensure
-    T.must(message_queue).close
-  end
-
-  class FakeHTTPResponse
-    attr_reader :code, :body
-
-    def initialize(code, body)
-      @code = code
-      @body = body
-    end
-  end
-
   def run_expectations(source)
     message_queue = Thread::Queue.new
-    js_content = File.read(File.join(TEST_FIXTURES_DIR, "rails_search_index.js"))
-    fake_response = FakeHTTPResponse.new("200", js_content)
-
     position = @__params&.first || { character: 0, line: 0 }
 
-    Net::HTTP.stubs(get_response: fake_response)
+    uri = URI("file:///fake.rb")
     store = RubyLsp::Store.new
-    store.set(uri: URI("file:///fake.rb"), source: source, version: 1)
+    store.set(uri: uri, source: source, version: 1)
 
-    RubyLsp::Executor.new(store, message_queue).execute({
-      method: "textDocument/hover",
-      params: { textDocument: { uri: "file:///fake.rb" }, position: position },
-    }).response
-  ensure
-    T.must(message_queue).close
+    executor = RubyLsp::Executor.new(store, message_queue)
+    index = executor.instance_variable_get(:@index)
+    index.index_single(uri.to_standardized_path, source)
+
+    begin
+      # We need to pretend that Sorbet is not a dependency or else we can't properly test
+      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+      executor.execute({
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: position },
+      }).response
+    ensure
+      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
+      T.must(message_queue).close
+    end
   end
 
   def test_hover_extensions
     message_queue = Thread::Queue.new
     create_hover_extension
-    js_content = File.read(File.join(TEST_FIXTURES_DIR, "rails_search_index.js"))
-    fake_response = FakeHTTPResponse.new("200", js_content)
-    Net::HTTP.stubs(get_response: fake_response)
 
     store = RubyLsp::Store.new
     store.set(uri: URI("file:///fake.rb"), source: <<~RUBY, version: 1)
@@ -77,7 +49,6 @@ class HoverExpectationsTest < ExpectationsTestRunner
     }).response
 
     assert_match("Method from middleware: belongs_to", response.contents.value)
-    assert_match("[Rails Document: `ActiveRecord::Associations::ClassMethods#belongs_to`]", response.contents.value)
   ensure
     RubyLsp::Extension.extensions.clear
     T.must(message_queue).close
@@ -115,9 +86,5 @@ class HoverExpectationsTest < ExpectationsTestRunner
         klass.new(emitter, message_queue)
       end
     end
-  end
-
-  def substitute(original)
-    original.gsub("RAILTIES_VERSION", Gem::Specification.find_by_name("railties").version.to_s)
   end
 end

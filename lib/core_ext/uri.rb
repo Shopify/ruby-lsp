@@ -6,8 +6,8 @@ module URI
     class << self
       extend T::Sig
 
-      sig { params(path: String, scheme: String).returns(URI::Generic) }
-      def from_path(path:, scheme: "file")
+      sig { params(path: String, fragment: T.nilable(String), scheme: String).returns(URI::Generic) }
+      def from_path(path:, fragment: nil, scheme: "file")
         # On Windows, if the path begins with the disk name, we need to add a leading slash to make it a valid URI
         escaped_path = if /^[A-Z]:/i.match?(path)
           DEFAULT_PARSER.escape("/#{path}")
@@ -15,7 +15,7 @@ module URI
           DEFAULT_PARSER.escape(path)
         end
 
-        build(scheme: scheme, path: escaped_path)
+        build(scheme: scheme, path: escaped_path, fragment: fragment)
       end
     end
 

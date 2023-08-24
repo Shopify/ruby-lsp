@@ -120,6 +120,11 @@ module RubyIndexer
         @comments = comments
       end
 
+      sig { returns(String) }
+      def file_name
+        File.basename(@file_path)
+      end
+
       class Namespace < Entry
         sig { returns(String) }
         def short_name

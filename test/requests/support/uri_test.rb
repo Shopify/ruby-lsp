@@ -45,5 +45,10 @@ module RubyLsp
       uri = URI::Generic.from_path(path: path)
       assert_equal(path, uri.to_standardized_path)
     end
+
+    def test_from_path_with_fragment
+      uri = URI::Generic.from_path(path: "/some/unix/path/to/file.rb", fragment: "L1,3-2,9")
+      assert_equal("file:///some/unix/path/to/file.rb#L1,3-2,9", uri.to_s)
+    end
   end
 end
