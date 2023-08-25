@@ -33,24 +33,33 @@ class HoverExpectationsTest < ExpectationsTestRunner
   end
 
   def test_hover_extensions
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
     message_queue = Thread::Queue.new
     create_hover_extension
 
     store = RubyLsp::Store.new
-    store.set(uri: URI("file:///fake.rb"), source: <<~RUBY, version: 1)
+    source = <<~RUBY
+      # Hello
       class Post
-        belongs_to :user
       end
-    RUBY
 
-    response = RubyLsp::Executor.new(store, message_queue).execute({
+      Post
+    RUBY
+    uri = URI::Generic.from_path(path: "/fake.rb")
+    store.set(uri: uri, source: source, version: 1)
+
+    executor = RubyLsp::Executor.new(store, message_queue)
+    executor.instance_variable_get(:@index).index_single(uri.to_standardized_path, source)
+
+    response = executor.execute({
       method: "textDocument/hover",
-      params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 1, character: 2 } },
+      params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 4, character: 0 } },
     }).response
 
-    assert_match("Method from middleware: belongs_to", response.contents.value)
+    assert_match("Hello\n\nHello from middleware: Post", response.contents.value)
   ensure
     RubyLsp::Extension.extensions.clear
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
     T.must(message_queue).close
   end
 
@@ -70,14 +79,14 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
           def initialize(emitter, message_queue)
             super
-            emitter.register(self, :on_command)
+            emitter.register(self, :on_const)
           end
 
-          def on_command(node)
+          def on_const(node)
             T.bind(self, RubyLsp::Listener[T.untyped])
             contents = RubyLsp::Interface::MarkupContent.new(
               kind: "markdown",
-              value: "Method from middleware: #{node.message.value}",
+              value: "Hello from middleware: #{node.value}",
             )
             @response = RubyLsp::Interface::Hover.new(range: range_from_syntax_tree_node(node), contents: contents)
           end

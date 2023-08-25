@@ -61,7 +61,7 @@ module RubyLsp
         if @response.nil?
           @response = other.response
         else
-          @response.contents.value << other_response.contents.value << "\n\n"
+          @response.contents.value << "\n\n" << other_response.contents.value
         end
 
         self
