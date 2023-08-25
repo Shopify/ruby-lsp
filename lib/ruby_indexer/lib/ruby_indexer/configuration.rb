@@ -111,17 +111,17 @@ module RubyIndexer
       end
 
       # Add the locked gems to the list of files to be indexed
-      locked_gems&.each do |spec|
-        next if excluded_gems.include?(spec.name)
+      locked_gems&.each do |lazy_spec|
+        next if excluded_gems.include?(lazy_spec.name)
 
-        full_gem_path = Gem::Specification.find_by_name(spec.name).full_gem_path
+        spec = Gem::Specification.find_by_name(lazy_spec.name)
 
         # When working on a gem, it will be included in the locked_gems list. Since these are the project's own files,
         # we have already included and handled exclude patterns for it and should not re-include or it'll lead to
         # duplicates or accidentally ignoring exclude patterns
-        next if full_gem_path == Dir.pwd
+        next if spec.full_gem_path == Dir.pwd
 
-        files_to_index.concat(Dir.glob("#{full_gem_path}/**/*.rb"))
+        files_to_index.concat(Dir.glob("#{spec.full_gem_path}/{#{spec.require_paths.join(",")}}/**/*.rb"))
       rescue Gem::MissingSpecError
         # If a gem is scoped only to some specific platform, then its dependencies may not be installed either, but they
         # are still listed in locked_gems. We can't index them because they are not installed for the platform, so we
