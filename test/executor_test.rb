@@ -115,6 +115,19 @@ class ExecutorTest < Minitest::Test
     refute_empty(index.instance_variable_get(:@entries))
   end
 
+  def test_initialized_recovers_from_indexing_failures
+    @store.experimental_features = true
+    RubyIndexer::Index.any_instance.expects(:index_all).once.raises(StandardError, "boom!")
+
+    @executor.execute({ method: "initialized", params: {} })
+    notification = T.must(@message_queue.pop)
+    assert_equal("window/showMessage", notification.message)
+    assert_equal(
+      "Error while indexing: boom!",
+      T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
+    )
+  end
+
   def test_rubocop_errors_push_window_notification
     @executor.expects(:formatting).raises(StandardError, "boom").once
 
