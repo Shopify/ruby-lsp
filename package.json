@@ -430,7 +430,7 @@
     "glob": "^10.3.3",
     "mocha": "^10.2.0",
     "prettier": "^3.0.2",
-    "typescript": "^5.1.6"
+    "typescript": "^5.2.2"
   },
   "dependencies": {
     "vscode-languageclient": "^8.1.0"
