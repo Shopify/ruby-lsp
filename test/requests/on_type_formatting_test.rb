@@ -353,7 +353,7 @@ class OnTypeFormattingTest < Minitest::Test
     expected_edits = [
       {
         range: { start: { line: 2, character: 2 }, end: { line: 2, character: 2 } },
-        newText: "  end",
+        newText: "  end\n",
       },
       {
         range: { start: { line: 0, character: 6 }, end: { line: 0, character: 6 } },
