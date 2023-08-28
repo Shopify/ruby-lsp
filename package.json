@@ -424,7 +424,7 @@
     "@vscode/test-electron": "^2.3.4",
     "@vscode/vsce": "^2.20.1",
     "esbuild": "^0.19.2",
-    "eslint": "^8.47.0",
+    "eslint": "^8.48.0",
     "eslint-import-resolver-typescript": "^3.6.0",
     "eslint-plugin-prettier": "^5.0.0",
     "glob": "^10.3.3",
