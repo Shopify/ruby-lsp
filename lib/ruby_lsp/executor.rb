@@ -58,14 +58,7 @@ module RubyLsp
           warn(errored_extensions.map(&:backtraces).join("\n\n"))
         end
 
-        if @store.experimental_features
-          # The begin progress invocation happens during `initialize`, so that the notification is sent before we are
-          # stuck indexing files
-          RubyIndexer.configuration.load_config
-          @index.index_all
-          end_progress("indexing-progress")
-        end
-
+        perform_initial_indexing
         check_formatter_is_available
 
         warn("Ruby LSP is ready")
@@ -207,6 +200,31 @@ module RubyLsp
       end
 
       VOID
+    end
+
+    sig { void }
+    def perform_initial_indexing
+      return unless @store.experimental_features
+
+      # The begin progress invocation happens during `initialize`, so that the notification is sent before we are
+      # stuck indexing files
+      RubyIndexer.configuration.load_config
+
+      begin
+        @index.index_all
+      rescue StandardError => error
+        @message_queue << Notification.new(
+          message: "window/showMessage",
+          params: Interface::ShowMessageParams.new(
+            type: Constant::MessageType::ERROR,
+            message: "Error while indexing: #{error.message}",
+          ),
+        )
+      end
+
+      # Always end the progress notification even if indexing failed or else it never goes away and the user has no way
+      # of dismissing it
+      end_progress("indexing-progress")
     end
 
     sig { params(query: T.nilable(String)).returns(T::Array[Interface::WorkspaceSymbol]) }
