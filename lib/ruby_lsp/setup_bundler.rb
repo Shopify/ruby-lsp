@@ -179,7 +179,7 @@ module RubyLsp
 
       if should_bundle_install?
         # Install gems using the custom bundle
-        command << "bundle check || bundle install "
+        command << "(bundle check || bundle install) "
       else
         # If ruby-lsp or debug are not in the Gemfile, try to update them to the latest version
         command << "bundle update "
