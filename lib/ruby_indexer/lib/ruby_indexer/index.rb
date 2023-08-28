@@ -95,6 +95,8 @@ module RubyIndexer
       content = source || File.read(path)
       visitor = IndexVisitor.new(self, YARP.parse(content), path)
       visitor.run
+    rescue Errno::EISDIR
+      # If `path` is a directory, just ignore it and continue indexing
     end
 
     class Entry
