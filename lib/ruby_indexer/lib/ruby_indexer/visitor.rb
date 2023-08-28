@@ -35,17 +35,10 @@ module RubyIndexer
         add_index_entry(node, Index::Entry::Class)
       when YARP::ModuleNode
         add_index_entry(node, Index::Entry::Module)
-      when YARP::ConstantWriteNode
+      when YARP::ConstantWriteNode, YARP::ConstantOrWriteNode
         add_constant(node)
-      when YARP::ConstantPathWriteNode
+      when YARP::ConstantPathWriteNode, YARP::ConstantPathOrWriteNode
         add_constant_with_path(node)
-      when YARP::OrWriteNode
-        case node.target
-        when YARP::ConstantWriteNode
-          add_constant(node.target)
-        when YARP::ConstantPathWriteNode
-          add_constant_with_path(node.target)
-        end
       end
     end
 
@@ -57,13 +50,21 @@ module RubyIndexer
 
     private
 
-    sig { params(node: YARP::ConstantWriteNode).void }
+    sig do
+      params(
+        node: T.any(YARP::ConstantWriteNode, YARP::ConstantOrWriteNode),
+      ).void
+    end
     def add_constant(node)
       comments = collect_comments(node)
       @index << Index::Entry::Constant.new(fully_qualify_name(node.name), @file_path, node.location, comments)
     end
 
-    sig { params(node: YARP::ConstantPathWriteNode).void }
+    sig do
+      params(
+        node: T.any(YARP::ConstantPathWriteNode, YARP::ConstantPathOrWriteNode),
+      ).void
+    end
     def add_constant_with_path(node)
       # ignore variable constants like `var::FOO` or `self.class::FOO`
       return unless node.target.parent.nil? || node.target.parent.is_a?(YARP::ConstantReadNode)
