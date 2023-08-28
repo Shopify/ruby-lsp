@@ -117,7 +117,7 @@ module RubyLsp
           move_cursor_to(@position[:line], @indentation + 2)
         elsif next_line.nil? || next_line.strip.empty?
           add_edit_with_text("#{indents}end", { line: @position[:line] + 1, character: @position[:character] })
-          move_cursor_to(@position[:line], @indentation + 3)
+          move_cursor_to(@position[:line] - 1, @indentation + @previous_line.size + 1)
         end
       end
 
