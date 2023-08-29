@@ -68,7 +68,7 @@ class IntegrationTest < Minitest::Test
     response = make_request("textDocument/documentSymbol", { textDocument: { uri: @uri } })
     symbol = response[:result].first
     assert_equal("Foo", symbol[:name])
-    assert_equal(RubyLsp::Requests::DocumentSymbol::SYMBOL_KIND[:class], symbol[:kind])
+    assert_equal(LanguageServer::Protocol::Constant::SymbolKind::CLASS, symbol[:kind])
   end
 
   def test_document_highlight
