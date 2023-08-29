@@ -26,7 +26,7 @@ module RubyLsp
       def initialize(emitter, message_queue)
         super
         @response = T.let([], ResponseType)
-        @tree = T.let(Support::PrefixTree.new(collect_load_path_files), Support::PrefixTree)
+        @tree = T.let(RubyIndexer::PrefixTree.new(collect_load_path_files), RubyIndexer::PrefixTree)
 
         emitter.register(self, :on_tstring_content)
       end
