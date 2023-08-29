@@ -65,7 +65,7 @@ module RubyLsp
         class_name = node.constant.constant.value
         @class_stack.push(class_name)
 
-        if class_name.end_with?("Test")
+        if @path && class_name.end_with?("Test")
           add_test_code_lens(
             node,
             name: class_name,
@@ -89,7 +89,7 @@ module RubyLsp
         visibility, _ = @visibility_stack.last
         if visibility == "public"
           method_name = node.name.value
-          if method_name.start_with?("test_")
+          if @path && method_name.start_with?("test_")
             add_test_code_lens(
               node,
               name: method_name,
