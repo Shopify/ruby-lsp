@@ -125,5 +125,18 @@ module RubyIndexer
     ensure
       FileUtils.rm_r("lib/this_is_a_dir.rb")
     end
+
+    def test_searching_for_require_paths
+      @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
+        class Foo
+        end
+      RUBY
+      @index.index_single(IndexablePath.new("/fake", "/fake/path/other_foo.rb"), <<~RUBY)
+        class Foo
+        end
+      RUBY
+
+      assert_equal(["path/foo", "path/other_foo"], @index.search_require_paths("path"))
+    end
   end
 end

@@ -509,7 +509,7 @@ module RubyLsp
       return unless target
 
       emitter = EventEmitter.new
-      listener = Requests::PathCompletion.new(emitter, @message_queue)
+      listener = Requests::PathCompletion.new(@index, emitter, @message_queue)
       emitter.emit_for_target(target)
       listener.response
     end
