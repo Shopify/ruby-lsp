@@ -109,14 +109,12 @@ class ExecutorTest < Minitest::Test
   end
 
   def test_initialized_populates_index
-    @store.experimental_features = true
     @executor.execute({ method: "initialized", params: {} })
     index = @executor.instance_variable_get(:@index)
     refute_empty(index.instance_variable_get(:@entries))
   end
 
   def test_initialized_recovers_from_indexing_failures
-    @store.experimental_features = true
     RubyIndexer::Index.any_instance.expects(:index_all).once.raises(StandardError, "boom!")
 
     @executor.execute({ method: "initialized", params: {} })
@@ -204,6 +202,12 @@ class ExecutorTest < Minitest::Test
 
       assert_equal("none", @store.formatter)
       refute_empty(@message_queue)
+
+      # Account for starting and ending the progress notifications during initialized
+      assert_equal("window/workDoneProgress/create", @message_queue.pop.message)
+      assert_equal("$/progress", @message_queue.pop.message)
+      assert_equal("$/progress", @message_queue.pop.message)
+
       notification = T.must(@message_queue.pop)
       assert_equal("window/showMessage", notification.message)
       assert_equal(

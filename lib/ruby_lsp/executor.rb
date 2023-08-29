@@ -204,8 +204,6 @@ module RubyLsp
 
     sig { void }
     def perform_initial_indexing
-      return unless @store.experimental_features
-
       # The begin progress invocation happens during `initialize`, so that the notification is sent before we are
       # stuck indexing files
       RubyIndexer.configuration.load_config
@@ -643,36 +641,34 @@ module RubyLsp
         )
       end
 
-      if @store.experimental_features
-        # Dynamically registered capabilities
-        file_watching_caps = options.dig(:capabilities, :workspace, :didChangeWatchedFiles)
+      # Dynamically registered capabilities
+      file_watching_caps = options.dig(:capabilities, :workspace, :didChangeWatchedFiles)
 
-        # Not every client supports dynamic registration or file watching
-        if file_watching_caps&.dig(:dynamicRegistration) && file_watching_caps&.dig(:relativePatternSupport)
-          @message_queue << Request.new(
-            message: "client/registerCapability",
-            params: Interface::RegistrationParams.new(
-              registrations: [
-                # Register watching Ruby files
-                Interface::Registration.new(
-                  id: "workspace/didChangeWatchedFiles",
-                  method: "workspace/didChangeWatchedFiles",
-                  register_options: Interface::DidChangeWatchedFilesRegistrationOptions.new(
-                    watchers: [
-                      Interface::FileSystemWatcher.new(
-                        glob_pattern: "**/*.rb",
-                        kind: Constant::WatchKind::CREATE | Constant::WatchKind::CHANGE | Constant::WatchKind::DELETE,
-                      ),
-                    ],
-                  ),
+      # Not every client supports dynamic registration or file watching
+      if file_watching_caps&.dig(:dynamicRegistration) && file_watching_caps&.dig(:relativePatternSupport)
+        @message_queue << Request.new(
+          message: "client/registerCapability",
+          params: Interface::RegistrationParams.new(
+            registrations: [
+              # Register watching Ruby files
+              Interface::Registration.new(
+                id: "workspace/didChangeWatchedFiles",
+                method: "workspace/didChangeWatchedFiles",
+                register_options: Interface::DidChangeWatchedFilesRegistrationOptions.new(
+                  watchers: [
+                    Interface::FileSystemWatcher.new(
+                      glob_pattern: "**/*.rb",
+                      kind: Constant::WatchKind::CREATE | Constant::WatchKind::CHANGE | Constant::WatchKind::DELETE,
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          )
-        end
-
-        begin_progress("indexing-progress", "Ruby LSP: indexing files")
+              ),
+            ],
+          ),
+        )
       end
+
+      begin_progress("indexing-progress", "Ruby LSP: indexing files")
 
       Interface::InitializeResult.new(
         capabilities: Interface::ServerCapabilities.new(
