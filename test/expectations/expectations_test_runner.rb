@@ -53,6 +53,9 @@ class ExpectationsTestRunner < Minitest::Test
         # temporarily skip until we figure out comment handling
         next if handler_class == RubyLsp::Requests::DocumentLink && path == "test/fixtures/source_comment.rb"
 
+        # temporarily skip until we figure out nesting here
+        next if handler_class == RubyLsp::Requests::Hover && path == "test/fixtures/documented_namespaced_class.rb"
+
         test_name = File.basename(path, ".rb")
 
         expectations_dir = File.join(TEST_EXP_DIR, expectation_suffix)

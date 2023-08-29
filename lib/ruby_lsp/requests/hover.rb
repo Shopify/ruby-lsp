@@ -3,19 +3,15 @@
 
 module RubyLsp
   module Requests
-    # ![Hover demo](../../rails_document_link_hover.gif)
+    # ![Hover demo](../../hover.gif)
     #
     # The [hover request](https://microsoft.github.io/language-server-protocol/specification#textDocument_hover)
-    # renders a clickable link to the code's official documentation.
-    # It currently only supports Rails' documentation: when hovering over Rails DSLs/constants under certain paths,
-    # like `before_save :callback` in `models/post.rb`, it generates a link to `before_save`'s API documentation.
+    # displays the documentation for the symbol currently under the cursor.
     #
     # # Example
     #
     # ```ruby
-    # class Post < ApplicationRecord
-    #   before_save :do_something # when hovering on before_save, the link will be rendered
-    # end
+    # String # -> Hovering over the class reference will show all declaration locations and the documentation
     # ```
     class Hover < Listener
       extend T::Sig
@@ -25,8 +21,9 @@ module RubyLsp
 
       ALLOWED_TARGETS = T.let(
         [
-          YARP::CallNode,
-          YARP::ConstantPathNode,
+          YARP::ClassNode,
+          YARP::ModuleNode,
+          YARP::ConstantWriteNode,
         ],
         T::Array[T.class_of(YARP::Node)],
       )
@@ -34,15 +31,24 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :response
 
-      sig { params(emitter: EventEmitter, message_queue: Thread::Queue).void }
-      def initialize(emitter, message_queue)
-        super
+      sig do
+        params(
+          index: RubyIndexer::Index,
+          nesting: T::Array[String],
+          emitter: EventEmitter,
+          message_queue: Thread::Queue,
+        ).void
+      end
+      def initialize(index, nesting, emitter, message_queue)
+        super(emitter, message_queue)
 
+        @nesting = nesting
+        @index = index
         @external_listeners.concat(
           Extension.extensions.filter_map { |ext| ext.create_hover_listener(emitter, message_queue) },
         )
         @response = T.let(nil, ResponseType)
-        emitter.register(self, :on_constant_path, :on_call)
+        emitter.register(self, :on_class, :on_module, :on_constant_write)
       end
 
       # Merges responses from other hover listeners
@@ -54,34 +60,63 @@ module RubyLsp
         if @response.nil?
           @response = other.response
         else
-          @response.contents.value << other_response.contents.value << "\n\n"
+          @response.contents.value << "\n\n" << other_response.contents.value
         end
 
         self
       end
 
-      sig { params(node: YARP::ConstantPathNode).void }
-      def on_constant_path(node)
-        @response = generate_rails_document_link_hover(node.location.slice, node.location)
+      sig { params(node: YARP::ClassNode).void }
+      def on_class(node)
+        return if DependencyDetector::HAS_TYPECHECKER
+
+        generate_hover(node.name, node.constant_path.location)
       end
 
-      sig { params(node: YARP::CallNode).void }
-      def on_call(node)
-        message = node.message
-        return if message.is_a?(Symbol)
+      sig { params(node: YARP::ModuleNode).void }
+      def on_module(node)
+        return if DependencyDetector::HAS_TYPECHECKER
 
-        @response = generate_rails_document_link_hover(message, node.message_loc)
+        generate_hover(node.name, node.constant_path.location)
+      end
+
+      sig { params(node: YARP::ConstantWriteNode).void }
+      def on_constant_write(node)
+        return if DependencyDetector::HAS_TYPECHECKER
+
+        generate_hover(node.name, node.name_loc)
       end
 
       private
 
-      sig { params(name: String, location: YARP::Location).returns(T.nilable(Interface::Hover)) }
-      def generate_rails_document_link_hover(name, location)
-        urls = Support::RailsDocumentClient.generate_rails_document_urls(name)
-        return if urls.empty?
+      sig { params(name: String, location: YARP::Location).void }
+      def generate_hover(name, location)
+        entries = @index.resolve(name, @nesting)
+        return unless entries
 
-        contents = Interface::MarkupContent.new(kind: "markdown", value: urls.join("\n\n"))
-        Interface::Hover.new(range: range_from_location(location), contents: contents)
+        title = +"```ruby\n#{name}\n```"
+        definitions = []
+        content = +""
+        entries.each do |entry|
+          loc = entry.location
+
+          # We always handle locations as zero based. However, for file links in Markdown we need them to be one based,
+          # which is why instead of the usual subtraction of 1 to line numbers, we are actually adding 1 to columns. The
+          # format for VS Code file URIs is `file:///path/to/file.rb#Lstart_line,start_column-end_line,end_column`
+          uri = URI::Generic.from_path(
+            path: entry.file_path,
+            fragment: "L#{loc.start_line},#{loc.start_column + 1}-#{loc.end_line},#{loc.end_column + 1}",
+          )
+
+          definitions << "[#{entry.file_name}](#{uri})"
+          content << "\n\n#{entry.comments.join("\n")}" unless entry.comments.empty?
+        end
+
+        contents = Interface::MarkupContent.new(
+          kind: "markdown",
+          value: "#{title}\n\n**Definitions**: #{definitions.join(" | ")}\n\n#{content}",
+        )
+        @response = Interface::Hover.new(range: range_from_location(location), contents: contents)
       end
     end
   end

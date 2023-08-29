@@ -6,6 +6,7 @@ require "bundler"
 require "fileutils"
 require "pathname"
 require "digest"
+require "time"
 
 # This file is a script that will configure a custom bundle for the Ruby LSP. The custom bundle allows developers to use
 # the Ruby LSP without including the gem in their application's Gemfile while at the same time giving us access to the
@@ -17,6 +18,8 @@ module RubyLsp
 
     class BundleNotLocked < StandardError; end
 
+    FOUR_HOURS = T.let(4 * 60 * 60, Integer)
+
     sig { params(project_path: String, branch: T.nilable(String)).void }
     def initialize(project_path, branch: nil)
       @project_path = project_path
@@ -27,6 +30,7 @@ module RubyLsp
       @custom_gemfile = T.let(@custom_dir + "Gemfile", Pathname)
       @custom_lockfile = T.let(@custom_dir + "Gemfile.lock", Pathname)
       @lockfile_hash_path = T.let(@custom_dir + "main_lockfile_hash", Pathname)
+      @last_updated_path = T.let(@custom_dir + "last_updated", Pathname)
 
       # Regular bundle paths
       @gemfile = T.let(
@@ -173,15 +177,16 @@ module RubyLsp
       # custom `.ruby-lsp/Gemfile.lock` already exists and includes both gems
       command = +""
 
-      if (@dependencies["ruby-lsp"] && @dependencies["debug"]) ||
-          custom_bundle_dependencies["ruby-lsp"].nil? || custom_bundle_dependencies["debug"].nil?
+      if should_bundle_install?
         # Install gems using the custom bundle
-        command << "bundle install "
+        command << "(bundle check || bundle install) "
       else
         # If ruby-lsp or debug are not in the Gemfile, try to update them to the latest version
         command << "bundle update "
         command << "ruby-lsp " unless @dependencies["ruby-lsp"]
         command << "debug " unless @dependencies["debug"]
+
+        @last_updated_path.write(Time.now.iso8601)
       end
 
       # Redirect stdout to stderr to prevent going into an infinite loop. The extension might confuse stdout output with
@@ -192,6 +197,13 @@ module RubyLsp
       warn("Ruby LSP> Running bundle install for the custom bundle. This may take a while...")
       system(env, command)
       [bundle_gemfile.to_s, expanded_path]
+    end
+
+    sig { returns(T::Boolean) }
+    def should_bundle_install?
+      (!@dependencies["ruby-lsp"].nil? && !@dependencies["debug"].nil?) ||
+        custom_bundle_dependencies["ruby-lsp"].nil? || custom_bundle_dependencies["debug"].nil? ||
+        (@last_updated_path.exist? && Time.parse(@last_updated_path.read) > (Time.now - FOUR_HOURS))
     end
   end
 end

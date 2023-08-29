@@ -111,10 +111,15 @@ module RubyLsp
           # If the project has Sorbet, then we only want to handle go to definition for constants defined in gems, as an
           # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
           # in the project, even if the files are typed false
-          next if DependencyDetector::HAS_TYPECHECKER && bundle_path && !entry.file_path.start_with?(bundle_path)
+          file_path = entry.file_path
+          if DependencyDetector::HAS_TYPECHECKER && bundle_path && !file_path.start_with?(bundle_path) &&
+              !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
+
+            next
+          end
 
           Interface::Location.new(
-            uri: URI::Generic.from_path(path: entry.file_path).to_s,
+            uri: URI::Generic.from_path(path: file_path).to_s,
             range: Interface::Range.new(
               start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
               end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),

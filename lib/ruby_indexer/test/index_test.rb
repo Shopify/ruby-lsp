@@ -118,5 +118,12 @@ module RubyIndexer
       assert_equal(4, result.length)
       assert_equal(["Foo::Baz", "Foo::Bar", "Foo", "Foo::Baz::Something"], result.map(&:name))
     end
+
+    def test_index_single_ignores_directories
+      FileUtils.mkdir("lib/this_is_a_dir.rb")
+      @index.index_single("lib/this_is_a_dir.rb")
+    ensure
+      FileUtils.rm_r("lib/this_is_a_dir.rb")
+    end
   end
 end

@@ -39,5 +39,16 @@ module RubyLsp
       uri = URI("file:///c%3A/some/windows/path/to/file.rb")
       assert_equal("c:/some/windows/path/to/file.rb", uri.to_standardized_path)
     end
+
+    def test_plus_signs_are_properly_unescaped
+      path = "/opt/rubies/3.3.0/lib/ruby/3.3.0+0/pathname.rb"
+      uri = URI::Generic.from_path(path: path)
+      assert_equal(path, uri.to_standardized_path)
+    end
+
+    def test_from_path_with_fragment
+      uri = URI::Generic.from_path(path: "/some/unix/path/to/file.rb", fragment: "L1,3-2,9")
+      assert_equal("file:///some/unix/path/to/file.rb#L1,3-2,9", uri.to_s)
+    end
   end
 end

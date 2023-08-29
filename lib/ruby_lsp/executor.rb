@@ -58,14 +58,7 @@ module RubyLsp
           warn(errored_extensions.map(&:backtraces).join("\n\n"))
         end
 
-        if @store.experimental_features
-          # The begin progress invocation happens during `initialize`, so that the notification is sent before we are
-          # stuck indexing files
-          RubyIndexer.configuration.load_config
-          @index.index_all
-          end_progress("indexing-progress")
-        end
-
+        perform_initial_indexing
         check_formatter_is_available
 
         warn("Ruby LSP is ready")
@@ -209,6 +202,31 @@ module RubyLsp
       VOID
     end
 
+    sig { void }
+    def perform_initial_indexing
+      return unless @store.experimental_features
+
+      # The begin progress invocation happens during `initialize`, so that the notification is sent before we are
+      # stuck indexing files
+      RubyIndexer.configuration.load_config
+
+      begin
+        @index.index_all
+      rescue StandardError => error
+        @message_queue << Notification.new(
+          message: "window/showMessage",
+          params: Interface::ShowMessageParams.new(
+            type: Constant::MessageType::ERROR,
+            message: "Error while indexing: #{error.message}",
+          ),
+        )
+      end
+
+      # Always end the progress notification even if indexing failed or else it never goes away and the user has no way
+      # of dismissing it
+      end_progress("indexing-progress")
+    end
+
     sig { params(query: T.nilable(String)).returns(T::Array[Interface::WorkspaceSymbol]) }
     def workspace_symbol(query)
       Requests::WorkspaceSymbol.new(query, @index).run
@@ -259,16 +277,20 @@ module RubyLsp
       document = @store.get(uri)
       return if document.syntax_error?
 
-      target, parent = document.locate_node(position)
+      target, parent, nesting = document.locate_node(
+        position,
+        node_types: Requests::Hover::ALLOWED_TARGETS,
+      )
 
-      if !Requests::Hover::ALLOWED_TARGETS.include?(target.class) &&
-          Requests::Hover::ALLOWED_TARGETS.include?(parent.class)
+      if (Requests::Hover::ALLOWED_TARGETS.include?(parent.class) &&
+          !Requests::Hover::ALLOWED_TARGETS.include?(target.class)) ||
+          (parent.is_a?(SyntaxTree::ConstPathRef) && target.is_a?(SyntaxTree::Const))
         target = parent
       end
 
       # Instantiate all listeners
       emitter = EventEmitter.new
-      hover = Requests::Hover.new(emitter, @message_queue)
+      hover = Requests::Hover.new(@index, nesting, emitter, @message_queue)
 
       # Emit events for all listeners
       emitter.emit_for_target(target)

@@ -49,4 +49,32 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
   ensure
     T.must(message_queue).close
   end
+
+  def test_jumping_to_default_gems
+    skip # restore the `ensure` when removing
+
+    message_queue = Thread::Queue.new
+    position = { character: 0, line: 0 }
+
+    path = "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb"
+    uri = URI::Generic.from_path(path: path)
+
+    store = RubyLsp::Store.new
+    store.experimental_features = true
+    store.set(uri: URI("file:///folder/fake.rb"), source: <<~RUBY, version: 1)
+      Pathname
+    RUBY
+
+    executor = RubyLsp::Executor.new(store, message_queue)
+    executor.instance_variable_get(:@index).index_single(T.must(uri.to_standardized_path))
+
+    response = executor.execute({
+      method: "textDocument/definition",
+      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: position },
+    }).response
+
+    refute_empty(response)
+  # ensure
+  #   T.must(message_queue).close
+  end
 end

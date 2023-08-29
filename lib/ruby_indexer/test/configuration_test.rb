@@ -18,6 +18,20 @@ module RubyIndexer
       assert(files_to_index.none? { |path| path == __FILE__ })
     end
 
+    def test_files_to_index_only_includes_gem_require_paths
+      @config.load_config
+      files_to_index = @config.files_to_index
+
+      Bundler.locked_gems.specs.each do |lazy_spec|
+        next if lazy_spec.name == "ruby-lsp"
+
+        spec = Gem::Specification.find_by_name(lazy_spec.name)
+        assert(files_to_index.none? { |path| path.start_with?("#{spec.full_gem_path}/test/") })
+      rescue Gem::MissingSpecError
+        # Transitive dependencies might be missing when running tests on Windows
+      end
+    end
+
     def test_files_to_index_does_not_include_default_gem_path_when_in_bundle
       @config.load_config
       files_to_index = @config.files_to_index

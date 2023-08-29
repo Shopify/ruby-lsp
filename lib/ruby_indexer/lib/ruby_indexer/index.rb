@@ -95,6 +95,8 @@ module RubyIndexer
       content = source || File.read(path)
       visitor = IndexVisitor.new(self, YARP.parse(content), path)
       visitor.run
+    rescue Errno::EISDIR
+      # If `path` is a directory, just ignore it and continue indexing
     end
 
     class Entry
@@ -118,6 +120,11 @@ module RubyIndexer
         @file_path = file_path
         @location = location
         @comments = comments
+      end
+
+      sig { returns(String) }
+      def file_name
+        File.basename(@file_path)
       end
 
       class Namespace < Entry

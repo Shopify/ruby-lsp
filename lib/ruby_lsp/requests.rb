@@ -21,6 +21,7 @@ module RubyLsp
   # - [CodeLens](rdoc-ref:RubyLsp::Requests::CodeLens)
   # - [Definition](rdoc-ref:RubyLsp::Requests::Definition)
   # - [ShowSyntaxTree](rdoc-ref:RubyLsp::Requests::ShowSyntaxTree)
+  # - [WorkspaceSymbol](rdoc-ref:RubyLsp::Requests::WorkspaceSymbol)
 
   module Requests
     autoload :BaseRequest, "ruby_lsp/requests/base_request"
