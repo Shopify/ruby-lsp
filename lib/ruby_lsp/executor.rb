@@ -104,6 +104,7 @@ module RubyLsp
         emitter.visit(document.tree) if document.parsed?
 
         code_lens.merge_external_listeners_responses!
+        document_symbol.merge_external_listeners_responses!
 
         # Store all responses retrieve in this round of visits in the cache and then return the response for the request
         # we actually received
