@@ -26,7 +26,8 @@ module RubyLsp
       def initialize(emitter, message_queue)
         super
         @response = T.let([], ResponseType)
-        @tree = T.let(RubyIndexer::PrefixTree.new(collect_load_path_files), RubyIndexer::PrefixTree)
+        @tree = T.let(RubyIndexer::PrefixTree[String].new, RubyIndexer::PrefixTree[String])
+        collect_load_path_files
 
         emitter.register(self, :on_tstring_content)
       end
@@ -44,8 +45,9 @@ module RubyLsp
       def collect_load_path_files
         $LOAD_PATH.flat_map do |p|
           Dir.glob("**/*.rb", base: p)
-        end.map! do |result|
-          result.delete_suffix!(".rb")
+        end.each do |result|
+          entry = result.delete_suffix!(".rb")
+          @tree.insert(entry, entry)
         end
       end
 

@@ -6,14 +6,15 @@ require "test_helper"
 module RubyIndexer
   class PrefixTreeTest < Minitest::Test
     def test_empty
-      tree = PrefixTree.new([])
+      tree = PrefixTree.new
 
       assert_empty(tree.search(""))
       assert_empty(tree.search("foo"))
     end
 
     def test_single_item
-      tree = PrefixTree.new(["foo"])
+      tree = PrefixTree.new
+      tree.insert("foo", "foo")
 
       assert_equal(["foo"], tree.search(""))
       assert_equal(["foo"], tree.search("foo"))
@@ -21,7 +22,8 @@ module RubyIndexer
     end
 
     def test_multiple_items
-      tree = PrefixTree.new(["foo", "bar", "baz"])
+      tree = PrefixTree[String].new
+      ["foo", "bar", "baz"].each { |item| tree.insert(item, item) }
 
       assert_equal(["foo", "bar", "baz"], tree.search(""))
       assert_equal(["bar", "baz"], tree.search("b"))
@@ -32,7 +34,8 @@ module RubyIndexer
     end
 
     def test_multiple_prefixes
-      tree = PrefixTree.new(["fo", "foo"])
+      tree = PrefixTree[String].new
+      ["fo", "foo"].each { |item| tree.insert(item, item) }
 
       assert_equal(["fo", "foo"], tree.search(""))
       assert_equal(["fo", "foo"], tree.search("f"))
@@ -42,7 +45,8 @@ module RubyIndexer
     end
 
     def test_multiple_prefixes_with_shuffled_order
-      tree = PrefixTree.new([
+      tree = PrefixTree[String].new
+      [
         "foo/bar/base",
         "foo/bar/on",
         "foo/bar/support/selection",
@@ -72,7 +76,7 @@ module RubyIndexer
         "foo/bar/support/formatting",
         "foo/bar/path",
         "foo/executor",
-      ])
+      ].each { |item| tree.insert(item, item) }
 
       assert_equal(
         [
@@ -90,6 +94,26 @@ module RubyIndexer
         ],
         tree.search("foo/bar/support"),
       )
+    end
+
+    def test_deletion
+      tree = PrefixTree[String].new
+      ["foo/bar", "foo/baz"].each { |item| tree.insert(item, item) }
+      assert_equal(["foo/bar", "foo/baz"], tree.search("foo"))
+
+      tree.delete("foo/bar")
+      assert_empty(tree.search("foo/bar"))
+      assert_equal(["foo/baz"], tree.search("foo"))
+    end
+
+    def test_deleted_node_is_removed_from_the_tree
+      tree = PrefixTree[String].new
+      tree.insert("foo/bar", "foo/bar")
+      assert_equal(["foo/bar"], tree.search("foo"))
+
+      tree.delete("foo/bar")
+      root = tree.instance_variable_get(:@root)
+      assert_empty(root.children)
     end
   end
 end
