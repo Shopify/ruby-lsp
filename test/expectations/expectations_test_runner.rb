@@ -105,7 +105,7 @@ class ExpectationsTestRunner < Minitest::Test
 
   private
 
-  def test_extension(extension_creation_method, source:, &block)
+  def test_extension(extension_creation_method, source:)
     RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
     message_queue = Thread::Queue.new
 
@@ -116,7 +116,10 @@ class ExpectationsTestRunner < Minitest::Test
     store.set(uri: uri, source: source, version: 1)
 
     executor = RubyLsp::Executor.new(store, message_queue)
-    executor.instance_variable_get(:@index).index_single(uri.to_standardized_path, source)
+    executor.instance_variable_get(:@index).index_single(
+      RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)),
+      source,
+    )
 
     yield(executor)
   ensure

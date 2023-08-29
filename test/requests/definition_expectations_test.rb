@@ -15,10 +15,15 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     store.set(uri: URI("file:///folder/fake.rb"), source: source, version: 1)
     executor = RubyLsp::Executor.new(store, message_queue)
 
-    executor.instance_variable_get(:@index).index_single(File.expand_path(
-      "../../lib/ruby_lsp/event_emitter.rb",
-      __dir__,
-    ))
+    executor.instance_variable_get(:@index).index_single(
+      RubyIndexer::IndexablePath.new(
+        nil,
+        File.expand_path(
+          "../../lib/ruby_lsp/event_emitter.rb",
+          __dir__,
+        ),
+      ),
+    )
 
     begin
       # We need to pretend that Sorbet is not a dependency or else we can't properly test
@@ -62,7 +67,12 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     RUBY
 
     executor = RubyLsp::Executor.new(store, message_queue)
-    executor.instance_variable_get(:@index).index_single(T.must(uri.to_standardized_path))
+    executor.instance_variable_get(:@index).index_single(
+      RubyIndexer::IndexablePath.new(
+        nil,
+        T.must(uri.to_standardized_path),
+      ),
+    )
 
     response = executor.execute({
       method: "textDocument/definition",

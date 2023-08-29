@@ -24,11 +24,11 @@ module RubyIndexer
 
       @excluded_gems = T.let(excluded_gem_names, T::Array[String])
       @included_gems = T.let([], T::Array[String])
-      @excluded_patterns = T.let(["**/*_test.rb"], T::Array[String])
+      @excluded_patterns = T.let([File.join("**", "*_test.rb")], T::Array[String])
       path = Bundler.settings["path"]
-      @excluded_patterns << "#{File.expand_path(path, Dir.pwd)}/**/*.rb" if path
+      @excluded_patterns << File.join(File.expand_path(path, Dir.pwd), "**", "*.rb") if path
 
-      @included_patterns = T.let(["#{Dir.pwd}/**/*.rb"], T::Array[String])
+      @included_patterns = T.let([File.join(Dir.pwd, "**", "*.rb")], T::Array[String])
       @excluded_magic_comments = T.let(
         [
           "frozen_string_literal:",
@@ -61,8 +61,8 @@ module RubyIndexer
       raise e, "Syntax error while loading .index.yml configuration: #{e.message}"
     end
 
-    sig { returns(T::Array[String]) }
-    def files_to_index
+    sig { returns(T::Array[IndexablePath]) }
+    def indexables
       excluded_gems = @excluded_gems - @included_gems
       locked_gems = Bundler.locked_gems&.specs
 
@@ -70,19 +70,22 @@ module RubyIndexer
       # having duplicates if BUNDLE_PATH is set to a folder inside the project structure
 
       # Add user specified patterns
-      files_to_index = @included_patterns.flat_map do |pattern|
-        Dir.glob(pattern, File::FNM_PATHNAME | File::FNM_EXTGLOB)
+      indexables = @included_patterns.flat_map do |pattern|
+        Dir.glob(pattern, File::FNM_PATHNAME | File::FNM_EXTGLOB).map! do |path|
+          load_path_entry = $LOAD_PATH.find { |load_path| path.start_with?(load_path) }
+          IndexablePath.new(load_path_entry, path)
+        end
       end
 
       # Remove user specified patterns
-      files_to_index.reject! do |path|
+      indexables.reject! do |indexable|
         @excluded_patterns.any? do |pattern|
-          File.fnmatch?(pattern, path, File::FNM_PATHNAME | File::FNM_EXTGLOB)
+          File.fnmatch?(pattern, indexable.full_path, File::FNM_PATHNAME | File::FNM_EXTGLOB)
         end
       end
 
       # Add default gems to the list of files to be indexed
-      Dir.glob("#{RbConfig::CONFIG["rubylibdir"]}/*").each do |default_path|
+      Dir.glob(File.join(RbConfig::CONFIG["rubylibdir"], "*")).each do |default_path|
         # The default_path might be a Ruby file or a folder with the gem's name. For example:
         #   bundler/
         #   bundler.rb
@@ -103,10 +106,14 @@ module RubyIndexer
 
         if pathname.directory?
           # If the default_path is a directory, we index all the Ruby files in it
-          files_to_index.concat(Dir.glob("#{default_path}/**/*.rb", File::FNM_PATHNAME | File::FNM_EXTGLOB))
+          indexables.concat(
+            Dir.glob(File.join(default_path, "**", "*.rb"), File::FNM_PATHNAME | File::FNM_EXTGLOB).map! do |path|
+              IndexablePath.new(RbConfig::CONFIG["rubylibdir"], path)
+            end,
+          )
         else
           # If the default_path is a Ruby file, we index it
-          files_to_index << default_path
+          indexables << IndexablePath.new(RbConfig::CONFIG["rubylibdir"], default_path)
         end
       end
 
@@ -121,15 +128,20 @@ module RubyIndexer
         # duplicates or accidentally ignoring exclude patterns
         next if spec.full_gem_path == Dir.pwd
 
-        files_to_index.concat(Dir.glob("#{spec.full_gem_path}/{#{spec.require_paths.join(",")}}/**/*.rb"))
+        indexables.concat(
+          spec.require_paths.flat_map do |require_path|
+            load_path_entry = File.join(spec.full_gem_path, require_path)
+            Dir.glob(File.join(load_path_entry, "**", "*.rb")).map! { |path| IndexablePath.new(load_path_entry, path) }
+          end,
+        )
       rescue Gem::MissingSpecError
         # If a gem is scoped only to some specific platform, then its dependencies may not be installed either, but they
         # are still listed in locked_gems. We can't index them because they are not installed for the platform, so we
         # just ignore if they're missing
       end
 
-      files_to_index.uniq!
-      files_to_index
+      indexables.uniq!
+      indexables
     end
 
     sig { returns(Regexp) }

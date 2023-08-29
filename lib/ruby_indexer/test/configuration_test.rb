@@ -11,55 +11,57 @@ module RubyIndexer
 
     def test_load_configuration_executes_configure_block
       @config.load_config
-      files_to_index = @config.files_to_index
+      indexables = @config.indexables
 
-      assert(files_to_index.none? { |path| path.include?("test/fixtures") })
-      assert(files_to_index.none? { |path| path.include?("minitest-reporters") })
-      assert(files_to_index.none? { |path| path == __FILE__ })
+      assert(indexables.none? { |indexable| indexable.full_path.include?("test/fixtures") })
+      assert(indexables.none? { |indexable| indexable.full_path.include?("minitest-reporters") })
+      assert(indexables.none? { |indexable| indexable.full_path == __FILE__ })
     end
 
-    def test_files_to_index_only_includes_gem_require_paths
+    def test_indexables_only_includes_gem_require_paths
       @config.load_config
-      files_to_index = @config.files_to_index
+      indexables = @config.indexables
 
       Bundler.locked_gems.specs.each do |lazy_spec|
         next if lazy_spec.name == "ruby-lsp"
 
         spec = Gem::Specification.find_by_name(lazy_spec.name)
-        assert(files_to_index.none? { |path| path.start_with?("#{spec.full_gem_path}/test/") })
+        assert(indexables.none? { |indexable| indexable.full_path.start_with?("#{spec.full_gem_path}/test/") })
       rescue Gem::MissingSpecError
         # Transitive dependencies might be missing when running tests on Windows
       end
     end
 
-    def test_files_to_index_does_not_include_default_gem_path_when_in_bundle
+    def test_indexables_does_not_include_default_gem_path_when_in_bundle
       @config.load_config
-      files_to_index = @config.files_to_index
+      indexables = @config.indexables
 
-      assert(files_to_index.none? { |path| path.start_with?("#{RbConfig::CONFIG["rubylibdir"]}/psych") })
+      assert(
+        indexables.none? { |indexable| indexable.full_path.start_with?("#{RbConfig::CONFIG["rubylibdir"]}/psych") },
+      )
     end
 
-    def test_files_to_index_includes_default_gems
+    def test_indexables_includes_default_gems
       @config.load_config
-      files_to_index = @config.files_to_index
+      indexables = @config.indexables.map(&:full_path)
 
-      assert_includes(files_to_index, "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb")
-      assert_includes(files_to_index, "#{RbConfig::CONFIG["rubylibdir"]}/ipaddr.rb")
-      assert_includes(files_to_index, "#{RbConfig::CONFIG["rubylibdir"]}/abbrev.rb")
+      assert_includes(indexables, "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb")
+      assert_includes(indexables, "#{RbConfig::CONFIG["rubylibdir"]}/ipaddr.rb")
+      assert_includes(indexables, "#{RbConfig::CONFIG["rubylibdir"]}/abbrev.rb")
     end
 
-    def test_files_to_index_includes_project_files
+    def test_indexables_includes_project_files
       @config.load_config
-      files_to_index = @config.files_to_index
+      indexables = @config.indexables.map(&:full_path)
 
       Dir.glob("#{Dir.pwd}/lib/**/*.rb").each do |path|
         next if path.end_with?("_test.rb")
 
-        assert_includes(files_to_index, path)
+        assert_includes(indexables, path)
       end
     end
 
-    def test_files_to_index_avoids_duplicates_if_bundle_path_is_inside_project
+    def test_indexables_avoids_duplicates_if_bundle_path_is_inside_project
       Bundler.settings.set_global("path", "vendor/bundle")
       config = Configuration.new
       config.load_config
@@ -69,18 +71,22 @@ module RubyIndexer
       Bundler.settings.set_global("path", nil)
     end
 
-    def test_files_to_index_does_not_include_gems_own_installed_files
+    def test_indexables_does_not_include_gems_own_installed_files
       @config.load_config
-      files_to_index = @config.files_to_index
+      indexables = @config.indexables
 
-      assert(files_to_index.none? { |path| path.start_with?(Bundler.bundle_path.join("gems", "ruby-lsp").to_s) })
+      assert(
+        indexables.none? do |indexable|
+          indexable.full_path.start_with?(Bundler.bundle_path.join("gems", "ruby-lsp").to_s)
+        end,
+      )
     end
 
     def test_paths_are_unique
       @config.load_config
-      files_to_index = @config.files_to_index
+      indexables = @config.indexables
 
-      assert_equal(files_to_index.uniq.length, files_to_index.length)
+      assert_equal(indexables.uniq.length, indexables.length)
     end
 
     def test_configuration_raises_for_unknown_keys
