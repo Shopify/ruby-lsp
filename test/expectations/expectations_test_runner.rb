@@ -105,6 +105,26 @@ class ExpectationsTestRunner < Minitest::Test
 
   private
 
+  def test_extension(extension_creation_method, source:, &block)
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    message_queue = Thread::Queue.new
+
+    send(extension_creation_method)
+
+    store = RubyLsp::Store.new
+    uri = URI::Generic.from_path(path: "/fake.rb")
+    store.set(uri: uri, source: source, version: 1)
+
+    executor = RubyLsp::Executor.new(store, message_queue)
+    executor.instance_variable_get(:@index).index_single(uri.to_standardized_path, source)
+
+    yield(executor)
+  ensure
+    RubyLsp::Extension.extensions.clear
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
+    T.must(message_queue).close
+  end
+
   def diff(expected, actual)
     res = super
     return unless res

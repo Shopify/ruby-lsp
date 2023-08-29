@@ -33,11 +33,6 @@ class HoverExpectationsTest < ExpectationsTestRunner
   end
 
   def test_hover_extensions
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
-    message_queue = Thread::Queue.new
-    create_hover_extension
-
-    store = RubyLsp::Store.new
     source = <<~RUBY
       # Hello
       class Post
@@ -45,22 +40,15 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
       Post
     RUBY
-    uri = URI::Generic.from_path(path: "/fake.rb")
-    store.set(uri: uri, source: source, version: 1)
 
-    executor = RubyLsp::Executor.new(store, message_queue)
-    executor.instance_variable_get(:@index).index_single(uri.to_standardized_path, source)
+    test_extension(:create_hover_extension, source: source) do |executor|
+      response = executor.execute({
+        method: "textDocument/hover",
+        params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 4, character: 0 } },
+      }).response
 
-    response = executor.execute({
-      method: "textDocument/hover",
-      params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 4, character: 0 } },
-    }).response
-
-    assert_match("Hello\n\nHello from middleware: Post", response.contents.value)
-  ensure
-    RubyLsp::Extension.extensions.clear
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
-    T.must(message_queue).close
+      assert_match("Hello\n\nHello from middleware: Post", response.contents.value)
+    end
   end
 
   private

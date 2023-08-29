@@ -8,32 +8,20 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::DocumentSymbol, "document_symbol"
 
   def test_document_symbol_extensions
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
-    message_queue = Thread::Queue.new
-    create_document_symbol_extension
-
-    store = RubyLsp::Store.new
     source = <<~RUBY
       test "foo" do
       end
     RUBY
-    uri = URI::Generic.from_path(path: "/fake.rb")
-    store.set(uri: uri, source: source, version: 1)
 
-    executor = RubyLsp::Executor.new(store, message_queue)
-    executor.instance_variable_get(:@index).index_single(uri.to_standardized_path, source)
+    test_extension(:create_document_symbol_extension, source: source) do |executor|
+      response = executor.execute({
+        method: "textDocument/documentSymbol",
+        params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 0, character: 1 } },
+      }).response
 
-    response = executor.execute({
-      method: "textDocument/documentSymbol",
-      params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 0, character: 1 } },
-    }).response
-
-    assert_equal("foo", response.first.name)
-    assert_equal(LanguageServer::Protocol::Constant::SymbolKind::METHOD, response.first.kind)
-  ensure
-    RubyLsp::Extension.extensions.clear
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
-    T.must(message_queue).close
+      assert_equal("foo", response.first.name)
+      assert_equal(LanguageServer::Protocol::Constant::SymbolKind::METHOD, response.first.kind)
+    end
   end
 
   private
