@@ -74,7 +74,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     }).response
 
     refute_empty(response)
-  # ensure
-  #   T.must(message_queue).close
+    # ensure
+    #   T.must(message_queue).close
   end
 end
