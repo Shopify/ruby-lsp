@@ -79,6 +79,24 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     assert_empty(response)
   end
 
+  def test_no_code_lens_for_unsaved_files
+    source = <<~RUBY
+      class FooTest < Test::Unit::TestCase
+        def test_bar; end
+      end
+    RUBY
+    uri = URI::Generic.build(scheme: "untitled", opaque: "Untitled-1")
+
+    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+
+    emitter = RubyLsp::EventEmitter.new
+    listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue, "minitest")
+    emitter.visit(document.tree)
+    response = listener.response
+
+    assert_empty(response)
+  end
+
   def test_code_lens_extensions
     message_queue = Thread::Queue.new
     create_code_lens_extension
