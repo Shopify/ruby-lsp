@@ -581,7 +581,7 @@ module RubyLsp
         Interface::DocumentSymbolClientCapabilities.new(
           hierarchical_document_symbol_support: true,
           symbol_kind: {
-            value_set: Requests::DocumentSymbol::SYMBOL_KIND.values,
+            value_set: (Constant::SymbolKind::FILE..Constant::SymbolKind::TYPE_PARAMETER).to_a,
           },
         )
       end

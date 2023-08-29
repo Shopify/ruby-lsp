@@ -32,38 +32,6 @@ module RubyLsp
 
       ResponseType = type_member { { fixed: T::Array[Interface::DocumentSymbol] } }
 
-      SYMBOL_KIND = T.let(
-        {
-          file: 1,
-          module: 2,
-          namespace: 3,
-          package: 4,
-          class: 5,
-          method: 6,
-          property: 7,
-          field: 8,
-          constructor: 9,
-          enum: 10,
-          interface: 11,
-          function: 12,
-          variable: 13,
-          constant: 14,
-          string: 15,
-          number: 16,
-          boolean: 17,
-          array: 18,
-          object: 19,
-          key: 20,
-          null: 21,
-          enummember: 22,
-          struct: 23,
-          event: 24,
-          operator: 25,
-          typeparameter: 26,
-        }.freeze,
-        T::Hash[Symbol, Integer],
-      )
-
       ATTR_ACCESSORS = T.let(["attr_reader", "attr_writer", "attr_accessor"].freeze, T::Array[String])
 
       class SymbolHierarchyRoot
@@ -111,7 +79,7 @@ module RubyLsp
       def on_class(node)
         @stack << create_document_symbol(
           name: full_constant_name(node.constant),
-          kind: :class,
+          kind: Constant::SymbolKind::CLASS,
           range_node: node,
           selection_range_node: node.constant,
         )
@@ -131,7 +99,7 @@ module RubyLsp
 
           create_document_symbol(
             name: argument.value.value,
-            kind: :field,
+            kind: Constant::SymbolKind::FIELD,
             range_node: argument,
             selection_range_node: argument.value,
           )
@@ -142,7 +110,7 @@ module RubyLsp
       def on_const_path_field(node)
         create_document_symbol(
           name: node.constant.value,
-          kind: :constant,
+          kind: Constant::SymbolKind::CONSTANT,
           range_node: node,
           selection_range_node: node.constant,
         )
@@ -154,10 +122,10 @@ module RubyLsp
 
         if target.is_a?(SyntaxTree::VarRef) && target.value.is_a?(SyntaxTree::Kw) && target.value.value == "self"
           name = "self.#{node.name.value}"
-          kind = :method
+          kind = Constant::SymbolKind::METHOD
         else
           name = node.name.value
-          kind = name == "initialize" ? :constructor : :method
+          kind = name == "initialize" ? Constant::SymbolKind::CONSTRUCTOR : Constant::SymbolKind::METHOD
         end
 
         symbol = create_document_symbol(
@@ -179,7 +147,7 @@ module RubyLsp
       def on_module(node)
         @stack << create_document_symbol(
           name: full_constant_name(node.constant),
-          kind: :module,
+          kind: Constant::SymbolKind::MODULE,
           range_node: node,
           selection_range_node: node.constant,
         )
@@ -194,7 +162,7 @@ module RubyLsp
       def on_top_const_field(node)
         create_document_symbol(
           name: node.constant.value,
-          kind: :constant,
+          kind: Constant::SymbolKind::CONSTANT,
           range_node: node,
           selection_range_node: node.constant,
         )
@@ -205,9 +173,9 @@ module RubyLsp
         value = node.value
         kind = case value
         when SyntaxTree::Const
-          :constant
+          Constant::SymbolKind::CONSTANT
         when SyntaxTree::CVar, SyntaxTree::IVar
-          :variable
+          Constant::SymbolKind::VARIABLE
         else
           return
         end
@@ -225,7 +193,7 @@ module RubyLsp
       sig do
         params(
           name: String,
-          kind: Symbol,
+          kind: Integer,
           range_node: SyntaxTree::Node,
           selection_range_node: SyntaxTree::Node,
         ).returns(Interface::DocumentSymbol)
@@ -233,7 +201,7 @@ module RubyLsp
       def create_document_symbol(name:, kind:, range_node:, selection_range_node:)
         symbol = Interface::DocumentSymbol.new(
           name: name,
-          kind: SYMBOL_KIND[kind],
+          kind: kind,
           range: range_from_syntax_tree_node(range_node),
           selection_range: range_from_syntax_tree_node(selection_range_node),
           children: [],
