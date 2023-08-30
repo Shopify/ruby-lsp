@@ -124,5 +124,14 @@ module RubyLsp
       ).returns(T.nilable(Listener[T.nilable(Interface::Hover)]))
     end
     def create_hover_listener(emitter, message_queue); end
+
+    # Creates a new DocumentSymbol listener. This method is invoked on every DocumentSymbol request
+    sig do
+      overridable.params(
+        emitter: EventEmitter,
+        message_queue: Thread::Queue,
+      ).returns(T.nilable(Listener[T.nilable(Interface::DocumentSymbol)]))
+    end
+    def create_document_symbol_listener(emitter, message_queue); end
   end
 end
