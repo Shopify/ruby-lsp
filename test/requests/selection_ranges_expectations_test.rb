@@ -5,7 +5,7 @@ require "test_helper"
 require "expectations/expectations_test_runner"
 
 class SelectionRangesExpectationsTest < ExpectationsTestRunner
-  # expectations_tests RubyLsp::Requests::SelectionRanges, "selection_ranges"
+  expectations_tests RubyLsp::Requests::SelectionRanges, "selection_ranges"
 
   def run_expectations(source)
     document = RubyLsp::Document.new(source: source, version: 1, uri: URI("file:///fake.rb"))
