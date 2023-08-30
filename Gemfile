@@ -24,3 +24,5 @@ group :development do
   gem "rdoc", require: false
   gem "psych", "~> 5.1", require: false
 end
+
+gem "yarp", git: "https://github.com/andyw8/yarp.git", branch: "andyw8/adjust-column-behaviour"

@@ -1,3 +1,10 @@
+GIT
+  remote: https://github.com/andyw8/yarp.git
+  revision: 62a31fafc31f48cd024e49b979c7da4a87fe490e
+  branch: andyw8/adjust-column-behaviour
+  specs:
+    yarp (0.9.0)
+
 PATH
   remote: .
   specs:
@@ -6,7 +13,7 @@ PATH
       sorbet-runtime
       syntax_tree (>= 6.1.1, < 7)
       yarp (>= 0.9, < 0.10)
-d
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -121,7 +128,6 @@ GEM
     yard-sorbet (0.8.1)
       sorbet-runtime (>= 0.5)
       yard (>= 0.9)
-    yarp (0.9.0)
 
 PLATFORMS
   arm64-darwin
@@ -147,6 +153,7 @@ DEPENDENCIES
   ruby-lsp!
   sorbet-static-and-runtime
   tapioca (~> 0.11)
+  yarp!
 
 BUNDLED WITH
    2.4.10
