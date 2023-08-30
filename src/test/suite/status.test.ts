@@ -43,6 +43,7 @@ suite("StatusItems", () => {
         ruby,
         state: ServerState.Running,
         formatter: "none",
+        serverVersion: "1.0.0",
       };
       status = new RubyVersionStatus(client);
     });
@@ -70,7 +71,13 @@ suite("StatusItems", () => {
   suite("ServerStatus", () => {
     beforeEach(() => {
       ruby = {} as Ruby;
-      client = { context, ruby, state: ServerState.Running, formatter: "none" };
+      client = {
+        context,
+        ruby,
+        state: ServerState.Running,
+        formatter: "none",
+        serverVersion: "1.0.0",
+      };
       status = new ServerStatus(client);
     });
 
@@ -99,7 +106,7 @@ suite("StatusItems", () => {
     test("Refresh when server is running", () => {
       client.state = ServerState.Running;
       status.refresh();
-      assert.strictEqual(status.item.text, "Ruby LSP: Running");
+      assert.strictEqual(status.item.text, "Ruby LSP v1.0.0: Running");
       assert.strictEqual(
         status.item.severity,
         vscode.LanguageStatusSeverity.Information,
@@ -135,6 +142,7 @@ suite("StatusItems", () => {
         ruby,
         formatter,
         state: ServerState.Running,
+        serverVersion: "1.0.0",
       };
       status = new ExperimentalFeaturesStatus(client);
     });
@@ -154,7 +162,13 @@ suite("StatusItems", () => {
   suite("YjitStatus when Ruby supports it", () => {
     beforeEach(() => {
       ruby = { supportsYjit: true } as Ruby;
-      client = { context, ruby, state: ServerState.Running, formatter: "none" };
+      client = {
+        context,
+        ruby,
+        state: ServerState.Running,
+        formatter: "none",
+        serverVersion: "1.0.0",
+      };
       status = new YjitStatus(client);
     });
 
@@ -178,7 +192,13 @@ suite("StatusItems", () => {
   suite("YjitStatus when Ruby does not support it", () => {
     beforeEach(() => {
       ruby = { supportsYjit: false } as Ruby;
-      client = { context, ruby, state: ServerState.Running, formatter: "none" };
+      client = {
+        context,
+        ruby,
+        state: ServerState.Running,
+        formatter: "none",
+        serverVersion: "1.0.0",
+      };
       status = new YjitStatus(client);
     });
 
@@ -212,6 +232,7 @@ suite("StatusItems", () => {
         ruby,
         formatter,
         state: ServerState.Running,
+        serverVersion: "1.0.0",
       });
     });
 
@@ -267,6 +288,7 @@ suite("StatusItems", () => {
         ruby,
         state: ServerState.Running,
         formatter: "auto",
+        serverVersion: "1.0.0",
       };
       status = new FormatterStatus(client);
     });

@@ -272,6 +272,10 @@ export default class Client implements ClientInterface {
     return this.#formatter;
   }
 
+  get serverVersion(): string | undefined {
+    return this.telemetry.serverVersion;
+  }
+
   async determineFormatter() {
     const configuration = vscode.workspace.getConfiguration("rubyLsp");
     const configuredFormatter: string = configuration.get("formatter")!;

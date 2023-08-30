@@ -43,6 +43,7 @@ export interface ClientInterface {
   ruby: Ruby;
   state: ServerState;
   formatter: string;
+  serverVersion: string | undefined;
 }
 
 export abstract class StatusItem {
@@ -132,7 +133,7 @@ export class ServerStatus extends StatusItem {
   refresh(): void {
     switch (this.client.state) {
       case ServerState.Running: {
-        this.item.text = "Ruby LSP: Running";
+        this.item.text = `Ruby LSP v${this.client.serverVersion}: Running`;
         this.item.command!.arguments = [STARTED_SERVER_OPTIONS];
         this.item.severity = vscode.LanguageStatusSeverity.Information;
         break;
