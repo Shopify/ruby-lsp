@@ -284,7 +284,7 @@ module RubyLsp
 
       if (Requests::Hover::ALLOWED_TARGETS.include?(parent.class) &&
           !Requests::Hover::ALLOWED_TARGETS.include?(target.class)) ||
-          (parent.is_a?(SyntaxTree::ConstPathRef) && target.is_a?(SyntaxTree::Const))
+          (parent.is_a?(YARP::ConstantPathNode) && target.is_a?(YARP::ConstantReadNode))
         target = parent
       end
 

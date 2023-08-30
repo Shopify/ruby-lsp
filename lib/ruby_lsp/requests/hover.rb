@@ -21,9 +21,10 @@ module RubyLsp
 
       ALLOWED_TARGETS = T.let(
         [
-          YARP::ClassNode,
-          YARP::ModuleNode,
+          YARP::CallNode,
+          YARP::ConstantReadNode,
           YARP::ConstantWriteNode,
+          YARP::ConstantPathNode,
         ],
         T::Array[T.class_of(YARP::Node)],
       )
@@ -48,7 +49,7 @@ module RubyLsp
           Extension.extensions.filter_map { |ext| ext.create_hover_listener(emitter, message_queue) },
         )
         @response = T.let(nil, ResponseType)
-        emitter.register(self, :on_class, :on_module, :on_constant_write)
+        emitter.register(self, :on_constant_read, :on_constant_write, :on_constant_path)
       end
 
       # Merges responses from other hover listeners
@@ -66,18 +67,11 @@ module RubyLsp
         self
       end
 
-      sig { params(node: YARP::ClassNode).void }
-      def on_class(node)
+      sig { params(node: YARP::ConstantReadNode).void }
+      def on_constant_read(node)
         return if DependencyDetector::HAS_TYPECHECKER
 
-        generate_hover(node.name, node.constant_path.location)
-      end
-
-      sig { params(node: YARP::ModuleNode).void }
-      def on_module(node)
-        return if DependencyDetector::HAS_TYPECHECKER
-
-        generate_hover(node.name, node.constant_path.location)
+        generate_hover(node.slice, node.location)
       end
 
       sig { params(node: YARP::ConstantWriteNode).void }
@@ -85,6 +79,13 @@ module RubyLsp
         return if DependencyDetector::HAS_TYPECHECKER
 
         generate_hover(node.name, node.name_loc)
+      end
+
+      sig { params(node: YARP::ConstantPathNode).void }
+      def on_constant_path(node)
+        return if DependencyDetector::HAS_TYPECHECKER
+
+        generate_hover(node.slice, node.location)
       end
 
       private
