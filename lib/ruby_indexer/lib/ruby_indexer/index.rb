@@ -17,6 +17,9 @@ module RubyIndexer
       # }
       @entries = T.let({}, T::Hash[String, T::Array[Entry]])
 
+      # Holds all entries in the index using a prefix tree for searching based on prefixes to provide autocompletion
+      @entries_tree = T.let(PrefixTree[T::Array[Entry]].new, PrefixTree[T::Array[Entry]])
+
       # Holds references to where entries where discovered so that we can easily delete them
       # {
       #  "/my/project/foo.rb" => [#<Entry::Class>, #<Entry::Class>],
@@ -33,13 +36,21 @@ module RubyIndexer
       # For each constant discovered in `path`, delete the associated entry from the index. If there are no entries
       # left, delete the constant from the index.
       @files_to_entries[indexable.full_path]&.each do |entry|
-        entries = @entries[entry.name]
+        name = entry.name
+        entries = @entries[name]
         next unless entries
 
         # Delete the specific entry from the list for this name
         entries.delete(entry)
-        # If all entries were deleted, then remove the name from the hash
-        @entries.delete(entry.name) if entries.empty?
+
+        # If all entries were deleted, then remove the name from the hash and from the prefix tree. Otherwise, update
+        # the prefix tree with the current entries
+        if entries.empty?
+          @entries.delete(name)
+          @entries_tree.delete(name)
+        else
+          @entries_tree.insert(name, entries)
+        end
       end
 
       @files_to_entries.delete(indexable.full_path)
@@ -50,8 +61,11 @@ module RubyIndexer
 
     sig { params(entry: Entry).void }
     def <<(entry)
-      (@entries[entry.name] ||= []) << entry
+      name = entry.name
+
+      (@entries[name] ||= []) << entry
       (@files_to_entries[entry.file_path] ||= []) << entry
+      @entries_tree.insert(name, T.must(@entries[name]))
     end
 
     sig { params(fully_qualified_name: String).returns(T.nilable(T::Array[Entry])) }
@@ -62,6 +76,31 @@ module RubyIndexer
     sig { params(query: String).returns(T::Array[String]) }
     def search_require_paths(query)
       @require_paths_tree.search(query)
+    end
+
+    # Searches entries in the index based on an exact prefix, intended for providing autocomplete. All possible matches
+    # to the prefix are returned. The return is an array of arrays, where each entry is the array of entries for a given
+    # name match. For example:
+    # ## Example
+    # ```ruby
+    # # If the index has two entries for `Foo::Bar` and one for `Foo::Baz`, then:
+    # index.prefix_search("Foo::B")
+    # # Will return:
+    # [
+    #   [#<Entry::Class name="Foo::Bar">, #<Entry::Class name="Foo::Bar">],
+    #   [#<Entry::Class name="Foo::Baz">],
+    # ]
+    # ```
+    sig { params(query: String, nesting: T::Array[String]).returns(T::Array[T::Array[Entry]]) }
+    def prefix_search(query, nesting)
+      results = (nesting.length + 1).downto(0).flat_map do |i|
+        prefix = T.must(nesting[0...i]).join("::")
+        namespaced_query = prefix.empty? ? query : "#{prefix}::#{query}"
+        @entries_tree.search(namespaced_query)
+      end
+
+      results.uniq!
+      results
     end
 
     # Fuzzy searches index entries based on Jaro-Winkler similarity. If no query is provided, all entries are returned
