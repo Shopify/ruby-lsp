@@ -207,7 +207,7 @@ module RubyLsp
       sig { params(node: YARP::InstanceVariableWriteNode).void }
       def on_instance_variable_write(node)
         create_document_symbol(
-          name: node.name,
+          name: node.name.to_s, # ???
           kind: :variable,
           range_node: node,
           selection_range_node: node.name_loc,

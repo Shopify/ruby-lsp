@@ -14,8 +14,8 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("FOO", Index::Entry::Constant, "/fake/path/foo.rb:0-0:0-6")
-      assert_entry("Bar::FOO", Index::Entry::Constant, "/fake/path/foo.rb:3-2:3-8")
+      assert_entry("FOO", Index::Entry::Constant, "/fake/path/foo.rb:0-0:0-7")
+      assert_entry("Bar::FOO", Index::Entry::Constant, "/fake/path/foo.rb:3-2:3-9")
     end
 
     def test_constant_or_writes
@@ -27,8 +27,8 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("FOO", Index::Entry::Constant, "/fake/path/foo.rb:0-0:0-8")
-      assert_entry("Bar::FOO", Index::Entry::Constant, "/fake/path/foo.rb:3-2:3-10")
+      assert_entry("FOO", Index::Entry::Constant, "/fake/path/foo.rb:0-0:0-9")
+      assert_entry("Bar::FOO", Index::Entry::Constant, "/fake/path/foo.rb:3-2:3-11")
     end
 
     def test_constant_path_writes
@@ -45,10 +45,10 @@ module RubyIndexer
         A::BAZ = 1
       RUBY
 
-      assert_entry("A::FOO", Index::Entry::Constant, "/fake/path/foo.rb:1-2:1-8")
-      assert_entry("BAR", Index::Entry::Constant, "/fake/path/foo.rb:2-2:2-10")
-      assert_entry("A::B::FOO", Index::Entry::Constant, "/fake/path/foo.rb:5-4:5-10")
-      assert_entry("A::BAZ", Index::Entry::Constant, "/fake/path/foo.rb:9-0:9-9")
+      assert_entry("A::FOO", Index::Entry::Constant, "/fake/path/foo.rb:1-2:1-9")
+      assert_entry("BAR", Index::Entry::Constant, "/fake/path/foo.rb:2-2:2-11")
+      assert_entry("A::B::FOO", Index::Entry::Constant, "/fake/path/foo.rb:5-4:5-11")
+      assert_entry("A::BAZ", Index::Entry::Constant, "/fake/path/foo.rb:9-0:9-10")
     end
 
     def test_constant_path_or_writes
@@ -61,9 +61,9 @@ module RubyIndexer
         A::BAZ ||= 1
       RUBY
 
-      assert_entry("A::FOO", Index::Entry::Constant, "/fake/path/foo.rb:1-2:1-10")
-      assert_entry("BAR", Index::Entry::Constant, "/fake/path/foo.rb:2-2:2-12")
-      assert_entry("A::BAZ", Index::Entry::Constant, "/fake/path/foo.rb:5-0:5-11")
+      assert_entry("A::FOO", Index::Entry::Constant, "/fake/path/foo.rb:1-2:1-11")
+      assert_entry("BAR", Index::Entry::Constant, "/fake/path/foo.rb:2-2:2-13")
+      assert_entry("A::BAZ", Index::Entry::Constant, "/fake/path/foo.rb:5-0:5-12")
     end
 
     def test_comments_for_constants

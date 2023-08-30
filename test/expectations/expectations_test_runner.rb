@@ -50,9 +50,6 @@ class ExpectationsTestRunner < Minitest::Test
       RB
 
       Dir.glob(TEST_FIXTURES_GLOB).each do |path|
-        # temporarily skip until we figure out comment handling
-        next if handler_class == RubyLsp::Requests::DocumentLink && path == "test/fixtures/source_comment.rb"
-
         test_name = File.basename(path, ".rb")
 
         expectations_dir = File.join(TEST_EXP_DIR, expectation_suffix)

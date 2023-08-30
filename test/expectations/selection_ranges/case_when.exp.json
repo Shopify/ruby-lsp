@@ -14,7 +14,7 @@
                 },
                 "end": {
                     "line": 2,
-                    "character": 12
+                    "character": 13
                 }
             },
             "parent": {
@@ -25,7 +25,7 @@
                     },
                     "end": {
                         "line": 2,
-                        "character": 12
+                        "character": 13
                     }
                 },
                 "parent": {
@@ -36,7 +36,7 @@
                         },
                         "end": {
                             "line": 5,
-                            "character": 2
+                            "character": 3
                         }
                     }
                 }

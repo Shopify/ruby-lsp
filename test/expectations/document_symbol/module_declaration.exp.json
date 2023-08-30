@@ -10,7 +10,7 @@
         },
         "end": {
           "line": 6,
-          "character": 2
+          "character": 3
         }
       },
       "selectionRange": {
@@ -20,7 +20,7 @@
         },
         "end": {
           "line": 0,
-          "character": 9
+          "character": 10
         }
       },
       "children": [
@@ -34,7 +34,7 @@
             },
             "end": {
               "line": 2,
-              "character": 4
+              "character": 5
             }
           },
           "selectionRange": {
@@ -44,7 +44,7 @@
             },
             "end": {
               "line": 1,
-              "character": 10
+              "character": 11
             }
           },
           "children": []
@@ -59,7 +59,7 @@
             },
             "end": {
               "line": 5,
-              "character": 4
+              "character": 5
             }
           },
           "selectionRange": {
@@ -69,7 +69,7 @@
             },
             "end": {
               "line": 4,
-              "character": 11
+              "character": 12
             }
           },
           "children": []
