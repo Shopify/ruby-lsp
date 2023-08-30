@@ -136,5 +136,15 @@ module RubyIndexer
       assert_empty(tree.search("abcdef"))
       assert_equal(["value1"], tree.search("abc"))
     end
+
+    def test_overriding_values
+      tree = PrefixTree[Integer].new
+
+      tree.insert("foo/bar", 123)
+      assert_equal([123], tree.search("foo/bar"))
+
+      tree.insert("foo/bar", 456)
+      assert_equal([456], tree.search("foo/bar"))
+    end
   end
 end
