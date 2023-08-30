@@ -33,8 +33,6 @@ class HoverExpectationsTest < ExpectationsTestRunner
   end
 
   def test_hover_extensions
-    skip
-
     RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
     message_queue = Thread::Queue.new
     create_hover_extension
@@ -59,10 +57,10 @@ class HoverExpectationsTest < ExpectationsTestRunner
     }).response
 
     assert_match("Hello\n\nHello from middleware: Post", response.contents.value)
-    # ensure
-    #   RubyLsp::Extension.extensions.clear
-    #   RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
-    #   T.must(message_queue).close
+  ensure
+    RubyLsp::Extension.extensions.clear
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
+    T.must(message_queue).close
   end
 
   private
@@ -81,14 +79,14 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
           def initialize(emitter, message_queue)
             super
-            emitter.register(self, :on_const)
+            emitter.register(self, :on_constant_read)
           end
 
-          def on_const(node)
+          def on_constant_read(node)
             T.bind(self, RubyLsp::Listener[T.untyped])
             contents = RubyLsp::Interface::MarkupContent.new(
               kind: "markdown",
-              value: "Hello from middleware: #{node.value}",
+              value: "Hello from middleware: #{node.slice}",
             )
             @response = RubyLsp::Interface::Hover.new(range: range_from_location(node.location), contents: contents)
           end

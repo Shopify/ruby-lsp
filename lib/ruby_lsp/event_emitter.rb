@@ -49,6 +49,8 @@ module RubyLsp
         @listeners[:on_module]&.each { |l| T.unsafe(l).on_module(node) }
       when YARP::ConstantWriteNode
         @listeners[:on_constant_write]&.each { |l| T.unsafe(l).on_constant_write(node) }
+      when YARP::ConstantReadNode
+        @listeners[:on_constant_read]&.each { |l| T.unsafe(l).on_constant_read(node) }
       end
     end
 
