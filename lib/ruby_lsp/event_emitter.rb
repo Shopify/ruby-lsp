@@ -48,6 +48,8 @@ module RubyLsp
         @listeners[:on_const_path_ref]&.each { |l| T.unsafe(l).on_const_path_ref(node) }
       when SyntaxTree::Const
         @listeners[:on_const]&.each { |l| T.unsafe(l).on_const(node) }
+      when SyntaxTree::TopConstRef
+        @listeners[:on_top_const_ref]&.each { |l| T.unsafe(l).on_top_const_ref(node) }
       end
     end
 

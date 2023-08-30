@@ -474,12 +474,18 @@ module RubyLsp
       return unless document.parsed?
 
       char_position = document.create_scanner.find_char_position(position)
-      matched, parent = document.locate(
-        T.must(document.tree),
-        char_position,
-        node_types: [SyntaxTree::Command, SyntaxTree::CommandCall, SyntaxTree::CallNode],
-      )
 
+      # When the user types in the first letter of a constant name, we actually receive the position of the next
+      # immediate character. We check to see if the character is uppercase and then remove the offset to try to locate
+      # the node, as it could not be a constant
+      target_node_types = if ("A".."Z").cover?(document.source[char_position - 1])
+        char_position -= 1
+        [SyntaxTree::Const, SyntaxTree::ConstPathRef, SyntaxTree::TopConstRef]
+      else
+        [SyntaxTree::Command, SyntaxTree::CommandCall, SyntaxTree::CallNode]
+      end
+
+      matched, parent, nesting = document.locate(T.must(document.tree), char_position, node_types: target_node_types)
       return unless matched && parent
 
       target = case matched
@@ -500,12 +506,19 @@ module RubyLsp
         return unless (path_node.location.start_char..path_node.location.end_char).cover?(char_position)
 
         path_node
+      when SyntaxTree::Const, SyntaxTree::ConstPathRef
+        if (parent.is_a?(SyntaxTree::ConstPathRef) || parent.is_a?(SyntaxTree::TopConstRef)) &&
+            matched.is_a?(SyntaxTree::Const)
+          parent
+        else
+          matched
+        end
       end
 
       return unless target
 
       emitter = EventEmitter.new
-      listener = Requests::PathCompletion.new(@index, emitter, @message_queue)
+      listener = Requests::Completion.new(@index, nesting, emitter, @message_queue)
       emitter.emit_for_target(target)
       listener.response
     end
@@ -641,7 +654,10 @@ module RubyLsp
       completion_provider = if enabled_features["completion"]
         Interface::CompletionOptions.new(
           resolve_provider: false,
-          trigger_characters: ["/"],
+          trigger_characters: ["/", *"A".."Z"],
+          completion_item: {
+            labelDetailsSupport: true,
+          },
         )
       end
 

@@ -74,6 +74,39 @@ module RubyLsp
             data: data,
           )
         end
+
+        sig { params(title: String, entries: T::Array[RubyIndexer::Index::Entry]).returns(Interface::MarkupContent) }
+        def markdown_from_index_entries(title, entries)
+          markdown_title = "```ruby\n#{title}\n```"
+          definitions = []
+          content = +""
+          entries.each do |entry|
+            loc = entry.location
+
+            # We always handle locations as zero based. However, for file links in Markdown we need them to be one
+            # based, which is why instead of the usual subtraction of 1 to line numbers, we are actually adding 1 to
+            # columns. The format for VS Code file URIs is
+            # `file:///path/to/file.rb#Lstart_line,start_column-end_line,end_column`
+            uri = URI::Generic.from_path(
+              path: entry.file_path,
+              fragment: "L#{loc.start_line},#{loc.start_column + 1}-#{loc.end_line},#{loc.end_column + 1}",
+            )
+
+            definitions << "[#{entry.file_name}](#{uri})"
+            content << "\n\n#{entry.comments.join("\n")}" unless entry.comments.empty?
+          end
+
+          Interface::MarkupContent.new(
+            kind: "markdown",
+            value: <<~MARKDOWN.chomp,
+              #{markdown_title}
+
+              **Definitions**: #{definitions.join(" | ")}
+
+              #{content}
+            MARKDOWN
+          )
+        end
       end
     end
   end

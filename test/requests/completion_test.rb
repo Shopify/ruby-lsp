@@ -3,7 +3,7 @@
 
 require "test_helper"
 
-class PathCompletionTest < Minitest::Test
+class CompletionTest < Minitest::Test
   def setup
     @message_queue = Thread::Queue.new
     @uri = URI("file:///fake.rb")
@@ -191,6 +191,103 @@ class PathCompletionTest < Minitest::Test
       params: { textDocument: { uri: @uri.to_s }, position: end_position },
     )
     assert_nil(result)
+  end
+
+  def test_completion_for_constants
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+      class Foo
+      end
+
+      F
+    RUBY
+
+    end_position = { line: 3, character: 1 }
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: end_position },
+    )
+    assert_equal(["Foo"], result.map(&:label))
+  ensure
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
+  end
+
+  def test_completion_for_constant_paths
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+      class Bar
+      end
+
+      class Foo::Bar
+      end
+
+      module Foo
+        B
+      end
+
+      Foo::B
+    RUBY
+
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    end_position = { line: 7, character: 3 }
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: end_position },
+    )
+    assert_equal(["Foo::Bar", "Bar"], result.map(&:label))
+    assert_equal(["Foo::Bar", "::Bar"], result.map(&:filter_text))
+    assert_equal(["Bar", "::Bar"], result.map { |completion| completion.text_edit.new_text })
+
+    end_position = { line: 10, character: 6 }
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: end_position },
+    )
+    assert_equal(["Foo::Bar"], result.map(&:label))
+    assert_equal(["Foo::Bar"], result.map(&:filter_text))
+    assert_equal(["Foo::Bar"], result.map { |completion| completion.text_edit.new_text })
+  ensure
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
+  end
+
+  def test_completion_for_top_level_constants_inside_nesting
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+      class Bar
+      end
+
+      class Foo::Bar
+      end
+
+      module Foo
+        ::B
+      end
+    RUBY
+
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    end_position = { line: 7, character: 5 }
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: end_position },
+    )
+    assert_equal(["Bar"], result.map(&:label))
+    assert_equal(["::Bar"], result.map(&:filter_text))
+    assert_equal(["::Bar"], result.map { |completion| completion.text_edit.new_text })
+  ensure
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
   end
 
   private
