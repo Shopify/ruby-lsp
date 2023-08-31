@@ -127,6 +127,8 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
       end
 
       def create_code_lens_listener(uri, emitter, message_queue)
+        raise "uri can't be nil" unless uri
+
         klass = Class.new(RubyLsp::Listener) do
           attr_reader :response
 

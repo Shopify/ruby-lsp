@@ -17,6 +17,8 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
+      include Extensible
+
       ResponseType = type_member { { fixed: T.nilable(Interface::Hover) } }
 
       ALLOWED_TARGETS = T.let(
@@ -41,15 +43,17 @@ module RubyLsp
         ).void
       end
       def initialize(index, nesting, emitter, message_queue)
-        super(emitter, message_queue)
-
         @nesting = nesting
         @index = index
-        @external_listeners.concat(
-          Extension.extensions.filter_map { |ext| ext.create_hover_listener(emitter, message_queue) },
-        )
         @response = T.let(nil, ResponseType)
+
+        super(emitter, message_queue)
         emitter.register(self, :on_const_path_ref, :on_const)
+      end
+
+      sig { override.params(extension: RubyLsp::Extension).returns(T.nilable(Listener[ResponseType])) }
+      def initialize_external_listener(extension)
+        extension.create_hover_listener(@emitter, @message_queue)
       end
 
       # Merges responses from other hover listeners

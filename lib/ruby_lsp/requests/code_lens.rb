@@ -22,6 +22,8 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
+      include Extensible
+
       ResponseType = type_member { { fixed: T::Array[Interface::CodeLens] } }
 
       BASE_COMMAND = T.let((File.exist?("Gemfile.lock") ? "bundle exec ruby" : "ruby") + " -Itest ", String)
@@ -33,18 +35,15 @@ module RubyLsp
 
       sig { params(uri: URI::Generic, emitter: EventEmitter, message_queue: Thread::Queue, test_library: String).void }
       def initialize(uri, emitter, message_queue, test_library)
-        super(emitter, message_queue)
-
         @uri = T.let(uri, URI::Generic)
-        @external_listeners.concat(
-          Extension.extensions.filter_map { |ext| ext.create_code_lens_listener(uri, emitter, message_queue) },
-        )
         @test_library = T.let(test_library, String)
         @response = T.let([], ResponseType)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
         # visibility_stack is a stack of [current_visibility, previous_visibility]
         @visibility_stack = T.let([["public", "public"]], T::Array[T::Array[T.nilable(String)]])
         @class_stack = T.let([], T::Array[String])
+
+        super(emitter, message_queue)
 
         emitter.register(
           self,
@@ -147,6 +146,11 @@ module RubyLsp
           @visibility_stack.pop
           @visibility_stack.push([vcall_value, vcall_value])
         end
+      end
+
+      sig { override.params(extension: RubyLsp::Extension).returns(T.nilable(Listener[ResponseType])) }
+      def initialize_external_listener(extension)
+        extension.create_code_lens_listener(@uri, @emitter, @message_queue)
       end
 
       sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }

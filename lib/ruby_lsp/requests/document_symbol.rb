@@ -30,6 +30,8 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
+      include Extensible
+
       ResponseType = type_member { { fixed: T::Array[Interface::DocumentSymbol] } }
 
       ATTR_ACCESSORS = T.let(["attr_reader", "attr_writer", "attr_accessor"].freeze, T::Array[String])
@@ -51,8 +53,6 @@ module RubyLsp
 
       sig { params(emitter: EventEmitter, message_queue: Thread::Queue).void }
       def initialize(emitter, message_queue)
-        super
-
         @root = T.let(SymbolHierarchyRoot.new, SymbolHierarchyRoot)
         @response = T.let(@root.children, T::Array[Interface::DocumentSymbol])
         @stack = T.let(
@@ -60,9 +60,7 @@ module RubyLsp
           T::Array[T.any(SymbolHierarchyRoot, Interface::DocumentSymbol)],
         )
 
-        @external_listeners.concat(
-          Extension.extensions.filter_map { |ext| ext.create_document_symbol_listener(emitter, message_queue) },
-        )
+        super
 
         emitter.register(
           self,
@@ -77,6 +75,11 @@ module RubyLsp
           :on_top_const_field,
           :on_var_field,
         )
+      end
+
+      sig { override.params(extension: RubyLsp::Extension).returns(T.nilable(Listener[ResponseType])) }
+      def initialize_external_listener(extension)
+        extension.create_document_symbol_listener(@emitter, @message_queue)
       end
 
       # Merges responses from other listeners
