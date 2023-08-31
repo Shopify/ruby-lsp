@@ -9,6 +9,7 @@ new H2 header in this file containing the instructions. -->
 - [Emacs LSP Mode](https://emacs-lsp.github.io/lsp-mode/page/lsp-ruby-lsp/)
 - [Emacs Eglot](#Emacs-Eglot)
 - [Neovim LSP](#Neovim-LSP)
+- [Sublime Text LSP](#sublime-text-lsp)
 
 ## Emacs Eglot
 
@@ -78,3 +79,26 @@ require("lspconfig").ruby_ls.setup({
   end,
 })
 ```
+
+## Sublime Text LSP
+
+[LSP for Sublime Text](https://github.com/sublimelsp/LSP) has built-in support for [Solargraph](https://lsp.sublimetext.io/language_servers/#solargraph) and [Sorbet](https://lsp.sublimetext.io/language_servers/#sorbet)
+
+To add ruby-lsp support, add the following configuration to your LSP client configuration:
+
+```json
+"clients": {
+  "ruby-lsp": {
+    "enabled": true,
+    "command": [
+      "ruby-lsp"
+    ],
+    "selector": "source.ruby | text.html.ruby | text.html.erb | text.html.rails",
+    "initializationOptions": {
+      "diagnostics": false
+    }
+  }
+}
+```
+
+Restart LSP or Sublime Text and `ruby-lsp` will automatically activate when opening `.rb` or `.erb` files.
