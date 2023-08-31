@@ -12,7 +12,6 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     position = @__params&.first || { character: 0, line: 0 }
 
     store = RubyLsp::Store.new
-    store.experimental_features = true
     store.set(uri: URI("file:///folder/fake.rb"), source: source, version: 1)
     executor = RubyLsp::Executor.new(store, message_queue)
 
@@ -60,7 +59,6 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     uri = URI::Generic.from_path(path: path)
 
     store = RubyLsp::Store.new
-    store.experimental_features = true
     store.set(uri: URI("file:///folder/fake.rb"), source: <<~RUBY, version: 1)
       Pathname
     RUBY

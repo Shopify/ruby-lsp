@@ -32,38 +32,6 @@ module RubyLsp
 
       ResponseType = type_member { { fixed: T::Array[Interface::DocumentSymbol] } }
 
-      SYMBOL_KIND = T.let(
-        {
-          file: 1,
-          module: 2,
-          namespace: 3,
-          package: 4,
-          class: 5,
-          method: 6,
-          property: 7,
-          field: 8,
-          constructor: 9,
-          enum: 10,
-          interface: 11,
-          function: 12,
-          variable: 13,
-          constant: 14,
-          string: 15,
-          number: 16,
-          boolean: 17,
-          array: 18,
-          object: 19,
-          key: 20,
-          null: 21,
-          enummember: 22,
-          struct: 23,
-          event: 24,
-          operator: 25,
-          typeparameter: 26,
-        }.freeze,
-        T::Hash[Symbol, Integer],
-      )
-
       ATTR_ACCESSORS = T.let(["attr_reader", "attr_writer", "attr_accessor"].freeze, T::Array[String])
 
       class SymbolHierarchyRoot
@@ -92,13 +60,17 @@ module RubyLsp
           T::Array[T.any(SymbolHierarchyRoot, Interface::DocumentSymbol)],
         )
 
+        @external_listeners.concat(
+          Extension.extensions.filter_map { |ext| ext.create_document_symbol_listener(emitter, message_queue) },
+        )
+
         emitter.register(
           self,
           :on_class,
           :after_class,
           :on_call,
-          :on_constant_path_write,
           :on_constant_write,
+          :on_constant_path_write,
           :on_def,
           :after_def,
           :on_module,
@@ -108,13 +80,20 @@ module RubyLsp
         )
       end
 
+      # Merges responses from other listeners
+      sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
+      def merge_response!(other)
+        @response.concat(other.response)
+        self
+      end
+
       sig { params(node: YARP::ClassNode).void }
       def on_class(node)
         @stack << create_document_symbol(
           name: node.constant_path.location.slice,
-          kind: :class,
+          kind: Constant::SymbolKind::CLASS,
           range_node: node,
-          selection_range_node: node.constant_path,
+          selection_range_location: node.constant_path.location,
         )
       end
 
@@ -125,7 +104,7 @@ module RubyLsp
 
       sig { params(node: YARP::CallNode).void }
       def on_call(node)
-        return unless ATTR_ACCESSORS.include?(node.name) && node.receiver.nil?
+        return unless ATTR_ACCESSORS.include?(node.name)
 
         arguments = node.arguments
         return unless arguments
@@ -135,9 +114,9 @@ module RubyLsp
 
           create_document_symbol(
             name: argument.value,
-            kind: :field,
+            kind: Constant::SymbolKind::FIELD,
             range_node: argument,
-            selection_range_node: argument,
+            selection_range_location: argument.location,
           )
         end
       end
@@ -146,9 +125,9 @@ module RubyLsp
       def on_constant_path_write(node)
         create_document_symbol(
           name: node.target.location.slice,
-          kind: :constant,
+          kind: Constant::SymbolKind::CONSTANT,
           range_node: node,
-          selection_range_node: node.target,
+          selection_range_location: node.target.location,
         )
       end
 
@@ -156,9 +135,9 @@ module RubyLsp
       def on_constant_write(node)
         create_document_symbol(
           name: node.name,
-          kind: :constant,
+          kind: Constant::SymbolKind::CONSTANT,
           range_node: node,
-          selection_range_node: node.name_loc,
+          selection_range_location: node.name_loc,
         )
       end
 
@@ -168,17 +147,17 @@ module RubyLsp
 
         if receiver.is_a?(YARP::SelfNode)
           name = "self.#{node.name}"
-          kind = :method
+          kind = Constant::SymbolKind::METHOD
         else
           name = node.name
-          kind = name == "initialize" ? :constructor : :method
+          kind = name == "initialize" ? Constant::SymbolKind::CONSTRUCTOR : Constant::SymbolKind::METHOD
         end
 
         symbol = create_document_symbol(
           name: name,
           kind: kind,
           range_node: node,
-          selection_range_node: node.name_loc,
+          selection_range_location: node.name_loc,
         )
 
         @stack << symbol
@@ -193,9 +172,9 @@ module RubyLsp
       def on_module(node)
         @stack << create_document_symbol(
           name: node.constant_path.location.slice,
-          kind: :module,
+          kind: Constant::SymbolKind::MODULE,
           range_node: node,
-          selection_range_node: node.constant_path,
+          selection_range_location: node.constant_path.location,
         )
       end
 
@@ -208,9 +187,9 @@ module RubyLsp
       def on_instance_variable_write(node)
         create_document_symbol(
           name: node.name,
-          kind: :variable,
+          kind: Constant::SymbolKind::VARIABLE,
           range_node: node,
-          selection_range_node: node.name_loc,
+          selection_range_location: node.name_loc,
         )
       end
 
@@ -218,9 +197,9 @@ module RubyLsp
       def on_class_variable_write(node)
         create_document_symbol(
           name: node.name,
-          kind: :variable,
+          kind: Constant::SymbolKind::VARIABLE,
           range_node: node,
-          selection_range_node: node.name_loc,
+          selection_range_location: node.name_loc,
         )
       end
 
@@ -229,23 +208,17 @@ module RubyLsp
       sig do
         params(
           name: String,
-          kind: Symbol,
+          kind: Integer,
           range_node: YARP::Node,
-          selection_range_node: T.any(YARP::Node, YARP::Location),
+          selection_range_location: YARP::Location,
         ).returns(Interface::DocumentSymbol)
       end
-      def create_document_symbol(name:, kind:, range_node:, selection_range_node:)
-        selection_range = if selection_range_node.is_a?(YARP::Node)
-          range_from_syntax_tree_node(selection_range_node)
-        else
-          range_from_location(selection_range_node)
-        end
-
+      def create_document_symbol(name:, kind:, range_node:, selection_range_location:)
         symbol = Interface::DocumentSymbol.new(
           name: name,
-          kind: SYMBOL_KIND[kind],
+          kind: kind,
           range: range_from_syntax_tree_node(range_node),
-          selection_range: selection_range,
+          selection_range: range_from_location(selection_range_location),
           children: [],
         )
 

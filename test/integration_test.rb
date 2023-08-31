@@ -69,7 +69,7 @@ class IntegrationTest < Minitest::Test
     response = make_request("textDocument/documentSymbol", { textDocument: { uri: @uri } })
     symbol = response[:result].first
     assert_equal("Foo", symbol[:name])
-    assert_equal(RubyLsp::Requests::DocumentSymbol::SYMBOL_KIND[:class], symbol[:kind])
+    assert_equal(LanguageServer::Protocol::Constant::SymbolKind::CLASS, symbol[:kind])
   end
 
   def test_document_highlight
@@ -372,11 +372,9 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_workspace_symbol
-    initialize_lsp(["workspaceSymbol"], experimental_features_enabled: true)
+    initialize_lsp(["workspaceSymbol"])
     open_file_with("class Foo\nend")
     # Read the response for the progress indicator notifications
-    read_response("window/workDoneProgress/create")
-    read_response("$/progress")
     read_response("textDocument/didOpen")
 
     # Populate the index
@@ -455,6 +453,8 @@ class IntegrationTest < Minitest::Test
 
     enabled_providers = enabled_features.map { |feature| FEATURE_TO_PROVIDER[feature] }
     assert_equal([:positionEncoding, :textDocumentSync, *enabled_providers], response[:capabilities].keys)
+    read_response("window/workDoneProgress/create")
+    read_response("$/progress")
   end
 
   def open_file_with(content)
