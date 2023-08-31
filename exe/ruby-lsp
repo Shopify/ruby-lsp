@@ -3,6 +3,7 @@
 
 require "optparse"
 
+original_args = ARGV.dup
 options = {}
 parser = OptionParser.new do |opts|
   opts.banner = "Usage: ruby-lsp [options]"
@@ -33,7 +34,7 @@ parser = OptionParser.new do |opts|
 end
 
 begin
-  parser.parse
+  parser.parse!
 rescue OptionParser::InvalidOption => e
   warn(e)
   warn("")
@@ -56,7 +57,7 @@ if ENV["BUNDLE_GEMFILE"].nil?
 
   env = { "BUNDLE_GEMFILE" => bundle_gemfile }
   env["BUNDLE_PATH"] = bundle_path if bundle_path
-  exit exec(env, "bundle exec ruby-lsp #{ARGV.join(" ")}")
+  exit exec(env, "bundle exec ruby-lsp #{original_args.join(" ")}")
 end
 
 require "sorbet-runtime"
