@@ -217,6 +217,15 @@ class ExecutorTest < Minitest::Test
     end
   end
 
+  def test_returns_void_for_unhandled_request
+    executor = RubyLsp::Executor.new(@store, @message_queue)
+
+    result = executor.execute(method: "anything/not/existing", params: {})
+    assert_same(RubyLsp::VOID, result.response)
+  end
+
+  private
+
   def with_uninstalled_rubocop(&block)
     rubocop_paths = $LOAD_PATH.select { |path| path.include?("gems/rubocop") }
     rubocop_paths.each { |path| $LOAD_PATH.delete(path) }
@@ -236,8 +245,6 @@ class ExecutorTest < Minitest::Test
   rescue NameError
     # Depending on which tests have run prior to this one, `RuboCopRunner` may or may not be defined
   end
-
-  private
 
   def stub_dependencies(rubocop:, syntax_tree:)
     dependencies = {}
