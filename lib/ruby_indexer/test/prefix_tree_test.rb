@@ -106,6 +106,17 @@ module RubyIndexer
       assert_equal(["foo/baz"], tree.search("foo"))
     end
 
+    def test_delete_does_not_impact_other_keys_with_the_same_value
+      tree = PrefixTree[String].new
+      tree.insert("key1", "value")
+      tree.insert("key2", "value")
+      assert_equal(["value", "value"], tree.search("key"))
+
+      tree.delete("key2")
+      assert_empty(tree.search("key2"))
+      assert_equal(["value"], tree.search("key1"))
+    end
+
     def test_deleted_node_is_removed_from_the_tree
       tree = PrefixTree[String].new
       tree.insert("foo/bar", "foo/bar")
