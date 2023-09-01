@@ -82,7 +82,7 @@ require("lspconfig").ruby_ls.setup({
 
 ## Sublime Text LSP
 
-[LSP for Sublime Text](https://github.com/sublimelsp/LSP) has built-in support for [Solargraph](https://lsp.sublimetext.io/language_servers/#solargraph) and [Sorbet](https://lsp.sublimetext.io/language_servers/#sorbet)
+[LSP for Sublime Text](https://github.com/sublimelsp/LSP) includes setup instructions for [Solargraph](https://lsp.sublimetext.io/language_servers/#solargraph) and [Sorbet](https://lsp.sublimetext.io/language_servers/#sorbet)
 
 To add ruby-lsp support, add the following configuration to your LSP client configuration:
 
@@ -93,12 +93,15 @@ To add ruby-lsp support, add the following configuration to your LSP client conf
     "command": [
       "ruby-lsp"
     ],
-    "selector": "source.ruby | text.html.ruby | text.html.erb | text.html.rails",
+    "selector": "source.ruby",
     "initializationOptions": {
-      "diagnostics": false
+      "enabledFeatures": {
+        "diagnostics": false
+      },
+      "experimentalFeaturesEnabled": true
     }
   }
 }
 ```
 
-Restart LSP or Sublime Text and `ruby-lsp` will automatically activate when opening `.rb` or `.erb` files.
+Restart LSP or Sublime Text and `ruby-lsp` will automatically activate when opening ruby files.
