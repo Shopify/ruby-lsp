@@ -6,11 +6,11 @@ require_relative "test_case"
 module RubyIndexer
   class IndexTest < TestCase
     def test_deleting_one_entry_for_a_class
-      @index.index_single("/fake/path/foo.rb", <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         class Foo
         end
       RUBY
-      @index.index_single("/fake/path/other_foo.rb", <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/other_foo.rb"), <<~RUBY)
         class Foo
         end
       RUBY
@@ -18,13 +18,13 @@ module RubyIndexer
       entries = @index["Foo"]
       assert_equal(2, entries.length)
 
-      @index.delete("/fake/path/other_foo.rb")
+      @index.delete(IndexablePath.new(nil, "/fake/path/other_foo.rb"))
       entries = @index["Foo"]
       assert_equal(1, entries.length)
     end
 
     def test_deleting_all_entries_for_a_class
-      @index.index_single("/fake/path/foo.rb", <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         class Foo
         end
       RUBY
@@ -32,13 +32,13 @@ module RubyIndexer
       entries = @index["Foo"]
       assert_equal(1, entries.length)
 
-      @index.delete("/fake/path/foo.rb")
+      @index.delete(IndexablePath.new(nil, "/fake/path/foo.rb"))
       entries = @index["Foo"]
       assert_nil(entries)
     end
 
     def test_index_resolve
-      @index.index_single("/fake/path/foo.rb", <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         class Bar; end
 
         module Foo
@@ -72,7 +72,7 @@ module RubyIndexer
     end
 
     def test_accessing_with_colon_colon_prefix
-      @index.index_single("/fake/path/foo.rb", <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         class Bar; end
 
         module Foo
@@ -92,7 +92,7 @@ module RubyIndexer
     end
 
     def test_fuzzy_search
-      @index.index_single("/fake/path/foo.rb", <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         class Bar; end
 
         module Foo
@@ -121,7 +121,7 @@ module RubyIndexer
 
     def test_index_single_ignores_directories
       FileUtils.mkdir("lib/this_is_a_dir.rb")
-      @index.index_single("lib/this_is_a_dir.rb")
+      @index.index_single(IndexablePath.new(nil, "lib/this_is_a_dir.rb"))
     ensure
       FileUtils.rm_r("lib/this_is_a_dir.rb")
     end

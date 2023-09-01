@@ -17,7 +17,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
     executor = RubyLsp::Executor.new(store, message_queue)
     index = executor.instance_variable_get(:@index)
-    index.index_single(uri.to_standardized_path, source)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
 
     begin
       # We need to pretend that Sorbet is not a dependency or else we can't properly test

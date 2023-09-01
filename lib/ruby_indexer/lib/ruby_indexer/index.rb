@@ -25,11 +25,11 @@ module RubyIndexer
       @files_to_entries = T.let({}, T::Hash[String, T::Array[Entry]])
     end
 
-    sig { params(path: String).void }
-    def delete(path)
+    sig { params(indexable: IndexablePath).void }
+    def delete(indexable)
       # For each constant discovered in `path`, delete the associated entry from the index. If there are no entries
       # left, delete the constant from the index.
-      @files_to_entries[path]&.each do |entry|
+      @files_to_entries[indexable.full_path]&.each do |entry|
         entries = @entries[entry.name]
         next unless entries
 
@@ -39,7 +39,7 @@ module RubyIndexer
         @entries.delete(entry.name) if entries.empty?
       end
 
-      @files_to_entries.delete(path)
+      @files_to_entries.delete(indexable.full_path)
     end
 
     sig { params(entry: Entry).void }
@@ -85,15 +85,15 @@ module RubyIndexer
       nil
     end
 
-    sig { params(paths: T::Array[String]).void }
-    def index_all(paths: RubyIndexer.configuration.files_to_index)
-      paths.each { |path| index_single(path) }
+    sig { params(indexable_paths: T::Array[IndexablePath]).void }
+    def index_all(indexable_paths: RubyIndexer.configuration.indexables)
+      indexable_paths.each { |path| index_single(path) }
     end
 
-    sig { params(path: String, source: T.nilable(String)).void }
-    def index_single(path, source = nil)
-      content = source || File.read(path)
-      visitor = IndexVisitor.new(self, YARP.parse(content), path)
+    sig { params(indexable_path: IndexablePath, source: T.nilable(String)).void }
+    def index_single(indexable_path, source = nil)
+      content = source || File.read(indexable_path.full_path)
+      visitor = IndexVisitor.new(self, YARP.parse(content), indexable_path.full_path)
       visitor.run
     rescue Errno::EISDIR
       # If `path` is a directory, just ignore it and continue indexing

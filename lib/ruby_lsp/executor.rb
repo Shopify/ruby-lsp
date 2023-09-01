@@ -191,14 +191,17 @@ module RubyLsp
         file_path = uri.to_standardized_path
         next if file_path.nil? || File.directory?(file_path)
 
+        load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
+        indexable = RubyIndexer::IndexablePath.new(load_path_entry, file_path)
+
         case change[:type]
         when Constant::FileChangeType::CREATED
-          @index.index_single(file_path)
+          @index.index_single(indexable)
         when Constant::FileChangeType::CHANGED
-          @index.delete(file_path)
-          @index.index_single(file_path)
+          @index.delete(indexable)
+          @index.index_single(indexable)
         when Constant::FileChangeType::DELETED
-          @index.delete(file_path)
+          @index.delete(indexable)
         end
       end
 
@@ -300,7 +303,9 @@ module RubyLsp
       hover.response
     end
 
-    sig { params(uri: URI::Generic, content_changes: T::Array[Document::EditShape], version: Integer).returns(Object) }
+    sig do
+      params(uri: URI::Generic, content_changes: T::Array[Document::EditShape], version: Integer).returns(Object)
+    end
     def text_document_did_change(uri, content_changes, version)
       @store.push_edits(uri: uri, edits: content_changes, version: version)
       VOID

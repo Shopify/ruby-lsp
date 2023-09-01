@@ -14,7 +14,7 @@ class WorkspaceSymbolTest < Minitest::Test
   end
 
   def test_returns_index_entries_based_on_query
-    @index.index_single("/fake.rb", <<~RUBY)
+    @index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake.rb"), <<~RUBY)
       class Foo; end
       module Bar; end
 
@@ -35,7 +35,7 @@ class WorkspaceSymbolTest < Minitest::Test
   end
 
   def test_fuzzy_matches_symbols
-    @index.index_single("/fake.rb", <<~RUBY)
+    @index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake.rb"), <<~RUBY)
       class Foo; end
       module Bar; end
 
@@ -57,13 +57,17 @@ class WorkspaceSymbolTest < Minitest::Test
 
   def test_matches_only_gem_symbols_if_typechecker_is_present
     RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
+    indexable = RubyIndexer::IndexablePath.new(
+      nil,
+      "#{RubyLsp::WORKSPACE_URI.to_standardized_path}/workspace_symbol_foo.rb",
+    )
 
-    @index.index_single("#{RubyLsp::WORKSPACE_URI.to_standardized_path}/workspace_symbol_foo.rb", <<~RUBY)
+    @index.index_single(indexable, <<~RUBY)
       class Foo; end
     RUBY
 
     path = "#{Bundler.bundle_path}/gems/fake-gem-0.1.0/lib/gem_symbol_foo.rb"
-    @index.index_single(path, <<~RUBY)
+    @index.index_single(RubyIndexer::IndexablePath.new(nil, path), <<~RUBY)
       class Foo; end
     RUBY
 
@@ -73,7 +77,7 @@ class WorkspaceSymbolTest < Minitest::Test
   end
 
   def test_symbols_include_container_name
-    @index.index_single("/fake.rb", <<~RUBY)
+    @index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake.rb"), <<~RUBY)
       module Foo
         class Bar; end
       end
@@ -86,7 +90,7 @@ class WorkspaceSymbolTest < Minitest::Test
   end
 
   def test_finds_default_gem_symbols
-    @index.index_single("#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb")
+    @index.index_single(RubyIndexer::IndexablePath.new(nil, "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb"))
 
     result = RubyLsp::Requests::WorkspaceSymbol.new("Pathname", @index).run
     refute_empty(result)
