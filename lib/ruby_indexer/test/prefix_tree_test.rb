@@ -126,5 +126,15 @@ module RubyIndexer
       root = tree.instance_variable_get(:@root)
       assert_empty(root.children)
     end
+
+    def test_deleting_non_terminal_nodes
+      tree = PrefixTree[String].new
+      tree.insert("abc", "value1")
+      tree.insert("abcdef", "value2")
+
+      tree.delete("abcdef")
+      assert_empty(tree.search("abcdef"))
+      assert_equal(["value1"], tree.search("abc"))
+    end
   end
 end

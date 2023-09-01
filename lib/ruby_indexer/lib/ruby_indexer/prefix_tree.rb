@@ -79,7 +79,7 @@ module RubyIndexer
 
       while parent
         parent.children.delete(node.key)
-        return if parent.children.any?
+        return if parent.children.any? || parent.leaf
 
         node = parent
         parent = parent.parent
