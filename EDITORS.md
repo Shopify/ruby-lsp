@@ -82,9 +82,7 @@ require("lspconfig").ruby_ls.setup({
 
 ## Sublime Text LSP
 
-[LSP for Sublime Text](https://github.com/sublimelsp/LSP) includes setup instructions for [Solargraph](https://lsp.sublimetext.io/language_servers/#solargraph) and [Sorbet](https://lsp.sublimetext.io/language_servers/#sorbet)
-
-To add ruby-lsp support, add the following configuration to your LSP client configuration:
+To configure the Ruby LSP using [LSP for Sublime Text](https://github.com/sublimelsp/LSP), add the following configuration to your LSP client configuration:
 
 ```json
 "clients": {
