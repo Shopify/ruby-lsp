@@ -23,6 +23,9 @@ module RubyIndexer
       #  "/my/project/bar.rb" => [#<Entry::Class>],
       # }
       @files_to_entries = T.let({}, T::Hash[String, T::Array[Entry]])
+
+      # Holds all require paths for every indexed item so that we can provide autocomplete for requires
+      @require_paths_tree = T.let(PrefixTree[String].new, PrefixTree[String])
     end
 
     sig { params(indexable: IndexablePath).void }
@@ -40,6 +43,9 @@ module RubyIndexer
       end
 
       @files_to_entries.delete(indexable.full_path)
+
+      require_path = indexable.require_path
+      @require_paths_tree.delete(require_path) if require_path
     end
 
     sig { params(entry: Entry).void }
@@ -51,6 +57,11 @@ module RubyIndexer
     sig { params(fully_qualified_name: String).returns(T.nilable(T::Array[Entry])) }
     def [](fully_qualified_name)
       @entries[fully_qualified_name.delete_prefix("::")]
+    end
+
+    sig { params(query: String).returns(T::Array[String]) }
+    def search_require_paths(query)
+      @require_paths_tree.search(query)
     end
 
     # Fuzzy searches index entries based on Jaro-Winkler similarity. If no query is provided, all entries are returned
@@ -95,6 +106,9 @@ module RubyIndexer
       content = source || File.read(indexable_path.full_path)
       visitor = IndexVisitor.new(self, YARP.parse(content), indexable_path.full_path)
       visitor.run
+
+      require_path = indexable_path.require_path
+      @require_paths_tree.insert(require_path, require_path) if require_path
     rescue Errno::EISDIR
       # If `path` is a directory, just ignore it and continue indexing
     end

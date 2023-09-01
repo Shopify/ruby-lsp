@@ -8,6 +8,7 @@ class PathCompletionTest < Minitest::Test
     @message_queue = Thread::Queue.new
     @uri = URI("file:///fake.rb")
     @store = RubyLsp::Store.new
+    @executor = RubyLsp::Executor.new(@store, @message_queue)
   end
 
   def teardown
@@ -31,7 +32,6 @@ class PathCompletionTest < Minitest::Test
     }
 
     result = with_file_structure do
-      @store = RubyLsp::Store.new
       @store.set(uri: @uri, source: document.source, version: 1)
       run_request(
         method: "textDocument/completion",
@@ -196,7 +196,6 @@ class PathCompletionTest < Minitest::Test
   private
 
   def run_request(method:, params: {})
-    @executor = RubyLsp::Executor.new(@store, @message_queue)
     result = @executor.execute({ method: method, params: params })
     error = result.error
     raise error if error
@@ -227,6 +226,13 @@ class PathCompletionTest < Minitest::Test
         tmpdir + "/foo/support/baz.rb",
         tmpdir + "/foo/support/quux.rb",
       ])
+
+      index = @executor.instance_variable_get(:@index)
+      indexables = Dir.glob(File.join(tmpdir, "**", "*.rb")).map! do |path|
+        RubyIndexer::IndexablePath.new(tmpdir, path)
+      end
+
+      index.index_all(indexable_paths: indexables)
 
       return block.call
     ensure

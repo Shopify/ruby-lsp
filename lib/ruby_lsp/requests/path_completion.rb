@@ -22,34 +22,23 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :response
 
-      sig { params(emitter: EventEmitter, message_queue: Thread::Queue).void }
-      def initialize(emitter, message_queue)
-        super
+      sig { params(index: RubyIndexer::Index, emitter: EventEmitter, message_queue: Thread::Queue).void }
+      def initialize(index, emitter, message_queue)
+        super(emitter, message_queue)
         @response = T.let([], ResponseType)
-        @tree = T.let(RubyIndexer::PrefixTree[String].new, RubyIndexer::PrefixTree[String])
-        collect_load_path_files
+        @index = index
 
         emitter.register(self, :on_tstring_content)
       end
 
       sig { params(node: SyntaxTree::TStringContent).void }
       def on_tstring_content(node)
-        @tree.search(node.value).sort.each do |path|
+        @index.search_require_paths(node.value).sort!.each do |path|
           @response << build_completion(path, node)
         end
       end
 
       private
-
-      sig { returns(T::Array[String]) }
-      def collect_load_path_files
-        $LOAD_PATH.flat_map do |p|
-          Dir.glob("**/*.rb", base: p)
-        end.each do |result|
-          entry = result.delete_suffix!(".rb")
-          @tree.insert(entry, entry)
-        end
-      end
 
       sig { params(label: String, node: SyntaxTree::TStringContent).returns(Interface::CompletionItem) }
       def build_completion(label, node)
