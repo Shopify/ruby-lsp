@@ -178,6 +178,8 @@ module RubyLsp
         workspace_symbol(request.dig(:params, :query))
       when "rubyLsp/textDocument/showSyntaxTree"
         show_syntax_tree(uri, request.dig(:params, :range))
+      else
+        VOID
       end
     end
 
