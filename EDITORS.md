@@ -9,6 +9,7 @@ new H2 header in this file containing the instructions. -->
 - [Emacs LSP Mode](https://emacs-lsp.github.io/lsp-mode/page/lsp-ruby-lsp/)
 - [Emacs Eglot](#Emacs-Eglot)
 - [Neovim LSP](#Neovim-LSP)
+- [Sublime Text LSP](#sublime-text-lsp)
 
 ## Emacs Eglot
 
@@ -78,3 +79,27 @@ require("lspconfig").ruby_ls.setup({
   end,
 })
 ```
+
+## Sublime Text LSP
+
+To configure the Ruby LSP using [LSP for Sublime Text](https://github.com/sublimelsp/LSP), add the following configuration to your LSP client configuration:
+
+```json
+"clients": {
+  "ruby-lsp": {
+    "enabled": true,
+    "command": [
+      "ruby-lsp"
+    ],
+    "selector": "source.ruby",
+    "initializationOptions": {
+      "enabledFeatures": {
+        "diagnostics": false
+      },
+      "experimentalFeaturesEnabled": true
+    }
+  }
+}
+```
+
+Restart LSP or Sublime Text and `ruby-lsp` will automatically activate when opening ruby files.
