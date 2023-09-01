@@ -13,8 +13,8 @@ require "tempfile"
 require "debug"
 require "mocha/minitest"
 
-sorbet_paths = Gem.loaded_specs["sorbet-runtime"].full_require_paths.freeze
-DEBUGGER__::CONFIG[:skip_path] = Array(DEBUGGER__::CONFIG[:skip_path]) + sorbet_paths
+SORBET_PATHS = T.let(Gem.loaded_specs["sorbet-runtime"].full_require_paths.freeze, T::Array[String])
+DEBUGGER__::CONFIG[:skip_path] = Array(DEBUGGER__::CONFIG[:skip_path]) + SORBET_PATHS
 
 minitest_reporter = if ENV["SPEC_REPORTER"]
   Minitest::Reporters::SpecReporter.new(color: true)
@@ -28,3 +28,16 @@ module Minitest
     Minitest::Test.make_my_diffs_pretty!
   end
 end
+
+class BacktraceWithoutSorbetFilter < Minitest::BacktraceFilter
+  extend T::Sig
+
+  sig { override.params(bt: T.nilable(T::Array[String])).returns(T::Array[String]) }
+  def filter(bt)
+    super.select do |line|
+      SORBET_PATHS.none? { |path| line.include?(path) }
+    end
+  end
+end
+
+Minitest.backtrace_filter = BacktraceWithoutSorbetFilter.new
