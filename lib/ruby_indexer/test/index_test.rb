@@ -138,5 +138,25 @@ module RubyIndexer
 
       assert_equal(["path/foo", "path/other_foo"], @index.search_require_paths("path"))
     end
+
+    def test_searching_for_entries_based_on_prefix
+      @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
+        class Foo::Bar
+        end
+      RUBY
+      @index.index_single(IndexablePath.new("/fake", "/fake/path/other_foo.rb"), <<~RUBY)
+        class Foo::Bar
+        end
+
+        class Foo::Baz
+        end
+      RUBY
+
+      results = @index.prefix_search("Foo", []).map { |entries| entries.map(&:name) }
+      assert_equal([["Foo::Bar", "Foo::Bar"], ["Foo::Baz"]], results)
+
+      results = @index.prefix_search("Ba", ["Foo"]).map { |entries| entries.map(&:name) }
+      assert_equal([["Foo::Bar", "Foo::Bar"], ["Foo::Baz"]], results)
+    end
   end
 end

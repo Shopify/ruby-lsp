@@ -64,6 +64,10 @@ module RubyIndexer
         node = node.children[char] ||= Node.new(char, value, node)
       end
 
+      # This line is to allow a value to be overridden. When we are indexing files, we want to be able to update entries
+      # for a given fully qualified name if we find more occurrences of it. Without being able to override, that would
+      # not be possible
+      node.value = value
       node.leaf = true
     end
 
@@ -116,7 +120,7 @@ module RubyIndexer
       attr_reader :key
 
       sig { returns(Value) }
-      attr_reader :value
+      attr_accessor :value
 
       sig { returns(T::Boolean) }
       attr_accessor :leaf
