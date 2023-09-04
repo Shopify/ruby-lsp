@@ -13,11 +13,9 @@ module RubyLsp
     # ```ruby
     # String # -> Hovering over the class reference will show all declaration locations and the documentation
     # ```
-    class Hover < Listener
+    class Hover < ExtensibleListener
       extend T::Sig
       extend T::Generic
-
-      include Extensible
 
       ResponseType = type_member { { fixed: T.nilable(Interface::Hover) } }
 

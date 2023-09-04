@@ -18,11 +18,9 @@ module RubyLsp
     # class Test < Minitest::Test
     # end
     # ```
-    class CodeLens < Listener
+    class CodeLens < ExtensibleListener
       extend T::Sig
       extend T::Generic
-
-      include Extensible
 
       ResponseType = type_member { { fixed: T::Array[Interface::CodeLens] } }
 

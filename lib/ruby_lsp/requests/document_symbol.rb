@@ -26,11 +26,9 @@ module RubyLsp
     #   end
     # end
     # ```
-    class DocumentSymbol < Listener
+    class DocumentSymbol < ExtensibleListener
       extend T::Sig
       extend T::Generic
-
-      include Extensible
 
       ResponseType = type_member { { fixed: T::Array[Interface::DocumentSymbol] } }
 
