@@ -77,10 +77,7 @@ module RubyIndexer
     sig { params(node: T.any(YARP::ClassNode, YARP::ModuleNode), klass: T.class_of(Index::Entry)).void }
     def add_index_entry(node, klass)
       name = node.constant_path.location.slice
-
-      unless /^[A-Z:]/.match?(name)
-        return visit_child_nodes(node)
-      end
+      return visit_child_nodes(node) unless /^[[:upper:]:]/.match?(name)
 
       comments = collect_comments(node)
       @index << klass.new(fully_qualify_name(name), @file_path, node.location, comments)

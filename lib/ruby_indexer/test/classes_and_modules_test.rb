@@ -216,5 +216,21 @@ module RubyIndexer
       second_foo_entry = @index["Bar"][0]
       assert_equal("This is a Bar comment", second_foo_entry.comments.join("\n"))
     end
+
+    def test_constants_using_unicode_names_are_properly_indexed
+      index(<<~RUBY)
+        class Árvore
+        end
+
+        module Ônibus
+        end
+
+        ÓCULOS = 1
+      RUBY
+
+      assert_entry("Árvore", Index::Entry::Class, "/fake/path/foo.rb:0-0:1-2")
+      assert_entry("Ônibus", Index::Entry::Module, "/fake/path/foo.rb:3-0:4-2")
+      assert_entry("ÓCULOS", Index::Entry::Constant, "/fake/path/foo.rb:6-0:6-9")
+    end
   end
 end
