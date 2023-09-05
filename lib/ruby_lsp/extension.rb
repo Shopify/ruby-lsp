@@ -130,7 +130,7 @@ module RubyLsp
       overridable.params(
         emitter: EventEmitter,
         message_queue: Thread::Queue,
-      ).returns(T.nilable(Listener[T.nilable(Interface::DocumentSymbol)]))
+      ).returns(T.nilable(Listener[T::Array[Interface::DocumentSymbol]]))
     end
     def create_document_symbol_listener(emitter, message_queue); end
   end
