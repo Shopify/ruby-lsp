@@ -36,7 +36,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
 
       def create_document_symbol_listener(emitter, message_queue)
         klass = Class.new(RubyLsp::Listener) do
-          attr_reader :response
+          attr_reader :_response
 
           def initialize(emitter, message_queue)
             super
@@ -51,7 +51,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
             first_argument = node.arguments.parts.first
             test_name = first_argument.parts.map(&:value).join
 
-            @response = [RubyLsp::Interface::DocumentSymbol.new(
+            @_response = [RubyLsp::Interface::DocumentSymbol.new(
               name: test_name,
               kind: LanguageServer::Protocol::Constant::SymbolKind::METHOD,
               selection_range: range_from_syntax_tree_node(node),

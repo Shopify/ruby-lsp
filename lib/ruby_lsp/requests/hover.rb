@@ -30,7 +30,7 @@ module RubyLsp
       )
 
       sig { override.returns(ResponseType) }
-      attr_reader :response
+      attr_reader :_response
 
       sig do
         params(
@@ -43,7 +43,7 @@ module RubyLsp
       def initialize(index, nesting, emitter, message_queue)
         @nesting = nesting
         @index = index
-        @response = T.let(nil, ResponseType)
+        @_response = T.let(nil, ResponseType)
 
         super(emitter, message_queue)
         emitter.register(self, :on_const_path_ref, :on_const)
@@ -60,10 +60,10 @@ module RubyLsp
         other_response = other.response
         return self unless other_response
 
-        if @response.nil?
-          @response = other.response
+        if @_response.nil?
+          @_response = other.response
         else
-          @response.contents.value << "\n\n" << other_response.contents.value
+          @_response.contents.value << "\n\n" << other_response.contents.value
         end
 
         self
@@ -113,7 +113,7 @@ module RubyLsp
           kind: "markdown",
           value: "#{title}\n\n**Definitions**: #{definitions.join(" | ")}\n\n#{content}",
         )
-        @response = Interface::Hover.new(range: range_from_syntax_tree_node(node), contents: contents)
+        @_response = Interface::Hover.new(range: range_from_syntax_tree_node(node), contents: contents)
       end
     end
   end

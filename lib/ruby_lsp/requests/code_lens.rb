@@ -29,13 +29,13 @@ module RubyLsp
       SUPPORTED_TEST_LIBRARIES = T.let(["minitest", "test-unit"], T::Array[String])
 
       sig { override.returns(ResponseType) }
-      attr_reader :response
+      attr_reader :_response
 
       sig { params(uri: URI::Generic, emitter: EventEmitter, message_queue: Thread::Queue, test_library: String).void }
       def initialize(uri, emitter, message_queue, test_library)
         @uri = T.let(uri, URI::Generic)
         @test_library = T.let(test_library, String)
-        @response = T.let([], ResponseType)
+        @_response = T.let([], ResponseType)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
         # visibility_stack is a stack of [current_visibility, previous_visibility]
         @visibility_stack = T.let([["public", "public"]], T::Array[T::Array[T.nilable(String)]])
@@ -153,7 +153,7 @@ module RubyLsp
 
       sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
       def merge_response!(other)
-        @response.concat(other.response)
+        @_response.concat(other.response)
         self
       end
 
@@ -176,7 +176,7 @@ module RubyLsp
           },
         ]
 
-        @response << create_code_lens(
+        @_response << create_code_lens(
           node,
           title: "Run",
           command_name: "rubyLsp.runTest",
@@ -184,7 +184,7 @@ module RubyLsp
           data: { type: "test", kind: kind },
         )
 
-        @response << create_code_lens(
+        @_response << create_code_lens(
           node,
           title: "Run In Terminal",
           command_name: "rubyLsp.runTestInTerminal",
@@ -192,7 +192,7 @@ module RubyLsp
           data: { type: "test_in_terminal", kind: kind },
         )
 
-        @response << create_code_lens(
+        @_response << create_code_lens(
           node,
           title: "Debug",
           command_name: "rubyLsp.debugTest",
@@ -241,7 +241,7 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::Command, remote: String).void }
       def add_open_gem_remote_code_lens(node, remote)
-        @response << create_code_lens(
+        @_response << create_code_lens(
           node,
           title: "Open remote",
           command_name: "rubyLsp.openLink",

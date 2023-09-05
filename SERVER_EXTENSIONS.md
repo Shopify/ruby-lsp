@@ -134,7 +134,7 @@ module RubyLsp
       ResponseType = type_member { { fixed: T.nilable(::RubyLsp::Interface::Hover) } }
 
       sig { override.returns(ResponseType) }
-      attr_reader :response
+      attr_reader :_response
 
       # Listeners are initialized with the EventEmitter. This object is used by the Ruby LSP to emit the events when it
       # finds nodes during AST analysis. Listeners must register which nodes they want to handle with the emitter (see
@@ -145,7 +145,7 @@ module RubyLsp
       def initialize(config, emitter, message_queue)
         super
 
-        @response = T.let(nil, ResponseType)
+        @_response = T.let(nil, ResponseType)
         @config = config
 
         # Register that this listener will handle `on_const` events (i.e.: whenever a constant is found in the code)
@@ -159,7 +159,7 @@ module RubyLsp
         # Certain helpers are made available to listeners to build LSP responses. The classes under `RubyLsp::Interface`
         # are generally used to build responses and they match exactly what the specification requests.
         contents = RubyLsp::Interface::MarkupContent.new(kind: "markdown", value: "Hello!")
-        @response = RubyLsp::Interface::Hover.new(range: range_from_syntax_tree_node(node), contents: contents)
+        @_response = RubyLsp::Interface::Hover.new(range: range_from_syntax_tree_node(node), contents: contents)
       end
     end
   end

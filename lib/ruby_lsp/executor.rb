@@ -105,9 +105,9 @@ module RubyLsp
 
         # Store all responses retrieve in this round of visits in the cache and then return the response for the request
         # we actually received
-        document.cache_set("textDocument/documentSymbol", document_symbol.merged_response)
+        document.cache_set("textDocument/documentSymbol", document_symbol.response)
         document.cache_set("textDocument/documentLink", document_link.response)
-        document.cache_set("textDocument/codeLens", code_lens.merged_response)
+        document.cache_set("textDocument/codeLens", code_lens.response)
         document.cache_set(
           "textDocument/semanticTokens/full",
           Requests::Support::SemanticTokenEncoder.new.encode(semantic_highlighting.response),
@@ -296,7 +296,7 @@ module RubyLsp
       # Emit events for all listeners
       emitter.emit_for_target(target)
 
-      hover.merged_response
+      hover.response
     end
 
     sig do

@@ -20,10 +20,15 @@ module RubyLsp
       @message_queue = message_queue
     end
 
+    sig { returns(ResponseType) }
+    def response
+      _response
+    end
+
     # Override this method with an attr_reader that returns the response of your listener. The listener should
     # accumulate results in a @response variable and then provide the reader so that it is accessible
     sig { abstract.returns(ResponseType) }
-    def response; end
+    def _response; end
   end
 
   # ExtensibleListener is an abstract class to be used by requests that accept extensions.
@@ -58,9 +63,9 @@ module RubyLsp
     end
 
     sig { returns(ResponseType) }
-    def merged_response
+    def response
       merge_external_listeners_responses! unless @response_merged
-      response
+      super
     end
 
     sig do

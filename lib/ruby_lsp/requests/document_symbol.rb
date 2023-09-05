@@ -47,12 +47,12 @@ module RubyLsp
       end
 
       sig { override.returns(T::Array[Interface::DocumentSymbol]) }
-      attr_reader :response
+      attr_reader :_response
 
       sig { params(emitter: EventEmitter, message_queue: Thread::Queue).void }
       def initialize(emitter, message_queue)
         @root = T.let(SymbolHierarchyRoot.new, SymbolHierarchyRoot)
-        @response = T.let(@root.children, T::Array[Interface::DocumentSymbol])
+        @_response = T.let(@root.children, T::Array[Interface::DocumentSymbol])
         @stack = T.let(
           [@root],
           T::Array[T.any(SymbolHierarchyRoot, Interface::DocumentSymbol)],
@@ -83,7 +83,7 @@ module RubyLsp
       # Merges responses from other listeners
       sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
       def merge_response!(other)
-        @response.concat(other.response)
+        @_response.concat(other.response)
         self
       end
 

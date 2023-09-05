@@ -63,7 +63,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
       def create_hover_listener(emitter, message_queue)
         klass = Class.new(RubyLsp::Listener) do
-          attr_reader :response
+          attr_reader :_response
 
           def initialize(emitter, message_queue)
             super
@@ -76,7 +76,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
               kind: "markdown",
               value: "Hello from middleware: #{node.value}",
             )
-            @response = RubyLsp::Interface::Hover.new(range: range_from_syntax_tree_node(node), contents: contents)
+            @_response = RubyLsp::Interface::Hover.new(range: range_from_syntax_tree_node(node), contents: contents)
           end
         end
 

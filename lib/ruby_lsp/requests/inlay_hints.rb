@@ -27,13 +27,13 @@ module RubyLsp
       RESCUE_STRING_LENGTH = T.let("rescue".length, Integer)
 
       sig { override.returns(ResponseType) }
-      attr_reader :response
+      attr_reader :_response
 
       sig { params(range: T::Range[Integer], emitter: EventEmitter, message_queue: Thread::Queue).void }
       def initialize(range, emitter, message_queue)
         super(emitter, message_queue)
 
-        @response = T.let([], ResponseType)
+        @_response = T.let([], ResponseType)
         @range = range
 
         emitter.register(self, :on_rescue)
@@ -47,7 +47,7 @@ module RubyLsp
         loc = node.location
         return unless visible?(node, @range)
 
-        @response << Interface::InlayHint.new(
+        @_response << Interface::InlayHint.new(
           position: { line: loc.start_line - 1, character: loc.start_column + RESCUE_STRING_LENGTH },
           label: "StandardError",
           padding_left: true,
