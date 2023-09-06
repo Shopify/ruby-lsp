@@ -42,35 +42,24 @@ module RubyLsp
         @nesting = nesting
         @index = index
         @_response = T.let(nil, ResponseType)
-        emitter.register(self, :on_command, :on_const, :on_const_path_ref)
+        emitter.register(self, :on_call, :on_constant_path)
       end
 
-      sig { params(node: SyntaxTree::ConstPathRef).void }
-      def on_const_path_ref(node)
-        name = full_constant_name(node)
-        find_in_index(name)
-      end
-
-      sig { params(node: SyntaxTree::Const).void }
-      def on_const(node)
-        find_in_index(node.value)
-      end
-
-      sig { params(node: SyntaxTree::Command).void }
-      def on_command(node)
-        message = node.message.value
+      sig { params(node: YARP::CallNode).void }
+      def on_call(node)
+        message = node.name
         return unless message == "require" || message == "require_relative"
 
-        argument = node.arguments.parts.first
-        return unless argument.is_a?(SyntaxTree::StringLiteral)
+        arguments = node.arguments
+        return unless arguments
 
-        string = argument.parts.first
-        return unless string.is_a?(SyntaxTree::TStringContent)
+        argument = arguments.arguments.first
+        return unless argument.is_a?(YARP::StringNode)
 
         case message
         when "require"
-          entry = @index.search_require_paths(string.value).find do |indexable_path|
-            indexable_path.require_path == string.value
+          entry = @index.search_require_paths(argument.content).find do |indexable_path|
+            indexable_path.require_path == argument.content
           end
 
           if entry
@@ -85,7 +74,7 @@ module RubyLsp
             )
           end
         when "require_relative"
-          required_file = "#{string.value}.rb"
+          required_file = "#{argument.content}.rb"
           path = @uri.to_standardized_path
           current_folder = path ? Pathname.new(CGI.unescape(path)).dirname : Dir.pwd
           candidate = File.expand_path(File.join(current_folder, required_file))
@@ -98,6 +87,11 @@ module RubyLsp
             ),
           )
         end
+      end
+
+      sig { params(node: YARP::ConstantPathNode).void }
+      def on_constant_path(node)
+        find_in_index(node.location.slice)
       end
 
       private
