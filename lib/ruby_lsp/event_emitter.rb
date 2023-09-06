@@ -62,6 +62,11 @@ module RubyLsp
       super
     end
 
+    sig { params(nodes: T::Array[T.nilable(YARP::Node)]).void }
+    def visit_all(nodes)
+      nodes.each { |node| visit(node) }
+    end
+
     sig { override.params(node: YARP::ClassNode).void }
     def visit_class_node(node)
       @listeners[:on_class]&.each { |l| T.unsafe(l).on_class(node) }
@@ -180,9 +185,9 @@ module RubyLsp
       @listeners[:after_binary]&.each { |l| T.unsafe(l).after_binary(node) }
     end
 
-    sig { override.params(node: SyntaxTree::Const).void }
-    def visit_const(node)
-      @listeners[:on_const]&.each { |l| T.unsafe(l).on_const(node) }
+    sig { override.params(node: YARP::ConstantReadNode).void }
+    def visit_constant_read_node(node)
+      @listeners[:on_constant_read]&.each { |l| T.unsafe(l).on_constant_read(node) }
       super
     end
   end
