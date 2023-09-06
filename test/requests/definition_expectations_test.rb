@@ -15,11 +15,21 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     store.set(uri: URI("file:///folder/fake.rb"), source: source, version: 1)
     executor = RubyLsp::Executor.new(store, message_queue)
 
-    executor.instance_variable_get(:@index).index_single(
+    index = executor.instance_variable_get(:@index)
+    index.index_single(
       RubyIndexer::IndexablePath.new(
         nil,
         File.expand_path(
-          "../../lib/ruby_lsp/event_emitter.rb",
+          "../../test/fixtures/class_reference_target.rb",
+          __dir__,
+        ),
+      ),
+    )
+    index.index_single(
+      RubyIndexer::IndexablePath.new(
+        nil,
+        File.expand_path(
+          "../../test/fixtures/constant_reference_target.rb",
           __dir__,
         ),
       ),

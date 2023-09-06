@@ -1,15 +1,15 @@
 {
     "result": [
         {
-            "uri": "file:///fixtures/class_reference_target.rb",
+            "uri": "file:///fixtures/constant_reference_target.rb",
             "range": {
                 "start": {
-                    "line": 4,
-                    "character": 2
+                    "line": 3,
+                    "character": 0
                 },
                 "end": {
-                    "line": 7,
-                    "character": 4
+                    "line": 4,
+                    "character": 2
                 }
             }
         }
@@ -17,7 +17,7 @@
     "params": [
         {
             "line": 0,
-            "character": 19
+            "character": 12
         }
     ]
 }

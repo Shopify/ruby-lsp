@@ -1,1 +1,1 @@
-emitter = RubyLsp::EventEmitter.new
+example = RubyLsp::ExampleClass.new
