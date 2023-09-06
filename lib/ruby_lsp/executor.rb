@@ -249,11 +249,9 @@ module RubyLsp
     end
     def definition(uri, position)
       document = @store.get(uri)
-      return if document.syntax_error?
-
       target, parent, nesting = document.locate_node(
         position,
-        node_types: [YARP::CallNode, YARP::ConstantPathNode],
+        node_types: [YARP::CallNode, YARP::ConstantReadNode, YARP::ConstantPathNode],
       )
 
       target = parent if target.is_a?(YARP::ConstantReadNode) && parent.is_a?(YARP::ConstantPathNode)
@@ -279,8 +277,6 @@ module RubyLsp
     end
     def hover(uri, position)
       document = @store.get(uri)
-      return if document.syntax_error?
-
       target, parent, nesting = document.locate_node(
         position,
         node_types: Requests::Hover::ALLOWED_TARGETS,
@@ -375,7 +371,6 @@ module RubyLsp
     end
     def document_highlight(uri, position)
       document = @store.get(uri)
-      return if document.syntax_error?
 
       target, parent = document.locate_node(position)
       emitter = EventEmitter.new
@@ -461,7 +456,7 @@ module RubyLsp
         @message_queue,
         range: start_line..end_line,
       )
-      emitter.visit(document.tree) if document.parsed?
+      emitter.visit(document.tree)
 
       Requests::Support::SemanticTokenEncoder.new.encode(listener.response)
     end
@@ -476,8 +471,10 @@ module RubyLsp
       document = @store.get(uri)
 
       char_position = document.create_scanner.find_char_position(position)
-      matched, parent =
-        document.locate(document.tree, char_position, node_types: [YARP::CallNode])
+      matched, parent, _ = T.cast(
+        document.locate(document.tree, char_position, node_types: [YARP::CallNode]),
+        [T.nilable(YARP::CallNode), T.nilable(YARP::Node), T::Array[String]],
+      )
       return unless matched && parent
 
       message = matched.message

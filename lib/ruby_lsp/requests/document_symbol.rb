@@ -215,7 +215,7 @@ module RubyLsp
       end
       def create_document_symbol(name:, kind:, range_node:, selection_range_node:)
         selection_range = if selection_range_node.is_a?(YARP::Node)
-          range_from_syntax_tree_node(selection_range_node)
+          range_from_node(selection_range_node)
         else
           range_from_location(selection_range_node)
         end
@@ -223,7 +223,7 @@ module RubyLsp
         symbol = Interface::DocumentSymbol.new(
           name: name,
           kind: kind,
-          range: range_from_syntax_tree_node(range_node),
+          range: range_from_node(range_node),
           selection_range: selection_range,
           children: [],
         )

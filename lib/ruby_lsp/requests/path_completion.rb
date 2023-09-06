@@ -33,22 +33,12 @@ module RubyLsp
 
       sig { params(node: YARP::StringNode).void }
       def on_string(node)
-        @index.search_require_paths(node.content_loc.slice).sort!.each do |path|
+        @index.search_require_paths(node.content).sort!.each do |path|
           @response << build_completion(path, node)
         end
       end
 
       private
-
-      sig { returns(T::Array[String]) }
-      def collect_load_path_files
-        $LOAD_PATH.flat_map do |p|
-          Dir.glob("**/*.rb", base: p)
-        end.each do |result|
-          entry = result.delete_suffix!(".rb")
-          @tree.insert(entry, entry)
-        end
-      end
 
       sig { params(label: String, node: YARP::StringNode).returns(Interface::CompletionItem) }
       def build_completion(label, node)

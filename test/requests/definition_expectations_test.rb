@@ -65,8 +65,6 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
   end
 
   def test_jumping_to_default_gems
-    skip # restore the `ensure` when removing
-
     message_queue = Thread::Queue.new
     position = { character: 0, line: 0 }
 
@@ -92,7 +90,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     }).response
 
     refute_empty(response)
-    # ensure
-    #   T.must(message_queue).close
+  ensure
+    T.must(message_queue).close
   end
 end
