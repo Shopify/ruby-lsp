@@ -29,7 +29,6 @@ module RubyLsp
 
       sig { override.returns(String) }
       def run
-        return "Document contains syntax error" if @document.syntax_error?
         return ast_for_range if @range
 
         output_string = +""
@@ -47,7 +46,7 @@ module RubyLsp
         start_char = scanner.find_char_position(range[:start])
         end_char = scanner.find_char_position(range[:end])
 
-        queue = T.cast(@document.tree, SyntaxTree::Program).statements.body.dup
+        queue = @document.tree.statements.body.dup
         found_nodes = []
 
         until queue.empty?
@@ -58,7 +57,7 @@ module RubyLsp
 
           # If the node is fully covered by the selection, then we found one of the nodes to be displayed and don't want
           # to continue descending into its children
-          if (start_char..end_char).cover?(loc.start_char..loc.end_char)
+          if (start_char..end_char).cover?(loc.start_offset..loc.end_offset)
             found_nodes << node
           else
             queue.unshift(*node.child_nodes)
