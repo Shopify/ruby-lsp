@@ -28,24 +28,34 @@ module RubyLsp
         @response = T.let([], ResponseType)
         @index = index
 
-        emitter.register(self, :on_tstring_content)
+        emitter.register(self, :on_string)
       end
 
-      sig { params(node: SyntaxTree::TStringContent).void }
-      def on_tstring_content(node)
-        @index.search_require_paths(node.value).sort!.each do |path|
+      sig { params(node: YARP::StringNode).void }
+      def on_string(node)
+        @index.search_require_paths(node.content_loc.slice).sort!.each do |path|
           @response << build_completion(path, node)
         end
       end
 
       private
 
-      sig { params(label: String, node: SyntaxTree::TStringContent).returns(Interface::CompletionItem) }
+      sig { returns(T::Array[String]) }
+      def collect_load_path_files
+        $LOAD_PATH.flat_map do |p|
+          Dir.glob("**/*.rb", base: p)
+        end.each do |result|
+          entry = result.delete_suffix!(".rb")
+          @tree.insert(entry, entry)
+        end
+      end
+
+      sig { params(label: String, node: YARP::StringNode).returns(Interface::CompletionItem) }
       def build_completion(label, node)
         Interface::CompletionItem.new(
           label: label,
           text_edit: Interface::TextEdit.new(
-            range: range_from_syntax_tree_node(node),
+            range: range_from_location(node.content_loc),
             new_text: label,
           ),
           kind: Constant::CompletionItemKind::REFERENCE,
