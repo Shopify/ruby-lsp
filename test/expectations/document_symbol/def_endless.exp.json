@@ -10,7 +10,7 @@
         },
         "end": {
           "line": 2,
-          "character": 12
+          "character": 11
         }
       },
       "selectionRange": {
@@ -20,7 +20,7 @@
         },
         "end": {
           "line": 2,
-          "character": 7
+          "character": 6
         }
       },
       "children": []
