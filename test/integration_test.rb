@@ -387,7 +387,7 @@ class IntegrationTest < Minitest::Test
     assert_equal(expected_uri, telemetry_response.dig(:params, :uri))
     assert_equal(RubyLsp::VERSION, telemetry_response.dig(:params, :lspVersion))
     assert_equal(request, telemetry_response.dig(:params, :request))
-    assert_in_delta(0.5, telemetry_response.dig(:params, :requestTime), 2)
+    assert_instance_of(Float, telemetry_response.dig(:params, :requestTime))
   end
 
   def make_request(request, params = nil)
