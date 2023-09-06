@@ -40,12 +40,12 @@ module RubyLsp
         @index = index
         @nesting = nesting
 
-        emitter.register(self, :on_tstring_content, :on_const_path_ref, :on_const, :on_top_const_ref)
+        emitter.register(self, :on_string, :on_const_path_ref, :on_const, :on_top_const_ref)
       end
 
-      sig { params(node: SyntaxTree::TStringContent).void }
-      def on_tstring_content(node)
-        @index.search_require_paths(node.value).map!(&:require_path).sort!.each do |path|
+      sig { params(node: YARP::StringNode).void }
+      def on_string(node)
+        @index.search_require_paths(node.content).map!(&:require_path).sort!.each do |path|
           @_response << build_completion(T.must(path), node)
         end
       end
@@ -86,7 +86,7 @@ module RubyLsp
 
       private
 
-      sig { params(label: String, node: SyntaxTree::TStringContent).returns(Interface::CompletionItem) }
+      sig { params(label: String, node: YARP::StringNode).returns(Interface::CompletionItem) }
       def build_completion(label, node)
         Interface::CompletionItem.new(
           label: label,

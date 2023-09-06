@@ -28,7 +28,7 @@ class CompletionTest < Minitest::Test
     }
     end_position = {
       line: 0,
-      character: document.source.rindex('"'),
+      character: T.must(document.source.rindex('"')) - 1,
     }
 
     result = with_file_structure do
@@ -64,7 +64,7 @@ class CompletionTest < Minitest::Test
     }
     end_position = {
       line: 0,
-      character: document.source.rindex('"'),
+      character: T.must(document.source.rindex('"')) - 1,
     }
 
     result = with_file_structure do
@@ -100,7 +100,7 @@ class CompletionTest < Minitest::Test
     }
     end_position = {
       line: 0,
-      character: document.source.rindex('"'),
+      character: T.must(document.source.rindex('"')) - 1,
     }
 
     result = with_file_structure do
@@ -136,7 +136,7 @@ class CompletionTest < Minitest::Test
     }
     end_position = {
       line: 0,
-      character: document.source.rindex('"'),
+      character: T.must(document.source.rindex('"')) - 1,
     }
 
     result = with_file_structure do
