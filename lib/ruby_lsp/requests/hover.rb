@@ -21,12 +21,12 @@ module RubyLsp
 
       ALLOWED_TARGETS = T.let(
         [
-          SyntaxTree::Const,
-          SyntaxTree::Command,
-          SyntaxTree::CallNode,
-          SyntaxTree::ConstPathRef,
+          YARP::CallNode,
+          YARP::ConstantReadNode,
+          YARP::ConstantWriteNode,
+          YARP::ConstantPathNode,
         ],
-        T::Array[T.class_of(SyntaxTree::Node)],
+        T::Array[T.class_of(YARP::Node)],
       )
 
       sig { override.returns(ResponseType) }
@@ -46,7 +46,7 @@ module RubyLsp
         @_response = T.let(nil, ResponseType)
 
         super(emitter, message_queue)
-        emitter.register(self, :on_const_path_ref, :on_const)
+        emitter.register(self, :on_constant_read, :on_constant_write, :on_constant_path)
       end
 
       sig { override.params(extension: RubyLsp::Extension).returns(T.nilable(Listener[ResponseType])) }
@@ -69,30 +69,36 @@ module RubyLsp
         self
       end
 
-      sig { params(node: SyntaxTree::ConstPathRef).void }
-      def on_const_path_ref(node)
+      sig { params(node: YARP::ConstantReadNode).void }
+      def on_constant_read(node)
         return if DependencyDetector::HAS_TYPECHECKER
 
-        name = full_constant_name(node)
-        generate_hover(name, node)
+        generate_hover(node.slice, node.location)
       end
 
-      sig { params(node: SyntaxTree::Const).void }
-      def on_const(node)
+      sig { params(node: YARP::ConstantWriteNode).void }
+      def on_constant_write(node)
         return if DependencyDetector::HAS_TYPECHECKER
 
-        generate_hover(node.value, node)
+        generate_hover(node.name, node.name_loc)
+      end
+
+      sig { params(node: YARP::ConstantPathNode).void }
+      def on_constant_path(node)
+        return if DependencyDetector::HAS_TYPECHECKER
+
+        generate_hover(node.slice, node.location)
       end
 
       private
 
-      sig { params(name: String, node: SyntaxTree::Node).void }
-      def generate_hover(name, node)
+      sig { params(name: String, location: YARP::Location).void }
+      def generate_hover(name, location)
         entries = @index.resolve(name, @nesting)
         return unless entries
 
         @_response = Interface::Hover.new(
-          range: range_from_syntax_tree_node(node),
+          range: range_from_location(node),
           contents: markdown_from_index_entries(name, entries),
         )
       end
