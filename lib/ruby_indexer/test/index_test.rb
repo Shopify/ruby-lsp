@@ -136,7 +136,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_equal(["path/foo", "path/other_foo"], @index.search_require_paths("path"))
+      assert_equal(["path/foo", "path/other_foo"], @index.search_require_paths("path").map(&:require_path))
     end
 
     def test_searching_for_entries_based_on_prefix

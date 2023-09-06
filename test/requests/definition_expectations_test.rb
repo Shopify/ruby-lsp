@@ -18,7 +18,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     index = executor.instance_variable_get(:@index)
     index.index_single(
       RubyIndexer::IndexablePath.new(
-        nil,
+        "#{Dir.pwd}/lib",
         File.expand_path(
           "../../test/fixtures/class_reference_target.rb",
           __dir__,
@@ -30,6 +30,15 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         nil,
         File.expand_path(
           "../../test/fixtures/constant_reference_target.rb",
+          __dir__,
+        ),
+      ),
+    )
+    index.index_single(
+      RubyIndexer::IndexablePath.new(
+        "#{Dir.pwd}/lib",
+        File.expand_path(
+          "../../lib/ruby_lsp/event_emitter.rb",
           __dir__,
         ),
       ),
@@ -90,6 +99,37 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     }).response
 
     refute_empty(response)
+  ensure
+    T.must(message_queue).close
+  end
+
+  def test_jumping_to_default_require_of_a_gem
+    message_queue = Thread::Queue.new
+
+    store = RubyLsp::Store.new
+    store.set(uri: URI("file:///folder/fake.rb"), source: <<~RUBY, version: 1)
+      require "bundler"
+    RUBY
+
+    executor = RubyLsp::Executor.new(store, message_queue)
+
+    uri = URI::Generic.from_path(path: "#{RbConfig::CONFIG["rubylibdir"]}/bundler.rb")
+    executor.instance_variable_get(:@index).index_single(
+      RubyIndexer::IndexablePath.new(RbConfig::CONFIG["rubylibdir"], T.must(uri.to_standardized_path)),
+    )
+
+    Dir.glob("#{RbConfig::CONFIG["rubylibdir"]}/bundler/*.rb").each do |path|
+      executor.instance_variable_get(:@index).index_single(
+        RubyIndexer::IndexablePath.new(RbConfig::CONFIG["rubylibdir"], path),
+      )
+    end
+
+    response = executor.execute({
+      method: "textDocument/definition",
+      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 10, line: 0 } },
+    }).response
+
+    assert_equal(uri.to_s, response.attributes[:uri])
   ensure
     T.must(message_queue).close
   end

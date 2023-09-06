@@ -105,7 +105,13 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["definition"])
     open_file_with("require 'ruby_lsp/utils'")
 
-    assert_telemetry("textDocument/didOpen")
+    read_response("textDocument/didOpen")
+
+    # Populate the index
+    send_request("initialized")
+    read_response("initialized")
+    # Read the response for the progress end notification
+    read_response("$/progress")
 
     response = make_request(
       "textDocument/definition",

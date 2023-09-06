@@ -1,6 +1,6 @@
 {
     "result": {
-        "uri": "file:///ruby_lsp/utils.rb",
+        "uri": "file:///ruby_lsp/event_emitter.rb",
         "range": {
             "start": {
                 "line": 0,
