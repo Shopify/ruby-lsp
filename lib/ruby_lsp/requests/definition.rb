@@ -42,32 +42,21 @@ module RubyLsp
         @nesting = nesting
         @index = index
         @response = T.let(nil, ResponseType)
-        emitter.register(self, :on_command, :on_const, :on_const_path_ref)
+        emitter.register(self, :on_call, :on_constant_path)
       end
 
-      sig { params(node: SyntaxTree::ConstPathRef).void }
-      def on_const_path_ref(node)
-        name = full_constant_name(node)
-        find_in_index(name)
-      end
-
-      sig { params(node: SyntaxTree::Const).void }
-      def on_const(node)
-        find_in_index(node.value)
-      end
-
-      sig { params(node: SyntaxTree::Command).void }
-      def on_command(node)
-        message = node.message.value
+      sig { params(node: YARP::CallNode).void }
+      def on_call(node)
+        message = node.name
         return unless message == "require" || message == "require_relative"
 
-        argument = node.arguments.parts.first
-        return unless argument.is_a?(SyntaxTree::StringLiteral)
+        arguments = node.arguments
+        return unless arguments
 
-        string = argument.parts.first
-        return unless string.is_a?(SyntaxTree::TStringContent)
+        argument = arguments.arguments.first
+        return unless argument.is_a?(YARP::StringNode)
 
-        required_file = "#{string.value}.rb"
+        required_file = "#{argument.content}.rb"
 
         case message
         when "require"
@@ -97,6 +86,11 @@ module RubyLsp
             )
           end
         end
+      end
+
+      sig { params(node: YARP::ConstantPathNode).void }
+      def on_constant_path(node)
+        find_in_index(node.location.slice)
       end
 
       private
