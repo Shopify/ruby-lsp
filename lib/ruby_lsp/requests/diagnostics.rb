@@ -28,10 +28,10 @@ module RubyLsp
         @uri = T.let(document.uri, URI::Generic)
       end
 
-      sig { override.returns(T.nilable(T.all(T::Array[Support::RuboCopDiagnostic], Object))) }
+      sig { override.returns(T.nilable(T.all(T::Array[Interface::Diagnostic], Object))) }
       def run
         # Running RuboCop is slow, so to avoid excessive runs we only do so if the file is syntactically valid
-        return if @document.syntax_error?
+        return syntax_error_diagnostics if @document.syntax_error?
 
         return unless defined?(Support::RuboCopDiagnosticsRunner)
 
@@ -39,7 +39,30 @@ module RubyLsp
         path = @uri.to_standardized_path
         return unless path.nil? || path.start_with?(T.must(WORKSPACE_URI.to_standardized_path))
 
-        Support::RuboCopDiagnosticsRunner.instance.run(@uri, @document)
+        Support::RuboCopDiagnosticsRunner.instance.run(@uri, @document).map!(&:to_lsp_diagnostic)
+      end
+
+      private
+
+      sig { returns(T.nilable(T::Array[Interface::Diagnostic])) }
+      def syntax_error_diagnostics
+        @document.parse_result.errors.map do |error|
+          Interface::Diagnostic.new(
+            range: Interface::Range.new(
+              start: Interface::Position.new(
+                line: error.location.start_line - 1,
+                character: error.location.start_column,
+              ),
+              end: Interface::Position.new(
+                line: error.location.end_line - 1,
+                character: error.location.end_column,
+              ),
+            ),
+            message: error.message,
+            severity: Constant::DiagnosticSeverity::ERROR,
+            source: "YARP",
+          )
+        end
       end
     end
   end
