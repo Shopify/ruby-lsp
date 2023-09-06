@@ -497,25 +497,20 @@ class SorbetTest < Minitest::Test
 
   sig do
     params(source: String)
-      .returns(T.any(SyntaxTree::CallNode, SyntaxTree::VCall))
+      .returns(YARP::CallNode)
   end
   def parse(source)
-    program = T.let(SyntaxTree.parse(source), SyntaxTree::Node)
+    program = T.let(YARP.parse(source).value, YARP::Node)
 
     select_relevant_node([program])
   end
 
   sig do
-    params(nodes: T::Array[SyntaxTree::Node])
-      .returns(T.any(SyntaxTree::CallNode, SyntaxTree::VCall))
+    params(nodes: T::Array[YARP::Node]).returns(YARP::CallNode)
   end
   def select_relevant_node(nodes)
     nodes.each do |node|
-      case node
-      when SyntaxTree::CallNode,
-           SyntaxTree::VCall
-        return node
-      end
+      return node if node.is_a?(YARP::CallNode)
     end
 
     select_relevant_node(nodes.map(&:child_nodes).flatten.compact)
