@@ -82,7 +82,7 @@ module RubyLsp
 
       sig { params(match: Support::HighlightTarget::HighlightMatch).void }
       def add_highlight(match)
-        range = range_from_syntax_tree_node(match.node)
+        range = range_from_node(match.node)
         @_response << Interface::DocumentHighlight.new(range: range, kind: match.type)
       end
     end

@@ -8,7 +8,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::DocumentSymbol, "document_symbol"
 
   def test_document_symbol_extensions
-    skip
+    skip("Won't pass until other automatic requests are migrated")
 
     source = <<~RUBY
       test "foo" do
@@ -18,7 +18,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
     test_extension(:create_document_symbol_extension, source: source) do |executor|
       response = executor.execute({
         method: "textDocument/documentSymbol",
-        params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 0, character: 1 } },
+        params: { textDocument: { uri: "file:///fake.rb" } },
       }).response
 
       assert_equal("foo", response.first.name)
@@ -42,22 +42,20 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
 
           def initialize(emitter, message_queue)
             super
-            emitter.register(self, :on_command)
+            emitter.register(self, :on_call)
           end
 
-          def on_command(node)
+          def on_call(node)
             T.bind(self, RubyLsp::Listener[T.untyped])
-            message_value = node.message.value
-            return unless message_value == "test" && node.arguments.parts.any?
-
-            first_argument = node.arguments.parts.first
-            test_name = first_argument.parts.map(&:value).join
+            message_value = node.message
+            arguments = node.arguments&.arguments
+            return unless message_value == "test" && arguments&.any?
 
             @_response = [RubyLsp::Interface::DocumentSymbol.new(
-              name: test_name,
+              name: arguments.first.content,
               kind: LanguageServer::Protocol::Constant::SymbolKind::METHOD,
-              selection_range: range_from_syntax_tree_node(node),
-              range: range_from_syntax_tree_node(node),
+              selection_range: range_from_node(node),
+              range: range_from_node(node),
             )]
           end
         end
