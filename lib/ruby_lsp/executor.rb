@@ -101,7 +101,7 @@ module RubyLsp
         code_lens = Requests::CodeLens.new(uri, emitter, @message_queue, @test_library)
 
         semantic_highlighting = Requests::SemanticHighlighting.new(emitter, @message_queue)
-        emitter.visit(document.tree) if document.parsed?
+        emitter.visit(document.tree)
 
         code_lens.merge_external_listeners_responses!
         document_symbol.merge_external_listeners_responses!
@@ -253,10 +253,10 @@ module RubyLsp
 
       target, parent, nesting = document.locate_node(
         position,
-        node_types: [SyntaxTree::Command, SyntaxTree::Const, SyntaxTree::ConstPathRef],
+        node_types: [YARP::CallNode, YARP::ConstantPathNode],
       )
 
-      target = parent if target.is_a?(SyntaxTree::Const) && parent.is_a?(SyntaxTree::ConstPathRef)
+      target = parent if target.is_a?(YARP::ConstantReadNode) && parent.is_a?(YARP::ConstantPathNode)
 
       emitter = EventEmitter.new
       base_listener = Requests::Definition.new(uri, nesting, @index, emitter, @message_queue)
@@ -288,7 +288,7 @@ module RubyLsp
 
       if (Requests::Hover::ALLOWED_TARGETS.include?(parent.class) &&
           !Requests::Hover::ALLOWED_TARGETS.include?(target.class)) ||
-          (parent.is_a?(SyntaxTree::ConstPathRef) && target.is_a?(SyntaxTree::Const))
+          (parent.is_a?(YARP::ConstantPathNode) && target.is_a?(YARP::ConstantReadNode))
         target = parent
       end
 
@@ -387,7 +387,6 @@ module RubyLsp
     sig { params(uri: URI::Generic, range: Document::RangeShape).returns(T.nilable(T::Array[Interface::InlayHint])) }
     def inlay_hint(uri, range)
       document = @store.get(uri)
-      return if document.syntax_error?
 
       start_line = range.dig(:start, :line)
       end_line = range.dig(:end, :line)
@@ -447,7 +446,7 @@ module RubyLsp
         Requests::Diagnostics.new(document).run
       end
 
-      Interface::FullDocumentDiagnosticReport.new(kind: "full", items: response.map(&:to_lsp_diagnostic)) if response
+      Interface::FullDocumentDiagnosticReport.new(kind: "full", items: response) if response
     end
 
     sig { params(uri: URI::Generic, range: Document::RangeShape).returns(Interface::SemanticTokens) }
@@ -475,42 +474,29 @@ module RubyLsp
     end
     def completion(uri, position)
       document = @store.get(uri)
-      return unless document.parsed?
 
       char_position = document.create_scanner.find_char_position(position)
-      matched, parent = document.locate(
-        T.must(document.tree),
-        char_position,
-        node_types: [SyntaxTree::Command, SyntaxTree::CommandCall, SyntaxTree::CallNode],
-      )
-
+      matched, parent =
+        document.locate(document.tree, char_position, node_types: [YARP::CallNode])
       return unless matched && parent
 
-      target = case matched
-      when SyntaxTree::Command, SyntaxTree::CallNode, SyntaxTree::CommandCall
-        message = matched.message
-        return if message.is_a?(Symbol)
-        return unless message.value == "require"
+      message = matched.message
+      return unless message == "require"
 
-        args = matched.arguments
-        args = args.arguments if args.is_a?(SyntaxTree::ArgParen)
-        return if args.nil? || args.is_a?(SyntaxTree::ArgsForward)
+      args = matched.arguments
+      return unless args
 
-        argument = args.parts.first
-        return unless argument.is_a?(SyntaxTree::StringLiteral)
+      args = args.arguments
+      return if args.is_a?(YARP::ForwardingArgumentsNode)
 
-        path_node = argument.parts.first
-        return unless path_node.is_a?(SyntaxTree::TStringContent)
-        return unless (path_node.location.start_char..path_node.location.end_char).cover?(char_position)
+      argument = args.first
+      return unless argument.is_a?(YARP::StringNode)
 
-        path_node
-      end
-
-      return unless target
+      return unless (argument.location.start_offset..argument.location.end_offset).cover?(char_position)
 
       emitter = EventEmitter.new
       listener = Requests::PathCompletion.new(@index, emitter, @message_queue)
-      emitter.emit_for_target(target)
+      emitter.emit_for_target(argument)
       listener.response
     end
 
