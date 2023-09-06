@@ -9,8 +9,8 @@ module RubyLsp
     RangeShape = T.type_alias { { start: PositionShape, end: PositionShape } }
     EditShape = T.type_alias { { range: RangeShape, text: String } }
 
-    sig { returns(T.nilable(SyntaxTree::Node)) }
-    attr_reader :tree
+    sig { returns(YARP::ParseResult) }
+    attr_reader :parse_result
 
     sig { returns(String) }
     attr_reader :source
@@ -29,10 +29,12 @@ module RubyLsp
       @version = T.let(version, Integer)
       @uri = T.let(uri, URI::Generic)
       @unparsed_edits = T.let([], T::Array[EditShape])
-      @syntax_error = T.let(false, T::Boolean)
-      @tree = T.let(SyntaxTree.parse(@source), T.nilable(SyntaxTree::Node))
-    rescue SyntaxTree::Parser::ParseError
-      @syntax_error = true
+      @parse_result = T.let(YARP.parse(@source), YARP::ParseResult)
+    end
+
+    sig { returns(YARP::ProgramNode) }
+    def tree
+      @parse_result.value
     end
 
     sig { params(other: Document).returns(T::Boolean) }
@@ -89,20 +91,12 @@ module RubyLsp
       return if @unparsed_edits.empty?
 
       @unparsed_edits.clear
-      @tree = SyntaxTree.parse(@source)
-      @syntax_error = false
-    rescue SyntaxTree::Parser::ParseError
-      @syntax_error = true
+      @parse_result = YARP.parse(@source)
     end
 
     sig { returns(T::Boolean) }
     def syntax_error?
-      @syntax_error
-    end
-
-    sig { returns(T::Boolean) }
-    def parsed?
-      !@tree.nil?
+      @parse_result.failure?
     end
 
     sig { returns(Scanner) }
@@ -113,27 +107,25 @@ module RubyLsp
     sig do
       params(
         position: PositionShape,
-        node_types: T::Array[T.class_of(SyntaxTree::Node)],
-      ).returns([T.nilable(SyntaxTree::Node), T.nilable(SyntaxTree::Node), T::Array[String]])
+        node_types: T::Array[T.class_of(YARP::Node)],
+      ).returns([T.nilable(YARP::Node), T.nilable(YARP::Node), T::Array[String]])
     end
     def locate_node(position, node_types: [])
-      return [nil, nil, []] unless parsed?
-
-      locate(T.must(@tree), create_scanner.find_char_position(position), node_types: node_types)
+      locate(@parse_result.value, create_scanner.find_char_position(position), node_types: node_types)
     end
 
     sig do
       params(
-        node: SyntaxTree::Node,
+        node: YARP::Node,
         char_position: Integer,
-        node_types: T::Array[T.class_of(SyntaxTree::Node)],
-      ).returns([T.nilable(SyntaxTree::Node), T.nilable(SyntaxTree::Node), T::Array[String]])
+        node_types: T::Array[T.class_of(YARP::Node)],
+      ).returns([T.nilable(YARP::Node), T.nilable(YARP::Node), T::Array[String]])
     end
     def locate(node, char_position, node_types: [])
-      queue = T.let(node.child_nodes.compact, T::Array[T.nilable(SyntaxTree::Node)])
+      queue = T.let(node.child_nodes.compact, T::Array[T.nilable(YARP::Node)])
       closest = node
-      parent = T.let(nil, T.nilable(SyntaxTree::Node))
-      nesting = T.let([], T::Array[T.any(SyntaxTree::ClassDeclaration, SyntaxTree::ModuleDeclaration)])
+      parent = T.let(nil, T.nilable(YARP::Node))
+      nesting = T.let([], T::Array[T.any(YARP::ClassNode, YARP::ModuleNode)])
 
       until queue.empty?
         candidate = queue.shift
@@ -144,24 +136,24 @@ module RubyLsp
         # Add the next child_nodes to the queue to be processed. The order here is important! We want to move in the
         # same order as the visiting mechanism, which means searching the child nodes before moving on to the next
         # sibling
-        queue.unshift(*candidate.child_nodes)
+        T.unsafe(queue).unshift(*candidate.child_nodes)
 
         # Skip if the current node doesn't cover the desired position
         loc = candidate.location
-        next unless (loc.start_char...loc.end_char).cover?(char_position)
+        next unless (loc.start_offset...loc.end_offset).cover?(char_position)
 
         # If the node's start character is already past the position, then we should've found the closest node
         # already
-        break if char_position < loc.start_char
+        break if char_position < loc.start_offset
 
         # If the candidate starts after the end of the previous nesting level, then we've exited that nesting level and
         # need to pop the stack
         previous_level = nesting.last
-        nesting.pop if previous_level && candidate.start_char > previous_level.end_char
+        nesting.pop if previous_level && loc.start_offset > previous_level.location.end_offset
 
         # Keep track of the nesting where we found the target. This is used to determine the fully qualified name of the
         # target when it is a constant
-        if candidate.is_a?(SyntaxTree::ClassDeclaration) || candidate.is_a?(SyntaxTree::ModuleDeclaration)
+        if candidate.is_a?(YARP::ClassNode) || candidate.is_a?(YARP::ModuleNode)
           nesting << candidate
         end
 
@@ -170,13 +162,13 @@ module RubyLsp
 
         # If the current node is narrower than or equal to the previous closest node, then it is more precise
         closest_loc = closest.location
-        if loc.end_char - loc.start_char <= closest_loc.end_char - closest_loc.start_char
+        if loc.end_offset - loc.start_offset <= closest_loc.end_offset - closest_loc.start_offset
           parent = closest
           closest = candidate
         end
       end
 
-      [closest, parent, nesting.map { |n| n.constant.constant.value }]
+      [closest, parent, nesting.map { |n| n.constant_path.location.slice }]
     end
 
     class Scanner

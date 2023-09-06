@@ -101,7 +101,7 @@ module RubyLsp
         code_lens = Requests::CodeLens.new(uri, emitter, @message_queue, @test_library)
 
         semantic_highlighting = Requests::SemanticHighlighting.new(emitter, @message_queue)
-        emitter.visit(document.tree) if document.parsed?
+        emitter.visit(document.tree)
 
         # Store all responses retrieve in this round of visits in the cache and then return the response for the request
         # we actually received
@@ -250,10 +250,10 @@ module RubyLsp
 
       target, parent, nesting = document.locate_node(
         position,
-        node_types: [SyntaxTree::Command, SyntaxTree::Const, SyntaxTree::ConstPathRef],
+        node_types: [YARP::CallNode, YARP::ConstantPathNode],
       )
 
-      target = parent if target.is_a?(SyntaxTree::Const) && parent.is_a?(SyntaxTree::ConstPathRef)
+      target = parent if target.is_a?(YARP::ConstantReadNode) && parent.is_a?(YARP::ConstantPathNode)
 
       emitter = EventEmitter.new
       base_listener = Requests::Definition.new(uri, nesting, @index, emitter, @message_queue)
@@ -285,7 +285,7 @@ module RubyLsp
 
       if (Requests::Hover::ALLOWED_TARGETS.include?(parent.class) &&
           !Requests::Hover::ALLOWED_TARGETS.include?(target.class)) ||
-          (parent.is_a?(SyntaxTree::ConstPathRef) && target.is_a?(SyntaxTree::Const))
+          (parent.is_a?(YARP::ConstantPathNode) && target.is_a?(YARP::ConstantReadNode))
         target = parent
       end
 
@@ -383,7 +383,6 @@ module RubyLsp
     sig { params(uri: URI::Generic, range: Document::RangeShape).returns(T.nilable(T::Array[Interface::InlayHint])) }
     def inlay_hint(uri, range)
       document = @store.get(uri)
-      return if document.syntax_error?
 
       start_line = range.dig(:start, :line)
       end_line = range.dig(:end, :line)
@@ -443,7 +442,7 @@ module RubyLsp
         Requests::Diagnostics.new(document).run
       end
 
-      Interface::FullDocumentDiagnosticReport.new(kind: "full", items: response.map(&:to_lsp_diagnostic)) if response
+      Interface::FullDocumentDiagnosticReport.new(kind: "full", items: response) if response
     end
 
     sig { params(uri: URI::Generic, range: Document::RangeShape).returns(Interface::SemanticTokens) }
@@ -471,7 +470,6 @@ module RubyLsp
     end
     def completion(uri, position)
       document = @store.get(uri)
-      return unless document.parsed?
 
       char_position = document.create_scanner.find_char_position(position)
 
@@ -480,35 +478,29 @@ module RubyLsp
       # the node, as it could not be a constant
       target_node_types = if ("A".."Z").cover?(document.source[char_position - 1])
         char_position -= 1
-        [SyntaxTree::Const, SyntaxTree::ConstPathRef, SyntaxTree::TopConstRef]
+        [YARP::ConstantReadNode, YARP::ConstantPathNode]
       else
-        [SyntaxTree::Command, SyntaxTree::CommandCall, SyntaxTree::CallNode]
+        [YARP::CallNode]
       end
 
-      matched, parent, nesting = document.locate(T.must(document.tree), char_position, node_types: target_node_types)
+      matched, parent, nesting = document.locate(document.tree, char_position, node_types: target_node_types)
       return unless matched && parent
 
       target = case matched
-      when SyntaxTree::Command, SyntaxTree::CallNode, SyntaxTree::CommandCall
+      when YARP::CallNode
         message = matched.message
-        return if message.is_a?(Symbol)
-        return unless message.value == "require"
+        return unless message == "require"
 
-        args = matched.arguments
-        args = args.arguments if args.is_a?(SyntaxTree::ArgParen)
-        return if args.nil? || args.is_a?(SyntaxTree::ArgsForward)
+        args = matched.arguments&.arguments
+        return if args.nil? || args.is_a?(YARP::ForwardingArgumentsNode)
 
-        argument = args.parts.first
-        return unless argument.is_a?(SyntaxTree::StringLiteral)
+        argument = args.first
+        return unless argument.is_a?(YARP::StringNode)
+        return unless (argument.location.start_offset..argument.location.end_offset).cover?(char_position)
 
-        path_node = argument.parts.first
-        return unless path_node.is_a?(SyntaxTree::TStringContent)
-        return unless (path_node.location.start_char..path_node.location.end_char).cover?(char_position)
-
-        path_node
-      when SyntaxTree::Const, SyntaxTree::ConstPathRef
-        if (parent.is_a?(SyntaxTree::ConstPathRef) || parent.is_a?(SyntaxTree::TopConstRef)) &&
-            matched.is_a?(SyntaxTree::Const)
+        argument
+      when YARP::ConstantReadNode, YARP::ConstantPathNode
+        if parent.is_a?(YARP::ConstantPathNode) && matched.is_a?(YARP::ConstantReadNode)
           parent
         else
           matched

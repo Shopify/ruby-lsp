@@ -18,9 +18,8 @@ module RubyLsp
   # emitter.emit_for_target(target_node)
   # listener.response
   # ```
-  class EventEmitter < SyntaxTree::Visitor
+  class EventEmitter < YARP::Visitor
     extend T::Sig
-    include SyntaxTree::WithScope
 
     sig { void }
     def initialize
@@ -35,86 +34,87 @@ module RubyLsp
 
     # Emit events for a specific node. This is similar to the regular `visit` method, but avoids going deeper into the
     # tree for performance
-    sig { params(node: T.nilable(SyntaxTree::Node)).void }
+    sig { params(node: T.nilable(YARP::Node)).void }
     def emit_for_target(node)
       case node
-      when SyntaxTree::Command
-        @listeners[:on_command]&.each { |l| T.unsafe(l).on_command(node) }
-      when SyntaxTree::CallNode
+      when YARP::CallNode
         @listeners[:on_call]&.each { |l| T.unsafe(l).on_call(node) }
-      when SyntaxTree::TStringContent
-        @listeners[:on_tstring_content]&.each { |l| T.unsafe(l).on_tstring_content(node) }
-      when SyntaxTree::ConstPathRef
-        @listeners[:on_const_path_ref]&.each { |l| T.unsafe(l).on_const_path_ref(node) }
-      when SyntaxTree::Const
-        @listeners[:on_const]&.each { |l| T.unsafe(l).on_const(node) }
-      when SyntaxTree::TopConstRef
-        @listeners[:on_top_const_ref]&.each { |l| T.unsafe(l).on_top_const_ref(node) }
+      when YARP::ConstantPathNode
+        @listeners[:on_constant_path]&.each { |l| T.unsafe(l).on_constant_path(node) }
+      when YARP::StringNode
+        @listeners[:on_string]&.each { |l| T.unsafe(l).on_string(node) }
+      when YARP::ClassNode
+        @listeners[:on_class]&.each { |l| T.unsafe(l).on_class(node) }
+      when YARP::ModuleNode
+        @listeners[:on_module]&.each { |l| T.unsafe(l).on_module(node) }
+      when YARP::ConstantWriteNode
+        @listeners[:on_constant_write]&.each { |l| T.unsafe(l).on_constant_write(node) }
+      when YARP::ConstantReadNode
+        @listeners[:on_constant_read]&.each { |l| T.unsafe(l).on_constant_read(node) }
       end
     end
 
     # Visit dispatchers are below. Notice that for nodes that create a new scope (e.g.: classes, modules, method defs)
     # we need both an `on_*` and `after_*` event. This is because some requests must know when we exit the scope
-    sig { override.params(node: T.nilable(SyntaxTree::Node)).void }
+    sig { override.params(node: T.nilable(YARP::Node)).void }
     def visit(node)
       @listeners[:on_node]&.each { |l| T.unsafe(l).on_node(node) }
       super
     end
 
-    sig { override.params(node: SyntaxTree::ClassDeclaration).void }
-    def visit_class(node)
+    sig { override.params(node: YARP::ClassNode).void }
+    def visit_class_node(node)
       @listeners[:on_class]&.each { |l| T.unsafe(l).on_class(node) }
       super
       @listeners[:after_class]&.each { |l| T.unsafe(l).after_class(node) }
     end
 
-    sig { override.params(node: SyntaxTree::ModuleDeclaration).void }
-    def visit_module(node)
+    sig { override.params(node: YARP::ModuleNode).void }
+    def visit_module_node(node)
       @listeners[:on_module]&.each { |l| T.unsafe(l).on_module(node) }
       super
       @listeners[:after_module]&.each { |l| T.unsafe(l).after_module(node) }
     end
 
-    sig { override.params(node: SyntaxTree::Command).void }
-    def visit_command(node)
-      @listeners[:on_command]&.each { |l| T.unsafe(l).on_command(node) }
-      super
-      @listeners[:after_command]&.each { |l| T.unsafe(l).after_command(node) }
-    end
-
-    sig { override.params(node: SyntaxTree::CommandCall).void }
-    def visit_command_call(node)
-      @listeners[:on_command_call]&.each { |l| T.unsafe(l).on_command_call(node) }
-      super
-    end
-
-    sig { override.params(node: SyntaxTree::CallNode).void }
-    def visit_call(node)
+    sig { override.params(node: YARP::CallNode).void }
+    def visit_call_node(node)
       @listeners[:on_call]&.each { |l| T.unsafe(l).on_call(node) }
       super
       @listeners[:after_call]&.each { |l| T.unsafe(l).after_call(node) }
     end
 
-    sig { override.params(node: SyntaxTree::VCall).void }
-    def visit_vcall(node)
-      @listeners[:on_vcall]&.each { |l| T.unsafe(l).on_vcall(node) }
+    sig { override.params(node: YARP::ConstantPathWriteNode).void }
+    def visit_constant_path_write_node(node)
+      @listeners[:on_constant_path_write]&.each { |l| T.unsafe(l).on_constant_path_write(node) }
       super
     end
 
-    sig { override.params(node: SyntaxTree::ConstPathField).void }
-    def visit_const_path_field(node)
-      @listeners[:on_const_path_field]&.each { |l| T.unsafe(l).on_const_path_field(node) }
+    sig { override.params(node: YARP::ConstantPathNode).void }
+    def visit_constant_path_node(node)
+      @listeners[:on_constant_path]&.each { |l| T.unsafe(l).on_constant_path(node) }
       super
     end
 
-    sig { override.params(node: SyntaxTree::TopConstField).void }
-    def visit_top_const_field(node)
-      @listeners[:on_top_const_field]&.each { |l| T.unsafe(l).on_top_const_field(node) }
+    sig { override.params(node: YARP::ConstantWriteNode).void }
+    def visit_constant_write_node(node)
+      @listeners[:on_constant_write]&.each { |l| T.unsafe(l).on_constant_write(node) }
       super
     end
 
-    sig { override.params(node: SyntaxTree::DefNode).void }
-    def visit_def(node)
+    sig { override.params(node: YARP::InstanceVariableWriteNode).void }
+    def visit_instance_variable_write_node(node)
+      @listeners[:on_instance_variable_write]&.each { |l| T.unsafe(l).on_instance_variable_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ClassVariableWriteNode).void }
+    def visit_class_variable_write_node(node)
+      @listeners[:on_class_variable_write]&.each { |l| T.unsafe(l).on_class_variable_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::DefNode).void }
+    def visit_def_node(node)
       @listeners[:on_def]&.each { |l| T.unsafe(l).on_def(node) }
       super
       @listeners[:after_def]&.each { |l| T.unsafe(l).after_def(node) }
@@ -132,8 +132,8 @@ module RubyLsp
       super
     end
 
-    sig { override.params(node: SyntaxTree::Rescue).void }
-    def visit_rescue(node)
+    sig { override.params(node: YARP::RescueNode).void }
+    def visit_rescue_node(node)
       @listeners[:on_rescue]&.each { |l| T.unsafe(l).on_rescue(node) }
       super
     end
