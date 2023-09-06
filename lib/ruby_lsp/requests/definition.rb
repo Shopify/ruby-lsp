@@ -42,7 +42,7 @@ module RubyLsp
         @nesting = nesting
         @index = index
         @_response = T.let(nil, ResponseType)
-        emitter.register(self, :on_call, :on_constant_path)
+        emitter.register(self, :on_call, :on_constant_read, :on_constant_path)
       end
 
       sig { params(node: YARP::CallNode).void }
@@ -91,7 +91,12 @@ module RubyLsp
 
       sig { params(node: YARP::ConstantPathNode).void }
       def on_constant_path(node)
-        find_in_index(node.location.slice)
+        find_in_index(node.slice)
+      end
+
+      sig { params(node: YARP::ConstantReadNode).void }
+      def on_constant_read(node)
+        find_in_index(node.slice)
       end
 
       private

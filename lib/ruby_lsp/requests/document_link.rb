@@ -100,7 +100,7 @@ module RubyLsp
         return if file_path.nil?
 
         @_response << Interface::DocumentLink.new(
-          range: range_from_syntax_tree_node(node),
+          range: range_from_node(node),
           target: "file://#{file_path}##{uri.line_number}",
           tooltip: "Jump to #{file_path}##{uri.line_number}",
         )

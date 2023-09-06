@@ -159,7 +159,7 @@ module RubyLsp
         # Certain helpers are made available to listeners to build LSP responses. The classes under `RubyLsp::Interface`
         # are generally used to build responses and they match exactly what the specification requests.
         contents = RubyLsp::Interface::MarkupContent.new(kind: "markdown", value: "Hello!")
-        @_response = RubyLsp::Interface::Hover.new(range: range_from_syntax_tree_node(node), contents: contents)
+        @_response = RubyLsp::Interface::Hover.new(range: range_from_node(node), contents: contents)
       end
     end
   end

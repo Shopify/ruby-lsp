@@ -10,7 +10,7 @@ module RubyLsp
         extend T::Sig
 
         sig { params(node: YARP::Node).returns(Interface::Range) }
-        def range_from_syntax_tree_node(node)
+        def range_from_node(node)
           loc = node.location
 
           Interface::Range.new(
@@ -52,7 +52,7 @@ module RubyLsp
           ).returns(Interface::CodeLens)
         end
         def create_code_lens(node, title:, command_name:, arguments:, data:)
-          range = range_from_syntax_tree_node(node)
+          range = range_from_node(node)
 
           Interface::CodeLens.new(
             range: range,
