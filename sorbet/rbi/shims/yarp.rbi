@@ -4199,12 +4199,9 @@ module YARP
     sig { returns(String) }
     def operator; end
 
-    sig { params(inspector: NodeInspector).returns(String) }
     def inspect(inspector); end
   end
 
-  # Represents the use of the `next` keyword.
-  #
   #     next 1
   #     ^^^^^^
   class NextNode < Node
@@ -5091,12 +5088,7 @@ module YARP
     attr_reader :operator_loc
 
     sig { params(name: T.nilable(Symbol), name_loc: T.nilable(Location), operator_loc: Location, location: Location).void }
-    def initialize(name, name_loc, operator_loc, location); end
 
-    sig { params(visitor: Visitor).void }
-    def accept(visitor); end
-
-    sig { returns(T::Array[T.nilable(Node)]) }
     def child_nodes; end
 
     sig { returns(T::Array[T.nilable(Node)]) }
