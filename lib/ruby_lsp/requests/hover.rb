@@ -49,7 +49,7 @@ module RubyLsp
           Extension.extensions.filter_map { |ext| ext.create_hover_listener(emitter, message_queue) },
         )
         @response = T.let(nil, ResponseType)
-        emitter.register(self, :on_call, :on_constant_read, :on_constant_write, :on_constant_path)
+        emitter.register(self, :on_constant_read, :on_constant_write, :on_constant_path)
       end
 
       # Merges responses from other hover listeners
