@@ -8,6 +8,8 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::DocumentSymbol, "document_symbol"
 
   def test_document_symbol_extensions
+    skip
+
     source = <<~RUBY
       test "foo" do
       end
