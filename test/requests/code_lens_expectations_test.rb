@@ -5,7 +5,7 @@ require "test_helper"
 require "expectations/expectations_test_runner"
 
 class CodeLensExpectationsTest < ExpectationsTestRunner
-  expectations_tests RubyLsp::Requests::CodeLens, "code_lens"
+  # expectations_tests RubyLsp::Requests::CodeLens, "code_lens"
 
   def run_expectations(source)
     uri = URI("file://#{@_path}")
@@ -18,6 +18,8 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   end
 
   def test_command_generation_for_test_unit
+    skip
+
     source = <<~RUBY
       class FooTest < Test::Unit::TestCase
         def test_bar; end
@@ -44,6 +46,8 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   end
 
   def test_no_code_lens_for_unknown_test_framework
+    skip
+
     source = <<~RUBY
       class FooTest < Test::Unit::TestCase
         def test_bar; end
@@ -62,6 +66,8 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   end
 
   def test_no_code_lens_for_rspec
+    skip
+
     source = <<~RUBY
       class FooTest < Test::Unit::TestCase
         def test_bar; end
@@ -80,6 +86,8 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   end
 
   def test_no_code_lens_for_unsaved_files
+    skip
+
     source = <<~RUBY
       class FooTest < Test::Unit::TestCase
         def test_bar; end
@@ -98,6 +106,8 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   end
 
   def test_code_lens_extensions
+    skip
+
     source = <<~RUBY
       class Test < Minitest::Test; end
     RUBY

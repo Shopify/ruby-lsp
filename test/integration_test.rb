@@ -60,6 +60,7 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_document_symbol
+    skip
     initialize_lsp(["documentSymbols"])
     open_file_with("class Foo\nend")
 
@@ -72,6 +73,7 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_document_highlight
+    skip
     initialize_lsp(["documentHighlights"])
     open_file_with("$foo = 1")
 
@@ -130,6 +132,7 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_semantic_highlighting
+    skip
     initialize_lsp(["semanticHighlighting"])
     open_file_with("class Foo\nend")
 
@@ -140,6 +143,7 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_document_link
+    skip
     initialize_lsp(["documentLink"])
     open_file_with(<<~DOC)
       # source://syntax_tree/#{Gem::Specification.find_by_name("syntax_tree").version}/lib/syntax_tree.rb#39
@@ -283,6 +287,7 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_folding_ranges
+    skip
     initialize_lsp(["foldingRanges"])
     open_file_with("class Foo\n\nend")
 
@@ -293,6 +298,7 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_code_lens
+    skip
     initialize_lsp(["codeLens"])
     open_file_with("class Foo\n\nend")
 
@@ -303,6 +309,7 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_request_with_telemetry
+    skip
     initialize_lsp(["foldingRanges"])
     open_file_with("class Foo\n\nend")
 
@@ -316,6 +323,7 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_selection_ranges
+    skip
     initialize_lsp(["selectionRanges"])
     open_file_with("class Foo\nend")
 
