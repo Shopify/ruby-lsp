@@ -9,10 +9,11 @@ module RubyLsp
 
         sig { params(position: Document::PositionShape).returns(T::Boolean) }
         def cover?(position)
-          line_range = (range.start.line..range.end.line)
-          character_range = (range.start.character..range.end.character)
-
-          line_range.cover?(position[:line]) && character_range.cover?(position[:character])
+          start_covered = range.start.line < position[:line] ||
+            (range.start.line == position[:line] && range.start.character <= position[:character])
+          end_covered = range.end.line > position[:line] ||
+            (range.end.line == position[:line] && range.end.character >= position[:character])
+          start_covered && end_covered
         end
       end
     end
