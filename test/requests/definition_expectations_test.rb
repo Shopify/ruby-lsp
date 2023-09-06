@@ -19,7 +19,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       RubyIndexer::IndexablePath.new(
         nil,
         File.expand_path(
-          "../../lib/ruby_lsp/event_emitter.rb",
+          "../../test/fixtures/class_reference_target.rb",
           __dir__,
         ),
       ),

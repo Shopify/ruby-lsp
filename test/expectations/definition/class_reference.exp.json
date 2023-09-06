@@ -1,14 +1,14 @@
 {
     "result": [
         {
-            "uri": "file:///ruby_lsp/event_emitter.rb",
+            "uri": "file:///fixtures/class_reference_target.rb",
             "range": {
                 "start": {
-                    "line": 20,
+                    "line": 4,
                     "character": 2
                 },
                 "end": {
-                    "line": 185,
+                    "line": 7,
                     "character": 4
                 }
             }
