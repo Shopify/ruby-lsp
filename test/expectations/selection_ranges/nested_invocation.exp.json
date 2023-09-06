@@ -14,29 +14,53 @@
                 },
                 "end": {
                     "line": 2,
-                    "character": 5
+                    "character": 4
                 }
             },
             "parent": {
                 "range": {
                     "start": {
-                        "line": 1,
-                        "character": 2
+                        "line": 2,
+                        "character": 4
                     },
                     "end": {
-                        "line": 4,
-                        "character": 3
+                        "line": 3,
+                        "character": 4
                     }
                 },
                 "parent": {
                     "range": {
                         "start": {
-                            "line": 0,
-                            "character": 0
+                            "line": 1,
+                            "character": 2
                         },
                         "end": {
-                            "line": 5,
-                            "character": 1
+                            "line": 4,
+                            "character": 2
+                        }
+                    },
+                    "parent": {
+                        "range": {
+                            "start": {
+                                "line": 1,
+                                "character": 2
+                            },
+                            "end": {
+                                "line": 4,
+                                "character": 2
+                            }
+                        },
+                        "parent": {
+                            "range": {
+                                "start": {
+                                    "line": 0,
+                                    "character": 0
+                                },
+                                "end": {
+                                    "line": 5,
+                                    "character": 0
+                                }
+                            }
                         }
                     }
                 }
