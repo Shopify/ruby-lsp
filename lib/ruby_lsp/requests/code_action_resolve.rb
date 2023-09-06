@@ -46,8 +46,6 @@ module RubyLsp
         source_range = @code_action.dig(:data, :range)
         return Error::EmptySelection if source_range[:start] == source_range[:end]
 
-        return Error::InvalidTargetRange if @document.syntax_error?
-
         scanner = @document.create_scanner
         start_index = scanner.find_char_position(source_range[:start])
         end_index = scanner.find_char_position(source_range[:end])
@@ -55,26 +53,23 @@ module RubyLsp
 
         # Find the closest statements node, so that we place the refactor in a valid position
         closest_statements, parent_statements = @document
-          .locate(T.must(@document.tree), start_index, node_types: [SyntaxTree::Statements])
+          .locate(@document.tree, start_index, node_types: [YARP::StatementsNode, YARP::BlockNode])
+
         return Error::InvalidTargetRange if closest_statements.nil?
 
         # Find the node with the end line closest to the requested position, so that we can place the refactor
         # immediately after that closest node
-        closest_node = closest_statements.child_nodes.compact.min_by do |node|
+        closest_node = T.must(closest_statements.child_nodes.compact.min_by do |node|
           distance = source_range.dig(:start, :line) - (node.location.end_line - 1)
           distance <= 0 ? Float::INFINITY : distance
-        end
+        end)
 
-        # Find the parent expression of the closest node
-        parent_expression = parent_statements.child_nodes.compact.find do |node|
-          loc = node.location
-          loc.start_line - 1 <= source_range.dig(:start, :line) && loc.end_line - 1 >= source_range.dig(:end, :line)
-        end if parent_statements
+        return Error::InvalidTargetRange if closest_node.is_a?(YARP::MissingNode)
 
         closest_node_loc = closest_node.location
         # If the parent expression is a single line block, then we have to extract it inside of the oneline block
-        if parent_expression.is_a?(SyntaxTree::MethodAddBlock) &&
-            parent_expression.location.start_line == parent_expression.location.end_line
+        if parent_statements.is_a?(YARP::BlockNode) &&
+            parent_statements.location.start_line == parent_statements.location.end_line
 
           variable_source = " #{NEW_VARIABLE_NAME} = #{extracted_source};"
           character = source_range.dig(:start, :character) - 1
@@ -105,7 +100,10 @@ module RubyLsp
             end: { line: target_line, character: indentation },
           }
 
-          variable_source = if T.must(lines[target_line]).strip.empty?
+          line = lines[target_line]
+          return Error::InvalidTargetRange unless line
+
+          variable_source = if line.strip.empty?
             "\n#{" " * indentation}#{NEW_VARIABLE_NAME} = #{extracted_source}"
           else
             "#{NEW_VARIABLE_NAME} = #{extracted_source}\n#{" " * indentation}"
