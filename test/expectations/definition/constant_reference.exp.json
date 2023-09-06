@@ -1,0 +1,23 @@
+{
+    "result": [
+        {
+            "uri": "file:///fixtures/constant_reference_target.rb",
+            "range": {
+                "start": {
+                    "line": 3,
+                    "character": 0
+                },
+                "end": {
+                    "line": 4,
+                    "character": 2
+                }
+            }
+        }
+    ],
+    "params": [
+        {
+            "line": 0,
+            "character": 12
+        }
+    ]
+}
