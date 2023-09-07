@@ -8,7 +8,7 @@
         },
         "end": {
           "line": 22,
-          "character": 3
+          "character": 2
         }
       },
       "command": {
@@ -22,7 +22,7 @@
             "start_line": 0,
             "start_column": 0,
             "end_line": 22,
-            "end_column": 3
+            "end_column": 2
           }
         ]
       },
@@ -39,7 +39,7 @@
         },
         "end": {
           "line": 22,
-          "character": 3
+          "character": 2
         }
       },
       "command": {
@@ -53,7 +53,7 @@
             "start_line": 0,
             "start_column": 0,
             "end_line": 22,
-            "end_column": 3
+            "end_column": 2
           }
         ]
       },
@@ -70,7 +70,7 @@
         },
         "end": {
           "line": 22,
-          "character": 3
+          "character": 2
         }
       },
       "command": {
@@ -84,7 +84,7 @@
             "start_line": 0,
             "start_column": 0,
             "end_line": 22,
-            "end_column": 3
+            "end_column": 2
           }
         ]
       },
@@ -101,7 +101,7 @@
         },
         "end": {
           "line": 5,
-          "character": 22
+          "character": 21
         }
       },
       "command": {
@@ -115,7 +115,7 @@
             "start_line": 5,
             "start_column": 2,
             "end_line": 5,
-            "end_column": 22
+            "end_column": 21
           }
         ]
       },
@@ -132,7 +132,7 @@
         },
         "end": {
           "line": 5,
-          "character": 22
+          "character": 21
         }
       },
       "command": {
@@ -146,7 +146,7 @@
             "start_line": 5,
             "start_column": 2,
             "end_line": 5,
-            "end_column": 22
+            "end_column": 21
           }
         ]
       },
@@ -163,7 +163,7 @@
         },
         "end": {
           "line": 5,
-          "character": 22
+          "character": 21
         }
       },
       "command": {
@@ -177,321 +177,321 @@
             "start_line": 5,
             "start_column": 2,
             "end_line": 5,
+            "end_column": 21
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 9
+        },
+        "end": {
+          "line": 9,
+          "character": 36
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "test_public_command",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_public_command/",
+          {
+            "start_line": 9,
+            "start_column": 9,
+            "end_line": 9,
+            "end_column": 36
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 9
+        },
+        "end": {
+          "line": 9,
+          "character": 36
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "test_public_command",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_public_command/",
+          {
+            "start_line": 9,
+            "start_column": 9,
+            "end_line": 9,
+            "end_column": 36
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 9
+        },
+        "end": {
+          "line": 9,
+          "character": 36
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "test_public_command",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_public_command/",
+          {
+            "start_line": 9,
+            "start_column": 9,
+            "end_line": 9,
+            "end_column": 36
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 11,
+          "character": 9
+        },
+        "end": {
+          "line": 11,
+          "character": 36
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "test_another_public",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_another_public/",
+          {
+            "start_line": 11,
+            "start_column": 9,
+            "end_line": 11,
+            "end_column": 36
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 11,
+          "character": 9
+        },
+        "end": {
+          "line": 11,
+          "character": 36
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "test_another_public",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_another_public/",
+          {
+            "start_line": 11,
+            "start_column": 9,
+            "end_line": 11,
+            "end_column": 36
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 11,
+          "character": 9
+        },
+        "end": {
+          "line": 11,
+          "character": 36
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "test_another_public",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_another_public/",
+          {
+            "start_line": 11,
+            "start_column": 9,
+            "end_line": 11,
+            "end_column": 36
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 17,
+          "character": 2
+        },
+        "end": {
+          "line": 17,
+          "character": 27
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "test_public_vcall",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_public_vcall/",
+          {
+            "start_line": 17,
+            "start_column": 2,
+            "end_line": 17,
+            "end_column": 27
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 17,
+          "character": 2
+        },
+        "end": {
+          "line": 17,
+          "character": 27
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "test_public_vcall",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_public_vcall/",
+          {
+            "start_line": 17,
+            "start_column": 2,
+            "end_line": 17,
+            "end_column": 27
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 17,
+          "character": 2
+        },
+        "end": {
+          "line": 17,
+          "character": 27
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "test_public_vcall",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_public_vcall/",
+          {
+            "start_line": 17,
+            "start_column": 2,
+            "end_line": 17,
+            "end_column": 27
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 19,
+          "character": 2
+        },
+        "end": {
+          "line": 19,
+          "character": 22
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "test_with_q?",
+          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_with_q\\?/",
+          {
+            "start_line": 19,
+            "start_column": 2,
+            "end_line": 19,
             "end_column": 22
           }
         ]
       },
       "data": {
-        "type": "debug",
-        "kind": "example"
-      }
-    },
-    {
-      "range": {
-        "start": {
-          "line": 9,
-          "character": 9
-        },
-        "end": {
-          "line": 9,
-          "character": 37
-        }
-      },
-      "command": {
-        "title": "Run",
-        "command": "rubyLsp.runTest",
-        "arguments": [
-          "/fixtures/minitest_tests.rb",
-          "test_public_command",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_public_command/",
-          {
-            "start_line": 9,
-            "start_column": 9,
-            "end_line": 9,
-            "end_column": 37
-          }
-        ]
-      },
-      "data": {
-        "type": "test",
-        "kind": "example"
-      }
-    },
-    {
-      "range": {
-        "start": {
-          "line": 9,
-          "character": 9
-        },
-        "end": {
-          "line": 9,
-          "character": 37
-        }
-      },
-      "command": {
-        "title": "Run In Terminal",
-        "command": "rubyLsp.runTestInTerminal",
-        "arguments": [
-          "/fixtures/minitest_tests.rb",
-          "test_public_command",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_public_command/",
-          {
-            "start_line": 9,
-            "start_column": 9,
-            "end_line": 9,
-            "end_column": 37
-          }
-        ]
-      },
-      "data": {
-        "type": "test_in_terminal",
-        "kind": "example"
-      }
-    },
-    {
-      "range": {
-        "start": {
-          "line": 9,
-          "character": 9
-        },
-        "end": {
-          "line": 9,
-          "character": 37
-        }
-      },
-      "command": {
-        "title": "Debug",
-        "command": "rubyLsp.debugTest",
-        "arguments": [
-          "/fixtures/minitest_tests.rb",
-          "test_public_command",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_public_command/",
-          {
-            "start_line": 9,
-            "start_column": 9,
-            "end_line": 9,
-            "end_column": 37
-          }
-        ]
-      },
-      "data": {
-        "type": "debug",
-        "kind": "example"
-      }
-    },
-    {
-      "range": {
-        "start": {
-          "line": 11,
-          "character": 9
-        },
-        "end": {
-          "line": 11,
-          "character": 37
-        }
-      },
-      "command": {
-        "title": "Run",
-        "command": "rubyLsp.runTest",
-        "arguments": [
-          "/fixtures/minitest_tests.rb",
-          "test_another_public",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_another_public/",
-          {
-            "start_line": 11,
-            "start_column": 9,
-            "end_line": 11,
-            "end_column": 37
-          }
-        ]
-      },
-      "data": {
-        "type": "test",
-        "kind": "example"
-      }
-    },
-    {
-      "range": {
-        "start": {
-          "line": 11,
-          "character": 9
-        },
-        "end": {
-          "line": 11,
-          "character": 37
-        }
-      },
-      "command": {
-        "title": "Run In Terminal",
-        "command": "rubyLsp.runTestInTerminal",
-        "arguments": [
-          "/fixtures/minitest_tests.rb",
-          "test_another_public",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_another_public/",
-          {
-            "start_line": 11,
-            "start_column": 9,
-            "end_line": 11,
-            "end_column": 37
-          }
-        ]
-      },
-      "data": {
-        "type": "test_in_terminal",
-        "kind": "example"
-      }
-    },
-    {
-      "range": {
-        "start": {
-          "line": 11,
-          "character": 9
-        },
-        "end": {
-          "line": 11,
-          "character": 37
-        }
-      },
-      "command": {
-        "title": "Debug",
-        "command": "rubyLsp.debugTest",
-        "arguments": [
-          "/fixtures/minitest_tests.rb",
-          "test_another_public",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_another_public/",
-          {
-            "start_line": 11,
-            "start_column": 9,
-            "end_line": 11,
-            "end_column": 37
-          }
-        ]
-      },
-      "data": {
-        "type": "debug",
-        "kind": "example"
-      }
-    },
-    {
-      "range": {
-        "start": {
-          "line": 17,
-          "character": 2
-        },
-        "end": {
-          "line": 17,
-          "character": 28
-        }
-      },
-      "command": {
-        "title": "Run",
-        "command": "rubyLsp.runTest",
-        "arguments": [
-          "/fixtures/minitest_tests.rb",
-          "test_public_vcall",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_public_vcall/",
-          {
-            "start_line": 17,
-            "start_column": 2,
-            "end_line": 17,
-            "end_column": 28
-          }
-        ]
-      },
-      "data": {
-        "type": "test",
-        "kind": "example"
-      }
-    },
-    {
-      "range": {
-        "start": {
-          "line": 17,
-          "character": 2
-        },
-        "end": {
-          "line": 17,
-          "character": 28
-        }
-      },
-      "command": {
-        "title": "Run In Terminal",
-        "command": "rubyLsp.runTestInTerminal",
-        "arguments": [
-          "/fixtures/minitest_tests.rb",
-          "test_public_vcall",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_public_vcall/",
-          {
-            "start_line": 17,
-            "start_column": 2,
-            "end_line": 17,
-            "end_column": 28
-          }
-        ]
-      },
-      "data": {
-        "type": "test_in_terminal",
-        "kind": "example"
-      }
-    },
-    {
-      "range": {
-        "start": {
-          "line": 17,
-          "character": 2
-        },
-        "end": {
-          "line": 17,
-          "character": 28
-        }
-      },
-      "command": {
-        "title": "Debug",
-        "command": "rubyLsp.debugTest",
-        "arguments": [
-          "/fixtures/minitest_tests.rb",
-          "test_public_vcall",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_public_vcall/",
-          {
-            "start_line": 17,
-            "start_column": 2,
-            "end_line": 17,
-            "end_column": 28
-          }
-        ]
-      },
-      "data": {
-        "type": "debug",
-        "kind": "example"
-      }
-    },
-    {
-      "range": {
-        "start": {
-          "line": 19,
-          "character": 2
-        },
-        "end": {
-          "line": 19,
-          "character": 23
-        }
-      },
-      "command": {
-        "title": "Run",
-        "command": "rubyLsp.runTest",
-        "arguments": [
-          "/fixtures/minitest_tests.rb",
-          "test_with_q?",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name /Test\\#test_with_q\\?/",
-          {
-            "start_line": 19,
-            "start_column": 2,
-            "end_line": 19,
-            "end_column": 23
-          }
-        ]
-      },
-      "data": {
         "type": "test",
         "kind": "example"
       }
@@ -504,7 +504,7 @@
         },
         "end": {
           "line": 19,
-          "character": 23
+          "character": 22
         }
       },
       "command": {
@@ -518,7 +518,7 @@
             "start_line": 19,
             "start_column": 2,
             "end_line": 19,
-            "end_column": 23
+            "end_column": 22
           }
         ]
       },
@@ -535,7 +535,7 @@
         },
         "end": {
           "line": 19,
-          "character": 23
+          "character": 22
         }
       },
       "command": {
@@ -549,7 +549,7 @@
             "start_line": 19,
             "start_column": 2,
             "end_line": 19,
-            "end_column": 23
+            "end_column": 22
           }
         ]
       },
@@ -566,7 +566,7 @@
         },
         "end": {
           "line": 32,
-          "character": 3
+          "character": 2
         }
       },
       "command": {
@@ -580,7 +580,7 @@
             "start_line": 24,
             "start_column": 0,
             "end_line": 32,
-            "end_column": 3
+            "end_column": 2
           }
         ]
       },
@@ -597,7 +597,7 @@
         },
         "end": {
           "line": 32,
-          "character": 3
+          "character": 2
         }
       },
       "command": {
@@ -611,7 +611,7 @@
             "start_line": 24,
             "start_column": 0,
             "end_line": 32,
-            "end_column": 3
+            "end_column": 2
           }
         ]
       },
@@ -628,7 +628,7 @@
         },
         "end": {
           "line": 32,
-          "character": 3
+          "character": 2
         }
       },
       "command": {
@@ -642,7 +642,7 @@
             "start_line": 24,
             "start_column": 0,
             "end_line": 32,
-            "end_column": 3
+            "end_column": 2
           }
         ]
       },
@@ -659,7 +659,7 @@
         },
         "end": {
           "line": 25,
-          "character": 22
+          "character": 21
         }
       },
       "command": {
@@ -673,7 +673,7 @@
             "start_line": 25,
             "start_column": 2,
             "end_line": 25,
-            "end_column": 22
+            "end_column": 21
           }
         ]
       },
@@ -690,7 +690,7 @@
         },
         "end": {
           "line": 25,
-          "character": 22
+          "character": 21
         }
       },
       "command": {
@@ -704,7 +704,7 @@
             "start_line": 25,
             "start_column": 2,
             "end_line": 25,
-            "end_column": 22
+            "end_column": 21
           }
         ]
       },
@@ -721,7 +721,7 @@
         },
         "end": {
           "line": 25,
-          "character": 22
+          "character": 21
         }
       },
       "command": {
@@ -735,7 +735,7 @@
             "start_line": 25,
             "start_column": 2,
             "end_line": 25,
-            "end_column": 22
+            "end_column": 21
           }
         ]
       },
@@ -752,7 +752,7 @@
         },
         "end": {
           "line": 31,
-          "character": 24
+          "character": 23
         }
       },
       "command": {
@@ -766,7 +766,7 @@
             "start_line": 31,
             "start_column": 2,
             "end_line": 31,
-            "end_column": 24
+            "end_column": 23
           }
         ]
       },
@@ -783,7 +783,7 @@
         },
         "end": {
           "line": 31,
-          "character": 24
+          "character": 23
         }
       },
       "command": {
@@ -797,7 +797,7 @@
             "start_line": 31,
             "start_column": 2,
             "end_line": 31,
-            "end_column": 24
+            "end_column": 23
           }
         ]
       },
@@ -814,7 +814,7 @@
         },
         "end": {
           "line": 31,
-          "character": 24
+          "character": 23
         }
       },
       "command": {
@@ -828,7 +828,7 @@
             "start_line": 31,
             "start_column": 2,
             "end_line": 31,
-            "end_column": 24
+            "end_column": 23
           }
         ]
       },
