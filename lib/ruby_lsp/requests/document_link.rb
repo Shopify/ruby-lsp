@@ -95,7 +95,7 @@ module RubyLsp
         return unless match
 
         uri = T.cast(URI(T.must(match[0])), URI::Source)
-        gem_version = T.must(resolve_version(uri))
+        gem_version = resolve_version(uri)
         file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, CGI.unescape(uri.path))
         return if file_path.nil?
 
@@ -112,14 +112,14 @@ module RubyLsp
       # 1. The version in the URI
       # 2. The version in the RBI file name
       # 3. The version from the gemspec
-      sig { params(uri: URI::Source).returns(T.nilable(String)) }
+      sig { params(uri: URI::Source).returns(String) }
       def resolve_version(uri)
         version = uri.gem_version
         return version unless version.nil? || version.empty?
 
         return @gem_version unless @gem_version.nil? || @gem_version.empty?
 
-        GEM_TO_VERSION_MAP[uri.gem_name]
+        GEM_TO_VERSION_MAP.fetch(uri.gem_name)
       end
     end
   end
