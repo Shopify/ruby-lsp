@@ -50,6 +50,13 @@ suite("Telemetry", () => {
   });
 
   test("The API object is acquired via command", async () => {
+    // eslint-disable-next-line no-process-env
+    if (!process.env.CI) {
+      // This test can't pass locally because the private telemetry command is already registered. Trying to register it
+      // again always throws errors
+      return;
+    }
+
     const api = new FakeApi();
     vscode.commands.registerCommand(
       "ruby-lsp.getPrivateTelemetryApi",

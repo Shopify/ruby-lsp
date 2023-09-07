@@ -1,4 +1,7 @@
 import * as assert from "assert";
+import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
 
 import * as vscode from "vscode";
 
@@ -11,13 +14,18 @@ suite("Ruby environment activation", () => {
     // eslint-disable-next-line no-process-env
     process.env.SHELL = "/bin/bash";
 
+    const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
+    fs.writeFileSync(path.join(tmpPath, ".ruby-version"), "3.2.2");
+
     const context = {
       extensionMode: vscode.ExtensionMode.Test,
     } as vscode.ExtensionContext;
 
-    // eslint-disable-next-line no-process-env
-    ruby = new Ruby(context, process.env.PWD);
-    await ruby.activateRuby(VersionManager.None);
+    ruby = new Ruby(context, tmpPath);
+    await ruby.activateRuby(
+      // eslint-disable-next-line no-process-env
+      process.env.CI ? VersionManager.None : VersionManager.Chruby,
+    );
 
     assert.ok(ruby.rubyVersion, "Expected Ruby version to be set");
     assert.strictEqual(
@@ -25,5 +33,7 @@ suite("Ruby environment activation", () => {
       true,
       "Expected YJIT support to be enabled",
     );
+
+    fs.rmSync(tmpPath, { recursive: true, force: true });
   });
 });

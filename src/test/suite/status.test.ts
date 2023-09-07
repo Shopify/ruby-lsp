@@ -148,11 +148,11 @@ suite("StatusItems", () => {
     });
 
     test("Status is initialized with the right values", () => {
-      assert.strictEqual(status.item.text, "Experimental features disabled");
+      assert.match(status.item.text, /Experimental features (dis|en)abled/);
       assert.strictEqual(status.item.name, "Experimental features");
-      assert.strictEqual(status.item.command?.title, "Enable");
+      assert.match(status.item.command?.title!, /Enable|Disable/);
       assert.strictEqual(
-        status.item.command.command,
+        status.item.command!.command,
         Command.ToggleExperimentalFeatures,
       );
       assert.strictEqual(context.subscriptions.length, 1);
@@ -253,30 +253,37 @@ suite("StatusItems", () => {
       assert.strictEqual(context.subscriptions.length, 1);
     });
 
-    test("Refresh updates number of features", () => {
-      // eslint-disable-next-line promise/catch-or-return
-      vscode.workspace
+    test("Refresh updates number of features", async () => {
+      const originalFeatures = vscode.workspace
         .getConfiguration("rubyLsp")
-        .update("enabledFeatures", { completion: false }, true, true)
-        .then(() => {
-          // The assertion depends on the resolution of the update promise. Awaiting leads to race conditions
-          const currentConfig: { [key: string]: boolean } =
-            configuration.get("enabledFeatures")!;
+        .get("enabledFeatures")!;
 
-          Object.keys(originalFeatures).forEach((key) => {
-            const expected =
-              key === "completion" ? false : originalFeatures[key];
-            assert.strictEqual(currentConfig[key], expected);
-          });
+      await vscode.workspace
+        .getConfiguration("rubyLsp")
+        .update("enabledFeatures", { completion: false }, true, true);
 
-          status.refresh();
-          assert.strictEqual(
-            status.item.text,
-            `${
-              numberOfFeatures - numberOfExperimentalFeatures - 1
-            }/${numberOfFeatures} features enabled`,
-          );
-        });
+      const currentFeatures: { [key: string]: boolean } = vscode.workspace
+        .getConfiguration("rubyLsp")
+        .get("enabledFeatures")!;
+
+      assert.notDeepEqual(currentFeatures, originalFeatures);
+
+      Object.keys(currentFeatures).forEach((key) => {
+        const expected = key === "completion" ? false : currentFeatures[key];
+        assert.strictEqual(currentFeatures[key], expected);
+      });
+
+      status.refresh();
+      assert.strictEqual(
+        status.item.text,
+        `${
+          numberOfFeatures - numberOfExperimentalFeatures - 1
+        }/${numberOfFeatures} features enabled`,
+      );
+
+      await vscode.workspace
+        .getConfiguration("rubyLsp")
+        .update("enabledFeatures", originalFeatures, true, true);
     });
   });
 

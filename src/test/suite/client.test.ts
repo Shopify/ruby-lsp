@@ -6,7 +6,7 @@ import * as os from "os";
 import { afterEach } from "mocha";
 import * as vscode from "vscode";
 
-import { Ruby } from "../../ruby";
+import { Ruby, VersionManager } from "../../ruby";
 import { Telemetry, TelemetryApi, TelemetryEvent } from "../../telemetry";
 import { TestController } from "../../testController";
 import { ServerState } from "../../status";
@@ -31,6 +31,7 @@ suite("Client", () => {
   const managerConfig = vscode.workspace.getConfiguration("rubyLsp");
   const currentManager = managerConfig.get("rubyVersionManager");
   const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
+  fs.writeFileSync(path.join(tmpPath, ".ruby-version"), "3.2.2");
 
   afterEach(async () => {
     if (client && client.state === ServerState.Running) {
@@ -46,7 +47,16 @@ suite("Client", () => {
   });
 
   test("Starting up the server succeeds", async () => {
-    // await managerConfig.update("rubyVersionManager", "none", true, true);
+    // eslint-disable-next-line no-process-env
+    if (process.env.CI) {
+      await managerConfig.update(
+        "rubyVersionManager",
+        VersionManager.None,
+        true,
+        true,
+      );
+    }
+
     const context = {
       extensionMode: vscode.ExtensionMode.Test,
       subscriptions: [],
