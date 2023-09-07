@@ -1,1 +1,1 @@
-require "ruby_lsp/utils"
+require "ruby_lsp/event_emitter"

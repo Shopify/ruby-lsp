@@ -33,8 +33,8 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::TStringContent).void }
       def on_tstring_content(node)
-        @index.search_require_paths(node.value).sort!.each do |path|
-          @response << build_completion(path, node)
+        @index.search_require_paths(node.value).map!(&:require_path).sort!.each do |path|
+          @response << build_completion(T.must(path), node)
         end
       end
 

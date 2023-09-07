@@ -28,7 +28,7 @@ module RubyIndexer
       @files_to_entries = T.let({}, T::Hash[String, T::Array[Entry]])
 
       # Holds all require paths for every indexed item so that we can provide autocomplete for requires
-      @require_paths_tree = T.let(PrefixTree[String].new, PrefixTree[String])
+      @require_paths_tree = T.let(PrefixTree[IndexablePath].new, PrefixTree[IndexablePath])
     end
 
     sig { params(indexable: IndexablePath).void }
@@ -73,7 +73,7 @@ module RubyIndexer
       @entries[fully_qualified_name.delete_prefix("::")]
     end
 
-    sig { params(query: String).returns(T::Array[String]) }
+    sig { params(query: String).returns(T::Array[IndexablePath]) }
     def search_require_paths(query)
       @require_paths_tree.search(query)
     end
@@ -147,7 +147,7 @@ module RubyIndexer
       visitor.run
 
       require_path = indexable_path.require_path
-      @require_paths_tree.insert(require_path, require_path) if require_path
+      @require_paths_tree.insert(require_path, indexable_path) if require_path
     rescue Errno::EISDIR
       # If `path` is a directory, just ignore it and continue indexing
     end

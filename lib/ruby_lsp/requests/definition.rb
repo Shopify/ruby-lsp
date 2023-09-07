@@ -67,13 +67,15 @@ module RubyLsp
         string = argument.parts.first
         return unless string.is_a?(SyntaxTree::TStringContent)
 
-        required_file = "#{string.value}.rb"
-
         case message
         when "require"
-          candidate = find_file_in_load_path(required_file)
+          entry = @index.search_require_paths(string.value).find do |indexable_path|
+            indexable_path.require_path == string.value
+          end
 
-          if candidate
+          if entry
+            candidate = entry.full_path
+
             @response = Interface::Location.new(
               uri: URI::Generic.from_path(path: candidate).to_s,
               range: Interface::Range.new(
@@ -83,19 +85,18 @@ module RubyLsp
             )
           end
         when "require_relative"
+          required_file = "#{string.value}.rb"
           path = @uri.to_standardized_path
           current_folder = path ? Pathname.new(CGI.unescape(path)).dirname : Dir.pwd
           candidate = File.expand_path(File.join(current_folder, required_file))
 
-          if candidate
-            @response = Interface::Location.new(
-              uri: URI::Generic.from_path(path: candidate).to_s,
-              range: Interface::Range.new(
-                start: Interface::Position.new(line: 0, character: 0),
-                end: Interface::Position.new(line: 0, character: 0),
-              ),
-            )
-          end
+          @response = Interface::Location.new(
+            uri: URI::Generic.from_path(path: candidate).to_s,
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: 0, character: 0),
+              end: Interface::Position.new(line: 0, character: 0),
+            ),
+          )
         end
       end
 
@@ -132,18 +133,6 @@ module RubyLsp
             ),
           )
         end
-      end
-
-      sig { params(file: String).returns(T.nilable(String)) }
-      def find_file_in_load_path(file)
-        return unless file.include?("/")
-
-        $LOAD_PATH.each do |p|
-          found = Dir.glob("**/#{file}", base: p).first
-          return "#{p}/#{found}" if found
-        end
-
-        nil
       end
     end
   end
