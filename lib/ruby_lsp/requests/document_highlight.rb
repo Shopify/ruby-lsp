@@ -28,7 +28,7 @@ module RubyLsp
       ResponseType = type_member { { fixed: T::Array[Interface::DocumentHighlight] } }
 
       sig { override.returns(ResponseType) }
-      attr_reader :response
+      attr_reader :_response
 
       sig do
         params(
@@ -41,7 +41,7 @@ module RubyLsp
       def initialize(target, parent, emitter, message_queue)
         super(emitter, message_queue)
 
-        @response = T.let([], T::Array[Interface::DocumentHighlight])
+        @_response = T.let([], T::Array[Interface::DocumentHighlight])
 
         return unless target && parent
 
@@ -83,7 +83,7 @@ module RubyLsp
       sig { params(match: Support::HighlightTarget::HighlightMatch).void }
       def add_highlight(match)
         range = range_from_syntax_tree_node(match.node)
-        @response << Interface::DocumentHighlight.new(range: range, kind: match.type)
+        @_response << Interface::DocumentHighlight.new(range: range, kind: match.type)
       end
     end
   end

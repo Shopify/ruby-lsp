@@ -73,7 +73,7 @@ module RubyLsp
       end
 
       sig { override.returns(ResponseType) }
-      attr_reader :response
+      attr_reader :_response
 
       sig { params(uri: URI::Generic, emitter: EventEmitter, message_queue: Thread::Queue).void }
       def initialize(uri, emitter, message_queue)
@@ -84,7 +84,7 @@ module RubyLsp
         path = uri.to_standardized_path
         version_match = path ? /(?<=%40)[\d.]+(?=\.rbi$)/.match(path) : nil
         @gem_version = T.let(version_match && version_match[0], T.nilable(String))
-        @response = T.let([], T::Array[Interface::DocumentLink])
+        @_response = T.let([], T::Array[Interface::DocumentLink])
 
         emitter.register(self, :on_comment)
       end
@@ -99,7 +99,7 @@ module RubyLsp
         file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, CGI.unescape(uri.path))
         return if file_path.nil?
 
-        @response << Interface::DocumentLink.new(
+        @_response << Interface::DocumentLink.new(
           range: range_from_syntax_tree_node(node),
           target: "file://#{file_path}##{uri.line_number}",
           tooltip: "Jump to #{file_path}##{uri.line_number}",

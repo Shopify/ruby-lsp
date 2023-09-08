@@ -24,7 +24,7 @@ module RubyLsp
       ResponseType = type_member { { fixed: T.nilable(T.any(T::Array[Interface::Location], Interface::Location)) } }
 
       sig { override.returns(ResponseType) }
-      attr_reader :response
+      attr_reader :_response
 
       sig do
         params(
@@ -41,7 +41,7 @@ module RubyLsp
         @uri = uri
         @nesting = nesting
         @index = index
-        @response = T.let(nil, ResponseType)
+        @_response = T.let(nil, ResponseType)
         emitter.register(self, :on_command, :on_const, :on_const_path_ref)
       end
 
@@ -76,7 +76,7 @@ module RubyLsp
           if entry
             candidate = entry.full_path
 
-            @response = Interface::Location.new(
+            @_response = Interface::Location.new(
               uri: URI::Generic.from_path(path: candidate).to_s,
               range: Interface::Range.new(
                 start: Interface::Position.new(line: 0, character: 0),
@@ -90,7 +90,7 @@ module RubyLsp
           current_folder = path ? Pathname.new(CGI.unescape(path)).dirname : Dir.pwd
           candidate = File.expand_path(File.join(current_folder, required_file))
 
-          @response = Interface::Location.new(
+          @_response = Interface::Location.new(
             uri: URI::Generic.from_path(path: candidate).to_s,
             range: Interface::Range.new(
               start: Interface::Position.new(line: 0, character: 0),
@@ -113,7 +113,7 @@ module RubyLsp
           nil
         end
 
-        @response = entries.filter_map do |entry|
+        @_response = entries.filter_map do |entry|
           location = entry.location
           # If the project has Sorbet, then we only want to handle go to definition for constants defined in gems, as an
           # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants

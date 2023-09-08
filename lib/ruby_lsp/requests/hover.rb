@@ -13,7 +13,7 @@ module RubyLsp
     # ```ruby
     # String # -> Hovering over the class reference will show all declaration locations and the documentation
     # ```
-    class Hover < Listener
+    class Hover < ExtensibleListener
       extend T::Sig
       extend T::Generic
 
@@ -30,7 +30,7 @@ module RubyLsp
       )
 
       sig { override.returns(ResponseType) }
-      attr_reader :response
+      attr_reader :_response
 
       sig do
         params(
@@ -41,15 +41,17 @@ module RubyLsp
         ).void
       end
       def initialize(index, nesting, emitter, message_queue)
-        super(emitter, message_queue)
-
         @nesting = nesting
         @index = index
-        @external_listeners.concat(
-          Extension.extensions.filter_map { |ext| ext.create_hover_listener(emitter, message_queue) },
-        )
-        @response = T.let(nil, ResponseType)
+        @_response = T.let(nil, ResponseType)
+
+        super(emitter, message_queue)
         emitter.register(self, :on_const_path_ref, :on_const)
+      end
+
+      sig { override.params(extension: RubyLsp::Extension).returns(T.nilable(Listener[ResponseType])) }
+      def initialize_external_listener(extension)
+        extension.create_hover_listener(@emitter, @message_queue)
       end
 
       # Merges responses from other hover listeners
@@ -58,10 +60,10 @@ module RubyLsp
         other_response = other.response
         return self unless other_response
 
-        if @response.nil?
-          @response = other.response
+        if @_response.nil?
+          @_response = other.response
         else
-          @response.contents.value << "\n\n" << other_response.contents.value
+          @_response.contents.value << "\n\n" << other_response.contents.value
         end
 
         self
@@ -111,7 +113,7 @@ module RubyLsp
           kind: "markdown",
           value: "#{title}\n\n**Definitions**: #{definitions.join(" | ")}\n\n#{content}",
         )
-        @response = Interface::Hover.new(range: range_from_syntax_tree_node(node), contents: contents)
+        @_response = Interface::Hover.new(range: range_from_syntax_tree_node(node), contents: contents)
       end
     end
   end

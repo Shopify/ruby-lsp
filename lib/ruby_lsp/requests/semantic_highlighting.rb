@@ -105,7 +105,7 @@ module RubyLsp
       end
 
       sig { override.returns(ResponseType) }
-      attr_reader :response
+      attr_reader :_response
 
       sig do
         params(
@@ -117,7 +117,7 @@ module RubyLsp
       def initialize(emitter, message_queue, range: nil)
         super(emitter, message_queue)
 
-        @response = T.let([], ResponseType)
+        @_response = T.let([], ResponseType)
         @range = range
         @special_methods = T.let(nil, T.nilable(T::Array[String]))
 
@@ -174,7 +174,7 @@ module RubyLsp
         # When finding a module or class definition, we will have already pushed a token related to this constant. We
         # need to look at the previous two tokens and if they match this locatione exactly, avoid pushing another token
         # on top of the previous one
-        return if @response.last(2).any? { |token| token.location == node.location }
+        return if @_response.last(2).any? { |token| token.location == node.location }
 
         add_token(node.location, :namespace)
       end
@@ -327,7 +327,7 @@ module RubyLsp
       def add_token(location, type, modifiers = [])
         length = location.end_char - location.start_char
         modifiers_indices = modifiers.filter_map { |modifier| TOKEN_MODIFIERS[modifier] }
-        @response.push(
+        @_response.push(
           SemanticToken.new(
             location: location,
             length: length,

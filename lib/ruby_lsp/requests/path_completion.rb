@@ -20,12 +20,12 @@ module RubyLsp
       ResponseType = type_member { { fixed: T::Array[Interface::CompletionItem] } }
 
       sig { override.returns(ResponseType) }
-      attr_reader :response
+      attr_reader :_response
 
       sig { params(index: RubyIndexer::Index, emitter: EventEmitter, message_queue: Thread::Queue).void }
       def initialize(index, emitter, message_queue)
         super(emitter, message_queue)
-        @response = T.let([], ResponseType)
+        @_response = T.let([], ResponseType)
         @index = index
 
         emitter.register(self, :on_tstring_content)
@@ -34,7 +34,7 @@ module RubyLsp
       sig { params(node: SyntaxTree::TStringContent).void }
       def on_tstring_content(node)
         @index.search_require_paths(node.value).map!(&:require_path).sort!.each do |path|
-          @response << build_completion(T.must(path), node)
+          @_response << build_completion(T.must(path), node)
         end
       end
 

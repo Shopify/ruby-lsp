@@ -18,7 +18,7 @@ module RubyLsp
     # class Test < Minitest::Test
     # end
     # ```
-    class CodeLens < Listener
+    class CodeLens < ExtensibleListener
       extend T::Sig
       extend T::Generic
 
@@ -29,22 +29,19 @@ module RubyLsp
       SUPPORTED_TEST_LIBRARIES = T.let(["minitest", "test-unit"], T::Array[String])
 
       sig { override.returns(ResponseType) }
-      attr_reader :response
+      attr_reader :_response
 
       sig { params(uri: URI::Generic, emitter: EventEmitter, message_queue: Thread::Queue, test_library: String).void }
       def initialize(uri, emitter, message_queue, test_library)
-        super(emitter, message_queue)
-
         @uri = T.let(uri, URI::Generic)
-        @external_listeners.concat(
-          Extension.extensions.filter_map { |ext| ext.create_code_lens_listener(uri, emitter, message_queue) },
-        )
         @test_library = T.let(test_library, String)
-        @response = T.let([], ResponseType)
+        @_response = T.let([], ResponseType)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
         # visibility_stack is a stack of [current_visibility, previous_visibility]
         @visibility_stack = T.let([["public", "public"]], T::Array[T::Array[T.nilable(String)]])
         @class_stack = T.let([], T::Array[String])
+
+        super(emitter, message_queue)
 
         emitter.register(
           self,
@@ -149,9 +146,14 @@ module RubyLsp
         end
       end
 
+      sig { override.params(extension: RubyLsp::Extension).returns(T.nilable(Listener[ResponseType])) }
+      def initialize_external_listener(extension)
+        extension.create_code_lens_listener(@uri, @emitter, @message_queue)
+      end
+
       sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
       def merge_response!(other)
-        @response.concat(other.response)
+        @_response.concat(other.response)
         self
       end
 
@@ -174,7 +176,7 @@ module RubyLsp
           },
         ]
 
-        @response << create_code_lens(
+        @_response << create_code_lens(
           node,
           title: "Run",
           command_name: "rubyLsp.runTest",
@@ -182,7 +184,7 @@ module RubyLsp
           data: { type: "test", kind: kind },
         )
 
-        @response << create_code_lens(
+        @_response << create_code_lens(
           node,
           title: "Run In Terminal",
           command_name: "rubyLsp.runTestInTerminal",
@@ -190,7 +192,7 @@ module RubyLsp
           data: { type: "test_in_terminal", kind: kind },
         )
 
-        @response << create_code_lens(
+        @_response << create_code_lens(
           node,
           title: "Debug",
           command_name: "rubyLsp.debugTest",
@@ -239,7 +241,7 @@ module RubyLsp
 
       sig { params(node: SyntaxTree::Command, remote: String).void }
       def add_open_gem_remote_code_lens(node, remote)
-        @response << create_code_lens(
+        @_response << create_code_lens(
           node,
           title: "Open remote",
           command_name: "rubyLsp.openLink",
