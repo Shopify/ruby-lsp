@@ -60,21 +60,21 @@ export class Debugger
     return [
       {
         type: "ruby_lsp",
-        name: "Debug",
+        name: "Debug script",
         request: "launch",
         // eslint-disable-next-line no-template-curly-in-string
         program: "ruby ${file}",
       },
       {
         type: "ruby_lsp",
-        name: "Debug",
+        name: "Debug test",
         request: "launch",
         // eslint-disable-next-line no-template-curly-in-string
         program: "ruby -Itest ${relativeFile}",
       },
       {
         type: "ruby_lsp",
-        name: "Debug",
+        name: "Attach debugger",
         request: "attach",
       },
     ];
@@ -96,6 +96,15 @@ export class Debugger
       );
     } else {
       debugConfiguration.env = this.ruby.env;
+    }
+
+    const customGemfilePath = path.join(
+      this.workingFolder,
+      ".ruby-lsp",
+      "Gemfile",
+    );
+    if (fs.existsSync(customGemfilePath)) {
+      debugConfiguration.env.BUNDLE_GEMFILE = customGemfilePath;
     }
 
     return debugConfiguration;
