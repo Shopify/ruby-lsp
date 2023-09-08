@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 module RubyLsp
-  # EventEmitter is an intermediary between our requests and Syntax Tree visitors. It's used to visit the document's AST
+  # EventEmitter is an intermediary between our requests and YARP visitors. It's used to visit the document's AST
   # and emit events that the requests can listen to for providing functionality. Usages:
   #
   # - For positional requests, locate the target node and use `emit_for_target` to fire events for each listener
