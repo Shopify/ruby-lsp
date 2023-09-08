@@ -9,3 +9,10 @@ updates:
     labels:
       - "dependencies"
       - "ruby"
+    groups:
+      minor-and-patch:
+        update-types:
+          - 'minor'
+          - 'patch'
+        exclude-patterns:
+          - 'yarp'
