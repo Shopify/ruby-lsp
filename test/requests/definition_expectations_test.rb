@@ -133,4 +133,71 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
   ensure
     T.must(message_queue).close
   end
+
+  def test_definition_extensions
+    source = <<~RUBY
+      RubyLsp
+    RUBY
+
+    test_extension(:create_definition_extension, source: source) do |executor|
+      index = executor.instance_variable_get(:@index)
+      index.index_single(
+        RubyIndexer::IndexablePath.new(
+          "#{Dir.pwd}/lib",
+          File.expand_path(
+            "../../test/fixtures/class_reference_target.rb",
+            __dir__,
+          ),
+        ),
+      )
+      response = executor.execute({
+        method: "textDocument/definition",
+        params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 0, character: 0 } },
+      }).response
+
+      assert_equal(2, response.size)
+      assert_match("class_reference_target.rb", response[0].uri)
+      assert_match("generated_by_extension.rb", response[1].uri)
+    end
+  end
+
+  private
+
+  def create_definition_extension
+    Class.new(RubyLsp::Extension) do
+      def activate; end
+
+      def name
+        "Definition Extension"
+      end
+
+      def create_definition_listener(uri, nesting, index, emitter, message_queue)
+        klass = Class.new(RubyLsp::Listener) do
+          attr_reader :_response
+
+          def initialize(uri, _, _, emitter, message_queue)
+            super(emitter, message_queue)
+            @uri = uri
+            emitter.register(self, :on_const)
+          end
+
+          def on_const(node)
+            location = node.location
+            @_response = RubyLsp::Interface::Location.new(
+              uri: "file:///generated_by_extension.rb",
+              range: RubyLsp::Interface::Range.new(
+                start: RubyLsp::Interface::Position.new(
+                  line: location.start_line - 1,
+                  character: location.start_column,
+                ),
+                end: RubyLsp::Interface::Position.new(line: location.end_line - 1, character: location.end_column),
+              ),
+            )
+          end
+        end
+
+        T.unsafe(klass).new(uri, nesting, index, emitter, message_queue)
+      end
+    end
+  end
 end

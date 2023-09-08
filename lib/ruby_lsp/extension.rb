@@ -133,5 +133,17 @@ module RubyLsp
       ).returns(T.nilable(Listener[T::Array[Interface::DocumentSymbol]]))
     end
     def create_document_symbol_listener(emitter, message_queue); end
+
+    # Creates a new Definition listener. This method is invoked on every Definition request
+    sig do
+      overridable.params(
+        uri: URI::Generic,
+        nesting: T::Array[String],
+        index: RubyIndexer::Index,
+        emitter: EventEmitter,
+        message_queue: Thread::Queue,
+      ).returns(T.nilable(Listener[T.nilable(T.any(T::Array[Interface::Location], Interface::Location))]))
+    end
+    def create_definition_listener(uri, nesting, index, emitter, message_queue); end
   end
 end

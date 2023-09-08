@@ -17,7 +17,7 @@ module RubyLsp
     # require "some_gem/file" # <- Request go to definition on this string will take you to the file
     # Product.new # <- Request go to definition on this class name will take you to its declaration.
     # ```
-    class Definition < Listener
+    class Definition < ExtensibleListener
       extend T::Sig
       extend T::Generic
 
@@ -36,13 +36,35 @@ module RubyLsp
         ).void
       end
       def initialize(uri, nesting, index, emitter, message_queue)
-        super(emitter, message_queue)
-
         @uri = uri
         @nesting = nesting
         @index = index
         @_response = T.let(nil, ResponseType)
+
+        super(emitter, message_queue)
+
         emitter.register(self, :on_command, :on_const, :on_const_path_ref)
+      end
+
+      sig { override.params(ext: Extension).returns(T.nilable(RubyLsp::Listener[ResponseType])) }
+      def initialize_external_listener(ext)
+        ext.create_definition_listener(@uri, @nesting, @index, @emitter, @message_queue)
+      end
+
+      sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
+      def merge_response!(other)
+        other_response = other._response
+
+        case @_response
+        when Interface::Location
+          @_response = [@_response, *other_response]
+        when Array
+          @_response.concat(Array(other_response))
+        when nil
+          @_response = other_response
+        end
+
+        self
       end
 
       sig { params(node: SyntaxTree::ConstPathRef).void }
