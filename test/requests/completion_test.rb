@@ -24,11 +24,11 @@ class CompletionTest < Minitest::Test
 
     start_position = {
       line: 0,
-      character: T.must(document.source.index('"')) + 1,
+      character: T.must(document.source.index('"')),
     }
     end_position = {
       line: 0,
-      character: T.must(document.source.rindex('"')) - 1,
+      character: T.must(document.source.rindex('"')),
     }
 
     result = with_file_structure do
@@ -60,11 +60,11 @@ class CompletionTest < Minitest::Test
 
     start_position = {
       line: 0,
-      character: T.must(document.source.index('"')) + 1,
+      character: T.must(document.source.index('"')),
     }
     end_position = {
       line: 0,
-      character: T.must(document.source.rindex('"')) - 1,
+      character: T.must(document.source.rindex('"')),
     }
 
     result = with_file_structure do
@@ -96,11 +96,11 @@ class CompletionTest < Minitest::Test
 
     start_position = {
       line: 0,
-      character: T.must(document.source.index('"')) + 1,
+      character: T.must(document.source.index('"')),
     }
     end_position = {
       line: 0,
-      character: T.must(document.source.rindex('"')) - 1,
+      character: T.must(document.source.rindex('"')),
     }
 
     result = with_file_structure do
@@ -132,11 +132,11 @@ class CompletionTest < Minitest::Test
 
     start_position = {
       line: 0,
-      character: T.must(document.source.index('"')) + 1,
+      character: T.must(document.source.index('"')),
     }
     end_position = {
       line: 0,
-      character: T.must(document.source.rindex('"')) - 1,
+      character: T.must(document.source.rindex('"')),
     }
 
     result = with_file_structure do

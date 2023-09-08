@@ -40,7 +40,7 @@ module RubyLsp
         @index = index
         @nesting = nesting
 
-        emitter.register(self, :on_string, :on_const_path_ref, :on_const, :on_top_const_ref)
+        emitter.register(self, :on_string, :on_constant_path, :on_constant_read)
       end
 
       sig { params(node: YARP::StringNode).void }
@@ -51,11 +51,11 @@ module RubyLsp
       end
 
       # Handle completion on regular constant references (e.g. `Bar`)
-      sig { params(node: SyntaxTree::Const).void }
-      def on_const(node)
+      sig { params(node: YARP::ConstantReadNode).void }
+      def on_constant_read(node)
         return if DependencyDetector::HAS_TYPECHECKER
 
-        name = node.value
+        name = node.slice
         candidates = @index.prefix_search(name, @nesting)
         candidates.each do |entries|
           @_response << build_entry_completion(name, node, entries, top_level?(T.must(entries.first).name, candidates))
@@ -63,25 +63,28 @@ module RubyLsp
       end
 
       # Handle completion on namespaced constant references (e.g. `Foo::Bar`)
-      sig { params(node: SyntaxTree::ConstPathRef).void }
-      def on_const_path_ref(node)
+      sig { params(node: YARP::ConstantPathNode).void }
+      def on_constant_path(node)
         return if DependencyDetector::HAS_TYPECHECKER
 
-        name = full_constant_name(node)
-        candidates = @index.prefix_search(name, @nesting)
-        candidates.each do |entries|
-          @_response << build_entry_completion(name, node, entries, top_level?(T.must(entries.first).name, candidates))
+        name = node.slice
+
+        top_level_reference = if name.start_with?("::")
+          name = name.delete_prefix("::")
+          true
+        else
+          false
         end
-      end
 
-      # Handle completion on top level constant references (e.g. `::Bar`)
-      sig { params(node: SyntaxTree::TopConstRef).void }
-      def on_top_const_ref(node)
-        return if DependencyDetector::HAS_TYPECHECKER
-
-        name = full_constant_name(node)
-        candidates = @index.prefix_search(name, [])
-        candidates.each { |entries| @_response << build_entry_completion(name, node, entries, true) }
+        candidates = @index.prefix_search(name, top_level_reference ? [] : @nesting)
+        candidates.each do |entries|
+          @_response << build_entry_completion(
+            name,
+            node,
+            entries,
+            top_level_reference || top_level?(T.must(entries.first).name, candidates),
+          )
+        end
       end
 
       private
@@ -91,7 +94,7 @@ module RubyLsp
         Interface::CompletionItem.new(
           label: label,
           text_edit: Interface::TextEdit.new(
-            range: range_from_syntax_tree_node(node),
+            range: range_from_node(node),
             new_text: label,
           ),
           kind: Constant::CompletionItemKind::REFERENCE,
@@ -101,7 +104,7 @@ module RubyLsp
       sig do
         params(
           name: String,
-          node: SyntaxTree::Node,
+          node: YARP::Node,
           entries: T::Array[RubyIndexer::Index::Entry],
           top_level: T::Boolean,
         ).returns(Interface::CompletionItem)
@@ -146,7 +149,7 @@ module RubyLsp
           label: first_entry.name,
           filter_text: top_level ? "::#{first_entry.name}" : first_entry.name,
           text_edit: Interface::TextEdit.new(
-            range: range_from_syntax_tree_node(node),
+            range: range_from_node(node),
             new_text: insertion_text,
           ),
           kind: kind,

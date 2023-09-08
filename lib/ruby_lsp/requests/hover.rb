@@ -98,7 +98,7 @@ module RubyLsp
         return unless entries
 
         @_response = Interface::Hover.new(
-          range: range_from_location(node),
+          range: range_from_location(location),
           contents: markdown_from_index_entries(name, entries),
         )
       end
