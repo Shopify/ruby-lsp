@@ -17,7 +17,7 @@ module RubyLsp
   # - [CodeActionResolve](rdoc-ref:RubyLsp::Requests::CodeActionResolve)
   # - [DocumentHighlight](rdoc-ref:RubyLsp::Requests::DocumentHighlight)
   # - [InlayHint](rdoc-ref:RubyLsp::Requests::InlayHints)
-  # - [PathCompletion](rdoc-ref:RubyLsp::Requests::PathCompletion)
+  # - [Completion](rdoc-ref:RubyLsp::Requests::Completion)
   # - [CodeLens](rdoc-ref:RubyLsp::Requests::CodeLens)
   # - [Definition](rdoc-ref:RubyLsp::Requests::Definition)
   # - [ShowSyntaxTree](rdoc-ref:RubyLsp::Requests::ShowSyntaxTree)
@@ -38,7 +38,7 @@ module RubyLsp
     autoload :CodeActionResolve, "ruby_lsp/requests/code_action_resolve"
     autoload :DocumentHighlight, "ruby_lsp/requests/document_highlight"
     autoload :InlayHints, "ruby_lsp/requests/inlay_hints"
-    autoload :PathCompletion, "ruby_lsp/requests/path_completion"
+    autoload :Completion, "ruby_lsp/requests/completion"
     autoload :CodeLens, "ruby_lsp/requests/code_lens"
     autoload :Definition, "ruby_lsp/requests/definition"
     autoload :ShowSyntaxTree, "ruby_lsp/requests/show_syntax_tree"

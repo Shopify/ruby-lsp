@@ -1,13 +1,37 @@
 {
   // Set this value to `verbose` to see the full JSON content of LSP requests and responses
-  "ruby lsp.trace.server": "messages",
+  "ruby lsp.trace.server": "off",
   "[ruby]": {
     "editor.defaultFormatter": "Shopify.ruby-lsp",
   },
   "cSpell.languageSettings": [
-    { "languageId": "*",      "locale": "en",              "dictionaries": ["wordsEn"] },
-    { "languageId": "*",      "locale": "en-US",           "dictionaries": ["wordsEn"] },
-    { "languageId": "*",                                   "dictionaries": ["companies", "softwareTerms", "misc"] },
-    { "languageId": "ruby",                                "dictionaries": ["ruby"]},
-]
+    {
+      "languageId": "*",
+      "locale": "en",
+      "dictionaries": [
+        "wordsEn"
+      ]
+    },
+    {
+      "languageId": "*",
+      "locale": "en-US",
+      "dictionaries": [
+        "wordsEn"
+      ]
+    },
+    {
+      "languageId": "*",
+      "dictionaries": [
+        "companies",
+        "softwareTerms",
+        "misc"
+      ]
+    },
+    {
+      "languageId": "ruby",
+      "dictionaries": [
+        "ruby"
+      ]
+    },
+  ]
 }
