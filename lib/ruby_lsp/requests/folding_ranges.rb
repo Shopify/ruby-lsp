@@ -18,96 +18,110 @@ module RubyLsp
     class FoldingRanges < BaseRequest
       extend T::Sig
 
-      SIMPLE_FOLDABLES = T.let(
-        [
-          SyntaxTree::ArrayLiteral,
-          SyntaxTree::BlockNode,
-          SyntaxTree::Case,
-          SyntaxTree::ClassDeclaration,
-          SyntaxTree::For,
-          SyntaxTree::HashLiteral,
-          SyntaxTree::Heredoc,
-          SyntaxTree::ModuleDeclaration,
-          SyntaxTree::SClass,
-          SyntaxTree::UnlessNode,
-          SyntaxTree::UntilNode,
-          SyntaxTree::WhileNode,
-          SyntaxTree::Else,
-          SyntaxTree::Ensure,
-          SyntaxTree::Begin,
-        ].freeze,
-        T::Array[T.class_of(SyntaxTree::Node)],
-      )
-
-      NODES_WITH_STATEMENTS = T.let(
-        [
-          SyntaxTree::IfNode,
-          SyntaxTree::Elsif,
-          SyntaxTree::In,
-          SyntaxTree::Rescue,
-          SyntaxTree::When,
-        ].freeze,
-        T::Array[T.class_of(SyntaxTree::Node)],
-      )
-
-      StatementNode = T.type_alias do
-        T.any(
-          SyntaxTree::IfNode,
-          SyntaxTree::Elsif,
-          SyntaxTree::In,
-          SyntaxTree::Rescue,
-          SyntaxTree::When,
-        )
-      end
-
       sig { params(document: Document).void }
       def initialize(document)
         super
 
         @ranges = T.let([], T::Array[Interface::FoldingRange])
-        @partial_range = T.let(nil, T.nilable(PartialRange))
+        @requires = T.let([], T::Array[YARP::CallNode])
       end
 
       sig { override.returns(T.all(T::Array[Interface::FoldingRange], Object)) }
       def run
-        if @document.parsed?
-          visit(@document.tree)
-          emit_partial_range
-        end
-
+        visit(@document.tree)
+        push_comment_ranges
+        emit_requires_range
         @ranges
       end
 
       private
 
-      sig { override.params(node: T.nilable(SyntaxTree::Node)).void }
+      sig { void }
+      def push_comment_ranges
+        # Group comments that are on consecutive lines and then push ranges for each group that has at least 2 comments
+        @document.parse_result.comments.chunk_while do |this, other|
+          this.location.end_line + 1 == other.location.start_line
+        end.each do |chunk|
+          next if chunk.length == 1
+
+          @ranges << Interface::FoldingRange.new(
+            start_line: chunk.first.location.start_line - 1,
+            end_line: chunk.last.location.end_line - 1,
+            kind: "comment",
+          )
+        end
+      end
+
+      sig { void }
+      def emit_requires_range
+        if @requires.length > 1
+          @ranges << Interface::FoldingRange.new(
+            start_line: T.must(@requires.first).location.start_line - 1,
+            end_line: T.must(@requires.last).location.end_line - 1,
+            kind: "imports",
+          )
+        end
+
+        @requires.clear
+      end
+
+      sig { override.params(node: T.nilable(YARP::Node)).void }
       def visit(node)
-        return unless handle_partial_range(node)
+        emit_requires_range unless node.is_a?(YARP::CallNode)
 
         case node
-        when *SIMPLE_FOLDABLES
-          location = T.must(node).location
+        when YARP::ArrayNode, YARP::BlockNode, YARP::CaseNode, YARP::ClassNode, YARP::ForNode, YARP::HashNode,
+          YARP::ModuleNode, YARP::SingletonClassNode, YARP::UnlessNode, YARP::UntilNode, YARP::WhileNode,
+          YARP::ElseNode, YARP::EnsureNode, YARP::BeginNode
+
+          location = node.location
           add_lines_range(location.start_line, location.end_line - 1)
-        when *NODES_WITH_STATEMENTS
-          add_statements_range(T.must(node), T.cast(node, StatementNode).statements)
-        when SyntaxTree::CallNode, SyntaxTree::CommandCall
-          # If there is a receiver, it may be a chained invocation,
-          # so we need to process it in special way.
-          if node.receiver.nil?
-            location = node.location
-            add_lines_range(location.start_line, location.end_line - 1)
-          else
-            add_call_range(node)
+        when YARP::InterpolatedStringNode
+          opening_loc = node.opening_loc
+          closing_loc = node.closing_loc
+
+          add_lines_range(opening_loc.start_line, closing_loc.end_line - 1) if opening_loc && closing_loc
+        when YARP::IfNode, YARP::InNode, YARP::RescueNode, YARP::WhenNode
+          add_statements_range(node)
+        when YARP::CallNode
+          # If we find a require, don't visit the child nodes (prevent `super`), so that we can keep accumulating into
+          # the `@requires` array and then push the range whenever we find a node that isn't a CallNode
+          if require?(node)
+            @requires << node
             return
           end
-        when SyntaxTree::Command
-          unless same_lines_for_command_and_block?(node)
-            location = node.location
+
+          location = node.location
+          add_lines_range(location.start_line, location.end_line - 1)
+
+          receiver = node.receiver
+          visit(receiver) if receiver && !same_lines?(receiver, node)
+
+          block = node.block
+          if block
+            same_lines?(block, node) ? visit(block.body) : visit(block)
+          end
+
+          arguments = node.arguments
+          visit(arguments) if arguments && !same_lines?(arguments, node)
+
+          return
+        when YARP::DefNode
+          params = node.parameters
+          parameter_loc = params&.location
+          location = node.location
+
+          if params && parameter_loc.end_line > location.start_line
+            # Multiline parameters
+            add_lines_range(location.start_line, parameter_loc.end_line)
+            add_lines_range(parameter_loc.end_line + 1, location.end_line - 1)
+          else
             add_lines_range(location.start_line, location.end_line - 1)
           end
-        when SyntaxTree::DefNode
-          add_def_range(node)
-        when SyntaxTree::StringConcat
+
+          visit(node.body)
+          return
+        when YARP::StringConcatNode
           add_string_concat(node)
           return
         end
@@ -115,179 +129,43 @@ module RubyLsp
         super
       end
 
-      # This is to prevent duplicate ranges
-      sig { params(node: T.any(SyntaxTree::Command, SyntaxTree::CommandCall)).returns(T::Boolean) }
-      def same_lines_for_command_and_block?(node)
-        node_block = node.block
-        return false unless node_block
+      sig { params(node: YARP::CallNode).returns(T::Boolean) }
+      def require?(node)
+        message = node.message
+        return false unless message == "require" || message == "require_relative"
 
-        location = node.location
-        block_location = node_block.location
-        block_location.start_line == location.start_line && block_location.end_line == location.end_line
+        receiver = node.receiver
+        return false unless receiver.nil? || receiver.slice == "Kernel"
+
+        arguments = node.arguments&.arguments
+        return false unless arguments
+
+        arguments.length == 1 && arguments.first.is_a?(YARP::StringNode)
       end
 
-      class PartialRange
-        extend T::Sig
+      sig { params(node: YARP::Node, other: YARP::Node).returns(T::Boolean) }
+      def same_lines?(node, other)
+        loc = node.location
+        other_loc = other.location
 
-        sig { returns(String) }
-        attr_reader :kind
-
-        sig { returns(Integer) }
-        attr_reader :end_line
-
-        class << self
-          extend T::Sig
-
-          sig { params(node: SyntaxTree::Node, kind: String).returns(PartialRange) }
-          def from(node, kind)
-            new(node.location.start_line - 1, node.location.end_line - 1, kind)
-          end
-        end
-
-        sig { params(start_line: Integer, end_line: Integer, kind: String).void }
-        def initialize(start_line, end_line, kind)
-          @start_line = start_line
-          @end_line = end_line
-          @kind = kind
-        end
-
-        sig { params(node: SyntaxTree::Node).returns(PartialRange) }
-        def extend_to(node)
-          @end_line = node.location.end_line - 1
-          self
-        end
-
-        sig { params(node: SyntaxTree::Node).returns(T::Boolean) }
-        def new_section?(node)
-          node.is_a?(SyntaxTree::Comment) && @end_line + 1 != node.location.start_line - 1
-        end
-
-        sig { returns(Interface::FoldingRange) }
-        def to_range
-          Interface::FoldingRange.new(
-            start_line: @start_line,
-            end_line: @end_line,
-            kind: @kind,
-          )
-        end
-
-        sig { returns(T::Boolean) }
-        def multiline?
-          @end_line > @start_line
-        end
+        loc.start_line == other_loc.start_line && loc.end_line == other_loc.end_line
       end
 
-      sig { params(node: T.nilable(SyntaxTree::Node)).returns(T::Boolean) }
-      def handle_partial_range(node)
-        kind = partial_range_kind(node)
+      sig { params(node: T.any(YARP::IfNode, YARP::InNode, YARP::RescueNode, YARP::WhenNode)).void }
+      def add_statements_range(node)
+        statements = node.statements
+        return unless statements
 
-        if kind.nil?
-          emit_partial_range
-          return true
-        end
+        body = statements.body
+        return if body.empty?
 
-        target_node = T.must(node)
-        @partial_range = if @partial_range.nil?
-          PartialRange.from(target_node, kind)
-        elsif @partial_range.kind != kind || @partial_range.new_section?(target_node)
-          emit_partial_range
-          PartialRange.from(target_node, kind)
-        else
-          @partial_range.extend_to(target_node)
-        end
-
-        false
+        add_lines_range(node.location.start_line, T.must(body.last).location.end_line)
       end
 
-      sig { params(node: T.nilable(SyntaxTree::Node)).returns(T.nilable(String)) }
-      def partial_range_kind(node)
-        case node
-        when SyntaxTree::Comment
-          "comment"
-        when SyntaxTree::Command
-          if node.message.value == "require" || node.message.value == "require_relative"
-            "imports"
-          end
-        end
-      end
-
-      sig { void }
-      def emit_partial_range
-        return if @partial_range.nil?
-
-        @ranges << @partial_range.to_range if @partial_range.multiline?
-        @partial_range = nil
-      end
-
-      sig { params(node: T.any(SyntaxTree::CallNode, SyntaxTree::CommandCall)).void }
-      def add_call_range(node)
-        receiver = T.let(node.receiver, T.nilable(SyntaxTree::Node))
-
-        loop do
-          case receiver
-          when SyntaxTree::CallNode
-            visit(receiver.arguments)
-            receiver = receiver.receiver
-          when SyntaxTree::MethodAddBlock
-            visit(receiver.block)
-            receiver = receiver.call
-
-            if receiver.is_a?(SyntaxTree::CallNode) || receiver.is_a?(SyntaxTree::CommandCall)
-              receiver = receiver.receiver
-            end
-          else
-            break
-          end
-        end
-
-        if receiver
-          unless node.is_a?(SyntaxTree::CommandCall) && same_lines_for_command_and_block?(node)
-            add_lines_range(
-              receiver.location.start_line,
-              node.location.end_line - 1,
-            )
-          end
-        end
-
-        visit(node.arguments)
-        visit(node.block) if node.is_a?(SyntaxTree::CommandCall)
-      end
-
-      sig { params(node: SyntaxTree::DefNode).void }
-      def add_def_range(node)
-        # For an endless method with no arguments, `node.params` returns `nil` for Ruby 3.0, but a `Syntax::Params`
-        # for Ruby 3.1
-        params = node.params
-        return unless params
-
-        params_location = params.location
-
-        if params_location.start_line < params_location.end_line
-          add_lines_range(params_location.end_line, node.location.end_line - 1)
-        else
-          location = node.location
-          add_lines_range(location.start_line, location.end_line - 1)
-        end
-
-        bodystmt = node.bodystmt
-        if bodystmt.is_a?(SyntaxTree::BodyStmt)
-          visit(bodystmt.statements)
-        else
-          visit(bodystmt)
-        end
-      end
-
-      sig { params(node: SyntaxTree::Node, statements: SyntaxTree::Statements).void }
-      def add_statements_range(node, statements)
-        return if statements.empty?
-
-        add_lines_range(node.location.start_line, T.must(statements.body.last).location.end_line)
-      end
-
-      sig { params(node: SyntaxTree::StringConcat).void }
+      sig { params(node: YARP::StringConcatNode).void }
       def add_string_concat(node)
-        left = T.let(node.left, SyntaxTree::Node)
-        left = left.left while left.is_a?(SyntaxTree::StringConcat)
+        left = T.let(node.left, YARP::Node)
+        left = left.left while left.is_a?(YARP::StringConcatNode)
 
         add_lines_range(left.location.start_line, node.right.location.end_line - 1)
       end
