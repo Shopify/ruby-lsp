@@ -57,7 +57,7 @@ module RubyIndexer
     end
     def add_constant(node)
       comments = collect_comments(node)
-      @index << Index::Entry::Constant.new(fully_qualify_name(node.name), @file_path, node.location, comments)
+      @index << Index::Entry::Constant.new(fully_qualify_name(node.name.to_s), @file_path, node.location, comments)
     end
 
     sig do
