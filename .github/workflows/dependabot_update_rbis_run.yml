@@ -1,0 +1,15 @@
+name: Update gem RBIs on Dependabot PRs
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'Gemfile.lock'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  dependabot_update_rbis:
+    uses: Shopify/ruby-lsp/.github/workflows/dependabot_update_rbis.yml@main

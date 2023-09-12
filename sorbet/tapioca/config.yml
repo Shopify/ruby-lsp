@@ -3,8 +3,9 @@ gem:
     "psych": "false"
   # Add your `gem` command parameters here:
   #
-  # exclude:
-  # - gem_name
+  # rdoc causes a failure 'webrick is not found.' when running `tapioca gem`.
+  exclude:
+  - rdoc
   # doc: true
   # workers: 5
 dsl:
