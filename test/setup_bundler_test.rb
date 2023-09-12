@@ -109,7 +109,7 @@ class SetupBundlerTest < Minitest::Test
         capture_subprocess_io do
           Object.any_instance.expects(:system).with(
             bundle_env(".ruby-lsp/Gemfile"),
-            "bundle update ruby-lsp debug 1>&2",
+            "((bundle check && bundle update ruby-lsp debug) || bundle install) 1>&2",
           )
 
           FileUtils.expects(:cp).never
@@ -270,28 +270,18 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
-  def test_does_not_print_to_stdout
-    # Create a temporary directory with no Gemfile or Gemfile.lock
-    Dir.mktmpdir do |dir|
-      Dir.chdir(dir) do
-        stdout, _stderr = capture_subprocess_io do
-          Bundler.with_unbundled_env do
-            run_script
-          end
-        end
-
-        assert_empty(stdout)
-      end
-    end
-  end
-
   private
 
   # This method runs the script and then immediately unloads it. This allows us to make assertions against the effects
   # of running the script multiple times
   def run_script(path = "/fake/project/path", branch: nil, expected_path: nil)
-    _bundle_gemfile, bundle_path = RubyLsp::SetupBundler.new(path, branch: branch).setup!
+    bundle_path = T.let(nil, T.nilable(String))
 
+    stdout, _stderr = capture_subprocess_io do
+      _bundle_gemfile, bundle_path = RubyLsp::SetupBundler.new(path, branch: branch).setup!
+    end
+
+    assert_empty(stdout)
     assert_equal(expected_path, bundle_path) if expected_path
   end
 
