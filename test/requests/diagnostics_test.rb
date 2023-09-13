@@ -34,6 +34,6 @@ class DiagnosticsTest < Minitest::Test
     diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(document).run)
 
     assert_equal(2, diagnostics.length)
-    assert_equal("Expected `end` to close `def` statement.", T.must(diagnostics.last).message)
+    assert_equal("Expected an `end` to close the `def` statement", T.must(diagnostics.last).message)
   end
 end
