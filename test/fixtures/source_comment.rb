@@ -9,3 +9,7 @@ end
 # source://syntax_tree//lib/syntax_tree.rb#39
 def baz
 end
+
+# source://deleted//lib/foo.rb.rb#1
+def baz
+end
