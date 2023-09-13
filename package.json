@@ -249,6 +249,16 @@
           "description": "Run the Ruby LSP server from the specified branch rather than using the released gem. Only supported if not using bundleGemfile",
           "type": "string",
           "default": ""
+        },
+        "rubyLsp.pullDiagnosticsOn": {
+          "description": "When to pull diagnostics from the server (on change, save or both). Selecting 'save' may significantly improve performance on large files",
+          "type": "string",
+          "enum": [
+            "change",
+            "save",
+            "both"
+          ],
+          "default": "both"
         }
       }
     },

@@ -13,6 +13,7 @@ import {
   Range,
   ExecutableOptions,
   ServerOptions,
+  DiagnosticPullOptions,
 } from "vscode-languageclient/node";
 
 import { Telemetry } from "./telemetry";
@@ -91,6 +92,7 @@ export default class Client implements ClientInterface {
       diagnosticCollectionName: LSP_NAME,
       outputChannel: this.outputChannel,
       revealOutputChannelOn: RevealOutputChannelOn.Never,
+      diagnosticPullOptions: this.diagnosticPullOptions(),
       initializationOptions: {
         enabledFeatures: this.listOfEnabledFeatures(),
         experimentalFeaturesEnabled: configuration.get(
@@ -586,5 +588,16 @@ export default class Client implements ClientInterface {
 
   private hasUserDefinedCustomBundle(): boolean {
     return this.customBundleGemfile.length > 0;
+  }
+
+  private diagnosticPullOptions(): DiagnosticPullOptions {
+    const configuration = vscode.workspace.getConfiguration("rubyLsp");
+    const pullOn: "change" | "save" | "both" =
+      configuration.get("pullDiagnosticsOn")!;
+
+    return {
+      onChange: pullOn === "change" || pullOn === "both",
+      onSave: pullOn === "save" || pullOn === "both",
+    };
   }
 }
