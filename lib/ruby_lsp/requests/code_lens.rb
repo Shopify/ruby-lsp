@@ -82,7 +82,7 @@ module RubyLsp
 
         visibility, _ = @visibility_stack.last
         if visibility == "public"
-          method_name = node.name
+          method_name = node.name.to_s
           if @path && method_name.start_with?("test_")
             add_test_code_lens(
               node,

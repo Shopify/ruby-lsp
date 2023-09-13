@@ -511,128 +511,6 @@ class YARP::AssocNode < ::YARP::Node
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
-========
-  # source://yarp//lib/yarp/node.rb#391
-  def accept(visitor); end
-
-  # def child_nodes: () -> Array[nil | Node]
-  #
-  # source://yarp//lib/yarp/node.rb#396
-  def child_nodes; end
-
-  # def copy: (**params) -> AssocNode
-  #
-  # source://yarp//lib/yarp/node.rb#401
-  def copy(**params); end
-
-  # def child_nodes: () -> Array[nil | Node]
-  # def deconstruct: () -> Array[nil | Node]
-  #
-  # source://yarp//lib/yarp/node.rb#396
-  def deconstruct; end
-
-  # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
-  #
-  # source://yarp//lib/yarp/node.rb#414
-  def deconstruct_keys(keys); end
-
-  # attr_reader key: Node
-  #
-  # source://yarp//lib/yarp/node.rb#374
-  def key; end
-
-  # def operator: () -> String?
-  #
-  # source://yarp//lib/yarp/node.rb#419
-  def operator; end
-
-  # attr_reader operator_loc: Location?
-  #
-  # source://yarp//lib/yarp/node.rb#380
-  def operator_loc; end
-
-  # attr_reader value: Node?
-  #
-  # source://yarp//lib/yarp/node.rb#377
-  def value; end
-end
-
-# Represents a splat in a hash literal.
-#
-#     { **foo }
-#       ^^^^^
-#
-# source://yarp//lib/yarp/node.rb#428
-class YARP::AssocSplatNode < ::YARP::Node
-  # def initialize: (value: Node?, operator_loc: Location, location: Location) -> void
-  #
-  # @return [AssocSplatNode] a new instance of AssocSplatNode
-  #
-  # source://yarp//lib/yarp/node.rb#436
-  def initialize(value, operator_loc, location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#443
-  def accept(visitor); end
-
-  # def child_nodes: () -> Array[nil | Node]
-  #
-  # source://yarp//lib/yarp/node.rb#448
-  def child_nodes; end
-
-  # def copy: (**params) -> AssocSplatNode
-  #
-  # source://yarp//lib/yarp/node.rb#453
-  def copy(**params); end
-
-  # def child_nodes: () -> Array[nil | Node]
-  # def deconstruct: () -> Array[nil | Node]
-  #
-  # source://yarp//lib/yarp/node.rb#448
-  def deconstruct; end
-
-  # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
-  #
-  # source://yarp//lib/yarp/node.rb#465
-  def deconstruct_keys(keys); end
-
-  # def operator: () -> String
-  #
-  # source://yarp//lib/yarp/node.rb#470
-  def operator; end
-
-  # attr_reader operator_loc: Location
-  #
-  # source://yarp//lib/yarp/node.rb#433
-  def operator_loc; end
-
-  # attr_reader value: Node?
-  #
-  # source://yarp//lib/yarp/node.rb#430
-  def value; end
-end
-
-YARP::BACKEND = T.let(T.unsafe(nil), Symbol)
-
-# Represents reading a reference to a field in the previous match.
-#
-#     $'
-#     ^^
-#
-# source://yarp//lib/yarp/node.rb#479
-class YARP::BackReferenceReadNode < ::YARP::Node
-  # def initialize: (location: Location) -> void
-  #
-  # @return [BackReferenceReadNode] a new instance of BackReferenceReadNode
-  #
-  # source://yarp//lib/yarp/node.rb#481
-  def initialize(location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   # source://yarp//lib/yarp/node.rb#486
   def accept(visitor); end
 
@@ -825,11 +703,7 @@ end
 #     end
 #     ^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#658
-========
-# source://yarp//lib/yarp/node.rb#517
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::BeginNode < ::YARP::Node
   # def initialize: (begin_keyword_loc: Location?, statements: StatementsNode?, rescue_clause: RescueNode?, else_clause: ElseNode?, ensure_clause: EnsureNode?, end_keyword_loc: Location?, location: Location) -> void
   #
@@ -921,11 +795,7 @@ end
 #     bar(&args)
 #     ^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#774
-========
-# source://yarp//lib/yarp/node.rb#597
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::BlockArgumentNode < ::YARP::Node
   # def initialize: (expression: Node?, operator_loc: Location, location: Location) -> void
   #
@@ -1043,11 +913,7 @@ end
 # [1, 2, 3].each { |i| puts x }
 #                ^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#894
-========
-# source://yarp//lib/yarp/node.rb#648
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::BlockNode < ::YARP::Node
   # def initialize: (locals: Array[Symbol], parameters: BlockParametersNode?, body: Node?, opening_loc: Location, closing_loc: Location, location: Location) -> void
   #
@@ -1132,11 +998,7 @@ end
 #           ^^
 #     end
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#991
-========
-# source://yarp//lib/yarp/node.rb#720
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::BlockParameterNode < ::YARP::Node
   # def initialize: (name: Symbol?, name_loc: Location?, operator_loc: Location, location: Location) -> void
   #
@@ -1209,11 +1071,7 @@ end
 #            ^^^^^^^^^^^^^^^^^
 #     end
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#1064
-========
-# source://yarp//lib/yarp/node.rb#780
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::BlockParametersNode < ::YARP::Node
   # def initialize: (parameters: ParametersNode?, locals: Array[Node], opening_loc: Location?, closing_loc: Location?, location: Location) -> void
   #
@@ -1292,11 +1150,7 @@ end
 #     break foo
 #     ^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#1149
-========
-# source://yarp//lib/yarp/node.rb#846
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::BreakNode < ::YARP::Node
   # def initialize: (arguments: ArgumentsNode?, keyword_loc: Location, location: Location) -> void
   #
@@ -1518,11 +1372,7 @@ end
 #     foo&.bar
 #     ^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#1390
-========
-# source://yarp//lib/yarp/node.rb#912
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::CallNode < ::YARP::Node
   # def initialize: (receiver: Node?, call_operator_loc: Location?, message_loc: Location?, opening_loc: Location?, arguments: ArgumentsNode?, closing_loc: Location?, block: BlockNode?, flags: Integer, name: String, location: Location) -> void
   #
@@ -1645,29 +1495,17 @@ class YARP::CallNode < ::YARP::Node
   def variable_call?; end
 end
 
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10557
-========
-# source://yarp//lib/yarp/node.rb#7983
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 module YARP::CallNodeFlags; end
 
 # &. operator
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10559
-========
-# source://yarp//lib/yarp/node.rb#7985
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 YARP::CallNodeFlags::SAFE_NAVIGATION = T.let(T.unsafe(nil), Integer)
 
 # a call that could have been a local variable
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10562
-========
-# source://yarp//lib/yarp/node.rb#7988
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 YARP::CallNodeFlags::VARIABLE_CALL = T.let(T.unsafe(nil), Integer)
 
 # Represents the use of an assignment operator on a call.
@@ -1675,15 +1513,9 @@ YARP::CallNodeFlags::VARIABLE_CALL = T.let(T.unsafe(nil), Integer)
 #     foo.bar += baz
 #     ^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#1535
 class YARP::CallOperatorWriteNode < ::YARP::Node
   # def initialize: (receiver: Node?, call_operator_loc: Location?, message_loc: Location?, opening_loc: Location?, arguments: ArgumentsNode?, closing_loc: Location?, flags: Integer, read_name: String, write_name: String, operator: Symbol, operator_loc: Location, value: Node, location: Location) -> void
-========
-# source://yarp//lib/yarp/node.rb#1023
-class YARP::CallOperatorAndWriteNode < ::YARP::Node
-  # def initialize: (target: CallNode, operator_loc: Location, value: Node, location: Location) -> void
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   #
   # @return [CallOperatorWriteNode] a new instance of CallOperatorWriteNode
   #
@@ -1824,15 +1656,9 @@ end
 #     foo.bar ||= value
 #     ^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#1694
 class YARP::CallOrWriteNode < ::YARP::Node
   # def initialize: (receiver: Node?, call_operator_loc: Location?, message_loc: Location?, opening_loc: Location?, arguments: ArgumentsNode?, closing_loc: Location?, flags: Integer, read_name: String, write_name: String, operator_loc: Location, value: Node, location: Location) -> void
-========
-# source://yarp//lib/yarp/node.rb#1079
-class YARP::CallOperatorOrWriteNode < ::YARP::Node
-  # def initialize: (target: CallNode, value: Node, operator_loc: Location, location: Location) -> void
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   #
   # @return [CallOrWriteNode] a new instance of CallOrWriteNode
   #
@@ -1955,79 +1781,17 @@ class YARP::CallOperatorOrWriteNode < ::YARP::Node
   # source://yarp//lib/yarp/node.rb#1726
   def value; end
 
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # def variable_call?: () -> bool
-========
-# Represents the use of an assignment operator on a call.
-#
-#     foo.bar += baz
-#     ^^^^^^^^^^^^^^
-#
-# source://yarp//lib/yarp/node.rb#1135
-class YARP::CallOperatorWriteNode < ::YARP::Node
-  # def initialize: (target: CallNode, operator_loc: Location, value: Node, operator: Symbol, location: Location) -> void
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1811
   def variable_call?; end
-========
-  # source://yarp//lib/yarp/node.rb#1149
-  def initialize(target, operator_loc, value, operator, location); end
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 
   # attr_reader write_name: String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1720
   def write_name; end
-========
-  # source://yarp//lib/yarp/node.rb#1158
-  def accept(visitor); end
-
-  # def child_nodes: () -> Array[nil | Node]
-  #
-  # source://yarp//lib/yarp/node.rb#1163
-  def child_nodes; end
-
-  # def copy: (**params) -> CallOperatorWriteNode
-  #
-  # source://yarp//lib/yarp/node.rb#1168
-  def copy(**params); end
-
-  # def child_nodes: () -> Array[nil | Node]
-  # def deconstruct: () -> Array[nil | Node]
-  #
-  # source://yarp//lib/yarp/node.rb#1163
-  def deconstruct; end
-
-  # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
-  #
-  # source://yarp//lib/yarp/node.rb#1182
-  def deconstruct_keys(keys); end
-
-  # attr_reader operator: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#1146
-  def operator; end
-
-  # attr_reader operator_loc: Location
-  #
-  # source://yarp//lib/yarp/node.rb#1140
-  def operator_loc; end
-
-  # attr_reader target: CallNode
-  #
-  # source://yarp//lib/yarp/node.rb#1137
-  def target; end
-
-  # attr_reader value: Node
-  #
-  # source://yarp//lib/yarp/node.rb#1143
-  def value; end
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 end
 
 # Represents assigning to a local variable in pattern matching.
@@ -2035,39 +1799,23 @@ end
 #     foo => [bar => baz]
 #            ^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#1852
-========
-# source://yarp//lib/yarp/node.rb#1191
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::CapturePatternNode < ::YARP::Node
   # def initialize: (value: Node, target: Node, operator_loc: Location, location: Location) -> void
   #
   # @return [CapturePatternNode] a new instance of CapturePatternNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1863
-========
-  # source://yarp//lib/yarp/node.rb#1202
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(value, target, operator_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1871
-========
-  # source://yarp//lib/yarp/node.rb#1210
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1876
-========
-  # source://yarp//lib/yarp/node.rb#1215
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -2077,30 +1825,18 @@ class YARP::CapturePatternNode < ::YARP::Node
 
   # def copy: (**params) -> CapturePatternNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1886
-========
-  # source://yarp//lib/yarp/node.rb#1220
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1876
-========
-  # source://yarp//lib/yarp/node.rb#1215
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1899
-========
-  # source://yarp//lib/yarp/node.rb#1233
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#1908
@@ -2108,38 +1844,22 @@ class YARP::CapturePatternNode < ::YARP::Node
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1904
-========
-  # source://yarp//lib/yarp/node.rb#1238
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1860
-========
-  # source://yarp//lib/yarp/node.rb#1199
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader target: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1857
-========
-  # source://yarp//lib/yarp/node.rb#1196
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def target; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1854
-========
-  # source://yarp//lib/yarp/node.rb#1193
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -2150,57 +1870,33 @@ end
 # when false
 # end
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#1925
-========
-# source://yarp//lib/yarp/node.rb#1249
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::CaseNode < ::YARP::Node
   # def initialize: (predicate: Node?, conditions: Array[Node], consequent: ElseNode?, case_keyword_loc: Location, end_keyword_loc: Location, location: Location) -> void
   #
   # @return [CaseNode] a new instance of CaseNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1942
-========
-  # source://yarp//lib/yarp/node.rb#1266
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(predicate, conditions, consequent, case_keyword_loc, end_keyword_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1952
-========
-  # source://yarp//lib/yarp/node.rb#1276
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def case_keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1987
-========
-  # source://yarp//lib/yarp/node.rb#1306
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def case_keyword; end
 
   # attr_reader case_keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1936
-========
-  # source://yarp//lib/yarp/node.rb#1260
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def case_keyword_loc; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1957
-========
-  # source://yarp//lib/yarp/node.rb#1281
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -2210,66 +1906,38 @@ class YARP::CaseNode < ::YARP::Node
 
   # attr_reader conditions: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1930
-========
-  # source://yarp//lib/yarp/node.rb#1254
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def conditions; end
 
   # attr_reader consequent: ElseNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1933
-========
-  # source://yarp//lib/yarp/node.rb#1257
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def consequent; end
 
   # def copy: (**params) -> CaseNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1967
-========
-  # source://yarp//lib/yarp/node.rb#1286
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1957
-========
-  # source://yarp//lib/yarp/node.rb#1281
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1982
-========
-  # source://yarp//lib/yarp/node.rb#1301
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # def end_keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1992
-========
-  # source://yarp//lib/yarp/node.rb#1311
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1939
-========
-  # source://yarp//lib/yarp/node.rb#1263
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword_loc; end
 
   # source://yarp//lib/yarp/node.rb#1996
@@ -2277,11 +1945,7 @@ class YARP::CaseNode < ::YARP::Node
 
   # attr_reader predicate: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#1927
-========
-  # source://yarp//lib/yarp/node.rb#1251
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def predicate; end
 end
 
@@ -2290,66 +1954,38 @@ end
 #     class Foo end
 #     ^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#2021
-========
-# source://yarp//lib/yarp/node.rb#1320
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ClassNode < ::YARP::Node
   # def initialize: (locals: Array[Symbol], class_keyword_loc: Location, constant_path: Node, inheritance_operator_loc: Location?, superclass: Node?, body: Node?, end_keyword_loc: Location, name: Symbol, location: Location) -> void
   #
   # @return [ClassNode] a new instance of ClassNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2047
-========
-  # source://yarp//lib/yarp/node.rb#1346
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(locals, class_keyword_loc, constant_path, inheritance_operator_loc, superclass, body, end_keyword_loc, name, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2060
-========
-  # source://yarp//lib/yarp/node.rb#1359
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # attr_reader body: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2038
-========
-  # source://yarp//lib/yarp/node.rb#1337
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def body; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2065
-========
-  # source://yarp//lib/yarp/node.rb#1364
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def class_keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2098
-========
-  # source://yarp//lib/yarp/node.rb#1392
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def class_keyword; end
 
   # attr_reader class_keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2026
-========
-  # source://yarp//lib/yarp/node.rb#1325
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def class_keyword_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -2359,75 +1995,43 @@ class YARP::ClassNode < ::YARP::Node
 
   # attr_reader constant_path: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2029
-========
-  # source://yarp//lib/yarp/node.rb#1328
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def constant_path; end
 
   # def copy: (**params) -> ClassNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2075
-========
-  # source://yarp//lib/yarp/node.rb#1369
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2065
-========
-  # source://yarp//lib/yarp/node.rb#1364
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2093
-========
-  # source://yarp//lib/yarp/node.rb#1387
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # def end_keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2108
-========
-  # source://yarp//lib/yarp/node.rb#1402
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2041
-========
-  # source://yarp//lib/yarp/node.rb#1340
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword_loc; end
 
   # def inheritance_operator: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2103
-========
-  # source://yarp//lib/yarp/node.rb#1397
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def inheritance_operator; end
 
   # attr_reader inheritance_operator_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2032
-========
-  # source://yarp//lib/yarp/node.rb#1331
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def inheritance_operator_loc; end
 
   # source://yarp//lib/yarp/node.rb#2112
@@ -2435,29 +2039,17 @@ class YARP::ClassNode < ::YARP::Node
 
   # attr_reader locals: Array[Symbol]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2023
-========
-  # source://yarp//lib/yarp/node.rb#1322
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def locals; end
 
   # attr_reader name: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2044
-========
-  # source://yarp//lib/yarp/node.rb#1343
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader superclass: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2035
-========
-  # source://yarp//lib/yarp/node.rb#1334
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def superclass; end
 end
 
@@ -2466,39 +2058,23 @@ end
 #     @@target &&= value
 #     ^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#2141
-========
-# source://yarp//lib/yarp/node.rb#1411
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ClassVariableAndWriteNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, operator_loc: Location, value: Node, location: Location) -> void
   #
   # @return [ClassVariableAndWriteNode] a new instance of ClassVariableAndWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2155
-========
-  # source://yarp//lib/yarp/node.rb#1425
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name, name_loc, operator_loc, value, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2164
-========
-  # source://yarp//lib/yarp/node.rb#1434
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2169
-========
-  # source://yarp//lib/yarp/node.rb#1439
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -2508,21 +2084,13 @@ class YARP::ClassVariableAndWriteNode < ::YARP::Node
 
   # def copy: (**params) -> ClassVariableAndWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2179
-========
-  # source://yarp//lib/yarp/node.rb#1444
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2169
-========
-  # source://yarp//lib/yarp/node.rb#1439
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
@@ -2530,54 +2098,32 @@ class YARP::ClassVariableAndWriteNode < ::YARP::Node
   # source://yarp//lib/yarp/node.rb#2193
   def deconstruct_keys(keys); end
 
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2202
   def inspect(inspector = T.unsafe(nil)); end
 
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#2143
-========
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#1413
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2146
-========
-  # source://yarp//lib/yarp/node.rb#1416
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2198
-========
-  # source://yarp//lib/yarp/node.rb#1463
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2149
-========
-  # source://yarp//lib/yarp/node.rb#1419
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2152
-========
-  # source://yarp//lib/yarp/node.rb#1422
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -2586,39 +2132,23 @@ end
 #     @@target += value
 #     ^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#2217
-========
-# source://yarp//lib/yarp/node.rb#1472
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ClassVariableOperatorWriteNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, operator_loc: Location, value: Node, operator: Symbol, location: Location) -> void
   #
   # @return [ClassVariableOperatorWriteNode] a new instance of ClassVariableOperatorWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2234
-========
-  # source://yarp//lib/yarp/node.rb#1489
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name, name_loc, operator_loc, value, operator, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2244
-========
-  # source://yarp//lib/yarp/node.rb#1499
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2249
-========
-  # source://yarp//lib/yarp/node.rb#1504
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -2628,21 +2158,13 @@ class YARP::ClassVariableOperatorWriteNode < ::YARP::Node
 
   # def copy: (**params) -> ClassVariableOperatorWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2259
-========
-  # source://yarp//lib/yarp/node.rb#1509
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2249
-========
-  # source://yarp//lib/yarp/node.rb#1504
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
@@ -2650,54 +2172,32 @@ class YARP::ClassVariableOperatorWriteNode < ::YARP::Node
   # source://yarp//lib/yarp/node.rb#2274
   def deconstruct_keys(keys); end
 
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2278
   def inspect(inspector = T.unsafe(nil)); end
 
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#2219
-========
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#1474
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2222
-========
-  # source://yarp//lib/yarp/node.rb#1477
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # attr_reader operator: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2231
-========
-  # source://yarp//lib/yarp/node.rb#1486
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2225
-========
-  # source://yarp//lib/yarp/node.rb#1480
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2228
-========
-  # source://yarp//lib/yarp/node.rb#1483
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -2706,39 +2206,23 @@ end
 #     @@target ||= value
 #     ^^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#2294
-========
-# source://yarp//lib/yarp/node.rb#1533
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ClassVariableOrWriteNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, operator_loc: Location, value: Node, location: Location) -> void
   #
   # @return [ClassVariableOrWriteNode] a new instance of ClassVariableOrWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2308
-========
-  # source://yarp//lib/yarp/node.rb#1547
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name, name_loc, operator_loc, value, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2317
-========
-  # source://yarp//lib/yarp/node.rb#1556
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2322
-========
-  # source://yarp//lib/yarp/node.rb#1561
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -2748,21 +2232,13 @@ class YARP::ClassVariableOrWriteNode < ::YARP::Node
 
   # def copy: (**params) -> ClassVariableOrWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2332
-========
-  # source://yarp//lib/yarp/node.rb#1566
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2322
-========
-  # source://yarp//lib/yarp/node.rb#1561
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
@@ -2770,54 +2246,32 @@ class YARP::ClassVariableOrWriteNode < ::YARP::Node
   # source://yarp//lib/yarp/node.rb#2346
   def deconstruct_keys(keys); end
 
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2355
   def inspect(inspector = T.unsafe(nil)); end
 
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#2296
-========
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#1535
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2299
-========
-  # source://yarp//lib/yarp/node.rb#1538
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2351
-========
-  # source://yarp//lib/yarp/node.rb#1585
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2302
-========
-  # source://yarp//lib/yarp/node.rb#1541
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2305
-========
-  # source://yarp//lib/yarp/node.rb#1544
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -2826,39 +2280,23 @@ end
 #     @@foo
 #     ^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#2370
-========
-# source://yarp//lib/yarp/node.rb#1594
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ClassVariableReadNode < ::YARP::Node
   # def initialize: (name: Symbol, location: Location) -> void
   #
   # @return [ClassVariableReadNode] a new instance of ClassVariableReadNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2375
-========
-  # source://yarp//lib/yarp/node.rb#1599
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2381
-========
-  # source://yarp//lib/yarp/node.rb#1605
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2386
-========
-  # source://yarp//lib/yarp/node.rb#1610
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -2868,21 +2306,13 @@ class YARP::ClassVariableReadNode < ::YARP::Node
 
   # def copy: (**params) -> ClassVariableReadNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2396
-========
-  # source://yarp//lib/yarp/node.rb#1615
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2386
-========
-  # source://yarp//lib/yarp/node.rb#1610
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
@@ -2890,18 +2320,12 @@ class YARP::ClassVariableReadNode < ::YARP::Node
   # source://yarp//lib/yarp/node.rb#2407
   def deconstruct_keys(keys); end
 
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2411
   def inspect(inspector = T.unsafe(nil)); end
 
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#2372
-========
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#1596
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 end
 
@@ -2910,39 +2334,23 @@ end
 #     @@foo, @@bar = baz
 #     ^^^^^  ^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#2422
-========
-# source://yarp//lib/yarp/node.rb#1635
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ClassVariableTargetNode < ::YARP::Node
   # def initialize: (name: Symbol, location: Location) -> void
   #
   # @return [ClassVariableTargetNode] a new instance of ClassVariableTargetNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2427
-========
-  # source://yarp//lib/yarp/node.rb#1640
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2433
-========
-  # source://yarp//lib/yarp/node.rb#1646
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2438
-========
-  # source://yarp//lib/yarp/node.rb#1651
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -2952,26 +2360,17 @@ class YARP::ClassVariableTargetNode < ::YARP::Node
 
   # def copy: (**params) -> ClassVariableTargetNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2448
-========
-  # source://yarp//lib/yarp/node.rb#1656
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2438
-========
-  # source://yarp//lib/yarp/node.rb#1651
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2459
   def deconstruct_keys(keys); end
 
@@ -2981,14 +2380,6 @@ class YARP::ClassVariableTargetNode < ::YARP::Node
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#2424
-========
-  # source://yarp//lib/yarp/node.rb#1667
-  def deconstruct_keys(keys); end
-
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#1637
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 end
 
@@ -2997,7 +2388,6 @@ end
 #     @@foo = 1
 #     ^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#2474
 class YARP::ClassVariableWriteNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, value: Node, operator_loc: Location?, location: Location) -> void
@@ -3005,33 +2395,16 @@ class YARP::ClassVariableWriteNode < ::YARP::Node
   # @return [ClassVariableWriteNode] a new instance of ClassVariableWriteNode
   #
   # source://yarp//lib/yarp/node.rb#2488
-========
-# source://yarp//lib/yarp/node.rb#1676
-class YARP::ClassVariableWriteNode < ::YARP::Node
-  # def initialize: (name: Symbol, name_loc: Location, value: Node?, operator_loc: Location?, location: Location) -> void
-  #
-  # @return [ClassVariableWriteNode] a new instance of ClassVariableWriteNode
-  #
-  # source://yarp//lib/yarp/node.rb#1690
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name, name_loc, value, operator_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2497
-========
-  # source://yarp//lib/yarp/node.rb#1699
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2502
-========
-  # source://yarp//lib/yarp/node.rb#1704
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -3041,26 +2414,17 @@ class YARP::ClassVariableWriteNode < ::YARP::Node
 
   # def copy: (**params) -> ClassVariableWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2512
-========
-  # source://yarp//lib/yarp/node.rb#1709
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2502
-========
-  # source://yarp//lib/yarp/node.rb#1704
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2526
   def deconstruct_keys(keys); end
 
@@ -3070,50 +2434,26 @@ class YARP::ClassVariableWriteNode < ::YARP::Node
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#2476
-========
-  # source://yarp//lib/yarp/node.rb#1723
-  def deconstruct_keys(keys); end
-
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#1678
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2479
-========
-  # source://yarp//lib/yarp/node.rb#1681
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2531
-========
-  # source://yarp//lib/yarp/node.rb#1728
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2485
-========
-  # source://yarp//lib/yarp/node.rb#1687
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2482
-========
-  # source://yarp//lib/yarp/node.rb#1684
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -3158,40 +2498,23 @@ YARP::Comment::TYPES = T.let(T.unsafe(nil), Array)
 #     Target &&= value
 #     ^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#2550
-========
-# source://yarp//lib/yarp/node.rb#1737
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ConstantAndWriteNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, operator_loc: Location, value: Node, location: Location) -> void
   #
   # @return [ConstantAndWriteNode] a new instance of ConstantAndWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2564
   def initialize(name, name_loc, operator_loc, value, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
   # source://yarp//lib/yarp/node.rb#2573
-========
-  # source://yarp//lib/yarp/node.rb#1748
-  def initialize(name_loc, operator_loc, value, location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#1756
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2578
-========
-  # source://yarp//lib/yarp/node.rb#1761
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -3201,30 +2524,18 @@ class YARP::ConstantAndWriteNode < ::YARP::Node
 
   # def copy: (**params) -> ConstantAndWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2588
-========
-  # source://yarp//lib/yarp/node.rb#1766
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2578
-========
-  # source://yarp//lib/yarp/node.rb#1761
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2602
-========
-  # source://yarp//lib/yarp/node.rb#1779
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#2611
@@ -3232,47 +2543,27 @@ class YARP::ConstantAndWriteNode < ::YARP::Node
 
   # attr_reader name: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2552
-========
-  # source://yarp//lib/yarp/node.rb#1784
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2555
-========
-  # source://yarp//lib/yarp/node.rb#1739
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2607
-========
-  # source://yarp//lib/yarp/node.rb#1789
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2558
-========
-  # source://yarp//lib/yarp/node.rb#1742
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2561
-========
-  # source://yarp//lib/yarp/node.rb#1745
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -3281,40 +2572,23 @@ end
 #     Target += value
 #     ^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#2626
-========
-# source://yarp//lib/yarp/node.rb#1798
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ConstantOperatorWriteNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, operator_loc: Location, value: Node, operator: Symbol, location: Location) -> void
   #
   # @return [ConstantOperatorWriteNode] a new instance of ConstantOperatorWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2643
   def initialize(name, name_loc, operator_loc, value, operator, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
   # source://yarp//lib/yarp/node.rb#2653
-========
-  # source://yarp//lib/yarp/node.rb#1812
-  def initialize(name_loc, operator_loc, value, operator, location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#1821
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2658
-========
-  # source://yarp//lib/yarp/node.rb#1826
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -3324,30 +2598,18 @@ class YARP::ConstantOperatorWriteNode < ::YARP::Node
 
   # def copy: (**params) -> ConstantOperatorWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2668
-========
-  # source://yarp//lib/yarp/node.rb#1831
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2658
-========
-  # source://yarp//lib/yarp/node.rb#1826
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2683
-========
-  # source://yarp//lib/yarp/node.rb#1845
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#2687
@@ -3355,47 +2617,27 @@ class YARP::ConstantOperatorWriteNode < ::YARP::Node
 
   # attr_reader name: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2628
-========
-  # source://yarp//lib/yarp/node.rb#1850
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2631
-========
-  # source://yarp//lib/yarp/node.rb#1800
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # attr_reader operator: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2640
-========
-  # source://yarp//lib/yarp/node.rb#1809
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2634
-========
-  # source://yarp//lib/yarp/node.rb#1803
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2637
-========
-  # source://yarp//lib/yarp/node.rb#1806
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -3404,40 +2646,23 @@ end
 #     Target ||= value
 #     ^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#2703
-========
-# source://yarp//lib/yarp/node.rb#1859
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ConstantOrWriteNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, operator_loc: Location, value: Node, location: Location) -> void
   #
   # @return [ConstantOrWriteNode] a new instance of ConstantOrWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2717
   def initialize(name, name_loc, operator_loc, value, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
   # source://yarp//lib/yarp/node.rb#2726
-========
-  # source://yarp//lib/yarp/node.rb#1870
-  def initialize(name_loc, operator_loc, value, location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#1878
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2731
-========
-  # source://yarp//lib/yarp/node.rb#1883
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -3447,30 +2672,18 @@ class YARP::ConstantOrWriteNode < ::YARP::Node
 
   # def copy: (**params) -> ConstantOrWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2741
-========
-  # source://yarp//lib/yarp/node.rb#1888
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2731
-========
-  # source://yarp//lib/yarp/node.rb#1883
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2755
-========
-  # source://yarp//lib/yarp/node.rb#1901
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#2764
@@ -3478,47 +2691,27 @@ class YARP::ConstantOrWriteNode < ::YARP::Node
 
   # attr_reader name: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2705
-========
-  # source://yarp//lib/yarp/node.rb#1906
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2708
-========
-  # source://yarp//lib/yarp/node.rb#1861
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2760
-========
-  # source://yarp//lib/yarp/node.rb#1911
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2711
-========
-  # source://yarp//lib/yarp/node.rb#1864
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2714
-========
-  # source://yarp//lib/yarp/node.rb#1867
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -3527,39 +2720,23 @@ end
 #     Parent::Child &&= value
 #     ^^^^^^^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#2779
-========
-# source://yarp//lib/yarp/node.rb#1920
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ConstantPathAndWriteNode < ::YARP::Node
   # def initialize: (target: ConstantPathNode, operator_loc: Location, value: Node, location: Location) -> void
   #
   # @return [ConstantPathAndWriteNode] a new instance of ConstantPathAndWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2790
-========
-  # source://yarp//lib/yarp/node.rb#1931
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(target, operator_loc, value, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2798
-========
-  # source://yarp//lib/yarp/node.rb#1939
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2803
-========
-  # source://yarp//lib/yarp/node.rb#1944
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -3569,30 +2746,18 @@ class YARP::ConstantPathAndWriteNode < ::YARP::Node
 
   # def copy: (**params) -> ConstantPathAndWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2813
-========
-  # source://yarp//lib/yarp/node.rb#1949
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2803
-========
-  # source://yarp//lib/yarp/node.rb#1944
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2826
-========
-  # source://yarp//lib/yarp/node.rb#1962
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#2835
@@ -3600,38 +2765,22 @@ class YARP::ConstantPathAndWriteNode < ::YARP::Node
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2831
-========
-  # source://yarp//lib/yarp/node.rb#1967
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2784
-========
-  # source://yarp//lib/yarp/node.rb#1925
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader target: ConstantPathNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2781
-========
-  # source://yarp//lib/yarp/node.rb#1922
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def target; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2787
-========
-  # source://yarp//lib/yarp/node.rb#1928
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -3640,48 +2789,28 @@ end
 #     Foo::Bar
 #     ^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#2850
-========
-# source://yarp//lib/yarp/node.rb#1976
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ConstantPathNode < ::YARP::Node
   # def initialize: (parent: Node?, child: Node, delimiter_loc: Location, location: Location) -> void
   #
   # @return [ConstantPathNode] a new instance of ConstantPathNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2861
-========
-  # source://yarp//lib/yarp/node.rb#1987
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(parent, child, delimiter_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2869
-========
-  # source://yarp//lib/yarp/node.rb#1995
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # attr_reader child: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2855
-========
-  # source://yarp//lib/yarp/node.rb#1981
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2874
-========
-  # source://yarp//lib/yarp/node.rb#2000
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -3691,48 +2820,28 @@ class YARP::ConstantPathNode < ::YARP::Node
 
   # def copy: (**params) -> ConstantPathNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2884
-========
-  # source://yarp//lib/yarp/node.rb#2005
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2874
-========
-  # source://yarp//lib/yarp/node.rb#2000
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2897
-========
-  # source://yarp//lib/yarp/node.rb#2018
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # def delimiter: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2902
-========
-  # source://yarp//lib/yarp/node.rb#2023
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def delimiter; end
 
   # attr_reader delimiter_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2858
-========
-  # source://yarp//lib/yarp/node.rb#1984
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def delimiter_loc; end
 
   # source://yarp//lib/yarp/node.rb#2906
@@ -3740,11 +2849,7 @@ class YARP::ConstantPathNode < ::YARP::Node
 
   # attr_reader parent: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2852
-========
-  # source://yarp//lib/yarp/node.rb#1978
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def parent; end
 end
 
@@ -3753,39 +2858,23 @@ end
 #     Parent::Child += value
 #     ^^^^^^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#2925
-========
-# source://yarp//lib/yarp/node.rb#2032
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ConstantPathOperatorWriteNode < ::YARP::Node
   # def initialize: (target: ConstantPathNode, operator_loc: Location, value: Node, operator: Symbol, location: Location) -> void
   #
   # @return [ConstantPathOperatorWriteNode] a new instance of ConstantPathOperatorWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2939
-========
-  # source://yarp//lib/yarp/node.rb#2046
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(target, operator_loc, value, operator, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2948
-========
-  # source://yarp//lib/yarp/node.rb#2055
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2953
-========
-  # source://yarp//lib/yarp/node.rb#2060
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -3795,30 +2884,18 @@ class YARP::ConstantPathOperatorWriteNode < ::YARP::Node
 
   # def copy: (**params) -> ConstantPathOperatorWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2963
-========
-  # source://yarp//lib/yarp/node.rb#2065
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2953
-========
-  # source://yarp//lib/yarp/node.rb#2060
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2977
-========
-  # source://yarp//lib/yarp/node.rb#2079
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#2981
@@ -3826,38 +2903,22 @@ class YARP::ConstantPathOperatorWriteNode < ::YARP::Node
 
   # attr_reader operator: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2936
-========
-  # source://yarp//lib/yarp/node.rb#2043
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2930
-========
-  # source://yarp//lib/yarp/node.rb#2037
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader target: ConstantPathNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2927
-========
-  # source://yarp//lib/yarp/node.rb#2034
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def target; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2933
-========
-  # source://yarp//lib/yarp/node.rb#2040
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -3866,39 +2927,23 @@ end
 #     Parent::Child ||= value
 #     ^^^^^^^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#2997
-========
-# source://yarp//lib/yarp/node.rb#2088
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ConstantPathOrWriteNode < ::YARP::Node
   # def initialize: (target: ConstantPathNode, operator_loc: Location, value: Node, location: Location) -> void
   #
   # @return [ConstantPathOrWriteNode] a new instance of ConstantPathOrWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3008
-========
-  # source://yarp//lib/yarp/node.rb#2099
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(target, operator_loc, value, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3016
-========
-  # source://yarp//lib/yarp/node.rb#2107
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3021
-========
-  # source://yarp//lib/yarp/node.rb#2112
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -3908,30 +2953,18 @@ class YARP::ConstantPathOrWriteNode < ::YARP::Node
 
   # def copy: (**params) -> ConstantPathOrWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3031
-========
-  # source://yarp//lib/yarp/node.rb#2117
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3021
-========
-  # source://yarp//lib/yarp/node.rb#2112
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3044
-========
-  # source://yarp//lib/yarp/node.rb#2130
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#3053
@@ -3939,38 +2972,22 @@ class YARP::ConstantPathOrWriteNode < ::YARP::Node
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3049
-========
-  # source://yarp//lib/yarp/node.rb#2135
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3002
-========
-  # source://yarp//lib/yarp/node.rb#2093
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader target: ConstantPathNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#2999
-========
-  # source://yarp//lib/yarp/node.rb#2090
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def target; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3005
-========
-  # source://yarp//lib/yarp/node.rb#2096
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -3979,48 +2996,28 @@ end
 #     Foo::Foo, Bar::Bar = baz
 #     ^^^^^^^^  ^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#3068
-========
-# source://yarp//lib/yarp/node.rb#2144
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ConstantPathTargetNode < ::YARP::Node
   # def initialize: (parent: Node?, child: Node, delimiter_loc: Location, location: Location) -> void
   #
   # @return [ConstantPathTargetNode] a new instance of ConstantPathTargetNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3079
-========
-  # source://yarp//lib/yarp/node.rb#2155
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(parent, child, delimiter_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3087
-========
-  # source://yarp//lib/yarp/node.rb#2163
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # attr_reader child: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3073
-========
-  # source://yarp//lib/yarp/node.rb#2149
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3092
-========
-  # source://yarp//lib/yarp/node.rb#2168
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -4030,48 +3027,28 @@ class YARP::ConstantPathTargetNode < ::YARP::Node
 
   # def copy: (**params) -> ConstantPathTargetNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3102
-========
-  # source://yarp//lib/yarp/node.rb#2173
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3092
-========
-  # source://yarp//lib/yarp/node.rb#2168
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3115
-========
-  # source://yarp//lib/yarp/node.rb#2186
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # def delimiter: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3120
-========
-  # source://yarp//lib/yarp/node.rb#2191
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def delimiter; end
 
   # attr_reader delimiter_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3076
-========
-  # source://yarp//lib/yarp/node.rb#2152
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def delimiter_loc; end
 
   # source://yarp//lib/yarp/node.rb#3124
@@ -4079,11 +3056,7 @@ class YARP::ConstantPathTargetNode < ::YARP::Node
 
   # attr_reader parent: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3070
-========
-  # source://yarp//lib/yarp/node.rb#2146
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def parent; end
 end
 
@@ -4098,39 +3071,23 @@ end
 #     ::Foo::Bar = 1
 #     ^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#3149
-========
-# source://yarp//lib/yarp/node.rb#2206
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ConstantPathWriteNode < ::YARP::Node
   # def initialize: (target: ConstantPathNode, operator_loc: Location, value: Node, location: Location) -> void
   #
   # @return [ConstantPathWriteNode] a new instance of ConstantPathWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3160
-========
-  # source://yarp//lib/yarp/node.rb#2217
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(target, operator_loc, value, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3168
-========
-  # source://yarp//lib/yarp/node.rb#2225
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3173
-========
-  # source://yarp//lib/yarp/node.rb#2230
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -4140,30 +3097,18 @@ class YARP::ConstantPathWriteNode < ::YARP::Node
 
   # def copy: (**params) -> ConstantPathWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3183
-========
-  # source://yarp//lib/yarp/node.rb#2235
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3173
-========
-  # source://yarp//lib/yarp/node.rb#2230
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3196
-========
-  # source://yarp//lib/yarp/node.rb#2248
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#3205
@@ -4171,38 +3116,22 @@ class YARP::ConstantPathWriteNode < ::YARP::Node
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3201
-========
-  # source://yarp//lib/yarp/node.rb#2253
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3154
-========
-  # source://yarp//lib/yarp/node.rb#2211
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader target: ConstantPathNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3151
-========
-  # source://yarp//lib/yarp/node.rb#2208
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def target; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3157
-========
-  # source://yarp//lib/yarp/node.rb#2214
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -4211,40 +3140,23 @@ end
 #     Foo
 #     ^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#3220
-========
-# source://yarp//lib/yarp/node.rb#2262
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ConstantReadNode < ::YARP::Node
   # def initialize: (name: Symbol, location: Location) -> void
   #
   # @return [ConstantReadNode] a new instance of ConstantReadNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3225
   def initialize(name, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
   # source://yarp//lib/yarp/node.rb#3231
-========
-  # source://yarp//lib/yarp/node.rb#2264
-  def initialize(location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#2269
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3236
-========
-  # source://yarp//lib/yarp/node.rb#2274
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -4254,30 +3166,18 @@ class YARP::ConstantReadNode < ::YARP::Node
 
   # def copy: (**params) -> ConstantReadNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3246
-========
-  # source://yarp//lib/yarp/node.rb#2279
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3236
-========
-  # source://yarp//lib/yarp/node.rb#2274
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3257
-========
-  # source://yarp//lib/yarp/node.rb#2289
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#3261
@@ -4294,40 +3194,23 @@ end
 #     Foo, Bar = baz
 #     ^^^  ^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#3272
-========
-# source://yarp//lib/yarp/node.rb#2298
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ConstantTargetNode < ::YARP::Node
   # def initialize: (name: Symbol, location: Location) -> void
   #
   # @return [ConstantTargetNode] a new instance of ConstantTargetNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3277
   def initialize(name, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
   # source://yarp//lib/yarp/node.rb#3283
-========
-  # source://yarp//lib/yarp/node.rb#2300
-  def initialize(location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#2305
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3288
-========
-  # source://yarp//lib/yarp/node.rb#2310
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -4337,30 +3220,18 @@ class YARP::ConstantTargetNode < ::YARP::Node
 
   # def copy: (**params) -> ConstantTargetNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3298
-========
-  # source://yarp//lib/yarp/node.rb#2315
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3288
-========
-  # source://yarp//lib/yarp/node.rb#2310
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3309
-========
-  # source://yarp//lib/yarp/node.rb#2325
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#3313
@@ -4377,40 +3248,23 @@ end
 #     Foo = 1
 #     ^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#3324
-========
-# source://yarp//lib/yarp/node.rb#2334
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ConstantWriteNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, value: Node, operator_loc: Location, location: Location) -> void
   #
   # @return [ConstantWriteNode] a new instance of ConstantWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3338
   def initialize(name, name_loc, value, operator_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
   # source://yarp//lib/yarp/node.rb#3347
-========
-  # source://yarp//lib/yarp/node.rb#2345
-  def initialize(name_loc, value, operator_loc, location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#2353
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3352
-========
-  # source://yarp//lib/yarp/node.rb#2358
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -4420,30 +3274,18 @@ class YARP::ConstantWriteNode < ::YARP::Node
 
   # def copy: (**params) -> ConstantWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3362
-========
-  # source://yarp//lib/yarp/node.rb#2363
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3352
-========
-  # source://yarp//lib/yarp/node.rb#2358
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3376
-========
-  # source://yarp//lib/yarp/node.rb#2376
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#3385
@@ -4451,155 +3293,87 @@ class YARP::ConstantWriteNode < ::YARP::Node
 
   # attr_reader name: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3326
-========
-  # source://yarp//lib/yarp/node.rb#2381
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3329
-========
-  # source://yarp//lib/yarp/node.rb#2336
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3381
-========
-  # source://yarp//lib/yarp/node.rb#2386
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3335
-========
-  # source://yarp//lib/yarp/node.rb#2342
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3332
   def value; end
 end
 
 # source://yarp//lib/yarp/node.rb#11011
-========
-  # source://yarp//lib/yarp/node.rb#2339
-  def value; end
-end
-
-# source://yarp//lib/yarp/node.rb#8431
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 module YARP::DSL
   private
 
   # Create a new AliasNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11020
-========
-  # source://yarp//lib/yarp/node.rb#8440
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def AliasNode(new_name, old_name, keyword_loc, location = T.unsafe(nil)); end
 
   # Create a new AlternationPatternNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11025
-========
-  # source://yarp//lib/yarp/node.rb#8445
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def AlternationPatternNode(left, right, operator_loc, location = T.unsafe(nil)); end
 
   # Create a new AndNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11030
-========
-  # source://yarp//lib/yarp/node.rb#8450
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def AndNode(left, right, operator_loc, location = T.unsafe(nil)); end
 
   # Create a new ArgumentsNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11035
-========
-  # source://yarp//lib/yarp/node.rb#8455
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ArgumentsNode(arguments, location = T.unsafe(nil)); end
 
   # Create a new ArrayNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11040
-========
-  # source://yarp//lib/yarp/node.rb#8460
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ArrayNode(elements, opening_loc, closing_loc, location = T.unsafe(nil)); end
 
   # Create a new ArrayPatternNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11045
-========
-  # source://yarp//lib/yarp/node.rb#8465
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ArrayPatternNode(constant, requireds, rest, posts, opening_loc, closing_loc, location = T.unsafe(nil)); end
 
   # Create a new AssocNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11050
-========
-  # source://yarp//lib/yarp/node.rb#8470
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def AssocNode(key, value, operator_loc, location = T.unsafe(nil)); end
 
   # Create a new AssocSplatNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11055
-========
-  # source://yarp//lib/yarp/node.rb#8475
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def AssocSplatNode(value, operator_loc, location = T.unsafe(nil)); end
 
   # Create a new BackReferenceReadNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11060
-========
-  # source://yarp//lib/yarp/node.rb#8480
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def BackReferenceReadNode(location = T.unsafe(nil)); end
 
   # Create a new BeginNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11065
-========
-  # source://yarp//lib/yarp/node.rb#8485
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def BeginNode(begin_keyword_loc, statements, rescue_clause, else_clause, ensure_clause, end_keyword_loc, location = T.unsafe(nil)); end
 
   # Create a new BlockArgumentNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11070
-========
-  # source://yarp//lib/yarp/node.rb#8490
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def BlockArgumentNode(expression, operator_loc, location = T.unsafe(nil)); end
 
   # Create a new BlockLocalVariableNode node
@@ -4609,39 +3383,22 @@ module YARP::DSL
 
   # Create a new BlockNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11080
-========
-  # source://yarp//lib/yarp/node.rb#8495
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def BlockNode(locals, parameters, body, opening_loc, closing_loc, location = T.unsafe(nil)); end
 
   # Create a new BlockParameterNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11085
   def BlockParameterNode(name, name_loc, operator_loc, location = T.unsafe(nil)); end
 
   # Create a new BlockParametersNode node
   #
   # source://yarp//lib/yarp/node.rb#11090
-========
-  # source://yarp//lib/yarp/node.rb#8500
-  def BlockParameterNode(name_loc, operator_loc, location = T.unsafe(nil)); end
-
-  # Create a new BlockParametersNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8505
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def BlockParametersNode(parameters, locals, opening_loc, closing_loc, location = T.unsafe(nil)); end
 
   # Create a new BreakNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11095
-========
-  # source://yarp//lib/yarp/node.rb#8510
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def BreakNode(arguments, keyword_loc, location = T.unsafe(nil)); end
 
   # Create a new CallAndWriteNode node
@@ -4651,7 +3408,6 @@ module YARP::DSL
 
   # Create a new CallNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11105
   def CallNode(receiver, call_operator_loc, message_loc, opening_loc, arguments, closing_loc, block, flags, name, location = T.unsafe(nil)); end
 
@@ -4668,106 +3424,50 @@ module YARP::DSL
   # Create a new CapturePatternNode node
   #
   # source://yarp//lib/yarp/node.rb#11120
-========
-  # source://yarp//lib/yarp/node.rb#8515
-  def CallNode(receiver, operator_loc, message_loc, opening_loc, arguments, closing_loc, block, flags, name, location = T.unsafe(nil)); end
-
-  # Create a new CallOperatorAndWriteNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8520
-  def CallOperatorAndWriteNode(target, operator_loc, value, location = T.unsafe(nil)); end
-
-  # Create a new CallOperatorOrWriteNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8525
-  def CallOperatorOrWriteNode(target, value, operator_loc, location = T.unsafe(nil)); end
-
-  # Create a new CallOperatorWriteNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8530
-  def CallOperatorWriteNode(target, operator_loc, value, operator, location = T.unsafe(nil)); end
-
-  # Create a new CapturePatternNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8535
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def CapturePatternNode(value, target, operator_loc, location = T.unsafe(nil)); end
 
   # Create a new CaseNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11125
-========
-  # source://yarp//lib/yarp/node.rb#8540
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def CaseNode(predicate, conditions, consequent, case_keyword_loc, end_keyword_loc, location = T.unsafe(nil)); end
 
   # Create a new ClassNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11130
-========
-  # source://yarp//lib/yarp/node.rb#8545
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ClassNode(locals, class_keyword_loc, constant_path, inheritance_operator_loc, superclass, body, end_keyword_loc, name, location = T.unsafe(nil)); end
 
   # Create a new ClassVariableAndWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11135
-========
-  # source://yarp//lib/yarp/node.rb#8550
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ClassVariableAndWriteNode(name, name_loc, operator_loc, value, location = T.unsafe(nil)); end
 
   # Create a new ClassVariableOperatorWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11140
-========
-  # source://yarp//lib/yarp/node.rb#8555
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ClassVariableOperatorWriteNode(name, name_loc, operator_loc, value, operator, location = T.unsafe(nil)); end
 
   # Create a new ClassVariableOrWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11145
-========
-  # source://yarp//lib/yarp/node.rb#8560
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ClassVariableOrWriteNode(name, name_loc, operator_loc, value, location = T.unsafe(nil)); end
 
   # Create a new ClassVariableReadNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11150
-========
-  # source://yarp//lib/yarp/node.rb#8565
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ClassVariableReadNode(name, location = T.unsafe(nil)); end
 
   # Create a new ClassVariableTargetNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11155
-========
-  # source://yarp//lib/yarp/node.rb#8570
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ClassVariableTargetNode(name, location = T.unsafe(nil)); end
 
   # Create a new ClassVariableWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11160
-========
-  # source://yarp//lib/yarp/node.rb#8575
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ClassVariableWriteNode(name, name_loc, value, operator_loc, location = T.unsafe(nil)); end
 
   # Create a new ConstantAndWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11165
   def ConstantAndWriteNode(name, name_loc, operator_loc, value, location = T.unsafe(nil)); end
 
@@ -4784,74 +3484,35 @@ module YARP::DSL
   # Create a new ConstantPathAndWriteNode node
   #
   # source://yarp//lib/yarp/node.rb#11180
-========
-  # source://yarp//lib/yarp/node.rb#8580
-  def ConstantAndWriteNode(name_loc, operator_loc, value, location = T.unsafe(nil)); end
-
-  # Create a new ConstantOperatorWriteNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8585
-  def ConstantOperatorWriteNode(name_loc, operator_loc, value, operator, location = T.unsafe(nil)); end
-
-  # Create a new ConstantOrWriteNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8590
-  def ConstantOrWriteNode(name_loc, operator_loc, value, location = T.unsafe(nil)); end
-
-  # Create a new ConstantPathAndWriteNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8595
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ConstantPathAndWriteNode(target, operator_loc, value, location = T.unsafe(nil)); end
 
   # Create a new ConstantPathNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11185
-========
-  # source://yarp//lib/yarp/node.rb#8600
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ConstantPathNode(parent, child, delimiter_loc, location = T.unsafe(nil)); end
 
   # Create a new ConstantPathOperatorWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11190
-========
-  # source://yarp//lib/yarp/node.rb#8605
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ConstantPathOperatorWriteNode(target, operator_loc, value, operator, location = T.unsafe(nil)); end
 
   # Create a new ConstantPathOrWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11195
-========
-  # source://yarp//lib/yarp/node.rb#8610
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ConstantPathOrWriteNode(target, operator_loc, value, location = T.unsafe(nil)); end
 
   # Create a new ConstantPathTargetNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11200
-========
-  # source://yarp//lib/yarp/node.rb#8615
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ConstantPathTargetNode(parent, child, delimiter_loc, location = T.unsafe(nil)); end
 
   # Create a new ConstantPathWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11205
-========
-  # source://yarp//lib/yarp/node.rb#8620
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ConstantPathWriteNode(target, operator_loc, value, location = T.unsafe(nil)); end
 
   # Create a new ConstantReadNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11210
   def ConstantReadNode(name, location = T.unsafe(nil)); end
 
@@ -4873,142 +3534,70 @@ module YARP::DSL
   # Create a new DefinedNode node
   #
   # source://yarp//lib/yarp/node.rb#11230
-========
-  # source://yarp//lib/yarp/node.rb#8625
-  def ConstantReadNode(location = T.unsafe(nil)); end
-
-  # Create a new ConstantTargetNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8630
-  def ConstantTargetNode(location = T.unsafe(nil)); end
-
-  # Create a new ConstantWriteNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8635
-  def ConstantWriteNode(name_loc, value, operator_loc, location = T.unsafe(nil)); end
-
-  # Create a new DefNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8640
-  def DefNode(name_loc, receiver, parameters, body, locals, def_keyword_loc, operator_loc, lparen_loc, rparen_loc, equal_loc, end_keyword_loc, location = T.unsafe(nil)); end
-
-  # Create a new DefinedNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8645
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def DefinedNode(lparen_loc, value, rparen_loc, keyword_loc, location = T.unsafe(nil)); end
 
   # Create a new ElseNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11235
-========
-  # source://yarp//lib/yarp/node.rb#8650
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ElseNode(else_keyword_loc, statements, end_keyword_loc, location = T.unsafe(nil)); end
 
   # Create a new EmbeddedStatementsNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11240
-========
-  # source://yarp//lib/yarp/node.rb#8655
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def EmbeddedStatementsNode(opening_loc, statements, closing_loc, location = T.unsafe(nil)); end
 
   # Create a new EmbeddedVariableNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11245
-========
-  # source://yarp//lib/yarp/node.rb#8660
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def EmbeddedVariableNode(operator_loc, variable, location = T.unsafe(nil)); end
 
   # Create a new EnsureNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11250
-========
-  # source://yarp//lib/yarp/node.rb#8665
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def EnsureNode(ensure_keyword_loc, statements, end_keyword_loc, location = T.unsafe(nil)); end
 
   # Create a new FalseNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11255
-========
-  # source://yarp//lib/yarp/node.rb#8670
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def FalseNode(location = T.unsafe(nil)); end
 
   # Create a new FindPatternNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11260
-========
-  # source://yarp//lib/yarp/node.rb#8675
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def FindPatternNode(constant, left, requireds, right, opening_loc, closing_loc, location = T.unsafe(nil)); end
 
   # Create a new FlipFlopNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11265
-========
-  # source://yarp//lib/yarp/node.rb#8680
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def FlipFlopNode(left, right, operator_loc, flags, location = T.unsafe(nil)); end
 
   # Create a new FloatNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11270
-========
-  # source://yarp//lib/yarp/node.rb#8685
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def FloatNode(location = T.unsafe(nil)); end
 
   # Create a new ForNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11275
-========
-  # source://yarp//lib/yarp/node.rb#8690
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ForNode(index, collection, statements, for_keyword_loc, in_keyword_loc, do_keyword_loc, end_keyword_loc, location = T.unsafe(nil)); end
 
   # Create a new ForwardingArgumentsNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11280
-========
-  # source://yarp//lib/yarp/node.rb#8695
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ForwardingArgumentsNode(location = T.unsafe(nil)); end
 
   # Create a new ForwardingParameterNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11285
-========
-  # source://yarp//lib/yarp/node.rb#8700
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ForwardingParameterNode(location = T.unsafe(nil)); end
 
   # Create a new ForwardingSuperNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11290
-========
-  # source://yarp//lib/yarp/node.rb#8705
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ForwardingSuperNode(block, location = T.unsafe(nil)); end
 
   # Create a new GlobalVariableAndWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11295
   def GlobalVariableAndWriteNode(name, name_loc, operator_loc, value, location = T.unsafe(nil)); end
 
@@ -5040,188 +3629,90 @@ module YARP::DSL
   # Create a new HashNode node
   #
   # source://yarp//lib/yarp/node.rb#11325
-========
-  # source://yarp//lib/yarp/node.rb#8710
-  def GlobalVariableAndWriteNode(name_loc, operator_loc, value, location = T.unsafe(nil)); end
-
-  # Create a new GlobalVariableOperatorWriteNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8715
-  def GlobalVariableOperatorWriteNode(name_loc, operator_loc, value, operator, location = T.unsafe(nil)); end
-
-  # Create a new GlobalVariableOrWriteNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8720
-  def GlobalVariableOrWriteNode(name_loc, operator_loc, value, location = T.unsafe(nil)); end
-
-  # Create a new GlobalVariableReadNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8725
-  def GlobalVariableReadNode(location = T.unsafe(nil)); end
-
-  # Create a new GlobalVariableTargetNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8730
-  def GlobalVariableTargetNode(location = T.unsafe(nil)); end
-
-  # Create a new GlobalVariableWriteNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8735
-  def GlobalVariableWriteNode(name_loc, value, operator_loc, location = T.unsafe(nil)); end
-
-  # Create a new HashNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8740
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def HashNode(opening_loc, elements, closing_loc, location = T.unsafe(nil)); end
 
   # Create a new HashPatternNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11330
-========
-  # source://yarp//lib/yarp/node.rb#8745
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def HashPatternNode(constant, assocs, kwrest, opening_loc, closing_loc, location = T.unsafe(nil)); end
 
   # Create a new IfNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11335
-========
-  # source://yarp//lib/yarp/node.rb#8750
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def IfNode(if_keyword_loc, predicate, statements, consequent, end_keyword_loc, location = T.unsafe(nil)); end
 
   # Create a new ImaginaryNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11340
-========
-  # source://yarp//lib/yarp/node.rb#8755
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ImaginaryNode(numeric, location = T.unsafe(nil)); end
 
   # Create a new InNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11345
-========
-  # source://yarp//lib/yarp/node.rb#8760
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def InNode(pattern, statements, in_loc, then_loc, location = T.unsafe(nil)); end
 
   # Create a new InstanceVariableAndWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11350
-========
-  # source://yarp//lib/yarp/node.rb#8765
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def InstanceVariableAndWriteNode(name, name_loc, operator_loc, value, location = T.unsafe(nil)); end
 
   # Create a new InstanceVariableOperatorWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11355
-========
-  # source://yarp//lib/yarp/node.rb#8770
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def InstanceVariableOperatorWriteNode(name, name_loc, operator_loc, value, operator, location = T.unsafe(nil)); end
 
   # Create a new InstanceVariableOrWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11360
-========
-  # source://yarp//lib/yarp/node.rb#8775
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def InstanceVariableOrWriteNode(name, name_loc, operator_loc, value, location = T.unsafe(nil)); end
 
   # Create a new InstanceVariableReadNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11365
-========
-  # source://yarp//lib/yarp/node.rb#8780
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def InstanceVariableReadNode(name, location = T.unsafe(nil)); end
 
   # Create a new InstanceVariableTargetNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11370
-========
-  # source://yarp//lib/yarp/node.rb#8785
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def InstanceVariableTargetNode(name, location = T.unsafe(nil)); end
 
   # Create a new InstanceVariableWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11375
-========
-  # source://yarp//lib/yarp/node.rb#8790
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def InstanceVariableWriteNode(name, name_loc, value, operator_loc, location = T.unsafe(nil)); end
 
   # Create a new IntegerNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11380
-========
-  # source://yarp//lib/yarp/node.rb#8795
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def IntegerNode(location = T.unsafe(nil)); end
 
   # Create a new InterpolatedRegularExpressionNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11385
-========
-  # source://yarp//lib/yarp/node.rb#8800
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def InterpolatedRegularExpressionNode(opening_loc, parts, closing_loc, flags, location = T.unsafe(nil)); end
 
   # Create a new InterpolatedStringNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11390
-========
-  # source://yarp//lib/yarp/node.rb#8805
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def InterpolatedStringNode(opening_loc, parts, closing_loc, location = T.unsafe(nil)); end
 
   # Create a new InterpolatedSymbolNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11395
-========
-  # source://yarp//lib/yarp/node.rb#8810
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def InterpolatedSymbolNode(opening_loc, parts, closing_loc, location = T.unsafe(nil)); end
 
   # Create a new InterpolatedXStringNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11400
-========
-  # source://yarp//lib/yarp/node.rb#8815
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def InterpolatedXStringNode(opening_loc, parts, closing_loc, location = T.unsafe(nil)); end
 
   # Create a new KeywordHashNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11405
-========
-  # source://yarp//lib/yarp/node.rb#8820
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def KeywordHashNode(elements, location = T.unsafe(nil)); end
 
   # Create a new KeywordParameterNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11410
   def KeywordParameterNode(name, name_loc, value, location = T.unsafe(nil)); end
 
@@ -5233,118 +3724,61 @@ module YARP::DSL
   # Create a new LambdaNode node
   #
   # source://yarp//lib/yarp/node.rb#11420
-========
-  # source://yarp//lib/yarp/node.rb#8825
-  def KeywordParameterNode(name_loc, value, location = T.unsafe(nil)); end
-
-  # Create a new KeywordRestParameterNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8830
-  def KeywordRestParameterNode(operator_loc, name_loc, location = T.unsafe(nil)); end
-
-  # Create a new LambdaNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8835
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def LambdaNode(locals, operator_loc, opening_loc, closing_loc, parameters, body, location = T.unsafe(nil)); end
 
   # Create a new LocalVariableAndWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11425
-========
-  # source://yarp//lib/yarp/node.rb#8840
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def LocalVariableAndWriteNode(name_loc, operator_loc, value, name, depth, location = T.unsafe(nil)); end
 
   # Create a new LocalVariableOperatorWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11430
-========
-  # source://yarp//lib/yarp/node.rb#8845
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def LocalVariableOperatorWriteNode(name_loc, operator_loc, value, name, operator, depth, location = T.unsafe(nil)); end
 
   # Create a new LocalVariableOrWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11435
-========
-  # source://yarp//lib/yarp/node.rb#8850
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def LocalVariableOrWriteNode(name_loc, operator_loc, value, name, depth, location = T.unsafe(nil)); end
 
   # Create a new LocalVariableReadNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11440
-========
-  # source://yarp//lib/yarp/node.rb#8855
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def LocalVariableReadNode(name, depth, location = T.unsafe(nil)); end
 
   # Create a new LocalVariableTargetNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11445
-========
-  # source://yarp//lib/yarp/node.rb#8860
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def LocalVariableTargetNode(name, depth, location = T.unsafe(nil)); end
 
   # Create a new LocalVariableWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11450
-========
-  # source://yarp//lib/yarp/node.rb#8865
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def LocalVariableWriteNode(name, depth, name_loc, value, operator_loc, location = T.unsafe(nil)); end
 
   # Create a new Location object
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11015
-========
-  # source://yarp//lib/yarp/node.rb#8435
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def Location(source = T.unsafe(nil), start_offset = T.unsafe(nil), length = T.unsafe(nil)); end
 
   # Create a new MatchPredicateNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11455
-========
-  # source://yarp//lib/yarp/node.rb#8870
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def MatchPredicateNode(value, pattern, operator_loc, location = T.unsafe(nil)); end
 
   # Create a new MatchRequiredNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11460
-========
-  # source://yarp//lib/yarp/node.rb#8875
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def MatchRequiredNode(value, pattern, operator_loc, location = T.unsafe(nil)); end
 
   # Create a new MissingNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11465
-========
-  # source://yarp//lib/yarp/node.rb#8880
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def MissingNode(location = T.unsafe(nil)); end
 
   # Create a new ModuleNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11470
-========
-  # source://yarp//lib/yarp/node.rb#8885
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ModuleNode(locals, module_keyword_loc, constant_path, body, end_keyword_loc, name, location = T.unsafe(nil)); end
 
   # Create a new MultiTargetNode node
@@ -5354,400 +3788,222 @@ module YARP::DSL
 
   # Create a new MultiWriteNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11480
   def MultiWriteNode(targets, lparen_loc, rparen_loc, operator_loc, value, location = T.unsafe(nil)); end
 
   # Create a new NextNode node
   #
   # source://yarp//lib/yarp/node.rb#11485
-========
-  # source://yarp//lib/yarp/node.rb#8890
-  def MultiWriteNode(targets, operator_loc, value, lparen_loc, rparen_loc, location = T.unsafe(nil)); end
-
-  # Create a new NextNode node
-  #
-  # source://yarp//lib/yarp/node.rb#8895
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def NextNode(arguments, keyword_loc, location = T.unsafe(nil)); end
 
   # Create a new NilNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11490
-========
-  # source://yarp//lib/yarp/node.rb#8900
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def NilNode(location = T.unsafe(nil)); end
 
   # Create a new NoKeywordsParameterNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11495
-========
-  # source://yarp//lib/yarp/node.rb#8905
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def NoKeywordsParameterNode(operator_loc, keyword_loc, location = T.unsafe(nil)); end
 
   # Create a new NumberedReferenceReadNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11500
-========
-  # source://yarp//lib/yarp/node.rb#8910
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def NumberedReferenceReadNode(number, location = T.unsafe(nil)); end
 
   # Create a new OptionalParameterNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11505
-========
-  # source://yarp//lib/yarp/node.rb#8915
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def OptionalParameterNode(name, name_loc, operator_loc, value, location = T.unsafe(nil)); end
 
   # Create a new OrNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11510
-========
-  # source://yarp//lib/yarp/node.rb#8920
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def OrNode(left, right, operator_loc, location = T.unsafe(nil)); end
 
   # Create a new ParametersNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11515
-========
-  # source://yarp//lib/yarp/node.rb#8925
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ParametersNode(requireds, optionals, posts, rest, keywords, keyword_rest, block, location = T.unsafe(nil)); end
 
   # Create a new ParenthesesNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11520
-========
-  # source://yarp//lib/yarp/node.rb#8930
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ParenthesesNode(body, opening_loc, closing_loc, location = T.unsafe(nil)); end
 
   # Create a new PinnedExpressionNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11525
-========
-  # source://yarp//lib/yarp/node.rb#8935
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def PinnedExpressionNode(expression, operator_loc, lparen_loc, rparen_loc, location = T.unsafe(nil)); end
 
   # Create a new PinnedVariableNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11530
-========
-  # source://yarp//lib/yarp/node.rb#8940
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def PinnedVariableNode(variable, operator_loc, location = T.unsafe(nil)); end
 
   # Create a new PostExecutionNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11535
-========
-  # source://yarp//lib/yarp/node.rb#8945
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def PostExecutionNode(statements, keyword_loc, opening_loc, closing_loc, location = T.unsafe(nil)); end
 
   # Create a new PreExecutionNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11540
-========
-  # source://yarp//lib/yarp/node.rb#8950
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def PreExecutionNode(statements, keyword_loc, opening_loc, closing_loc, location = T.unsafe(nil)); end
 
   # Create a new ProgramNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11545
-========
-  # source://yarp//lib/yarp/node.rb#8955
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ProgramNode(locals, statements, location = T.unsafe(nil)); end
 
   # Create a new RangeNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11550
-========
-  # source://yarp//lib/yarp/node.rb#8960
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def RangeNode(left, right, operator_loc, flags, location = T.unsafe(nil)); end
 
   # Create a new RationalNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11555
-========
-  # source://yarp//lib/yarp/node.rb#8965
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def RationalNode(numeric, location = T.unsafe(nil)); end
 
   # Create a new RedoNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11560
-========
-  # source://yarp//lib/yarp/node.rb#8970
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def RedoNode(location = T.unsafe(nil)); end
 
   # Create a new RegularExpressionNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11565
-========
-  # source://yarp//lib/yarp/node.rb#8975
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def RegularExpressionNode(opening_loc, content_loc, closing_loc, unescaped, flags, location = T.unsafe(nil)); end
 
   # Create a new RequiredDestructuredParameterNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11570
-========
-  # source://yarp//lib/yarp/node.rb#8980
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def RequiredDestructuredParameterNode(parameters, opening_loc, closing_loc, location = T.unsafe(nil)); end
 
   # Create a new RequiredParameterNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11575
-========
-  # source://yarp//lib/yarp/node.rb#8985
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def RequiredParameterNode(name, location = T.unsafe(nil)); end
 
   # Create a new RescueModifierNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11580
-========
-  # source://yarp//lib/yarp/node.rb#8990
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def RescueModifierNode(expression, keyword_loc, rescue_expression, location = T.unsafe(nil)); end
 
   # Create a new RescueNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11585
-========
-  # source://yarp//lib/yarp/node.rb#8995
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def RescueNode(keyword_loc, exceptions, operator_loc, reference, statements, consequent, location = T.unsafe(nil)); end
 
   # Create a new RestParameterNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11590
   def RestParameterNode(name, name_loc, operator_loc, location = T.unsafe(nil)); end
 
   # Create a new RetryNode node
   #
   # source://yarp//lib/yarp/node.rb#11595
-========
-  # source://yarp//lib/yarp/node.rb#9000
-  def RestParameterNode(operator_loc, name_loc, location = T.unsafe(nil)); end
-
-  # Create a new RetryNode node
-  #
-  # source://yarp//lib/yarp/node.rb#9005
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def RetryNode(location = T.unsafe(nil)); end
 
   # Create a new ReturnNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11600
-========
-  # source://yarp//lib/yarp/node.rb#9010
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ReturnNode(keyword_loc, arguments, location = T.unsafe(nil)); end
 
   # Create a new SelfNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11605
-========
-  # source://yarp//lib/yarp/node.rb#9015
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def SelfNode(location = T.unsafe(nil)); end
 
   # Create a new SingletonClassNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11610
-========
-  # source://yarp//lib/yarp/node.rb#9020
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def SingletonClassNode(locals, class_keyword_loc, operator_loc, expression, body, end_keyword_loc, location = T.unsafe(nil)); end
 
   # Create a new SourceEncodingNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11615
-========
-  # source://yarp//lib/yarp/node.rb#9025
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def SourceEncodingNode(location = T.unsafe(nil)); end
 
   # Create a new SourceFileNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11620
-========
-  # source://yarp//lib/yarp/node.rb#9030
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def SourceFileNode(filepath, location = T.unsafe(nil)); end
 
   # Create a new SourceLineNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11625
-========
-  # source://yarp//lib/yarp/node.rb#9035
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def SourceLineNode(location = T.unsafe(nil)); end
 
   # Create a new SplatNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11630
-========
-  # source://yarp//lib/yarp/node.rb#9040
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def SplatNode(operator_loc, expression, location = T.unsafe(nil)); end
 
   # Create a new StatementsNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11635
-========
-  # source://yarp//lib/yarp/node.rb#9045
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def StatementsNode(body, location = T.unsafe(nil)); end
 
   # Create a new StringConcatNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11640
-========
-  # source://yarp//lib/yarp/node.rb#9050
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def StringConcatNode(left, right, location = T.unsafe(nil)); end
 
   # Create a new StringNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11645
-========
-  # source://yarp//lib/yarp/node.rb#9055
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def StringNode(opening_loc, content_loc, closing_loc, unescaped, location = T.unsafe(nil)); end
 
   # Create a new SuperNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11650
-========
-  # source://yarp//lib/yarp/node.rb#9060
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def SuperNode(keyword_loc, lparen_loc, arguments, rparen_loc, block, location = T.unsafe(nil)); end
 
   # Create a new SymbolNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11655
-========
-  # source://yarp//lib/yarp/node.rb#9065
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def SymbolNode(opening_loc, value_loc, closing_loc, unescaped, location = T.unsafe(nil)); end
 
   # Create a new TrueNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11660
-========
-  # source://yarp//lib/yarp/node.rb#9070
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def TrueNode(location = T.unsafe(nil)); end
 
   # Create a new UndefNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11665
-========
-  # source://yarp//lib/yarp/node.rb#9075
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def UndefNode(names, keyword_loc, location = T.unsafe(nil)); end
 
   # Create a new UnlessNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11670
-========
-  # source://yarp//lib/yarp/node.rb#9080
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def UnlessNode(keyword_loc, predicate, statements, consequent, end_keyword_loc, location = T.unsafe(nil)); end
 
   # Create a new UntilNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11675
-========
-  # source://yarp//lib/yarp/node.rb#9085
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def UntilNode(keyword_loc, closing_loc, predicate, statements, flags, location = T.unsafe(nil)); end
 
   # Create a new WhenNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11680
-========
-  # source://yarp//lib/yarp/node.rb#9090
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def WhenNode(keyword_loc, conditions, statements, location = T.unsafe(nil)); end
 
   # Create a new WhileNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11685
-========
-  # source://yarp//lib/yarp/node.rb#9095
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def WhileNode(keyword_loc, closing_loc, predicate, statements, flags, location = T.unsafe(nil)); end
 
   # Create a new XStringNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11690
-========
-  # source://yarp//lib/yarp/node.rb#9100
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def XStringNode(opening_loc, content_loc, closing_loc, unescaped, location = T.unsafe(nil)); end
 
   # Create a new YieldNode node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#11695
-========
-  # source://yarp//lib/yarp/node.rb#9105
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def YieldNode(keyword_loc, lparen_loc, arguments, rparen_loc, location = T.unsafe(nil)); end
 end
 
@@ -5817,49 +4073,28 @@ end
 #     end
 #     ^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#3401
-========
-# source://yarp//lib/yarp/node.rb#2396
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::DefNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, receiver: Node?, parameters: ParametersNode?, body: Node?, locals: Array[Symbol], def_keyword_loc: Location, operator_loc: Location?, lparen_loc: Location?, rparen_loc: Location?, equal_loc: Location?, end_keyword_loc: Location?, location: Location) -> void
   #
   # @return [DefNode] a new instance of DefNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3439
   def initialize(name, name_loc, receiver, parameters, body, locals, def_keyword_loc, operator_loc, lparen_loc, rparen_loc, equal_loc, end_keyword_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
   # source://yarp//lib/yarp/node.rb#3456
-========
-  # source://yarp//lib/yarp/node.rb#2431
-  def initialize(name_loc, receiver, parameters, body, locals, def_keyword_loc, operator_loc, lparen_loc, rparen_loc, equal_loc, end_keyword_loc, location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#2447
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # attr_reader body: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3415
-========
-  # source://yarp//lib/yarp/node.rb#2407
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def body; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3461
-========
-  # source://yarp//lib/yarp/node.rb#2452
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -5869,84 +4104,48 @@ class YARP::DefNode < ::YARP::Node
 
   # def copy: (**params) -> DefNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3471
-========
-  # source://yarp//lib/yarp/node.rb#2457
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3461
-========
-  # source://yarp//lib/yarp/node.rb#2452
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3493
-========
-  # source://yarp//lib/yarp/node.rb#2478
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # def def_keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3498
-========
-  # source://yarp//lib/yarp/node.rb#2488
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def def_keyword; end
 
   # attr_reader def_keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3421
-========
-  # source://yarp//lib/yarp/node.rb#2413
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def def_keyword_loc; end
 
   # def end_keyword: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3523
-========
-  # source://yarp//lib/yarp/node.rb#2513
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3436
-========
-  # source://yarp//lib/yarp/node.rb#2428
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword_loc; end
 
   # def equal: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3518
-========
-  # source://yarp//lib/yarp/node.rb#2508
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def equal; end
 
   # attr_reader equal_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3433
-========
-  # source://yarp//lib/yarp/node.rb#2425
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def equal_loc; end
 
   # source://yarp//lib/yarp/node.rb#3527
@@ -5954,101 +4153,57 @@ class YARP::DefNode < ::YARP::Node
 
   # attr_reader locals: Array[Symbol]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3418
-========
-  # source://yarp//lib/yarp/node.rb#2410
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def locals; end
 
   # def lparen: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3508
-========
-  # source://yarp//lib/yarp/node.rb#2498
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def lparen; end
 
   # attr_reader lparen_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3427
-========
-  # source://yarp//lib/yarp/node.rb#2419
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def lparen_loc; end
 
   # attr_reader name: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3403
-========
-  # source://yarp//lib/yarp/node.rb#2483
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3406
-========
-  # source://yarp//lib/yarp/node.rb#2398
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3503
-========
-  # source://yarp//lib/yarp/node.rb#2493
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3424
-========
-  # source://yarp//lib/yarp/node.rb#2416
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader parameters: ParametersNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3412
-========
-  # source://yarp//lib/yarp/node.rb#2404
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def parameters; end
 
   # attr_reader receiver: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3409
-========
-  # source://yarp//lib/yarp/node.rb#2401
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def receiver; end
 
   # def rparen: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3513
-========
-  # source://yarp//lib/yarp/node.rb#2503
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def rparen; end
 
   # attr_reader rparen_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3430
-========
-  # source://yarp//lib/yarp/node.rb#2422
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def rparen_loc; end
 end
 
@@ -6057,39 +4212,23 @@ end
 #     defined?(a)
 #     ^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#3564
-========
-# source://yarp//lib/yarp/node.rb#2522
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::DefinedNode < ::YARP::Node
   # def initialize: (lparen_loc: Location?, value: Node, rparen_loc: Location?, keyword_loc: Location, location: Location) -> void
   #
   # @return [DefinedNode] a new instance of DefinedNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3578
-========
-  # source://yarp//lib/yarp/node.rb#2536
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(lparen_loc, value, rparen_loc, keyword_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3587
-========
-  # source://yarp//lib/yarp/node.rb#2545
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3592
-========
-  # source://yarp//lib/yarp/node.rb#2550
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -6099,30 +4238,18 @@ class YARP::DefinedNode < ::YARP::Node
 
   # def copy: (**params) -> DefinedNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3602
-========
-  # source://yarp//lib/yarp/node.rb#2555
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3592
-========
-  # source://yarp//lib/yarp/node.rb#2550
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3616
-========
-  # source://yarp//lib/yarp/node.rb#2569
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#3635
@@ -6130,65 +4257,37 @@ class YARP::DefinedNode < ::YARP::Node
 
   # def keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3631
-========
-  # source://yarp//lib/yarp/node.rb#2584
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3575
-========
-  # source://yarp//lib/yarp/node.rb#2533
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword_loc; end
 
   # def lparen: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3621
-========
-  # source://yarp//lib/yarp/node.rb#2574
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def lparen; end
 
   # attr_reader lparen_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3566
-========
-  # source://yarp//lib/yarp/node.rb#2524
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def lparen_loc; end
 
   # def rparen: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3626
-========
-  # source://yarp//lib/yarp/node.rb#2579
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def rparen; end
 
   # attr_reader rparen_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3572
-========
-  # source://yarp//lib/yarp/node.rb#2530
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def rparen_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3569
-========
-  # source://yarp//lib/yarp/node.rb#2527
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -6322,38 +4421,22 @@ class YARP::DesugarVisitor < ::YARP::MutationVisitor
   # Desugar `x &&= y` to `x && x = y`
   #
   # source://yarp//lib/yarp/desugar_visitor.rb#143
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   def desugar_and_write_node(node, read_class, write_class, *arguments); end
-========
-  def desugar_and_write_node(node, read_class, write_class, arguments: T.unsafe(nil)); end
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 
   # Desugar `x += y` to `x = x + y`
   #
   # source://yarp//lib/yarp/desugar_visitor.rb#153
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   def desugar_operator_write_node(node, read_class, write_class, *arguments); end
-========
-  def desugar_operator_write_node(node, read_class, write_class, arguments: T.unsafe(nil)); end
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 
   # Desugar `x ||= y` to `defined?(x) ? x : x = y`
   #
   # source://yarp//lib/yarp/desugar_visitor.rb#185
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   def desugar_or_write_defined_node(node, read_class, write_class, *arguments); end
-========
-  def desugar_or_write_defined_node(node, read_class, write_class, arguments: T.unsafe(nil)); end
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 
   # Desugar `x ||= y` to `x || x = y`
   #
   # source://yarp//lib/yarp/desugar_visitor.rb#175
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   def desugar_or_write_node(node, read_class, write_class, *arguments); end
-========
-  def desugar_or_write_node(node, read_class, write_class, arguments: T.unsafe(nil)); end
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 end
 
 # Represents an `else` clause in a `case`, `if`, or `unless` statement.
@@ -6361,39 +4444,23 @@ end
 #     if a then b else c end
 #                 ^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#3650
-========
-# source://yarp//lib/yarp/node.rb#2593
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ElseNode < ::YARP::Node
   # def initialize: (else_keyword_loc: Location, statements: StatementsNode?, end_keyword_loc: Location?, location: Location) -> void
   #
   # @return [ElseNode] a new instance of ElseNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3661
-========
-  # source://yarp//lib/yarp/node.rb#2604
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(else_keyword_loc, statements, end_keyword_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3669
-========
-  # source://yarp//lib/yarp/node.rb#2612
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3674
-========
-  # source://yarp//lib/yarp/node.rb#2617
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -6403,66 +4470,38 @@ class YARP::ElseNode < ::YARP::Node
 
   # def copy: (**params) -> ElseNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3684
-========
-  # source://yarp//lib/yarp/node.rb#2622
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3674
-========
-  # source://yarp//lib/yarp/node.rb#2617
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3697
-========
-  # source://yarp//lib/yarp/node.rb#2635
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # def else_keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3702
-========
-  # source://yarp//lib/yarp/node.rb#2640
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def else_keyword; end
 
   # attr_reader else_keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3652
-========
-  # source://yarp//lib/yarp/node.rb#2595
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def else_keyword_loc; end
 
   # def end_keyword: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3707
-========
-  # source://yarp//lib/yarp/node.rb#2645
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3658
-========
-  # source://yarp//lib/yarp/node.rb#2601
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword_loc; end
 
   # source://yarp//lib/yarp/node.rb#3711
@@ -6470,11 +4509,7 @@ class YARP::ElseNode < ::YARP::Node
 
   # attr_reader statements: StatementsNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3655
-========
-  # source://yarp//lib/yarp/node.rb#2598
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def statements; end
 end
 
@@ -6483,57 +4518,33 @@ end
 #     "foo #{bar}"
 #          ^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#3729
-========
-# source://yarp//lib/yarp/node.rb#2654
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::EmbeddedStatementsNode < ::YARP::Node
   # def initialize: (opening_loc: Location, statements: StatementsNode?, closing_loc: Location, location: Location) -> void
   #
   # @return [EmbeddedStatementsNode] a new instance of EmbeddedStatementsNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3740
-========
-  # source://yarp//lib/yarp/node.rb#2665
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(opening_loc, statements, closing_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3748
-========
-  # source://yarp//lib/yarp/node.rb#2673
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3753
-========
-  # source://yarp//lib/yarp/node.rb#2678
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3786
-========
-  # source://yarp//lib/yarp/node.rb#2706
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3737
-========
-  # source://yarp//lib/yarp/node.rb#2662
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -6543,30 +4554,18 @@ class YARP::EmbeddedStatementsNode < ::YARP::Node
 
   # def copy: (**params) -> EmbeddedStatementsNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3763
-========
-  # source://yarp//lib/yarp/node.rb#2683
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3753
-========
-  # source://yarp//lib/yarp/node.rb#2678
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3776
-========
-  # source://yarp//lib/yarp/node.rb#2696
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#3790
@@ -6574,29 +4573,17 @@ class YARP::EmbeddedStatementsNode < ::YARP::Node
 
   # def opening: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3781
-========
-  # source://yarp//lib/yarp/node.rb#2701
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening; end
 
   # attr_reader opening_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3731
-========
-  # source://yarp//lib/yarp/node.rb#2656
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening_loc; end
 
   # attr_reader statements: StatementsNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3734
-========
-  # source://yarp//lib/yarp/node.rb#2659
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def statements; end
 end
 
@@ -6605,39 +4592,23 @@ end
 #     "foo #@bar"
 #          ^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#3808
-========
-# source://yarp//lib/yarp/node.rb#2715
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::EmbeddedVariableNode < ::YARP::Node
   # def initialize: (operator_loc: Location, variable: Node, location: Location) -> void
   #
   # @return [EmbeddedVariableNode] a new instance of EmbeddedVariableNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3816
-========
-  # source://yarp//lib/yarp/node.rb#2723
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(operator_loc, variable, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3823
-========
-  # source://yarp//lib/yarp/node.rb#2730
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3828
-========
-  # source://yarp//lib/yarp/node.rb#2735
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -6647,30 +4618,18 @@ class YARP::EmbeddedVariableNode < ::YARP::Node
 
   # def copy: (**params) -> EmbeddedVariableNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3838
-========
-  # source://yarp//lib/yarp/node.rb#2740
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3828
-========
-  # source://yarp//lib/yarp/node.rb#2735
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3850
-========
-  # source://yarp//lib/yarp/node.rb#2752
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#3859
@@ -6678,29 +4637,17 @@ class YARP::EmbeddedVariableNode < ::YARP::Node
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3855
-========
-  # source://yarp//lib/yarp/node.rb#2757
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3810
-========
-  # source://yarp//lib/yarp/node.rb#2717
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader variable: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3813
-========
-  # source://yarp//lib/yarp/node.rb#2720
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def variable; end
 end
 
@@ -6713,39 +4660,23 @@ end
 #       bar
 #     end
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#3876
-========
-# source://yarp//lib/yarp/node.rb#2770
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::EnsureNode < ::YARP::Node
   # def initialize: (ensure_keyword_loc: Location, statements: StatementsNode?, end_keyword_loc: Location, location: Location) -> void
   #
   # @return [EnsureNode] a new instance of EnsureNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3887
-========
-  # source://yarp//lib/yarp/node.rb#2781
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(ensure_keyword_loc, statements, end_keyword_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3895
-========
-  # source://yarp//lib/yarp/node.rb#2789
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3900
-========
-  # source://yarp//lib/yarp/node.rb#2794
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -6755,66 +4686,38 @@ class YARP::EnsureNode < ::YARP::Node
 
   # def copy: (**params) -> EnsureNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3910
-========
-  # source://yarp//lib/yarp/node.rb#2799
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3900
-========
-  # source://yarp//lib/yarp/node.rb#2794
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3923
-========
-  # source://yarp//lib/yarp/node.rb#2812
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # def end_keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3933
-========
-  # source://yarp//lib/yarp/node.rb#2822
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3884
-========
-  # source://yarp//lib/yarp/node.rb#2778
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword_loc; end
 
   # def ensure_keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3928
-========
-  # source://yarp//lib/yarp/node.rb#2817
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ensure_keyword; end
 
   # attr_reader ensure_keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3878
-========
-  # source://yarp//lib/yarp/node.rb#2772
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ensure_keyword_loc; end
 
   # source://yarp//lib/yarp/node.rb#3937
@@ -6822,11 +4725,7 @@ class YARP::EnsureNode < ::YARP::Node
 
   # attr_reader statements: StatementsNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3881
-========
-  # source://yarp//lib/yarp/node.rb#2775
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def statements; end
 end
 
@@ -6835,39 +4734,23 @@ end
 #     false
 #     ^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#3955
-========
-# source://yarp//lib/yarp/node.rb#2831
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::FalseNode < ::YARP::Node
   # def initialize: (location: Location) -> void
   #
   # @return [FalseNode] a new instance of FalseNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3957
-========
-  # source://yarp//lib/yarp/node.rb#2833
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3962
-========
-  # source://yarp//lib/yarp/node.rb#2838
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3967
-========
-  # source://yarp//lib/yarp/node.rb#2843
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -6877,30 +4760,18 @@ class YARP::FalseNode < ::YARP::Node
 
   # def copy: (**params) -> FalseNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3977
-========
-  # source://yarp//lib/yarp/node.rb#2848
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3967
-========
-  # source://yarp//lib/yarp/node.rb#2843
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#3987
-========
-  # source://yarp//lib/yarp/node.rb#2858
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#3991
@@ -6918,57 +4789,33 @@ end
 #     foo in Foo(*bar, baz, *qux)
 #     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#4007
-========
-# source://yarp//lib/yarp/node.rb#2873
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::FindPatternNode < ::YARP::Node
   # def initialize: (constant: Node?, left: Node, requireds: Array[Node], right: Node, opening_loc: Location?, closing_loc: Location?, location: Location) -> void
   #
   # @return [FindPatternNode] a new instance of FindPatternNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4027
-========
-  # source://yarp//lib/yarp/node.rb#2893
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(constant, left, requireds, right, opening_loc, closing_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4038
-========
-  # source://yarp//lib/yarp/node.rb#2904
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4043
-========
-  # source://yarp//lib/yarp/node.rb#2909
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4079
-========
-  # source://yarp//lib/yarp/node.rb#2940
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4024
-========
-  # source://yarp//lib/yarp/node.rb#2890
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -6978,39 +4825,23 @@ class YARP::FindPatternNode < ::YARP::Node
 
   # attr_reader constant: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4009
-========
-  # source://yarp//lib/yarp/node.rb#2875
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def constant; end
 
   # def copy: (**params) -> FindPatternNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4053
-========
-  # source://yarp//lib/yarp/node.rb#2914
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4043
-========
-  # source://yarp//lib/yarp/node.rb#2909
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4069
-========
-  # source://yarp//lib/yarp/node.rb#2930
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#4083
@@ -7018,47 +4849,27 @@ class YARP::FindPatternNode < ::YARP::Node
 
   # attr_reader left: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4012
-========
-  # source://yarp//lib/yarp/node.rb#2878
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def left; end
 
   # def opening: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4074
-========
-  # source://yarp//lib/yarp/node.rb#2935
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening; end
 
   # attr_reader opening_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4021
-========
-  # source://yarp//lib/yarp/node.rb#2887
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening_loc; end
 
   # attr_reader requireds: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4015
-========
-  # source://yarp//lib/yarp/node.rb#2881
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def requireds; end
 
   # attr_reader right: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4018
-========
-  # source://yarp//lib/yarp/node.rb#2884
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def right; end
 end
 
@@ -7067,39 +4878,23 @@ end
 #     baz if foo .. bar
 #            ^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#4106
-========
-# source://yarp//lib/yarp/node.rb#2949
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::FlipFlopNode < ::YARP::Node
   # def initialize: (left: Node?, right: Node?, operator_loc: Location, flags: Integer, location: Location) -> void
   #
   # @return [FlipFlopNode] a new instance of FlipFlopNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4120
-========
-  # source://yarp//lib/yarp/node.rb#2963
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(left, right, operator_loc, flags, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4129
-========
-  # source://yarp//lib/yarp/node.rb#2972
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4134
-========
-  # source://yarp//lib/yarp/node.rb#2977
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -7109,50 +4904,30 @@ class YARP::FlipFlopNode < ::YARP::Node
 
   # def copy: (**params) -> FlipFlopNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4144
-========
-  # source://yarp//lib/yarp/node.rb#2982
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4134
-========
-  # source://yarp//lib/yarp/node.rb#2977
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4158
-========
-  # source://yarp//lib/yarp/node.rb#2996
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # def exclude_end?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4168
-========
-  # source://yarp//lib/yarp/node.rb#3006
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def exclude_end?; end
 
   # attr_reader flags: Integer
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4117
-========
-  # source://yarp//lib/yarp/node.rb#2960
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def flags; end
 
   # source://yarp//lib/yarp/node.rb#4172
@@ -7160,38 +4935,22 @@ class YARP::FlipFlopNode < ::YARP::Node
 
   # attr_reader left: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4108
-========
-  # source://yarp//lib/yarp/node.rb#2951
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def left; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4163
-========
-  # source://yarp//lib/yarp/node.rb#3001
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4114
-========
-  # source://yarp//lib/yarp/node.rb#2957
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader right: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4111
-========
-  # source://yarp//lib/yarp/node.rb#2954
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def right; end
 end
 
@@ -7206,29 +4965,17 @@ class YARP::FloatNode < ::YARP::Node
   #
   # @return [FloatNode] a new instance of FloatNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4198
-========
-  # source://yarp//lib/yarp/node.rb#3017
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4203
-========
-  # source://yarp//lib/yarp/node.rb#3022
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4208
-========
-  # source://yarp//lib/yarp/node.rb#3027
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -7238,30 +4985,18 @@ class YARP::FloatNode < ::YARP::Node
 
   # def copy: (**params) -> FloatNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4218
-========
-  # source://yarp//lib/yarp/node.rb#3032
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4208
-========
-  # source://yarp//lib/yarp/node.rb#3027
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4228
-========
-  # source://yarp//lib/yarp/node.rb#3042
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#4232
@@ -7276,48 +5011,28 @@ end
 #     for i in a end
 #     ^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#4242
-========
-# source://yarp//lib/yarp/node.rb#3051
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ForNode < ::YARP::Node
   # def initialize: (index: Node, collection: Node, statements: StatementsNode?, for_keyword_loc: Location, in_keyword_loc: Location, do_keyword_loc: Location?, end_keyword_loc: Location, location: Location) -> void
   #
   # @return [ForNode] a new instance of ForNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4265
-========
-  # source://yarp//lib/yarp/node.rb#3074
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(index, collection, statements, for_keyword_loc, in_keyword_loc, do_keyword_loc, end_keyword_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4277
-========
-  # source://yarp//lib/yarp/node.rb#3086
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4282
-========
-  # source://yarp//lib/yarp/node.rb#3091
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # attr_reader collection: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4247
-========
-  # source://yarp//lib/yarp/node.rb#3056
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def collection; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -7327,111 +5042,63 @@ class YARP::ForNode < ::YARP::Node
 
   # def copy: (**params) -> ForNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4292
-========
-  # source://yarp//lib/yarp/node.rb#3096
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4282
-========
-  # source://yarp//lib/yarp/node.rb#3091
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4309
-========
-  # source://yarp//lib/yarp/node.rb#3113
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # def do_keyword: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4324
-========
-  # source://yarp//lib/yarp/node.rb#3128
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def do_keyword; end
 
   # attr_reader do_keyword_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4259
-========
-  # source://yarp//lib/yarp/node.rb#3068
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def do_keyword_loc; end
 
   # def end_keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4329
-========
-  # source://yarp//lib/yarp/node.rb#3133
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4262
-========
-  # source://yarp//lib/yarp/node.rb#3071
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword_loc; end
 
   # def for_keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4314
-========
-  # source://yarp//lib/yarp/node.rb#3118
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def for_keyword; end
 
   # attr_reader for_keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4253
-========
-  # source://yarp//lib/yarp/node.rb#3062
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def for_keyword_loc; end
 
   # def in_keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4319
-========
-  # source://yarp//lib/yarp/node.rb#3123
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def in_keyword; end
 
   # attr_reader in_keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4256
-========
-  # source://yarp//lib/yarp/node.rb#3065
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def in_keyword_loc; end
 
   # attr_reader index: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4244
-========
-  # source://yarp//lib/yarp/node.rb#3053
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def index; end
 
   # source://yarp//lib/yarp/node.rb#4333
@@ -7439,11 +5106,7 @@ class YARP::ForNode < ::YARP::Node
 
   # attr_reader statements: StatementsNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4250
-========
-  # source://yarp//lib/yarp/node.rb#3059
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def statements; end
 end
 
@@ -7454,39 +5117,23 @@ end
 #       ^^^^^^^^
 #     end
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#4359
-========
-# source://yarp//lib/yarp/node.rb#3144
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ForwardingArgumentsNode < ::YARP::Node
   # def initialize: (location: Location) -> void
   #
   # @return [ForwardingArgumentsNode] a new instance of ForwardingArgumentsNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4361
-========
-  # source://yarp//lib/yarp/node.rb#3146
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4366
-========
-  # source://yarp//lib/yarp/node.rb#3151
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4371
-========
-  # source://yarp//lib/yarp/node.rb#3156
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -7496,30 +5143,18 @@ class YARP::ForwardingArgumentsNode < ::YARP::Node
 
   # def copy: (**params) -> ForwardingArgumentsNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4381
-========
-  # source://yarp//lib/yarp/node.rb#3161
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4371
-========
-  # source://yarp//lib/yarp/node.rb#3156
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4391
-========
-  # source://yarp//lib/yarp/node.rb#3171
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#4395
@@ -7532,39 +5167,23 @@ end
 #             ^^^
 #     end
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#4406
-========
-# source://yarp//lib/yarp/node.rb#3181
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ForwardingParameterNode < ::YARP::Node
   # def initialize: (location: Location) -> void
   #
   # @return [ForwardingParameterNode] a new instance of ForwardingParameterNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4408
-========
-  # source://yarp//lib/yarp/node.rb#3183
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4413
-========
-  # source://yarp//lib/yarp/node.rb#3188
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4418
-========
-  # source://yarp//lib/yarp/node.rb#3193
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -7574,30 +5193,18 @@ class YARP::ForwardingParameterNode < ::YARP::Node
 
   # def copy: (**params) -> ForwardingParameterNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4428
-========
-  # source://yarp//lib/yarp/node.rb#3198
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4418
-========
-  # source://yarp//lib/yarp/node.rb#3193
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4438
-========
-  # source://yarp//lib/yarp/node.rb#3208
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#4442
@@ -7609,48 +5216,28 @@ end
 #     super
 #     ^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#4452
-========
-# source://yarp//lib/yarp/node.rb#3217
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ForwardingSuperNode < ::YARP::Node
   # def initialize: (block: BlockNode?, location: Location) -> void
   #
   # @return [ForwardingSuperNode] a new instance of ForwardingSuperNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4457
-========
-  # source://yarp//lib/yarp/node.rb#3222
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(block, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4463
-========
-  # source://yarp//lib/yarp/node.rb#3228
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # attr_reader block: BlockNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4454
-========
-  # source://yarp//lib/yarp/node.rb#3219
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def block; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4468
-========
-  # source://yarp//lib/yarp/node.rb#3233
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -7660,30 +5247,18 @@ class YARP::ForwardingSuperNode < ::YARP::Node
 
   # def copy: (**params) -> ForwardingSuperNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4478
-========
-  # source://yarp//lib/yarp/node.rb#3238
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4468
-========
-  # source://yarp//lib/yarp/node.rb#3233
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4489
-========
-  # source://yarp//lib/yarp/node.rb#3249
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#4493
@@ -7695,40 +5270,23 @@ end
 #     $target &&= value
 #     ^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#4509
-========
-# source://yarp//lib/yarp/node.rb#3258
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::GlobalVariableAndWriteNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, operator_loc: Location, value: Node, location: Location) -> void
   #
   # @return [GlobalVariableAndWriteNode] a new instance of GlobalVariableAndWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4523
   def initialize(name, name_loc, operator_loc, value, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
   # source://yarp//lib/yarp/node.rb#4532
-========
-  # source://yarp//lib/yarp/node.rb#3269
-  def initialize(name_loc, operator_loc, value, location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#3277
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4537
-========
-  # source://yarp//lib/yarp/node.rb#3282
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -7738,30 +5296,18 @@ class YARP::GlobalVariableAndWriteNode < ::YARP::Node
 
   # def copy: (**params) -> GlobalVariableAndWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4547
-========
-  # source://yarp//lib/yarp/node.rb#3287
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4537
-========
-  # source://yarp//lib/yarp/node.rb#3282
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4561
-========
-  # source://yarp//lib/yarp/node.rb#3300
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#4570
@@ -7769,47 +5315,27 @@ class YARP::GlobalVariableAndWriteNode < ::YARP::Node
 
   # attr_reader name: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4511
-========
-  # source://yarp//lib/yarp/node.rb#3305
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4514
-========
-  # source://yarp//lib/yarp/node.rb#3260
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4566
-========
-  # source://yarp//lib/yarp/node.rb#3310
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4517
-========
-  # source://yarp//lib/yarp/node.rb#3263
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4520
-========
-  # source://yarp//lib/yarp/node.rb#3266
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -7818,40 +5344,23 @@ end
 #     $target += value
 #     ^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#4585
-========
-# source://yarp//lib/yarp/node.rb#3319
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::GlobalVariableOperatorWriteNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, operator_loc: Location, value: Node, operator: Symbol, location: Location) -> void
   #
   # @return [GlobalVariableOperatorWriteNode] a new instance of GlobalVariableOperatorWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4602
   def initialize(name, name_loc, operator_loc, value, operator, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
   # source://yarp//lib/yarp/node.rb#4612
-========
-  # source://yarp//lib/yarp/node.rb#3333
-  def initialize(name_loc, operator_loc, value, operator, location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#3342
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4617
-========
-  # source://yarp//lib/yarp/node.rb#3347
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -7861,30 +5370,18 @@ class YARP::GlobalVariableOperatorWriteNode < ::YARP::Node
 
   # def copy: (**params) -> GlobalVariableOperatorWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4627
-========
-  # source://yarp//lib/yarp/node.rb#3352
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4617
-========
-  # source://yarp//lib/yarp/node.rb#3347
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4642
-========
-  # source://yarp//lib/yarp/node.rb#3366
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#4646
@@ -7892,47 +5389,27 @@ class YARP::GlobalVariableOperatorWriteNode < ::YARP::Node
 
   # attr_reader name: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4587
-========
-  # source://yarp//lib/yarp/node.rb#3371
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4590
-========
-  # source://yarp//lib/yarp/node.rb#3321
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # attr_reader operator: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4599
-========
-  # source://yarp//lib/yarp/node.rb#3330
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4593
-========
-  # source://yarp//lib/yarp/node.rb#3324
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4596
-========
-  # source://yarp//lib/yarp/node.rb#3327
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -7941,40 +5418,23 @@ end
 #     $target ||= value
 #     ^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#4662
-========
-# source://yarp//lib/yarp/node.rb#3380
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::GlobalVariableOrWriteNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, operator_loc: Location, value: Node, location: Location) -> void
   #
   # @return [GlobalVariableOrWriteNode] a new instance of GlobalVariableOrWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4676
   def initialize(name, name_loc, operator_loc, value, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
   # source://yarp//lib/yarp/node.rb#4685
-========
-  # source://yarp//lib/yarp/node.rb#3391
-  def initialize(name_loc, operator_loc, value, location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#3399
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4690
-========
-  # source://yarp//lib/yarp/node.rb#3404
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -7984,30 +5444,18 @@ class YARP::GlobalVariableOrWriteNode < ::YARP::Node
 
   # def copy: (**params) -> GlobalVariableOrWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4700
-========
-  # source://yarp//lib/yarp/node.rb#3409
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4690
-========
-  # source://yarp//lib/yarp/node.rb#3404
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4714
-========
-  # source://yarp//lib/yarp/node.rb#3422
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#4723
@@ -8015,47 +5463,27 @@ class YARP::GlobalVariableOrWriteNode < ::YARP::Node
 
   # attr_reader name: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4664
-========
-  # source://yarp//lib/yarp/node.rb#3427
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4667
-========
-  # source://yarp//lib/yarp/node.rb#3382
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4719
-========
-  # source://yarp//lib/yarp/node.rb#3432
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4670
-========
-  # source://yarp//lib/yarp/node.rb#3385
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4673
-========
-  # source://yarp//lib/yarp/node.rb#3388
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -8064,40 +5492,23 @@ end
 #     $foo
 #     ^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#4738
-========
-# source://yarp//lib/yarp/node.rb#3441
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::GlobalVariableReadNode < ::YARP::Node
   # def initialize: (name: Symbol, location: Location) -> void
   #
   # @return [GlobalVariableReadNode] a new instance of GlobalVariableReadNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4743
   def initialize(name, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
   # source://yarp//lib/yarp/node.rb#4749
-========
-  # source://yarp//lib/yarp/node.rb#3443
-  def initialize(location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#3448
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4754
-========
-  # source://yarp//lib/yarp/node.rb#3453
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -8107,30 +5518,18 @@ class YARP::GlobalVariableReadNode < ::YARP::Node
 
   # def copy: (**params) -> GlobalVariableReadNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4764
-========
-  # source://yarp//lib/yarp/node.rb#3458
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4754
-========
-  # source://yarp//lib/yarp/node.rb#3453
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4775
-========
-  # source://yarp//lib/yarp/node.rb#3468
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#4779
@@ -8147,40 +5546,23 @@ end
 #     $foo, $bar = baz
 #     ^^^^  ^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#4790
-========
-# source://yarp//lib/yarp/node.rb#3477
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::GlobalVariableTargetNode < ::YARP::Node
   # def initialize: (name: Symbol, location: Location) -> void
   #
   # @return [GlobalVariableTargetNode] a new instance of GlobalVariableTargetNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4795
   def initialize(name, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
   # source://yarp//lib/yarp/node.rb#4801
-========
-  # source://yarp//lib/yarp/node.rb#3479
-  def initialize(location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#3484
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4806
-========
-  # source://yarp//lib/yarp/node.rb#3489
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -8190,30 +5572,18 @@ class YARP::GlobalVariableTargetNode < ::YARP::Node
 
   # def copy: (**params) -> GlobalVariableTargetNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4816
-========
-  # source://yarp//lib/yarp/node.rb#3494
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4806
-========
-  # source://yarp//lib/yarp/node.rb#3489
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4827
-========
-  # source://yarp//lib/yarp/node.rb#3504
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#4831
@@ -8230,7 +5600,6 @@ end
 #     $foo = 1
 #     ^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#4842
 class YARP::GlobalVariableWriteNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, value: Node, operator_loc: Location, location: Location) -> void
@@ -8243,29 +5612,11 @@ class YARP::GlobalVariableWriteNode < ::YARP::Node
   # def accept: (visitor: Visitor) -> void
   #
   # source://yarp//lib/yarp/node.rb#4865
-========
-# source://yarp//lib/yarp/node.rb#3513
-class YARP::GlobalVariableWriteNode < ::YARP::Node
-  # def initialize: (name_loc: Location, value: Node, operator_loc: Location, location: Location) -> void
-  #
-  # @return [GlobalVariableWriteNode] a new instance of GlobalVariableWriteNode
-  #
-  # source://yarp//lib/yarp/node.rb#3524
-  def initialize(name_loc, value, operator_loc, location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#3532
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4870
-========
-  # source://yarp//lib/yarp/node.rb#3537
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -8275,30 +5626,18 @@ class YARP::GlobalVariableWriteNode < ::YARP::Node
 
   # def copy: (**params) -> GlobalVariableWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4880
-========
-  # source://yarp//lib/yarp/node.rb#3542
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4870
-========
-  # source://yarp//lib/yarp/node.rb#3537
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4894
-========
-  # source://yarp//lib/yarp/node.rb#3555
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#4903
@@ -8306,47 +5645,27 @@ class YARP::GlobalVariableWriteNode < ::YARP::Node
 
   # attr_reader name: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4844
-========
-  # source://yarp//lib/yarp/node.rb#3560
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4847
-========
-  # source://yarp//lib/yarp/node.rb#3515
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4899
-========
-  # source://yarp//lib/yarp/node.rb#3565
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4853
-========
-  # source://yarp//lib/yarp/node.rb#3521
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4850
-========
-  # source://yarp//lib/yarp/node.rb#3518
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -8355,57 +5674,33 @@ end
 #     { a => b }
 #     ^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#4918
-========
-# source://yarp//lib/yarp/node.rb#3574
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::HashNode < ::YARP::Node
   # def initialize: (opening_loc: Location, elements: Array[Node], closing_loc: Location, location: Location) -> void
   #
   # @return [HashNode] a new instance of HashNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4929
-========
-  # source://yarp//lib/yarp/node.rb#3585
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(opening_loc, elements, closing_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4937
-========
-  # source://yarp//lib/yarp/node.rb#3593
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4942
-========
-  # source://yarp//lib/yarp/node.rb#3598
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4975
-========
-  # source://yarp//lib/yarp/node.rb#3626
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4926
-========
-  # source://yarp//lib/yarp/node.rb#3582
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -8415,39 +5710,23 @@ class YARP::HashNode < ::YARP::Node
 
   # def copy: (**params) -> HashNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4952
-========
-  # source://yarp//lib/yarp/node.rb#3603
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4942
-========
-  # source://yarp//lib/yarp/node.rb#3598
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4965
-========
-  # source://yarp//lib/yarp/node.rb#3616
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # attr_reader elements: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4923
-========
-  # source://yarp//lib/yarp/node.rb#3579
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def elements; end
 
   # source://yarp//lib/yarp/node.rb#4979
@@ -8455,20 +5734,12 @@ class YARP::HashNode < ::YARP::Node
 
   # def opening: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4970
-========
-  # source://yarp//lib/yarp/node.rb#3621
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening; end
 
   # attr_reader opening_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4920
-========
-  # source://yarp//lib/yarp/node.rb#3576
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening_loc; end
 end
 
@@ -8480,66 +5751,38 @@ end
 #     foo => { a: 1, b: 2, **c }
 #            ^^^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#4995
-========
-# source://yarp//lib/yarp/node.rb#3638
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::HashPatternNode < ::YARP::Node
   # def initialize: (constant: Node?, assocs: Array[Node], kwrest: Node?, opening_loc: Location?, closing_loc: Location?, location: Location) -> void
   #
   # @return [HashPatternNode] a new instance of HashPatternNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5012
-========
-  # source://yarp//lib/yarp/node.rb#3655
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(constant, assocs, kwrest, opening_loc, closing_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5022
-========
-  # source://yarp//lib/yarp/node.rb#3665
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # attr_reader assocs: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5000
-========
-  # source://yarp//lib/yarp/node.rb#3643
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def assocs; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5027
-========
-  # source://yarp//lib/yarp/node.rb#3670
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5062
-========
-  # source://yarp//lib/yarp/node.rb#3700
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5009
-========
-  # source://yarp//lib/yarp/node.rb#3652
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -8549,39 +5792,23 @@ class YARP::HashPatternNode < ::YARP::Node
 
   # attr_reader constant: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#4997
-========
-  # source://yarp//lib/yarp/node.rb#3640
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def constant; end
 
   # def copy: (**params) -> HashPatternNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5037
-========
-  # source://yarp//lib/yarp/node.rb#3675
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5027
-========
-  # source://yarp//lib/yarp/node.rb#3670
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5052
-========
-  # source://yarp//lib/yarp/node.rb#3690
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#5066
@@ -8589,29 +5816,17 @@ class YARP::HashPatternNode < ::YARP::Node
 
   # attr_reader kwrest: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5003
-========
-  # source://yarp//lib/yarp/node.rb#3646
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def kwrest; end
 
   # def opening: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5057
-========
-  # source://yarp//lib/yarp/node.rb#3695
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening; end
 
   # attr_reader opening_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5006
-========
-  # source://yarp//lib/yarp/node.rb#3649
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening_loc; end
 end
 
@@ -8623,39 +5838,23 @@ end
 #     if foo then bar end
 #     ^^^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#5094
-========
-# source://yarp//lib/yarp/node.rb#3712
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::IfNode < ::YARP::Node
   # def initialize: (if_keyword_loc: Location?, predicate: Node, statements: StatementsNode?, consequent: Node?, end_keyword_loc: Location?, location: Location) -> void
   #
   # @return [IfNode] a new instance of IfNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5111
-========
-  # source://yarp//lib/yarp/node.rb#3729
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(if_keyword_loc, predicate, statements, consequent, end_keyword_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5121
-========
-  # source://yarp//lib/yarp/node.rb#3739
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5130
-========
-  # source://yarp//lib/yarp/node.rb#3748
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -8665,75 +5864,43 @@ class YARP::IfNode < ::YARP::Node
 
   # attr_reader consequent: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5105
-========
-  # source://yarp//lib/yarp/node.rb#3723
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def consequent; end
 
   # def copy: (**params) -> IfNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5140
-========
-  # source://yarp//lib/yarp/node.rb#3753
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5130
-========
-  # source://yarp//lib/yarp/node.rb#3748
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5155
-========
-  # source://yarp//lib/yarp/node.rb#3768
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # def end_keyword: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5165
-========
-  # source://yarp//lib/yarp/node.rb#3778
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5108
-========
-  # source://yarp//lib/yarp/node.rb#3726
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword_loc; end
 
   # def if_keyword: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5160
-========
-  # source://yarp//lib/yarp/node.rb#3773
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def if_keyword; end
 
   # attr_reader if_keyword_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5096
-========
-  # source://yarp//lib/yarp/node.rb#3714
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def if_keyword_loc; end
 
   # source://yarp//lib/yarp/node.rb#5169
@@ -8741,26 +5908,15 @@ class YARP::IfNode < ::YARP::Node
 
   # attr_reader predicate: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5099
   def predicate; end
 
   # source://yarp//lib/yarp/node.rb#5125
-========
-  # source://yarp//lib/yarp/node.rb#3717
-  def predicate; end
-
-  # source://yarp//lib/yarp/node.rb#3743
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def set_newline_flag(newline_marked); end
 
   # attr_reader statements: StatementsNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5102
-========
-  # source://yarp//lib/yarp/node.rb#3720
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def statements; end
 end
 
@@ -8775,29 +5931,17 @@ class YARP::ImaginaryNode < ::YARP::Node
   #
   # @return [ImaginaryNode] a new instance of ImaginaryNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5200
-========
-  # source://yarp//lib/yarp/node.rb#3792
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(numeric, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5206
-========
-  # source://yarp//lib/yarp/node.rb#3798
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5211
-========
-  # source://yarp//lib/yarp/node.rb#3803
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -8807,30 +5951,18 @@ class YARP::ImaginaryNode < ::YARP::Node
 
   # def copy: (**params) -> ImaginaryNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5221
-========
-  # source://yarp//lib/yarp/node.rb#3808
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5211
-========
-  # source://yarp//lib/yarp/node.rb#3803
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5232
-========
-  # source://yarp//lib/yarp/node.rb#3819
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#5236
@@ -8838,11 +5970,7 @@ class YARP::ImaginaryNode < ::YARP::Node
 
   # attr_reader numeric: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5197
-========
-  # source://yarp//lib/yarp/node.rb#3789
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def numeric; end
 
   # source://yarp//lib/yarp.rb#399
@@ -8854,39 +5982,23 @@ end
 #     case a; in b then c end
 #             ^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#5248
-========
-# source://yarp//lib/yarp/node.rb#3828
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::InNode < ::YARP::Node
   # def initialize: (pattern: Node, statements: StatementsNode?, in_loc: Location, then_loc: Location?, location: Location) -> void
   #
   # @return [InNode] a new instance of InNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5262
-========
-  # source://yarp//lib/yarp/node.rb#3842
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(pattern, statements, in_loc, then_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5271
-========
-  # source://yarp//lib/yarp/node.rb#3851
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5276
-========
-  # source://yarp//lib/yarp/node.rb#3856
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -8896,48 +6008,28 @@ class YARP::InNode < ::YARP::Node
 
   # def copy: (**params) -> InNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5286
-========
-  # source://yarp//lib/yarp/node.rb#3861
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5276
-========
-  # source://yarp//lib/yarp/node.rb#3856
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5300
-========
-  # source://yarp//lib/yarp/node.rb#3875
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # def in: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5305
-========
-  # source://yarp//lib/yarp/node.rb#3880
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def in; end
 
   # attr_reader in_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5256
-========
-  # source://yarp//lib/yarp/node.rb#3836
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def in_loc; end
 
   # source://yarp//lib/yarp/node.rb#5314
@@ -8945,38 +6037,22 @@ class YARP::InNode < ::YARP::Node
 
   # attr_reader pattern: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5250
-========
-  # source://yarp//lib/yarp/node.rb#3830
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def pattern; end
 
   # attr_reader statements: StatementsNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5253
-========
-  # source://yarp//lib/yarp/node.rb#3833
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def statements; end
 
   # def then: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5310
-========
-  # source://yarp//lib/yarp/node.rb#3885
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def then; end
 
   # attr_reader then_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5259
-========
-  # source://yarp//lib/yarp/node.rb#3839
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def then_loc; end
 end
 
@@ -8985,39 +6061,23 @@ end
 #     @target &&= value
 #     ^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#5334
-========
-# source://yarp//lib/yarp/node.rb#3894
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::InstanceVariableAndWriteNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, operator_loc: Location, value: Node, location: Location) -> void
   #
   # @return [InstanceVariableAndWriteNode] a new instance of InstanceVariableAndWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5348
-========
-  # source://yarp//lib/yarp/node.rb#3908
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name, name_loc, operator_loc, value, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5357
-========
-  # source://yarp//lib/yarp/node.rb#3917
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5362
-========
-  # source://yarp//lib/yarp/node.rb#3922
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -9027,26 +6087,17 @@ class YARP::InstanceVariableAndWriteNode < ::YARP::Node
 
   # def copy: (**params) -> InstanceVariableAndWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5372
-========
-  # source://yarp//lib/yarp/node.rb#3927
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5362
-========
-  # source://yarp//lib/yarp/node.rb#3922
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5386
   def deconstruct_keys(keys); end
 
@@ -9056,50 +6107,26 @@ class YARP::InstanceVariableAndWriteNode < ::YARP::Node
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#5336
-========
-  # source://yarp//lib/yarp/node.rb#3941
-  def deconstruct_keys(keys); end
-
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#3896
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5339
-========
-  # source://yarp//lib/yarp/node.rb#3899
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5391
-========
-  # source://yarp//lib/yarp/node.rb#3946
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5342
-========
-  # source://yarp//lib/yarp/node.rb#3902
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5345
-========
-  # source://yarp//lib/yarp/node.rb#3905
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -9108,39 +6135,23 @@ end
 #     @target += value
 #     ^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#5410
-========
-# source://yarp//lib/yarp/node.rb#3955
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::InstanceVariableOperatorWriteNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, operator_loc: Location, value: Node, operator: Symbol, location: Location) -> void
   #
   # @return [InstanceVariableOperatorWriteNode] a new instance of InstanceVariableOperatorWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5427
-========
-  # source://yarp//lib/yarp/node.rb#3972
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name, name_loc, operator_loc, value, operator, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5437
-========
-  # source://yarp//lib/yarp/node.rb#3982
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5442
-========
-  # source://yarp//lib/yarp/node.rb#3987
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -9150,26 +6161,17 @@ class YARP::InstanceVariableOperatorWriteNode < ::YARP::Node
 
   # def copy: (**params) -> InstanceVariableOperatorWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5452
-========
-  # source://yarp//lib/yarp/node.rb#3992
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5442
-========
-  # source://yarp//lib/yarp/node.rb#3987
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5467
   def deconstruct_keys(keys); end
 
@@ -9179,50 +6181,26 @@ class YARP::InstanceVariableOperatorWriteNode < ::YARP::Node
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#5412
-========
-  # source://yarp//lib/yarp/node.rb#4007
-  def deconstruct_keys(keys); end
-
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#3957
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5415
-========
-  # source://yarp//lib/yarp/node.rb#3960
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # attr_reader operator: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5424
-========
-  # source://yarp//lib/yarp/node.rb#3969
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5418
-========
-  # source://yarp//lib/yarp/node.rb#3963
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5421
-========
-  # source://yarp//lib/yarp/node.rb#3966
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -9231,39 +6209,23 @@ end
 #     @target ||= value
 #     ^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#5487
-========
-# source://yarp//lib/yarp/node.rb#4016
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::InstanceVariableOrWriteNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, operator_loc: Location, value: Node, location: Location) -> void
   #
   # @return [InstanceVariableOrWriteNode] a new instance of InstanceVariableOrWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5501
-========
-  # source://yarp//lib/yarp/node.rb#4030
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name, name_loc, operator_loc, value, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5510
-========
-  # source://yarp//lib/yarp/node.rb#4039
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5515
-========
-  # source://yarp//lib/yarp/node.rb#4044
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -9273,26 +6235,17 @@ class YARP::InstanceVariableOrWriteNode < ::YARP::Node
 
   # def copy: (**params) -> InstanceVariableOrWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5525
-========
-  # source://yarp//lib/yarp/node.rb#4049
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5515
-========
-  # source://yarp//lib/yarp/node.rb#4044
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5539
   def deconstruct_keys(keys); end
 
@@ -9302,50 +6255,26 @@ class YARP::InstanceVariableOrWriteNode < ::YARP::Node
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#5489
-========
-  # source://yarp//lib/yarp/node.rb#4063
-  def deconstruct_keys(keys); end
-
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#4018
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5492
-========
-  # source://yarp//lib/yarp/node.rb#4021
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5544
-========
-  # source://yarp//lib/yarp/node.rb#4068
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5495
-========
-  # source://yarp//lib/yarp/node.rb#4024
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5498
-========
-  # source://yarp//lib/yarp/node.rb#4027
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -9354,39 +6283,23 @@ end
 #     @foo
 #     ^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#5563
-========
-# source://yarp//lib/yarp/node.rb#4077
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::InstanceVariableReadNode < ::YARP::Node
   # def initialize: (name: Symbol, location: Location) -> void
   #
   # @return [InstanceVariableReadNode] a new instance of InstanceVariableReadNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5568
-========
-  # source://yarp//lib/yarp/node.rb#4082
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5574
-========
-  # source://yarp//lib/yarp/node.rb#4088
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5579
-========
-  # source://yarp//lib/yarp/node.rb#4093
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -9396,26 +6309,17 @@ class YARP::InstanceVariableReadNode < ::YARP::Node
 
   # def copy: (**params) -> InstanceVariableReadNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5589
-========
-  # source://yarp//lib/yarp/node.rb#4098
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5579
-========
-  # source://yarp//lib/yarp/node.rb#4093
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5600
   def deconstruct_keys(keys); end
 
@@ -9425,14 +6329,6 @@ class YARP::InstanceVariableReadNode < ::YARP::Node
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#5565
-========
-  # source://yarp//lib/yarp/node.rb#4109
-  def deconstruct_keys(keys); end
-
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#4079
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 end
 
@@ -9441,39 +6337,23 @@ end
 #     @foo, @bar = baz
 #     ^^^^  ^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#5615
-========
-# source://yarp//lib/yarp/node.rb#4118
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::InstanceVariableTargetNode < ::YARP::Node
   # def initialize: (name: Symbol, location: Location) -> void
   #
   # @return [InstanceVariableTargetNode] a new instance of InstanceVariableTargetNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5620
-========
-  # source://yarp//lib/yarp/node.rb#4123
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5626
-========
-  # source://yarp//lib/yarp/node.rb#4129
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5631
-========
-  # source://yarp//lib/yarp/node.rb#4134
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -9483,26 +6363,17 @@ class YARP::InstanceVariableTargetNode < ::YARP::Node
 
   # def copy: (**params) -> InstanceVariableTargetNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5641
-========
-  # source://yarp//lib/yarp/node.rb#4139
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5631
-========
-  # source://yarp//lib/yarp/node.rb#4134
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5652
   def deconstruct_keys(keys); end
 
@@ -9512,14 +6383,6 @@ class YARP::InstanceVariableTargetNode < ::YARP::Node
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#5617
-========
-  # source://yarp//lib/yarp/node.rb#4150
-  def deconstruct_keys(keys); end
-
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#4120
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 end
 
@@ -9528,39 +6391,23 @@ end
 #     @foo = 1
 #     ^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#5667
-========
-# source://yarp//lib/yarp/node.rb#4159
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::InstanceVariableWriteNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, value: Node, operator_loc: Location, location: Location) -> void
   #
   # @return [InstanceVariableWriteNode] a new instance of InstanceVariableWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5681
-========
-  # source://yarp//lib/yarp/node.rb#4173
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name, name_loc, value, operator_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5690
-========
-  # source://yarp//lib/yarp/node.rb#4182
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5695
-========
-  # source://yarp//lib/yarp/node.rb#4187
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -9570,26 +6417,17 @@ class YARP::InstanceVariableWriteNode < ::YARP::Node
 
   # def copy: (**params) -> InstanceVariableWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5705
-========
-  # source://yarp//lib/yarp/node.rb#4192
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5695
-========
-  # source://yarp//lib/yarp/node.rb#4187
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5719
   def deconstruct_keys(keys); end
 
@@ -9599,50 +6437,26 @@ class YARP::InstanceVariableWriteNode < ::YARP::Node
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#5669
-========
-  # source://yarp//lib/yarp/node.rb#4206
-  def deconstruct_keys(keys); end
-
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#4161
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5672
-========
-  # source://yarp//lib/yarp/node.rb#4164
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5724
-========
-  # source://yarp//lib/yarp/node.rb#4211
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5678
-========
-  # source://yarp//lib/yarp/node.rb#4170
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5675
-========
-  # source://yarp//lib/yarp/node.rb#4167
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -9657,29 +6471,17 @@ class YARP::IntegerNode < ::YARP::Node
   #
   # @return [IntegerNode] a new instance of IntegerNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5745
-========
-  # source://yarp//lib/yarp/node.rb#4222
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5750
-========
-  # source://yarp//lib/yarp/node.rb#4227
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5755
-========
-  # source://yarp//lib/yarp/node.rb#4232
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -9689,30 +6491,18 @@ class YARP::IntegerNode < ::YARP::Node
 
   # def copy: (**params) -> IntegerNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5765
-========
-  # source://yarp//lib/yarp/node.rb#4237
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5755
-========
-  # source://yarp//lib/yarp/node.rb#4232
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5775
-========
-  # source://yarp//lib/yarp/node.rb#4247
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#5779
@@ -9727,68 +6517,40 @@ end
 #     /foo #{bar} baz/
 #     ^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#5789
-========
-# source://yarp//lib/yarp/node.rb#4256
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::InterpolatedRegularExpressionNode < ::YARP::Node
   # def initialize: (opening_loc: Location, parts: Array[Node], closing_loc: Location, flags: Integer, location: Location) -> void
   #
   # @return [InterpolatedRegularExpressionNode] a new instance of InterpolatedRegularExpressionNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5803
-========
-  # source://yarp//lib/yarp/node.rb#4270
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(opening_loc, parts, closing_loc, flags, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5812
-========
-  # source://yarp//lib/yarp/node.rb#4279
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def ascii_8bit?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5881
-========
-  # source://yarp//lib/yarp/node.rb#4343
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ascii_8bit?; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5822
-========
-  # source://yarp//lib/yarp/node.rb#4289
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5856
-========
-  # source://yarp//lib/yarp/node.rb#4318
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5797
-========
-  # source://yarp//lib/yarp/node.rb#4264
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -9798,72 +6560,44 @@ class YARP::InterpolatedRegularExpressionNode < ::YARP::Node
 
   # def copy: (**params) -> InterpolatedRegularExpressionNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5832
-========
-  # source://yarp//lib/yarp/node.rb#4294
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5822
-========
-  # source://yarp//lib/yarp/node.rb#4289
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5846
-========
-  # source://yarp//lib/yarp/node.rb#4308
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # def euc_jp?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5876
-========
-  # source://yarp//lib/yarp/node.rb#4338
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def euc_jp?; end
 
   # def extended?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5871
-========
-  # source://yarp//lib/yarp/node.rb#4333
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def extended?; end
 
   # attr_reader flags: Integer
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5800
-========
-  # source://yarp//lib/yarp/node.rb#4267
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def flags; end
 
   # def ignore_case?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5861
-========
-  # source://yarp//lib/yarp/node.rb#4323
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ignore_case?; end
 
   # source://yarp//lib/yarp/node.rb#5900
@@ -9873,77 +6607,46 @@ class YARP::InterpolatedRegularExpressionNode < ::YARP::Node
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5866
-========
-  # source://yarp//lib/yarp/node.rb#4328
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def multi_line?; end
 
   # def once?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5896
-========
-  # source://yarp//lib/yarp/node.rb#4358
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def once?; end
 
   # def opening: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5851
-========
-  # source://yarp//lib/yarp/node.rb#4313
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening; end
 
   # attr_reader opening_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5791
-========
-  # source://yarp//lib/yarp/node.rb#4258
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening_loc; end
 
   # attr_reader parts: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5794
   def parts; end
 
   # source://yarp//lib/yarp/node.rb#5816
-========
-  # source://yarp//lib/yarp/node.rb#4261
-  def parts; end
-
-  # source://yarp//lib/yarp/node.rb#4283
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def set_newline_flag(newline_marked); end
 
   # def utf_8?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5891
-========
-  # source://yarp//lib/yarp/node.rb#4353
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def utf_8?; end
 
   # def windows_31j?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5886
-========
-  # source://yarp//lib/yarp/node.rb#4348
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def windows_31j?; end
 end
 
@@ -9952,57 +6655,33 @@ end
 #     "foo #{bar} baz"
 #     ^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#5914
-========
-# source://yarp//lib/yarp/node.rb#4367
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::InterpolatedStringNode < ::YARP::Node
   # def initialize: (opening_loc: Location?, parts: Array[Node], closing_loc: Location?, location: Location) -> void
   #
   # @return [InterpolatedStringNode] a new instance of InterpolatedStringNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5925
-========
-  # source://yarp//lib/yarp/node.rb#4378
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(opening_loc, parts, closing_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5933
-========
-  # source://yarp//lib/yarp/node.rb#4386
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5943
-========
-  # source://yarp//lib/yarp/node.rb#4396
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5976
-========
-  # source://yarp//lib/yarp/node.rb#4424
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5922
-========
-  # source://yarp//lib/yarp/node.rb#4375
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -10012,30 +6691,18 @@ class YARP::InterpolatedStringNode < ::YARP::Node
 
   # def copy: (**params) -> InterpolatedStringNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5953
-========
-  # source://yarp//lib/yarp/node.rb#4401
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5943
-========
-  # source://yarp//lib/yarp/node.rb#4396
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5966
-========
-  # source://yarp//lib/yarp/node.rb#4414
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#5980
@@ -10043,35 +6710,20 @@ class YARP::InterpolatedStringNode < ::YARP::Node
 
   # def opening: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5971
-========
-  # source://yarp//lib/yarp/node.rb#4419
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening; end
 
   # attr_reader opening_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5916
-========
-  # source://yarp//lib/yarp/node.rb#4369
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening_loc; end
 
   # attr_reader parts: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5919
   def parts; end
 
   # source://yarp//lib/yarp/node.rb#5937
-========
-  # source://yarp//lib/yarp/node.rb#4372
-  def parts; end
-
-  # source://yarp//lib/yarp/node.rb#4390
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def set_newline_flag(newline_marked); end
 end
 
@@ -10080,57 +6732,33 @@ end
 #     :"foo #{bar} baz"
 #     ^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#5993
-========
-# source://yarp//lib/yarp/node.rb#4433
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::InterpolatedSymbolNode < ::YARP::Node
   # def initialize: (opening_loc: Location?, parts: Array[Node], closing_loc: Location?, location: Location) -> void
   #
   # @return [InterpolatedSymbolNode] a new instance of InterpolatedSymbolNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6004
-========
-  # source://yarp//lib/yarp/node.rb#4444
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(opening_loc, parts, closing_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6012
-========
-  # source://yarp//lib/yarp/node.rb#4452
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6022
-========
-  # source://yarp//lib/yarp/node.rb#4462
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6055
-========
-  # source://yarp//lib/yarp/node.rb#4490
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6001
-========
-  # source://yarp//lib/yarp/node.rb#4441
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -10140,30 +6768,18 @@ class YARP::InterpolatedSymbolNode < ::YARP::Node
 
   # def copy: (**params) -> InterpolatedSymbolNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6032
-========
-  # source://yarp//lib/yarp/node.rb#4467
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6022
-========
-  # source://yarp//lib/yarp/node.rb#4462
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6045
-========
-  # source://yarp//lib/yarp/node.rb#4480
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#6059
@@ -10171,35 +6787,20 @@ class YARP::InterpolatedSymbolNode < ::YARP::Node
 
   # def opening: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6050
-========
-  # source://yarp//lib/yarp/node.rb#4485
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening; end
 
   # attr_reader opening_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5995
-========
-  # source://yarp//lib/yarp/node.rb#4435
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening_loc; end
 
   # attr_reader parts: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#5998
   def parts; end
 
   # source://yarp//lib/yarp/node.rb#6016
-========
-  # source://yarp//lib/yarp/node.rb#4438
-  def parts; end
-
-  # source://yarp//lib/yarp/node.rb#4456
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def set_newline_flag(newline_marked); end
 end
 
@@ -10208,57 +6809,33 @@ end
 #     `foo #{bar} baz`
 #     ^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#6072
-========
-# source://yarp//lib/yarp/node.rb#4499
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::InterpolatedXStringNode < ::YARP::Node
   # def initialize: (opening_loc: Location, parts: Array[Node], closing_loc: Location, location: Location) -> void
   #
   # @return [InterpolatedXStringNode] a new instance of InterpolatedXStringNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6083
-========
-  # source://yarp//lib/yarp/node.rb#4510
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(opening_loc, parts, closing_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6091
-========
-  # source://yarp//lib/yarp/node.rb#4518
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6101
-========
-  # source://yarp//lib/yarp/node.rb#4528
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6134
-========
-  # source://yarp//lib/yarp/node.rb#4556
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6080
-========
-  # source://yarp//lib/yarp/node.rb#4507
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -10268,30 +6845,18 @@ class YARP::InterpolatedXStringNode < ::YARP::Node
 
   # def copy: (**params) -> InterpolatedXStringNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6111
-========
-  # source://yarp//lib/yarp/node.rb#4533
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6101
-========
-  # source://yarp//lib/yarp/node.rb#4528
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6124
-========
-  # source://yarp//lib/yarp/node.rb#4546
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#6138
@@ -10299,35 +6864,20 @@ class YARP::InterpolatedXStringNode < ::YARP::Node
 
   # def opening: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6129
-========
-  # source://yarp//lib/yarp/node.rb#4551
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening; end
 
   # attr_reader opening_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6074
-========
-  # source://yarp//lib/yarp/node.rb#4501
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening_loc; end
 
   # attr_reader parts: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6077
   def parts; end
 
   # source://yarp//lib/yarp/node.rb#6095
-========
-  # source://yarp//lib/yarp/node.rb#4504
-  def parts; end
-
-  # source://yarp//lib/yarp/node.rb#4522
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def set_newline_flag(newline_marked); end
 end
 
@@ -10336,39 +6886,23 @@ end
 #     foo(a: b)
 #         ^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#6151
-========
-# source://yarp//lib/yarp/node.rb#4565
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::KeywordHashNode < ::YARP::Node
   # def initialize: (elements: Array[Node], location: Location) -> void
   #
   # @return [KeywordHashNode] a new instance of KeywordHashNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6156
-========
-  # source://yarp//lib/yarp/node.rb#4570
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(elements, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6162
-========
-  # source://yarp//lib/yarp/node.rb#4576
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6167
-========
-  # source://yarp//lib/yarp/node.rb#4581
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -10378,39 +6912,23 @@ class YARP::KeywordHashNode < ::YARP::Node
 
   # def copy: (**params) -> KeywordHashNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6177
-========
-  # source://yarp//lib/yarp/node.rb#4586
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6167
-========
-  # source://yarp//lib/yarp/node.rb#4581
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6188
-========
-  # source://yarp//lib/yarp/node.rb#4597
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # attr_reader elements: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6153
-========
-  # source://yarp//lib/yarp/node.rb#4567
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def elements; end
 
   # source://yarp//lib/yarp/node.rb#6192
@@ -10427,40 +6945,23 @@ end
 #           ^^^^
 #     end
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#6208
-========
-# source://yarp//lib/yarp/node.rb#4611
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::KeywordParameterNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, value: Node?, location: Location) -> void
   #
   # @return [KeywordParameterNode] a new instance of KeywordParameterNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6219
   def initialize(name, name_loc, value, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
   # source://yarp//lib/yarp/node.rb#6227
-========
-  # source://yarp//lib/yarp/node.rb#4619
-  def initialize(name_loc, value, location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#4626
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6232
-========
-  # source://yarp//lib/yarp/node.rb#4631
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -10470,30 +6971,18 @@ class YARP::KeywordParameterNode < ::YARP::Node
 
   # def copy: (**params) -> KeywordParameterNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6242
-========
-  # source://yarp//lib/yarp/node.rb#4636
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6232
-========
-  # source://yarp//lib/yarp/node.rb#4631
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6255
-========
-  # source://yarp//lib/yarp/node.rb#4648
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#6259
@@ -10501,29 +6990,17 @@ class YARP::KeywordParameterNode < ::YARP::Node
 
   # attr_reader name: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6210
-========
-  # source://yarp//lib/yarp/node.rb#4653
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6213
-========
-  # source://yarp//lib/yarp/node.rb#4613
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # attr_reader value: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6216
-========
-  # source://yarp//lib/yarp/node.rb#4616
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -10533,40 +7010,23 @@ end
 #           ^^^
 #     end
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#6278
-========
-# source://yarp//lib/yarp/node.rb#4663
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::KeywordRestParameterNode < ::YARP::Node
   # def initialize: (name: Symbol?, name_loc: Location?, operator_loc: Location, location: Location) -> void
   #
   # @return [KeywordRestParameterNode] a new instance of KeywordRestParameterNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6289
   def initialize(name, name_loc, operator_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
   # source://yarp//lib/yarp/node.rb#6297
-========
-  # source://yarp//lib/yarp/node.rb#4671
-  def initialize(operator_loc, name_loc, location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#4678
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6302
-========
-  # source://yarp//lib/yarp/node.rb#4683
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -10576,30 +7036,18 @@ class YARP::KeywordRestParameterNode < ::YARP::Node
 
   # def copy: (**params) -> KeywordRestParameterNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6312
-========
-  # source://yarp//lib/yarp/node.rb#4688
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6302
-========
-  # source://yarp//lib/yarp/node.rb#4683
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6325
-========
-  # source://yarp//lib/yarp/node.rb#4700
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#6334
@@ -10607,38 +7055,22 @@ class YARP::KeywordRestParameterNode < ::YARP::Node
 
   # attr_reader name: Symbol?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6280
-========
-  # source://yarp//lib/yarp/node.rb#4710
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6283
-========
-  # source://yarp//lib/yarp/node.rb#4668
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6330
-========
-  # source://yarp//lib/yarp/node.rb#4705
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6286
-========
-  # source://yarp//lib/yarp/node.rb#4665
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 end
 
@@ -10647,66 +7079,38 @@ end
 #     ->(value) { value * 2 }
 #     ^^^^^^^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#6347
-========
-# source://yarp//lib/yarp/node.rb#4719
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::LambdaNode < ::YARP::Node
   # def initialize: (locals: Array[Symbol], operator_loc: Location, opening_loc: Location, closing_loc: Location, parameters: BlockParametersNode?, body: Node?, location: Location) -> void
   #
   # @return [LambdaNode] a new instance of LambdaNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6367
-========
-  # source://yarp//lib/yarp/node.rb#4739
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(locals, operator_loc, opening_loc, closing_loc, parameters, body, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6378
-========
-  # source://yarp//lib/yarp/node.rb#4750
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # attr_reader body: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6364
-========
-  # source://yarp//lib/yarp/node.rb#4736
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def body; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6383
-========
-  # source://yarp//lib/yarp/node.rb#4755
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6424
-========
-  # source://yarp//lib/yarp/node.rb#4791
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6358
-========
-  # source://yarp//lib/yarp/node.rb#4730
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -10716,30 +7120,18 @@ class YARP::LambdaNode < ::YARP::Node
 
   # def copy: (**params) -> LambdaNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6393
-========
-  # source://yarp//lib/yarp/node.rb#4760
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6383
-========
-  # source://yarp//lib/yarp/node.rb#4755
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6409
-========
-  # source://yarp//lib/yarp/node.rb#4776
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#6428
@@ -10747,56 +7139,32 @@ class YARP::LambdaNode < ::YARP::Node
 
   # attr_reader locals: Array[Symbol]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6349
-========
-  # source://yarp//lib/yarp/node.rb#4721
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def locals; end
 
   # def opening: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6419
-========
-  # source://yarp//lib/yarp/node.rb#4786
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening; end
 
   # attr_reader opening_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6355
-========
-  # source://yarp//lib/yarp/node.rb#4727
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6414
-========
-  # source://yarp//lib/yarp/node.rb#4781
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6352
-========
-  # source://yarp//lib/yarp/node.rb#4724
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader parameters: BlockParametersNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6361
-========
-  # source://yarp//lib/yarp/node.rb#4733
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def parameters; end
 end
 
@@ -11030,35 +7398,22 @@ end
 #     target &&= value
 #     ^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#6454
-========
-# source://yarp//lib/yarp/node.rb#4800
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::LocalVariableAndWriteNode < ::YARP::Node
   # def initialize: (name_loc: Location, operator_loc: Location, value: Node, name: Symbol, depth: Integer, location: Location) -> void
   #
   # @return [LocalVariableAndWriteNode] a new instance of LocalVariableAndWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6471
-========
-  # source://yarp//lib/yarp/node.rb#4817
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name_loc, operator_loc, value, name, depth, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6481
-========
-  # source://yarp//lib/yarp/node.rb#4827
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6486
   def child_nodes; end
 
@@ -11070,38 +7425,21 @@ class YARP::LocalVariableAndWriteNode < ::YARP::Node
   # def copy: (**params) -> LocalVariableAndWriteNode
   #
   # source://yarp//lib/yarp/node.rb#6496
-========
-  # source://yarp//lib/yarp/node.rb#4832
-  def child_nodes; end
-
-  # def copy: (**params) -> LocalVariableAndWriteNode
-  #
-  # source://yarp//lib/yarp/node.rb#4837
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6486
-========
-  # source://yarp//lib/yarp/node.rb#4832
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6511
-========
-  # source://yarp//lib/yarp/node.rb#4852
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # attr_reader depth: Integer
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6468
   def depth; end
 
@@ -11111,50 +7449,26 @@ class YARP::LocalVariableAndWriteNode < ::YARP::Node
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#6465
-========
-  # source://yarp//lib/yarp/node.rb#4814
-  def depth; end
-
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#4811
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6456
-========
-  # source://yarp//lib/yarp/node.rb#4802
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6516
-========
-  # source://yarp//lib/yarp/node.rb#4857
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6459
-========
-  # source://yarp//lib/yarp/node.rb#4805
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6462
-========
-  # source://yarp//lib/yarp/node.rb#4808
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -11163,35 +7477,22 @@ end
 #     target += value
 #     ^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#6536
-========
-# source://yarp//lib/yarp/node.rb#4866
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::LocalVariableOperatorWriteNode < ::YARP::Node
   # def initialize: (name_loc: Location, operator_loc: Location, value: Node, name: Symbol, operator: Symbol, depth: Integer, location: Location) -> void
   #
   # @return [LocalVariableOperatorWriteNode] a new instance of LocalVariableOperatorWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6556
-========
-  # source://yarp//lib/yarp/node.rb#4886
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name_loc, operator_loc, value, name, operator, depth, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6567
-========
-  # source://yarp//lib/yarp/node.rb#4897
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6572
   def child_nodes; end
 
@@ -11203,38 +7504,21 @@ class YARP::LocalVariableOperatorWriteNode < ::YARP::Node
   # def copy: (**params) -> LocalVariableOperatorWriteNode
   #
   # source://yarp//lib/yarp/node.rb#6582
-========
-  # source://yarp//lib/yarp/node.rb#4902
-  def child_nodes; end
-
-  # def copy: (**params) -> LocalVariableOperatorWriteNode
-  #
-  # source://yarp//lib/yarp/node.rb#4907
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6572
-========
-  # source://yarp//lib/yarp/node.rb#4902
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6598
-========
-  # source://yarp//lib/yarp/node.rb#4923
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # attr_reader depth: Integer
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6553
   def depth; end
 
@@ -11244,50 +7528,26 @@ class YARP::LocalVariableOperatorWriteNode < ::YARP::Node
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#6547
-========
-  # source://yarp//lib/yarp/node.rb#4883
-  def depth; end
-
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#4877
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6538
-========
-  # source://yarp//lib/yarp/node.rb#4868
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # attr_reader operator: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6550
-========
-  # source://yarp//lib/yarp/node.rb#4880
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6541
-========
-  # source://yarp//lib/yarp/node.rb#4871
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6544
-========
-  # source://yarp//lib/yarp/node.rb#4874
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -11296,21 +7556,13 @@ end
 #     target ||= value
 #     ^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#6619
-========
-# source://yarp//lib/yarp/node.rb#4932
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::LocalVariableOrWriteNode < ::YARP::Node
   # def initialize: (name_loc: Location, operator_loc: Location, value: Node, name: Symbol, depth: Integer, location: Location) -> void
   #
   # @return [LocalVariableOrWriteNode] a new instance of LocalVariableOrWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6636
-========
-  # source://yarp//lib/yarp/node.rb#4949
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name_loc, operator_loc, value, name, depth, location); end
 
   # def accept: (visitor: Visitor) -> void
@@ -11323,14 +7575,11 @@ class YARP::LocalVariableOrWriteNode < ::YARP::Node
   # source://yarp//lib/yarp/node.rb#6651
   def child_nodes; end
 
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://yarp//lib/yarp/node.rb#6656
   def comment_targets; end
 
-========
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   # def copy: (**params) -> LocalVariableOrWriteNode
   #
   # source://yarp//lib/yarp/node.rb#6661
@@ -11352,18 +7601,12 @@ class YARP::LocalVariableOrWriteNode < ::YARP::Node
   # source://yarp//lib/yarp/node.rb#6633
   def depth; end
 
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6685
   def inspect(inspector = T.unsafe(nil)); end
 
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#6630
-========
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#4943
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
@@ -11373,11 +7616,7 @@ class YARP::LocalVariableOrWriteNode < ::YARP::Node
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6681
-========
-  # source://yarp//lib/yarp/node.rb#4989
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
@@ -11398,35 +7637,22 @@ end
 #     foo
 #     ^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#6703
-========
-# source://yarp//lib/yarp/node.rb#5000
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::LocalVariableReadNode < ::YARP::Node
   # def initialize: (name: Symbol, depth: Integer, location: Location) -> void
   #
   # @return [LocalVariableReadNode] a new instance of LocalVariableReadNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6711
-========
-  # source://yarp//lib/yarp/node.rb#5008
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name, depth, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6718
-========
-  # source://yarp//lib/yarp/node.rb#5015
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6723
   def child_nodes; end
 
@@ -11438,38 +7664,21 @@ class YARP::LocalVariableReadNode < ::YARP::Node
   # def copy: (**params) -> LocalVariableReadNode
   #
   # source://yarp//lib/yarp/node.rb#6733
-========
-  # source://yarp//lib/yarp/node.rb#5020
-  def child_nodes; end
-
-  # def copy: (**params) -> LocalVariableReadNode
-  #
-  # source://yarp//lib/yarp/node.rb#5025
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6723
-========
-  # source://yarp//lib/yarp/node.rb#5020
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6745
-========
-  # source://yarp//lib/yarp/node.rb#5037
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # attr_reader depth: Integer
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6708
   def depth; end
 
@@ -11479,14 +7688,6 @@ class YARP::LocalVariableReadNode < ::YARP::Node
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#6705
-========
-  # source://yarp//lib/yarp/node.rb#5005
-  def depth; end
-
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#5002
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 end
 
@@ -11495,35 +7696,22 @@ end
 #     foo, bar = baz
 #     ^^^  ^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#6761
-========
-# source://yarp//lib/yarp/node.rb#5046
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::LocalVariableTargetNode < ::YARP::Node
   # def initialize: (name: Symbol, depth: Integer, location: Location) -> void
   #
   # @return [LocalVariableTargetNode] a new instance of LocalVariableTargetNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6769
-========
-  # source://yarp//lib/yarp/node.rb#5054
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name, depth, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6776
-========
-  # source://yarp//lib/yarp/node.rb#5061
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6781
   def child_nodes; end
 
@@ -11535,38 +7723,21 @@ class YARP::LocalVariableTargetNode < ::YARP::Node
   # def copy: (**params) -> LocalVariableTargetNode
   #
   # source://yarp//lib/yarp/node.rb#6791
-========
-  # source://yarp//lib/yarp/node.rb#5066
-  def child_nodes; end
-
-  # def copy: (**params) -> LocalVariableTargetNode
-  #
-  # source://yarp//lib/yarp/node.rb#5071
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6781
-========
-  # source://yarp//lib/yarp/node.rb#5066
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6803
-========
-  # source://yarp//lib/yarp/node.rb#5083
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # attr_reader depth: Integer
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6766
   def depth; end
 
@@ -11576,14 +7747,6 @@ class YARP::LocalVariableTargetNode < ::YARP::Node
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#6763
-========
-  # source://yarp//lib/yarp/node.rb#5051
-  def depth; end
-
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#5048
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 end
 
@@ -11592,35 +7755,22 @@ end
 #     foo = 1
 #     ^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#6819
-========
-# source://yarp//lib/yarp/node.rb#5092
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::LocalVariableWriteNode < ::YARP::Node
   # def initialize: (name: Symbol, depth: Integer, name_loc: Location, value: Node, operator_loc: Location, location: Location) -> void
   #
   # @return [LocalVariableWriteNode] a new instance of LocalVariableWriteNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6836
-========
-  # source://yarp//lib/yarp/node.rb#5109
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name, depth, name_loc, value, operator_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6846
-========
-  # source://yarp//lib/yarp/node.rb#5119
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6851
   def child_nodes; end
 
@@ -11632,38 +7782,21 @@ class YARP::LocalVariableWriteNode < ::YARP::Node
   # def copy: (**params) -> LocalVariableWriteNode
   #
   # source://yarp//lib/yarp/node.rb#6861
-========
-  # source://yarp//lib/yarp/node.rb#5124
-  def child_nodes; end
-
-  # def copy: (**params) -> LocalVariableWriteNode
-  #
-  # source://yarp//lib/yarp/node.rb#5129
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6851
-========
-  # source://yarp//lib/yarp/node.rb#5124
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6876
-========
-  # source://yarp//lib/yarp/node.rb#5144
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # attr_reader depth: Integer
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6824
   def depth; end
 
@@ -11673,50 +7806,26 @@ class YARP::LocalVariableWriteNode < ::YARP::Node
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#6821
-========
-  # source://yarp//lib/yarp/node.rb#5097
-  def depth; end
-
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#5094
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6827
-========
-  # source://yarp//lib/yarp/node.rb#5100
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6881
-========
-  # source://yarp//lib/yarp/node.rb#5149
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6833
-========
-  # source://yarp//lib/yarp/node.rb#5106
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6830
-========
-  # source://yarp//lib/yarp/node.rb#5103
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -11821,20 +7930,12 @@ class YARP::Location
   end
 end
 
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10565
-========
-# source://yarp//lib/yarp/node.rb#7991
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 module YARP::LoopFlags; end
 
 # a loop after a begin statement, so the body is executed first before the condition
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10567
-========
-# source://yarp//lib/yarp/node.rb#7993
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 YARP::LoopFlags::BEGIN_MODIFIER = T.let(T.unsafe(nil), Integer)
 
 # Represents the use of the modifier `in` operator.
@@ -11842,39 +7943,23 @@ YARP::LoopFlags::BEGIN_MODIFIER = T.let(T.unsafe(nil), Integer)
 #     foo in bar
 #     ^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#6901
-========
-# source://yarp//lib/yarp/node.rb#5158
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::MatchPredicateNode < ::YARP::Node
   # def initialize: (value: Node, pattern: Node, operator_loc: Location, location: Location) -> void
   #
   # @return [MatchPredicateNode] a new instance of MatchPredicateNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6912
-========
-  # source://yarp//lib/yarp/node.rb#5169
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(value, pattern, operator_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6920
-========
-  # source://yarp//lib/yarp/node.rb#5177
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6925
-========
-  # source://yarp//lib/yarp/node.rb#5182
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -11884,30 +7969,18 @@ class YARP::MatchPredicateNode < ::YARP::Node
 
   # def copy: (**params) -> MatchPredicateNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6935
-========
-  # source://yarp//lib/yarp/node.rb#5187
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6925
-========
-  # source://yarp//lib/yarp/node.rb#5182
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6948
-========
-  # source://yarp//lib/yarp/node.rb#5200
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#6957
@@ -11915,38 +7988,22 @@ class YARP::MatchPredicateNode < ::YARP::Node
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6953
-========
-  # source://yarp//lib/yarp/node.rb#5205
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6909
-========
-  # source://yarp//lib/yarp/node.rb#5166
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader pattern: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6906
-========
-  # source://yarp//lib/yarp/node.rb#5163
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def pattern; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6903
-========
-  # source://yarp//lib/yarp/node.rb#5160
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -11955,39 +8012,23 @@ end
 #     foo => bar
 #     ^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#6972
-========
-# source://yarp//lib/yarp/node.rb#5214
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::MatchRequiredNode < ::YARP::Node
   # def initialize: (value: Node, pattern: Node, operator_loc: Location, location: Location) -> void
   #
   # @return [MatchRequiredNode] a new instance of MatchRequiredNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6983
-========
-  # source://yarp//lib/yarp/node.rb#5225
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(value, pattern, operator_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6991
-========
-  # source://yarp//lib/yarp/node.rb#5233
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6996
-========
-  # source://yarp//lib/yarp/node.rb#5238
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -11997,30 +8038,18 @@ class YARP::MatchRequiredNode < ::YARP::Node
 
   # def copy: (**params) -> MatchRequiredNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7006
-========
-  # source://yarp//lib/yarp/node.rb#5243
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6996
-========
-  # source://yarp//lib/yarp/node.rb#5238
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7019
-========
-  # source://yarp//lib/yarp/node.rb#5256
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#7028
@@ -12028,77 +8057,45 @@ class YARP::MatchRequiredNode < ::YARP::Node
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7024
-========
-  # source://yarp//lib/yarp/node.rb#5261
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6980
-========
-  # source://yarp//lib/yarp/node.rb#5222
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader pattern: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6977
-========
-  # source://yarp//lib/yarp/node.rb#5219
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def pattern; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#6974
-========
-  # source://yarp//lib/yarp/node.rb#5216
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
 # Represents a node that is missing from the source and results in a syntax
 # error.
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#7041
-========
-# source://yarp//lib/yarp/node.rb#5268
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::MissingNode < ::YARP::Node
   # def initialize: (location: Location) -> void
   #
   # @return [MissingNode] a new instance of MissingNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7043
-========
-  # source://yarp//lib/yarp/node.rb#5270
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7048
-========
-  # source://yarp//lib/yarp/node.rb#5275
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7053
-========
-  # source://yarp//lib/yarp/node.rb#5280
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -12108,30 +8105,18 @@ class YARP::MissingNode < ::YARP::Node
 
   # def copy: (**params) -> MissingNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7063
-========
-  # source://yarp//lib/yarp/node.rb#5285
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7053
-========
-  # source://yarp//lib/yarp/node.rb#5280
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7073
-========
-  # source://yarp//lib/yarp/node.rb#5295
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#7077
@@ -12143,48 +8128,28 @@ end
 #     module Foo end
 #     ^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#7087
-========
-# source://yarp//lib/yarp/node.rb#5304
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ModuleNode < ::YARP::Node
   # def initialize: (locals: Array[Symbol], module_keyword_loc: Location, constant_path: Node, body: Node?, end_keyword_loc: Location, name: Symbol, location: Location) -> void
   #
   # @return [ModuleNode] a new instance of ModuleNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7107
-========
-  # source://yarp//lib/yarp/node.rb#5324
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(locals, module_keyword_loc, constant_path, body, end_keyword_loc, name, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7118
-========
-  # source://yarp//lib/yarp/node.rb#5335
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # attr_reader body: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7098
-========
-  # source://yarp//lib/yarp/node.rb#5315
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def body; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7123
-========
-  # source://yarp//lib/yarp/node.rb#5340
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -12194,57 +8159,33 @@ class YARP::ModuleNode < ::YARP::Node
 
   # attr_reader constant_path: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7095
-========
-  # source://yarp//lib/yarp/node.rb#5312
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def constant_path; end
 
   # def copy: (**params) -> ModuleNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7133
-========
-  # source://yarp//lib/yarp/node.rb#5345
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7123
-========
-  # source://yarp//lib/yarp/node.rb#5340
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7149
-========
-  # source://yarp//lib/yarp/node.rb#5361
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # def end_keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7159
-========
-  # source://yarp//lib/yarp/node.rb#5371
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7101
-========
-  # source://yarp//lib/yarp/node.rb#5318
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword_loc; end
 
   # source://yarp//lib/yarp/node.rb#7163
@@ -12252,38 +8193,22 @@ class YARP::ModuleNode < ::YARP::Node
 
   # attr_reader locals: Array[Symbol]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7089
-========
-  # source://yarp//lib/yarp/node.rb#5306
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def locals; end
 
   # def module_keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7154
-========
-  # source://yarp//lib/yarp/node.rb#5366
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def module_keyword; end
 
   # attr_reader module_keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7092
-========
-  # source://yarp//lib/yarp/node.rb#5309
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def module_keyword_loc; end
 
   # attr_reader name: Symbol
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7104
-========
-  # source://yarp//lib/yarp/node.rb#5321
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 end
 
@@ -12292,75 +8217,44 @@ end
 #     a, b, c = 1, 2, 3
 #     ^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#7185
 class YARP::MultiTargetNode < ::YARP::Node
   # def initialize: (targets: Array[Node], lparen_loc: Location?, rparen_loc: Location?, location: Location) -> void
-========
-# source://yarp//lib/yarp/node.rb#5380
-class YARP::MultiWriteNode < ::YARP::Node
-  # def initialize: (targets: Array[Node], operator_loc: Location?, value: Node?, lparen_loc: Location?, rparen_loc: Location?, location: Location) -> void
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   #
   # @return [MultiTargetNode] a new instance of MultiTargetNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7196
   def initialize(targets, lparen_loc, rparen_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
   # source://yarp//lib/yarp/node.rb#7204
-========
-  # source://yarp//lib/yarp/node.rb#5397
-  def initialize(targets, operator_loc, value, lparen_loc, rparen_loc, location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#5407
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7209
-========
-  # source://yarp//lib/yarp/node.rb#5412
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7214
   def comment_targets; end
 
   # def copy: (**params) -> MultiTargetNode
   #
   # source://yarp//lib/yarp/node.rb#7219
-========
-  # source://yarp//lib/yarp/node.rb#5417
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7209
-========
-  # source://yarp//lib/yarp/node.rb#5412
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7232
-========
-  # source://yarp//lib/yarp/node.rb#5432
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#7246
@@ -12368,54 +8262,26 @@ class YARP::MultiWriteNode < ::YARP::Node
 
   # def lparen: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7237
-========
-  # source://yarp//lib/yarp/node.rb#5442
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def lparen; end
 
   # attr_reader lparen_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7190
   def lparen_loc; end
 
   # def rparen: () -> String?
   #
   # source://yarp//lib/yarp/node.rb#7242
-========
-  # source://yarp//lib/yarp/node.rb#5391
-  def lparen_loc; end
-
-  # def operator: () -> String?
-  #
-  # source://yarp//lib/yarp/node.rb#5437
-  def operator; end
-
-  # attr_reader operator_loc: Location?
-  #
-  # source://yarp//lib/yarp/node.rb#5385
-  def operator_loc; end
-
-  # def rparen: () -> String?
-  #
-  # source://yarp//lib/yarp/node.rb#5447
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def rparen; end
 
   # attr_reader rparen_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7193
-========
-  # source://yarp//lib/yarp/node.rb#5394
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def rparen_loc; end
 
   # attr_reader targets: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7187
   def targets; end
 end
@@ -12501,18 +8367,11 @@ class YARP::MultiWriteNode < ::YARP::Node
   # attr_reader targets: Array[Node]
   #
   # source://yarp//lib/yarp/node.rb#7261
-========
-  # source://yarp//lib/yarp/node.rb#5382
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def targets; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7273
-========
-  # source://yarp//lib/yarp/node.rb#5388
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -13208,48 +9067,28 @@ end
 #     next 1
 #     ^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#7351
-========
-# source://yarp//lib/yarp/node.rb#5456
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::NextNode < ::YARP::Node
   # def initialize: (arguments: ArgumentsNode?, keyword_loc: Location, location: Location) -> void
   #
   # @return [NextNode] a new instance of NextNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7359
-========
-  # source://yarp//lib/yarp/node.rb#5464
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(arguments, keyword_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7366
-========
-  # source://yarp//lib/yarp/node.rb#5471
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # attr_reader arguments: ArgumentsNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7353
-========
-  # source://yarp//lib/yarp/node.rb#5458
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def arguments; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7371
-========
-  # source://yarp//lib/yarp/node.rb#5476
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -13259,30 +9098,18 @@ class YARP::NextNode < ::YARP::Node
 
   # def copy: (**params) -> NextNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7381
-========
-  # source://yarp//lib/yarp/node.rb#5481
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7371
-========
-  # source://yarp//lib/yarp/node.rb#5476
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7393
-========
-  # source://yarp//lib/yarp/node.rb#5493
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#7402
@@ -13290,20 +9117,12 @@ class YARP::NextNode < ::YARP::Node
 
   # def keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7398
-========
-  # source://yarp//lib/yarp/node.rb#5498
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7356
-========
-  # source://yarp//lib/yarp/node.rb#5461
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword_loc; end
 end
 
@@ -13312,39 +9131,23 @@ end
 #     nil
 #     ^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#7419
-========
-# source://yarp//lib/yarp/node.rb#5507
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::NilNode < ::YARP::Node
   # def initialize: (location: Location) -> void
   #
   # @return [NilNode] a new instance of NilNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7421
-========
-  # source://yarp//lib/yarp/node.rb#5509
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7426
-========
-  # source://yarp//lib/yarp/node.rb#5514
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7431
-========
-  # source://yarp//lib/yarp/node.rb#5519
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -13354,30 +9157,18 @@ class YARP::NilNode < ::YARP::Node
 
   # def copy: (**params) -> NilNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7441
-========
-  # source://yarp//lib/yarp/node.rb#5524
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7431
-========
-  # source://yarp//lib/yarp/node.rb#5519
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7451
-========
-  # source://yarp//lib/yarp/node.rb#5534
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#7455
@@ -13390,39 +9181,23 @@ end
 #           ^^^^^
 #     end
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#7466
-========
-# source://yarp//lib/yarp/node.rb#5544
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::NoKeywordsParameterNode < ::YARP::Node
   # def initialize: (operator_loc: Location, keyword_loc: Location, location: Location) -> void
   #
   # @return [NoKeywordsParameterNode] a new instance of NoKeywordsParameterNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7474
-========
-  # source://yarp//lib/yarp/node.rb#5552
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(operator_loc, keyword_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7481
-========
-  # source://yarp//lib/yarp/node.rb#5559
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7486
-========
-  # source://yarp//lib/yarp/node.rb#5564
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -13432,30 +9207,18 @@ class YARP::NoKeywordsParameterNode < ::YARP::Node
 
   # def copy: (**params) -> NoKeywordsParameterNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7496
-========
-  # source://yarp//lib/yarp/node.rb#5569
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7486
-========
-  # source://yarp//lib/yarp/node.rb#5564
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7508
-========
-  # source://yarp//lib/yarp/node.rb#5581
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#7522
@@ -13463,38 +9226,22 @@ class YARP::NoKeywordsParameterNode < ::YARP::Node
 
   # def keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7518
-========
-  # source://yarp//lib/yarp/node.rb#5591
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7471
-========
-  # source://yarp//lib/yarp/node.rb#5549
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7513
-========
-  # source://yarp//lib/yarp/node.rb#5586
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7468
-========
-  # source://yarp//lib/yarp/node.rb#5546
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 end
 
@@ -13587,39 +9334,23 @@ end
 #     $1
 #     ^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#7534
-========
-# source://yarp//lib/yarp/node.rb#5600
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::NumberedReferenceReadNode < ::YARP::Node
   # def initialize: (number: Integer, location: Location) -> void
   #
   # @return [NumberedReferenceReadNode] a new instance of NumberedReferenceReadNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7539
-========
-  # source://yarp//lib/yarp/node.rb#5605
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(number, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7545
-========
-  # source://yarp//lib/yarp/node.rb#5611
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7550
-========
-  # source://yarp//lib/yarp/node.rb#5616
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -13629,26 +9360,17 @@ class YARP::NumberedReferenceReadNode < ::YARP::Node
 
   # def copy: (**params) -> NumberedReferenceReadNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7560
-========
-  # source://yarp//lib/yarp/node.rb#5621
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7550
-========
-  # source://yarp//lib/yarp/node.rb#5616
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7571
   def deconstruct_keys(keys); end
 
@@ -13658,14 +9380,6 @@ class YARP::NumberedReferenceReadNode < ::YARP::Node
   # attr_reader number: Integer
   #
   # source://yarp//lib/yarp/node.rb#7536
-========
-  # source://yarp//lib/yarp/node.rb#5632
-  def deconstruct_keys(keys); end
-
-  # attr_reader number: Integer
-  #
-  # source://yarp//lib/yarp/node.rb#5602
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def number; end
 end
 
@@ -13675,35 +9389,22 @@ end
 #           ^^^^^
 #     end
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#7587
-========
-# source://yarp//lib/yarp/node.rb#5642
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::OptionalParameterNode < ::YARP::Node
   # def initialize: (name: Symbol, name_loc: Location, operator_loc: Location, value: Node, location: Location) -> void
   #
   # @return [OptionalParameterNode] a new instance of OptionalParameterNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7601
-========
-  # source://yarp//lib/yarp/node.rb#5656
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name, name_loc, operator_loc, value, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7610
-========
-  # source://yarp//lib/yarp/node.rb#5665
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7615
   def child_nodes; end
 
@@ -13715,29 +9416,16 @@ class YARP::OptionalParameterNode < ::YARP::Node
   # def copy: (**params) -> OptionalParameterNode
   #
   # source://yarp//lib/yarp/node.rb#7625
-========
-  # source://yarp//lib/yarp/node.rb#5670
-  def child_nodes; end
-
-  # def copy: (**params) -> OptionalParameterNode
-  #
-  # source://yarp//lib/yarp/node.rb#5675
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7615
-========
-  # source://yarp//lib/yarp/node.rb#5670
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7639
   def deconstruct_keys(keys); end
 
@@ -13747,50 +9435,26 @@ class YARP::OptionalParameterNode < ::YARP::Node
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#7589
-========
-  # source://yarp//lib/yarp/node.rb#5689
-  def deconstruct_keys(keys); end
-
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#5644
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7592
-========
-  # source://yarp//lib/yarp/node.rb#5647
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7644
-========
-  # source://yarp//lib/yarp/node.rb#5694
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7595
-========
-  # source://yarp//lib/yarp/node.rb#5650
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader value: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7598
-========
-  # source://yarp//lib/yarp/node.rb#5653
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 end
 
@@ -13799,39 +9463,23 @@ end
 #     left or right
 #     ^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#7663
-========
-# source://yarp//lib/yarp/node.rb#5703
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::OrNode < ::YARP::Node
   # def initialize: (left: Node, right: Node, operator_loc: Location, location: Location) -> void
   #
   # @return [OrNode] a new instance of OrNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7674
-========
-  # source://yarp//lib/yarp/node.rb#5714
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(left, right, operator_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7682
-========
-  # source://yarp//lib/yarp/node.rb#5722
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7687
-========
-  # source://yarp//lib/yarp/node.rb#5727
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -13841,30 +9489,18 @@ class YARP::OrNode < ::YARP::Node
 
   # def copy: (**params) -> OrNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7697
-========
-  # source://yarp//lib/yarp/node.rb#5732
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7687
-========
-  # source://yarp//lib/yarp/node.rb#5727
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7710
-========
-  # source://yarp//lib/yarp/node.rb#5745
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#7719
@@ -13872,38 +9508,22 @@ class YARP::OrNode < ::YARP::Node
 
   # attr_reader left: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7665
-========
-  # source://yarp//lib/yarp/node.rb#5705
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def left; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7715
-========
-  # source://yarp//lib/yarp/node.rb#5750
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7671
-========
-  # source://yarp//lib/yarp/node.rb#5711
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader right: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7668
-========
-  # source://yarp//lib/yarp/node.rb#5708
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def right; end
 end
 
@@ -14135,48 +9755,28 @@ YARP::Pack::UTF8 = T.let(T.unsafe(nil), Symbol)
 #           ^^^^^^^
 #     end
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#7735
-========
-# source://yarp//lib/yarp/node.rb#5760
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ParametersNode < ::YARP::Node
   # def initialize: (requireds: Array[Node], optionals: Array[Node], posts: Array[Node], rest: RestParameterNode?, keywords: Array[Node], keyword_rest: Node?, block: BlockParameterNode?, location: Location) -> void
   #
   # @return [ParametersNode] a new instance of ParametersNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7758
-========
-  # source://yarp//lib/yarp/node.rb#5783
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(requireds, optionals, posts, rest, keywords, keyword_rest, block, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7770
-========
-  # source://yarp//lib/yarp/node.rb#5795
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # attr_reader block: BlockParameterNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7755
-========
-  # source://yarp//lib/yarp/node.rb#5780
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def block; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7775
-========
-  # source://yarp//lib/yarp/node.rb#5800
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -14186,30 +9786,18 @@ class YARP::ParametersNode < ::YARP::Node
 
   # def copy: (**params) -> ParametersNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7785
-========
-  # source://yarp//lib/yarp/node.rb#5805
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7775
-========
-  # source://yarp//lib/yarp/node.rb#5800
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7802
-========
-  # source://yarp//lib/yarp/node.rb#5822
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#7806
@@ -14217,56 +9805,32 @@ class YARP::ParametersNode < ::YARP::Node
 
   # attr_reader keyword_rest: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7752
-========
-  # source://yarp//lib/yarp/node.rb#5777
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword_rest; end
 
   # attr_reader keywords: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7749
-========
-  # source://yarp//lib/yarp/node.rb#5774
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keywords; end
 
   # attr_reader optionals: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7740
-========
-  # source://yarp//lib/yarp/node.rb#5765
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def optionals; end
 
   # attr_reader posts: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7743
-========
-  # source://yarp//lib/yarp/node.rb#5768
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def posts; end
 
   # attr_reader requireds: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7737
-========
-  # source://yarp//lib/yarp/node.rb#5762
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def requireds; end
 
   # attr_reader rest: RestParameterNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7746
-========
-  # source://yarp//lib/yarp/node.rb#5771
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def rest; end
 end
 
@@ -14275,66 +9839,38 @@ end
 #     (10 + 34)
 #     ^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#7838
-========
-# source://yarp//lib/yarp/node.rb#5831
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ParenthesesNode < ::YARP::Node
   # def initialize: (body: Node?, opening_loc: Location, closing_loc: Location, location: Location) -> void
   #
   # @return [ParenthesesNode] a new instance of ParenthesesNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7849
-========
-  # source://yarp//lib/yarp/node.rb#5842
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(body, opening_loc, closing_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7857
-========
-  # source://yarp//lib/yarp/node.rb#5850
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # attr_reader body: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7840
-========
-  # source://yarp//lib/yarp/node.rb#5833
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def body; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7866
-========
-  # source://yarp//lib/yarp/node.rb#5859
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7899
-========
-  # source://yarp//lib/yarp/node.rb#5887
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7846
-========
-  # source://yarp//lib/yarp/node.rb#5839
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -14344,30 +9880,18 @@ class YARP::ParenthesesNode < ::YARP::Node
 
   # def copy: (**params) -> ParenthesesNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7876
-========
-  # source://yarp//lib/yarp/node.rb#5864
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7866
-========
-  # source://yarp//lib/yarp/node.rb#5859
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7889
-========
-  # source://yarp//lib/yarp/node.rb#5877
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#7903
@@ -14375,26 +9899,15 @@ class YARP::ParenthesesNode < ::YARP::Node
 
   # def opening: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7894
-========
-  # source://yarp//lib/yarp/node.rb#5882
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening; end
 
   # attr_reader opening_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7843
   def opening_loc; end
 
   # source://yarp//lib/yarp/node.rb#7861
-========
-  # source://yarp//lib/yarp/node.rb#5836
-  def opening_loc; end
-
-  # source://yarp//lib/yarp/node.rb#5854
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def set_newline_flag(newline_marked); end
 end
 
@@ -14794,39 +10307,23 @@ end
 #     foo in ^(bar)
 #            ^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#7922
-========
-# source://yarp//lib/yarp/node.rb#5897
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::PinnedExpressionNode < ::YARP::Node
   # def initialize: (expression: Node, operator_loc: Location, lparen_loc: Location, rparen_loc: Location, location: Location) -> void
   #
   # @return [PinnedExpressionNode] a new instance of PinnedExpressionNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7936
-========
-  # source://yarp//lib/yarp/node.rb#5911
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(expression, operator_loc, lparen_loc, rparen_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7945
-========
-  # source://yarp//lib/yarp/node.rb#5920
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7950
-========
-  # source://yarp//lib/yarp/node.rb#5925
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -14836,39 +10333,23 @@ class YARP::PinnedExpressionNode < ::YARP::Node
 
   # def copy: (**params) -> PinnedExpressionNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7960
-========
-  # source://yarp//lib/yarp/node.rb#5930
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7950
-========
-  # source://yarp//lib/yarp/node.rb#5925
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7974
-========
-  # source://yarp//lib/yarp/node.rb#5944
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # attr_reader expression: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7924
-========
-  # source://yarp//lib/yarp/node.rb#5899
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def expression; end
 
   # source://yarp//lib/yarp/node.rb#7993
@@ -14876,56 +10357,32 @@ class YARP::PinnedExpressionNode < ::YARP::Node
 
   # def lparen: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7984
-========
-  # source://yarp//lib/yarp/node.rb#5954
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def lparen; end
 
   # attr_reader lparen_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7930
-========
-  # source://yarp//lib/yarp/node.rb#5905
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def lparen_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7979
-========
-  # source://yarp//lib/yarp/node.rb#5949
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7927
-========
-  # source://yarp//lib/yarp/node.rb#5902
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # def rparen: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7989
-========
-  # source://yarp//lib/yarp/node.rb#5959
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def rparen; end
 
   # attr_reader rparen_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#7933
-========
-  # source://yarp//lib/yarp/node.rb#5908
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def rparen_loc; end
 end
 
@@ -14935,39 +10392,23 @@ end
 #     foo in ^bar
 #            ^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#8009
-========
-# source://yarp//lib/yarp/node.rb#5969
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::PinnedVariableNode < ::YARP::Node
   # def initialize: (variable: Node, operator_loc: Location, location: Location) -> void
   #
   # @return [PinnedVariableNode] a new instance of PinnedVariableNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8017
-========
-  # source://yarp//lib/yarp/node.rb#5977
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(variable, operator_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8024
-========
-  # source://yarp//lib/yarp/node.rb#5984
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8029
-========
-  # source://yarp//lib/yarp/node.rb#5989
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -14977,30 +10418,18 @@ class YARP::PinnedVariableNode < ::YARP::Node
 
   # def copy: (**params) -> PinnedVariableNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8039
-========
-  # source://yarp//lib/yarp/node.rb#5994
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8029
-========
-  # source://yarp//lib/yarp/node.rb#5989
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8051
-========
-  # source://yarp//lib/yarp/node.rb#6006
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#8060
@@ -15008,29 +10437,17 @@ class YARP::PinnedVariableNode < ::YARP::Node
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8056
-========
-  # source://yarp//lib/yarp/node.rb#6011
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8014
-========
-  # source://yarp//lib/yarp/node.rb#5974
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader variable: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8011
-========
-  # source://yarp//lib/yarp/node.rb#5971
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def variable; end
 end
 
@@ -15039,57 +10456,33 @@ end
 #     END { foo }
 #     ^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#8073
-========
-# source://yarp//lib/yarp/node.rb#6020
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::PostExecutionNode < ::YARP::Node
   # def initialize: (statements: StatementsNode?, keyword_loc: Location, opening_loc: Location, closing_loc: Location, location: Location) -> void
   #
   # @return [PostExecutionNode] a new instance of PostExecutionNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8087
-========
-  # source://yarp//lib/yarp/node.rb#6034
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(statements, keyword_loc, opening_loc, closing_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8096
-========
-  # source://yarp//lib/yarp/node.rb#6043
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8101
-========
-  # source://yarp//lib/yarp/node.rb#6048
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8140
-========
-  # source://yarp//lib/yarp/node.rb#6082
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8084
-========
-  # source://yarp//lib/yarp/node.rb#6031
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -15099,30 +10492,18 @@ class YARP::PostExecutionNode < ::YARP::Node
 
   # def copy: (**params) -> PostExecutionNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8111
-========
-  # source://yarp//lib/yarp/node.rb#6053
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8101
-========
-  # source://yarp//lib/yarp/node.rb#6048
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8125
-========
-  # source://yarp//lib/yarp/node.rb#6067
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#8144
@@ -15130,47 +10511,27 @@ class YARP::PostExecutionNode < ::YARP::Node
 
   # def keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8130
-========
-  # source://yarp//lib/yarp/node.rb#6072
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8078
-========
-  # source://yarp//lib/yarp/node.rb#6025
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword_loc; end
 
   # def opening: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8135
-========
-  # source://yarp//lib/yarp/node.rb#6077
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening; end
 
   # attr_reader opening_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8081
-========
-  # source://yarp//lib/yarp/node.rb#6028
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening_loc; end
 
   # attr_reader statements: StatementsNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8075
-========
-  # source://yarp//lib/yarp/node.rb#6022
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def statements; end
 end
 
@@ -15179,57 +10540,33 @@ end
 #     BEGIN { foo }
 #     ^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#8163
-========
-# source://yarp//lib/yarp/node.rb#6091
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::PreExecutionNode < ::YARP::Node
   # def initialize: (statements: StatementsNode?, keyword_loc: Location, opening_loc: Location, closing_loc: Location, location: Location) -> void
   #
   # @return [PreExecutionNode] a new instance of PreExecutionNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8177
-========
-  # source://yarp//lib/yarp/node.rb#6105
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(statements, keyword_loc, opening_loc, closing_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8186
-========
-  # source://yarp//lib/yarp/node.rb#6114
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8191
-========
-  # source://yarp//lib/yarp/node.rb#6119
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8230
-========
-  # source://yarp//lib/yarp/node.rb#6153
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8174
-========
-  # source://yarp//lib/yarp/node.rb#6102
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -15239,30 +10576,18 @@ class YARP::PreExecutionNode < ::YARP::Node
 
   # def copy: (**params) -> PreExecutionNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8201
-========
-  # source://yarp//lib/yarp/node.rb#6124
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8191
-========
-  # source://yarp//lib/yarp/node.rb#6119
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8215
-========
-  # source://yarp//lib/yarp/node.rb#6138
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#8234
@@ -15270,85 +10595,49 @@ class YARP::PreExecutionNode < ::YARP::Node
 
   # def keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8220
-========
-  # source://yarp//lib/yarp/node.rb#6143
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8168
-========
-  # source://yarp//lib/yarp/node.rb#6096
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword_loc; end
 
   # def opening: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8225
-========
-  # source://yarp//lib/yarp/node.rb#6148
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening; end
 
   # attr_reader opening_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8171
-========
-  # source://yarp//lib/yarp/node.rb#6099
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening_loc; end
 
   # attr_reader statements: StatementsNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8165
-========
-  # source://yarp//lib/yarp/node.rb#6093
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def statements; end
 end
 
 # The top level node of any parse tree.
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#8250
-========
-# source://yarp//lib/yarp/node.rb#6159
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ProgramNode < ::YARP::Node
   # def initialize: (locals: Array[Symbol], statements: StatementsNode, location: Location) -> void
   #
   # @return [ProgramNode] a new instance of ProgramNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8258
-========
-  # source://yarp//lib/yarp/node.rb#6167
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(locals, statements, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8265
-========
-  # source://yarp//lib/yarp/node.rb#6174
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8270
-========
-  # source://yarp//lib/yarp/node.rb#6179
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -15358,30 +10647,18 @@ class YARP::ProgramNode < ::YARP::Node
 
   # def copy: (**params) -> ProgramNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8280
-========
-  # source://yarp//lib/yarp/node.rb#6184
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8270
-========
-  # source://yarp//lib/yarp/node.rb#6179
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8292
-========
-  # source://yarp//lib/yarp/node.rb#6196
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#8296
@@ -15389,37 +10666,21 @@ class YARP::ProgramNode < ::YARP::Node
 
   # attr_reader locals: Array[Symbol]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8252
-========
-  # source://yarp//lib/yarp/node.rb#6161
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def locals; end
 
   # attr_reader statements: StatementsNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8255
   def statements; end
 end
 
 # source://yarp//lib/yarp/node.rb#10570
-========
-  # source://yarp//lib/yarp/node.rb#6164
-  def statements; end
-end
-
-# source://yarp//lib/yarp/node.rb#7996
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 module YARP::RangeFlags; end
 
 # ... operator
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10572
-========
-# source://yarp//lib/yarp/node.rb#7998
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 YARP::RangeFlags::EXCLUDE_END = T.let(T.unsafe(nil), Integer)
 
 # Represents the use of the `..` or `...` operators.
@@ -15430,39 +10691,23 @@ YARP::RangeFlags::EXCLUDE_END = T.let(T.unsafe(nil), Integer)
 #     c if a =~ /left/ ... b =~ /right/
 #          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#8312
-========
-# source://yarp//lib/yarp/node.rb#6208
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::RangeNode < ::YARP::Node
   # def initialize: (left: Node?, right: Node?, operator_loc: Location, flags: Integer, location: Location) -> void
   #
   # @return [RangeNode] a new instance of RangeNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8326
-========
-  # source://yarp//lib/yarp/node.rb#6222
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(left, right, operator_loc, flags, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8335
-========
-  # source://yarp//lib/yarp/node.rb#6231
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8340
-========
-  # source://yarp//lib/yarp/node.rb#6236
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -15472,50 +10717,30 @@ class YARP::RangeNode < ::YARP::Node
 
   # def copy: (**params) -> RangeNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8350
-========
-  # source://yarp//lib/yarp/node.rb#6241
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8340
-========
-  # source://yarp//lib/yarp/node.rb#6236
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8364
-========
-  # source://yarp//lib/yarp/node.rb#6255
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # def exclude_end?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8374
-========
-  # source://yarp//lib/yarp/node.rb#6265
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def exclude_end?; end
 
   # attr_reader flags: Integer
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8323
-========
-  # source://yarp//lib/yarp/node.rb#6219
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def flags; end
 
   # source://yarp//lib/yarp/node.rb#8378
@@ -15523,38 +10748,22 @@ class YARP::RangeNode < ::YARP::Node
 
   # attr_reader left: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8314
-========
-  # source://yarp//lib/yarp/node.rb#6210
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def left; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8369
-========
-  # source://yarp//lib/yarp/node.rb#6260
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8320
-========
-  # source://yarp//lib/yarp/node.rb#6216
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader right: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8317
-========
-  # source://yarp//lib/yarp/node.rb#6213
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def right; end
 end
 
@@ -15569,29 +10778,17 @@ class YARP::RationalNode < ::YARP::Node
   #
   # @return [RationalNode] a new instance of RationalNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8407
-========
-  # source://yarp//lib/yarp/node.rb#6279
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(numeric, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8413
-========
-  # source://yarp//lib/yarp/node.rb#6285
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8418
-========
-  # source://yarp//lib/yarp/node.rb#6290
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -15601,30 +10798,18 @@ class YARP::RationalNode < ::YARP::Node
 
   # def copy: (**params) -> RationalNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8428
-========
-  # source://yarp//lib/yarp/node.rb#6295
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8418
-========
-  # source://yarp//lib/yarp/node.rb#6290
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8439
-========
-  # source://yarp//lib/yarp/node.rb#6306
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#8443
@@ -15632,11 +10817,7 @@ class YARP::RationalNode < ::YARP::Node
 
   # attr_reader numeric: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8404
-========
-  # source://yarp//lib/yarp/node.rb#6276
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def numeric; end
 
   # source://yarp//lib/yarp.rb#411
@@ -15648,39 +10829,23 @@ end
 #     redo
 #     ^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#8455
-========
-# source://yarp//lib/yarp/node.rb#6315
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::RedoNode < ::YARP::Node
   # def initialize: (location: Location) -> void
   #
   # @return [RedoNode] a new instance of RedoNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8457
-========
-  # source://yarp//lib/yarp/node.rb#6317
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8462
-========
-  # source://yarp//lib/yarp/node.rb#6322
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8467
-========
-  # source://yarp//lib/yarp/node.rb#6327
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -15690,113 +10855,65 @@ class YARP::RedoNode < ::YARP::Node
 
   # def copy: (**params) -> RedoNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8477
-========
-  # source://yarp//lib/yarp/node.rb#6332
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8467
-========
-  # source://yarp//lib/yarp/node.rb#6327
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8487
-========
-  # source://yarp//lib/yarp/node.rb#6342
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#8491
   def inspect(inspector = T.unsafe(nil)); end
 end
 
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10575
-========
-# source://yarp//lib/yarp/node.rb#8001
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 module YARP::RegularExpressionFlags; end
 
 # n - forces the ASCII-8BIT encoding
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10589
-========
-# source://yarp//lib/yarp/node.rb#8015
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 YARP::RegularExpressionFlags::ASCII_8BIT = T.let(T.unsafe(nil), Integer)
 
 # e - forces the EUC-JP encoding
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10586
-========
-# source://yarp//lib/yarp/node.rb#8012
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 YARP::RegularExpressionFlags::EUC_JP = T.let(T.unsafe(nil), Integer)
 
 # x - ignores whitespace and allows comments in regular expressions
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10583
-========
-# source://yarp//lib/yarp/node.rb#8009
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 YARP::RegularExpressionFlags::EXTENDED = T.let(T.unsafe(nil), Integer)
 
 # i - ignores the case of characters when matching
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10577
-========
-# source://yarp//lib/yarp/node.rb#8003
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 YARP::RegularExpressionFlags::IGNORE_CASE = T.let(T.unsafe(nil), Integer)
 
 # m - allows $ to match the end of lines within strings
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10580
-========
-# source://yarp//lib/yarp/node.rb#8006
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 YARP::RegularExpressionFlags::MULTI_LINE = T.let(T.unsafe(nil), Integer)
 
 # o - only interpolates values into the regular expression once
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10598
-========
-# source://yarp//lib/yarp/node.rb#8024
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 YARP::RegularExpressionFlags::ONCE = T.let(T.unsafe(nil), Integer)
 
 # u - forces the UTF-8 encoding
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10595
-========
-# source://yarp//lib/yarp/node.rb#8021
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 YARP::RegularExpressionFlags::UTF_8 = T.let(T.unsafe(nil), Integer)
 
 # s - forces the Windows-31J encoding
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10592
-========
-# source://yarp//lib/yarp/node.rb#8018
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 YARP::RegularExpressionFlags::WINDOWS_31J = T.let(T.unsafe(nil), Integer)
 
 # Represents a regular expression literal with no interpolation.
@@ -15804,68 +10921,40 @@ YARP::RegularExpressionFlags::WINDOWS_31J = T.let(T.unsafe(nil), Integer)
 #     /foo/i
 #     ^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#8501
-========
-# source://yarp//lib/yarp/node.rb#6351
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::RegularExpressionNode < ::YARP::Node
   # def initialize: (opening_loc: Location, content_loc: Location, closing_loc: Location, unescaped: String, flags: Integer, location: Location) -> void
   #
   # @return [RegularExpressionNode] a new instance of RegularExpressionNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8518
-========
-  # source://yarp//lib/yarp/node.rb#6368
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(opening_loc, content_loc, closing_loc, unescaped, flags, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8528
-========
-  # source://yarp//lib/yarp/node.rb#6378
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def ascii_8bit?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8598
-========
-  # source://yarp//lib/yarp/node.rb#6443
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ascii_8bit?; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8533
-========
-  # source://yarp//lib/yarp/node.rb#6383
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8573
-========
-  # source://yarp//lib/yarp/node.rb#6418
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8509
-========
-  # source://yarp//lib/yarp/node.rb#6359
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -15875,90 +10964,54 @@ class YARP::RegularExpressionNode < ::YARP::Node
 
   # def content: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8568
-========
-  # source://yarp//lib/yarp/node.rb#6413
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def content; end
 
   # attr_reader content_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8506
-========
-  # source://yarp//lib/yarp/node.rb#6356
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def content_loc; end
 
   # def copy: (**params) -> RegularExpressionNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8543
-========
-  # source://yarp//lib/yarp/node.rb#6388
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8533
-========
-  # source://yarp//lib/yarp/node.rb#6383
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8558
-========
-  # source://yarp//lib/yarp/node.rb#6403
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # def euc_jp?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8593
-========
-  # source://yarp//lib/yarp/node.rb#6438
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def euc_jp?; end
 
   # def extended?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8588
-========
-  # source://yarp//lib/yarp/node.rb#6433
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def extended?; end
 
   # attr_reader flags: Integer
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8515
-========
-  # source://yarp//lib/yarp/node.rb#6365
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def flags; end
 
   # def ignore_case?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8578
-========
-  # source://yarp//lib/yarp/node.rb#6423
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def ignore_case?; end
 
   # source://yarp//lib/yarp/node.rb#8617
@@ -15968,71 +11021,43 @@ class YARP::RegularExpressionNode < ::YARP::Node
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8583
-========
-  # source://yarp//lib/yarp/node.rb#6428
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def multi_line?; end
 
   # def once?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8613
-========
-  # source://yarp//lib/yarp/node.rb#6458
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def once?; end
 
   # def opening: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8563
-========
-  # source://yarp//lib/yarp/node.rb#6408
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening; end
 
   # attr_reader opening_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8503
-========
-  # source://yarp//lib/yarp/node.rb#6353
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening_loc; end
 
   # attr_reader unescaped: String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8512
-========
-  # source://yarp//lib/yarp/node.rb#6362
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def unescaped; end
 
   # def utf_8?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8608
-========
-  # source://yarp//lib/yarp/node.rb#6453
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def utf_8?; end
 
   # def windows_31j?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8603
-========
-  # source://yarp//lib/yarp/node.rb#6448
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def windows_31j?; end
 end
 
@@ -16042,57 +11067,33 @@ end
 #             ^^^^^^^^^^
 #     end
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#8633
-========
-# source://yarp//lib/yarp/node.rb#6468
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::RequiredDestructuredParameterNode < ::YARP::Node
   # def initialize: (parameters: Array[Node], opening_loc: Location, closing_loc: Location, location: Location) -> void
   #
   # @return [RequiredDestructuredParameterNode] a new instance of RequiredDestructuredParameterNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8644
-========
-  # source://yarp//lib/yarp/node.rb#6479
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(parameters, opening_loc, closing_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8652
-========
-  # source://yarp//lib/yarp/node.rb#6487
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8657
-========
-  # source://yarp//lib/yarp/node.rb#6492
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8690
-========
-  # source://yarp//lib/yarp/node.rb#6520
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8641
-========
-  # source://yarp//lib/yarp/node.rb#6476
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -16102,30 +11103,18 @@ class YARP::RequiredDestructuredParameterNode < ::YARP::Node
 
   # def copy: (**params) -> RequiredDestructuredParameterNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8667
-========
-  # source://yarp//lib/yarp/node.rb#6497
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8657
-========
-  # source://yarp//lib/yarp/node.rb#6492
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8680
-========
-  # source://yarp//lib/yarp/node.rb#6510
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#8694
@@ -16133,29 +11122,17 @@ class YARP::RequiredDestructuredParameterNode < ::YARP::Node
 
   # def opening: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8685
-========
-  # source://yarp//lib/yarp/node.rb#6515
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening; end
 
   # attr_reader opening_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8638
-========
-  # source://yarp//lib/yarp/node.rb#6473
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening_loc; end
 
   # attr_reader parameters: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8635
-========
-  # source://yarp//lib/yarp/node.rb#6470
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def parameters; end
 end
 
@@ -16165,35 +11142,22 @@ end
 #           ^
 #     end
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#8708
-========
-# source://yarp//lib/yarp/node.rb#6530
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::RequiredParameterNode < ::YARP::Node
   # def initialize: (name: Symbol, location: Location) -> void
   #
   # @return [RequiredParameterNode] a new instance of RequiredParameterNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8713
-========
-  # source://yarp//lib/yarp/node.rb#6535
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(name, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8719
-========
-  # source://yarp//lib/yarp/node.rb#6541
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8724
   def child_nodes; end
 
@@ -16205,29 +11169,16 @@ class YARP::RequiredParameterNode < ::YARP::Node
   # def copy: (**params) -> RequiredParameterNode
   #
   # source://yarp//lib/yarp/node.rb#8734
-========
-  # source://yarp//lib/yarp/node.rb#6546
-  def child_nodes; end
-
-  # def copy: (**params) -> RequiredParameterNode
-  #
-  # source://yarp//lib/yarp/node.rb#6551
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8724
-========
-  # source://yarp//lib/yarp/node.rb#6546
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8745
   def deconstruct_keys(keys); end
 
@@ -16237,14 +11188,6 @@ class YARP::RequiredParameterNode < ::YARP::Node
   # attr_reader name: Symbol
   #
   # source://yarp//lib/yarp/node.rb#8710
-========
-  # source://yarp//lib/yarp/node.rb#6562
-  def deconstruct_keys(keys); end
-
-  # attr_reader name: Symbol
-  #
-  # source://yarp//lib/yarp/node.rb#6532
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 end
 
@@ -16253,39 +11196,23 @@ end
 #   foo rescue nil
 #   ^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#8760
-========
-# source://yarp//lib/yarp/node.rb#6571
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::RescueModifierNode < ::YARP::Node
   # def initialize: (expression: Node, keyword_loc: Location, rescue_expression: Node, location: Location) -> void
   #
   # @return [RescueModifierNode] a new instance of RescueModifierNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8771
-========
-  # source://yarp//lib/yarp/node.rb#6582
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(expression, keyword_loc, rescue_expression, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8779
-========
-  # source://yarp//lib/yarp/node.rb#6590
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8788
-========
-  # source://yarp//lib/yarp/node.rb#6599
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -16295,39 +11222,23 @@ class YARP::RescueModifierNode < ::YARP::Node
 
   # def copy: (**params) -> RescueModifierNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8798
-========
-  # source://yarp//lib/yarp/node.rb#6604
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8788
-========
-  # source://yarp//lib/yarp/node.rb#6599
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8811
-========
-  # source://yarp//lib/yarp/node.rb#6617
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # attr_reader expression: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8762
-========
-  # source://yarp//lib/yarp/node.rb#6573
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def expression; end
 
   # source://yarp//lib/yarp/node.rb#8820
@@ -16335,35 +11246,20 @@ class YARP::RescueModifierNode < ::YARP::Node
 
   # def keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8816
-========
-  # source://yarp//lib/yarp/node.rb#6622
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8765
-========
-  # source://yarp//lib/yarp/node.rb#6576
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword_loc; end
 
   # attr_reader rescue_expression: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8768
   def rescue_expression; end
 
   # source://yarp//lib/yarp/node.rb#8783
-========
-  # source://yarp//lib/yarp/node.rb#6579
-  def rescue_expression; end
-
-  # source://yarp//lib/yarp/node.rb#6594
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def set_newline_flag(newline_marked); end
 end
 
@@ -16378,39 +11274,23 @@ end
 # `Foo, *splat, Bar` are in the `exceptions` field.
 # `ex` is in the `exception` field.
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#8841
-========
-# source://yarp//lib/yarp/node.rb#6637
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::RescueNode < ::YARP::Node
   # def initialize: (keyword_loc: Location, exceptions: Array[Node], operator_loc: Location?, reference: Node?, statements: StatementsNode?, consequent: RescueNode?, location: Location) -> void
   #
   # @return [RescueNode] a new instance of RescueNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8861
-========
-  # source://yarp//lib/yarp/node.rb#6657
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(keyword_loc, exceptions, operator_loc, reference, statements, consequent, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8872
-========
-  # source://yarp//lib/yarp/node.rb#6668
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8877
-========
-  # source://yarp//lib/yarp/node.rb#6673
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -16420,48 +11300,28 @@ class YARP::RescueNode < ::YARP::Node
 
   # attr_reader consequent: RescueNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8858
-========
-  # source://yarp//lib/yarp/node.rb#6654
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def consequent; end
 
   # def copy: (**params) -> RescueNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8887
-========
-  # source://yarp//lib/yarp/node.rb#6678
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8877
-========
-  # source://yarp//lib/yarp/node.rb#6673
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8903
-========
-  # source://yarp//lib/yarp/node.rb#6694
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # attr_reader exceptions: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8846
-========
-  # source://yarp//lib/yarp/node.rb#6642
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def exceptions; end
 
   # source://yarp//lib/yarp/node.rb#8917
@@ -16469,56 +11329,32 @@ class YARP::RescueNode < ::YARP::Node
 
   # def keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8908
-========
-  # source://yarp//lib/yarp/node.rb#6699
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8843
-========
-  # source://yarp//lib/yarp/node.rb#6639
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword_loc; end
 
   # def operator: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8913
-========
-  # source://yarp//lib/yarp/node.rb#6704
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8849
-========
-  # source://yarp//lib/yarp/node.rb#6645
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 
   # attr_reader reference: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8852
-========
-  # source://yarp//lib/yarp/node.rb#6648
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def reference; end
 
   # attr_reader statements: StatementsNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8855
-========
-  # source://yarp//lib/yarp/node.rb#6651
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def statements; end
 end
 
@@ -16528,40 +11364,23 @@ end
 #           ^^
 #     end
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#8949
-========
-# source://yarp//lib/yarp/node.rb#6714
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::RestParameterNode < ::YARP::Node
   # def initialize: (name: Symbol?, name_loc: Location?, operator_loc: Location, location: Location) -> void
   #
   # @return [RestParameterNode] a new instance of RestParameterNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8960
   def initialize(name, name_loc, operator_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
   # source://yarp//lib/yarp/node.rb#8968
-========
-  # source://yarp//lib/yarp/node.rb#6722
-  def initialize(operator_loc, name_loc, location); end
-
-  # def accept: (visitor: Visitor) -> void
-  #
-  # source://yarp//lib/yarp/node.rb#6729
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8973
-========
-  # source://yarp//lib/yarp/node.rb#6734
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -16571,30 +11390,18 @@ class YARP::RestParameterNode < ::YARP::Node
 
   # def copy: (**params) -> RestParameterNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8983
-========
-  # source://yarp//lib/yarp/node.rb#6739
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8973
-========
-  # source://yarp//lib/yarp/node.rb#6734
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8996
-========
-  # source://yarp//lib/yarp/node.rb#6751
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#9005
@@ -16602,38 +11409,22 @@ class YARP::RestParameterNode < ::YARP::Node
 
   # attr_reader name: Symbol?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8951
-========
-  # source://yarp//lib/yarp/node.rb#6761
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name; end
 
   # attr_reader name_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8954
-========
-  # source://yarp//lib/yarp/node.rb#6719
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def name_loc; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9001
-========
-  # source://yarp//lib/yarp/node.rb#6756
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#8957
-========
-  # source://yarp//lib/yarp/node.rb#6716
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 end
 
@@ -16642,39 +11433,23 @@ end
 #     retry
 #     ^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#9018
-========
-# source://yarp//lib/yarp/node.rb#6770
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::RetryNode < ::YARP::Node
   # def initialize: (location: Location) -> void
   #
   # @return [RetryNode] a new instance of RetryNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9020
-========
-  # source://yarp//lib/yarp/node.rb#6772
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9025
-========
-  # source://yarp//lib/yarp/node.rb#6777
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9030
-========
-  # source://yarp//lib/yarp/node.rb#6782
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -16684,30 +11459,18 @@ class YARP::RetryNode < ::YARP::Node
 
   # def copy: (**params) -> RetryNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9040
-========
-  # source://yarp//lib/yarp/node.rb#6787
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9030
-========
-  # source://yarp//lib/yarp/node.rb#6782
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9050
-========
-  # source://yarp//lib/yarp/node.rb#6797
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#9054
@@ -16719,48 +11482,28 @@ end
 #     return 1
 #     ^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#9064
-========
-# source://yarp//lib/yarp/node.rb#6806
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::ReturnNode < ::YARP::Node
   # def initialize: (keyword_loc: Location, arguments: ArgumentsNode?, location: Location) -> void
   #
   # @return [ReturnNode] a new instance of ReturnNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9072
-========
-  # source://yarp//lib/yarp/node.rb#6814
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(keyword_loc, arguments, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9079
-========
-  # source://yarp//lib/yarp/node.rb#6821
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # attr_reader arguments: ArgumentsNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9069
-========
-  # source://yarp//lib/yarp/node.rb#6811
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def arguments; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9084
-========
-  # source://yarp//lib/yarp/node.rb#6826
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -16770,30 +11513,18 @@ class YARP::ReturnNode < ::YARP::Node
 
   # def copy: (**params) -> ReturnNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9094
-========
-  # source://yarp//lib/yarp/node.rb#6831
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9084
-========
-  # source://yarp//lib/yarp/node.rb#6826
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9106
-========
-  # source://yarp//lib/yarp/node.rb#6843
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#9115
@@ -16801,20 +11532,12 @@ class YARP::ReturnNode < ::YARP::Node
 
   # def keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9111
-========
-  # source://yarp//lib/yarp/node.rb#6848
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9066
-========
-  # source://yarp//lib/yarp/node.rb#6808
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword_loc; end
 end
 
@@ -18163,39 +12886,23 @@ end
 #     self
 #     ^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#9132
-========
-# source://yarp//lib/yarp/node.rb#6857
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::SelfNode < ::YARP::Node
   # def initialize: (location: Location) -> void
   #
   # @return [SelfNode] a new instance of SelfNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9134
-========
-  # source://yarp//lib/yarp/node.rb#6859
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9139
-========
-  # source://yarp//lib/yarp/node.rb#6864
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9144
-========
-  # source://yarp//lib/yarp/node.rb#6869
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -18205,30 +12912,18 @@ class YARP::SelfNode < ::YARP::Node
 
   # def copy: (**params) -> SelfNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9154
-========
-  # source://yarp//lib/yarp/node.rb#6874
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9144
-========
-  # source://yarp//lib/yarp/node.rb#6869
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9164
-========
-  # source://yarp//lib/yarp/node.rb#6884
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#9168
@@ -18362,66 +13057,38 @@ YARP::Serialize::TOKEN_TYPES = T.let(T.unsafe(nil), Array)
 #     class << self end
 #     ^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#9178
-========
-# source://yarp//lib/yarp/node.rb#6893
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::SingletonClassNode < ::YARP::Node
   # def initialize: (locals: Array[Symbol], class_keyword_loc: Location, operator_loc: Location, expression: Node, body: Node?, end_keyword_loc: Location, location: Location) -> void
   #
   # @return [SingletonClassNode] a new instance of SingletonClassNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9198
-========
-  # source://yarp//lib/yarp/node.rb#6913
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(locals, class_keyword_loc, operator_loc, expression, body, end_keyword_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9209
-========
-  # source://yarp//lib/yarp/node.rb#6924
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # attr_reader body: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9192
-========
-  # source://yarp//lib/yarp/node.rb#6907
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def body; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9214
-========
-  # source://yarp//lib/yarp/node.rb#6929
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def class_keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9245
-========
-  # source://yarp//lib/yarp/node.rb#6955
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def class_keyword; end
 
   # attr_reader class_keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9183
-========
-  # source://yarp//lib/yarp/node.rb#6898
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def class_keyword_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -18431,57 +13098,33 @@ class YARP::SingletonClassNode < ::YARP::Node
 
   # def copy: (**params) -> SingletonClassNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9224
-========
-  # source://yarp//lib/yarp/node.rb#6934
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9214
-========
-  # source://yarp//lib/yarp/node.rb#6929
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9240
-========
-  # source://yarp//lib/yarp/node.rb#6950
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # def end_keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9255
-========
-  # source://yarp//lib/yarp/node.rb#6965
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9195
-========
-  # source://yarp//lib/yarp/node.rb#6910
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword_loc; end
 
   # attr_reader expression: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9189
-========
-  # source://yarp//lib/yarp/node.rb#6904
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def expression; end
 
   # source://yarp//lib/yarp/node.rb#9259
@@ -18489,29 +13132,17 @@ class YARP::SingletonClassNode < ::YARP::Node
 
   # attr_reader locals: Array[Symbol]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9180
-========
-  # source://yarp//lib/yarp/node.rb#6895
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def locals; end
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9250
-========
-  # source://yarp//lib/yarp/node.rb#6960
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9186
-========
-  # source://yarp//lib/yarp/node.rb#6901
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 end
 
@@ -18559,39 +13190,23 @@ end
 #     __ENCODING__
 #     ^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#9281
-========
-# source://yarp//lib/yarp/node.rb#6974
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::SourceEncodingNode < ::YARP::Node
   # def initialize: (location: Location) -> void
   #
   # @return [SourceEncodingNode] a new instance of SourceEncodingNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9283
-========
-  # source://yarp//lib/yarp/node.rb#6976
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9288
-========
-  # source://yarp//lib/yarp/node.rb#6981
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9293
-========
-  # source://yarp//lib/yarp/node.rb#6986
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -18601,30 +13216,18 @@ class YARP::SourceEncodingNode < ::YARP::Node
 
   # def copy: (**params) -> SourceEncodingNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9303
-========
-  # source://yarp//lib/yarp/node.rb#6991
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9293
-========
-  # source://yarp//lib/yarp/node.rb#6986
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9313
-========
-  # source://yarp//lib/yarp/node.rb#7001
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#9317
@@ -18636,39 +13239,23 @@ end
 #     __FILE__
 #     ^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#9327
-========
-# source://yarp//lib/yarp/node.rb#7010
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::SourceFileNode < ::YARP::Node
   # def initialize: (filepath: String, location: Location) -> void
   #
   # @return [SourceFileNode] a new instance of SourceFileNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9332
-========
-  # source://yarp//lib/yarp/node.rb#7015
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(filepath, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9338
-========
-  # source://yarp//lib/yarp/node.rb#7021
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9343
-========
-  # source://yarp//lib/yarp/node.rb#7026
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -18678,39 +13265,23 @@ class YARP::SourceFileNode < ::YARP::Node
 
   # def copy: (**params) -> SourceFileNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9353
-========
-  # source://yarp//lib/yarp/node.rb#7031
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9343
-========
-  # source://yarp//lib/yarp/node.rb#7026
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9364
-========
-  # source://yarp//lib/yarp/node.rb#7042
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # attr_reader filepath: String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9329
-========
-  # source://yarp//lib/yarp/node.rb#7012
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def filepath; end
 
   # source://yarp//lib/yarp/node.rb#9368
@@ -18722,39 +13293,23 @@ end
 #     __LINE__
 #     ^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#9379
-========
-# source://yarp//lib/yarp/node.rb#7051
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::SourceLineNode < ::YARP::Node
   # def initialize: (location: Location) -> void
   #
   # @return [SourceLineNode] a new instance of SourceLineNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9381
-========
-  # source://yarp//lib/yarp/node.rb#7053
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9386
-========
-  # source://yarp//lib/yarp/node.rb#7058
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9391
-========
-  # source://yarp//lib/yarp/node.rb#7063
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -18764,30 +13319,18 @@ class YARP::SourceLineNode < ::YARP::Node
 
   # def copy: (**params) -> SourceLineNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9401
-========
-  # source://yarp//lib/yarp/node.rb#7068
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9391
-========
-  # source://yarp//lib/yarp/node.rb#7063
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9411
-========
-  # source://yarp//lib/yarp/node.rb#7078
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#9415
@@ -18799,39 +13342,23 @@ end
 #     [*a]
 #      ^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#9425
-========
-# source://yarp//lib/yarp/node.rb#7087
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::SplatNode < ::YARP::Node
   # def initialize: (operator_loc: Location, expression: Node?, location: Location) -> void
   #
   # @return [SplatNode] a new instance of SplatNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9433
-========
-  # source://yarp//lib/yarp/node.rb#7095
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(operator_loc, expression, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9440
-========
-  # source://yarp//lib/yarp/node.rb#7102
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9445
-========
-  # source://yarp//lib/yarp/node.rb#7107
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -18841,39 +13368,23 @@ class YARP::SplatNode < ::YARP::Node
 
   # def copy: (**params) -> SplatNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9455
-========
-  # source://yarp//lib/yarp/node.rb#7112
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9445
-========
-  # source://yarp//lib/yarp/node.rb#7107
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9467
-========
-  # source://yarp//lib/yarp/node.rb#7124
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # attr_reader expression: Node?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9430
-========
-  # source://yarp//lib/yarp/node.rb#7092
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def expression; end
 
   # source://yarp//lib/yarp/node.rb#9476
@@ -18881,20 +13392,12 @@ class YARP::SplatNode < ::YARP::Node
 
   # def operator: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9472
-========
-  # source://yarp//lib/yarp/node.rb#7129
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator; end
 
   # attr_reader operator_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9427
-========
-  # source://yarp//lib/yarp/node.rb#7089
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def operator_loc; end
 end
 
@@ -18903,48 +13406,28 @@ end
 #     foo; bar; baz
 #     ^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#9493
-========
-# source://yarp//lib/yarp/node.rb#7138
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::StatementsNode < ::YARP::Node
   # def initialize: (body: Array[Node], location: Location) -> void
   #
   # @return [StatementsNode] a new instance of StatementsNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9498
-========
-  # source://yarp//lib/yarp/node.rb#7143
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(body, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9504
-========
-  # source://yarp//lib/yarp/node.rb#7149
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # attr_reader body: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9495
-========
-  # source://yarp//lib/yarp/node.rb#7140
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def body; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9509
-========
-  # source://yarp//lib/yarp/node.rb#7154
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -18954,30 +13437,18 @@ class YARP::StatementsNode < ::YARP::Node
 
   # def copy: (**params) -> StatementsNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9519
-========
-  # source://yarp//lib/yarp/node.rb#7159
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9509
-========
-  # source://yarp//lib/yarp/node.rb#7154
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9530
-========
-  # source://yarp//lib/yarp/node.rb#7170
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#9534
@@ -18989,39 +13460,23 @@ end
 #     "foo" "bar"
 #     ^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#9545
-========
-# source://yarp//lib/yarp/node.rb#7179
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::StringConcatNode < ::YARP::Node
   # def initialize: (left: Node, right: Node, location: Location) -> void
   #
   # @return [StringConcatNode] a new instance of StringConcatNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9553
-========
-  # source://yarp//lib/yarp/node.rb#7187
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(left, right, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9560
-========
-  # source://yarp//lib/yarp/node.rb#7194
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9565
-========
-  # source://yarp//lib/yarp/node.rb#7199
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -19031,30 +13486,18 @@ class YARP::StringConcatNode < ::YARP::Node
 
   # def copy: (**params) -> StringConcatNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9575
-========
-  # source://yarp//lib/yarp/node.rb#7204
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9565
-========
-  # source://yarp//lib/yarp/node.rb#7199
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9587
-========
-  # source://yarp//lib/yarp/node.rb#7216
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#9591
@@ -19062,20 +13505,12 @@ class YARP::StringConcatNode < ::YARP::Node
 
   # attr_reader left: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9547
-========
-  # source://yarp//lib/yarp/node.rb#7181
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def left; end
 
   # attr_reader right: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9550
-========
-  # source://yarp//lib/yarp/node.rb#7184
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def right; end
 end
 
@@ -19091,57 +13526,33 @@ end
 #     "foo #{bar} baz"
 #      ^^^^      ^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#9612
-========
-# source://yarp//lib/yarp/node.rb#7232
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::StringNode < ::YARP::Node
   # def initialize: (opening_loc: Location?, content_loc: Location, closing_loc: Location?, unescaped: String, location: Location) -> void
   #
   # @return [StringNode] a new instance of StringNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9626
-========
-  # source://yarp//lib/yarp/node.rb#7246
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(opening_loc, content_loc, closing_loc, unescaped, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9635
-========
-  # source://yarp//lib/yarp/node.rb#7255
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9640
-========
-  # source://yarp//lib/yarp/node.rb#7260
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9679
-========
-  # source://yarp//lib/yarp/node.rb#7294
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9620
-========
-  # source://yarp//lib/yarp/node.rb#7240
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -19151,48 +13562,28 @@ class YARP::StringNode < ::YARP::Node
 
   # def content: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9674
-========
-  # source://yarp//lib/yarp/node.rb#7289
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def content; end
 
   # attr_reader content_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9617
-========
-  # source://yarp//lib/yarp/node.rb#7237
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def content_loc; end
 
   # def copy: (**params) -> StringNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9650
-========
-  # source://yarp//lib/yarp/node.rb#7265
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9640
-========
-  # source://yarp//lib/yarp/node.rb#7260
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9664
-========
-  # source://yarp//lib/yarp/node.rb#7279
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#9683
@@ -19200,29 +13591,17 @@ class YARP::StringNode < ::YARP::Node
 
   # def opening: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9669
-========
-  # source://yarp//lib/yarp/node.rb#7284
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening; end
 
   # attr_reader opening_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9614
-========
-  # source://yarp//lib/yarp/node.rb#7234
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening_loc; end
 
   # attr_reader unescaped: String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9623
-========
-  # source://yarp//lib/yarp/node.rb#7243
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def unescaped; end
 end
 
@@ -19234,57 +13613,33 @@ end
 #     super foo, bar
 #     ^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#9700
-========
-# source://yarp//lib/yarp/node.rb#7306
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::SuperNode < ::YARP::Node
   # def initialize: (keyword_loc: Location, lparen_loc: Location?, arguments: ArgumentsNode?, rparen_loc: Location?, block: BlockNode?, location: Location) -> void
   #
   # @return [SuperNode] a new instance of SuperNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9717
-========
-  # source://yarp//lib/yarp/node.rb#7323
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(keyword_loc, lparen_loc, arguments, rparen_loc, block, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9727
-========
-  # source://yarp//lib/yarp/node.rb#7333
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # attr_reader arguments: ArgumentsNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9708
-========
-  # source://yarp//lib/yarp/node.rb#7314
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def arguments; end
 
   # attr_reader block: BlockNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9714
-========
-  # source://yarp//lib/yarp/node.rb#7320
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def block; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9732
-========
-  # source://yarp//lib/yarp/node.rb#7338
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -19294,30 +13649,18 @@ class YARP::SuperNode < ::YARP::Node
 
   # def copy: (**params) -> SuperNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9742
-========
-  # source://yarp//lib/yarp/node.rb#7343
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9732
-========
-  # source://yarp//lib/yarp/node.rb#7338
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9757
-========
-  # source://yarp//lib/yarp/node.rb#7358
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#9776
@@ -19325,56 +13668,32 @@ class YARP::SuperNode < ::YARP::Node
 
   # def keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9762
-========
-  # source://yarp//lib/yarp/node.rb#7363
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9702
-========
-  # source://yarp//lib/yarp/node.rb#7308
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword_loc; end
 
   # def lparen: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9767
-========
-  # source://yarp//lib/yarp/node.rb#7368
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def lparen; end
 
   # attr_reader lparen_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9705
-========
-  # source://yarp//lib/yarp/node.rb#7311
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def lparen_loc; end
 
   # def rparen: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9772
-========
-  # source://yarp//lib/yarp/node.rb#7373
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def rparen; end
 
   # attr_reader rparen_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9711
-========
-  # source://yarp//lib/yarp/node.rb#7317
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def rparen_loc; end
 end
 
@@ -19386,57 +13705,33 @@ end
 #     %i[foo]
 #        ^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#9804
-========
-# source://yarp//lib/yarp/node.rb#7385
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::SymbolNode < ::YARP::Node
   # def initialize: (opening_loc: Location?, value_loc: Location?, closing_loc: Location?, unescaped: String, location: Location) -> void
   #
   # @return [SymbolNode] a new instance of SymbolNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9818
-========
-  # source://yarp//lib/yarp/node.rb#7399
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(opening_loc, value_loc, closing_loc, unescaped, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9827
-========
-  # source://yarp//lib/yarp/node.rb#7408
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9832
-========
-  # source://yarp//lib/yarp/node.rb#7413
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9871
-========
-  # source://yarp//lib/yarp/node.rb#7447
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9812
-========
-  # source://yarp//lib/yarp/node.rb#7393
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -19446,30 +13741,18 @@ class YARP::SymbolNode < ::YARP::Node
 
   # def copy: (**params) -> SymbolNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9842
-========
-  # source://yarp//lib/yarp/node.rb#7418
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9832
-========
-  # source://yarp//lib/yarp/node.rb#7413
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9856
-========
-  # source://yarp//lib/yarp/node.rb#7432
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#9875
@@ -19477,47 +13760,27 @@ class YARP::SymbolNode < ::YARP::Node
 
   # def opening: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9861
-========
-  # source://yarp//lib/yarp/node.rb#7437
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening; end
 
   # attr_reader opening_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9806
-========
-  # source://yarp//lib/yarp/node.rb#7387
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening_loc; end
 
   # attr_reader unescaped: String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9815
-========
-  # source://yarp//lib/yarp/node.rb#7396
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def unescaped; end
 
   # def value: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9866
-========
-  # source://yarp//lib/yarp/node.rb#7442
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value; end
 
   # attr_reader value_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9809
-========
-  # source://yarp//lib/yarp/node.rb#7390
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def value_loc; end
 end
 
@@ -19560,39 +13823,23 @@ end
 #     true
 #     ^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#9889
-========
-# source://yarp//lib/yarp/node.rb#7456
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::TrueNode < ::YARP::Node
   # def initialize: (location: Location) -> void
   #
   # @return [TrueNode] a new instance of TrueNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9891
-========
-  # source://yarp//lib/yarp/node.rb#7458
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9896
-========
-  # source://yarp//lib/yarp/node.rb#7463
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9901
-========
-  # source://yarp//lib/yarp/node.rb#7468
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -19602,30 +13849,18 @@ class YARP::TrueNode < ::YARP::Node
 
   # def copy: (**params) -> TrueNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9911
-========
-  # source://yarp//lib/yarp/node.rb#7473
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9901
-========
-  # source://yarp//lib/yarp/node.rb#7468
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9921
-========
-  # source://yarp//lib/yarp/node.rb#7483
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#9925
@@ -19637,39 +13872,23 @@ end
 #     undef :foo, :bar, :baz
 #     ^^^^^^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#9935
-========
-# source://yarp//lib/yarp/node.rb#7492
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::UndefNode < ::YARP::Node
   # def initialize: (names: Array[Node], keyword_loc: Location, location: Location) -> void
   #
   # @return [UndefNode] a new instance of UndefNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9943
-========
-  # source://yarp//lib/yarp/node.rb#7500
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(names, keyword_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9950
-========
-  # source://yarp//lib/yarp/node.rb#7507
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9955
-========
-  # source://yarp//lib/yarp/node.rb#7512
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -19679,30 +13898,18 @@ class YARP::UndefNode < ::YARP::Node
 
   # def copy: (**params) -> UndefNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9965
-========
-  # source://yarp//lib/yarp/node.rb#7517
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9955
-========
-  # source://yarp//lib/yarp/node.rb#7512
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9977
-========
-  # source://yarp//lib/yarp/node.rb#7529
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#9986
@@ -19710,29 +13917,17 @@ class YARP::UndefNode < ::YARP::Node
 
   # def keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9982
-========
-  # source://yarp//lib/yarp/node.rb#7534
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9940
-========
-  # source://yarp//lib/yarp/node.rb#7497
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword_loc; end
 
   # attr_reader names: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#9937
-========
-  # source://yarp//lib/yarp/node.rb#7494
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def names; end
 end
 
@@ -19744,39 +13939,23 @@ end
 #     unless foo then bar end
 #     ^^^^^^^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10001
-========
-# source://yarp//lib/yarp/node.rb#7546
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::UnlessNode < ::YARP::Node
   # def initialize: (keyword_loc: Location, predicate: Node, statements: StatementsNode?, consequent: ElseNode?, end_keyword_loc: Location?, location: Location) -> void
   #
   # @return [UnlessNode] a new instance of UnlessNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10018
-========
-  # source://yarp//lib/yarp/node.rb#7563
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(keyword_loc, predicate, statements, consequent, end_keyword_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10028
-========
-  # source://yarp//lib/yarp/node.rb#7573
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10037
-========
-  # source://yarp//lib/yarp/node.rb#7582
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -19786,57 +13965,33 @@ class YARP::UnlessNode < ::YARP::Node
 
   # attr_reader consequent: ElseNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10012
-========
-  # source://yarp//lib/yarp/node.rb#7557
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def consequent; end
 
   # def copy: (**params) -> UnlessNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10047
-========
-  # source://yarp//lib/yarp/node.rb#7587
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10037
-========
-  # source://yarp//lib/yarp/node.rb#7582
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10062
-========
-  # source://yarp//lib/yarp/node.rb#7602
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # def end_keyword: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10072
-========
-  # source://yarp//lib/yarp/node.rb#7612
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10015
-========
-  # source://yarp//lib/yarp/node.rb#7560
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def end_keyword_loc; end
 
   # source://yarp//lib/yarp/node.rb#10076
@@ -19844,44 +13999,25 @@ class YARP::UnlessNode < ::YARP::Node
 
   # def keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10067
-========
-  # source://yarp//lib/yarp/node.rb#7607
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10003
-========
-  # source://yarp//lib/yarp/node.rb#7548
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword_loc; end
 
   # attr_reader predicate: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10006
   def predicate; end
 
   # source://yarp//lib/yarp/node.rb#10032
-========
-  # source://yarp//lib/yarp/node.rb#7551
-  def predicate; end
-
-  # source://yarp//lib/yarp/node.rb#7577
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def set_newline_flag(newline_marked); end
 
   # attr_reader statements: StatementsNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10009
-========
-  # source://yarp//lib/yarp/node.rb#7554
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def statements; end
 end
 
@@ -19893,68 +14029,40 @@ end
 #     until foo do bar end
 #     ^^^^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10105
-========
-# source://yarp//lib/yarp/node.rb#7624
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::UntilNode < ::YARP::Node
   # def initialize: (keyword_loc: Location, closing_loc: Location?, predicate: Node, statements: StatementsNode?, flags: Integer, location: Location) -> void
   #
   # @return [UntilNode] a new instance of UntilNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10122
-========
-  # source://yarp//lib/yarp/node.rb#7641
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(keyword_loc, closing_loc, predicate, statements, flags, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10132
-========
-  # source://yarp//lib/yarp/node.rb#7651
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def begin_modifier?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10181
-========
-  # source://yarp//lib/yarp/node.rb#7695
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def begin_modifier?; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10141
-========
-  # source://yarp//lib/yarp/node.rb#7660
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10176
-========
-  # source://yarp//lib/yarp/node.rb#7690
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10110
-========
-  # source://yarp//lib/yarp/node.rb#7629
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -19964,39 +14072,23 @@ class YARP::UntilNode < ::YARP::Node
 
   # def copy: (**params) -> UntilNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10151
-========
-  # source://yarp//lib/yarp/node.rb#7665
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10141
-========
-  # source://yarp//lib/yarp/node.rb#7660
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10166
-========
-  # source://yarp//lib/yarp/node.rb#7680
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # attr_reader flags: Integer
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10119
-========
-  # source://yarp//lib/yarp/node.rb#7638
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def flags; end
 
   # source://yarp//lib/yarp/node.rb#10185
@@ -20004,44 +14096,25 @@ class YARP::UntilNode < ::YARP::Node
 
   # def keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10171
-========
-  # source://yarp//lib/yarp/node.rb#7685
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10107
-========
-  # source://yarp//lib/yarp/node.rb#7626
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword_loc; end
 
   # attr_reader predicate: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10113
   def predicate; end
 
   # source://yarp//lib/yarp/node.rb#10136
-========
-  # source://yarp//lib/yarp/node.rb#7632
-  def predicate; end
-
-  # source://yarp//lib/yarp/node.rb#7655
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def set_newline_flag(newline_marked); end
 
   # attr_reader statements: StatementsNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10116
-========
-  # source://yarp//lib/yarp/node.rb#7635
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def statements; end
 end
 
@@ -20738,39 +14811,23 @@ end
 #     ^^^^^^^^^
 #     end
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10208
-========
-# source://yarp//lib/yarp/node.rb#7706
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::WhenNode < ::YARP::Node
   # def initialize: (keyword_loc: Location, conditions: Array[Node], statements: StatementsNode?, location: Location) -> void
   #
   # @return [WhenNode] a new instance of WhenNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10219
-========
-  # source://yarp//lib/yarp/node.rb#7717
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(keyword_loc, conditions, statements, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10227
-========
-  # source://yarp//lib/yarp/node.rb#7725
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10232
-========
-  # source://yarp//lib/yarp/node.rb#7730
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -20780,39 +14837,23 @@ class YARP::WhenNode < ::YARP::Node
 
   # attr_reader conditions: Array[Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10213
-========
-  # source://yarp//lib/yarp/node.rb#7711
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def conditions; end
 
   # def copy: (**params) -> WhenNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10242
-========
-  # source://yarp//lib/yarp/node.rb#7735
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10232
-========
-  # source://yarp//lib/yarp/node.rb#7730
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10255
-========
-  # source://yarp//lib/yarp/node.rb#7748
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#10264
@@ -20820,29 +14861,17 @@ class YARP::WhenNode < ::YARP::Node
 
   # def keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10260
-========
-  # source://yarp//lib/yarp/node.rb#7753
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10210
-========
-  # source://yarp//lib/yarp/node.rb#7708
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword_loc; end
 
   # attr_reader statements: StatementsNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10216
-========
-  # source://yarp//lib/yarp/node.rb#7714
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def statements; end
 end
 
@@ -20854,68 +14883,40 @@ end
 #     while foo do bar end
 #     ^^^^^^^^^^^^^^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10285
-========
-# source://yarp//lib/yarp/node.rb#7765
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::WhileNode < ::YARP::Node
   # def initialize: (keyword_loc: Location, closing_loc: Location?, predicate: Node, statements: StatementsNode?, flags: Integer, location: Location) -> void
   #
   # @return [WhileNode] a new instance of WhileNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10302
-========
-  # source://yarp//lib/yarp/node.rb#7782
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(keyword_loc, closing_loc, predicate, statements, flags, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10312
-========
-  # source://yarp//lib/yarp/node.rb#7792
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def begin_modifier?: () -> bool
   #
   # @return [Boolean]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10361
-========
-  # source://yarp//lib/yarp/node.rb#7836
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def begin_modifier?; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10321
-========
-  # source://yarp//lib/yarp/node.rb#7801
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10356
-========
-  # source://yarp//lib/yarp/node.rb#7831
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10290
-========
-  # source://yarp//lib/yarp/node.rb#7770
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -20925,39 +14926,23 @@ class YARP::WhileNode < ::YARP::Node
 
   # def copy: (**params) -> WhileNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10331
-========
-  # source://yarp//lib/yarp/node.rb#7806
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10321
-========
-  # source://yarp//lib/yarp/node.rb#7801
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10346
-========
-  # source://yarp//lib/yarp/node.rb#7821
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # attr_reader flags: Integer
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10299
-========
-  # source://yarp//lib/yarp/node.rb#7779
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def flags; end
 
   # source://yarp//lib/yarp/node.rb#10365
@@ -20965,44 +14950,25 @@ class YARP::WhileNode < ::YARP::Node
 
   # def keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10351
-========
-  # source://yarp//lib/yarp/node.rb#7826
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10287
-========
-  # source://yarp//lib/yarp/node.rb#7767
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword_loc; end
 
   # attr_reader predicate: Node
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10293
   def predicate; end
 
   # source://yarp//lib/yarp/node.rb#10316
-========
-  # source://yarp//lib/yarp/node.rb#7773
-  def predicate; end
-
-  # source://yarp//lib/yarp/node.rb#7796
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def set_newline_flag(newline_marked); end
 
   # attr_reader statements: StatementsNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10296
-========
-  # source://yarp//lib/yarp/node.rb#7776
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def statements; end
 end
 
@@ -21011,57 +14977,33 @@ end
 #     `foo`
 #     ^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10386
-========
-# source://yarp//lib/yarp/node.rb#7845
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::XStringNode < ::YARP::Node
   # def initialize: (opening_loc: Location, content_loc: Location, closing_loc: Location, unescaped: String, location: Location) -> void
   #
   # @return [XStringNode] a new instance of XStringNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10400
-========
-  # source://yarp//lib/yarp/node.rb#7859
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(opening_loc, content_loc, closing_loc, unescaped, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10409
-========
-  # source://yarp//lib/yarp/node.rb#7868
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10414
-========
-  # source://yarp//lib/yarp/node.rb#7873
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def closing: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10453
-========
-  # source://yarp//lib/yarp/node.rb#7907
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing; end
 
   # attr_reader closing_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10394
-========
-  # source://yarp//lib/yarp/node.rb#7853
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -21071,48 +15013,28 @@ class YARP::XStringNode < ::YARP::Node
 
   # def content: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10448
-========
-  # source://yarp//lib/yarp/node.rb#7902
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def content; end
 
   # attr_reader content_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10391
-========
-  # source://yarp//lib/yarp/node.rb#7850
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def content_loc; end
 
   # def copy: (**params) -> XStringNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10424
-========
-  # source://yarp//lib/yarp/node.rb#7878
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10414
-========
-  # source://yarp//lib/yarp/node.rb#7873
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10438
-========
-  # source://yarp//lib/yarp/node.rb#7892
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#10457
@@ -21120,29 +15042,17 @@ class YARP::XStringNode < ::YARP::Node
 
   # def opening: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10443
-========
-  # source://yarp//lib/yarp/node.rb#7897
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening; end
 
   # attr_reader opening_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10388
-========
-  # source://yarp//lib/yarp/node.rb#7847
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def opening_loc; end
 
   # attr_reader unescaped: String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10397
-========
-  # source://yarp//lib/yarp/node.rb#7856
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def unescaped; end
 end
 
@@ -21151,48 +15061,28 @@ end
 #     yield 1
 #     ^^^^^^^
 #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
 # source://yarp//lib/yarp/node.rb#10471
-========
-# source://yarp//lib/yarp/node.rb#7916
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
 class YARP::YieldNode < ::YARP::Node
   # def initialize: (keyword_loc: Location, lparen_loc: Location?, arguments: ArgumentsNode?, rparen_loc: Location?, location: Location) -> void
   #
   # @return [YieldNode] a new instance of YieldNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10485
-========
-  # source://yarp//lib/yarp/node.rb#7930
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def initialize(keyword_loc, lparen_loc, arguments, rparen_loc, location); end
 
   # def accept: (visitor: Visitor) -> void
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10494
-========
-  # source://yarp//lib/yarp/node.rb#7939
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def accept(visitor); end
 
   # attr_reader arguments: ArgumentsNode?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10479
-========
-  # source://yarp//lib/yarp/node.rb#7924
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def arguments; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10499
-========
-  # source://yarp//lib/yarp/node.rb#7944
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
@@ -21202,30 +15092,18 @@ class YARP::YieldNode < ::YARP::Node
 
   # def copy: (**params) -> YieldNode
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10509
-========
-  # source://yarp//lib/yarp/node.rb#7949
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def copy(**params); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10499
-========
-  # source://yarp//lib/yarp/node.rb#7944
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct; end
 
   # def deconstruct_keys: (keys: Array[Symbol]) -> Hash[Symbol, nil | Node | Array[Node] | String | Token | Array[Token] | Location]
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10523
-========
-  # source://yarp//lib/yarp/node.rb#7963
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def deconstruct_keys(keys); end
 
   # source://yarp//lib/yarp/node.rb#10542
@@ -21233,55 +15111,31 @@ class YARP::YieldNode < ::YARP::Node
 
   # def keyword: () -> String
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10528
-========
-  # source://yarp//lib/yarp/node.rb#7968
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10473
-========
-  # source://yarp//lib/yarp/node.rb#7918
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def keyword_loc; end
 
   # def lparen: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10533
-========
-  # source://yarp//lib/yarp/node.rb#7973
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def lparen; end
 
   # attr_reader lparen_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10476
-========
-  # source://yarp//lib/yarp/node.rb#7921
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def lparen_loc; end
 
   # def rparen: () -> String?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10538
-========
-  # source://yarp//lib/yarp/node.rb#7978
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def rparen; end
 
   # attr_reader rparen_loc: Location?
   #
-<<<<<<<< HEAD:sorbet/rbi/gems/yarp@0.11.0.rbi
   # source://yarp//lib/yarp/node.rb#10482
-========
-  # source://yarp//lib/yarp/node.rb#7927
->>>>>>>> a9aad88d (Add YARP RBI annotations (#978)):sorbet/rbi/gems/yarp@0.10.0.rbi
   def rparen_loc; end
 end

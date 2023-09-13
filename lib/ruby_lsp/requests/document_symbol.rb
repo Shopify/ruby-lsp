@@ -113,8 +113,11 @@ module RubyLsp
         arguments.arguments.each do |argument|
           next unless argument.is_a?(YARP::SymbolNode)
 
+          name = argument.value
+          next unless name
+
           create_document_symbol(
-            name: argument.value,
+            name: name,
             kind: Constant::SymbolKind::FIELD,
             range_node: argument,
             selection_range_node: argument,
@@ -135,7 +138,7 @@ module RubyLsp
       sig { params(node: YARP::ConstantWriteNode).void }
       def on_constant_write(node)
         create_document_symbol(
-          name: node.name,
+          name: node.name.to_s,
           kind: Constant::SymbolKind::CONSTANT,
           range_node: node,
           selection_range_node: node.name_loc,
@@ -165,7 +168,7 @@ module RubyLsp
           name = "self.#{node.name}"
           kind = Constant::SymbolKind::METHOD
         else
-          name = node.name
+          name = node.name.to_s
           kind = name == "initialize" ? Constant::SymbolKind::CONSTRUCTOR : Constant::SymbolKind::METHOD
         end
 

@@ -22,20 +22,21 @@ class CompletionTest < Minitest::Test
       require "#{prefix}"
     RUBY
 
+    end_char = T.must(document.source.rindex('"'))
     start_position = {
       line: 0,
       character: T.must(document.source.index('"')),
     }
     end_position = {
       line: 0,
-      character: T.must(document.source.rindex('"')),
+      character: end_char + 1,
     }
 
     result = with_file_structure do
       @store.set(uri: @uri, source: document.source, version: 1)
       run_request(
         method: "textDocument/completion",
-        params: { textDocument: { uri: @uri.to_s }, position: end_position },
+        params: { textDocument: { uri: @uri.to_s }, position: { line: 0, character: end_char } },
       )
     end
 
@@ -58,20 +59,21 @@ class CompletionTest < Minitest::Test
       require("#{prefix}")
     RUBY
 
+    end_char = T.must(document.source.rindex('"'))
     start_position = {
       line: 0,
       character: T.must(document.source.index('"')),
     }
     end_position = {
       line: 0,
-      character: T.must(document.source.rindex('"')),
+      character: end_char + 1,
     }
 
     result = with_file_structure do
       @store.set(uri: @uri, source: document.source, version: 1)
       run_request(
         method: "textDocument/completion",
-        params: { textDocument: { uri: @uri.to_s }, position: end_position },
+        params: { textDocument: { uri: @uri.to_s }, position: { line: 0, character: end_char } },
       )
     end
 
@@ -94,20 +96,21 @@ class CompletionTest < Minitest::Test
       Kernel.require "#{prefix}"
     RUBY
 
+    end_char = T.must(document.source.rindex('"'))
     start_position = {
       line: 0,
       character: T.must(document.source.index('"')),
     }
     end_position = {
       line: 0,
-      character: T.must(document.source.rindex('"')),
+      character: end_char + 1,
     }
 
     result = with_file_structure do
       @store.set(uri: @uri, source: document.source, version: 1)
       run_request(
         method: "textDocument/completion",
-        params: { textDocument: { uri: @uri.to_s }, position: end_position },
+        params: { textDocument: { uri: @uri.to_s }, position: { line: 0, character: end_char } },
       )
     end
 
@@ -130,20 +133,21 @@ class CompletionTest < Minitest::Test
       require "#{prefix}"
     RUBY
 
+    end_char = T.must(document.source.rindex('"'))
     start_position = {
       line: 0,
       character: T.must(document.source.index('"')),
     }
     end_position = {
       line: 0,
-      character: T.must(document.source.rindex('"')),
+      character: end_char + 1,
     }
 
     result = with_file_structure do
       @store.set(uri: @uri, source: document.source, version: 1)
       run_request(
         method: "textDocument/completion",
-        params: { textDocument: { uri: @uri.to_s }, position: end_position },
+        params: { textDocument: { uri: @uri.to_s }, position: { line: 0, character: end_char } },
       )
     end
 
