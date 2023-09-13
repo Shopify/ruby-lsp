@@ -175,19 +175,23 @@ module RubyLsp
       # weren't a part of the Gemfile, then we need to run `bundle install` for the first time to generate the
       # Gemfile.lock with them included or else Bundler will complain that they're missing. We can only update if the
       # custom `.ruby-lsp/Gemfile.lock` already exists and includes both gems
-      command = +""
 
-      if should_bundle_install?
-        # Install gems using the custom bundle
-        command << "(bundle check || bundle install) "
-      else
+      # When not updating, we run `(bundle check || bundle install)`
+      # When updating, we run `((bundle check && bundle update ruby-lsp debug) || bundle install)`
+      command = +"(bundle check"
+
+      if should_bundle_update?
         # If ruby-lsp or debug are not in the Gemfile, try to update them to the latest version
-        command << "bundle update "
+        command.prepend("(")
+        command << " && bundle update "
         command << "ruby-lsp " unless @dependencies["ruby-lsp"]
-        command << "debug " unless @dependencies["debug"]
+        command << "debug" unless @dependencies["debug"]
+        command << ")"
 
         @last_updated_path.write(Time.now.iso8601)
       end
+
+      command << " || bundle install) "
 
       # Redirect stdout to stderr to prevent going into an infinite loop. The extension might confuse stdout output with
       # responses
@@ -200,10 +204,17 @@ module RubyLsp
     end
 
     sig { returns(T::Boolean) }
-    def should_bundle_install?
-      (!@dependencies["ruby-lsp"].nil? && !@dependencies["debug"].nil?) ||
-        custom_bundle_dependencies["ruby-lsp"].nil? || custom_bundle_dependencies["debug"].nil? ||
-        (@last_updated_path.exist? && Time.parse(@last_updated_path.read) > (Time.now - FOUR_HOURS))
+    def should_bundle_update?
+      # If both `ruby-lsp` and `debug` are in the Gemfile, then we shouldn't try to upgrade them or else it will produce
+      # version control changes
+      return false if @dependencies["ruby-lsp"] && @dependencies["debug"]
+
+      # If the custom lockfile doesn't include either the `ruby-lsp` or `debug`, we need to run bundle install before
+      # updating
+      return false if custom_bundle_dependencies["ruby-lsp"].nil? || custom_bundle_dependencies["debug"].nil?
+
+      # If the last updated file doesn't exist or was updated more than 4 hours ago, we should update
+      !@last_updated_path.exist? || Time.parse(@last_updated_path.read) < (Time.now - FOUR_HOURS)
     end
   end
 end
