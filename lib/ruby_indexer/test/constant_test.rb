@@ -104,5 +104,61 @@ module RubyIndexer
 
       assert_no_entry
     end
+
+    def test_private_constant_indexing
+      index(<<~RUBY)
+        class A
+          B = 1
+          private_constant(:B)
+
+          C = 2
+          private_constant("C")
+
+          D = 1
+        end
+      RUBY
+
+      b_const = @index["A::B"].first
+      assert_equal(:private, b_const.visibility)
+
+      c_const = @index["A::C"].first
+      assert_equal(:private, c_const.visibility)
+
+      d_const = @index["A::D"].first
+      assert_equal(:public, d_const.visibility)
+    end
+
+    def test_marking_constants_as_private_reopening_namespaces
+      index(<<~RUBY)
+        module A
+          module B
+            CONST_A = 1
+            private_constant(:CONST_A)
+
+            CONST_B = 2
+            CONST_C = 3
+          end
+
+          module B
+            private_constant(:CONST_B)
+          end
+        end
+
+        module A
+          module B
+            private_constant(:CONST_C)
+          end
+        end
+      RUBY
+
+      b_const = @index["A::B::CONST_A"].first
+      assert_equal(:private, b_const.visibility)
+
+      c_const = @index["A::B::CONST_B"].first
+      assert_equal(:private, c_const.visibility)
+
+      d_const = @index["A::B::CONST_C"].first
+      assert_equal(:private, d_const.visibility)
+    end
   end
 end
