@@ -46,7 +46,7 @@ module RubyLsp
             ).returns(T::Boolean)
           end
           def annotation?(node)
-            ANNOTATIONS[node.name]&.match?(node)
+            !!ANNOTATIONS[node.name]&.match?(node)
           end
         end
       end
