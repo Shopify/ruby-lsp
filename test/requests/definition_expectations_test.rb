@@ -178,10 +178,10 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           def initialize(uri, _, _, emitter, message_queue)
             super(emitter, message_queue)
             @uri = uri
-            emitter.register(self, :on_const)
+            emitter.register(self, :on_constant_read)
           end
 
-          def on_const(node)
+          def on_constant_read(node)
             location = node.location
             @_response = RubyLsp::Interface::Location.new(
               uri: "file:///generated_by_extension.rb",

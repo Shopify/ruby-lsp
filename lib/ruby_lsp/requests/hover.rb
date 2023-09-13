@@ -80,7 +80,7 @@ module RubyLsp
       def on_constant_write(node)
         return if DependencyDetector::HAS_TYPECHECKER
 
-        generate_hover(node.name, node.name_loc)
+        generate_hover(node.name.to_s, node.name_loc)
       end
 
       sig { params(node: YARP::ConstantPathNode).void }
