@@ -294,6 +294,58 @@ class CompletionTest < Minitest::Test
     RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
   end
 
+  def test_completion_private_constants_inside_the_same_namespace
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+      class A
+        CONST = 1
+        private_constant(:CONST)
+
+        C
+      end
+    RUBY
+
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    end_position = { line: 3, character: 4 }
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: end_position },
+    )
+    assert_equal(["CONST"], result.map { |completion| completion.text_edit.new_text })
+  ensure
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
+  end
+
+  def test_completion_private_constants_from_different_namespace
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+      class A
+        CONST = 1
+        private_constant(:CONST)
+      end
+
+      A::C
+    RUBY
+
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    end_position = { line: 4, character: 5 }
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: end_position },
+    )
+    assert_empty(result)
+  ensure
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
+  end
+
   private
 
   def run_request(method:, params: {})
