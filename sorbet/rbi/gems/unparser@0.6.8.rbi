@@ -1099,13 +1099,13 @@ class Unparser::Color
   def format(text); end
 end
 
-# source://unparser//lib/unparser/color.rb#39
+# source://unparser//lib/unparser/color.rb#41
 Unparser::Color::GREEN = T.let(T.unsafe(nil), Unparser::Color)
 
 # source://unparser//lib/unparser/color.rb#17
 Unparser::Color::NONE = T.let(T.unsafe(nil), T.untyped)
 
-# source://unparser//lib/unparser/color.rb#38
+# source://unparser//lib/unparser/color.rb#40
 Unparser::Color::RED = T.let(T.unsafe(nil), Unparser::Color)
 
 # Holds the comments that remain to be emitted
@@ -3692,7 +3692,7 @@ class Unparser::NodeDetails::Send
 
   # @return [Boolean]
   #
-  # source://unparser//lib/unparser/node_details/send.rb#36
+  # source://unparser//lib/unparser/node_details/send.rb#37
   def arguments?; end
 
   # @return [Boolean]
@@ -3702,7 +3702,7 @@ class Unparser::NodeDetails::Send
 
   # @return [Boolean]
   #
-  # source://unparser//lib/unparser/node_details/send.rb#32
+  # source://unparser//lib/unparser/node_details/send.rb#33
   def assignment_operator?; end
 
   # @return [Boolean]
@@ -3710,7 +3710,7 @@ class Unparser::NodeDetails::Send
   # source://unparser//lib/unparser/node_details/send.rb#21
   def binary_syntax_allowed?; end
 
-  # source://unparser//lib/unparser/node_details/send.rb#40
+  # source://unparser//lib/unparser/node_details/send.rb#41
   def non_assignment_selector; end
 
   # source://unparser//lib/unparser/dsl.rb#18
@@ -3726,7 +3726,7 @@ class Unparser::NodeDetails::Send
 
   # @return [Boolean]
   #
-  # source://unparser//lib/unparser/node_details/send.rb#28
+  # source://unparser//lib/unparser/node_details/send.rb#29
   def selector_unary_operator?; end
 
   # source://unparser//lib/unparser/adamantium/method_builder.rb#87
@@ -3913,21 +3913,22 @@ class Unparser::Validation
 
   # Test if source could be unparsed successfully
   #
+  #
   # @api private
   # @return [Boolean]
   #
-  # source://unparser//lib/unparser/validation.rb#20
+  # source://unparser//lib/unparser/validation.rb#21
   def success?; end
 
   private
 
-  # source://unparser//lib/unparser/validation.rb#106
+  # source://unparser//lib/unparser/validation.rb#108
   def make_report(label, attribute_name); end
 
-  # source://unparser//lib/unparser/validation.rb#118
+  # source://unparser//lib/unparser/validation.rb#120
   def node_diff_report; end
 
-  # source://unparser//lib/unparser/validation.rb#110
+  # source://unparser//lib/unparser/validation.rb#112
   def report_exception(exception); end
 
   class << self
@@ -3939,7 +3940,7 @@ class Unparser::Validation
     # @param original_node [Parser::AST::Node]
     # @return [Validator]
     #
-    # source://unparser//lib/unparser/validation.rb#79
+    # source://unparser//lib/unparser/validation.rb#81
     def from_node(original_node); end
 
     # Create validator from file
@@ -3947,7 +3948,7 @@ class Unparser::Validation
     # @param path [Pathname]
     # @return [Validator]
     #
-    # source://unparser//lib/unparser/validation.rb#100
+    # source://unparser//lib/unparser/validation.rb#102
     def from_path(path); end
 
     # Create validator from string
@@ -3955,29 +3956,29 @@ class Unparser::Validation
     # @param original_source [String]
     # @return [Validator]
     #
-    # source://unparser//lib/unparser/validation.rb#53
+    # source://unparser//lib/unparser/validation.rb#55
     def from_string(original_source); end
 
     private
 
-    # source://unparser//lib/unparser/validation.rb#133
+    # source://unparser//lib/unparser/validation.rb#135
     def const_unit(_value); end
   end
 end
 
-# source://unparser//lib/unparser/validation.rb#136
+# source://unparser//lib/unparser/validation.rb#138
 class Unparser::Validation::Literal < ::Unparser::Validation
-  # source://unparser//lib/unparser/validation.rb#141
+  # source://unparser//lib/unparser/validation.rb#143
   def report; end
 
   # @return [Boolean]
   #
-  # source://unparser//lib/unparser/validation.rb#137
+  # source://unparser//lib/unparser/validation.rb#139
   def success?; end
 
   private
 
-  # source://unparser//lib/unparser/validation.rb#156
+  # source://unparser//lib/unparser/validation.rb#158
   def source_diff_report; end
 end
 

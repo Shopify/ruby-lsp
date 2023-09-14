@@ -1516,39 +1516,38 @@ RuboCop::Cop::Minitest::RefuteEmpty::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Arr
 # @example
 #   # bad
 #   assert("rubocop-minitest" != actual)
-#   assert(! "rubocop-minitest" == actual)
 #
 #   # good
 #   refute_equal("rubocop-minitest", actual)
 #
-# source://rubocop-minitest//lib/rubocop/cop/minitest/refute_equal.rb#17
+# source://rubocop-minitest//lib/rubocop/cop/minitest/refute_equal.rb#16
 class RuboCop::Cop::Minitest::RefuteEqual < ::RuboCop::Cop::Base
   include ::RuboCop::Cop::RangeHelp
   include ::RuboCop::Cop::ArgumentRangeHelper
   extend ::RuboCop::Cop::AutoCorrector
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_equal.rb#24
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_equal.rb#23
   def assert_not_equal(param0 = T.unsafe(nil)); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_equal.rb#28
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_equal.rb#27
   def on_send(node); end
 
   private
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_equal.rb#50
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_equal.rb#49
   def original_usage(first_part, custom_message); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_equal.rb#46
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_equal.rb#45
   def preferred_usage(first_arg, second_arg, custom_message = T.unsafe(nil)); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_equal.rb#54
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_equal.rb#53
   def process_not_equal(node); end
 end
 
-# source://rubocop-minitest//lib/rubocop/cop/minitest/refute_equal.rb#21
+# source://rubocop-minitest//lib/rubocop/cop/minitest/refute_equal.rb#20
 RuboCop::Cop::Minitest::RefuteEqual::MSG = T.let(T.unsafe(nil), String)
 
-# source://rubocop-minitest//lib/rubocop/cop/minitest/refute_equal.rb#22
+# source://rubocop-minitest//lib/rubocop/cop/minitest/refute_equal.rb#21
 RuboCop::Cop::Minitest::RefuteEqual::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
 
 # Enforces the use of `refute(object)` over `assert_equal(false, object)`.
@@ -2430,7 +2429,7 @@ module RuboCop::Cop::MinitestExplorationHelpers
   # @api private
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#113
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#112
   def lifecycle_hook_method?(node); end
 
   # @api private
