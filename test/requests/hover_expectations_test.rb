@@ -32,6 +32,68 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hovering_over_private_constant_from_the_same_namespace
+    message_queue = Thread::Queue.new
+    store = RubyLsp::Store.new
+
+    uri = URI("file:///fake.rb")
+    source = <<~RUBY
+      class A
+        CONST = 123
+        private_constant(:CONST)
+
+        CONST
+      end
+    RUBY
+    store.set(uri: uri, source: source, version: 1)
+
+    executor = RubyLsp::Executor.new(store, message_queue)
+    index = executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
+
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    response = executor.execute({
+      method: "textDocument/hover",
+      params: { textDocument: { uri: uri }, position: { character: 2, line: 4 } },
+    }).response
+
+    assert_match("CONST", response.contents.value)
+  ensure
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
+    T.must(message_queue).close
+  end
+
+  def test_hovering_over_private_constant_from_different_namespace
+    message_queue = Thread::Queue.new
+    store = RubyLsp::Store.new
+
+    uri = URI("file:///fake.rb")
+    source = <<~RUBY
+      class A
+        CONST = 123
+        private_constant(:CONST)
+      end
+
+      A::CONST # invalid private reference
+    RUBY
+    store.set(uri: uri, source: source, version: 1)
+
+    executor = RubyLsp::Executor.new(store, message_queue)
+    index = executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
+
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    response = executor.execute({
+      method: "textDocument/hover",
+      params: { textDocument: { uri: uri }, position: { character: 0, line: 5 } },
+    }).response
+
+    assert_nil(response)
+  ensure
+    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
+    T.must(message_queue).close
+  end
+
   def test_hover_extensions
     source = <<~RUBY
       # Hello
