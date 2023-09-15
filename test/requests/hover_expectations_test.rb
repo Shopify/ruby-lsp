@@ -62,7 +62,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
       end
 
       def create_hover_listener(emitter, message_queue)
-        klass = Class.new(RubyLsp::Listener) do
+        klass = Class.new(RubyLsp::ExtensionListener) do
           attr_reader :_response
 
           def initialize(emitter, message_queue)
@@ -71,12 +71,16 @@ class HoverExpectationsTest < ExpectationsTestRunner
           end
 
           def on_const(node)
-            T.bind(self, RubyLsp::Listener[T.untyped])
+            T.bind(self, RubyLsp::ExtensionListener[T.untyped])
             contents = RubyLsp::Interface::MarkupContent.new(
               kind: "markdown",
               value: "Hello from middleware: #{node.value}",
             )
             @_response = RubyLsp::Interface::Hover.new(range: range_from_syntax_tree_node(node), contents: contents)
+          end
+
+          def merge_response(current_response)
+            current_response.contents.value << "\n\n#{@_response.contents.value}"
           end
         end
 

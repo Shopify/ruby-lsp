@@ -129,7 +129,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
       def create_code_lens_listener(uri, emitter, message_queue)
         raise "uri can't be nil" unless uri
 
-        klass = Class.new(RubyLsp::Listener) do
+        klass = Class.new(RubyLsp::ExtensionListener) do
           attr_reader :_response
 
           def initialize(uri, emitter, message_queue)
@@ -138,7 +138,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
           end
 
           def on_class(node)
-            T.bind(self, RubyLsp::Listener[T.untyped])
+            T.bind(self, RubyLsp::ExtensionListener[T.untyped])
 
             @_response = [RubyLsp::Interface::CodeLens.new(
               range: range_from_syntax_tree_node(node),
@@ -147,6 +147,10 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
                 command: "rubyLsp.runTest",
               ),
             )]
+          end
+
+          def merge_response(current_response)
+            current_response.concat(@_response)
           end
         end
 

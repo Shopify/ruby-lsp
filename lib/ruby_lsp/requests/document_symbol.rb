@@ -75,16 +75,9 @@ module RubyLsp
         )
       end
 
-      sig { override.params(extension: RubyLsp::Extension).returns(T.nilable(Listener[ResponseType])) }
+      sig { override.params(extension: RubyLsp::Extension).returns(T.nilable(ExtensionListener[ResponseType])) }
       def initialize_external_listener(extension)
         extension.create_document_symbol_listener(@emitter, @message_queue)
-      end
-
-      # Merges responses from other listeners
-      sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
-      def merge_response!(other)
-        @_response.concat(other.response)
-        self
       end
 
       sig { params(node: SyntaxTree::ClassDeclaration).void }

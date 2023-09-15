@@ -112,7 +112,7 @@ module RubyLsp
         uri: URI::Generic,
         emitter: EventEmitter,
         message_queue: Thread::Queue,
-      ).returns(T.nilable(Listener[T::Array[Interface::CodeLens]]))
+      ).returns(T.nilable(ExtensionListener[T::Array[Interface::CodeLens]]))
     end
     def create_code_lens_listener(uri, emitter, message_queue); end
 
@@ -121,7 +121,7 @@ module RubyLsp
       overridable.params(
         emitter: EventEmitter,
         message_queue: Thread::Queue,
-      ).returns(T.nilable(Listener[T.nilable(Interface::Hover)]))
+      ).returns(T.nilable(ExtensionListener[T.nilable(Interface::Hover)]))
     end
     def create_hover_listener(emitter, message_queue); end
 
@@ -130,7 +130,7 @@ module RubyLsp
       overridable.params(
         emitter: EventEmitter,
         message_queue: Thread::Queue,
-      ).returns(T.nilable(Listener[T::Array[Interface::DocumentSymbol]]))
+      ).returns(T.nilable(ExtensionListener[T::Array[Interface::DocumentSymbol]]))
     end
     def create_document_symbol_listener(emitter, message_queue); end
 
@@ -142,7 +142,7 @@ module RubyLsp
         index: RubyIndexer::Index,
         emitter: EventEmitter,
         message_queue: Thread::Queue,
-      ).returns(T.nilable(Listener[T.nilable(T.any(T::Array[Interface::Location], Interface::Location))]))
+      ).returns(T.nilable(ExtensionListener[T.nilable(T.any(T::Array[Interface::Location], Interface::Location))]))
     end
     def create_definition_listener(uri, nesting, index, emitter, message_queue); end
   end

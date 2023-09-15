@@ -146,15 +146,9 @@ module RubyLsp
         end
       end
 
-      sig { override.params(extension: RubyLsp::Extension).returns(T.nilable(Listener[ResponseType])) }
+      sig { override.params(extension: RubyLsp::Extension).returns(T.nilable(ExtensionListener[ResponseType])) }
       def initialize_external_listener(extension)
         extension.create_code_lens_listener(@uri, @emitter, @message_queue)
-      end
-
-      sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
-      def merge_response!(other)
-        @_response.concat(other.response)
-        self
       end
 
       private

@@ -30,6 +30,7 @@ module RubyLsp
     sig { abstract.returns(ResponseType) }
     def _response; end
   end
+  private_constant(:Listener)
 
   # ExtensibleListener is an abstract class to be used by requests that accept extensions.
   class ExtensibleListener < Listener
@@ -51,7 +52,7 @@ module RubyLsp
         Extension.extensions.filter_map do |ext|
           initialize_external_listener(ext)
         end,
-        T::Array[RubyLsp::Listener[ResponseType]],
+        T::Array[RubyLsp::ExtensionListener[ResponseType]],
       )
     end
 
@@ -59,7 +60,7 @@ module RubyLsp
     # response to the editor including the results of all extensions
     sig { void }
     def merge_external_listeners_responses!
-      @external_listeners.each { |l| merge_response!(l) }
+      @external_listeners.each { |l| l.merge_response(_response) }
     end
 
     sig { returns(ResponseType) }
@@ -69,14 +70,22 @@ module RubyLsp
     end
 
     sig do
-      abstract.params(extension: RubyLsp::Extension).returns(T.nilable(RubyLsp::Listener[ResponseType]))
+      abstract.params(extension: RubyLsp::Extension).returns(T.nilable(RubyLsp::ExtensionListener[ResponseType]))
     end
     def initialize_external_listener(extension); end
+  end
+  private_constant(:ExtensibleListener)
 
-    # Does nothing by default. Requests that accept extensions should override this method to define how to merge
-    # responses coming from external listeners
-    sig { abstract.params(other: Listener[T.untyped]).returns(T.self_type) }
-    def merge_response!(other)
-    end
+  class ExtensionListener < Listener
+    extend T::Sig
+    extend T::Helpers
+    extend T::Generic
+
+    ResponseType = type_member
+
+    abstract!
+
+    sig { abstract.params(current_response: ResponseType).void }
+    def merge_response(current_response); end
   end
 end

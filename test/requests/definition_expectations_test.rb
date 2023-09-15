@@ -172,7 +172,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       end
 
       def create_definition_listener(uri, nesting, index, emitter, message_queue)
-        klass = Class.new(RubyLsp::Listener) do
+        klass = Class.new(RubyLsp::ExtensionListener) do
           attr_reader :_response
 
           def initialize(uri, _, _, emitter, message_queue)
@@ -193,6 +193,10 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
                 end: RubyLsp::Interface::Position.new(line: location.end_line - 1, character: location.end_column),
               ),
             )
+          end
+
+          def merge_response(current_response)
+            current_response << @_response
           end
         end
 

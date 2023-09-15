@@ -127,7 +127,7 @@ module RubyLsp
     end
 
     # All listeners have to inherit from ::RubyLsp::Listener
-    class Hover < ::RubyLsp::Listener
+    class Hover < ::RubyLsp::ExtensionListener
       extend T::Sig
       extend T::Generic
 
@@ -215,7 +215,7 @@ indicate progress. To send notifications, all listeners have access to the messa
 notifications to the client.
 
 ```ruby
-class MyListener < ::RubyLsp::Listener
+class MyListener < ::RubyLsp::ExtensionListener
   def initialize(emitter, message_queue)
     super
 

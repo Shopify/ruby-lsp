@@ -49,24 +49,9 @@ module RubyLsp
         emitter.register(self, :on_const_path_ref, :on_const)
       end
 
-      sig { override.params(extension: RubyLsp::Extension).returns(T.nilable(Listener[ResponseType])) }
+      sig { override.params(extension: RubyLsp::Extension).returns(T.nilable(ExtensionListener[ResponseType])) }
       def initialize_external_listener(extension)
         extension.create_hover_listener(@emitter, @message_queue)
-      end
-
-      # Merges responses from other hover listeners
-      sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
-      def merge_response!(other)
-        other_response = other.response
-        return self unless other_response
-
-        if @_response.nil?
-          @_response = other.response
-        else
-          @_response.contents.value << "\n\n" << other_response.contents.value
-        end
-
-        self
       end
 
       sig { params(node: SyntaxTree::ConstPathRef).void }

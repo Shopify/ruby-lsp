@@ -35,7 +35,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
       end
 
       def create_document_symbol_listener(emitter, message_queue)
-        klass = Class.new(RubyLsp::Listener) do
+        klass = Class.new(RubyLsp::ExtensionListener) do
           attr_reader :_response
 
           def initialize(emitter, message_queue)
@@ -44,7 +44,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
           end
 
           def on_command(node)
-            T.bind(self, RubyLsp::Listener[T.untyped])
+            T.bind(self, RubyLsp::ExtensionListener[T.untyped])
             message_value = node.message.value
             return unless message_value == "test" && node.arguments.parts.any?
 
@@ -57,6 +57,10 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
               selection_range: range_from_syntax_tree_node(node),
               range: range_from_syntax_tree_node(node),
             )]
+          end
+
+          def merge_response(current_response)
+            current_response.concat(@_response)
           end
         end
 
