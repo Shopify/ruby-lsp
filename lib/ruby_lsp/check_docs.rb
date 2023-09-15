@@ -54,7 +54,7 @@ module RubyLsp
       features = ObjectSpace.each_object(Class).filter_map do |k|
         klass = T.unsafe(k)
         klass if klass < Requests::BaseRequest ||
-          (klass < Listener && klass != ExtensibleListener)
+          (klass < Listener && klass != ExtensibleListener && klass != ExtensionListener)
       end
 
       missing_docs = T.let(Hash.new { |h, k| h[k] = [] }, T::Hash[String, T::Array[String]])
