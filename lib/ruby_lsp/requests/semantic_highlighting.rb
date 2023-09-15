@@ -150,7 +150,7 @@ module RubyLsp
           :on_local_variable_operator_write,
           :on_local_variable_or_write,
           :on_local_variable_target,
-          :after_lambda,
+          :on_block_local_variable,
         )
       end
 
@@ -244,14 +244,12 @@ module RubyLsp
 
       sig { params(node: YARP::BlockNode).void }
       def after_block(node)
-        process_lambda_or_block_locals(node)
-
         @current_scope = T.must(@current_scope.parent)
       end
 
-      sig { params(node: YARP::LambdaNode).void }
-      def after_lambda(node)
-        process_lambda_or_block_locals(node)
+      sig { params(node: YARP::BlockLocalVariableNode).void }
+      def on_block_local_variable(node)
+        add_token(node.location, :variable)
       end
 
       sig { params(node: YARP::BlockParameterNode).void }
@@ -415,23 +413,6 @@ module RubyLsp
           local_var_loc = loc.copy(start_offset: loc.start_offset + capture_name_offset, length: name.length)
 
           add_token(local_var_loc, @current_scope.type_for(name))
-        end
-      end
-
-      sig { params(node: T.any(YARP::BlockNode, YARP::LambdaNode)).void }
-      def process_lambda_or_block_locals(node)
-        parameters = node.parameters
-        return unless parameters
-
-        node.locals.each do |local|
-          next if @current_scope.parameter?(local)
-
-          loc = parameters.location
-          offset = loc.slice.index(local.to_s)
-          next unless offset
-
-          local_var_loc = loc.copy(start_offset: loc.start_offset + offset, length: local.length)
-          add_token(local_var_loc, :variable)
         end
       end
     end
