@@ -88,24 +88,6 @@ module RubyLsp
       @listeners[:after_call]&.each { |l| T.unsafe(l).after_call(node) }
     end
 
-    sig { override.params(node: YARP::ConstantPathWriteNode).void }
-    def visit_constant_path_write_node(node)
-      @listeners[:on_constant_path_write]&.each { |l| T.unsafe(l).on_constant_path_write(node) }
-      super
-    end
-
-    sig { override.params(node: YARP::ConstantPathNode).void }
-    def visit_constant_path_node(node)
-      @listeners[:on_constant_path]&.each { |l| T.unsafe(l).on_constant_path(node) }
-      super
-    end
-
-    sig { override.params(node: YARP::ConstantWriteNode).void }
-    def visit_constant_write_node(node)
-      @listeners[:on_constant_write]&.each { |l| T.unsafe(l).on_constant_write(node) }
-      super
-    end
-
     sig { override.params(node: YARP::InstanceVariableWriteNode).void }
     def visit_instance_variable_write_node(node)
       @listeners[:on_instance_variable_write]&.each { |l| T.unsafe(l).on_instance_variable_write(node) }
@@ -125,15 +107,16 @@ module RubyLsp
       @listeners[:after_def]&.each { |l| T.unsafe(l).after_def(node) }
     end
 
-    sig { override.params(node: SyntaxTree::VarField).void }
-    def visit_var_field(node)
-      @listeners[:on_var_field]&.each { |l| T.unsafe(l).on_var_field(node) }
+    sig { override.params(node: YARP::BlockNode).void }
+    def visit_block_node(node)
+      @listeners[:on_block]&.each { |l| T.unsafe(l).on_block(node) }
       super
+      @listeners[:after_block]&.each { |l| T.unsafe(l).after_block(node) }
     end
 
-    sig { override.params(node: SyntaxTree::Comment).void }
-    def visit_comment(node)
-      @listeners[:on_comment]&.each { |l| T.unsafe(l).on_comment(node) }
+    sig { override.params(node: YARP::SelfNode).void }
+    def visit_self_node(node)
+      @listeners[:on_self]&.each { |l| T.unsafe(l).on_self(node) }
       super
     end
 
@@ -143,52 +126,131 @@ module RubyLsp
       super
     end
 
-    sig { override.params(node: SyntaxTree::Kw).void }
-    def visit_kw(node)
-      @listeners[:on_kw]&.each { |l| T.unsafe(l).on_kw(node) }
+    sig { override.params(node: YARP::BlockParameterNode).void }
+    def visit_block_parameter_node(node)
+      @listeners[:on_block_parameter]&.each { |l| T.unsafe(l).on_block_parameter(node) }
       super
     end
 
-    sig { override.params(node: SyntaxTree::Params).void }
-    def visit_params(node)
-      @listeners[:on_params]&.each { |l| T.unsafe(l).on_params(node) }
+    sig { override.params(node: YARP::KeywordParameterNode).void }
+    def visit_keyword_parameter_node(node)
+      @listeners[:on_keyword_parameter]&.each { |l| T.unsafe(l).on_keyword_parameter(node) }
       super
     end
 
-    sig { override.params(node: SyntaxTree::Field).void }
-    def visit_field(node)
-      @listeners[:on_field]&.each { |l| T.unsafe(l).on_field(node) }
+    sig { override.params(node: YARP::KeywordRestParameterNode).void }
+    def visit_keyword_rest_parameter_node(node)
+      @listeners[:on_keyword_rest_parameter]&.each { |l| T.unsafe(l).on_keyword_rest_parameter(node) }
       super
     end
 
-    sig { override.params(node: SyntaxTree::VarRef).void }
-    def visit_var_ref(node)
-      @listeners[:on_var_ref]&.each { |l| T.unsafe(l).on_var_ref(node) }
+    sig { override.params(node: YARP::OptionalParameterNode).void }
+    def visit_optional_parameter_node(node)
+      @listeners[:on_optional_parameter]&.each { |l| T.unsafe(l).on_optional_parameter(node) }
       super
     end
 
-    sig { override.params(node: SyntaxTree::BlockVar).void }
-    def visit_block_var(node)
-      @listeners[:on_block_var]&.each { |l| T.unsafe(l).on_block_var(node) }
+    sig { override.params(node: YARP::RequiredParameterNode).void }
+    def visit_required_parameter_node(node)
+      @listeners[:on_required_parameter]&.each { |l| T.unsafe(l).on_required_parameter(node) }
       super
     end
 
-    sig { override.params(node: SyntaxTree::LambdaVar).void }
-    def visit_lambda_var(node)
-      @listeners[:on_lambda_var]&.each { |l| T.unsafe(l).on_lambda_var(node) }
+    sig { override.params(node: YARP::RestParameterNode).void }
+    def visit_rest_parameter_node(node)
+      @listeners[:on_rest_parameter]&.each { |l| T.unsafe(l).on_rest_parameter(node) }
       super
-    end
-
-    sig { override.params(node: SyntaxTree::Binary).void }
-    def visit_binary(node)
-      super
-      @listeners[:after_binary]&.each { |l| T.unsafe(l).after_binary(node) }
     end
 
     sig { override.params(node: YARP::ConstantReadNode).void }
     def visit_constant_read_node(node)
       @listeners[:on_constant_read]&.each { |l| T.unsafe(l).on_constant_read(node) }
       super
+    end
+
+    sig { override.params(node: YARP::ConstantPathNode).void }
+    def visit_constant_path_node(node)
+      @listeners[:on_constant_path]&.each { |l| T.unsafe(l).on_constant_path(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ConstantPathWriteNode).void }
+    def visit_constant_path_write_node(node)
+      @listeners[:on_constant_path_write]&.each { |l| T.unsafe(l).on_constant_path_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ConstantWriteNode).void }
+    def visit_constant_write_node(node)
+      @listeners[:on_constant_write]&.each { |l| T.unsafe(l).on_constant_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ConstantAndWriteNode).void }
+    def visit_constant_and_write_node(node)
+      @listeners[:on_constant_and_write]&.each { |l| T.unsafe(l).on_constant_and_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ConstantOperatorWriteNode).void }
+    def visit_constant_operator_write_node(node)
+      @listeners[:on_constant_operator_write]&.each { |l| T.unsafe(l).on_constant_operator_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ConstantOrWriteNode).void }
+    def visit_constant_or_write_node(node)
+      @listeners[:on_constant_or_write]&.each { |l| T.unsafe(l).on_constant_or_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ConstantTargetNode).void }
+    def visit_constant_target_node(node)
+      @listeners[:on_constant_target]&.each { |l| T.unsafe(l).on_constant_target(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::LocalVariableWriteNode).void }
+    def visit_local_variable_write_node(node)
+      @listeners[:on_local_variable_write]&.each { |l| T.unsafe(l).on_local_variable_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::LocalVariableReadNode).void }
+    def visit_local_variable_read_node(node)
+      @listeners[:on_local_variable_read]&.each { |l| T.unsafe(l).on_local_variable_read(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::LocalVariableAndWriteNode).void }
+    def visit_local_variable_and_write_node(node)
+      @listeners[:on_local_variable_and_write]&.each { |l| T.unsafe(l).on_local_variable_and_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::LocalVariableOperatorWriteNode).void }
+    def visit_local_variable_operator_write_node(node)
+      @listeners[:on_local_variable_operator_write]&.each { |l| T.unsafe(l).on_local_variable_operator_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::LocalVariableOrWriteNode).void }
+    def visit_local_variable_or_write_node(node)
+      @listeners[:on_local_variable_or_write]&.each { |l| T.unsafe(l).on_local_variable_or_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::LocalVariableTargetNode).void }
+    def visit_local_variable_target_node(node)
+      @listeners[:on_local_variable_target]&.each { |l| T.unsafe(l).on_local_variable_target(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::LambdaNode).void }
+    def visit_lambda_node(node)
+      @listeners[:on_lambda]&.each { |l| T.unsafe(l).on_lambda(node) }
+      super
+      @listeners[:after_lambda]&.each { |l| T.unsafe(l).after_lambda(node) }
     end
   end
 end
