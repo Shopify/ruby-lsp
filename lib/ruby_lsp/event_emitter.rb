@@ -246,11 +246,10 @@ module RubyLsp
       super
     end
 
-    sig { override.params(node: YARP::LambdaNode).void }
-    def visit_lambda_node(node)
-      @listeners[:on_lambda]&.each { |l| T.unsafe(l).on_lambda(node) }
+    sig { override.params(node: YARP::BlockLocalVariableNode).void }
+    def visit_block_local_variable_node(node)
+      @listeners[:on_block_local_variable]&.each { |l| T.unsafe(l).on_block_local_variable(node) }
       super
-      @listeners[:after_lambda]&.each { |l| T.unsafe(l).after_lambda(node) }
     end
   end
 end
