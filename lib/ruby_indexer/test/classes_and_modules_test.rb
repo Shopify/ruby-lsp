@@ -216,5 +216,28 @@ module RubyIndexer
       second_foo_entry = @index["Bar"][0]
       assert_equal("This is a Bar comment", second_foo_entry.comments.join("\n"))
     end
+
+    def test_private_class_and_module_indexing
+      index(<<~RUBY)
+        class A
+          class B; end
+          private_constant(:B)
+
+          module C; end
+          private_constant("C")
+
+          class D; end
+        end
+      RUBY
+
+      b_const = @index["A::B"].first
+      assert_equal(:private, b_const.visibility)
+
+      c_const = @index["A::C"].first
+      assert_equal(:private, c_const.visibility)
+
+      d_const = @index["A::D"].first
+      assert_equal(:public, d_const.visibility)
+    end
   end
 end

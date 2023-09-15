@@ -39,6 +39,9 @@ module RubyIndexer
         add_constant(node)
       when YARP::ConstantPathWriteNode, YARP::ConstantPathOrWriteNode
         add_constant_with_path(node)
+      when YARP::CallNode
+        message = node.message
+        handle_private_constant(node) if message == "private_constant"
       end
     end
 
@@ -49,6 +52,28 @@ module RubyIndexer
     end
 
     private
+
+    sig { params(node: YARP::CallNode).void }
+    def handle_private_constant(node)
+      arguments = node.arguments&.arguments
+      return unless arguments
+
+      first_argument = arguments.first
+
+      name = case first_argument
+      when YARP::StringNode
+        first_argument.content
+      when YARP::SymbolNode
+        first_argument.value
+      end
+
+      return unless name
+
+      # The private_constant method does not resolve the constant name. It always points to a constant that needs to
+      # exist in the current namespace
+      entries = @index[fully_qualify_name(name)]
+      entries&.each { |entry| entry.visibility = :private }
+    end
 
     sig do
       params(

@@ -167,12 +167,16 @@ module RubyIndexer
       sig { returns(T::Array[String]) }
       attr_reader :comments
 
+      sig { returns(Symbol) }
+      attr_accessor :visibility
+
       sig { params(name: String, file_path: String, location: YARP::Location, comments: T::Array[String]).void }
       def initialize(name, file_path, location, comments)
         @name = name
         @file_path = file_path
         @location = location
         @comments = comments
+        @visibility = T.let(:public, Symbol)
       end
 
       sig { returns(String) }
