@@ -4,44 +4,46 @@
 require "test_helper"
 require "expectations/expectations_test_runner"
 
-class DocumentLinkExpectationsTest < ExpectationsTestRunner
-  expectations_tests RubyLsp::Requests::DocumentLink, "document_link"
+module RubyLsp
+  class DocumentLinkExpectationsTest < ExpectationsTestRunner
+    expectations_tests Requests::DocumentLink, "document_link"
 
-  def assert_expectations(source, expected)
-    source = substitute_syntax_tree_version(source)
-    actual = T.cast(run_expectations(source), T::Array[LanguageServer::Protocol::Interface::DocumentLink])
-    assert_equal(map_expectations(json_expectations(expected)), JSON.parse(actual.to_json))
-  end
-
-  def map_expectations(expectations)
-    expectations.each do |expectation|
-      expectation["target"] = substitute(expectation["target"])
-      expectation["tooltip"] = substitute(expectation["tooltip"])
+    def assert_expectations(source, expected)
+      source = substitute_syntax_tree_version(source)
+      actual = T.cast(run_expectations(source), T::Array[LanguageServer::Protocol::Interface::DocumentLink])
+      assert_equal(map_expectations(json_expectations(expected)), JSON.parse(actual.to_json))
     end
-  end
 
-  def run_expectations(source)
-    message_queue = Thread::Queue.new
-    uri = URI("file://#{@_path}")
-    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+    def map_expectations(expectations)
+      expectations.each do |expectation|
+        expectation["target"] = substitute(expectation["target"])
+        expectation["tooltip"] = substitute(expectation["tooltip"])
+      end
+    end
 
-    emitter = RubyLsp::EventEmitter.new
-    listener = RubyLsp::Requests::DocumentLink.new(uri, emitter, message_queue)
-    emitter.visit(document.tree)
-    listener.response
-  ensure
-    T.must(message_queue).close
-  end
+    def run_expectations(source)
+      message_queue = Thread::Queue.new
+      uri = URI("file://#{@_path}")
+      document = Document.new(source: source, version: 1, uri: uri)
 
-  private
+      emitter = EventEmitter.new
+      listener = Requests::DocumentLink.new(uri, emitter, message_queue)
+      emitter.visit(document.tree)
+      listener.response
+    ensure
+      T.must(message_queue).close
+    end
 
-  def substitute(original)
-    substitute_syntax_tree_version(original)
-      .sub("BUNDLER_PATH", Bundler.bundle_path.to_s)
-      .sub("RUBY_ROOT", RbConfig::CONFIG["rubylibdir"])
-  end
+    private
 
-  def substitute_syntax_tree_version(original)
-    original.sub("SYNTAX_TREE_VERSION", Gem::Specification.find_by_name("syntax_tree").version.to_s)
+    def substitute(original)
+      substitute_syntax_tree_version(original)
+        .sub("BUNDLER_PATH", Bundler.bundle_path.to_s)
+        .sub("RUBY_ROOT", RbConfig::CONFIG["rubylibdir"])
+    end
+
+    def substitute_syntax_tree_version(original)
+      original.sub("SYNTAX_TREE_VERSION", Gem::Specification.find_by_name("syntax_tree").version.to_s)
+    end
   end
 end
