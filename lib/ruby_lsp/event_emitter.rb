@@ -251,5 +251,101 @@ module RubyLsp
       @listeners[:on_block_local_variable]&.each { |l| T.unsafe(l).on_block_local_variable(node) }
       super
     end
+
+    sig { override.params(node: YARP::IfNode).void }
+    def visit_if_node(node)
+      @listeners[:on_if]&.each { |l| T.unsafe(l).on_if(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::InNode).void }
+    def visit_in_node(node)
+      @listeners[:on_in]&.each { |l| T.unsafe(l).on_in(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::WhenNode).void }
+    def visit_when_node(node)
+      @listeners[:on_when]&.each { |l| T.unsafe(l).on_when(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::InterpolatedStringNode).void }
+    def visit_interpolated_string_node(node)
+      @listeners[:on_interpolated_string]&.each { |l| T.unsafe(l).on_interpolated_string(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ArrayNode).void }
+    def visit_array_node(node)
+      @listeners[:on_array]&.each { |l| T.unsafe(l).on_array(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::CaseNode).void }
+    def visit_case_node(node)
+      @listeners[:on_case]&.each { |l| T.unsafe(l).on_case(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ForNode).void }
+    def visit_for_node(node)
+      @listeners[:on_for]&.each { |l| T.unsafe(l).on_for(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::HashNode).void }
+    def visit_hash_node(node)
+      @listeners[:on_hash]&.each { |l| T.unsafe(l).on_hash(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::SingletonClassNode).void }
+    def visit_singleton_class_node(node)
+      @listeners[:on_singleton_class]&.each { |l| T.unsafe(l).on_singleton_class(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::UnlessNode).void }
+    def visit_unless_node(node)
+      @listeners[:on_unless]&.each { |l| T.unsafe(l).on_unless(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::UntilNode).void }
+    def visit_until_node(node)
+      @listeners[:on_until]&.each { |l| T.unsafe(l).on_until(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::WhileNode).void }
+    def visit_while_node(node)
+      @listeners[:on_while]&.each { |l| T.unsafe(l).on_while(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ElseNode).void }
+    def visit_else_node(node)
+      @listeners[:on_else]&.each { |l| T.unsafe(l).on_else(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::EnsureNode).void }
+    def visit_ensure_node(node)
+      @listeners[:on_ensure]&.each { |l| T.unsafe(l).on_ensure(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::BeginNode).void }
+    def visit_begin_node(node)
+      @listeners[:on_begin]&.each { |l| T.unsafe(l).on_begin(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::StringConcatNode).void }
+    def visit_string_concat_node(node)
+      @listeners[:on_string_concat]&.each { |l| T.unsafe(l).on_string_concat(node) }
+      super
+    end
   end
 end
