@@ -83,7 +83,7 @@ module RubyLsp
       class SemanticToken
         extend T::Sig
 
-        sig { returns(SyntaxTree::Location) }
+        sig { returns(YARP::Location) }
         attr_reader :location
 
         sig { returns(Integer) }
@@ -95,7 +95,7 @@ module RubyLsp
         sig { returns(T::Array[Integer]) }
         attr_reader :modifier
 
-        sig { params(location: SyntaxTree::Location, length: Integer, type: Integer, modifier: T::Array[Integer]).void }
+        sig { params(location: YARP::Location, length: Integer, type: Integer, modifier: T::Array[Integer]).void }
         def initialize(location:, length:, type:, modifier:)
           @location = location
           @length = length
@@ -120,56 +120,66 @@ module RubyLsp
         @_response = T.let([], ResponseType)
         @range = range
         @special_methods = T.let(nil, T.nilable(T::Array[String]))
+        @current_scope = T.let(ParameterScope.new, ParameterScope)
 
         emitter.register(
           self,
-          :after_binary,
-          :on_block_var,
           :on_call,
           :on_class,
-          :on_command,
-          :on_command_call,
-          :on_const,
           :on_def,
-          :on_field,
-          :on_kw,
-          :on_lambda_var,
+          :after_def,
+          :on_block,
+          :after_block,
+          :on_self,
           :on_module,
-          :on_params,
-          :on_var_field,
-          :on_var_ref,
-          :on_vcall,
+          :on_local_variable_write,
+          :on_local_variable_read,
+          :on_block_parameter,
+          :on_keyword_parameter,
+          :on_keyword_rest_parameter,
+          :on_optional_parameter,
+          :on_required_parameter,
+          :on_rest_parameter,
+          :on_constant_read,
+          :on_constant_write,
+          :on_constant_and_write,
+          :on_constant_operator_write,
+          :on_constant_or_write,
+          :on_constant_target,
+          :on_local_variable_and_write,
+          :on_local_variable_operator_write,
+          :on_local_variable_or_write,
+          :on_local_variable_target,
+          :after_lambda,
         )
       end
 
-      sig { params(node: SyntaxTree::CallNode).void }
+      sig { params(node: YARP::CallNode).void }
       def on_call(node)
         return unless visible?(node, @range)
 
         message = node.message
-        if !message.is_a?(Symbol) && !special_method?(message.value)
-          type = Support::Sorbet.annotation?(node) ? :type : :method
-          add_token(message.location, type)
+        return unless message
+
+        # We can't push a semantic token for [] and []= because the argument inside the brackets is a part of
+        # the message_loc
+        return if message.start_with?("[") && (message.end_with?("]") || message.end_with?("]="))
+
+        return process_regexp_locals(node) if message == "=~"
+        return if special_method?(message)
+
+        # Numbered parameters
+        if /_\d+/.match?(message)
+          add_token(T.must(node.message_loc), :parameter)
+          return
         end
+
+        type = Support::Sorbet.annotation?(node) ? :type : :method
+        add_token(T.must(node.message_loc), type)
       end
 
-      sig { params(node: SyntaxTree::Command).void }
-      def on_command(node)
-        return unless visible?(node, @range)
-
-        add_token(node.message.location, :method) unless special_method?(node.message.value)
-      end
-
-      sig { params(node: SyntaxTree::CommandCall).void }
-      def on_command_call(node)
-        return unless visible?(node, @range)
-
-        message = node.message
-        add_token(message.location, :method) unless message.is_a?(Symbol)
-      end
-
-      sig { params(node: SyntaxTree::Const).void }
-      def on_const(node)
+      sig { params(node: YARP::ConstantReadNode).void }
+      def on_constant_read(node)
         return unless visible?(node, @range)
         # When finding a module or class definition, we will have already pushed a token related to this constant. We
         # need to look at the previous two tokens and if they match this locatione exactly, avoid pushing another token
@@ -179,153 +189,195 @@ module RubyLsp
         add_token(node.location, :namespace)
       end
 
-      sig { params(node: SyntaxTree::DefNode).void }
+      sig { params(node: YARP::ConstantWriteNode).void }
+      def on_constant_write(node)
+        return unless visible?(node, @range)
+
+        add_token(node.name_loc, :namespace)
+      end
+
+      sig { params(node: YARP::ConstantAndWriteNode).void }
+      def on_constant_and_write(node)
+        return unless visible?(node, @range)
+
+        add_token(node.name_loc, :namespace)
+      end
+
+      sig { params(node: YARP::ConstantOperatorWriteNode).void }
+      def on_constant_operator_write(node)
+        return unless visible?(node, @range)
+
+        add_token(node.name_loc, :namespace)
+      end
+
+      sig { params(node: YARP::ConstantOrWriteNode).void }
+      def on_constant_or_write(node)
+        return unless visible?(node, @range)
+
+        add_token(node.name_loc, :namespace)
+      end
+
+      sig { params(node: YARP::ConstantTargetNode).void }
+      def on_constant_target(node)
+        return unless visible?(node, @range)
+
+        add_token(node.location, :namespace)
+      end
+
+      sig { params(node: YARP::DefNode).void }
       def on_def(node)
+        @current_scope = ParameterScope.new(@current_scope)
         return unless visible?(node, @range)
 
-        add_token(node.name.location, :method, [:declaration])
+        add_token(node.name_loc, :method, [:declaration])
       end
 
-      sig { params(node: SyntaxTree::Kw).void }
-      def on_kw(node)
+      sig { params(node: YARP::DefNode).void }
+      def after_def(node)
+        @current_scope = T.must(@current_scope.parent)
+      end
+
+      sig { params(node: YARP::BlockNode).void }
+      def on_block(node)
+        @current_scope = ParameterScope.new(@current_scope)
+      end
+
+      sig { params(node: YARP::BlockNode).void }
+      def after_block(node)
+        process_lambda_or_block_locals(node)
+
+        @current_scope = T.must(@current_scope.parent)
+      end
+
+      sig { params(node: YARP::LambdaNode).void }
+      def after_lambda(node)
+        process_lambda_or_block_locals(node)
+      end
+
+      sig { params(node: YARP::BlockParameterNode).void }
+      def on_block_parameter(node)
+        name = node.name
+        @current_scope << name.to_sym if name
+      end
+
+      sig { params(node: YARP::KeywordParameterNode).void }
+      def on_keyword_parameter(node)
+        name = node.name
+        @current_scope << name.to_s.delete_suffix(":").to_sym if name
+
         return unless visible?(node, @range)
 
-        case node.value
-        when "self"
-          add_token(node.location, :variable, [:default_library])
+        location = node.name_loc
+        add_token(location.copy(length: location.length - 1), :parameter)
+      end
+
+      sig { params(node: YARP::KeywordRestParameterNode).void }
+      def on_keyword_rest_parameter(node)
+        name = node.name
+
+        if name
+          @current_scope << name.to_sym
+
+          add_token(T.must(node.name_loc), :parameter) if visible?(node, @range)
         end
       end
 
-      sig { params(node: SyntaxTree::Params).void }
-      def on_params(node)
+      sig { params(node: YARP::OptionalParameterNode).void }
+      def on_optional_parameter(node)
+        @current_scope << node.name
         return unless visible?(node, @range)
 
-        node.keywords.each do |keyword, *|
-          location = keyword.location
-          add_token(location_without_colon(location), :parameter)
-        end
-
-        node.requireds.each do |required|
-          add_token(required.location, :parameter)
-        end
-
-        rest = node.keyword_rest
-        if rest && !rest.is_a?(SyntaxTree::ArgsForward) && !rest.is_a?(Symbol)
-          name = rest.name
-          add_token(name.location, :parameter) if name
-        end
+        add_token(node.name_loc, :parameter)
       end
 
-      sig { params(node: SyntaxTree::Field).void }
-      def on_field(node)
+      sig { params(node: YARP::RequiredParameterNode).void }
+      def on_required_parameter(node)
+        @current_scope << node.name
         return unless visible?(node, @range)
 
-        add_token(node.name.location, :method)
+        add_token(node.location, :parameter)
       end
 
-      sig { params(node: SyntaxTree::VarField).void }
-      def on_var_field(node)
+      sig { params(node: YARP::RestParameterNode).void }
+      def on_rest_parameter(node)
+        name = node.name
+
+        if name
+          @current_scope << name.to_sym
+
+          add_token(T.must(node.name_loc), :parameter) if visible?(node, @range)
+        end
+      end
+
+      sig { params(node: YARP::SelfNode).void }
+      def on_self(node)
         return unless visible?(node, @range)
 
-        value = node.value
-
-        case value
-        when SyntaxTree::Ident
-          type = type_for_local(value)
-          add_token(value.location, type)
-        end
+        add_token(node.location, :variable, [:default_library])
       end
 
-      sig { params(node: SyntaxTree::VarRef).void }
-      def on_var_ref(node)
+      sig { params(node: YARP::LocalVariableWriteNode).void }
+      def on_local_variable_write(node)
         return unless visible?(node, @range)
 
-        value = node.value
-
-        case value
-        when SyntaxTree::Ident
-          type = type_for_local(value)
-          add_token(value.location, type)
-        end
+        add_token(node.name_loc, @current_scope.type_for(node.name))
       end
 
-      # All block locals are variables. E.g.: [].each do |x; block_local|
-      sig { params(node: SyntaxTree::BlockVar).void }
-      def on_block_var(node)
-        node.locals.each { |local| add_token(local.location, :variable) }
-      end
-
-      # All lambda locals are variables. E.g.: ->(x; lambda_local) {}
-      sig { params(node: SyntaxTree::LambdaVar).void }
-      def on_lambda_var(node)
-        node.locals.each { |local| add_token(local.location, :variable) }
-      end
-
-      sig { params(node: SyntaxTree::VCall).void }
-      def on_vcall(node)
+      sig { params(node: YARP::LocalVariableReadNode).void }
+      def on_local_variable_read(node)
         return unless visible?(node, @range)
 
-        # A VCall may exist as a local in the current_scope. This happens when used named capture groups in a regexp
-        ident = node.value
-        value = ident.value
-        local = @emitter.current_scope.find_local(value)
-        return if local.nil? && special_method?(value)
-
-        type = if local
-          :variable
-        elsif Support::Sorbet.annotation?(node)
-          :type
-        else
-          :method
-        end
-
-        add_token(node.value.location, type)
+        add_token(node.location, @current_scope.type_for(node.name))
       end
 
-      sig { params(node: SyntaxTree::Binary).void }
-      def after_binary(node)
-        # You can only capture local variables with regexp by using the =~ operator
-        return unless node.operator == :=~
+      sig { params(node: YARP::LocalVariableAndWriteNode).void }
+      def on_local_variable_and_write(node)
+        return unless visible?(node, @range)
 
-        left = node.left
-        # The regexp needs to be on the left hand side of the =~ for local variable capture
-        return unless left.is_a?(SyntaxTree::RegexpLiteral)
-
-        parts = left.parts
-        return unless parts.one?
-
-        content = parts.first
-        return unless content.is_a?(SyntaxTree::TStringContent)
-
-        # For each capture name we find in the regexp, look for a local in the current_scope
-        Regexp.new(content.value, Regexp::FIXEDENCODING).names.each do |name|
-          local = @emitter.current_scope.find_local(name)
-          next unless local
-
-          local.definitions.each { |definition| add_token(definition, :variable) }
-        end
+        add_token(node.name_loc, @current_scope.type_for(node.name))
       end
 
-      sig { params(node: SyntaxTree::ClassDeclaration).void }
+      sig { params(node: YARP::LocalVariableOperatorWriteNode).void }
+      def on_local_variable_operator_write(node)
+        return unless visible?(node, @range)
+
+        add_token(node.name_loc, @current_scope.type_for(node.name))
+      end
+
+      sig { params(node: YARP::LocalVariableOrWriteNode).void }
+      def on_local_variable_or_write(node)
+        return unless visible?(node, @range)
+
+        add_token(node.name_loc, @current_scope.type_for(node.name))
+      end
+
+      sig { params(node: YARP::LocalVariableTargetNode).void }
+      def on_local_variable_target(node)
+        return unless visible?(node, @range)
+
+        add_token(node.location, @current_scope.type_for(node.name))
+      end
+
+      sig { params(node: YARP::ClassNode).void }
       def on_class(node)
         return unless visible?(node, @range)
 
-        add_token(node.constant.location, :class, [:declaration])
+        add_token(node.constant_path.location, :class, [:declaration])
 
         superclass = node.superclass
         add_token(superclass.location, :class) if superclass
       end
 
-      sig { params(node: SyntaxTree::ModuleDeclaration).void }
+      sig { params(node: YARP::ModuleNode).void }
       def on_module(node)
         return unless visible?(node, @range)
 
-        add_token(node.constant.location, :namespace, [:declaration])
+        add_token(node.constant_path.location, :namespace, [:declaration])
       end
 
-      sig { params(location: SyntaxTree::Location, type: Symbol, modifiers: T::Array[Symbol]).void }
+      sig { params(location: YARP::Location, type: Symbol, modifiers: T::Array[Symbol]).void }
       def add_token(location, type, modifiers = [])
-        length = location.end_char - location.start_char
+        length = location.end_offset - location.start_offset
         modifiers_indices = modifiers.filter_map { |modifier| TOKEN_MODIFIERS[modifier] }
         @_response.push(
           SemanticToken.new(
@@ -339,38 +391,47 @@ module RubyLsp
 
       private
 
-      # Exclude the ":" symbol at the end of a location
-      # We use it on keyword parameters to be consistent
-      # with the rest of the parameters
-      sig { params(location: T.untyped).returns(SyntaxTree::Location) }
-      def location_without_colon(location)
-        SyntaxTree::Location.new(
-          start_line: location.start_line,
-          start_column: location.start_column,
-          start_char: location.start_char,
-          end_char: location.end_char - 1,
-          end_column: location.end_column - 1,
-          end_line: location.end_line,
-        )
-      end
-
-      # Textmate provides highlighting for a subset
-      # of these special Ruby-specific methods.
-      # We want to utilize that highlighting, so we
-      # avoid making a semantic token for it.
+      # Textmate provides highlighting for a subset of these special Ruby-specific methods.  We want to utilize that
+      # highlighting, so we avoid making a semantic token for it.
       sig { params(method_name: String).returns(T::Boolean) }
       def special_method?(method_name)
         SPECIAL_RUBY_METHODS.include?(method_name)
       end
 
-      sig { params(value: SyntaxTree::Ident).returns(Symbol) }
-      def type_for_local(value)
-        local = @emitter.current_scope.find_local(value.value)
+      sig { params(node: YARP::CallNode).void }
+      def process_regexp_locals(node)
+        receiver = node.receiver
 
-        if local.nil? || local.type == :variable
-          :variable
-        else
-          :parameter
+        # The regexp needs to be the receiver of =~ for local variable capture
+        return unless receiver.is_a?(YARP::RegularExpressionNode)
+
+        content = receiver.content
+        loc = receiver.content_loc
+
+        # For each capture name we find in the regexp, look for a local in the current_scope
+        Regexp.new(content, Regexp::FIXEDENCODING).names.each do |name|
+          # The +3 is to compensate for the "(?<" part of the capture name
+          capture_name_offset = T.must(content.index("(?<#{name}>")) + 3
+          local_var_loc = loc.copy(start_offset: loc.start_offset + capture_name_offset, length: name.length)
+
+          add_token(local_var_loc, @current_scope.type_for(name))
+        end
+      end
+
+      sig { params(node: T.any(YARP::BlockNode, YARP::LambdaNode)).void }
+      def process_lambda_or_block_locals(node)
+        parameters = node.parameters
+        return unless parameters
+
+        node.locals.each do |local|
+          next if @current_scope.parameter?(local)
+
+          loc = parameters.location
+          offset = loc.slice.index(local.to_s)
+          next unless offset
+
+          local_var_loc = loc.copy(start_offset: loc.start_offset + offset, length: local.length)
+          add_token(local_var_loc, :variable)
         end
       end
     end

@@ -96,15 +96,12 @@ class SemanticTokenEncoderTest < Minitest::Test
   private
 
   def stub_token(start_line, start_column, length, type, modifier)
+    location = YARP::Location.new("", 123, 123)
+    location.expects(:start_line).returns(start_line).at_least_once
+    location.expects(:start_column).returns(start_column).at_least_once
+
     RubyLsp::Requests::SemanticHighlighting::SemanticToken.new(
-      location: SyntaxTree::Location.new(
-        start_line: start_line,
-        start_column: start_column,
-        start_char: 0,
-        end_char: 0,
-        end_column: 0,
-        end_line: 0,
-      ),
+      location: location,
       length: length,
       type: type,
       modifier: modifier,
