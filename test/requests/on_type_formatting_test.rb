@@ -363,4 +363,36 @@ class OnTypeFormattingTest < Minitest::Test
 
     assert_equal(expected_edits.to_json, T.must(edits).to_json)
   end
+
+  def test_auto_indent_after_end_keyword
+    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "if true\nputs \"a\"\nend",
+      }],
+      version: 2,
+    )
+    document.parse
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 3, character: 0 }, "d").run
+
+    expected_edits = [
+      {
+        range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } },
+        newText: "  ",
+      },
+      {
+        range: { start: { line: 2, character: 3 }, end: { line: 2, character: 3 } },
+        newText: "$0",
+      },
+      {
+        range: { start: { line: 3, character: 0 }, end: { line: 3, character: 0 } },
+        newText: "\n  ",
+      },
+    ]
+
+    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+  end
 end

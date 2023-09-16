@@ -53,6 +53,10 @@ module RubyLsp
           elsif @document.syntax_error?
             handle_statement_end
           end
+        when "d"
+          if @previous_line.strip == "end"
+            auto_indent_after_end_keyword
+          end
         end
 
         @edits
@@ -170,6 +174,25 @@ module RubyLsp
         end
 
         count
+      end
+
+      sig { void }
+      def auto_indent_after_end_keyword
+        start_line_index = (@position[:line] - 2).downto(0).find do |i|
+          END_REGEXES.any? { |regex| regex.match?(@lines[i]) }
+        end
+
+        return unless start_line_index
+
+        start_line_indentation = find_indentation(@lines[start_line_index])
+
+        (start_line_index + 1...@position[:line] - 1).each do |i|
+          add_edit_with_text("  ", { line: i, character: 0 })
+        end
+
+        move_cursor_to(@position[:line] - 1, 3)
+
+        add_edit_with_text("\n" + (" " * (start_line_indentation + 2)), @position)
       end
     end
   end
