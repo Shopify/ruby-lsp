@@ -69,6 +69,9 @@ module RubyIndexer
 
       return unless name
 
+      receiver = node.receiver
+      name = "#{receiver.slice}::#{name}" if receiver
+
       # The private_constant method does not resolve the constant name. It always points to a constant that needs to
       # exist in the current namespace
       entries = @index[fully_qualify_name(name)]
