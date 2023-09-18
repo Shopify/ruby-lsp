@@ -97,7 +97,7 @@ module RubyLsp
         # Run listeners for the document
         emitter = EventEmitter.new
         document_symbol = Requests::DocumentSymbol.new(emitter, @message_queue)
-        document_link = Requests::DocumentLink.new(uri, emitter, document.comments, @message_queue)
+        document_link = Requests::DocumentLink.new(uri, document.comments, emitter, @message_queue)
         code_lens = Requests::CodeLens.new(uri, emitter, @message_queue, @test_library)
 
         semantic_highlighting = Requests::SemanticHighlighting.new(emitter, @message_queue)
