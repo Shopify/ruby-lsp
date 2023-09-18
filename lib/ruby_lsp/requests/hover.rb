@@ -51,7 +51,7 @@ module RubyLsp
 
       sig { override.params(extension: RubyLsp::Extension).returns(T.nilable(Listener[ResponseType])) }
       def initialize_external_listener(extension)
-        extension.create_hover_listener(@emitter, @message_queue)
+        extension.create_hover_listener(@nesting, @index, @emitter, @message_queue)
       end
 
       # Merges responses from other hover listeners

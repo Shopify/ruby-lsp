@@ -115,11 +115,13 @@ module RubyLsp
 
       sig do
         override.params(
+          nesting: T::Array[String],
+          index: RubyIndexer::Index,
           emitter: EventEmitter,
           message_queue: Thread::Queue,
         ).returns(T.nilable(Listener[T.nilable(Interface::Hover)]))
       end
-      def create_hover_listener(emitter, message_queue)
+      def create_hover_listener(nesting, index emitter, message_queue)
         # Use the listener factory methods to instantiate listeners with parameters sent by the LSP combined with any
         # pre-computed information in the extension. These factory methods are invoked on every request
         Hover.new(@config, emitter, message_queue)
