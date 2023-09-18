@@ -151,14 +151,35 @@ module RubyIndexer
         end
       RUBY
 
-      b_const = @index["A::B::CONST_A"].first
+      a_const = @index["A::B::CONST_A"].first
+      assert_equal(:private, a_const.visibility)
+
+      b_const = @index["A::B::CONST_B"].first
       assert_equal(:private, b_const.visibility)
 
-      c_const = @index["A::B::CONST_B"].first
+      c_const = @index["A::B::CONST_C"].first
       assert_equal(:private, c_const.visibility)
+    end
 
-      d_const = @index["A::B::CONST_C"].first
-      assert_equal(:private, d_const.visibility)
+    def test_marking_constants_as_private_with_receiver
+      index(<<~RUBY)
+        module A
+          module B
+            CONST_A = 1
+            CONST_B = 2
+          end
+
+          B.private_constant(:CONST_A)
+        end
+
+        A::B.private_constant(:CONST_B)
+      RUBY
+
+      a_const = @index["A::B::CONST_A"].first
+      assert_equal(:private, a_const.visibility)
+
+      b_const = @index["A::B::CONST_B"].first
+      assert_equal(:private, b_const.visibility)
     end
   end
 end
