@@ -93,8 +93,8 @@ module RubyLsp
         @stack << create_document_symbol(
           name: node.constant_path.location.slice,
           kind: Constant::SymbolKind::CLASS,
-          range_node: node,
-          selection_range_node: node.constant_path,
+          range_location: node.location,
+          selection_range_location: node.constant_path.location,
         )
       end
 
@@ -119,8 +119,8 @@ module RubyLsp
           create_document_symbol(
             name: name,
             kind: Constant::SymbolKind::FIELD,
-            range_node: argument,
-            selection_range_node: argument,
+            range_location: argument.location,
+            selection_range_location: T.must(argument.value_loc),
           )
         end
       end
@@ -130,8 +130,8 @@ module RubyLsp
         create_document_symbol(
           name: node.target.location.slice,
           kind: Constant::SymbolKind::CONSTANT,
-          range_node: node,
-          selection_range_node: node.target,
+          range_location: node.location,
+          selection_range_location: node.target.location,
         )
       end
 
@@ -140,8 +140,8 @@ module RubyLsp
         create_document_symbol(
           name: node.name.to_s,
           kind: Constant::SymbolKind::CONSTANT,
-          range_node: node,
-          selection_range_node: node.name_loc,
+          range_location: node.location,
+          selection_range_location: node.name_loc,
         )
       end
 
@@ -155,8 +155,8 @@ module RubyLsp
         @stack << create_document_symbol(
           name: node.constant_path.location.slice,
           kind: Constant::SymbolKind::MODULE,
-          range_node: node,
-          selection_range_node: node.constant_path,
+          range_location: node.location,
+          selection_range_location: node.constant_path.location,
         )
       end
 
@@ -175,8 +175,8 @@ module RubyLsp
         symbol = create_document_symbol(
           name: name,
           kind: kind,
-          range_node: node,
-          selection_range_node: node.name_loc,
+          range_location: node.location,
+          selection_range_location: node.name_loc,
         )
 
         @stack << symbol
@@ -192,8 +192,8 @@ module RubyLsp
         create_document_symbol(
           name: node.name.to_s,
           kind: Constant::SymbolKind::VARIABLE,
-          range_node: node,
-          selection_range_node: node.name_loc,
+          range_location: node.name_loc,
+          selection_range_location: node.name_loc,
         )
       end
 
@@ -202,8 +202,8 @@ module RubyLsp
         create_document_symbol(
           name: node.name.to_s,
           kind: Constant::SymbolKind::VARIABLE,
-          range_node: node,
-          selection_range_node: node.name_loc,
+          range_location: node.name_loc,
+          selection_range_location: node.name_loc,
         )
       end
 
@@ -213,22 +213,16 @@ module RubyLsp
         params(
           name: String,
           kind: Integer,
-          range_node: YARP::Node,
-          selection_range_node: T.any(YARP::Node, YARP::Location),
+          range_location: YARP::Location,
+          selection_range_location: YARP::Location,
         ).returns(Interface::DocumentSymbol)
       end
-      def create_document_symbol(name:, kind:, range_node:, selection_range_node:)
-        selection_range = if selection_range_node.is_a?(YARP::Node)
-          range_from_node(selection_range_node)
-        else
-          range_from_location(selection_range_node)
-        end
-
+      def create_document_symbol(name:, kind:, range_location:, selection_range_location:)
         symbol = Interface::DocumentSymbol.new(
           name: name,
           kind: kind,
-          range: range_from_node(range_node),
-          selection_range: selection_range,
+          range: range_from_location(range_location),
+          selection_range: range_from_location(selection_range_location),
           children: [],
         )
 
