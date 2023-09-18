@@ -31,8 +31,8 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      sig { params(uri: URI::Generic, emitter: EventEmitter, message_queue: Thread::Queue, test_library: String).void }
-      def initialize(uri, emitter, message_queue, test_library)
+      sig { params(uri: URI::Generic, test_library: String, emitter: EventEmitter, message_queue: Thread::Queue).void }
+      def initialize(uri, test_library, emitter, message_queue)
         @uri = T.let(uri, URI::Generic)
         @test_library = T.let(test_library, String)
         @_response = T.let([], ResponseType)
