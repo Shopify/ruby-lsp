@@ -15,6 +15,8 @@ module RubyIndexer
 
       assert(indexables.none? { |indexable| indexable.full_path.include?("test/fixtures") })
       assert(indexables.none? { |indexable| indexable.full_path.include?("minitest-reporters") })
+      assert(indexables.none? { |indexable| indexable.full_path.include?("ansi") })
+      assert(indexables.any? { |indexable| indexable.full_path.include?("sorbet-runtime") })
       assert(indexables.none? { |indexable| indexable.full_path == __FILE__ })
     end
 

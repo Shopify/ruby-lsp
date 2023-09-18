@@ -18,11 +18,7 @@ module RubyIndexer
 
     sig { void }
     def initialize
-      excluded_gem_names = Bundler.definition.dependencies.filter_map do |dependency|
-        dependency.name if dependency.groups == [:development]
-      end
-
-      @excluded_gems = T.let(excluded_gem_names, T::Array[String])
+      @excluded_gems = T.let(initial_excluded_gems, T::Array[String])
       @included_gems = T.let([], T::Array[String])
       @excluded_patterns = T.let([File.join("**", "*_test.rb")], T::Array[String])
       path = Bundler.settings["path"]
@@ -173,6 +169,40 @@ module RubyIndexer
       @excluded_patterns.concat(config["excluded_patterns"]) if config["excluded_patterns"]
       @included_patterns.concat(config["included_patterns"]) if config["included_patterns"]
       @excluded_magic_comments.concat(config["excluded_magic_comments"]) if config["excluded_magic_comments"]
+    end
+
+    sig { returns(T::Array[String]) }
+    def initial_excluded_gems
+      excluded, others = Bundler.definition.dependencies.partition do |dependency|
+        dependency.groups == [:development]
+      end
+
+      # When working on a gem, we need to make sure that its gemspec dependencies can't be excluded. This is necessary
+      # because Bundler doesn't assign groups to gemspec dependencies
+      this_gem = Bundler.definition.dependencies.find { |d| d.to_spec.full_gem_path == Dir.pwd }
+      others.concat(this_gem.to_spec.dependencies) if this_gem
+
+      excluded.each do |dependency|
+        next unless dependency.runtime?
+
+        dependency.to_spec.dependencies.each do |transitive_dependency|
+          # If the transitive dependecy is included in other groups, skip it
+          next if others.any? { |d| d.name == transitive_dependency.name }
+
+          # If the transitive dependency is included as a transitive dependency of a gem outside of the development
+          # group, skip it
+          next if others.any? { |d| d.to_spec.dependencies.include?(transitive_dependency) }
+
+          excluded << transitive_dependency
+        end
+      rescue Gem::MissingSpecError
+        # If a gem is scoped only to some specific platform, then its dependencies may not be installed either, but they
+        # are still listed in dependencies. We can't index them because they are not installed for the platform, so we
+        # just ignore if they're missing
+      end
+
+      excluded.uniq!
+      excluded.map(&:name)
     end
   end
 end
