@@ -26,7 +26,7 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new
-    listener = RubyLsp::Requests::DocumentLink.new(uri, emitter, message_queue)
+    listener = RubyLsp::Requests::DocumentLink.new(uri, emitter, message_queue, document.comments)
     emitter.visit(document.tree)
     listener.response
   ensure

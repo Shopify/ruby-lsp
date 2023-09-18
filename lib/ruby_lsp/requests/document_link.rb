@@ -75,8 +75,15 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      sig { params(uri: URI::Generic, emitter: EventEmitter, message_queue: Thread::Queue).void }
-      def initialize(uri, emitter, message_queue)
+      sig do
+        params(
+          uri: URI::Generic,
+          emitter: EventEmitter,
+          message_queue: Thread::Queue,
+          comments: T::Array[YARP::Comment],
+        ).void
+      end
+      def initialize(uri, emitter, message_queue, comments)
         super(emitter, message_queue)
 
         # Match the version based on the version in the RBI file name. Notice that the `@` symbol is sanitized to `%40`
@@ -85,6 +92,12 @@ module RubyLsp
         version_match = path ? /(?<=%40)[\d.]+(?=\.rbi$)/.match(path) : nil
         @gem_version = T.let(version_match && version_match[0], T.nilable(String))
         @_response = T.let([], T::Array[Interface::DocumentLink])
+        @comments = T.let(
+          comments.map do |comment|
+            [comment.location.end_line, comment]
+          end.to_h,
+          T::Hash[Integer, YARP::Comment],
+        )
 
         emitter.register(self, :on_def, :on_class, :on_module, :on_constant_write, :on_constant_path_write)
       end
@@ -118,11 +131,10 @@ module RubyLsp
 
       sig { params(node: YARP::Node).void }
       def extract_document_link(node)
-        comments = node.location.comments
-        return if comments.none?
+        comment = @comments[node.location.start_line - 1]
+        return unless comment
 
-        first_comment_location = comments.first.location
-        match = first_comment_location.slice.match(%r{source://.*#\d+$})
+        match = comment.location.slice.match(%r{source://.*#\d+$})
         return unless match
 
         uri = T.cast(URI(T.must(match[0])), URI::Source)
@@ -133,7 +145,7 @@ module RubyLsp
         return if file_path.nil?
 
         @_response << Interface::DocumentLink.new(
-          range: range_from_location(first_comment_location),
+          range: range_from_location(comment.location),
           target: "file://#{file_path}##{uri.line_number}",
           tooltip: "Jump to #{file_path}##{uri.line_number}",
         )
