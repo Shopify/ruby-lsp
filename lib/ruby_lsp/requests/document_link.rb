@@ -86,12 +86,43 @@ module RubyLsp
         @gem_version = T.let(version_match && version_match[0], T.nilable(String))
         @_response = T.let([], T::Array[Interface::DocumentLink])
 
-        emitter.register(self, :on_comment)
+        emitter.register(self, :on_def, :on_class, :on_module, :on_constant_write, :on_constant_path_write)
       end
 
-      sig { params(node: SyntaxTree::Comment).void }
-      def on_comment(node)
-        match = node.value.match(%r{source://.*#\d+$})
+      sig { params(node: YARP::DefNode).void }
+      def on_def(node)
+        extract_document_link(node)
+      end
+
+      sig { params(node: YARP::ClassNode).void }
+      def on_class(node)
+        extract_document_link(node)
+      end
+
+      sig { params(node: YARP::ModuleNode).void }
+      def on_module(node)
+        extract_document_link(node)
+      end
+
+      sig { params(node: YARP::ConstantWriteNode).void }
+      def on_constant_write(node)
+        extract_document_link(node)
+      end
+
+      sig { params(node: YARP::ConstantPathWriteNode).void }
+      def on_constant_path_write(node)
+        extract_document_link(node)
+      end
+
+      private
+
+      sig { params(node: YARP::Node).void }
+      def extract_document_link(node)
+        comments = node.location.comments
+        return if comments.none?
+
+        first_comment_location = comments.first.location
+        match = first_comment_location.slice.match(%r{source://.*#\d+$})
         return unless match
 
         uri = T.cast(URI(T.must(match[0])), URI::Source)
@@ -102,13 +133,11 @@ module RubyLsp
         return if file_path.nil?
 
         @_response << Interface::DocumentLink.new(
-          range: range_from_node(node),
+          range: range_from_location(first_comment_location),
           target: "file://#{file_path}##{uri.line_number}",
           tooltip: "Jump to #{file_path}##{uri.line_number}",
         )
       end
-
-      private
 
       # Try to figure out the gem version for a source:// link. The order of precedence is:
       # 1. The version in the URI

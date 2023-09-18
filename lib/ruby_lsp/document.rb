@@ -30,6 +30,7 @@ module RubyLsp
       @uri = T.let(uri, URI::Generic)
       @unparsed_edits = T.let([], T::Array[EditShape])
       @parse_result = T.let(YARP.parse(@source), YARP::ParseResult)
+      @parse_result.attach_comments!
     end
 
     sig { returns(YARP::ProgramNode) }
