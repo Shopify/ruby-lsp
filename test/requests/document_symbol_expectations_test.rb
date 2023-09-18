@@ -8,8 +8,6 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::DocumentSymbol, "document_symbol"
 
   def test_document_symbol_extensions
-    skip("Won't pass until other automatic requests are migrated")
-
     source = <<~RUBY
       test "foo" do
       end
