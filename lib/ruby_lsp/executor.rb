@@ -82,12 +82,10 @@ module RubyLsp
           request.dig(:params, :contentChanges),
           request.dig(:params, :textDocument, :version),
         )
-      when "textDocument/foldingRange"
-        folding_range(uri)
       when "textDocument/selectionRange"
         selection_range(uri, request.dig(:params, :positions))
       when "textDocument/documentSymbol", "textDocument/documentLink", "textDocument/codeLens",
-           "textDocument/semanticTokens/full"
+           "textDocument/semanticTokens/full", "textDocument/foldingRange"
         document = @store.get(uri)
 
         # If the response has already been cached by another request, return it
@@ -96,6 +94,7 @@ module RubyLsp
 
         # Run listeners for the document
         emitter = EventEmitter.new
+        folding_range = Requests::FoldingRanges.new(document.parse_result.comments, emitter, @message_queue)
         document_symbol = Requests::DocumentSymbol.new(emitter, @message_queue)
         document_link = Requests::DocumentLink.new(uri, emitter, @message_queue)
         code_lens = Requests::CodeLens.new(uri, emitter, @message_queue, @test_library)
@@ -105,6 +104,7 @@ module RubyLsp
 
         # Store all responses retrieve in this round of visits in the cache and then return the response for the request
         # we actually received
+        document.cache_set("textDocument/foldingRange", folding_range.response)
         document.cache_set("textDocument/documentSymbol", document_symbol.response)
         document.cache_set("textDocument/documentLink", document_link.response)
         document.cache_set("textDocument/codeLens", code_lens.response)
@@ -257,13 +257,6 @@ module RubyLsp
       base_listener = Requests::Definition.new(uri, nesting, @index, emitter, @message_queue)
       emitter.emit_for_target(target)
       base_listener.response
-    end
-
-    sig { params(uri: URI::Generic).returns(T::Array[Interface::FoldingRange]) }
-    def folding_range(uri)
-      @store.cache_fetch(uri, "textDocument/foldingRange") do |document|
-        Requests::FoldingRanges.new(document).run
-      end
     end
 
     sig do
