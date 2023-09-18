@@ -7,8 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # os: [ubuntu-latest, macos-latest, windows-latest]
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         ruby: ["3.0", "3.1", "3.2", "head"]
         include:
           - ruby: "head"
@@ -32,9 +31,9 @@ jobs:
       - name: Check if all requests are using valid visits
         run: bundle exec rake check_visit_overrides
 
-      # - name: Typecheck
-      #   if: matrix.os != 'windows-latest'
-      #   run: bundle exec srb tc
+      - name: Typecheck
+        if: matrix.os != 'windows-latest'
+        run: bundle exec srb tc
 
       - name: Lint Ruby files
         run: bundle exec rubocop

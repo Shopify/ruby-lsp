@@ -99,8 +99,8 @@ module RubyLsp
         ).returns(Support::SelectionRange)
       end
       def create_heredoc_selection_range(node, parent)
-        opening_loc = node.opening_loc
-        closing_loc = node.closing_loc
+        opening_loc = node.opening_loc || node.location
+        closing_loc = node.closing_loc || node.location
 
         RubyLsp::Requests::Support::SelectionRange.new(
           range: Interface::Range.new(

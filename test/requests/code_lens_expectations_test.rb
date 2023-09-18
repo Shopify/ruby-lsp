@@ -98,8 +98,6 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   end
 
   def test_code_lens_extensions
-    skip("Skipped until all automatic requests are migrated")
-
     source = <<~RUBY
       class Test < Minitest::Test; end
     RUBY
