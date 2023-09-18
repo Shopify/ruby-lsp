@@ -78,12 +78,12 @@ module RubyLsp
       sig do
         params(
           uri: URI::Generic,
+          comments: T::Array[YARP::Comment],
           emitter: EventEmitter,
           message_queue: Thread::Queue,
-          comments: T::Array[YARP::Comment],
         ).void
       end
-      def initialize(uri, emitter, message_queue, comments)
+      def initialize(uri, comments, emitter, message_queue)
         super(emitter, message_queue)
 
         # Match the version based on the version in the RBI file name. Notice that the `@` symbol is sanitized to `%40`
@@ -92,10 +92,10 @@ module RubyLsp
         version_match = path ? /(?<=%40)[\d.]+(?=\.rbi$)/.match(path) : nil
         @gem_version = T.let(version_match && version_match[0], T.nilable(String))
         @_response = T.let([], T::Array[Interface::DocumentLink])
-        @comments = T.let(
-          comments.map do |comment|
+        @lines_to_comments = T.let(
+          comments.to_h do |comment|
             [comment.location.end_line, comment]
-          end.to_h,
+          end,
           T::Hash[Integer, YARP::Comment],
         )
 
@@ -131,7 +131,7 @@ module RubyLsp
 
       sig { params(node: YARP::Node).void }
       def extract_document_link(node)
-        comment = @comments[node.location.start_line - 1]
+        comment = @lines_to_comments[node.location.start_line - 1]
         return unless comment
 
         match = comment.location.slice.match(%r{source://.*#\d+$})
