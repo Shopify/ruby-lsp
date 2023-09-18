@@ -96,7 +96,7 @@ module RubyLsp
         emitter = EventEmitter.new
         folding_range = Requests::FoldingRanges.new(document.parse_result.comments, emitter, @message_queue)
         document_symbol = Requests::DocumentSymbol.new(emitter, @message_queue)
-        document_link = Requests::DocumentLink.new(uri, emitter, @message_queue)
+        document_link = Requests::DocumentLink.new(uri, document.comments, emitter, @message_queue)
         code_lens = Requests::CodeLens.new(uri, emitter, @message_queue, @test_library)
 
         semantic_highlighting = Requests::SemanticHighlighting.new(emitter, @message_queue)

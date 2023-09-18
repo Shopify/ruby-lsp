@@ -37,6 +37,11 @@ module RubyLsp
       @parse_result.value
     end
 
+    sig { returns(T::Array[YARP::Comment]) }
+    def comments
+      @parse_result.comments
+    end
+
     sig { params(other: Document).returns(T::Boolean) }
     def ==(other)
       @source == other.source
