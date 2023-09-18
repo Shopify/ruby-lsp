@@ -21,28 +21,30 @@ class ShowSyntaxTreeTest < Minitest::Test
     }).response
 
     assert_equal(<<~AST, response[:ast])
-      ProgramNode(0...6)(
-        [],
-        StatementsNode(0...6)(
-          [CallNode(0...6)(
-             nil,
-             nil,
-             (0...3),
-             nil,
-             nil,
-             nil,
-             BlockNode(4...6)(
-               [],
-               nil,
-               StatementsNode(4...6)([MissingNode(4...6)()]),
-               (4...6),
-               (6...6)
-             ),
-             0,
-             "foo"
-           )]
-        )
-      )
+      @ ProgramNode (location: (0...6))
+      ├── locals: []
+      └── statements:
+          @ StatementsNode (location: (0...6))
+          └── body: (length: 1)
+              └── @ CallNode (location: (0...6))
+                  ├── receiver: ∅
+                  ├── call_operator_loc: ∅
+                  ├── message_loc: (0...3) = "foo"
+                  ├── opening_loc: ∅
+                  ├── arguments: ∅
+                  ├── closing_loc: ∅
+                  ├── block:
+                  │   @ BlockNode (location: (4...6))
+                  │   ├── locals: []
+                  │   ├── parameters: ∅
+                  │   ├── body:
+                  │   │   @ StatementsNode (location: (4...6))
+                  │   │   └── body: (length: 1)
+                  │   │       └── @ MissingNode (location: (4...6))
+                  │   ├── opening_loc: (4...6) = "do"
+                  │   └── closing_loc: (6...6) = ""
+                  ├── flags: ∅
+                  └── name: "foo"
     AST
   end
 
@@ -58,18 +60,19 @@ class ShowSyntaxTreeTest < Minitest::Test
     }).response
 
     assert_equal(<<~AST, response[:ast])
-      ProgramNode(0...9)(
-        [:foo],
-        StatementsNode(0...9)(
-          [LocalVariableWriteNode(0...9)(
-             :foo,
-             0,
-             (0...3),
-             IntegerNode(6...9)(),
-             (4...5)
-           )]
-        )
-      )
+      @ ProgramNode (location: (0...9))
+      ├── locals: [:foo]
+      └── statements:
+          @ StatementsNode (location: (0...9))
+          └── body: (length: 1)
+              └── @ LocalVariableWriteNode (location: (0...9))
+                  ├── name: :foo
+                  ├── depth: 0
+                  ├── name_loc: (0...3) = "foo"
+                  ├── value:
+                  │   @ IntegerNode (location: (6...9))
+                  │   └── flags: decimal
+                  └── operator_loc: (4...5) = "="
     AST
   end
 
@@ -93,15 +96,23 @@ class ShowSyntaxTreeTest < Minitest::Test
     }).response
 
     assert_equal(<<~AST, response[:ast])
-      LocalVariableWriteNode(0...9)(:foo, 0, (0...3), IntegerNode(6...9)(), (4...5))
+      @ LocalVariableWriteNode (location: (0...9))
+      ├── name: :foo
+      ├── depth: 0
+      ├── name_loc: (0...3) = "foo"
+      ├── value:
+      │   @ IntegerNode (location: (6...9))
+      │   └── flags: decimal
+      └── operator_loc: (4...5) = "="
 
-      LocalVariableWriteNode(10...19)(
-        :bar,
-        0,
-        (10...13),
-        IntegerNode(16...19)(),
-        (14...15)
-      )
+      @ LocalVariableWriteNode (location: (10...19))
+      ├── name: :bar
+      ├── depth: 0
+      ├── name_loc: (10...13) = "bar"
+      ├── value:
+      │   @ IntegerNode (location: (16...19))
+      │   └── flags: decimal
+      └── operator_loc: (14...15) = "="
     AST
 
     # We execute twice just to make sure we do not mutate by mistake.

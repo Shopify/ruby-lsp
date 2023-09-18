@@ -168,12 +168,6 @@ module RubyLsp
         return process_regexp_locals(node) if message == "=~"
         return if special_method?(message)
 
-        # Numbered parameters
-        if /_\d+/.match?(message)
-          add_token(T.must(node.message_loc), :parameter)
-          return
-        end
-
         type = Support::Sorbet.annotation?(node) ? :type : :method
         add_token(T.must(node.message_loc), type)
       end
@@ -324,6 +318,12 @@ module RubyLsp
       sig { params(node: YARP::LocalVariableReadNode).void }
       def on_local_variable_read(node)
         return unless visible?(node, @range)
+
+        # Numbered parameters
+        if /_\d+/.match?(node.name)
+          add_token(node.location, :parameter)
+          return
+        end
 
         add_token(node.location, @current_scope.type_for(node.name))
       end
