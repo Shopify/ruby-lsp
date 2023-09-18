@@ -432,7 +432,7 @@ class DocumentTest < Minitest::Test
     assert_equal("ActiveRecord", T.cast(found, YARP::ConstantReadNode).location.slice)
 
     assert_instance_of(YARP::ConstantPathNode, parent)
-    assert_equal("ActiveRecord", T.cast(parent, YARP::ConstantPathNode).child_nodes.first.location.slice)
+    assert_equal("ActiveRecord", T.must(T.cast(parent, YARP::ConstantPathNode).child_nodes.first).location.slice)
 
     # Locate the `Base` class
     found, parent = T.cast(
@@ -443,8 +443,8 @@ class DocumentTest < Minitest::Test
     assert_equal("Base", found.location.slice)
 
     assert_instance_of(YARP::ConstantPathNode, parent)
-    assert_equal("Base", parent.child_nodes[1].location.slice)
-    assert_equal("ActiveRecord", parent.child_nodes[0].location.slice)
+    assert_equal("Base", T.must(parent.child_nodes[1]).location.slice)
+    assert_equal("ActiveRecord", T.must(parent.child_nodes[0]).location.slice)
 
     # Locate the `where` invocation
     found, parent = T.cast(
@@ -452,7 +452,7 @@ class DocumentTest < Minitest::Test
       [YARP::CallNode, YARP::StatementsNode, T::Array[String]],
     )
     assert_instance_of(YARP::CallNode, found)
-    assert_equal("where", found.message_loc.slice)
+    assert_equal("where", T.must(found.message_loc).slice)
 
     assert_instance_of(YARP::StatementsNode, parent)
   end
