@@ -12,7 +12,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new
-    listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue, "minitest")
+    listener = RubyLsp::Requests::CodeLens.new(uri, "minitest", emitter, @message_queue)
     emitter.visit(document.tree)
     listener.response
   end
@@ -28,7 +28,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new
-    listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue, "test-unit")
+    listener = RubyLsp::Requests::CodeLens.new(uri, "test-unit", emitter, @message_queue)
     emitter.visit(document.tree)
     response = listener.response
 
@@ -54,7 +54,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new
-    listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue, "unknown")
+    listener = RubyLsp::Requests::CodeLens.new(uri, "unknown", emitter, @message_queue)
     emitter.visit(document.tree)
     response = listener.response
 
@@ -72,7 +72,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new
-    listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue, "rspec")
+    listener = RubyLsp::Requests::CodeLens.new(uri, "rspec", emitter, @message_queue)
     emitter.visit(document.tree)
     response = listener.response
 
@@ -90,7 +90,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new
-    listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue, "minitest")
+    listener = RubyLsp::Requests::CodeLens.new(uri, "minitest", emitter, @message_queue)
     emitter.visit(document.tree)
     response = listener.response
 
