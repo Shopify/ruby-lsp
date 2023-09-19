@@ -88,31 +88,6 @@ class StoreTest < Minitest::Test
     file&.unlink
   end
 
-  def test_push_edits_recovers_from_initial_syntax_error
-    file = Tempfile.new("foo.rb")
-    file.write("def great_code")
-    file.rewind
-    uri = URI("file://#{file.path}")
-    document = @store.get(uri)
-
-    refute_nil(document)
-    assert_nil(document.tree)
-
-    @store.push_edits(
-      uri: uri,
-      edits: [{ range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } }, text: " ; end" }],
-      version: 2,
-    )
-
-    document = @store.get(uri)
-    document.parse
-    refute_nil(document)
-    refute_nil(document.tree)
-  ensure
-    file&.close
-    file&.unlink
-  end
-
   def test_clear
     @store.clear
 

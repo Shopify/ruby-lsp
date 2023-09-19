@@ -39,10 +39,9 @@ module RubyLsp
         emitter.register(self, :on_rescue)
       end
 
-      sig { params(node: SyntaxTree::Rescue).void }
+      sig { params(node: YARP::RescueNode).void }
       def on_rescue(node)
-        exception = node.exception
-        return unless exception.nil? || exception.exceptions.nil?
+        return unless node.exceptions.empty?
 
         loc = node.location
         return unless visible?(node, @range)

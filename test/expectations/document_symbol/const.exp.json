@@ -10,7 +10,7 @@
         },
         "end": {
           "line": 0,
-          "character": 2
+          "character": 7
         }
       },
       "selectionRange": {
@@ -26,7 +26,7 @@
       "children": []
     },
     {
-      "name": "C2",
+      "name": "::C2",
       "kind": 14,
       "range": {
         "start": {
@@ -35,63 +35,63 @@
         },
         "end": {
           "line": 1,
-          "character": 4
-        }
-      },
-      "selectionRange": {
-        "start": {
-          "line": 1,
-          "character": 2
-        },
-        "end": {
-          "line": 1,
-          "character": 4
-        }
-      },
-      "children": []
-    },
-    {
-      "name": "C3",
-      "kind": 14,
-      "range": {
-        "start": {
-          "line": 2,
-          "character": 0
-        },
-        "end": {
-          "line": 2,
-          "character": 7
-        }
-      },
-      "selectionRange": {
-        "start": {
-          "line": 2,
-          "character": 5
-        },
-        "end": {
-          "line": 2,
-          "character": 7
-        }
-      },
-      "children": []
-    },
-    {
-      "name": "C4",
-      "kind": 14,
-      "range": {
-        "start": {
-          "line": 3,
-          "character": 0
-        },
-        "end": {
-          "line": 3,
           "character": 9
         }
       },
       "selectionRange": {
         "start": {
-          "line": 3,
+          "line": 1,
+          "character": 0
+        },
+        "end": {
+          "line": 1,
+          "character": 4
+        }
+      },
+      "children": []
+    },
+    {
+      "name": "Foo::C3",
+      "kind": 14,
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 0
+        },
+        "end": {
+          "line": 2,
+          "character": 12
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 2,
+          "character": 0
+        },
+        "end": {
+          "line": 2,
           "character": 7
+        }
+      },
+      "children": []
+    },
+    {
+      "name": "::Foo::C4",
+      "kind": 14,
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 0
+        },
+        "end": {
+          "line": 3,
+          "character": 14
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 3,
+          "character": 0
         },
         "end": {
           "line": 3,

@@ -141,9 +141,9 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
             T.bind(self, RubyLsp::Listener[T.untyped])
 
             @_response = [RubyLsp::Interface::CodeLens.new(
-              range: range_from_syntax_tree_node(node),
+              range: range_from_node(node),
               command: RubyLsp::Interface::Command.new(
-                title: "Run #{node.constant.constant.value}",
+                title: "Run #{node.constant_path.slice}",
                 command: "rubyLsp.runTest",
               ),
             )]

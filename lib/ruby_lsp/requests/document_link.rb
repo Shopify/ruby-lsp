@@ -75,8 +75,15 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      sig { params(uri: URI::Generic, emitter: EventEmitter, message_queue: Thread::Queue).void }
-      def initialize(uri, emitter, message_queue)
+      sig do
+        params(
+          uri: URI::Generic,
+          comments: T::Array[YARP::Comment],
+          emitter: EventEmitter,
+          message_queue: Thread::Queue,
+        ).void
+      end
+      def initialize(uri, comments, emitter, message_queue)
         super(emitter, message_queue)
 
         # Match the version based on the version in the RBI file name. Notice that the `@` symbol is sanitized to `%40`
@@ -85,13 +92,49 @@ module RubyLsp
         version_match = path ? /(?<=%40)[\d.]+(?=\.rbi$)/.match(path) : nil
         @gem_version = T.let(version_match && version_match[0], T.nilable(String))
         @_response = T.let([], T::Array[Interface::DocumentLink])
+        @lines_to_comments = T.let(
+          comments.to_h do |comment|
+            [comment.location.end_line, comment]
+          end,
+          T::Hash[Integer, YARP::Comment],
+        )
 
-        emitter.register(self, :on_comment)
+        emitter.register(self, :on_def, :on_class, :on_module, :on_constant_write, :on_constant_path_write)
       end
 
-      sig { params(node: SyntaxTree::Comment).void }
-      def on_comment(node)
-        match = node.value.match(%r{source://.*#\d+$})
+      sig { params(node: YARP::DefNode).void }
+      def on_def(node)
+        extract_document_link(node)
+      end
+
+      sig { params(node: YARP::ClassNode).void }
+      def on_class(node)
+        extract_document_link(node)
+      end
+
+      sig { params(node: YARP::ModuleNode).void }
+      def on_module(node)
+        extract_document_link(node)
+      end
+
+      sig { params(node: YARP::ConstantWriteNode).void }
+      def on_constant_write(node)
+        extract_document_link(node)
+      end
+
+      sig { params(node: YARP::ConstantPathWriteNode).void }
+      def on_constant_path_write(node)
+        extract_document_link(node)
+      end
+
+      private
+
+      sig { params(node: YARP::Node).void }
+      def extract_document_link(node)
+        comment = @lines_to_comments[node.location.start_line - 1]
+        return unless comment
+
+        match = comment.location.slice.match(%r{source://.*#\d+$})
         return unless match
 
         uri = T.cast(URI(T.must(match[0])), URI::Source)
@@ -102,13 +145,11 @@ module RubyLsp
         return if file_path.nil?
 
         @_response << Interface::DocumentLink.new(
-          range: range_from_syntax_tree_node(node),
+          range: range_from_location(comment.location),
           target: "file://#{file_path}##{uri.line_number}",
           tooltip: "Jump to #{file_path}##{uri.line_number}",
         )
       end
-
-      private
 
       # Try to figure out the gem version for a source:// link. The order of precedence is:
       # 1. The version in the URI

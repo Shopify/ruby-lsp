@@ -32,8 +32,8 @@ module RubyLsp
 
       sig do
         params(
-          target: T.nilable(SyntaxTree::Node),
-          parent: T.nilable(SyntaxTree::Node),
+          target: T.nilable(YARP::Node),
+          parent: T.nilable(YARP::Node),
           emitter: EventEmitter,
           message_queue: Thread::Queue,
         ).void
@@ -47,11 +47,21 @@ module RubyLsp
 
         highlight_target =
           case target
-          when *DIRECT_HIGHLIGHTS
+          when YARP::GlobalVariableReadNode, YARP::GlobalVariableAndWriteNode, YARP::GlobalVariableOperatorWriteNode,
+            YARP::GlobalVariableOrWriteNode, YARP::GlobalVariableTargetNode, YARP::GlobalVariableWriteNode,
+            YARP::InstanceVariableAndWriteNode, YARP::InstanceVariableOperatorWriteNode,
+            YARP::InstanceVariableOrWriteNode, YARP::InstanceVariableReadNode, YARP::InstanceVariableTargetNode,
+            YARP::InstanceVariableWriteNode, YARP::ConstantAndWriteNode, YARP::ConstantOperatorWriteNode,
+            YARP::ConstantOrWriteNode, YARP::ConstantPathAndWriteNode, YARP::ConstantPathNode,
+            YARP::ConstantPathOperatorWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathTargetNode,
+            YARP::ConstantPathWriteNode, YARP::ConstantReadNode, YARP::ConstantTargetNode, YARP::ConstantWriteNode,
+            YARP::ClassVariableAndWriteNode, YARP::ClassVariableOperatorWriteNode, YARP::ClassVariableOrWriteNode,
+            YARP::ClassVariableReadNode, YARP::ClassVariableTargetNode, YARP::ClassVariableWriteNode,
+            YARP::LocalVariableAndWriteNode, YARP::LocalVariableOperatorWriteNode, YARP::LocalVariableOrWriteNode,
+            YARP::LocalVariableReadNode, YARP::LocalVariableTargetNode, YARP::LocalVariableWriteNode, YARP::CallNode,
+            YARP::BlockParameterNode, YARP::KeywordParameterNode, YARP::KeywordRestParameterNode,
+            YARP::OptionalParameterNode, YARP::RequiredParameterNode, YARP::RestParameterNode
             Support::HighlightTarget.new(target)
-          when SyntaxTree::Ident
-            relevant_node = parent.is_a?(SyntaxTree::Params) ? target : parent
-            Support::HighlightTarget.new(relevant_node)
           end
 
         @target = T.let(highlight_target, T.nilable(Support::HighlightTarget))
@@ -59,7 +69,7 @@ module RubyLsp
         emitter.register(self, :on_node) if @target
       end
 
-      sig { params(node: T.nilable(SyntaxTree::Node)).void }
+      sig { params(node: T.nilable(YARP::Node)).void }
       def on_node(node)
         return if node.nil?
 
@@ -69,20 +79,9 @@ module RubyLsp
 
       private
 
-      DIRECT_HIGHLIGHTS = T.let(
-        [
-          SyntaxTree::GVar,
-          SyntaxTree::IVar,
-          SyntaxTree::Const,
-          SyntaxTree::CVar,
-          SyntaxTree::VarField,
-        ],
-        T::Array[T.class_of(SyntaxTree::Node)],
-      )
-
       sig { params(match: Support::HighlightTarget::HighlightMatch).void }
       def add_highlight(match)
-        range = range_from_syntax_tree_node(match.node)
+        range = range_from_location(match.location)
         @_response << Interface::DocumentHighlight.new(range: range, kind: match.type)
       end
     end

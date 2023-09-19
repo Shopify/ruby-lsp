@@ -14,14 +14,14 @@
                 },
                 "end": {
                     "line": 5,
-                    "character": 6
+                    "character": 18
                 }
             },
             "parent": {
                 "range": {
                     "start": {
-                        "line": 5,
-                        "character": 2
+                        "line": 4,
+                        "character": 0
                     },
                     "end": {
                         "line": 5,
@@ -31,35 +31,23 @@
                 "parent": {
                     "range": {
                         "start": {
-                            "line": 4,
+                            "line": 2,
                             "character": 0
                         },
                         "end": {
-                            "line": 6,
-                            "character": 0
+                            "line": 5,
+                            "character": 18
                         }
                     },
                     "parent": {
                         "range": {
                             "start": {
-                                "line": 2,
+                                "line": 0,
                                 "character": 0
                             },
                             "end": {
-                                "line": 6,
-                                "character": 0
-                            }
-                        },
-                        "parent": {
-                            "range": {
-                                "start": {
-                                    "line": 0,
-                                    "character": 0
-                                },
-                                "end": {
-                                    "line": 8,
-                                    "character": 3
-                                }
+                                "line": 8,
+                                "character": 3
                             }
                         }
                     }

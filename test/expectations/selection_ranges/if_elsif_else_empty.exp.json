@@ -13,14 +13,14 @@
                     "character": 0
                 },
                 "end": {
-                    "line": 2,
-                    "character": 4
+                    "line": 3,
+                    "character": 3
                 }
             },
             "parent": {
                 "range": {
                     "start": {
-                        "line": 2,
+                        "line": 1,
                         "character": 0
                     },
                     "end": {
@@ -31,24 +31,12 @@
                 "parent": {
                     "range": {
                         "start": {
-                            "line": 1,
+                            "line": 0,
                             "character": 0
                         },
                         "end": {
                             "line": 3,
                             "character": 3
-                        }
-                    },
-                    "parent": {
-                        "range": {
-                            "start": {
-                                "line": 0,
-                                "character": 0
-                            },
-                            "end": {
-                                "line": 3,
-                                "character": 3
-                            }
                         }
                     }
                 }

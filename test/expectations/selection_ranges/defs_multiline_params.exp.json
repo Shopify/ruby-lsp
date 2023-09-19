@@ -21,11 +21,11 @@
                 "range": {
                     "start": {
                         "line": 1,
-                        "character": 13
+                        "character": 2
                     },
                     "end": {
                         "line": 2,
-                        "character": 0
+                        "character": 3
                     }
                 },
                 "parent": {

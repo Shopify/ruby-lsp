@@ -42,66 +42,11 @@ module RubyLsp
 
           sig do
             params(
-              node: T.any(SyntaxTree::CallNode, SyntaxTree::VCall),
+              node: YARP::CallNode,
             ).returns(T::Boolean)
           end
           def annotation?(node)
-            annotation = annotation(node)
-
-            return false if annotation.nil?
-
-            return false unless annotation.supports_receiver?(receiver_name(node))
-
-            annotation.supports_arity?(node.arity)
-          end
-
-          private
-
-          sig { params(node: T.any(SyntaxTree::CallNode, SyntaxTree::VCall)).returns(T.nilable(Annotation)) }
-          def annotation(node)
-            case node
-            when SyntaxTree::VCall
-              ANNOTATIONS[node.value.value]
-            when SyntaxTree::CallNode
-              message = node.message
-              ANNOTATIONS[message.value] unless message.is_a?(Symbol)
-            else
-              T.absurd(node)
-            end
-          end
-
-          sig do
-            params(receiver: T.any(SyntaxTree::CallNode, SyntaxTree::VCall)).returns(T.nilable(String))
-          end
-          def receiver_name(receiver)
-            case receiver
-            when SyntaxTree::CallNode
-              node_name(receiver.receiver)
-            when SyntaxTree::VCall
-              nil
-            else
-              T.absurd(receiver)
-            end
-          end
-
-          sig do
-            params(node: T.nilable(SyntaxTree::Node)).returns(T.nilable(String))
-          end
-          def node_name(node)
-            case node
-            when SyntaxTree::VarRef
-              node.value.value
-            when SyntaxTree::CallNode
-              node_name(node.receiver)
-            when SyntaxTree::VCall
-              node_name(node.value)
-            when SyntaxTree::Ident, SyntaxTree::Backtick, SyntaxTree::Const, SyntaxTree::Op
-              node.value
-            when NilClass, SyntaxTree::Node
-              nil
-            else
-              T.absurd(node)
-            end
+            !!ANNOTATIONS[node.name]&.match?(node)
           end
         end
       end

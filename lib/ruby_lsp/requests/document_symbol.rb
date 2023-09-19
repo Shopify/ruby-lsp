@@ -64,14 +64,15 @@ module RubyLsp
           self,
           :on_class,
           :after_class,
-          :on_command,
-          :on_const_path_field,
+          :on_call,
+          :on_constant_path_write,
+          :on_constant_write,
           :on_def,
           :after_def,
           :on_module,
           :after_module,
-          :on_top_const_field,
-          :on_var_field,
+          :on_instance_variable_write,
+          :on_class_variable_write,
         )
       end
 
@@ -87,116 +88,122 @@ module RubyLsp
         self
       end
 
-      sig { params(node: SyntaxTree::ClassDeclaration).void }
+      sig { params(node: YARP::ClassNode).void }
       def on_class(node)
         @stack << create_document_symbol(
-          name: full_constant_name(node.constant),
+          name: node.constant_path.location.slice,
           kind: Constant::SymbolKind::CLASS,
-          range_node: node,
-          selection_range_node: node.constant,
+          range_location: node.location,
+          selection_range_location: node.constant_path.location,
         )
       end
 
-      sig { params(node: SyntaxTree::ClassDeclaration).void }
+      sig { params(node: YARP::ClassNode).void }
       def after_class(node)
         @stack.pop
       end
 
-      sig { params(node: SyntaxTree::Command).void }
-      def on_command(node)
-        return unless ATTR_ACCESSORS.include?(node.message.value)
+      sig { params(node: YARP::CallNode).void }
+      def on_call(node)
+        return unless ATTR_ACCESSORS.include?(node.name) && node.receiver.nil?
 
-        node.arguments.parts.each do |argument|
-          next unless argument.is_a?(SyntaxTree::SymbolLiteral)
+        arguments = node.arguments
+        return unless arguments
+
+        arguments.arguments.each do |argument|
+          next unless argument.is_a?(YARP::SymbolNode)
+
+          name = argument.value
+          next unless name
 
           create_document_symbol(
-            name: argument.value.value,
+            name: name,
             kind: Constant::SymbolKind::FIELD,
-            range_node: argument,
-            selection_range_node: argument.value,
+            range_location: argument.location,
+            selection_range_location: T.must(argument.value_loc),
           )
         end
       end
 
-      sig { params(node: SyntaxTree::ConstPathField).void }
-      def on_const_path_field(node)
+      sig { params(node: YARP::ConstantPathWriteNode).void }
+      def on_constant_path_write(node)
         create_document_symbol(
-          name: node.constant.value,
+          name: node.target.location.slice,
           kind: Constant::SymbolKind::CONSTANT,
-          range_node: node,
-          selection_range_node: node.constant,
+          range_location: node.location,
+          selection_range_location: node.target.location,
         )
       end
 
-      sig { params(node: SyntaxTree::DefNode).void }
-      def on_def(node)
-        target = node.target
+      sig { params(node: YARP::ConstantWriteNode).void }
+      def on_constant_write(node)
+        create_document_symbol(
+          name: node.name.to_s,
+          kind: Constant::SymbolKind::CONSTANT,
+          range_location: node.location,
+          selection_range_location: node.name_loc,
+        )
+      end
 
-        if target.is_a?(SyntaxTree::VarRef) && target.value.is_a?(SyntaxTree::Kw) && target.value.value == "self"
-          name = "self.#{node.name.value}"
+      sig { params(node: YARP::DefNode).void }
+      def after_def(node)
+        @stack.pop
+      end
+
+      sig { params(node: YARP::ModuleNode).void }
+      def on_module(node)
+        @stack << create_document_symbol(
+          name: node.constant_path.location.slice,
+          kind: Constant::SymbolKind::MODULE,
+          range_location: node.location,
+          selection_range_location: node.constant_path.location,
+        )
+      end
+
+      sig { params(node: YARP::DefNode).void }
+      def on_def(node)
+        receiver = node.receiver
+
+        if receiver.is_a?(YARP::SelfNode)
+          name = "self.#{node.name}"
           kind = Constant::SymbolKind::METHOD
         else
-          name = node.name.value
+          name = node.name.to_s
           kind = name == "initialize" ? Constant::SymbolKind::CONSTRUCTOR : Constant::SymbolKind::METHOD
         end
 
         symbol = create_document_symbol(
           name: name,
           kind: kind,
-          range_node: node,
-          selection_range_node: node.name,
+          range_location: node.location,
+          selection_range_location: node.name_loc,
         )
 
         @stack << symbol
       end
 
-      sig { params(node: SyntaxTree::DefNode).void }
-      def after_def(node)
-        @stack.pop
-      end
-
-      sig { params(node: SyntaxTree::ModuleDeclaration).void }
-      def on_module(node)
-        @stack << create_document_symbol(
-          name: full_constant_name(node.constant),
-          kind: Constant::SymbolKind::MODULE,
-          range_node: node,
-          selection_range_node: node.constant,
-        )
-      end
-
-      sig { params(node: SyntaxTree::ModuleDeclaration).void }
+      sig { params(node: YARP::ModuleNode).void }
       def after_module(node)
         @stack.pop
       end
 
-      sig { params(node: SyntaxTree::TopConstField).void }
-      def on_top_const_field(node)
+      sig { params(node: YARP::InstanceVariableWriteNode).void }
+      def on_instance_variable_write(node)
         create_document_symbol(
-          name: node.constant.value,
-          kind: Constant::SymbolKind::CONSTANT,
-          range_node: node,
-          selection_range_node: node.constant,
+          name: node.name.to_s,
+          kind: Constant::SymbolKind::VARIABLE,
+          range_location: node.name_loc,
+          selection_range_location: node.name_loc,
         )
       end
 
-      sig { params(node: SyntaxTree::VarField).void }
-      def on_var_field(node)
-        value = node.value
-        kind = case value
-        when SyntaxTree::Const
-          Constant::SymbolKind::CONSTANT
-        when SyntaxTree::CVar, SyntaxTree::IVar
-          Constant::SymbolKind::VARIABLE
-        else
-          return
-        end
-
+      sig { params(node: YARP::ClassVariableWriteNode).void }
+      def on_class_variable_write(node)
         create_document_symbol(
-          name: value.value,
-          kind: kind,
-          range_node: node,
-          selection_range_node: value,
+          name: node.name.to_s,
+          kind: Constant::SymbolKind::VARIABLE,
+          range_location: node.name_loc,
+          selection_range_location: node.name_loc,
         )
       end
 
@@ -206,16 +213,16 @@ module RubyLsp
         params(
           name: String,
           kind: Integer,
-          range_node: SyntaxTree::Node,
-          selection_range_node: SyntaxTree::Node,
+          range_location: YARP::Location,
+          selection_range_location: YARP::Location,
         ).returns(Interface::DocumentSymbol)
       end
-      def create_document_symbol(name:, kind:, range_node:, selection_range_node:)
+      def create_document_symbol(name:, kind:, range_location:, selection_range_location:)
         symbol = Interface::DocumentSymbol.new(
           name: name,
           kind: kind,
-          range: range_from_syntax_tree_node(range_node),
-          selection_range: range_from_syntax_tree_node(selection_range_node),
+          range: range_from_location(range_location),
+          selection_range: range_from_location(selection_range_location),
           children: [],
         )
 

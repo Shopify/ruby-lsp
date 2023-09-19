@@ -7,7 +7,26 @@ if you are looking to modify the template
 =end
 
 module YARP
-  class NodeInspector; end
+  class Node
+    sig { returns(T::Array[T.nilable(Node)]) }
+    def child_nodes; end
+
+    sig { returns(Location) }
+    def location; end
+  end
+
+  class Location
+    sig { returns(String) }
+    def slice; end
+
+    sig { returns(T::Array[Comment]) }
+    def comments; end
+  end
+
+  class Comment
+    sig { returns(Location) }
+    def location; end
+  end
 
   # Represents the use of the `alias` keyword to alias a global variable.
   #
@@ -2875,6 +2894,40 @@ module YARP
     def inspect(inspector); end
   end
 
+  # Represents a node that is implicitly being added to the tree but doesn't
+  # correspond directly to a node in the source.
+  #
+  #     { foo: }
+  #       ^^^^
+  #
+  #     { Foo: }
+  #       ^^^^
+  class ImplicitNode < Node
+    sig { returns(Node) }
+    attr_reader :value
+
+    sig { params(value: Node, location: Location).void }
+    def initialize(value, location); end
+
+    sig { params(visitor: Visitor).void }
+    def accept(visitor); end
+
+    sig { returns(T::Array[T.nilable(Node)]) }
+    def child_nodes; end
+
+    sig { returns(T::Array[T.nilable(Node)]) }
+    def deconstruct; end
+
+    sig { params(params: T.untyped).returns(ImplicitNode) }
+    def copy(**params); end
+
+    sig { params(keys: T::Array[Symbol]).returns(T::Hash[Symbol, T.nilable(T.any(Node, T::Array[Node], String, Token, T::Array[Token], Location))]) }
+    def deconstruct_keys(keys); end
+
+    sig { params(inspector: NodeInspector).returns(String) }
+    def inspect(inspector); end
+  end
+
   # Represents the use of the `in` keyword in a case statement.
   #
   #     case a; in b then c end
@@ -3156,8 +3209,8 @@ module YARP
     sig { returns(Integer) }
     attr_reader :flags
 
-    sig { params(location: Location).void }
-    def initialize(location); end
+    sig { params(flags: Integer, location: Location).void }
+    def initialize(flags, location); end
 
     sig { params(visitor: Visitor).void }
     def accept(visitor); end
@@ -4029,6 +4082,40 @@ module YARP
 
     sig { returns(String) }
     def operator; end
+
+    sig { params(inspector: NodeInspector).returns(String) }
+    def inspect(inspector); end
+  end
+
+  # Represents writing local variables using a regular expression match with
+  # named capture groups.
+  #
+  #     /(?<foo>bar)/ =~ baz
+  #     ^^^^^^^^^^^^^^^^^^^^
+  class MatchWriteNode < Node
+    sig { returns(CallNode) }
+    attr_reader :call
+
+    sig { returns(T::Array[Symbol]) }
+    attr_reader :locals
+
+    sig { params(call: CallNode, locals: T::Array[Symbol], location: Location).void }
+    def initialize(call, locals, location); end
+
+    sig { params(visitor: Visitor).void }
+    def accept(visitor); end
+
+    sig { returns(T::Array[T.nilable(Node)]) }
+    def child_nodes; end
+
+    sig { returns(T::Array[T.nilable(Node)]) }
+    def deconstruct; end
+
+    sig { params(params: T.untyped).returns(MatchWriteNode) }
+    def copy(**params); end
+
+    sig { params(keys: T::Array[Symbol]).returns(T::Hash[Symbol, T.nilable(T.any(Node, T::Array[Node], String, Token, T::Array[Token], Location))]) }
+    def deconstruct_keys(keys); end
 
     sig { params(inspector: NodeInspector).returns(String) }
     def inspect(inspector); end
@@ -5454,6 +5541,9 @@ module YARP
   #     "foo #{bar} baz"
   #      ^^^^      ^^^^
   class StringNode < Node
+    sig { returns(Integer) }
+    attr_reader :flags
+
     sig { returns(T.nilable(Location)) }
     attr_reader :opening_loc
 
@@ -5466,8 +5556,8 @@ module YARP
     sig { returns(String) }
     attr_reader :unescaped
 
-    sig { params(opening_loc: T.nilable(Location), content_loc: Location, closing_loc: T.nilable(Location), unescaped: String, location: Location).void }
-    def initialize(opening_loc, content_loc, closing_loc, unescaped, location); end
+    sig { params(flags: Integer, opening_loc: T.nilable(Location), content_loc: Location, closing_loc: T.nilable(Location), unescaped: String, location: Location).void }
+    def initialize(flags, opening_loc, content_loc, closing_loc, unescaped, location); end
 
     sig { params(visitor: Visitor).void }
     def accept(visitor); end
@@ -5483,6 +5573,9 @@ module YARP
 
     sig { params(keys: T::Array[Symbol]).returns(T::Hash[Symbol, T.nilable(T.any(Node, T::Array[Node], String, Token, T::Array[Token], Location))]) }
     def deconstruct_keys(keys); end
+
+    sig { returns(T::Boolean) }
+    def frozen?; end
 
     sig { returns(T.nilable(String)) }
     def opening; end
@@ -6025,6 +6118,11 @@ module YARP
     ONCE = 1 << 7
           end
 
+  module StringFlags
+    # frozen by virtue of a frozen_string_literal comment
+    FROZEN = 1 << 0
+          end
+
   class Visitor < BasicVisitor
     # Visit a AliasGlobalVariableNode node
     sig { params(node: AliasGlobalVariableNode).void }
@@ -6290,6 +6388,10 @@ module YARP
     sig { params(node: ImaginaryNode).void }
     def visit_imaginary_node(node); end
 
+    # Visit a ImplicitNode node
+    sig { params(node: ImplicitNode).void }
+    def visit_implicit_node(node); end
+
     # Visit a InNode node
     sig { params(node: InNode).void }
     def visit_in_node(node); end
@@ -6393,6 +6495,10 @@ module YARP
     # Visit a MatchRequiredNode node
     sig { params(node: MatchRequiredNode).void }
     def visit_match_required_node(node); end
+
+    # Visit a MatchWriteNode node
+    sig { params(node: MatchWriteNode).void }
+    def visit_match_write_node(node); end
 
     # Visit a MissingNode node
     sig { params(node: MissingNode).void }
@@ -6788,6 +6894,9 @@ module YARP
     # Create a new ImaginaryNode node
     sig { params(numeric: Node, location: Location).returns(ImaginaryNode) }
     def ImaginaryNode(numeric, location); end
+    # Create a new ImplicitNode node
+    sig { params(value: Node, location: Location).returns(ImplicitNode) }
+    def ImplicitNode(value, location); end
     # Create a new InNode node
     sig { params(pattern: Node, statements: T.nilable(StatementsNode), in_loc: Location, then_loc: T.nilable(Location), location: Location).returns(InNode) }
     def InNode(pattern, statements, in_loc, then_loc, location); end
@@ -6810,8 +6919,8 @@ module YARP
     sig { params(name: Symbol, name_loc: Location, value: Node, operator_loc: Location, location: Location).returns(InstanceVariableWriteNode) }
     def InstanceVariableWriteNode(name, name_loc, value, operator_loc, location); end
     # Create a new IntegerNode node
-    sig { params(location: Location).returns(IntegerNode) }
-    def IntegerNode(location); end
+    sig { params(flags: Integer, location: Location).returns(IntegerNode) }
+    def IntegerNode(flags, location); end
     # Create a new InterpolatedMatchLastLineNode node
     sig { params(opening_loc: Location, parts: T::Array[Node], closing_loc: Location, flags: Integer, location: Location).returns(InterpolatedMatchLastLineNode) }
     def InterpolatedMatchLastLineNode(opening_loc, parts, closing_loc, flags, location); end
@@ -6866,6 +6975,9 @@ module YARP
     # Create a new MatchRequiredNode node
     sig { params(value: Node, pattern: Node, operator_loc: Location, location: Location).returns(MatchRequiredNode) }
     def MatchRequiredNode(value, pattern, operator_loc, location); end
+    # Create a new MatchWriteNode node
+    sig { params(call: CallNode, locals: T::Array[Symbol], location: Location).returns(MatchWriteNode) }
+    def MatchWriteNode(call, locals, location); end
     # Create a new MissingNode node
     sig { params(location: Location).returns(MissingNode) }
     def MissingNode(location); end
@@ -6975,8 +7087,8 @@ module YARP
     sig { params(left: Node, right: Node, location: Location).returns(StringConcatNode) }
     def StringConcatNode(left, right, location); end
     # Create a new StringNode node
-    sig { params(opening_loc: T.nilable(Location), content_loc: Location, closing_loc: T.nilable(Location), unescaped: String, location: Location).returns(StringNode) }
-    def StringNode(opening_loc, content_loc, closing_loc, unescaped, location); end
+    sig { params(flags: Integer, opening_loc: T.nilable(Location), content_loc: Location, closing_loc: T.nilable(Location), unescaped: String, location: Location).returns(StringNode) }
+    def StringNode(flags, opening_loc, content_loc, closing_loc, unescaped, location); end
     # Create a new SuperNode node
     sig { params(keyword_loc: Location, lparen_loc: T.nilable(Location), arguments: T.nilable(ArgumentsNode), rparen_loc: T.nilable(Location), block: T.nilable(BlockNode), location: Location).returns(SuperNode) }
     def SuperNode(keyword_loc, lparen_loc, arguments, rparen_loc, block, location); end
