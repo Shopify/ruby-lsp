@@ -61,7 +61,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
         "HoverExtension"
       end
 
-      def create_hover_listener(emitter, message_queue)
+      def create_hover_listener(nesting, index, emitter, message_queue)
         klass = Class.new(RubyLsp::Listener) do
           attr_reader :_response
 

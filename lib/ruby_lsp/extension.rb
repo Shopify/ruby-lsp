@@ -119,11 +119,13 @@ module RubyLsp
     # Creates a new Hover listener. This method is invoked on every Hover request
     sig do
       overridable.params(
+        nesting: T::Array[String],
+        index: RubyIndexer::Index,
         emitter: EventEmitter,
         message_queue: Thread::Queue,
       ).returns(T.nilable(Listener[T.nilable(Interface::Hover)]))
     end
-    def create_hover_listener(emitter, message_queue); end
+    def create_hover_listener(nesting, index, emitter, message_queue); end
 
     # Creates a new DocumentSymbol listener. This method is invoked on every DocumentSymbol request
     sig do
