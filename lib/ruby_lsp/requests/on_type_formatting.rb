@@ -184,7 +184,7 @@ module RubyLsp
 
         return unless start_line_index
 
-        start_line_indentation = find_indentation(@lines[start_line_index])
+        start_line_indentation = find_indentation(T.must(@lines[start_line_index]))
 
         (start_line_index + 1...@position[:line] - 1).each do |i|
           add_edit_with_text("  ", { line: i, character: 0 })
