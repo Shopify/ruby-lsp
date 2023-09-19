@@ -20,14 +20,19 @@ module RubyLsp
         extend T::Sig
 
         MESSAGE = <<~EOS
-          An internal error occurred for the %s cop.
+          An internal error occurred %s.
           Updating to a newer version of RuboCop may solve this.
           For more details, run RuboCop on the command line.
         EOS
 
-        sig { params(rubocop_error: RuboCop::ErrorWithAnalyzedFileLocation).void }
+        sig { params(rubocop_error: T.any(RuboCop::ErrorWithAnalyzedFileLocation, StandardError)).void }
         def initialize(rubocop_error)
-          message = format(MESSAGE, rubocop_error.cop.name)
+          message = case rubocop_error
+          when RuboCop::ErrorWithAnalyzedFileLocation
+            format(MESSAGE, "for the #{rubocop_error.cop.name} cop")
+          when StandardError
+            format(MESSAGE, rubocop_error.message)
+          end
           super(message)
         end
       end
@@ -87,7 +92,7 @@ module RubyLsp
           raise Formatting::Error, error.message
         rescue RuboCop::ValidationError => error
           raise ConfigurationError, error.message
-        rescue RuboCop::ErrorWithAnalyzedFileLocation => error
+        rescue StandardError => error
           raise InternalRuboCopError, error
         end
 
