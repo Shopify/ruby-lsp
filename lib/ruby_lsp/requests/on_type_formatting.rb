@@ -190,7 +190,7 @@ module RubyLsp
           add_edit_with_text("  ", { line: i, character: 0 })
         end
 
-        move_cursor_to(@position[:line] - 1, 3)
+        move_cursor_to(@position[:line], @position[:character])
 
         add_edit_with_text("\n" + (" " * (start_line_indentation + 2)), @position)
       end

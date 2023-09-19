@@ -384,7 +384,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "  ",
       },
       {
-        range: { start: { line: 2, character: 3 }, end: { line: 2, character: 3 } },
+        range: { start: { line: 3, character: 0 }, end: { line: 3, character: 0 } },
         newText: "$0",
       },
       {
