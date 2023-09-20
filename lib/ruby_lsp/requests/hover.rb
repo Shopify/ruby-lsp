@@ -97,6 +97,11 @@ module RubyLsp
         entries = @index.resolve(name, @nesting)
         return unless entries
 
+        # We should only show hover for private constants if the constant is defined in the same namespace as the
+        # reference
+        first_entry = T.must(entries.first)
+        return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{name}"
+
         @_response = Interface::Hover.new(
           range: range_from_location(location),
           contents: markdown_from_index_entries(name, entries),

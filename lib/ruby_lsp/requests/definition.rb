@@ -128,6 +128,11 @@ module RubyLsp
         entries = @index.resolve(value, @nesting)
         return unless entries
 
+        # We should only allow jumping to the definition of private constants if the constant is defined in the same
+        # namespace as the reference
+        first_entry = T.must(entries.first)
+        return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{value}"
+
         bundle_path = begin
           Bundler.bundle_path.to_s
         rescue Bundler::GemfileNotFound

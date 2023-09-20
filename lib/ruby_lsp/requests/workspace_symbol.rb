@@ -45,6 +45,9 @@ module RubyLsp
             next
           end
 
+          # We should never show private symbols when searching the entire workspace
+          next if entry.visibility == :private
+
           kind = kind_for_entry(entry)
           loc = entry.location
 

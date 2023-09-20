@@ -78,6 +78,11 @@ module RubyLsp
 
         candidates = @index.prefix_search(name, top_level_reference ? [] : @nesting)
         candidates.each do |entries|
+          # The only time we may have a private constant reference from outside of the namespace is if we're dealing
+          # with ConstantPath and the entry name doesn't start with the current nesting
+          first_entry = T.must(entries.first)
+          next if first_entry.visibility == :private && !first_entry.name.start_with?("#{@nesting}::")
+
           @_response << build_entry_completion(
             name,
             node,

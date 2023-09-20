@@ -134,6 +134,80 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     T.must(message_queue).close
   end
 
+  def test_jumping_to_private_constant_inside_the_same_namespace
+    message_queue = Thread::Queue.new
+    store = RubyLsp::Store.new
+
+    uri = URI("file:///folder/fake.rb")
+    source = <<~RUBY
+      class A
+        CONST = 123
+        private_constant(:CONST)
+
+        CONST
+      end
+    RUBY
+
+    store.set(uri: uri, source: source, version: 1)
+
+    executor = RubyLsp::Executor.new(store, message_queue)
+
+    executor.instance_variable_get(:@index).index_single(
+      RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
+    )
+
+    begin
+      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+      response = executor.execute({
+        method: "textDocument/definition",
+        params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 2, line: 4 } },
+      }).response
+    ensure
+      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
+    end
+
+    assert_equal(uri.to_s, response.first.attributes[:uri])
+  ensure
+    T.must(message_queue).close
+  end
+
+  def test_jumping_to_private_constant_from_different_namespace
+    message_queue = Thread::Queue.new
+    store = RubyLsp::Store.new
+
+    uri = URI("file:///folder/fake.rb")
+    source = <<~RUBY
+      class A
+        CONST = 123
+        private_constant(:CONST)
+      end
+
+      A::CONST # invalid private reference
+    RUBY
+
+    store.set(uri: uri, source: source, version: 1)
+
+    executor = RubyLsp::Executor.new(store, message_queue)
+
+    executor.instance_variable_get(:@index).index_single(
+      RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
+    )
+
+    begin
+      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+      response = executor.execute({
+        method: "textDocument/definition",
+        params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 0, line: 5 } },
+      }).response
+    ensure
+      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
+    end
+
+    assert_nil(response)
+  ensure
+    T.must(message_queue).close
+  end
+
   def test_definition_extensions
     source = <<~RUBY
       RubyLsp
