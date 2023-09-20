@@ -17,6 +17,8 @@ jobs:
     name: Ruby ${{ matrix.ruby }} on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1

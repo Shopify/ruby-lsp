@@ -12,7 +12,16 @@ updates:
     groups:
       minor-and-patch:
         update-types:
-          - 'minor'
-          - 'patch'
+          - "minor"
+          - "patch"
         exclude-patterns:
-          - 'yarp'
+          - "yarp"
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "Shopify/ruby-dev-exp"
+    labels:
+      - "dependencies"
+      - "fixtures"

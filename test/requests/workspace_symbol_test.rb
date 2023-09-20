@@ -95,4 +95,17 @@ class WorkspaceSymbolTest < Minitest::Test
     result = RubyLsp::Requests::WorkspaceSymbol.new("Pathname", @index).run
     refute_empty(result)
   end
+
+  def test_does_not_include_private_constants
+    @index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake.rb"), <<~RUBY)
+      class Foo
+        CONSTANT = 1
+        private_constant(:CONSTANT)
+      end
+    RUBY
+
+    result = RubyLsp::Requests::WorkspaceSymbol.new("Foo::CONSTANT", @index).run
+    assert_equal(1, result.length)
+    assert_equal("Foo", T.must(result.first).name)
+  end
 end
