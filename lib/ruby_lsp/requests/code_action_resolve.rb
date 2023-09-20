@@ -43,6 +43,8 @@ module RubyLsp
 
       sig { override.returns(T.any(Interface::CodeAction, Error)) }
       def run
+        return Error::EmptySelection if @document.source.empty?
+
         source_range = @code_action.dig(:data, :range)
         return Error::EmptySelection if source_range[:start] == source_range[:end]
 
@@ -55,7 +57,7 @@ module RubyLsp
         closest_statements, parent_statements = @document
           .locate(@document.tree, start_index, node_types: [YARP::StatementsNode, YARP::BlockNode])
 
-        return Error::InvalidTargetRange if closest_statements.nil?
+        return Error::InvalidTargetRange if closest_statements.nil? || closest_statements.child_nodes.compact.empty?
 
         # Find the node with the end line closest to the requested position, so that we can place the refactor
         # immediately after that closest node

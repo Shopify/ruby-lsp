@@ -1,0 +1,3 @@
+[submodule "test/fixtures/yarp"]
+	path = test/fixtures/yarp
+	url = https://github.com/ruby/yarp.git
