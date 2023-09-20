@@ -31,8 +31,8 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      sig { params(uri: URI::Generic, emitter: EventEmitter, message_queue: Thread::Queue, test_library: String).void }
-      def initialize(uri, emitter, message_queue, test_library)
+      sig { params(uri: URI::Generic, test_library: String, emitter: EventEmitter, message_queue: Thread::Queue).void }
+      def initialize(uri, test_library, emitter, message_queue)
         @uri = T.let(uri, URI::Generic)
         @test_library = T.let(test_library, String)
         @_response = T.let([], ResponseType)
@@ -48,18 +48,15 @@ module RubyLsp
           :on_class,
           :after_class,
           :on_def,
-          :on_command,
-          :after_command,
           :on_call,
           :after_call,
-          :on_vcall,
         )
       end
 
-      sig { params(node: SyntaxTree::ClassDeclaration).void }
+      sig { params(node: YARP::ClassNode).void }
       def on_class(node)
         @visibility_stack.push(["public", "public"])
-        class_name = node.constant.constant.value
+        class_name = node.constant_path.slice
         @class_stack.push(class_name)
 
         if @path && class_name.end_with?("Test")
@@ -72,20 +69,20 @@ module RubyLsp
         end
       end
 
-      sig { params(node: SyntaxTree::ClassDeclaration).void }
+      sig { params(node: YARP::ClassNode).void }
       def after_class(node)
         @visibility_stack.pop
         @class_stack.pop
       end
 
-      sig { params(node: SyntaxTree::DefNode).void }
+      sig { params(node: YARP::DefNode).void }
       def on_def(node)
         class_name = @class_stack.last
         return unless class_name&.end_with?("Test")
 
         visibility, _ = @visibility_stack.last
         if visibility == "public"
-          method_name = node.name.value
+          method_name = node.name.to_s
           if @path && method_name.start_with?("test_")
             add_test_code_lens(
               node,
@@ -97,53 +94,39 @@ module RubyLsp
         end
       end
 
-      sig { params(node: SyntaxTree::Command).void }
-      def on_command(node)
-        node_message = node.message.value
-        if ACCESS_MODIFIERS.include?(node_message) && node.arguments.parts.any?
-          visibility, _ = @visibility_stack.pop
-          @visibility_stack.push([node_message, visibility])
-        elsif @path&.include?("Gemfile") && node_message.include?("gem") && node.arguments.parts.any?
-          remote = resolve_gem_remote(node)
+      sig { params(node: YARP::CallNode).void }
+      def on_call(node)
+        name = node.name
+        arguments = node.arguments
+
+        # If we found `private` by itself or `private def foo`
+        if ACCESS_MODIFIERS.include?(name)
+          if arguments.nil?
+            @visibility_stack.pop
+            @visibility_stack.push([name, name])
+          elsif arguments.arguments.first.is_a?(YARP::DefNode)
+            visibility, _ = @visibility_stack.pop
+            @visibility_stack.push([name, visibility])
+          end
+
+          return
+        end
+
+        if @path&.include?("Gemfile") && name == "gem" && arguments
+          first_argument = arguments.arguments.first
+          return unless first_argument.is_a?(YARP::StringNode)
+
+          remote = resolve_gem_remote(first_argument)
           return unless remote
 
           add_open_gem_remote_code_lens(node, remote)
         end
       end
 
-      sig { params(node: SyntaxTree::Command).void }
-      def after_command(node)
-        _, prev_visibility = @visibility_stack.pop
-        @visibility_stack.push([prev_visibility, prev_visibility])
-      end
-
-      sig { params(node: SyntaxTree::CallNode).void }
-      def on_call(node)
-        ident = node.message if node.message.is_a?(SyntaxTree::Ident)
-
-        if ident
-          ident_value = T.cast(ident, SyntaxTree::Ident).value
-          if ACCESS_MODIFIERS.include?(ident_value)
-            visibility, _ = @visibility_stack.pop
-            @visibility_stack.push([ident_value, visibility])
-          end
-        end
-      end
-
-      sig { params(node: SyntaxTree::CallNode).void }
+      sig { params(node: YARP::CallNode).void }
       def after_call(node)
         _, prev_visibility = @visibility_stack.pop
         @visibility_stack.push([prev_visibility, prev_visibility])
-      end
-
-      sig { params(node: SyntaxTree::VCall).void }
-      def on_vcall(node)
-        vcall_value = node.value.value
-
-        if ACCESS_MODIFIERS.include?(vcall_value)
-          @visibility_stack.pop
-          @visibility_stack.push([vcall_value, vcall_value])
-        end
       end
 
       sig { override.params(extension: RubyLsp::Extension).returns(T.nilable(Listener[ResponseType])) }
@@ -159,7 +142,7 @@ module RubyLsp
 
       private
 
-      sig { params(node: SyntaxTree::Node, name: String, command: String, kind: Symbol).void }
+      sig { params(node: YARP::Node, name: String, command: String, kind: Symbol).void }
       def add_test_code_lens(node, name:, command:, kind:)
         # don't add code lenses if the test library is not supported or unknown
         return unless SUPPORTED_TEST_LIBRARIES.include?(@test_library) && @path
@@ -201,15 +184,9 @@ module RubyLsp
         )
       end
 
-      sig { params(node: SyntaxTree::Command).returns(T.nilable(String)) }
-      def resolve_gem_remote(node)
-        gem_statement = node.arguments.parts.first
-        return unless gem_statement.is_a?(SyntaxTree::StringLiteral)
-
-        gem_name = gem_statement.parts.first
-        return unless gem_name.is_a?(SyntaxTree::TStringContent)
-
-        spec = Gem::Specification.stubs.find { |gem| gem.name == gem_name.value }&.to_spec
+      sig { params(gem_name: YARP::StringNode).returns(T.nilable(String)) }
+      def resolve_gem_remote(gem_name)
+        spec = Gem::Specification.stubs.find { |gem| gem.name == gem_name.content }&.to_spec
         return if spec.nil?
 
         [spec.homepage, spec.metadata["source_code_uri"]].compact.find do |page|
@@ -239,7 +216,7 @@ module RubyLsp
         command
       end
 
-      sig { params(node: SyntaxTree::Command, remote: String).void }
+      sig { params(node: YARP::CallNode, remote: String).void }
       def add_open_gem_remote_code_lens(node, remote)
         @_response << create_code_lens(
           node,

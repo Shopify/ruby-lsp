@@ -22,6 +22,19 @@
         {
             "range": {
                 "start": {
+                    "line": 0,
+                    "character": 6
+                },
+                "end": {
+                    "line": 0,
+                    "character": 9
+                }
+            },
+            "kind": 2
+        },
+        {
+            "range": {
+                "start": {
                     "line": 3,
                     "character": 0
                 },

@@ -9,8 +9,8 @@ module RubyLsp
         # or extensions by created by developers outside of Shopify, so be cautious of changing anything.
         extend T::Sig
 
-        sig { params(node: SyntaxTree::Node).returns(Interface::Range) }
-        def range_from_syntax_tree_node(node)
+        sig { params(node: YARP::Node).returns(Interface::Range) }
+        def range_from_node(node)
           loc = node.location
 
           Interface::Range.new(
@@ -22,28 +22,18 @@ module RubyLsp
           )
         end
 
-        sig do
-          params(node: T.any(SyntaxTree::ConstPathRef, SyntaxTree::ConstRef, SyntaxTree::TopConstRef)).returns(String)
-        end
-        def full_constant_name(node)
-          name = node.constant.value.dup
-          constant = T.let(node, SyntaxTree::Node)
-
-          while constant.is_a?(SyntaxTree::ConstPathRef)
-            constant = constant.parent
-
-            case constant
-            when SyntaxTree::ConstPathRef
-              name.prepend("#{constant.constant.value}::")
-            when SyntaxTree::VarRef
-              name.prepend("#{constant.value.value}::")
-            end
-          end
-
-          name
+        sig { params(location: YARP::Location).returns(Interface::Range) }
+        def range_from_location(location)
+          Interface::Range.new(
+            start: Interface::Position.new(
+              line: location.start_line - 1,
+              character: location.start_column,
+            ),
+            end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
+          )
         end
 
-        sig { params(node: T.nilable(SyntaxTree::Node), range: T.nilable(T::Range[Integer])).returns(T::Boolean) }
+        sig { params(node: T.nilable(YARP::Node), range: T.nilable(T::Range[Integer])).returns(T::Boolean) }
         def visible?(node, range)
           return true if range.nil?
           return false if node.nil?
@@ -54,7 +44,7 @@ module RubyLsp
 
         sig do
           params(
-            node: SyntaxTree::Node,
+            node: YARP::Node,
             title: String,
             command_name: String,
             arguments: T.nilable(T::Array[T.untyped]),
@@ -62,7 +52,7 @@ module RubyLsp
           ).returns(Interface::CodeLens)
         end
         def create_code_lens(node, title:, command_name:, arguments:, data:)
-          range = range_from_syntax_tree_node(node)
+          range = range_from_node(node)
 
           Interface::CodeLens.new(
             range: range,

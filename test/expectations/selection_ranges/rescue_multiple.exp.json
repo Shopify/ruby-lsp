@@ -21,7 +21,7 @@
                 "range": {
                     "start": {
                         "line": 1,
-                        "character": 7
+                        "character": 0
                     },
                     "end": {
                         "line": 1,
@@ -31,24 +31,12 @@
                 "parent": {
                     "range": {
                         "start": {
-                            "line": 1,
+                            "line": 0,
                             "character": 0
                         },
                         "end": {
                             "line": 2,
                             "character": 3
-                        }
-                    },
-                    "parent": {
-                        "range": {
-                            "start": {
-                                "line": 0,
-                                "character": 0
-                            },
-                            "end": {
-                                "line": 2,
-                                "character": 3
-                            }
                         }
                     }
                 }

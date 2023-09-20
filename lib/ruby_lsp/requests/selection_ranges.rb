@@ -25,41 +25,37 @@ module RubyLsp
 
       NODES_THAT_CAN_BE_PARENTS = T.let(
         [
-          SyntaxTree::Assign,
-          SyntaxTree::ArrayLiteral,
-          SyntaxTree::Begin,
-          SyntaxTree::BlockNode,
-          SyntaxTree::CallNode,
-          SyntaxTree::Case,
-          SyntaxTree::ClassDeclaration,
-          SyntaxTree::Command,
-          SyntaxTree::DefNode,
-          SyntaxTree::Elsif,
-          SyntaxTree::Else,
-          SyntaxTree::EmbDoc,
-          SyntaxTree::Ensure,
-          SyntaxTree::For,
-          SyntaxTree::HashLiteral,
-          SyntaxTree::Heredoc,
-          SyntaxTree::HeredocBeg,
-          SyntaxTree::HshPtn,
-          SyntaxTree::IfNode,
-          SyntaxTree::In,
-          SyntaxTree::Lambda,
-          SyntaxTree::MethodAddBlock,
-          SyntaxTree::ModuleDeclaration,
-          SyntaxTree::Params,
-          SyntaxTree::Rescue,
-          SyntaxTree::RescueEx,
-          SyntaxTree::StringConcat,
-          SyntaxTree::StringLiteral,
-          SyntaxTree::UnlessNode,
-          SyntaxTree::UntilNode,
-          SyntaxTree::VCall,
-          SyntaxTree::When,
-          SyntaxTree::WhileNode,
+          YARP::ArgumentsNode,
+          YARP::ArrayNode,
+          YARP::AssocNode,
+          YARP::BeginNode,
+          YARP::BlockNode,
+          YARP::CallNode,
+          YARP::CaseNode,
+          YARP::ClassNode,
+          YARP::DefNode,
+          YARP::ElseNode,
+          YARP::EnsureNode,
+          YARP::ForNode,
+          YARP::HashNode,
+          YARP::HashPatternNode,
+          YARP::IfNode,
+          YARP::InNode,
+          YARP::InterpolatedStringNode,
+          YARP::KeywordHashNode,
+          YARP::LambdaNode,
+          YARP::LocalVariableWriteNode,
+          YARP::ModuleNode,
+          YARP::ParametersNode,
+          YARP::RescueNode,
+          YARP::StringConcatNode,
+          YARP::StringNode,
+          YARP::UnlessNode,
+          YARP::UntilNode,
+          YARP::WhenNode,
+          YARP::WhileNode,
         ].freeze,
-        T::Array[T.class_of(SyntaxTree::Node)],
+        T::Array[T.class_of(YARP::Node)],
       )
 
       sig { params(document: Document).void }
@@ -72,19 +68,23 @@ module RubyLsp
 
       sig { override.returns(T.all(T::Array[Support::SelectionRange], Object)) }
       def run
-        visit(@document.tree) if @document.parsed?
+        visit(@document.tree)
         @ranges.reverse!
       end
 
       private
 
-      sig { override.params(node: T.nilable(SyntaxTree::Node)).void }
+      sig { override.params(node: T.nilable(YARP::Node)).void }
       def visit(node)
         return if node.nil?
 
-        range = create_selection_range(node.location, @stack.last)
-
+        range = if node.is_a?(YARP::InterpolatedStringNode)
+          create_heredoc_selection_range(node, @stack.last)
+        else
+          create_selection_range(node.location, @stack.last)
+        end
         @ranges << range
+
         return if node.child_nodes.empty?
 
         @stack << range if NODES_THAT_CAN_BE_PARENTS.include?(node.class)
@@ -94,11 +94,36 @@ module RubyLsp
 
       sig do
         params(
-          location: SyntaxTree::Location,
+          node: YARP::InterpolatedStringNode,
           parent: T.nilable(Support::SelectionRange),
         ).returns(Support::SelectionRange)
       end
-      def create_selection_range(location, parent = nil)
+      def create_heredoc_selection_range(node, parent)
+        opening_loc = node.opening_loc || node.location
+        closing_loc = node.closing_loc || node.location
+
+        RubyLsp::Requests::Support::SelectionRange.new(
+          range: Interface::Range.new(
+            start: Interface::Position.new(
+              line: opening_loc.start_line - 1,
+              character: opening_loc.start_column,
+            ),
+            end: Interface::Position.new(
+              line: closing_loc.end_line - 1,
+              character: closing_loc.end_column,
+            ),
+          ),
+          parent: parent,
+        )
+      end
+
+      sig do
+        params(
+          location: YARP::Location,
+          parent: T.nilable(Support::SelectionRange),
+        ).returns(Support::SelectionRange)
+      end
+      def create_selection_range(location, parent)
         RubyLsp::Requests::Support::SelectionRange.new(
           range: Interface::Range.new(
             start: Interface::Position.new(

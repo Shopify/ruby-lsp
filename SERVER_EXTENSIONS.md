@@ -115,11 +115,13 @@ module RubyLsp
 
       sig do
         override.params(
+          nesting: T::Array[String],
+          index: RubyIndexer::Index,
           emitter: EventEmitter,
           message_queue: Thread::Queue,
         ).returns(T.nilable(Listener[T.nilable(Interface::Hover)]))
       end
-      def create_hover_listener(emitter, message_queue)
+      def create_hover_listener(nesting, index emitter, message_queue)
         # Use the listener factory methods to instantiate listeners with parameters sent by the LSP combined with any
         # pre-computed information in the extension. These factory methods are invoked on every request
         Hover.new(@config, emitter, message_queue)
@@ -148,18 +150,18 @@ module RubyLsp
         @_response = T.let(nil, ResponseType)
         @config = config
 
-        # Register that this listener will handle `on_const` events (i.e.: whenever a constant is found in the code)
-        emitter.register(self, :on_const)
+        # Register that this listener will handle `on_constant_read` events (i.e.: whenever a constant read is found in the code)
+        emitter.register(self, :on_constant_read)
       end
 
       # Listeners must define methods for each event they registered with the emitter. In this case, we have to define
       # `on_const` to specify what this listener should do every time we find a constant
-      sig { params(node: SyntaxTree::Const).void }
-      def on_const(node)
+      sig { params(node: YARP::ConstantReadNode).void }
+      def on_constant_read(node)
         # Certain helpers are made available to listeners to build LSP responses. The classes under `RubyLsp::Interface`
         # are generally used to build responses and they match exactly what the specification requests.
         contents = RubyLsp::Interface::MarkupContent.new(kind: "markdown", value: "Hello!")
-        @_response = RubyLsp::Interface::Hover.new(range: range_from_syntax_tree_node(node), contents: contents)
+        @_response = RubyLsp::Interface::Hover.new(range: range_from_node(node), contents: contents)
       end
     end
   end

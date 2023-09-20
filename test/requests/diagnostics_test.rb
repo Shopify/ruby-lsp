@@ -25,4 +25,15 @@ class DiagnosticsTest < Minitest::Test
 
     assert_nil(RubyLsp::Requests::Diagnostics.new(document).run)
   end
+
+  def test_returns_syntax_error_diagnostics
+    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: URI("file:///fake/file.rb"))
+      def foo
+    RUBY
+
+    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(document).run)
+
+    assert_equal(2, diagnostics.length)
+    assert_equal("Expected an `end` to close the `def` statement", T.must(diagnostics.last).message)
+  end
 end

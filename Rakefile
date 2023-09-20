@@ -13,6 +13,7 @@ end
 
 RDoc::Task.new do |rdoc|
   rdoc.main = "README.md"
+  rdoc.title = "Ruby LSP documentation"
   rdoc.rdoc_files.include("*.md", "lib/**/*.rb")
   rdoc.rdoc_dir = "docs"
   rdoc.markup = "markdown"

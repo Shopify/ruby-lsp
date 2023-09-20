@@ -12,7 +12,7 @@ class ShowSyntaxTreeTest < Minitest::Test
     @message_queue.close
   end
 
-  def test_returns_nil_if_document_has_syntax_error
+  def test_returns_partial_tree_if_document_has_syntax_error
     store = RubyLsp::Store.new
     store.set(uri: URI("file:///fake.rb"), source: "foo do", version: 1)
     response = RubyLsp::Executor.new(store, @message_queue).execute({
@@ -20,7 +20,32 @@ class ShowSyntaxTreeTest < Minitest::Test
       params: { textDocument: { uri: "file:///fake.rb" } },
     }).response
 
-    assert_equal("Document contains syntax error", response[:ast])
+    assert_equal(<<~AST, response[:ast])
+      @ ProgramNode (location: (0...6))
+      ├── locals: []
+      └── statements:
+          @ StatementsNode (location: (0...6))
+          └── body: (length: 1)
+              └── @ CallNode (location: (0...6))
+                  ├── receiver: ∅
+                  ├── call_operator_loc: ∅
+                  ├── message_loc: (0...3) = "foo"
+                  ├── opening_loc: ∅
+                  ├── arguments: ∅
+                  ├── closing_loc: ∅
+                  ├── block:
+                  │   @ BlockNode (location: (4...6))
+                  │   ├── locals: []
+                  │   ├── parameters: ∅
+                  │   ├── body:
+                  │   │   @ StatementsNode (location: (4...6))
+                  │   │   └── body: (length: 1)
+                  │   │       └── @ MissingNode (location: (4...6))
+                  │   ├── opening_loc: (4...6) = "do"
+                  │   └── closing_loc: (6...6) = ""
+                  ├── flags: ∅
+                  └── name: "foo"
+    AST
   end
 
   def test_returns_ast_if_document_is_parsed
@@ -35,7 +60,19 @@ class ShowSyntaxTreeTest < Minitest::Test
     }).response
 
     assert_equal(<<~AST, response[:ast])
-      (program (statements ((assign (var_field (ident "foo")) (int "123")))))
+      @ ProgramNode (location: (0...9))
+      ├── locals: [:foo]
+      └── statements:
+          @ StatementsNode (location: (0...9))
+          └── body: (length: 1)
+              └── @ LocalVariableWriteNode (location: (0...9))
+                  ├── name: :foo
+                  ├── depth: 0
+                  ├── name_loc: (0...3) = "foo"
+                  ├── value:
+                  │   @ IntegerNode (location: (6...9))
+                  │   └── flags: decimal
+                  └── operator_loc: (4...5) = "="
     AST
   end
 
@@ -59,10 +96,26 @@ class ShowSyntaxTreeTest < Minitest::Test
     }).response
 
     assert_equal(<<~AST, response[:ast])
-      (assign (var_field (ident "foo")) (int "123"))
+      @ LocalVariableWriteNode (location: (0...9))
+      ├── name: :foo
+      ├── depth: 0
+      ├── name_loc: (0...3) = "foo"
+      ├── value:
+      │   @ IntegerNode (location: (6...9))
+      │   └── flags: decimal
+      └── operator_loc: (4...5) = "="
 
-      (assign (var_field (ident "bar")) (int "456"))
+      @ LocalVariableWriteNode (location: (10...19))
+      ├── name: :bar
+      ├── depth: 0
+      ├── name_loc: (10...13) = "bar"
+      ├── value:
+      │   @ IntegerNode (location: (16...19))
+      │   └── flags: decimal
+      └── operator_loc: (14...15) = "="
     AST
+
+    # We execute twice just to make sure we do not mutate by mistake.
 
     response = RubyLsp::Executor.new(store, @message_queue).execute({
       method: "rubyLsp/textDocument/showSyntaxTree",

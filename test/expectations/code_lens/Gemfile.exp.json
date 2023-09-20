@@ -14,7 +14,9 @@
       "command": {
         "title": "Open remote",
         "command": "rubyLsp.openLink",
-        "arguments": ["https://github.com/ruby/rake"]
+        "arguments": [
+          "https://github.com/ruby/rake"
+        ]
       },
       "data": {
         "type": "link"
@@ -34,7 +36,9 @@
       "command": {
         "title": "Open remote",
         "command": "rubyLsp.openLink",
-        "arguments": ["https://github.com/rubocop/rubocop-minitest"]
+        "arguments": [
+          "https://github.com/rubocop/rubocop-minitest"
+        ]
       },
       "data": {
         "type": "link"
@@ -54,7 +58,9 @@
       "command": {
         "title": "Open remote",
         "command": "rubyLsp.openLink",
-        "arguments": ["https://github.com/ruby/debug"]
+        "arguments": [
+          "https://github.com/ruby/debug"
+        ]
       },
       "data": {
         "type": "link"
