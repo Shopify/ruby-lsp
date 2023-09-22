@@ -30,6 +30,26 @@ module RubyIndexer
       add_index_entry(node, Index::Entry::Module)
     end
 
+    sig { override.params(node: YARP::MultiWriteNode).void }
+    def visit_multi_write_node(node)
+      value = node.value
+      values = value.is_a?(YARP::ArrayNode) && value.opening_loc ? value.elements : []
+
+      node.targets.each_with_index do |target, i|
+        current_value = values[i]
+        # The moment we find a splat on the right hand side of the assignment, we can no longer figure out which value
+        # gets assigned to what
+        values.clear if current_value.is_a?(YARP::SplatNode)
+
+        case target
+        when YARP::ConstantTargetNode
+          add_constant(target, fully_qualify_name(target.name.to_s), current_value)
+        when YARP::ConstantPathTargetNode
+          add_constant(target, fully_qualify_name(target.slice), current_value)
+        end
+      end
+    end
+
     sig { override.params(node: YARP::ConstantPathWriteNode).void }
     def visit_constant_path_write_node(node)
       # ignore variable constants like `var::FOO` or `self.class::FOO`
@@ -138,12 +158,15 @@ module RubyIndexer
           YARP::ConstantPathOrWriteNode,
           YARP::ConstantPathOperatorWriteNode,
           YARP::ConstantPathAndWriteNode,
+          YARP::ConstantTargetNode,
+          YARP::ConstantPathTargetNode,
         ),
         name: String,
+        value: T.nilable(YARP::Node),
       ).void
     end
-    def add_constant(node, name)
-      value = node.value
+    def add_constant(node, name, value = nil)
+      value = node.value unless node.is_a?(YARP::ConstantTargetNode) || node.is_a?(YARP::ConstantPathTargetNode)
       comments = collect_comments(node)
 
       @index << case value
