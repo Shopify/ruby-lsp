@@ -94,7 +94,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
     T.must(message_queue).close
   end
 
-  def test_hover_extensions
+  def test_hover_addons
     source = <<~RUBY
       # Hello
       class Post
@@ -103,7 +103,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
       Post
     RUBY
 
-    test_extension(:create_hover_extension, source: source) do |executor|
+    test_addon(:create_hover_addon, source: source) do |executor|
       response = executor.execute({
         method: "textDocument/hover",
         params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 4, character: 0 } },
@@ -115,12 +115,12 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
   private
 
-  def create_hover_extension
-    Class.new(RubyLsp::Extension) do
+  def create_hover_addon
+    Class.new(RubyLsp::Addon) do
       def activate; end
 
       def name
-        "HoverExtension"
+        "HoverAddon"
       end
 
       def create_hover_listener(nesting, index, emitter, message_queue)

@@ -42,20 +42,20 @@ module RubyLsp
       when "initialize"
         initialize_request(request.dig(:params))
       when "initialized"
-        Extension.load_extensions
+        Addon.load_addons
 
-        errored_extensions = Extension.extensions.select(&:error?)
+        errored_addons = Addon.addons.select(&:error?)
 
-        if errored_extensions.any?
+        if errored_addons.any?
           @message_queue << Notification.new(
             message: "window/showMessage",
             params: Interface::ShowMessageParams.new(
               type: Constant::MessageType::WARNING,
-              message: "Error loading extensions:\n\n#{errored_extensions.map(&:formatted_errors).join("\n\n")}",
+              message: "Error loading addons:\n\n#{errored_addons.map(&:formatted_errors).join("\n\n")}",
             ),
           )
 
-          warn(errored_extensions.map(&:backtraces).join("\n\n"))
+          warn(errored_addons.map(&:backtraces).join("\n\n"))
         end
 
         perform_initial_indexing

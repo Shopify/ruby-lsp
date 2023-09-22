@@ -46,9 +46,9 @@ module RubyLsp
         emitter.register(self, :on_call, :on_constant_read, :on_constant_path)
       end
 
-      sig { override.params(ext: Extension).returns(T.nilable(RubyLsp::Listener[ResponseType])) }
-      def initialize_external_listener(ext)
-        ext.create_definition_listener(@uri, @nesting, @index, @emitter, @message_queue)
+      sig { override.params(addon: Addon).returns(T.nilable(RubyLsp::Listener[ResponseType])) }
+      def initialize_external_listener(addon)
+        addon.create_definition_listener(@uri, @nesting, @index, @emitter, @message_queue)
       end
 
       sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }

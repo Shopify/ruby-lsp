@@ -7,13 +7,13 @@ require "expectations/expectations_test_runner"
 class DocumentSymbolExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::DocumentSymbol, "document_symbol"
 
-  def test_document_symbol_extensions
+  def test_document_symbol_addons
     source = <<~RUBY
       test "foo" do
       end
     RUBY
 
-    test_extension(:create_document_symbol_extension, source: source) do |executor|
+    test_addon(:create_document_symbol_addon, source: source) do |executor|
       response = executor.execute({
         method: "textDocument/documentSymbol",
         params: { textDocument: { uri: "file:///fake.rb" } },
@@ -26,12 +26,12 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
 
   private
 
-  def create_document_symbol_extension
-    Class.new(RubyLsp::Extension) do
+  def create_document_symbol_addon
+    Class.new(RubyLsp::Addon) do
       def activate; end
 
       def name
-        "Document SymbolsExtension"
+        "Document SymbolsAddon"
       end
 
       def create_document_symbol_listener(emitter, message_queue)
