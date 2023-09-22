@@ -8,3 +8,8 @@ updates:
       - "Shopify/ruby-dev-exp"
     ignore:
       - dependency-name: "@types/vscode"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
