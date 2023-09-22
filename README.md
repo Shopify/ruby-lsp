@@ -61,10 +61,8 @@ default shell.
 
 > [!NOTE]
 >
-> For manager-specific notes and how to set up custom activation for managers that are not listed above,
-> please see [version managers](VERSION_MANAGERS.md).
-
-See [version managers](VERSION_MANAGERS.md) for user-contributed configuration examples.
+> For manager-specific notes, setting up custom activation for managers not listed above,
+> and community-contributed examples, please see [version managers](VERSION_MANAGERS.md).
 
 #### Configuring a formatter
 
