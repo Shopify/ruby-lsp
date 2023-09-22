@@ -435,9 +435,9 @@
     "@vscode/vsce": "^2.21.0",
     "esbuild": "^0.19.3",
     "eslint": "^8.49.0",
-    "eslint-import-resolver-typescript": "^3.6.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-prettier": "^5.0.0",
-    "glob": "^10.3.4",
+    "glob": "^10.3.5",
     "mocha": "^10.2.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
