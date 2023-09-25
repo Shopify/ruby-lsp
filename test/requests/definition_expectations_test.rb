@@ -208,12 +208,12 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     T.must(message_queue).close
   end
 
-  def test_definition_extensions
+  def test_definition_addons
     source = <<~RUBY
       RubyLsp
     RUBY
 
-    test_extension(:create_definition_extension, source: source) do |executor|
+    test_addon(:create_definition_addon, source: source) do |executor|
       index = executor.instance_variable_get(:@index)
       index.index_single(
         RubyIndexer::IndexablePath.new(
@@ -231,18 +231,18 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
       assert_equal(2, response.size)
       assert_match("class_reference_target.rb", response[0].uri)
-      assert_match("generated_by_extension.rb", response[1].uri)
+      assert_match("generated_by_addon.rb", response[1].uri)
     end
   end
 
   private
 
-  def create_definition_extension
-    Class.new(RubyLsp::Extension) do
+  def create_definition_addon
+    Class.new(RubyLsp::Addon) do
       def activate; end
 
       def name
-        "Definition Extension"
+        "Definition Addon"
       end
 
       def create_definition_listener(uri, nesting, index, emitter, message_queue)
@@ -258,7 +258,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           def on_constant_read(node)
             location = node.location
             @_response = RubyLsp::Interface::Location.new(
-              uri: "file:///generated_by_extension.rb",
+              uri: "file:///generated_by_addon.rb",
               range: RubyLsp::Interface::Range.new(
                 start: RubyLsp::Interface::Position.new(
                   line: location.start_line - 1,

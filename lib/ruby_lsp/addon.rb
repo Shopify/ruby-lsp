@@ -2,24 +2,24 @@
 # frozen_string_literal: true
 
 module RubyLsp
-  # To register an extension, inherit from this class and implement both `name` and `activate`
+  # To register an addon, inherit from this class and implement both `name` and `activate`
   #
   # # Example
   #
   # ```ruby
   # module MyGem
-  #   class MyExtension < Extension
+  #   class MyAddon < Addon
   #     def activate
   #       # Perform any relevant initialization
   #     end
   #
   #     def name
-  #       "My extension name"
+  #       "My addon name"
   #     end
   #   end
   # end
   # ```
-  class Extension
+  class Addon
     extend T::Sig
     extend T::Helpers
 
@@ -28,37 +28,37 @@ module RubyLsp
     class << self
       extend T::Sig
 
-      # Automatically track and instantiate extension classes
-      sig { params(child_class: T.class_of(Extension)).void }
+      # Automatically track and instantiate addon classes
+      sig { params(child_class: T.class_of(Addon)).void }
       def inherited(child_class)
-        extensions << child_class.new
+        addons << child_class.new
         super
       end
 
-      sig { returns(T::Array[Extension]) }
-      def extensions
-        @extensions ||= T.let([], T.nilable(T::Array[Extension]))
+      sig { returns(T::Array[Addon]) }
+      def addons
+        @addons ||= T.let([], T.nilable(T::Array[Addon]))
       end
 
-      # Discovers and loads all extensions. Returns the list of activated extensions
-      sig { returns(T::Array[Extension]) }
-      def load_extensions
-        # Require all extensions entry points, which should be placed under
-        # `some_gem/lib/ruby_lsp/your_gem_name/extension.rb`
-        Gem.find_files("ruby_lsp/**/extension.rb").each do |extension|
-          require File.expand_path(extension)
+      # Discovers and loads all addons. Returns the list of activated addons
+      sig { returns(T::Array[Addon]) }
+      def load_addons
+        # Require all addons entry points, which should be placed under
+        # `some_gem/lib/ruby_lsp/your_gem_name/addon.rb`
+        Gem.find_files("ruby_lsp/**/addon.rb").each do |addon|
+          require File.expand_path(addon)
         rescue => e
           warn(e.message)
           warn(e.backtrace.to_s) # rubocop:disable Lint/RedundantStringCoercion
         end
 
-        # Activate each one of the discovered extensions. If any problems occur in the extensions, we don't want to
+        # Activate each one of the discovered addons. If any problems occur in the addons, we don't want to
         # fail to boot the server
-        extensions.each do |extension|
-          extension.activate
+        addons.each do |addon|
+          addon.activate
           nil
         rescue => e
-          extension.add_error(e)
+          addon.add_error(e)
         end
       end
     end
@@ -92,17 +92,17 @@ module RubyLsp
       @errors.filter_map(&:backtrace).join("\n\n")
     end
 
-    # Each extension should implement `MyExtension#activate` and use to perform any sort of initialization, such as
+    # Each addon should implement `MyAddon#activate` and use to perform any sort of initialization, such as
     # reading information into memory or even spawning a separate process
     sig { abstract.void }
     def activate; end
 
-    # Each extension should implement `MyExtension#deactivate` and use to perform any clean up, like shutting down a
+    # Each addon should implement `MyAddon#deactivate` and use to perform any clean up, like shutting down a
     # child process
     sig { abstract.void }
     def deactivate; end
 
-    # Extensions should override the `name` method to return the extension name
+    # Addons should override the `name` method to return the addon name
     sig { abstract.returns(String) }
     def name; end
 

@@ -125,11 +125,11 @@ class ExpectationsTestRunner < Minitest::Test
 
   private
 
-  def test_extension(extension_creation_method, source:)
+  def test_addon(addon_creation_method, source:)
     RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
     message_queue = Thread::Queue.new
 
-    send(extension_creation_method)
+    send(addon_creation_method)
 
     store = RubyLsp::Store.new
     uri = URI::Generic.from_path(path: "/fake.rb")
@@ -143,7 +143,7 @@ class ExpectationsTestRunner < Minitest::Test
 
     yield(executor)
   ensure
-    RubyLsp::Extension.extensions.clear
+    RubyLsp::Addon.addons.clear
     RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
     T.must(message_queue).close
   end

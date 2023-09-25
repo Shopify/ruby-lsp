@@ -5,9 +5,9 @@ require "ruby_lsp/internal"
 require "objspace"
 
 module RubyLsp
-  # This rake task checks that all requests or extensions are fully documented. Add the rake task to your Rakefile and
-  # specify the absolute path for all files that must be required in order to discover all listeners and their
-  # related GIFs
+  # This rake task checks that all requests or addons are fully documented. Add the rake task to your Rakefile and
+  # specify the absolute path for all files that must be required in order to discover all listeners and their related
+  # GIFs
   #
   #   # Rakefile
   #   request_files = FileList.new("#{__dir__}/lib/ruby_lsp/requests/*.rb") do |fl|
@@ -53,8 +53,7 @@ module RubyLsp
       # documented
       features = ObjectSpace.each_object(Class).filter_map do |k|
         klass = T.unsafe(k)
-        klass if klass < RubyLsp::Requests::BaseRequest ||
-          (klass < RubyLsp::Listener && klass != RubyLsp::ExtensibleListener)
+        klass if klass < Requests::BaseRequest || (klass < Listener && klass != ExtensibleListener)
       end
 
       missing_docs = T.let(Hash.new { |h, k| h[k] = [] }, T::Hash[String, T::Array[String]])
@@ -82,14 +81,14 @@ module RubyLsp
           T.must(missing_docs[class_name]) << "No documentation found"
         elsif !%r{\(https://microsoft.github.io/language-server-protocol/specification#.*\)}.match?(documentation)
           T.must(missing_docs[class_name]) << <<~DOCS
-            Missing specification link. Requests and extensions should include a link to the LSP specification for the
+            Missing specification link. Requests and addons should include a link to the LSP specification for the
             related feature. For example:
 
             [Inlay hint](https://microsoft.github.io/language-server-protocol/specification#textDocument_inlayHint)
           DOCS
         elsif !documentation.include?("# Example")
           T.must(missing_docs[class_name]) << <<~DOCS
-            Missing example. Requests and extensions should include a code example that explains what the feature does.
+            Missing example. Requests and addons should include a code example that explains what the feature does.
 
             # # Example
             # ```ruby
@@ -99,7 +98,7 @@ module RubyLsp
           DOCS
         elsif !/\[.* demo\]\(.*\.gif\)/.match?(documentation)
           T.must(missing_docs[class_name]) << <<~DOCS
-            Missing demonstration GIF. Each request and extension must be documented with a GIF that shows the feature
+            Missing demonstration GIF. Each request and addon must be documented with a GIF that shows the feature
             working. For example:
 
             # [Inlay hint demo](../../inlay_hint.gif)
