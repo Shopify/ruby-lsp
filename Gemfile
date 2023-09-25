@@ -23,4 +23,6 @@ group :development do
   gem "tapioca", "~> 0.11", require: false, platforms: NON_WINDOWS_PLATFORMS
   gem "rdoc", require: false
   gem "psych", "~> 5.1", require: false
+
+  gem "syntax_tree", ">= 6.1.1", "< 7"
 end
