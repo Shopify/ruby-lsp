@@ -4,7 +4,6 @@ PATH
     ruby-lsp (0.11.0)
       language_server-protocol (~> 3.17.0)
       sorbet-runtime (>= 0.5.5685)
-      syntax_tree (>= 6.1.1, < 7)
       yarp (>= 0.12, < 0.13)
 
 GEM
@@ -132,6 +131,7 @@ DEPENDENCIES
   rubocop-sorbet (~> 0.7)
   ruby-lsp!
   sorbet-static-and-runtime
+  syntax_tree (>= 6.1.1, < 7)
   tapioca (~> 0.11)
 
 BUNDLED WITH

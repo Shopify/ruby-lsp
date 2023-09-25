@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "sorbet-runtime"
-require "syntax_tree"
 require "yarp"
 require "language_server-protocol"
 require "bundler"
