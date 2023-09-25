@@ -164,8 +164,6 @@ module RubyIndexer
       # If `path` is a directory, just ignore it and continue indexing
     end
 
-    private
-
     # Follows aliases in a namespace. The algorithm keeps checking if the name is an alias and then recursively follows
     # it. The idea is that we test the name in parts starting from the complete name to the first namespace. For
     # `Foo::Bar::Baz`, we would test:
@@ -205,6 +203,8 @@ module RubyIndexer
 
       real_parts.join("::")
     end
+
+    private
 
     # Attempts to resolve an UnresolvedAlias into a resolved Alias. If the unresolved alias is pointing to a constant
     # that doesn't exist, then we return the same UnresolvedAlias
