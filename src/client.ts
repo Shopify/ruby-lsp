@@ -2,6 +2,7 @@ import path from "path";
 import fs from "fs";
 import { promisify } from "util";
 import { exec } from "child_process";
+import { performance as Perf } from "perf_hooks";
 
 import * as vscode from "vscode";
 import {
@@ -14,9 +15,10 @@ import {
   ExecutableOptions,
   ServerOptions,
   DiagnosticPullOptions,
+  MessageSignature,
 } from "vscode-languageclient/node";
 
-import { Telemetry } from "./telemetry";
+import { Telemetry, RequestEvent } from "./telemetry";
 import { Ruby } from "./ruby";
 import { StatusItems, Command, ServerState, ClientInterface } from "./status";
 import { TestController } from "./testController";
@@ -41,6 +43,9 @@ export default class Client implements ClientInterface {
     .getConfiguration("rubyLsp")
     .get("bundleGemfile")!;
 
+  private readonly baseFolder;
+  private requestId = 0;
+
   #context: vscode.ExtensionContext;
   #ruby: Ruby;
   #state: ServerState = ServerState.Starting;
@@ -54,6 +59,7 @@ export default class Client implements ClientInterface {
     workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath,
   ) {
     this.workingFolder = workingFolder;
+    this.baseFolder = path.basename(this.workingFolder);
     this.telemetry = telemetry;
     this.testController = testController;
     this.#context = context;
@@ -174,6 +180,29 @@ export default class Client implements ClientInterface {
 
           return undefined;
         },
+        sendRequest: async <TP, T>(
+          type: string | MessageSignature,
+          param: TP | undefined,
+          token: vscode.CancellationToken,
+          next: (
+            type: string | MessageSignature,
+            param?: TP,
+            token?: vscode.CancellationToken,
+          ) => Promise<T>,
+        ) => {
+          return this.benchmarkMiddleware(type, param, () =>
+            next(type, param, token),
+          );
+        },
+        sendNotification: async <TR>(
+          type: string | MessageSignature,
+          next: (type: string | MessageSignature, params?: TR) => Promise<void>,
+          params: TR,
+        ) => {
+          return this.benchmarkMiddleware(type, params, () =>
+            next(type, params),
+          );
+        },
       },
     };
 
@@ -182,26 +211,6 @@ export default class Client implements ClientInterface {
       this.executables(),
       clientOptions,
     );
-
-    const baseFolder = path.basename(this.workingFolder);
-
-    this.client.onTelemetry((event) => {
-      // If an error occurs in the ruby-lsp or ruby-lsp-rails projects, don't send telemetry, but show an error message
-      if (
-        event.errorMessage &&
-        (baseFolder === "ruby-lsp" || baseFolder === "ruby-lsp-rails")
-      ) {
-        vscode.window.showErrorMessage(
-          `Ruby LSP error ${event.errorClass}: ${event.errorMessage}`,
-        );
-      } else {
-        this.telemetry.sendEvent({
-          ...event,
-          rubyVersion: this.ruby.rubyVersion,
-          yjitEnabled: this.ruby.yjitEnabled,
-        });
-      }
-    });
 
     try {
       await this.client.start();
@@ -599,5 +608,86 @@ export default class Client implements ClientInterface {
       onChange: pullOn === "change" || pullOn === "both",
       onSave: pullOn === "save" || pullOn === "both",
     };
+  }
+
+  private async benchmarkMiddleware<T>(
+    type: string | MessageSignature,
+    params: any,
+    runRequest: () => Promise<T>,
+  ): Promise<T> {
+    // Because of the custom bundle logic in the server, we can only fetch the server version after launching it. That
+    // means some requests may be received before the computed the version. For those, we cannot send telemetry
+    if (this.serverVersion === undefined) {
+      return runRequest();
+    }
+
+    const telemetryData: RequestEvent = {
+      request: typeof type === "string" ? type : type.method,
+      rubyVersion: this.ruby.rubyVersion!,
+      yjitEnabled: this.ruby.yjitEnabled!,
+      lspVersion: this.serverVersion,
+      requestTime: 0,
+    };
+
+    // If there are parameters in the request, include those
+    if (params) {
+      const castParam = { ...params } as { textDocument?: { uri: string } };
+
+      if ("textDocument" in castParam) {
+        const uri = castParam.textDocument?.uri.replace(
+          // eslint-disable-next-line no-process-env
+          process.env.HOME!,
+          "~",
+        );
+
+        delete castParam.textDocument;
+        telemetryData.uri = uri;
+      }
+
+      telemetryData.params = JSON.stringify(params);
+    }
+
+    let result: T | undefined;
+    let errorResult;
+    const benchmarkId = this.requestId++;
+
+    // Execute the request measuring the time it takes to receive the response
+    Perf.mark(`${benchmarkId}.start`);
+    try {
+      result = await runRequest();
+    } catch (error: any) {
+      // If any errors occurred in the request, we'll receive these from the LSP server
+      telemetryData.errorClass = error.data.errorClass;
+      telemetryData.errorMessage = error.data.errorMessage;
+      telemetryData.backtrace = error.data.backtrace;
+      errorResult = error;
+    }
+    Perf.mark(`${benchmarkId}.end`);
+
+    // Insert benchmarked response time into telemetry data
+    const bench = Perf.measure(
+      "benchmarks",
+      `${benchmarkId}.start`,
+      `${benchmarkId}.end`,
+    );
+    telemetryData.requestTime = bench.duration;
+    this.telemetry.sendEvent(telemetryData);
+
+    // If there has been an error, we must throw it again. Otherwise we can return the result
+    if (errorResult) {
+      if (
+        this.baseFolder === "ruby-lsp" ||
+        this.baseFolder === "ruby-lsp-rails"
+      ) {
+        vscode.window.showErrorMessage(
+          `Ruby LSP error ${errorResult.data.errorClass}: ${errorResult.data.errorMessage}\n\n
+                ${errorResult.data.backtrace}`,
+        );
+      }
+
+      throw errorResult;
+    }
+
+    return result!;
   }
 }

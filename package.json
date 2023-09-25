@@ -11,7 +11,7 @@
   "license": "MIT",
   "icon": "icon.png",
   "engines": {
-    "vscode": "^1.63.0"
+    "vscode": "^1.68.0"
   },
   "categories": [
     "Programming Languages",
@@ -428,7 +428,7 @@
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "20.x",
-    "@types/vscode": "^1.63.0",
+    "@types/vscode": "^1.68.0",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "@vscode/test-electron": "^2.3.4",
@@ -443,6 +443,6 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "vscode-languageclient": "^8.1.0"
+    "vscode-languageclient": "^9.0.0"
   }
 }

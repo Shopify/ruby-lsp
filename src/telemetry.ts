@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-interface RequestEvent {
+export interface RequestEvent {
   request: string;
   requestTime: number;
   lspVersion: string;
