@@ -103,6 +103,10 @@ module RubyLsp
           ClassVariableHighlight.new(emitter, message_queue, target.name)
         when YARP::ConstantReadNode, YARP::ConstantTargetNode, YARP::ConstantWriteNode, YARP::ConstantAndWriteNode, YARP::ConstantOrWriteNode, YARP::ConstantOperatorWriteNode
           ConstantHighlight.new(emitter, message_queue, target.name)
+        when YARP::ConstantPathNode, YARP::ConstantPathTargetNode
+          ConstantPathHighlight.new(emitter, message_queue, target)
+        when YARP::ConstantPathWriteNode, YARP::ConstantPathAndWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathOperatorWriteNode
+          ConstantPathHighlight.new(emitter, message_queue, target.target)
         when YARP::GlobalVariableReadNode, YARP::GlobalVariableTargetNode, YARP::GlobalVariableWriteNode, YARP::GlobalVariableAndWriteNode, YARP::GlobalVariableOrWriteNode, YARP::GlobalVariableOperatorWriteNode
           GlobalVariableHighlight.new(emitter, message_queue, target.name)
         when YARP::InstanceVariableReadNode, YARP::InstanceVariableTargetNode, YARP::InstanceVariableWriteNode, YARP::InstanceVariableAndWriteNode, YARP::InstanceVariableOrWriteNode, YARP::InstanceVariableOperatorWriteNode
@@ -292,6 +296,105 @@ module RubyLsp
           if constant_path.is_a?(YARP::ConstantReadNode) && constant_path.name == name
             add_highlight(Highlight.new(kind: WRITE, location: node.constant_path.location))
           end
+        end
+      end
+
+      class ConstantPathHighlight < HighlightListener
+        extend T::Sig
+
+        ResponseType = type_member { { fixed: T::Array[Interface::DocumentHighlight] } }
+
+        sig { returns(T::Array[T.nilable(Symbol)]) }
+        attr_reader :names
+
+        sig { params(emitter: EventEmitter, message_queue: Thread::Queue, node: T.any(YARP::ConstantPathNode, YARP::ConstantPathTargetNode)).void }
+        def initialize(emitter, message_queue, node)
+          super(emitter, message_queue)
+          
+          @names = T.let(path_names(node), T::Array[T.nilable(Symbol)])
+          emitter.register(
+            self,
+            :on_class,
+            :on_constant_path,
+            :on_constant_path_target,
+            :on_constant_path_write,
+            :on_constant_path_and_write,
+            :on_constant_path_or_write,
+            :on_constant_path_operator_write,
+            :on_module
+          )
+        end
+
+        sig { params(node: YARP::ClassNode).void }
+        def on_class(node)
+          constant_path = node.constant_path
+
+          if constant_path.is_a?(YARP::ConstantPathNode) && path_names(constant_path) == names
+            add_highlight(Highlight.new(kind: WRITE, location: node.constant_path.location))
+          end
+        end
+
+        sig { params(node: YARP::ConstantPathNode).void }
+        def on_constant_path(node)
+          add_highlight(Highlight.new(kind: READ, location: node.location)) if path_names(node) == names
+        end
+
+        sig { params(node: YARP::ConstantPathTargetNode).void }
+        def on_constant_path_target(node)
+          add_highlight(Highlight.new(kind: WRITE, location: node.location)) if path_names(node) == names
+        end
+
+        sig { params(node: YARP::ConstantPathWriteNode).void }
+        def on_constant_path_write(node)
+          add_highlight(Highlight.new(kind: WRITE, location: node.target.location)) if path_names(node.target) == names
+        end
+
+        sig { params(node: YARP::ConstantPathAndWriteNode).void }
+        def on_constant_path_and_write(node)
+          add_highlight(Highlight.new(kind: WRITE, location: node.target.location)) if path_names(node.target) == names
+        end
+
+        sig { params(node: YARP::ConstantPathOrWriteNode).void }
+        def on_constant_path_or_write(node)
+          add_highlight(Highlight.new(kind: WRITE, location: node.target.location)) if path_names(node.target) == names
+        end
+
+        sig { params(node: YARP::ConstantPathOperatorWriteNode).void }
+        def on_constant_path_operator_write(node)
+          add_highlight(Highlight.new(kind: WRITE, location: node.target.location)) if path_names(node.target) == names
+        end
+
+        sig { params(node: YARP::ModuleNode).void }
+        def on_module(node)
+          constant_path = node.constant_path
+
+          if constant_path.is_a?(YARP::ConstantPathNode) && path_names(constant_path) == names
+            add_highlight(Highlight.new(kind: WRITE, location: node.constant_path.location))
+          end
+        end
+
+        private
+
+        sig { params(node: T.any(YARP::ConstantPathNode, YARP::ConstantPathTargetNode)).returns(T::Array[T.nilable(Symbol)]) }
+        def path_names(node)
+          queue = [node]
+          names = []
+        
+          while (current = queue.shift)
+            child = current.child
+            names << child.name if child.is_a?(YARP::ConstantReadNode)
+        
+            parent = current.parent
+            if parent.is_a?(YARP::ConstantPathNode)
+              queue << parent
+            elsif parent.is_a?(YARP::ConstantReadNode)
+              names << parent.name
+            else
+              names << nil
+            end
+          end
+        
+          names.reverse
         end
       end
 
