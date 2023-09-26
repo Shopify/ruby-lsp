@@ -112,7 +112,7 @@ module RubyLsp
         end
       end
 
-      class GlobalVariableHighlight < Listener
+      class HighlightListener < Listener
         extend T::Sig
 
         ResponseType = type_member { { fixed: T::Array[Interface::DocumentHighlight] } }
@@ -120,14 +120,32 @@ module RubyLsp
         sig { override.returns(ResponseType) }
         attr_reader :_response
 
+        sig { params(emitter: EventEmitter, message_queue: Thread::Queue).void }
+        def initialize(emitter, message_queue)
+          super(emitter, message_queue)
+          @_response = T.let([], ResponseType)
+        end
+
+        private
+
+        sig { params(highlight: Highlight).void }
+        def add_highlight(highlight)
+          range = range_from_location(highlight.location)
+          @_response << Interface::DocumentHighlight.new(range: range, kind: highlight.kind)
+        end
+      end
+
+      class GlobalVariableHighlight < HighlightListener
+        extend T::Sig
+
+        ResponseType = type_member { { fixed: T::Array[Interface::DocumentHighlight] } }
+
         sig { returns(Symbol) }
         attr_reader :name
 
         sig { params(emitter: EventEmitter, message_queue: Thread::Queue, name: Symbol).void }
         def initialize(emitter, message_queue, name)
           super(emitter, message_queue)
-
-          @_response = T.let([], ResponseType)
           @name = T.let(name, Symbol)
 
           emitter.register(
@@ -170,23 +188,12 @@ module RubyLsp
         def on_global_variable_operator_write(node)
           add_highlight(Highlight.new(kind: WRITE, location: node.name_loc)) if node.name == name
         end
-
-        private
-
-        sig { params(highlight: Highlight).void }
-        def add_highlight(highlight)
-          range = range_from_location(highlight.location)
-          @_response << Interface::DocumentHighlight.new(range: range, kind: highlight.kind)
-        end
       end
 
-      class InstanceVariableHighlight < Listener
+      class InstanceVariableHighlight < HighlightListener
         extend T::Sig
 
         ResponseType = type_member { { fixed: T::Array[Interface::DocumentHighlight] } }
-
-        sig { override.returns(ResponseType) }
-        attr_reader :_response
 
         sig { returns(Symbol) }
         attr_reader :name
@@ -194,8 +201,6 @@ module RubyLsp
         sig { params(emitter: EventEmitter, message_queue: Thread::Queue, name: Symbol).void }
         def initialize(emitter, message_queue, name)
           super(emitter, message_queue)
-
-          @_response = T.let([], ResponseType)
           @name = T.let(name, Symbol)
 
           emitter.register(
@@ -237,14 +242,6 @@ module RubyLsp
         sig { params(node: YARP::InstanceVariableOperatorWriteNode).void }
         def on_instance_variable_operator_write(node)
           add_highlight(Highlight.new(kind: WRITE, location: node.name_loc)) if node.name == name
-        end
-
-        private
-
-        sig { params(highlight: Highlight).void }
-        def add_highlight(highlight)
-          range = range_from_location(highlight.location)
-          @_response << Interface::DocumentHighlight.new(range: range, kind: highlight.kind)
         end
       end
 
