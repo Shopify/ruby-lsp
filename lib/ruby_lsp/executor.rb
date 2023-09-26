@@ -363,7 +363,7 @@ module RubyLsp
 
       target, parent = document.locate_node(position)
       emitter = EventEmitter.new
-      listener = Requests::DocumentHighlight.new(target, parent, emitter, @message_queue)
+      listener = Requests::DocumentHighlight.for(target, parent, emitter, @message_queue)
       emitter.visit(document.tree)
       listener.response
     end

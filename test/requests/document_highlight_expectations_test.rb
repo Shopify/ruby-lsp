@@ -15,7 +15,7 @@ class DocumentHighlightExpectationsTest < ExpectationsTestRunner
 
     emitter = RubyLsp::EventEmitter.new
 
-    listener = RubyLsp::Requests::DocumentHighlight.new(target, parent, emitter, @message_queue)
+    listener = RubyLsp::Requests::DocumentHighlight.for(target, parent, emitter, @message_queue)
     emitter.visit(document.tree)
     listener.response
   end

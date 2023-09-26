@@ -347,5 +347,41 @@ module RubyLsp
       @listeners[:on_string_concat]&.each { |l| T.unsafe(l).on_string_concat(node) }
       super
     end
+
+    sig { override.params(node: YARP::GlobalVariableReadNode).void }
+    def visit_global_variable_read_node(node)
+      @listeners[:on_global_variable_read]&.each { |l| T.unsafe(l).on_global_variable_read(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::GlobalVariableTargetNode).void }
+    def visit_global_variable_target_node(node)
+      @listeners[:on_global_variable_read]&.each { |l| T.unsafe(l).on_global_variable_target(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::GlobalVariableWriteNode).void }
+    def visit_global_variable_write_node(node)
+      @listeners[:on_global_variable_write]&.each { |l| T.unsafe(l).on_global_variable_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::GlobalVariableAndWriteNode).void }
+    def visit_global_variable_and_write_node(node)
+      @listeners[:on_global_variable_and_write]&.each { |l| T.unsafe(l).on_global_variable_and_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::GlobalVariableOrWriteNode).void }
+    def visit_global_variable_or_write_node(node)
+      @listeners[:on_global_variable_or_write]&.each { |l| T.unsafe(l).on_global_variable_or_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::GlobalVariableOperatorWriteNode).void }
+    def visit_global_variable_operator_write_node(node)
+      @listeners[:on_global_variable_operator_write]&.each { |l| T.unsafe(l).on_global_variable_operator_write(node) }
+      super
+    end
   end
 end
