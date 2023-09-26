@@ -26,30 +26,49 @@ module RubyIndexer
       visit(@parse_result.value)
     end
 
-    sig { params(node: T.nilable(YARP::Node)).void }
-    def visit(node)
-      case node
-      when YARP::ProgramNode, YARP::StatementsNode
-        visit_child_nodes(node)
-      when YARP::ClassNode
-        add_index_entry(node, Index::Entry::Class)
-      when YARP::ModuleNode
-        add_index_entry(node, Index::Entry::Module)
-      when YARP::ConstantWriteNode, YARP::ConstantOrWriteNode
-        name = fully_qualify_name(node.name.to_s)
-        add_constant(node, name)
-      when YARP::ConstantPathWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathOperatorWriteNode,
-        YARP::ConstantPathAndWriteNode
+    sig { params(node: YARP::CallNode).void }
+    def visit_call_node(node)
+      handle_private_constant(node) if node.message == "private_constant"
+    end
 
-        # ignore variable constants like `var::FOO` or `self.class::FOO`
-        return unless node.target.parent.nil? || node.target.parent.is_a?(YARP::ConstantReadNode)
+    sig { params(node: YARP::ClassNode).void }
+    def visit_class_node(node)
+      add_index_entry(node, Index::Entry::Class)
+    end
 
-        name = fully_qualify_name(node.target.location.slice)
-        add_constant(node, name)
-      when YARP::CallNode
-        message = node.message
-        handle_private_constant(node) if message == "private_constant"
-      end
+    sig { params(node: YARP::ConstantWriteNode).void }
+    def visit_constant_write_node(node)
+      add_constant_write_node(node)
+    end
+
+    sig { params(node: YARP::ConstantOrWriteNode).void }
+    def visit_constant_or_write_node(node)
+      add_constant_write_node(node)
+    end
+
+    sig { params(node: YARP::ConstantPathWriteNode).void }
+    def visit_constant_path_write_node(node)
+      add_constant_path_write_node(node)
+    end
+
+    sig { params(node: YARP::ConstantPathAndWriteNode).void }
+    def visit_constant_path_and_write_node(node)
+      add_constant_path_write_node(node)
+    end
+
+    sig { params(node: YARP::ConstantPathOrWriteNode).void }
+    def visit_constant_path_or_write_node(node)
+      add_constant_path_write_node(node)
+    end
+
+    sig { params(node: YARP::ConstantPathOperatorWriteNode).void }
+    def visit_constant_path_operator_write_node(node)
+      add_constant_path_write_node(node)
+    end
+
+    sig { params(node: YARP::ModuleNode).void }
+    def visit_module_node(node)
+      add_index_entry(node, Index::Entry::Module)
     end
 
     # Override to avoid using `map` instead of `each`
@@ -59,6 +78,19 @@ module RubyIndexer
     end
 
     private
+
+    sig { params(node: T.any(YARP::ConstantWriteNode, YARP::ConstantOrWriteNode)).void }
+    def add_constant_write_node(node)
+      add_constant(node, fully_qualify_name(node.name.to_s))
+    end
+
+    sig { params(node: T.any(YARP::ConstantPathWriteNode, YARP::ConstantPathAndWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathOperatorWriteNode)).void }
+    def add_constant_path_write_node(node)
+      return unless node.target.parent.nil? || node.target.parent.is_a?(YARP::ConstantReadNode)
+
+      name = fully_qualify_name(node.target.location.slice)
+      add_constant(node, name)
+    end
 
     sig { params(node: YARP::CallNode).void }
     def handle_private_constant(node)
