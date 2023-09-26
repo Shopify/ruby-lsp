@@ -71,7 +71,7 @@ module RubyLsp
             YARP::ConstantPathOperatorWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathTargetNode,
             YARP::ConstantPathWriteNode, YARP::ConstantReadNode, YARP::ConstantTargetNode, YARP::ConstantWriteNode,
             YARP::LocalVariableAndWriteNode, YARP::LocalVariableOperatorWriteNode, YARP::LocalVariableOrWriteNode,
-            YARP::LocalVariableReadNode, YARP::LocalVariableTargetNode, YARP::LocalVariableWriteNode, YARP::CallNode,
+            YARP::LocalVariableReadNode, YARP::LocalVariableTargetNode, YARP::LocalVariableWriteNode,
             YARP::BlockParameterNode, YARP::KeywordParameterNode, YARP::KeywordRestParameterNode,
             YARP::OptionalParameterNode, YARP::RequiredParameterNode, YARP::RestParameterNode
             HighlightTarget.new(target)
@@ -101,6 +101,8 @@ module RubyLsp
       end
       def self.for(target, parent, emitter, message_queue)
         case target
+        when YARP::CallNode
+          CallHighlight.new(emitter, message_queue, target.message)
         when YARP::ClassVariableReadNode, YARP::ClassVariableTargetNode, YARP::ClassVariableWriteNode, YARP::ClassVariableAndWriteNode, YARP::ClassVariableOrWriteNode, YARP::ClassVariableOperatorWriteNode
           ClassVariableHighlight.new(emitter, message_queue, target.name)
         when YARP::GlobalVariableReadNode, YARP::GlobalVariableTargetNode, YARP::GlobalVariableWriteNode, YARP::GlobalVariableAndWriteNode, YARP::GlobalVariableOrWriteNode, YARP::GlobalVariableOperatorWriteNode
@@ -135,6 +137,34 @@ module RubyLsp
         end
       end
 
+      class CallHighlight < HighlightListener
+        extend T::Sig
+
+        ResponseType = type_member { { fixed: T::Array[Interface::DocumentHighlight] } }
+
+        sig { returns(String) }
+        attr_reader :message
+
+        sig { params(emitter: EventEmitter, message_queue: Thread::Queue, message: T.nilable(String)).void }
+        def initialize(emitter, message_queue, message)
+          super(emitter, message_queue)
+          return unless message
+
+          @message = T.let(message, String)
+          emitter.register(self, :on_call, :on_def)
+        end
+
+        sig { params(node: YARP::CallNode).void }
+        def on_call(node)
+          add_highlight(Highlight.new(kind: READ, location: node.location)) if node.message == message
+        end
+
+        sig { params(node: YARP::DefNode).void }
+        def on_def(node)
+          add_highlight(Highlight.new(kind: WRITE, location: node.name_loc)) if node.name.to_s == message
+        end
+      end
+
       class ClassVariableHighlight < HighlightListener
         extend T::Sig
 
@@ -146,8 +176,8 @@ module RubyLsp
         sig { params(emitter: EventEmitter, message_queue: Thread::Queue, name: Symbol).void }
         def initialize(emitter, message_queue, name)
           super(emitter, message_queue)
+          
           @name = T.let(name, Symbol)
-
           emitter.register(
             self,
             :on_class_variable_read,
@@ -201,8 +231,8 @@ module RubyLsp
         sig { params(emitter: EventEmitter, message_queue: Thread::Queue, name: Symbol).void }
         def initialize(emitter, message_queue, name)
           super(emitter, message_queue)
+          
           @name = T.let(name, Symbol)
-
           emitter.register(
             self,
             :on_global_variable_read,
@@ -256,8 +286,8 @@ module RubyLsp
         sig { params(emitter: EventEmitter, message_queue: Thread::Queue, name: Symbol).void }
         def initialize(emitter, message_queue, name)
           super(emitter, message_queue)
+          
           @name = T.let(name, Symbol)
-
           emitter.register(
             self,
             :on_instance_variable_read,
@@ -328,39 +358,27 @@ module RubyLsp
         # visiting)
         sig { params(other: YARP::Node).returns(T.nilable(Highlight)) }
         def matched_highlight(other)
-          case @node
-          # Method definitions and invocations
-          when YARP::CallNode, YARP::DefNode
-            case other
-            when YARP::CallNode
-              Highlight.new(kind: READ, location: other.location)
-            when YARP::DefNode
-              Highlight.new(kind: WRITE, location: other.name_loc)
-            end
-          # Variables, parameters and constants
-          else
-            case other
-            when YARP::ConstantPathTargetNode,
-              YARP::ConstantTargetNode, YARP::LocalVariableTargetNode,
-              YARP::BlockParameterNode, YARP::RequiredParameterNode
+          case other
+          when YARP::ConstantPathTargetNode,
+            YARP::ConstantTargetNode, YARP::LocalVariableTargetNode,
+            YARP::BlockParameterNode, YARP::RequiredParameterNode
 
-              Highlight.new(kind: WRITE, location: other.location)
-            when YARP::LocalVariableWriteNode, YARP::KeywordParameterNode, YARP::RestParameterNode,
-              YARP::OptionalParameterNode, YARP::KeywordRestParameterNode, YARP::LocalVariableAndWriteNode,
-              YARP::LocalVariableOperatorWriteNode, YARP::LocalVariableOrWriteNode, YARP::ConstantWriteNode, YARP::ConstantOrWriteNode, YARP::ConstantOperatorWriteNode,
-              YARP::ConstantAndWriteNode
+            Highlight.new(kind: WRITE, location: other.location)
+          when YARP::LocalVariableWriteNode, YARP::KeywordParameterNode, YARP::RestParameterNode,
+            YARP::OptionalParameterNode, YARP::KeywordRestParameterNode, YARP::LocalVariableAndWriteNode,
+            YARP::LocalVariableOperatorWriteNode, YARP::LocalVariableOrWriteNode, YARP::ConstantWriteNode, YARP::ConstantOrWriteNode, YARP::ConstantOperatorWriteNode,
+            YARP::ConstantAndWriteNode
 
-              Highlight.new(kind: WRITE, location: T.must(other.name_loc)) if other.name
-            when YARP::ConstantPathWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathAndWriteNode,
-              YARP::ConstantPathOperatorWriteNode
+            Highlight.new(kind: WRITE, location: T.must(other.name_loc)) if other.name
+          when YARP::ConstantPathWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathAndWriteNode,
+            YARP::ConstantPathOperatorWriteNode
 
-              Highlight.new(kind: WRITE, location: other.target.location)
-            when YARP::LocalVariableReadNode, YARP::ConstantPathNode, YARP::ConstantReadNode
+            Highlight.new(kind: WRITE, location: other.target.location)
+          when YARP::LocalVariableReadNode, YARP::ConstantPathNode, YARP::ConstantReadNode
 
-              Highlight.new(kind: READ, location: other.location)
-            when YARP::ClassNode, YARP::ModuleNode
-              Highlight.new(kind: WRITE, location: other.constant_path.location)
-            end
+            Highlight.new(kind: READ, location: other.location)
+          when YARP::ClassNode, YARP::ModuleNode
+            Highlight.new(kind: WRITE, location: other.constant_path.location)
           end
         end
 
@@ -379,8 +397,6 @@ module RubyLsp
             YARP::RequiredParameterNode, YARP::RestParameterNode
 
             node.name.to_s
-          when YARP::CallNode
-            node.message
           when YARP::ClassNode, YARP::ModuleNode
             node.constant_path.slice
           end
