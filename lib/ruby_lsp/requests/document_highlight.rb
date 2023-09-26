@@ -101,6 +101,8 @@ module RubyLsp
           CallHighlight.new(emitter, message_queue, target.message)
         when YARP::ClassVariableReadNode, YARP::ClassVariableTargetNode, YARP::ClassVariableWriteNode, YARP::ClassVariableAndWriteNode, YARP::ClassVariableOrWriteNode, YARP::ClassVariableOperatorWriteNode
           ClassVariableHighlight.new(emitter, message_queue, target.name)
+        when YARP::ConstantReadNode, YARP::ConstantTargetNode, YARP::ConstantWriteNode, YARP::ConstantAndWriteNode, YARP::ConstantOrWriteNode, YARP::ConstantOperatorWriteNode
+          ConstantHighlight.new(emitter, message_queue, target.name)
         when YARP::GlobalVariableReadNode, YARP::GlobalVariableTargetNode, YARP::GlobalVariableWriteNode, YARP::GlobalVariableAndWriteNode, YARP::GlobalVariableOrWriteNode, YARP::GlobalVariableOperatorWriteNode
           GlobalVariableHighlight.new(emitter, message_queue, target.name)
         when YARP::InstanceVariableReadNode, YARP::InstanceVariableTargetNode, YARP::InstanceVariableWriteNode, YARP::InstanceVariableAndWriteNode, YARP::InstanceVariableOrWriteNode, YARP::InstanceVariableOperatorWriteNode
@@ -215,6 +217,81 @@ module RubyLsp
         sig { params(node: YARP::ClassVariableOperatorWriteNode).void }
         def on_class_variable_operator_write(node)
           add_highlight(Highlight.new(kind: WRITE, location: node.name_loc)) if node.name == name
+        end
+      end
+
+      class ConstantHighlight < HighlightListener
+        extend T::Sig
+
+        ResponseType = type_member { { fixed: T::Array[Interface::DocumentHighlight] } }
+
+        sig { returns(Symbol) }
+        attr_reader :name
+
+        sig { params(emitter: EventEmitter, message_queue: Thread::Queue, name: Symbol).void }
+        def initialize(emitter, message_queue, name)
+          super(emitter, message_queue)
+          
+          @name = T.let(name, Symbol)
+          emitter.register(
+            self,
+            :on_class,
+            :on_constant_read,
+            :on_constant_target,
+            :on_constant_write,
+            :on_constant_and_write,
+            :on_constant_or_write,
+            :on_constant_operator_write,
+            :on_module
+          )
+        end
+
+        sig { params(node: YARP::ClassNode).void }
+        def on_class(node)
+          constant_path = node.constant_path
+
+          if constant_path.is_a?(YARP::ConstantReadNode) && constant_path.name == name
+            add_highlight(Highlight.new(kind: WRITE, location: node.constant_path.location))
+          end
+        end
+
+        sig { params(node: YARP::ConstantReadNode).void }
+        def on_constant_read(node)
+          add_highlight(Highlight.new(kind: READ, location: node.location)) if node.name == name
+        end
+
+        sig { params(node: YARP::ConstantTargetNode).void }
+        def on_constant_target(node)
+          add_highlight(Highlight.new(kind: WRITE, location: node.location)) if node.name == name
+        end
+
+        sig { params(node: YARP::ConstantWriteNode).void }
+        def on_constant_write(node)
+          add_highlight(Highlight.new(kind: WRITE, location: node.name_loc)) if node.name == name
+        end
+
+        sig { params(node: YARP::ConstantAndWriteNode).void }
+        def on_constant_and_write(node)
+          add_highlight(Highlight.new(kind: WRITE, location: node.name_loc)) if node.name == name
+        end
+
+        sig { params(node: YARP::ConstantOrWriteNode).void }
+        def on_constant_or_write(node)
+          add_highlight(Highlight.new(kind: WRITE, location: node.name_loc)) if node.name == name
+        end
+
+        sig { params(node: YARP::ConstantOperatorWriteNode).void }
+        def on_constant_operator_write(node)
+          add_highlight(Highlight.new(kind: WRITE, location: node.name_loc)) if node.name == name
+        end
+
+        sig { params(node: YARP::ModuleNode).void }
+        def on_module(node)
+          constant_path = node.constant_path
+
+          if constant_path.is_a?(YARP::ConstantReadNode) && constant_path.name == name
+            add_highlight(Highlight.new(kind: WRITE, location: node.constant_path.location))
+          end
         end
       end
 
