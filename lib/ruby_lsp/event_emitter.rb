@@ -88,12 +88,6 @@ module RubyLsp
       @listeners[:after_call]&.each { |l| T.unsafe(l).after_call(node) }
     end
 
-    sig { override.params(node: YARP::ClassVariableWriteNode).void }
-    def visit_class_variable_write_node(node)
-      @listeners[:on_class_variable_write]&.each { |l| T.unsafe(l).on_class_variable_write(node) }
-      super
-    end
-
     sig { override.params(node: YARP::DefNode).void }
     def visit_def_node(node)
       @listeners[:on_def]&.each { |l| T.unsafe(l).on_def(node) }
@@ -339,6 +333,42 @@ module RubyLsp
     sig { override.params(node: YARP::StringConcatNode).void }
     def visit_string_concat_node(node)
       @listeners[:on_string_concat]&.each { |l| T.unsafe(l).on_string_concat(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ClassVariableReadNode).void }
+    def visit_class_variable_read_node(node)
+      @listeners[:on_class_variable_read]&.each { |l| T.unsafe(l).on_class_variable_read(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ClassVariableTargetNode).void }
+    def visit_class_variable_target_node(node)
+      @listeners[:on_class_variable_read]&.each { |l| T.unsafe(l).on_class_variable_target(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ClassVariableWriteNode).void }
+    def visit_class_variable_write_node(node)
+      @listeners[:on_class_variable_write]&.each { |l| T.unsafe(l).on_class_variable_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ClassVariableAndWriteNode).void }
+    def visit_class_variable_and_write_node(node)
+      @listeners[:on_class_variable_and_write]&.each { |l| T.unsafe(l).on_class_variable_and_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ClassVariableOrWriteNode).void }
+    def visit_class_variable_or_write_node(node)
+      @listeners[:on_class_variable_or_write]&.each { |l| T.unsafe(l).on_class_variable_or_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::ClassVariableOperatorWriteNode).void }
+    def visit_class_variable_operator_write_node(node)
+      @listeners[:on_class_variable_operator_write]&.each { |l| T.unsafe(l).on_class_variable_operator_write(node) }
       super
     end
 
