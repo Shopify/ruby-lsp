@@ -66,9 +66,7 @@ module RubyLsp
 
         highlight_target =
           case target
-          when YARP::InstanceVariableAndWriteNode, YARP::InstanceVariableOperatorWriteNode,
-            YARP::InstanceVariableOrWriteNode, YARP::InstanceVariableReadNode, YARP::InstanceVariableTargetNode,
-            YARP::InstanceVariableWriteNode, YARP::ConstantAndWriteNode, YARP::ConstantOperatorWriteNode,
+          when YARP::ConstantAndWriteNode, YARP::ConstantOperatorWriteNode,
             YARP::ConstantOrWriteNode, YARP::ConstantPathAndWriteNode, YARP::ConstantPathNode,
             YARP::ConstantPathOperatorWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathTargetNode,
             YARP::ConstantPathWriteNode, YARP::ConstantReadNode, YARP::ConstantTargetNode, YARP::ConstantWriteNode,
@@ -107,6 +105,8 @@ module RubyLsp
         case target
         when YARP::GlobalVariableReadNode, YARP::GlobalVariableTargetNode, YARP::GlobalVariableWriteNode, YARP::GlobalVariableAndWriteNode, YARP::GlobalVariableOrWriteNode, YARP::GlobalVariableOperatorWriteNode
           GlobalVariableHighlight.new(emitter, message_queue, target.name)
+        when YARP::InstanceVariableReadNode, YARP::InstanceVariableTargetNode, YARP::InstanceVariableWriteNode, YARP::InstanceVariableAndWriteNode, YARP::InstanceVariableOrWriteNode, YARP::InstanceVariableOperatorWriteNode
+          InstanceVariableHighlight.new(emitter, message_queue, target.name)
         else
           new(target, parent, emitter, message_queue)
         end
@@ -180,6 +180,74 @@ module RubyLsp
         end
       end
 
+      class InstanceVariableHighlight < Listener
+        extend T::Sig
+
+        ResponseType = type_member { { fixed: T::Array[Interface::DocumentHighlight] } }
+
+        sig { override.returns(ResponseType) }
+        attr_reader :_response
+
+        sig { returns(Symbol) }
+        attr_reader :name
+
+        sig { params(emitter: EventEmitter, message_queue: Thread::Queue, name: Symbol).void }
+        def initialize(emitter, message_queue, name)
+          super(emitter, message_queue)
+
+          @_response = T.let([], ResponseType)
+          @name = T.let(name, Symbol)
+
+          emitter.register(
+            self,
+            :on_instance_variable_read,
+            :on_instance_variable_target,
+            :on_instance_variable_write,
+            :on_instance_variable_and_write,
+            :on_instance_variable_or_write,
+            :on_instance_variable_operator_write
+          )
+        end
+
+        sig { params(node: YARP::InstanceVariableReadNode).void }
+        def on_instance_variable_read(node)
+          add_highlight(Highlight.new(kind: READ, location: node.location)) if node.name == name
+        end
+
+        sig { params(node: YARP::InstanceVariableTargetNode).void }
+        def on_instance_variable_target(node)
+          add_highlight(Highlight.new(kind: WRITE, location: node.location)) if node.name == name
+        end
+
+        sig { params(node: YARP::InstanceVariableWriteNode).void }
+        def on_instance_variable_write(node)
+          add_highlight(Highlight.new(kind: WRITE, location: node.name_loc)) if node.name == name
+        end
+
+        sig { params(node: YARP::InstanceVariableAndWriteNode).void }
+        def on_instance_variable_and_write(node)
+          add_highlight(Highlight.new(kind: WRITE, location: node.name_loc)) if node.name == name
+        end
+
+        sig { params(node: YARP::InstanceVariableOrWriteNode).void }
+        def on_instance_variable_or_write(node)
+          add_highlight(Highlight.new(kind: WRITE, location: node.name_loc)) if node.name == name
+        end
+
+        sig { params(node: YARP::InstanceVariableOperatorWriteNode).void }
+        def on_instance_variable_operator_write(node)
+          add_highlight(Highlight.new(kind: WRITE, location: node.name_loc)) if node.name == name
+        end
+
+        private
+
+        sig { params(highlight: Highlight).void }
+        def add_highlight(highlight)
+          range = range_from_location(highlight.location)
+          @_response << Interface::DocumentHighlight.new(range: range, kind: highlight.kind)
+        end
+      end
+
       private
 
       sig { params(highlight: Highlight).void }
@@ -220,7 +288,7 @@ module RubyLsp
           # Variables, parameters and constants
           else
             case other
-            when YARP::InstanceVariableTargetNode, YARP::ConstantPathTargetNode,
+            when YARP::ConstantPathTargetNode,
               YARP::ConstantTargetNode, YARP::ClassVariableTargetNode, YARP::LocalVariableTargetNode,
               YARP::BlockParameterNode, YARP::RequiredParameterNode
 
@@ -230,16 +298,14 @@ module RubyLsp
               YARP::LocalVariableOperatorWriteNode, YARP::LocalVariableOrWriteNode, YARP::ClassVariableWriteNode,
               YARP::ClassVariableOrWriteNode, YARP::ClassVariableOperatorWriteNode, YARP::ClassVariableAndWriteNode,
               YARP::ConstantWriteNode, YARP::ConstantOrWriteNode, YARP::ConstantOperatorWriteNode,
-              YARP::InstanceVariableWriteNode, YARP::ConstantAndWriteNode, YARP::InstanceVariableOrWriteNode,
-              YARP::InstanceVariableAndWriteNode, YARP::InstanceVariableOperatorWriteNode
+              YARP::ConstantAndWriteNode
 
               Highlight.new(kind: WRITE, location: T.must(other.name_loc)) if other.name
             when YARP::ConstantPathWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathAndWriteNode,
               YARP::ConstantPathOperatorWriteNode
 
               Highlight.new(kind: WRITE, location: other.target.location)
-            when YARP::LocalVariableReadNode, YARP::ConstantPathNode, YARP::ConstantReadNode,
-              YARP::InstanceVariableReadNode, YARP::ClassVariableReadNode
+            when YARP::LocalVariableReadNode, YARP::ConstantPathNode, YARP::ConstantReadNode, YARP::ClassVariableReadNode
 
               Highlight.new(kind: READ, location: other.location)
             when YARP::ClassNode, YARP::ModuleNode
@@ -255,9 +321,7 @@ module RubyLsp
             YARP::ConstantPathWriteNode, YARP::ConstantPathTargetNode, YARP::ConstantPathOrWriteNode,
             YARP::ConstantPathOperatorWriteNode, YARP::ConstantPathAndWriteNode
             node.slice
-          when YARP::InstanceVariableAndWriteNode, YARP::InstanceVariableOperatorWriteNode,
-            YARP::InstanceVariableOrWriteNode, YARP::InstanceVariableReadNode, YARP::InstanceVariableTargetNode,
-            YARP::InstanceVariableWriteNode, YARP::ConstantAndWriteNode, YARP::ConstantOperatorWriteNode,
+          when YARP::ConstantAndWriteNode, YARP::ConstantOperatorWriteNode,
             YARP::ConstantOrWriteNode, YARP::ConstantWriteNode, YARP::ClassVariableAndWriteNode,
             YARP::ClassVariableOperatorWriteNode, YARP::ClassVariableOrWriteNode, YARP::ClassVariableReadNode,
             YARP::ClassVariableTargetNode, YARP::ClassVariableWriteNode, YARP::LocalVariableAndWriteNode,

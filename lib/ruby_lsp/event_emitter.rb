@@ -88,12 +88,6 @@ module RubyLsp
       @listeners[:after_call]&.each { |l| T.unsafe(l).after_call(node) }
     end
 
-    sig { override.params(node: YARP::InstanceVariableWriteNode).void }
-    def visit_instance_variable_write_node(node)
-      @listeners[:on_instance_variable_write]&.each { |l| T.unsafe(l).on_instance_variable_write(node) }
-      super
-    end
-
     sig { override.params(node: YARP::ClassVariableWriteNode).void }
     def visit_class_variable_write_node(node)
       @listeners[:on_class_variable_write]&.each { |l| T.unsafe(l).on_class_variable_write(node) }
@@ -381,6 +375,42 @@ module RubyLsp
     sig { override.params(node: YARP::GlobalVariableOperatorWriteNode).void }
     def visit_global_variable_operator_write_node(node)
       @listeners[:on_global_variable_operator_write]&.each { |l| T.unsafe(l).on_global_variable_operator_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::InstanceVariableReadNode).void }
+    def visit_instance_variable_read_node(node)
+      @listeners[:on_instance_variable_read]&.each { |l| T.unsafe(l).on_instance_variable_read(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::InstanceVariableTargetNode).void }
+    def visit_instance_variable_target_node(node)
+      @listeners[:on_instance_variable_read]&.each { |l| T.unsafe(l).on_instance_variable_target(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::InstanceVariableWriteNode).void }
+    def visit_instance_variable_write_node(node)
+      @listeners[:on_instance_variable_write]&.each { |l| T.unsafe(l).on_instance_variable_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::InstanceVariableAndWriteNode).void }
+    def visit_instance_variable_and_write_node(node)
+      @listeners[:on_instance_variable_and_write]&.each { |l| T.unsafe(l).on_instance_variable_and_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::InstanceVariableOrWriteNode).void }
+    def visit_instance_variable_or_write_node(node)
+      @listeners[:on_instance_variable_or_write]&.each { |l| T.unsafe(l).on_instance_variable_or_write(node) }
+      super
+    end
+
+    sig { override.params(node: YARP::InstanceVariableOperatorWriteNode).void }
+    def visit_instance_variable_operator_write_node(node)
+      @listeners[:on_instance_variable_operator_write]&.each { |l| T.unsafe(l).on_instance_variable_operator_write(node) }
       super
     end
   end
