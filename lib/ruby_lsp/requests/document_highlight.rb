@@ -22,10 +22,8 @@ module RubyLsp
     #   FOO # should be highlighted as "read"
     # end
     # ```
-    class DocumentHighlight < Listener
+    class DocumentHighlight
       extend T::Sig
-
-      ResponseType = type_member { { fixed: T::Array[Interface::DocumentHighlight] } }
 
       READ = Constant::DocumentHighlightKind::READ
       WRITE = Constant::DocumentHighlightKind::WRITE
@@ -43,78 +41,6 @@ module RubyLsp
         def initialize(kind:, location:)
           @kind = kind
           @location = location
-        end
-      end
-
-      sig { override.returns(ResponseType) }
-      attr_reader :_response
-
-      sig do
-        params(
-          target: T.nilable(YARP::Node),
-          parent: T.nilable(YARP::Node),
-          emitter: EventEmitter,
-          message_queue: Thread::Queue,
-        ).void
-      end
-      def initialize(target, parent, emitter, message_queue)
-        super(emitter, message_queue)
-
-        @_response = T.let([], T::Array[Interface::DocumentHighlight])
-
-        return unless target && parent
-
-        highlight_target =
-          case target
-          when YARP::ConstantAndWriteNode, YARP::ConstantOperatorWriteNode,
-            YARP::ConstantOrWriteNode, YARP::ConstantPathAndWriteNode, YARP::ConstantPathNode,
-            YARP::ConstantPathOperatorWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathTargetNode,
-            YARP::ConstantPathWriteNode, YARP::ConstantReadNode, YARP::ConstantTargetNode, YARP::ConstantWriteNode
-            HighlightTarget.new(target)
-          end
-
-        @target = T.let(highlight_target, T.nilable(HighlightTarget))
-
-        emitter.register(self, :on_node) if @target
-      end
-
-      sig { params(node: T.nilable(YARP::Node)).void }
-      def on_node(node)
-        return if node.nil?
-
-        match = T.must(@target).highlight_type(node)
-        add_highlight(match) if match
-      end
-
-      sig do
-        type_parameters(:ResponseType)
-        .params(
-          target: T.nilable(YARP::Node),
-          parent: T.nilable(YARP::Node),
-          emitter: EventEmitter,
-          message_queue: Thread::Queue,
-        ).returns(Listener[T::Array[Interface::DocumentHighlight]])
-      end
-      def self.for(target, parent, emitter, message_queue)
-        case target
-        when YARP::CallNode
-          CallHighlight.new(emitter, message_queue, target.message)
-        when YARP::ClassVariableReadNode, YARP::ClassVariableTargetNode, YARP::ClassVariableWriteNode, YARP::ClassVariableAndWriteNode, YARP::ClassVariableOrWriteNode, YARP::ClassVariableOperatorWriteNode
-          ClassVariableHighlight.new(emitter, message_queue, target.name)
-        when YARP::ConstantReadNode, YARP::ConstantTargetNode, YARP::ConstantWriteNode, YARP::ConstantAndWriteNode, YARP::ConstantOrWriteNode, YARP::ConstantOperatorWriteNode
-          ConstantHighlight.new(emitter, message_queue, target.name)
-        when YARP::ConstantPathNode, YARP::ConstantPathTargetNode
-          ConstantPathHighlight.new(emitter, message_queue, target)
-        when YARP::ConstantPathWriteNode, YARP::ConstantPathAndWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathOperatorWriteNode
-          ConstantPathHighlight.new(emitter, message_queue, target.target)
-        when YARP::GlobalVariableReadNode, YARP::GlobalVariableTargetNode, YARP::GlobalVariableWriteNode, YARP::GlobalVariableAndWriteNode, YARP::GlobalVariableOrWriteNode, YARP::GlobalVariableOperatorWriteNode
-          GlobalVariableHighlight.new(emitter, message_queue, target.name)
-        when YARP::InstanceVariableReadNode, YARP::InstanceVariableTargetNode, YARP::InstanceVariableWriteNode, YARP::InstanceVariableAndWriteNode, YARP::InstanceVariableOrWriteNode, YARP::InstanceVariableOperatorWriteNode
-          InstanceVariableHighlight.new(emitter, message_queue, target.name)
-        when YARP::LocalVariableReadNode, YARP::LocalVariableTargetNode, YARP::LocalVariableWriteNode, YARP::LocalVariableAndWriteNode, YARP::LocalVariableOrWriteNode, YARP::LocalVariableOperatorWriteNode, YARP::BlockParameterNode, YARP::KeywordParameterNode, YARP::KeywordRestParameterNode, YARP::OptionalParameterNode, YARP::RequiredParameterNode, YARP::RestParameterNode
-          LocalVariableHighlight.new(emitter, message_queue, target.name)
-        else
-          new(target, parent, emitter, message_queue)
         end
       end
 
@@ -606,60 +532,41 @@ module RubyLsp
         end
       end
 
-      private
-
-      sig { params(highlight: Highlight).void }
-      def add_highlight(highlight)
-        range = range_from_location(highlight.location)
-        @_response << Interface::DocumentHighlight.new(range: range, kind: highlight.kind)
-      end
-
-      class HighlightTarget
+      class NullHighlight < HighlightListener
         extend T::Sig
 
-        sig { params(node: YARP::Node).void }
-        def initialize(node)
-          @node = node
-          @value = T.let(value(node), T.nilable(String))
-        end
+        ResponseType = type_member { { fixed: T::Array[Interface::DocumentHighlight] } }
+      end
 
-        sig { params(other: YARP::Node).returns(T.nilable(Highlight)) }
-        def highlight_type(other)
-          matched_highlight(other) if @value && @value == value(other)
-        end
-
-        private
-
-        # Match the target type (where the cursor is positioned) with the `other` type (the node we're currently
-        # visiting)
-        sig { params(other: YARP::Node).returns(T.nilable(Highlight)) }
-        def matched_highlight(other)
-          case other
-          when YARP::ConstantPathTargetNode, YARP::ConstantTargetNode
-            Highlight.new(kind: WRITE, location: other.location)
-          when YARP::ConstantWriteNode, YARP::ConstantOrWriteNode, YARP::ConstantOperatorWriteNode, YARP::ConstantAndWriteNode
-            Highlight.new(kind: WRITE, location: other.name_loc)
-          when YARP::ConstantPathWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathAndWriteNode, YARP::ConstantPathOperatorWriteNode
-            Highlight.new(kind: WRITE, location: other.target.location)
-          when YARP::ConstantPathNode, YARP::ConstantReadNode
-            Highlight.new(kind: READ, location: other.location)
-          when YARP::ClassNode, YARP::ModuleNode
-            Highlight.new(kind: WRITE, location: other.constant_path.location)
-          end
-        end
-
-        sig { params(node: YARP::Node).returns(T.nilable(String)) }
-        def value(node)
-          case node
-          when YARP::ConstantReadNode, YARP::ConstantPathNode, YARP::BlockArgumentNode, YARP::ConstantTargetNode,
-            YARP::ConstantPathWriteNode, YARP::ConstantPathTargetNode, YARP::ConstantPathOrWriteNode,
-            YARP::ConstantPathOperatorWriteNode, YARP::ConstantPathAndWriteNode
-            node.slice
-          when YARP::ConstantAndWriteNode, YARP::ConstantOperatorWriteNode, YARP::ConstantOrWriteNode, YARP::ConstantWriteNode
-            node.name.to_s
-          when YARP::ClassNode, YARP::ModuleNode
-            node.constant_path.slice
-          end
+      sig do
+        type_parameters(:ResponseType)
+        .params(
+          target: T.nilable(YARP::Node),
+          parent: T.nilable(YARP::Node),
+          emitter: EventEmitter,
+          message_queue: Thread::Queue,
+        ).returns(Listener[T::Array[Interface::DocumentHighlight]])
+      end
+      def self.for(target, parent, emitter, message_queue)
+        case target
+        when YARP::CallNode
+          CallHighlight.new(emitter, message_queue, target.message)
+        when YARP::ClassVariableReadNode, YARP::ClassVariableTargetNode, YARP::ClassVariableWriteNode, YARP::ClassVariableAndWriteNode, YARP::ClassVariableOrWriteNode, YARP::ClassVariableOperatorWriteNode
+          ClassVariableHighlight.new(emitter, message_queue, target.name)
+        when YARP::ConstantReadNode, YARP::ConstantTargetNode, YARP::ConstantWriteNode, YARP::ConstantAndWriteNode, YARP::ConstantOrWriteNode, YARP::ConstantOperatorWriteNode
+          ConstantHighlight.new(emitter, message_queue, target.name)
+        when YARP::ConstantPathNode, YARP::ConstantPathTargetNode
+          ConstantPathHighlight.new(emitter, message_queue, target)
+        when YARP::ConstantPathWriteNode, YARP::ConstantPathAndWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathOperatorWriteNode
+          ConstantPathHighlight.new(emitter, message_queue, target.target)
+        when YARP::GlobalVariableReadNode, YARP::GlobalVariableTargetNode, YARP::GlobalVariableWriteNode, YARP::GlobalVariableAndWriteNode, YARP::GlobalVariableOrWriteNode, YARP::GlobalVariableOperatorWriteNode
+          GlobalVariableHighlight.new(emitter, message_queue, target.name)
+        when YARP::InstanceVariableReadNode, YARP::InstanceVariableTargetNode, YARP::InstanceVariableWriteNode, YARP::InstanceVariableAndWriteNode, YARP::InstanceVariableOrWriteNode, YARP::InstanceVariableOperatorWriteNode
+          InstanceVariableHighlight.new(emitter, message_queue, target.name)
+        when YARP::LocalVariableReadNode, YARP::LocalVariableTargetNode, YARP::LocalVariableWriteNode, YARP::LocalVariableAndWriteNode, YARP::LocalVariableOrWriteNode, YARP::LocalVariableOperatorWriteNode, YARP::BlockParameterNode, YARP::KeywordParameterNode, YARP::KeywordRestParameterNode, YARP::OptionalParameterNode, YARP::RequiredParameterNode, YARP::RestParameterNode
+          LocalVariableHighlight.new(emitter, message_queue, target.name)
+        else
+          NullHighlight.new(emitter, message_queue)
         end
       end
     end
