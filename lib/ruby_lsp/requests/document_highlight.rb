@@ -3,26 +3,8 @@
 
 module RubyLsp
   module Requests
-    # ![Document highlight demo](../../document_highlight.gif)
-    #
-    # The [document highlight](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentHighlight)
-    # informs the editor all relevant elements of the currently pointed item for highlighting. For example, when
-    # the cursor is on the `F` of the constant `FOO`, the editor should identify other occurrences of `FOO`
-    # and highlight them.
-    #
-    # For writable elements like constants or variables, their read/write occurrences should be highlighted differently.
-    # This is achieved by sending different "kind" attributes to the editor (2 for read and 3 for write).
-    #
-    # # Example
-    #
-    # ```ruby
-    # FOO = 1 # should be highlighted as "write"
-    #
-    # def foo
-    #   FOO # should be highlighted as "read"
-    # end
-    # ```
-    class DocumentHighlight
+    # A module that contains the logic to perform document highlighting.
+    module DocumentHighlight
       READ = Constant::DocumentHighlightKind::READ
       WRITE = Constant::DocumentHighlightKind::WRITE
 
@@ -42,6 +24,25 @@ module RubyLsp
         end
       end
 
+      # ![Document highlight demo](../../document_highlight.gif)
+      #
+      # The [document highlight](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentHighlight)
+      # informs the editor all relevant elements of the currently pointed item for highlighting. For example, when
+      # the cursor is on the `F` of the constant `FOO`, the editor should identify other occurrences of `FOO`
+      # and highlight them.
+      #
+      # For writable elements like constants or variables, their read/write occurrences should be highlighted
+      # differently. This is achieved by sending different "kind" attributes to the editor (2 for read and 3 for write).
+      #
+      # # Example
+      #
+      # ```ruby
+      # FOO = 1 # should be highlighted as "write"
+      #
+      # def foo
+      #   FOO # should be highlighted as "read"
+      # end
+      # ```
       class HighlightListener < Listener
         extend T::Sig
 
@@ -65,6 +66,24 @@ module RubyLsp
         end
       end
 
+      # ![Document highlight demo](../../document_highlight.gif)
+      #
+      # The [document highlight](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentHighlight)
+      # informs the editor all relevant elements of the currently pointed item for highlighting. For example, when
+      # the cursor is on the `F` of the constant `FOO`, the editor should identify other occurrences of `FOO`
+      # and highlight them.
+      #
+      # For writable elements like constants or variables, their read/write occurrences should be highlighted
+      # differently. This is achieved by sending different "kind" attributes to the editor (2 for read and 3 for write).
+      #
+      # # Example
+      #
+      # ```ruby
+      # foo.bar # should be highlighted as "read"
+      #
+      # def bar # should be highlighted as "write"
+      # end
+      # ```
       class CallHighlight < HighlightListener
         extend T::Sig
 
@@ -93,6 +112,25 @@ module RubyLsp
         end
       end
 
+      # ![Document highlight demo](../../document_highlight.gif)
+      #
+      # The [document highlight](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentHighlight)
+      # informs the editor all relevant elements of the currently pointed item for highlighting. For example, when
+      # the cursor is on the `F` of the constant `FOO`, the editor should identify other occurrences of `FOO`
+      # and highlight them.
+      #
+      # For writable elements like constants or variables, their read/write occurrences should be highlighted
+      # differently. This is achieved by sending different "kind" attributes to the editor (2 for read and 3 for write).
+      #
+      # # Example
+      #
+      # ```ruby
+      # @@foo = 1 # should be highlighted as "write"
+      #
+      # def foo
+      #   @@foo # should be highlighted as "read"
+      # end
+      # ```
       class ClassVariableHighlight < HighlightListener
         extend T::Sig
 
@@ -148,6 +186,25 @@ module RubyLsp
         end
       end
 
+      # ![Document highlight demo](../../document_highlight.gif)
+      #
+      # The [document highlight](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentHighlight)
+      # informs the editor all relevant elements of the currently pointed item for highlighting. For example, when
+      # the cursor is on the `F` of the constant `FOO`, the editor should identify other occurrences of `FOO`
+      # and highlight them.
+      #
+      # For writable elements like constants or variables, their read/write occurrences should be highlighted
+      # differently. This is achieved by sending different "kind" attributes to the editor (2 for read and 3 for write).
+      #
+      # # Example
+      #
+      # ```ruby
+      # FOO = 1 # should be highlighted as "write"
+      #
+      # def foo
+      #   FOO # should be highlighted as "read"
+      # end
+      # ```
       class ConstantHighlight < HighlightListener
         extend T::Sig
 
@@ -223,6 +280,25 @@ module RubyLsp
         end
       end
 
+      # ![Document highlight demo](../../document_highlight.gif)
+      #
+      # The [document highlight](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentHighlight)
+      # informs the editor all relevant elements of the currently pointed item for highlighting. For example, when
+      # the cursor is on the `F` of the constant `FOO`, the editor should identify other occurrences of `FOO`
+      # and highlight them.
+      #
+      # For writable elements like constants or variables, their read/write occurrences should be highlighted
+      # differently. This is achieved by sending different "kind" attributes to the editor (2 for read and 3 for write).
+      #
+      # # Example
+      #
+      # ```ruby
+      # FOO::BAR = 1 # should be highlighted as "write"
+      #
+      # def foo
+      #   FOO::BAR # should be highlighted as "read"
+      # end
+      # ```
       class ConstantPathHighlight < HighlightListener
         extend T::Sig
 
@@ -330,6 +406,25 @@ module RubyLsp
         end
       end
 
+      # ![Document highlight demo](../../document_highlight.gif)
+      #
+      # The [document highlight](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentHighlight)
+      # informs the editor all relevant elements of the currently pointed item for highlighting. For example, when
+      # the cursor is on the `F` of the constant `FOO`, the editor should identify other occurrences of `FOO`
+      # and highlight them.
+      #
+      # For writable elements like constants or variables, their read/write occurrences should be highlighted
+      # differently. This is achieved by sending different "kind" attributes to the editor (2 for read and 3 for write).
+      #
+      # # Example
+      #
+      # ```ruby
+      # $foo = 1 # should be highlighted as "write"
+      #
+      # def foo
+      #   $foo # should be highlighted as "read"
+      # end
+      # ```
       class GlobalVariableHighlight < HighlightListener
         extend T::Sig
 
@@ -385,6 +480,25 @@ module RubyLsp
         end
       end
 
+      # ![Document highlight demo](../../document_highlight.gif)
+      #
+      # The [document highlight](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentHighlight)
+      # informs the editor all relevant elements of the currently pointed item for highlighting. For example, when
+      # the cursor is on the `F` of the constant `FOO`, the editor should identify other occurrences of `FOO`
+      # and highlight them.
+      #
+      # For writable elements like constants or variables, their read/write occurrences should be highlighted
+      # differently. This is achieved by sending different "kind" attributes to the editor (2 for read and 3 for write).
+      #
+      # # Example
+      #
+      # ```ruby
+      # @foo = 1 # should be highlighted as "write"
+      #
+      # def foo
+      #   @foo # should be highlighted as "read"
+      # end
+      # ```
       class InstanceVariableHighlight < HighlightListener
         extend T::Sig
 
@@ -440,6 +554,25 @@ module RubyLsp
         end
       end
 
+      # ![Document highlight demo](../../document_highlight.gif)
+      #
+      # The [document highlight](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentHighlight)
+      # informs the editor all relevant elements of the currently pointed item for highlighting. For example, when
+      # the cursor is on the `F` of the constant `FOO`, the editor should identify other occurrences of `FOO`
+      # and highlight them.
+      #
+      # For writable elements like constants or variables, their read/write occurrences should be highlighted
+      # differently. This is achieved by sending different "kind" attributes to the editor (2 for read and 3 for write).
+      #
+      # # Example
+      #
+      # ```ruby
+      # bar = 1 # should be highlighted as "write"
+      #
+      # foo do
+      #   bar # should be highlighted as "read"
+      # end
+      # ```
       class LocalVariableHighlight < HighlightListener
         extend T::Sig
 
@@ -538,6 +671,22 @@ module RubyLsp
         end
       end
 
+      # ![Document highlight demo](../../document_highlight.gif)
+      #
+      # The [document highlight](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentHighlight)
+      # informs the editor all relevant elements of the currently pointed item for highlighting. For example, when
+      # the cursor is on the `F` of the constant `FOO`, the editor should identify other occurrences of `FOO`
+      # and highlight them.
+      #
+      # For writable elements like constants or variables, their read/write occurrences should be highlighted
+      # differently. This is achieved by sending different "kind" attributes to the editor (2 for read and 3 for write).
+      #
+      # # Example
+      #
+      # ```ruby
+      # class Foo # when this is highlighted, the null highlight will be used to not match anything
+      # end
+      # ```
       class NullHighlight < HighlightListener
         extend T::Sig
 
