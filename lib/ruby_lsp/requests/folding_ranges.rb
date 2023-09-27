@@ -166,11 +166,6 @@ module RubyLsp
         add_simple_range(node)
       end
 
-      sig { params(node: YARP::Node).void }
-      def on_node(node)
-        emit_requires_range unless node.is_a?(YARP::CallNode)
-      end
-
       sig { params(node: YARP::StringConcatNode).void }
       def on_string_concat(node)
         left = T.let(node.left, YARP::Node)
