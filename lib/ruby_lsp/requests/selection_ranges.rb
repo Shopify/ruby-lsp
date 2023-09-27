@@ -58,39 +58,31 @@ module RubyLsp
         T::Array[T.class_of(YARP::Node)],
       )
 
-      sig { params(document: Document).void }
-      def initialize(document)
-        super(document)
-
-        @ranges = T.let([], T::Array[Support::SelectionRange])
-        @stack = T.let([], T::Array[Support::SelectionRange])
-      end
-
       sig { override.returns(T.all(T::Array[Support::SelectionRange], Object)) }
       def run
-        visit(@document.tree)
-        @ranges.reverse!
+        queue = T.let([[@document.tree, nil]], T::Array[[YARP::Node, T.nilable(Support::SelectionRange)]])
+        ranges = T.let([], T::Array[Support::SelectionRange])
+
+        while (item = queue.shift)
+          node, parent = item
+          range = if node.is_a?(YARP::InterpolatedStringNode)
+            create_heredoc_selection_range(node, parent)
+          else
+            create_selection_range(node.location, parent)
+          end
+
+          ranges.unshift(range)
+
+          if (child_nodes = node.child_nodes.compact).any?
+            next_parent = NODES_THAT_CAN_BE_PARENTS.include?(node.class) ? range : parent
+            queue = child_nodes.map { |child_node| [child_node, next_parent] }.concat(queue)
+          end
+        end
+
+        ranges
       end
 
       private
-
-      sig { override.params(node: T.nilable(YARP::Node)).void }
-      def visit(node)
-        return if node.nil?
-
-        range = if node.is_a?(YARP::InterpolatedStringNode)
-          create_heredoc_selection_range(node, @stack.last)
-        else
-          create_selection_range(node.location, @stack.last)
-        end
-        @ranges << range
-
-        return if node.child_nodes.empty?
-
-        @stack << range if NODES_THAT_CAN_BE_PARENTS.include?(node.class)
-        visit_all(node.child_nodes)
-        @stack.pop if NODES_THAT_CAN_BE_PARENTS.include?(node.class)
-      end
 
       sig do
         params(
