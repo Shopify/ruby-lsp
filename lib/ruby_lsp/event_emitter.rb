@@ -435,7 +435,9 @@ module RubyLsp
 
     sig { override.params(node: YARP::InstanceVariableOperatorWriteNode).void }
     def visit_instance_variable_operator_write_node(node)
-      @listeners[:on_instance_variable_operator_write]&.each { |l| T.unsafe(l).on_instance_variable_operator_write(node) }
+      @listeners[:on_instance_variable_operator_write]&.each do |l|
+        T.unsafe(l).on_instance_variable_operator_write(node)
+      end
       super
     end
   end

@@ -84,7 +84,14 @@ module RubyIndexer
       add_constant(node, fully_qualify_name(node.name.to_s))
     end
 
-    sig { params(node: T.any(YARP::ConstantPathWriteNode, YARP::ConstantPathAndWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathOperatorWriteNode)).void }
+    sig do
+      params(node: T.any(
+        YARP::ConstantPathWriteNode,
+        YARP::ConstantPathAndWriteNode,
+        YARP::ConstantPathOrWriteNode,
+        YARP::ConstantPathOperatorWriteNode,
+      )).void
+    end
     def add_constant_path_write_node(node)
       return unless node.target.parent.nil? || node.target.parent.is_a?(YARP::ConstantReadNode)
 
