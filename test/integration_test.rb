@@ -28,6 +28,7 @@ class IntegrationTest < Minitest::Test
     "codeLens" => :codeLensProvider,
     "definition" => :definitionProvider,
     "workspaceSymbol" => :workspaceSymbolProvider,
+    "references" => :referencesProvider,
   }.freeze
 
   def setup
@@ -341,6 +342,22 @@ class IntegrationTest < Minitest::Test
     make_request("initialized")
 
     response = make_request("workspace/symbol", {})
+    refute_empty(response[:result])
+  end
+
+  def test_references
+    initialize_lsp(["references"])
+    open_file_with("String")
+
+    # Populate the index
+    make_request("initialized")
+
+    response = make_request(
+      "textDocument/references",
+      { textDocument: { uri: @uri }, position: { line: 0, character: 0 }, context: { includeDeclaration: true } },
+    )
+
+    assert_nil(response[:error])
     refute_empty(response[:result])
   end
 

@@ -168,6 +168,8 @@ module RubyLsp
         completion(uri, request.dig(:params, :position))
       when "textDocument/definition"
         definition(uri, request.dig(:params, :position))
+      when "textDocument/references"
+        references(uri, request.dig(:params, :position), request.dig(:params, :context))
       when "workspace/didChangeWatchedFiles"
         did_change_watched_files(request.dig(:params, :changes))
       when "workspace/symbol"
@@ -230,6 +232,27 @@ module RubyLsp
     sig { params(query: T.nilable(String)).returns(T::Array[Interface::WorkspaceSymbol]) }
     def workspace_symbol(query)
       Requests::WorkspaceSymbol.new(query, @index).run
+    end
+
+    sig do
+      params(
+        uri: URI::Generic,
+        position: Document::PositionShape,
+        context: { includeDeclaration: T::Boolean },
+      ).returns(T::Array[Interface::Location])
+    end
+    def references(uri, position, context)
+      document = @store.get(uri)
+      target, parent, nesting = document.locate_node(
+        position,
+        node_types: [YARP::ConstantReadNode, YARP::ConstantPathNode],
+      )
+      target = parent if target.is_a?(YARP::ConstantReadNode) && parent.is_a?(YARP::ConstantPathNode)
+
+      emitter = EventEmitter.new
+      listener = Requests::References.new(nesting, @index, context, emitter, @message_queue)
+      emitter.emit_for_target(target)
+      listener.response
     end
 
     sig { params(uri: URI::Generic, range: T.nilable(Document::RangeShape)).returns({ ast: String }) }
@@ -703,6 +726,7 @@ module RubyLsp
           code_lens_provider: code_lens_provider,
           definition_provider: enabled_features["definition"],
           workspace_symbol_provider: enabled_features["workspaceSymbol"],
+          references_provider: enabled_features["references"],
         ),
       )
     end
