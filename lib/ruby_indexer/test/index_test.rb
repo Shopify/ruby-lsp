@@ -178,5 +178,16 @@ module RubyIndexer
 
       assert_equal("Bar", entries.first.name)
     end
+
+    def test_find_references
+      path = File.expand_path("test/fixtures/class_and_reference.rb")
+      @index.index_single(IndexablePath.new(nil, path))
+
+      references = @index.find_references("Foo")
+      refute_empty(references)
+
+      reference = references.first
+      assert_equal(path, reference.file_path)
+    end
   end
 end

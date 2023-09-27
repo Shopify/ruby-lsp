@@ -9,6 +9,8 @@ require "ruby_indexer/lib/ruby_indexer/visitor"
 require "ruby_indexer/lib/ruby_indexer/index"
 require "ruby_indexer/lib/ruby_indexer/configuration"
 require "ruby_indexer/lib/ruby_indexer/prefix_tree"
+require "ruby_indexer/lib/ruby_indexer/reference"
+require "ruby_indexer/lib/ruby_indexer/references_visitor"
 
 module RubyIndexer
   class << self
