@@ -170,6 +170,16 @@ module RubyIndexer
       # If `path` is a directory, just ignore it and continue indexing
     end
 
+    # Finds references to a fully qualified in all indexed files
+    sig { params(fully_qualified_name: String).returns(T::Array[Reference]) }
+    def find_references(fully_qualified_name)
+      @files_to_entries.flat_map do |path, _entries|
+        visitor = ReferencesVisitor.new(self, path, fully_qualified_name)
+        visitor.visit(YARP.parse(File.read(path)).value)
+        visitor.references
+      end
+    end
+
     private
 
     # Follows aliases in a namespace. The algorithm keeps checking if the name is an alias and then recursively follows
