@@ -301,6 +301,81 @@ module RubyIndexer
       class Constant < Entry
       end
 
+      class Parameter
+        extend T::Helpers
+        extend T::Sig
+
+        abstract!
+
+        sig { returns(Symbol) }
+        attr_reader :name
+
+        sig { params(name: Symbol).void }
+        def initialize(name:)
+          @name = name
+        end
+      end
+
+      class RequiredParameter < Parameter
+      end
+
+      class Method < Entry
+        extend T::Sig
+        extend T::Helpers
+        abstract!
+
+        sig { returns(T::Array[Parameter]) }
+        attr_reader :parameters
+
+        sig do
+          params(
+            name: String,
+            file_path: String,
+            location: Prism::Location,
+            comments: T::Array[String],
+            parameters_node: T.nilable(Prism::ParametersNode),
+          ).void
+        end
+        def initialize(name, file_path, location, comments, parameters_node)
+          super(name, file_path, location, comments)
+          @parameters = T.let(list_params(parameters_node), T::Array[Parameter])
+        end
+
+        private
+
+        sig { params(parameters_node: T.nilable(Prism::ParametersNode)).returns(T::Array[Parameter]) }
+        def list_params(parameters_node)
+          return [] unless parameters_node
+
+          parameters_node.requireds.filter_map do |required|
+            name = parameter_name(required)
+            next unless name
+
+            RequiredParameter.new(name: name)
+          end
+        end
+
+        sig do
+          params(node: Prism::Node).returns(T.nilable(Symbol))
+        end
+        def parameter_name(node)
+          case node
+          when Prism::RequiredParameterNode
+            node.name
+          when Prism::RequiredDestructuredParameterNode
+            names = node.parameters.map { |parameter_node| parameter_name(parameter_node) }
+            names_with_commas = names.join(", ")
+            :"(#{names_with_commas})"
+          end
+        end
+      end
+
+      class SingletonMethod < Method
+      end
+
+      class InstanceMethod < Method
+      end
+
       # An UnresolvedAlias points to a constant alias with a right hand side that has not yet been resolved. For
       # example, if we find
       #
