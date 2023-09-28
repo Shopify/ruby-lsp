@@ -21,11 +21,11 @@ module RubyLsp
     class WorkspaceSymbol
       extend T::Sig
 
-      sig { params(query: T.nilable(String), index: RubyIndexer::Index, type_checker: T::Boolean).void }
-      def initialize(query, index, type_checker)
+      sig { params(query: T.nilable(String), index: RubyIndexer::Index).void }
+      def initialize(query, index)
         @query = query
         @index = index
-        @type_checker = type_checker
+        @type_checker = T.let(DependencyDetector.instance.typechecker?, T::Boolean)
       end
 
       sig { returns(T::Array[Interface::WorkspaceSymbol]) }
