@@ -286,7 +286,7 @@ module RubyLsp
 
       # Instantiate all listeners
       emitter = EventEmitter.new
-      hover = Requests::Hover.new(@index, nesting, @dependency_detector.typechecker?, emitter, @message_queue)
+      hover = Requests::Hover.new(@index, nesting, emitter, @message_queue)
 
       # Emit events for all listeners
       emitter.emit_for_target(target)
