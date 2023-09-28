@@ -63,8 +63,6 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["documentSymbols"])
     open_file_with("class Foo\nend")
 
-    assert_telemetry("textDocument/didOpen")
-
     response = make_request("textDocument/documentSymbol", { textDocument: { uri: @uri } })
     symbol = response[:result].first
     assert_equal("Foo", symbol[:name])
@@ -74,8 +72,6 @@ class IntegrationTest < Minitest::Test
   def test_document_highlight
     initialize_lsp(["documentHighlights"])
     open_file_with("$foo = 1")
-
-    assert_telemetry("textDocument/didOpen")
 
     response = make_request(
       "textDocument/documentHighlight",
@@ -90,8 +86,6 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["hover"])
     open_file_with("$foo = 1")
 
-    assert_telemetry("textDocument/didOpen")
-
     response = make_request(
       "textDocument/hover",
       { textDocument: { uri: @uri }, position: { line: 0, character: 1 } },
@@ -105,13 +99,8 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["definition"])
     open_file_with("require 'ruby_lsp/utils'")
 
-    read_response("textDocument/didOpen")
-
     # Populate the index
-    send_request("initialized")
-    read_response("initialized")
-    # Read the response for the progress end notification
-    read_response("$/progress")
+    make_request("initialized")
 
     response = make_request(
       "textDocument/definition",
@@ -131,15 +120,13 @@ class IntegrationTest < Minitest::Test
       { textDocument: { uri: @uri }, position: { line: 0, character: 1 } },
     )
 
-    assert_nil(response[:result])
+    assert_empty(response[:result])
     assert_nil(response[:error])
   end
 
   def test_semantic_highlighting
     initialize_lsp(["semanticHighlighting"])
     open_file_with("class Foo\nend")
-
-    assert_telemetry("textDocument/didOpen")
 
     response = make_request("textDocument/semanticTokens/full", { textDocument: { uri: @uri } })
     assert_equal([0, 6, 3, 2, 1], response[:result][:data])
@@ -153,8 +140,6 @@ class IntegrationTest < Minitest::Test
       end
     DOC
 
-    assert_telemetry("textDocument/didOpen")
-
     response = make_request("textDocument/documentLink", { textDocument: { uri: @uri } })
     assert_match(/syntax_tree/, response.dig(:result, 0, :target))
   end
@@ -162,8 +147,6 @@ class IntegrationTest < Minitest::Test
   def test_formatting
     initialize_lsp(["formatting"])
     open_file_with("class Foo\nend")
-
-    assert_telemetry("textDocument/didOpen")
 
     response = make_request("textDocument/formatting", { textDocument: { uri: @uri } })
     assert_equal(<<~FORMATTED, response[:result].first[:newText])
@@ -179,8 +162,6 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["onTypeFormatting"])
     open_file_with("class Foo\nend")
 
-    assert_telemetry("textDocument/didOpen")
-
     response = make_request(
       "textDocument/onTypeFormatting",
       { textDocument: { uri: @uri, position: { line: 0, character: 0 }, character: "\n" } },
@@ -191,8 +172,6 @@ class IntegrationTest < Minitest::Test
   def test_code_actions
     initialize_lsp(["codeActions"])
     open_file_with("class Foo\nend")
-
-    assert_telemetry("textDocument/didOpen")
 
     response = make_request(
       "textDocument/codeAction",
@@ -248,8 +227,6 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["codeActions"])
     open_file_with("class Foo\nend")
 
-    assert_telemetry("textDocument/didOpen")
-
     response = make_request(
       "codeAction/resolve",
       {
@@ -266,8 +243,6 @@ class IntegrationTest < Minitest::Test
   def test_document_did_close
     initialize_lsp([])
     open_file_with("class Foo\nend")
-
-    assert_telemetry("textDocument/didOpen")
 
     assert(send_request("textDocument/didClose", { textDocument: { uri: @uri } }))
   end
@@ -292,8 +267,6 @@ class IntegrationTest < Minitest::Test
     initialize_lsp(["foldingRanges"])
     open_file_with("class Foo\n\nend")
 
-    assert_telemetry("textDocument/didOpen")
-
     response = make_request("textDocument/foldingRange", { textDocument: { uri: @uri } })
     assert_equal({ startLine: 0, endLine: 1, kind: "region" }, response[:result].first)
   end
@@ -301,8 +274,6 @@ class IntegrationTest < Minitest::Test
   def test_code_lens
     initialize_lsp(["codeLens"])
     open_file_with("class Foo\n\nend")
-
-    assert_telemetry("textDocument/didOpen")
 
     response = make_request("textDocument/codeLens", { textDocument: { uri: @uri } })
     assert_empty(response[:result])
@@ -314,18 +285,13 @@ class IntegrationTest < Minitest::Test
 
     send_request("textDocument/foldingRange", { textDocument: { uri: @uri } })
 
-    assert_telemetry("textDocument/didOpen")
-
     response = read_response("textDocument/foldingRange")
     assert_equal({ startLine: 0, endLine: 1, kind: "region" }, response[:result].first)
-    assert_telemetry("textDocument/foldingRange")
   end
 
   def test_selection_ranges
     initialize_lsp(["selectionRanges"])
     open_file_with("class Foo\nend")
-
-    assert_telemetry("textDocument/didOpen")
 
     response = make_request(
       "textDocument/selectionRange",
@@ -353,15 +319,13 @@ class IntegrationTest < Minitest::Test
       },
     )
 
-    assert_nil(response[:result])
+    refute_nil(response[:result].first)
     assert_nil(response[:error])
   end
 
   def test_diagnostics
     initialize_lsp([])
     open_file_with("class Foo\nend")
-
-    assert_telemetry("textDocument/didOpen")
 
     response = make_request("textDocument/diagnostic", { textDocument: { uri: @uri } })
 
@@ -372,29 +336,15 @@ class IntegrationTest < Minitest::Test
   def test_workspace_symbol
     initialize_lsp(["workspaceSymbol"])
     open_file_with("class Foo\nend")
-    # Read the response for the progress indicator notifications
-    read_response("textDocument/didOpen")
 
     # Populate the index
-    send_request("initialized")
-    read_response("initialized")
-    # Read the response for the progress end notification
-    read_response("$/progress")
+    make_request("initialized")
 
     response = make_request("workspace/symbol", {})
     refute_empty(response[:result])
   end
 
   private
-
-  def assert_telemetry(request, expected_uri = @uri.path.sub(Dir.home, "~"))
-    telemetry_response = read_response("telemetry/event")
-
-    assert_equal(expected_uri, telemetry_response.dig(:params, :uri))
-    assert_equal(RubyLsp::VERSION, telemetry_response.dig(:params, :lspVersion))
-    assert_equal(request, telemetry_response.dig(:params, :request))
-    assert_instance_of(Float, telemetry_response.dig(:params, :requestTime))
-  end
 
   def make_request(request, params = nil)
     send_request(request, params)
@@ -456,6 +406,6 @@ class IntegrationTest < Minitest::Test
   end
 
   def open_file_with(content)
-    make_request("textDocument/didOpen", { textDocument: { uri: @uri, text: content } })
+    send_request("textDocument/didOpen", { textDocument: { uri: @uri, text: content } })
   end
 end

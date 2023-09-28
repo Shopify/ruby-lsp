@@ -2,10 +2,8 @@
 # frozen_string_literal: true
 
 require "sorbet-runtime"
-require "syntax_tree"
 require "yarp"
 require "language_server-protocol"
-require "benchmark"
 require "bundler"
 require "uri"
 require "cgi"
@@ -21,5 +19,5 @@ require "ruby_lsp/event_emitter"
 require "ruby_lsp/requests"
 require "ruby_lsp/listener"
 require "ruby_lsp/store"
-require "ruby_lsp/extension"
+require "ruby_lsp/addon"
 require "ruby_lsp/requests/support/rubocop_runner"

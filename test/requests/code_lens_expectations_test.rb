@@ -97,12 +97,12 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     assert_empty(response)
   end
 
-  def test_code_lens_extensions
+  def test_code_lens_addons
     source = <<~RUBY
       class Test < Minitest::Test; end
     RUBY
 
-    test_extension(:create_code_lens_extension, source: source) do |executor|
+    test_addon(:create_code_lens_addon, source: source) do |executor|
       response = executor.execute({
         method: "textDocument/codeLens",
         params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 1, character: 2 } },
@@ -118,12 +118,12 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
   private
 
-  def create_code_lens_extension
-    Class.new(RubyLsp::Extension) do
+  def create_code_lens_addon
+    Class.new(RubyLsp::Addon) do
       def activate; end
 
       def name
-        "CodeLensExtension"
+        "CodeLensAddon"
       end
 
       def create_code_lens_listener(uri, emitter, message_queue)

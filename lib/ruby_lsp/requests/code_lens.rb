@@ -129,9 +129,9 @@ module RubyLsp
         @visibility_stack.push([prev_visibility, prev_visibility])
       end
 
-      sig { override.params(extension: RubyLsp::Extension).returns(T.nilable(Listener[ResponseType])) }
-      def initialize_external_listener(extension)
-        extension.create_code_lens_listener(@uri, @emitter, @message_queue)
+      sig { override.params(addon: Addon).returns(T.nilable(Listener[ResponseType])) }
+      def initialize_external_listener(addon)
+        addon.create_code_lens_listener(@uri, @emitter, @message_queue)
       end
 
       sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }

@@ -41,20 +41,10 @@ module RubyLsp
     sig { returns(T.nilable(Exception)) }
     attr_reader :error
 
-    sig { returns(T.nilable(Float)) }
-    attr_reader :request_time
-
-    sig do
-      params(
-        response: T.untyped,
-        error: T.nilable(Exception),
-        request_time: T.nilable(Float),
-      ).void
-    end
-    def initialize(response:, error: nil, request_time: nil)
+    sig { params(response: T.untyped, error: T.nilable(Exception)).void }
+    def initialize(response:, error: nil)
       @response = response
       @error = error
-      @request_time = request_time
     end
   end
 
