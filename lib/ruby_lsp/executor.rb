@@ -507,7 +507,6 @@ module RubyLsp
       listener = Requests::Completion.new(
         @index,
         nesting,
-        @dependency_detector.typechecker?,
         emitter,
         @message_queue,
       )

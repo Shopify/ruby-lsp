@@ -30,17 +30,16 @@ module RubyLsp
         params(
           index: RubyIndexer::Index,
           nesting: T::Array[String],
-          typechecker: T::Boolean,
           emitter: EventEmitter,
           message_queue: Thread::Queue,
         ).void
       end
-      def initialize(index, nesting, typechecker, emitter, message_queue)
+      def initialize(index, nesting, emitter, message_queue)
         super(emitter, message_queue)
         @_response = T.let([], ResponseType)
         @index = index
         @nesting = nesting
-        @typechecker = typechecker
+        @typechecker = T.let(DependencyDetector.instance.typechecker?, T::Boolean)
 
         emitter.register(self, :on_string, :on_constant_path, :on_constant_read)
       end
