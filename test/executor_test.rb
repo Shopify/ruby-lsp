@@ -5,8 +5,7 @@ require "test_helper"
 
 class ExecutorTest < Minitest::Test
   def setup
-    # to clear memoization
-    Singleton.__init__(RubyLsp::DependencyDetector)
+    reset_dependency_detector
     @store = RubyLsp::Store.new
     @message_queue = Thread::Queue.new
     @executor = RubyLsp::Executor.new(@store, @message_queue)

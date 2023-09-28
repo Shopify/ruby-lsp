@@ -6,8 +6,7 @@ require "test_helper"
 module RubyLsp
   class DependencyDetectorTest < Minitest::Test
     def setup
-      # to clear memoization
-      Singleton.__init__(RubyLsp::DependencyDetector)
+      reset_dependency_detector
     end
 
     def test_detects_no_test_library_when_there_are_no_dependencies

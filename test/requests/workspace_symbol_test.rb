@@ -5,6 +5,7 @@ require "test_helper"
 
 class WorkspaceSymbolTest < Minitest::Test
   def setup
+    reset_dependency_detector
     @index = RubyIndexer::Index.new
   end
 
