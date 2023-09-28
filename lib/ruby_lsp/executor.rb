@@ -258,7 +258,6 @@ module RubyLsp
         uri,
         nesting,
         @index,
-        @dependency_detector.typechecker?,
         emitter,
         @message_queue,
       )

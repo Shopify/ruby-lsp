@@ -26,30 +26,26 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      # rubocop:disable Metrics/ParameterLists
       sig do
         params(
           uri: URI::Generic,
           nesting: T::Array[String],
           index: RubyIndexer::Index,
-          typechecker: T::Boolean,
           emitter: EventEmitter,
           message_queue: Thread::Queue,
         ).void
       end
-      def initialize(uri, nesting, index, typechecker, emitter, message_queue)
+      def initialize(uri, nesting, index, emitter, message_queue)
         @uri = uri
         @nesting = nesting
         @index = index
-        @typechecker = typechecker
+        @typechecker = T.let(RubyLsp::DependencyDetector.instance.typechecker?, T::Boolean)
         @_response = T.let(nil, ResponseType)
 
         super(emitter, message_queue)
 
         emitter.register(self, :on_call, :on_constant_read, :on_constant_path)
       end
-      # rubocop:enable Metrics/ParameterLists
-
       sig { override.params(addon: Addon).returns(T.nilable(RubyLsp::Listener[ResponseType])) }
       def initialize_external_listener(addon)
         addon.create_definition_listener(@uri, @nesting, @index, @emitter, @message_queue)
