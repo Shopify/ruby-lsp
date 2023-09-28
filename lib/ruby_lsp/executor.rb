@@ -13,7 +13,6 @@ module RubyLsp
       # Requests that mutate the store must be run sequentially! Parallel requests only receive a temporary copy of the
       # store
       @store = store
-      @dependency_detector = T.let(DependencyDetector.instance, RubyLsp::DependencyDetector)
       @message_queue = message_queue
       @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
     end
@@ -561,7 +560,7 @@ module RubyLsp
       @store.supports_progress = options.dig(:capabilities, :window, :workDoneProgress) || true
       formatter = options.dig(:initializationOptions, :formatter) || "auto"
       @store.formatter = if formatter == "auto"
-        @dependency_detector.detected_formatter
+        DependencyDetector.instance.detected_formatter
       else
         formatter
       end
