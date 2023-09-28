@@ -32,16 +32,16 @@ module RubyLsp
           uri: URI::Generic,
           nesting: T::Array[String],
           index: RubyIndexer::Index,
-          type_checker: T::Boolean,
+          typechecker: T::Boolean,
           emitter: EventEmitter,
           message_queue: Thread::Queue,
         ).void
       end
-      def initialize(uri, nesting, index, type_checker, emitter, message_queue)
+      def initialize(uri, nesting, index, typechecker, emitter, message_queue)
         @uri = uri
         @nesting = nesting
         @index = index
-        @type_checker = type_checker
+        @typechecker = typechecker
         @_response = T.let(nil, ResponseType)
 
         super(emitter, message_queue)
@@ -149,7 +149,7 @@ module RubyLsp
           # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
           # in the project, even if the files are typed false
           file_path = entry.file_path
-          if @type_checker && bundle_path && !file_path.start_with?(bundle_path) &&
+          if @typechecker && bundle_path && !file_path.start_with?(bundle_path) &&
               !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
 
             next
