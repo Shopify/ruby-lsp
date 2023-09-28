@@ -31,10 +31,9 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      sig { params(uri: URI::Generic, test_library: String, emitter: EventEmitter, message_queue: Thread::Queue).void }
-      def initialize(uri, test_library, emitter, message_queue)
+      sig { params(uri: URI::Generic, emitter: EventEmitter, message_queue: Thread::Queue).void }
+      def initialize(uri, emitter, message_queue)
         @uri = T.let(uri, URI::Generic)
-        @test_library = T.let(test_library, String)
         @_response = T.let([], ResponseType)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
         # visibility_stack is a stack of [current_visibility, previous_visibility]
@@ -145,7 +144,7 @@ module RubyLsp
       sig { params(node: YARP::Node, name: String, command: String, kind: Symbol).void }
       def add_test_code_lens(node, name:, command:, kind:)
         # don't add code lenses if the test library is not supported or unknown
-        return unless SUPPORTED_TEST_LIBRARIES.include?(@test_library) && @path
+        return unless SUPPORTED_TEST_LIBRARIES.include?(DependencyDetector.instance.detected_test_library) && @path
 
         arguments = [
           @path,
@@ -198,7 +197,7 @@ module RubyLsp
       def generate_test_command(class_name:, method_name: nil)
         command = BASE_COMMAND + T.must(@path)
 
-        case @test_library
+        case DependencyDetector.instance.detected_test_library
         when "minitest"
           command += if method_name
             " --name " + "/#{Shellwords.escape(class_name + "#" + method_name)}/"
