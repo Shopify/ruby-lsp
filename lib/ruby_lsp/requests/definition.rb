@@ -39,7 +39,7 @@ module RubyLsp
         @uri = uri
         @nesting = nesting
         @index = index
-        @typechecker = T.let(RubyLsp::DependencyDetector.instance.typechecker?, T::Boolean)
+        @typechecker = T.let(DependencyDetector.instance.typechecker?, T::Boolean)
         @_response = T.let(nil, ResponseType)
 
         super(emitter, message_queue)
