@@ -8,9 +8,19 @@ module RubyLsp
     include Singleton
     extend T::Sig
 
+    attr_reader :detected_formatter, :detected_test_library
+
     sig { void }
     def initialize
       @dependency_keys = T.let(nil, T.nilable(T::Array[String]))
+      @detected_formatter = T.let(detected_formatter, String)
+      @detected_test_library = T.let(detected_test_library, String)
+      @typechecker = T.let(typechecker?, T::Boolean)
+    end
+
+    sig { returns(T::Boolean) }
+    def typechecker?
+      @typechecker
     end
 
     sig { returns(String) }
