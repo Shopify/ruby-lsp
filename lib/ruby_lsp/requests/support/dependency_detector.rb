@@ -8,14 +8,18 @@ module RubyLsp
     include Singleton
     extend T::Sig
 
-    attr_reader :detected_formatter, :detected_test_library
+    sig { returns(String) }
+    attr_reader :detected_formatter
+
+    sig { returns(String) }
+    attr_reader :detected_test_library
 
     sig { void }
     def initialize
       @dependency_keys = T.let(nil, T.nilable(T::Array[String]))
-      @detected_formatter = T.let(detected_formatter, String)
-      @detected_test_library = T.let(detected_test_library, String)
-      @typechecker = T.let(typechecker?, T::Boolean)
+      @detected_formatter = T.let(detect_formatter, String)
+      @detected_test_library = T.let(detect_test_library, String)
+      @typechecker = T.let(detect_typechecker, T::Boolean)
     end
 
     sig { returns(T::Boolean) }
@@ -24,7 +28,7 @@ module RubyLsp
     end
 
     sig { returns(String) }
-    def detected_formatter
+    def detect_formatter
       # NOTE: Intentionally no $ at end, since we want to match rubocop-shopify, etc.
       if direct_dependency?(/^rubocop/)
         "rubocop"
@@ -36,7 +40,7 @@ module RubyLsp
     end
 
     sig { returns(String) }
-    def detected_test_library
+    def detect_test_library
       # A Rails app may have a dependency on minitest, but we would instead want to use the Rails test runner provided
       # by ruby-lsp-rails.
       if direct_dependency?(/^rails$/)
@@ -59,11 +63,9 @@ module RubyLsp
     end
 
     sig { returns(T::Boolean) }
-    def typechecker?
+    def detect_typechecker
       direct_dependency?(/^sorbet/) || direct_dependency?(/^sorbet-static-and-runtime/)
     end
-
-    private
 
     sig { returns(T::Array[String]) }
     def dependency_keys
