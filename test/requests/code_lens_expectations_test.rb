@@ -56,7 +56,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new
-    RubyLsp::DependencyDetector.instance.stubs(:detected_test_library).returns("rspec")
+    RubyLsp::DependencyDetector.instance.stubs(:detected_test_library).returns("unknown")
     listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue)
     emitter.visit(document.tree)
     response = listener.response
