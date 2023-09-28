@@ -126,7 +126,7 @@ class ExpectationsTestRunner < Minitest::Test
   private
 
   def test_addon(addon_creation_method, source:)
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    stub_typechecking
     message_queue = Thread::Queue.new
 
     send(addon_creation_method)
@@ -144,7 +144,6 @@ class ExpectationsTestRunner < Minitest::Test
     yield(executor)
   ensure
     RubyLsp::Addon.addons.clear
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
     T.must(message_queue).close
   end
 

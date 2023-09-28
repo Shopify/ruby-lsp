@@ -26,25 +26,29 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
+      # rubocop:disable Metrics/ParameterLists
       sig do
         params(
           uri: URI::Generic,
           nesting: T::Array[String],
           index: RubyIndexer::Index,
+          type_checker: T::Boolean,
           emitter: EventEmitter,
           message_queue: Thread::Queue,
         ).void
       end
-      def initialize(uri, nesting, index, emitter, message_queue)
+      def initialize(uri, nesting, index, type_checker, emitter, message_queue)
         @uri = uri
         @nesting = nesting
         @index = index
+        @type_checker = type_checker
         @_response = T.let(nil, ResponseType)
 
         super(emitter, message_queue)
 
         emitter.register(self, :on_call, :on_constant_read, :on_constant_path)
       end
+      # rubocop:enable Metrics/ParameterLists
 
       sig { override.params(addon: Addon).returns(T.nilable(RubyLsp::Listener[ResponseType])) }
       def initialize_external_listener(addon)
@@ -145,7 +149,7 @@ module RubyLsp
           # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
           # in the project, even if the files are typed false
           file_path = entry.file_path
-          if DependencyDetector::HAS_TYPECHECKER && bundle_path && !file_path.start_with?(bundle_path) &&
+          if @type_checker && bundle_path && !file_path.start_with?(bundle_path) &&
               !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
 
             next

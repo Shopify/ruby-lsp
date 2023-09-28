@@ -36,13 +36,15 @@ module RubyLsp
         params(
           index: RubyIndexer::Index,
           nesting: T::Array[String],
+          type_checker: T::Boolean,
           emitter: EventEmitter,
           message_queue: Thread::Queue,
         ).void
       end
-      def initialize(index, nesting, emitter, message_queue)
-        @nesting = nesting
+      def initialize(index, nesting, type_checker, emitter, message_queue)
         @index = index
+        @nesting = nesting
+        @type_checker = type_checker
         @_response = T.let(nil, ResponseType)
 
         super(emitter, message_queue)
@@ -71,21 +73,21 @@ module RubyLsp
 
       sig { params(node: YARP::ConstantReadNode).void }
       def on_constant_read(node)
-        return if DependencyDetector::HAS_TYPECHECKER
+        return if @type_checker
 
         generate_hover(node.slice, node.location)
       end
 
       sig { params(node: YARP::ConstantWriteNode).void }
       def on_constant_write(node)
-        return if DependencyDetector::HAS_TYPECHECKER
+        return if @type_checker
 
         generate_hover(node.name.to_s, node.name_loc)
       end
 
       sig { params(node: YARP::ConstantPathNode).void }
       def on_constant_path(node)
-        return if DependencyDetector::HAS_TYPECHECKER
+        return if @type_checker
 
         generate_hover(node.slice, node.location)
       end

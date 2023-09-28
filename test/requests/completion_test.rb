@@ -198,7 +198,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_constants
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    stub_typechecking
     document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Foo
       end
@@ -217,12 +217,10 @@ class CompletionTest < Minitest::Test
       params: { textDocument: { uri: @uri.to_s }, position: end_position },
     )
     assert_equal(["Foo"], result.map(&:label))
-  ensure
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
   end
 
   def test_completion_for_constant_paths
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    stub_typechecking
     document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Bar
       end
@@ -259,12 +257,10 @@ class CompletionTest < Minitest::Test
     assert_equal(["Foo::Bar"], result.map(&:label))
     assert_equal(["Foo::Bar"], result.map(&:filter_text))
     assert_equal(["Foo::Bar"], result.map { |completion| completion.text_edit.new_text })
-  ensure
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
   end
 
   def test_completion_for_top_level_constants_inside_nesting
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    stub_typechecking
     document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Bar
       end
@@ -290,12 +286,10 @@ class CompletionTest < Minitest::Test
     assert_equal(["Bar"], result.map(&:label))
     assert_equal(["::Bar"], result.map(&:filter_text))
     assert_equal(["::Bar"], result.map { |completion| completion.text_edit.new_text })
-  ensure
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
   end
 
   def test_completion_private_constants_inside_the_same_namespace
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    stub_typechecking
     document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
       class A
         CONST = 1
@@ -316,12 +310,10 @@ class CompletionTest < Minitest::Test
       params: { textDocument: { uri: @uri.to_s }, position: end_position },
     )
     assert_equal(["CONST"], result.map { |completion| completion.text_edit.new_text })
-  ensure
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
   end
 
   def test_completion_private_constants_from_different_namespace
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    stub_typechecking
     document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
       class A
         CONST = 1
@@ -342,8 +334,6 @@ class CompletionTest < Minitest::Test
       params: { textDocument: { uri: @uri.to_s }, position: end_position },
     )
     assert_empty(result)
-  ensure
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
   end
 
   private

@@ -21,13 +21,12 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
     begin
       # We need to pretend that Sorbet is not a dependency or else we can't properly test
-      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+      stub_typechecking
       executor.execute({
         method: "textDocument/hover",
         params: { textDocument: { uri: uri }, position: position },
       }).response
     ensure
-      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
       T.must(message_queue).close
     end
   end
@@ -51,7 +50,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
     index = executor.instance_variable_get(:@index)
     index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
 
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    stub_typechecking
     response = executor.execute({
       method: "textDocument/hover",
       params: { textDocument: { uri: uri }, position: { character: 2, line: 4 } },
@@ -59,7 +58,6 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
     assert_match("CONST", response.contents.value)
   ensure
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
     T.must(message_queue).close
   end
 
@@ -82,7 +80,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
     index = executor.instance_variable_get(:@index)
     index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
 
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    stub_typechecking
     response = executor.execute({
       method: "textDocument/hover",
       params: { textDocument: { uri: uri }, position: { character: 0, line: 5 } },
@@ -90,7 +88,6 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
     assert_nil(response)
   ensure
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
     T.must(message_queue).close
   end
 

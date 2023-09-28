@@ -21,10 +21,11 @@ module RubyLsp
     class WorkspaceSymbol
       extend T::Sig
 
-      sig { params(query: T.nilable(String), index: RubyIndexer::Index).void }
-      def initialize(query, index)
+      sig { params(query: T.nilable(String), index: RubyIndexer::Index, type_checker: T::Boolean).void }
+      def initialize(query, index, type_checker)
         @query = query
         @index = index
+        @type_checker = type_checker
       end
 
       sig { returns(T::Array[Interface::WorkspaceSymbol]) }
@@ -39,7 +40,7 @@ module RubyLsp
           # If the project is using Sorbet, we let Sorbet handle symbols defined inside the project itself and RBIs, but
           # we still return entries defined in gems to allow developers to jump directly to the source
           file_path = entry.file_path
-          if DependencyDetector::HAS_TYPECHECKER && bundle_path && !file_path.start_with?(bundle_path) &&
+          if @type_checker && bundle_path && !file_path.start_with?(bundle_path) &&
               !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
 
             next
