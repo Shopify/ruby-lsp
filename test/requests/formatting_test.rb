@@ -177,7 +177,7 @@ class FormattingTest < Minitest::Test
   def clear_syntax_tree_runner_singleton_instance
     return unless defined?(RubyLsp::Requests::Support::SyntaxTreeFormattingRunner)
 
-    T.unsafe(Singleton).__init__(RubyLsp::Requests::Support::SyntaxTreeFormattingRunner)
+    Singleton.__init__(RubyLsp::Requests::Support::SyntaxTreeFormattingRunner)
     RubyLsp::Requests::Formatting.register_formatter(
       "syntax_tree",
       RubyLsp::Requests::Support::SyntaxTreeFormattingRunner.instance,
