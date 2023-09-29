@@ -306,5 +306,23 @@ module RubyIndexer
       constant = @index["A::M"].first
       assert_instance_of(Index::Entry::Constant, constant)
     end
+
+    def test_indexing_or_and_operator_nodes
+      index(<<~RUBY)
+        A ||= 1
+        B &&= 2
+        C &= 3
+        D::E ||= 4
+        F::G &&= 5
+        H::I &= 6
+      RUBY
+
+      assert_entry("A", Index::Entry::Constant, "/fake/path/foo.rb:0-0:0-7")
+      assert_entry("B", Index::Entry::Constant, "/fake/path/foo.rb:1-0:1-7")
+      assert_entry("C", Index::Entry::Constant, "/fake/path/foo.rb:2-0:2-6")
+      assert_entry("D::E", Index::Entry::Constant, "/fake/path/foo.rb:3-0:3-10")
+      assert_entry("F::G", Index::Entry::Constant, "/fake/path/foo.rb:4-0:4-10")
+      assert_entry("H::I", Index::Entry::Constant, "/fake/path/foo.rb:5-0:5-9")
+    end
   end
 end
