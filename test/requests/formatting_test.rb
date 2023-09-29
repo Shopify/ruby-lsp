@@ -5,6 +5,7 @@ require "test_helper"
 
 class FormattingTest < Minitest::Test
   def setup
+    reset_dependency_detector
     @document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: URI::Generic.from_path(path: __FILE__))
       class Foo
       def foo
