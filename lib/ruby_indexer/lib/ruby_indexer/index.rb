@@ -127,6 +127,12 @@ module RubyIndexer
     # 3. Baz
     sig { params(name: String, nesting: T::Array[String]).returns(T.nilable(T::Array[Entry])) }
     def resolve(name, nesting)
+      if name.start_with?("::")
+        name = name.delete_prefix("::")
+        results = @entries[name] || @entries[follow_aliased_namespace(name)]
+        return results.map { |e| e.is_a?(Entry::UnresolvedAlias) ? resolve_alias(e) : e } if results
+      end
+
       nesting.length.downto(0).each do |i|
         namespace = T.must(nesting[0...i]).join("::")
         full_name = namespace.empty? ? name : "#{namespace}::#{name}"
