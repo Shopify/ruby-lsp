@@ -19,6 +19,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   end
 
   def test_command_generation_for_test_unit
+    stub_test_library("test-unit")
     source = <<~RUBY
       class FooTest < Test::Unit::TestCase
         def test_bar; end
@@ -29,7 +30,6 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new
-    stub_test_library("test-unit")
     listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue)
     emitter.visit(document.tree)
     response = listener.response
@@ -161,7 +161,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   end
 
   def stub_test_library(name)
-    RubyLsp::DependencyDetector.instance.stubs(:detected_test_library).returns(name)
     Singleton.__init__(RubyLsp::DependencyDetector)
+    RubyLsp::DependencyDetector.instance.stubs(:detected_test_library).returns(name)
   end
 end

@@ -247,10 +247,10 @@ class ExecutorTest < Minitest::Test
   end
 
   def stub_dependencies(rubocop:, syntax_tree:)
+    Singleton.__init__(RubyLsp::DependencyDetector)
     dependencies = {}
     dependencies["syntax_tree"] = "..." if syntax_tree
     dependencies["rubocop"] = "..." if rubocop
     Bundler.locked_gems.stubs(:dependencies).returns(dependencies)
-    Singleton.__init__(RubyLsp::DependencyDetector)
   end
 end

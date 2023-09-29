@@ -47,8 +47,8 @@ module RubyLsp
     private
 
     def stub_dependencies(dependencies)
-      Bundler.locked_gems.stubs(dependencies: dependencies)
       Singleton.__init__(RubyLsp::DependencyDetector)
+      Bundler.locked_gems.stubs(dependencies: dependencies)
     end
   end
 end
