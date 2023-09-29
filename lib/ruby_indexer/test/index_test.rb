@@ -158,5 +158,25 @@ module RubyIndexer
       results = @index.prefix_search("Ba", ["Foo"]).map { |entries| entries.map(&:name) }
       assert_equal([["Foo::Bar", "Foo::Bar"], ["Foo::Baz"]], results)
     end
+
+    def test_resolve_normalizes_top_level_names
+      @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
+        class Bar; end
+
+        module Foo
+          class Bar; end
+        end
+      RUBY
+
+      entries = @index.resolve("::Foo::Bar", [])
+      refute_nil(entries)
+
+      assert_equal("Foo::Bar", entries.first.name)
+
+      entries = @index.resolve("::Bar", ["Foo"])
+      refute_nil(entries)
+
+      assert_equal("Bar", entries.first.name)
+    end
   end
 end
