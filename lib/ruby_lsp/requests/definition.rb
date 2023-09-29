@@ -39,7 +39,6 @@ module RubyLsp
         @uri = uri
         @nesting = nesting
         @index = index
-        @typechecker = T.let(DependencyDetector.instance.typechecker?, T::Boolean)
         @_response = T.let(nil, ResponseType)
 
         super(emitter, message_queue)
@@ -145,7 +144,7 @@ module RubyLsp
           # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
           # in the project, even if the files are typed false
           file_path = entry.file_path
-          if @typechecker && bundle_path && !file_path.start_with?(bundle_path) &&
+          if DependencyDetector.instance.typechecker? && bundle_path && !file_path.start_with?(bundle_path) &&
               !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
 
             next

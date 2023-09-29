@@ -39,7 +39,6 @@ module RubyLsp
         @_response = T.let([], ResponseType)
         @index = index
         @nesting = nesting
-        @typechecker = T.let(DependencyDetector.instance.typechecker?, T::Boolean)
 
         emitter.register(self, :on_string, :on_constant_path, :on_constant_read)
       end
@@ -54,7 +53,7 @@ module RubyLsp
       # Handle completion on regular constant references (e.g. `Bar`)
       sig { params(node: YARP::ConstantReadNode).void }
       def on_constant_read(node)
-        return if @typechecker
+        return if DependencyDetector.instance.typechecker?
 
         name = node.slice
         candidates = @index.prefix_search(name, @nesting)
@@ -66,7 +65,7 @@ module RubyLsp
       # Handle completion on namespaced constant references (e.g. `Foo::Bar`)
       sig { params(node: YARP::ConstantPathNode).void }
       def on_constant_path(node)
-        return if @typechecker
+        return if DependencyDetector.instance.typechecker?
 
         name = node.slice
 
