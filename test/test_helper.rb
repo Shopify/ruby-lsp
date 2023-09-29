@@ -35,11 +35,6 @@ module Minitest
     end
 
     sig { void }
-    def unstub_typechecking
-      RubyLsp::DependencyDetector.instance.unstub(:typechecker?)
-    end
-
-    sig { void }
     def reset_dependency_detector
       Singleton.__init__(RubyLsp::DependencyDetector)
     end
