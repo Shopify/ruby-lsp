@@ -179,6 +179,11 @@
               "description": "Enable workspace symbol, which allows fuzzy searching for symbols in the entire project with CTRL/CMD + T",
               "type": "boolean",
               "default": true
+            },
+            "references": {
+              "description": "Enable references, which finds all references to the symbol under the cursor",
+              "type": "boolean",
+              "default": true
             }
           },
           "default": {
@@ -197,7 +202,8 @@
             "completion": true,
             "codeLens": true,
             "definition": true,
-            "workspaceSymbol": true
+            "workspaceSymbol": true,
+            "references": true
           }
         },
         "rubyLsp.rubyVersionManager": {
