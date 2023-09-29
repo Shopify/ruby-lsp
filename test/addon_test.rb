@@ -21,6 +21,7 @@ module RubyLsp
 
     def teardown
       Addon.addons.clear
+      super
     end
 
     def test_registering_an_addon_invokes_activate_on_initialized

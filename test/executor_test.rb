@@ -5,7 +5,6 @@ require "test_helper"
 
 class ExecutorTest < Minitest::Test
   def setup
-    reset_dependency_detector
     @store = RubyLsp::Store.new
     @message_queue = Thread::Queue.new
     @executor = RubyLsp::Executor.new(@store, @message_queue)
@@ -13,6 +12,7 @@ class ExecutorTest < Minitest::Test
 
   def teardown
     @message_queue.close
+    super
   end
 
   def test_initialize_enabled_features_with_array

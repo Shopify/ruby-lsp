@@ -38,6 +38,10 @@ module Minitest
     def reset_dependency_detector
       Singleton.__init__(RubyLsp::DependencyDetector)
     end
+
+    def teardown
+      Singleton.__init__(RubyLsp::DependencyDetector)
+    end
   end
 end
 
