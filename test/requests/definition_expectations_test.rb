@@ -45,7 +45,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     )
 
     # We need to pretend that Sorbet is not a dependency or else we can't properly test
-    stub_typechecking
+    stub_no_typechecker
     response = executor.execute({
       method: "textDocument/definition",
       params: { textDocument: { uri: "file:///folder/fake.rb" }, position: position },
@@ -152,7 +152,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
     )
 
-    stub_typechecking
+    stub_no_typechecker
     response = executor.execute({
       method: "textDocument/definition",
       params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 2, line: 4 } },
@@ -185,7 +185,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
     )
 
-    stub_typechecking
+    stub_no_typechecker
     response = executor.execute({
       method: "textDocument/definition",
       params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 0, line: 5 } },

@@ -30,7 +30,7 @@ module Minitest
     Minitest::Test.make_my_diffs_pretty!
 
     sig { void }
-    def stub_typechecking
+    def stub_no_typechecker
       RubyLsp::DependencyDetector.instance.stubs(:typechecker).returns(false)
     end
 

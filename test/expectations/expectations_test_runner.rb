@@ -127,7 +127,7 @@ class ExpectationsTestRunner < Minitest::Test
   private
 
   def test_addon(addon_creation_method, source:)
-    stub_typechecking
+    stub_no_typechecker
     message_queue = Thread::Queue.new
 
     send(addon_creation_method)
