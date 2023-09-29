@@ -19,7 +19,6 @@ module RubyLsp
 
     sig { void }
     def initialize
-      @dependency_keys = T.let(nil, T.nilable(T::Array[String]))
       @detected_formatter = T.let(detect_formatter, String)
       @detected_test_library = T.let(detect_test_library, String)
       @typechecker = T.let(detect_typechecker, T::Boolean)
@@ -67,12 +66,15 @@ module RubyLsp
 
     sig { returns(T::Array[String]) }
     def dependency_keys
-      @dependency_keys ||= begin
-        Bundler.with_original_env { Bundler.default_gemfile }
-        Bundler.locked_gems.dependencies.keys
-      rescue Bundler::GemfileNotFound
-        []
-      end
+      @dependency_keys ||= T.let(
+        begin
+          Bundler.with_original_env { Bundler.default_gemfile }
+          Bundler.locked_gems.dependencies.keys
+        rescue Bundler::GemfileNotFound
+          []
+        end,
+        T.nilable(T::Array[String]),
+      )
     end
   end
 end
