@@ -10,7 +10,6 @@ class ShowSyntaxTreeTest < Minitest::Test
 
   def teardown
     @message_queue.close
-    super
   end
 
   def test_returns_partial_tree_if_document_has_syntax_error

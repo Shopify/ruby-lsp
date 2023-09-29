@@ -12,7 +12,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new
-    RubyLsp::DependencyDetector.instance.stubs(:detected_test_library).returns("minitest")
+    stub_test_library("minitest")
     listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue)
     emitter.visit(document.tree)
     listener.response
@@ -29,7 +29,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new
-    RubyLsp::DependencyDetector.instance.stubs(:detected_test_library).returns("test-unit")
+    stub_test_library("test-unit")
     listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue)
     emitter.visit(document.tree)
     response = listener.response
@@ -56,7 +56,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new
-    RubyLsp::DependencyDetector.instance.stubs(:detected_test_library).returns("unknown")
+    stub_test_library("unknown")
     listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue)
     emitter.visit(document.tree)
     response = listener.response
@@ -75,7 +75,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new
-    RubyLsp::DependencyDetector.instance.stubs(:detected_test_library).returns("rspec")
+    stub_test_library("rspec")
     listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue)
     emitter.visit(document.tree)
     response = listener.response
@@ -94,7 +94,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
     emitter = RubyLsp::EventEmitter.new
-    RubyLsp::DependencyDetector.instance.stubs(:detected_test_library).returns("minitest")
+    stub_test_library("minitest")
     listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue)
     emitter.visit(document.tree)
     response = listener.response
@@ -158,5 +158,10 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
         T.unsafe(klass).new(uri, emitter, message_queue)
       end
     end
+  end
+
+  def stub_test_library(name)
+    RubyLsp::DependencyDetector.instance.stubs(:detected_test_library).returns(name)
+    Singleton.__init__(RubyLsp::DependencyDetector)
   end
 end

@@ -57,7 +57,6 @@ class IntegrationTest < Minitest::Test
     # Make sure the exit status is zero
     assert_equal(0, @wait_thr.value)
     refute_predicate(@wait_thr, :alive?)
-    super
   end
 
   def test_document_symbol

@@ -28,7 +28,6 @@ class ExpectationsTestRunner < Minitest::Test
 
           def teardown
             @message_queue.close
-            super
           end
 
           def run_expectations(source)

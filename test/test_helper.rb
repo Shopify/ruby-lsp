@@ -33,11 +33,6 @@ module Minitest
     def stub_no_typechecker
       RubyLsp::DependencyDetector.instance.stubs(:typechecker).returns(false)
     end
-
-    sig { void }
-    def teardown
-      Singleton.__init__(RubyLsp::DependencyDetector)
-    end
   end
 end
 

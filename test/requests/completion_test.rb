@@ -13,7 +13,6 @@ class CompletionTest < Minitest::Test
 
   def teardown
     T.must(@message_queue).close
-    super
   end
 
   def test_completion_command

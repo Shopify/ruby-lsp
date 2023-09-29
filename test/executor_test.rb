@@ -12,7 +12,6 @@ class ExecutorTest < Minitest::Test
 
   def teardown
     @message_queue.close
-    super
   end
 
   def test_initialize_enabled_features_with_array
@@ -252,5 +251,6 @@ class ExecutorTest < Minitest::Test
     dependencies["syntax_tree"] = "..." if syntax_tree
     dependencies["rubocop"] = "..." if rubocop
     Bundler.locked_gems.stubs(:dependencies).returns(dependencies)
+    Singleton.__init__(RubyLsp::DependencyDetector)
   end
 end
