@@ -5,6 +5,7 @@ require "test_helper"
 
 class WorkspaceSymbolTest < Minitest::Test
   def setup
+    RubyLsp::DependencyDetector.instance.stubs(typechecker: false)
     @index = RubyIndexer::Index.new
   end
 
@@ -15,7 +16,6 @@ class WorkspaceSymbolTest < Minitest::Test
 
       CONSTANT = 1
     RUBY
-    RubyLsp::DependencyDetector.instance.stubs(typechecker: false)
 
     result = RubyLsp::Requests::WorkspaceSymbol.new("Foo", @index).run.first
     assert_equal("Foo", T.must(result).name)
@@ -37,7 +37,6 @@ class WorkspaceSymbolTest < Minitest::Test
 
       CONSTANT = 1
     RUBY
-    RubyLsp::DependencyDetector.instance.stubs(typechecker: false)
 
     result = RubyLsp::Requests::WorkspaceSymbol.new("Floo", @index).run.first
     assert_equal("Foo", T.must(result).name)
@@ -53,6 +52,8 @@ class WorkspaceSymbolTest < Minitest::Test
   end
 
   def test_matches_only_gem_symbols_if_typechecker_is_present
+    # reset the singleton so that the stub is not used
+    Singleton.__init__(RubyLsp::DependencyDetector)
     indexable = RubyIndexer::IndexablePath.new(
       nil,
       "#{RubyLsp::WORKSPACE_URI.to_standardized_path}/workspace_symbol_foo.rb",
@@ -67,7 +68,6 @@ class WorkspaceSymbolTest < Minitest::Test
       class Foo; end
     RUBY
 
-    RubyLsp::DependencyDetector.instance.stubs(typechecker: true)
     result = RubyLsp::Requests::WorkspaceSymbol.new("Foo", @index).run
     assert_equal(1, result.length)
     assert_equal(URI::Generic.from_path(path: path).to_s, T.must(result.first).location.uri)
@@ -80,7 +80,6 @@ class WorkspaceSymbolTest < Minitest::Test
       end
     RUBY
 
-    RubyLsp::DependencyDetector.instance.stubs(typechecker: false)
     result = RubyLsp::Requests::WorkspaceSymbol.new("Foo::Bar", @index).run.first
     assert_equal("Foo::Bar", T.must(result).name)
     assert_equal(RubyLsp::Constant::SymbolKind::CLASS, T.must(result).kind)
@@ -90,14 +89,11 @@ class WorkspaceSymbolTest < Minitest::Test
   def test_finds_default_gem_symbols
     @index.index_single(RubyIndexer::IndexablePath.new(nil, "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb"))
 
-    RubyLsp::DependencyDetector.instance.stubs(typechecker: false)
     result = RubyLsp::Requests::WorkspaceSymbol.new("Pathname", @index).run
     refute_empty(result)
   end
 
   def test_does_not_include_private_constants
-    RubyLsp::DependencyDetector.instance.stubs(typechecker: false)
-
     @index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake.rb"), <<~RUBY)
       class Foo
         CONSTANT = 1
