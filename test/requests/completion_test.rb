@@ -9,6 +9,7 @@ class CompletionTest < Minitest::Test
     @uri = URI("file:///fake.rb")
     @store = RubyLsp::Store.new
     @executor = RubyLsp::Executor.new(@store, @message_queue)
+    stub_no_typechecker
   end
 
   def teardown
@@ -198,7 +199,6 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_constants
-    stub_no_typechecker
     document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Foo
       end
@@ -220,7 +220,6 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_constant_paths
-    stub_no_typechecker
     document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Bar
       end
@@ -260,7 +259,6 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_top_level_constants_inside_nesting
-    stub_no_typechecker
     document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Bar
       end
@@ -289,7 +287,6 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_private_constants_inside_the_same_namespace
-    stub_no_typechecker
     document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
       class A
         CONST = 1
@@ -313,7 +310,6 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_private_constants_from_different_namespace
-    stub_no_typechecker
     document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
       class A
         CONST = 1
