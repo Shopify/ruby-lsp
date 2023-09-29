@@ -53,7 +53,7 @@ module RubyLsp
       # Handle completion on regular constant references (e.g. `Bar`)
       sig { params(node: YARP::ConstantReadNode).void }
       def on_constant_read(node)
-        return if DependencyDetector.instance.typechecker?
+        return if DependencyDetector.instance.typechecker
 
         name = node.slice
         candidates = @index.prefix_search(name, @nesting)
@@ -65,7 +65,7 @@ module RubyLsp
       # Handle completion on namespaced constant references (e.g. `Foo::Bar`)
       sig { params(node: YARP::ConstantPathNode).void }
       def on_constant_path(node)
-        return if DependencyDetector.instance.typechecker?
+        return if DependencyDetector.instance.typechecker
 
         name = node.slice
 

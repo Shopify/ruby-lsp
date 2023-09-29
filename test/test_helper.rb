@@ -31,7 +31,7 @@ module Minitest
 
     sig { void }
     def stub_typechecking
-      RubyLsp::DependencyDetector.instance.stubs(:typechecker?).returns(false)
+      RubyLsp::DependencyDetector.instance.stubs(:typechecker).returns(false)
     end
 
     sig { void }

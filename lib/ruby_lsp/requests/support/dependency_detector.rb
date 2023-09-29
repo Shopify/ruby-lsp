@@ -14,17 +14,15 @@ module RubyLsp
     sig { returns(String) }
     attr_reader :detected_test_library
 
+    sig { returns(T::Boolean) }
+    attr_reader :typechecker
+
     sig { void }
     def initialize
       @dependency_keys = T.let(nil, T.nilable(T::Array[String]))
       @detected_formatter = T.let(detect_formatter, String)
       @detected_test_library = T.let(detect_test_library, String)
       @typechecker = T.let(detect_typechecker, T::Boolean)
-    end
-
-    sig { returns(T::Boolean) }
-    def typechecker?
-      @typechecker
     end
 
     sig { returns(String) }
