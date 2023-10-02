@@ -56,7 +56,7 @@ module RubyLsp
 
     sig { params(gem_pattern: Regexp).returns(T::Boolean) }
     def direct_dependency?(gem_pattern)
-      dependency_keys.grep(gem_pattern).any?
+      dependencies.grep(gem_pattern).any?
     end
 
     sig { returns(T::Boolean) }
@@ -65,16 +65,24 @@ module RubyLsp
     end
 
     sig { returns(T::Array[String]) }
-    def dependency_keys
-      @dependency_keys ||= T.let(
+    def dependencies
+      # NOTE: If changing this behaviour, it's likely that the extension will also need changed.
+      @dependencies ||= T.let(
         begin
           Bundler.with_original_env { Bundler.default_gemfile }
-          Bundler.locked_gems.dependencies.keys
+          Bundler.locked_gems.dependencies.keys + gemspec_dependencies
         rescue Bundler::GemfileNotFound
           []
         end,
         T.nilable(T::Array[String]),
       )
+    end
+
+    sig { returns(T::Array[String]) }
+    def gemspec_dependencies
+      Dir.glob("{,*}.gemspec").flat_map do |path|
+        Bundler.load_gemspec(path).dependencies.map(&:name)
+      end
     end
   end
 end

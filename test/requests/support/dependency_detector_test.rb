@@ -32,6 +32,10 @@ module RubyLsp
       assert_equal("test-unit", DependencyDetector.instance.detected_test_library)
     end
 
+    def test_detects_dependencies_in_gemspecs
+      assert(DependencyDetector.instance.direct_dependency?(/^yarp$/))
+    end
+
     def test_detects_rails_if_both_rails_and_minitest_are_present
       stub_dependencies("minitest" => "1.2.3", "rails" => "1.2.3")
 
