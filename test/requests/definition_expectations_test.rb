@@ -44,16 +44,12 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       ),
     )
 
-    begin
-      # We need to pretend that Sorbet is not a dependency or else we can't properly test
-      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
-      response = executor.execute({
-        method: "textDocument/definition",
-        params: { textDocument: { uri: "file:///folder/fake.rb" }, position: position },
-      }).response
-    ensure
-      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
-    end
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    stub_no_typechecker
+    response = executor.execute({
+      method: "textDocument/definition",
+      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: position },
+    }).response
 
     case response
     when RubyLsp::Interface::Location
@@ -156,15 +152,11 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
     )
 
-    begin
-      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
-      response = executor.execute({
-        method: "textDocument/definition",
-        params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 2, line: 4 } },
-      }).response
-    ensure
-      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
-    end
+    stub_no_typechecker
+    response = executor.execute({
+      method: "textDocument/definition",
+      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 2, line: 4 } },
+    }).response
 
     assert_equal(uri.to_s, response.first.attributes[:uri])
   ensure
@@ -193,15 +185,11 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
     )
 
-    begin
-      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
-      response = executor.execute({
-        method: "textDocument/definition",
-        params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 0, line: 5 } },
-      }).response
-    ensure
-      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
-    end
+    stub_no_typechecker
+    response = executor.execute({
+      method: "textDocument/definition",
+      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 0, line: 5 } },
+    }).response
 
     assert_nil(response)
   ensure

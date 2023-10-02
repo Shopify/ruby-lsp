@@ -13,7 +13,6 @@ module RubyLsp
       # Requests that mutate the store must be run sequentially! Parallel requests only receive a temporary copy of the
       # store
       @store = store
-      @test_library = T.let(DependencyDetector.detected_test_library, String)
       @message_queue = message_queue
       @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
     end
@@ -97,7 +96,7 @@ module RubyLsp
         folding_range = Requests::FoldingRanges.new(document.parse_result.comments, emitter, @message_queue)
         document_symbol = Requests::DocumentSymbol.new(emitter, @message_queue)
         document_link = Requests::DocumentLink.new(uri, document.comments, emitter, @message_queue)
-        code_lens = Requests::CodeLens.new(uri, @test_library, emitter, @message_queue)
+        code_lens = Requests::CodeLens.new(uri, emitter, @message_queue)
 
         semantic_highlighting = Requests::SemanticHighlighting.new(emitter, @message_queue)
         emitter.visit(document.tree)
@@ -254,7 +253,13 @@ module RubyLsp
       target = parent if target.is_a?(YARP::ConstantReadNode) && parent.is_a?(YARP::ConstantPathNode)
 
       emitter = EventEmitter.new
-      base_listener = Requests::Definition.new(uri, nesting, @index, emitter, @message_queue)
+      base_listener = Requests::Definition.new(
+        uri,
+        nesting,
+        @index,
+        emitter,
+        @message_queue,
+      )
       emitter.emit_for_target(target)
       base_listener.response
     end
@@ -498,7 +503,12 @@ module RubyLsp
       return unless target
 
       emitter = EventEmitter.new
-      listener = Requests::Completion.new(@index, nesting, emitter, @message_queue)
+      listener = Requests::Completion.new(
+        @index,
+        nesting,
+        emitter,
+        @message_queue,
+      )
       emitter.emit_for_target(target)
       listener.response
     end
@@ -550,7 +560,7 @@ module RubyLsp
       @store.supports_progress = options.dig(:capabilities, :window, :workDoneProgress) || true
       formatter = options.dig(:initializationOptions, :formatter) || "auto"
       @store.formatter = if formatter == "auto"
-        DependencyDetector.detected_formatter
+        DependencyDetector.instance.detected_formatter
       else
         formatter
       end

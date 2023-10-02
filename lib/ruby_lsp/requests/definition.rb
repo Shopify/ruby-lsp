@@ -45,7 +45,6 @@ module RubyLsp
 
         emitter.register(self, :on_call, :on_constant_read, :on_constant_path)
       end
-
       sig { override.params(addon: Addon).returns(T.nilable(RubyLsp::Listener[ResponseType])) }
       def initialize_external_listener(addon)
         addon.create_definition_listener(@uri, @nesting, @index, @emitter, @message_queue)
@@ -145,7 +144,7 @@ module RubyLsp
           # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
           # in the project, even if the files are typed false
           file_path = entry.file_path
-          if DependencyDetector::HAS_TYPECHECKER && bundle_path && !file_path.start_with?(bundle_path) &&
+          if DependencyDetector.instance.typechecker && bundle_path && !file_path.start_with?(bundle_path) &&
               !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
 
             next
