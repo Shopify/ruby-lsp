@@ -23,6 +23,46 @@ By default, the Ruby LSP will generate a `.ruby-lsp` folder with a custom bundle
 Additionally, it will attempt to use available version managers to select the correct Ruby version for any given
 project. Refer to configuration for more options.
 
+## Features
+
+![Ruby LSP demo](extras/ruby_lsp_demo.gif)
+
+The Ruby LSP features include
+
+- Semantic highlighting
+- Symbol search and code outline
+- RuboCop errors and warnings (diagnostics)
+- Format on save (with RuboCop or Syntax Tree)
+- Format on type
+- [Debugging support](#configuring-vs-code-debugger)
+- Running and debugging tests through VS Code's UI
+- Go to definition for classes, modules, constants and required files
+- Showing documentaton on hover for classes, modules and constants
+- Completion for classes, modules, constants and require paths
+- Fuzzy search classes, modules and constants anywhere in the project and its dependencies (workspace symbol)
+
+Adding method support for definition, completion, hover and workspace symbol is planned, but not yet completed.
+
+See complete information about features in the [ruby-lsp server
+documentation](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html).
+
+### Commands
+
+Available commands are listed below and can always be found by searching for the `Ruby LSP` prefix in the command
+palette (Default hotkey: CMD + SHIFT + P).
+
+| Command                              | Description                                             |
+| ------------------------------------ | ------------------------------------------------------- |
+| Ruby LSP: Start                      | Start the Ruby LSP server                               |
+| Ruby LSP: Restart                    | Restart the Ruby LSP server                             |
+| Ruby LSP: Stop                       | Stop the Ruby LSP server                                |
+| Ruby LSP: Update language server gem | Updates the `ruby-lsp` server gem to the latest version |
+
+### Snippets
+
+This extension provides convenience snippets for common Ruby constructs, such as blocks, classes, methods or even unit
+test boilerplates. Find the full list [here](https://github.com/Shopify/vscode-ruby-lsp/blob/main/snippets.json).
+
 ### Configuration
 
 #### Enable or disable features
@@ -122,40 +162,6 @@ This command would generate the following configuration:
   ]
 }
 ```
-
-## Features
-
-![Ruby LSP demo](extras/ruby_lsp_demo.gif)
-
-The Ruby LSP features include
-
-- Semantic highlighting
-- Symbol search and code outline
-- RuboCop errors and warnings (diagnostics)
-- Format on save (with RuboCop or Syntax Tree)
-- Format on type
-- Require path completion
-- Debugging support
-- Running and debugging tests through VS Code's UI
-
-See more features in the [ruby-lsp server documentation](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html)
-
-### Commands
-
-Available commands are listed below and can always be found by searching for the `Ruby LSP` prefix in the command
-palette (Default hotkey: CMD + SHIFT + P).
-
-| Command                              | Description                                             |
-| ------------------------------------ | ------------------------------------------------------- |
-| Ruby LSP: Start                      | Start the Ruby LSP server                               |
-| Ruby LSP: Restart                    | Restart the Ruby LSP server                             |
-| Ruby LSP: Stop                       | Stop the Ruby LSP server                                |
-| Ruby LSP: Update language server gem | Updates the `ruby-lsp` server gem to the latest version |
-
-### Snippets
-
-This extension provides convenience snippets for common Ruby constructs, such as blocks, classes, methods or even unit
-test boilerplates. Find the full list [here](https://github.com/Shopify/vscode-ruby-lsp/blob/main/snippets.json).
 
 ## Troubleshooting
 
