@@ -5,7 +5,7 @@ require "test_helper"
 
 class WorkspaceSymbolTest < Minitest::Test
   def setup
-    RubyLsp::DependencyDetector.instance.stubs(typechecker: false)
+    stub_no_typechecker
     @index = RubyIndexer::Index.new
   end
 
