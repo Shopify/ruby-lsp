@@ -56,7 +56,7 @@ module RubyLsp
 
     sig { params(gem_pattern: Regexp).returns(T::Boolean) }
     def direct_dependency?(gem_pattern)
-      dependencies.grep(gem_pattern).any?
+      dependencies.any?(gem_pattern)
     end
 
     sig { returns(T::Boolean) }
