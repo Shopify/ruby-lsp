@@ -80,9 +80,7 @@ module RubyLsp
 
     sig { returns(T::Array[String]) }
     def gemspec_dependencies
-      Dir.glob("{,*}.gemspec").flat_map do |path|
-        Bundler.load_gemspec(path).dependencies.map(&:name)
-      end
+      Array(Bundler.locked_gems.sources.find { Bundler::Source::Gemspec === _1 }&.gemspec&.dependencies&.map(&:name))
     end
   end
 end
