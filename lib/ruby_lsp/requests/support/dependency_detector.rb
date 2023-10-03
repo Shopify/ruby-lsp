@@ -80,7 +80,9 @@ module RubyLsp
 
     sig { returns(T::Array[String]) }
     def gemspec_dependencies
-      Array(Bundler.locked_gems.sources.find { Bundler::Source::Gemspec === _1 }&.gemspec&.dependencies).map(&:name)
+      Bundler.locked_gems.sources
+        .select { _1.is_a?(Bundler::Source::Gemspec) }
+        .flat_map { _1.gemspec&.dependencies&.map(&:name) }
     end
   end
 end
