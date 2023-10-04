@@ -20,6 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
+          token: ${{ secrets.SHOPIFY_GH_ACCESS_TOKEN }}
       - name: Get Ruby version from dev.yml
         id: ruby
         shell: ruby -ryaml {0}
