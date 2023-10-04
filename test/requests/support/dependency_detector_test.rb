@@ -5,6 +5,10 @@ require "test_helper"
 
 module RubyLsp
   class DependencyDetectorTest < Minitest::Test
+    def teardown
+      Singleton.__init__(RubyLsp::DependencyDetector)
+    end
+
     def test_detects_no_test_library_when_there_are_no_dependencies
       stub_dependencies({})
 
@@ -27,6 +31,10 @@ module RubyLsp
       stub_dependencies("test-unit" => "1.2.3")
 
       assert_equal("test-unit", DependencyDetector.instance.detected_test_library)
+    end
+
+    def test_detects_dependencies_in_gemspecs
+      assert(DependencyDetector.instance.direct_dependency?(/^yarp$/))
     end
 
     def test_detects_rails_if_both_rails_and_minitest_are_present
