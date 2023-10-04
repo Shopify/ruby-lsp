@@ -5,7 +5,7 @@ require "test_helper"
 
 module RubyLsp
   class DependencyDetectorTest < Minitest::Test
-    def setup
+    def teardown
       Singleton.__init__(RubyLsp::DependencyDetector)
     end
 
@@ -52,6 +52,7 @@ module RubyLsp
     private
 
     def stub_dependencies(dependencies)
+      Singleton.__init__(RubyLsp::DependencyDetector)
       Bundler.locked_gems.stubs(dependencies: dependencies)
     end
   end
