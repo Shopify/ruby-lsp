@@ -179,7 +179,12 @@ module RubyIndexer
 
       # When working on a gem, we need to make sure that its gemspec dependencies can't be excluded. This is necessary
       # because Bundler doesn't assign groups to gemspec dependencies
-      this_gem = Bundler.definition.dependencies.find { |d| d.to_spec.full_gem_path == Dir.pwd }
+      this_gem = Bundler.definition.dependencies.find do |d|
+        d.to_spec.full_gem_path == Dir.pwd
+      rescue Gem::MissingSpecError
+        false
+      end
+
       others.concat(this_gem.to_spec.dependencies) if this_gem
 
       excluded.each do |dependency|
