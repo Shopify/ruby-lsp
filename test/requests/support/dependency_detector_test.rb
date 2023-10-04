@@ -5,6 +5,10 @@ require "test_helper"
 
 module RubyLsp
   class DependencyDetectorTest < Minitest::Test
+    def setup
+      Singleton.__init__(RubyLsp::DependencyDetector)
+    end
+
     def test_detects_no_test_library_when_there_are_no_dependencies
       stub_dependencies({})
 
@@ -48,7 +52,6 @@ module RubyLsp
     private
 
     def stub_dependencies(dependencies)
-      Singleton.__init__(RubyLsp::DependencyDetector)
       Bundler.locked_gems.stubs(dependencies: dependencies)
     end
   end
