@@ -239,5 +239,38 @@ module RubyIndexer
       d_const = @index["A::D"].first
       assert_equal(:public, d_const.visibility)
     end
+
+    def test_keeping_track_of_super_classes
+      index(<<~RUBY)
+        class Foo < Bar
+        end
+
+        class Baz
+        end
+
+        module Something
+          class Baz
+          end
+
+          class Qux < ::Baz
+          end
+        end
+
+        class FinalThing < Something::Baz
+        end
+      RUBY
+
+      foo = T.must(@index["Foo"].first)
+      assert_equal("Bar", foo.parent_class)
+
+      baz = T.must(@index["Baz"].first)
+      assert_nil(baz.parent_class)
+
+      qux = T.must(@index["Something::Qux"].first)
+      assert_equal("::Baz", qux.parent_class)
+
+      final_thing = T.must(@index["FinalThing"].first)
+      assert_equal("Something::Baz", final_thing.parent_class)
+    end
   end
 end

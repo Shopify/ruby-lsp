@@ -22,12 +22,12 @@ module RubyIndexer
 
     sig { override.params(node: Prism::ClassNode).void }
     def visit_class_node(node)
-      add_index_entry(node, Index::Entry::Class)
+      add_class_entry(node)
     end
 
     sig { override.params(node: Prism::ModuleNode).void }
     def visit_module_node(node)
-      add_index_entry(node, Index::Entry::Module)
+      add_module_entry(node)
     end
 
     sig { override.params(node: Prism::MultiWriteNode).void }
@@ -189,16 +189,33 @@ module RubyIndexer
       end
     end
 
-    sig { params(node: T.any(Prism::ClassNode, Prism::ModuleNode), klass: T.class_of(Index::Entry)).void }
-    def add_index_entry(node, klass)
+    sig { params(node: Prism::ModuleNode).void }
+    def add_module_entry(node)
       name = node.constant_path.location.slice
-
-      unless /^[A-Z:]/.match?(name)
-        return visit_child_nodes(node)
-      end
+      return visit_child_nodes(node) unless /^[A-Z:]/.match?(name)
 
       comments = collect_comments(node)
-      @index << klass.new(fully_qualify_name(name), @file_path, node.location, comments)
+
+      @index << Index::Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments)
+      @stack << name
+      visit_child_nodes(node)
+      @stack.pop
+    end
+
+    sig { params(node: Prism::ClassNode).void }
+    def add_class_entry(node)
+      name = node.constant_path.location.slice
+      return visit_child_nodes(node) unless /^[A-Z:]/.match?(name)
+
+      comments = collect_comments(node)
+
+      superclass = node.superclass
+      parent_class = case superclass
+      when Prism::ConstantReadNode, Prism::ConstantPathNode
+        superclass.slice
+      end
+
+      @index << Index::Entry::Class.new(fully_qualify_name(name), @file_path, node.location, comments, parent_class)
       @stack << name
       visit(node.body)
       @stack.pop
