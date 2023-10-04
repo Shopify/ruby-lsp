@@ -58,7 +58,8 @@ module RubyLsp
         name = node.slice
         candidates = @index.prefix_search(name, @nesting)
         candidates.each do |entries|
-          @_response << build_entry_completion(name, node, entries, top_level?(T.must(entries.first).name, candidates))
+          complete_name = T.must(entries.first).name
+          @_response << build_entry_completion(complete_name, node, entries, top_level?(complete_name, candidates))
         end
       end
 
@@ -76,15 +77,28 @@ module RubyLsp
           false
         end
 
-        candidates = @index.prefix_search(name, top_level_reference ? [] : @nesting)
+        # If we're trying to provide completion for an aliased namespace, we need to first discover it's real name in
+        # order to find which possible constants match the desired search
+        *namespace, incomplete_name = name.split("::")
+        aliased_namespace = namespace.join("::")
+        namespace_entries = @index.resolve(aliased_namespace, @nesting)
+        return unless namespace_entries
+
+        real_namespace = @index.follow_aliased_namespace(T.must(namespace_entries.first).name)
+
+        candidates = @index.prefix_search("#{real_namespace}::#{incomplete_name}", top_level_reference ? [] : @nesting)
         candidates.each do |entries|
           # The only time we may have a private constant reference from outside of the namespace is if we're dealing
           # with ConstantPath and the entry name doesn't start with the current nesting
           first_entry = T.must(entries.first)
           next if first_entry.visibility == :private && !first_entry.name.start_with?("#{@nesting}::")
 
+          constant_name = T.must(first_entry.name.split("::").last)
+
+          full_name = aliased_namespace.empty? ? constant_name : "#{aliased_namespace}::#{constant_name}"
+
           @_response << build_entry_completion(
-            name,
+            full_name,
             node,
             entries,
             top_level_reference || top_level?(T.must(entries.first).name, candidates),
@@ -127,7 +141,7 @@ module RubyLsp
           Constant::CompletionItemKind::REFERENCE
         end
 
-        insertion_text = first_entry.name.dup
+        insertion_text = name.dup
 
         # If we have two entries with the same name inside the current namespace and the user selects the top level
         # option, we have to ensure it's prefixed with `::` or else we're completing the wrong constant. For example:
@@ -151,8 +165,8 @@ module RubyLsp
         # For these top level references, we need to include the `::` as part of the filter text or else it won't match
         # the right entries in the index
         Interface::CompletionItem.new(
-          label: first_entry.name,
-          filter_text: top_level ? "::#{first_entry.name}" : first_entry.name,
+          label: name,
+          filter_text: top_level ? "::#{name}" : name,
           text_edit: Interface::TextEdit.new(
             range: range_from_node(node),
             new_text: insertion_text,
@@ -161,7 +175,7 @@ module RubyLsp
           label_details: Interface::CompletionItemLabelDetails.new(
             description: entries.map(&:file_name).join(","),
           ),
-          documentation: markdown_from_index_entries(first_entry.name, entries),
+          documentation: markdown_from_index_entries(name, entries),
         )
       end
 

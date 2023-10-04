@@ -5,9 +5,6 @@ require "test_helper"
 
 module RubyLsp
   class DependencyDetectorTest < Minitest::Test
-    def teardown
-    end
-
     def test_detects_no_test_library_when_there_are_no_dependencies
       stub_dependencies({})
 
