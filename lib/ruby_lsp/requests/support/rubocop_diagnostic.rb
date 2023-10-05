@@ -47,13 +47,10 @@ module RubyLsp
 
         sig { returns(Interface::Diagnostic) }
         def to_lsp_diagnostic
-          if @offense.correctable?
-            severity = RUBOCOP_TO_LSP_SEVERITY[@offense.severity.name]
-            message = @offense.message
-          else
-            severity = Constant::DiagnosticSeverity::WARNING
-            message = "#{@offense.message}\n\nThis offense is not auto-correctable.\n"
-          end
+          severity = RUBOCOP_TO_LSP_SEVERITY[@offense.severity.name]
+          message  = @offense.message
+
+          message += "\n\nThis offense is not auto-correctable.\n" unless @offense.correctable?
 
           Interface::Diagnostic.new(
             message: message,
