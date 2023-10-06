@@ -178,5 +178,20 @@ module RubyIndexer
 
       assert_equal("Bar", entries.first.name)
     end
+
+    def test_resolving_aliases_to_non_existing_constants_with_conflicting_names
+      @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
+        module Foo
+          class Float < self
+            INFINITY = ::Float::INFINITY
+          end
+        end
+      RUBY
+
+      entry = @index.resolve("INFINITY", ["Foo", "Float"]).first
+      refute_nil(entry)
+
+      assert_instance_of(Index::Entry::UnresolvedAlias, entry)
+    end
   end
 end
