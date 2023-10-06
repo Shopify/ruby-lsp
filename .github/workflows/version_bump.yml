@@ -25,6 +25,8 @@ jobs:
         run: |
           version=$(awk -F. '{$NF+=1}1' OFS=. VERSION)
           echo "$version" > VERSION
+          // We need to unset deployment mode because it won't allow for modifications to `Gemfile.lock`
+          bundle config unset deployment
           bundle install
           echo "VERSION=$version" >> "$GITHUB_OUTPUT"
 
