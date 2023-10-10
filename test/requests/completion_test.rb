@@ -245,7 +245,7 @@ class CompletionTest < Minitest::Test
       params: { textDocument: { uri: @uri.to_s }, position: end_position },
     )
     assert_equal(["Foo::Bar", "Bar"], result.map(&:label))
-    assert_equal(["Foo::Bar", "::Bar"], result.map(&:filter_text))
+    assert_equal(["Bar", "::Bar"], result.map(&:filter_text))
     assert_equal(["Bar", "::Bar"], result.map { |completion| completion.text_edit.new_text })
 
     end_position = { line: 10, character: 6 }
@@ -333,7 +333,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_aliased_constants
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    stub_no_typechecker
     document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
       module A
         module B
@@ -362,12 +362,10 @@ class CompletionTest < Minitest::Test
     assert_equal(["ALIAS_NAME::B::CONST"], result.map(&:label))
     assert_equal(["ALIAS_NAME::B::CONST"], result.map(&:filter_text))
     assert_equal(["ALIAS_NAME::B::CONST"], result.map { |completion| completion.text_edit.new_text })
-  ensure
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
   end
 
   def test_completion_for_aliased_complex_constants
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    stub_no_typechecker
     document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
       module A
         module B
@@ -397,8 +395,44 @@ class CompletionTest < Minitest::Test
     assert_equal(["FINAL_ALIAS::ALIAS_NAME::B::CONST"], result.map(&:label))
     assert_equal(["FINAL_ALIAS::ALIAS_NAME::B::CONST"], result.map(&:filter_text))
     assert_equal(["FINAL_ALIAS::ALIAS_NAME::B::CONST"], result.map { |completion| completion.text_edit.new_text })
-  ensure
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
+  end
+
+  def test_completion_uses_shortest_possible_name_for_filter_text
+    stub_no_typechecker
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+      module A
+        module B
+          class Foo
+          end
+
+          F
+          A::B::F
+        end
+      end
+    RUBY
+
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: { line: 5, character: 5 } },
+    )
+
+    assert_equal(["A::B::Foo"], result.map(&:label))
+    assert_equal(["Foo"], result.map(&:filter_text))
+    assert_equal(["Foo"], result.map { |completion| completion.text_edit.new_text })
+
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: { line: 6, character: 11 } },
+    )
+
+    assert_equal(["A::B::Foo"], result.map(&:label))
+    assert_equal(["A::B::Foo"], result.map(&:filter_text))
+    assert_equal(["Foo"], result.map { |completion| completion.text_edit.new_text })
   end
 
   private
