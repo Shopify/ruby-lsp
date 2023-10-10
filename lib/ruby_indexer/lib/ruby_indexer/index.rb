@@ -130,7 +130,7 @@ module RubyIndexer
       if name.start_with?("::")
         name = name.delete_prefix("::")
         results = @entries[name] || @entries[follow_aliased_namespace(name)]
-        return results.map { |e| e.is_a?(Entry::UnresolvedAlias) ? resolve_alias(e) : e } if results
+        return results&.map { |e| e.is_a?(Entry::UnresolvedAlias) ? resolve_alias(e) : e }
       end
 
       nesting.length.downto(0).each do |i|
