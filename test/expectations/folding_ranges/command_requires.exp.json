@@ -4,6 +4,11 @@
       "startLine": 0,
       "endLine": 3,
       "kind": "imports"
+    },
+    {
+      "startLine": 7,
+      "endLine": 8,
+      "kind": "imports"
     }
   ]
 }
