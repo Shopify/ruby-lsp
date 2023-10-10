@@ -435,6 +435,41 @@ RuboCop::Cop::Minitest::AssertNil::ASSERTION_TYPE = T.let(T.unsafe(nil), String)
 # source://rubocop-minitest//lib/rubocop/cop/minitest/assert_nil.rb#28
 RuboCop::Cop::Minitest::AssertNil::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
 
+# Enforces the use of `assert_operator(expected, :<, actual)` over `assert(expected < actual)`.
+#
+# @example
+#
+#   # bad
+#   assert(expected < actual)
+#
+#   # good
+#   assert_operator(expected, :<, actual)
+#
+# source://rubocop-minitest//lib/rubocop/cop/minitest/assert_operator.rb#16
+class RuboCop::Cop::Minitest::AssertOperator < ::RuboCop::Cop::Base
+  extend ::RuboCop::Cop::AutoCorrector
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/assert_operator.rb#23
+  def on_send(node); end
+
+  private
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/assert_operator.rb#41
+  def build_new_arguments(node); end
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/assert_operator.rb#52
+  def range_of_arguments(node); end
+end
+
+# source://rubocop-minitest//lib/rubocop/cop/minitest/assert_operator.rb#21
+RuboCop::Cop::Minitest::AssertOperator::ALLOWED_OPERATORS = T.let(T.unsafe(nil), Array)
+
+# source://rubocop-minitest//lib/rubocop/cop/minitest/assert_operator.rb#19
+RuboCop::Cop::Minitest::AssertOperator::MSG = T.let(T.unsafe(nil), String)
+
+# source://rubocop-minitest//lib/rubocop/cop/minitest/assert_operator.rb#20
+RuboCop::Cop::Minitest::AssertOperator::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
+
 # Checks for opportunities to use `assert_output`.
 #
 # @example
@@ -496,8 +531,8 @@ class RuboCop::Cop::Minitest::AssertPathExists < ::RuboCop::Cop::Base
 
   private
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/assert_path_exists.rb#44
-  def build_good_method(path, message); end
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/assert_path_exists.rb#45
+  def build_good_method(node, path, message); end
 end
 
 # source://rubocop-minitest//lib/rubocop/cop/minitest/assert_path_exists.rb#20
@@ -1209,11 +1244,16 @@ class RuboCop::Cop::Minitest::LiteralAsActualArgument < ::RuboCop::Cop::Base
   include ::RuboCop::Cop::ArgumentRangeHelper
   extend ::RuboCop::Cop::AutoCorrector
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/literal_as_actual_argument.rb#39
-  def autocorrect(corrector, node, expected, actual, message); end
-
   # source://rubocop-minitest//lib/rubocop/cop/minitest/literal_as_actual_argument.rb#27
   def on_send(node); end
+
+  private
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/literal_as_actual_argument.rb#41
+  def autocorrect(corrector, node, expected, actual); end
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/literal_as_actual_argument.rb#54
+  def wrap_with_parentheses(corrector, node); end
 end
 
 # source://rubocop-minitest//lib/rubocop/cop/minitest/literal_as_actual_argument.rb#24
@@ -1841,6 +1881,41 @@ RuboCop::Cop::Minitest::RefuteNil::ASSERTION_TYPE = T.let(T.unsafe(nil), String)
 # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_nil.rb#28
 RuboCop::Cop::Minitest::RefuteNil::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
 
+# Enforces the use of `refute_operator(expected, :<, actual)` over `refute(expected < actual)`.
+#
+# @example
+#
+#   # bad
+#   refute(expected < actual)
+#
+#   # good
+#   refute_operator(expected, :<, actual)
+#
+# source://rubocop-minitest//lib/rubocop/cop/minitest/refute_operator.rb#16
+class RuboCop::Cop::Minitest::RefuteOperator < ::RuboCop::Cop::Base
+  extend ::RuboCop::Cop::AutoCorrector
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_operator.rb#23
+  def on_send(node); end
+
+  private
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_operator.rb#41
+  def build_new_arguments(node); end
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_operator.rb#52
+  def range_of_arguments(node); end
+end
+
+# source://rubocop-minitest//lib/rubocop/cop/minitest/refute_operator.rb#21
+RuboCop::Cop::Minitest::RefuteOperator::ALLOWED_OPERATORS = T.let(T.unsafe(nil), Array)
+
+# source://rubocop-minitest//lib/rubocop/cop/minitest/refute_operator.rb#19
+RuboCop::Cop::Minitest::RefuteOperator::MSG = T.let(T.unsafe(nil), String)
+
+# source://rubocop-minitest//lib/rubocop/cop/minitest/refute_operator.rb#20
+RuboCop::Cop::Minitest::RefuteOperator::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
+
 # Enforces the test to use `refute_path_exists` instead of using `refute(File.exist?(path))`.
 #
 # @example
@@ -1864,8 +1939,8 @@ class RuboCop::Cop::Minitest::RefutePathExists < ::RuboCop::Cop::Base
 
   private
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_path_exists.rb#44
-  def build_good_method(path, message); end
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_path_exists.rb#45
+  def build_good_method(node, path, message); end
 end
 
 # source://rubocop-minitest//lib/rubocop/cop/minitest/refute_path_exists.rb#20
