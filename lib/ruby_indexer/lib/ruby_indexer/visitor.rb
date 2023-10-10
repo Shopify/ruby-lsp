@@ -35,7 +35,8 @@ module RubyIndexer
         add_index_entry(node, Index::Entry::Class)
       when YARP::ModuleNode
         add_index_entry(node, Index::Entry::Module)
-      when YARP::ConstantWriteNode, YARP::ConstantOrWriteNode
+      when YARP::ConstantWriteNode, YARP::ConstantOrWriteNode, YARP::ConstantAndWriteNode,
+        YARP::ConstantOperatorWriteNode
         name = fully_qualify_name(node.name.to_s)
         add_constant(node, name)
       when YARP::ConstantPathWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathOperatorWriteNode,
@@ -90,6 +91,8 @@ module RubyIndexer
         node: T.any(
           YARP::ConstantWriteNode,
           YARP::ConstantOrWriteNode,
+          YARP::ConstantAndWriteNode,
+          YARP::ConstantOperatorWriteNode,
           YARP::ConstantPathWriteNode,
           YARP::ConstantPathOrWriteNode,
           YARP::ConstantPathOperatorWriteNode,
