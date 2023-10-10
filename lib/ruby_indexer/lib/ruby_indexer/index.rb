@@ -182,6 +182,8 @@ module RubyIndexer
     # aliases, so we have to invoke `follow_aliased_namespace` again to check until we only return a real name
     sig { params(name: String).returns(String) }
     def follow_aliased_namespace(name)
+      return name if @entries[name]
+
       parts = name.split("::")
       real_parts = []
 
