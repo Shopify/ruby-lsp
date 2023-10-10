@@ -1,8 +1,6 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "set"
-
 module RubyLsp
   class ParameterScope
     extend T::Sig
