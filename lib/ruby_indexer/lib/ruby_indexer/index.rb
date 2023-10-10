@@ -161,8 +161,9 @@ module RubyIndexer
     sig { params(indexable_path: IndexablePath, source: T.nilable(String)).void }
     def index_single(indexable_path, source = nil)
       content = source || File.read(indexable_path.full_path)
-      visitor = IndexVisitor.new(self, YARP.parse(content), indexable_path.full_path)
-      visitor.run
+      result = YARP.parse(content)
+      visitor = IndexVisitor.new(self, result, indexable_path.full_path)
+      result.value.accept(visitor)
 
       require_path = indexable_path.require_path
       @require_paths_tree.insert(require_path, indexable_path) if require_path
