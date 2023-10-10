@@ -8,7 +8,6 @@ module RubyIndexer
     sig { params(index: Index, parse_result: YARP::ParseResult, file_path: String).void }
     def initialize(index, parse_result, file_path)
       @index = index
-      @parse_result = parse_result
       @file_path = file_path
       @stack = T.let([], T::Array[String])
       @comments_by_line = T.let(
@@ -21,42 +20,84 @@ module RubyIndexer
       super()
     end
 
-    sig { void }
-    def run
-      visit(@parse_result.value)
+    sig { override.params(node: YARP::ClassNode).void }
+    def visit_class_node(node)
+      add_index_entry(node, Index::Entry::Class)
     end
 
-    sig { params(node: T.nilable(YARP::Node)).void }
-    def visit(node)
-      case node
-      when YARP::ProgramNode, YARP::StatementsNode
-        visit_child_nodes(node)
-      when YARP::ClassNode
-        add_index_entry(node, Index::Entry::Class)
-      when YARP::ModuleNode
-        add_index_entry(node, Index::Entry::Module)
-      when YARP::ConstantWriteNode, YARP::ConstantOrWriteNode, YARP::ConstantAndWriteNode,
-        YARP::ConstantOperatorWriteNode
-        name = fully_qualify_name(node.name.to_s)
-        add_constant(node, name)
-      when YARP::ConstantPathWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathOperatorWriteNode,
-        YARP::ConstantPathAndWriteNode
-
-        # ignore variable constants like `var::FOO` or `self.class::FOO`
-        return unless node.target.parent.nil? || node.target.parent.is_a?(YARP::ConstantReadNode)
-
-        name = fully_qualify_name(node.target.location.slice)
-        add_constant(node, name)
-      when YARP::CallNode
-        message = node.message
-        handle_private_constant(node) if message == "private_constant"
-      end
+    sig { override.params(node: YARP::ModuleNode).void }
+    def visit_module_node(node)
+      add_index_entry(node, Index::Entry::Module)
     end
 
-    # Override to avoid using `map` instead of `each`
-    sig { params(nodes: T::Array[T.nilable(YARP::Node)]).void }
-    def visit_all(nodes)
-      nodes.each { |node| visit(node) }
+    sig { override.params(node: YARP::ConstantPathWriteNode).void }
+    def visit_constant_path_write_node(node)
+      # ignore variable constants like `var::FOO` or `self.class::FOO`
+      target = node.target
+      return unless target.parent.nil? || target.parent.is_a?(YARP::ConstantReadNode)
+
+      name = fully_qualify_name(target.location.slice)
+      add_constant(node, name)
+    end
+
+    sig { override.params(node: YARP::ConstantPathOrWriteNode).void }
+    def visit_constant_path_or_write_node(node)
+      # ignore variable constants like `var::FOO` or `self.class::FOO`
+      target = node.target
+      return unless target.parent.nil? || target.parent.is_a?(YARP::ConstantReadNode)
+
+      name = fully_qualify_name(target.location.slice)
+      add_constant(node, name)
+    end
+
+    sig { override.params(node: YARP::ConstantPathOperatorWriteNode).void }
+    def visit_constant_path_operator_write_node(node)
+      # ignore variable constants like `var::FOO` or `self.class::FOO`
+      target = node.target
+      return unless target.parent.nil? || target.parent.is_a?(YARP::ConstantReadNode)
+
+      name = fully_qualify_name(target.location.slice)
+      add_constant(node, name)
+    end
+
+    sig { override.params(node: YARP::ConstantPathAndWriteNode).void }
+    def visit_constant_path_and_write_node(node)
+      # ignore variable constants like `var::FOO` or `self.class::FOO`
+      target = node.target
+      return unless target.parent.nil? || target.parent.is_a?(YARP::ConstantReadNode)
+
+      name = fully_qualify_name(target.location.slice)
+      add_constant(node, name)
+    end
+
+    sig { override.params(node: YARP::ConstantWriteNode).void }
+    def visit_constant_write_node(node)
+      name = fully_qualify_name(node.name.to_s)
+      add_constant(node, name)
+    end
+
+    sig { override.params(node: YARP::ConstantOrWriteNode).void }
+    def visit_constant_or_write_node(node)
+      name = fully_qualify_name(node.name.to_s)
+      add_constant(node, name)
+    end
+
+    sig { override.params(node: YARP::ConstantAndWriteNode).void }
+    def visit_constant_and_write_node(node)
+      name = fully_qualify_name(node.name.to_s)
+      add_constant(node, name)
+    end
+
+    sig { override.params(node: YARP::ConstantOperatorWriteNode).void }
+    def visit_constant_operator_write_node(node)
+      name = fully_qualify_name(node.name.to_s)
+      add_constant(node, name)
+    end
+
+    sig { override.params(node: YARP::CallNode).void }
+    def visit_call_node(node)
+      message = node.message
+      handle_private_constant(node) if message == "private_constant"
     end
 
     private
@@ -136,7 +177,7 @@ module RubyIndexer
       comments = collect_comments(node)
       @index << klass.new(fully_qualify_name(name), @file_path, node.location, comments)
       @stack << name
-      visit_child_nodes(node)
+      visit(node.body)
       @stack.pop
     end
 
