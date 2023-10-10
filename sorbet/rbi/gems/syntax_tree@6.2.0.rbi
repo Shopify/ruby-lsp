@@ -1768,6 +1768,402 @@ class SyntaxTree::CHAR < ::SyntaxTree::Node
   def value; end
 end
 
+# Syntax Tree ships with the `stree` CLI, which can be used to inspect and
+# manipulate Ruby code. This module is responsible for powering that CLI.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#9
+module SyntaxTree::CLI
+  class << self
+    # Run the CLI over the given array of strings that make up the arguments
+    # passed to the invocation.
+    #
+    # source://syntax_tree//lib/syntax_tree/cli.rb#565
+    def run(argv); end
+
+    private
+
+    # Take a line of Ruby source and colorize the output.
+    #
+    # source://syntax_tree//lib/syntax_tree/cli.rb#721
+    def colorize_line(line); end
+
+    # These are the options we're going to pass into IRB::Color.colorize_code.
+    # Since we support multiple versions of IRB, we're going to need to do
+    # some reflection to make sure we always pass valid options.
+    #
+    # source://syntax_tree//lib/syntax_tree/cli.rb#729
+    def colorize_options; end
+
+    # Highlights a snippet from a source and parse error.
+    #
+    # source://syntax_tree//lib/syntax_tree/cli.rb#697
+    def highlight_error(error, source); end
+
+    # Processes each item in the queue with the given action. Returns whether
+    # or not any errors were encountered.
+    #
+    # source://syntax_tree//lib/syntax_tree/cli.rb#653
+    def process_queue(queue, action); end
+  end
+end
+
+# An action of the CLI that prints out the AST for the given source.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#121
+class SyntaxTree::CLI::AST < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#122
+  def run(item); end
+end
+
+# The parent action class for the CLI that implements the basics.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#103
+class SyntaxTree::CLI::Action
+  # @return [Action] a new instance of Action
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#106
+  def initialize(options); end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#116
+  def failure; end
+
+  # Returns the value of attribute options.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#104
+  def options; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#110
+  def run(item); end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#113
+  def success; end
+end
+
+# An action of the CLI that generates ctags for the given source.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#158
+class SyntaxTree::CLI::CTags < ::SyntaxTree::CLI::Action
+  # @return [CTags] a new instance of CTags
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#161
+  def initialize(options); end
+
+  # Returns the value of attribute entries.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#159
+  def entries; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#166
+  def run(item); end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#233
+  def success; end
+end
+
+# An action of the CLI that ensures that the filepath is formatted as
+# expected.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#129
+class SyntaxTree::CLI::Check < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#152
+  def failure; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#133
+  def run(item); end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#148
+  def success; end
+end
+
+# source://syntax_tree//lib/syntax_tree/cli.rb#130
+class SyntaxTree::CLI::Check::UnformattedError < ::StandardError; end
+
+# A utility wrapper around colored strings in the output.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#11
+class SyntaxTree::CLI::Color
+  # @return [Color] a new instance of Color
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#14
+  def initialize(value, code); end
+
+  # Returns the value of attribute code.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#12
+  def code; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#19
+  def to_s; end
+
+  # Returns the value of attribute value.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#12
+  def value; end
+
+  class << self
+    # source://syntax_tree//lib/syntax_tree/cli.rb#23
+    def bold(value); end
+
+    # source://syntax_tree//lib/syntax_tree/cli.rb#27
+    def gray(value); end
+
+    # source://syntax_tree//lib/syntax_tree/cli.rb#31
+    def red(value); end
+
+    # source://syntax_tree//lib/syntax_tree/cli.rb#35
+    def yellow(value); end
+  end
+end
+
+# We allow a minimal configuration file to act as additional command line
+# arguments to the CLI. Each line of the config file should be a new
+# argument, as in:
+#
+#     --plugins=plugin/single_quote
+#     --print-width=100
+#
+# When invoking the CLI, we will read this config file and then parse it if
+# it exists in the current working directory.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#544
+class SyntaxTree::CLI::ConfigFile
+  # @return [ConfigFile] a new instance of ConfigFile
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#549
+  def initialize; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#557
+  def arguments; end
+
+  # @return [Boolean]
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#553
+  def exists?; end
+
+  # Returns the value of attribute filepath.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#547
+  def filepath; end
+end
+
+# source://syntax_tree//lib/syntax_tree/cli.rb#545
+SyntaxTree::CLI::ConfigFile::FILENAME = T.let(T.unsafe(nil), String)
+
+# An action of the CLI that formats the source twice to check if the first
+# format is not idempotent.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#245
+class SyntaxTree::CLI::Debug < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#277
+  def failure; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#249
+  def run(item); end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#273
+  def success; end
+end
+
+# source://syntax_tree//lib/syntax_tree/cli.rb#246
+class SyntaxTree::CLI::Debug::NonIdempotentFormatError < ::StandardError; end
+
+# An action of the CLI that prints out the doc tree IR for the given source.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#283
+class SyntaxTree::CLI::Doc < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#284
+  def run(item); end
+end
+
+# An action of the CLI that outputs a pattern-matching Ruby expression that
+# would match the first expression of the input given.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#297
+class SyntaxTree::CLI::Expr < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#298
+  def run(item); end
+end
+
+# An item of work that corresponds to a file to be processed.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#41
+class SyntaxTree::CLI::FileItem
+  # @return [FileItem] a new instance of FileItem
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#44
+  def initialize(filepath); end
+
+  # Returns the value of attribute filepath.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#42
+  def filepath; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#48
+  def handler; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#52
+  def source; end
+
+  # @return [Boolean]
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#56
+  def writable?; end
+end
+
+# An action of the CLI that formats the input source and prints it out.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#311
+class SyntaxTree::CLI::Format < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#312
+  def run(item); end
+end
+
+# The help message displayed if the input arguments are not correctly
+# ordered or formatted.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#409
+SyntaxTree::CLI::HELP = T.let(T.unsafe(nil), String)
+
+# An action of the CLI that converts the source into its equivalent JSON
+# representation.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#326
+class SyntaxTree::CLI::Json < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#327
+  def run(item); end
+end
+
+# An action of the CLI that outputs a pattern-matching Ruby expression that
+# would match the input given.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#335
+class SyntaxTree::CLI::Match < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#336
+  def run(item); end
+end
+
+# This represents all of the options that can be passed to the CLI. It is
+# responsible for parsing the list and then returning the file paths at the
+# end.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#466
+class SyntaxTree::CLI::Options
+  # @return [Options] a new instance of Options
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#473
+  def initialize; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#481
+  def formatter_options; end
+
+  # Returns the value of attribute ignore_files.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#467
+  def ignore_files; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#486
+  def parse(arguments); end
+
+  # Returns the value of attribute plugins.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#467
+  def plugins; end
+
+  # Returns the value of attribute print_width.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#467
+  def print_width; end
+
+  # Returns the value of attribute scripts.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#467
+  def scripts; end
+
+  # Returns the value of attribute target_ruby_version.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#467
+  def target_ruby_version; end
+
+  private
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#492
+  def parser; end
+end
+
+# An item of work that correspond to the content passed in via stdin.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#84
+class SyntaxTree::CLI::STDINItem
+  # source://syntax_tree//lib/syntax_tree/cli.rb#89
+  def filepath; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#85
+  def handler; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#93
+  def source; end
+
+  # @return [Boolean]
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#97
+  def writable?; end
+end
+
+# An item of work that corresponds to a script content passed via the
+# command line.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#63
+class SyntaxTree::CLI::ScriptItem
+  # @return [ScriptItem] a new instance of ScriptItem
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#66
+  def initialize(source); end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#74
+  def filepath; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#70
+  def handler; end
+
+  # Returns the value of attribute source.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#64
+  def source; end
+
+  # @return [Boolean]
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#78
+  def writable?; end
+end
+
+# An action of the CLI that searches for the given pattern matching pattern
+# in the given files.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#343
+class SyntaxTree::CLI::Search < ::SyntaxTree::CLI::Action
+  # @return [Search] a new instance of Search
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#346
+  def initialize(query); end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#359
+  def run(item); end
+
+  # Returns the value of attribute search.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#344
+  def search; end
+end
+
+# An action of the CLI that formats the input source and writes the
+# formatted output back to the file.
+#
+# source://syntax_tree//lib/syntax_tree/cli.rb#381
+class SyntaxTree::CLI::Write < ::SyntaxTree::CLI::Action
+  # source://syntax_tree//lib/syntax_tree/cli.rb#382
+  def run(item); end
+end
+
 # CVar represents the use of a class variable.
 #
 #     @@variable
