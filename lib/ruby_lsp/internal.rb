@@ -7,6 +7,7 @@ require "language_server-protocol"
 require "bundler"
 require "uri"
 require "cgi"
+require "set"
 
 require "ruby-lsp"
 require "ruby_indexer/ruby_indexer"
