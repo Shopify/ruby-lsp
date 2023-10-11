@@ -98,92 +98,76 @@ module RubyLsp
 
       sig { params(node: YARP::ArrayNode).void }
       def on_array(node)
-        emit_requires_range
         add_simple_range(node)
       end
 
       sig { params(node: YARP::BlockNode).void }
       def on_block(node)
-        emit_requires_range
         add_simple_range(node)
       end
 
       sig { params(node: YARP::CaseNode).void }
       def on_case(node)
-        emit_requires_range
         add_simple_range(node)
       end
 
       sig { params(node: YARP::ClassNode).void }
       def on_class(node)
-        emit_requires_range
         add_simple_range(node)
       end
 
       sig { params(node: YARP::ModuleNode).void }
       def on_module(node)
-        emit_requires_range
         add_simple_range(node)
       end
 
       sig { params(node: YARP::ForNode).void }
       def on_for(node)
-        emit_requires_range
         add_simple_range(node)
       end
 
       sig { params(node: YARP::HashNode).void }
       def on_hash(node)
-        emit_requires_range
         add_simple_range(node)
       end
 
       sig { params(node: YARP::SingletonClassNode).void }
       def on_singleton_class(node)
-        emit_requires_range
         add_simple_range(node)
       end
 
       sig { params(node: YARP::UnlessNode).void }
       def on_unless(node)
-        emit_requires_range
         add_simple_range(node)
       end
 
       sig { params(node: YARP::UntilNode).void }
       def on_until(node)
-        emit_requires_range
         add_simple_range(node)
       end
 
       sig { params(node: YARP::WhileNode).void }
       def on_while(node)
-        emit_requires_range
         add_simple_range(node)
       end
 
       sig { params(node: YARP::ElseNode).void }
       def on_else(node)
-        emit_requires_range
         add_simple_range(node)
       end
 
       sig { params(node: YARP::EnsureNode).void }
       def on_ensure(node)
-        emit_requires_range
         add_simple_range(node)
       end
 
       sig { params(node: YARP::BeginNode).void }
       def on_begin(node)
-        emit_requires_range
-
         add_simple_range(node)
       end
 
       sig { params(node: YARP::StringConcatNode).void }
       def on_string_concat(node)
-        emit_requires_range
         left = T.let(node.left, YARP::Node)
         left = left.left while left.is_a?(YARP::StringConcatNode)
 
@@ -192,7 +176,6 @@ module RubyLsp
 
       sig { params(node: YARP::DefNode).void }
       def on_def(node)
-        emit_requires_range
         params = node.parameters
         parameter_loc = params&.location
         location = node.location
@@ -215,7 +198,6 @@ module RubyLsp
           return
         end
 
-        emit_requires_range
         location = node.location
         add_lines_range(location.start_line, location.end_line - 1)
       end
@@ -284,6 +266,7 @@ module RubyLsp
 
       sig { params(start_line: Integer, end_line: Integer).void }
       def add_lines_range(start_line, end_line)
+        emit_requires_range
         return if start_line >= end_line
 
         @_response << Interface::FoldingRange.new(
