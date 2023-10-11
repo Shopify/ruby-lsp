@@ -153,9 +153,27 @@ module RubyIndexer
       nil
     end
 
-    sig { params(indexable_paths: T::Array[IndexablePath]).void }
-    def index_all(indexable_paths: RubyIndexer.configuration.indexables)
-      indexable_paths.each { |path| index_single(path) }
+    # Index all files for the given indexable paths, which defaults to what is configured. A block can be used to track
+    # and control indexing progress. That block is invoked with the current progress percentage and should return `true`
+    # to continue indexing or `false` to stop indexing.
+    sig do
+      params(
+        indexable_paths: T::Array[IndexablePath],
+        block: T.nilable(T.proc.params(progress: Integer).returns(T::Boolean)),
+      ).void
+    end
+    def index_all(indexable_paths: RubyIndexer.configuration.indexables, &block)
+      # Calculate how many paths are worth 1% of progress
+      progress_step = (indexable_paths.length / 100.0).ceil
+
+      indexable_paths.each_with_index do |path, index|
+        if block && index % progress_step == 0
+          progress = (index / progress_step) + 1
+          break unless block.call(progress)
+        end
+
+        index_single(path)
+      end
     end
 
     sig { params(indexable_path: IndexablePath, source: T.nilable(String)).void }

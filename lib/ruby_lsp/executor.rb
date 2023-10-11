@@ -210,21 +210,31 @@ module RubyLsp
       # stuck indexing files
       RubyIndexer.configuration.load_config
 
-      begin
-        @index.index_all
-      rescue StandardError => error
-        @message_queue << Notification.new(
-          message: "window/showMessage",
-          params: Interface::ShowMessageParams.new(
-            type: Constant::MessageType::ERROR,
-            message: "Error while indexing: #{error.message}",
-          ),
-        )
-      end
+      Thread.new do
+        begin
+          @index.index_all do |percentage|
+            progress("indexing-progress", percentage)
+            true
+          rescue ClosedQueueError
+            # Since we run indexing on a separate thread, it's possible to kill the server before indexing is complete.
+            # In those cases, the message queue will be closed and raise a ClosedQueueError. By returning `false`, we
+            # tell the index to stop working immediately
+            false
+          end
+        rescue StandardError => error
+          @message_queue << Notification.new(
+            message: "window/showMessage",
+            params: Interface::ShowMessageParams.new(
+              type: Constant::MessageType::ERROR,
+              message: "Error while indexing: #{error.message}",
+            ),
+          )
+        end
 
-      # Always end the progress notification even if indexing failed or else it never goes away and the user has no way
-      # of dismissing it
-      end_progress("indexing-progress")
+        # Always end the progress notification even if indexing failed or else it never goes away and the user has no
+        # way of dismissing it
+        end_progress("indexing-progress")
+      end
     end
 
     sig { params(query: T.nilable(String)).returns(T::Array[Interface::WorkspaceSymbol]) }
@@ -513,8 +523,8 @@ module RubyLsp
       listener.response
     end
 
-    sig { params(id: String, title: String).void }
-    def begin_progress(id, title)
+    sig { params(id: String, title: String, percentage: Integer).void }
+    def begin_progress(id, title, percentage: 0)
       return unless @store.supports_progress
 
       @message_queue << Request.new(
@@ -526,7 +536,29 @@ module RubyLsp
         message: "$/progress",
         params: Interface::ProgressParams.new(
           token: id,
-          value: Interface::WorkDoneProgressBegin.new(kind: "begin", title: title),
+          value: Interface::WorkDoneProgressBegin.new(
+            kind: "begin",
+            title: title,
+            percentage: percentage,
+            message: "#{percentage}% completed",
+          ),
+        ),
+      )
+    end
+
+    sig { params(id: String, percentage: Integer).void }
+    def progress(id, percentage)
+      return unless @store.supports_progress
+
+      @message_queue << Notification.new(
+        message: "$/progress",
+        params: Interface::ProgressParams.new(
+          token: id,
+          value: Interface::WorkDoneProgressReport.new(
+            kind: "report",
+            percentage: percentage,
+            message: "#{percentage}% completed",
+          ),
         ),
       )
     end
@@ -542,6 +574,9 @@ module RubyLsp
           value: Interface::WorkDoneProgressEnd.new(kind: "end"),
         ),
       )
+    rescue ClosedQueueError
+      # If the server was killed and the message queue is already closed, there's no way to end the progress
+      # notification
     end
 
     sig { params(options: T::Hash[Symbol, T.untyped]).returns(Interface::InitializeResult) }
@@ -557,7 +592,8 @@ module RubyLsp
         encodings.first
       end
 
-      @store.supports_progress = options.dig(:capabilities, :window, :workDoneProgress) || true
+      progress = options.dig(:capabilities, :window, :workDoneProgress)
+      @store.supports_progress = progress.nil? ? true : progress
       formatter = options.dig(:initializationOptions, :formatter) || "auto"
       @store.formatter = if formatter == "auto"
         DependencyDetector.instance.detected_formatter
