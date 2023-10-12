@@ -644,7 +644,7 @@ export default class Client implements ClientInterface {
         telemetryData.uri = uri;
       }
 
-      telemetryData.params = JSON.stringify(params);
+      telemetryData.params = JSON.stringify(castParam);
     }
 
     let result: T | undefined;
