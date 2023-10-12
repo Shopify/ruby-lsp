@@ -40,10 +40,7 @@ module RubyLsp
           node, parent = queue.shift
           next unless node
 
-          range = RubyLsp::Requests::Support::SelectionRange.new(
-            range: range_from_location(node.location),
-            parent: parent,
-          )
+          range = Support::SelectionRange.new(range: range_from_location(node.location), parent: parent)
           T.unsafe(queue).unshift(*node.child_nodes.map { |child| [child, range] })
           @ranges.unshift(range)
         end

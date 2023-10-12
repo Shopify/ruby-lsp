@@ -305,8 +305,8 @@ class IntegrationTest < Minitest::Test
     )
 
     assert_equal(
-      { range: { start: { line: 0, character: 0 }, end: { line: 1, character: 3 } } },
-      response[:result].first,
+      { start: { line: 0, character: 0 }, end: { line: 1, character: 3 } },
+      response[:result].first[:range],
     )
   end
 
