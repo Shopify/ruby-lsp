@@ -627,8 +627,18 @@ export default class Client implements ClientInterface {
       return runRequest();
     }
 
+    const request = typeof type === "string" ? type : type.method;
+
+    // The first few requests are not representative for telemetry. Their response time is much higher than the rest
+    // because they are inflate by the time we spend indexing and by regular "warming up" of the server (like
+    // autoloading constants or running signature blocks).
+    if (this.requestId < 50) {
+      this.requestId++;
+      return runRequest();
+    }
+
     const telemetryData: RequestEvent = {
-      request: typeof type === "string" ? type : type.method,
+      request,
       rubyVersion: this.ruby.rubyVersion!,
       yjitEnabled: this.ruby.yjitEnabled!,
       lspVersion: this.serverVersion,
