@@ -1,3 +1,3 @@
-[submodule "test/fixtures/yarp"]
-	path = test/fixtures/yarp
-	url = https://github.com/ruby/yarp.git
+[submodule "test/fixtures/prism"]
+	path = test/fixtures/prism
+	url = https://github.com/ruby/prism.git

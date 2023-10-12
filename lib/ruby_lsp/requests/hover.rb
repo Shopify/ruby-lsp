@@ -21,12 +21,12 @@ module RubyLsp
 
       ALLOWED_TARGETS = T.let(
         [
-          YARP::CallNode,
-          YARP::ConstantReadNode,
-          YARP::ConstantWriteNode,
-          YARP::ConstantPathNode,
+          Prism::CallNode,
+          Prism::ConstantReadNode,
+          Prism::ConstantWriteNode,
+          Prism::ConstantPathNode,
         ],
-        T::Array[T.class_of(YARP::Node)],
+        T::Array[T.class_of(Prism::Node)],
       )
 
       sig { override.returns(ResponseType) }
@@ -69,21 +69,21 @@ module RubyLsp
         self
       end
 
-      sig { params(node: YARP::ConstantReadNode).void }
+      sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read(node)
         return if DependencyDetector.instance.typechecker
 
         generate_hover(node.slice, node.location)
       end
 
-      sig { params(node: YARP::ConstantWriteNode).void }
+      sig { params(node: Prism::ConstantWriteNode).void }
       def on_constant_write(node)
         return if DependencyDetector.instance.typechecker
 
         generate_hover(node.name.to_s, node.name_loc)
       end
 
-      sig { params(node: YARP::ConstantPathNode).void }
+      sig { params(node: Prism::ConstantPathNode).void }
       def on_constant_path(node)
         return if DependencyDetector.instance.typechecker
 
@@ -92,7 +92,7 @@ module RubyLsp
 
       private
 
-      sig { params(name: String, location: YARP::Location).void }
+      sig { params(name: String, location: Prism::Location).void }
       def generate_hover(name, location)
         entries = @index.resolve(name, @nesting)
         return unless entries

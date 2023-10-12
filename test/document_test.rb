@@ -428,33 +428,33 @@ class DocumentTest < Minitest::Test
 
     # Locate the `ActiveRecord` module
     found, parent = document.locate_node({ line: 0, character: 19 })
-    assert_instance_of(YARP::ConstantReadNode, found)
-    assert_equal("ActiveRecord", T.cast(found, YARP::ConstantReadNode).location.slice)
+    assert_instance_of(Prism::ConstantReadNode, found)
+    assert_equal("ActiveRecord", T.cast(found, Prism::ConstantReadNode).location.slice)
 
-    assert_instance_of(YARP::ConstantPathNode, parent)
-    assert_equal("ActiveRecord", T.must(T.cast(parent, YARP::ConstantPathNode).child_nodes.first).location.slice)
+    assert_instance_of(Prism::ConstantPathNode, parent)
+    assert_equal("ActiveRecord", T.must(T.cast(parent, Prism::ConstantPathNode).child_nodes.first).location.slice)
 
     # Locate the `Base` class
     found, parent = T.cast(
       document.locate_node({ line: 0, character: 27 }),
-      [YARP::ConstantReadNode, YARP::ConstantPathNode, T::Array[String]],
+      [Prism::ConstantReadNode, Prism::ConstantPathNode, T::Array[String]],
     )
-    assert_instance_of(YARP::ConstantReadNode, found)
+    assert_instance_of(Prism::ConstantReadNode, found)
     assert_equal("Base", found.location.slice)
 
-    assert_instance_of(YARP::ConstantPathNode, parent)
+    assert_instance_of(Prism::ConstantPathNode, parent)
     assert_equal("Base", T.must(parent.child_nodes[1]).location.slice)
     assert_equal("ActiveRecord", T.must(parent.child_nodes[0]).location.slice)
 
     # Locate the `where` invocation
     found, parent = T.cast(
       document.locate_node({ line: 3, character: 4 }),
-      [YARP::CallNode, YARP::StatementsNode, T::Array[String]],
+      [Prism::CallNode, Prism::StatementsNode, T::Array[String]],
     )
-    assert_instance_of(YARP::CallNode, found)
+    assert_instance_of(Prism::CallNode, found)
     assert_equal("where", T.must(found.message_loc).slice)
 
-    assert_instance_of(YARP::StatementsNode, parent)
+    assert_instance_of(Prism::StatementsNode, parent)
   end
 
   def test_locate_returns_nesting
@@ -475,11 +475,11 @@ class DocumentTest < Minitest::Test
     RUBY
 
     found, _parent, nesting = document.locate_node({ line: 9, character: 6 })
-    assert_equal("Qux", T.cast(found, YARP::ConstantReadNode).location.slice)
+    assert_equal("Qux", T.cast(found, Prism::ConstantReadNode).location.slice)
     assert_equal(["Foo", "Bar"], nesting)
 
     found, _parent, nesting = document.locate_node({ line: 3, character: 6 })
-    assert_equal("Hello", T.cast(found, YARP::ConstantReadNode).location.slice)
+    assert_equal("Hello", T.cast(found, Prism::ConstantReadNode).location.slice)
     assert_equal(["Foo", "Other"], nesting)
   end
 
@@ -494,8 +494,8 @@ class DocumentTest < Minitest::Test
       end
     RUBY
 
-    found, _parent, nesting = document.locate_node({ line: 3, character: 6 }, node_types: [YARP::ConstantReadNode])
-    assert_equal("Qux", T.cast(found, YARP::ConstantReadNode).location.slice)
+    found, _parent, nesting = document.locate_node({ line: 3, character: 6 }, node_types: [Prism::ConstantReadNode])
+    assert_equal("Qux", T.cast(found, Prism::ConstantReadNode).location.slice)
     assert_equal(["Foo", "Bar"], nesting)
   end
 
@@ -507,11 +507,11 @@ class DocumentTest < Minitest::Test
     )
 
     # When there's a new edit, we parse it the first `parse` invocation
-    YARP.expects(:parse).with(document.source).once
+    Prism.expects(:parse).with(document.source).once
     document.parse
 
     # If there are no new edits, we don't do anything
-    YARP.expects(:parse).never
+    Prism.expects(:parse).never
     document.parse
 
     document.push_edits(
@@ -520,7 +520,7 @@ class DocumentTest < Minitest::Test
     )
 
     # If there's another edit, we parse it once again
-    YARP.expects(:parse).with(document.source).once
+    Prism.expects(:parse).with(document.source).once
     document.parse
   end
 

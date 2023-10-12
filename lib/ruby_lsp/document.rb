@@ -9,7 +9,7 @@ module RubyLsp
     RangeShape = T.type_alias { { start: PositionShape, end: PositionShape } }
     EditShape = T.type_alias { { range: RangeShape, text: String } }
 
-    sig { returns(YARP::ParseResult) }
+    sig { returns(Prism::ParseResult) }
     attr_reader :parse_result
 
     sig { returns(String) }
@@ -29,15 +29,15 @@ module RubyLsp
       @version = T.let(version, Integer)
       @uri = T.let(uri, URI::Generic)
       @needs_parsing = T.let(false, T::Boolean)
-      @parse_result = T.let(YARP.parse(@source), YARP::ParseResult)
+      @parse_result = T.let(Prism.parse(@source), Prism::ParseResult)
     end
 
-    sig { returns(YARP::ProgramNode) }
+    sig { returns(Prism::ProgramNode) }
     def tree
       @parse_result.value
     end
 
-    sig { returns(T::Array[YARP::Comment]) }
+    sig { returns(T::Array[Prism::Comment]) }
     def comments
       @parse_result.comments
     end
@@ -96,7 +96,7 @@ module RubyLsp
       return unless @needs_parsing
 
       @needs_parsing = false
-      @parse_result = YARP.parse(@source)
+      @parse_result = Prism.parse(@source)
     end
 
     sig { returns(T::Boolean) }
@@ -112,8 +112,8 @@ module RubyLsp
     sig do
       params(
         position: PositionShape,
-        node_types: T::Array[T.class_of(YARP::Node)],
-      ).returns([T.nilable(YARP::Node), T.nilable(YARP::Node), T::Array[String]])
+        node_types: T::Array[T.class_of(Prism::Node)],
+      ).returns([T.nilable(Prism::Node), T.nilable(Prism::Node), T::Array[String]])
     end
     def locate_node(position, node_types: [])
       locate(@parse_result.value, create_scanner.find_char_position(position), node_types: node_types)
@@ -121,16 +121,16 @@ module RubyLsp
 
     sig do
       params(
-        node: YARP::Node,
+        node: Prism::Node,
         char_position: Integer,
-        node_types: T::Array[T.class_of(YARP::Node)],
-      ).returns([T.nilable(YARP::Node), T.nilable(YARP::Node), T::Array[String]])
+        node_types: T::Array[T.class_of(Prism::Node)],
+      ).returns([T.nilable(Prism::Node), T.nilable(Prism::Node), T::Array[String]])
     end
     def locate(node, char_position, node_types: [])
-      queue = T.let(node.child_nodes.compact, T::Array[T.nilable(YARP::Node)])
+      queue = T.let(node.child_nodes.compact, T::Array[T.nilable(Prism::Node)])
       closest = node
-      parent = T.let(nil, T.nilable(YARP::Node))
-      nesting = T.let([], T::Array[T.any(YARP::ClassNode, YARP::ModuleNode)])
+      parent = T.let(nil, T.nilable(Prism::Node))
+      nesting = T.let([], T::Array[T.any(Prism::ClassNode, Prism::ModuleNode)])
 
       until queue.empty?
         candidate = queue.shift
@@ -158,7 +158,7 @@ module RubyLsp
 
         # Keep track of the nesting where we found the target. This is used to determine the fully qualified name of the
         # target when it is a constant
-        if candidate.is_a?(YARP::ClassNode) || candidate.is_a?(YARP::ModuleNode)
+        if candidate.is_a?(Prism::ClassNode) || candidate.is_a?(Prism::ModuleNode)
           nesting << candidate
         end
 

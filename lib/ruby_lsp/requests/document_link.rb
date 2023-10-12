@@ -78,7 +78,7 @@ module RubyLsp
       sig do
         params(
           uri: URI::Generic,
-          comments: T::Array[YARP::Comment],
+          comments: T::Array[Prism::Comment],
           emitter: EventEmitter,
           message_queue: Thread::Queue,
         ).void
@@ -96,40 +96,40 @@ module RubyLsp
           comments.to_h do |comment|
             [comment.location.end_line, comment]
           end,
-          T::Hash[Integer, YARP::Comment],
+          T::Hash[Integer, Prism::Comment],
         )
 
         emitter.register(self, :on_def, :on_class, :on_module, :on_constant_write, :on_constant_path_write)
       end
 
-      sig { params(node: YARP::DefNode).void }
+      sig { params(node: Prism::DefNode).void }
       def on_def(node)
         extract_document_link(node)
       end
 
-      sig { params(node: YARP::ClassNode).void }
+      sig { params(node: Prism::ClassNode).void }
       def on_class(node)
         extract_document_link(node)
       end
 
-      sig { params(node: YARP::ModuleNode).void }
+      sig { params(node: Prism::ModuleNode).void }
       def on_module(node)
         extract_document_link(node)
       end
 
-      sig { params(node: YARP::ConstantWriteNode).void }
+      sig { params(node: Prism::ConstantWriteNode).void }
       def on_constant_write(node)
         extract_document_link(node)
       end
 
-      sig { params(node: YARP::ConstantPathWriteNode).void }
+      sig { params(node: Prism::ConstantPathWriteNode).void }
       def on_constant_path_write(node)
         extract_document_link(node)
       end
 
       private
 
-      sig { params(node: YARP::Node).void }
+      sig { params(node: Prism::Node).void }
       def extract_document_link(node)
         comment = @lines_to_comments[node.location.start_line - 1]
         return unless comment

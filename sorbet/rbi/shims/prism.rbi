@@ -6,7 +6,7 @@ modified manually. See templates/rbi/yarp.rbi.erb
 if you are looking to modify the template
 =end
 
-module YARP
+module Prism
   class Node
     sig { returns(T::Array[T.nilable(Node)]) }
     def child_nodes; end

@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 module RubyLsp
-  # EventEmitter is an intermediary between our requests and YARP visitors. It's used to visit the document's AST
+  # EventEmitter is an intermediary between our requests and Prism visitors. It's used to visit the document's AST
   # and emit events that the requests can listen to for providing functionality. Usages:
   #
   # - For positional requests, locate the target node and use `emit_for_target` to fire events for each listener
@@ -18,7 +18,7 @@ module RubyLsp
   # emitter.emit_for_target(target_node)
   # listener.response
   # ```
-  class EventEmitter < YARP::Visitor
+  class EventEmitter < Prism::Visitor
     extend T::Sig
 
     sig { void }
@@ -34,32 +34,32 @@ module RubyLsp
 
     # Emit events for a specific node. This is similar to the regular `visit` method, but avoids going deeper into the
     # tree for performance
-    sig { params(node: T.nilable(YARP::Node)).void }
+    sig { params(node: T.nilable(Prism::Node)).void }
     def emit_for_target(node)
       case node
-      when YARP::CallNode
+      when Prism::CallNode
         @listeners[:on_call]&.each { |l| T.unsafe(l).on_call(node) }
-      when YARP::ConstantPathNode
+      when Prism::ConstantPathNode
         @listeners[:on_constant_path]&.each { |l| T.unsafe(l).on_constant_path(node) }
-      when YARP::StringNode
+      when Prism::StringNode
         @listeners[:on_string]&.each { |l| T.unsafe(l).on_string(node) }
-      when YARP::ClassNode
+      when Prism::ClassNode
         @listeners[:on_class]&.each { |l| T.unsafe(l).on_class(node) }
-      when YARP::ModuleNode
+      when Prism::ModuleNode
         @listeners[:on_module]&.each { |l| T.unsafe(l).on_module(node) }
-      when YARP::ConstantWriteNode
+      when Prism::ConstantWriteNode
         @listeners[:on_constant_write]&.each { |l| T.unsafe(l).on_constant_write(node) }
-      when YARP::ConstantReadNode
+      when Prism::ConstantReadNode
         @listeners[:on_constant_read]&.each { |l| T.unsafe(l).on_constant_read(node) }
       end
     end
 
-    sig { params(nodes: T::Array[T.nilable(YARP::Node)]).void }
+    sig { params(nodes: T::Array[T.nilable(Prism::Node)]).void }
     def visit_all(nodes)
       nodes.each { |node| visit(node) }
     end
 
-    YARP::Visitor.instance_methods.grep(/^visit_.*_node/).each do |method|
+    Prism::Visitor.instance_methods.grep(/^visit_.*_node/).each do |method|
       event_name = method.to_s.delete_prefix("visit_").delete_suffix("_node")
 
       class_eval(<<~RUBY, __FILE__, __LINE__ + 1)

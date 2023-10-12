@@ -52,7 +52,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: YARP::ClassNode).void }
+      sig { params(node: Prism::ClassNode).void }
       def on_class(node)
         @visibility_stack.push(["public", "public"])
         class_name = node.constant_path.slice
@@ -68,13 +68,13 @@ module RubyLsp
         end
       end
 
-      sig { params(node: YARP::ClassNode).void }
+      sig { params(node: Prism::ClassNode).void }
       def after_class(node)
         @visibility_stack.pop
         @class_stack.pop
       end
 
-      sig { params(node: YARP::DefNode).void }
+      sig { params(node: Prism::DefNode).void }
       def on_def(node)
         class_name = @class_stack.last
         return unless class_name&.end_with?("Test")
@@ -93,7 +93,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: YARP::CallNode).void }
+      sig { params(node: Prism::CallNode).void }
       def on_call(node)
         name = node.name
         arguments = node.arguments
@@ -103,7 +103,7 @@ module RubyLsp
           if arguments.nil?
             @visibility_stack.pop
             @visibility_stack.push([name, name])
-          elsif arguments.arguments.first.is_a?(YARP::DefNode)
+          elsif arguments.arguments.first.is_a?(Prism::DefNode)
             visibility, _ = @visibility_stack.pop
             @visibility_stack.push([name, visibility])
           end
@@ -113,7 +113,7 @@ module RubyLsp
 
         if @path&.include?("Gemfile") && name == "gem" && arguments
           first_argument = arguments.arguments.first
-          return unless first_argument.is_a?(YARP::StringNode)
+          return unless first_argument.is_a?(Prism::StringNode)
 
           remote = resolve_gem_remote(first_argument)
           return unless remote
@@ -122,7 +122,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: YARP::CallNode).void }
+      sig { params(node: Prism::CallNode).void }
       def after_call(node)
         _, prev_visibility = @visibility_stack.pop
         @visibility_stack.push([prev_visibility, prev_visibility])
@@ -141,7 +141,7 @@ module RubyLsp
 
       private
 
-      sig { params(node: YARP::Node, name: String, command: String, kind: Symbol).void }
+      sig { params(node: Prism::Node, name: String, command: String, kind: Symbol).void }
       def add_test_code_lens(node, name:, command:, kind:)
         # don't add code lenses if the test library is not supported or unknown
         return unless SUPPORTED_TEST_LIBRARIES.include?(DependencyDetector.instance.detected_test_library) && @path
@@ -183,7 +183,7 @@ module RubyLsp
         )
       end
 
-      sig { params(gem_name: YARP::StringNode).returns(T.nilable(String)) }
+      sig { params(gem_name: Prism::StringNode).returns(T.nilable(String)) }
       def resolve_gem_remote(gem_name)
         spec = Gem::Specification.stubs.find { |gem| gem.name == gem_name.content }&.to_spec
         return if spec.nil?
@@ -215,7 +215,7 @@ module RubyLsp
         command
       end
 
-      sig { params(node: YARP::CallNode, remote: String).void }
+      sig { params(node: Prism::CallNode, remote: String).void }
       def add_open_gem_remote_code_lens(node, remote)
         @_response << create_code_lens(
           node,

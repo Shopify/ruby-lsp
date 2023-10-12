@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "sorbet-runtime"
-require "yarp"
+require "prism"
 require "language_server-protocol"
 require "bundler"
 require "uri"

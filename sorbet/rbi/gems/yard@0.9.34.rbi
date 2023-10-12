@@ -486,51 +486,6 @@ RUBY18 = T.let(T.unsafe(nil), FalseClass)
 # source://yard//lib/yard.rb#62
 RUBY19 = T.let(T.unsafe(nil), TrueClass)
 
-# @private
-#
-# source://yard//lib/yard/server/rack_adapter.rb#93
-class Rack::Request
-  # source://rack/2.2.7/lib/rack/request.rb#26
-  def initialize(env); end
-
-  # source://rack/2.2.7/lib/rack/request.rb#40
-  def delete_param(k); end
-
-  # source://rack/2.2.7/lib/rack/request.rb#31
-  def params; end
-
-  # source://rack/2.2.7/lib/rack/request.rb#31
-  def query; end
-
-  # source://rack/2.2.7/lib/rack/request.rb#35
-  def update_param(k, v); end
-
-  # Returns the value of attribute version_supplied.
-  #
-  # source://yard//lib/yard/server/rack_adapter.rb#94
-  def version_supplied; end
-
-  # Sets the attribute version_supplied
-  #
-  # @param value the value to set the attribute version_supplied to.
-  #
-  # source://yard//lib/yard/server/rack_adapter.rb#94
-  def version_supplied=(_arg0); end
-
-  # @return [Boolean]
-  #
-  # source://yard//lib/yard/server/rack_adapter.rb#96
-  def xhr?; end
-
-  class << self
-    # source://rack/2.2.7/lib/rack/request.rb#16
-    def ip_filter; end
-
-    # source://rack/2.2.7/lib/rack/request.rb#16
-    def ip_filter=(_arg0); end
-  end
-end
-
 # source://yard//lib/yard/core_ext/string.rb#2
 class String
   include ::Comparable
@@ -14379,74 +14334,6 @@ end
 #
 # source://yard//lib/yard/server/adapter.rb#11
 class YARD::Server::NotFoundError < ::RuntimeError; end
-
-# A server adapter to respond to requests using the Rack server infrastructure.
-#
-# @since 0.6.0
-#
-# source://yard//lib/yard/server/rack_adapter.rb#52
-class YARD::Server::RackAdapter < ::YARD::Server::Adapter
-  include ::YARD::Server::HTTPUtils
-
-  # Responds to Rack requests and builds a response with the {Router}.
-  #
-  # @return [Array(Numeric,Hash,Array)] the Rack-style response
-  # @since 0.6.0
-  #
-  # source://yard//lib/yard/server/rack_adapter.rb#57
-  def call(env); end
-
-  # Starts the Rack server. This method will pass control to the server and
-  # block.
-  #
-  # @return [void]
-  # @since 0.6.0
-  #
-  # source://yard//lib/yard/server/rack_adapter.rb#70
-  def start; end
-
-  private
-
-  # @since 0.6.0
-  #
-  # source://yard//lib/yard/server/rack_adapter.rb#79
-  def print_start_message(server); end
-end
-
-# This class wraps the {RackAdapter} into a Rack-compatible middleware.
-# See {#initialize} for a list of options to pass via Rack's +#use+ method.
-#
-# @example Using the RackMiddleware in a Rack application
-#   libraries = {:mylib => [YARD::Server::LibraryVersion.new('mylib', nil, '/path/to/.yardoc')]}
-#   use YARD::Server::RackMiddleware, :libraries => libraries
-# @note You must pass a +:libraries+ option to the RackMiddleware via +#use+. To
-#   read about how to return a list of libraries, see {LibraryVersion} or look
-#   at the example below.
-# @since 0.6.0
-#
-# source://yard//lib/yard/server/rack_adapter.rb#25
-class YARD::Server::RackMiddleware
-  # Creates a new Rack-based middleware for serving YARD documentation.
-  #
-  # @option opts
-  # @option opts
-  # @option opts
-  # @param app the next Rack middleware in the stack
-  # @param opts [Hash] a customizable set of options
-  # @return [RackMiddleware] a new instance of RackMiddleware
-  # @since 0.6.0
-  #
-  # source://yard//lib/yard/server/rack_adapter.rb#35
-  def initialize(app, opts = T.unsafe(nil)); end
-
-  # @since 0.6.0
-  #
-  # source://yard//lib/yard/server/rack_adapter.rb#41
-  def call(env); end
-end
-
-# source://yard//lib/yard/server/rack_adapter.rb#12
-YARD::Server::RackServer = Rack::Server
 
 # A router class implements the logic used to recognize a request for a specific
 # URL and run specific {Commands::Base commands}.

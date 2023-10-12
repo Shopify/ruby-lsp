@@ -21,12 +21,12 @@ module RubyLsp
 
       ResponseType = type_member { { fixed: T::Array[Interface::FoldingRange] } }
 
-      sig { params(comments: T::Array[YARP::Comment], emitter: EventEmitter, queue: Thread::Queue).void }
+      sig { params(comments: T::Array[Prism::Comment], emitter: EventEmitter, queue: Thread::Queue).void }
       def initialize(comments, emitter, queue)
         super(emitter, queue)
 
         @_response = T.let([], ResponseType)
-        @requires = T.let([], T::Array[YARP::CallNode])
+        @requires = T.let([], T::Array[Prism::CallNode])
         @finalized_response = T.let(false, T::Boolean)
         @comments = comments
 
@@ -68,27 +68,27 @@ module RubyLsp
         @_response
       end
 
-      sig { params(node: YARP::IfNode).void }
+      sig { params(node: Prism::IfNode).void }
       def on_if(node)
         add_statements_range(node)
       end
 
-      sig { params(node: YARP::InNode).void }
+      sig { params(node: Prism::InNode).void }
       def on_in(node)
         add_statements_range(node)
       end
 
-      sig { params(node: YARP::RescueNode).void }
+      sig { params(node: Prism::RescueNode).void }
       def on_rescue(node)
         add_statements_range(node)
       end
 
-      sig { params(node: YARP::WhenNode).void }
+      sig { params(node: Prism::WhenNode).void }
       def on_when(node)
         add_statements_range(node)
       end
 
-      sig { params(node: YARP::InterpolatedStringNode).void }
+      sig { params(node: Prism::InterpolatedStringNode).void }
       def on_interpolated_string(node)
         opening_loc = node.opening_loc
         closing_loc = node.closing_loc
@@ -96,85 +96,85 @@ module RubyLsp
         add_lines_range(opening_loc.start_line, closing_loc.end_line - 1) if opening_loc && closing_loc
       end
 
-      sig { params(node: YARP::ArrayNode).void }
+      sig { params(node: Prism::ArrayNode).void }
       def on_array(node)
         add_simple_range(node)
       end
 
-      sig { params(node: YARP::BlockNode).void }
+      sig { params(node: Prism::BlockNode).void }
       def on_block(node)
         add_simple_range(node)
       end
 
-      sig { params(node: YARP::CaseNode).void }
+      sig { params(node: Prism::CaseNode).void }
       def on_case(node)
         add_simple_range(node)
       end
 
-      sig { params(node: YARP::ClassNode).void }
+      sig { params(node: Prism::ClassNode).void }
       def on_class(node)
         add_simple_range(node)
       end
 
-      sig { params(node: YARP::ModuleNode).void }
+      sig { params(node: Prism::ModuleNode).void }
       def on_module(node)
         add_simple_range(node)
       end
 
-      sig { params(node: YARP::ForNode).void }
+      sig { params(node: Prism::ForNode).void }
       def on_for(node)
         add_simple_range(node)
       end
 
-      sig { params(node: YARP::HashNode).void }
+      sig { params(node: Prism::HashNode).void }
       def on_hash(node)
         add_simple_range(node)
       end
 
-      sig { params(node: YARP::SingletonClassNode).void }
+      sig { params(node: Prism::SingletonClassNode).void }
       def on_singleton_class(node)
         add_simple_range(node)
       end
 
-      sig { params(node: YARP::UnlessNode).void }
+      sig { params(node: Prism::UnlessNode).void }
       def on_unless(node)
         add_simple_range(node)
       end
 
-      sig { params(node: YARP::UntilNode).void }
+      sig { params(node: Prism::UntilNode).void }
       def on_until(node)
         add_simple_range(node)
       end
 
-      sig { params(node: YARP::WhileNode).void }
+      sig { params(node: Prism::WhileNode).void }
       def on_while(node)
         add_simple_range(node)
       end
 
-      sig { params(node: YARP::ElseNode).void }
+      sig { params(node: Prism::ElseNode).void }
       def on_else(node)
         add_simple_range(node)
       end
 
-      sig { params(node: YARP::EnsureNode).void }
+      sig { params(node: Prism::EnsureNode).void }
       def on_ensure(node)
         add_simple_range(node)
       end
 
-      sig { params(node: YARP::BeginNode).void }
+      sig { params(node: Prism::BeginNode).void }
       def on_begin(node)
         add_simple_range(node)
       end
 
-      sig { params(node: YARP::StringConcatNode).void }
+      sig { params(node: Prism::StringConcatNode).void }
       def on_string_concat(node)
-        left = T.let(node.left, YARP::Node)
-        left = left.left while left.is_a?(YARP::StringConcatNode)
+        left = T.let(node.left, Prism::Node)
+        left = left.left while left.is_a?(Prism::StringConcatNode)
 
         add_lines_range(left.location.start_line, node.right.location.end_line - 1)
       end
 
-      sig { params(node: YARP::DefNode).void }
+      sig { params(node: Prism::DefNode).void }
       def on_def(node)
         params = node.parameters
         parameter_loc = params&.location
@@ -189,7 +189,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: YARP::CallNode).void }
+      sig { params(node: Prism::CallNode).void }
       def on_call(node)
         # If we find a require, don't visit the child nodes (prevent `super`), so that we can keep accumulating into
         # the `@requires` array and then push the range whenever we find a node that isn't a CallNode
@@ -233,7 +233,7 @@ module RubyLsp
         @requires.clear
       end
 
-      sig { params(node: YARP::CallNode).returns(T::Boolean) }
+      sig { params(node: Prism::CallNode).returns(T::Boolean) }
       def require?(node)
         message = node.message
         return false unless message == "require" || message == "require_relative"
@@ -244,10 +244,10 @@ module RubyLsp
         arguments = node.arguments&.arguments
         return false unless arguments
 
-        arguments.length == 1 && arguments.first.is_a?(YARP::StringNode)
+        arguments.length == 1 && arguments.first.is_a?(Prism::StringNode)
       end
 
-      sig { params(node: T.any(YARP::IfNode, YARP::InNode, YARP::RescueNode, YARP::WhenNode)).void }
+      sig { params(node: T.any(Prism::IfNode, Prism::InNode, Prism::RescueNode, Prism::WhenNode)).void }
       def add_statements_range(node)
         statements = node.statements
         return unless statements
@@ -258,7 +258,7 @@ module RubyLsp
         add_lines_range(node.location.start_line, T.must(body.last).location.end_line)
       end
 
-      sig { params(node: YARP::Node).void }
+      sig { params(node: Prism::Node).void }
       def add_simple_range(node)
         location = node.location
         add_lines_range(location.start_line, location.end_line - 1)

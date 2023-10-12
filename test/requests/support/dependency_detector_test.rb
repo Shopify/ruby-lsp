@@ -34,7 +34,7 @@ module RubyLsp
     end
 
     def test_detects_dependencies_in_gemspecs
-      assert(DependencyDetector.instance.direct_dependency?(/^yarp$/))
+      assert(DependencyDetector.instance.direct_dependency?(/^prism$/))
     end
 
     def test_detects_rails_if_both_rails_and_minitest_are_present

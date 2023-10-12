@@ -66,7 +66,7 @@ module RubyLsp
         self
       end
 
-      sig { params(node: YARP::CallNode).void }
+      sig { params(node: Prism::CallNode).void }
       def on_call(node)
         message = node.name
         return unless message == "require" || message == "require_relative"
@@ -75,7 +75,7 @@ module RubyLsp
         return unless arguments
 
         argument = arguments.arguments.first
-        return unless argument.is_a?(YARP::StringNode)
+        return unless argument.is_a?(Prism::StringNode)
 
         case message
         when "require"
@@ -110,12 +110,12 @@ module RubyLsp
         end
       end
 
-      sig { params(node: YARP::ConstantPathNode).void }
+      sig { params(node: Prism::ConstantPathNode).void }
       def on_constant_path(node)
         find_in_index(node.slice)
       end
 
-      sig { params(node: YARP::ConstantReadNode).void }
+      sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read(node)
         find_in_index(node.slice)
       end

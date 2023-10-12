@@ -42,7 +42,7 @@ module RubyLsp
 
           sig do
             params(
-              node: YARP::CallNode,
+              node: Prism::CallNode,
             ).returns(T::Boolean)
           end
           def annotation?(node)

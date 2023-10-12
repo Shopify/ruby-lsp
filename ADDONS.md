@@ -157,7 +157,7 @@ module RubyLsp
 
       # Listeners must define methods for each event they registered with the emitter. In this case, we have to define
       # `on_const` to specify what this listener should do every time we find a constant
-      sig { params(node: YARP::ConstantReadNode).void }
+      sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read(node)
         # Certain helpers are made available to listeners to build LSP responses. The classes under `RubyLsp::Interface`
         # are generally used to build responses and they match exactly what the specification requests.
