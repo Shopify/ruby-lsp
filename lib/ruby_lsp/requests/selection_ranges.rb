@@ -20,123 +20,35 @@ module RubyLsp
     #   puts "Hello, world!" # --> Cursor is on this line
     # end
     # ```
-    class SelectionRanges < BaseRequest
+    class SelectionRanges
       extend T::Sig
-
-      NODES_THAT_CAN_BE_PARENTS = T.let(
-        [
-          YARP::ArgumentsNode,
-          YARP::ArrayNode,
-          YARP::AssocNode,
-          YARP::BeginNode,
-          YARP::BlockNode,
-          YARP::CallNode,
-          YARP::CaseNode,
-          YARP::ClassNode,
-          YARP::DefNode,
-          YARP::ElseNode,
-          YARP::EnsureNode,
-          YARP::ForNode,
-          YARP::HashNode,
-          YARP::HashPatternNode,
-          YARP::IfNode,
-          YARP::InNode,
-          YARP::InterpolatedStringNode,
-          YARP::KeywordHashNode,
-          YARP::LambdaNode,
-          YARP::LocalVariableWriteNode,
-          YARP::ModuleNode,
-          YARP::ParametersNode,
-          YARP::RescueNode,
-          YARP::StringConcatNode,
-          YARP::StringNode,
-          YARP::UnlessNode,
-          YARP::UntilNode,
-          YARP::WhenNode,
-          YARP::WhileNode,
-        ].freeze,
-        T::Array[T.class_of(YARP::Node)],
-      )
+      include Support::Common
 
       sig { params(document: Document).void }
       def initialize(document)
-        super(document)
-
+        @document = document
         @ranges = T.let([], T::Array[Support::SelectionRange])
         @stack = T.let([], T::Array[Support::SelectionRange])
       end
 
-      sig { override.returns(T.all(T::Array[Support::SelectionRange], Object)) }
+      sig { returns(T.all(T::Array[Support::SelectionRange], Object)) }
       def run
-        visit(@document.tree)
-        @ranges.reverse!
-      end
+        # [node, parent]
+        queue = [[@document.tree, nil]]
 
-      private
+        until queue.empty?
+          node, parent = queue.shift
+          next unless node
 
-      sig { override.params(node: T.nilable(YARP::Node)).void }
-      def visit(node)
-        return if node.nil?
-
-        range = if node.is_a?(YARP::InterpolatedStringNode)
-          create_heredoc_selection_range(node, @stack.last)
-        else
-          create_selection_range(node.location, @stack.last)
+          range = RubyLsp::Requests::Support::SelectionRange.new(
+            range: range_from_location(node.location),
+            parent: parent,
+          )
+          T.unsafe(queue).unshift(*node.child_nodes.map { |child| [child, range] })
+          @ranges.unshift(range)
         end
-        @ranges << range
 
-        return if node.child_nodes.empty?
-
-        @stack << range if NODES_THAT_CAN_BE_PARENTS.include?(node.class)
-        visit_all(node.child_nodes)
-        @stack.pop if NODES_THAT_CAN_BE_PARENTS.include?(node.class)
-      end
-
-      sig do
-        params(
-          node: YARP::InterpolatedStringNode,
-          parent: T.nilable(Support::SelectionRange),
-        ).returns(Support::SelectionRange)
-      end
-      def create_heredoc_selection_range(node, parent)
-        opening_loc = node.opening_loc || node.location
-        closing_loc = node.closing_loc || node.location
-
-        RubyLsp::Requests::Support::SelectionRange.new(
-          range: Interface::Range.new(
-            start: Interface::Position.new(
-              line: opening_loc.start_line - 1,
-              character: opening_loc.start_column,
-            ),
-            end: Interface::Position.new(
-              line: closing_loc.end_line - 1,
-              character: closing_loc.end_column,
-            ),
-          ),
-          parent: parent,
-        )
-      end
-
-      sig do
-        params(
-          location: YARP::Location,
-          parent: T.nilable(Support::SelectionRange),
-        ).returns(Support::SelectionRange)
-      end
-      def create_selection_range(location, parent)
-        RubyLsp::Requests::Support::SelectionRange.new(
-          range: Interface::Range.new(
-            start: Interface::Position.new(
-              line: location.start_line - 1,
-              character: location.start_column,
-            ),
-            end: Interface::Position.new(
-              line: location.end_line - 1,
-              character: location.end_column,
-            ),
-          ),
-          parent: parent,
-        )
+        @ranges
       end
     end
   end
