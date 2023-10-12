@@ -101,8 +101,8 @@ default shell.
 
 > [!NOTE]
 >
-> For manager-specific notes, setting up custom activation for managers not listed above,
-> and community-contributed examples, please see [version managers](VERSION_MANAGERS.md).
+> For manager-specific notes, setting up custom activation for managers not listed above and community-contributed
+> examples, please see [version managers](https://github.com/Shopify/vscode-ruby-lsp/blob/main/VERSION_MANAGERS.md).
 
 #### Configuring a formatter
 
