@@ -46,9 +46,9 @@ module RubyLsp
       @dependencies = T.let(load_dependencies, T::Hash[String, T.untyped])
     end
 
-    # Setups up the custom bundle and returns the `BUNDLE_GEMFILE` and `BUNDLE_PATH` that should be used for running the
-    # server
-    sig { returns([String, T.nilable(String)]) }
+    # Sets up the custom bundle and returns the `BUNDLE_GEMFILE`, `BUNDLE_PATH` and `BUNDLE_APP_CONFIG` that should be
+    # used for running the server
+    sig { returns([String, T.nilable(String), T.nilable(String)]) }
     def setup!
       raise BundleNotLocked if @gemfile&.exist? && !@lockfile&.exist?
 
@@ -156,7 +156,7 @@ module RubyLsp
       dependencies
     end
 
-    sig { params(bundle_gemfile: T.nilable(Pathname)).returns([String, T.nilable(String)]) }
+    sig { params(bundle_gemfile: T.nilable(Pathname)).returns([String, T.nilable(String), T.nilable(String)]) }
     def run_bundle_install(bundle_gemfile = @gemfile)
       # If the user has a custom bundle path configured, we need to ensure that we will use the absolute and not
       # relative version of it when running `bundle install`. This is necessary to avoid installing the gems under the
@@ -169,6 +169,9 @@ module RubyLsp
       env = {}
       env["BUNDLE_GEMFILE"] = bundle_gemfile.to_s
       env["BUNDLE_PATH"] = expanded_path if expanded_path
+
+      local_config_path = File.join(Dir.pwd, ".bundle")
+      env["BUNDLE_APP_CONFIG"] = local_config_path if Dir.exist?(local_config_path)
 
       # If both `ruby-lsp` and `debug` are already in the Gemfile, then we shouldn't try to upgrade them or else we'll
       # produce undesired source control changes. If the custom bundle was just created and either `ruby-lsp` or `debug`
@@ -200,7 +203,7 @@ module RubyLsp
       # Add bundle update
       warn("Ruby LSP> Running bundle install for the custom bundle. This may take a while...")
       system(env, command)
-      [bundle_gemfile.to_s, expanded_path]
+      [bundle_gemfile.to_s, expanded_path, env["BUNDLE_APP_CONFIG"]]
     end
 
     sig { returns(T::Boolean) }
