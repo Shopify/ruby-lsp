@@ -324,5 +324,68 @@ module RubyIndexer
       assert_entry("F::G", Index::Entry::Constant, "/fake/path/foo.rb:4-0:4-10")
       assert_entry("H::I", Index::Entry::Constant, "/fake/path/foo.rb:5-0:5-9")
     end
+
+    def test_indexing_constant_targets
+      index(<<~RUBY)
+        module A
+          B, C = [1, Y]
+          D::E, F::G = [Z, 4]
+          H, I::J = [5, B]
+          K, L = C
+        end
+
+        module Real
+          Z = 1
+          Y = 2
+        end
+      RUBY
+
+      assert_entry("A::B", Index::Entry::Constant, "/fake/path/foo.rb:1-2:1-3")
+      assert_entry("A::C", Index::Entry::UnresolvedAlias, "/fake/path/foo.rb:1-5:1-6")
+      assert_entry("A::D::E", Index::Entry::UnresolvedAlias, "/fake/path/foo.rb:2-2:2-6")
+      assert_entry("A::F::G", Index::Entry::Constant, "/fake/path/foo.rb:2-8:2-12")
+      assert_entry("A::H", Index::Entry::Constant, "/fake/path/foo.rb:3-2:3-3")
+      assert_entry("A::I::J", Index::Entry::UnresolvedAlias, "/fake/path/foo.rb:3-5:3-9")
+      assert_entry("A::K", Index::Entry::Constant, "/fake/path/foo.rb:4-2:4-3")
+      assert_entry("A::L", Index::Entry::Constant, "/fake/path/foo.rb:4-5:4-6")
+    end
+
+    def test_indexing_constant_targets_with_splats
+      index(<<~RUBY)
+        A, *, B = baz
+        C, = bar
+        (D, E) = baz
+        F, G = *baz, qux
+        H, I = [baz, *qux]
+        J, L = [*something, String]
+        M = [String]
+      RUBY
+
+      assert_entry("A", Index::Entry::Constant, "/fake/path/foo.rb:0-0:0-1")
+      assert_entry("B", Index::Entry::Constant, "/fake/path/foo.rb:0-6:0-7")
+      assert_entry("D", Index::Entry::Constant, "/fake/path/foo.rb:2-1:2-2")
+      assert_entry("E", Index::Entry::Constant, "/fake/path/foo.rb:2-4:2-5")
+      assert_entry("F", Index::Entry::Constant, "/fake/path/foo.rb:3-0:3-1")
+      assert_entry("G", Index::Entry::Constant, "/fake/path/foo.rb:3-3:3-4")
+      assert_entry("H", Index::Entry::Constant, "/fake/path/foo.rb:4-0:4-1")
+      assert_entry("I", Index::Entry::Constant, "/fake/path/foo.rb:4-3:4-4")
+      assert_entry("J", Index::Entry::Constant, "/fake/path/foo.rb:5-0:5-1")
+      assert_entry("L", Index::Entry::Constant, "/fake/path/foo.rb:5-3:5-4")
+      assert_entry("M", Index::Entry::Constant, "/fake/path/foo.rb:6-0:6-12")
+    end
+
+    def test_indexing_destructuring_an_array
+      index(<<~RUBY)
+        Baz = [1, 2]
+        Foo, Bar = Baz
+        This, That = foo, bar
+      RUBY
+
+      assert_entry("Baz", Index::Entry::Constant, "/fake/path/foo.rb:0-0:0-12")
+      assert_entry("Foo", Index::Entry::Constant, "/fake/path/foo.rb:1-0:1-3")
+      assert_entry("Bar", Index::Entry::Constant, "/fake/path/foo.rb:1-5:1-8")
+      assert_entry("This", Index::Entry::Constant, "/fake/path/foo.rb:2-0:2-4")
+      assert_entry("That", Index::Entry::Constant, "/fake/path/foo.rb:2-6:2-10")
+    end
   end
 end
