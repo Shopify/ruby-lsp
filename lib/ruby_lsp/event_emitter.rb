@@ -54,11 +54,6 @@ module RubyLsp
       end
     end
 
-    sig { params(nodes: T::Array[T.nilable(Prism::Node)]).void }
-    def visit_all(nodes)
-      nodes.each { |node| visit(node) }
-    end
-
     Prism::Visitor.instance_methods.grep(/^visit_.*_node/).each do |method|
       event_name = method.to_s.delete_prefix("visit_").delete_suffix("_node")
 
