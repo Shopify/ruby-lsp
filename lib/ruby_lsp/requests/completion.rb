@@ -43,7 +43,7 @@ module RubyLsp
         emitter.register(self, :on_string, :on_constant_path, :on_constant_read)
       end
 
-      sig { params(node: YARP::StringNode).void }
+      sig { params(node: Prism::StringNode).void }
       def on_string(node)
         @index.search_require_paths(node.content).map!(&:require_path).sort!.each do |path|
           @_response << build_completion(T.must(path), node)
@@ -51,7 +51,7 @@ module RubyLsp
       end
 
       # Handle completion on regular constant references (e.g. `Bar`)
-      sig { params(node: YARP::ConstantReadNode).void }
+      sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read(node)
         return if DependencyDetector.instance.typechecker
 
@@ -64,7 +64,7 @@ module RubyLsp
       end
 
       # Handle completion on namespaced constant references (e.g. `Foo::Bar`)
-      sig { params(node: YARP::ConstantPathNode).void }
+      sig { params(node: Prism::ConstantPathNode).void }
       def on_constant_path(node)
         return if DependencyDetector.instance.typechecker
 
@@ -108,7 +108,7 @@ module RubyLsp
 
       private
 
-      sig { params(label: String, node: YARP::StringNode).returns(Interface::CompletionItem) }
+      sig { params(label: String, node: Prism::StringNode).returns(Interface::CompletionItem) }
       def build_completion(label, node)
         Interface::CompletionItem.new(
           label: label,
@@ -123,7 +123,7 @@ module RubyLsp
       sig do
         params(
           name: String,
-          node: YARP::Node,
+          node: Prism::Node,
           entries: T::Array[RubyIndexer::Index::Entry],
           top_level: T::Boolean,
         ).returns(Interface::CompletionItem)

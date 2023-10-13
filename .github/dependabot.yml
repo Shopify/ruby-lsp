@@ -15,7 +15,7 @@ updates:
           - "minor"
           - "patch"
         exclude-patterns:
-          - "yarp"
+          - "prism"
   - package-ecosystem: "gitsubmodule"
     directory: "/"
     schedule:

@@ -10,7 +10,7 @@ module RubyLsp
         # cautious of changing anything.
         extend T::Sig
 
-        sig { params(node: YARP::Node).returns(Interface::Range) }
+        sig { params(node: Prism::Node).returns(Interface::Range) }
         def range_from_node(node)
           loc = node.location
 
@@ -23,7 +23,7 @@ module RubyLsp
           )
         end
 
-        sig { params(location: YARP::Location).returns(Interface::Range) }
+        sig { params(location: Prism::Location).returns(Interface::Range) }
         def range_from_location(location)
           Interface::Range.new(
             start: Interface::Position.new(
@@ -34,7 +34,7 @@ module RubyLsp
           )
         end
 
-        sig { params(node: T.nilable(YARP::Node), range: T.nilable(T::Range[Integer])).returns(T::Boolean) }
+        sig { params(node: T.nilable(Prism::Node), range: T.nilable(T::Range[Integer])).returns(T::Boolean) }
         def visible?(node, range)
           return true if range.nil?
           return false if node.nil?
@@ -45,7 +45,7 @@ module RubyLsp
 
         sig do
           params(
-            node: YARP::Node,
+            node: Prism::Node,
             title: String,
             command_name: String,
             arguments: T.nilable(T::Array[T.untyped]),

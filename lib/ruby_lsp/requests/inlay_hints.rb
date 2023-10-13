@@ -39,7 +39,7 @@ module RubyLsp
         emitter.register(self, :on_rescue)
       end
 
-      sig { params(node: YARP::RescueNode).void }
+      sig { params(node: Prism::RescueNode).void }
       def on_rescue(node)
         return unless node.exceptions.empty?
 

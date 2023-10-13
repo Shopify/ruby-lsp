@@ -23,7 +23,6 @@ module RubyLsp
     class SelectionRanges
       extend T::Sig
       include Support::Common
-
       sig { params(document: Document).void }
       def initialize(document)
         @document = document

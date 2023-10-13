@@ -257,10 +257,10 @@ module RubyLsp
       document = @store.get(uri)
       target, parent, nesting = document.locate_node(
         position,
-        node_types: [YARP::CallNode, YARP::ConstantReadNode, YARP::ConstantPathNode],
+        node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode],
       )
 
-      target = parent if target.is_a?(YARP::ConstantReadNode) && parent.is_a?(YARP::ConstantPathNode)
+      target = parent if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)
 
       emitter = EventEmitter.new
       base_listener = Requests::Definition.new(
@@ -289,7 +289,7 @@ module RubyLsp
 
       if (Requests::Hover::ALLOWED_TARGETS.include?(parent.class) &&
           !Requests::Hover::ALLOWED_TARGETS.include?(target.class)) ||
-          (parent.is_a?(YARP::ConstantPathNode) && target.is_a?(YARP::ConstantReadNode))
+          (parent.is_a?(Prism::ConstantPathNode) && target.is_a?(Prism::ConstantReadNode))
         target = parent
       end
 
@@ -481,29 +481,29 @@ module RubyLsp
       # the node, as it could not be a constant
       target_node_types = if ("A".."Z").cover?(document.source[char_position - 1])
         char_position -= 1
-        [YARP::ConstantReadNode, YARP::ConstantPathNode]
+        [Prism::ConstantReadNode, Prism::ConstantPathNode]
       else
-        [YARP::CallNode]
+        [Prism::CallNode]
       end
 
       matched, parent, nesting = document.locate(document.tree, char_position, node_types: target_node_types)
       return unless matched && parent
 
       target = case matched
-      when YARP::CallNode
+      when Prism::CallNode
         message = matched.message
         return unless message == "require"
 
         args = matched.arguments&.arguments
-        return if args.nil? || args.is_a?(YARP::ForwardingArgumentsNode)
+        return if args.nil? || args.is_a?(Prism::ForwardingArgumentsNode)
 
         argument = args.first
-        return unless argument.is_a?(YARP::StringNode)
+        return unless argument.is_a?(Prism::StringNode)
         return unless (argument.location.start_offset..argument.location.end_offset).cover?(char_position)
 
         argument
-      when YARP::ConstantReadNode, YARP::ConstantPathNode
-        if parent.is_a?(YARP::ConstantPathNode) && matched.is_a?(YARP::ConstantReadNode)
+      when Prism::ConstantReadNode, Prism::ConstantPathNode
+        if parent.is_a?(Prism::ConstantPathNode) && matched.is_a?(Prism::ConstantReadNode)
           parent
         else
           matched

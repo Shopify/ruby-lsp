@@ -88,7 +88,7 @@ module RubyLsp
         self
       end
 
-      sig { params(node: YARP::ClassNode).void }
+      sig { params(node: Prism::ClassNode).void }
       def on_class(node)
         @stack << create_document_symbol(
           name: node.constant_path.location.slice,
@@ -98,12 +98,12 @@ module RubyLsp
         )
       end
 
-      sig { params(node: YARP::ClassNode).void }
+      sig { params(node: Prism::ClassNode).void }
       def after_class(node)
         @stack.pop
       end
 
-      sig { params(node: YARP::CallNode).void }
+      sig { params(node: Prism::CallNode).void }
       def on_call(node)
         return unless ATTR_ACCESSORS.include?(node.name) && node.receiver.nil?
 
@@ -111,7 +111,7 @@ module RubyLsp
         return unless arguments
 
         arguments.arguments.each do |argument|
-          next unless argument.is_a?(YARP::SymbolNode)
+          next unless argument.is_a?(Prism::SymbolNode)
 
           name = argument.value
           next unless name
@@ -125,7 +125,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: YARP::ConstantPathWriteNode).void }
+      sig { params(node: Prism::ConstantPathWriteNode).void }
       def on_constant_path_write(node)
         create_document_symbol(
           name: node.target.location.slice,
@@ -135,7 +135,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: YARP::ConstantWriteNode).void }
+      sig { params(node: Prism::ConstantWriteNode).void }
       def on_constant_write(node)
         create_document_symbol(
           name: node.name.to_s,
@@ -145,12 +145,12 @@ module RubyLsp
         )
       end
 
-      sig { params(node: YARP::DefNode).void }
+      sig { params(node: Prism::DefNode).void }
       def after_def(node)
         @stack.pop
       end
 
-      sig { params(node: YARP::ModuleNode).void }
+      sig { params(node: Prism::ModuleNode).void }
       def on_module(node)
         @stack << create_document_symbol(
           name: node.constant_path.location.slice,
@@ -160,11 +160,11 @@ module RubyLsp
         )
       end
 
-      sig { params(node: YARP::DefNode).void }
+      sig { params(node: Prism::DefNode).void }
       def on_def(node)
         receiver = node.receiver
 
-        if receiver.is_a?(YARP::SelfNode)
+        if receiver.is_a?(Prism::SelfNode)
           name = "self.#{node.name}"
           kind = Constant::SymbolKind::METHOD
         else
@@ -182,12 +182,12 @@ module RubyLsp
         @stack << symbol
       end
 
-      sig { params(node: YARP::ModuleNode).void }
+      sig { params(node: Prism::ModuleNode).void }
       def after_module(node)
         @stack.pop
       end
 
-      sig { params(node: YARP::InstanceVariableWriteNode).void }
+      sig { params(node: Prism::InstanceVariableWriteNode).void }
       def on_instance_variable_write(node)
         create_document_symbol(
           name: node.name.to_s,
@@ -197,7 +197,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: YARP::ClassVariableWriteNode).void }
+      sig { params(node: Prism::ClassVariableWriteNode).void }
       def on_class_variable_write(node)
         create_document_symbol(
           name: node.name.to_s,
@@ -213,8 +213,8 @@ module RubyLsp
         params(
           name: String,
           kind: Integer,
-          range_location: YARP::Location,
-          selection_range_location: YARP::Location,
+          range_location: Prism::Location,
+          selection_range_location: Prism::Location,
         ).returns(Interface::DocumentSymbol)
       end
       def create_document_symbol(name:, kind:, range_location:, selection_range_location:)

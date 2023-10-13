@@ -55,7 +55,7 @@ module RubyLsp
 
         # Find the closest statements node, so that we place the refactor in a valid position
         closest_statements, parent_statements = @document
-          .locate(@document.tree, start_index, node_types: [YARP::StatementsNode, YARP::BlockNode])
+          .locate(@document.tree, start_index, node_types: [Prism::StatementsNode, Prism::BlockNode])
 
         return Error::InvalidTargetRange if closest_statements.nil? || closest_statements.child_nodes.compact.empty?
 
@@ -66,11 +66,11 @@ module RubyLsp
           distance <= 0 ? Float::INFINITY : distance
         end)
 
-        return Error::InvalidTargetRange if closest_node.is_a?(YARP::MissingNode)
+        return Error::InvalidTargetRange if closest_node.is_a?(Prism::MissingNode)
 
         closest_node_loc = closest_node.location
         # If the parent expression is a single line block, then we have to extract it inside of the oneline block
-        if parent_statements.is_a?(YARP::BlockNode) &&
+        if parent_statements.is_a?(Prism::BlockNode) &&
             parent_statements.location.start_line == parent_statements.location.end_line
 
           variable_source = " #{NEW_VARIABLE_NAME} = #{extracted_source};"

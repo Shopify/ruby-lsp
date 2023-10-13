@@ -497,20 +497,20 @@ class SorbetTest < Minitest::Test
 
   sig do
     params(source: String)
-      .returns(YARP::CallNode)
+      .returns(Prism::CallNode)
   end
   def parse(source)
-    program = T.let(YARP.parse(source).value, YARP::Node)
+    program = T.let(Prism.parse(source).value, Prism::Node)
 
     select_relevant_node([program])
   end
 
   sig do
-    params(nodes: T::Array[YARP::Node]).returns(YARP::CallNode)
+    params(nodes: T::Array[Prism::Node]).returns(Prism::CallNode)
   end
   def select_relevant_node(nodes)
     nodes.each do |node|
-      return node if node.is_a?(YARP::CallNode)
+      return node if node.is_a?(Prism::CallNode)
     end
 
     select_relevant_node(nodes.map(&:child_nodes).flatten.compact)

@@ -3,8 +3,8 @@ PATH
   specs:
     ruby-lsp (0.11.2)
       language_server-protocol (~> 3.17.0)
+      prism (>= 0.13, < 0.14)
       sorbet-runtime (>= 0.5.5685)
-      yarp (>= 0.12, < 0.13)
 
 GEM
   remote: https://rubygems.org/
@@ -37,6 +37,7 @@ GEM
       ast (~> 2.4.1)
       racc
     prettier_print (1.2.1)
+    prism (0.13.0)
     psych (5.1.0)
       stringio
     racc (1.7.1)
@@ -106,7 +107,7 @@ GEM
     yard-sorbet (0.8.1)
       sorbet-runtime (>= 0.5)
       yard (>= 0.9)
-    yarp (0.12.0)
+    yarp (0.13.0)
 
 PLATFORMS
   arm64-darwin

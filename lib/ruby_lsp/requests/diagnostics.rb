@@ -60,7 +60,7 @@ module RubyLsp
             ),
             message: error.message,
             severity: Constant::DiagnosticSeverity::ERROR,
-            source: "YARP",
+            source: "Prism",
           )
         end
       end
