@@ -270,6 +270,26 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_returns_bundle_app_config_if_there_is_local_config
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        bundle_gemfile = Pathname.new(".ruby-lsp").expand_path(Dir.pwd) + "Gemfile"
+        Bundler.with_unbundled_env do
+          Bundler.settings.set_local("without", "production")
+          Object.any_instance.expects(:system).with(
+            bundle_env(bundle_gemfile.to_s),
+            "(bundle check || bundle install) 1>&2",
+          )
+
+          run_script(branch: "test-branch")
+        end
+      end
+    end
+  ensure
+    # CI uses a local bundle config and we don't want to delete that
+    FileUtils.rm_r(File.join(Dir.pwd, ".bundle")) unless ENV["CI"]
+  end
+
   private
 
   # This method runs the script and then immediately unloads it. This allows us to make assertions against the effects
@@ -293,6 +313,9 @@ class SetupBundlerTest < Minitest::Test
     env["BUNDLE_PATH"] = File.expand_path(path, Dir.pwd) if path
     env["BUNDLE_GEMFILE"] =
       bundle_gemfile_path.absolute? ? bundle_gemfile_path.to_s : bundle_gemfile_path.expand_path(Dir.pwd).to_s
+
+    local_config_path = File.join(Dir.pwd, ".bundle")
+    env["BUNDLE_APP_CONFIG"] = local_config_path if Dir.exist?(local_config_path)
     env
   end
 end

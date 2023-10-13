@@ -49,7 +49,7 @@ if ENV["BUNDLE_GEMFILE"].nil?
   require_relative "../lib/ruby_lsp/setup_bundler"
 
   begin
-    bundle_gemfile, bundle_path = RubyLsp::SetupBundler.new(Dir.pwd, branch: options[:branch]).setup!
+    bundle_gemfile, bundle_path, bundle_app_config = RubyLsp::SetupBundler.new(Dir.pwd, branch: options[:branch]).setup!
   rescue RubyLsp::SetupBundler::BundleNotLocked
     warn("Project contains a Gemfile, but no Gemfile.lock. Run `bundle install` to lock gems and restart the server")
     exit(78)
@@ -57,6 +57,7 @@ if ENV["BUNDLE_GEMFILE"].nil?
 
   env = { "BUNDLE_GEMFILE" => bundle_gemfile }
   env["BUNDLE_PATH"] = bundle_path if bundle_path
+  env["BUNDLE_APP_CONFIG"] = bundle_app_config if bundle_app_config
   exit exec(env, "bundle exec ruby-lsp #{original_args.join(" ")}")
 end
 
