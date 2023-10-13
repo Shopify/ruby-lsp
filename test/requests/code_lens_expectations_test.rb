@@ -11,10 +11,10 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     uri = URI("file://#{@_path}")
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
-    emitter = RubyLsp::EventEmitter.new
+    dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
-    listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue)
-    emitter.visit(document.tree)
+    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher, @message_queue)
+    dispatcher.dispatch(document.tree)
     listener.response
   end
 
@@ -29,9 +29,9 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
-    emitter = RubyLsp::EventEmitter.new
-    listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue)
-    emitter.visit(document.tree)
+    dispatcher = Prism::Dispatcher.new
+    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher, @message_queue)
+    dispatcher.dispatch(document.tree)
     response = listener.response
 
     assert_equal(6, response.size)
@@ -55,10 +55,10 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
-    emitter = RubyLsp::EventEmitter.new
+    dispatcher = Prism::Dispatcher.new
     stub_test_library("unknown")
-    listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue)
-    emitter.visit(document.tree)
+    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher, @message_queue)
+    dispatcher.dispatch(document.tree)
     response = listener.response
 
     assert_empty(response)
@@ -74,10 +74,10 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
-    emitter = RubyLsp::EventEmitter.new
+    dispatcher = Prism::Dispatcher.new
     stub_test_library("rspec")
-    listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue)
-    emitter.visit(document.tree)
+    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher, @message_queue)
+    dispatcher.dispatch(document.tree)
     response = listener.response
 
     assert_empty(response)
@@ -93,10 +93,10 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
-    emitter = RubyLsp::EventEmitter.new
+    dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
-    listener = RubyLsp::Requests::CodeLens.new(uri, emitter, @message_queue)
-    emitter.visit(document.tree)
+    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher, @message_queue)
+    dispatcher.dispatch(document.tree)
     response = listener.response
 
     assert_empty(response)
@@ -131,18 +131,18 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
         "CodeLensAddon"
       end
 
-      def create_code_lens_listener(uri, emitter, message_queue)
+      def create_code_lens_listener(uri, dispatcher, message_queue)
         raise "uri can't be nil" unless uri
 
         klass = Class.new(RubyLsp::Listener) do
           attr_reader :_response
 
-          def initialize(uri, emitter, message_queue)
-            super(emitter, message_queue)
-            emitter.register(self, :on_class)
+          def initialize(uri, dispatcher, message_queue)
+            super(dispatcher, message_queue)
+            dispatcher.register(self, :on_class_node_enter)
           end
 
-          def on_class(node)
+          def on_class_node_enter(node)
             T.bind(self, RubyLsp::Listener[T.untyped])
 
             @_response = [RubyLsp::Interface::CodeLens.new(
@@ -155,7 +155,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        T.unsafe(klass).new(uri, emitter, message_queue)
+        T.unsafe(klass).new(uri, dispatcher, message_queue)
       end
     end
   end

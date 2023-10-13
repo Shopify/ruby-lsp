@@ -36,22 +36,27 @@ module RubyLsp
         params(
           index: RubyIndexer::Index,
           nesting: T::Array[String],
-          emitter: EventEmitter,
+          dispatcher: Prism::Dispatcher,
           message_queue: Thread::Queue,
         ).void
       end
-      def initialize(index, nesting, emitter, message_queue)
+      def initialize(index, nesting, dispatcher, message_queue)
         @index = index
         @nesting = nesting
         @_response = T.let(nil, ResponseType)
 
-        super(emitter, message_queue)
-        emitter.register(self, :on_constant_read, :on_constant_write, :on_constant_path)
+        super(dispatcher, message_queue)
+        dispatcher.register(
+          self,
+          :on_constant_read_node_enter,
+          :on_constant_write_node_enter,
+          :on_constant_path_node_enter,
+        )
       end
 
       sig { override.params(addon: Addon).returns(T.nilable(Listener[ResponseType])) }
       def initialize_external_listener(addon)
-        addon.create_hover_listener(@nesting, @index, @emitter, @message_queue)
+        addon.create_hover_listener(@nesting, @index, @dispatcher, @message_queue)
       end
 
       # Merges responses from other hover listeners
@@ -70,21 +75,21 @@ module RubyLsp
       end
 
       sig { params(node: Prism::ConstantReadNode).void }
-      def on_constant_read(node)
+      def on_constant_read_node_enter(node)
         return if DependencyDetector.instance.typechecker
 
         generate_hover(node.slice, node.location)
       end
 
       sig { params(node: Prism::ConstantWriteNode).void }
-      def on_constant_write(node)
+      def on_constant_write_node_enter(node)
         return if DependencyDetector.instance.typechecker
 
         generate_hover(node.name.to_s, node.name_loc)
       end
 
       sig { params(node: Prism::ConstantPathNode).void }
-      def on_constant_path(node)
+      def on_constant_path_node_enter(node)
         return if DependencyDetector.instance.typechecker
 
         generate_hover(node.slice, node.location)

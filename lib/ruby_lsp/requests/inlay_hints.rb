@@ -29,18 +29,18 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      sig { params(range: T::Range[Integer], emitter: EventEmitter, message_queue: Thread::Queue).void }
-      def initialize(range, emitter, message_queue)
-        super(emitter, message_queue)
+      sig { params(range: T::Range[Integer], dispatcher: Prism::Dispatcher, message_queue: Thread::Queue).void }
+      def initialize(range, dispatcher, message_queue)
+        super(dispatcher, message_queue)
 
         @_response = T.let([], ResponseType)
         @range = range
 
-        emitter.register(self, :on_rescue)
+        dispatcher.register(self, :on_rescue_node_enter)
       end
 
       sig { params(node: Prism::RescueNode).void }
-      def on_rescue(node)
+      def on_rescue_node_enter(node)
         return unless node.exceptions.empty?
 
         loc = node.location

@@ -3,7 +3,7 @@
 
 module RubyLsp
   # Listener is an abstract class to be used by requests for listening to events emitted when visiting an AST using the
-  # EventEmitter.
+  # Prism::Dispatcher.
   class Listener
     extend T::Sig
     extend T::Helpers
@@ -14,9 +14,9 @@ module RubyLsp
 
     abstract!
 
-    sig { params(emitter: EventEmitter, message_queue: Thread::Queue).void }
-    def initialize(emitter, message_queue)
-      @emitter = emitter
+    sig { params(dispatcher: Prism::Dispatcher, message_queue: Thread::Queue).void }
+    def initialize(dispatcher, message_queue)
+      @dispatcher = dispatcher
       @message_queue = message_queue
     end
 
@@ -43,8 +43,8 @@ module RubyLsp
     # When inheriting from ExtensibleListener, the `super` of constructor must be called **after** the subclass's own
     # ivars have been initialized. This is because the constructor of ExtensibleListener calls
     # `initialize_external_listener` which may depend on the subclass's ivars.
-    sig { params(emitter: EventEmitter, message_queue: Thread::Queue).void }
-    def initialize(emitter, message_queue)
+    sig { params(dispatcher: Prism::Dispatcher, message_queue: Thread::Queue).void }
+    def initialize(dispatcher, message_queue)
       super
       @response_merged = T.let(false, T::Boolean)
       @external_listeners = T.let(

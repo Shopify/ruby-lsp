@@ -38,7 +38,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       RubyIndexer::IndexablePath.new(
         "#{Dir.pwd}/lib",
         File.expand_path(
-          "../../lib/ruby_lsp/event_emitter.rb",
+          "../../lib/ruby_lsp/listener.rb",
           __dir__,
         ),
       ),
@@ -233,17 +233,17 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         "Definition Addon"
       end
 
-      def create_definition_listener(uri, nesting, index, emitter, message_queue)
+      def create_definition_listener(uri, nesting, index, dispatcher, message_queue)
         klass = Class.new(RubyLsp::Listener) do
           attr_reader :_response
 
-          def initialize(uri, _, _, emitter, message_queue)
-            super(emitter, message_queue)
+          def initialize(uri, _, _, dispatcher, message_queue)
+            super(dispatcher, message_queue)
             @uri = uri
-            emitter.register(self, :on_constant_read)
+            dispatcher.register(self, :on_constant_read_node_enter)
           end
 
-          def on_constant_read(node)
+          def on_constant_read_node_enter(node)
             location = node.location
             @_response = RubyLsp::Interface::Location.new(
               uri: "file:///generated_by_addon.rb",
@@ -258,7 +258,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        T.unsafe(klass).new(uri, nesting, index, emitter, message_queue)
+        T.unsafe(klass).new(uri, nesting, index, dispatcher, message_queue)
       end
     end
   end

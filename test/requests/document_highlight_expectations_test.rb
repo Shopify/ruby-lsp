@@ -13,10 +13,10 @@ class DocumentHighlightExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
     target, parent = document.locate_node(params.first)
 
-    emitter = RubyLsp::EventEmitter.new
+    dispatcher = Prism::Dispatcher.new
 
-    listener = RubyLsp::Requests::DocumentHighlight.new(target, parent, emitter, @message_queue)
-    emitter.visit(document.tree)
+    listener = RubyLsp::Requests::DocumentHighlight.new(target, parent, dispatcher, @message_queue)
+    dispatcher.dispatch(document.tree)
     listener.response
   end
 

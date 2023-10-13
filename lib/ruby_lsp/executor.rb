@@ -92,14 +92,14 @@ module RubyLsp
         return cached_response if cached_response
 
         # Run listeners for the document
-        emitter = EventEmitter.new
-        folding_range = Requests::FoldingRanges.new(document.parse_result.comments, emitter, @message_queue)
-        document_symbol = Requests::DocumentSymbol.new(emitter, @message_queue)
-        document_link = Requests::DocumentLink.new(uri, document.comments, emitter, @message_queue)
-        code_lens = Requests::CodeLens.new(uri, emitter, @message_queue)
+        dispatcher = Prism::Dispatcher.new
+        folding_range = Requests::FoldingRanges.new(document.parse_result.comments, dispatcher, @message_queue)
+        document_symbol = Requests::DocumentSymbol.new(dispatcher, @message_queue)
+        document_link = Requests::DocumentLink.new(uri, document.comments, dispatcher, @message_queue)
+        code_lens = Requests::CodeLens.new(uri, dispatcher, @message_queue)
 
-        semantic_highlighting = Requests::SemanticHighlighting.new(emitter, @message_queue)
-        emitter.visit(document.tree)
+        semantic_highlighting = Requests::SemanticHighlighting.new(dispatcher, @message_queue)
+        dispatcher.dispatch(document.tree)
 
         # Store all responses retrieve in this round of visits in the cache and then return the response for the request
         # we actually received
@@ -262,15 +262,15 @@ module RubyLsp
 
       target = parent if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)
 
-      emitter = EventEmitter.new
+      dispatcher = Prism::Dispatcher.new
       base_listener = Requests::Definition.new(
         uri,
         nesting,
         @index,
-        emitter,
+        dispatcher,
         @message_queue,
       )
-      emitter.emit_for_target(target)
+      dispatcher.dispatch_once(target)
       base_listener.response
     end
 
@@ -294,11 +294,11 @@ module RubyLsp
       end
 
       # Instantiate all listeners
-      emitter = EventEmitter.new
-      hover = Requests::Hover.new(@index, nesting, emitter, @message_queue)
+      dispatcher = Prism::Dispatcher.new
+      hover = Requests::Hover.new(@index, nesting, dispatcher, @message_queue)
 
       # Emit events for all listeners
-      emitter.emit_for_target(target)
+      dispatcher.dispatch_once(target)
 
       hover.response
     end
@@ -377,9 +377,9 @@ module RubyLsp
       document = @store.get(uri)
 
       target, parent = document.locate_node(position)
-      emitter = EventEmitter.new
-      listener = Requests::DocumentHighlight.new(target, parent, emitter, @message_queue)
-      emitter.visit(document.tree)
+      dispatcher = Prism::Dispatcher.new
+      listener = Requests::DocumentHighlight.new(target, parent, dispatcher, @message_queue)
+      dispatcher.visit(document.tree)
       listener.response
     end
 
@@ -390,9 +390,9 @@ module RubyLsp
       start_line = range.dig(:start, :line)
       end_line = range.dig(:end, :line)
 
-      emitter = EventEmitter.new
-      listener = Requests::InlayHints.new(start_line..end_line, emitter, @message_queue)
-      emitter.visit(document.tree)
+      dispatcher = Prism::Dispatcher.new
+      listener = Requests::InlayHints.new(start_line..end_line, dispatcher, @message_queue)
+      dispatcher.visit(document.tree)
       listener.response
     end
 
@@ -454,13 +454,13 @@ module RubyLsp
       start_line = range.dig(:start, :line)
       end_line = range.dig(:end, :line)
 
-      emitter = EventEmitter.new
+      dispatcher = Prism::Dispatcher.new
       listener = Requests::SemanticHighlighting.new(
-        emitter,
+        dispatcher,
         @message_queue,
         range: start_line..end_line,
       )
-      emitter.visit(document.tree)
+      dispatcher.visit(document.tree)
 
       Requests::Support::SemanticTokenEncoder.new.encode(listener.response)
     end
@@ -512,14 +512,14 @@ module RubyLsp
 
       return unless target
 
-      emitter = EventEmitter.new
+      dispatcher = Prism::Dispatcher.new
       listener = Requests::Completion.new(
         @index,
         nesting,
-        emitter,
+        dispatcher,
         @message_queue,
       )
-      emitter.emit_for_target(target)
+      dispatcher.dispatch_once(target)
       listener.response
     end
 
