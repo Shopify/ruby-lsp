@@ -59,7 +59,13 @@ module RubyLsp
         candidates = @index.prefix_search(name, @nesting)
         candidates.each do |entries|
           complete_name = T.must(entries.first).name
-          @_response << build_entry_completion(complete_name, node, entries, top_level?(complete_name, candidates))
+          @_response << build_entry_completion(
+            complete_name,
+            name,
+            node,
+            entries,
+            top_level?(complete_name, candidates),
+          )
         end
       end
 
@@ -99,6 +105,7 @@ module RubyLsp
 
           @_response << build_entry_completion(
             full_name,
+            name,
             node,
             entries,
             top_level_reference || top_level?(T.must(entries.first).name, candidates),
@@ -122,13 +129,14 @@ module RubyLsp
 
       sig do
         params(
-          name: String,
+          real_name: String,
+          incomplete_name: String,
           node: Prism::Node,
           entries: T::Array[RubyIndexer::Index::Entry],
           top_level: T::Boolean,
         ).returns(Interface::CompletionItem)
       end
-      def build_entry_completion(name, node, entries, top_level)
+      def build_entry_completion(real_name, incomplete_name, node, entries, top_level)
         first_entry = T.must(entries.first)
         kind = case first_entry
         when RubyIndexer::Index::Entry::Class
@@ -141,14 +149,18 @@ module RubyLsp
           Constant::CompletionItemKind::REFERENCE
         end
 
-        insertion_text = name.dup
+        insertion_text = real_name.dup
+        filter_text = real_name.dup
 
         # If we have two entries with the same name inside the current namespace and the user selects the top level
         # option, we have to ensure it's prefixed with `::` or else we're completing the wrong constant. For example:
         # If we have the index with ["Foo::Bar", "Bar"], and we're providing suggestions for `B` inside a `Foo` module,
         # then selecting the `Foo::Bar` option needs to complete to `Bar` and selecting the top level `Bar` option needs
         # to complete to `::Bar`.
-        insertion_text.prepend("::") if top_level
+        if top_level
+          insertion_text.prepend("::")
+          filter_text.prepend("::")
+        end
 
         # If the user is searching for a constant inside the current namespace, then we prefer completing the short name
         # of that constant. E.g.:
@@ -159,14 +171,22 @@ module RubyLsp
         #
         #  Foo::B # --> completion inserts `Bar` instead of `Foo::Bar`
         # end
-        @nesting.each { |namespace| insertion_text.delete_prefix!("#{namespace}::") }
+        @nesting.each do |namespace|
+          prefix = "#{namespace}::"
+          insertion_text.delete_prefix!(prefix)
+
+          # If the user is typing a fully qualified name `Foo::Bar::Baz`, then we should not use the short name (e.g.:
+          # `Baz`) as filtering. So we only shorten the filter text if the user is not including the namespaces in their
+          # typing
+          filter_text.delete_prefix!(prefix) unless incomplete_name.start_with?(prefix)
+        end
 
         # When using a top level constant reference (e.g.: `::Bar`), the editor includes the `::` as part of the filter.
         # For these top level references, we need to include the `::` as part of the filter text or else it won't match
         # the right entries in the index
         Interface::CompletionItem.new(
-          label: name,
-          filter_text: top_level ? "::#{name}" : name,
+          label: real_name,
+          filter_text: filter_text,
           text_edit: Interface::TextEdit.new(
             range: range_from_node(node),
             new_text: insertion_text,
@@ -175,7 +195,7 @@ module RubyLsp
           label_details: Interface::CompletionItemLabelDetails.new(
             description: entries.map(&:file_name).join(","),
           ),
-          documentation: markdown_from_index_entries(name, entries),
+          documentation: markdown_from_index_entries(real_name, entries),
         )
       end
 
