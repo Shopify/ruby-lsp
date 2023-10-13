@@ -19,7 +19,7 @@ Want to discuss Ruby developer experience? Consider joining the public
 
 Search for `Shopify.ruby-lsp` in the extensions tab and click install.
 
-By default, the Ruby LSP will generate a `.ruby-lsp` folder with a custom bundle that includes the server gem.
+By default, the Ruby LSP will generate a `.ruby-lsp` directory with a custom bundle that includes the server gem.
 Additionally, it will attempt to use available version managers to select the correct Ruby version for any given
 project. Refer to configuration for more options.
 
@@ -116,25 +116,65 @@ The tool to be used for formatting files can be configured with the following se
 "rubyLsp.formatter": "auto"
 ```
 
+#### Ruby version requirement
+
+By default, the Ruby LSP uses the current project's Ruby version and bundle. This allows the LSP to index the correct
+gem versions, and to ensure formatting behavior is consistent with CI.
+
+The Ruby LSP and its main dependency [Prism](https://github.com/ruby/prism) (the new Ruby parser) both follow the same
+policy, which is to support only Ruby versions that are not beyond their end-of-life.
+
+If you're working on a project with an older Ruby version, it might be possible to install older versions of the server
+gem to get support for older rubies, but that might also involve using older versions of the VS Code extension - since
+some functionality requires implementations in both client and server.
+
+The other alternative is to use a custom Gemfile separate from the project with a different Ruby version. Notice that
+certain functionality may be degraded or require manual configuration, since the Ruby LSP will not be able to inspect
+the project's real bundle to discover dependencies. Please see the instructions below.
+
 #### Using a custom Gemfile
 
 If you are working on a project using an older version of Ruby not supported by Ruby LSP, then you may specify a
-separate `Gemfile` for development tools. You can include the `ruby-lsp` in it and point to that Gemfile by using the
-following configuration:
+separate `Gemfile` for development tools.
 
 **Note**: when using this, gems will not be installed automatically and neither will `ruby-lsp` upgrades.
 
+Create a directory to store the custom bundle outside of the project that uses the old Ruby version. Inside that
+directory, add your preferred version manager configuration to select a supported Ruby version. For example, if using
+`chruby`, it would look like this:
+
+```shell
+# the/directory/.ruby-version
+
+3.2.2
+```
+
+Create a `Gemfile` for development tools inside that directory.
+
+```ruby
+# the/directory/Gemfile
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+gem "ruby-lsp"
+gem "rubocop"
+```
+
+Run `bundle install` inside that directory to generate a lockfile. After the directory contains the custom `Gemfile` and
+the version manager configuration, use the following configuration in VS Code to point the Ruby LSP to that `Gemfile`.
+
 ```jsonc
 {
-  "rubyLsp.bundleGemfile": "../../relative/path/to/Gemfile", // using a relative path from the current project
-  "rubyLsp.bundleGemfile": "/absolute/path/to/Gemfile" // using an absolute path
+  "rubyLsp.bundleGemfile": "../../relative/path/to/the/directory/Gemfile",
+  "rubyLsp.bundleGemfile": "/absolute/path/to/the/directory/Gemfile"
 }
 ```
 
 #### Configuring VS Code debugger
 
-To configure the VS Code debugger, you can use the "Debug: Add configuration..." command to create a
-`launch.json` file in the `.vscode` folder of your project.
+To configure the VS Code debugger, you can use the "Debug: Add configuration..." command to create a `launch.json` file
+in the `.vscode` directory of your project.
 
 This command would generate the following configuration:
 
