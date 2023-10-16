@@ -442,7 +442,7 @@
     "esbuild": "^0.19.4",
     "eslint": "^8.50.0",
     "eslint-import-resolver-typescript": "^3.6.1",
-    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
     "glob": "^10.3.7",
     "mocha": "^10.2.0",
     "prettier": "^3.0.3",
