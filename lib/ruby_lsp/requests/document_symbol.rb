@@ -32,7 +32,7 @@ module RubyLsp
 
       ResponseType = type_member { { fixed: T::Array[Interface::DocumentSymbol] } }
 
-      ATTR_ACCESSORS = T.let(["attr_reader", "attr_writer", "attr_accessor"].freeze, T::Array[String])
+      ATTR_ACCESSORS = T.let([:attr_reader, :attr_writer, :attr_accessor].freeze, T::Array[Symbol])
 
       class SymbolHierarchyRoot
         extend T::Sig

@@ -2,6 +2,14 @@
 # frozen_string_literal: true
 
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+
+# Remove this once RBI has been migrated to Prism
+yarp_bundle_path = Bundler.bundle_path.join("gems", "yarp").to_s
+yarp_require_path = Gem.loaded_specs["yarp"]&.require_path
+$LOAD_PATH.reject! do |path|
+  path.start_with?(yarp_bundle_path) || (yarp_require_path && path.start_with?(yarp_require_path))
+end
+
 $VERBOSE = nil unless ENV["VERBOSE"] || ENV["CI"]
 
 require_relative "../lib/ruby_lsp/internal"
