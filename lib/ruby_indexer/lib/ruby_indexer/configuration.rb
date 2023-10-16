@@ -98,6 +98,10 @@ module RubyIndexer
         next if locked_gems&.any? do |locked_spec|
           locked_spec.name == short_name &&
             !Gem::Specification.find_by_name(short_name).full_gem_path.start_with?(RbConfig::CONFIG["rubylibprefix"])
+        rescue Gem::MissingSpecError
+          # If a default gem is scoped to a specific platform, then `find_by_name` will raise. We want to skip those
+          # cases
+          true
         end
 
         if pathname.directory?
