@@ -428,7 +428,7 @@
     "ws": ">= 7.4.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.23.0",
+    "@babel/core": "^7.23.2",
     "@shopify/eslint-plugin": "^43.0.0",
     "@shopify/prettier-config": "^1.1.2",
     "@types/glob": "^8.1.0",
@@ -437,10 +437,10 @@
     "@types/vscode": "^1.68.0",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
-    "@vscode/test-electron": "^2.3.4",
+    "@vscode/test-electron": "^2.3.5",
     "@vscode/vsce": "^2.21.1",
     "esbuild": "^0.19.4",
-    "eslint": "^8.50.0",
+    "eslint": "^8.51.0",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-prettier": "^5.0.1",
     "glob": "^10.3.7",
