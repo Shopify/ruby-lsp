@@ -120,16 +120,16 @@ class HoverExpectationsTest < ExpectationsTestRunner
         "HoverAddon"
       end
 
-      def create_hover_listener(nesting, index, emitter, message_queue)
+      def create_hover_listener(nesting, index, dispatcher, message_queue)
         klass = Class.new(RubyLsp::Listener) do
           attr_reader :_response
 
-          def initialize(emitter, message_queue)
+          def initialize(dispatcher, message_queue)
             super
-            emitter.register(self, :on_constant_read)
+            dispatcher.register(self, :on_constant_read_node_enter)
           end
 
-          def on_constant_read(node)
+          def on_constant_read_node_enter(node)
             T.bind(self, RubyLsp::Listener[T.untyped])
             contents = RubyLsp::Interface::MarkupContent.new(
               kind: "markdown",
@@ -139,7 +139,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        klass.new(emitter, message_queue)
+        klass.new(dispatcher, message_queue)
       end
     end
   end

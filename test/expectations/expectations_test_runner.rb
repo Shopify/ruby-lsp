@@ -11,9 +11,9 @@ class ExpectationsTestRunner < Minitest::Test
     def expectations_tests(handler_class, expectation_suffix)
       execute_request = if handler_class < RubyLsp::Listener
         <<~RUBY
-          emitter = RubyLsp::EventEmitter.new
-          listener = #{handler_class}.new(emitter, @message_queue)
-          emitter.visit(document.tree)
+          dispatcher = Prism::Dispatcher.new
+          listener = #{handler_class}.new(dispatcher, @message_queue)
+          dispatcher.dispatch(document.tree)
           listener.response
         RUBY
       else

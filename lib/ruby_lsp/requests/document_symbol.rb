@@ -49,8 +49,8 @@ module RubyLsp
       sig { override.returns(T::Array[Interface::DocumentSymbol]) }
       attr_reader :_response
 
-      sig { params(emitter: EventEmitter, message_queue: Thread::Queue).void }
-      def initialize(emitter, message_queue)
+      sig { params(dispatcher: Prism::Dispatcher, message_queue: Thread::Queue).void }
+      def initialize(dispatcher, message_queue)
         @root = T.let(SymbolHierarchyRoot.new, SymbolHierarchyRoot)
         @_response = T.let(@root.children, T::Array[Interface::DocumentSymbol])
         @stack = T.let(
@@ -60,25 +60,25 @@ module RubyLsp
 
         super
 
-        emitter.register(
+        dispatcher.register(
           self,
-          :on_class,
-          :after_class,
-          :on_call,
-          :on_constant_path_write,
-          :on_constant_write,
-          :on_def,
-          :after_def,
-          :on_module,
-          :after_module,
-          :on_instance_variable_write,
-          :on_class_variable_write,
+          :on_class_node_enter,
+          :on_class_node_leave,
+          :on_call_node_enter,
+          :on_constant_path_write_node_enter,
+          :on_constant_write_node_enter,
+          :on_def_node_enter,
+          :on_def_node_leave,
+          :on_module_node_enter,
+          :on_module_node_leave,
+          :on_instance_variable_write_node_enter,
+          :on_class_variable_write_node_enter,
         )
       end
 
       sig { override.params(addon: Addon).returns(T.nilable(Listener[ResponseType])) }
       def initialize_external_listener(addon)
-        addon.create_document_symbol_listener(@emitter, @message_queue)
+        addon.create_document_symbol_listener(@dispatcher, @message_queue)
       end
 
       # Merges responses from other listeners
@@ -89,7 +89,7 @@ module RubyLsp
       end
 
       sig { params(node: Prism::ClassNode).void }
-      def on_class(node)
+      def on_class_node_enter(node)
         @stack << create_document_symbol(
           name: node.constant_path.location.slice,
           kind: Constant::SymbolKind::CLASS,
@@ -99,12 +99,12 @@ module RubyLsp
       end
 
       sig { params(node: Prism::ClassNode).void }
-      def after_class(node)
+      def on_class_node_leave(node)
         @stack.pop
       end
 
       sig { params(node: Prism::CallNode).void }
-      def on_call(node)
+      def on_call_node_enter(node)
         return unless ATTR_ACCESSORS.include?(node.name) && node.receiver.nil?
 
         arguments = node.arguments
@@ -126,7 +126,7 @@ module RubyLsp
       end
 
       sig { params(node: Prism::ConstantPathWriteNode).void }
-      def on_constant_path_write(node)
+      def on_constant_path_write_node_enter(node)
         create_document_symbol(
           name: node.target.location.slice,
           kind: Constant::SymbolKind::CONSTANT,
@@ -136,7 +136,7 @@ module RubyLsp
       end
 
       sig { params(node: Prism::ConstantWriteNode).void }
-      def on_constant_write(node)
+      def on_constant_write_node_enter(node)
         create_document_symbol(
           name: node.name.to_s,
           kind: Constant::SymbolKind::CONSTANT,
@@ -146,12 +146,12 @@ module RubyLsp
       end
 
       sig { params(node: Prism::DefNode).void }
-      def after_def(node)
+      def on_def_node_leave(node)
         @stack.pop
       end
 
       sig { params(node: Prism::ModuleNode).void }
-      def on_module(node)
+      def on_module_node_enter(node)
         @stack << create_document_symbol(
           name: node.constant_path.location.slice,
           kind: Constant::SymbolKind::MODULE,
@@ -161,7 +161,7 @@ module RubyLsp
       end
 
       sig { params(node: Prism::DefNode).void }
-      def on_def(node)
+      def on_def_node_enter(node)
         receiver = node.receiver
 
         if receiver.is_a?(Prism::SelfNode)
@@ -183,12 +183,12 @@ module RubyLsp
       end
 
       sig { params(node: Prism::ModuleNode).void }
-      def after_module(node)
+      def on_module_node_leave(node)
         @stack.pop
       end
 
       sig { params(node: Prism::InstanceVariableWriteNode).void }
-      def on_instance_variable_write(node)
+      def on_instance_variable_write_node_enter(node)
         create_document_symbol(
           name: node.name.to_s,
           kind: Constant::SymbolKind::VARIABLE,
@@ -198,7 +198,7 @@ module RubyLsp
       end
 
       sig { params(node: Prism::ClassVariableWriteNode).void }
-      def on_class_variable_write(node)
+      def on_class_variable_write_node_enter(node)
         create_document_symbol(
           name: node.name.to_s,
           kind: Constant::SymbolKind::VARIABLE,

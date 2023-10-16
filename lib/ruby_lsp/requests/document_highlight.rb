@@ -112,12 +112,12 @@ module RubyLsp
         params(
           target: T.nilable(Prism::Node),
           parent: T.nilable(Prism::Node),
-          emitter: EventEmitter,
+          dispatcher: Prism::Dispatcher,
           message_queue: Thread::Queue,
         ).void
       end
-      def initialize(target, parent, emitter, message_queue)
-        super(emitter, message_queue)
+      def initialize(target, parent, dispatcher, message_queue)
+        super(dispatcher, message_queue)
 
         @_response = T.let([], T::Array[Interface::DocumentHighlight])
 
@@ -146,228 +146,228 @@ module RubyLsp
         @target_value = T.let(node_value(highlight_target), T.nilable(String))
 
         if @target && @target_value
-          emitter.register(
+          dispatcher.register(
             self,
-            :on_call,
-            :on_def,
-            :on_global_variable_target,
-            :on_instance_variable_target,
-            :on_constant_path_target,
-            :on_constant_target,
-            :on_class_variable_target,
-            :on_local_variable_target,
-            :on_block_parameter,
-            :on_required_parameter,
-            :on_class,
-            :on_module,
-            :on_local_variable_read,
-            :on_constant_path,
-            :on_constant_read,
-            :on_instance_variable_read,
-            :on_class_variable_read,
-            :on_global_variable_read,
-            :on_constant_path_write,
-            :on_constant_path_or_write,
-            :on_constant_path_and_write,
-            :on_constant_path_operator_write,
-            :on_local_variable_write,
-            :on_keyword_parameter,
-            :on_rest_parameter,
-            :on_optional_parameter,
-            :on_keyword_rest_parameter,
-            :on_local_variable_and_write,
-            :on_local_variable_operator_write,
-            :on_local_variable_or_write,
-            :on_class_variable_write,
-            :on_class_variable_or_write,
-            :on_class_variable_operator_write,
-            :on_class_variable_and_write,
-            :on_constant_write,
-            :on_constant_or_write,
-            :on_constant_operator_write,
-            :on_instance_variable_write,
-            :on_constant_and_write,
-            :on_instance_variable_or_write,
-            :on_instance_variable_and_write,
-            :on_instance_variable_operator_write,
-            :on_global_variable_write,
-            :on_global_variable_or_write,
-            :on_global_variable_and_write,
-            :on_global_variable_operator_write,
+            :on_call_node_enter,
+            :on_def_node_enter,
+            :on_global_variable_target_node_enter,
+            :on_instance_variable_target_node_enter,
+            :on_constant_path_target_node_enter,
+            :on_constant_target_node_enter,
+            :on_class_variable_target_node_enter,
+            :on_local_variable_target_node_enter,
+            :on_block_parameter_node_enter,
+            :on_required_parameter_node_enter,
+            :on_class_node_enter,
+            :on_module_node_enter,
+            :on_local_variable_read_node_enter,
+            :on_constant_path_node_enter,
+            :on_constant_read_node_enter,
+            :on_instance_variable_read_node_enter,
+            :on_class_variable_read_node_enter,
+            :on_global_variable_read_node_enter,
+            :on_constant_path_write_node_enter,
+            :on_constant_path_or_write_node_enter,
+            :on_constant_path_and_write_node_enter,
+            :on_constant_path_operator_write_node_enter,
+            :on_local_variable_write_node_enter,
+            :on_keyword_parameter_node_enter,
+            :on_rest_parameter_node_enter,
+            :on_optional_parameter_node_enter,
+            :on_keyword_rest_parameter_node_enter,
+            :on_local_variable_and_write_node_enter,
+            :on_local_variable_operator_write_node_enter,
+            :on_local_variable_or_write_node_enter,
+            :on_class_variable_write_node_enter,
+            :on_class_variable_or_write_node_enter,
+            :on_class_variable_operator_write_node_enter,
+            :on_class_variable_and_write_node_enter,
+            :on_constant_write_node_enter,
+            :on_constant_or_write_node_enter,
+            :on_constant_operator_write_node_enter,
+            :on_instance_variable_write_node_enter,
+            :on_constant_and_write_node_enter,
+            :on_instance_variable_or_write_node_enter,
+            :on_instance_variable_and_write_node_enter,
+            :on_instance_variable_operator_write_node_enter,
+            :on_global_variable_write_node_enter,
+            :on_global_variable_or_write_node_enter,
+            :on_global_variable_and_write_node_enter,
+            :on_global_variable_operator_write_node_enter,
           )
         end
       end
 
       sig { params(node: Prism::CallNode).void }
-      def on_call(node)
+      def on_call_node_enter(node)
         return unless matches?(node, [Prism::CallNode, Prism::DefNode])
 
         add_highlight(Constant::DocumentHighlightKind::READ, node.location)
       end
 
       sig { params(node: Prism::DefNode).void }
-      def on_def(node)
+      def on_def_node_enter(node)
         return unless matches?(node, [Prism::CallNode, Prism::DefNode])
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::GlobalVariableTargetNode).void }
-      def on_global_variable_target(node)
+      def on_global_variable_target_node_enter(node)
         return unless matches?(node, GLOBAL_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.location)
       end
 
       sig { params(node: Prism::InstanceVariableTargetNode).void }
-      def on_instance_variable_target(node)
+      def on_instance_variable_target_node_enter(node)
         return unless matches?(node, INSTANCE_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.location)
       end
 
       sig { params(node: Prism::ConstantPathTargetNode).void }
-      def on_constant_path_target(node)
+      def on_constant_path_target_node_enter(node)
         return unless matches?(node, CONSTANT_PATH_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.location)
       end
 
       sig { params(node: Prism::ConstantTargetNode).void }
-      def on_constant_target(node)
+      def on_constant_target_node_enter(node)
         return unless matches?(node, CONSTANT_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.location)
       end
 
       sig { params(node: Prism::ClassVariableTargetNode).void }
-      def on_class_variable_target(node)
+      def on_class_variable_target_node_enter(node)
         return unless matches?(node, CLASS_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.location)
       end
 
       sig { params(node: Prism::LocalVariableTargetNode).void }
-      def on_local_variable_target(node)
+      def on_local_variable_target_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.location)
       end
 
       sig { params(node: Prism::BlockParameterNode).void }
-      def on_block_parameter(node)
+      def on_block_parameter_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.location)
       end
 
       sig { params(node: Prism::RequiredParameterNode).void }
-      def on_required_parameter(node)
+      def on_required_parameter_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.location)
       end
 
       sig { params(node: Prism::ClassNode).void }
-      def on_class(node)
+      def on_class_node_enter(node)
         return unless matches?(node, CONSTANT_NODES + CONSTANT_PATH_NODES + [Prism::ClassNode])
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.constant_path.location)
       end
 
       sig { params(node: Prism::ModuleNode).void }
-      def on_module(node)
+      def on_module_node_enter(node)
         return unless matches?(node, CONSTANT_NODES + CONSTANT_PATH_NODES + [Prism::ModuleNode])
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.constant_path.location)
       end
 
       sig { params(node: Prism::LocalVariableReadNode).void }
-      def on_local_variable_read(node)
+      def on_local_variable_read_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::READ, node.location)
       end
 
       sig { params(node: Prism::ConstantPathNode).void }
-      def on_constant_path(node)
+      def on_constant_path_node_enter(node)
         return unless matches?(node, CONSTANT_PATH_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::READ, node.location)
       end
 
       sig { params(node: Prism::ConstantReadNode).void }
-      def on_constant_read(node)
+      def on_constant_read_node_enter(node)
         return unless matches?(node, CONSTANT_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::READ, node.location)
       end
 
       sig { params(node: Prism::InstanceVariableReadNode).void }
-      def on_instance_variable_read(node)
+      def on_instance_variable_read_node_enter(node)
         return unless matches?(node, INSTANCE_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::READ, node.location)
       end
 
       sig { params(node: Prism::ClassVariableReadNode).void }
-      def on_class_variable_read(node)
+      def on_class_variable_read_node_enter(node)
         return unless matches?(node, CLASS_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::READ, node.location)
       end
 
       sig { params(node: Prism::GlobalVariableReadNode).void }
-      def on_global_variable_read(node)
+      def on_global_variable_read_node_enter(node)
         return unless matches?(node, GLOBAL_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::READ, node.location)
       end
 
       sig { params(node: Prism::ConstantPathWriteNode).void }
-      def on_constant_path_write(node)
+      def on_constant_path_write_node_enter(node)
         return unless matches?(node, CONSTANT_PATH_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.target.location)
       end
 
       sig { params(node: Prism::ConstantPathOrWriteNode).void }
-      def on_constant_path_or_write(node)
+      def on_constant_path_or_write_node_enter(node)
         return unless matches?(node, CONSTANT_PATH_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.target.location)
       end
 
       sig { params(node: Prism::ConstantPathAndWriteNode).void }
-      def on_constant_path_and_write(node)
+      def on_constant_path_and_write_node_enter(node)
         return unless matches?(node, CONSTANT_PATH_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.target.location)
       end
 
       sig { params(node: Prism::ConstantPathOperatorWriteNode).void }
-      def on_constant_path_operator_write(node)
+      def on_constant_path_operator_write_node_enter(node)
         return unless matches?(node, CONSTANT_PATH_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.target.location)
       end
 
       sig { params(node: Prism::LocalVariableWriteNode).void }
-      def on_local_variable_write(node)
+      def on_local_variable_write_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::KeywordParameterNode).void }
-      def on_keyword_parameter(node)
+      def on_keyword_parameter_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::RestParameterNode).void }
-      def on_rest_parameter(node)
+      def on_rest_parameter_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         name_loc = node.name_loc
@@ -375,14 +375,14 @@ module RubyLsp
       end
 
       sig { params(node: Prism::OptionalParameterNode).void }
-      def on_optional_parameter(node)
+      def on_optional_parameter_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::KeywordRestParameterNode).void }
-      def on_keyword_rest_parameter(node)
+      def on_keyword_rest_parameter_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         name_loc = node.name_loc
@@ -390,133 +390,133 @@ module RubyLsp
       end
 
       sig { params(node: Prism::LocalVariableAndWriteNode).void }
-      def on_local_variable_and_write(node)
+      def on_local_variable_and_write_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::LocalVariableOperatorWriteNode).void }
-      def on_local_variable_operator_write(node)
+      def on_local_variable_operator_write_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::LocalVariableOrWriteNode).void }
-      def on_local_variable_or_write(node)
+      def on_local_variable_or_write_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::ClassVariableWriteNode).void }
-      def on_class_variable_write(node)
+      def on_class_variable_write_node_enter(node)
         return unless matches?(node, CLASS_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::ClassVariableOrWriteNode).void }
-      def on_class_variable_or_write(node)
+      def on_class_variable_or_write_node_enter(node)
         return unless matches?(node, CLASS_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::ClassVariableOperatorWriteNode).void }
-      def on_class_variable_operator_write(node)
+      def on_class_variable_operator_write_node_enter(node)
         return unless matches?(node, CLASS_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::ClassVariableAndWriteNode).void }
-      def on_class_variable_and_write(node)
+      def on_class_variable_and_write_node_enter(node)
         return unless matches?(node, CLASS_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::ConstantWriteNode).void }
-      def on_constant_write(node)
+      def on_constant_write_node_enter(node)
         return unless matches?(node, CONSTANT_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::ConstantOrWriteNode).void }
-      def on_constant_or_write(node)
+      def on_constant_or_write_node_enter(node)
         return unless matches?(node, CONSTANT_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::ConstantOperatorWriteNode).void }
-      def on_constant_operator_write(node)
+      def on_constant_operator_write_node_enter(node)
         return unless matches?(node, CONSTANT_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::InstanceVariableWriteNode).void }
-      def on_instance_variable_write(node)
+      def on_instance_variable_write_node_enter(node)
         return unless matches?(node, INSTANCE_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::InstanceVariableOrWriteNode).void }
-      def on_instance_variable_or_write(node)
+      def on_instance_variable_or_write_node_enter(node)
         return unless matches?(node, INSTANCE_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::InstanceVariableAndWriteNode).void }
-      def on_instance_variable_and_write(node)
+      def on_instance_variable_and_write_node_enter(node)
         return unless matches?(node, INSTANCE_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
-      def on_instance_variable_operator_write(node)
+      def on_instance_variable_operator_write_node_enter(node)
         return unless matches?(node, INSTANCE_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::ConstantAndWriteNode).void }
-      def on_constant_and_write(node)
+      def on_constant_and_write_node_enter(node)
         return unless matches?(node, CONSTANT_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::GlobalVariableWriteNode).void }
-      def on_global_variable_write(node)
+      def on_global_variable_write_node_enter(node)
         return unless matches?(node, GLOBAL_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::GlobalVariableOrWriteNode).void }
-      def on_global_variable_or_write(node)
+      def on_global_variable_or_write_node_enter(node)
         return unless matches?(node, GLOBAL_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::GlobalVariableAndWriteNode).void }
-      def on_global_variable_and_write(node)
+      def on_global_variable_and_write_node_enter(node)
         return unless matches?(node, GLOBAL_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
       sig { params(node: Prism::GlobalVariableOperatorWriteNode).void }
-      def on_global_variable_operator_write(node)
+      def on_global_variable_operator_write_node_enter(node)
         return unless matches?(node, GLOBAL_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)

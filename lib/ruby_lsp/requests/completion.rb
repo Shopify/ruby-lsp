@@ -30,21 +30,26 @@ module RubyLsp
         params(
           index: RubyIndexer::Index,
           nesting: T::Array[String],
-          emitter: EventEmitter,
+          dispatcher: Prism::Dispatcher,
           message_queue: Thread::Queue,
         ).void
       end
-      def initialize(index, nesting, emitter, message_queue)
-        super(emitter, message_queue)
+      def initialize(index, nesting, dispatcher, message_queue)
+        super(dispatcher, message_queue)
         @_response = T.let([], ResponseType)
         @index = index
         @nesting = nesting
 
-        emitter.register(self, :on_string, :on_constant_path, :on_constant_read)
+        dispatcher.register(
+          self,
+          :on_string_node_enter,
+          :on_constant_path_node_enter,
+          :on_constant_read_node_enter,
+        )
       end
 
       sig { params(node: Prism::StringNode).void }
-      def on_string(node)
+      def on_string_node_enter(node)
         @index.search_require_paths(node.content).map!(&:require_path).sort!.each do |path|
           @_response << build_completion(T.must(path), node)
         end
@@ -52,7 +57,7 @@ module RubyLsp
 
       # Handle completion on regular constant references (e.g. `Bar`)
       sig { params(node: Prism::ConstantReadNode).void }
-      def on_constant_read(node)
+      def on_constant_read_node_enter(node)
         return if DependencyDetector.instance.typechecker
 
         name = node.slice
@@ -71,7 +76,7 @@ module RubyLsp
 
       # Handle completion on namespaced constant references (e.g. `Foo::Bar`)
       sig { params(node: Prism::ConstantPathNode).void }
-      def on_constant_path(node)
+      def on_constant_path_node_enter(node)
         return if DependencyDetector.instance.typechecker
 
         name = node.slice

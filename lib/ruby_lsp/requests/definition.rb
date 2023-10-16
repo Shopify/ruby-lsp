@@ -31,23 +31,29 @@ module RubyLsp
           uri: URI::Generic,
           nesting: T::Array[String],
           index: RubyIndexer::Index,
-          emitter: EventEmitter,
+          dispatcher: Prism::Dispatcher,
           message_queue: Thread::Queue,
         ).void
       end
-      def initialize(uri, nesting, index, emitter, message_queue)
+      def initialize(uri, nesting, index, dispatcher, message_queue)
         @uri = uri
         @nesting = nesting
         @index = index
         @_response = T.let(nil, ResponseType)
 
-        super(emitter, message_queue)
+        super(dispatcher, message_queue)
 
-        emitter.register(self, :on_call, :on_constant_read, :on_constant_path)
+        dispatcher.register(
+          self,
+          :on_call_node_enter,
+          :on_constant_read_node_enter,
+          :on_constant_path_node_enter,
+        )
       end
+
       sig { override.params(addon: Addon).returns(T.nilable(RubyLsp::Listener[ResponseType])) }
       def initialize_external_listener(addon)
-        addon.create_definition_listener(@uri, @nesting, @index, @emitter, @message_queue)
+        addon.create_definition_listener(@uri, @nesting, @index, @dispatcher, @message_queue)
       end
 
       sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
@@ -67,7 +73,7 @@ module RubyLsp
       end
 
       sig { params(node: Prism::CallNode).void }
-      def on_call(node)
+      def on_call_node_enter(node)
         message = node.name
         return unless message == "require" || message == "require_relative"
 
@@ -111,12 +117,12 @@ module RubyLsp
       end
 
       sig { params(node: Prism::ConstantPathNode).void }
-      def on_constant_path(node)
+      def on_constant_path_node_enter(node)
         find_in_index(node.slice)
       end
 
       sig { params(node: Prism::ConstantReadNode).void }
-      def on_constant_read(node)
+      def on_constant_read_node_enter(node)
         find_in_index(node.slice)
       end
 

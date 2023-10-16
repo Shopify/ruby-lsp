@@ -21,39 +21,39 @@ module RubyLsp
 
       ResponseType = type_member { { fixed: T::Array[Interface::FoldingRange] } }
 
-      sig { params(comments: T::Array[Prism::Comment], emitter: EventEmitter, queue: Thread::Queue).void }
-      def initialize(comments, emitter, queue)
-        super(emitter, queue)
+      sig { params(comments: T::Array[Prism::Comment], dispatcher: Prism::Dispatcher, queue: Thread::Queue).void }
+      def initialize(comments, dispatcher, queue)
+        super(dispatcher, queue)
 
         @_response = T.let([], ResponseType)
         @requires = T.let([], T::Array[Prism::CallNode])
         @finalized_response = T.let(false, T::Boolean)
         @comments = comments
 
-        emitter.register(
+        dispatcher.register(
           self,
-          :on_if,
-          :on_in,
-          :on_rescue,
-          :on_when,
-          :on_interpolated_string,
-          :on_array,
-          :on_block,
-          :on_case,
-          :on_class,
-          :on_module,
-          :on_for,
-          :on_hash,
-          :on_singleton_class,
-          :on_unless,
-          :on_until,
-          :on_while,
-          :on_else,
-          :on_ensure,
-          :on_begin,
-          :on_string_concat,
-          :on_def,
-          :on_call,
+          :on_if_node_enter,
+          :on_in_node_enter,
+          :on_rescue_node_enter,
+          :on_when_node_enter,
+          :on_interpolated_string_node_enter,
+          :on_array_node_enter,
+          :on_block_node_enter,
+          :on_case_node_enter,
+          :on_class_node_enter,
+          :on_module_node_enter,
+          :on_for_node_enter,
+          :on_hash_node_enter,
+          :on_singleton_class_node_enter,
+          :on_unless_node_enter,
+          :on_until_node_enter,
+          :on_while_node_enter,
+          :on_else_node_enter,
+          :on_ensure_node_enter,
+          :on_begin_node_enter,
+          :on_string_concat_node_enter,
+          :on_def_node_enter,
+          :on_call_node_enter,
         )
       end
 
@@ -69,27 +69,27 @@ module RubyLsp
       end
 
       sig { params(node: Prism::IfNode).void }
-      def on_if(node)
+      def on_if_node_enter(node)
         add_statements_range(node)
       end
 
       sig { params(node: Prism::InNode).void }
-      def on_in(node)
+      def on_in_node_enter(node)
         add_statements_range(node)
       end
 
       sig { params(node: Prism::RescueNode).void }
-      def on_rescue(node)
+      def on_rescue_node_enter(node)
         add_statements_range(node)
       end
 
       sig { params(node: Prism::WhenNode).void }
-      def on_when(node)
+      def on_when_node_enter(node)
         add_statements_range(node)
       end
 
       sig { params(node: Prism::InterpolatedStringNode).void }
-      def on_interpolated_string(node)
+      def on_interpolated_string_node_enter(node)
         opening_loc = node.opening_loc
         closing_loc = node.closing_loc
 
@@ -97,77 +97,77 @@ module RubyLsp
       end
 
       sig { params(node: Prism::ArrayNode).void }
-      def on_array(node)
+      def on_array_node_enter(node)
         add_simple_range(node)
       end
 
       sig { params(node: Prism::BlockNode).void }
-      def on_block(node)
+      def on_block_node_enter(node)
         add_simple_range(node)
       end
 
       sig { params(node: Prism::CaseNode).void }
-      def on_case(node)
+      def on_case_node_enter(node)
         add_simple_range(node)
       end
 
       sig { params(node: Prism::ClassNode).void }
-      def on_class(node)
+      def on_class_node_enter(node)
         add_simple_range(node)
       end
 
       sig { params(node: Prism::ModuleNode).void }
-      def on_module(node)
+      def on_module_node_enter(node)
         add_simple_range(node)
       end
 
       sig { params(node: Prism::ForNode).void }
-      def on_for(node)
+      def on_for_node_enter(node)
         add_simple_range(node)
       end
 
       sig { params(node: Prism::HashNode).void }
-      def on_hash(node)
+      def on_hash_node_enter(node)
         add_simple_range(node)
       end
 
       sig { params(node: Prism::SingletonClassNode).void }
-      def on_singleton_class(node)
+      def on_singleton_class_node_enter(node)
         add_simple_range(node)
       end
 
       sig { params(node: Prism::UnlessNode).void }
-      def on_unless(node)
+      def on_unless_node_enter(node)
         add_simple_range(node)
       end
 
       sig { params(node: Prism::UntilNode).void }
-      def on_until(node)
+      def on_until_node_enter(node)
         add_simple_range(node)
       end
 
       sig { params(node: Prism::WhileNode).void }
-      def on_while(node)
+      def on_while_node_enter(node)
         add_simple_range(node)
       end
 
       sig { params(node: Prism::ElseNode).void }
-      def on_else(node)
+      def on_else_node_enter(node)
         add_simple_range(node)
       end
 
       sig { params(node: Prism::EnsureNode).void }
-      def on_ensure(node)
+      def on_ensure_node_enter(node)
         add_simple_range(node)
       end
 
       sig { params(node: Prism::BeginNode).void }
-      def on_begin(node)
+      def on_begin_node_enter(node)
         add_simple_range(node)
       end
 
       sig { params(node: Prism::StringConcatNode).void }
-      def on_string_concat(node)
+      def on_string_concat_node_enter(node)
         left = T.let(node.left, Prism::Node)
         left = left.left while left.is_a?(Prism::StringConcatNode)
 
@@ -175,7 +175,7 @@ module RubyLsp
       end
 
       sig { params(node: Prism::DefNode).void }
-      def on_def(node)
+      def on_def_node_enter(node)
         params = node.parameters
         parameter_loc = params&.location
         location = node.location
@@ -190,7 +190,7 @@ module RubyLsp
       end
 
       sig { params(node: Prism::CallNode).void }
-      def on_call(node)
+      def on_call_node_enter(node)
         # If we find a require, don't visit the child nodes (prevent `super`), so that we can keep accumulating into
         # the `@requires` array and then push the range whenever we find a node that isn't a CallNode
         if require?(node)

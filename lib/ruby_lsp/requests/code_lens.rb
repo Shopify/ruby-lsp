@@ -31,8 +31,8 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      sig { params(uri: URI::Generic, emitter: EventEmitter, message_queue: Thread::Queue).void }
-      def initialize(uri, emitter, message_queue)
+      sig { params(uri: URI::Generic, dispatcher: Prism::Dispatcher, message_queue: Thread::Queue).void }
+      def initialize(uri, dispatcher, message_queue)
         @uri = T.let(uri, URI::Generic)
         @_response = T.let([], ResponseType)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
@@ -40,20 +40,20 @@ module RubyLsp
         @visibility_stack = T.let([["public", "public"]], T::Array[T::Array[T.nilable(String)]])
         @class_stack = T.let([], T::Array[String])
 
-        super(emitter, message_queue)
+        super(dispatcher, message_queue)
 
-        emitter.register(
+        dispatcher.register(
           self,
-          :on_class,
-          :after_class,
-          :on_def,
-          :on_call,
-          :after_call,
+          :on_class_node_enter,
+          :on_class_node_leave,
+          :on_def_node_enter,
+          :on_call_node_enter,
+          :on_call_node_leave,
         )
       end
 
       sig { params(node: Prism::ClassNode).void }
-      def on_class(node)
+      def on_class_node_enter(node)
         @visibility_stack.push(["public", "public"])
         class_name = node.constant_path.slice
         @class_stack.push(class_name)
@@ -69,13 +69,13 @@ module RubyLsp
       end
 
       sig { params(node: Prism::ClassNode).void }
-      def after_class(node)
+      def on_class_node_leave(node)
         @visibility_stack.pop
         @class_stack.pop
       end
 
       sig { params(node: Prism::DefNode).void }
-      def on_def(node)
+      def on_def_node_enter(node)
         class_name = @class_stack.last
         return unless class_name&.end_with?("Test")
 
@@ -94,7 +94,7 @@ module RubyLsp
       end
 
       sig { params(node: Prism::CallNode).void }
-      def on_call(node)
+      def on_call_node_enter(node)
         name = node.name
         arguments = node.arguments
 
@@ -123,14 +123,14 @@ module RubyLsp
       end
 
       sig { params(node: Prism::CallNode).void }
-      def after_call(node)
+      def on_call_node_leave(node)
         _, prev_visibility = @visibility_stack.pop
         @visibility_stack.push([prev_visibility, prev_visibility])
       end
 
       sig { override.params(addon: Addon).returns(T.nilable(Listener[ResponseType])) }
       def initialize_external_listener(addon)
-        addon.create_code_lens_listener(@uri, @emitter, @message_queue)
+        addon.create_code_lens_listener(@uri, @dispatcher, @message_queue)
       end
 
       sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }

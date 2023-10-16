@@ -79,12 +79,12 @@ module RubyLsp
         params(
           uri: URI::Generic,
           comments: T::Array[Prism::Comment],
-          emitter: EventEmitter,
+          dispatcher: Prism::Dispatcher,
           message_queue: Thread::Queue,
         ).void
       end
-      def initialize(uri, comments, emitter, message_queue)
-        super(emitter, message_queue)
+      def initialize(uri, comments, dispatcher, message_queue)
+        super(dispatcher, message_queue)
 
         # Match the version based on the version in the RBI file name. Notice that the `@` symbol is sanitized to `%40`
         # in the URI
@@ -99,31 +99,38 @@ module RubyLsp
           T::Hash[Integer, Prism::Comment],
         )
 
-        emitter.register(self, :on_def, :on_class, :on_module, :on_constant_write, :on_constant_path_write)
+        dispatcher.register(
+          self,
+          :on_def_node_enter,
+          :on_class_node_enter,
+          :on_module_node_enter,
+          :on_constant_write_node_enter,
+          :on_constant_path_write_node_enter,
+        )
       end
 
       sig { params(node: Prism::DefNode).void }
-      def on_def(node)
+      def on_def_node_enter(node)
         extract_document_link(node)
       end
 
       sig { params(node: Prism::ClassNode).void }
-      def on_class(node)
+      def on_class_node_enter(node)
         extract_document_link(node)
       end
 
       sig { params(node: Prism::ModuleNode).void }
-      def on_module(node)
+      def on_module_node_enter(node)
         extract_document_link(node)
       end
 
       sig { params(node: Prism::ConstantWriteNode).void }
-      def on_constant_write(node)
+      def on_constant_write_node_enter(node)
         extract_document_link(node)
       end
 
       sig { params(node: Prism::ConstantPathWriteNode).void }
-      def on_constant_path_write(node)
+      def on_constant_path_write_node_enter(node)
         extract_document_link(node)
       end
 
