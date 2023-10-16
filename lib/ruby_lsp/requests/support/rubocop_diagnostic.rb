@@ -9,9 +9,9 @@ module RubyLsp
 
         RUBOCOP_TO_LSP_SEVERITY = T.let(
           {
-            convention: Constant::DiagnosticSeverity::INFORMATION,
-            info: Constant::DiagnosticSeverity::INFORMATION,
+            info: Constant::DiagnosticSeverity::HINT,
             refactor: Constant::DiagnosticSeverity::INFORMATION,
+            convention: Constant::DiagnosticSeverity::INFORMATION,
             warning: Constant::DiagnosticSeverity::WARNING,
             error: Constant::DiagnosticSeverity::ERROR,
             fatal: Constant::DiagnosticSeverity::ERROR,
