@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 # frozen_string_literal: true
 
 module RubyIndexer
@@ -133,16 +133,16 @@ module RubyIndexer
         @key = key
         @value = value
         @parent = parent
-        @children = T.let({}, T::Hash[String, Node[Value]])
-        @leaf = T.let(false, T::Boolean)
+        @children = {}
+        @leaf = false
       end
 
       sig { returns(T::Array[Value]) }
       def collect
-        result = T.let([], T::Array[Value])
-        result << value if leaf
+        result = []
+        result << @value if @leaf
 
-        children.each_value do |node|
+        @children.each_value do |node|
           result.concat(node.collect)
         end
 
