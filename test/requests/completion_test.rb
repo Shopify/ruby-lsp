@@ -258,6 +258,35 @@ class CompletionTest < Minitest::Test
     assert_equal(["Foo::Bar"], result.map { |completion| completion.text_edit.new_text })
   end
 
+  def test_completion_conflicting_constants
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+      module Foo
+        class Qux; end
+
+        module Bar
+          class Qux; end
+
+          Q
+        end
+
+        Q
+      end
+    RUBY
+
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: { line: 6, character: 5 } },
+    )
+    assert_equal(["Foo::Bar::Qux", "Foo::Qux"], result.map(&:label))
+    assert_equal(["Qux", "Foo::Qux"], result.map(&:filter_text))
+    assert_equal(["Qux", "Foo::Qux"], result.map { |completion| completion.text_edit.new_text })
+  end
+
   def test_completion_for_top_level_constants_inside_nesting
     document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Bar

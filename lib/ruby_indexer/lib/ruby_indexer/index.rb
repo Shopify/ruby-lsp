@@ -95,7 +95,7 @@ module RubyIndexer
     # ```
     sig { params(query: String, nesting: T::Array[String]).returns(T::Array[T::Array[Entry]]) }
     def prefix_search(query, nesting)
-      results = (nesting.length + 1).downto(0).flat_map do |i|
+      results = nesting.length.downto(0).flat_map do |i|
         prefix = T.must(nesting[0...i]).join("::")
         namespaced_query = prefix.empty? ? query : "#{prefix}::#{query}"
         @entries_tree.search(namespaced_query)
