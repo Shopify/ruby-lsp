@@ -54,6 +54,7 @@ module RubyLsp
           :on_string_concat_node_enter,
           :on_def_node_enter,
           :on_call_node_enter,
+          :on_lambda_node_enter,
         )
       end
 
@@ -200,6 +201,11 @@ module RubyLsp
 
         location = node.location
         add_lines_range(location.start_line, location.end_line - 1)
+      end
+
+      sig { params(node: Prism::LambdaNode).void }
+      def on_lambda_node_enter(node)
+        add_simple_range(node)
       end
 
       private
