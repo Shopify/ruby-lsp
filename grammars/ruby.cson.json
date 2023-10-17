@@ -1,9 +1,4 @@
 {
-  "information_for_contributors": [
-    "This file has been converted from https://github.com/atom/language-ruby/blob/main/grammars/ruby.cson",
-    "If you want to provide a fix or improvement, please create a pull request against the original repository.",
-    "Once accepted there, we are happy to receive an update request."
-  ],
   "version": "https://github.com/atom/language-ruby/commit/f4082a02f467f8b253449d6998226fdea0957efa",
   "name": "Ruby",
   "scopeName": "source.ruby",
