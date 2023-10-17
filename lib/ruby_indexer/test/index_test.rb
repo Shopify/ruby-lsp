@@ -191,7 +191,7 @@ module RubyIndexer
       entry = @index.resolve("INFINITY", ["Foo", "Float"]).first
       refute_nil(entry)
 
-      assert_instance_of(Index::Entry::UnresolvedAlias, entry)
+      assert_instance_of(Entry::UnresolvedAlias, entry)
     end
   end
 end

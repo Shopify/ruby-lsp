@@ -126,9 +126,9 @@ module RubyIndexer
       comments = collect_comments(node)
       case node.receiver
       when nil
-        @index << Index::Entry::InstanceMethod.new(method_name, @file_path, node.location, comments, node.parameters)
+        @index << Entry::InstanceMethod.new(method_name, @file_path, node.location, comments, node.parameters)
       when Prism::SelfNode
-        @index << Index::Entry::SingletonMethod.new(method_name, @file_path, node.location, comments, node.parameters)
+        @index << Entry::SingletonMethod.new(method_name, @file_path, node.location, comments, node.parameters)
       end
     end
 
@@ -183,21 +183,21 @@ module RubyIndexer
 
       @index << case value
       when Prism::ConstantReadNode, Prism::ConstantPathNode
-        Index::Entry::UnresolvedAlias.new(value.slice, @stack.dup, name, @file_path, node.location, comments)
+        Entry::UnresolvedAlias.new(value.slice, @stack.dup, name, @file_path, node.location, comments)
       when Prism::ConstantWriteNode, Prism::ConstantAndWriteNode, Prism::ConstantOrWriteNode,
         Prism::ConstantOperatorWriteNode
 
         # If the right hand side is another constant assignment, we need to visit it because that constant has to be
         # indexed too
         visit(value)
-        Index::Entry::UnresolvedAlias.new(value.name.to_s, @stack.dup, name, @file_path, node.location, comments)
+        Entry::UnresolvedAlias.new(value.name.to_s, @stack.dup, name, @file_path, node.location, comments)
       when Prism::ConstantPathWriteNode, Prism::ConstantPathOrWriteNode, Prism::ConstantPathOperatorWriteNode,
         Prism::ConstantPathAndWriteNode
 
         visit(value)
-        Index::Entry::UnresolvedAlias.new(value.target.slice, @stack.dup, name, @file_path, node.location, comments)
+        Entry::UnresolvedAlias.new(value.target.slice, @stack.dup, name, @file_path, node.location, comments)
       else
-        Index::Entry::Constant.new(name, @file_path, node.location, comments)
+        Entry::Constant.new(name, @file_path, node.location, comments)
       end
     end
 
@@ -208,7 +208,7 @@ module RubyIndexer
 
       comments = collect_comments(node)
 
-      @index << Index::Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments)
+      @index << Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments)
       @stack << name
       visit_child_nodes(node)
       @stack.pop
@@ -227,7 +227,7 @@ module RubyIndexer
         superclass.slice
       end
 
-      @index << Index::Entry::Class.new(fully_qualify_name(name), @file_path, node.location, comments, parent_class)
+      @index << Entry::Class.new(fully_qualify_name(name), @file_path, node.location, comments, parent_class)
       @stack << name
       visit(node.body)
       @stack.pop
