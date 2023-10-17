@@ -44,7 +44,7 @@ class ShowSyntaxTreeTest < Minitest::Test
                   │   ├── opening_loc: (1,4)-(1,6) = "do"
                   │   └── closing_loc: (1,6)-(1,6) = ""
                   ├── flags: ∅
-                  └── name: "foo"
+                  └── name: :foo
     AST
   end
 

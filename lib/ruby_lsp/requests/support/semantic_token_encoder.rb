@@ -43,15 +43,18 @@ module RubyLsp
         def compute_delta(token)
           row = token.location.start_line - 1
           column = token.location.start_column
-          delta_line = row - @current_row
 
-          delta_column = column
-          delta_column -= @current_column if delta_line == 0
+          begin
+            delta_line = row - @current_row
 
-          [delta_line, delta_column, token.length, token.type, encode_modifiers(token.modifier)]
-        ensure
-          @current_row = row
-          @current_column = column
+            delta_column = column
+            delta_column -= @current_column if delta_line == 0
+
+            [delta_line, delta_column, token.length, token.type, encode_modifiers(token.modifier)]
+          ensure
+            @current_row = row
+            @current_column = column
+          end
         end
 
         # Encode an array of modifiers to positions onto a bit flag

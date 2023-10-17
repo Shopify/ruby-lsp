@@ -75,7 +75,7 @@ module RubyLsp
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
         message = node.name
-        return unless message == "require" || message == "require_relative"
+        return unless message == :require || message == :require_relative
 
         arguments = node.arguments
         return unless arguments
@@ -84,7 +84,7 @@ module RubyLsp
         return unless argument.is_a?(Prism::StringNode)
 
         case message
-        when "require"
+        when :require
           entry = @index.search_require_paths(argument.content).find do |indexable_path|
             indexable_path.require_path == argument.content
           end
@@ -100,7 +100,7 @@ module RubyLsp
               ),
             )
           end
-        when "require_relative"
+        when :require_relative
           required_file = "#{argument.content}.rb"
           path = @uri.to_standardized_path
           current_folder = path ? Pathname.new(CGI.unescape(path)).dirname : Dir.pwd

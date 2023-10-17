@@ -91,7 +91,7 @@ module RubyLsp
         # If we're trying to provide completion for an aliased namespace, we need to first discover it's real name in
         # order to find which possible constants match the desired search
         *namespace, incomplete_name = name.split("::")
-        aliased_namespace = namespace.join("::")
+        aliased_namespace = T.must(namespace).join("::")
         namespace_entries = @index.resolve(aliased_namespace, @nesting)
         return unless namespace_entries
 
