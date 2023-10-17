@@ -132,16 +132,19 @@ module RubyIndexer
     def visit_def_node(node)
       method_name = node.name.to_s
       comments = collect_comments(node)
-      case node.receiver
+      entry_class = case node.receiver
       when nil
-        @index << if @singleton
-          Entry::SingletonMethod.new(method_name, @file_path, node.location, comments, node.parameters)
+        if @singleton
+          Entry::SingletonMethod
         else
-          Entry::InstanceMethod.new(method_name, @file_path, node.location, comments, node.parameters)
+          Entry::InstanceMethod
         end
       when Prism::SelfNode
-        @index << Entry::SingletonMethod.new(method_name, @file_path, node.location, comments, node.parameters)
+        Entry::SingletonMethod
+      else
+        return
       end
+      @index << entry_class.new(method_name, @file_path, node.location, comments, node.parameters)
     end
 
     private
