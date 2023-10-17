@@ -53,16 +53,15 @@ module RubyLsp
           message += "\n\nThis offense is not auto-correctable.\n" unless @offense.correctable?
 
           cop = RuboCop::Cop::Registry.global.find_by_cop_name(@offense.cop_name)
-          code = if cop&.documentation_url
-            { value: @offense.cop_name, target: cop.documentation_url }
-          else
-            @offense.cop_name
+          if cop&.documentation_url
+            code_description = { href: cop.documentation_url }
           end
 
           Interface::Diagnostic.new(
             message: message,
             source: "RuboCop",
-            code: code,
+            code: @offense.cop_name,
+            code_description: code_description,
             severity: severity,
             range: Interface::Range.new(
               start: Interface::Position.new(
