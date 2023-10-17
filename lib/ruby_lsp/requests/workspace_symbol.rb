@@ -73,14 +73,14 @@ module RubyLsp
 
       private
 
-      sig { params(entry: RubyIndexer::Index::Entry).returns(T.nilable(Integer)) }
+      sig { params(entry: RubyIndexer::Entry).returns(T.nilable(Integer)) }
       def kind_for_entry(entry)
         case entry
-        when RubyIndexer::Index::Entry::Class
+        when RubyIndexer::Entry::Class
           Constant::SymbolKind::CLASS
-        when RubyIndexer::Index::Entry::Module
+        when RubyIndexer::Entry::Module
           Constant::SymbolKind::NAMESPACE
-        when RubyIndexer::Index::Entry::Constant
+        when RubyIndexer::Entry::Constant
           Constant::SymbolKind::CONSTANT
         end
       end

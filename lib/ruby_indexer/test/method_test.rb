@@ -13,7 +13,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Index::Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
     end
 
     def test_singleton_method_using_self_receiver
@@ -24,7 +24,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Index::Entry::SingletonMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::SingletonMethod, "/fake/path/foo.rb:1-2:2-5")
     end
 
     def test_singleton_method_using_other_receiver_is_not_indexed
@@ -46,12 +46,12 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Index::Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_equal(1, entry.parameters.length)
       parameter = entry.parameters.first
       assert_equal(:a, parameter.name)
-      assert_instance_of(Index::Entry::RequiredParameter, parameter)
+      assert_instance_of(Entry::RequiredParameter, parameter)
     end
 
     def test_method_with_destructed_parameters
@@ -62,12 +62,12 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Index::Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_equal(1, entry.parameters.length)
       parameter = entry.parameters.first
       assert_equal(:"(a, (b, ))", parameter.name)
-      assert_instance_of(Index::Entry::RequiredParameter, parameter)
+      assert_instance_of(Entry::RequiredParameter, parameter)
     end
   end
 end

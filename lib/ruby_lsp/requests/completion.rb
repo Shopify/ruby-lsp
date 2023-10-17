@@ -137,18 +137,18 @@ module RubyLsp
           real_name: String,
           incomplete_name: String,
           node: Prism::Node,
-          entries: T::Array[RubyIndexer::Index::Entry],
+          entries: T::Array[RubyIndexer::Entry],
           top_level: T::Boolean,
         ).returns(Interface::CompletionItem)
       end
       def build_entry_completion(real_name, incomplete_name, node, entries, top_level)
         first_entry = T.must(entries.first)
         kind = case first_entry
-        when RubyIndexer::Index::Entry::Class
+        when RubyIndexer::Entry::Class
           Constant::CompletionItemKind::CLASS
-        when RubyIndexer::Index::Entry::Module
+        when RubyIndexer::Entry::Module
           Constant::CompletionItemKind::MODULE
-        when RubyIndexer::Index::Entry::Constant
+        when RubyIndexer::Entry::Constant
           Constant::CompletionItemKind::CONSTANT
         else
           Constant::CompletionItemKind::REFERENCE
@@ -206,7 +206,7 @@ module RubyLsp
 
       # Check if the `entry_name` has potential conflicts in `candidates`, so that we use a top level reference instead
       # of a short name
-      sig { params(entry_name: String, candidates: T::Array[T::Array[RubyIndexer::Index::Entry]]).returns(T::Boolean) }
+      sig { params(entry_name: String, candidates: T::Array[T::Array[RubyIndexer::Entry]]).returns(T::Boolean) }
       def top_level?(entry_name, candidates)
         candidates.any? { |entries| T.must(entries.first).name == "#{@nesting.join("::")}::#{entry_name}" }
       end

@@ -66,7 +66,7 @@ module RubyLsp
           )
         end
 
-        sig { params(title: String, entries: T::Array[RubyIndexer::Index::Entry]).returns(Interface::MarkupContent) }
+        sig { params(title: String, entries: T::Array[RubyIndexer::Entry]).returns(Interface::MarkupContent) }
         def markdown_from_index_entries(title, entries)
           markdown_title = "```ruby\n#{title}\n```"
           definitions = []
