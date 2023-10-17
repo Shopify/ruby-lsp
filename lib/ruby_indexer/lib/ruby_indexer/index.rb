@@ -286,6 +286,11 @@ module RubyIndexer
       end
 
       class Namespace < Entry
+        extend T::Sig
+        extend T::Helpers
+
+        abstract!
+
         sig { returns(String) }
         def short_name
           T.must(@name.split("::").last)
@@ -296,6 +301,26 @@ module RubyIndexer
       end
 
       class Class < Namespace
+        extend T::Sig
+
+        # The unresolved name of the parent class. This may return `nil`, which indicates the lack of an explicit parent
+        # and therefore ::Object is the correct parent class
+        sig { returns(T.nilable(String)) }
+        attr_reader :parent_class
+
+        sig do
+          params(
+            name: String,
+            file_path: String,
+            location: Prism::Location,
+            comments: T::Array[String],
+            parent_class: T.nilable(String),
+          ).void
+        end
+        def initialize(name, file_path, location, comments, parent_class)
+          super(name, file_path, location, comments)
+          @parent_class = T.let(parent_class, T.nilable(String))
+        end
       end
 
       class Constant < Entry
