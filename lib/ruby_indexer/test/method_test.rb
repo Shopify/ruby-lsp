@@ -16,7 +16,39 @@ module RubyIndexer
       assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
     end
 
-    def test_singleton_method_using_self_receiver
+    def test_singleton_method_using_class_self
+      index(<<~RUBY)
+        class Foo
+          class << self
+            def bar
+            end
+          end
+
+          def baz
+          end
+        end
+      RUBY
+
+      assert_entry("bar", Entry::SingletonMethod, "/fake/path/foo.rb:2-4:3-7")
+      assert_entry("baz", Entry::InstanceMethod, "/fake/path/foo.rb:6-2:7-5")
+    end
+
+    def test_singleton_method_using_class_self_with_nesting
+      index(<<~RUBY)
+        class Foo
+          class << self
+            class Nested
+              def bar
+              end
+            end
+          end
+        end
+      RUBY
+
+      assert_entry("bar", Entry::SingletonMethod, "/fake/path/foo.rb:3-6:4-9")
+    end
+
+    def test_singleton_method_using_class
       index(<<~RUBY)
         class Foo
           def self.bar
