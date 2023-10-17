@@ -25,45 +25,45 @@ interface LanguageConfig {
 
 const EMBEDDED_HEREDOC_LANGUAGES: InferrableLanguageConfigOrLabel[] = [
   // Languages for which we can infer everything from the comment label
-  "c",
-  "css",
+  "C",
+  "CSS",
   "GraphQL",
-  "lua",
-  "ruby",
-  "sql",
+  "Lua",
+  "Ruby",
+  "SQL",
 
   // Languages requiring at least one override
   {
     id: "cpp",
-    label: "c++",
+    label: "C++",
   },
   {
-    label: "html",
+    label: "HTML",
     contentName: "text.html",
     includeName: "text.html.basic",
   },
   {
-    label: "javascript",
     id: "js",
+    label: "Javascript",
     delimiters: ["JS", "JAVASCRIPT"],
     contentName: "source.js",
   },
   {
-    label: "jQuery javascript",
     id: "js.jquery",
+    label: "jQuery Javascript",
     delimiters: "JQUERY",
     contentName: "source.js.jquery",
   },
   {
-    label: "shell",
+    label: "Shell",
     delimiters: ["SH", "SHELL"],
   },
   {
-    label: "slim",
+    label: "Slim",
     contentName: "text.slim",
   },
   {
-    label: "xml",
+    label: "XML",
     contentName: "text.xml",
   },
 ];
