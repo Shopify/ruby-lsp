@@ -69,7 +69,7 @@ module RubyLsp
             name,
             node,
             entries,
-            top_level?(complete_name, candidates),
+            top_level?(complete_name),
           )
         end
       end
@@ -113,7 +113,7 @@ module RubyLsp
             name,
             node,
             entries,
-            top_level_reference || top_level?(T.must(entries.first).name, candidates),
+            top_level_reference || top_level?(T.must(entries.first).name),
           )
         end
       end
@@ -178,7 +178,13 @@ module RubyLsp
         # end
         @nesting.each do |namespace|
           prefix = "#{namespace}::"
-          insertion_text.delete_prefix!(prefix)
+          shortened_name = insertion_text.delete_prefix(prefix)
+
+          # If a different entry exists for the shortened name, then there's a conflict and we should not shorten it
+          conflict_name = "#{@nesting.join("::")}::#{shortened_name}"
+          break if real_name != conflict_name && @index[conflict_name]
+
+          insertion_text = shortened_name
 
           # If the user is typing a fully qualified name `Foo::Bar::Baz`, then we should not use the short name (e.g.:
           # `Baz`) as filtering. So we only shorten the filter text if the user is not including the namespaces in their
@@ -204,11 +210,31 @@ module RubyLsp
         )
       end
 
-      # Check if the `entry_name` has potential conflicts in `candidates`, so that we use a top level reference instead
-      # of a short name
-      sig { params(entry_name: String, candidates: T::Array[T::Array[RubyIndexer::Entry]]).returns(T::Boolean) }
-      def top_level?(entry_name, candidates)
-        candidates.any? { |entries| T.must(entries.first).name == "#{@nesting.join("::")}::#{entry_name}" }
+      # Check if there are any conflicting names for `entry_name`, which would require us to use a top level reference.
+      # For example:
+      #
+      # ```ruby
+      # class Bar; end
+      #
+      # module Foo
+      #   class Bar; end
+      #
+      #   # in this case, the completion for `Bar` conflicts with `Foo::Bar`, so we can't suggest `Bar` as the
+      #   # completion, but instead need to suggest `::Bar`
+      #   B
+      # end
+      # ```
+      sig { params(entry_name: String).returns(T::Boolean) }
+      def top_level?(entry_name)
+        @nesting.length.downto(0).each do |i|
+          prefix = T.must(@nesting[0...i]).join("::")
+          full_name = prefix.empty? ? entry_name : "#{prefix}::#{entry_name}"
+          next if full_name == entry_name
+
+          return true if @index[full_name]
+        end
+
+        false
       end
     end
   end
