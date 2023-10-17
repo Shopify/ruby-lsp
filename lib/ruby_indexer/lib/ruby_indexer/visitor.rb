@@ -120,6 +120,18 @@ module RubyIndexer
       handle_private_constant(node) if message == "private_constant"
     end
 
+    sig { override.params(node: Prism::DefNode).void }
+    def visit_def_node(node)
+      method_name = node.name.to_s
+      comments = collect_comments(node)
+      case node.receiver
+      when nil
+        @index << Index::Entry::InstanceMethod.new(method_name, @file_path, node.location, comments, node.parameters)
+      when Prism::SelfNode
+        @index << Index::Entry::SingletonMethod.new(method_name, @file_path, node.location, comments, node.parameters)
+      end
+    end
+
     private
 
     sig { params(node: Prism::CallNode).void }

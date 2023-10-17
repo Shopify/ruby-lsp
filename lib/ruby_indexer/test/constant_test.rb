@@ -102,7 +102,7 @@ module RubyIndexer
         self.class::FOO = 1
       RUBY
 
-      assert_no_entry
+      assert_no_entries
     end
 
     def test_private_constant_indexing
