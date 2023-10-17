@@ -61,7 +61,10 @@
         }
       },
       "severity": 3,
-      "code": "Style/FrozenStringLiteralComment",
+      "code": {
+        "value": "Style/FrozenStringLiteralComment",
+        "target": "https://docs.rubocop.org/rubocop/cops_style.html#stylefrozenstringliteralcomment"
+      },
       "source": "RuboCop",
       "message": "Style/FrozenStringLiteralComment: Missing frozen string literal comment.",
       "data": {
@@ -110,7 +113,10 @@
         }
       },
       "severity": 3,
-      "code": "Layout/EmptyLinesAroundMethodBody",
+      "code": {
+        "value": "Layout/EmptyLinesAroundMethodBody",
+        "target": "https://docs.rubocop.org/rubocop/cops_layout.html#layoutemptylinesaroundmethodbody"
+      },
       "source": "RuboCop",
       "message": "Layout/EmptyLinesAroundMethodBody: Extra empty line detected at method body beginning.",
       "data": {
@@ -159,7 +165,10 @@
         }
       },
       "severity": 3,
-      "code": "Layout/EmptyLines",
+      "code": {
+        "value": "Layout/EmptyLines",
+        "target": "https://docs.rubocop.org/rubocop/cops_layout.html#layoutemptylines"
+      },
       "source": "RuboCop",
       "message": "Layout/EmptyLines: Extra blank line detected.",
       "data": {
@@ -208,7 +217,10 @@
         }
       },
       "severity": 3,
-      "code": "Layout/IndentationWidth",
+      "code": {
+        "value": "Layout/IndentationWidth",
+        "target": "https://docs.rubocop.org/rubocop/cops_layout.html#layoutindentationwidth"
+      },
       "source": "RuboCop",
       "message": "Layout/IndentationWidth: Use 2 (not 0) spaces for indentation.",
       "data": {
