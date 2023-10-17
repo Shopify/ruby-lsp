@@ -10,7 +10,7 @@ module RubyIndexer
       @index = index
       @file_path = file_path
       @stack = T.let([], T::Array[String])
-      @singleton = T.let(false, T::Boolean)
+      @singleton_class = T.let(false, T::Boolean)
       @comments_by_line = T.let(
         parse_result.comments.to_h do |c|
           [c.location.start_line, c]
@@ -28,9 +28,9 @@ module RubyIndexer
 
     sig { override.params(node: Prism::SingletonClassNode).void }
     def visit_singleton_class_node(node)
-      @singleton = true
+      @singleton_class = true
       super
-      @singleton = false
+      @singleton_class = false
     end
 
     sig { override.params(node: Prism::ModuleNode).void }
@@ -134,7 +134,7 @@ module RubyIndexer
       comments = collect_comments(node)
       entry_class = case node.receiver
       when nil
-        if @singleton
+        if @singleton_class # i.e. `class << self`
           Entry::SingletonMethod
         else
           Entry::InstanceMethod
