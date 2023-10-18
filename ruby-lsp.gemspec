@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency("language_server-protocol", "~> 3.17.0")
-  s.add_dependency("prism", ">= 0.15", "< 0.16")
+  s.add_dependency("prism", ">= 0.15.1", "< 0.16")
   s.add_dependency("sorbet-runtime", ">= 0.5.5685")
 
   s.required_ruby_version = ">= 3.0"
