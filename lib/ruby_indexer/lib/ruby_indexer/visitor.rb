@@ -144,7 +144,7 @@ module RubyIndexer
       else
         return
       end
-      name = @stack.join("::")
+      name = @class_entry
 
       @index << entry_class.new(method_name, @file_path, node.location, comments, node.parameters, name)
     end
@@ -244,7 +244,8 @@ module RubyIndexer
         superclass.slice
       end
 
-      @index << Entry::Class.new(fully_qualify_name(name), @file_path, node.location, comments, parent_class)
+      @class_entry = Entry::Class.new(fully_qualify_name(name), @file_path, node.location, comments, parent_class)
+      @index << @class_entry
       @stack << name
       visit(node.body)
       @stack.pop

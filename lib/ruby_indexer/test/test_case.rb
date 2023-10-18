@@ -28,7 +28,7 @@ module RubyIndexer
           ":#{location.end_line - 1}-#{location.end_column}"
 
       assert_equal(expected_location, location_string)
-      assert_equal(expected_namespace, entry.namespace) if expected_namespace
+      assert_equal(expected_namespace, entry.namespace.name) if expected_namespace
     end
 
     def refute_entry(expected_name)
