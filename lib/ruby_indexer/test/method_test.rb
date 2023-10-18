@@ -16,6 +16,15 @@ module RubyIndexer
       assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5", "Foo")
     end
 
+    def test_top_level_method
+      index(<<~RUBY)
+        def bar
+        end
+      RUBY
+
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:0-0:1-3", nil)
+    end
+
     def test_module_method_with_no_parameters
       index(<<~RUBY)
         module Foo
