@@ -23,7 +23,7 @@ module RubyIndexer
 
     sig { override.params(node: Prism::ClassNode).void }
     def visit_class_node(node)
-      add_class_entry(node)
+      add_class_or_module_entry(node)
     end
 
     sig { override.params(node: Prism::SingletonClassNode).void }
@@ -144,7 +144,7 @@ module RubyIndexer
       else
         return
       end
-      name = @class_entry
+      name = @class_or_module_entry
 
       @index << entry_class.new(method_name, @file_path, node.location, comments, node.parameters, name)
     end
@@ -225,14 +225,15 @@ module RubyIndexer
 
       comments = collect_comments(node)
 
-      @index << Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments)
+      @class_or_module_entry = Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments)
+      @index << @class_or_module_entry
       @stack << name
       visit_child_nodes(node)
       @stack.pop
     end
 
     sig { params(node: Prism::ClassNode).void }
-    def add_class_entry(node)
+    def add_class_or_module_entry(node)
       name = node.constant_path.location.slice
       return visit_child_nodes(node) unless /^[A-Z:]/.match?(name)
 
@@ -244,8 +245,14 @@ module RubyIndexer
         superclass.slice
       end
 
-      @class_entry = Entry::Class.new(fully_qualify_name(name), @file_path, node.location, comments, parent_class)
-      @index << @class_entry
+      @class_or_module_entry = Entry::Class.new(
+        fully_qualify_name(name),
+        @file_path,
+        node.location,
+        comments,
+        parent_class,
+      )
+      @index << @class_or_module_entry
       @stack << name
       visit(node.body)
       @stack.pop

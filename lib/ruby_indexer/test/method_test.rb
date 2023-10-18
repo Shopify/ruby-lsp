@@ -16,6 +16,17 @@ module RubyIndexer
       assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5", "Foo")
     end
 
+    def test_module_method_with_no_parameters
+      index(<<~RUBY)
+        module Foo
+          def bar
+          end
+        end
+      RUBY
+
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5", "Foo")
+    end
+
     def test_singleton_method_using_class_self
       index(<<~RUBY)
         class Foo
