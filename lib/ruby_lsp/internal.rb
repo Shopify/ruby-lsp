@@ -8,6 +8,7 @@ $LOAD_PATH.delete_if { |path| yarp_require_paths.include?(path) } if yarp_requir
 
 require "sorbet-runtime"
 require "prism"
+require "prism/visitor"
 require "language_server-protocol"
 require "bundler"
 require "uri"

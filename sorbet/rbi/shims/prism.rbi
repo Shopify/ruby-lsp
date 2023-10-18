@@ -466,8 +466,8 @@ module Prism
   #     $'
   #     ^^
   class BackReferenceReadNode < Node
-    sig { params(location: Location).void }
-    def initialize(location); end
+    sig { params(name: Symbol, location: Location).void }
+    def initialize(name, location); end
 
     sig { params(visitor: Visitor).void }
     def accept(visitor); end
@@ -820,8 +820,8 @@ module Prism
     sig { returns(Node) }
     attr_reader :value
 
-    sig { params(receiver: T.nilable(Node), call_operator_loc: T.nilable(Location), message_loc: T.nilable(Location), opening_loc: T.nilable(Location), arguments: T.nilable(ArgumentsNode), closing_loc: T.nilable(Location), flags: Integer, read_name: Symbol, write_name: Symbol, operator_loc: Location, value: Node, location: Location).void }
-    def initialize(receiver, call_operator_loc, message_loc, opening_loc, arguments, closing_loc, flags, read_name, write_name, operator_loc, value, location); end
+    sig { params(receiver: T.nilable(Node), call_operator_loc: T.nilable(Location), message_loc: T.nilable(Location), flags: Integer, read_name: Symbol, write_name: Symbol, operator_loc: Location, value: Node, location: Location).void }
+    def initialize(receiver, call_operator_loc, message_loc, flags, read_name, write_name, operator_loc, value, location); end
 
     sig { params(visitor: Visitor).void }
     def accept(visitor); end
@@ -991,8 +991,8 @@ module Prism
     sig { returns(Node) }
     attr_reader :value
 
-    sig { params(receiver: T.nilable(Node), call_operator_loc: T.nilable(Location), message_loc: T.nilable(Location), opening_loc: T.nilable(Location), arguments: T.nilable(ArgumentsNode), closing_loc: T.nilable(Location), flags: Integer, read_name: Symbol, write_name: Symbol, operator: Symbol, operator_loc: Location, value: Node, location: Location).void }
-    def initialize(receiver, call_operator_loc, message_loc, opening_loc, arguments, closing_loc, flags, read_name, write_name, operator, operator_loc, value, location); end
+    sig { params(receiver: T.nilable(Node), call_operator_loc: T.nilable(Location), message_loc: T.nilable(Location), flags: Integer, read_name: Symbol, write_name: Symbol, operator: Symbol, operator_loc: Location, value: Node, location: Location).void }
+    def initialize(receiver, call_operator_loc, message_loc, flags, read_name, write_name, operator, operator_loc, value, location); end
 
     sig { params(visitor: Visitor).void }
     def accept(visitor); end
@@ -1069,8 +1069,8 @@ module Prism
     sig { returns(Node) }
     attr_reader :value
 
-    sig { params(receiver: T.nilable(Node), call_operator_loc: T.nilable(Location), message_loc: T.nilable(Location), opening_loc: T.nilable(Location), arguments: T.nilable(ArgumentsNode), closing_loc: T.nilable(Location), flags: Integer, read_name: Symbol, write_name: Symbol, operator_loc: Location, value: Node, location: Location).void }
-    def initialize(receiver, call_operator_loc, message_loc, opening_loc, arguments, closing_loc, flags, read_name, write_name, operator_loc, value, location); end
+    sig { params(receiver: T.nilable(Node), call_operator_loc: T.nilable(Location), message_loc: T.nilable(Location), flags: Integer, read_name: Symbol, write_name: Symbol, operator_loc: Location, value: Node, location: Location).void }
+    def initialize(receiver, call_operator_loc, message_loc, flags, read_name, write_name, operator_loc, value, location); end
 
     sig { params(visitor: Visitor).void }
     def accept(visitor); end
@@ -6790,8 +6790,8 @@ module Prism
     sig { params(value: T.nilable(Node), operator_loc: Location, location: Location).returns(AssocSplatNode) }
     def AssocSplatNode(value, operator_loc, location); end
     # Create a new BackReferenceReadNode node
-    sig { params(location: Location).returns(BackReferenceReadNode) }
-    def BackReferenceReadNode(location); end
+    sig { params(name: Symbol, location: Location).returns(BackReferenceReadNode) }
+    def BackReferenceReadNode(name, location); end
     # Create a new BeginNode node
     sig { params(begin_keyword_loc: T.nilable(Location), statements: T.nilable(StatementsNode), rescue_clause: T.nilable(RescueNode), else_clause: T.nilable(ElseNode), ensure_clause: T.nilable(EnsureNode), end_keyword_loc: T.nilable(Location), location: Location).returns(BeginNode) }
     def BeginNode(begin_keyword_loc, statements, rescue_clause, else_clause, ensure_clause, end_keyword_loc, location); end
@@ -6814,17 +6814,17 @@ module Prism
     sig { params(arguments: T.nilable(ArgumentsNode), keyword_loc: Location, location: Location).returns(BreakNode) }
     def BreakNode(arguments, keyword_loc, location); end
     # Create a new CallAndWriteNode node
-    sig { params(receiver: T.nilable(Node), call_operator_loc: T.nilable(Location), message_loc: T.nilable(Location), opening_loc: T.nilable(Location), arguments: T.nilable(ArgumentsNode), closing_loc: T.nilable(Location), flags: Integer, read_name: Symbol, write_name: Symbol, operator_loc: Location, value: Node, location: Location).returns(CallAndWriteNode) }
-    def CallAndWriteNode(receiver, call_operator_loc, message_loc, opening_loc, arguments, closing_loc, flags, read_name, write_name, operator_loc, value, location); end
+    sig { params(receiver: T.nilable(Node), call_operator_loc: T.nilable(Location), message_loc: T.nilable(Location), flags: Integer, read_name: Symbol, write_name: Symbol, operator_loc: Location, value: Node, location: Location).returns(CallAndWriteNode) }
+    def CallAndWriteNode(receiver, call_operator_loc, message_loc, flags, read_name, write_name, operator_loc, value, location); end
     # Create a new CallNode node
     sig { params(receiver: T.nilable(Node), call_operator_loc: T.nilable(Location), message_loc: T.nilable(Location), opening_loc: T.nilable(Location), arguments: T.nilable(ArgumentsNode), closing_loc: T.nilable(Location), block: T.nilable(Node), flags: Integer, name: Symbol, location: Location).returns(CallNode) }
     def CallNode(receiver, call_operator_loc, message_loc, opening_loc, arguments, closing_loc, block, flags, name, location); end
     # Create a new CallOperatorWriteNode node
-    sig { params(receiver: T.nilable(Node), call_operator_loc: T.nilable(Location), message_loc: T.nilable(Location), opening_loc: T.nilable(Location), arguments: T.nilable(ArgumentsNode), closing_loc: T.nilable(Location), flags: Integer, read_name: Symbol, write_name: Symbol, operator: Symbol, operator_loc: Location, value: Node, location: Location).returns(CallOperatorWriteNode) }
-    def CallOperatorWriteNode(receiver, call_operator_loc, message_loc, opening_loc, arguments, closing_loc, flags, read_name, write_name, operator, operator_loc, value, location); end
+    sig { params(receiver: T.nilable(Node), call_operator_loc: T.nilable(Location), message_loc: T.nilable(Location), flags: Integer, read_name: Symbol, write_name: Symbol, operator: Symbol, operator_loc: Location, value: Node, location: Location).returns(CallOperatorWriteNode) }
+    def CallOperatorWriteNode(receiver, call_operator_loc, message_loc, flags, read_name, write_name, operator, operator_loc, value, location); end
     # Create a new CallOrWriteNode node
-    sig { params(receiver: T.nilable(Node), call_operator_loc: T.nilable(Location), message_loc: T.nilable(Location), opening_loc: T.nilable(Location), arguments: T.nilable(ArgumentsNode), closing_loc: T.nilable(Location), flags: Integer, read_name: Symbol, write_name: Symbol, operator_loc: Location, value: Node, location: Location).returns(CallOrWriteNode) }
-    def CallOrWriteNode(receiver, call_operator_loc, message_loc, opening_loc, arguments, closing_loc, flags, read_name, write_name, operator_loc, value, location); end
+    sig { params(receiver: T.nilable(Node), call_operator_loc: T.nilable(Location), message_loc: T.nilable(Location), flags: Integer, read_name: Symbol, write_name: Symbol, operator_loc: Location, value: Node, location: Location).returns(CallOrWriteNode) }
+    def CallOrWriteNode(receiver, call_operator_loc, message_loc, flags, read_name, write_name, operator_loc, value, location = T.unsafe(nil)); end
     # Create a new CapturePatternNode node
     sig { params(value: Node, target: Node, operator_loc: Location, location: Location).returns(CapturePatternNode) }
     def CapturePatternNode(value, target, operator_loc, location); end
