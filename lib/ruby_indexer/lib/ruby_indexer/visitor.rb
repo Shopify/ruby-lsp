@@ -17,6 +17,7 @@ module RubyIndexer
         end,
         T::Hash[Integer, Prism::Comment],
       )
+      @class_or_module_entry = T.let(nil, T.any(NilClass, Entry::Class, Entry::Module))
 
       super()
     end
