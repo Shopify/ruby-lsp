@@ -32,7 +32,7 @@ module RubyLsp
 
       ResponseType = type_member { { fixed: T::Array[Interface::DocumentSymbol] } }
 
-      ATTR_ACCESSORS = T.let([:attr_reader, :attr_writer, :attr_accessor].freeze, T::Array[Symbol])
+      ATTR_ACCESSORS = T.let(["attr_reader", "attr_writer", "attr_accessor"].freeze, T::Array[String])
 
       class SymbolHierarchyRoot
         extend T::Sig
@@ -105,7 +105,7 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
-        return unless ATTR_ACCESSORS.include?(node.name) && node.receiver.nil?
+        return unless ATTR_ACCESSORS.include?(node.name.to_s) && node.receiver.nil?
 
         arguments = node.arguments
         return unless arguments

@@ -25,7 +25,7 @@ module RubyLsp
       ResponseType = type_member { { fixed: T::Array[Interface::CodeLens] } }
 
       BASE_COMMAND = T.let((File.exist?("Gemfile.lock") ? "bundle exec ruby" : "ruby") + " -Itest ", String)
-      ACCESS_MODIFIERS = T.let([:public, :private, :protected], T::Array[Symbol])
+      ACCESS_MODIFIERS = T.let(["public", "private", "protected"], T::Array[String])
       SUPPORTED_TEST_LIBRARIES = T.let(["minitest", "test-unit"], T::Array[String])
 
       sig { override.returns(ResponseType) }
@@ -37,7 +37,7 @@ module RubyLsp
         @_response = T.let([], ResponseType)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
         # visibility_stack is a stack of [current_visibility, previous_visibility]
-        @visibility_stack = T.let([[:public, :public]], T::Array[T::Array[T.nilable(Symbol)]])
+        @visibility_stack = T.let([["public", "public"]], T::Array[T::Array[T.nilable(String)]])
         @class_stack = T.let([], T::Array[String])
 
         super(dispatcher, message_queue)
@@ -54,7 +54,7 @@ module RubyLsp
 
       sig { params(node: Prism::ClassNode).void }
       def on_class_node_enter(node)
-        @visibility_stack.push([:public, :public])
+        @visibility_stack.push(["public", "public"])
         class_name = node.constant_path.slice
         @class_stack.push(class_name)
 
@@ -80,7 +80,7 @@ module RubyLsp
         return unless class_name&.end_with?("Test")
 
         visibility, _ = @visibility_stack.last
-        if visibility == :public
+        if visibility == "public"
           method_name = node.name.to_s
           if @path && method_name.start_with?("test_")
             add_test_code_lens(
@@ -95,7 +95,7 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
-        name = node.name
+        name = node.name.to_s
         arguments = node.arguments
 
         # If we found `private` by itself or `private def foo`
@@ -111,7 +111,7 @@ module RubyLsp
           return
         end
 
-        if @path&.include?("Gemfile") && name == :gem && arguments
+        if @path&.include?("Gemfile") && name == "gem" && arguments
           first_argument = arguments.arguments.first
           return unless first_argument.is_a?(Prism::StringNode)
 
