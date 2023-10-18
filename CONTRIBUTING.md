@@ -24,8 +24,10 @@ The test suite can be executed by running
 bin/test
 # or the spec reporter
 SPEC_REPORTER=1 bin/test
-# Warning are turned off by default. If you wish to see warnings use
+# Warnings are turned off by default. If you wish to see warnings use
 VERBOSE=1 bin/test
+# Run a single test like this: "bin/test my_test.rb test_name_regex", e.g.
+bin/test test/requests/diagnostics_expectations_test.rb test_diagnostics__def_bad_formatting
 ```
 
 ## Expectation testing
@@ -46,7 +48,7 @@ We define expectations as `.exp` files, of which there are two variants:
 To add a new test scenario
 
 1. Add a new fixture `my_fixture.rb` file under `test/fixtures`
-2. For applicable requests, add expectation files related to this fixutre. For example,
+2. For applicable requests, add expectation files related to this fixture. For example,
 `test/expectations/semantic_highlighting/my_fixture.exp.json`
 
 To add a new expectations test runner for a new request handler:

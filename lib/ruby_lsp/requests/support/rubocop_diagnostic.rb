@@ -19,6 +19,12 @@ module RubyLsp
           T::Hash[Symbol, Integer],
         )
 
+        # Cache cops to attach URLs to diagnostics. Only built-in cops for now.
+        COP_TO_DOC_URL = T.let(
+          RuboCop::Cop::Registry.global.to_h,
+          T::Hash[String, [T.class_of(RuboCop::Cop::Base)]],
+        )
+
         sig { params(offense: RuboCop::Cop::Offense, uri: URI::Generic).void }
         def initialize(offense, uri)
           @offense = offense
@@ -52,10 +58,16 @@ module RubyLsp
 
           message += "\n\nThis offense is not auto-correctable.\n" unless @offense.correctable?
 
+          cop = COP_TO_DOC_URL[@offense.cop_name]&.first
+          if cop&.documentation_url
+            code_description = { href: cop.documentation_url }
+          end
+
           Interface::Diagnostic.new(
             message: message,
             source: "RuboCop",
             code: @offense.cop_name,
+            code_description: code_description,
             severity: severity,
             range: Interface::Range.new(
               start: Interface::Position.new(

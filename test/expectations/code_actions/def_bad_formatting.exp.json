@@ -62,6 +62,9 @@
                         }
                     },
                     "code": "Layout/EmptyLines",
+                    "codeDescription": {
+                        "href": "https://docs.rubocop.org/rubocop/cops_layout.html#layoutemptylines"
+                    },
                     "severity": 3,
                     "source": "RuboCop"
                 },
@@ -111,6 +114,9 @@
                         }
                     },
                     "code": "Layout/IndentationWidth",
+                    "codeDescription": {
+                        "href": "https://docs.rubocop.org/rubocop/cops_layout.html#layoutindentationwidth"
+                    },
                     "severity": 3,
                     "source": "RuboCop"
                 }

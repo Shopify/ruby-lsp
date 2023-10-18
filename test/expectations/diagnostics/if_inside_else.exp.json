@@ -48,6 +48,9 @@
       },
       "severity": 3,
       "code": "Style/IfInsideElse",
+      "codeDescription": {
+        "href": "https://docs.rubocop.org/rubocop/cops_style.html#styleifinsideelse"
+      },
       "source": "RuboCop",
       "message": "Style/IfInsideElse: Convert `if` nested inside `else` to `elsif`.",
       "data": {
