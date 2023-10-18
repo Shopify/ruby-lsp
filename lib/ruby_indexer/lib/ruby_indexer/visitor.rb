@@ -147,7 +147,7 @@ module RubyIndexer
       end
       name = @class_or_module_entry
 
-      @index << entry_class.new(method_name, @file_path, node.location, comments, node.parameters, name)
+      @index << entry_class.new(method_name, @file_path, node.location, comments, node.parameters, T.must(name))
     end
 
     private

@@ -101,7 +101,7 @@ module RubyIndexer
       sig { returns(T::Array[Parameter]) }
       attr_reader :parameters
 
-      sig { returns(T.nilable(Entry)) }
+      sig { returns(T.any(NilClass, Entry::Class, Entry::Module)) }
       attr_reader :namespace
 
       # rubocop:disable Metrics/ParameterLists
@@ -112,13 +112,13 @@ module RubyIndexer
           location: Prism::Location,
           comments: T::Array[String],
           parameters_node: T.nilable(Prism::ParametersNode),
-          namespace: T.nilable(Entry),
+          namespace: T.any(NilClass, Entry::Class, Entry::Module),
         ).void
       end
       def initialize(name, file_path, location, comments, parameters_node, namespace)
         super(name, file_path, location, comments)
         @parameters = T.let(list_params(parameters_node), T::Array[Parameter])
-        @namespace = T.let(namespace, T.untyped)
+        @namespace = T.let(namespace, T.any(NilClass, Entry::Class, Entry::Module))
       end
       # rubocop:enable Metrics/ParameterLists
 
