@@ -50,7 +50,7 @@ module RubyIndexer
       RUBY
 
       assert_entry("bar", Entry::SingletonMethod, "/fake/path/foo.rb:2-4:3-7", "Foo")
-      assert_entry("bar", Entry::SingletonMethod, "/fake/path/foo.rb:2-4:3-7", "Foo")
+      assert_entry("baz", Entry::InstanceMethod, "/fake/path/foo.rb:6-2:7-5", "Foo")
     end
 
     def test_singleton_method_using_class_self_with_nesting
