@@ -144,7 +144,9 @@ module RubyIndexer
       else
         return
       end
-      @index << entry_class.new(method_name, @file_path, node.location, comments, node.parameters)
+      name = @stack.join("::")
+
+      @index << entry_class.new(method_name, @file_path, node.location, comments, node.parameters, name)
     end
 
     private

@@ -101,6 +101,9 @@ module RubyIndexer
       sig { returns(T::Array[Parameter]) }
       attr_reader :parameters
 
+      sig { returns(String) }
+      attr_reader :namespace
+
       sig do
         params(
           name: String,
@@ -108,11 +111,13 @@ module RubyIndexer
           location: Prism::Location,
           comments: T::Array[String],
           parameters_node: T.nilable(Prism::ParametersNode),
+          namespace: T.nilable(String) # nilable or not?
         ).void
       end
-      def initialize(name, file_path, location, comments, parameters_node)
+      def initialize(name, file_path, location, comments, parameters_node, namespace = nil)
         super(name, file_path, location, comments)
         @parameters = T.let(list_params(parameters_node), T::Array[Parameter])
+        @namespace = T.let(namespace, T.nilable(String))
       end
 
       private

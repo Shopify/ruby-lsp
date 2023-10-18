@@ -13,7 +13,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5", "Foo")
     end
 
     def test_singleton_method_using_class_self
@@ -29,8 +29,8 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::SingletonMethod, "/fake/path/foo.rb:2-4:3-7")
-      assert_entry("baz", Entry::InstanceMethod, "/fake/path/foo.rb:6-2:7-5")
+      assert_entry("bar", Entry::SingletonMethod, "/fake/path/foo.rb:2-4:3-7", "Foo")
+      assert_entry("bar", Entry::SingletonMethod, "/fake/path/foo.rb:2-4:3-7", "Foo")
     end
 
     def test_singleton_method_using_class_self_with_nesting
@@ -45,7 +45,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::SingletonMethod, "/fake/path/foo.rb:3-6:4-9")
+      assert_entry("bar", Entry::SingletonMethod, "/fake/path/foo.rb:3-6:4-9", "Foo::Nested")
     end
 
     def test_singleton_method_using_class
@@ -56,7 +56,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::SingletonMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::SingletonMethod, "/fake/path/foo.rb:1-2:2-5", "Foo")
     end
 
     def test_singleton_method_using_other_receiver_is_not_indexed
@@ -78,7 +78,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5", "Foo")
       entry = T.must(@index["bar"].first)
       assert_equal(1, entry.parameters.length)
       parameter = entry.parameters.first
@@ -94,7 +94,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5", "Foo")
       entry = T.must(@index["bar"].first)
       assert_equal(1, entry.parameters.length)
       parameter = entry.parameters.first
