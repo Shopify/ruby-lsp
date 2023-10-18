@@ -101,7 +101,7 @@ module RubyIndexer
       sig { returns(T::Array[Parameter]) }
       attr_reader :parameters
 
-      sig { returns(String) }
+      sig { returns(T.nilable(String)) }
       attr_reader :namespace
 
       sig do
@@ -114,7 +114,7 @@ module RubyIndexer
           namespace: T.nilable(String) # nilable or not?
         ).void
       end
-      def initialize(name, file_path, location, comments, parameters_node, namespace = nil)
+      def initialize(name, file_path, location, comments, parameters_node, namespace)
         super(name, file_path, location, comments)
         @parameters = T.let(list_params(parameters_node), T::Array[Parameter])
         @namespace = T.let(namespace, T.nilable(String))
