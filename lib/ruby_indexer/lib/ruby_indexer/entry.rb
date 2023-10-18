@@ -112,7 +112,7 @@ module RubyIndexer
           location: Prism::Location,
           comments: T::Array[String],
           parameters_node: T.nilable(Prism::ParametersNode),
-          namespace: T.nilable(String), # nilable or not?
+          namespace: T.nilable(String),
         ).void
       end
       def initialize(name, file_path, location, comments, parameters_node, namespace)
