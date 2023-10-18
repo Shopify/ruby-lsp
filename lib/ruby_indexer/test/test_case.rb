@@ -15,7 +15,7 @@ module RubyIndexer
       @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), source)
     end
 
-    def assert_entry(expected_name, type, expected_location, expected_namespace)
+    def assert_entry(expected_name, type, expected_location, expected_namespace = nil)
       entries = @index[expected_name]
       refute_empty(entries, "Expected #{expected_name} to be indexed")
 

@@ -65,6 +65,7 @@ module RubyIndexer
         end
       RUBY
 
+      # TODO: I think this isn't correct
       assert_entry("bar", Entry::SingletonMethod, "/fake/path/foo.rb:3-6:4-9", "Foo::Nested")
     end
 
