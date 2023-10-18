@@ -20,8 +20,6 @@ class ShowSyntaxTreeTest < Minitest::Test
       params: { textDocument: { uri: "file:///fake.rb" } },
     }).response
 
-    call_node_name = RUBY_PLATFORM.match?(/(mswin|mingw)/) ? ":foo" : "\"foo\""
-
     assert_equal(<<~AST, response[:ast])
       @ ProgramNode (location: (1,0)-(1,6))
       ├── locals: []
@@ -46,7 +44,7 @@ class ShowSyntaxTreeTest < Minitest::Test
                   │   ├── opening_loc: (1,4)-(1,6) = "do"
                   │   └── closing_loc: (1,6)-(1,6) = ""
                   ├── flags: ∅
-                  └── name: #{call_node_name}
+                  └── name: :foo
     AST
   end
 
