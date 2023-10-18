@@ -24,6 +24,5 @@ group :development do
   gem "rdoc", require: false
   gem "psych", "~> 5.1", require: false
 
-  gem "rbi", github: "Shopify/rbi", branch: "vs/move_to_prism"
   gem "syntax_tree", ">= 6.1.1", "< 7"
 end
