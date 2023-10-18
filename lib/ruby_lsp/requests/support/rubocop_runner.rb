@@ -101,6 +101,25 @@ module RubyLsp
           @options[:stdin]
         end
 
+        class << self
+          extend T::Sig
+
+          sig { params(cop_name: String).returns(T.nilable(T.class_of(RuboCop::Cop::Base))) }
+          def find_cop_by_name(cop_name)
+            cop_registry[cop_name]&.first
+          end
+
+          private
+
+          sig { returns(T::Hash[String, [T.class_of(RuboCop::Cop::Base)]]) }
+          def cop_registry
+            @cop_registry ||= T.let(
+              RuboCop::Cop::Registry.global.to_h,
+              T.nilable(T::Hash[String, [T.class_of(RuboCop::Cop::Base)]]),
+            )
+          end
+        end
+
         private
 
         sig { params(_file: String, offenses: T::Array[RuboCop::Cop::Offense]).void }
