@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "bundler/setup"
+
+require "ruby_lsp/internal"
+
+index = RubyIndexer::Index.new
+
+RubyIndexer.configuration.indexables.each do |indexable|
+  puts "indexing: #{indexable.full_path}"
+  content = File.read(indexable.full_path)
+  result = Prism.parse(content)
+  visitor = RubyIndexer::IndexVisitor.new(index, result, indexable.full_path)
+  result.value.accept(visitor)
+end
