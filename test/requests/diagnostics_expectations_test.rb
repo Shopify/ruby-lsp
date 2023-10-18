@@ -52,6 +52,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
         source: "RuboCop",
         code: diagnostic["code"],
         severity: diagnostic["severity"],
+        code_description: diagnostic["codeDescription"],
         range: LanguageServer::Protocol::Interface::Range.new(
           start: LanguageServer::Protocol::Interface::Position.new(
             line: diagnostic["range"]["start"]["line"],
