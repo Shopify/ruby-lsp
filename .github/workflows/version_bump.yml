@@ -49,8 +49,8 @@ jobs:
             const response = await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              head: automated-bump-version-${{ steps.version.outputs.VERSION }},
-              base: main,
+              head: "automated-bump-version-${{ steps.version.outputs.VERSION }}",
+              base: "main",
               title: "Bump version to v${{ steps.version.outputs.VERSION }}"
             });
 
