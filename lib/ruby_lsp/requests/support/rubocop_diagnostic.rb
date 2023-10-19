@@ -19,12 +19,6 @@ module RubyLsp
           T::Hash[Symbol, Integer],
         )
 
-        # Cache cops to attach URLs to diagnostics. Only built-in cops for now.
-        COP_TO_DOC_URL = T.let(
-          RuboCop::Cop::Registry.global.to_h,
-          T::Hash[String, [T.class_of(RuboCop::Cop::Base)]],
-        )
-
         sig { params(offense: RuboCop::Cop::Offense, uri: URI::Generic).void }
         def initialize(offense, uri)
           @offense = offense
@@ -53,16 +47,6 @@ module RubyLsp
 
         sig { returns(Interface::Diagnostic) }
         def to_lsp_diagnostic
-          severity = RUBOCOP_TO_LSP_SEVERITY[@offense.severity.name]
-          message  = @offense.message
-
-          message += "\n\nThis offense is not auto-correctable.\n" unless @offense.correctable?
-
-          cop = COP_TO_DOC_URL[@offense.cop_name]&.first
-          if cop&.documentation_url
-            code_description = { href: cop.documentation_url }
-          end
-
           Interface::Diagnostic.new(
             message: message,
             source: "RuboCop",
@@ -87,6 +71,24 @@ module RubyLsp
         end
 
         private
+
+        sig { returns(String) }
+        def message
+          message  = @offense.message
+          message += "\n\nThis offense is not auto-correctable.\n" unless @offense.correctable?
+          message
+        end
+
+        sig { returns(T.nilable(Integer)) }
+        def severity
+          RUBOCOP_TO_LSP_SEVERITY[@offense.severity.name]
+        end
+
+        sig { returns(T.nilable(Interface::CodeDescription)) }
+        def code_description
+          doc_url = RuboCopRunner.find_cop_by_name(@offense.cop_name)&.documentation_url
+          Interface::CodeDescription.new(href: doc_url) if doc_url
+        end
 
         sig { returns(T::Array[Interface::TextEdit]) }
         def offense_replacements
