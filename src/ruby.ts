@@ -30,6 +30,7 @@ export class Ruby {
   private _error = false;
   private readonly context: vscode.ExtensionContext;
   private readonly customBundleGemfile?: string;
+  private readonly cwd: string;
   private readonly outputChannel: vscode.OutputChannel;
 
   constructor(
@@ -50,6 +51,10 @@ export class Ruby {
         ? customBundleGemfile
         : path.resolve(path.join(this.workingFolder, customBundleGemfile));
     }
+
+    this.cwd = this.customBundleGemfile
+      ? path.dirname(this.customBundleGemfile)
+      : this.workingFolder;
   }
 
   get versionManager() {
@@ -135,11 +140,7 @@ export class Ruby {
       );
     }
 
-    const cwd = this.customBundleGemfile
-      ? path.dirname(this.customBundleGemfile)
-      : this.workingFolder;
-
-    const result = await asyncExec("shadowenv hook --json", { cwd });
+    const result = await asyncExec("shadowenv hook --json", { cwd: this.cwd });
 
     if (result.stdout.trim() === "") {
       result.stdout = "{ }";
@@ -167,18 +168,11 @@ export class Ruby {
       command += "'";
     }
 
-    // If there's a custom bundle configured by the user, we need to activate the Ruby version in that folder, so that
-    // they can place configuration files such as `.ruby-version` there and use a different Ruby version than the
-    // project they are working on
-    const cwd = this.customBundleGemfile
-      ? path.dirname(this.customBundleGemfile)
-      : this.workingFolder;
-
     this.outputChannel.appendLine(
-      `Ruby LSP> Trying to activate Ruby environment with command: ${command} inside directory: ${cwd}`,
+      `Ruby LSP> Trying to activate Ruby environment with command: ${command} inside directory: ${this.cwd}`,
     );
 
-    const result = await asyncExec(command, { cwd });
+    const result = await asyncExec(command, { cwd: this.cwd });
 
     const envJson = /RUBY_ENV_ACTIVATE(.*)RUBY_ENV_ACTIVATE/.exec(
       result.stdout,
@@ -190,7 +184,7 @@ export class Ruby {
   private async fetchRubyInfo() {
     const rubyInfo = await asyncExec(
       "ruby -e 'puts \"#{RUBY_VERSION},#{defined?(RubyVM::YJIT)}\"'",
-      { env: this._env },
+      { env: this._env, cwd: this.cwd },
     );
 
     const [rubyVersion, yjitIsDefined] = rubyInfo.stdout.trim().split(",");
@@ -248,7 +242,7 @@ export class Ruby {
   }
 
   private readRubyVersion() {
-    let dir = this.workingFolder;
+    let dir = this.cwd;
 
     while (fs.existsSync(dir)) {
       const versionFile = path.join(dir, ".ruby-version");
