@@ -2,9 +2,19 @@ PATH
   remote: .
   specs:
     ruby-lsp (0.12.0)
+      bundler
+      cgi
+      did_you_mean (~> 1.6.3)
+      digest
+      fileutils
       language_server-protocol (~> 3.17.0)
+      pathname
       prism (>= 0.15.1, < 0.16)
+      set
       sorbet-runtime (>= 0.5.5685)
+      time
+      uri
+      yaml
 
 GEM
   remote: https://rubygems.org/
@@ -13,10 +23,15 @@ GEM
     ast (2.4.2)
     base64 (0.1.1)
     builder (3.2.4)
+    cgi (0.3.6)
+    date (3.3.3)
     debug (1.8.0)
       irb (>= 1.5.0)
       reline (>= 0.3.1)
+    did_you_mean (1.6.3)
+    digest (3.1.1)
     erubi (1.12.0)
+    fileutils (1.7.0)
     io-console (0.6.0)
     irb (1.8.0)
       rdoc (~> 6.5)
@@ -36,6 +51,7 @@ GEM
     parser (3.2.2.4)
       ast (~> 2.4.1)
       racc
+    pathname (0.2.1)
     prettier_print (1.2.1)
     prism (0.15.1)
     psych (5.1.1)
@@ -76,6 +92,7 @@ GEM
       rubocop (>= 0.90.0)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
+    set (1.0.3)
     sorbet (0.5.11074)
       sorbet-static (= 0.5.11074)
     sorbet-runtime (0.5.11074)
@@ -102,7 +119,11 @@ GEM
       thor (>= 1.2.0)
       yard-sorbet
     thor (1.2.2)
+    time (0.2.2)
+      date
     unicode-display_width (2.5.0)
+    uri (0.12.1)
+    yaml (0.2.1)
     yard (0.9.34)
     yard-sorbet (0.8.1)
       sorbet-runtime (>= 0.5)
@@ -111,13 +132,11 @@ GEM
 
 PLATFORMS
   arm64-darwin
-  x64-mingw-ucrt
   x64-mingw32
   x86_64-darwin
   x86_64-linux
 
 DEPENDENCIES
-  bundler (~> 2.4.2)
   debug (~> 1.8)
   minitest (~> 5.20)
   minitest-reporters (~> 1.6)
@@ -136,4 +155,4 @@ DEPENDENCIES
   tapioca (~> 0.11)
 
 BUNDLED WITH
-   2.4.10
+   2.4.21
