@@ -446,7 +446,9 @@
     "glob": "^10.3.7",
     "mocha": "^10.2.0",
     "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "vscode-oniguruma": "^2.0.1",
+    "vscode-textmate": "^9.0.0"
   },
   "dependencies": {
     "vscode-languageclient": "^9.0.1"
