@@ -48,6 +48,19 @@ module RubyIndexer
       assert_entry("bar", Entry::SingletonMethod, "/fake/path/foo.rb:3-6:4-9")
     end
 
+    def test_singleton_method_with_named_class
+      index(<<~RUBY)
+        class Foo; end
+
+        class << Foo
+          def bar
+          end
+        end
+      RUBY
+
+      assert_entry("bar", Entry::SingletonMethod, "/fake/path/foo.rb:3-2:4-5")
+    end
+
     def test_singleton_method_using_class
       index(<<~RUBY)
         class Foo
