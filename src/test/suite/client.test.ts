@@ -28,6 +28,7 @@ class FakeApi implements TelemetryApi {
 suite("Client", () => {
   let client: Client | undefined;
   let testController: TestController | undefined;
+  const outputChannel = vscode.window.createOutputChannel("Ruby LSP");
   const managerConfig = vscode.workspace.getConfiguration("rubyLsp");
   const currentManager = managerConfig.get("rubyVersionManager");
   const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
@@ -66,7 +67,7 @@ suite("Client", () => {
       },
     } as unknown as vscode.ExtensionContext;
 
-    const ruby = new Ruby(context, tmpPath);
+    const ruby = new Ruby(context, outputChannel, tmpPath);
     await ruby.activateRuby();
 
     const telemetry = new Telemetry(context, new FakeApi());
@@ -83,6 +84,7 @@ suite("Client", () => {
       telemetry,
       ruby,
       testController,
+      outputChannel,
       tmpPath,
     );
     await client.start();

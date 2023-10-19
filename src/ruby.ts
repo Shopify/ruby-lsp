@@ -30,13 +30,16 @@ export class Ruby {
   private _error = false;
   private readonly context: vscode.ExtensionContext;
   private readonly customBundleGemfile?: string;
+  private readonly outputChannel: vscode.OutputChannel;
 
   constructor(
     context: vscode.ExtensionContext,
+    outputChannel: vscode.OutputChannel,
     workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath,
   ) {
     this.context = context;
     this.workingFolder = workingFolder;
+    this.outputChannel = outputChannel;
 
     const customBundleGemfile: string = vscode.workspace
       .getConfiguration("rubyLsp")
@@ -75,6 +78,9 @@ export class Ruby {
     // If the version manager is auto, discover the actual manager before trying to activate anything
     if (this.versionManager === VersionManager.Auto) {
       await this.discoverVersionManager();
+      this.outputChannel.appendLine(
+        `Ruby LSP> Discovered version manager ${this.versionManager}`,
+      );
     }
 
     try {
@@ -167,6 +173,10 @@ export class Ruby {
     const cwd = this.customBundleGemfile
       ? path.dirname(this.customBundleGemfile)
       : this.workingFolder;
+
+    this.outputChannel.appendLine(
+      `Ruby LSP> Trying to activate Ruby environment with command: ${command} inside directory: ${cwd}`,
+    );
 
     const result = await asyncExec(command, { cwd });
 
@@ -302,6 +312,10 @@ export class Ruby {
       if (this.shell) {
         command += "'";
       }
+
+      this.outputChannel.appendLine(
+        `Ruby LSP> Checking if ${tool} is available on the path with command: ${command}`,
+      );
 
       await asyncExec(command, { cwd: this.workingFolder });
       return true;

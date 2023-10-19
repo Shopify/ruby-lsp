@@ -37,7 +37,7 @@ export default class Client implements ClientInterface {
   private readonly workingFolder: string;
   private readonly telemetry: Telemetry;
   private readonly statusItems: StatusItems;
-  private readonly outputChannel = vscode.window.createOutputChannel(LSP_NAME);
+  private readonly outputChannel: vscode.OutputChannel;
   private readonly testController: TestController;
   private readonly customBundleGemfile: string = vscode.workspace
     .getConfiguration("rubyLsp")
@@ -56,6 +56,7 @@ export default class Client implements ClientInterface {
     telemetry: Telemetry,
     ruby: Ruby,
     testController: TestController,
+    outputChannel: vscode.OutputChannel,
     workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath,
   ) {
     this.workingFolder = workingFolder;
@@ -64,6 +65,7 @@ export default class Client implements ClientInterface {
     this.testController = testController;
     this.#context = context;
     this.#ruby = ruby;
+    this.outputChannel = outputChannel;
     this.#formatter = "";
     this.statusItems = new StatusItems(this);
     this.registerCommands();

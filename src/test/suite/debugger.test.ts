@@ -9,10 +9,12 @@ import { Debugger } from "../../debugger";
 import { Ruby } from "../../ruby";
 
 suite("Debugger", () => {
+  const outputChannel = vscode.window.createOutputChannel("Ruby LSP");
+
   test("Provide debug configurations returns the default configs", () => {
     const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const ruby = { env: {} } as Ruby;
-    const debug = new Debugger(context, ruby, "fake");
+    const debug = new Debugger(context, ruby, outputChannel, "fake");
     const configs = debug.provideDebugConfigurations!(undefined);
     assert.deepEqual(
       [
@@ -45,7 +47,7 @@ suite("Debugger", () => {
   test("Resolve configuration injects Ruby environment", () => {
     const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const ruby = { env: { bogus: "hello!" } } as unknown as Ruby;
-    const debug = new Debugger(context, ruby, "fake");
+    const debug = new Debugger(context, ruby, outputChannel, "fake");
     const configs: any = debug.resolveDebugConfiguration!(undefined, {
       type: "ruby_lsp",
       name: "Debug",
@@ -61,7 +63,7 @@ suite("Debugger", () => {
   test("Resolve configuration injects Ruby environment and allows users custom environment", () => {
     const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const ruby = { env: { bogus: "hello!" } } as unknown as Ruby;
-    const debug = new Debugger(context, ruby, "fake");
+    const debug = new Debugger(context, ruby, outputChannel, "fake");
     const configs: any = debug.resolveDebugConfiguration!(undefined, {
       type: "ruby_lsp",
       name: "Debug",
@@ -82,7 +84,7 @@ suite("Debugger", () => {
 
     const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const ruby = { env: { bogus: "hello!" } } as unknown as Ruby;
-    const debug = new Debugger(context, ruby, tmpPath);
+    const debug = new Debugger(context, ruby, outputChannel, tmpPath);
     const configs: any = debug.resolveDebugConfiguration!(undefined, {
       type: "ruby_lsp",
       name: "Debug",

@@ -16,13 +16,16 @@ export class Debugger
   private debugProcess?: ChildProcessWithoutNullStreams;
   private readonly console = vscode.debug.activeDebugConsole;
   private readonly subscriptions: vscode.Disposable[];
+  private readonly outputChannel: vscode.OutputChannel;
 
   constructor(
     context: vscode.ExtensionContext,
     ruby: Ruby,
+    outputChannel: vscode.OutputChannel,
     workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath,
   ) {
     this.ruby = ruby;
+    this.outputChannel = outputChannel;
     this.subscriptions = [
       vscode.debug.registerDebugConfigurationProvider("ruby_lsp", this),
       vscode.debug.registerDebugAdapterDescriptorFactory("ruby_lsp", this),
@@ -130,7 +133,11 @@ export class Debugger
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     return new Promise((resolve, reject) => {
       if (sockets.length === 0) {
-        reject(new Error("No debuggee processes found"));
+        reject(
+          new Error(
+            `No debuggee processes found. Was a socket created in ${socketsDir}?`,
+          ),
+        );
       }
 
       return vscode.window
@@ -161,23 +168,31 @@ export class Debugger
     const configuration = session.configuration;
 
     return new Promise((resolve, reject) => {
-      this.debugProcess = spawn(
-        "bundle",
-        [
-          "exec",
-          "rdbg",
-          "--open",
-          "--command",
-          `--sock-path=${sockPath}`,
-          "--",
-          configuration.program,
-        ],
-        {
-          shell: true,
-          env: configuration.env,
-          cwd: this.workingFolder,
-        },
+      const args = [
+        "exec",
+        "rdbg",
+        "--open",
+        "--command",
+        `--sock-path=${sockPath}`,
+        "--",
+        configuration.program,
+      ];
+
+      this.outputChannel.appendLine(
+        `Ruby LSP> Spawning debugger in directory ${this.workingFolder}`,
       );
+      this.outputChannel.appendLine(
+        `Ruby LSP>   Command bundle ${args.join(" ")}`,
+      );
+      this.outputChannel.appendLine(
+        `Ruby LSP>   Environment ${JSON.stringify(configuration.env)}`,
+      );
+
+      this.debugProcess = spawn("bundle", args, {
+        shell: true,
+        env: configuration.env,
+        cwd: this.workingFolder,
+      });
 
       this.debugProcess.stderr.on("data", (data) => {
         const message = data.toString();
@@ -214,8 +229,9 @@ export class Debugger
       // actually an error
       this.debugProcess.on("exit", (code) => {
         if (code) {
-          const message = `Debugger exited with status ${code}`;
+          const message = `Debugger exited with status ${code}. Check the output channel for more information.`;
           this.console.append(message);
+          this.outputChannel.show();
           reject(new Error(message));
         }
       });
