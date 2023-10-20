@@ -203,6 +203,28 @@ This command would generate the following configuration:
 }
 ```
 
+#### VS Code configurations
+
+In addition to the Ruby LSP's own configuration, there are some VS Code settings that may need to be changed to get the
+most of the Ruby LSP. These settings are not specific to the Ruby LSP, but they impact all language servers and take
+precedence over any other configurations.
+
+These are the settings that may impact the Ruby LSP's behavior and their explanations.
+
+```jsonc
+{
+  // All of these settings are scoped only to the Ruby language
+  "[ruby]": {
+    "editor.defaultFormatter": "Shopify.ruby-lsp", // Use the Ruby LSP as the default formatter
+    "editor.formatOnSave": true, // Format files automatically when saving
+    "editor.tabSize": 2, // Use 2 spaces for indentation
+    "editor.insertSpaces": true, // Use spaces and not tabs for indentantion
+    "editor.semanticHighlighting.enabled": true, // Enable semantic highlighting
+    "editor.formatOnType": true // Enable formatting while typing
+  }
+}
+```
+
 ## Troubleshooting
 
 To verify if the Ruby LSP has been activated properly, you can
