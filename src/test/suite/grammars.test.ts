@@ -66,6 +66,10 @@ const EMBEDDED_HEREDOC_LANGUAGES: InferrableLanguageConfigOrLabel[] = [
     label: "XML",
     contentName: "text.xml",
   },
+  {
+    label: "YAML",
+    delimiters: ["YAML", "YML"],
+  },
 ];
 
 // This file runs from inside the out/test directory

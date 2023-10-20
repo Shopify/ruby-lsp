@@ -1975,6 +1975,44 @@
       ]
     },
     {
+      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)(?:YAML|YML))\\b\\1))",
+      "comment": "Heredoc with embedded YAML",
+      "end": "(?!\\G)",
+      "name": "meta.embedded.block.yaml",
+      "patterns": [
+        {
+          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)(?:YAML|YML))\\b\\1)",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.ruby"
+            }
+          },
+          "contentName": "source.yaml",
+          "end": "^\\s*\\2$\\n?",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.ruby"
+            }
+          },
+          "name": "string.unquoted.heredoc.ruby",
+          "patterns": [
+            {
+              "include": "#heredoc"
+            },
+            {
+              "include": "#interpolated_ruby"
+            },
+            {
+              "include": "source.yaml"
+            },
+            {
+              "include": "#escaped_char"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)SLIM)\\b\\1))",
       "comment": "Heredoc with embedded Slim",
       "end": "(?!\\G)",
