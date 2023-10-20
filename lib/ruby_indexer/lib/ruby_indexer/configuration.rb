@@ -67,8 +67,12 @@ module RubyIndexer
 
       # Add user specified patterns
       indexables = @included_patterns.flat_map do |pattern|
+        load_path_entry = T.let(nil, T.nilable(String))
+
         Dir.glob(pattern, File::FNM_PATHNAME | File::FNM_EXTGLOB).map! do |path|
-          load_path_entry = $LOAD_PATH.find { |load_path| path.start_with?(load_path) }
+          # All entries for the same pattern match the same $LOAD_PATH entry. Since searching the $LOAD_PATH for every
+          # entry is expensive, we memoize it for the entire pattern
+          load_path_entry ||= $LOAD_PATH.find { |load_path| path.start_with?(load_path) }
           IndexablePath.new(load_path_entry, path)
         end
       end
