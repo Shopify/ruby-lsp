@@ -21,7 +21,7 @@ module RubyIndexer
     def initialize(load_path_entry, full_path)
       @full_path = full_path
       @require_path = T.let(
-        load_path_entry ? Pathname.new(full_path).relative_path_from(load_path_entry).to_s.delete_suffix(".rb") : nil,
+        load_path_entry ? full_path.delete_prefix("#{load_path_entry}/").delete_suffix(".rb") : nil,
         T.nilable(String),
       )
     end
