@@ -10,10 +10,6 @@ class UseRegisterWithHandlerMethodTest < Minitest::Test
   include RuboCop::Minitest::AssertOffense
 
   def setup
-    # Reload because Rubocop is unloaded by test/requests/formatting_test.rb
-    # assert_offense calls RuboCop::RSpec::ExpectOffense::AnnotatedSource
-    require "rubocop/rspec/expect_offense"
-
     @cop = ::RuboCop::Cop::RubyLsp::UseRegisterWithHandlerMethod.new
   end
 

@@ -7,10 +7,10 @@ require "sorbet-runtime"
 module RuboCop
   module Cop
     module RubyLsp
-      # Avoid using register without method handler, or handler without register.
+      # Avoid using register without handler method, or handler without register.
       #
       # @example
-      # # Register without method handler.
+      # # Register without handler method.
       #
       # # bad
       # class MyListener < Listener
@@ -33,12 +33,12 @@ module RuboCop
       #     )
       #   end
       #
-      #   def on_string_node_enter(dispatcher)
+      #   def on_string_node_enter(node)
       #   end
       # end
       #
       # @example
-      # # Method handler without register.
+      # # Handler method without register.
       #
       # # bad
       # class MyListener < Listener
@@ -49,7 +49,7 @@ module RuboCop
       #     )
       #   end
       #
-      #   def on_string_node_enter(dispatcher)
+      #   def on_string_node_enter(node)
       #   end
       # end
       #
@@ -63,7 +63,7 @@ module RuboCop
       #     )
       #   end
       #
-      #   def on_string_node_enter(dispatcher)
+      #   def on_string_node_enter(node)
       #   end
       # end
       class UseRegisterWithHandlerMethod < RuboCop::Cop::Base
