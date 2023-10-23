@@ -38,7 +38,7 @@ GEM
       racc
     prettier_print (1.2.1)
     prism (0.15.1)
-    psych (5.1.1)
+    psych (5.1.1.1)
       stringio
     racc (1.7.1)
     rainbow (3.1.1)
