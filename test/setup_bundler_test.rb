@@ -290,6 +290,31 @@ class SetupBundlerTest < Minitest::Test
     FileUtils.rm_r(File.join(Dir.pwd, ".bundle")) unless ENV["CI"]
   end
 
+  def test_custom_bundle_uses_alternative_gemfiles
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "gems.rb"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "rdoc"
+        GEMFILE
+
+        Bundler.with_unbundled_env do
+          capture_subprocess_io do
+            system("bundle install")
+            run_script
+          end
+        end
+
+        assert_path_exists(".ruby-lsp")
+        assert_path_exists(".ruby-lsp/gems.rb")
+        assert_path_exists(".ruby-lsp/gems.locked")
+        assert_match("debug", File.read(".ruby-lsp/gems.rb"))
+        assert_match("ruby-lsp", File.read(".ruby-lsp/gems.rb"))
+        assert_match("eval_gemfile(File.expand_path(\"../gems.rb\", __dir__))", File.read(".ruby-lsp/gems.rb"))
+      end
+    end
+  end
+
   private
 
   # This method runs the script and then immediately unloads it. This allows us to make assertions against the effects
