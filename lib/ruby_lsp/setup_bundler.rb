@@ -25,13 +25,6 @@ module RubyLsp
       @project_path = project_path
       @branch = branch
 
-      # Custom bundle paths
-      @custom_dir = T.let(Pathname.new(".ruby-lsp").expand_path(Dir.pwd), Pathname)
-      @custom_gemfile = T.let(@custom_dir + "Gemfile", Pathname)
-      @custom_lockfile = T.let(@custom_dir + "Gemfile.lock", Pathname)
-      @lockfile_hash_path = T.let(@custom_dir + "main_lockfile_hash", Pathname)
-      @last_updated_path = T.let(@custom_dir + "last_updated", Pathname)
-
       # Regular bundle paths
       @gemfile = T.let(
         begin
@@ -42,6 +35,15 @@ module RubyLsp
         T.nilable(Pathname),
       )
       @lockfile = T.let(@gemfile ? Bundler.default_lockfile : nil, T.nilable(Pathname))
+
+      @gemfile_name = T.let(@gemfile&.basename&.to_s || "Gemfile", String)
+
+      # Custom bundle paths
+      @custom_dir = T.let(Pathname.new(".ruby-lsp").expand_path(Dir.pwd), Pathname)
+      @custom_gemfile = T.let(@custom_dir + @gemfile_name, Pathname)
+      @custom_lockfile = T.let(@custom_dir + (@lockfile&.basename || "Gemfile.lock"), Pathname)
+      @lockfile_hash_path = T.let(@custom_dir + "main_lockfile_hash", Pathname)
+      @last_updated_path = T.let(@custom_dir + "last_updated", Pathname)
 
       @dependencies = T.let(load_dependencies, T::Hash[String, T.untyped])
     end
@@ -118,7 +120,7 @@ module RubyLsp
       # If there's a top level Gemfile, we want to evaluate from the custom bundle. We get the source from the top level
       # Gemfile, so if there isn't one we need to add a default source
       if @gemfile&.exist?
-        parts << "eval_gemfile(File.expand_path(\"../Gemfile\", __dir__))"
+        parts << "eval_gemfile(File.expand_path(\"../#{@gemfile_name}\", __dir__))"
       else
         parts.unshift('source "https://rubygems.org"')
       end

@@ -24,7 +24,23 @@ module RubyLsp
 
       ResponseType = type_member { { fixed: T::Array[Interface::CodeLens] } }
 
-      BASE_COMMAND = T.let((File.exist?("Gemfile.lock") ? "bundle exec ruby" : "ruby") + " -Itest ", String)
+      BASE_COMMAND = T.let(
+        begin
+          Bundler.with_original_env { Bundler.default_lockfile }
+          "bundle exec ruby"
+        rescue Bundler::GemfileNotFound
+          "ruby"
+        end + " -Itest ",
+        String,
+      )
+      GEMFILE_NAME = T.let(
+        begin
+          Bundler.with_original_env { Bundler.default_gemfile.basename.to_s }
+        rescue Bundler::GemfileNotFound
+          "Gemfile"
+        end,
+        String,
+      )
       ACCESS_MODIFIERS = T.let([:public, :private, :protected], T::Array[Symbol])
       SUPPORTED_TEST_LIBRARIES = T.let(["minitest", "test-unit"], T::Array[String])
 
@@ -111,7 +127,7 @@ module RubyLsp
           return
         end
 
-        if @path&.include?("Gemfile") && name == :gem && arguments
+        if @path&.include?(GEMFILE_NAME) && name == :gem && arguments
           first_argument = arguments.arguments.first
           return unless first_argument.is_a?(Prism::StringNode)
 
