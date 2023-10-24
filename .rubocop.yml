@@ -2,24 +2,25 @@ inherit_gem:
   rubocop-shopify: rubocop.yml
 
 require:
- - rubocop-sorbet
- - rubocop-minitest
- - rubocop-rake
- - ./lib/rubocop/cop/ruby_lsp/use_language_server_aliases
+  - rubocop-sorbet
+  - rubocop-minitest
+  - rubocop-rake
+  - ./lib/rubocop/cop/ruby_lsp/use_language_server_aliases
+  - ./lib/rubocop/cop/ruby_lsp/use_register_with_handler_method
 
 AllCops:
   NewCops: disable
   SuggestExtensions: false
   TargetRubyVersion: 3.0
   Exclude:
-  - "vendor/**/*"
-  - "features/**/*"
-  - "test/fixtures/**/*"
-  - "test/expectations/**/*"
+    - "vendor/**/*"
+    - "features/**/*"
+    - "test/fixtures/**/*"
+    - "test/expectations/**/*"
 
 Naming/FileName:
   Exclude:
-  - "lib/ruby-lsp.rb"
+    - "lib/ruby-lsp.rb"
 
 RubyLsp/UseLanguageServerAliases:
   Exclude:
