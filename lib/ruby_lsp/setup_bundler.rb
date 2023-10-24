@@ -20,10 +20,11 @@ module RubyLsp
 
     FOUR_HOURS = T.let(4 * 60 * 60, Integer)
 
-    sig { params(project_path: String, branch: T.nilable(String)).void }
-    def initialize(project_path, branch: nil)
+    sig { params(project_path: String, options: T.untyped).void }
+    def initialize(project_path, **options)
       @project_path = project_path
-      @branch = branch
+      @branch = T.let(options[:branch], T.nilable(String))
+      @experimental = T.let(options[:experimental], T.nilable(T::Boolean))
 
       # Regular bundle paths
       @gemfile = T.let(
@@ -190,7 +191,9 @@ module RubyLsp
         command.prepend("(")
         command << " && bundle update "
         command << "ruby-lsp " unless @dependencies["ruby-lsp"]
-        command << "debug" unless @dependencies["debug"]
+        command << "debug " unless @dependencies["debug"]
+        command << "--pre" if @experimental
+        command.delete_suffix!(" ")
         command << ")"
 
         @last_updated_path.write(Time.now.iso8601)
@@ -204,6 +207,7 @@ module RubyLsp
 
       # Add bundle update
       warn("Ruby LSP> Running bundle install for the custom bundle. This may take a while...")
+      warn("Ruby LSP> Command: #{command}")
       system(env, command)
       [bundle_gemfile.to_s, expanded_path, env["BUNDLE_APP_CONFIG"]]
     end
