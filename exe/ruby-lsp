@@ -78,7 +78,8 @@ rescue
   nil
 end
 
-require_relative "../lib/ruby_lsp/internal"
+$LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+require "ruby_lsp/internal"
 
 if options[:debug]
   if ["x64-mingw-ucrt", "x64-mingw32"].include?(RUBY_PLATFORM)
