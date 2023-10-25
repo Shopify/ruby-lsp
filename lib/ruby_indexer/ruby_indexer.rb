@@ -12,12 +12,12 @@ require "ruby_indexer/lib/ruby_indexer/configuration"
 require "ruby_indexer/lib/ruby_indexer/prefix_tree"
 
 module RubyIndexer
+  @configuration = T.let(Configuration.new, Configuration)
+
   class << self
     extend T::Sig
 
     sig { returns(Configuration) }
-    def configuration
-      @configuration ||= T.let(Configuration.new, T.nilable(Configuration))
-    end
+    attr_reader :configuration
   end
 end
