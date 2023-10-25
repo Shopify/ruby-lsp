@@ -270,6 +270,38 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_install_prerelease_versions_if_experimental_is_true
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "rdoc"
+        GEMFILE
+
+        capture_subprocess_io do
+          Bundler.with_unbundled_env do
+            # Run bundle install to generate the lockfile
+            system("bundle install")
+
+            # Run the script once to generate a custom bundle
+            run_script
+          end
+        end
+
+        capture_subprocess_io do
+          Object.any_instance.expects(:system).with(
+            bundle_env(".ruby-lsp/Gemfile"),
+            "((bundle check && bundle update ruby-lsp debug --pre) || bundle install) 1>&2",
+          )
+
+          Bundler.with_unbundled_env do
+            run_script(experimental: true)
+          end
+        end
+      end
+    end
+  end
+
   def test_returns_bundle_app_config_if_there_is_local_config
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
@@ -281,7 +313,7 @@ class SetupBundlerTest < Minitest::Test
             "(bundle check || bundle install) 1>&2",
           )
 
-          run_script(branch: "test-branch")
+          run_script
         end
       end
     end
@@ -319,11 +351,11 @@ class SetupBundlerTest < Minitest::Test
 
   # This method runs the script and then immediately unloads it. This allows us to make assertions against the effects
   # of running the script multiple times
-  def run_script(path = "/fake/project/path", branch: nil, expected_path: nil)
+  def run_script(path = "/fake/project/path", expected_path: nil, **options)
     bundle_path = T.let(nil, T.nilable(String))
 
     stdout, _stderr = capture_subprocess_io do
-      _bundle_gemfile, bundle_path = RubyLsp::SetupBundler.new(path, branch: branch).setup!
+      _bundle_gemfile, bundle_path = RubyLsp::SetupBundler.new(path, **options).setup!
     end
 
     assert_empty(stdout)

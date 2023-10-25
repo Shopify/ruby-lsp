@@ -25,6 +25,13 @@ parser = OptionParser.new do |opts|
     options[:branch] = branch
   end
 
+  opts.on(
+    "--experimental",
+    "Run pre-release versions of the Ruby LSP",
+  ) do
+    options[:experimental] = true
+  end
+
   opts.on("-h", "--help", "Print this help") do
     puts opts.help
     puts
@@ -49,7 +56,7 @@ if ENV["BUNDLE_GEMFILE"].nil?
   require_relative "../lib/ruby_lsp/setup_bundler"
 
   begin
-    bundle_gemfile, bundle_path, bundle_app_config = RubyLsp::SetupBundler.new(Dir.pwd, branch: options[:branch]).setup!
+    bundle_gemfile, bundle_path, bundle_app_config = RubyLsp::SetupBundler.new(Dir.pwd, **options).setup!
   rescue RubyLsp::SetupBundler::BundleNotLocked
     warn("Project contains a Gemfile, but no Gemfile.lock. Run `bundle install` to lock gems and restart the server")
     exit(78)
