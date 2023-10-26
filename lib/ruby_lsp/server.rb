@@ -58,7 +58,7 @@ module RubyLsp
 
     sig { void }
     def start
-      warn("Starting Ruby LSP...")
+      warn("Starting Ruby LSP...(v#{VERSION})")
 
       # Requests that have to be executed sequentially or in the main process are implemented here. All other requests
       # fall under the else branch which just pushes requests to the queue
