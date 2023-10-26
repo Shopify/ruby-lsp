@@ -44,4 +44,4 @@ jobs:
         run: bundle exec rake
 
       - name: Run index troubleshooting tool
-        run: ./exe/ruby-lsp-doctor
+        run: bundle exec ruby-lsp-doctor
