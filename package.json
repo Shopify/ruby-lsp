@@ -20,7 +20,8 @@
   ],
   "activationEvents": [
     "onLanguage:ruby",
-    "workspaceContains:Gemfile.lock"
+    "workspaceContains:Gemfile.lock",
+    "workspaceContains:gems.locked"
   ],
   "main": "./out/extension.js",
   "contributes": {

@@ -345,6 +345,7 @@ export default class Client implements ClientInterface {
 
   private registerAutoRestarts() {
     this.createRestartWatcher("Gemfile.lock");
+    this.createRestartWatcher("gems.locked");
     this.createRestartWatcher("**/.rubocop.yml");
 
     // If a configuration that affects the Ruby LSP has changed, update the client options using the latest
@@ -467,6 +468,12 @@ export default class Client implements ClientInterface {
       fs.existsSync(path.join(this.workingFolder, ".ruby-lsp", "Gemfile"))
     ) {
       bundleGemfile = path.join(this.workingFolder, ".ruby-lsp", "Gemfile");
+    } else if (
+      fs.existsSync(path.join(this.workingFolder, ".ruby-lsp", "gems.rb"))
+    ) {
+      bundleGemfile = path.join(this.workingFolder, ".ruby-lsp", "gems.rb");
+    } else if (fs.existsSync(path.join(this.workingFolder, "gems.rb"))) {
+      bundleGemfile = path.join(this.workingFolder, "gems.rb");
     } else {
       bundleGemfile = path.join(this.workingFolder, "Gemfile");
     }

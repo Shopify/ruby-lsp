@@ -101,11 +101,16 @@ export class Debugger
       debugConfiguration.env = this.ruby.env;
     }
 
-    const customGemfilePath = path.join(
+    let customGemfilePath = path.join(
       this.workingFolder,
       ".ruby-lsp",
       "Gemfile",
     );
+    if (fs.existsSync(customGemfilePath)) {
+      debugConfiguration.env.BUNDLE_GEMFILE = customGemfilePath;
+    }
+
+    customGemfilePath = path.join(this.workingFolder, ".ruby-lsp", "gems.rb");
     if (fs.existsSync(customGemfilePath)) {
       debugConfiguration.env.BUNDLE_GEMFILE = customGemfilePath;
     }
