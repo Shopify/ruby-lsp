@@ -107,6 +107,7 @@ module RubyLsp
         @special_methods = T.let(nil, T.nilable(T::Array[String]))
         @current_scope = T.let(ParameterScope.new, ParameterScope)
         @index = index
+        @nesting = T.let([], T::Array[String])
         @inside_regex_capture = T.let(false, T::Boolean)
 
         dispatcher.register(
@@ -373,6 +374,7 @@ module RubyLsp
       def on_class_node_enter(node)
         return unless visible?(node, @range)
 
+        @nesting.push(node.name)
         add_token(node.constant_path.location, :class, [:declaration])
 
         superclass = node.superclass
@@ -383,6 +385,7 @@ module RubyLsp
       def on_module_node_enter(node)
         return unless visible?(node, @range)
 
+        @nesting.push(node.name)
         add_token(node.constant_path.location, :namespace, [:declaration])
       end
 
