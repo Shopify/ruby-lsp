@@ -43,10 +43,16 @@ module RubyLsp
         end
       end
 
-      sig { params(dispatcher: Prism::Dispatcher, range: T.nilable(T::Range[Integer])).void }
-      def initialize(dispatcher, range: nil)
+      sig {
+        params(
+          dispatcher: Prism::Dispatcher,
+          index: RubyIndexer::Index,
+          range: T.nilable(T::Range[Integer])
+        ).void
+      }
+      def initialize(dispatcher, index, range: nil)
         super()
-        @listener = T.let(Listeners::SemanticHighlighting.new(dispatcher, range: range), Listener[ResponseType])
+        @listener = T.let(Listeners::SemanticHighlighting.new(dispatcher, index, range: range), Listener[ResponseType])
       end
 
       sig { override.returns(ResponseType) }

@@ -92,14 +92,21 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      sig { params(dispatcher: Prism::Dispatcher, range: T.nilable(T::Range[Integer])).void }
-      def initialize(dispatcher, range: nil)
+      sig {
+        params(
+          dispatcher: Prism::Dispatcher,
+          index: RubyIndexer::Index,
+          range: T.nilable(T::Range[Integer])
+        ).void
+      }
+      def initialize(dispatcher, index, range: nil)
         super(dispatcher)
 
         @_response = T.let([], ResponseType)
         @range = range
         @special_methods = T.let(nil, T.nilable(T::Array[String]))
         @current_scope = T.let(ParameterScope.new, ParameterScope)
+        @index = index
         @inside_regex_capture = T.let(false, T::Boolean)
 
         dispatcher.register(

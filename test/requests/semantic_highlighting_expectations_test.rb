@@ -11,6 +11,22 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI("file:///fake.rb"))
     range = @__params&.any? ? @__params.first : nil
 
+    store = RubyLsp::Store.new
+    store.set(uri: URI("file:///folder/fake.rb"), source: source, version: 1)
+    executor = RubyLsp::Executor.new(store, message_queue)
+    index = executor.instance_variable_get(:@index)
+    Dir.glob(TEST_RUBY_LSP_FIXTURES).each do |path|
+      index.index_single(
+        RubyIndexer::IndexablePath.new(
+          "#{Dir.pwd}/lib",
+          File.expand_path(
+            "../../#{path}",
+            __dir__,
+          ),
+        ),
+      )
+    end
+
     if range
       start_line = range.dig(:start, :line)
       end_line = range.dig(:end, :line)
@@ -18,7 +34,11 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
     end
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::SemanticHighlighting.new(dispatcher, range: processed_range)
+    listener = RubyLsp::Requests::SemanticHighlighting.new(
+      dispatcher,
+      executor.instance_variable_get(:@index),
+      range: processed_range
+    )
 
     dispatcher.dispatch(document.tree)
     RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode(listener.perform)
