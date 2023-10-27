@@ -114,12 +114,14 @@ module RubyLsp
           self,
           :on_call_node_enter,
           :on_class_node_enter,
+          :on_class_node_leave,
           :on_def_node_enter,
           :on_def_node_leave,
           :on_block_node_enter,
           :on_block_node_leave,
           :on_self_node_enter,
           :on_module_node_enter,
+          :on_module_node_leave,
           :on_local_variable_write_node_enter,
           :on_local_variable_read_node_enter,
           :on_block_parameter_node_enter,
@@ -381,12 +383,22 @@ module RubyLsp
         add_token(superclass.location, :class) if superclass
       end
 
+      sig { params(node: Prism::ClassNode).void }
+      def on_class_node_leave(node)
+        @nesting.pop
+      end
+
       sig { params(node: Prism::ModuleNode).void }
       def on_module_node_enter(node)
         return unless visible?(node, @range)
 
         @nesting.push(node.name)
         add_token(node.constant_path.location, :namespace, [:declaration])
+      end
+
+      sig { params(node: Prism::ClassNode).void }
+      def on_module_node_leave(node)
+        @nesting.pop
       end
 
       private
