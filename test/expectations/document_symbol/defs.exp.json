@@ -2,7 +2,7 @@
   "result": [
     {
       "name": "self.foo",
-      "kind": 6,
+      "kind": 12,
       "range": {
         "start": {
           "line": 0,
