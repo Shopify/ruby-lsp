@@ -198,7 +198,11 @@ module RubyIndexer
       excluded.each do |dependency|
         next unless dependency.runtime?
 
-        dependency.to_spec.dependencies.each do |transitive_dependency|
+        # If the dependency is prerelease, to_spec may return `nil`
+        spec = dependency.to_spec
+        next unless spec
+
+        spec.dependencies.each do |transitive_dependency|
           # If the transitive dependency is included in other groups, skip it
           next if others.any? { |d| d.name == transitive_dependency.name }
 
