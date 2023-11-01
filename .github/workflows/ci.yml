@@ -41,6 +41,7 @@ jobs:
         run: bundle exec rubocop
 
       - name: Lint RBI shims
+        if: matrix.os != 'windows-latest'
         run: bundle exec rubocop sorbet/rbi/shims
 
       - name: Run tests
