@@ -78,6 +78,19 @@ export default class Client implements ClientInterface {
       return;
     }
 
+    try {
+      fs.accessSync(this.workingFolder, fs.constants.W_OK);
+    } catch (error: any) {
+      this.state = ServerState.Error;
+
+      vscode.window.showErrorMessage(
+        `Directory ${this.workingFolder} is not writable. The Ruby LSP server needs to be able to create a .ruby-lsp
+        directory to function appropriately. Consider switching to a directory for which VS Code has write permissions`,
+      );
+
+      return;
+    }
+
     this.state = ServerState.Starting;
 
     try {
