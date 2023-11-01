@@ -3,6 +3,33 @@ name: CI
 on: [push, pull_request]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+
+      - name: Check if documentation is up to date
+        run: bundle exec rake ruby_lsp:check_docs
+
+      - name: Check if all requests are using valid visits
+        run: bundle exec rake check_visit_overrides
+
+      - name: Typecheck
+        run: bundle exec srb tc
+
+      - name: Lint Ruby files
+        run: bundle exec rubocop
+
+      - name: Lint RBI shims
+        run: bundle exec rubocop sorbet/rbi/shims
   build:
     strategy:
       fail-fast: false
@@ -26,19 +53,6 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
           cache-version: 1
-
-      - name: Check if documentation is up to date
-        run: bundle exec rake ruby_lsp:check_docs
-
-      - name: Check if all requests are using valid visits
-        run: bundle exec rake check_visit_overrides
-
-      - name: Typecheck
-        if: matrix.os != 'windows-latest'
-        run: bundle exec srb tc
-
-      - name: Lint Ruby files
-        run: bundle exec rubocop
 
       - name: Run tests
         run: bundle exec rake
