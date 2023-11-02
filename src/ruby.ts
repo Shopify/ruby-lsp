@@ -140,13 +140,15 @@ export class Ruby {
       );
     }
 
-    const result = await asyncExec("shadowenv hook --json", { cwd: this.cwd });
+    const result = await asyncExec("shadowenv hook --json 1>&2", {
+      cwd: this.cwd,
+    });
 
-    if (result.stdout.trim() === "") {
-      result.stdout = "{ }";
+    if (result.stderr.trim() === "") {
+      result.stderr = "{ }";
     }
     // eslint-disable-next-line no-process-env
-    const env = { ...process.env, ...JSON.parse(result.stdout).exported };
+    const env = { ...process.env, ...JSON.parse(result.stderr).exported };
 
     // The only reason we set the process environment here is to allow other extensions that don't perform activation
     // work properly
@@ -162,7 +164,7 @@ export class Ruby {
 
   private async activate(ruby: string) {
     let command = this.shell ? `${this.shell} -ic '` : "";
-    command += `${ruby} -rjson -e "printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, JSON.dump(ENV.to_h))"`;
+    command += `${ruby} -rjson -e "STDERR.printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, JSON.dump(ENV.to_h))"`;
 
     if (this.shell) {
       command += "'";
@@ -175,7 +177,7 @@ export class Ruby {
     const result = await asyncExec(command, { cwd: this.cwd });
 
     const envJson = /RUBY_ENV_ACTIVATE(.*)RUBY_ENV_ACTIVATE/.exec(
-      result.stdout,
+      result.stderr,
     )![1];
 
     this._env = JSON.parse(envJson);
@@ -183,11 +185,11 @@ export class Ruby {
 
   private async fetchRubyInfo() {
     const rubyInfo = await asyncExec(
-      "ruby -e 'puts \"#{RUBY_VERSION},#{defined?(RubyVM::YJIT)}\"'",
+      "ruby -e 'STDERR.print(\"#{RUBY_VERSION},#{defined?(RubyVM::YJIT)}\")'",
       { env: this._env, cwd: this.cwd },
     );
 
-    const [rubyVersion, yjitIsDefined] = rubyInfo.stdout.trim().split(",");
+    const [rubyVersion, yjitIsDefined] = rubyInfo.stderr.trim().split(",");
 
     this.rubyVersion = rubyVersion;
     this.yjitEnabled = yjitIsDefined === "constant";

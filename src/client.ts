@@ -432,13 +432,13 @@ export default class Client implements ClientInterface {
       "rubyLsp.lastGemUpdate",
     );
 
-    const { stdout } = await asyncExec("gem list ruby-lsp", {
+    const { stderr } = await asyncExec("gem list ruby-lsp 1>&2", {
       cwd: this.workingFolder,
       env: this.ruby.env,
     });
 
     // If the gem is not yet installed, install it
-    if (!stdout.includes("ruby-lsp")) {
+    if (!stderr.includes("ruby-lsp")) {
       await asyncExec("gem install ruby-lsp", {
         cwd: this.workingFolder,
         env: this.ruby.env,
@@ -492,14 +492,14 @@ export default class Client implements ClientInterface {
     }
 
     const result = await asyncExec(
-      `bundle exec ruby -e "require 'ruby-lsp'; print RubyLsp::VERSION"`,
+      `bundle exec ruby -e "require 'ruby-lsp'; STDERR.print(RubyLsp::VERSION)"`,
       {
         cwd: this.workingFolder,
         env: { ...this.ruby.env, BUNDLE_GEMFILE: bundleGemfile },
       },
     );
 
-    return result.stdout;
+    return result.stderr;
   }
 
   // If the `.git` folder exists and `.git/rebase-merge` or `.git/rebase-apply` exists, then we're in the middle of a
