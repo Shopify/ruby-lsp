@@ -17,22 +17,37 @@
       "message": "Sorbet/TrueSigil: Sorbet sigil should be at least `true` got `false`.\n\nThis offense is not auto-correctable.\n",
       "data": {
         "correctable": false,
-        "code_action": {
-          "title": "Autocorrect Sorbet/TrueSigil",
-          "kind": "quickfix",
-          "isPreferred": true,
-          "edit": {
-            "documentChanges": [
-              {
-                "textDocument": {
-                  "uri": "file:///fake",
-                  "version": null
-                },
-                "edits": []
-              }
-            ]
+        "code_actions": [
+          {
+            "title": "Disable Sorbet/TrueSigil for this line",
+            "kind": "quickfix",
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
+                  },
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 0,
+                          "character": 14
+                        },
+                        "end": {
+                          "line": 0,
+                          "character": 14
+                        }
+                      },
+                      "newText": " # rubocop:disable Sorbet/TrueSigil"
+                    }
+                  ]
+                }
+              ]
+            }
           }
-        }
+        ]
       }
     },
     {
@@ -55,75 +70,106 @@
       "message": "Style/IfInsideElse: Convert `if` nested inside `else` to `elsif`.",
       "data": {
         "correctable": true,
-        "code_action": {
-          "title": "Autocorrect Style/IfInsideElse",
-          "kind": "quickfix",
-          "isPreferred": true,
-          "edit": {
-            "documentChanges": [
-              {
-                "textDocument": {
-                  "uri": "file:///fake",
-                  "version": null
-                },
-                "edits": [
-                  {
-                    "range": {
-                      "start": {
-                        "line": 6,
-                        "character": 2
-                      },
-                      "end": {
-                        "line": 6,
-                        "character": 6
-                      }
-                    },
-                    "newText": "elsif b"
+        "code_actions": [
+          {
+            "title": "Autocorrect Style/IfInsideElse",
+            "kind": "quickfix",
+            "isPreferred": true,
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
                   },
-                  {
-                    "range": {
-                      "start": {
-                        "line": 7,
-                        "character": 4
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 6,
+                          "character": 2
+                        },
+                        "end": {
+                          "line": 6,
+                          "character": 6
+                        }
                       },
-                      "end": {
-                        "line": 7,
-                        "character": 8
-                      }
+                      "newText": "elsif b"
                     },
-                    "newText": "do_thing_1\n      do_thing_2"
+                    {
+                      "range": {
+                        "start": {
+                          "line": 7,
+                          "character": 4
+                        },
+                        "end": {
+                          "line": 7,
+                          "character": 8
+                        }
+                      },
+                      "newText": "do_thing_1\n      do_thing_2"
+                    },
+                    {
+                      "range": {
+                        "start": {
+                          "line": 8,
+                          "character": 0
+                        },
+                        "end": {
+                          "line": 10,
+                          "character": 0
+                        }
+                      },
+                      "newText": ""
+                    },
+                    {
+                      "range": {
+                        "start": {
+                          "line": 10,
+                          "character": 0
+                        },
+                        "end": {
+                          "line": 11,
+                          "character": 0
+                        }
+                      },
+                      "newText": ""
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "title": "Disable Style/IfInsideElse for this line",
+            "kind": "quickfix",
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
                   },
-                  {
-                    "range": {
-                      "start": {
-                        "line": 8,
-                        "character": 0
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 7,
+                          "character": 8
+                        },
+                        "end": {
+                          "line": 7,
+                          "character": 8
+                        }
                       },
-                      "end": {
-                        "line": 10,
-                        "character": 0
-                      }
-                    },
-                    "newText": ""
-                  },
-                  {
-                    "range": {
-                      "start": {
-                        "line": 10,
-                        "character": 0
-                      },
-                      "end": {
-                        "line": 11,
-                        "character": 0
-                      }
-                    },
-                    "newText": ""
-                  }
-                ]
-              }
-            ]
+                      "newText": " # rubocop:disable Style/IfInsideElse"
+                    }
+                  ]
+                }
+              ]
+            }
           }
-        }
+        ]
       }
     }
   ]

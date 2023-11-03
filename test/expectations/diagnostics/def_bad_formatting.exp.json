@@ -17,36 +17,67 @@
       "message": "Sorbet/TrueSigil: No Sorbet sigil found in file. Try a `typed: true` to start (you can also use `rubocop -a` to automatically add this).",
       "data": {
         "correctable": true,
-        "code_action": {
-          "title": "Autocorrect Sorbet/TrueSigil",
-          "kind": "quickfix",
-          "isPreferred": true,
-          "edit": {
-            "documentChanges": [
-              {
-                "textDocument": {
-                  "uri": "file:///fake",
-                  "version": null
-                },
-                "edits": [
-                  {
-                    "range": {
-                      "start": {
-                        "line": 0,
-                        "character": 0
+        "code_actions": [
+          {
+            "title": "Autocorrect Sorbet/TrueSigil",
+            "kind": "quickfix",
+            "isPreferred": true,
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
+                  },
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 0,
+                          "character": 0
+                        },
+                        "end": {
+                          "line": 0,
+                          "character": 0
+                        }
                       },
-                      "end": {
-                        "line": 0,
-                        "character": 0
-                      }
-                    },
-                    "newText": "# typed: true\n"
-                  }
-                ]
-              }
-            ]
+                      "newText": "# typed: true\n"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "title": "Disable Sorbet/TrueSigil for this line",
+            "kind": "quickfix",
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
+                  },
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 0,
+                          "character": 7
+                        },
+                        "end": {
+                          "line": 0,
+                          "character": 7
+                        }
+                      },
+                      "newText": " # rubocop:disable Sorbet/TrueSigil"
+                    }
+                  ]
+                }
+              ]
+            }
           }
-        }
+        ]
       }
     },
     {
@@ -69,36 +100,67 @@
       "message": "Style/FrozenStringLiteralComment: Missing frozen string literal comment.",
       "data": {
         "correctable": true,
-        "code_action": {
-          "title": "Autocorrect Style/FrozenStringLiteralComment",
-          "kind": "quickfix",
-          "isPreferred": true,
-          "edit": {
-            "documentChanges": [
-              {
-                "textDocument": {
-                  "uri": "file:///fake",
-                  "version": null
-                },
-                "edits": [
-                  {
-                    "range": {
-                      "start": {
-                        "line": 0,
-                        "character": 0
+        "code_actions": [
+          {
+            "title": "Autocorrect Style/FrozenStringLiteralComment",
+            "kind": "quickfix",
+            "isPreferred": true,
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
+                  },
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 0,
+                          "character": 0
+                        },
+                        "end": {
+                          "line": 0,
+                          "character": 0
+                        }
                       },
-                      "end": {
-                        "line": 0,
-                        "character": 0
-                      }
-                    },
-                    "newText": "# frozen_string_literal: true\n"
-                  }
-                ]
-              }
-            ]
+                      "newText": "# frozen_string_literal: true\n"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "title": "Disable Style/FrozenStringLiteralComment for this line",
+            "kind": "quickfix",
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
+                  },
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 0,
+                          "character": 7
+                        },
+                        "end": {
+                          "line": 0,
+                          "character": 7
+                        }
+                      },
+                      "newText": " # rubocop:disable Style/FrozenStringLiteralComment"
+                    }
+                  ]
+                }
+              ]
+            }
           }
-        }
+        ]
       }
     },
     {
@@ -121,36 +183,67 @@
       "message": "Layout/EmptyLinesAroundMethodBody: Extra empty line detected at method body beginning.",
       "data": {
         "correctable": true,
-        "code_action": {
-          "title": "Autocorrect Layout/EmptyLinesAroundMethodBody",
-          "kind": "quickfix",
-          "isPreferred": true,
-          "edit": {
-            "documentChanges": [
-              {
-                "textDocument": {
-                  "uri": "file:///fake",
-                  "version": null
-                },
-                "edits": [
-                  {
-                    "range": {
-                      "start": {
-                        "line": 1,
-                        "character": 0
+        "code_actions": [
+          {
+            "title": "Autocorrect Layout/EmptyLinesAroundMethodBody",
+            "kind": "quickfix",
+            "isPreferred": true,
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
+                  },
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 1,
+                          "character": 0
+                        },
+                        "end": {
+                          "line": 2,
+                          "character": 0
+                        }
                       },
-                      "end": {
-                        "line": 2,
-                        "character": 0
-                      }
-                    },
-                    "newText": ""
-                  }
-                ]
-              }
-            ]
+                      "newText": ""
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "title": "Disable Layout/EmptyLinesAroundMethodBody for this line",
+            "kind": "quickfix",
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
+                  },
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 1,
+                          "character": 0
+                        },
+                        "end": {
+                          "line": 1,
+                          "character": 0
+                        }
+                      },
+                      "newText": " # rubocop:disable Layout/EmptyLinesAroundMethodBody"
+                    }
+                  ]
+                }
+              ]
+            }
           }
-        }
+        ]
       }
     },
     {
@@ -173,36 +266,67 @@
       "message": "Layout/EmptyLines: Extra blank line detected.",
       "data": {
         "correctable": true,
-        "code_action": {
-          "title": "Autocorrect Layout/EmptyLines",
-          "kind": "quickfix",
-          "isPreferred": true,
-          "edit": {
-            "documentChanges": [
-              {
-                "textDocument": {
-                  "uri": "file:///fake",
-                  "version": null
-                },
-                "edits": [
-                  {
-                    "range": {
-                      "start": {
-                        "line": 2,
-                        "character": 0
+        "code_actions": [
+          {
+            "title": "Autocorrect Layout/EmptyLines",
+            "kind": "quickfix",
+            "isPreferred": true,
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
+                  },
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 2,
+                          "character": 0
+                        },
+                        "end": {
+                          "line": 3,
+                          "character": 0
+                        }
                       },
-                      "end": {
-                        "line": 3,
-                        "character": 0
-                      }
-                    },
-                    "newText": ""
-                  }
-                ]
-              }
-            ]
+                      "newText": ""
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "title": "Disable Layout/EmptyLines for this line",
+            "kind": "quickfix",
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
+                  },
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 2,
+                          "character": 0
+                        },
+                        "end": {
+                          "line": 2,
+                          "character": 0
+                        }
+                      },
+                      "newText": " # rubocop:disable Layout/EmptyLines"
+                    }
+                  ]
+                }
+              ]
+            }
           }
-        }
+        ]
       }
     },
     {
@@ -225,36 +349,67 @@
       "message": "Layout/IndentationWidth: Use 2 (not 0) spaces for indentation.",
       "data": {
         "correctable": true,
-        "code_action": {
-          "title": "Autocorrect Layout/IndentationWidth",
-          "kind": "quickfix",
-          "isPreferred": true,
-          "edit": {
-            "documentChanges": [
-              {
-                "textDocument": {
-                  "uri": "file:///fake",
-                  "version": null
-                },
-                "edits": [
-                  {
-                    "range": {
-                      "start": {
-                        "line": 3,
-                        "character": 0
+        "code_actions": [
+          {
+            "title": "Autocorrect Layout/IndentationWidth",
+            "kind": "quickfix",
+            "isPreferred": true,
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
+                  },
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 3,
+                          "character": 0
+                        },
+                        "end": {
+                          "line": 3,
+                          "character": 0
+                        }
                       },
-                      "end": {
-                        "line": 3,
-                        "character": 0
-                      }
-                    },
-                    "newText": "  "
-                  }
-                ]
-              }
-            ]
+                      "newText": "  "
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "title": "Disable Layout/IndentationWidth for this line",
+            "kind": "quickfix",
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
+                  },
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 3,
+                          "character": 20
+                        },
+                        "end": {
+                          "line": 3,
+                          "character": 20
+                        }
+                      },
+                      "newText": " # rubocop:disable Layout/IndentationWidth"
+                    }
+                  ]
+                }
+              ]
+            }
           }
-        }
+        ]
       }
     }
   ]
