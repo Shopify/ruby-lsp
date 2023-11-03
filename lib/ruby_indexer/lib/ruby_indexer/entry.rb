@@ -136,8 +136,9 @@ module RubyIndexer
         case node
         when Prism::RequiredParameterNode
           node.name
-        when Prism::RequiredDestructuredParameterNode
-          names = node.parameters.map { |parameter_node| parameter_name(parameter_node) }
+        when Prism::MultiTargetNode
+          names = [*node.lefts, *node.rest, *node.rights].map { |parameter_node| parameter_name(parameter_node) }
+
           names_with_commas = names.join(", ")
           :"(#{names_with_commas})"
         end

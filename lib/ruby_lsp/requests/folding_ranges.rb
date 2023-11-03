@@ -94,7 +94,7 @@ module RubyLsp
         opening_loc = node.opening_loc
         closing_loc = node.closing_loc
 
-        add_lines_range(opening_loc.start_line, closing_loc.end_line - 1) if opening_loc && closing_loc
+        add_lines_range(opening_loc.start_line, closing_loc.start_line - 1) if opening_loc && closing_loc
       end
 
       sig { params(node: Prism::ArrayNode).void }
