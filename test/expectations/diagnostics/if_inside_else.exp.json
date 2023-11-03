@@ -46,6 +46,48 @@
                 }
               ]
             }
+          },
+          {
+            "title": "Disable Sorbet/TrueSigil for this entire file",
+            "kind": "quickfix",
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
+                  },
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 0,
+                          "character": 0
+                        },
+                        "end": {
+                          "line": 0,
+                          "character": 0
+                        }
+                      },
+                      "newText": "# rubocop:disable Sorbet/TrueSigil\n"
+                    },
+                    {
+                      "range": {
+                        "start": {
+                          "line": 12,
+                          "character": 3
+                        },
+                        "end": {
+                          "line": 12,
+                          "character": 3
+                        }
+                      },
+                      "newText": "\n# rubocop:enable Sorbet/TrueSigil"
+                    }
+                  ]
+                }
+              ]
+            }
           }
         ]
       }
@@ -163,6 +205,48 @@
                         }
                       },
                       "newText": " # rubocop:disable Style/IfInsideElse"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "title": "Disable Style/IfInsideElse for this entire file",
+            "kind": "quickfix",
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
+                  },
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 0,
+                          "character": 0
+                        },
+                        "end": {
+                          "line": 0,
+                          "character": 0
+                        }
+                      },
+                      "newText": "# rubocop:disable Style/IfInsideElse\n"
+                    },
+                    {
+                      "range": {
+                        "start": {
+                          "line": 12,
+                          "character": 3
+                        },
+                        "end": {
+                          "line": 12,
+                          "character": 3
+                        }
+                      },
+                      "newText": "\n# rubocop:enable Style/IfInsideElse"
                     }
                   ]
                 }

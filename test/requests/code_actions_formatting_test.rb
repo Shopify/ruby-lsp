@@ -29,6 +29,24 @@ class CodeActionsFormattingTest < Minitest::Test
     assert_disable_line("line_disable_existing", "Lint/UselessAssignment")
   end
 
+  def test_disable_file__no_trailing
+    skip("Document#push_edits not matching vscode")
+    assert_disable_file("file_disable_no_trailing", "Lint/UselessAssignment")
+  end
+
+  def test_disable_file__existing
+    assert_disable_file("file_disable_existing", "Lint/UselessAssignment")
+  end
+
+  def test_disable_file__existing_no_trailing
+    assert_disable_file("file_disable_existing_no_trailing", "Lint/UselessAssignment")
+  end
+
+  def test_disable_file__mismatch
+    skip("Document#push_edits not matching vscode")
+    assert_disable_file("file_disable_mismatch", "Lint/UselessAssignment")
+  end
+
   private
 
   def assert_disable_line(fixture, cop_name)
@@ -36,6 +54,14 @@ class CodeActionsFormattingTest < Minitest::Test
       "rubocop_#{fixture}",
       cop_name,
       "Disable #{cop_name} for this line",
+    )
+  end
+
+  def assert_disable_file(fixture, cop_name)
+    assert_fixtures_match(
+      "rubocop_#{fixture}",
+      cop_name,
+      "Disable #{cop_name} for this entire file",
     )
   end
 

@@ -32,6 +32,7 @@ module RubyLsp
 
           code_actions << autocorrect_action if @offense.correctable?
           code_actions << disable_line_action
+          code_actions << disable_file_action
 
           code_actions
         end
@@ -154,6 +155,78 @@ module RubyLsp
           )
 
           [inline_comment]
+        end
+
+        sig { returns(Interface::CodeAction) }
+        def disable_file_action
+          Interface::CodeAction.new(
+            title: "Disable #{@offense.cop_name} for this entire file",
+            kind: Constant::CodeActionKind::QUICK_FIX,
+            edit: Interface::WorkspaceEdit.new(
+              document_changes: [
+                Interface::TextDocumentEdit.new(
+                  text_document: Interface::OptionalVersionedTextDocumentIdentifier.new(
+                    uri: @uri.to_s,
+                    version: nil,
+                  ),
+                  edits: file_disable_comments,
+                ),
+              ],
+            ),
+          )
+        end
+
+        sig { returns(T::Array[Interface::TextEdit]) }
+        def file_disable_comments
+          block_disable_comments(0, @document.source.lines.length - 1)
+        end
+
+        sig do
+          params(
+            start_line_no: Integer,
+            end_line_no: Integer,
+          ).returns(T::Array[Interface::TextEdit])
+        end
+        def block_disable_comments(start_line_no, end_line_no)
+          start_line = T.must(@document.source.lines[start_line_no]).chomp
+          end_line = T.must(@document.source.lines[end_line_no]).chomp
+
+          disable_comment = if start_line.start_with?("# rubocop:disable ")
+            pos = Interface::Position.new(
+              line: start_line_no,
+              character: length_of_line(start_line),
+            )
+
+            Interface::TextEdit.new(
+              range: Interface::Range.new(start: pos, end: pos),
+              new_text: ",#{@offense.cop_name}",
+            )
+          else
+            pos = Interface::Position.new(line: start_line_no, character: 0)
+
+            Interface::TextEdit.new(
+              range: Interface::Range.new(start: pos, end: pos),
+              new_text: "# rubocop:disable #{@offense.cop_name}\n",
+            )
+          end
+
+          reenable_pos = Interface::Position.new(
+            line: end_line_no,
+            character: length_of_line(end_line),
+          )
+          reenable_comment = if end_line.start_with?("# rubocop:enable ")
+            Interface::TextEdit.new(
+              range: Interface::Range.new(start: reenable_pos, end: reenable_pos),
+              new_text: ",#{@offense.cop_name}",
+            )
+          else
+            Interface::TextEdit.new(
+              range: Interface::Range.new(start: reenable_pos, end: reenable_pos),
+              new_text: "\n# rubocop:enable #{@offense.cop_name}",
+            )
+          end
+
+          [disable_comment, reenable_comment]
         end
 
         sig { params(line: String).returns(Integer) }
