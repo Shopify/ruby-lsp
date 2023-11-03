@@ -1,40 +1,40 @@
 {
-    "params": {
-        "range": {
-            "start": {
-                "line": 2,
-                "character": 9
-            },
-            "end": {
-                "line": 2,
-                "character": 13
-            }
-        },
-        "textDocument": {
-            "uri": "file:///fake",
-            "version": null
-        },
-        "context": {
-            "diagnostics": []
-        }
+  "params": {
+    "range": {
+      "start": {
+        "line": 2,
+        "character": 9
+      },
+      "end": {
+        "line": 2,
+        "character": 13
+      }
     },
-    "result": [
-        {
-            "title": "Refactor: Extract Variable",
-            "kind": "refactor.extract",
-            "data": {
-                "range": {
-                    "start": {
-                        "line": 2,
-                        "character": 9
-                    },
-                    "end": {
-                        "line": 2,
-                        "character": 13
-                    }
-                },
-                "uri": "file:///fake"
-            }
-        }
-    ]
+    "textDocument": {
+      "uri": "file:///fake",
+      "version": null
+    },
+    "context": {
+      "diagnostics": []
+    }
+  },
+  "result": [
+    {
+      "title": "Refactor: Extract Variable",
+      "kind": "refactor.extract",
+      "data": {
+        "range": {
+          "start": {
+            "line": 2,
+            "character": 9
+          },
+          "end": {
+            "line": 2,
+            "character": 13
+          }
+        },
+        "uri": "file:///fake"
+      }
+    }
+  ]
 }
