@@ -35,7 +35,7 @@ module RubyIndexer
       value = node.value
       values = value.is_a?(Prism::ArrayNode) && value.opening_loc ? value.elements : []
 
-      node.targets.each_with_index do |target, i|
+      [*node.lefts, *node.rest, *node.rights].each_with_index do |target, i|
         current_value = values[i]
         # The moment we find a splat on the right hand side of the assignment, we can no longer figure out which value
         # gets assigned to what

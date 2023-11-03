@@ -97,7 +97,8 @@ module RubyLsp
           Prism::LocalVariableWriteNode,
           Prism::BlockParameterNode,
           Prism::RequiredParameterNode,
-          Prism::KeywordParameterNode,
+          Prism::RequiredKeywordParameterNode,
+          Prism::OptionalKeywordParameterNode,
           Prism::RestParameterNode,
           Prism::OptionalParameterNode,
           Prism::KeywordRestParameterNode,
@@ -137,8 +138,9 @@ module RubyLsp
             Prism::ClassVariableReadNode, Prism::ClassVariableTargetNode, Prism::ClassVariableWriteNode,
             Prism::LocalVariableAndWriteNode, Prism::LocalVariableOperatorWriteNode, Prism::LocalVariableOrWriteNode,
             Prism::LocalVariableReadNode, Prism::LocalVariableTargetNode, Prism::LocalVariableWriteNode,
-            Prism::CallNode, Prism::BlockParameterNode, Prism::KeywordParameterNode, Prism::KeywordRestParameterNode,
-            Prism::OptionalParameterNode, Prism::RequiredParameterNode, Prism::RestParameterNode
+            Prism::CallNode, Prism::BlockParameterNode, Prism::RequiredKeywordParameterNode,
+            Prism::RequiredKeywordParameterNode, Prism::KeywordRestParameterNode, Prism::OptionalParameterNode,
+            Prism::RequiredParameterNode, Prism::RestParameterNode
             target
           end
 
@@ -171,7 +173,8 @@ module RubyLsp
             :on_constant_path_and_write_node_enter,
             :on_constant_path_operator_write_node_enter,
             :on_local_variable_write_node_enter,
-            :on_keyword_parameter_node_enter,
+            :on_required_keyword_parameter_node_enter,
+            :on_optional_keyword_parameter_node_enter,
             :on_rest_parameter_node_enter,
             :on_optional_parameter_node_enter,
             :on_keyword_rest_parameter_node_enter,
@@ -359,8 +362,15 @@ module RubyLsp
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::KeywordParameterNode).void }
-      def on_keyword_parameter_node_enter(node)
+      sig { params(node: Prism::RequiredKeywordParameterNode).void }
+      def on_required_keyword_parameter_node_enter(node)
+        return unless matches?(node, LOCAL_NODES)
+
+        add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
+      end
+
+      sig { params(node: Prism::OptionalKeywordParameterNode).void }
+      def on_optional_keyword_parameter_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
@@ -551,8 +561,8 @@ module RubyLsp
           Prism::ClassVariableTargetNode, Prism::ClassVariableWriteNode, Prism::LocalVariableAndWriteNode,
           Prism::LocalVariableOperatorWriteNode, Prism::LocalVariableOrWriteNode, Prism::LocalVariableReadNode,
           Prism::LocalVariableTargetNode, Prism::LocalVariableWriteNode, Prism::DefNode, Prism::BlockParameterNode,
-          Prism::KeywordParameterNode, Prism::KeywordRestParameterNode, Prism::OptionalParameterNode,
-          Prism::RequiredParameterNode, Prism::RestParameterNode
+          Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode, Prism::KeywordRestParameterNode,
+          Prism::OptionalParameterNode, Prism::RequiredParameterNode, Prism::RestParameterNode
 
           node.name.to_s
         when Prism::CallNode

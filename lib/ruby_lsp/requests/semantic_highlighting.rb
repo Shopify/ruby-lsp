@@ -135,7 +135,8 @@ module RubyLsp
           :on_local_variable_write_node_enter,
           :on_local_variable_read_node_enter,
           :on_block_parameter_node_enter,
-          :on_keyword_parameter_node_enter,
+          :on_required_keyword_parameter_node_enter,
+          :on_optional_keyword_parameter_node_enter,
           :on_keyword_rest_parameter_node_enter,
           :on_optional_parameter_node_enter,
           :on_required_parameter_node_enter,
@@ -252,11 +253,18 @@ module RubyLsp
         @current_scope << name.to_sym if name
       end
 
-      sig { params(node: Prism::KeywordParameterNode).void }
-      def on_keyword_parameter_node_enter(node)
-        name = node.name
-        @current_scope << name.to_s.delete_suffix(":").to_sym if name
+      sig { params(node: Prism::RequiredKeywordParameterNode).void }
+      def on_required_keyword_parameter_node_enter(node)
+        @current_scope << node.name
+        return unless visible?(node, @range)
 
+        location = node.name_loc
+        add_token(location.copy(length: location.length - 1), :parameter)
+      end
+
+      sig { params(node: Prism::OptionalKeywordParameterNode).void }
+      def on_optional_keyword_parameter_node_enter(node)
+        @current_scope << node.name
         return unless visible?(node, @range)
 
         location = node.name_loc

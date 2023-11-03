@@ -87,15 +87,19 @@ module RubyLsp
             :start,
             :line,
           ) && closest_node_loc.end_line - 1 >= source_range.dig(:end, :line)
-            indentation_line = closest_node_loc.start_line - 1
-            target_line = indentation_line
+            indentation_line_number = closest_node_loc.start_line - 1
+            target_line = indentation_line_number
           else
             target_line = closest_node_loc.end_line
-            indentation_line = closest_node_loc.end_line - 1
+            indentation_line_number = closest_node_loc.end_line - 1
           end
 
           lines = @document.source.lines
-          indentation = T.must(T.must(lines[indentation_line])[/\A */]).size
+
+          indentation_line = lines[indentation_line_number]
+          return Error::InvalidTargetRange unless indentation_line
+
+          indentation = T.must(indentation_line[/\A */]).size
 
           target_range = {
             start: { line: target_line, character: indentation },
