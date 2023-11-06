@@ -12,8 +12,7 @@ let debug: Debugger | undefined;
 let testController: TestController | undefined;
 
 export async function activate(context: vscode.ExtensionContext) {
-  const outputChannel = vscode.window.createOutputChannel("Ruby LSP");
-  const ruby = new Ruby(context, outputChannel);
+  const ruby = new Ruby(context, vscode.workspace.workspaceFolders![0]);
   await ruby.activateRuby();
 
   const telemetry = new Telemetry(context);
@@ -26,10 +25,10 @@ export async function activate(context: vscode.ExtensionContext) {
     telemetry,
   );
 
-  client = new Client(context, telemetry, ruby, testController, outputChannel);
+  client = new Client(context, telemetry, ruby, testController);
 
   await client.start();
-  debug = new Debugger(context, ruby, outputChannel);
+  debug = new Debugger(context, ruby);
 
   vscode.workspace.registerTextDocumentContentProvider(
     "ruby-lsp",

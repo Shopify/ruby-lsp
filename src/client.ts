@@ -22,6 +22,7 @@ import { Telemetry, RequestEvent } from "./telemetry";
 import { Ruby } from "./ruby";
 import { StatusItems, Command, ServerState, ClientInterface } from "./status";
 import { TestController } from "./testController";
+import { LOG_CHANNEL } from "./common";
 
 const LSP_NAME = "Ruby LSP";
 const asyncExec = promisify(exec);
@@ -37,7 +38,6 @@ export default class Client implements ClientInterface {
   private readonly workingFolder: string;
   private readonly telemetry: Telemetry;
   private readonly statusItems: StatusItems;
-  private readonly outputChannel: vscode.OutputChannel;
   private readonly testController: TestController;
   private readonly customBundleGemfile: string = vscode.workspace
     .getConfiguration("rubyLsp")
@@ -56,7 +56,6 @@ export default class Client implements ClientInterface {
     telemetry: Telemetry,
     ruby: Ruby,
     testController: TestController,
-    outputChannel: vscode.OutputChannel,
     workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath,
   ) {
     this.workingFolder = workingFolder;
@@ -65,7 +64,6 @@ export default class Client implements ClientInterface {
     this.testController = testController;
     this.#context = context;
     this.#ruby = ruby;
-    this.outputChannel = outputChannel;
     this.#formatter = "";
     this.statusItems = new StatusItems(this);
     this.registerCommands();
@@ -111,7 +109,7 @@ export default class Client implements ClientInterface {
     const clientOptions: LanguageClientOptions = {
       documentSelector: [{ language: "ruby" }],
       diagnosticCollectionName: LSP_NAME,
-      outputChannel: this.outputChannel,
+      outputChannel: LOG_CHANNEL,
       revealOutputChannelOn: RevealOutputChannelOn.Never,
       diagnosticPullOptions: this.diagnosticPullOptions(),
       initializationOptions: {
@@ -231,9 +229,7 @@ export default class Client implements ClientInterface {
       await this.client.start();
     } catch (error: any) {
       this.state = ServerState.Error;
-      this.outputChannel.appendLine(
-        `Error restarting the server: ${error.message}`,
-      );
+      LOG_CHANNEL.error(`Error restarting the server: ${error.message}`);
       return;
     }
 
@@ -274,16 +270,12 @@ export default class Client implements ClientInterface {
       }
     } catch (error: any) {
       this.state = ServerState.Error;
-
-      this.outputChannel.appendLine(
-        `Error restarting the server: ${error.message}`,
-      );
+      LOG_CHANNEL.error(`Error restarting the server: ${error.message}`);
     }
   }
 
   dispose() {
     this.client?.dispose();
-    this.outputChannel.dispose();
   }
 
   get ruby(): Ruby {
@@ -461,9 +453,7 @@ export default class Client implements ClientInterface {
         this.context.workspaceState.update("rubyLsp.lastGemUpdate", Date.now());
       } catch (error) {
         // If we fail to update the global installation of `ruby-lsp`, we don't want to prevent the server from starting
-        this.outputChannel.appendLine(
-          `Failed to update global ruby-lsp gem: ${error}`,
-        );
+        LOG_CHANNEL.error(`Failed to update global ruby-lsp gem: ${error}`);
       }
     }
   }

@@ -5,6 +5,7 @@ import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import * as vscode from "vscode";
 
 import { Ruby } from "./ruby";
+import { LOG_CHANNEL } from "./common";
 
 export class Debugger
   implements
@@ -16,16 +17,13 @@ export class Debugger
   private debugProcess?: ChildProcessWithoutNullStreams;
   private readonly console = vscode.debug.activeDebugConsole;
   private readonly subscriptions: vscode.Disposable[];
-  private readonly outputChannel: vscode.OutputChannel;
 
   constructor(
     context: vscode.ExtensionContext,
     ruby: Ruby,
-    outputChannel: vscode.OutputChannel,
     workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath,
   ) {
     this.ruby = ruby;
-    this.outputChannel = outputChannel;
     this.subscriptions = [
       vscode.debug.registerDebugConfigurationProvider("ruby_lsp", this),
       vscode.debug.registerDebugAdapterDescriptorFactory("ruby_lsp", this),
@@ -183,15 +181,9 @@ export class Debugger
         configuration.program,
       ];
 
-      this.outputChannel.appendLine(
-        `Ruby LSP> Spawning debugger in directory ${this.workingFolder}`,
-      );
-      this.outputChannel.appendLine(
-        `Ruby LSP>   Command bundle ${args.join(" ")}`,
-      );
-      this.outputChannel.appendLine(
-        `Ruby LSP>   Environment ${JSON.stringify(configuration.env)}`,
-      );
+      LOG_CHANNEL.info(`Spawning debugger in directory ${this.workingFolder}`);
+      LOG_CHANNEL.info(`   Command bundle ${args.join(" ")}`);
+      LOG_CHANNEL.info(`   Environment ${JSON.stringify(configuration.env)}`);
 
       this.debugProcess = spawn("bundle", args, {
         shell: true,
@@ -236,7 +228,7 @@ export class Debugger
         if (code) {
           const message = `Debugger exited with status ${code}. Check the output channel for more information.`;
           this.console.append(message);
-          this.outputChannel.show();
+          LOG_CHANNEL.show();
           reject(new Error(message));
         }
       });
