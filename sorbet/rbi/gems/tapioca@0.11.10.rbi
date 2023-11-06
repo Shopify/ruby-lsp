@@ -54,7 +54,7 @@ module RBI; end
 
 # source://tapioca//lib/tapioca/rbi_ext/model.rb#5
 class RBI::Tree < ::RBI::NodeWithComments
-  # source://rbi/0.1.1/lib/rbi/model.rb#119
+  # source://rbi/0.1.4/lib/rbi/model.rb#119
   sig do
     params(
       loc: T.nilable(::RBI::Loc),
@@ -64,19 +64,19 @@ class RBI::Tree < ::RBI::NodeWithComments
   end
   def initialize(loc: T.unsafe(nil), comments: T.unsafe(nil), &block); end
 
-  # source://rbi/0.1.1/lib/rbi/model.rb#126
+  # source://rbi/0.1.4/lib/rbi/model.rb#126
   sig { params(node: ::RBI::Node).void }
   def <<(node); end
 
-  # source://rbi/0.1.1/lib/rbi/printer.rb#226
+  # source://rbi/0.1.4/lib/rbi/printer.rb#226
   sig { override.params(v: ::RBI::Printer).void }
   def accept_printer(v); end
 
-  # source://rbi/0.1.1/lib/rbi/rewriters/add_sig_templates.rb#66
+  # source://rbi/0.1.4/lib/rbi/rewriters/add_sig_templates.rb#66
   sig { params(with_todo_comment: T::Boolean).void }
   def add_sig_templates!(with_todo_comment: T.unsafe(nil)); end
 
-  # source://rbi/0.1.1/lib/rbi/rewriters/annotate.rb#49
+  # source://rbi/0.1.4/lib/rbi/rewriters/annotate.rb#49
   sig { params(annotation: ::String, annotate_scopes: T::Boolean, annotate_properties: T::Boolean).void }
   def annotate!(annotation, annotate_scopes: T.unsafe(nil), annotate_properties: T.unsafe(nil)); end
 
@@ -140,23 +140,23 @@ class RBI::Tree < ::RBI::NodeWithComments
   end
   def create_type_variable(name, type:, variance: T.unsafe(nil), fixed: T.unsafe(nil), upper: T.unsafe(nil), lower: T.unsafe(nil)); end
 
-  # source://rbi/0.1.1/lib/rbi/rewriters/deannotate.rb#41
+  # source://rbi/0.1.4/lib/rbi/rewriters/deannotate.rb#41
   sig { params(annotation: ::String).void }
   def deannotate!(annotation); end
 
-  # source://rbi/0.1.1/lib/rbi/model.rb#132
+  # source://rbi/0.1.4/lib/rbi/model.rb#132
   sig { returns(T::Boolean) }
   def empty?; end
 
-  # source://rbi/0.1.1/lib/rbi/rewriters/group_nodes.rb#38
+  # source://rbi/0.1.4/lib/rbi/rewriters/group_nodes.rb#38
   sig { void }
   def group_nodes!; end
 
-  # source://rbi/0.1.1/lib/rbi/index.rb#68
+  # source://rbi/0.1.4/lib/rbi/index.rb#68
   sig { returns(::RBI::Index) }
   def index; end
 
-  # source://rbi/0.1.1/lib/rbi/rewriters/merge_trees.rb#324
+  # source://rbi/0.1.4/lib/rbi/rewriters/merge_trees.rb#324
   sig do
     params(
       other: ::RBI::Tree,
@@ -167,23 +167,23 @@ class RBI::Tree < ::RBI::NodeWithComments
   end
   def merge(other, left_name: T.unsafe(nil), right_name: T.unsafe(nil), keep: T.unsafe(nil)); end
 
-  # source://rbi/0.1.1/lib/rbi/rewriters/nest_non_public_methods.rb#46
+  # source://rbi/0.1.4/lib/rbi/rewriters/nest_non_public_methods.rb#46
   sig { void }
   def nest_non_public_methods!; end
 
-  # source://rbi/0.1.1/lib/rbi/rewriters/nest_singleton_methods.rb#36
+  # source://rbi/0.1.4/lib/rbi/rewriters/nest_singleton_methods.rb#36
   sig { void }
   def nest_singleton_methods!; end
 
-  # source://rbi/0.1.1/lib/rbi/model.rb#110
+  # source://rbi/0.1.4/lib/rbi/model.rb#110
   sig { returns(T::Array[::RBI::Node]) }
   def nodes; end
 
-  # source://rbi/0.1.1/lib/rbi/printer.rb#233
+  # source://rbi/0.1.4/lib/rbi/printer.rb#233
   sig { override.returns(T::Boolean) }
   def oneline?; end
 
-  # source://rbi/0.1.1/lib/rbi/rewriters/sort_nodes.rb#119
+  # source://rbi/0.1.4/lib/rbi/rewriters/sort_nodes.rb#119
   sig { void }
   def sort_nodes!; end
 
@@ -204,7 +204,7 @@ class RBI::TypedParam < ::T::Struct
   const :type, ::String
 
   class << self
-    # source://sorbet-runtime/0.5.11072/lib/types/struct.rb#13
+    # source://sorbet-runtime/0.5.11116/lib/types/struct.rb#13
     def inherited(s); end
   end
 end
@@ -859,7 +859,7 @@ class Tapioca::Commands::Command
   sig { void }
   def initialize; end
 
-  # source://thor/1.2.2/lib/thor/base.rb#139
+  # source://thor/1.3.0/lib/thor/base.rb#155
   sig { returns(::Thor::Actions) }
   def file_writer; end
 
@@ -1121,7 +1121,7 @@ class Tapioca::ConfigHelper::ConfigError < ::T::Struct
   const :message_parts, T::Array[::Tapioca::ConfigHelper::ConfigErrorMessagePart]
 
   class << self
-    # source://sorbet-runtime/0.5.11072/lib/types/struct.rb#13
+    # source://sorbet-runtime/0.5.11116/lib/types/struct.rb#13
     def inherited(s); end
   end
 end
@@ -1132,7 +1132,7 @@ class Tapioca::ConfigHelper::ConfigErrorMessagePart < ::T::Struct
   const :colors, T::Array[::Symbol]
 
   class << self
-    # source://sorbet-runtime/0.5.11072/lib/types/struct.rb#13
+    # source://sorbet-runtime/0.5.11116/lib/types/struct.rb#13
     def inherited(s); end
   end
 end
@@ -2421,13 +2421,13 @@ class Tapioca::Loaders::Loader
 
   private
 
-  # source://tapioca//lib/tapioca/loaders/loader.rb#198
+  # source://tapioca//lib/tapioca/loaders/loader.rb#213
   sig { void }
   def eager_load_rails_app; end
 
   # @return [Array<T.class_of(Rails::Engine)>]
   #
-  # source://tapioca//lib/tapioca/loaders/loader.rb#169
+  # source://tapioca//lib/tapioca/loaders/loader.rb#171
   def engines; end
 
   # source://tapioca//lib/tapioca/loaders/loader.rb#29
@@ -2441,11 +2441,11 @@ class Tapioca::Loaders::Loader
   end
   def load_bundle(gemfile, initialize_file, require_file, halt_upon_load_error); end
 
-  # source://tapioca//lib/tapioca/loaders/loader.rb#127
+  # source://tapioca//lib/tapioca/loaders/loader.rb#129
   sig { void }
   def load_engines_in_classic_mode; end
 
-  # source://tapioca//lib/tapioca/loaders/loader.rb#105
+  # source://tapioca//lib/tapioca/loaders/loader.rb#107
   sig { void }
   def load_engines_in_zeitwerk_mode; end
 
@@ -2464,26 +2464,37 @@ class Tapioca::Loaders::Loader
   sig { void }
   def load_rails_engines; end
 
-  # source://tapioca//lib/tapioca/loaders/loader.rb#219
+  # Rails 7.2 renamed `eager_load_paths` to `all_eager_load_paths`, which maintains the same original functionality.
+  # The `eager_load_paths` method still exists, but doesn't return all paths anymore and causes Tapioca to miss some
+  # engine paths. The following commit is the change:
+  # https://github.com/rails/rails/commit/ebfca905db14020589c22e6937382e6f8f687664
+  #
+  # Here we make sure that the new `all_eager_load_paths` is always defined for every Rails version below 7.2, so
+  # that we can use it everywhere
+  #
+  # source://tapioca//lib/tapioca/loaders/loader.rb#191
+  def normalize_eager_load_paths_configuration!; end
+
+  # source://tapioca//lib/tapioca/loaders/loader.rb#234
   sig { params(file: T.nilable(::String)).void }
   def require_helper(file); end
 
-  # source://tapioca//lib/tapioca/loaders/loader.rb#94
+  # source://tapioca//lib/tapioca/loaders/loader.rb#96
   def run_initializers; end
 
-  # source://tapioca//lib/tapioca/loaders/loader.rb#183
+  # source://tapioca//lib/tapioca/loaders/loader.rb#198
   sig { params(path: ::String).void }
   def safe_require(path); end
 
-  # source://tapioca//lib/tapioca/loaders/loader.rb#190
+  # source://tapioca//lib/tapioca/loaders/loader.rb#205
   sig { void }
   def silence_deprecations; end
 
-  # source://tapioca//lib/tapioca/loaders/loader.rb#152
+  # source://tapioca//lib/tapioca/loaders/loader.rb#154
   sig { params(blk: T.proc.void).void }
   def with_rails_application(&blk); end
 
-  # source://tapioca//lib/tapioca/loaders/loader.rb#145
+  # source://tapioca//lib/tapioca/loaders/loader.rb#147
   sig { returns(T::Boolean) }
   def zeitwerk_mode?; end
 end
@@ -3322,7 +3333,7 @@ module Tapioca::Static::SymbolLoader
 
     # @return [Array<T.class_of(Rails::Engine)>]
     #
-    # source://sorbet-runtime/0.5.11072/lib/types/private/methods/_methods.rb#255
+    # source://sorbet-runtime/0.5.11116/lib/types/private/methods/_methods.rb#255
     def engines(*args, **_arg1, &blk); end
 
     # source://tapioca//lib/tapioca/static/symbol_loader.rb#74
