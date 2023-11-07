@@ -193,5 +193,34 @@ module RubyIndexer
 
       assert_instance_of(Entry::UnresolvedAlias, entry)
     end
+
+    def test_visitor_does_not_visit_unnecessary_nodes
+      # These immense string concatenations cause so much recursion in the visitor mechanism, that we actually hit a
+      # system stack error. There are some examples of these concatenations using local variables inside Ruby itself. We
+      # may want to revisit using a recursive visitor in the future, but for now let's ensure we don't visit nodes we do
+      # not care about
+
+      concats = (0...10_000).map do |i|
+        <<~STRING
+          "string#{i}" \\
+        STRING
+      end.join
+
+      index(<<~RUBY)
+        module Foo
+          local_var = #{concats}
+            "final"
+
+          @class_instance_var = #{concats}
+            "final"
+
+          @@class_var = #{concats}
+            "final"
+
+          $global_var = #{concats}
+            "final"
+        end
+      RUBY
+    end
   end
 end

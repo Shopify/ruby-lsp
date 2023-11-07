@@ -132,6 +132,77 @@ module RubyIndexer
       end
     end
 
+    # The following visits are made no-oped intentionally, because we do not want to continue visiting down child nodes
+    # that are not relevant for the index
+
+    # Local variables
+
+    sig { override.params(node: Prism::LocalVariableWriteNode).void }
+    def visit_local_variable_write_node(node); end
+
+    sig { override.params(node: Prism::LocalVariableOrWriteNode).void }
+    def visit_local_variable_or_write_node(node); end
+
+    sig { override.params(node: Prism::LocalVariableAndWriteNode).void }
+    def visit_local_variable_and_write_node(node); end
+
+    sig { override.params(node: Prism::LocalVariableOperatorWriteNode).void }
+    def visit_local_variable_operator_write_node(node); end
+
+    sig { override.params(node: Prism::LocalVariableTargetNode).void }
+    def visit_local_variable_target_node(node); end
+
+    # Instance variables
+
+    sig { override.params(node: Prism::InstanceVariableWriteNode).void }
+    def visit_instance_variable_write_node(node); end
+
+    sig { override.params(node: Prism::InstanceVariableOrWriteNode).void }
+    def visit_instance_variable_or_write_node(node); end
+
+    sig { override.params(node: Prism::InstanceVariableAndWriteNode).void }
+    def visit_instance_variable_and_write_node(node); end
+
+    sig { override.params(node: Prism::InstanceVariableOperatorWriteNode).void }
+    def visit_instance_variable_operator_write_node(node); end
+
+    sig { override.params(node: Prism::InstanceVariableTargetNode).void }
+    def visit_instance_variable_target_node(node); end
+
+    # Class variables
+
+    sig { override.params(node: Prism::ClassVariableWriteNode).void }
+    def visit_class_variable_write_node(node); end
+
+    sig { override.params(node: Prism::ClassVariableOrWriteNode).void }
+    def visit_class_variable_or_write_node(node); end
+
+    sig { override.params(node: Prism::ClassVariableAndWriteNode).void }
+    def visit_class_variable_and_write_node(node); end
+
+    sig { override.params(node: Prism::ClassVariableOperatorWriteNode).void }
+    def visit_class_variable_operator_write_node(node); end
+
+    sig { override.params(node: Prism::ClassVariableTargetNode).void }
+    def visit_class_variable_target_node(node); end
+
+    # Global variables
+
+    sig { override.params(node: Prism::GlobalVariableWriteNode).void }
+    def visit_global_variable_write_node(node); end
+
+    sig { override.params(node: Prism::GlobalVariableOrWriteNode).void }
+    def visit_global_variable_or_write_node(node); end
+
+    sig { override.params(node: Prism::GlobalVariableAndWriteNode).void }
+    def visit_global_variable_and_write_node(node); end
+
+    sig { override.params(node: Prism::GlobalVariableOperatorWriteNode).void }
+    def visit_global_variable_operator_write_node(node); end
+
+    sig { override.params(node: Prism::GlobalVariableTargetNode).void }
+    def visit_global_variable_target_node(node); end
+
     private
 
     sig { params(node: Prism::CallNode).void }
@@ -204,20 +275,20 @@ module RubyIndexer
     sig { params(node: Prism::ModuleNode).void }
     def add_module_entry(node)
       name = node.constant_path.location.slice
-      return visit_child_nodes(node) unless /^[A-Z:]/.match?(name)
+      return visit(node.body) unless /^[A-Z:]/.match?(name)
 
       comments = collect_comments(node)
 
       @index << Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments)
       @stack << name
-      visit_child_nodes(node)
+      visit(node.body)
       @stack.pop
     end
 
     sig { params(node: Prism::ClassNode).void }
     def add_class_entry(node)
       name = node.constant_path.location.slice
-      return visit_child_nodes(node) unless /^[A-Z:]/.match?(name)
+      return visit(node.body) unless /^[A-Z:]/.match?(name)
 
       comments = collect_comments(node)
 
