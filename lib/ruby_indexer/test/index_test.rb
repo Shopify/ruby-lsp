@@ -193,5 +193,28 @@ module RubyIndexer
 
       assert_instance_of(Entry::UnresolvedAlias, entry)
     end
+
+    def test_visitor_does_not_visit_unnecessary_nodes
+      concats = (0...10_000).map do |i|
+        <<~STRING
+          "string#{i}" \\
+        STRING
+      end.join
+
+      index(<<~RUBY)
+        module Foo
+          local_var = #{concats}
+            "final"
+          @class_instance_var = #{concats}
+            "final"
+          @@class_var = #{concats}
+            "final"
+          $global_var = #{concats}
+            "final"
+          CONST = #{concats}
+            "final"
+        end
+      RUBY
+    end
   end
 end

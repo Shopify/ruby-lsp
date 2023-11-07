@@ -180,8 +180,8 @@ module RubyIndexer
     def index_single(indexable_path, source = nil)
       content = source || File.read(indexable_path.full_path)
       result = Prism.parse(content)
-      visitor = IndexVisitor.new(self, result, indexable_path.full_path)
-      result.value.accept(visitor)
+      collector = Collector.new(self, result, indexable_path.full_path)
+      collector.collect(result.value)
 
       require_path = indexable_path.require_path
       @require_paths_tree.insert(require_path, indexable_path) if require_path
