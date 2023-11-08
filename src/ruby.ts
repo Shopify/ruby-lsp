@@ -145,16 +145,6 @@ export class Ruby {
     // eslint-disable-next-line no-process-env
     const env = { ...process.env, ...JSON.parse(result.stderr).exported };
 
-    // If the configurations under `.shadowenv.d/` point to a Ruby version that is not installed, shadowenv will still
-    // return the complete environment without throwing any errors. Here, we check to see if the RUBY_ROOT returned by
-    // shadowenv exists. If it doesn't, then it's likely that the Ruby version configured is not installed
-    if (!(await pathExists(env.RUBY_ROOT))) {
-      throw new Error(
-        `The Ruby version configured in .shadowenv.d is ${env.RUBY_VERSION}, \
-        but the Ruby installation at ${env.RUBY_ROOT} does not exist`,
-      );
-    }
-
     // The only reason we set the process environment here is to allow other extensions that don't perform activation
     // work properly
     // eslint-disable-next-line no-process-env
