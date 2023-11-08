@@ -23,7 +23,7 @@ export class Ruby {
   private readonly workingFolderPath: string;
   #versionManager?: VersionManager;
   // eslint-disable-next-line no-process-env
-  private readonly shell = process.env.SHELL;
+  private readonly shell = process.env.SHELL?.replace(/(\s+)/g, "\\$1");
   private _env: NodeJS.ProcessEnv = {};
   private _error = false;
   private readonly context: vscode.ExtensionContext;
