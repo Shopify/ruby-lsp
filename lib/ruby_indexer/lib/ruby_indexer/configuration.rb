@@ -71,8 +71,13 @@ module RubyIndexer
 
         Dir.glob(pattern, File::FNM_PATHNAME | File::FNM_EXTGLOB).map! do |path|
           # All entries for the same pattern match the same $LOAD_PATH entry. Since searching the $LOAD_PATH for every
-          # entry is expensive, we memoize it for the entire pattern
-          load_path_entry ||= $LOAD_PATH.find { |load_path| path.start_with?(load_path) }
+          # entry is expensive, we memoize it until we find a path that doesn't belong to that $LOAD_PATH. This happens
+          # on repositories that define multiple gems, like Rails. All frameworks are defined inside the Dir.pwd, but
+          # each one of them belongs to a different $LOAD_PATH entry
+          if load_path_entry.nil? || !path.start_with?(load_path_entry)
+            load_path_entry = $LOAD_PATH.find { |load_path| path.start_with?(load_path) }
+          end
+
           IndexablePath.new(load_path_entry, path)
         end
       end
@@ -144,7 +149,7 @@ module RubyIndexer
         # just ignore if they're missing
       end
 
-      indexables.uniq!
+      indexables.uniq!(&:full_path)
       indexables
     end
 
