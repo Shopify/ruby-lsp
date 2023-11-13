@@ -34,8 +34,6 @@ module RubyLsp
         output << "  "
       end
 
-      warn(output)
-
       output
     end
   end
