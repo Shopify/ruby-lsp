@@ -500,14 +500,18 @@ class DocumentTest < Minitest::Test
   end
 
   def test_reparsing_without_new_edits_does_nothing
+    text = "def foo; end"
+
     document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///foo/bar.rb"))
     document.push_edits(
-      [{ range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } }, text: "def foo; end" }],
+      [{ range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } }, text: text }],
       version: 2,
     )
 
+    parse_result = Prism.parse(text)
+
     # When there's a new edit, we parse it the first `parse` invocation
-    Prism.expects(:parse).with(document.source).once
+    Prism.expects(:parse).with(document.source).once.returns(parse_result)
     document.parse
 
     # If there are no new edits, we don't do anything
@@ -520,7 +524,7 @@ class DocumentTest < Minitest::Test
     )
 
     # If there's another edit, we parse it once again
-    Prism.expects(:parse).with(document.source).once
+    Prism.expects(:parse).with(document.source).once.returns(parse_result)
     document.parse
   end
 

@@ -28,8 +28,8 @@ module RubyLsp
       @source = T.let(source, String)
       @version = T.let(version, Integer)
       @uri = T.let(uri, URI::Generic)
-      @needs_parsing = T.let(false, T::Boolean)
-      @parse_result = T.let(Prism.parse(@source), Prism::ParseResult)
+      @needs_parsing = T.let(true, T::Boolean)
+      @parse_result = T.let(parse, Prism::ParseResult)
     end
 
     sig { returns(Prism::ProgramNode) }
@@ -91,9 +91,9 @@ module RubyLsp
       @cache.clear
     end
 
-    sig { void }
+    sig { returns(Prism::ParseResult) }
     def parse
-      return unless @needs_parsing
+      return @parse_result unless @needs_parsing 
 
       @needs_parsing = false
       @parse_result = Prism.parse(@source)
