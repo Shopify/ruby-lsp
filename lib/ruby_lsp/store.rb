@@ -47,7 +47,11 @@ module RubyLsp
 
     sig { params(uri: URI::Generic, source: String, version: Integer, encoding: Encoding).void }
     def set(uri:, source:, version:, encoding: Encoding::UTF_8)
-      document = RubyDocument.new(source: source, version: version, uri: uri, encoding: encoding)
+      document = if erb?(uri)
+        ERBDocument.new(source: source, version: version, uri: uri, encoding: encoding)
+      else
+        RubyDocument.new(source: source, version: version, uri: uri, encoding: encoding)
+      end
       @state[uri.to_s] = document
     end
 
@@ -81,6 +85,11 @@ module RubyLsp
     end
     def cache_fetch(uri, request_name, &block)
       get(uri).cache_fetch(request_name, &block)
+    end
+
+    sig { params(uri: URI::Generic).returns(T::Boolean) }
+    def erb?(uri)
+      uri.to_s.match?(/\.(?:erb|rhtml|rhtm)$/)
     end
   end
 end
