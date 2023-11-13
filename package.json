@@ -429,11 +429,11 @@
     "ws": ">= 7.4.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.23.2",
+    "@babel/core": "^7.23.3",
     "@shopify/eslint-plugin": "^43.0.0",
     "@shopify/prettier-config": "^1.1.2",
     "@types/glob": "^8.1.0",
-    "@types/mocha": "^10.0.2",
+    "@types/mocha": "^10.0.4",
     "@types/node": "20.x",
     "@types/vscode": "^1.68.0",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
@@ -447,7 +447,7 @@
     "glob": "^10.3.7",
     "mocha": "^10.2.0",
     "ovsx": "^0.8.3",
-    "prettier": "^3.0.3",
+    "prettier": "^3.1.0",
     "typescript": "^5.2.2",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.0.0"
