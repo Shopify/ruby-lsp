@@ -51,12 +51,17 @@ module RubyLsp
           if (comment_match = @previous_line.match(/^#(\s*)/))
             handle_comment_line(T.must(comment_match[1]))
           elsif @document.syntax_error?
-            handle_statement_end
+            if /<<[-~]?(?<quote>['"`]?)(?<delimiter>\w+)\k<quote>/ =~ @previous_line # rubocop:disable Lint/UselessAssignment
+              handle_heredoc_end(delimiter)
+            else
+              handle_statement_end
+            end
           end
         end
 
         @edits
       end
+
 
       private
 
@@ -119,6 +124,12 @@ module RubyLsp
           add_edit_with_text("#{indents}end\n", { line: @position[:line] + 1, character: @position[:character] })
           move_cursor_to(@position[:line] - 1, @indentation + @previous_line.size + 1)
         end
+      end
+
+      def handle_heredoc_end(delimiter)
+        add_edit_with_text("\n")
+        add_edit_with_text(delimiter)
+        move_cursor_to(@position[:line], @indentation + 2)
       end
 
       sig { params(spaces: String).void }
