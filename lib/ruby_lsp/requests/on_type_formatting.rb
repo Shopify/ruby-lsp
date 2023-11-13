@@ -125,7 +125,7 @@ module RubyLsp
         end
       end
 
-      sig { void }
+      sig { params(delimiter: String).void }
       def handle_heredoc_end(delimiter)
         add_edit_with_text("\n")
         add_edit_with_text(delimiter)
