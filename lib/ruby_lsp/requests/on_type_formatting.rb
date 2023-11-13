@@ -62,7 +62,6 @@ module RubyLsp
         @edits
       end
 
-
       private
 
       sig { void }
@@ -126,6 +125,7 @@ module RubyLsp
         end
       end
 
+      sig { void }
       def handle_heredoc_end(delimiter)
         add_edit_with_text("\n")
         add_edit_with_text(delimiter)
