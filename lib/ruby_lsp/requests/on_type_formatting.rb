@@ -127,8 +127,9 @@ module RubyLsp
 
       sig { params(delimiter: String).void }
       def handle_heredoc_end(delimiter)
+        indents = " " * @indentation
         add_edit_with_text("\n")
-        add_edit_with_text(delimiter)
+        add_edit_with_text("#{indents}#{delimiter}")
         move_cursor_to(@position[:line], @indentation + 2)
       end
 
