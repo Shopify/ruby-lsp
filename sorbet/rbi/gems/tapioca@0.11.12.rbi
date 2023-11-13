@@ -204,7 +204,7 @@ class RBI::TypedParam < ::T::Struct
   const :type, ::String
 
   class << self
-    # source://sorbet-runtime/0.5.11116/lib/types/struct.rb#13
+    # source://sorbet-runtime/0.5.11120/lib/types/struct.rb#13
     def inherited(s); end
   end
 end
@@ -1121,7 +1121,7 @@ class Tapioca::ConfigHelper::ConfigError < ::T::Struct
   const :message_parts, T::Array[::Tapioca::ConfigHelper::ConfigErrorMessagePart]
 
   class << self
-    # source://sorbet-runtime/0.5.11116/lib/types/struct.rb#13
+    # source://sorbet-runtime/0.5.11120/lib/types/struct.rb#13
     def inherited(s); end
   end
 end
@@ -1132,7 +1132,7 @@ class Tapioca::ConfigHelper::ConfigErrorMessagePart < ::T::Struct
   const :colors, T::Array[::Symbol]
 
   class << self
-    # source://sorbet-runtime/0.5.11116/lib/types/struct.rb#13
+    # source://sorbet-runtime/0.5.11120/lib/types/struct.rb#13
     def inherited(s); end
   end
 end
@@ -2204,94 +2204,94 @@ end
 class Tapioca::Gemfile::GemSpec
   include ::Tapioca::GemHelper
 
-  # source://tapioca//lib/tapioca/gemfile.rb#135
+  # source://tapioca//lib/tapioca/gemfile.rb#136
   sig { params(spec: T.any(::Bundler::StubSpecification, ::Gem::Specification)).void }
   def initialize(spec); end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#145
+  # source://tapioca//lib/tapioca/gemfile.rb#146
   sig { params(other: ::BasicObject).returns(T::Boolean) }
   def ==(other); end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#170
+  # source://tapioca//lib/tapioca/gemfile.rb#171
   sig { params(path: ::String).returns(T::Boolean) }
   def contains_path?(path); end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#160
+  # source://tapioca//lib/tapioca/gemfile.rb#161
   sig { returns(T::Array[::Gem::Dependency]) }
   def dependencies; end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#189
+  # source://tapioca//lib/tapioca/gemfile.rb#190
   sig { returns(T::Boolean) }
   def export_rbi_files?; end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#184
+  # source://tapioca//lib/tapioca/gemfile.rb#185
   sig { returns(T::Array[::String]) }
   def exported_rbi_files; end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#194
+  # source://tapioca//lib/tapioca/gemfile.rb#195
   sig { returns(::RBI::MergeTree) }
   def exported_rbi_tree; end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#132
+  # source://tapioca//lib/tapioca/gemfile.rb#133
   sig { returns(T::Array[::Pathname]) }
   def files; end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#129
+  # source://tapioca//lib/tapioca/gemfile.rb#130
   sig { returns(::String) }
   def full_gem_path; end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#150
+  # source://tapioca//lib/tapioca/gemfile.rb#151
   sig { params(gemfile_dir: ::String).returns(T::Boolean) }
   def ignore?(gemfile_dir); end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#155
+  # source://tapioca//lib/tapioca/gemfile.rb#156
   sig { returns(::String) }
   def name; end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#179
+  # source://tapioca//lib/tapioca/gemfile.rb#180
   sig { void }
   def parse_yard_docs; end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#165
+  # source://tapioca//lib/tapioca/gemfile.rb#166
   sig { returns(::String) }
   def rbi_file_name; end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#206
+  # source://tapioca//lib/tapioca/gemfile.rb#207
   sig { params(file: ::Pathname).returns(::Pathname) }
   def relative_path_for(file); end
 
   # @return [String]
   #
-  # source://tapioca//lib/tapioca/gemfile.rb#129
+  # source://tapioca//lib/tapioca/gemfile.rb#130
   def version; end
 
   private
 
-  # source://tapioca//lib/tapioca/gemfile.rb#217
+  # source://tapioca//lib/tapioca/gemfile.rb#218
   sig { returns(T::Array[::Pathname]) }
   def collect_files; end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#232
+  # source://tapioca//lib/tapioca/gemfile.rb#233
   sig { returns(T.nilable(T::Boolean)) }
   def default_gem?; end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#291
+  # source://tapioca//lib/tapioca/gemfile.rb#292
   sig { returns(T::Boolean) }
   def gem_ignored?; end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#270
+  # source://tapioca//lib/tapioca/gemfile.rb#271
   sig { params(path: ::String).returns(T::Boolean) }
   def has_parent_gemspec?(path); end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#237
+  # source://tapioca//lib/tapioca/gemfile.rb#238
   sig { returns(::Regexp) }
   def require_paths_prefix_matcher; end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#249
+  # source://tapioca//lib/tapioca/gemfile.rb#250
   sig { params(file: ::String).returns(::Pathname) }
   def resolve_to_ruby_lib_dir(file); end
 
-  # source://tapioca//lib/tapioca/gemfile.rb#263
+  # source://tapioca//lib/tapioca/gemfile.rb#264
   sig { returns(::String) }
   def version_string; end
 
@@ -2421,13 +2421,24 @@ class Tapioca::Loaders::Loader
 
   private
 
-  # source://tapioca//lib/tapioca/loaders/loader.rb#213
+  # Rails 7.2 renamed `eager_load_paths` to `all_eager_load_paths`, which maintains the same original functionality.
+  # The `eager_load_paths` method still exists, but doesn't return all paths anymore and causes Tapioca to miss some
+  # engine paths. The following commit is the change:
+  # https://github.com/rails/rails/commit/ebfca905db14020589c22e6937382e6f8f687664
+  #
+  # @param engine [T.class_of(Rails::Engine)]
+  # @return [Array<String>]
+  #
+  # source://sorbet-runtime/0.5.11120/lib/types/private/methods/_methods.rb#255
+  def eager_load_paths(*args, **_arg1, &blk); end
+
+  # source://tapioca//lib/tapioca/loaders/loader.rb#198
   sig { void }
   def eager_load_rails_app; end
 
   # @return [Array<T.class_of(Rails::Engine)>]
   #
-  # source://tapioca//lib/tapioca/loaders/loader.rb#171
+  # source://tapioca//lib/tapioca/loaders/loader.rb#169
   def engines; end
 
   # source://tapioca//lib/tapioca/loaders/loader.rb#29
@@ -2441,11 +2452,11 @@ class Tapioca::Loaders::Loader
   end
   def load_bundle(gemfile, initialize_file, require_file, halt_upon_load_error); end
 
-  # source://tapioca//lib/tapioca/loaders/loader.rb#129
+  # source://tapioca//lib/tapioca/loaders/loader.rb#127
   sig { void }
   def load_engines_in_classic_mode; end
 
-  # source://tapioca//lib/tapioca/loaders/loader.rb#107
+  # source://tapioca//lib/tapioca/loaders/loader.rb#105
   sig { void }
   def load_engines_in_zeitwerk_mode; end
 
@@ -2464,37 +2475,26 @@ class Tapioca::Loaders::Loader
   sig { void }
   def load_rails_engines; end
 
-  # Rails 7.2 renamed `eager_load_paths` to `all_eager_load_paths`, which maintains the same original functionality.
-  # The `eager_load_paths` method still exists, but doesn't return all paths anymore and causes Tapioca to miss some
-  # engine paths. The following commit is the change:
-  # https://github.com/rails/rails/commit/ebfca905db14020589c22e6937382e6f8f687664
-  #
-  # Here we make sure that the new `all_eager_load_paths` is always defined for every Rails version below 7.2, so
-  # that we can use it everywhere
-  #
-  # source://tapioca//lib/tapioca/loaders/loader.rb#191
-  def normalize_eager_load_paths_configuration!; end
-
-  # source://tapioca//lib/tapioca/loaders/loader.rb#234
+  # source://tapioca//lib/tapioca/loaders/loader.rb#219
   sig { params(file: T.nilable(::String)).void }
   def require_helper(file); end
 
-  # source://tapioca//lib/tapioca/loaders/loader.rb#96
+  # source://tapioca//lib/tapioca/loaders/loader.rb#94
   def run_initializers; end
 
-  # source://tapioca//lib/tapioca/loaders/loader.rb#198
+  # source://tapioca//lib/tapioca/loaders/loader.rb#183
   sig { params(path: ::String).void }
   def safe_require(path); end
 
-  # source://tapioca//lib/tapioca/loaders/loader.rb#205
+  # source://tapioca//lib/tapioca/loaders/loader.rb#190
   sig { void }
   def silence_deprecations; end
 
-  # source://tapioca//lib/tapioca/loaders/loader.rb#154
+  # source://tapioca//lib/tapioca/loaders/loader.rb#152
   sig { params(blk: T.proc.void).void }
   def with_rails_application(&blk); end
 
-  # source://tapioca//lib/tapioca/loaders/loader.rb#147
+  # source://tapioca//lib/tapioca/loaders/loader.rb#145
   sig { returns(T::Boolean) }
   def zeitwerk_mode?; end
 end
@@ -3317,7 +3317,7 @@ module Tapioca::Static::SymbolLoader
     sig { params(gem: ::Tapioca::Gemfile::GemSpec).returns(T::Set[::String]) }
     def engine_symbols(gem); end
 
-    # source://tapioca//lib/tapioca/static/symbol_loader.rb#40
+    # source://tapioca//lib/tapioca/static/symbol_loader.rb#48
     sig { params(gem: ::Tapioca::Gemfile::GemSpec).returns(T::Set[::String]) }
     def gem_symbols(gem); end
 
@@ -3325,7 +3325,7 @@ module Tapioca::Static::SymbolLoader
     sig { returns(T::Set[::String]) }
     def payload_symbols; end
 
-    # source://tapioca//lib/tapioca/static/symbol_loader.rb#45
+    # source://tapioca//lib/tapioca/static/symbol_loader.rb#53
     sig { params(paths: T::Array[::Pathname]).returns(T::Set[::String]) }
     def symbols_from_paths(paths); end
 
@@ -3333,10 +3333,10 @@ module Tapioca::Static::SymbolLoader
 
     # @return [Array<T.class_of(Rails::Engine)>]
     #
-    # source://sorbet-runtime/0.5.11116/lib/types/private/methods/_methods.rb#255
+    # source://sorbet-runtime/0.5.11120/lib/types/private/methods/_methods.rb#255
     def engines(*args, **_arg1, &blk); end
 
-    # source://tapioca//lib/tapioca/static/symbol_loader.rb#74
+    # source://tapioca//lib/tapioca/static/symbol_loader.rb#82
     sig { params(input: ::String, table_type: ::String).returns(::String) }
     def symbol_table_json_from(input, table_type: T.unsafe(nil)); end
   end
