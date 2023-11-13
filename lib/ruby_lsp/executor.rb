@@ -218,7 +218,7 @@ module RubyLsp
       when "workspace/didChangeWatchedFiles"
         did_change_watched_files(request.dig(:params, :changes))
       when "workspace/symbol"
-        workspace_symbol(request.dig(:params, :query))
+        workspace_symbol(uri, request.dig(:params, :query))
       when "rubyLsp/textDocument/showSyntaxTree"
         show_syntax_tree(uri, request.dig(:params, :range))
       when "rubyLsp/workspace/dependencies"
@@ -302,9 +302,9 @@ module RubyLsp
       end
     end
 
-    sig { params(query: T.nilable(String)).returns(T::Array[Interface::WorkspaceSymbol]) }
-    def workspace_symbol(query)
-      Requests::WorkspaceSymbol.new(query, @index).perform
+    sig { params(uri: URI::Generic, query: T.nilable(String)).returns(T::Array[Interface::WorkspaceSymbol]) }
+    def workspace_symbol(uri, query)
+      Requests::WorkspaceSymbol.new(query, @index, uri).perform
     end
 
     sig { params(uri: URI::Generic, range: T.nilable(T::Hash[Symbol, T.untyped])).returns({ ast: String }) }
