@@ -8,7 +8,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Diagnostics, "diagnostics"
 
   def run_expectations(source)
-    document = RubyLsp::Document.new(source: source, version: 1, uri: URI::Generic.from_path(path: __FILE__))
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI::Generic.from_path(path: __FILE__))
     RubyLsp::Requests::Diagnostics.new(document).run
     result = T.let(nil, T.nilable(T::Array[RubyLsp::Interface::Diagnostic]))
 

@@ -9,7 +9,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
   def run_expectations(source)
     uri = URI("file://#{@_path}")
-    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
@@ -27,7 +27,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     RUBY
     uri = URI("file:///fake.rb")
 
-    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher, @message_queue)
@@ -53,7 +53,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     RUBY
     uri = URI("file:///fake.rb")
 
-    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("unknown")
@@ -72,7 +72,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     RUBY
     uri = URI("file:///fake.rb")
 
-    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("rspec")
@@ -91,7 +91,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     RUBY
     uri = URI::Generic.build(scheme: "untitled", opaque: "Untitled-1")
 
-    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")

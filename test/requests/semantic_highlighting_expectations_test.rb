@@ -9,7 +9,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
 
   def run_expectations(source)
     message_queue = Thread::Queue.new
-    document = RubyLsp::Document.new(source: source, version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI("file:///fake.rb"))
     range = @__params&.any? ? @__params.first : nil
 
     if range

@@ -12,7 +12,7 @@ class StoreTest < Minitest::Test
   def test_get
     uri = URI("file:///foo/bar.rb")
     assert_equal(
-      RubyLsp::Document.new(source: "def foo; end", version: 1, uri: uri),
+      RubyLsp::RubyDocument.new(source: "def foo; end", version: 1, uri: uri),
       @store.get(uri),
     )
   end
@@ -22,7 +22,7 @@ class StoreTest < Minitest::Test
     @store.set(uri: uri, source: "def foo; end", version: 1)
 
     assert_equal(
-      RubyLsp::Document.new(source: "def foo; end", version: 1, uri: uri),
+      RubyLsp::RubyDocument.new(source: "def foo; end", version: 1, uri: uri),
       @store.get(uri),
     )
   end
@@ -32,7 +32,7 @@ class StoreTest < Minitest::Test
     @store.set(uri: uri, source: "def foo; end", version: 1)
 
     assert_equal(
-      RubyLsp::Document.new(source: "def foo; end", version: 1, uri: uri),
+      RubyLsp::RubyDocument.new(source: "def foo; end", version: 1, uri: uri),
       @store.get(uri),
     )
 
@@ -65,7 +65,7 @@ class StoreTest < Minitest::Test
     uri = URI("file://#{file.path}")
 
     assert_equal(
-      RubyLsp::Document.new(source: "def great_code; end", version: 1, uri: uri),
+      RubyLsp::RubyDocument.new(source: "def great_code; end", version: 1, uri: uri),
       @store.get(uri),
     )
   ensure
@@ -80,7 +80,7 @@ class StoreTest < Minitest::Test
     uri = URI("file://#{file.path}")
 
     assert_equal(
-      RubyLsp::Document.new(source: "def great_code; end", version: 1, uri: uri),
+      RubyLsp::RubyDocument.new(source: "def great_code; end", version: 1, uri: uri),
       @store.get(uri),
     )
   ensure
@@ -188,7 +188,7 @@ class StoreTest < Minitest::Test
     )
 
     assert_equal(
-      RubyLsp::Document.new(source: "def bar; puts 'a'; end", version: 1, uri: URI("file://foo.rb")),
+      RubyLsp::RubyDocument.new(source: "def bar; puts 'a'; end", version: 1, uri: URI("file://foo.rb")),
       @store.get(uri),
     )
   end

@@ -4,6 +4,9 @@
 module RubyLsp
   class Document
     extend T::Sig
+    extend T::Helpers
+
+    abstract!
 
     PositionShape = T.type_alias { { line: Integer, character: Integer } }
     RangeShape = T.type_alias { { start: PositionShape, end: PositionShape } }
@@ -91,13 +94,8 @@ module RubyLsp
       @cache.clear
     end
 
-    sig { returns(Prism::ParseResult) }
-    def parse
-      return @parse_result unless @needs_parsing 
-
-      @needs_parsing = false
-      @parse_result = Prism.parse(@source)
-    end
+    sig { abstract.returns(Prism::ParseResult) }
+    def parse; end
 
     sig { returns(T::Boolean) }
     def syntax_error?
