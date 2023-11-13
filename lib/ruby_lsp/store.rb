@@ -4,6 +4,7 @@
 module RubyLsp
   class Store
     extend T::Sig
+    include Support::Common
 
     sig { returns(T::Boolean) }
     attr_accessor :supports_progress
@@ -85,11 +86,6 @@ module RubyLsp
     end
     def cache_fetch(uri, request_name, &block)
       get(uri).cache_fetch(request_name, &block)
-    end
-
-    sig { params(uri: URI::Generic).returns(T::Boolean) }
-    def erb?(uri)
-      uri.to_s.match?(/\.(?:erb|rhtml|rhtm)$/)
     end
   end
 end
