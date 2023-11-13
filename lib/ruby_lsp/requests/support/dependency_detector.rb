@@ -6,6 +6,7 @@ require "singleton"
 module RubyLsp
   class DependencyDetector
     include Singleton
+    include Support::Common
     extend T::Sig
 
     sig { returns(String) }
@@ -89,13 +90,6 @@ module RubyLsp
       Bundler.locked_gems.sources
         .grep(Bundler::Source::Gemspec)
         .flat_map { _1.gemspec&.dependencies&.map(&:name) }
-    end
-
-    private
-
-    sig { params(uri: URI::Generic).returns(T::Boolean) }
-    def erb?(uri)
-      uri.to_s.match?(/\.(?:erb|rhtml|rhtm)$/)
     end
   end
 end
