@@ -57,6 +57,8 @@ module RubyLsp
           warn(errored_addons.map(&:backtraces).join("\n\n"))
         end
 
+        RubyVM::YJIT.enable if defined? RubyVM::YJIT.enable
+
         perform_initial_indexing
         check_formatter_is_available
 
