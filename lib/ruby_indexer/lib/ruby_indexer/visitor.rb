@@ -36,9 +36,16 @@ module RubyIndexer
       when YARP::ModuleNode
         add_index_entry(node, Index::Entry::Module)
       when YARP::ConstantWriteNode, YARP::ConstantOrWriteNode
-        add_constant(node)
-      when YARP::ConstantPathWriteNode, YARP::ConstantPathOrWriteNode
-        add_constant_with_path(node)
+        name = fully_qualify_name(node.name.to_s)
+        add_constant(node, name)
+      when YARP::ConstantPathWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathOperatorWriteNode,
+        YARP::ConstantPathAndWriteNode
+
+        # ignore variable constants like `var::FOO` or `self.class::FOO`
+        return unless node.target.parent.nil? || node.target.parent.is_a?(YARP::ConstantReadNode)
+
+        name = fully_qualify_name(node.target.location.slice)
+        add_constant(node, name)
       when YARP::CallNode
         message = node.message
         handle_private_constant(node) if message == "private_constant"
@@ -80,26 +87,39 @@ module RubyIndexer
 
     sig do
       params(
-        node: T.any(YARP::ConstantWriteNode, YARP::ConstantOrWriteNode),
+        node: T.any(
+          YARP::ConstantWriteNode,
+          YARP::ConstantOrWriteNode,
+          YARP::ConstantPathWriteNode,
+          YARP::ConstantPathOrWriteNode,
+          YARP::ConstantPathOperatorWriteNode,
+          YARP::ConstantPathAndWriteNode,
+        ),
+        name: String,
       ).void
     end
-    def add_constant(node)
+    def add_constant(node, name)
+      value = node.value
       comments = collect_comments(node)
-      @index << Index::Entry::Constant.new(fully_qualify_name(node.name.to_s), @file_path, node.location, comments)
-    end
 
-    sig do
-      params(
-        node: T.any(YARP::ConstantPathWriteNode, YARP::ConstantPathOrWriteNode),
-      ).void
-    end
-    def add_constant_with_path(node)
-      # ignore variable constants like `var::FOO` or `self.class::FOO`
-      return unless node.target.parent.nil? || node.target.parent.is_a?(YARP::ConstantReadNode)
+      @index << case value
+      when YARP::ConstantReadNode, YARP::ConstantPathNode
+        Index::Entry::UnresolvedAlias.new(value.slice, @stack.dup, name, @file_path, node.location, comments)
+      when YARP::ConstantWriteNode, YARP::ConstantAndWriteNode, YARP::ConstantOrWriteNode,
+        YARP::ConstantOperatorWriteNode
 
-      name = node.target.location.slice
-      comments = collect_comments(node)
-      @index << Index::Entry::Constant.new(fully_qualify_name(name), @file_path, node.location, comments)
+        # If the right hand side is another constant assignment, we need to visit it because that constant has to be
+        # indexed too
+        visit(value)
+        Index::Entry::UnresolvedAlias.new(value.name.to_s, @stack.dup, name, @file_path, node.location, comments)
+      when YARP::ConstantPathWriteNode, YARP::ConstantPathOrWriteNode, YARP::ConstantPathOperatorWriteNode,
+        YARP::ConstantPathAndWriteNode
+
+        visit(value)
+        Index::Entry::UnresolvedAlias.new(value.target.slice, @stack.dup, name, @file_path, node.location, comments)
+      else
+        Index::Entry::Constant.new(name, @file_path, node.location, comments)
+      end
     end
 
     sig { params(node: T.any(YARP::ClassNode, YARP::ModuleNode), klass: T.class_of(Index::Entry)).void }

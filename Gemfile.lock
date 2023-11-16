@@ -3,8 +3,7 @@ PATH
   specs:
     ruby-lsp (0.11.0)
       language_server-protocol (~> 3.17.0)
-      sorbet-runtime
-      syntax_tree (>= 6.1.1, < 7)
+      sorbet-runtime (>= 0.5.5685)
       yarp (>= 0.12, < 0.13)
 
 GEM
@@ -66,7 +65,7 @@ GEM
       unicode-display_width (>= 2.4.0, < 3.0)
     rubocop-ast (1.29.0)
       parser (>= 3.2.1.0)
-    rubocop-minitest (0.31.1)
+    rubocop-minitest (0.32.1)
       rubocop (>= 1.39, < 2.0)
     rubocop-rake (0.6.0)
       rubocop (~> 1.0)
@@ -76,14 +75,14 @@ GEM
       rubocop (>= 0.90.0)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
-    sorbet (0.5.11032)
-      sorbet-static (= 0.5.11032)
-    sorbet-runtime (0.5.11032)
-    sorbet-static (0.5.11032-universal-darwin)
-    sorbet-static (0.5.11032-x86_64-linux)
-    sorbet-static-and-runtime (0.5.11032)
-      sorbet (= 0.5.11032)
-      sorbet-runtime (= 0.5.11032)
+    sorbet (0.5.11039)
+      sorbet-static (= 0.5.11039)
+    sorbet-runtime (0.5.11039)
+    sorbet-static (0.5.11039-universal-darwin)
+    sorbet-static (0.5.11039-x86_64-linux)
+    sorbet-static-and-runtime (0.5.11039)
+      sorbet (= 0.5.11039)
+      sorbet-runtime (= 0.5.11039)
     spoom (1.2.4)
       erubi (>= 1.10.0)
       sorbet-static-and-runtime (>= 0.5.10187)
@@ -126,12 +125,13 @@ DEPENDENCIES
   rake (~> 13.0)
   rdoc
   rubocop (~> 1.56)
-  rubocop-minitest (~> 0.31.1)
+  rubocop-minitest (~> 0.32.1)
   rubocop-rake (~> 0.6.0)
   rubocop-shopify (~> 2.14)
   rubocop-sorbet (~> 0.7)
   ruby-lsp!
   sorbet-static-and-runtime
+  syntax_tree (>= 6.1.1, < 7)
   tapioca (~> 0.11)
 
 BUNDLED WITH

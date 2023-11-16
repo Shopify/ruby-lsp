@@ -28,7 +28,7 @@ module RubyLsp
       @source = T.let(source, String)
       @version = T.let(version, Integer)
       @uri = T.let(uri, URI::Generic)
-      @unparsed_edits = T.let([], T::Array[EditShape])
+      @needs_parsing = T.let(false, T::Boolean)
       @parse_result = T.let(YARP.parse(@source), YARP::ParseResult)
     end
 
@@ -87,15 +87,15 @@ module RubyLsp
       end
 
       @version = version
-      @unparsed_edits.concat(edits)
+      @needs_parsing = true
       @cache.clear
     end
 
     sig { void }
     def parse
-      return if @unparsed_edits.empty?
+      return unless @needs_parsing
 
-      @unparsed_edits.clear
+      @needs_parsing = false
       @parse_result = YARP.parse(@source)
     end
 

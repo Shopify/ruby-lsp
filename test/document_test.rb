@@ -502,13 +502,26 @@ class DocumentTest < Minitest::Test
   def test_reparsing_without_new_edits_does_nothing
     document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///foo/bar.rb"))
     document.push_edits(
-      [{ range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } }, text: "def foo" }],
+      [{ range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } }, text: "def foo; end" }],
       version: 2,
     )
 
+    # When there's a new edit, we parse it the first `parse` invocation
+    YARP.expects(:parse).with(document.source).once
     document.parse
-    assert_predicate(document, :syntax_error?)
-    assert_empty(document.instance_variable_get(:@unparsed_edits))
+
+    # If there are no new edits, we don't do anything
+    YARP.expects(:parse).never
+    document.parse
+
+    document.push_edits(
+      [{ range: { start: { line: 0, character: 12 }, end: { line: 0, character: 12 } }, text: "\ndef bar; end" }],
+      version: 3,
+    )
+
+    # If there's another edit, we parse it once again
+    YARP.expects(:parse).with(document.source).once
+    document.parse
   end
 
   def test_cache_set_and_get

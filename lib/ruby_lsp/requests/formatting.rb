@@ -29,12 +29,7 @@ module RubyLsp
       class Error < StandardError; end
       class InvalidFormatter < StandardError; end
 
-      @formatters = T.let(
-        {
-          "syntax_tree" => Support::SyntaxTreeFormattingRunner.instance,
-        },
-        T::Hash[String, Support::FormatterRunner],
-      )
+      @formatters = T.let({}, T::Hash[String, Support::FormatterRunner])
 
       class << self
         extend T::Sig
@@ -50,6 +45,10 @@ module RubyLsp
 
       if defined?(Support::RuboCopFormattingRunner)
         register_formatter("rubocop", Support::RuboCopFormattingRunner.instance)
+      end
+
+      if defined?(Support::SyntaxTreeFormattingRunner)
+        register_formatter("syntax_tree", Support::SyntaxTreeFormattingRunner.instance)
       end
 
       extend T::Sig
