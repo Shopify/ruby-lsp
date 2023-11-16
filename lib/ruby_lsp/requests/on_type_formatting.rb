@@ -54,9 +54,7 @@ module RubyLsp
             handle_statement_end
           end
         when "d"
-          if @previous_line.strip == "end"
-            auto_indent_after_end_keyword
-          end
+          auto_indent_after_end_keyword
         end
 
         @edits
@@ -178,21 +176,23 @@ module RubyLsp
 
       sig { void }
       def auto_indent_after_end_keyword
-        start_line_index = (@position[:line] - 2).downto(0).find do |i|
-          END_REGEXES.any? { |regex| regex.match?(@lines[i]) }
-        end
+        current_line = @lines[@position[:line]]
+        return unless current_line&.strip == "end"
 
-        return unless start_line_index
+        target, _parent, _nesting = T.cast(
+          @document.locate_node(@position, node_types: [YARP::StatementsNode]),
+          [T.nilable(YARP::StatementsNode), T.nilable(YARP::Node), T::Array[String]],
+        )
+        return unless target
 
-        start_line_indentation = find_indentation(T.must(@lines[start_line_index]))
-
-        (start_line_index + 1...@position[:line] - 1).each do |i|
-          add_edit_with_text("  ", { line: i, character: 0 })
+        target.body.each do |node|
+          start_line = node.location.start_line
+          unless @lines[start_line]&.start_with?("  ")
+            add_edit_with_text("  ", { line: start_line, character: 0 })
+          end
         end
 
         move_cursor_to(@position[:line], @position[:character])
-
-        add_edit_with_text("\n" + (" " * (start_line_indentation + 2)), @position)
       end
     end
   end

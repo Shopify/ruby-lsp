@@ -619,7 +619,7 @@ module RubyLsp
       on_type_formatting_provider = if enabled_features["onTypeFormatting"]
         Interface::DocumentOnTypeFormattingOptions.new(
           first_trigger_character: "{",
-          more_trigger_character: ["\n", "|"],
+          more_trigger_character: ["\n", "|", "d"],
         )
       end
 

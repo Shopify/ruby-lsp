@@ -376,7 +376,7 @@ class OnTypeFormattingTest < Minitest::Test
     )
     document.parse
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 3, character: 0 }, "d").run
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 2, character: 0 }, "d").run
 
     expected_edits = [
       {
@@ -384,12 +384,8 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "  ",
       },
       {
-        range: { start: { line: 3, character: 0 }, end: { line: 3, character: 0 } },
+        range: { start: { line: 2, character: 0 }, end: { line: 2, character: 0 } },
         newText: "$0",
-      },
-      {
-        range: { start: { line: 3, character: 0 }, end: { line: 3, character: 0 } },
-        newText: "\n  ",
       },
     ]
 
