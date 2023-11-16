@@ -95,7 +95,7 @@ module RubyIndexer
     # ```
     sig { params(query: String, nesting: T::Array[String]).returns(T::Array[T::Array[Entry]]) }
     def prefix_search(query, nesting)
-      results = (nesting.length + 1).downto(0).flat_map do |i|
+      results = nesting.length.downto(0).flat_map do |i|
         prefix = T.must(nesting[0...i]).join("::")
         namespaced_query = prefix.empty? ? query : "#{prefix}::#{query}"
         @entries_tree.search(namespaced_query)
@@ -127,6 +127,12 @@ module RubyIndexer
     # 3. Baz
     sig { params(name: String, nesting: T::Array[String]).returns(T.nilable(T::Array[Entry])) }
     def resolve(name, nesting)
+      if name.start_with?("::")
+        name = name.delete_prefix("::")
+        results = @entries[name] || @entries[follow_aliased_namespace(name)]
+        return results&.map { |e| e.is_a?(Entry::UnresolvedAlias) ? resolve_alias(e) : e }
+      end
+
       nesting.length.downto(0).each do |i|
         namespace = T.must(nesting[0...i]).join("::")
         full_name = namespace.empty? ? name : "#{namespace}::#{name}"
@@ -147,24 +153,41 @@ module RubyIndexer
       nil
     end
 
-    sig { params(indexable_paths: T::Array[IndexablePath]).void }
-    def index_all(indexable_paths: RubyIndexer.configuration.indexables)
-      indexable_paths.each { |path| index_single(path) }
+    # Index all files for the given indexable paths, which defaults to what is configured. A block can be used to track
+    # and control indexing progress. That block is invoked with the current progress percentage and should return `true`
+    # to continue indexing or `false` to stop indexing.
+    sig do
+      params(
+        indexable_paths: T::Array[IndexablePath],
+        block: T.nilable(T.proc.params(progress: Integer).returns(T::Boolean)),
+      ).void
+    end
+    def index_all(indexable_paths: RubyIndexer.configuration.indexables, &block)
+      # Calculate how many paths are worth 1% of progress
+      progress_step = (indexable_paths.length / 100.0).ceil
+
+      indexable_paths.each_with_index do |path, index|
+        if block && index % progress_step == 0
+          progress = (index / progress_step) + 1
+          break unless block.call(progress)
+        end
+
+        index_single(path)
+      end
     end
 
     sig { params(indexable_path: IndexablePath, source: T.nilable(String)).void }
     def index_single(indexable_path, source = nil)
       content = source || File.read(indexable_path.full_path)
-      visitor = IndexVisitor.new(self, YARP.parse(content), indexable_path.full_path)
-      visitor.run
+      result = Prism.parse(content)
+      collector = Collector.new(self, result, indexable_path.full_path)
+      collector.collect(result.value)
 
       require_path = indexable_path.require_path
       @require_paths_tree.insert(require_path, indexable_path) if require_path
     rescue Errno::EISDIR
       # If `path` is a directory, just ignore it and continue indexing
     end
-
-    private
 
     # Follows aliases in a namespace. The algorithm keeps checking if the name is an alias and then recursively follows
     # it. The idea is that we test the name in parts starting from the complete name to the first namespace. For
@@ -178,6 +201,8 @@ module RubyIndexer
     # aliases, so we have to invoke `follow_aliased_namespace` again to check until we only return a real name
     sig { params(name: String).returns(String) }
     def follow_aliased_namespace(name)
+      return name if @entries[name]
+
       parts = name.split("::")
       real_parts = []
 
@@ -206,6 +231,8 @@ module RubyIndexer
       real_parts.join("::")
     end
 
+    private
+
     # Attempts to resolve an UnresolvedAlias into a resolved Alias. If the unresolved alias is pointing to a constant
     # that doesn't exist, then we return the same UnresolvedAlias
     sig { params(entry: Entry::UnresolvedAlias).returns(T.any(Entry::Alias, Entry::UnresolvedAlias)) }
@@ -224,107 +251,6 @@ module RubyIndexer
       @entries_tree.insert(entry.name, original_entries)
 
       resolved_alias
-    end
-
-    class Entry
-      extend T::Sig
-
-      sig { returns(String) }
-      attr_reader :name
-
-      sig { returns(String) }
-      attr_reader :file_path
-
-      sig { returns(YARP::Location) }
-      attr_reader :location
-
-      sig { returns(T::Array[String]) }
-      attr_reader :comments
-
-      sig { returns(Symbol) }
-      attr_accessor :visibility
-
-      sig { params(name: String, file_path: String, location: YARP::Location, comments: T::Array[String]).void }
-      def initialize(name, file_path, location, comments)
-        @name = name
-        @file_path = file_path
-        @location = location
-        @comments = comments
-        @visibility = T.let(:public, Symbol)
-      end
-
-      sig { returns(String) }
-      def file_name
-        File.basename(@file_path)
-      end
-
-      class Namespace < Entry
-        sig { returns(String) }
-        def short_name
-          T.must(@name.split("::").last)
-        end
-      end
-
-      class Module < Namespace
-      end
-
-      class Class < Namespace
-      end
-
-      class Constant < Entry
-      end
-
-      # An UnresolvedAlias points to a constant alias with a right hand side that has not yet been resolved. For
-      # example, if we find
-      #
-      # ```ruby
-      #   CONST = Foo
-      # ```
-      # Before we have discovered `Foo`, there's no way to eagerly resolve this alias to the correct target constant.
-      # All aliases are inserted as UnresolvedAlias in the index first and then we lazily resolve them to the correct
-      # target in [rdoc-ref:Index#resolve]. If the right hand side contains a constant that doesn't exist, then it's not
-      # possible to resolve the alias and it will remain an UnresolvedAlias until the right hand side constant exists
-      class UnresolvedAlias < Entry
-        extend T::Sig
-
-        sig { returns(String) }
-        attr_reader :target
-
-        sig { returns(T::Array[String]) }
-        attr_reader :nesting
-
-        sig do
-          params(
-            target: String,
-            nesting: T::Array[String],
-            name: String,
-            file_path: String,
-            location: YARP::Location,
-            comments: T::Array[String],
-          ).void
-        end
-        def initialize(target, nesting, name, file_path, location, comments) # rubocop:disable Metrics/ParameterLists
-          super(name, file_path, location, comments)
-
-          @target = target
-          @nesting = nesting
-        end
-      end
-
-      # Alias represents a resolved alias, which points to an existing constant target
-      class Alias < Entry
-        extend T::Sig
-
-        sig { returns(String) }
-        attr_reader :target
-
-        sig { params(target: String, unresolved_alias: UnresolvedAlias).void }
-        def initialize(target, unresolved_alias)
-          super(unresolved_alias.name, unresolved_alias.file_path, unresolved_alias.location, unresolved_alias.comments)
-
-          @target = target
-        end
-      end
     end
   end
 end

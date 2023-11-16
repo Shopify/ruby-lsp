@@ -39,7 +39,7 @@ module RubyLsp
           # If the project is using Sorbet, we let Sorbet handle symbols defined inside the project itself and RBIs, but
           # we still return entries defined in gems to allow developers to jump directly to the source
           file_path = entry.file_path
-          if DependencyDetector::HAS_TYPECHECKER && bundle_path && !file_path.start_with?(bundle_path) &&
+          if DependencyDetector.instance.typechecker && bundle_path && !file_path.start_with?(bundle_path) &&
               !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
 
             next
@@ -73,14 +73,14 @@ module RubyLsp
 
       private
 
-      sig { params(entry: RubyIndexer::Index::Entry).returns(T.nilable(Integer)) }
+      sig { params(entry: RubyIndexer::Entry).returns(T.nilable(Integer)) }
       def kind_for_entry(entry)
         case entry
-        when RubyIndexer::Index::Entry::Class
+        when RubyIndexer::Entry::Class
           Constant::SymbolKind::CLASS
-        when RubyIndexer::Index::Entry::Module
+        when RubyIndexer::Entry::Module
           Constant::SymbolKind::NAMESPACE
-        when RubyIndexer::Index::Entry::Constant
+        when RubyIndexer::Entry::Constant
           Constant::SymbolKind::CONSTANT
         end
       end

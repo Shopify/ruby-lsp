@@ -24,38 +24,53 @@ module RubyLsp
 
       ResponseType = type_member { { fixed: T::Array[Interface::CodeLens] } }
 
-      BASE_COMMAND = T.let((File.exist?("Gemfile.lock") ? "bundle exec ruby" : "ruby") + " -Itest ", String)
-      ACCESS_MODIFIERS = T.let(["public", "private", "protected"], T::Array[String])
+      BASE_COMMAND = T.let(
+        begin
+          Bundler.with_original_env { Bundler.default_lockfile }
+          "bundle exec ruby"
+        rescue Bundler::GemfileNotFound
+          "ruby"
+        end + " -Itest ",
+        String,
+      )
+      GEMFILE_NAME = T.let(
+        begin
+          Bundler.with_original_env { Bundler.default_gemfile.basename.to_s }
+        rescue Bundler::GemfileNotFound
+          "Gemfile"
+        end,
+        String,
+      )
+      ACCESS_MODIFIERS = T.let([:public, :private, :protected], T::Array[Symbol])
       SUPPORTED_TEST_LIBRARIES = T.let(["minitest", "test-unit"], T::Array[String])
 
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      sig { params(uri: URI::Generic, test_library: String, emitter: EventEmitter, message_queue: Thread::Queue).void }
-      def initialize(uri, test_library, emitter, message_queue)
+      sig { params(uri: URI::Generic, dispatcher: Prism::Dispatcher, message_queue: Thread::Queue).void }
+      def initialize(uri, dispatcher, message_queue)
         @uri = T.let(uri, URI::Generic)
-        @test_library = T.let(test_library, String)
         @_response = T.let([], ResponseType)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
         # visibility_stack is a stack of [current_visibility, previous_visibility]
-        @visibility_stack = T.let([["public", "public"]], T::Array[T::Array[T.nilable(String)]])
+        @visibility_stack = T.let([[:public, :public]], T::Array[T::Array[T.nilable(Symbol)]])
         @class_stack = T.let([], T::Array[String])
 
-        super(emitter, message_queue)
+        super(dispatcher, message_queue)
 
-        emitter.register(
+        dispatcher.register(
           self,
-          :on_class,
-          :after_class,
-          :on_def,
-          :on_call,
-          :after_call,
+          :on_class_node_enter,
+          :on_class_node_leave,
+          :on_def_node_enter,
+          :on_call_node_enter,
+          :on_call_node_leave,
         )
       end
 
-      sig { params(node: YARP::ClassNode).void }
-      def on_class(node)
-        @visibility_stack.push(["public", "public"])
+      sig { params(node: Prism::ClassNode).void }
+      def on_class_node_enter(node)
+        @visibility_stack.push([:public, :public])
         class_name = node.constant_path.slice
         @class_stack.push(class_name)
 
@@ -69,19 +84,19 @@ module RubyLsp
         end
       end
 
-      sig { params(node: YARP::ClassNode).void }
-      def after_class(node)
+      sig { params(node: Prism::ClassNode).void }
+      def on_class_node_leave(node)
         @visibility_stack.pop
         @class_stack.pop
       end
 
-      sig { params(node: YARP::DefNode).void }
-      def on_def(node)
+      sig { params(node: Prism::DefNode).void }
+      def on_def_node_enter(node)
         class_name = @class_stack.last
         return unless class_name&.end_with?("Test")
 
         visibility, _ = @visibility_stack.last
-        if visibility == "public"
+        if visibility == :public
           method_name = node.name.to_s
           if @path && method_name.start_with?("test_")
             add_test_code_lens(
@@ -94,8 +109,8 @@ module RubyLsp
         end
       end
 
-      sig { params(node: YARP::CallNode).void }
-      def on_call(node)
+      sig { params(node: Prism::CallNode).void }
+      def on_call_node_enter(node)
         name = node.name
         arguments = node.arguments
 
@@ -104,7 +119,7 @@ module RubyLsp
           if arguments.nil?
             @visibility_stack.pop
             @visibility_stack.push([name, name])
-          elsif arguments.arguments.first.is_a?(YARP::DefNode)
+          elsif arguments.arguments.first.is_a?(Prism::DefNode)
             visibility, _ = @visibility_stack.pop
             @visibility_stack.push([name, visibility])
           end
@@ -112,9 +127,9 @@ module RubyLsp
           return
         end
 
-        if @path&.include?("Gemfile") && name == "gem" && arguments
+        if @path&.include?(GEMFILE_NAME) && name == :gem && arguments
           first_argument = arguments.arguments.first
-          return unless first_argument.is_a?(YARP::StringNode)
+          return unless first_argument.is_a?(Prism::StringNode)
 
           remote = resolve_gem_remote(first_argument)
           return unless remote
@@ -123,15 +138,15 @@ module RubyLsp
         end
       end
 
-      sig { params(node: YARP::CallNode).void }
-      def after_call(node)
+      sig { params(node: Prism::CallNode).void }
+      def on_call_node_leave(node)
         _, prev_visibility = @visibility_stack.pop
         @visibility_stack.push([prev_visibility, prev_visibility])
       end
 
       sig { override.params(addon: Addon).returns(T.nilable(Listener[ResponseType])) }
       def initialize_external_listener(addon)
-        addon.create_code_lens_listener(@uri, @emitter, @message_queue)
+        addon.create_code_lens_listener(@uri, @dispatcher, @message_queue)
       end
 
       sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
@@ -142,10 +157,10 @@ module RubyLsp
 
       private
 
-      sig { params(node: YARP::Node, name: String, command: String, kind: Symbol).void }
+      sig { params(node: Prism::Node, name: String, command: String, kind: Symbol).void }
       def add_test_code_lens(node, name:, command:, kind:)
         # don't add code lenses if the test library is not supported or unknown
-        return unless SUPPORTED_TEST_LIBRARIES.include?(@test_library) && @path
+        return unless SUPPORTED_TEST_LIBRARIES.include?(DependencyDetector.instance.detected_test_library) && @path
 
         arguments = [
           @path,
@@ -184,7 +199,7 @@ module RubyLsp
         )
       end
 
-      sig { params(gem_name: YARP::StringNode).returns(T.nilable(String)) }
+      sig { params(gem_name: Prism::StringNode).returns(T.nilable(String)) }
       def resolve_gem_remote(gem_name)
         spec = Gem::Specification.stubs.find { |gem| gem.name == gem_name.content }&.to_spec
         return if spec.nil?
@@ -198,7 +213,7 @@ module RubyLsp
       def generate_test_command(class_name:, method_name: nil)
         command = BASE_COMMAND + T.must(@path)
 
-        case @test_library
+        case DependencyDetector.instance.detected_test_library
         when "minitest"
           command += if method_name
             " --name " + "/#{Shellwords.escape(class_name + "#" + method_name)}/"
@@ -216,7 +231,7 @@ module RubyLsp
         command
       end
 
-      sig { params(node: YARP::CallNode, remote: String).void }
+      sig { params(node: Prism::CallNode, remote: String).void }
       def add_open_gem_remote_code_lens(node, remote)
         @_response << create_code_lens(
           node,

@@ -31,24 +31,29 @@ module RubyLsp
           uri: URI::Generic,
           nesting: T::Array[String],
           index: RubyIndexer::Index,
-          emitter: EventEmitter,
+          dispatcher: Prism::Dispatcher,
           message_queue: Thread::Queue,
         ).void
       end
-      def initialize(uri, nesting, index, emitter, message_queue)
+      def initialize(uri, nesting, index, dispatcher, message_queue)
         @uri = uri
         @nesting = nesting
         @index = index
         @_response = T.let(nil, ResponseType)
 
-        super(emitter, message_queue)
+        super(dispatcher, message_queue)
 
-        emitter.register(self, :on_call, :on_constant_read, :on_constant_path)
+        dispatcher.register(
+          self,
+          :on_call_node_enter,
+          :on_constant_read_node_enter,
+          :on_constant_path_node_enter,
+        )
       end
 
       sig { override.params(addon: Addon).returns(T.nilable(RubyLsp::Listener[ResponseType])) }
       def initialize_external_listener(addon)
-        addon.create_definition_listener(@uri, @nesting, @index, @emitter, @message_queue)
+        addon.create_definition_listener(@uri, @nesting, @index, @dispatcher, @message_queue)
       end
 
       sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
@@ -67,19 +72,19 @@ module RubyLsp
         self
       end
 
-      sig { params(node: YARP::CallNode).void }
-      def on_call(node)
+      sig { params(node: Prism::CallNode).void }
+      def on_call_node_enter(node)
         message = node.name
-        return unless message == "require" || message == "require_relative"
+        return unless message == :require || message == :require_relative
 
         arguments = node.arguments
         return unless arguments
 
         argument = arguments.arguments.first
-        return unless argument.is_a?(YARP::StringNode)
+        return unless argument.is_a?(Prism::StringNode)
 
         case message
-        when "require"
+        when :require
           entry = @index.search_require_paths(argument.content).find do |indexable_path|
             indexable_path.require_path == argument.content
           end
@@ -95,7 +100,7 @@ module RubyLsp
               ),
             )
           end
-        when "require_relative"
+        when :require_relative
           required_file = "#{argument.content}.rb"
           path = @uri.to_standardized_path
           current_folder = path ? Pathname.new(CGI.unescape(path)).dirname : Dir.pwd
@@ -111,13 +116,13 @@ module RubyLsp
         end
       end
 
-      sig { params(node: YARP::ConstantPathNode).void }
-      def on_constant_path(node)
+      sig { params(node: Prism::ConstantPathNode).void }
+      def on_constant_path_node_enter(node)
         find_in_index(node.slice)
       end
 
-      sig { params(node: YARP::ConstantReadNode).void }
-      def on_constant_read(node)
+      sig { params(node: Prism::ConstantReadNode).void }
+      def on_constant_read_node_enter(node)
         find_in_index(node.slice)
       end
 
@@ -145,7 +150,7 @@ module RubyLsp
           # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
           # in the project, even if the files are typed false
           file_path = entry.file_path
-          if DependencyDetector::HAS_TYPECHECKER && bundle_path && !file_path.start_with?(bundle_path) &&
+          if DependencyDetector.instance.typechecker && bundle_path && !file_path.start_with?(bundle_path) &&
               !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
 
             next

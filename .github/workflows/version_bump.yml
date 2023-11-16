@@ -1,4 +1,4 @@
-name: Release
+name: Version bump
 
 on:
   push:
@@ -23,8 +23,12 @@ jobs:
       - name: Bump patch version
         id: version
         run: |
-          version=$(awk -F. '{$NF+=1}1' OFS=. VERSION)
-          echo "$version" > VERSION
+          version=$(ruby -e 'major, minor, patch = File.read("VERSION").split(".").map(&:to_i)
+                    new_version = "#{major}.#{minor}.#{patch + 1}"
+                    File.write("VERSION", "#{new_version}\n")
+                    print(new_version)')
+
+          bundle config unset deployment
           bundle install
           echo "VERSION=$version" >> "$GITHUB_OUTPUT"
 
@@ -45,8 +49,8 @@ jobs:
             const response = await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              head: automated-bump-version-${{ steps.version.outputs.VERSION }},
-              base: main,
+              head: "automated-bump-version-${{ steps.version.outputs.VERSION }}",
+              base: "main",
               title: "Bump version to v${{ steps.version.outputs.VERSION }}"
             });
 

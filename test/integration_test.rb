@@ -100,7 +100,10 @@ class IntegrationTest < Minitest::Test
     open_file_with("require 'ruby_lsp/utils'")
 
     # Populate the index
-    make_request("initialized")
+    send_request("initialized")
+
+    # There's no easy way to know when indexing finished. Here we just sleep until it's done
+    sleep(5)
 
     response = make_request(
       "textDocument/definition",
@@ -302,8 +305,8 @@ class IntegrationTest < Minitest::Test
     )
 
     assert_equal(
-      { range: { start: { line: 0, character: 0 }, end: { line: 1, character: 3 } } },
-      response[:result].first,
+      { start: { line: 0, character: 0 }, end: { line: 1, character: 3 } },
+      response[:result].first[:range],
     )
   end
 
@@ -338,8 +341,10 @@ class IntegrationTest < Minitest::Test
     open_file_with("class Foo\nend")
 
     # Populate the index
-    make_request("initialized")
+    send_request("initialized")
 
+    # There's no easy way to know when indexing finished. Here we just sleep until it's done
+    sleep(5)
     response = make_request("workspace/symbol", {})
     refute_empty(response[:result])
   end
@@ -386,6 +391,9 @@ class IntegrationTest < Minitest::Test
           experimentalFeaturesEnabled: experimental_features_enabled,
           formatter: "rubocop",
         },
+        capabilities: {
+          window: { workDoneProgress: false },
+        },
       },
     )[:result]
 
@@ -401,8 +409,6 @@ class IntegrationTest < Minitest::Test
 
     enabled_providers = enabled_features.map { |feature| FEATURE_TO_PROVIDER[feature] }
     assert_equal([:positionEncoding, :textDocumentSync, *enabled_providers], response[:capabilities].keys)
-    read_response("window/workDoneProgress/create")
-    read_response("$/progress")
   end
 
   def open_file_with(content)

@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+$LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+require "ruby_lsp/internal"
+
+index = RubyIndexer::Index.new
+
+RubyIndexer.configuration.indexables.each do |indexable|
+  puts "indexing: #{indexable.full_path}"
+  content = File.read(indexable.full_path)
+  result = Prism.parse(content)
+  collector = RubyIndexer::Collector.new(index, result, indexable.full_path)
+  collector.collect(result.value)
+end

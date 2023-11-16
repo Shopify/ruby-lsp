@@ -67,8 +67,17 @@ module RubyIndexer
 
       # Add user specified patterns
       indexables = @included_patterns.flat_map do |pattern|
+        load_path_entry = T.let(nil, T.nilable(String))
+
         Dir.glob(pattern, File::FNM_PATHNAME | File::FNM_EXTGLOB).map! do |path|
-          load_path_entry = $LOAD_PATH.find { |load_path| path.start_with?(load_path) }
+          # All entries for the same pattern match the same $LOAD_PATH entry. Since searching the $LOAD_PATH for every
+          # entry is expensive, we memoize it until we find a path that doesn't belong to that $LOAD_PATH. This happens
+          # on repositories that define multiple gems, like Rails. All frameworks are defined inside the Dir.pwd, but
+          # each one of them belongs to a different $LOAD_PATH entry
+          if load_path_entry.nil? || !path.start_with?(load_path_entry)
+            load_path_entry = $LOAD_PATH.find { |load_path| path.start_with?(load_path) }
+          end
+
           IndexablePath.new(load_path_entry, path)
         end
       end
@@ -98,6 +107,10 @@ module RubyIndexer
         next if locked_gems&.any? do |locked_spec|
           locked_spec.name == short_name &&
             !Gem::Specification.find_by_name(short_name).full_gem_path.start_with?(RbConfig::CONFIG["rubylibprefix"])
+        rescue Gem::MissingSpecError
+          # If a default gem is scoped to a specific platform, then `find_by_name` will raise. We want to skip those
+          # cases
+          true
         end
 
         if pathname.directory?
@@ -136,13 +149,13 @@ module RubyIndexer
         # just ignore if they're missing
       end
 
-      indexables.uniq!
+      indexables.uniq!(&:full_path)
       indexables
     end
 
     sig { returns(Regexp) }
     def magic_comment_regex
-      @magic_comment_regex ||= T.let(/^\s*#\s*#{@excluded_magic_comments.join("|")}/, T.nilable(Regexp))
+      @magic_comment_regex ||= T.let(/^#\s*#{@excluded_magic_comments.join("|")}/, T.nilable(Regexp))
     end
 
     private
@@ -179,13 +192,22 @@ module RubyIndexer
 
       # When working on a gem, we need to make sure that its gemspec dependencies can't be excluded. This is necessary
       # because Bundler doesn't assign groups to gemspec dependencies
-      this_gem = Bundler.definition.dependencies.find { |d| d.to_spec.full_gem_path == Dir.pwd }
+      this_gem = Bundler.definition.dependencies.find do |d|
+        d.to_spec.full_gem_path == Dir.pwd
+      rescue Gem::MissingSpecError
+        false
+      end
+
       others.concat(this_gem.to_spec.dependencies) if this_gem
 
       excluded.each do |dependency|
         next unless dependency.runtime?
 
-        dependency.to_spec.dependencies.each do |transitive_dependency|
+        # If the dependency is prerelease, to_spec may return `nil`
+        spec = dependency.to_spec
+        next unless spec
+
+        spec.dependencies.each do |transitive_dependency|
           # If the transitive dependency is included in other groups, skip it
           next if others.any? { |d| d.name == transitive_dependency.name }
 

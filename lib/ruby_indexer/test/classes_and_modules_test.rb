@@ -11,7 +11,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("Foo", Index::Entry::Class, "/fake/path/foo.rb:0-0:1-3")
+      assert_entry("Foo", Entry::Class, "/fake/path/foo.rb:0-0:1-3")
     end
 
     def test_class_with_statements
@@ -21,7 +21,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("Foo", Index::Entry::Class, "/fake/path/foo.rb:0-0:2-3")
+      assert_entry("Foo", Entry::Class, "/fake/path/foo.rb:0-0:2-3")
     end
 
     def test_colon_colon_class
@@ -30,7 +30,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("Foo", Index::Entry::Class, "/fake/path/foo.rb:0-0:1-3")
+      assert_entry("Foo", Entry::Class, "/fake/path/foo.rb:0-0:1-3")
     end
 
     def test_colon_colon_class_inside_class
@@ -41,8 +41,8 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("Bar", Index::Entry::Class, "/fake/path/foo.rb:0-0:3-3")
-      assert_entry("Foo", Index::Entry::Class, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("Bar", Entry::Class, "/fake/path/foo.rb:0-0:3-3")
+      assert_entry("Foo", Entry::Class, "/fake/path/foo.rb:1-2:2-5")
     end
 
     def test_namespaced_class
@@ -51,7 +51,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("Foo::Bar", Index::Entry::Class, "/fake/path/foo.rb:0-0:1-3")
+      assert_entry("Foo::Bar", Entry::Class, "/fake/path/foo.rb:0-0:1-3")
     end
 
     def test_dynamically_namespaced_class
@@ -69,7 +69,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("Foo", Index::Entry::Module, "/fake/path/foo.rb:0-0:1-3")
+      assert_entry("Foo", Entry::Module, "/fake/path/foo.rb:0-0:1-3")
     end
 
     def test_module_with_statements
@@ -79,7 +79,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("Foo", Index::Entry::Module, "/fake/path/foo.rb:0-0:2-3")
+      assert_entry("Foo", Entry::Module, "/fake/path/foo.rb:0-0:2-3")
     end
 
     def test_colon_colon_module
@@ -88,7 +88,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("Foo", Index::Entry::Module, "/fake/path/foo.rb:0-0:1-3")
+      assert_entry("Foo", Entry::Module, "/fake/path/foo.rb:0-0:1-3")
     end
 
     def test_namespaced_module
@@ -97,7 +97,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("Foo::Bar", Index::Entry::Module, "/fake/path/foo.rb:0-0:1-3")
+      assert_entry("Foo::Bar", Entry::Module, "/fake/path/foo.rb:0-0:1-3")
     end
 
     def test_dynamically_namespaced_module
@@ -124,11 +124,11 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("Foo", Index::Entry::Module, "/fake/path/foo.rb:0-0:10-3")
-      assert_entry("Foo::Bar", Index::Entry::Class, "/fake/path/foo.rb:1-2:2-5")
-      assert_entry("Foo::Baz", Index::Entry::Module, "/fake/path/foo.rb:4-2:9-5")
-      assert_entry("Foo::Baz::Qux", Index::Entry::Class, "/fake/path/foo.rb:5-4:8-7")
-      assert_entry("Foo::Baz::Qux::Something", Index::Entry::Class, "/fake/path/foo.rb:6-6:7-9")
+      assert_entry("Foo", Entry::Module, "/fake/path/foo.rb:0-0:10-3")
+      assert_entry("Foo::Bar", Entry::Class, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("Foo::Baz", Entry::Module, "/fake/path/foo.rb:4-2:9-5")
+      assert_entry("Foo::Baz::Qux", Entry::Class, "/fake/path/foo.rb:5-4:8-7")
+      assert_entry("Foo::Baz::Qux::Something", Entry::Class, "/fake/path/foo.rb:6-6:7-9")
     end
 
     def test_deleting_from_index_based_on_file_path
@@ -137,7 +137,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("Foo", Index::Entry::Class, "/fake/path/foo.rb:0-0:1-3")
+      assert_entry("Foo", Entry::Class, "/fake/path/foo.rb:0-0:1-3")
 
       @index.delete(IndexablePath.new(nil, "/fake/path/foo.rb"))
       refute_entry("Foo")
@@ -238,6 +238,39 @@ module RubyIndexer
 
       d_const = @index["A::D"].first
       assert_equal(:public, d_const.visibility)
+    end
+
+    def test_keeping_track_of_super_classes
+      index(<<~RUBY)
+        class Foo < Bar
+        end
+
+        class Baz
+        end
+
+        module Something
+          class Baz
+          end
+
+          class Qux < ::Baz
+          end
+        end
+
+        class FinalThing < Something::Baz
+        end
+      RUBY
+
+      foo = T.must(@index["Foo"].first)
+      assert_equal("Bar", foo.parent_class)
+
+      baz = T.must(@index["Baz"].first)
+      assert_nil(baz.parent_class)
+
+      qux = T.must(@index["Something::Qux"].first)
+      assert_equal("::Baz", qux.parent_class)
+
+      final_thing = T.must(@index["FinalThing"].first)
+      assert_equal("Something::Baz", final_thing.parent_class)
     end
   end
 end

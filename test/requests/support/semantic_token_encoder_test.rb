@@ -96,7 +96,7 @@ class SemanticTokenEncoderTest < Minitest::Test
   private
 
   def stub_token(start_line, start_column, length, type, modifier)
-    location = YARP::Location.new("", 123, 123)
+    location = Prism::Location.new(Prism::Source.new(""), 123, 123)
     location.expects(:start_line).returns(start_line).at_least_once
     location.expects(:start_column).returns(start_column).at_least_once
 

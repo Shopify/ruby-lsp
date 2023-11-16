@@ -110,6 +110,10 @@ class ExecutorTest < Minitest::Test
 
   def test_initialized_populates_index
     @executor.execute({ method: "initialized", params: {} })
+
+    assert_equal("$/progress", @message_queue.pop.message)
+    assert_equal("$/progress", @message_queue.pop.message)
+
     index = @executor.instance_variable_get(:@index)
     refute_empty(index.instance_variable_get(:@entries))
   end
@@ -206,7 +210,6 @@ class ExecutorTest < Minitest::Test
       # Account for starting and ending the progress notifications during initialized
       assert_equal("window/workDoneProgress/create", @message_queue.pop.message)
       assert_equal("$/progress", @message_queue.pop.message)
-      assert_equal("$/progress", @message_queue.pop.message)
 
       notification = T.must(@message_queue.pop)
       assert_equal("window/showMessage", notification.message)
@@ -247,6 +250,7 @@ class ExecutorTest < Minitest::Test
   end
 
   def stub_dependencies(rubocop:, syntax_tree:)
+    Singleton.__init__(RubyLsp::DependencyDetector)
     dependencies = {}
     dependencies["syntax_tree"] = "..." if syntax_tree
     dependencies["rubocop"] = "..." if rubocop

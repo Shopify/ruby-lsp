@@ -12,9 +12,9 @@ class FoldingRangesExpectationsTest < ExpectationsTestRunner
     uri = URI("file://#{@_path}")
     document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
 
-    emitter = RubyLsp::EventEmitter.new
-    listener = RubyLsp::Requests::FoldingRanges.new(document.parse_result.comments, emitter, message_queue)
-    emitter.visit(document.tree)
+    dispatcher = Prism::Dispatcher.new
+    listener = RubyLsp::Requests::FoldingRanges.new(document.parse_result.comments, dispatcher, message_queue)
+    dispatcher.dispatch(document.tree)
     listener.response
   ensure
     T.must(message_queue).close

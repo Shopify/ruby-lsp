@@ -1,55 +1,88 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "singleton"
+
 module RubyLsp
-  module DependencyDetector
-    class << self
-      extend T::Sig
+  class DependencyDetector
+    include Singleton
+    extend T::Sig
 
-      sig { returns(String) }
-      def detected_formatter
-        # NOTE: Intentionally no $ at end, since we want to match rubocop-shopify, etc.
-        if direct_dependency?(/^rubocop/)
-          "rubocop"
-        elsif direct_dependency?(/^syntax_tree$/)
-          "syntax_tree"
-        else
-          "none"
-        end
-      end
+    sig { returns(String) }
+    attr_reader :detected_formatter
 
-      sig { returns(String) }
-      def detected_test_library
-        # A Rails app may have a dependency on minitest, but we would instead want to use the Rails test runner provided
-        # by ruby-lsp-rails.
-        if direct_dependency?(/^rails$/)
-          "rails"
-        # NOTE: Intentionally ends with $ to avoid mis-matching minitest-reporters, etc. in a Rails app.
-        elsif direct_dependency?(/^minitest$/)
-          "minitest"
-        elsif direct_dependency?(/^test-unit/)
-          "test-unit"
-        elsif direct_dependency?(/^rspec/)
-          "rspec"
-        else
-          "unknown"
-        end
-      end
+    sig { returns(String) }
+    attr_reader :detected_test_library
 
-      sig { returns(T::Boolean) }
-      def typechecker?
-        direct_dependency?(/^sorbet/) || direct_dependency?(/^sorbet-static-and-runtime/)
-      end
+    sig { returns(T::Boolean) }
+    attr_reader :typechecker
 
-      sig { params(gem_pattern: Regexp).returns(T::Boolean) }
-      def direct_dependency?(gem_pattern)
-        Bundler.with_original_env { Bundler.default_gemfile } &&
-          Bundler.locked_gems.dependencies.keys.grep(gem_pattern).any?
-      rescue Bundler::GemfileNotFound
-        false
+    sig { void }
+    def initialize
+      @detected_formatter = T.let(detect_formatter, String)
+      @detected_test_library = T.let(detect_test_library, String)
+      @typechecker = T.let(detect_typechecker, T::Boolean)
+    end
+
+    sig { returns(String) }
+    def detect_formatter
+      # NOTE: Intentionally no $ at end, since we want to match rubocop-shopify, etc.
+      if direct_dependency?(/^rubocop/)
+        "rubocop"
+      elsif direct_dependency?(/^syntax_tree$/)
+        "syntax_tree"
+      else
+        "none"
       end
     end
 
-    HAS_TYPECHECKER = T.let(typechecker?, T::Boolean)
+    sig { returns(String) }
+    def detect_test_library
+      # A Rails app may have a dependency on minitest, but we would instead want to use the Rails test runner provided
+      # by ruby-lsp-rails.
+      if direct_dependency?(/^rails$/)
+        "rails"
+      # NOTE: Intentionally ends with $ to avoid mis-matching minitest-reporters, etc. in a Rails app.
+      elsif direct_dependency?(/^minitest$/)
+        "minitest"
+      elsif direct_dependency?(/^test-unit/)
+        "test-unit"
+      elsif direct_dependency?(/^rspec/)
+        "rspec"
+      else
+        "unknown"
+      end
+    end
+
+    sig { params(gem_pattern: Regexp).returns(T::Boolean) }
+    def direct_dependency?(gem_pattern)
+      dependencies.any?(gem_pattern)
+    end
+
+    sig { returns(T::Boolean) }
+    def detect_typechecker
+      direct_dependency?(/^sorbet/) || direct_dependency?(/^sorbet-static-and-runtime/)
+    end
+
+    sig { returns(T::Array[String]) }
+    def dependencies
+      # NOTE: If changing this behaviour, it's likely that the VS Code extension will also need changed.
+      @dependencies ||= T.let(
+        begin
+          Bundler.with_original_env { Bundler.default_gemfile }
+          Bundler.locked_gems.dependencies.keys + gemspec_dependencies
+        rescue Bundler::GemfileNotFound
+          []
+        end,
+        T.nilable(T::Array[String]),
+      )
+    end
+
+    sig { returns(T::Array[String]) }
+    def gemspec_dependencies
+      Bundler.locked_gems.sources
+        .grep(Bundler::Source::Gemspec)
+        .flat_map { _1.gemspec&.dependencies&.map(&:name) }
+    end
   end
 end

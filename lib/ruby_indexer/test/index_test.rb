@@ -158,5 +158,63 @@ module RubyIndexer
       results = @index.prefix_search("Ba", ["Foo"]).map { |entries| entries.map(&:name) }
       assert_equal([["Foo::Bar", "Foo::Bar"], ["Foo::Baz"]], results)
     end
+
+    def test_resolve_normalizes_top_level_names
+      @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
+        class Bar; end
+
+        module Foo
+          class Bar; end
+        end
+      RUBY
+
+      entries = @index.resolve("::Foo::Bar", [])
+      refute_nil(entries)
+
+      assert_equal("Foo::Bar", entries.first.name)
+
+      entries = @index.resolve("::Bar", ["Foo"])
+      refute_nil(entries)
+
+      assert_equal("Bar", entries.first.name)
+    end
+
+    def test_resolving_aliases_to_non_existing_constants_with_conflicting_names
+      @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
+        module Foo
+          class Float < self
+            INFINITY = ::Float::INFINITY
+          end
+        end
+      RUBY
+
+      entry = @index.resolve("INFINITY", ["Foo", "Float"]).first
+      refute_nil(entry)
+
+      assert_instance_of(Entry::UnresolvedAlias, entry)
+    end
+
+    def test_visitor_does_not_visit_unnecessary_nodes
+      concats = (0...10_000).map do |i|
+        <<~STRING
+          "string#{i}" \\
+        STRING
+      end.join
+
+      index(<<~RUBY)
+        module Foo
+          local_var = #{concats}
+            "final"
+          @class_instance_var = #{concats}
+            "final"
+          @@class_var = #{concats}
+            "final"
+          $global_var = #{concats}
+            "final"
+          CONST = #{concats}
+            "final"
+        end
+      RUBY
+    end
   end
 end

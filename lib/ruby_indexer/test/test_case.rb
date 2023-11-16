@@ -35,8 +35,12 @@ module RubyIndexer
       assert_nil(entries, "Expected #{expected_name} to not be indexed")
     end
 
-    def assert_no_entry
+    def assert_no_entries
       assert_empty(@index.instance_variable_get(:@entries), "Expected nothing to be indexed")
+    end
+
+    def assert_no_entry(entry)
+      refute(@index.instance_variable_get(:@entries).key?(entry), "Expected '#{entry}' to not be indexed")
     end
   end
 end

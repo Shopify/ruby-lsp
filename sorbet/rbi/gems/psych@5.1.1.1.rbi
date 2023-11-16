@@ -239,8 +239,14 @@ module Psych
     # source://psych//lib/psych.rb#692
     def add_tag(tag, klass); end
 
-    # source://psych//lib/psych.rb#726
+    # source://psych//lib/psych.rb#708
     def config; end
+
+    # source://psych//lib/psych.rb#720
+    def domain_types; end
+
+    # source://psych//lib/psych.rb#732
+    def domain_types=(value); end
 
     # call-seq:
     #   Psych.dump(o)               -> string of yaml
@@ -295,6 +301,12 @@ module Psych
     #
     # source://psych//lib/psych.rb#595
     def dump_stream(*objects); end
+
+    # source://psych//lib/psych.rb#716
+    def dump_tags; end
+
+    # source://psych//lib/psych.rb#728
+    def dump_tags=(value); end
 
     # Load +yaml+ in to a Ruby data structure.  If multiple documents are
     # provided, the object contained in the first document will be returned.
@@ -352,6 +364,12 @@ module Psych
     #
     # source://psych//lib/psych.rb#626
     def load_stream(yaml, filename: T.unsafe(nil), fallback: T.unsafe(nil), **kwargs); end
+
+    # source://psych//lib/psych.rb#712
+    def load_tags; end
+
+    # source://psych//lib/psych.rb#724
+    def load_tags=(value); end
 
     # Parse a YAML string in +yaml+.  Returns the Psych::Nodes::Document.
     # +filename+ is used in the exception message if a Psych::SyntaxError is
@@ -592,16 +610,6 @@ module Psych
     #
     # source://psych//lib/psych.rb#647
     def unsafe_load_file(filename, **kwargs); end
-
-    private
-
-    # source://psych//lib/psych.rb#703
-    def parse_caller(at); end
-
-    # Workaround for emulating `warn '...', uplevel: 1` in Ruby 2.4 or lower.
-    #
-    # source://psych//lib/psych.rb#698
-    def warn_with_uplevel(message, uplevel: T.unsafe(nil)); end
   end
 end
 
@@ -1111,135 +1119,6 @@ end
 class Psych::JSON::Stream < ::Psych::Visitors::JSONTree
   include ::Psych::Streaming
   extend ::Psych::Streaming::ClassMethods
-end
-
-# The base class for any Node in a YAML parse tree.  This class should
-# never be instantiated.
-#
-# source://psych//lib/psych/nodes/node.rb#11
-class Psych::Nodes::Node
-  include ::Enumerable
-
-  # Create a new Psych::Nodes::Node
-  #
-  # @return [Node] a new instance of Node
-  #
-  # source://psych//lib/psych/nodes/node.rb#33
-  def initialize; end
-
-  # @return [Boolean]
-  #
-  # source://psych//lib/psych/nodes/node.rb#67
-  def alias?; end
-
-  # The children of this node
-  #
-  # source://psych//lib/psych/nodes/node.rb#15
-  def children; end
-
-  # @return [Boolean]
-  #
-  # source://psych//lib/psych/nodes/node.rb#68
-  def document?; end
-
-  # Iterate over each node in the tree. Yields each node to +block+ depth
-  # first.
-  #
-  # source://psych//lib/psych/nodes/node.rb#40
-  def each(&block); end
-
-  # The column number where this node ends
-  #
-  # source://psych//lib/psych/nodes/node.rb#30
-  def end_column; end
-
-  # The column number where this node ends
-  #
-  # source://psych//lib/psych/nodes/node.rb#30
-  def end_column=(_arg0); end
-
-  # The line number where this node ends
-  #
-  # source://psych//lib/psych/nodes/node.rb#27
-  def end_line; end
-
-  # The line number where this node ends
-  #
-  # source://psych//lib/psych/nodes/node.rb#27
-  def end_line=(_arg0); end
-
-  # @return [Boolean]
-  #
-  # source://psych//lib/psych/nodes/node.rb#69
-  def mapping?; end
-
-  # @return [Boolean]
-  #
-  # source://psych//lib/psych/nodes/node.rb#70
-  def scalar?; end
-
-  # @return [Boolean]
-  #
-  # source://psych//lib/psych/nodes/node.rb#71
-  def sequence?; end
-
-  # The column number where this node start
-  #
-  # source://psych//lib/psych/nodes/node.rb#24
-  def start_column; end
-
-  # The column number where this node start
-  #
-  # source://psych//lib/psych/nodes/node.rb#24
-  def start_column=(_arg0); end
-
-  # The line number where this node start
-  #
-  # source://psych//lib/psych/nodes/node.rb#21
-  def start_line; end
-
-  # The line number where this node start
-  #
-  # source://psych//lib/psych/nodes/node.rb#21
-  def start_line=(_arg0); end
-
-  # @return [Boolean]
-  #
-  # source://psych//lib/psych/nodes/node.rb#72
-  def stream?; end
-
-  # An associated tag
-  #
-  # source://psych//lib/psych/nodes/node.rb#18
-  def tag; end
-
-  # Convert this node to Ruby.
-  #
-  # See also Psych::Visitors::ToRuby
-  #
-  # source://psych//lib/psych/nodes/node.rb#49
-  def to_ruby(symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil), strict_integer: T.unsafe(nil)); end
-
-  # Convert this node to YAML.
-  #
-  # See also Psych::Visitors::Emitter
-  #
-  # source://psych//lib/psych/nodes/node.rb#58
-  def to_yaml(io = T.unsafe(nil), options = T.unsafe(nil)); end
-
-  # Convert this node to Ruby.
-  #
-  # See also Psych::Visitors::ToRuby
-  #
-  # source://psych//lib/psych/nodes/node.rb#49
-  def transform(symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil), strict_integer: T.unsafe(nil)); end
-
-  # Convert this node to YAML.
-  #
-  # See also Psych::Visitors::Emitter
-  #
-  # source://psych//lib/psych/nodes/node.rb#58
-  def yaml(io = T.unsafe(nil), options = T.unsafe(nil)); end
 end
 
 # YAML event parser class.  This class parses a YAML document and calls

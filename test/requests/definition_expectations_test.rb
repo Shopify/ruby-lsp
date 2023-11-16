@@ -38,22 +38,18 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       RubyIndexer::IndexablePath.new(
         "#{Dir.pwd}/lib",
         File.expand_path(
-          "../../lib/ruby_lsp/event_emitter.rb",
+          "../../lib/ruby_lsp/listener.rb",
           __dir__,
         ),
       ),
     )
 
-    begin
-      # We need to pretend that Sorbet is not a dependency or else we can't properly test
-      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
-      response = executor.execute({
-        method: "textDocument/definition",
-        params: { textDocument: { uri: "file:///folder/fake.rb" }, position: position },
-      }).response
-    ensure
-      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
-    end
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    stub_no_typechecker
+    response = executor.execute({
+      method: "textDocument/definition",
+      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: position },
+    }).response
 
     case response
     when RubyLsp::Interface::Location
@@ -156,15 +152,11 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
     )
 
-    begin
-      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
-      response = executor.execute({
-        method: "textDocument/definition",
-        params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 2, line: 4 } },
-      }).response
-    ensure
-      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
-    end
+    stub_no_typechecker
+    response = executor.execute({
+      method: "textDocument/definition",
+      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 2, line: 4 } },
+    }).response
 
     assert_equal(uri.to_s, response.first.attributes[:uri])
   ensure
@@ -193,15 +185,11 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
     )
 
-    begin
-      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
-      response = executor.execute({
-        method: "textDocument/definition",
-        params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 0, line: 5 } },
-      }).response
-    ensure
-      RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
-    end
+    stub_no_typechecker
+    response = executor.execute({
+      method: "textDocument/definition",
+      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 0, line: 5 } },
+    }).response
 
     assert_nil(response)
   ensure
@@ -245,17 +233,17 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         "Definition Addon"
       end
 
-      def create_definition_listener(uri, nesting, index, emitter, message_queue)
+      def create_definition_listener(uri, nesting, index, dispatcher, message_queue)
         klass = Class.new(RubyLsp::Listener) do
           attr_reader :_response
 
-          def initialize(uri, _, _, emitter, message_queue)
-            super(emitter, message_queue)
+          def initialize(uri, _, _, dispatcher, message_queue)
+            super(dispatcher, message_queue)
             @uri = uri
-            emitter.register(self, :on_constant_read)
+            dispatcher.register(self, :on_constant_read_node_enter)
           end
 
-          def on_constant_read(node)
+          def on_constant_read_node_enter(node)
             location = node.location
             @_response = RubyLsp::Interface::Location.new(
               uri: "file:///generated_by_addon.rb",
@@ -270,7 +258,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        T.unsafe(klass).new(uri, nesting, index, emitter, message_queue)
+        T.unsafe(klass).new(uri, nesting, index, dispatcher, message_queue)
       end
     end
   end

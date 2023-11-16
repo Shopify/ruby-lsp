@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-YARP_FIXTURES_DIR=test/fixtures/yarp/test/yarp/fixtures
+PRISM_FIXTURES_DIR=test/fixtures/prism/test/prism/fixtures
 
-if [ ! -d "$YARP_FIXTURES_DIR" ]; then
-    echo "$YARP_FIXTURES_DIR does not exist."
+if [ ! -d "$PRISM_FIXTURES_DIR" ]; then
+    echo "$PRISM_FIXTURES_DIR does not exist."
     echo "Please run 'git submodule update --init' to pull submodule fixtures."
     exit 1
 fi

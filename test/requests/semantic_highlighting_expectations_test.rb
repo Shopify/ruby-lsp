@@ -18,14 +18,14 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
       processed_range = start_line..end_line
     end
 
-    emitter = RubyLsp::EventEmitter.new
+    dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::SemanticHighlighting.new(
-      emitter,
+      dispatcher,
       message_queue,
       range: processed_range,
     )
 
-    emitter.visit(document.tree)
+    dispatcher.dispatch(document.tree)
     RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode(listener.response)
   ensure
     T.must(message_queue).close

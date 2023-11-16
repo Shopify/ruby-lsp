@@ -25,6 +25,13 @@ parser = OptionParser.new do |opts|
     options[:branch] = branch
   end
 
+  opts.on(
+    "--experimental",
+    "Run pre-release versions of the Ruby LSP",
+  ) do
+    options[:experimental] = true
+  end
+
   opts.on("-h", "--help", "Print this help") do
     puts opts.help
     puts
@@ -49,7 +56,7 @@ if ENV["BUNDLE_GEMFILE"].nil?
   require_relative "../lib/ruby_lsp/setup_bundler"
 
   begin
-    bundle_gemfile, bundle_path = RubyLsp::SetupBundler.new(Dir.pwd, branch: options[:branch]).setup!
+    bundle_gemfile, bundle_path, bundle_app_config = RubyLsp::SetupBundler.new(Dir.pwd, **options).setup!
   rescue RubyLsp::SetupBundler::BundleNotLocked
     warn("Project contains a Gemfile, but no Gemfile.lock. Run `bundle install` to lock gems and restart the server")
     exit(78)
@@ -57,6 +64,7 @@ if ENV["BUNDLE_GEMFILE"].nil?
 
   env = { "BUNDLE_GEMFILE" => bundle_gemfile }
   env["BUNDLE_PATH"] = bundle_path if bundle_path
+  env["BUNDLE_APP_CONFIG"] = bundle_app_config if bundle_app_config
   exit exec(env, "bundle exec ruby-lsp #{original_args.join(" ")}")
 end
 
@@ -77,7 +85,8 @@ rescue
   nil
 end
 
-require_relative "../lib/ruby_lsp/internal"
+$LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+require "ruby_lsp/internal"
 
 if options[:debug]
   if ["x64-mingw-ucrt", "x64-mingw32"].include?(RUBY_PLATFORM)

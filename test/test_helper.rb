@@ -6,6 +6,7 @@ $VERBOSE = nil unless ENV["VERBOSE"] || ENV["CI"]
 
 require_relative "../lib/ruby_lsp/internal"
 require_relative "../lib/rubocop/cop/ruby_lsp/use_language_server_aliases"
+require_relative "../lib/rubocop/cop/ruby_lsp/use_register_with_handler_method"
 
 require "minitest/autorun"
 require "minitest/reporters"
@@ -25,7 +26,14 @@ Minitest::Reporters.use!(minitest_reporter)
 
 module Minitest
   class Test
+    extend T::Sig
+
     Minitest::Test.make_my_diffs_pretty!
+
+    sig { void }
+    def stub_no_typechecker
+      RubyLsp::DependencyDetector.instance.stubs(:typechecker).returns(false)
+    end
   end
 end
 

@@ -20,8 +20,8 @@
             "parent": {
                 "range": {
                     "start": {
-                        "line": 4,
-                        "character": 0
+                        "line": 5,
+                        "character": 2
                     },
                     "end": {
                         "line": 5,
@@ -31,7 +31,7 @@
                 "parent": {
                     "range": {
                         "start": {
-                            "line": 2,
+                            "line": 4,
                             "character": 0
                         },
                         "end": {
@@ -42,12 +42,48 @@
                     "parent": {
                         "range": {
                             "start": {
-                                "line": 0,
+                                "line": 2,
                                 "character": 0
                             },
                             "end": {
-                                "line": 8,
-                                "character": 3
+                                "line": 5,
+                                "character": 18
+                            }
+                        },
+                        "parent": {
+                            "range": {
+                                "start": {
+                                    "line": 0,
+                                    "character": 0
+                                },
+                                "end": {
+                                    "line": 8,
+                                    "character": 3
+                                }
+                            },
+                            "parent": {
+                                "range": {
+                                    "start": {
+                                        "line": 0,
+                                        "character": 0
+                                    },
+                                    "end": {
+                                        "line": 8,
+                                        "character": 3
+                                    }
+                                },
+                                "parent": {
+                                    "range": {
+                                        "start": {
+                                            "line": 0,
+                                            "character": 0
+                                        },
+                                        "end": {
+                                            "line": 8,
+                                            "character": 3
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

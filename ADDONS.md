@@ -117,14 +117,14 @@ module RubyLsp
         override.params(
           nesting: T::Array[String],
           index: RubyIndexer::Index,
-          emitter: EventEmitter,
+          dispatcher: Prism::Dispatcher,
           message_queue: Thread::Queue,
         ).returns(T.nilable(Listener[T.nilable(Interface::Hover)]))
       end
-      def create_hover_listener(nesting, index emitter, message_queue)
+      def create_hover_listener(nesting, index, dispatcher, message_queue)
         # Use the listener factory methods to instantiate listeners with parameters sent by the LSP combined with any
         # pre-computed information in the addon. These factory methods are invoked on every request
-        Hover.new(@config, emitter, message_queue)
+        Hover.new(@config, dispatcher, message_queue)
       end
     end
 
@@ -138,27 +138,27 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      # Listeners are initialized with the EventEmitter. This object is used by the Ruby LSP to emit the events when it
-      # finds nodes during AST analysis. Listeners must register which nodes they want to handle with the emitter (see
-      # below).
+      # Listeners are initialized with the Prism::Dispatcher. This object is used by the Ruby LSP to emit the events
+      # when it finds nodes during AST analysis. Listeners must register which nodes they want to handle with the
+      # dispatcher (see below).
       # Additionally, listeners are instantiated with a message_queue to push notifications (not used in this example).
       # See "Sending notifications to the client" for more information.
-      sig { params(config: SomeConfiguration, emitter: RubyLsp::EventEmitter, message_queue: Thread::Queue).void }
-      def initialize(config, emitter, message_queue)
+      sig { params(config: SomeConfiguration, dispatcher: Prism::Dispatcher, message_queue: Thread::Queue).void }
+      def initialize(config, dispatcher, message_queue)
         super
 
         @_response = T.let(nil, ResponseType)
         @config = config
 
-        # Register that this listener will handle `on_constant_read` events (i.e.: whenever a constant read is found in
-        # the code)
-        emitter.register(self, :on_constant_read)
+        # Register that this listener will handle `on_constant_read_node_enter` events (i.e.: whenever a constant read
+        # is found in the code)
+        dispatcher.register(self, :on_constant_read_node_enter)
       end
 
-      # Listeners must define methods for each event they registered with the emitter. In this case, we have to define
-      # `on_const` to specify what this listener should do every time we find a constant
-      sig { params(node: YARP::ConstantReadNode).void }
-      def on_constant_read(node)
+      # Listeners must define methods for each event they registered with the dispatcher. In this case, we have to
+      # define `on_constant_read_node_enter` to specify what this listener should do every time we find a constant
+      sig { params(node: Prism::ConstantReadNode).void }
+      def on_constant_read_node_enter(node)
         # Certain helpers are made available to listeners to build LSP responses. The classes under `RubyLsp::Interface`
         # are generally used to build responses and they match exactly what the specification requests.
         contents = RubyLsp::Interface::MarkupContent.new(kind: "markdown", value: "Hello!")
@@ -219,7 +219,7 @@ notifications to the client.
 
 ```ruby
 class MyListener < ::RubyLsp::Listener
-  def initialize(emitter, message_queue)
+  def initialize(dispatcher, message_queue)
     super
 
     @message_queue << Notification.new(

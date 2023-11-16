@@ -17,20 +17,20 @@ module RubyLsp
           @receiver = receiver
         end
 
-        sig { params(node: YARP::CallNode).returns(T::Boolean) }
+        sig { params(node: Prism::CallNode).returns(T::Boolean) }
         def match?(node)
           receiver_matches?(node) && arity_matches?(node)
         end
 
         private
 
-        sig { params(node: YARP::CallNode).returns(T::Boolean) }
+        sig { params(node: Prism::CallNode).returns(T::Boolean) }
         def receiver_matches?(node)
           node_receiver = node.receiver
           (node_receiver && @receiver && node_receiver.location.slice == "T") || (!node_receiver && !@receiver)
         end
 
-        sig { params(node: YARP::CallNode).returns(T::Boolean) }
+        sig { params(node: Prism::CallNode).returns(T::Boolean) }
         def arity_matches?(node)
           node_arity = node.arguments&.arguments&.size || 0
 

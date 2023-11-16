@@ -11,7 +11,7 @@
           "character": 14
         }
       },
-      "severity": 2,
+      "severity": 3,
       "code": "Sorbet/TrueSigil",
       "source": "RuboCop",
       "message": "Sorbet/TrueSigil: Sorbet sigil should be at least `true` got `false`.\n\nThis offense is not auto-correctable.\n",
@@ -48,6 +48,9 @@
       },
       "severity": 3,
       "code": "Style/IfInsideElse",
+      "codeDescription": {
+        "href": "https://docs.rubocop.org/rubocop/cops_style.html#styleifinsideelse"
+      },
       "source": "RuboCop",
       "message": "Style/IfInsideElse: Convert `if` nested inside `else` to `elsif`.",
       "data": {

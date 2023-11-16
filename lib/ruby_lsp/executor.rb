@@ -13,7 +13,6 @@ module RubyLsp
       # Requests that mutate the store must be run sequentially! Parallel requests only receive a temporary copy of the
       # store
       @store = store
-      @test_library = T.let(DependencyDetector.detected_test_library, String)
       @message_queue = message_queue
       @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
     end
@@ -58,6 +57,8 @@ module RubyLsp
           warn(errored_addons.map(&:backtraces).join("\n\n"))
         end
 
+        RubyVM::YJIT.enable if defined? RubyVM::YJIT.enable
+
         perform_initial_indexing
         check_formatter_is_available
 
@@ -93,14 +94,14 @@ module RubyLsp
         return cached_response if cached_response
 
         # Run listeners for the document
-        emitter = EventEmitter.new
-        folding_range = Requests::FoldingRanges.new(document.parse_result.comments, emitter, @message_queue)
-        document_symbol = Requests::DocumentSymbol.new(emitter, @message_queue)
-        document_link = Requests::DocumentLink.new(uri, document.comments, emitter, @message_queue)
-        code_lens = Requests::CodeLens.new(uri, @test_library, emitter, @message_queue)
+        dispatcher = Prism::Dispatcher.new
+        folding_range = Requests::FoldingRanges.new(document.parse_result.comments, dispatcher, @message_queue)
+        document_symbol = Requests::DocumentSymbol.new(dispatcher, @message_queue)
+        document_link = Requests::DocumentLink.new(uri, document.comments, dispatcher, @message_queue)
+        code_lens = Requests::CodeLens.new(uri, dispatcher, @message_queue)
 
-        semantic_highlighting = Requests::SemanticHighlighting.new(emitter, @message_queue)
-        emitter.visit(document.tree)
+        semantic_highlighting = Requests::SemanticHighlighting.new(dispatcher, @message_queue)
+        dispatcher.dispatch(document.tree)
 
         # Store all responses retrieve in this round of visits in the cache and then return the response for the request
         # we actually received
@@ -211,21 +212,31 @@ module RubyLsp
       # stuck indexing files
       RubyIndexer.configuration.load_config
 
-      begin
-        @index.index_all
-      rescue StandardError => error
-        @message_queue << Notification.new(
-          message: "window/showMessage",
-          params: Interface::ShowMessageParams.new(
-            type: Constant::MessageType::ERROR,
-            message: "Error while indexing: #{error.message}",
-          ),
-        )
-      end
+      Thread.new do
+        begin
+          @index.index_all do |percentage|
+            progress("indexing-progress", percentage)
+            true
+          rescue ClosedQueueError
+            # Since we run indexing on a separate thread, it's possible to kill the server before indexing is complete.
+            # In those cases, the message queue will be closed and raise a ClosedQueueError. By returning `false`, we
+            # tell the index to stop working immediately
+            false
+          end
+        rescue StandardError => error
+          @message_queue << Notification.new(
+            message: "window/showMessage",
+            params: Interface::ShowMessageParams.new(
+              type: Constant::MessageType::ERROR,
+              message: "Error while indexing: #{error.message}",
+            ),
+          )
+        end
 
-      # Always end the progress notification even if indexing failed or else it never goes away and the user has no way
-      # of dismissing it
-      end_progress("indexing-progress")
+        # Always end the progress notification even if indexing failed or else it never goes away and the user has no
+        # way of dismissing it
+        end_progress("indexing-progress")
+      end
     end
 
     sig { params(query: T.nilable(String)).returns(T::Array[Interface::WorkspaceSymbol]) }
@@ -248,14 +259,20 @@ module RubyLsp
       document = @store.get(uri)
       target, parent, nesting = document.locate_node(
         position,
-        node_types: [YARP::CallNode, YARP::ConstantReadNode, YARP::ConstantPathNode],
+        node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode],
       )
 
-      target = parent if target.is_a?(YARP::ConstantReadNode) && parent.is_a?(YARP::ConstantPathNode)
+      target = parent if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)
 
-      emitter = EventEmitter.new
-      base_listener = Requests::Definition.new(uri, nesting, @index, emitter, @message_queue)
-      emitter.emit_for_target(target)
+      dispatcher = Prism::Dispatcher.new
+      base_listener = Requests::Definition.new(
+        uri,
+        nesting,
+        @index,
+        dispatcher,
+        @message_queue,
+      )
+      dispatcher.dispatch_once(target)
       base_listener.response
     end
 
@@ -274,16 +291,16 @@ module RubyLsp
 
       if (Requests::Hover::ALLOWED_TARGETS.include?(parent.class) &&
           !Requests::Hover::ALLOWED_TARGETS.include?(target.class)) ||
-          (parent.is_a?(YARP::ConstantPathNode) && target.is_a?(YARP::ConstantReadNode))
+          (parent.is_a?(Prism::ConstantPathNode) && target.is_a?(Prism::ConstantReadNode))
         target = parent
       end
 
       # Instantiate all listeners
-      emitter = EventEmitter.new
-      hover = Requests::Hover.new(@index, nesting, emitter, @message_queue)
+      dispatcher = Prism::Dispatcher.new
+      hover = Requests::Hover.new(@index, nesting, dispatcher, @message_queue)
 
       # Emit events for all listeners
-      emitter.emit_for_target(target)
+      dispatcher.dispatch_once(target)
 
       hover.response
     end
@@ -362,9 +379,9 @@ module RubyLsp
       document = @store.get(uri)
 
       target, parent = document.locate_node(position)
-      emitter = EventEmitter.new
-      listener = Requests::DocumentHighlight.new(target, parent, emitter, @message_queue)
-      emitter.visit(document.tree)
+      dispatcher = Prism::Dispatcher.new
+      listener = Requests::DocumentHighlight.new(target, parent, dispatcher, @message_queue)
+      dispatcher.visit(document.tree)
       listener.response
     end
 
@@ -375,9 +392,9 @@ module RubyLsp
       start_line = range.dig(:start, :line)
       end_line = range.dig(:end, :line)
 
-      emitter = EventEmitter.new
-      listener = Requests::InlayHints.new(start_line..end_line, emitter, @message_queue)
-      emitter.visit(document.tree)
+      dispatcher = Prism::Dispatcher.new
+      listener = Requests::InlayHints.new(start_line..end_line, dispatcher, @message_queue)
+      dispatcher.visit(document.tree)
       listener.response
     end
 
@@ -439,13 +456,13 @@ module RubyLsp
       start_line = range.dig(:start, :line)
       end_line = range.dig(:end, :line)
 
-      emitter = EventEmitter.new
+      dispatcher = Prism::Dispatcher.new
       listener = Requests::SemanticHighlighting.new(
-        emitter,
+        dispatcher,
         @message_queue,
         range: start_line..end_line,
       )
-      emitter.visit(document.tree)
+      dispatcher.visit(document.tree)
 
       Requests::Support::SemanticTokenEncoder.new.encode(listener.response)
     end
@@ -466,29 +483,29 @@ module RubyLsp
       # the node, as it could not be a constant
       target_node_types = if ("A".."Z").cover?(document.source[char_position - 1])
         char_position -= 1
-        [YARP::ConstantReadNode, YARP::ConstantPathNode]
+        [Prism::ConstantReadNode, Prism::ConstantPathNode]
       else
-        [YARP::CallNode]
+        [Prism::CallNode]
       end
 
       matched, parent, nesting = document.locate(document.tree, char_position, node_types: target_node_types)
       return unless matched && parent
 
       target = case matched
-      when YARP::CallNode
+      when Prism::CallNode
         message = matched.message
         return unless message == "require"
 
         args = matched.arguments&.arguments
-        return if args.nil? || args.is_a?(YARP::ForwardingArgumentsNode)
+        return if args.nil? || args.is_a?(Prism::ForwardingArgumentsNode)
 
         argument = args.first
-        return unless argument.is_a?(YARP::StringNode)
+        return unless argument.is_a?(Prism::StringNode)
         return unless (argument.location.start_offset..argument.location.end_offset).cover?(char_position)
 
         argument
-      when YARP::ConstantReadNode, YARP::ConstantPathNode
-        if parent.is_a?(YARP::ConstantPathNode) && matched.is_a?(YARP::ConstantReadNode)
+      when Prism::ConstantReadNode, Prism::ConstantPathNode
+        if parent.is_a?(Prism::ConstantPathNode) && matched.is_a?(Prism::ConstantReadNode)
           parent
         else
           matched
@@ -497,14 +514,19 @@ module RubyLsp
 
       return unless target
 
-      emitter = EventEmitter.new
-      listener = Requests::Completion.new(@index, nesting, emitter, @message_queue)
-      emitter.emit_for_target(target)
+      dispatcher = Prism::Dispatcher.new
+      listener = Requests::Completion.new(
+        @index,
+        nesting,
+        dispatcher,
+        @message_queue,
+      )
+      dispatcher.dispatch_once(target)
       listener.response
     end
 
-    sig { params(id: String, title: String).void }
-    def begin_progress(id, title)
+    sig { params(id: String, title: String, percentage: Integer).void }
+    def begin_progress(id, title, percentage: 0)
       return unless @store.supports_progress
 
       @message_queue << Request.new(
@@ -516,7 +538,29 @@ module RubyLsp
         message: "$/progress",
         params: Interface::ProgressParams.new(
           token: id,
-          value: Interface::WorkDoneProgressBegin.new(kind: "begin", title: title),
+          value: Interface::WorkDoneProgressBegin.new(
+            kind: "begin",
+            title: title,
+            percentage: percentage,
+            message: "#{percentage}% completed",
+          ),
+        ),
+      )
+    end
+
+    sig { params(id: String, percentage: Integer).void }
+    def progress(id, percentage)
+      return unless @store.supports_progress
+
+      @message_queue << Notification.new(
+        message: "$/progress",
+        params: Interface::ProgressParams.new(
+          token: id,
+          value: Interface::WorkDoneProgressReport.new(
+            kind: "report",
+            percentage: percentage,
+            message: "#{percentage}% completed",
+          ),
         ),
       )
     end
@@ -532,6 +576,9 @@ module RubyLsp
           value: Interface::WorkDoneProgressEnd.new(kind: "end"),
         ),
       )
+    rescue ClosedQueueError
+      # If the server was killed and the message queue is already closed, there's no way to end the progress
+      # notification
     end
 
     sig { params(options: T::Hash[Symbol, T.untyped]).returns(Interface::InitializeResult) }
@@ -547,10 +594,11 @@ module RubyLsp
         encodings.first
       end
 
-      @store.supports_progress = options.dig(:capabilities, :window, :workDoneProgress) || true
+      progress = options.dig(:capabilities, :window, :workDoneProgress)
+      @store.supports_progress = progress.nil? ? true : progress
       formatter = options.dig(:initializationOptions, :formatter) || "auto"
       @store.formatter = if formatter == "auto"
-        DependencyDetector.detected_formatter
+        DependencyDetector.instance.detected_formatter
       else
         formatter
       end

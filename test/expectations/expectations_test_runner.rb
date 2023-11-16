@@ -5,15 +5,15 @@ class ExpectationsTestRunner < Minitest::Test
   TEST_EXP_DIR = "test/expectations"
   TEST_FIXTURES_DIR = "test/fixtures"
   TEST_RUBY_LSP_FIXTURES = File.join(TEST_FIXTURES_DIR, "*.rb")
-  TEST_YARP_FIXTURES = File.join(TEST_FIXTURES_DIR, "yarp/test/yarp/fixtures/**", "*.txt")
+  TEST_PRISM_FIXTURES = File.join(TEST_FIXTURES_DIR, "prism/test/prism/fixtures/**", "*.txt")
 
   class << self
     def expectations_tests(handler_class, expectation_suffix)
       execute_request = if handler_class < RubyLsp::Listener
         <<~RUBY
-          emitter = RubyLsp::EventEmitter.new
-          listener = #{handler_class}.new(emitter, @message_queue)
-          emitter.visit(document.tree)
+          dispatcher = Prism::Dispatcher.new
+          listener = #{handler_class}.new(dispatcher, @message_queue)
+          dispatcher.dispatch(document.tree)
           listener.response
         RUBY
       else
@@ -93,7 +93,7 @@ class ExpectationsTestRunner < Minitest::Test
         end
       end
 
-      Dir.glob(TEST_YARP_FIXTURES).each do |path|
+      Dir.glob(TEST_PRISM_FIXTURES).each do |path|
         class_eval(<<~RB, __FILE__, __LINE__ + 1)
           def test_#{expectation_suffix}__#{uniq_name_from_path(path)}__does_not_raise
             @_path = "#{path}"
@@ -107,8 +107,8 @@ class ExpectationsTestRunner < Minitest::Test
     end
 
     # Ensure that the test name include path context to avoid duplicate
-    # from test/fixtures/yarp/test/yarp/fixtures/unparser/corpus/semantic/and.txt
-    # to test_fixtures_yarp_test_yarp_fixtures_unparser_corpus_semantic_and
+    # from test/fixtures/prism/test/prism/fixtures/unparser/corpus/semantic/and.txt
+    # to test_fixtures_prism_test_prism_fixtures_unparser_corpus_semantic_and
     def uniq_name_from_path(path)
       path.gsub("/", "_").gsub('.txt', '')
     end
@@ -126,7 +126,7 @@ class ExpectationsTestRunner < Minitest::Test
   private
 
   def test_addon(addon_creation_method, source:)
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    stub_no_typechecker
     message_queue = Thread::Queue.new
 
     send(addon_creation_method)
@@ -144,7 +144,6 @@ class ExpectationsTestRunner < Minitest::Test
     yield(executor)
   ensure
     RubyLsp::Addon.addons.clear
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
     T.must(message_queue).close
   end
 

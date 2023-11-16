@@ -14,12 +14,12 @@ Gem::Specification.new do |s|
 
   s.files = Dir.glob("lib/**/*.rb") + ["README.md", "VERSION", "LICENSE.txt"]
   s.bindir = "exe"
-  s.executables = ["ruby-lsp", "ruby-lsp-check"]
+  s.executables = ["ruby-lsp", "ruby-lsp-check", "ruby-lsp-doctor"]
   s.require_paths = ["lib"]
 
   s.add_dependency("language_server-protocol", "~> 3.17.0")
+  s.add_dependency("prism", ">= 0.17.1", "< 0.18")
   s.add_dependency("sorbet-runtime", ">= 0.5.5685")
-  s.add_dependency("yarp", ">= 0.12", "< 0.13")
 
   s.required_ruby_version = ">= 3.0"
 end

@@ -9,9 +9,9 @@ module RubyLsp
 
         RUBOCOP_TO_LSP_SEVERITY = T.let(
           {
-            convention: Constant::DiagnosticSeverity::INFORMATION,
-            info: Constant::DiagnosticSeverity::INFORMATION,
+            info: Constant::DiagnosticSeverity::HINT,
             refactor: Constant::DiagnosticSeverity::INFORMATION,
+            convention: Constant::DiagnosticSeverity::INFORMATION,
             warning: Constant::DiagnosticSeverity::WARNING,
             error: Constant::DiagnosticSeverity::ERROR,
             fatal: Constant::DiagnosticSeverity::ERROR,
@@ -47,18 +47,11 @@ module RubyLsp
 
         sig { returns(Interface::Diagnostic) }
         def to_lsp_diagnostic
-          if @offense.correctable?
-            severity = RUBOCOP_TO_LSP_SEVERITY[@offense.severity.name]
-            message = @offense.message
-          else
-            severity = Constant::DiagnosticSeverity::WARNING
-            message = "#{@offense.message}\n\nThis offense is not auto-correctable.\n"
-          end
-
           Interface::Diagnostic.new(
             message: message,
             source: "RuboCop",
             code: @offense.cop_name,
+            code_description: code_description,
             severity: severity,
             range: Interface::Range.new(
               start: Interface::Position.new(
@@ -78,6 +71,24 @@ module RubyLsp
         end
 
         private
+
+        sig { returns(String) }
+        def message
+          message  = @offense.message
+          message += "\n\nThis offense is not auto-correctable.\n" unless @offense.correctable?
+          message
+        end
+
+        sig { returns(T.nilable(Integer)) }
+        def severity
+          RUBOCOP_TO_LSP_SEVERITY[@offense.severity.name]
+        end
+
+        sig { returns(T.nilable(Interface::CodeDescription)) }
+        def code_description
+          doc_url = RuboCopRunner.find_cop_by_name(@offense.cop_name)&.documentation_url
+          Interface::CodeDescription.new(href: doc_url) if doc_url
+        end
 
         sig { returns(T::Array[Interface::TextEdit]) }
         def offense_replacements

@@ -5,12 +5,8 @@ require "test_helper"
 
 class WorkspaceSymbolTest < Minitest::Test
   def setup
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, false)
+    stub_no_typechecker
     @index = RubyIndexer::Index.new
-  end
-
-  def teardown
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
   end
 
   def test_returns_index_entries_based_on_query
@@ -56,7 +52,8 @@ class WorkspaceSymbolTest < Minitest::Test
   end
 
   def test_matches_only_gem_symbols_if_typechecker_is_present
-    RubyLsp::DependencyDetector.const_set(:HAS_TYPECHECKER, true)
+    # reset the singleton so that the stub is not used
+    Singleton.__init__(RubyLsp::DependencyDetector)
     indexable = RubyIndexer::IndexablePath.new(
       nil,
       "#{RubyLsp::WORKSPACE_URI.to_standardized_path}/workspace_symbol_foo.rb",

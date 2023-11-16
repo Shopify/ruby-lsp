@@ -13,3 +13,4 @@ permissions:
 jobs:
   dependabot_update_rbis:
     uses: Shopify/ruby-lsp/.github/workflows/dependabot_update_rbis.yml@main
+    secrets: inherit

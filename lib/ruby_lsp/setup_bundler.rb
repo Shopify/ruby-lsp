@@ -20,17 +20,11 @@ module RubyLsp
 
     FOUR_HOURS = T.let(4 * 60 * 60, Integer)
 
-    sig { params(project_path: String, branch: T.nilable(String)).void }
-    def initialize(project_path, branch: nil)
+    sig { params(project_path: String, options: T.untyped).void }
+    def initialize(project_path, **options)
       @project_path = project_path
-      @branch = branch
-
-      # Custom bundle paths
-      @custom_dir = T.let(Pathname.new(".ruby-lsp").expand_path(Dir.pwd), Pathname)
-      @custom_gemfile = T.let(@custom_dir + "Gemfile", Pathname)
-      @custom_lockfile = T.let(@custom_dir + "Gemfile.lock", Pathname)
-      @lockfile_hash_path = T.let(@custom_dir + "main_lockfile_hash", Pathname)
-      @last_updated_path = T.let(@custom_dir + "last_updated", Pathname)
+      @branch = T.let(options[:branch], T.nilable(String))
+      @experimental = T.let(options[:experimental], T.nilable(T::Boolean))
 
       # Regular bundle paths
       @gemfile = T.let(
@@ -43,12 +37,21 @@ module RubyLsp
       )
       @lockfile = T.let(@gemfile ? Bundler.default_lockfile : nil, T.nilable(Pathname))
 
+      @gemfile_name = T.let(@gemfile&.basename&.to_s || "Gemfile", String)
+
+      # Custom bundle paths
+      @custom_dir = T.let(Pathname.new(".ruby-lsp").expand_path(Dir.pwd), Pathname)
+      @custom_gemfile = T.let(@custom_dir + @gemfile_name, Pathname)
+      @custom_lockfile = T.let(@custom_dir + (@lockfile&.basename || "Gemfile.lock"), Pathname)
+      @lockfile_hash_path = T.let(@custom_dir + "main_lockfile_hash", Pathname)
+      @last_updated_path = T.let(@custom_dir + "last_updated", Pathname)
+
       @dependencies = T.let(load_dependencies, T::Hash[String, T.untyped])
     end
 
-    # Setups up the custom bundle and returns the `BUNDLE_GEMFILE` and `BUNDLE_PATH` that should be used for running the
-    # server
-    sig { returns([String, T.nilable(String)]) }
+    # Sets up the custom bundle and returns the `BUNDLE_GEMFILE`, `BUNDLE_PATH` and `BUNDLE_APP_CONFIG` that should be
+    # used for running the server
+    sig { returns([String, T.nilable(String), T.nilable(String)]) }
     def setup!
       raise BundleNotLocked if @gemfile&.exist? && !@lockfile&.exist?
 
@@ -118,7 +121,7 @@ module RubyLsp
       # If there's a top level Gemfile, we want to evaluate from the custom bundle. We get the source from the top level
       # Gemfile, so if there isn't one we need to add a default source
       if @gemfile&.exist?
-        parts << "eval_gemfile(File.expand_path(\"../Gemfile\", __dir__))"
+        parts << "eval_gemfile(File.expand_path(\"../#{@gemfile_name}\", __dir__))"
       else
         parts.unshift('source "https://rubygems.org"')
       end
@@ -156,7 +159,7 @@ module RubyLsp
       dependencies
     end
 
-    sig { params(bundle_gemfile: T.nilable(Pathname)).returns([String, T.nilable(String)]) }
+    sig { params(bundle_gemfile: T.nilable(Pathname)).returns([String, T.nilable(String), T.nilable(String)]) }
     def run_bundle_install(bundle_gemfile = @gemfile)
       # If the user has a custom bundle path configured, we need to ensure that we will use the absolute and not
       # relative version of it when running `bundle install`. This is necessary to avoid installing the gems under the
@@ -169,6 +172,9 @@ module RubyLsp
       env = {}
       env["BUNDLE_GEMFILE"] = bundle_gemfile.to_s
       env["BUNDLE_PATH"] = expanded_path if expanded_path
+
+      local_config_path = File.join(Dir.pwd, ".bundle")
+      env["BUNDLE_APP_CONFIG"] = local_config_path if Dir.exist?(local_config_path)
 
       # If both `ruby-lsp` and `debug` are already in the Gemfile, then we shouldn't try to upgrade them or else we'll
       # produce undesired source control changes. If the custom bundle was just created and either `ruby-lsp` or `debug`
@@ -185,7 +191,9 @@ module RubyLsp
         command.prepend("(")
         command << " && bundle update "
         command << "ruby-lsp " unless @dependencies["ruby-lsp"]
-        command << "debug" unless @dependencies["debug"]
+        command << "debug " unless @dependencies["debug"]
+        command << "--pre" if @experimental
+        command.delete_suffix!(" ")
         command << ")"
 
         @last_updated_path.write(Time.now.iso8601)
@@ -199,8 +207,9 @@ module RubyLsp
 
       # Add bundle update
       warn("Ruby LSP> Running bundle install for the custom bundle. This may take a while...")
+      warn("Ruby LSP> Command: #{command}")
       system(env, command)
-      [bundle_gemfile.to_s, expanded_path]
+      [bundle_gemfile.to_s, expanded_path, env["BUNDLE_APP_CONFIG"]]
     end
 
     sig { returns(T::Boolean) }

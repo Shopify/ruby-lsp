@@ -78,13 +78,13 @@ module RubyLsp
       sig do
         params(
           uri: URI::Generic,
-          comments: T::Array[YARP::Comment],
-          emitter: EventEmitter,
+          comments: T::Array[Prism::Comment],
+          dispatcher: Prism::Dispatcher,
           message_queue: Thread::Queue,
         ).void
       end
-      def initialize(uri, comments, emitter, message_queue)
-        super(emitter, message_queue)
+      def initialize(uri, comments, dispatcher, message_queue)
+        super(dispatcher, message_queue)
 
         # Match the version based on the version in the RBI file name. Notice that the `@` symbol is sanitized to `%40`
         # in the URI
@@ -96,40 +96,47 @@ module RubyLsp
           comments.to_h do |comment|
             [comment.location.end_line, comment]
           end,
-          T::Hash[Integer, YARP::Comment],
+          T::Hash[Integer, Prism::Comment],
         )
 
-        emitter.register(self, :on_def, :on_class, :on_module, :on_constant_write, :on_constant_path_write)
+        dispatcher.register(
+          self,
+          :on_def_node_enter,
+          :on_class_node_enter,
+          :on_module_node_enter,
+          :on_constant_write_node_enter,
+          :on_constant_path_write_node_enter,
+        )
       end
 
-      sig { params(node: YARP::DefNode).void }
-      def on_def(node)
+      sig { params(node: Prism::DefNode).void }
+      def on_def_node_enter(node)
         extract_document_link(node)
       end
 
-      sig { params(node: YARP::ClassNode).void }
-      def on_class(node)
+      sig { params(node: Prism::ClassNode).void }
+      def on_class_node_enter(node)
         extract_document_link(node)
       end
 
-      sig { params(node: YARP::ModuleNode).void }
-      def on_module(node)
+      sig { params(node: Prism::ModuleNode).void }
+      def on_module_node_enter(node)
         extract_document_link(node)
       end
 
-      sig { params(node: YARP::ConstantWriteNode).void }
-      def on_constant_write(node)
+      sig { params(node: Prism::ConstantWriteNode).void }
+      def on_constant_write_node_enter(node)
         extract_document_link(node)
       end
 
-      sig { params(node: YARP::ConstantPathWriteNode).void }
-      def on_constant_path_write(node)
+      sig { params(node: Prism::ConstantPathWriteNode).void }
+      def on_constant_path_write_node_enter(node)
         extract_document_link(node)
       end
 
       private
 
-      sig { params(node: YARP::Node).void }
+      sig { params(node: Prism::Node).void }
       def extract_document_link(node)
         comment = @lines_to_comments[node.location.start_line - 1]
         return unless comment
