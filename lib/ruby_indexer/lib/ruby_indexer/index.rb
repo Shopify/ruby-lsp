@@ -93,8 +93,14 @@ module RubyIndexer
     #   [#<Entry::Class name="Foo::Baz">],
     # ]
     # ```
-    sig { params(query: String, nesting: T::Array[String]).returns(T::Array[T::Array[Entry]]) }
-    def prefix_search(query, nesting)
+    sig { params(query: String, nesting: T.nilable(T::Array[String])).returns(T::Array[T::Array[Entry]]) }
+    def prefix_search(query, nesting = nil)
+      unless nesting
+        results = @entries_tree.search(query)
+        results.uniq!
+        return results
+      end
+
       results = nesting.length.downto(0).flat_map do |i|
         prefix = T.must(nesting[0...i]).join("::")
         namespaced_query = prefix.empty? ? query : "#{prefix}::#{query}"
@@ -229,6 +235,18 @@ module RubyIndexer
       end
 
       real_parts.join("::")
+    end
+
+    # Attempts to find a given method for a resolved fully qualified receiver name. Returns `nil` if the method does not
+    # exist on that receiver
+    sig { params(method_name: String, receiver_name: String).returns(T.nilable(Entry::Method)) }
+    def resolve_method(method_name, receiver_name)
+      method_entries = T.cast(self[method_name], T.nilable(T::Array[Entry::Method]))
+      owner_entries = self[receiver_name]
+      return unless owner_entries && method_entries
+
+      owner_name = T.must(owner_entries.first).name
+      method_entries.find { |entry| entry.owner&.name == owner_name }
     end
 
     private
