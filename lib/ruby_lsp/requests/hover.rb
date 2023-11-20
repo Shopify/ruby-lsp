@@ -51,6 +51,7 @@ module RubyLsp
           :on_constant_read_node_enter,
           :on_constant_write_node_enter,
           :on_constant_path_node_enter,
+          :on_call_node_enter,
         )
       end
 
@@ -93,6 +94,25 @@ module RubyLsp
         return if DependencyDetector.instance.typechecker
 
         generate_hover(node.slice, node.location)
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def on_call_node_enter(node)
+        return if DependencyDetector.instance.typechecker
+        return if node.receiver
+
+        message = node.message
+        return unless message
+
+        target_method = @index.resolve_method(message, @nesting.join("::"))
+        return unless target_method
+
+        location = target_method.location
+
+        @_response = Interface::Hover.new(
+          range: range_from_location(location),
+          contents: markdown_from_index_entries(message, target_method),
+        )
       end
 
       private

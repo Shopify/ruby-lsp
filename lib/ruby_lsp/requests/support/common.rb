@@ -9,6 +9,9 @@ module RubyLsp
         # https://github.com/Shopify/ruby-lsp-rails, or addons by created by developers outside of Shopify, so be
         # cautious of changing anything.
         extend T::Sig
+        extend T::Helpers
+
+        requires_ancestor { Kernel }
 
         sig { params(node: Prism::Node).returns(Interface::Range) }
         def range_from_node(node)
@@ -82,7 +85,7 @@ module RubyLsp
           markdown_title = "```ruby\n#{title}\n```"
           definitions = []
           content = +""
-          entries.each do |entry|
+          Array(entries).each do |entry|
             loc = entry.location
 
             # We always handle locations as zero based. However, for file links in Markdown we need them to be one
