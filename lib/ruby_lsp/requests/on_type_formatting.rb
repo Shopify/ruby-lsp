@@ -51,8 +51,11 @@ module RubyLsp
           if (comment_match = @previous_line.match(/^#(\s*)/))
             handle_comment_line(T.must(comment_match[1]))
           elsif @document.syntax_error?
-            if /<<[-~]?(?<quote>['"`]?)(?<delimiter>\w+)\k<quote>/ =~ @previous_line # rubocop:disable Lint/UselessAssignment
-              handle_heredoc_end(delimiter)
+            match = /(?<=<<(-|~))(?<quote>['"`]?)(?<delimiter>\w+)\k<quote>/.match(@previous_line)
+            heredoc_delimiter = match && match.named_captures["delimiter"]
+
+            if heredoc_delimiter
+              handle_heredoc_end(heredoc_delimiter)
             else
               handle_statement_end
             end
