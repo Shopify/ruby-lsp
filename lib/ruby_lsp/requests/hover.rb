@@ -99,7 +99,9 @@ module RubyLsp
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
         return if DependencyDetector.instance.typechecker
-        return if node.receiver
+
+        receiver = node.receiver
+        return if receiver && !receiver.is_a?(Prism::SelfNode)
 
         message = node.message
         return unless message

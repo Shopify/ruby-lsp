@@ -61,7 +61,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
     T.must(message_queue).close
   end
 
-  def test_hovering_methods_defined_on_self
+  def test_hovering_methods_invoked_on_implicit_self
     message_queue = Thread::Queue.new
     store = RubyLsp::Store.new
 
@@ -86,6 +86,38 @@ class HoverExpectationsTest < ExpectationsTestRunner
     response = executor.execute({
       method: "textDocument/hover",
       params: { textDocument: { uri: uri }, position: { character: 4, line: 5 } },
+    }).response
+
+    assert_match("Hello from `foo`", response.contents.value)
+  ensure
+    T.must(message_queue).close
+  end
+
+  def test_hovering_methods_invoked_on_explicit_self
+    message_queue = Thread::Queue.new
+    store = RubyLsp::Store.new
+
+    uri = URI("file:///fake.rb")
+    source = <<~RUBY
+      class A
+        # Hello from `foo`
+        def foo; end
+
+        def bar
+          self.foo
+        end
+      end
+    RUBY
+    store.set(uri: uri, source: source, version: 1)
+
+    executor = RubyLsp::Executor.new(store, message_queue)
+    index = executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
+
+    stub_no_typechecker
+    response = executor.execute({
+      method: "textDocument/hover",
+      params: { textDocument: { uri: uri }, position: { character: 9, line: 5 } },
     }).response
 
     assert_match("Hello from `foo`", response.contents.value)

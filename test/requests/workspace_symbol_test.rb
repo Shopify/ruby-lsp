@@ -109,6 +109,7 @@ class WorkspaceSymbolTest < Minitest::Test
   def test_returns_method_symbols
     @index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake.rb"), <<~RUBY)
       class Foo
+        def initialize; end
         def bar; end
       end
     RUBY
@@ -116,5 +117,9 @@ class WorkspaceSymbolTest < Minitest::Test
     result = RubyLsp::Requests::WorkspaceSymbol.new("bar", @index).run.first
     assert_equal("bar", T.must(result).name)
     assert_equal(RubyLsp::Constant::SymbolKind::METHOD, T.must(result).kind)
+
+    result = RubyLsp::Requests::WorkspaceSymbol.new("initialize", @index).run.first
+    assert_equal("initialize", T.must(result).name)
+    assert_equal(RubyLsp::Constant::SymbolKind::CONSTRUCTOR, T.must(result).kind)
   end
 end

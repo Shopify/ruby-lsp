@@ -102,7 +102,8 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def handle_method_definition(node)
-        return if node.receiver
+        receiver = node.receiver
+        return if receiver && !receiver.is_a?(Prism::SelfNode)
 
         message = node.message
         return unless message
