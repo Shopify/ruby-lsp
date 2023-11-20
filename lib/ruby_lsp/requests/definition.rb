@@ -138,23 +138,13 @@ module RubyLsp
         first_entry = T.must(entries.first)
         return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{value}"
 
-        bundle_path = begin
-          Bundler.bundle_path.to_s
-        rescue Bundler::GemfileNotFound
-          nil
-        end
-
         @_response = entries.filter_map do |entry|
           location = entry.location
           # If the project has Sorbet, then we only want to handle go to definition for constants defined in gems, as an
           # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
           # in the project, even if the files are typed false
           file_path = entry.file_path
-          if DependencyDetector.instance.typechecker && bundle_path && !file_path.start_with?(bundle_path) &&
-              !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
-
-            next
-          end
+          next if defined_in_gem?(file_path)
 
           Interface::Location.new(
             uri: URI::Generic.from_path(path: file_path).to_s,

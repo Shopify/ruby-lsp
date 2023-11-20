@@ -8,6 +8,15 @@ module RubyLsp
   # This freeze is not redundant since the interpolated string is mutable
   WORKSPACE_URI = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
 
+  BUNDLE_PATH = T.let(
+    begin
+      Bundler.bundle_path.to_s
+    rescue Bundler::GemfileNotFound
+      nil
+    end,
+    T.nilable(String),
+  )
+
   # A notification to be sent to the client
   class Message
     extend T::Sig

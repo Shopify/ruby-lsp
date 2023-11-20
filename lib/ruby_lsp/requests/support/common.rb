@@ -66,7 +66,18 @@ module RubyLsp
           )
         end
 
-        sig { params(title: String, entries: T::Array[RubyIndexer::Entry]).returns(Interface::MarkupContent) }
+        sig { params(file_path: String).returns(T.nilable(T::Boolean)) }
+        def defined_in_gem?(file_path)
+          DependencyDetector.instance.typechecker && BUNDLE_PATH && !file_path.start_with?(T.must(BUNDLE_PATH)) &&
+            !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
+        end
+
+        sig do
+          params(
+            title: String,
+            entries: T.any(T::Array[RubyIndexer::Entry], RubyIndexer::Entry),
+          ).returns(Interface::MarkupContent)
+        end
         def markdown_from_index_entries(title, entries)
           markdown_title = "```ruby\n#{title}\n```"
           definitions = []
