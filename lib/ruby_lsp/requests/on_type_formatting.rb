@@ -51,7 +51,14 @@ module RubyLsp
           if (comment_match = @previous_line.match(/^#(\s*)/))
             handle_comment_line(T.must(comment_match[1]))
           elsif @document.syntax_error?
-            handle_statement_end
+            match = /(?<=<<(-|~))(?<quote>['"`]?)(?<delimiter>\w+)\k<quote>/.match(@previous_line)
+            heredoc_delimiter = match && match.named_captures["delimiter"]
+
+            if heredoc_delimiter
+              handle_heredoc_end(heredoc_delimiter)
+            else
+              handle_statement_end
+            end
           end
         end
 
@@ -119,6 +126,14 @@ module RubyLsp
           add_edit_with_text("#{indents}end\n", { line: @position[:line] + 1, character: @position[:character] })
           move_cursor_to(@position[:line] - 1, @indentation + @previous_line.size + 1)
         end
+      end
+
+      sig { params(delimiter: String).void }
+      def handle_heredoc_end(delimiter)
+        indents = " " * @indentation
+        add_edit_with_text("\n")
+        add_edit_with_text("#{indents}#{delimiter}")
+        move_cursor_to(@position[:line], @indentation + 2)
       end
 
       sig { params(spaces: String).void }

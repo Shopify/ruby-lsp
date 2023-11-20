@@ -363,4 +363,34 @@ class OnTypeFormattingTest < Minitest::Test
 
     assert_equal(expected_edits.to_json, T.must(edits).to_json)
   end
+
+  def test_adding_heredoc_delimiter
+    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "str = <<~STR",
+      }],
+      version: 2,
+    )
+    document.parse
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").run
+    expected_edits = [
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: "\n",
+      },
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: "STR",
+      },
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: "$0",
+      },
+    ]
+    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+  end
 end
