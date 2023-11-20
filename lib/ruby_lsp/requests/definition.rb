@@ -9,7 +9,12 @@ module RubyLsp
     # request](https://microsoft.github.io/language-server-protocol/specification#textDocument_definition) jumps to the
     # definition of the symbol under the cursor.
     #
-    # Currently, only jumping to classes, modules and required files is supported.
+    # Currently supported targets:
+    # - Classes
+    # - Modules
+    # - Constants
+    # - Require paths
+    # - Methods invoked on self only
     #
     # # Example
     #
@@ -75,8 +80,52 @@ module RubyLsp
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
         message = node.name
-        return unless message == :require || message == :require_relative
 
+        if message == :require || message == :require_relative
+          handle_require_definition(node)
+        else
+          handle_method_definition(node)
+        end
+      end
+
+      sig { params(node: Prism::ConstantPathNode).void }
+      def on_constant_path_node_enter(node)
+        find_in_index(node.slice)
+      end
+
+      sig { params(node: Prism::ConstantReadNode).void }
+      def on_constant_read_node_enter(node)
+        find_in_index(node.slice)
+      end
+
+      private
+
+      sig { params(node: Prism::CallNode).void }
+      def handle_method_definition(node)
+        return if node.receiver
+
+        message = node.message
+        return unless message
+
+        target_method = @index.resolve_method(message, @nesting.join("::"))
+        return unless target_method
+
+        location = target_method.location
+        file_path = target_method.file_path
+        return if defined_in_gem?(file_path)
+
+        @_response = Interface::Location.new(
+          uri: URI::Generic.from_path(path: file_path).to_s,
+          range: Interface::Range.new(
+            start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
+            end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
+          ),
+        )
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def handle_require_definition(node)
+        message = node.name
         arguments = node.arguments
         return unless arguments
 
@@ -115,18 +164,6 @@ module RubyLsp
           )
         end
       end
-
-      sig { params(node: Prism::ConstantPathNode).void }
-      def on_constant_path_node_enter(node)
-        find_in_index(node.slice)
-      end
-
-      sig { params(node: Prism::ConstantReadNode).void }
-      def on_constant_read_node_enter(node)
-        find_in_index(node.slice)
-      end
-
-      private
 
       sig { params(value: String).void }
       def find_in_index(value)
