@@ -105,4 +105,16 @@ class WorkspaceSymbolTest < Minitest::Test
     assert_equal(1, result.length)
     assert_equal("Foo", T.must(result.first).name)
   end
+
+  def test_returns_method_symbols
+    @index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake.rb"), <<~RUBY)
+      class Foo
+        def bar; end
+      end
+    RUBY
+
+    result = RubyLsp::Requests::WorkspaceSymbol.new("bar", @index).run.first
+    assert_equal("bar", T.must(result).name)
+    assert_equal(RubyLsp::Constant::SymbolKind::METHOD, T.must(result).kind)
+  end
 end

@@ -73,6 +73,8 @@ module RubyLsp
           Constant::SymbolKind::NAMESPACE
         when RubyIndexer::Entry::Constant
           Constant::SymbolKind::CONSTANT
+        when RubyIndexer::Entry::Method
+          entry.name == "initialize" ? Constant::SymbolKind::CONSTRUCTOR : Constant::SymbolKind::METHOD
         end
       end
     end
