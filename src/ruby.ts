@@ -169,8 +169,16 @@ export class Ruby {
 
   private async activate(ruby: string) {
     let command = this.shell ? `${this.shell} -ic '` : "";
-    command += `${ruby} -rjson -e "STDERR.printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE},
-      JSON.dump({ env: ENV.to_h, ruby_version: RUBY_VERSION, yjit: defined?(RubyVM::YJIT) }))"`;
+
+    // The Ruby activation script is intentionally written as an array that gets joined into a one liner because some
+    // terminals cannot handle line breaks. Do not switch this to a multiline string or that will break activation for
+    // those terminals
+    const script = [
+      "STDERR.printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, ",
+      "JSON.dump({ env: ENV.to_h, ruby_version: RUBY_VERSION, yjit: defined?(RubyVM::YJIT) }))",
+    ].join("");
+
+    command += `${ruby} -rjson -e "${script}"`;
 
     if (this.shell) {
       command += "'";
