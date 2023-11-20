@@ -69,5 +69,19 @@ module RubyIndexer
       assert_equal(:"(a, (b, ))", parameter.name)
       assert_instance_of(Entry::RequiredParameter, parameter)
     end
+
+    def test_keeps_track_of_method_owner
+      index(<<~RUBY)
+        class Foo
+          def bar
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+      owner_name = T.must(entry.owner).name
+
+      assert_equal("Foo", owner_name)
+    end
   end
 end

@@ -19,6 +19,7 @@ module RubyIndexer
         T::Hash[Integer, Prism::Comment],
       )
       @queue = T.let([], T::Array[Object])
+      @current_owner = T.let(nil, T.nilable(Entry::Namespace))
 
       super()
     end
@@ -150,9 +151,23 @@ module RubyIndexer
       comments = collect_comments(node)
       case node.receiver
       when nil
-        @index << Entry::InstanceMethod.new(method_name, @file_path, node.location, comments, node.parameters)
+        @index << Entry::InstanceMethod.new(
+          method_name,
+          @file_path,
+          node.location,
+          comments,
+          node.parameters,
+          @current_owner,
+        )
       when Prism::SelfNode
-        @index << Entry::SingletonMethod.new(method_name, @file_path, node.location, comments, node.parameters)
+        @index << Entry::SingletonMethod.new(
+          method_name,
+          @file_path,
+          node.location,
+          comments,
+          node.parameters,
+          @current_owner,
+        )
       end
     end
 
@@ -232,8 +247,8 @@ module RubyIndexer
       end
 
       comments = collect_comments(node)
-
-      @index << Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments)
+      @current_owner = Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments)
+      @index << @current_owner
       @stack << name
       @queue.prepend(node.body, LEAVE_EVENT)
     end
@@ -255,13 +270,14 @@ module RubyIndexer
         superclass.slice
       end
 
-      @index << Entry::Class.new(
+      @current_owner = Entry::Class.new(
         fully_qualify_name(name),
         @file_path,
         node.location,
         comments,
         parent_class,
       )
+      @index << @current_owner
       @stack << name
       @queue.prepend(node.body, LEAVE_EVENT)
     end

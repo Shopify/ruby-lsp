@@ -216,5 +216,35 @@ module RubyIndexer
         end
       RUBY
     end
+
+    def test_resolve_method_with_known_receiver
+      index(<<~RUBY)
+        module Foo
+          module Bar
+            def baz; end
+          end
+        end
+      RUBY
+
+      entry = T.must(@index.resolve_method("baz", "Foo::Bar"))
+      assert_equal("baz", entry.name)
+      assert_equal("Foo::Bar", T.must(entry.owner).name)
+    end
+
+    def test_prefix_search_for_methods
+      index(<<~RUBY)
+        module Foo
+          module Bar
+            def baz; end
+          end
+        end
+      RUBY
+
+      entries = @index.prefix_search("ba")
+      refute_empty(entries)
+
+      entry = T.must(entries.first).first
+      assert_equal("baz", entry.name)
+    end
   end
 end

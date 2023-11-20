@@ -101,6 +101,9 @@ module RubyIndexer
       sig { returns(T::Array[Parameter]) }
       attr_reader :parameters
 
+      sig { returns(T.nilable(Entry::Namespace)) }
+      attr_reader :owner
+
       sig do
         params(
           name: String,
@@ -108,11 +111,13 @@ module RubyIndexer
           location: Prism::Location,
           comments: T::Array[String],
           parameters_node: T.nilable(Prism::ParametersNode),
+          owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, parameters_node)
+      def initialize(name, file_path, location, comments, parameters_node, owner) # rubocop:disable Metrics/ParameterLists
         super(name, file_path, location, comments)
         @parameters = T.let(list_params(parameters_node), T::Array[Parameter])
+        @owner = owner
       end
 
       private
