@@ -6,9 +6,14 @@ module RubyLsp
     # ![Completion demo](../../completion.gif)
     #
     # The [completion](https://microsoft.github.io/language-server-protocol/specification#textDocument_completion)
-    # suggests possible completions according to what the developer is typing. Currently, completion is support for
-    # - require paths
-    # - classes, modules and constant names
+    # suggests possible completions according to what the developer is typing.
+    #
+    # Currently supported targets:
+    # - Classes
+    # - Modules
+    # - Constants
+    # - Require paths
+    # - Methods invoked on self only
     #
     # # Example
     #
@@ -45,6 +50,7 @@ module RubyLsp
           :on_string_node_enter,
           :on_constant_path_node_enter,
           :on_constant_read_node_enter,
+          :on_call_node_enter,
         )
       end
 
@@ -118,7 +124,47 @@ module RubyLsp
         end
       end
 
+      sig { params(node: Prism::CallNode).void }
+      def on_call_node_enter(node)
+        return if DependencyDetector.instance.typechecker
+        return if node.receiver
+
+        name = node.message
+        return unless name
+
+        receiver_entries = @index[@nesting.join("::")]
+        return unless receiver_entries
+
+        receiver = T.must(receiver_entries.first)
+
+        candidates = T.cast(@index.prefix_search(name), T::Array[T::Array[RubyIndexer::Entry::Method]])
+        candidates.each do |entries|
+          entry = entries.find { |e| e.owner&.name == receiver.name }
+          next unless entry
+
+          @_response << build_method_completion(entry, node)
+        end
+      end
+
       private
+
+      sig { params(entry: RubyIndexer::Entry::Method, node: Prism::CallNode).returns(Interface::CompletionItem) }
+      def build_method_completion(entry, node)
+        name = entry.name
+        parameters = entry.parameters
+        new_text = parameters.empty? ? name : "#{name}(#{parameters.map(&:name).join(", ")})"
+
+        Interface::CompletionItem.new(
+          label: name,
+          filter_text: name,
+          text_edit: Interface::TextEdit.new(range: range_from_node(node), new_text: new_text),
+          kind: Constant::CompletionItemKind::METHOD,
+          label_details: Interface::CompletionItemLabelDetails.new(
+            description: entry.file_name,
+          ),
+          documentation: markdown_from_index_entries(name, entry),
+        )
+      end
 
       sig { params(label: String, node: Prism::StringNode).returns(Interface::CompletionItem) }
       def build_completion(label, node)
