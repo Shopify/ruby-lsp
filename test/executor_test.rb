@@ -108,6 +108,33 @@ class ExecutorTest < Minitest::Test
     assert_includes("utf-16", hash.dig("capabilities", "positionEncoding"))
   end
 
+  def test_server_info_includes_version
+    response = @executor.execute({
+      method: "initialize",
+      params: {
+        initializationOptions: {},
+        capabilities: {},
+      },
+    }).response
+
+    hash = JSON.parse(response.to_json)
+    assert_equal(RubyLsp::VERSION, hash.dig("serverInfo", "version"))
+  end
+
+  def test_server_info_includes_formatter
+    RubyLsp::DependencyDetector.instance.expects(:detected_formatter).returns("rubocop")
+    response = @executor.execute({
+      method: "initialize",
+      params: {
+        initializationOptions: {},
+        capabilities: {},
+      },
+    }).response
+
+    hash = JSON.parse(response.to_json)
+    assert_equal("rubocop", hash.dig("formatter"))
+  end
+
   def test_initialized_populates_index
     @executor.execute({ method: "initialized", params: {} })
 

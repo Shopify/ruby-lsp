@@ -581,7 +581,7 @@ module RubyLsp
       # notification
     end
 
-    sig { params(options: T::Hash[Symbol, T.untyped]).returns(Interface::InitializeResult) }
+    sig { params(options: T::Hash[Symbol, T.untyped]).returns(T::Hash[Symbol, T.untyped]) }
     def initialize_request(options)
       @store.clear
 
@@ -718,7 +718,7 @@ module RubyLsp
 
       begin_progress("indexing-progress", "Ruby LSP: indexing files")
 
-      Interface::InitializeResult.new(
+      {
         capabilities: Interface::ServerCapabilities.new(
           text_document_sync: Interface::TextDocumentSyncOptions.new(
             change: Constant::TextDocumentSyncKind::INCREMENTAL,
@@ -742,7 +742,12 @@ module RubyLsp
           definition_provider: enabled_features["definition"],
           workspace_symbol_provider: enabled_features["workspaceSymbol"],
         ),
-      )
+        serverInfo: {
+          name: "Ruby LSP",
+          version: VERSION,
+        },
+        formatter: @store.formatter,
+      }
     end
 
     sig { void }
