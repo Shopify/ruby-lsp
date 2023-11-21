@@ -11,7 +11,7 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
     message_queue = Thread::Queue.new
     params = @__params&.any? ? @__params : default_args
     uri = URI("file://#{@_path}")
-    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::InlayHints.new(params.first, dispatcher, message_queue)

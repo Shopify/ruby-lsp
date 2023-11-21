@@ -5,7 +5,7 @@ require "test_helper"
 
 class OnTypeFormattingTest < Minitest::Test
   def test_adding_missing_ends
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -35,7 +35,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_adding_missing_curly_brace_in_string_interpolation
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -61,7 +61,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_adding_missing_pipe
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -87,7 +87,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_pipe_is_not_added_in_regular_or_pipe
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -103,7 +103,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_pipe_is_removed_if_user_adds_manually_after_completion
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -159,7 +159,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_pipe_is_removed_if_user_adds_manually_after_block_argument
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -192,7 +192,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_comment_continuation
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -218,7 +218,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_keyword_handling
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -234,7 +234,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_comment_continuation_with_other_line_break_matches
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     # If the current comment line has another word we match for, such as `while`, we still only want to complete the new
     # comment, but avoid adding an incorrect end to the comment's `while` word
@@ -262,7 +262,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_comment_continuation_when_inserting_new_line_in_the_middle
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     # When inserting a new line between while and blah, the document will have a syntax error momentarily before we auto
     # insert the comment continuation. We must avoid accidentally trying to add an `end` token to `while` while the
@@ -291,7 +291,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_breaking_line_between_keyword_and_more_content
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -322,7 +322,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_breaking_line_between_keyword_when_there_is_content_on_the_next_line
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -338,7 +338,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_breaking_line_immediately_after_keyword
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{

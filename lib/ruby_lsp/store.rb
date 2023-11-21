@@ -1,8 +1,6 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "ruby_lsp/document"
-
 module RubyLsp
   class Store
     extend T::Sig
@@ -40,7 +38,7 @@ module RubyLsp
 
     sig { params(uri: URI::Generic, source: String, version: Integer).void }
     def set(uri:, source:, version:)
-      document = Document.new(source: source, version: version, uri: uri, encoding: @encoding)
+      document = RubyDocument.new(source: source, version: version, uri: uri, encoding: @encoding)
       @state[uri.to_s] = document
     end
 
