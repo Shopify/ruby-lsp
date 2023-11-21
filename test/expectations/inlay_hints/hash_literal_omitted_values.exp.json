@@ -53,6 +53,24 @@
       "label": "hello",
       "tooltip": "This is a local variable: hello",
       "paddingLeft": true
+    },
+    {
+      "position": {
+        "line": 14,
+        "character": 8
+      },
+      "label": "foo",
+      "tooltip": "This is a method call. Method name: foo",
+      "paddingLeft": true
+    },
+    {
+      "position": {
+        "line": 16,
+        "character": 9
+      },
+      "label": "TEST",
+      "tooltip": "This is a constant: TEST",
+      "paddingLeft": true
     }
   ]
 }

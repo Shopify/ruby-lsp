@@ -27,7 +27,7 @@ module RubyLsp
     #   var: var, # Label "var" goes here in cases where the value is omitted
     #   a: "hello",
     # }
-    # `
+    # ```
     class InlayHints < Listener
       extend T::Sig
       extend T::Generic
@@ -46,8 +46,7 @@ module RubyLsp
         @_response = T.let([], ResponseType)
         @range = range
 
-        dispatcher.register(self, :on_rescue_node_enter)
-        dispatcher.register(self, :on_implicit_node_enter)
+        dispatcher.register(self, :on_rescue_node_enter, :on_implicit_node_enter)
       end
 
       sig { params(node: Prism::RescueNode).void }

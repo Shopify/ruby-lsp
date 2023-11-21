@@ -10,4 +10,10 @@ module Foo
 
   def test(opts = {}); end
   test(foo:, TEST:, hello:)
+
+  {
+    foo:,
+    bar: "bar",
+    TEST:,
+  }
 end
