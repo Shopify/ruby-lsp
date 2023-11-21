@@ -490,6 +490,32 @@ class CompletionTest < Minitest::Test
     assert_equal(["bar(a, b)", "baz(c, d)"], result.map { |completion| completion.text_edit.new_text })
   end
 
+  def test_completion_for_methods_invoked_on_explicit_self
+    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+      class Foo
+        def bar(a, b); end
+        def baz(c, d); end
+
+        def process
+          self.b
+        end
+      end
+    RUBY
+
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: { line: 5, character: 10 } },
+    )
+    assert_equal(["bar", "baz"], result.map(&:label))
+    assert_equal(["bar", "baz"], result.map(&:filter_text))
+    assert_equal(["bar(a, b)", "baz(c, d)"], result.map { |completion| completion.text_edit.new_text })
+  end
+
   def test_completion_for_methods_named_with_uppercase_characters
     document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Kernel

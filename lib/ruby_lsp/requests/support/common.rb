@@ -75,6 +75,12 @@ module RubyLsp
             !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
         end
 
+        sig { params(node: Prism::CallNode).returns(T::Boolean) }
+        def self_receiver?(node)
+          receiver = node.receiver
+          receiver.nil? || receiver.is_a?(Prism::SelfNode)
+        end
+
         sig do
           params(
             title: String,
