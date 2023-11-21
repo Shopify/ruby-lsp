@@ -365,7 +365,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_adding_heredoc_delimiter
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
