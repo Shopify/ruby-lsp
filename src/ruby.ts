@@ -215,7 +215,11 @@ export class Ruby {
     this.supportsYjit =
       this.yjitEnabled && (major > 3 || (major === 3 && minor >= 2));
 
-    const useYjit = vscode.workspace.getConfiguration("rubyLsp").get("yjit");
+    // Starting with Ruby 3.3 the server enables YJIT itself
+    const useYjit =
+      vscode.workspace.getConfiguration("rubyLsp").get("yjit") &&
+      major === 3 &&
+      minor === 2;
 
     if (this.supportsYjit && useYjit) {
       // RUBYOPT may be empty or it may contain bundler paths. In the second case, we must concat to avoid accidentally
