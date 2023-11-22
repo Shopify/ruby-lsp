@@ -381,7 +381,8 @@
           "capfile",
           "rakefile",
           "gemfile"
-        ]
+        ],
+        "configuration": "./languages/ruby.json"
       },
       {
         "id": "erb",
