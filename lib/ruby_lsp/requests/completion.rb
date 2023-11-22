@@ -137,7 +137,10 @@ module RubyLsp
 
         receiver = T.must(receiver_entries.first)
 
-        candidates = T.cast(@index.prefix_search(name), T::Array[T::Array[RubyIndexer::Entry::Method]])
+        candidates = T.cast(
+          @index.prefix_search(name),
+          T::Array[T.any(T::Array[RubyIndexer::Entry::Method], T::Array[RubyIndexer::Entry::Attribute])],
+        )
         candidates.each do |entries|
           entry = entries.find { |e| e.owner&.name == receiver.name }
           next unless entry
@@ -148,7 +151,12 @@ module RubyLsp
 
       private
 
-      sig { params(entry: RubyIndexer::Entry::Method, node: Prism::CallNode).returns(Interface::CompletionItem) }
+      sig do
+        params(
+          entry: T.any(RubyIndexer::Entry::Method, RubyIndexer::Entry::Attribute),
+          node: Prism::CallNode,
+        ).returns(Interface::CompletionItem)
+      end
       def build_method_completion(entry, node)
         name = entry.name
         parameters = entry.parameters
