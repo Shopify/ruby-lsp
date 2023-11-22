@@ -1,0 +1,76 @@
+{
+  "result": [
+    {
+      "position": {
+        "line": 2,
+        "character": 9
+      },
+      "label": "hello",
+      "tooltip": "This is a local variable: hello",
+      "paddingLeft": true
+    },
+    {
+      "position": {
+        "line": 5,
+        "character": 8
+      },
+      "label": "TEST",
+      "tooltip": "This is a constant: TEST",
+      "paddingLeft": true
+    },
+    {
+      "position": {
+        "line": 8,
+        "character": 7
+      },
+      "label": "foo",
+      "tooltip": "This is a method call. Method name: foo",
+      "paddingLeft": true
+    },
+    {
+      "position": {
+        "line": 11,
+        "character": 11
+      },
+      "label": "foo",
+      "tooltip": "This is a method call. Method name: foo",
+      "paddingLeft": true
+    },
+    {
+      "position": {
+        "line": 11,
+        "character": 18
+      },
+      "label": "TEST",
+      "tooltip": "This is a constant: TEST",
+      "paddingLeft": true
+    },
+    {
+      "position": {
+        "line": 11,
+        "character": 26
+      },
+      "label": "hello",
+      "tooltip": "This is a local variable: hello",
+      "paddingLeft": true
+    },
+    {
+      "position": {
+        "line": 14,
+        "character": 8
+      },
+      "label": "foo",
+      "tooltip": "This is a method call. Method name: foo",
+      "paddingLeft": true
+    },
+    {
+      "position": {
+        "line": 16,
+        "character": 9
+      },
+      "label": "TEST",
+      "tooltip": "This is a constant: TEST",
+      "paddingLeft": true
+    }
+  ]
+}
