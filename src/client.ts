@@ -180,8 +180,27 @@ export default class Client implements ClientInterface {
             workspaceEdit.set(document.uri, response);
             await vscode.workspace.applyEdit(workspaceEdit);
 
+            const editor = vscode.window.activeTextEditor!;
+            const existingText = editor.document.getText(
+              new vscode.Range(
+                cursorPosition.range.start,
+                cursorPosition.range.end,
+              ),
+            );
+
+            const indentChar = vscode.window.activeTextEditor?.options
+              .insertSpaces
+              ? " "
+              : "\t";
+
+            const indentation = indentChar.repeat(
+              cursorPosition.range.end.character - existingText.length,
+            );
+
             await vscode.window.activeTextEditor!.insertSnippet(
-              new vscode.SnippetString(cursorPosition.newText),
+              new vscode.SnippetString(
+                `${indentation}${cursorPosition.newText}`,
+              ),
               new vscode.Selection(
                 cursorPosition.range.start,
                 cursorPosition.range.end,
