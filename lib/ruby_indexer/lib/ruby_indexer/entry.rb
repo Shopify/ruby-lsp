@@ -93,6 +93,27 @@ module RubyIndexer
     class RequiredParameter < Parameter
     end
 
+    class Attribute < Entry
+      extend T::Sig
+
+      sig { returns(T.nilable(Entry::Namespace)) }
+      attr_reader :owner
+
+      sig do
+        params(
+          name: String,
+          file_path: String,
+          location: Prism::Location,
+          comments: T::Array[String],
+          owner: T.nilable(Entry::Namespace),
+        ).void
+      end
+      def initialize(name, file_path, location, comments, owner)
+        super(name, file_path, location, comments)
+        @owner = owner
+      end
+    end
+
     class Method < Entry
       extend T::Sig
       extend T::Helpers
