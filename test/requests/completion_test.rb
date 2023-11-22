@@ -465,7 +465,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_methods_invoked_on_self
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Foo
         def bar(a, b); end
         def baz(c, d); end
@@ -491,7 +491,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_methods_invoked_on_explicit_self
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Foo
         def bar(a, b); end
         def baz(c, d); end
@@ -517,7 +517,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_methods_named_with_uppercase_characters
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Kernel
         def Array(a); end
 
