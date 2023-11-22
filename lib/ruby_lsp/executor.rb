@@ -476,34 +476,32 @@ module RubyLsp
     def completion(uri, position)
       document = @store.get(uri)
 
-      char_position = document.create_scanner.find_char_position(position)
-
-      # When the user types in the first letter of a constant name, we actually receive the position of the next
-      # immediate character. We check to see if the character is uppercase and then remove the offset to try to locate
-      # the node, as it could not be a constant
-      target_node_types = if ("A".."Z").cover?(document.source[char_position - 1])
-        char_position -= 1
-        [Prism::ConstantReadNode, Prism::ConstantPathNode]
-      else
-        [Prism::CallNode]
-      end
-
-      matched, parent, nesting = document.locate(document.tree, char_position, node_types: target_node_types)
+      # Completion always receives the position immediately after the character that was just typed. Here we adjust it
+      # back by 1, so that we find the right node
+      char_position = document.create_scanner.find_char_position(position) - 1
+      matched, parent, nesting = document.locate(
+        document.tree,
+        char_position,
+        node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode],
+      )
       return unless matched && parent
 
       target = case matched
       when Prism::CallNode
         message = matched.message
-        return unless message == "require"
 
-        args = matched.arguments&.arguments
-        return if args.nil? || args.is_a?(Prism::ForwardingArgumentsNode)
+        if message == "require"
+          args = matched.arguments&.arguments
+          return if args.nil? || args.is_a?(Prism::ForwardingArgumentsNode)
 
-        argument = args.first
-        return unless argument.is_a?(Prism::StringNode)
-        return unless (argument.location.start_offset..argument.location.end_offset).cover?(char_position)
+          argument = args.first
+          return unless argument.is_a?(Prism::StringNode)
+          return unless (argument.location.start_offset..argument.location.end_offset).cover?(char_position)
 
-        argument
+          argument
+        else
+          matched
+        end
       when Prism::ConstantReadNode, Prism::ConstantPathNode
         if parent.is_a?(Prism::ConstantPathNode) && matched.is_a?(Prism::ConstantReadNode)
           parent
@@ -682,7 +680,7 @@ module RubyLsp
       completion_provider = if enabled_features["completion"]
         Interface::CompletionOptions.new(
           resolve_provider: false,
-          trigger_characters: ["/", *"A".."Z"],
+          trigger_characters: ["/"],
           completion_item: {
             labelDetailsSupport: true,
           },

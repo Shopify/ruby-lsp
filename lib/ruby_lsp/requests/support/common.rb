@@ -9,6 +9,9 @@ module RubyLsp
         # https://github.com/Shopify/ruby-lsp-rails, or addons by created by developers outside of Shopify, so be
         # cautious of changing anything.
         extend T::Sig
+        extend T::Helpers
+
+        requires_ancestor { Kernel }
 
         sig { params(node: Prism::Node).returns(Interface::Range) }
         def range_from_node(node)
@@ -66,12 +69,29 @@ module RubyLsp
           )
         end
 
-        sig { params(title: String, entries: T::Array[RubyIndexer::Entry]).returns(Interface::MarkupContent) }
+        sig { params(file_path: String).returns(T.nilable(T::Boolean)) }
+        def defined_in_gem?(file_path)
+          DependencyDetector.instance.typechecker && BUNDLE_PATH && !file_path.start_with?(T.must(BUNDLE_PATH)) &&
+            !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
+        end
+
+        sig { params(node: Prism::CallNode).returns(T::Boolean) }
+        def self_receiver?(node)
+          receiver = node.receiver
+          receiver.nil? || receiver.is_a?(Prism::SelfNode)
+        end
+
+        sig do
+          params(
+            title: String,
+            entries: T.any(T::Array[RubyIndexer::Entry], RubyIndexer::Entry),
+          ).returns(Interface::MarkupContent)
+        end
         def markdown_from_index_entries(title, entries)
           markdown_title = "```ruby\n#{title}\n```"
           definitions = []
           content = +""
-          entries.each do |entry|
+          Array(entries).each do |entry|
             loc = entry.location
 
             # We always handle locations as zero based. However, for file links in Markdown we need them to be one
