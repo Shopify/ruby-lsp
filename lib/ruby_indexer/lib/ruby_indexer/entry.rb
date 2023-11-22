@@ -40,6 +40,15 @@ module RubyIndexer
 
       abstract!
 
+      sig { returns(SingletonClass) }
+      attr_reader :singleton_klass
+
+      sig { params(name: String, file_path: String, location: Prism::Location, comments: T::Array[String]).void }
+      def initialize(name, file_path, location, comments)
+        super
+        @singleton_klass = T.let(SingletonClass.new(name, self), SingletonClass)
+      end
+
       sig { returns(String) }
       def short_name
         T.must(@name.split("::").last)
@@ -69,6 +78,23 @@ module RubyIndexer
       def initialize(name, file_path, location, comments, parent_class)
         super(name, file_path, location, comments)
         @parent_class = T.let(parent_class, T.nilable(String))
+        @singleton_klass = T.let(SingletonClass.new(name, self), SingletonClass)
+      end
+    end
+
+    class SingletonClass
+      extend T::Sig
+
+      sig { returns(Namespace) }
+      attr_reader :attached_class
+
+      sig { returns(String) }
+      attr_reader :name
+
+      sig { params(name: String, attached_class: Namespace).void }
+      def initialize(name, attached_class)
+        @name = T.let("Class:#{name}", String)
+        @attached_class = attached_class
       end
     end
 
@@ -127,7 +153,7 @@ module RubyIndexer
 
       abstract!
 
-      sig { returns(T.nilable(Entry::Namespace)) }
+      sig { returns(T.nilable(T.any(Namespace, SingletonClass))) }
       attr_reader :owner
 
       sig do
@@ -175,7 +201,7 @@ module RubyIndexer
           location: Prism::Location,
           comments: T::Array[String],
           parameters_node: T.nilable(Prism::ParametersNode),
-          owner: T.nilable(Entry::Namespace),
+          owner: T.nilable(T.any(Namespace, SingletonClass)),
         ).void
       end
       def initialize(name, file_path, location, comments, parameters_node, owner) # rubocop:disable Metrics/ParameterLists
@@ -267,12 +293,6 @@ module RubyIndexer
           :"(#{names_with_commas})"
         end
       end
-    end
-
-    class SingletonMethod < Method
-    end
-
-    class InstanceMethod < Method
     end
 
     # An UnresolvedAlias points to a constant alias with a right hand side that has not yet been resolved. For

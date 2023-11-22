@@ -106,7 +106,7 @@ module RubyLsp
         message = node.message
         return unless message
 
-        target_method = @index.resolve_method(message, @nesting.join("::"))
+        target_method = @index.resolve_method(message, @nesting.join("::"), singleton: false)
         return unless target_method
 
         location = target_method.location

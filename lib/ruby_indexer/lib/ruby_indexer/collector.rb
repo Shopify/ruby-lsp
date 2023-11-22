@@ -161,7 +161,7 @@ module RubyIndexer
       comments = collect_comments(node)
       case node.receiver
       when nil
-        @index << Entry::InstanceMethod.new(
+        @index << Entry::Method.new(
           method_name,
           @file_path,
           node.location,
@@ -170,13 +170,13 @@ module RubyIndexer
           @current_owner,
         )
       when Prism::SelfNode
-        @index << Entry::SingletonMethod.new(
+        @index << Entry::Method.new(
           method_name,
           @file_path,
           node.location,
           comments,
           node.parameters,
-          @current_owner,
+          @current_owner&.singleton_klass,
         )
       end
     end

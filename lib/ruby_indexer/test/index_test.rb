@@ -226,9 +226,23 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index.resolve_method("baz", "Foo::Bar"))
+      entry = T.must(@index.resolve_method("baz", "Foo::Bar", singleton: false))
       assert_equal("baz", entry.name)
       assert_equal("Foo::Bar", T.must(entry.owner).name)
+    end
+
+    def test_resolve_method_for_singleton_method
+      index(<<~RUBY)
+        module Foo
+          module Bar
+            def self.baz; end
+          end
+        end
+      RUBY
+
+      entry = T.must(@index.resolve_method("baz", "Foo::Bar", singleton: true))
+      assert_equal("baz", entry.name)
+      assert_equal("Class:Foo::Bar", T.must(entry.owner).name)
     end
 
     def test_prefix_search_for_methods
