@@ -39,6 +39,13 @@ jobs:
         include:
           - ruby: "head"
             experimental: true
+        exclude:
+          - os: windows-latest
+            ruby: '3.1'
+          - os: windows-latest
+            ruby: '3.2'
+          - os: windows-latest
+            ruby: 'head'
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ !!matrix.experimental }}
     name: Ruby ${{ matrix.ruby }} on ${{ matrix.os }}
