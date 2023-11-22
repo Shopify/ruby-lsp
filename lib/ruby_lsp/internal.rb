@@ -29,3 +29,5 @@ require "ruby_lsp/ruby_document"
 require "ruby_lsp/store"
 require "ruby_lsp/addon"
 require "ruby_lsp/requests/support/rubocop_runner"
+
+Bundler.ui.level = :silent
