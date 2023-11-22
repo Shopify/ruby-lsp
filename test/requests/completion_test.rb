@@ -24,14 +24,8 @@ class CompletionTest < Minitest::Test
     RUBY
 
     end_char = T.must(document.source.rindex('"'))
-    start_position = {
-      line: 0,
-      character: T.must(document.source.index('"')),
-    }
-    end_position = {
-      line: 0,
-      character: end_char + 1,
-    }
+    start_position = { line: 0, character: T.must(document.source.index('"')) + 1 }
+    end_position = { line: 0, character: end_char }
 
     result = with_file_structure do
       @store.set(uri: @uri, source: document.source, version: 1)
@@ -61,14 +55,8 @@ class CompletionTest < Minitest::Test
     RUBY
 
     end_char = T.must(document.source.rindex('"'))
-    start_position = {
-      line: 0,
-      character: T.must(document.source.index('"')),
-    }
-    end_position = {
-      line: 0,
-      character: end_char + 1,
-    }
+    start_position = { line: 0, character: T.must(document.source.index('"')) + 1 }
+    end_position = { line: 0, character: end_char }
 
     result = with_file_structure do
       @store.set(uri: @uri, source: document.source, version: 1)
@@ -98,14 +86,8 @@ class CompletionTest < Minitest::Test
     RUBY
 
     end_char = T.must(document.source.rindex('"'))
-    start_position = {
-      line: 0,
-      character: T.must(document.source.index('"')),
-    }
-    end_position = {
-      line: 0,
-      character: end_char + 1,
-    }
+    start_position = { line: 0, character: T.must(document.source.index('"')) + 1 }
+    end_position = { line: 0, character: end_char }
 
     result = with_file_structure do
       @store.set(uri: @uri, source: document.source, version: 1)
@@ -135,14 +117,8 @@ class CompletionTest < Minitest::Test
     RUBY
 
     end_char = T.must(document.source.rindex('"'))
-    start_position = {
-      line: 0,
-      character: T.must(document.source.index('"')),
-    }
-    end_position = {
-      line: 0,
-      character: end_char + 1,
-    }
+    start_position = { line: 0, character: T.must(document.source.index('"')) + 1 }
+    end_position = { line: 0, character: end_char }
 
     result = with_file_structure do
       @store.set(uri: @uri, source: document.source, version: 1)

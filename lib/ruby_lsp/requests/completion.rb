@@ -168,10 +168,16 @@ module RubyLsp
 
       sig { params(label: String, node: Prism::StringNode).returns(Interface::CompletionItem) }
       def build_completion(label, node)
+        # We should use the content location as we only replace the content and not the delimiters of the string
+        loc = node.content_loc
+
         Interface::CompletionItem.new(
           label: label,
           text_edit: Interface::TextEdit.new(
-            range: range_from_node(node),
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column),
+              end: Interface::Position.new(line: loc.end_line - 1, character: loc.end_column),
+            ),
             new_text: label,
           ),
           kind: Constant::CompletionItemKind::REFERENCE,
