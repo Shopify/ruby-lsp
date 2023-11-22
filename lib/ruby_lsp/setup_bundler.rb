@@ -12,6 +12,8 @@ require "time"
 # the Ruby LSP without including the gem in their application's Gemfile while at the same time giving us access to the
 # exact locked versions of dependencies.
 
+Bundler.ui.level = :silent
+
 module RubyLsp
   class SetupBundler
     extend T::Sig
