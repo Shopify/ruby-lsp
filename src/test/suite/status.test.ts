@@ -301,7 +301,7 @@ suite("StatusItems", () => {
     });
 
     test("Status is initialized with the right values", () => {
-      assert.strictEqual(status.item.text, "Using formatter: auto");
+      assert.strictEqual(status.item.text, "Formatter: auto");
       assert.strictEqual(status.item.name, "Formatter");
       assert.strictEqual(status.item.command?.title, "Help");
       assert.strictEqual(status.item.command.command, Command.FormatterHelp);

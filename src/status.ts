@@ -133,7 +133,9 @@ export class ServerStatus extends StatusItem {
   refresh(): void {
     switch (this.client.state) {
       case ServerState.Running: {
-        this.item.text = `Ruby LSP v${this.client.serverVersion}: Running`;
+        this.item.text = this.client.serverVersion
+          ? `Ruby LSP v${this.client.serverVersion}: Running`
+          : "Ruby LSP: Running";
         this.item.command!.arguments = [STARTED_SERVER_OPTIONS];
         this.item.severity = vscode.LanguageStatusSeverity.Information;
         break;
@@ -359,7 +361,12 @@ export class FormatterStatus extends StatusItem {
   }
 
   refresh(): void {
-    this.item.text = `Using formatter: ${this.client.formatter}`;
+    if (this.client.formatter) {
+      this.item.text = `Formatter: ${this.client.formatter}`;
+    } else {
+      this.item.text =
+        "Formatter: requires server to be v0.12.4 or higher to display this field";
+    }
   }
 
   registerCommand(): void {

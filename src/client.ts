@@ -252,10 +252,9 @@ export default class Client implements ClientInterface {
       return;
     }
 
-    // We cannot inquire anything related to the bundle before the custom bundle logic in the server runs
-    await this.determineFormatter();
-    this.telemetry.serverVersion = await this.getServerVersion();
-
+    const initializeResult = this.client.initializeResult;
+    this.#formatter = initializeResult?.formatter;
+    this.telemetry.serverVersion = initializeResult?.serverInfo?.version;
     this.state = ServerState.Running;
   }
 
@@ -311,23 +310,6 @@ export default class Client implements ClientInterface {
 
   get serverVersion(): string | undefined {
     return this.telemetry.serverVersion;
-  }
-
-  async determineFormatter() {
-    const configuration = vscode.workspace.getConfiguration("rubyLsp");
-    const configuredFormatter: string = configuration.get("formatter")!;
-
-    if (configuredFormatter === "auto") {
-      if (await this.projectHasDependency(/^rubocop/)) {
-        this.#formatter = "rubocop";
-      } else if (await this.projectHasDependency(/^syntax_tree$/)) {
-        this.#formatter = "syntax_tree";
-      } else {
-        this.#formatter = "none";
-      }
-    } else {
-      this.#formatter = configuredFormatter;
-    }
   }
 
   get context(): vscode.ExtensionContext {
@@ -404,33 +386,6 @@ export default class Client implements ClientInterface {
     return Object.keys(features).filter((key) => features[key]);
   }
 
-  private async projectHasDependency(gemNamePattern: RegExp): Promise<boolean> {
-    try {
-      // We can't include `BUNDLE_GEMFILE` here, because we want to check if the project's bundle includes the
-      // dependency and not our custom bundle
-      const { BUNDLE_GEMFILE, ...withoutBundleGemfileEnv } = this.ruby.env;
-
-      // exit with an error if gemNamePattern not a dependency or is a transitive dependency.
-      // exit with success if gemNamePattern is a direct dependency.
-
-      // NOTE: If changing this behavior, it's likely that the gem will also need changed.
-      const script = `
-        gemfile_dependencies = Bundler.locked_gems.dependencies.keys
-        gemspec_dependencies = Bundler.locked_gems.sources.grep(Bundler::Source::Gemspec).flat_map do
-          _1.gemspec&.dependencies&.map(&:name)
-        end
-        exit 1 unless (gemfile_dependencies + gemspec_dependencies).any?(${gemNamePattern})
-      `;
-      await asyncExec(`ruby -rbundler/setup -e "${script}"`, {
-        cwd: this.workingFolder,
-        env: withoutBundleGemfileEnv,
-      });
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
   private async installOrUpdateServer(): Promise<void> {
     // If there's a user configured custom bundle to run the LSP, then we do not perform auto-updates and let the user
     // manage that custom bundle themselves
@@ -475,40 +430,6 @@ export default class Client implements ClientInterface {
         LOG_CHANNEL.error(`Failed to update global ruby-lsp gem: ${error}`);
       }
     }
-  }
-
-  private async getServerVersion(): Promise<string> {
-    let bundleGemfile;
-
-    // If a custom Gemfile was configured outside of the project, use that. Otherwise, prefer our custom bundle over the
-    // app's bundle
-    if (this.hasUserDefinedCustomBundle()) {
-      bundleGemfile = path.isAbsolute(this.customBundleGemfile)
-        ? this.customBundleGemfile
-        : path.resolve(path.join(this.workingFolder, this.customBundleGemfile));
-    } else if (
-      fs.existsSync(path.join(this.workingFolder, ".ruby-lsp", "Gemfile"))
-    ) {
-      bundleGemfile = path.join(this.workingFolder, ".ruby-lsp", "Gemfile");
-    } else if (
-      fs.existsSync(path.join(this.workingFolder, ".ruby-lsp", "gems.rb"))
-    ) {
-      bundleGemfile = path.join(this.workingFolder, ".ruby-lsp", "gems.rb");
-    } else if (fs.existsSync(path.join(this.workingFolder, "gems.rb"))) {
-      bundleGemfile = path.join(this.workingFolder, "gems.rb");
-    } else {
-      bundleGemfile = path.join(this.workingFolder, "Gemfile");
-    }
-
-    const result = await asyncExec(
-      `bundle exec ruby -e "require 'ruby-lsp'; STDERR.print(RubyLsp::VERSION)"`,
-      {
-        cwd: this.workingFolder,
-        env: { ...this.ruby.env, BUNDLE_GEMFILE: bundleGemfile },
-      },
-    );
-
-    return result.stderr;
   }
 
   // If the `.git` folder exists and `.git/rebase-merge` or `.git/rebase-apply` exists, then we're in the middle of a
