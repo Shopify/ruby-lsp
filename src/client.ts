@@ -178,24 +178,30 @@ export default class Client implements ClientInterface {
 
             const workspaceEdit = new vscode.WorkspaceEdit();
             workspaceEdit.set(document.uri, response);
-            await vscode.workspace.applyEdit(workspaceEdit);
 
             const editor = vscode.window.activeTextEditor!;
-            const existingText = editor.document.getText(
-              new vscode.Range(
-                cursorPosition.range.start,
-                cursorPosition.range.end,
-              ),
-            );
+
+            // This should happen before applying the edits, otherwise the cursor will be moved to the wrong position
+            const existingText = editor.document.lineAt(
+              cursorPosition.range.start.line,
+            ).text;
+
+            await vscode.workspace.applyEdit(workspaceEdit);
 
             const indentChar = vscode.window.activeTextEditor?.options
               .insertSpaces
               ? " "
               : "\t";
 
-            const indentation = indentChar.repeat(
-              cursorPosition.range.end.character - existingText.length,
-            );
+            // If the line is not empty, we don't want to indent the cursor
+            let indentationLength = 0;
+
+            // If the line is empty or only contains whitespace, we want to indent the cursor to the requested position
+            if (/^\s*$/.exec(existingText)) {
+              indentationLength = cursorPosition.range.end.character;
+            }
+
+            const indentation = indentChar.repeat(indentationLength);
 
             await vscode.window.activeTextEditor!.insertSnippet(
               new vscode.SnippetString(
