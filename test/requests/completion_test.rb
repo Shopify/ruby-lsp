@@ -574,7 +574,7 @@ class CompletionTest < Minitest::Test
         ),
         new_text: path,
       ),
-      kind: LanguageServer::Protocol::Constant::CompletionItemKind::REFERENCE,
+      kind: LanguageServer::Protocol::Constant::CompletionItemKind::FILE,
     )
   end
 end
