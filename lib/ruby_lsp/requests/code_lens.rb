@@ -55,6 +55,8 @@ module RubyLsp
         # visibility_stack is a stack of [current_visibility, previous_visibility]
         @visibility_stack = T.let([[:public, :public]], T::Array[T::Array[T.nilable(Symbol)]])
         @class_stack = T.let([], T::Array[String])
+        @group_id = T.let(1, Integer)
+        @group_id_stack = T.let([], T::Array[Integer])
 
         super(dispatcher, message_queue)
 
@@ -82,12 +84,16 @@ module RubyLsp
             kind: :group,
           )
         end
+
+        @group_id_stack.push(@group_id)
+        @group_id += 1
       end
 
       sig { params(node: Prism::ClassNode).void }
       def on_class_node_leave(node)
         @visibility_stack.pop
         @class_stack.pop
+        @group_id_stack.pop
       end
 
       sig { params(node: Prism::DefNode).void }
@@ -174,12 +180,15 @@ module RubyLsp
           },
         ]
 
+        grouping_data = { group_id: @group_id_stack.last, kind: kind }
+        grouping_data[:id] = @group_id if kind == :group
+
         @_response << create_code_lens(
           node,
           title: "Run",
           command_name: "rubyLsp.runTest",
           arguments: arguments,
-          data: { type: "test", kind: kind },
+          data: { type: "test", **grouping_data },
         )
 
         @_response << create_code_lens(
@@ -187,7 +196,7 @@ module RubyLsp
           title: "Run In Terminal",
           command_name: "rubyLsp.runTestInTerminal",
           arguments: arguments,
-          data: { type: "test_in_terminal", kind: kind },
+          data: { type: "test_in_terminal", **grouping_data },
         )
 
         @_response << create_code_lens(
@@ -195,7 +204,7 @@ module RubyLsp
           title: "Debug",
           command_name: "rubyLsp.debugTest",
           arguments: arguments,
-          data: { type: "debug", kind: kind },
+          data: { type: "debug", **grouping_data },
         )
       end
 
