@@ -75,7 +75,7 @@ module RubyLsp
           Constant::SymbolKind::CONSTANT
         when RubyIndexer::Entry::Method
           entry.name == "initialize" ? Constant::SymbolKind::CONSTRUCTOR : Constant::SymbolKind::METHOD
-        when RubyIndexer::Entry::Attribute
+        when RubyIndexer::Entry::Accessor
           Constant::SymbolKind::PROPERTY
         end
       end

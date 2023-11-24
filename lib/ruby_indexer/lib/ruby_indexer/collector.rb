@@ -328,6 +328,9 @@ module RubyIndexer
       arguments = node.arguments&.arguments
       return unless arguments
 
+      receiver = node.receiver
+      return unless receiver.nil? || receiver.is_a?(Prism::SelfNode)
+
       comments = collect_comments(node)
       arguments.each do |argument|
         name, loc = case argument
@@ -339,8 +342,8 @@ module RubyIndexer
 
         next unless name && loc
 
-        @index << Entry::Attribute.new(name, @file_path, loc, comments, @current_owner) if reader
-        @index << Entry::Attribute.new("#{name}=", @file_path, loc, comments, @current_owner) if writer
+        @index << Entry::Accessor.new(name, @file_path, loc, comments, @current_owner) if reader
+        @index << Entry::Accessor.new("#{name}=", @file_path, loc, comments, @current_owner) if writer
       end
     end
   end

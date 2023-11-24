@@ -93,14 +93,11 @@ module RubyIndexer
     class RequiredParameter < Parameter
     end
 
-    class Attribute < Entry
+    class Accessor < Entry
       extend T::Sig
 
       sig { returns(T.nilable(Entry::Namespace)) }
       attr_reader :owner
-
-      sig { returns(T::Array[Parameter]) }
-      attr_reader :parameters
 
       sig do
         params(
@@ -114,9 +111,13 @@ module RubyIndexer
       def initialize(name, file_path, location, comments, owner)
         super(name, file_path, location, comments)
         @owner = owner
+      end
 
-        @parameters = T.let([], T::Array[Parameter])
-        @parameters << RequiredParameter.new(name: name.delete_suffix("=").to_sym) if name.end_with?("=")
+      sig { returns(T::Array[Parameter]) }
+      def parameters
+        params = []
+        params << RequiredParameter.new(name: name.delete_suffix("=").to_sym) if name.end_with?("=")
+        params
       end
     end
 
