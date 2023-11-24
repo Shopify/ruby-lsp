@@ -209,10 +209,6 @@ class OnTypeFormattingTest < Minitest::Test
         range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } },
         newText: "#    ",
       },
-      {
-        range: { start: { line: 0, character: 9 }, end: { line: 0, character: 9 } },
-        newText: "$0",
-      },
     ]
     assert_equal(expected_edits.to_json, T.must(edits).to_json)
   end
@@ -253,10 +249,6 @@ class OnTypeFormattingTest < Minitest::Test
         range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } },
         newText: "#    ",
       },
-      {
-        range: { start: { line: 0, character: 9 }, end: { line: 0, character: 9 } },
-        newText: "$0",
-      },
     ]
     assert_equal(expected_edits.to_json, T.must(edits).to_json)
   end
@@ -281,10 +273,6 @@ class OnTypeFormattingTest < Minitest::Test
       {
         range: { start: { line: 0, character: 7 }, end: { line: 0, character: 7 } },
         newText: "# ",
-      },
-      {
-        range: { start: { line: 0, character: 2 }, end: { line: 0, character: 2 } },
-        newText: "$0",
       },
     ]
     assert_equal(expected_edits.to_json, T.must(edits).to_json)

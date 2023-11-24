@@ -139,7 +139,6 @@ module RubyLsp
       sig { params(spaces: String).void }
       def handle_comment_line(spaces)
         add_edit_with_text("##{spaces}")
-        move_cursor_to(@position[:line], @indentation + spaces.size + 1)
       end
 
       sig { params(text: String, position: Document::PositionShape).void }
