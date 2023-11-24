@@ -174,13 +174,10 @@ module RubyLsp
         Interface::CompletionItem.new(
           label: label,
           text_edit: Interface::TextEdit.new(
-            range: Interface::Range.new(
-              start: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column),
-              end: Interface::Position.new(line: loc.end_line - 1, character: loc.end_column),
-            ),
+            range: range_from_location(loc),
             new_text: label,
           ),
-          kind: Constant::CompletionItemKind::REFERENCE,
+          kind: Constant::CompletionItemKind::FILE,
         )
       end
 
