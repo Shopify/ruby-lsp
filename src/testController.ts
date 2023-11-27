@@ -93,7 +93,9 @@ export class TestController {
       this.testCommands.delete(test);
     });
 
+    const groupIdMap: { [key: string]: vscode.TestItem } = {};
     let classTest: vscode.TestItem;
+
     const uri = vscode.Uri.from({
       scheme: "file",
       path: response[0].command!.arguments![0],
@@ -121,16 +123,40 @@ export class TestController {
         new vscode.Position(location.end_line, location.end_column),
       );
 
-      // Add test methods as children to the test class so it appears nested in Test explorer
-      // and running the test class will run all of the test methods
+      // If the test has a group_id, the server supports code lens hierarchy
+      if ("group_id" in res.data) {
+        // If it has an id, it's a group
+        if (res.data?.id) {
+          // Add group to the map
+          groupIdMap[res.data.id] = testItem;
+          testItem.canResolveChildren = true;
 
-      if (testItem.tags.find((tag) => tag.id === "example")) {
-        testItem.tags = [...testItem.tags, this.debugTag];
-        classTest.children.add(testItem);
+          if (res.data.group_id) {
+            // Add nested group to its parent group
+            groupIdMap[res.data.group_id].children.add(testItem);
+          } else {
+            // Or add it to the top-level
+            this.testController.items.add(testItem);
+          }
+          // Otherwise, it's a test
+        } else {
+          // Add test to its parent group
+          groupIdMap[res.data.group_id].children.add(testItem);
+          testItem.tags = [...testItem.tags, this.debugTag];
+        }
+        // If the server doesn't support code lens hierarchy, all groups are top-level
       } else {
-        classTest = testItem;
-        classTest.canResolveChildren = true;
-        this.testController.items.add(testItem);
+        // Add test methods as children to the test class so it appears nested in Test explorer
+        // and running the test class will run all of the test methods
+        // eslint-disable-next-line no-lonely-if
+        if (testItem.tags.find((tag) => tag.id === "example")) {
+          testItem.tags = [...testItem.tags, this.debugTag];
+          classTest.children.add(testItem);
+        } else {
+          classTest = testItem;
+          classTest.canResolveChildren = true;
+          this.testController.items.add(testItem);
+        }
       }
     });
   }
