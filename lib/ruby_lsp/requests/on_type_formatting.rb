@@ -20,8 +20,8 @@ module RubyLsp
 
       END_REGEXES = T.let(
         [
-          /(if|unless|for|while|class|module|until|def|case).*/,
-          /.*\sdo/,
+          /\b(if|unless|for|while|class|module|until|def|case)\b.*/,
+          /.*\s\bdo\b/,
         ],
         T::Array[Regexp],
       )
