@@ -74,14 +74,14 @@ GEM
       rubocop (>= 0.90.0)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
-    sorbet (0.5.11120)
-      sorbet-static (= 0.5.11120)
-    sorbet-runtime (0.5.11120)
-    sorbet-static (0.5.11120-universal-darwin)
-    sorbet-static (0.5.11120-x86_64-linux)
-    sorbet-static-and-runtime (0.5.11120)
-      sorbet (= 0.5.11120)
-      sorbet-runtime (= 0.5.11120)
+    sorbet (0.5.11142)
+      sorbet-static (= 0.5.11142)
+    sorbet-runtime (0.5.11142)
+    sorbet-static (0.5.11142-universal-darwin)
+    sorbet-static (0.5.11142-x86_64-linux)
+    sorbet-static-and-runtime (0.5.11142)
+      sorbet (= 0.5.11142)
+      sorbet-runtime (= 0.5.11142)
     spoom (1.2.4)
       erubi (>= 1.10.0)
       sorbet-static-and-runtime (>= 0.5.10187)
@@ -108,7 +108,6 @@ GEM
 
 PLATFORMS
   arm64-darwin
-  x64-mingw-ucrt
   x64-mingw32
   x86_64-darwin
   x86_64-linux
