@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs/promises";
+import os from "os";
 
 import * as vscode from "vscode";
 
@@ -170,11 +171,19 @@ export class Ruby {
   private async activate(ruby: string) {
     let command = this.shell ? `${this.shell} -ic '` : "";
 
+    // Certain shell plugins take over standard pipes like `stderr` and cause activation issues. To get around tools
+    // that do that, we use a temporary file to write the environment information from Ruby and then read it in NodeJS
+    // to apply the right environment variables
+    const tmpFilePath = path.join(
+      os.tmpdir(),
+      `ruby_lsp_${path.basename(this.workingFolderPath)}`,
+    );
+
     // The Ruby activation script is intentionally written as an array that gets joined into a one liner because some
     // terminals cannot handle line breaks. Do not switch this to a multiline string or that will break activation for
     // those terminals
     const script = [
-      "STDERR.printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, ",
+      `File.write(\\"${tmpFilePath}\\", `,
       "JSON.dump({ env: ENV.to_h, ruby_version: RUBY_VERSION, yjit: defined?(RubyVM::YJIT) }))",
     ].join("");
 
@@ -188,16 +197,19 @@ export class Ruby {
       `Trying to activate Ruby environment with command: ${command} inside directory: ${this.cwd}`,
     );
 
-    const result = await asyncExec(command, { cwd: this.cwd });
-    const rubyInfoJson = /RUBY_ENV_ACTIVATE(.*)RUBY_ENV_ACTIVATE/.exec(
-      result.stderr,
-    )![1];
+    try {
+      await asyncExec(command, { cwd: this.cwd });
+      const envJson = await fs.readFile(tmpFilePath, "utf8");
+      const rubyInfo = JSON.parse(envJson);
 
-    const rubyInfo = JSON.parse(rubyInfoJson);
-
-    this._env = rubyInfo.env;
-    this.rubyVersion = rubyInfo.ruby_version;
-    this.yjitEnabled = rubyInfo.yjit === "constant";
+      this._env = rubyInfo.env;
+      this.rubyVersion = rubyInfo.ruby_version;
+      this.yjitEnabled = rubyInfo.yjit === "constant";
+    } catch (error: any) {
+      // Ensure we cleanup the temp file even if we failed to activate
+      await fs.rm(tmpFilePath);
+      throw error;
+    }
   }
 
   // Fetch information related to the Ruby version. This can only be invoked after activation, so that `rubyVersion` is
