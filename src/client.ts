@@ -543,15 +543,17 @@ export default class Client implements ClientInterface {
         options: executableOptions,
       };
     } else {
+      const argsWithBranch = branch.length > 0 ? ["--branch", branch] : [];
+
       run = {
         command: "ruby-lsp",
-        args: branch.length > 0 ? ["--branch", branch] : [],
+        args: argsWithBranch,
         options: executableOptions,
       };
 
       debug = {
         command: "ruby-lsp",
-        args: ["--debug"],
+        args: argsWithBranch.concat(["--debug"]),
         options: executableOptions,
       };
     }
