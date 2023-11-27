@@ -93,8 +93,11 @@ module RubyIndexer
     class RequiredParameter < Parameter
     end
 
-    class Accessor < Entry
+    class Member < Entry
       extend T::Sig
+      extend T::Helpers
+
+      abstract!
 
       sig { returns(T.nilable(Entry::Namespace)) }
       attr_reader :owner
@@ -113,7 +116,14 @@ module RubyIndexer
         @owner = owner
       end
 
-      sig { returns(T::Array[Parameter]) }
+      sig { abstract.returns(T::Array[Parameter]) }
+      def parameters; end
+    end
+
+    class Accessor < Member
+      extend T::Sig
+
+      sig { override.returns(T::Array[Parameter]) }
       def parameters
         params = []
         params << RequiredParameter.new(name: name.delete_suffix("=").to_sym) if name.end_with?("=")
@@ -121,16 +131,14 @@ module RubyIndexer
       end
     end
 
-    class Method < Entry
+    class Method < Member
       extend T::Sig
       extend T::Helpers
+
       abstract!
 
-      sig { returns(T::Array[Parameter]) }
+      sig { override.returns(T::Array[Parameter]) }
       attr_reader :parameters
-
-      sig { returns(T.nilable(Entry::Namespace)) }
-      attr_reader :owner
 
       sig do
         params(
@@ -143,9 +151,9 @@ module RubyIndexer
         ).void
       end
       def initialize(name, file_path, location, comments, parameters_node, owner) # rubocop:disable Metrics/ParameterLists
-        super(name, file_path, location, comments)
+        super(name, file_path, location, comments, owner)
+
         @parameters = T.let(list_params(parameters_node), T::Array[Parameter])
-        @owner = owner
       end
 
       private
@@ -162,9 +170,7 @@ module RubyIndexer
         end
       end
 
-      sig do
-        params(node: Prism::Node).returns(T.nilable(Symbol))
-      end
+      sig { params(node: Prism::Node).returns(T.nilable(Symbol)) }
       def parameter_name(node)
         case node
         when Prism::RequiredParameterNode

@@ -139,7 +139,7 @@ module RubyLsp
 
         candidates = T.cast(
           @index.prefix_search(name),
-          T::Array[T.any(T::Array[RubyIndexer::Entry::Method], T::Array[RubyIndexer::Entry::Accessor])],
+          T::Array[T::Array[RubyIndexer::Entry::Member]],
         )
         candidates.each do |entries|
           entry = entries.find { |e| e.owner&.name == receiver.name }
@@ -153,7 +153,7 @@ module RubyLsp
 
       sig do
         params(
-          entry: T.any(RubyIndexer::Entry::Method, RubyIndexer::Entry::Accessor),
+          entry: RubyIndexer::Entry::Member,
           node: Prism::CallNode,
         ).returns(Interface::CompletionItem)
       end
