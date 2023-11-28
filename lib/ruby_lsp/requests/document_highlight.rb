@@ -114,11 +114,10 @@ module RubyLsp
           target: T.nilable(Prism::Node),
           parent: T.nilable(Prism::Node),
           dispatcher: Prism::Dispatcher,
-          message_queue: Thread::Queue,
         ).void
       end
-      def initialize(target, parent, dispatcher, message_queue)
-        super(dispatcher, message_queue)
+      def initialize(target, parent, dispatcher)
+        super(dispatcher)
 
         @_response = T.let([], T::Array[Interface::DocumentHighlight])
 

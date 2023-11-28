@@ -47,8 +47,8 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      sig { params(uri: URI::Generic, dispatcher: Prism::Dispatcher, message_queue: Thread::Queue).void }
-      def initialize(uri, dispatcher, message_queue)
+      sig { params(uri: URI::Generic, dispatcher: Prism::Dispatcher).void }
+      def initialize(uri, dispatcher)
         @uri = T.let(uri, URI::Generic)
         @_response = T.let([], ResponseType)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
@@ -58,7 +58,7 @@ module RubyLsp
         @group_id = T.let(1, Integer)
         @group_id_stack = T.let([], T::Array[Integer])
 
-        super(dispatcher, message_queue)
+        super(dispatcher)
 
         dispatcher.register(
           self,
@@ -152,7 +152,7 @@ module RubyLsp
 
       sig { override.params(addon: Addon).returns(T.nilable(Listener[ResponseType])) }
       def initialize_external_listener(addon)
-        addon.create_code_lens_listener(@uri, @dispatcher, @message_queue)
+        addon.create_code_lens_listener(@uri, @dispatcher)
       end
 
       sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }

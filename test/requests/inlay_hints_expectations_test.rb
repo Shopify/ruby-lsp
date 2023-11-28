@@ -8,17 +8,14 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::InlayHints, "inlay_hints"
 
   def run_expectations(source)
-    message_queue = Thread::Queue.new
     params = @__params&.any? ? @__params : default_args
     uri = URI("file://#{@_path}")
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::InlayHints.new(params.first, dispatcher, message_queue)
+    listener = RubyLsp::Requests::InlayHints.new(params.first, dispatcher)
     dispatcher.dispatch(document.tree)
     listener.response
-  ensure
-    T.must(message_queue).close
   end
 
   def default_args

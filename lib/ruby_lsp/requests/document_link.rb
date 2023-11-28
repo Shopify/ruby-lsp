@@ -80,11 +80,10 @@ module RubyLsp
           uri: URI::Generic,
           comments: T::Array[Prism::Comment],
           dispatcher: Prism::Dispatcher,
-          message_queue: Thread::Queue,
         ).void
       end
-      def initialize(uri, comments, dispatcher, message_queue)
-        super(dispatcher, message_queue)
+      def initialize(uri, comments, dispatcher)
+        super(dispatcher)
 
         # Match the version based on the version in the RBI file name. Notice that the `@` symbol is sanitized to `%40`
         # in the URI

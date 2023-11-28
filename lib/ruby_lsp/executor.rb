@@ -41,7 +41,7 @@ module RubyLsp
       when "initialize"
         initialize_request(request.dig(:params))
       when "initialized"
-        Addon.load_addons
+        Addon.load_addons(@message_queue)
 
         errored_addons = Addon.addons.select(&:error?)
 
@@ -95,12 +95,12 @@ module RubyLsp
 
         # Run listeners for the document
         dispatcher = Prism::Dispatcher.new
-        folding_range = Requests::FoldingRanges.new(document.parse_result.comments, dispatcher, @message_queue)
-        document_symbol = Requests::DocumentSymbol.new(dispatcher, @message_queue)
-        document_link = Requests::DocumentLink.new(uri, document.comments, dispatcher, @message_queue)
-        code_lens = Requests::CodeLens.new(uri, dispatcher, @message_queue)
+        folding_range = Requests::FoldingRanges.new(document.parse_result.comments, dispatcher)
+        document_symbol = Requests::DocumentSymbol.new(dispatcher)
+        document_link = Requests::DocumentLink.new(uri, document.comments, dispatcher)
+        code_lens = Requests::CodeLens.new(uri, dispatcher)
 
-        semantic_highlighting = Requests::SemanticHighlighting.new(dispatcher, @message_queue)
+        semantic_highlighting = Requests::SemanticHighlighting.new(dispatcher)
         dispatcher.dispatch(document.tree)
 
         # Store all responses retrieve in this round of visits in the cache and then return the response for the request
@@ -265,13 +265,7 @@ module RubyLsp
       target = parent if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)
 
       dispatcher = Prism::Dispatcher.new
-      base_listener = Requests::Definition.new(
-        uri,
-        nesting,
-        @index,
-        dispatcher,
-        @message_queue,
-      )
+      base_listener = Requests::Definition.new(uri, nesting, @index, dispatcher)
       dispatcher.dispatch_once(target)
       base_listener.response
     end
@@ -297,7 +291,7 @@ module RubyLsp
 
       # Instantiate all listeners
       dispatcher = Prism::Dispatcher.new
-      hover = Requests::Hover.new(@index, nesting, dispatcher, @message_queue)
+      hover = Requests::Hover.new(@index, nesting, dispatcher)
 
       # Emit events for all listeners
       dispatcher.dispatch_once(target)
@@ -380,7 +374,7 @@ module RubyLsp
 
       target, parent = document.locate_node(position)
       dispatcher = Prism::Dispatcher.new
-      listener = Requests::DocumentHighlight.new(target, parent, dispatcher, @message_queue)
+      listener = Requests::DocumentHighlight.new(target, parent, dispatcher)
       dispatcher.visit(document.tree)
       listener.response
     end
@@ -393,7 +387,7 @@ module RubyLsp
       end_line = range.dig(:end, :line)
 
       dispatcher = Prism::Dispatcher.new
-      listener = Requests::InlayHints.new(start_line..end_line, dispatcher, @message_queue)
+      listener = Requests::InlayHints.new(start_line..end_line, dispatcher)
       dispatcher.visit(document.tree)
       listener.response
     end
@@ -457,11 +451,7 @@ module RubyLsp
       end_line = range.dig(:end, :line)
 
       dispatcher = Prism::Dispatcher.new
-      listener = Requests::SemanticHighlighting.new(
-        dispatcher,
-        @message_queue,
-        range: start_line..end_line,
-      )
+      listener = Requests::SemanticHighlighting.new(dispatcher, range: start_line..end_line)
       dispatcher.visit(document.tree)
 
       Requests::Support::SemanticTokenEncoder.new.encode(listener.response)
@@ -513,12 +503,7 @@ module RubyLsp
       return unless target
 
       dispatcher = Prism::Dispatcher.new
-      listener = Requests::Completion.new(
-        @index,
-        nesting,
-        dispatcher,
-        @message_queue,
-      )
+      listener = Requests::Completion.new(@index, nesting, dispatcher)
       dispatcher.dispatch_once(target)
       listener.response
     end

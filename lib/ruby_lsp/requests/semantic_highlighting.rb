@@ -107,15 +107,9 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      sig do
-        params(
-          dispatcher: Prism::Dispatcher,
-          message_queue: Thread::Queue,
-          range: T.nilable(T::Range[Integer]),
-        ).void
-      end
-      def initialize(dispatcher, message_queue, range: nil)
-        super(dispatcher, message_queue)
+      sig { params(dispatcher: Prism::Dispatcher, range: T.nilable(T::Range[Integer])).void }
+      def initialize(dispatcher, range: nil)
+        super(dispatcher)
 
         @_response = T.let([], ResponseType)
         @range = range

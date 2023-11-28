@@ -21,9 +21,9 @@ module RubyLsp
 
       ResponseType = type_member { { fixed: T::Array[Interface::FoldingRange] } }
 
-      sig { params(comments: T::Array[Prism::Comment], dispatcher: Prism::Dispatcher, queue: Thread::Queue).void }
-      def initialize(comments, dispatcher, queue)
-        super(dispatcher, queue)
+      sig { params(comments: T::Array[Prism::Comment], dispatcher: Prism::Dispatcher).void }
+      def initialize(comments, dispatcher)
+        super(dispatcher)
 
         @_response = T.let([], ResponseType)
         @requires = T.let([], T::Array[Prism::CallNode])

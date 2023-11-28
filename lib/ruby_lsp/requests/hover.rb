@@ -37,15 +37,14 @@ module RubyLsp
           index: RubyIndexer::Index,
           nesting: T::Array[String],
           dispatcher: Prism::Dispatcher,
-          message_queue: Thread::Queue,
         ).void
       end
-      def initialize(index, nesting, dispatcher, message_queue)
+      def initialize(index, nesting, dispatcher)
         @index = index
         @nesting = nesting
         @_response = T.let(nil, ResponseType)
 
-        super(dispatcher, message_queue)
+        super(dispatcher)
         dispatcher.register(
           self,
           :on_constant_read_node_enter,
@@ -57,7 +56,7 @@ module RubyLsp
 
       sig { override.params(addon: Addon).returns(T.nilable(Listener[ResponseType])) }
       def initialize_external_listener(addon)
-        addon.create_hover_listener(@nesting, @index, @dispatcher, @message_queue)
+        addon.create_hover_listener(@nesting, @index, @dispatcher)
       end
 
       # Merges responses from other hover listeners

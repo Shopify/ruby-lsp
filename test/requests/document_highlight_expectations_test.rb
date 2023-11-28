@@ -15,7 +15,7 @@ class DocumentHighlightExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
 
-    listener = RubyLsp::Requests::DocumentHighlight.new(target, parent, dispatcher, @message_queue)
+    listener = RubyLsp::Requests::DocumentHighlight.new(target, parent, dispatcher)
     dispatcher.dispatch(document.tree)
     listener.response
   end

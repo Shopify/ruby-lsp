@@ -37,16 +37,15 @@ module RubyLsp
           nesting: T::Array[String],
           index: RubyIndexer::Index,
           dispatcher: Prism::Dispatcher,
-          message_queue: Thread::Queue,
         ).void
       end
-      def initialize(uri, nesting, index, dispatcher, message_queue)
+      def initialize(uri, nesting, index, dispatcher)
         @uri = uri
         @nesting = nesting
         @index = index
         @_response = T.let(nil, ResponseType)
 
-        super(dispatcher, message_queue)
+        super(dispatcher)
 
         dispatcher.register(
           self,
@@ -58,7 +57,7 @@ module RubyLsp
 
       sig { override.params(addon: Addon).returns(T.nilable(RubyLsp::Listener[ResponseType])) }
       def initialize_external_listener(addon)
-        addon.create_definition_listener(@uri, @nesting, @index, @dispatcher, @message_queue)
+        addon.create_definition_listener(@uri, @nesting, @index, @dispatcher)
       end
 
       sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
