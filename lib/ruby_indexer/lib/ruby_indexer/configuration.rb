@@ -120,7 +120,7 @@ module RubyIndexer
               IndexablePath.new(RbConfig::CONFIG["rubylibdir"], path)
             end,
           )
-        else
+        elsif pathname.extname == ".rb"
           # If the default_path is a Ruby file, we index it
           indexables << IndexablePath.new(RbConfig::CONFIG["rubylibdir"], default_path)
         end

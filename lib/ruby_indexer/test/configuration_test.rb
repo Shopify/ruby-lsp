@@ -84,6 +84,16 @@ module RubyIndexer
       )
     end
 
+    def test_indexables_does_not_include_non_ruby_files_inside_rubylibdir
+      path = Pathname.new(RbConfig::CONFIG["rubylibdir"]).join("extra_file.txt").to_s
+      FileUtils.touch(path)
+      indexables = @config.indexables
+
+      assert(indexables.none? { |indexable| indexable.full_path == path })
+    ensure
+      FileUtils.rm(T.must(path))
+    end
+
     def test_paths_are_unique
       @config.load_config
       indexables = @config.indexables
