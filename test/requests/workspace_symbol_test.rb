@@ -54,10 +54,7 @@ class WorkspaceSymbolTest < Minitest::Test
   def test_matches_only_gem_symbols_if_typechecker_is_present
     # reset the singleton so that the stub is not used
     Singleton.__init__(RubyLsp::DependencyDetector)
-    indexable = RubyIndexer::IndexablePath.new(
-      nil,
-      "#{RubyLsp::WORKSPACE_URI.to_standardized_path}/workspace_symbol_foo.rb",
-    )
+    indexable = RubyIndexer::IndexablePath.new(nil, "#{Dir.pwd}/workspace_symbol_foo.rb")
 
     @index.index_single(indexable, <<~RUBY)
       class Foo; end

@@ -175,6 +175,35 @@ class ExecutorTest < Minitest::Test
     )
   end
 
+  def test_returns_nil_diagnostics_and_formatting_for_files_outside_workspace
+    @executor.execute({
+      method: "initialize",
+      params: {
+        initializationOptions: { enabledFeatures: ["formatting", "diagnostics"] },
+        capabilities: { general: { positionEncodings: ["utf-8"] } },
+        workspaceFolders: [{ uri: URI::Generic.from_path(path: Dir.pwd).to_standardized_path }],
+      },
+    })
+
+    result = @executor.execute({
+      method: "textDocument/formatting",
+      params: {
+        textDocument: { uri: "file:///foo.rb" },
+      },
+    })
+
+    assert_nil(result.response)
+
+    result = @executor.execute({
+      method: "textDocument/diagnostic",
+      params: {
+        textDocument: { uri: "file:///foo.rb" },
+      },
+    })
+
+    assert_nil(result.response)
+  end
+
   def test_did_close_clears_diagnostics
     uri = URI("file:///foo.rb")
     @store.set(uri: uri, source: "", version: 1)

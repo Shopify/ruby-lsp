@@ -32,12 +32,7 @@ module RubyLsp
       def run
         # Running RuboCop is slow, so to avoid excessive runs we only do so if the file is syntactically valid
         return syntax_error_diagnostics if @document.syntax_error?
-
         return unless defined?(Support::RuboCopDiagnosticsRunner)
-
-        # Don't try to run RuboCop diagnostics for files outside the current working directory
-        path = @uri.to_standardized_path
-        return unless path.nil? || path.start_with?(T.must(WORKSPACE_URI.to_standardized_path))
 
         Support::RuboCopDiagnosticsRunner.instance.run(@uri, @document).map!(&:to_lsp_diagnostic)
       end

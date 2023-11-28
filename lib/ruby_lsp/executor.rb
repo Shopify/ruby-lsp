@@ -355,6 +355,11 @@ module RubyLsp
       # If formatter is set to `auto` but no supported formatting gem is found, don't attempt to format
       return if @store.formatter == "none"
 
+      # Do not format files outside of the workspace. For example, if someone is looking at a gem's source code, we
+      # don't want to format it
+      path = uri.to_standardized_path
+      return unless path.nil? || path.start_with?(T.must(@store.workspace_uri.to_standardized_path))
+
       Requests::Formatting.new(@store.get(uri), formatter: @store.formatter).run
     end
 
@@ -443,6 +448,11 @@ module RubyLsp
 
     sig { params(uri: URI::Generic).returns(T.nilable(Interface::FullDocumentDiagnosticReport)) }
     def diagnostic(uri)
+      # Do not compute diagnostics for files outside of the workspace. For example, if someone is looking at a gem's
+      # source code, we don't want to show diagnostics for it
+      path = uri.to_standardized_path
+      return unless path.nil? || path.start_with?(T.must(@store.workspace_uri.to_standardized_path))
+
       response = @store.cache_fetch(uri, "textDocument/diagnostic") do |document|
         Requests::Diagnostics.new(document).run
       end
@@ -582,6 +592,9 @@ module RubyLsp
     sig { params(options: T::Hash[Symbol, T.untyped]).returns(T::Hash[Symbol, T.untyped]) }
     def initialize_request(options)
       @store.clear
+
+      workspace_uri = options.dig(:workspaceFolders, 0, :uri)
+      @store.workspace_uri = URI(workspace_uri) if workspace_uri
 
       encodings = options.dig(:capabilities, :general, :positionEncodings)
       @store.encoding = if encodings.nil? || encodings.empty?
