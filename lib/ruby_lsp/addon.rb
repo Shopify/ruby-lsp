@@ -41,8 +41,8 @@ module RubyLsp
       end
 
       # Discovers and loads all addons. Returns the list of activated addons
-      sig { returns(T::Array[Addon]) }
-      def load_addons
+      sig { params(message_queue: Thread::Queue).returns(T::Array[Addon]) }
+      def load_addons(message_queue)
         # Require all addons entry points, which should be placed under
         # `some_gem/lib/ruby_lsp/your_gem_name/addon.rb`
         Gem.find_files("ruby_lsp/**/addon.rb").each do |addon|
@@ -55,7 +55,7 @@ module RubyLsp
         # Activate each one of the discovered addons. If any problems occur in the addons, we don't want to
         # fail to boot the server
         addons.each do |addon|
-          addon.activate
+          addon.activate(message_queue)
           nil
         rescue => e
           addon.add_error(e)
@@ -94,8 +94,8 @@ module RubyLsp
 
     # Each addon should implement `MyAddon#activate` and use to perform any sort of initialization, such as
     # reading information into memory or even spawning a separate process
-    sig { abstract.void }
-    def activate; end
+    sig { abstract.params(message_queue: Thread::Queue).void }
+    def activate(message_queue); end
 
     # Each addon should implement `MyAddon#deactivate` and use to perform any clean up, like shutting down a
     # child process
@@ -111,10 +111,9 @@ module RubyLsp
       overridable.params(
         uri: URI::Generic,
         dispatcher: Prism::Dispatcher,
-        message_queue: Thread::Queue,
       ).returns(T.nilable(Listener[T::Array[Interface::CodeLens]]))
     end
-    def create_code_lens_listener(uri, dispatcher, message_queue); end
+    def create_code_lens_listener(uri, dispatcher); end
 
     # Creates a new Hover listener. This method is invoked on every Hover request
     sig do
@@ -122,19 +121,17 @@ module RubyLsp
         nesting: T::Array[String],
         index: RubyIndexer::Index,
         dispatcher: Prism::Dispatcher,
-        message_queue: Thread::Queue,
       ).returns(T.nilable(Listener[T.nilable(Interface::Hover)]))
     end
-    def create_hover_listener(nesting, index, dispatcher, message_queue); end
+    def create_hover_listener(nesting, index, dispatcher); end
 
     # Creates a new DocumentSymbol listener. This method is invoked on every DocumentSymbol request
     sig do
       overridable.params(
         dispatcher: Prism::Dispatcher,
-        message_queue: Thread::Queue,
       ).returns(T.nilable(Listener[T::Array[Interface::DocumentSymbol]]))
     end
-    def create_document_symbol_listener(dispatcher, message_queue); end
+    def create_document_symbol_listener(dispatcher); end
 
     # Creates a new Definition listener. This method is invoked on every Definition request
     sig do
@@ -143,9 +140,8 @@ module RubyLsp
         nesting: T::Array[String],
         index: RubyIndexer::Index,
         dispatcher: Prism::Dispatcher,
-        message_queue: Thread::Queue,
       ).returns(T.nilable(Listener[T.nilable(T.any(T::Array[Interface::Location], Interface::Location))]))
     end
-    def create_definition_listener(uri, nesting, index, dispatcher, message_queue); end
+    def create_definition_listener(uri, nesting, index, dispatcher); end
   end
 end
