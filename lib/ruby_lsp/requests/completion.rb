@@ -137,15 +137,11 @@ module RubyLsp
 
         receiver = T.must(receiver_entries.first)
 
-        candidates = T.cast(
-          @index.prefix_search(name),
-          T::Array[T::Array[RubyIndexer::Entry::Member]],
-        )
-        candidates.each do |entries|
-          entry = entries.find { |e| e.owner&.name == receiver.name }
+        @index.prefix_search(name).each do |entries|
+          entry = entries.find { |e| e.is_a?(RubyIndexer::Entry::Member) && e.owner&.name == receiver.name }
           next unless entry
 
-          @_response << build_method_completion(entry, node)
+          @_response << build_method_completion(T.cast(entry, RubyIndexer::Entry::Member), node)
         end
       end
 
