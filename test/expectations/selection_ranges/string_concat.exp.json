@@ -24,7 +24,7 @@
                         "character": 0
                     },
                     "end": {
-                        "line": 1,
+                        "line": 2,
                         "character": 7
                     }
                 },
@@ -48,18 +48,6 @@
                             "end": {
                                 "line": 2,
                                 "character": 7
-                            }
-                        },
-                        "parent": {
-                            "range": {
-                                "start": {
-                                    "line": 0,
-                                    "character": 0
-                                },
-                                "end": {
-                                    "line": 2,
-                                    "character": 7
-                                }
                             }
                         }
                     }
