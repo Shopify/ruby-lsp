@@ -40,6 +40,7 @@ module RubyLsp
           :on_array_node_enter,
           :on_block_node_enter,
           :on_case_node_enter,
+          :on_case_match_node_enter,
           :on_class_node_enter,
           :on_module_node_enter,
           :on_for_node_enter,
@@ -51,7 +52,6 @@ module RubyLsp
           :on_else_node_enter,
           :on_ensure_node_enter,
           :on_begin_node_enter,
-          :on_string_concat_node_enter,
           :on_def_node_enter,
           :on_call_node_enter,
           :on_lambda_node_enter,
@@ -91,10 +91,10 @@ module RubyLsp
 
       sig { params(node: Prism::InterpolatedStringNode).void }
       def on_interpolated_string_node_enter(node)
-        opening_loc = node.opening_loc
-        closing_loc = node.closing_loc
+        opening_loc = node.opening_loc || node.location
+        closing_loc = node.closing_loc || node.parts.last&.location || node.location
 
-        add_lines_range(opening_loc.start_line, closing_loc.start_line - 1) if opening_loc && closing_loc
+        add_lines_range(opening_loc.start_line, closing_loc.start_line - 1)
       end
 
       sig { params(node: Prism::ArrayNode).void }
@@ -109,6 +109,11 @@ module RubyLsp
 
       sig { params(node: Prism::CaseNode).void }
       def on_case_node_enter(node)
+        add_simple_range(node)
+      end
+
+      sig { params(node: Prism::CaseMatchNode).void }
+      def on_case_match_node_enter(node)
         add_simple_range(node)
       end
 
@@ -165,14 +170,6 @@ module RubyLsp
       sig { params(node: Prism::BeginNode).void }
       def on_begin_node_enter(node)
         add_simple_range(node)
-      end
-
-      sig { params(node: Prism::StringConcatNode).void }
-      def on_string_concat_node_enter(node)
-        left = T.let(node.left, Prism::Node)
-        left = left.left while left.is_a?(Prism::StringConcatNode)
-
-        add_lines_range(left.location.start_line, node.right.location.end_line - 1)
       end
 
       sig { params(node: Prism::DefNode).void }

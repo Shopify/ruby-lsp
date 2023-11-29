@@ -121,6 +121,7 @@ module RubyLsp
         @range = range
         @special_methods = T.let(nil, T.nilable(T::Array[String]))
         @current_scope = T.let(ParameterScope.new, ParameterScope)
+        @inside_regex_capture = T.let(false, T::Boolean)
 
         dispatcher.register(
           self,
@@ -152,6 +153,8 @@ module RubyLsp
           :on_local_variable_or_write_node_enter,
           :on_local_variable_target_node_enter,
           :on_block_local_variable_node_enter,
+          :on_match_write_node_enter,
+          :on_match_write_node_leave,
         )
       end
 
@@ -165,12 +168,26 @@ module RubyLsp
         # We can't push a semantic token for [] and []= because the argument inside the brackets is a part of
         # the message_loc
         return if message.start_with?("[") && (message.end_with?("]") || message.end_with?("]="))
-
-        return process_regexp_locals(node) if message == "=~"
+        return if message == "=~"
         return if special_method?(message)
 
         type = Support::Sorbet.annotation?(node) ? :type : :method
         add_token(T.must(node.message_loc), type)
+      end
+
+      sig { params(node: Prism::MatchWriteNode).void }
+      def on_match_write_node_enter(node)
+        call = node.call
+
+        if call.message == "=~"
+          @inside_regex_capture = true
+          process_regexp_locals(call)
+        end
+      end
+
+      sig { params(node: Prism::MatchWriteNode).void }
+      def on_match_write_node_leave(node)
+        @inside_regex_capture = true if node.call.message == "=~"
       end
 
       sig { params(node: Prism::ConstantReadNode).void }
@@ -359,6 +376,12 @@ module RubyLsp
 
       sig { params(node: Prism::LocalVariableTargetNode).void }
       def on_local_variable_target_node_enter(node)
+        # If we're inside a regex capture, Prism will add LocalVariableTarget nodes for each captured variable.
+        # Unfortunately, if the regex contains a backslash, the location will be incorrect and we'll end up highlighting
+        # the entire regex as a local variable. We process these captures in process_regexp_locals instead and then
+        # prevent pushing local variable target tokens. See https://github.com/ruby/prism/issues/1912
+        return if @inside_regex_capture
+
         return unless visible?(node, @range)
 
         add_token(node.location, @current_scope.type_for(node.name))
