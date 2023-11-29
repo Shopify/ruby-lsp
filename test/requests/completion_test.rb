@@ -517,6 +517,31 @@ class CompletionTest < Minitest::Test
     assert_equal(["Array(a)"], result.map { |completion| completion.text_edit.new_text })
   end
 
+  def test_completion_for_attributes
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+      class Foo
+        attr_accessor :bar
+
+        def qux
+          b
+        end
+      end
+    RUBY
+
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: { line: 4, character: 5 } },
+    )
+    assert_equal(["bar", "bar="], result.map(&:label))
+    assert_equal(["bar", "bar="], result.map(&:filter_text))
+    assert_equal(["bar", "bar=(bar)"], result.map { |completion| completion.text_edit.new_text })
+  end
+
   private
 
   def run_request(method:, params: {})

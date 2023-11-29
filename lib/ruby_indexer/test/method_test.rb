@@ -83,5 +83,35 @@ module RubyIndexer
 
       assert_equal("Foo", owner_name)
     end
+
+    def test_keeps_track_of_attributes
+      index(<<~RUBY)
+        class Foo
+          # Hello there
+          attr_reader :bar, :other
+          attr_writer :baz
+          attr_accessor :qux
+        end
+      RUBY
+
+      assert_entry("bar", Entry::Accessor, "/fake/path/foo.rb:2-15:2-18")
+      assert_equal("Hello there", @index["bar"].first.comments.join("\n"))
+      assert_entry("other", Entry::Accessor, "/fake/path/foo.rb:2-21:2-26")
+      assert_equal("Hello there", @index["other"].first.comments.join("\n"))
+      assert_entry("baz=", Entry::Accessor, "/fake/path/foo.rb:3-15:3-18")
+      assert_entry("qux", Entry::Accessor, "/fake/path/foo.rb:4-17:4-20")
+      assert_entry("qux=", Entry::Accessor, "/fake/path/foo.rb:4-17:4-20")
+    end
+
+    def test_ignores_attributes_invoked_on_constant
+      index(<<~RUBY)
+        class Foo
+        end
+
+        Foo.attr_reader :bar
+      RUBY
+
+      assert_no_entry("bar")
+    end
   end
 end
