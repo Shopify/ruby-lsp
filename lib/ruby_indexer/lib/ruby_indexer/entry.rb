@@ -98,6 +98,14 @@ module RubyIndexer
     class OptionalParameter < Parameter
     end
 
+    # An required keyword method parameter, e.g. `def foo(a:)`
+    class KeywordParameter < Parameter
+    end
+
+    # An optional keyword method parameter, e.g. `def foo(a: 123)`
+    class OptionalKeywordParameter < Parameter
+    end
+
     class Member < Entry
       extend T::Sig
       extend T::Helpers
@@ -183,13 +191,26 @@ module RubyIndexer
           parameters << OptionalParameter.new(name: name)
         end
 
+        parameters_node.keywords.each do |keyword|
+          name = parameter_name(keyword)
+          next unless name
+
+          case keyword
+          when Prism::RequiredKeywordParameterNode
+            parameters << KeywordParameter.new(name: name)
+          when Prism::OptionalKeywordParameterNode
+            parameters << OptionalKeywordParameter.new(name: name)
+          end
+        end
+
         parameters
       end
 
       sig { params(node: Prism::Node).returns(T.nilable(Symbol)) }
       def parameter_name(node)
         case node
-        when Prism::RequiredParameterNode, Prism::OptionalParameterNode
+        when Prism::RequiredParameterNode, Prism::OptionalParameterNode, Prism::RequiredKeywordParameterNode,
+          Prism::OptionalKeywordParameterNode
           node.name
         when Prism::MultiTargetNode
           names = [*node.lefts, *node.rest, *node.rights].map { |parameter_node| parameter_name(parameter_node) }

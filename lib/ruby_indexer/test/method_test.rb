@@ -86,6 +86,26 @@ module RubyIndexer
       assert_instance_of(Entry::OptionalParameter, parameter)
     end
 
+    def test_method_with_keyword_parameters
+      index(<<~RUBY)
+        class Foo
+          def bar(a:, b: 123)
+          end
+        end
+      RUBY
+
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      entry = T.must(@index["bar"].first)
+      assert_equal(2, entry.parameters.length)
+      a, b = entry.parameters
+
+      assert_equal(:a, a.name)
+      assert_instance_of(Entry::KeywordParameter, a)
+
+      assert_equal(:b, b.name)
+      assert_instance_of(Entry::OptionalKeywordParameter, b)
+    end
+
     def test_keeps_track_of_method_owner
       index(<<~RUBY)
         class Foo
