@@ -106,6 +106,118 @@ module RubyIndexer
       assert_instance_of(Entry::OptionalKeywordParameter, b)
     end
 
+    def test_method_with_rest_and_keyword_rest_parameters
+      index(<<~RUBY)
+        class Foo
+          def bar(*a, **b)
+          end
+        end
+      RUBY
+
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      entry = T.must(@index["bar"].first)
+      assert_equal(2, entry.parameters.length)
+      a, b = entry.parameters
+
+      assert_equal(:a, a.name)
+      assert_instance_of(Entry::RestParameter, a)
+
+      assert_equal(:b, b.name)
+      assert_instance_of(Entry::KeywordRestParameter, b)
+    end
+
+    def test_method_with_post_parameters
+      index(<<~RUBY)
+        class Foo
+          def bar(*a, b)
+          end
+
+          def baz(**a, b)
+          end
+
+          def qux(*a, (b, c))
+        end
+      RUBY
+
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      entry = T.must(@index["bar"].first)
+      assert_equal(2, entry.parameters.length)
+      a, b = entry.parameters
+
+      assert_equal(:a, a.name)
+      assert_instance_of(Entry::RestParameter, a)
+
+      assert_equal(:b, b.name)
+      assert_instance_of(Entry::RequiredParameter, b)
+
+      entry = T.must(@index["baz"].first)
+      assert_equal(2, entry.parameters.length)
+      a, b = entry.parameters
+
+      assert_equal(:a, a.name)
+      assert_instance_of(Entry::KeywordRestParameter, a)
+
+      assert_equal(:b, b.name)
+      assert_instance_of(Entry::RequiredParameter, b)
+
+      entry = T.must(@index["qux"].first)
+      assert_equal(2, entry.parameters.length)
+      _a, second = entry.parameters
+
+      assert_equal(:"(b, c)", second.name)
+      assert_instance_of(Entry::RequiredParameter, second)
+    end
+
+    def test_method_with_destructured_rest_parameters
+      index(<<~RUBY)
+        class Foo
+          def bar((a, *b))
+          end
+        end
+      RUBY
+
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      entry = T.must(@index["bar"].first)
+      assert_equal(1, entry.parameters.length)
+      param = entry.parameters.first
+
+      assert_equal(:"(a, *b)", param.name)
+      assert_instance_of(Entry::RequiredParameter, param)
+    end
+
+    def test_method_with_anonymous_rest_parameters
+      index(<<~RUBY)
+        class Foo
+          def bar(*, **)
+          end
+        end
+      RUBY
+
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      entry = T.must(@index["bar"].first)
+      assert_equal(2, entry.parameters.length)
+      first, second = entry.parameters
+
+      assert_equal(Entry::RestParameter::DEFAULT_NAME, first.name)
+      assert_instance_of(Entry::RestParameter, first)
+
+      assert_equal(Entry::KeywordRestParameter::DEFAULT_NAME, second.name)
+      assert_instance_of(Entry::KeywordRestParameter, second)
+    end
+
+    def test_method_with_forbidden_keyword_splat_parameter
+      index(<<~RUBY)
+        class Foo
+          def bar(**nil)
+          end
+        end
+      RUBY
+
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      entry = T.must(@index["bar"].first)
+      assert_empty(entry.parameters)
+    end
+
     def test_keeps_track_of_method_owner
       index(<<~RUBY)
         class Foo
