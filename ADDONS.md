@@ -63,8 +63,8 @@ module RubyLsp
       extend T::Sig
 
       # Performs any activation that needs to happen once when the language server is booted
-      sig { override.void }
-      def activate
+      sig { override.params(message_queue: Thread::Queue).void }
+      def activate(message_queue)
       end
 
       # Performs any cleanup when shutting down the server, like terminating a subprocess
@@ -99,8 +99,9 @@ module RubyLsp
     class Addon < ::RubyLsp::Addon
       extend T::Sig
 
-      sig { override.void }
-      def activate
+      sig { override.params(message_queue: Thread::Queue).void }
+      def activate(message_queue)
+        @message_queue = message_queue
         @config = SomeConfiguration.new
       end
 
@@ -118,13 +119,12 @@ module RubyLsp
           nesting: T::Array[String],
           index: RubyIndexer::Index,
           dispatcher: Prism::Dispatcher,
-          message_queue: Thread::Queue,
         ).returns(T.nilable(Listener[T.nilable(Interface::Hover)]))
       end
-      def create_hover_listener(nesting, index, dispatcher, message_queue)
+      def create_hover_listener(nesting, index, dispatcher)
         # Use the listener factory methods to instantiate listeners with parameters sent by the LSP combined with any
         # pre-computed information in the addon. These factory methods are invoked on every request
-        Hover.new(@config, dispatcher, message_queue)
+        Hover.new(@config, dispatcher)
       end
     end
 
@@ -143,9 +143,9 @@ module RubyLsp
       # dispatcher (see below).
       # Additionally, listeners are instantiated with a message_queue to push notifications (not used in this example).
       # See "Sending notifications to the client" for more information.
-      sig { params(config: SomeConfiguration, dispatcher: Prism::Dispatcher, message_queue: Thread::Queue).void }
-      def initialize(config, dispatcher, message_queue)
-        super
+      sig { params(config: SomeConfiguration, dispatcher: Prism::Dispatcher).void }
+      def initialize(config, dispatcher)
+        super(dispatcher)
 
         @_response = T.let(nil, ResponseType)
         @config = config
@@ -181,7 +181,7 @@ class MyFormatterRubyLspAddon < RubyLsp::Addon
     "My Formatter"
   end
 
-  def activate
+  def activate(message_queue)
     # The first argument is an identifier users can pick to select this formatter. To use this formatter, users must
     # have rubyLsp.formatter configured to "my_formatter"
     # The second argument is a singleton instance that implements the `FormatterRunner` interface (see below)
@@ -213,22 +213,49 @@ end
 
 ### Sending notifications to the client
 
-Sometimes, requests may want to send asynchronous information to the client. For example, a slow request may want to
-indicate progress. To send notifications, all listeners have access to the message queue, where they can push
-notifications to the client.
+Sometimes, addons may need to send asynchronous information to the client. For example, a slow request might want to
+indicate progress or diagnostics may be computed in the background without blocking the language server.
+
+For this purpose, all addons receive the message queue when activated, which is a thread queue that can receive
+notifications for the client. The addon should keep a reference to this message queue and pass it to listeners that are
+interested in using it.
+
+**Note**: do not close the message queue anywhere. The Ruby LSP will handle closing the message queue when appropriate.
 
 ```ruby
-class MyListener < ::RubyLsp::Listener
-  def initialize(dispatcher, message_queue)
-    super
+module RubyLsp
+  module MyGem
+    class Addon < ::RubyLsp::Addon
+      def activate(message_queue)
+        @message_queue = message_queue
+      end
 
-    @message_queue << Notification.new(
-      message: "$/progress",
-      params: Interface::ProgressParams.new(
-        token: "progress-token-id",
-        value: Interface::WorkDoneProgressBegin.new(kind: "begin", title: "Starting slow work!"),
-      )
-    )
+      def deactivate; end
+
+      def name
+        "Ruby LSP My Gem"
+      end
+
+      def create_hover_listener(nesting, index, dispatcher)
+        MyHoverListener.new(@message_queue, nesting, index, dispatcher)
+      end
+    end
+
+    class MyHoverListener < ::RubyLsp::Listener
+      def initialize(message_queue, nesting, index, dispatcher)
+        super(dispatcher)
+
+        @message_queue = message_queue
+
+        @message_queue << Notification.new(
+          message: "$/progress",
+          params: Interface::ProgressParams.new(
+            token: "progress-token-id",
+            value: Interface::WorkDoneProgressBegin.new(kind: "begin", title: "Starting slow work!"),
+          )
+        )
+      end
+    end
   end
 end
 ```
