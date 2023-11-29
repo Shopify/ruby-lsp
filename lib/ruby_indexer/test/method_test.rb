@@ -70,6 +70,22 @@ module RubyIndexer
       assert_instance_of(Entry::RequiredParameter, parameter)
     end
 
+    def test_method_with_optional_parameters
+      index(<<~RUBY)
+        class Foo
+          def bar(a = 123)
+          end
+        end
+      RUBY
+
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      entry = T.must(@index["bar"].first)
+      assert_equal(1, entry.parameters.length)
+      parameter = entry.parameters.first
+      assert_equal(:a, parameter.name)
+      assert_instance_of(Entry::OptionalParameter, parameter)
+    end
+
     def test_keeps_track_of_method_owner
       index(<<~RUBY)
         class Foo
