@@ -50,13 +50,30 @@ end
 puts "\n"
 message_queue.close
 
+# Indexing
+puts "Verifying that indexing executes successfully. This may take a while..."
+
+index = RubyIndexer::Index.new
+indexables = RubyIndexer.configuration.indexables
+
+indexables.each_with_index do |indexable, i|
+  result = Prism.parse(File.read(indexable.full_path))
+  collector = RubyIndexer::Collector.new(index, result, indexable.full_path)
+  collector.collect(result.value)
+rescue => e
+  errors[indexable.full_path] = e
+ensure
+  print("\033[M\033[0KIndexed #{i + 1}/#{indexables.length}") unless ENV["CI"]
+end
+puts "\n"
+
 if errors.empty?
-  puts "All automatic LSP requests executed successfully"
+  puts "All operations completed successfully!"
   exit
 end
 
 puts <<~ERRORS
-  Errors while executing requests:
+  Errors while executing:
 
   #{errors.map { |file, error| "#{file}: #{error.message}" }.join("\n")}
 ERRORS
