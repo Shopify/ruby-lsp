@@ -90,7 +90,12 @@ module RubyIndexer
       end
     end
 
+    # A required method parameter, e.g. `def foo(a)`
     class RequiredParameter < Parameter
+    end
+
+    # An optional method parameter, e.g. `def foo(a = 123)`
+    class OptionalParameter < Parameter
     end
 
     class Member < Entry
@@ -162,18 +167,29 @@ module RubyIndexer
       def list_params(parameters_node)
         return [] unless parameters_node
 
-        parameters_node.requireds.filter_map do |required|
+        parameters = []
+
+        parameters_node.requireds.each do |required|
           name = parameter_name(required)
           next unless name
 
-          RequiredParameter.new(name: name)
+          parameters << RequiredParameter.new(name: name)
         end
+
+        parameters_node.optionals.each do |optional|
+          name = parameter_name(optional)
+          next unless name
+
+          parameters << OptionalParameter.new(name: name)
+        end
+
+        parameters
       end
 
       sig { params(node: Prism::Node).returns(T.nilable(Symbol)) }
       def parameter_name(node)
         case node
-        when Prism::RequiredParameterNode
+        when Prism::RequiredParameterNode, Prism::OptionalParameterNode
           node.name
         when Prism::MultiTargetNode
           names = [*node.lefts, *node.rest, *node.rights].map { |parameter_node| parameter_name(parameter_node) }
