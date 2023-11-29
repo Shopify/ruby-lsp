@@ -209,8 +209,8 @@ module RubyIndexer
       sig { params(node: Prism::Node).returns(T.nilable(Symbol)) }
       def parameter_name(node)
         case node
-        when Prism::RequiredParameterNode, Prism::OptionalParameterNode, Prism::RequiredKeywordParameterNode,
-          Prism::OptionalKeywordParameterNode
+        when Prism::RequiredParameterNode, Prism::OptionalParameterNode, 
+          Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode
           node.name
         when Prism::MultiTargetNode
           names = [*node.lefts, *node.rest, *node.rights].map { |parameter_node| parameter_name(parameter_node) }
