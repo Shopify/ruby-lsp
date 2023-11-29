@@ -209,7 +209,7 @@ module RubyIndexer
       sig { params(node: Prism::Node).returns(T.nilable(Symbol)) }
       def parameter_name(node)
         case node
-        when Prism::RequiredParameterNode, Prism::OptionalParameterNode, 
+        when Prism::RequiredParameterNode, Prism::OptionalParameterNode,
           Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode
           node.name
         when Prism::MultiTargetNode
