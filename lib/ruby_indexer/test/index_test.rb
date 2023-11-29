@@ -246,5 +246,16 @@ module RubyIndexer
       entry = T.must(entries.first).first
       assert_equal("baz", entry.name)
     end
+
+    def test_indexing_prism_fixtures_succeeds
+      fixtures = Dir.glob("test/fixtures/prism/test/prism/fixtures/**/*.txt")
+
+      fixtures.each do |fixture|
+        indexable_path = IndexablePath.new("", fixture)
+        @index.index_single(indexable_path)
+      end
+
+      refute_empty(@index.instance_variable_get(:@entries))
+    end
   end
 end
