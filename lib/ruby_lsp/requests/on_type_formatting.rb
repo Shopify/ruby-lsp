@@ -118,7 +118,7 @@ module RubyLsp
         current_line = @lines[@position[:line]]
         next_line = @lines[@position[:line] + 1]
 
-        if current_line.nil? || current_line.strip.empty?
+        if current_line.nil? || current_line.strip.empty? || current_line.include?(")") || current_line.include?("]")
           add_edit_with_text("\n")
           add_edit_with_text("#{indents}end")
           move_cursor_to(@position[:line], @indentation + 2)

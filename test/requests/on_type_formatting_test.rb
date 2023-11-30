@@ -407,4 +407,46 @@ class OnTypeFormattingTest < Minitest::Test
     ]
     assert_equal(expected_edits.to_json, T.must(edits).to_json)
   end
+
+  def test_completing_end_token_inside_parameters
+    document = RubyLsp::RubyDocument.new(source: +"foo(proc do\n)", version: 1, uri: URI("file:///fake.rb"))
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 0 }, "\n").run
+    expected_edits = [
+      {
+        range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } },
+        newText: "\n",
+      },
+      {
+        range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } },
+        newText: "end",
+      },
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: "$0",
+      },
+    ]
+    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+  end
+
+  def test_completing_end_token_inside_brackets
+    document = RubyLsp::RubyDocument.new(source: +"foo[proc do\n]", version: 1, uri: URI("file:///fake.rb"))
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 0 }, "\n").run
+    expected_edits = [
+      {
+        range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } },
+        newText: "\n",
+      },
+      {
+        range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } },
+        newText: "end",
+      },
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: "$0",
+      },
+    ]
+    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+  end
 end
