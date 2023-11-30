@@ -29,6 +29,16 @@ class CodeActionsFormattingTest < Minitest::Test
     assert_disable_line("line_disable_existing", "Lint/UselessAssignment")
   end
 
+  def test_disable_line__multiline_string
+    skip("Incompatible with inline RuboCop comment")
+    assert_disable_line("multiline_string", "Lint/Void")
+  end
+
+  def test_disable_line__continuation
+    skip("Incompatible with inline RuboCop comment")
+    assert_disable_line("continuation", "Layout/SpaceAroundOperators")
+  end
+
   private
 
   def assert_disable_line(fixture, cop_name)
@@ -58,7 +68,7 @@ class CodeActionsFormattingTest < Minitest::Test
     ).returns(T.untyped)
   end
   def assert_corrects_to_expected(diagnostic_code, code_action_title, source, expected)
-    document = RubyLsp::Document.new(
+    document = RubyLsp::RubyDocument.new(
       source: source.dup,
       version: 1,
       uri: URI::Generic.from_path(path: __FILE__),
@@ -72,7 +82,8 @@ class CodeActionsFormattingTest < Minitest::Test
       diagnostics: [JSON.parse(T.must(diagnostic).to_json, symbolize_names: true)],
     }).run
 
-    # deal with weird typing in CodeActions#run lying about its type
+    # CodeActions#run returns Array<CodeAction, Hash>. We're interested in the
+    # hashes here, so cast to untyped and only look at those.
     untyped_result = T.let(result, T.untyped)
     selected_action = untyped_result.find do |ca|
       code_action = T.let(ca, T.untyped)

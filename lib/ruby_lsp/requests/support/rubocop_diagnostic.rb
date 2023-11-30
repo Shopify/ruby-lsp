@@ -19,6 +19,8 @@ module RubyLsp
           T::Hash[Symbol, Integer],
         )
 
+        # TODO: avoid passing document once we have alternative ways to get at
+        # encoding and file source
         sig { params(document: Document, offense: RuboCop::Cop::Offense, uri: URI::Generic).void }
         def initialize(document, offense, uri)
           @document = document
@@ -146,8 +148,8 @@ module RubyLsp
             character: length_of_line(@offense.source_line),
           )
 
-          # TODO: probably better to use a block comment for multi-line
-          # offenses. Harder though; need to do indentation and such.
+          # TODO: fails for multiline strings - may be preferable to use block
+          # comments to disable some offenses
           inline_comment = Interface::TextEdit.new(
             range: Interface::Range.new(start: eol, end: eol),
             new_text: new_text,
