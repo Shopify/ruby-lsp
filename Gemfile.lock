@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruby-lsp (0.13.0)
+    ruby-lsp (0.13.1)
       language_server-protocol (~> 3.17.0)
       prism (>= 0.18.0, < 0.19)
       sorbet-runtime (>= 0.5.5685)
