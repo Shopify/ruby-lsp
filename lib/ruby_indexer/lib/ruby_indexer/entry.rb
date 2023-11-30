@@ -116,6 +116,11 @@ module RubyIndexer
       DEFAULT_NAME = T.let(:"<anonymous keyword splat>", Symbol)
     end
 
+    # A block method parameter, e.g. `def foo(&block)`
+    class BlockParameter < Parameter
+      DEFAULT_NAME = T.let(:"<anonymous block>", Symbol)
+    end
+
     class Member < Entry
       extend T::Sig
       extend T::Helpers
@@ -233,6 +238,9 @@ module RubyIndexer
 
           parameters << RequiredParameter.new(name: name)
         end
+
+        block = parameters_node.block
+        parameters << BlockParameter.new(name: block.name || BlockParameter::DEFAULT_NAME) if block
 
         parameters
       end
