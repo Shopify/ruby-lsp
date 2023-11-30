@@ -109,16 +109,6 @@ class FormattingTest < Minitest::Test
     assert_nil(RubyLsp::Requests::Formatting.new(document, formatter: "rubocop").run)
   end
 
-  def test_returns_nil_if_document_is_not_in_project_folder
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///fake.rb"))
-      class Foo
-      def foo
-      end
-      end
-    RUBY
-    assert_nil(RubyLsp::Requests::Formatting.new(document).run)
-  end
-
   def test_allows_specifying_formatter
     SyntaxTree
       .expects(:format)

@@ -64,11 +64,6 @@ module RubyLsp
       sig { override.returns(T.nilable(T.all(T::Array[Interface::TextEdit], Object))) }
       def run
         return if @formatter == "none"
-
-        # Don't try to format files outside the current working directory
-        path = @uri.to_standardized_path
-        return unless path.nil? || path.start_with?(T.must(WORKSPACE_URI.to_standardized_path))
-
         return if @document.syntax_error?
 
         formatted_text = formatted_file

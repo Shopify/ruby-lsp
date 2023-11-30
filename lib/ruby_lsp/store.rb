@@ -17,6 +17,9 @@ module RubyLsp
     sig { returns(T::Boolean) }
     attr_accessor :experimental_features
 
+    sig { returns(URI::Generic) }
+    attr_accessor :workspace_uri
+
     sig { void }
     def initialize
       @state = T.let({}, T::Hash[String, Document])
@@ -24,6 +27,7 @@ module RubyLsp
       @formatter = T.let("auto", String)
       @supports_progress = T.let(true, T::Boolean)
       @experimental_features = T.let(false, T::Boolean)
+      @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
     end
 
     sig { params(uri: URI::Generic).returns(Document) }

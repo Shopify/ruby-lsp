@@ -4,10 +4,6 @@
 module RubyLsp
   # Used to indicate that a request shouldn't return a response
   VOID = T.let(Object.new.freeze, Object)
-
-  # This freeze is not redundant since the interpolated string is mutable
-  WORKSPACE_URI = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
-
   BUNDLE_PATH = T.let(
     begin
       Bundler.bundle_path.to_s

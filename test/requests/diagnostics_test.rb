@@ -16,16 +16,6 @@ class DiagnosticsTest < Minitest::Test
     assert_empty(result)
   end
 
-  def test_returns_nil_if_document_is_not_in_project_folder
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///some/other/folder/file.rb"))
-      def foo
-      wrong_indent
-      end
-    RUBY
-
-    assert_nil(RubyLsp::Requests::Diagnostics.new(document).run)
-  end
-
   def test_returns_syntax_error_diagnostics
     document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///fake/file.rb"))
       def foo
