@@ -36,11 +36,10 @@ module RubyLsp
           index: RubyIndexer::Index,
           nesting: T::Array[String],
           dispatcher: Prism::Dispatcher,
-          message_queue: Thread::Queue,
         ).void
       end
-      def initialize(index, nesting, dispatcher, message_queue)
-        super(dispatcher, message_queue)
+      def initialize(index, nesting, dispatcher)
+        super(dispatcher)
         @_response = T.let([], ResponseType)
         @index = index
         @nesting = nesting

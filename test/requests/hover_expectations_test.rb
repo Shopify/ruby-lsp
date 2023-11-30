@@ -178,17 +178,17 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
   def create_hover_addon
     Class.new(RubyLsp::Addon) do
-      def activate; end
+      def activate(message_queue); end
 
       def name
         "HoverAddon"
       end
 
-      def create_hover_listener(nesting, index, dispatcher, message_queue)
+      def create_hover_listener(nesting, index, dispatcher)
         klass = Class.new(RubyLsp::Listener) do
           attr_reader :_response
 
-          def initialize(dispatcher, message_queue)
+          def initialize(dispatcher)
             super
             dispatcher.register(self, :on_constant_read_node_enter)
           end
@@ -203,7 +203,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        klass.new(dispatcher, message_queue)
+        klass.new(dispatcher)
       end
     end
   end

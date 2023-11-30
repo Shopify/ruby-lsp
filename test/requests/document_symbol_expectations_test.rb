@@ -28,17 +28,17 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
 
   def create_document_symbol_addon
     Class.new(RubyLsp::Addon) do
-      def activate; end
+      def activate(message_queue); end
 
       def name
         "Document SymbolsAddon"
       end
 
-      def create_document_symbol_listener(dispatcher, message_queue)
+      def create_document_symbol_listener(dispatcher)
         klass = Class.new(RubyLsp::Listener) do
           attr_reader :_response
 
-          def initialize(dispatcher, message_queue)
+          def initialize(dispatcher)
             super
             dispatcher.register(self, :on_call_node_enter)
           end
@@ -58,7 +58,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        klass.new(dispatcher, message_queue)
+        klass.new(dispatcher)
       end
     end
   end
