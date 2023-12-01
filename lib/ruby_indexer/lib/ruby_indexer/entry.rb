@@ -106,6 +106,16 @@ module RubyIndexer
     class OptionalKeywordParameter < Parameter
     end
 
+    # A rest method parameter, e.g. `def foo(*a)`
+    class RestParameter < Parameter
+      DEFAULT_NAME = T.let(:"<anonymous splat>", Symbol)
+    end
+
+    # A keyword rest method parameter, e.g. `def foo(**a)`
+    class KeywordRestParameter < Parameter
+      DEFAULT_NAME = T.let(:"<anonymous keyword splat>", Symbol)
+    end
+
     class Member < Entry
       extend T::Sig
       extend T::Helpers
@@ -203,17 +213,47 @@ module RubyIndexer
           end
         end
 
+        rest = parameters_node.rest
+
+        if rest
+          rest_name = rest.name || RestParameter::DEFAULT_NAME
+          parameters << RestParameter.new(name: rest_name)
+        end
+
+        keyword_rest = parameters_node.keyword_rest
+
+        if keyword_rest.is_a?(Prism::KeywordRestParameterNode)
+          keyword_rest_name = parameter_name(keyword_rest) || KeywordRestParameter::DEFAULT_NAME
+          parameters << KeywordRestParameter.new(name: keyword_rest_name)
+        end
+
+        parameters_node.posts.each do |post|
+          name = parameter_name(post)
+          next unless name
+
+          parameters << RequiredParameter.new(name: name)
+        end
+
         parameters
       end
 
-      sig { params(node: Prism::Node).returns(T.nilable(Symbol)) }
+      sig { params(node: T.nilable(Prism::Node)).returns(T.nilable(Symbol)) }
       def parameter_name(node)
         case node
         when Prism::RequiredParameterNode, Prism::OptionalParameterNode,
-          Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode
+          Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode,
+          Prism::RestParameterNode, Prism::KeywordRestParameterNode
           node.name
         when Prism::MultiTargetNode
-          names = [*node.lefts, *node.rest, *node.rights].map { |parameter_node| parameter_name(parameter_node) }
+          names = node.lefts.map { |parameter_node| parameter_name(parameter_node) }
+
+          rest = node.rest
+          if rest.is_a?(Prism::SplatNode)
+            name = rest.expression&.slice
+            names << (rest.operator == "*" ? "*#{name}".to_sym : name&.to_sym)
+          end
+
+          names.concat(node.rights.map { |parameter_node| parameter_name(parameter_node) })
 
           names_with_commas = names.join(", ")
           :"(#{names_with_commas})"
