@@ -36,21 +36,18 @@ export class RubyVersionStatus extends StatusItem {
 
     this.item.name = "Ruby LSP Status";
     this.item.command = {
-      title: "Change version manager",
-      command: Command.SelectVersionManager,
+      title: "Change Ruby version",
+      command: Command.ChangeRubyVersion,
     };
 
     this.item.text = "Activating Ruby environment";
-    this.item.severity = vscode.LanguageStatusSeverity.Information;
   }
 
   refresh(workspace: WorkspaceInterface): void {
-    if (workspace.ruby.error) {
-      this.item.text = "Failed to activate Ruby";
-      this.item.severity = vscode.LanguageStatusSeverity.Error;
+    if (workspace.ruby.rubyVersion) {
+      this.item.text = `Using Ruby ${workspace.ruby.rubyVersion}`;
     } else {
-      this.item.text = `Using Ruby ${workspace.ruby.rubyVersion} with ${workspace.ruby.versionManager}`;
-      this.item.severity = vscode.LanguageStatusSeverity.Information;
+      this.item.text = "Ruby environment not activated";
     }
   }
 }
@@ -138,26 +135,10 @@ export class YjitStatus extends StatusItem {
   }
 
   refresh(workspace: WorkspaceInterface): void {
-    const useYjit: boolean | undefined = vscode.workspace
-      .getConfiguration("rubyLsp")
-      .get("yjit");
-
-    if (useYjit && workspace.ruby.supportsYjit) {
+    if (workspace.ruby.yjitEnabled) {
       this.item.text = "YJIT enabled";
-
-      this.item.command = {
-        title: "Disable",
-        command: Command.ToggleYjit,
-      };
     } else {
       this.item.text = "YJIT disabled";
-
-      if (workspace.ruby.supportsYjit) {
-        this.item.command = {
-          title: "Enable",
-          command: Command.ToggleYjit,
-        };
-      }
     }
   }
 }

@@ -28,7 +28,7 @@ suite("StatusItems", () => {
 
   suite("RubyVersionStatus", () => {
     beforeEach(() => {
-      ruby = { rubyVersion: "3.2.0", versionManager: "shadowenv" } as Ruby;
+      ruby = { rubyVersion: "3.2.0" } as Ruby;
       workspace = {
         ruby,
         lspClient: {
@@ -44,21 +44,21 @@ suite("StatusItems", () => {
     });
 
     test("Status is initialized with the right values", () => {
-      assert.strictEqual(status.item.text, "Using Ruby 3.2.0 with shadowenv");
+      assert.strictEqual(status.item.text, "Using Ruby 3.2.0");
       assert.strictEqual(status.item.name, "Ruby LSP Status");
-      assert.strictEqual(status.item.command?.title, "Change version manager");
+      assert.strictEqual(status.item.command?.title, "Change Ruby version");
       assert.strictEqual(
         status.item.command.command,
-        Command.SelectVersionManager,
+        Command.ChangeRubyVersion,
       );
     });
 
     test("Refresh updates version string", () => {
-      assert.strictEqual(status.item.text, "Using Ruby 3.2.0 with shadowenv");
+      assert.strictEqual(status.item.text, "Using Ruby 3.2.0");
 
       workspace.ruby.rubyVersion = "3.2.1";
       status.refresh(workspace);
-      assert.strictEqual(status.item.text, "Using Ruby 3.2.1 with shadowenv");
+      assert.strictEqual(status.item.text, "Using Ruby 3.2.1");
     });
   });
 
@@ -148,9 +148,9 @@ suite("StatusItems", () => {
     });
   });
 
-  suite("YjitStatus when Ruby supports it", () => {
+  suite("YjitStatus", () => {
     beforeEach(() => {
-      ruby = { supportsYjit: true } as Ruby;
+      ruby = { yjitEnabled: true } as Ruby;
       workspace = {
         ruby,
         lspClient: {
@@ -165,50 +165,15 @@ suite("StatusItems", () => {
       status.refresh(workspace);
     });
 
-    test("Status is initialized with the right values", () => {
+    test("Shows enabled if YJIT is enabled", () => {
       assert.strictEqual(status.item.text, "YJIT enabled");
       assert.strictEqual(status.item.name, "YJIT");
-      assert.strictEqual(status.item.command?.title, "Disable");
-      assert.strictEqual(status.item.command.command, Command.ToggleYjit);
     });
 
-    test("Refresh updates whether it's disabled or enabled", () => {
-      assert.strictEqual(status.item.text, "YJIT enabled");
-
-      workspace.ruby.supportsYjit = false;
+    test("Shows disabled if YJIT is disabled", () => {
+      workspace.ruby.yjitEnabled = false;
       status.refresh(workspace);
       assert.strictEqual(status.item.text, "YJIT disabled");
-    });
-  });
-
-  suite("YjitStatus when Ruby does not support it", () => {
-    beforeEach(() => {
-      ruby = { supportsYjit: false } as Ruby;
-      workspace = {
-        ruby,
-        lspClient: {
-          state: State.Running,
-          formatter: "none",
-          serverVersion: "1.0.0",
-          sendRequest: <T>() => Promise.resolve([] as T),
-        },
-        error: false,
-      };
-      status = new YjitStatus();
-      status.refresh(workspace);
-    });
-
-    test("Refresh ignores YJIT configuration if Ruby doesn't support it", () => {
-      assert.strictEqual(status.item.text, "YJIT disabled");
-      assert.strictEqual(status.item.command, undefined);
-
-      const lspConfig = vscode.workspace.getConfiguration("rubyLsp");
-      lspConfig.update("yjit", true, true, true);
-      workspace.ruby.supportsYjit = false;
-      status.refresh(workspace);
-
-      assert.strictEqual(status.item.text, "YJIT disabled");
-      assert.strictEqual(status.item.command, undefined);
     });
   });
 

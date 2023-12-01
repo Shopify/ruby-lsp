@@ -39,7 +39,7 @@ export class Workspace implements WorkspaceInterface {
       LOG_CHANNEL,
     );
     this.telemetry = telemetry;
-    this.ruby = new Ruby(context, workspaceFolder, this.outputChannel);
+    this.ruby = new Ruby(workspaceFolder, context, this.outputChannel);
     this.createTestItems = createTestItems;
 
     this.registerRestarts(context);
@@ -47,10 +47,15 @@ export class Workspace implements WorkspaceInterface {
   }
 
   async start() {
-    await this.ruby.activateRuby();
-
-    if (this.ruby.error) {
+    try {
+      await this.ruby.activate();
+    } catch (error: any) {
       this.error = true;
+
+      vscode.window.showErrorMessage(
+        `Failed to activate Ruby environment: ${error.message}`,
+      );
+
       return;
     }
 
@@ -235,13 +240,8 @@ export class Workspace implements WorkspaceInterface {
     // configuration and restart the server
     vscode.workspace.onDidChangeConfiguration(async (event) => {
       if (event.affectsConfiguration("rubyLsp")) {
-        // Re-activate Ruby if the version manager changed
-        if (
-          event.affectsConfiguration("rubyLsp.rubyVersionManager") ||
-          event.affectsConfiguration("rubyLsp.bundleGemfile") ||
-          event.affectsConfiguration("rubyLsp.customRubyCommand")
-        ) {
-          await this.ruby.activateRuby();
+        if (event.affectsConfiguration("rubyLsp.bundleGemfile")) {
+          await this.ruby.activate();
         }
 
         await this.restart();

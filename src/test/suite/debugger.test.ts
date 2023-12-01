@@ -6,7 +6,7 @@ import * as os from "os";
 import * as vscode from "vscode";
 
 import { Debugger } from "../../debugger";
-import { Ruby, VersionManager } from "../../ruby";
+import { Ruby } from "../../ruby";
 import { Workspace } from "../../workspace";
 import { WorkspaceChannel } from "../../workspaceChannel";
 import { LOG_CHANNEL, asyncExec } from "../../common";
@@ -138,13 +138,6 @@ suite("Debugger", () => {
   });
 
   test("Launching the debugger", async () => {
-    // eslint-disable-next-line no-process-env
-    if (process.env.CI) {
-      await vscode.workspace
-        .getConfiguration("rubyLsp")
-        .update("rubyVersionManager", VersionManager.None, true, true);
-    }
-
     // By default, VS Code always saves all open files when launching a debugging session. This is a problem for tests
     // because it attempts to save an untitled test file and then we get stuck in the save file dialog with no way of
     // closing it. We have to disable that before running this test
@@ -165,15 +158,25 @@ suite("Debugger", () => {
       'source "https://rubygems.org"\ngem "debug"',
     );
 
-    const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
+    const context = {
+      subscriptions: [],
+      workspaceState: {
+        get: (_name: string) => undefined,
+        update: (_name: string, _value: any) => Promise.resolve(),
+      },
+      globalState: {
+        get: (_name: string) => undefined,
+        update: (_name: string, _value: any) => Promise.resolve(),
+      },
+    } as unknown as vscode.ExtensionContext;
     const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
     const workspaceFolder: vscode.WorkspaceFolder = {
       uri: vscode.Uri.from({ scheme: "file", path: tmpPath }),
       name: path.basename(tmpPath),
       index: 0,
     };
-    const ruby = new Ruby(context, workspaceFolder, outputChannel);
-    await ruby.activateRuby();
+    const ruby = new Ruby(workspaceFolder, context, outputChannel);
+    await ruby.activate();
 
     try {
       await asyncExec("gem install debug", { env: ruby.env, cwd: tmpPath });

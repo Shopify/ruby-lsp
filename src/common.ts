@@ -12,8 +12,7 @@ export enum Command {
   Update = "rubyLsp.update",
   ToggleExperimentalFeatures = "rubyLsp.toggleExperimentalFeatures",
   ServerOptions = "rubyLsp.serverOptions",
-  ToggleYjit = "rubyLsp.toggleYjit",
-  SelectVersionManager = "rubyLsp.selectRubyVersionManager",
+  ChangeRubyVersion = "rubyLsp.changeRubyVersion",
   ToggleFeatures = "rubyLsp.toggleFeatures",
   FormatterHelp = "rubyLsp.formatterHelp",
   RunTest = "rubyLsp.runTest",
@@ -24,10 +23,8 @@ export enum Command {
 }
 
 export interface RubyInterface {
-  error: boolean;
-  versionManager?: string;
   rubyVersion?: string;
-  supportsYjit?: boolean;
+  yjitEnabled?: boolean;
 }
 
 export interface ClientInterface {

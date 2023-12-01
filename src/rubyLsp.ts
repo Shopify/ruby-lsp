@@ -7,7 +7,6 @@ import { Telemetry } from "./telemetry";
 import DocumentProvider from "./documentProvider";
 import { Workspace } from "./workspace";
 import { Command, STATUS_EMITTER, pathExists } from "./common";
-import { VersionManager } from "./ruby";
 import { StatusItems } from "./status";
 import { TestController } from "./testController";
 import { Debugger } from "./debugger";
@@ -263,17 +262,6 @@ export class RubyLsp {
             .update("enabledFeatures", features, true, true);
         }
       }),
-      vscode.commands.registerCommand(Command.ToggleYjit, () => {
-        const lspConfig = vscode.workspace.getConfiguration("rubyLsp");
-        const yjitEnabled = lspConfig.get("yjit");
-        lspConfig.update("yjit", !yjitEnabled, true, true);
-
-        const workspace = this.currentActiveWorkspace();
-
-        if (workspace) {
-          STATUS_EMITTER.fire(workspace);
-        }
-      }),
       vscode.commands.registerCommand(
         Command.ToggleExperimentalFeatures,
         async () => {
@@ -302,20 +290,10 @@ export class RubyLsp {
             await vscode.commands.executeCommand(result.description);
         },
       ),
-      vscode.commands.registerCommand(
-        Command.SelectVersionManager,
-        async () => {
-          const configuration = vscode.workspace.getConfiguration("rubyLsp");
-          const options = Object.values(VersionManager);
-          const manager = await vscode.window.showQuickPick(options, {
-            placeHolder: `Current: ${configuration.get("rubyVersionManager")}`,
-          });
-
-          if (manager !== undefined) {
-            configuration.update("rubyVersionManager", manager, true, true);
-          }
-        },
-      ),
+      vscode.commands.registerCommand(Command.ChangeRubyVersion, async () => {
+        const workspace = this.currentActiveWorkspace();
+        return workspace?.ruby.changeVersion();
+      }),
       vscode.commands.registerCommand(
         Command.RunTest,
         (_path, name, _command) => {
