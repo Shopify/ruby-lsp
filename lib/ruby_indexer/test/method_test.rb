@@ -185,6 +185,30 @@ module RubyIndexer
       assert_instance_of(Entry::RequiredParameter, param)
     end
 
+    def test_method_with_block_parameters
+      index(<<~RUBY)
+        class Foo
+          def bar(&block)
+          end
+
+          def baz(&)
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+      param = entry.parameters.first
+      assert_equal(:block, param.name)
+      assert_instance_of(Entry::BlockParameter, param)
+
+      entry = T.must(@index["baz"].first)
+      assert_equal(1, entry.parameters.length)
+
+      param = entry.parameters.first
+      assert_equal(Entry::BlockParameter::DEFAULT_NAME, param.name)
+      assert_instance_of(Entry::BlockParameter, param)
+    end
+
     def test_method_with_anonymous_rest_parameters
       index(<<~RUBY)
         class Foo
