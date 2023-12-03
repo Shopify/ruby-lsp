@@ -20,6 +20,9 @@ module RubyLsp
     sig { returns(URI::Generic) }
     attr_accessor :workspace_uri
 
+    sig { returns(T::Hash[Symbol, T::Hash[Symbol, T::Boolean]]) }
+    attr_accessor :features_configuration
+
     sig { void }
     def initialize
       @state = T.let({}, T::Hash[String, Document])
@@ -28,6 +31,15 @@ module RubyLsp
       @supports_progress = T.let(true, T::Boolean)
       @experimental_features = T.let(false, T::Boolean)
       @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
+      @features_configuration = T.let(
+        {
+          inlayHint: {
+            implicitRescue: true,
+            implicitHashValue: true,
+          },
+        },
+        T::Hash[Symbol, T::Hash[Symbol, T::Boolean]],
+      )
     end
 
     sig { params(uri: URI::Generic).returns(Document) }

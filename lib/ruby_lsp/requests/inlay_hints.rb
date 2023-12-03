@@ -39,18 +39,26 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      sig { params(range: T::Range[Integer], dispatcher: Prism::Dispatcher).void }
-      def initialize(range, dispatcher)
+      sig do
+        params(
+          range: T::Range[Integer],
+          hints_configuration: T::Hash[Symbol, T::Boolean],
+          dispatcher: Prism::Dispatcher,
+        ).void
+      end
+      def initialize(range, hints_configuration, dispatcher)
         super(dispatcher)
 
         @_response = T.let([], ResponseType)
         @range = range
+        @hints_configuration = hints_configuration
 
         dispatcher.register(self, :on_rescue_node_enter, :on_implicit_node_enter)
       end
 
       sig { params(node: Prism::RescueNode).void }
       def on_rescue_node_enter(node)
+        return unless @hints_configuration.dig(:implicitRescue)
         return unless node.exceptions.empty?
 
         loc = node.location
@@ -66,6 +74,7 @@ module RubyLsp
 
       sig { params(node: Prism::ImplicitNode).void }
       def on_implicit_node_enter(node)
+        return unless @hints_configuration.dig(:implicitHashValue)
         return unless visible?(node, @range)
 
         node_value = node.value

@@ -221,6 +221,47 @@ class ExecutorTest < Minitest::Test
     @store.delete(uri)
   end
 
+  def test_initialize_features_with_default_configuration
+    RubyLsp::Executor.new(@store, @message_queue)
+      .execute(method: "initialize", params: { initializationOptions: {} })
+
+    assert(@store.features_configuration.dig(:inlayHint, :implicitRescue))
+    assert(@store.features_configuration.dig(:inlayHint, :implicitHashValue))
+  end
+
+  def test_initialize_features_with_provided_configuration
+    RubyLsp::Executor.new(@store, @message_queue)
+      .execute(method: "initialize", params: {
+        initializationOptions: {
+          featuresConfiguration: {
+            inlayHint: {
+              implicitRescue: false,
+              implicitHashValue: false,
+            },
+          },
+        },
+      })
+
+    refute(@store.features_configuration.dig(:inlayHint, :implicitRescue))
+    refute(@store.features_configuration.dig(:inlayHint, :implicitHashValue))
+  end
+
+  def test_initialize_features_with_partially_provided_configuration
+    RubyLsp::Executor.new(@store, @message_queue)
+      .execute(method: "initialize", params: {
+        initializationOptions: {
+          featuresConfiguration: {
+            inlayHint: {
+              implicitHashValue: false,
+            },
+          },
+        },
+      })
+
+    assert(@store.features_configuration.dig(:inlayHint, :implicitRescue))
+    refute(@store.features_configuration.dig(:inlayHint, :implicitHashValue))
+  end
+
   def test_detects_rubocop_if_direct_dependency
     stub_dependencies(rubocop: true, syntax_tree: false)
     RubyLsp::Executor.new(@store, @message_queue)

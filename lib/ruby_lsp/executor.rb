@@ -392,7 +392,8 @@ module RubyLsp
       end_line = range.dig(:end, :line)
 
       dispatcher = Prism::Dispatcher.new
-      listener = Requests::InlayHints.new(start_line..end_line, dispatcher)
+      hints_configurations = T.must(@store.features_configuration.dig(:inlayHint))
+      listener = Requests::InlayHints.new(start_line..end_line, hints_configurations, dispatcher)
       dispatcher.visit(document.tree)
       listener.response
     end
@@ -601,6 +602,8 @@ module RubyLsp
 
       configured_features = options.dig(:initializationOptions, :enabledFeatures)
       @store.experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled) || false
+      configured_hints = options.dig(:initializationOptions, :featuresConfiguration, :inlayHint)
+      T.must(@store.features_configuration.dig(:inlayHint)).merge!(configured_hints) if configured_hints
 
       enabled_features = case configured_features
       when Array
@@ -743,6 +746,7 @@ module RubyLsp
           version: VERSION,
         },
         formatter: @store.formatter,
+        features_configuration: @store.features_configuration,
       }
     end
 
