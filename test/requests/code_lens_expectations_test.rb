@@ -13,7 +13,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(uri, default_lenses_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
     listener.response
   end
@@ -30,7 +30,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(uri, default_lenses_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.response
 
@@ -57,7 +57,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("unknown")
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(uri, default_lenses_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.response
 
@@ -76,7 +76,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("rspec")
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(uri, default_lenses_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.response
 
@@ -95,10 +95,24 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(uri, default_lenses_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.response
 
+    assert_empty(response)
+  end
+
+  def test_skip_gemfile_links
+    uri = URI("file:///Gemfile")
+    document = RubyLsp::RubyDocument.new(uri: uri, source: <<~RUBY, version: 1)
+      gem 'minitest'
+    RUBY
+
+    dispatcher = Prism::Dispatcher.new
+    lenses_configuration = { gemfileLinks: false }
+    listener = RubyLsp::Requests::CodeLens.new(uri, lenses_configuration, dispatcher)
+    dispatcher.dispatch(document.tree)
+    response = listener.response
     assert_empty(response)
   end
 
@@ -122,6 +136,10 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   end
 
   private
+
+  def default_lenses_configuration
+    { gemfileLinks: true }
+  end
 
   def create_code_lens_addon
     Class.new(RubyLsp::Addon) do

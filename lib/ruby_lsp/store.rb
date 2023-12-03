@@ -33,6 +33,9 @@ module RubyLsp
       @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
       @features_configuration = T.let(
         {
+          codeLens: {
+            gemfileLinks: true,
+          },
           inlayHint: {
             implicitRescue: true,
             implicitHashValue: true,

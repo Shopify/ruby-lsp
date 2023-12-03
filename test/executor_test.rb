@@ -225,6 +225,7 @@ class ExecutorTest < Minitest::Test
     RubyLsp::Executor.new(@store, @message_queue)
       .execute(method: "initialize", params: { initializationOptions: {} })
 
+    assert(@store.features_configuration.dig(:codeLens, :gemfileLinks))
     assert(@store.features_configuration.dig(:inlayHint, :implicitRescue))
     assert(@store.features_configuration.dig(:inlayHint, :implicitHashValue))
   end
@@ -234,6 +235,9 @@ class ExecutorTest < Minitest::Test
       .execute(method: "initialize", params: {
         initializationOptions: {
           featuresConfiguration: {
+            codeLens: {
+              gemfileLinks: false,
+            },
             inlayHint: {
               implicitRescue: false,
               implicitHashValue: false,
@@ -242,6 +246,7 @@ class ExecutorTest < Minitest::Test
         },
       })
 
+    refute(@store.features_configuration.dig(:codeLens, :gemfileLinks))
     refute(@store.features_configuration.dig(:inlayHint, :implicitRescue))
     refute(@store.features_configuration.dig(:inlayHint, :implicitHashValue))
   end
@@ -251,6 +256,9 @@ class ExecutorTest < Minitest::Test
       .execute(method: "initialize", params: {
         initializationOptions: {
           featuresConfiguration: {
+            codeLens: {
+              gemfileLinks: false,
+            },
             inlayHint: {
               implicitHashValue: false,
             },
@@ -258,6 +266,7 @@ class ExecutorTest < Minitest::Test
         },
       })
 
+    refute(@store.features_configuration.dig(:codeLens, :gemfileLinks))
     assert(@store.features_configuration.dig(:inlayHint, :implicitRescue))
     refute(@store.features_configuration.dig(:inlayHint, :implicitHashValue))
   end
