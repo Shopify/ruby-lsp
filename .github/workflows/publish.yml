@@ -56,3 +56,10 @@ jobs:
           node_modules/.bin/vsce publish --pre-release --packagePath vscode-ruby-lsp.vsix
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      # Stable releases for OpenVSX
+      - name: Publish extension on OpenVSX
+        if: "!github.event.release.prerelease"
+        run: |
+          yarn run package
+          node_modules/.bin/ovs publish vscode-ruby-lsp.vsix -p ${{ secrets.OPENVSX_TOKEN }} --yarn
