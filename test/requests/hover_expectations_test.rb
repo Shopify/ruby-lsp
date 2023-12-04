@@ -31,6 +31,50 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hovering_over_rdoc_documented_classes
+    message_queue = Thread::Queue.new
+    store = RubyLsp::Store.new
+
+    uri = URI("file:///fake.rb")
+    source = <<~RUBY
+      RubyLsp::Listener
+
+      class Foo
+        # This is Foo::Listener
+        class Listener
+        end
+
+        Listener
+      end
+    RUBY
+    store.set(uri: uri, source: source, version: 1)
+
+    executor = RubyLsp::Executor.new(store, message_queue)
+    index = executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
+
+    listener_doc = "Listener is an abstract class to be used by requests"
+
+    stub_no_typechecker
+
+    match_response = executor.execute({
+      method: "textDocument/hover",
+      params: { textDocument: { uri: uri }, position: { character: 10, line: 0 } },
+    }).response
+
+    assert_match(listener_doc, match_response.contents.value)
+
+    not_match_response = executor.execute({
+      method: "textDocument/hover",
+      params: { textDocument: { uri: uri }, position: { character: 3, line: 6 } },
+    }).response
+
+    refute_match(listener_doc, not_match_response.contents.value)
+    assert_match("This is Foo::Listener", not_match_response.contents.value)
+  ensure
+    T.must(message_queue).close
+  end
+
   def test_hovering_over_private_constant_from_the_same_namespace
     message_queue = Thread::Queue.new
     store = RubyLsp::Store.new

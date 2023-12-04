@@ -43,6 +43,8 @@ module RubyLsp
         @index = index
         @nesting = nesting
         @_response = T.let(nil, ResponseType)
+        @rdoc_driver = T.let(RDoc::RI::Driver.new, RDoc::RI::Driver)
+        @rdoc_formatter = T.let(RDoc::Markup::ToMarkdown.new, RDoc::Markup::ToMarkdown)
 
         super(dispatcher)
         dispatcher.register(
@@ -119,17 +121,60 @@ module RubyLsp
       sig { params(name: String, location: Prism::Location).void }
       def generate_hover(name, location)
         entries = @index.resolve(name, @nesting)
-        return unless entries
+        indexed_contents = nil
 
-        # We should only show hover for private constants if the constant is defined in the same namespace as the
-        # reference
-        first_entry = T.must(entries.first)
-        return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{name}"
+        if entries
+          # We should only show hover for private constants if the constant is defined in the same namespace as the
+          # reference
+          first_entry = T.must(entries.first)
+          unless first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{name}"
+            indexed_contents = markdown_from_index_entries(name, entries)
+          end
+        end
+
+        ri_contents = generate_hover_from_rdoc(name, entries)
+
+        contents = if ri_contents && indexed_contents
+          Interface::MarkupContent.new(
+            kind: "markdown",
+            value: "#{ri_contents.value}\n\n---\n\n#{indexed_contents.value}",
+          )
+        else
+          indexed_contents || ri_contents
+        end
+
+        return unless contents
 
         @_response = Interface::Hover.new(
           range: range_from_location(location),
-          contents: markdown_from_index_entries(name, entries),
+          contents: contents,
         )
+      end
+
+      sig do
+        params(
+          name: String,
+          entries: T.nilable(T::Array[RubyIndexer::Entry]),
+        ).returns(T.nilable(Interface::MarkupContent))
+      end
+      def generate_hover_from_rdoc(name, entries)
+        if entries
+          first_entry = T.must(entries.first)
+          name = first_entry.name
+        end
+
+        expand_name = @rdoc_driver.expand_name(name)
+        found, klasses, includes, extends = @rdoc_driver.classes_and_includes_and_extends_for(expand_name)
+
+        unless found.empty?
+          ri_doc = @rdoc_driver.class_document(expand_name, found, klasses, includes, extends)
+          Interface::MarkupContent.new(
+            kind: "markdown",
+            value: ri_doc.accept(@rdoc_formatter),
+          )
+        end
+      rescue RDoc::RI::Driver::NotFoundError
+        nil
       end
     end
   end
