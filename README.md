@@ -161,6 +161,19 @@ gem "ruby-lsp"
 gem "rubocop"
 ```
 
+> [!NOTE]
+>
+> Take in mind that formatters, linters and their extensions should be included in the custom gemfile; you might need to add more gems than the ones shown above.
+> e.g: If you are using rubocop, you would also need to add them:
+
+```ruby
+gem "rubocop-packaging"
+gem "rubocop-performance"
+gem "rubocop-rspec"
+gem "rubocop-shopify"
+gem "rubocop-thread_safety"
+```
+
 Run `bundle install` inside that directory to generate a lockfile. After the directory contains the custom `Gemfile` and
 the version manager configuration, use the following configuration in VS Code to point the Ruby LSP to that `Gemfile`.
 
