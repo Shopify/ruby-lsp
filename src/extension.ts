@@ -1,51 +1,18 @@
 import * as vscode from "vscode";
 
-import Client from "./client";
-import { Telemetry } from "./telemetry";
-import { Ruby } from "./ruby";
-import { Debugger } from "./debugger";
-import { TestController } from "./testController";
-import DocumentProvider from "./documentProvider";
+import { RubyLsp } from "./rubyLsp";
 
-let client: Client | undefined;
-let debug: Debugger | undefined;
-let testController: TestController | undefined;
+let extension: RubyLsp;
 
 export async function activate(context: vscode.ExtensionContext) {
-  const ruby = new Ruby(context, vscode.workspace.workspaceFolders![0]);
-  await ruby.activateRuby();
+  if (!vscode.workspace.workspaceFolders) {
+    return;
+  }
 
-  const telemetry = new Telemetry(context);
-  await telemetry.sendConfigurationEvents();
-
-  testController = new TestController(
-    context,
-    vscode.workspace.workspaceFolders![0].uri.fsPath,
-    ruby,
-    telemetry,
-  );
-
-  client = new Client(context, telemetry, ruby, testController);
-
-  await client.start();
-  debug = new Debugger(context, ruby);
-
-  vscode.workspace.registerTextDocumentContentProvider(
-    "ruby-lsp",
-    new DocumentProvider(),
-  );
+  extension = new RubyLsp(context);
+  await extension.activate();
 }
 
 export async function deactivate(): Promise<void> {
-  if (client) {
-    await client.stop();
-  }
-
-  if (testController) {
-    testController.dispose();
-  }
-
-  if (debug) {
-    debug.dispose();
-  }
+  await extension.deactivate();
 }

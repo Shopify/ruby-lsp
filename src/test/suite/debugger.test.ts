@@ -7,12 +7,14 @@ import * as vscode from "vscode";
 
 import { Debugger } from "../../debugger";
 import { Ruby } from "../../ruby";
+import { Workspace } from "../../workspace";
 
 suite("Debugger", () => {
   test("Provide debug configurations returns the default configs", () => {
     const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
-    const ruby = { env: {} } as Ruby;
-    const debug = new Debugger(context, ruby, "fake");
+    const debug = new Debugger(context, () => {
+      return undefined;
+    });
     const configs = debug.provideDebugConfigurations!(undefined);
     assert.deepEqual(
       [
@@ -40,39 +42,58 @@ suite("Debugger", () => {
     );
 
     debug.dispose();
+    context.subscriptions.forEach((subscription) => subscription.dispose());
   });
 
   test("Resolve configuration injects Ruby environment", () => {
     const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const ruby = { env: { bogus: "hello!" } } as unknown as Ruby;
-    const debug = new Debugger(context, ruby, "fake");
-    const configs: any = debug.resolveDebugConfiguration!(undefined, {
-      type: "ruby_lsp",
-      name: "Debug",
-      request: "launch",
-      // eslint-disable-next-line no-template-curly-in-string
-      program: "ruby ${file}",
+    const debug = new Debugger(context, () => {
+      return {
+        ruby,
+        workspaceFolder: { uri: { fsPath: "fake" } },
+      } as Workspace;
     });
+    const configs: any = debug.resolveDebugConfiguration!(
+      { uri: { fsPath: "fake" } } as vscode.WorkspaceFolder,
+      {
+        type: "ruby_lsp",
+        name: "Debug",
+        request: "launch",
+        // eslint-disable-next-line no-template-curly-in-string
+        program: "ruby ${file}",
+      },
+    );
 
     assert.strictEqual(ruby.env, configs.env);
     debug.dispose();
+    context.subscriptions.forEach((subscription) => subscription.dispose());
   });
 
   test("Resolve configuration injects Ruby environment and allows users custom environment", () => {
     const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const ruby = { env: { bogus: "hello!" } } as unknown as Ruby;
-    const debug = new Debugger(context, ruby, "fake");
-    const configs: any = debug.resolveDebugConfiguration!(undefined, {
-      type: "ruby_lsp",
-      name: "Debug",
-      request: "launch",
-      // eslint-disable-next-line no-template-curly-in-string
-      program: "ruby ${file}",
-      env: { parallel: "1" },
+    const debug = new Debugger(context, () => {
+      return {
+        ruby,
+        workspaceFolder: { uri: { fsPath: "fake" } },
+      } as Workspace;
     });
+    const configs: any = debug.resolveDebugConfiguration!(
+      { uri: { fsPath: "fake" } } as vscode.WorkspaceFolder,
+      {
+        type: "ruby_lsp",
+        name: "Debug",
+        request: "launch",
+        // eslint-disable-next-line no-template-curly-in-string
+        program: "ruby ${file}",
+        env: { parallel: "1" },
+      },
+    );
 
     assert.deepEqual({ parallel: "1", ...ruby.env }, configs.env);
     debug.dispose();
+    context.subscriptions.forEach((subscription) => subscription.dispose());
   });
 
   test("Resolve configuration injects BUNDLE_GEMFILE if there's a custom bundle", () => {
@@ -82,15 +103,23 @@ suite("Debugger", () => {
 
     const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const ruby = { env: { bogus: "hello!" } } as unknown as Ruby;
-    const debug = new Debugger(context, ruby, tmpPath);
-    const configs: any = debug.resolveDebugConfiguration!(undefined, {
-      type: "ruby_lsp",
-      name: "Debug",
-      request: "launch",
-      // eslint-disable-next-line no-template-curly-in-string
-      program: "ruby ${file}",
-      env: { parallel: "1" },
+    const debug = new Debugger(context, () => {
+      return {
+        ruby,
+        workspaceFolder: { uri: { fsPath: tmpPath } },
+      } as Workspace;
     });
+    const configs: any = debug.resolveDebugConfiguration!(
+      { uri: { fsPath: tmpPath } } as vscode.WorkspaceFolder,
+      {
+        type: "ruby_lsp",
+        name: "Debug",
+        request: "launch",
+        // eslint-disable-next-line no-template-curly-in-string
+        program: "ruby ${file}",
+        env: { parallel: "1" },
+      },
+    );
 
     assert.deepEqual(
       {
@@ -102,6 +131,7 @@ suite("Debugger", () => {
     );
 
     debug.dispose();
+    context.subscriptions.forEach((subscription) => subscription.dispose());
     fs.rmSync(tmpPath, { recursive: true, force: true });
   });
 });

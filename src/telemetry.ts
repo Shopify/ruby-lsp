@@ -41,7 +41,6 @@ class DevelopmentApi implements TelemetryApi {
 }
 
 export class Telemetry {
-  public serverVersion?: string;
   private api?: TelemetryApi;
   private readonly context: vscode.ExtensionContext;
 
@@ -110,8 +109,8 @@ export class Telemetry {
     );
   }
 
-  async sendCodeLensEvent(type: CodeLensEvent["type"]) {
-    await this.sendEvent({ type, lspVersion: this.serverVersion! });
+  async sendCodeLensEvent(type: CodeLensEvent["type"], lspVersion: string) {
+    await this.sendEvent({ type, lspVersion });
   }
 
   private async initialize(): Promise<boolean> {

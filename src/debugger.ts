@@ -4,33 +4,28 @@ import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 
 import * as vscode from "vscode";
 
-import { Ruby } from "./ruby";
 import { LOG_CHANNEL } from "./common";
+import { Workspace } from "./workspace";
 
 export class Debugger
   implements
     vscode.DebugAdapterDescriptorFactory,
     vscode.DebugConfigurationProvider
 {
-  private readonly workingFolder: string;
-  private readonly ruby: Ruby;
   private debugProcess?: ChildProcessWithoutNullStreams;
   private readonly console = vscode.debug.activeDebugConsole;
-  private readonly subscriptions: vscode.Disposable[];
+  private readonly currentActiveWorkspace: () => Workspace | undefined;
 
   constructor(
     context: vscode.ExtensionContext,
-    ruby: Ruby,
-    workingFolder = vscode.workspace.workspaceFolders![0].uri.fsPath,
+    currentActiveWorkspace: () => Workspace | undefined,
   ) {
-    this.ruby = ruby;
-    this.subscriptions = [
+    this.currentActiveWorkspace = currentActiveWorkspace;
+
+    context.subscriptions.push(
       vscode.debug.registerDebugConfigurationProvider("ruby_lsp", this),
       vscode.debug.registerDebugAdapterDescriptorFactory("ruby_lsp", this),
-    ];
-    this.workingFolder = workingFolder;
-
-    context.subscriptions.push(...this.subscriptions);
+    );
   }
 
   // This is where we start the debuggee process. We currently support launching with the debugger or attaching to a
@@ -89,26 +84,30 @@ export class Debugger
     debugConfiguration: vscode.DebugConfiguration,
     _token?: vscode.CancellationToken,
   ): vscode.ProviderResult<vscode.DebugConfiguration> {
+    const workspace = this.currentActiveWorkspace();
+
+    if (!workspace) {
+      throw new Error("Debugging requires a workspace folder to be opened");
+    }
+
     if (debugConfiguration.env) {
       // If the user has their own debug launch configurations, we still need to inject the Ruby environment
       debugConfiguration.env = Object.assign(
         debugConfiguration.env,
-        this.ruby.env,
+        workspace.ruby.env,
       );
     } else {
-      debugConfiguration.env = this.ruby.env;
+      debugConfiguration.env = workspace.ruby.env;
     }
 
-    let customGemfilePath = path.join(
-      this.workingFolder,
-      ".ruby-lsp",
-      "Gemfile",
-    );
+    const workspacePath = workspace.workspaceFolder.uri.fsPath;
+
+    let customGemfilePath = path.join(workspacePath, ".ruby-lsp", "Gemfile");
     if (fs.existsSync(customGemfilePath)) {
       debugConfiguration.env.BUNDLE_GEMFILE = customGemfilePath;
     }
 
-    customGemfilePath = path.join(this.workingFolder, ".ruby-lsp", "gems.rb");
+    customGemfilePath = path.join(workspacePath, ".ruby-lsp", "gems.rb");
     if (fs.existsSync(customGemfilePath)) {
       debugConfiguration.env.BUNDLE_GEMFILE = customGemfilePath;
     }
@@ -116,12 +115,12 @@ export class Debugger
     return debugConfiguration;
   }
 
+  // If the extension is deactivating, we need to ensure the debug process is terminated or else it may continue running
+  // in the background
   dispose() {
     if (this.debugProcess) {
       this.debugProcess.kill("SIGTERM");
     }
-
-    this.subscriptions.forEach((subscription) => subscription.dispose());
   }
 
   private attachDebuggee(): Promise<vscode.DebugAdapterDescriptor | undefined> {
@@ -167,7 +166,15 @@ export class Debugger
   ): Promise<vscode.DebugAdapterDescriptor | undefined> {
     let initialMessage = "";
     let initialized = false;
-    const sockPath = this.socketPath();
+
+    const workspace = this.currentActiveWorkspace();
+
+    if (!workspace) {
+      throw new Error("Debugging requires a workspace folder to be opened");
+    }
+
+    const cwd = workspace.workspaceFolder.uri.fsPath;
+    const sockPath = this.socketPath(cwd);
     const configuration = session.configuration;
 
     return new Promise((resolve, reject) => {
@@ -181,14 +188,14 @@ export class Debugger
         configuration.program,
       ];
 
-      LOG_CHANNEL.info(`Spawning debugger in directory ${this.workingFolder}`);
+      LOG_CHANNEL.info(`Spawning debugger in directory ${cwd}`);
       LOG_CHANNEL.info(`   Command bundle ${args.join(" ")}`);
       LOG_CHANNEL.info(`   Environment ${JSON.stringify(configuration.env)}`);
 
       this.debugProcess = spawn("bundle", args, {
         shell: true,
         env: configuration.env,
-        cwd: this.workingFolder,
+        cwd,
       });
 
       this.debugProcess.stderr.on("data", (data) => {
@@ -237,14 +244,14 @@ export class Debugger
 
   // Generate a socket path so that Ruby debug doesn't have to create one for us. This makes coordination easier since
   // we always know the path to the socket
-  private socketPath() {
+  private socketPath(cwd: string) {
     const socketsDir = path.join("/", "tmp", "ruby-lsp-debug-sockets");
     if (!fs.existsSync(socketsDir)) {
       fs.mkdirSync(socketsDir);
     }
 
     let socketIndex = 0;
-    const prefix = `ruby-debug-${path.basename(this.workingFolder)}`;
+    const prefix = `ruby-debug-${path.basename(cwd)}`;
     const existingSockets = fs
       .readdirSync(socketsDir)
       .map((file) => file)

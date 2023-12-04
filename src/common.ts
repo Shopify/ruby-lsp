@@ -3,9 +3,53 @@ import { exec } from "child_process";
 import { promisify } from "util";
 
 import * as vscode from "vscode";
+import { State } from "vscode-languageclient";
+
+export enum Command {
+  Start = "rubyLsp.start",
+  Stop = "rubyLsp.stop",
+  Restart = "rubyLsp.restart",
+  Update = "rubyLsp.update",
+  ToggleExperimentalFeatures = "rubyLsp.toggleExperimentalFeatures",
+  ServerOptions = "rubyLsp.serverOptions",
+  ToggleYjit = "rubyLsp.toggleYjit",
+  SelectVersionManager = "rubyLsp.selectRubyVersionManager",
+  ToggleFeatures = "rubyLsp.toggleFeatures",
+  FormatterHelp = "rubyLsp.formatterHelp",
+  RunTest = "rubyLsp.runTest",
+  RunTestInTerminal = "rubyLsp.runTestInTerminal",
+  DebugTest = "rubyLsp.debugTest",
+  OpenLink = "rubyLsp.openLink",
+  ShowSyntaxTree = "rubyLsp.showSyntaxTree",
+}
+
+export interface RubyInterface {
+  error: boolean;
+  versionManager?: string;
+  rubyVersion?: string;
+  supportsYjit?: boolean;
+}
+
+export interface ClientInterface {
+  state: State;
+  formatter: string;
+  serverVersion?: string;
+}
+
+export interface WorkspaceInterface {
+  ruby: RubyInterface;
+  lspClient?: ClientInterface;
+  error: boolean;
+}
+
+// Event emitter used to signal that the language status items need to be refreshed
+export const STATUS_EMITTER = new vscode.EventEmitter<
+  WorkspaceInterface | undefined
+>();
 
 export const asyncExec = promisify(exec);
-export const LOG_CHANNEL = vscode.window.createOutputChannel("Ruby LSP", {
+export const LSP_NAME = "Ruby LSP";
+export const LOG_CHANNEL = vscode.window.createOutputChannel(LSP_NAME, {
   log: true,
 });
 

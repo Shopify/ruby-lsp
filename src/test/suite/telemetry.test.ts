@@ -121,8 +121,7 @@ suite("Telemetry", () => {
       api,
     );
 
-    telemetry.serverVersion = "1.0.0";
-    await telemetry.sendCodeLensEvent("test");
+    await telemetry.sendCodeLensEvent("test", "1.0.0");
 
     const codeLensEvent = api.sentEvents[0] as CodeLensEvent;
     assert.strictEqual(codeLensEvent.type, "test");
