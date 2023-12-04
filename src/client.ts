@@ -29,12 +29,10 @@ function getLspExecutables(
 ): ServerOptions {
   let run: Executable;
   let debug: Executable;
-  const branch: string = vscode.workspace
-    .getConfiguration("rubyLsp")
-    .get("branch")!;
-  const customBundleGemfile: string = vscode.workspace
-    .getConfiguration("rubyLsp")
-    .get("bundleGemfile")!;
+  const config = vscode.workspace.getConfiguration("rubyLsp");
+  const branch: string = config.get("branch")!;
+  const customBundleGemfile: string = config.get("bundleGemfile")!;
+  const useBundlerCompose: boolean = config.get("useBundlerCompose")!;
 
   const executableOptions: ExecutableOptions = {
     cwd: workspaceFolder.uri.fsPath,
@@ -54,6 +52,18 @@ function getLspExecutables(
     debug = {
       command: "bundle",
       args: ["exec", "ruby-lsp", "--debug"],
+      options: executableOptions,
+    };
+  } else if (useBundlerCompose) {
+    run = {
+      command: "bundle",
+      args: ["compose", "gem", "ruby-lsp"],
+      options: executableOptions,
+    };
+
+    debug = {
+      command: "bundle",
+      args: ["compose", "gem", "ruby-lsp", "--", "--debug"],
       options: executableOptions,
     };
   } else {
