@@ -20,7 +20,7 @@ GEM
     irb (1.8.0)
       rdoc (~> 6.5)
       reline (>= 0.3.6)
-    json (2.6.3)
+    json (2.7.0)
     language_server-protocol (3.17.0.3)
     minitest (5.20.0)
     minitest-reporters (1.6.1)
@@ -51,7 +51,7 @@ GEM
     reline (0.3.8)
       io-console (~> 0.5)
     rexml (3.2.6)
-    rubocop (1.57.2)
+    rubocop (1.58.0)
       json (~> 2.3)
       language_server-protocol (>= 3.17.0)
       parallel (~> 1.10)
@@ -59,7 +59,7 @@ GEM
       rainbow (>= 2.2.2, < 4.0)
       regexp_parser (>= 1.8, < 3.0)
       rexml (>= 3.2.5, < 4.0)
-      rubocop-ast (>= 1.28.1, < 2.0)
+      rubocop-ast (>= 1.30.0, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 2.4.0, < 3.0)
     rubocop-ast (1.30.0)
@@ -74,14 +74,14 @@ GEM
       rubocop (>= 0.90.0)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
-    sorbet (0.5.11120)
-      sorbet-static (= 0.5.11120)
-    sorbet-runtime (0.5.11120)
-    sorbet-static (0.5.11120-universal-darwin)
-    sorbet-static (0.5.11120-x86_64-linux)
-    sorbet-static-and-runtime (0.5.11120)
-      sorbet (= 0.5.11120)
-      sorbet-runtime (= 0.5.11120)
+    sorbet (0.5.11144)
+      sorbet-static (= 0.5.11144)
+    sorbet-runtime (0.5.11144)
+    sorbet-static (0.5.11144-universal-darwin)
+    sorbet-static (0.5.11144-x86_64-linux)
+    sorbet-static-and-runtime (0.5.11144)
+      sorbet (= 0.5.11144)
+      sorbet-runtime (= 0.5.11144)
     spoom (1.2.4)
       erubi (>= 1.10.0)
       sorbet-static-and-runtime (>= 0.5.10187)
@@ -108,8 +108,6 @@ GEM
 
 PLATFORMS
   arm64-darwin
-  x64-mingw-ucrt
-  x64-mingw32
   x86_64-darwin
   x86_64-linux
 
@@ -122,7 +120,7 @@ DEPENDENCIES
   psych (~> 5.1)
   rake (~> 13.1)
   rdoc
-  rubocop (~> 1.57)
+  rubocop (~> 1.58)
   rubocop-minitest (~> 0.33.0)
   rubocop-rake (~> 0.6.0)
   rubocop-shopify (~> 2.14)
