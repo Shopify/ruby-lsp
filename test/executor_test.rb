@@ -225,9 +225,9 @@ class ExecutorTest < Minitest::Test
     RubyLsp::Executor.new(@store, @message_queue)
       .execute(method: "initialize", params: { initializationOptions: {} })
 
-    assert(@store.features_configuration.dig(:codeLens, :gemfileLinks))
-    assert(@store.features_configuration.dig(:inlayHint, :implicitRescue))
-    assert(@store.features_configuration.dig(:inlayHint, :implicitHashValue))
+    assert(@store.features_configuration.dig(:codeLens).enabled?(:gemfileLinks))
+    refute(@store.features_configuration.dig(:inlayHint).enabled?(:implicitRescue))
+    refute(@store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
   end
 
   def test_initialize_features_with_provided_configuration
@@ -239,16 +239,16 @@ class ExecutorTest < Minitest::Test
               gemfileLinks: false,
             },
             inlayHint: {
-              implicitRescue: false,
-              implicitHashValue: false,
+              implicitRescue: true,
+              implicitHashValue: true,
             },
           },
         },
       })
 
-    refute(@store.features_configuration.dig(:codeLens, :gemfileLinks))
-    refute(@store.features_configuration.dig(:inlayHint, :implicitRescue))
-    refute(@store.features_configuration.dig(:inlayHint, :implicitHashValue))
+    refute(@store.features_configuration.dig(:codeLens).enabled?(:gemfileLinks))
+    assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitRescue))
+    assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
   end
 
   def test_initialize_features_with_partially_provided_configuration
@@ -260,15 +260,35 @@ class ExecutorTest < Minitest::Test
               gemfileLinks: false,
             },
             inlayHint: {
-              implicitHashValue: false,
+              implicitHashValue: true,
             },
           },
         },
       })
 
-    refute(@store.features_configuration.dig(:codeLens, :gemfileLinks))
-    assert(@store.features_configuration.dig(:inlayHint, :implicitRescue))
-    refute(@store.features_configuration.dig(:inlayHint, :implicitHashValue))
+    refute(@store.features_configuration.dig(:codeLens).enabled?(:gemfileLinks))
+    refute(@store.features_configuration.dig(:inlayHint).enabled?(:implicitRescue))
+    assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
+  end
+
+  def test_initialize_features_with_enable_all_configuration
+    RubyLsp::Executor.new(@store, @message_queue)
+      .execute(method: "initialize", params: {
+        initializationOptions: {
+          featuresConfiguration: {
+            codeLens: {
+              enableAll: true,
+            },
+            inlayHint: {
+              enableAll: true,
+            },
+          },
+        },
+      })
+
+    assert(@store.features_configuration.dig(:codeLens).enabled?(:gemfileLinks))
+    assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitRescue))
+    assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
   end
 
   def test_detects_rubocop_if_direct_dependency

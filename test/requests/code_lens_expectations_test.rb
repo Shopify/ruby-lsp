@@ -109,7 +109,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     RUBY
 
     dispatcher = Prism::Dispatcher.new
-    lenses_configuration = { gemfileLinks: false }
+    lenses_configuration = RubyLsp::RequestConfig.new({ gemfileLinks: false })
     listener = RubyLsp::Requests::CodeLens.new(uri, lenses_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.response
@@ -138,7 +138,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   private
 
   def default_lenses_configuration
-    { gemfileLinks: true }
+    RubyLsp::RequestConfig.new({ gemfileLinks: true })
   end
 
   def create_code_lens_addon

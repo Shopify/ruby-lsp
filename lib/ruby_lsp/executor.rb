@@ -606,8 +606,8 @@ module RubyLsp
 
       configured_hints = options.dig(:initializationOptions, :featuresConfiguration, :inlayHint)
       configured_lenses = options.dig(:initializationOptions, :featuresConfiguration, :codeLens)
-      T.must(@store.features_configuration.dig(:inlayHint)).merge!(configured_hints) if configured_hints
-      T.must(@store.features_configuration.dig(:codeLens)).merge!(configured_lenses) if configured_lenses
+      T.must(@store.features_configuration.dig(:inlayHint)).configuration.merge!(configured_hints) if configured_hints
+      T.must(@store.features_configuration.dig(:codeLens)).configuration.merge!(configured_lenses) if configured_lenses
 
       enabled_features = case configured_features
       when Array

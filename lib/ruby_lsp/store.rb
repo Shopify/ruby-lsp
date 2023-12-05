@@ -20,7 +20,7 @@ module RubyLsp
     sig { returns(URI::Generic) }
     attr_accessor :workspace_uri
 
-    sig { returns(T::Hash[Symbol, T::Hash[Symbol, T::Boolean]]) }
+    sig { returns(T::Hash[Symbol, RequestConfig]) }
     attr_accessor :features_configuration
 
     sig { void }
@@ -33,15 +33,17 @@ module RubyLsp
       @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
       @features_configuration = T.let(
         {
-          codeLens: {
+          codeLens: RequestConfig.new({
+            enableAll: false,
             gemfileLinks: true,
-          },
-          inlayHint: {
-            implicitRescue: true,
-            implicitHashValue: true,
-          },
+          }),
+          inlayHint: RequestConfig.new({
+            enableAll: false,
+            implicitRescue: false,
+            implicitHashValue: false,
+          }),
         },
-        T::Hash[Symbol, T::Hash[Symbol, T::Boolean]],
+        T::Hash[Symbol, RequestConfig],
       )
     end
 

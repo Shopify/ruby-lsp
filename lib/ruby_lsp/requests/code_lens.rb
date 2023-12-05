@@ -11,6 +11,10 @@ module RubyLsp
     # [code lens](https://microsoft.github.io/language-server-protocol/specification#textDocument_codeLens)
     # request informs the editor of runnable commands such as tests
     #
+    # # Configuration
+    #
+    # To disable gem code lenses, set `rubyLsp.featuresConfiguration.codeLens.gemfileLinks` to `false`.
+    #
     # # Example
     #
     # ```ruby
@@ -50,7 +54,7 @@ module RubyLsp
       sig do
         params(
           uri: URI::Generic,
-          lenses_configuration: T::Hash[Symbol, T::Boolean],
+          lenses_configuration: RequestConfig,
           dispatcher: Prism::Dispatcher,
         ).void
       end
@@ -141,7 +145,7 @@ module RubyLsp
         end
 
         if @path&.include?(GEMFILE_NAME) && name == :gem && arguments
-          return unless @lenses_configuration.dig(:gemfileLinks)
+          return unless @lenses_configuration.enabled?(:gemfileLinks)
 
           first_argument = arguments.arguments.first
           return unless first_argument.is_a?(Prism::StringNode)

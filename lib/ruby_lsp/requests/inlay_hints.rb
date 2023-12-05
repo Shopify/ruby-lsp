@@ -9,6 +9,14 @@ module RubyLsp
     # are labels added directly in the code that explicitly show the user something that might
     # otherwise just be implied.
     #
+    # # Configuration
+    #
+    # To enable rescue hints, set `rubyLsp.featuresConfiguration.inlayHint.implicitRescue` to `true`.
+    #
+    # To enable hash value hints, set `rubyLsp.featuresConfiguration.inlayHint.implicitHashValue` to `true`.
+    #
+    # To enable all hints, set `rubyLsp.featuresConfiguration.inlayHint.enableAll` to `true`.
+    #
     # # Example
     #
     # ```ruby
@@ -42,7 +50,7 @@ module RubyLsp
       sig do
         params(
           range: T::Range[Integer],
-          hints_configuration: T::Hash[Symbol, T::Boolean],
+          hints_configuration: RequestConfig,
           dispatcher: Prism::Dispatcher,
         ).void
       end
@@ -58,7 +66,7 @@ module RubyLsp
 
       sig { params(node: Prism::RescueNode).void }
       def on_rescue_node_enter(node)
-        return unless @hints_configuration.dig(:implicitRescue)
+        return unless @hints_configuration.enabled?(:implicitRescue)
         return unless node.exceptions.empty?
 
         loc = node.location
@@ -74,7 +82,7 @@ module RubyLsp
 
       sig { params(node: Prism::ImplicitNode).void }
       def on_implicit_node_enter(node)
-        return unless @hints_configuration.dig(:implicitHashValue)
+        return unless @hints_configuration.enabled?(:implicitHashValue)
         return unless visible?(node, @range)
 
         node_value = node.value
