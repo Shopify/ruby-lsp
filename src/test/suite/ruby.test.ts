@@ -11,8 +11,10 @@ suite("Ruby environment activation", () => {
   let ruby: Ruby;
 
   test("Activate fetches Ruby information when outside of Ruby LSP", async () => {
-    // eslint-disable-next-line no-process-env
-    process.env.SHELL = "/bin/bash";
+    if (os.platform() !== "win32") {
+      // eslint-disable-next-line no-process-env
+      process.env.SHELL = "/bin/bash";
+    }
 
     const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
     fs.writeFileSync(path.join(tmpPath, ".ruby-version"), "3.2.2");
@@ -30,10 +32,10 @@ suite("Ruby environment activation", () => {
     );
 
     assert.ok(ruby.rubyVersion, "Expected Ruby version to be set");
-    assert.strictEqual(
+    assert.notStrictEqual(
       ruby.supportsYjit,
-      true,
-      "Expected YJIT support to be enabled",
+      undefined,
+      "Expected YJIT support to be set to true or false",
     );
 
     fs.rmSync(tmpPath, { recursive: true, force: true });

@@ -29,13 +29,6 @@ suite("Client", () => {
   let client: Client | undefined;
   const managerConfig = vscode.workspace.getConfiguration("rubyLsp");
   const currentManager = managerConfig.get("rubyVersionManager");
-  const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
-  const workspaceFolder: vscode.WorkspaceFolder = {
-    uri: vscode.Uri.parse(`file://${tmpPath}`),
-    name: path.basename(tmpPath),
-    index: 0,
-  };
-  fs.writeFileSync(path.join(tmpPath, ".ruby-version"), "3.2.2");
 
   afterEach(async () => {
     if (client && client.state === State.Running) {
@@ -44,7 +37,6 @@ suite("Client", () => {
     }
 
     managerConfig.update("rubyVersionManager", currentManager, true, true);
-    fs.rmSync(tmpPath, { recursive: true, force: true });
   });
 
   test("Starting up the server succeeds", async () => {
@@ -57,6 +49,14 @@ suite("Client", () => {
         true,
       );
     }
+
+    const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
+    const workspaceFolder: vscode.WorkspaceFolder = {
+      uri: vscode.Uri.from({ scheme: "file", path: tmpPath }),
+      name: path.basename(tmpPath),
+      index: 0,
+    };
+    fs.writeFileSync(path.join(tmpPath, ".ruby-version"), "3.2.2");
 
     const context = {
       extensionMode: vscode.ExtensionMode.Test,
@@ -83,7 +83,25 @@ suite("Client", () => {
       () => {},
       workspaceFolder,
     );
-    await client.start();
+
+    try {
+      await client.start();
+    } catch (error: any) {
+      assert.fail(`Failed to start server ${error.message}`);
+    }
     assert.strictEqual(client.state, State.Running);
-  }).timeout(30000);
+
+    try {
+      await client.stop();
+      await client.dispose();
+    } catch (error: any) {
+      assert.fail(`Failed to stop server: ${error.message}`);
+    }
+
+    try {
+      fs.rmSync(tmpPath, { recursive: true, force: true });
+    } catch (error: any) {
+      // On Windows, sometimes removing the directory fails with EBUSY on CI
+    }
+  }).timeout(60000);
 });

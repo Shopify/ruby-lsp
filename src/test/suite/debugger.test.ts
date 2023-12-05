@@ -125,7 +125,7 @@ suite("Debugger", () => {
       {
         parallel: "1",
         ...ruby.env,
-        BUNDLE_GEMFILE: `${tmpPath}/.ruby-lsp/Gemfile`,
+        BUNDLE_GEMFILE: path.join(tmpPath, ".ruby-lsp", "Gemfile"),
       },
       configs.env,
     );
