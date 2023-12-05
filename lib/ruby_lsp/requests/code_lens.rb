@@ -11,6 +11,10 @@ module RubyLsp
     # [code lens](https://microsoft.github.io/language-server-protocol/specification#textDocument_codeLens)
     # request informs the editor of runnable commands such as tests
     #
+    # # Configuration
+    #
+    # To disable gem code lenses, set `rubyLsp.featuresConfiguration.codeLens.gemfileLinks` to `false`.
+    #
     # # Example
     #
     # ```ruby
@@ -47,8 +51,14 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      sig { params(uri: URI::Generic, dispatcher: Prism::Dispatcher).void }
-      def initialize(uri, dispatcher)
+      sig do
+        params(
+          uri: URI::Generic,
+          lenses_configuration: RequestConfig,
+          dispatcher: Prism::Dispatcher,
+        ).void
+      end
+      def initialize(uri, lenses_configuration, dispatcher)
         @uri = T.let(uri, URI::Generic)
         @_response = T.let([], ResponseType)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
@@ -57,6 +67,7 @@ module RubyLsp
         @class_stack = T.let([], T::Array[String])
         @group_id = T.let(1, Integer)
         @group_id_stack = T.let([], T::Array[Integer])
+        @lenses_configuration = lenses_configuration
 
         super(dispatcher)
 
@@ -134,6 +145,8 @@ module RubyLsp
         end
 
         if @path&.include?(GEMFILE_NAME) && name == :gem && arguments
+          return unless @lenses_configuration.enabled?(:gemfileLinks)
+
           first_argument = arguments.arguments.first
           return unless first_argument.is_a?(Prism::StringNode)
 

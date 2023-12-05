@@ -9,6 +9,14 @@ module RubyLsp
     # are labels added directly in the code that explicitly show the user something that might
     # otherwise just be implied.
     #
+    # # Configuration
+    #
+    # To enable rescue hints, set `rubyLsp.featuresConfiguration.inlayHint.implicitRescue` to `true`.
+    #
+    # To enable hash value hints, set `rubyLsp.featuresConfiguration.inlayHint.implicitHashValue` to `true`.
+    #
+    # To enable all hints, set `rubyLsp.featuresConfiguration.inlayHint.enableAll` to `true`.
+    #
     # # Example
     #
     # ```ruby
@@ -39,18 +47,26 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      sig { params(range: T::Range[Integer], dispatcher: Prism::Dispatcher).void }
-      def initialize(range, dispatcher)
+      sig do
+        params(
+          range: T::Range[Integer],
+          hints_configuration: RequestConfig,
+          dispatcher: Prism::Dispatcher,
+        ).void
+      end
+      def initialize(range, hints_configuration, dispatcher)
         super(dispatcher)
 
         @_response = T.let([], ResponseType)
         @range = range
+        @hints_configuration = hints_configuration
 
         dispatcher.register(self, :on_rescue_node_enter, :on_implicit_node_enter)
       end
 
       sig { params(node: Prism::RescueNode).void }
       def on_rescue_node_enter(node)
+        return unless @hints_configuration.enabled?(:implicitRescue)
         return unless node.exceptions.empty?
 
         loc = node.location
@@ -66,6 +82,7 @@ module RubyLsp
 
       sig { params(node: Prism::ImplicitNode).void }
       def on_implicit_node_enter(node)
+        return unless @hints_configuration.enabled?(:implicitHashValue)
         return unless visible?(node, @range)
 
         node_value = node.value

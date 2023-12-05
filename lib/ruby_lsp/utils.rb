@@ -74,4 +74,22 @@ module RubyLsp
       @cancelled = true
     end
   end
+
+  # A request configuration, to turn on/off features
+  class RequestConfig
+    extend T::Sig
+
+    sig { returns(T::Hash[Symbol, T::Boolean]) }
+    attr_accessor :configuration
+
+    sig { params(configuration: T::Hash[Symbol, T::Boolean]).void }
+    def initialize(configuration)
+      @configuration = configuration
+    end
+
+    sig { params(feature: Symbol).returns(T.nilable(T::Boolean)) }
+    def enabled?(feature)
+      @configuration[:enableAll] || @configuration[feature]
+    end
+  end
 end

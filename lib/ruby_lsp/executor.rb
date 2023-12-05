@@ -98,7 +98,8 @@ module RubyLsp
         folding_range = Requests::FoldingRanges.new(document.parse_result.comments, dispatcher)
         document_symbol = Requests::DocumentSymbol.new(dispatcher)
         document_link = Requests::DocumentLink.new(uri, document.comments, dispatcher)
-        code_lens = Requests::CodeLens.new(uri, dispatcher)
+        lenses_configuration = T.must(@store.features_configuration.dig(:codeLens))
+        code_lens = Requests::CodeLens.new(uri, lenses_configuration, dispatcher)
 
         semantic_highlighting = Requests::SemanticHighlighting.new(dispatcher)
         dispatcher.dispatch(document.tree)
@@ -392,7 +393,8 @@ module RubyLsp
       end_line = range.dig(:end, :line)
 
       dispatcher = Prism::Dispatcher.new
-      listener = Requests::InlayHints.new(start_line..end_line, dispatcher)
+      hints_configurations = T.must(@store.features_configuration.dig(:inlayHint))
+      listener = Requests::InlayHints.new(start_line..end_line, hints_configurations, dispatcher)
       dispatcher.visit(document.tree)
       listener.response
     end
@@ -601,6 +603,11 @@ module RubyLsp
 
       configured_features = options.dig(:initializationOptions, :enabledFeatures)
       @store.experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled) || false
+
+      configured_hints = options.dig(:initializationOptions, :featuresConfiguration, :inlayHint)
+      configured_lenses = options.dig(:initializationOptions, :featuresConfiguration, :codeLens)
+      T.must(@store.features_configuration.dig(:inlayHint)).configuration.merge!(configured_hints) if configured_hints
+      T.must(@store.features_configuration.dig(:codeLens)).configuration.merge!(configured_lenses) if configured_lenses
 
       enabled_features = case configured_features
       when Array

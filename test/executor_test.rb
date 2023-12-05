@@ -221,6 +221,76 @@ class ExecutorTest < Minitest::Test
     @store.delete(uri)
   end
 
+  def test_initialize_features_with_default_configuration
+    RubyLsp::Executor.new(@store, @message_queue)
+      .execute(method: "initialize", params: { initializationOptions: {} })
+
+    assert(@store.features_configuration.dig(:codeLens).enabled?(:gemfileLinks))
+    refute(@store.features_configuration.dig(:inlayHint).enabled?(:implicitRescue))
+    refute(@store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
+  end
+
+  def test_initialize_features_with_provided_configuration
+    RubyLsp::Executor.new(@store, @message_queue)
+      .execute(method: "initialize", params: {
+        initializationOptions: {
+          featuresConfiguration: {
+            codeLens: {
+              gemfileLinks: false,
+            },
+            inlayHint: {
+              implicitRescue: true,
+              implicitHashValue: true,
+            },
+          },
+        },
+      })
+
+    refute(@store.features_configuration.dig(:codeLens).enabled?(:gemfileLinks))
+    assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitRescue))
+    assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
+  end
+
+  def test_initialize_features_with_partially_provided_configuration
+    RubyLsp::Executor.new(@store, @message_queue)
+      .execute(method: "initialize", params: {
+        initializationOptions: {
+          featuresConfiguration: {
+            codeLens: {
+              gemfileLinks: false,
+            },
+            inlayHint: {
+              implicitHashValue: true,
+            },
+          },
+        },
+      })
+
+    refute(@store.features_configuration.dig(:codeLens).enabled?(:gemfileLinks))
+    refute(@store.features_configuration.dig(:inlayHint).enabled?(:implicitRescue))
+    assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
+  end
+
+  def test_initialize_features_with_enable_all_configuration
+    RubyLsp::Executor.new(@store, @message_queue)
+      .execute(method: "initialize", params: {
+        initializationOptions: {
+          featuresConfiguration: {
+            codeLens: {
+              enableAll: true,
+            },
+            inlayHint: {
+              enableAll: true,
+            },
+          },
+        },
+      })
+
+    assert(@store.features_configuration.dig(:codeLens).enabled?(:gemfileLinks))
+    assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitRescue))
+    assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
+  end
+
   def test_detects_rubocop_if_direct_dependency
     stub_dependencies(rubocop: true, syntax_tree: false)
     RubyLsp::Executor.new(@store, @message_queue)
