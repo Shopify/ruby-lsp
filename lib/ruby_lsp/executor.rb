@@ -750,7 +750,6 @@ module RubyLsp
           version: VERSION,
         },
         formatter: @store.formatter,
-        features_configuration: @store.features_configuration,
       }
     end
 
