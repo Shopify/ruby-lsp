@@ -46,7 +46,7 @@ body:
       description: Reproduction steps and an explanation of the observed behavior
       placeholder: >
         Before submitting the issue report, please follow the instructions on
-        [troubleshotting](https://github.com/Shopify/vscode-ruby-lsp#troubleshooting) and make sure you are:
+        [troubleshotting](https://github.com/Shopify/vscode-ruby-lsp/blob/main/TROUBLESHOOTING.md) and make sure you are:
         1. On the latest version of the Ruby LSP VS Code extension
         2. On the latest version of the Ruby LSP server gem
         3. On the latest version of VS Code
