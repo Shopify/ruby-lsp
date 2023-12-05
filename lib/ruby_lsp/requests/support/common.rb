@@ -85,12 +85,12 @@ module RubyLsp
           params(
             title: String,
             entries: T.any(T::Array[RubyIndexer::Entry], RubyIndexer::Entry),
-          ).returns(Interface::MarkupContent)
+          ).returns(T::Array[HoverResponse])
         end
         def markdown_from_index_entries(title, entries)
-          markdown_title = "```ruby\n#{title}\n```"
           definitions = []
-          content = +""
+          documentation = +""
+
           Array(entries).each do |entry|
             loc = entry.location
 
@@ -104,18 +104,44 @@ module RubyLsp
             )
 
             definitions << "[#{entry.file_name}](#{uri})"
-            content << "\n\n#{entry.comments.join("\n")}" unless entry.comments.empty?
+            documentation << "\n\n#{entry.comments.join("\n")}" unless entry.comments.empty?
           end
 
-          Interface::MarkupContent.new(
-            kind: "markdown",
-            value: <<~MARKDOWN.chomp,
-              #{markdown_title}
+          [
+            HoverResponse.new(:signature, title),
+            HoverResponse.new(:link, "**Definitions**: #{definitions.join(" | ")}"),
+            HoverResponse.new(:documentation, documentation),
+          ]
+        end
 
-              **Definitions**: #{definitions.join(" | ")}
+        sig { params(responses: T::Array[HoverResponse], location: Prism::Location).returns(Interface::Hover) }
+        def formatted_hover(responses, location)
+          links = responses.filter_map { |r| r.markdown_content if r.link? }.join("\n")
+          docs = responses.filter_map { |r| r.markdown_content if r.documentation? }.join("\n")
 
-              #{content}
-            MARKDOWN
+          value = <<~MARKDOWN.chomp
+            ```ruby\n#{responses.filter_map { |r| r.markdown_content if r.signature? }.join(" | ")}\n```
+
+            #{links}
+
+            #{docs}
+          MARKDOWN
+
+          Interface::Hover.new(
+            range: Interface::Range.new(
+              start: Interface::Position.new(
+                line: location.start_line - 1,
+                character: location.start_column,
+              ),
+              end: Interface::Position.new(
+                line: location.end_line - 1,
+                character: location.end_column,
+              ),
+            ),
+            contents: Interface::MarkupContent.new(
+              kind: "markdown",
+              value: value,
+            ),
           )
         end
       end

@@ -121,7 +121,7 @@ module RubyLsp
         nesting: T::Array[String],
         index: RubyIndexer::Index,
         dispatcher: Prism::Dispatcher,
-      ).returns(T.nilable(Listener[T.nilable(Interface::Hover)]))
+      ).returns(T.nilable(Listener[T.nilable(T::Array[HoverResponse])]))
     end
     def create_hover_listener(nesting, index, dispatcher); end
 

@@ -165,7 +165,7 @@ module RubyLsp
           label_details: Interface::CompletionItemLabelDetails.new(
             description: entry.file_name,
           ),
-          documentation: markdown_from_index_entries(name, entry),
+          documentation: formatted_hover(markdown_from_index_entries(name, entry), node.location),
         )
       end
 
@@ -258,7 +258,7 @@ module RubyLsp
           label_details: Interface::CompletionItemLabelDetails.new(
             description: entries.map(&:file_name).join(","),
           ),
-          documentation: markdown_from_index_entries(real_name, entries),
+          documentation: formatted_hover(markdown_from_index_entries(real_name, entries), node.location),
         )
       end
 

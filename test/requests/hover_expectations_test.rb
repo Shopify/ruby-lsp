@@ -170,7 +170,19 @@ class HoverExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 4, character: 0 } },
       }).response
 
-      assert_match("Hello\n\nHello from middleware: Post", response.contents.value)
+      assert_equal(<<~CONTENT.chomp, response.contents.value)
+        ```ruby
+        Post | T.class_of(Post)
+        ```
+
+        **Definitions**: [fake.rb](file:///fake.rb#L2,1-3,4)
+        Click here to see the docs!
+
+
+
+        Hello
+        Hello from middleware: Post
+      CONTENT
     end
   end
 
@@ -194,12 +206,11 @@ class HoverExpectationsTest < ExpectationsTestRunner
           end
 
           def on_constant_read_node_enter(node)
-            T.bind(self, RubyLsp::Listener[T.untyped])
-            contents = RubyLsp::Interface::MarkupContent.new(
-              kind: "markdown",
-              value: "Hello from middleware: #{node.slice}",
-            )
-            @_response = RubyLsp::Interface::Hover.new(range: range_from_location(node.location), contents: contents)
+            @_response = [
+              RubyLsp::HoverResponse.new(:documentation, "Hello from middleware: #{node.slice}"),
+              RubyLsp::HoverResponse.new(:link, "Click here to see the docs!"),
+              RubyLsp::HoverResponse.new(:signature, "T.class_of(Post)"),
+            ]
           end
         end
 

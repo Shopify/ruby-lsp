@@ -92,4 +92,36 @@ module RubyLsp
       @configuration[:enableAll] || @configuration[feature]
     end
   end
+
+  class HoverResponse
+    extend T::Sig
+
+    CATEGORIES = T.let([:link, :documentation, :signature], T::Array[Symbol])
+
+    sig { returns(String) }
+    attr_reader :markdown_content
+
+    sig { params(category: Symbol, markdown_content: String).void }
+    def initialize(category, markdown_content)
+      raise ArgumentError, "Invalid category: #{category}" unless CATEGORIES.include?(category)
+
+      @category = category
+      @markdown_content = markdown_content
+    end
+
+    sig { returns(T::Boolean) }
+    def link?
+      @category == :link
+    end
+
+    sig { returns(T::Boolean) }
+    def documentation?
+      @category == :documentation
+    end
+
+    sig { returns(T::Boolean) }
+    def signature?
+      @category == :signature
+    end
+  end
 end

@@ -290,6 +290,8 @@ module RubyLsp
         target = parent
       end
 
+      return unless target
+
       # Instantiate all listeners
       dispatcher = Prism::Dispatcher.new
       hover = Requests::Hover.new(@index, nesting, dispatcher)

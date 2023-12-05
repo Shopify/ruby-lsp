@@ -17,7 +17,7 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
-      ResponseType = type_member { { fixed: T.nilable(Interface::Hover) } }
+      ResponseType = type_member { { fixed: T.nilable(T::Array[HoverResponse]) } }
 
       ALLOWED_TARGETS = T.let(
         [
@@ -42,7 +42,8 @@ module RubyLsp
       def initialize(index, nesting, dispatcher)
         @index = index
         @nesting = nesting
-        @_response = T.let(nil, ResponseType)
+        @_response = T.let([], ResponseType)
+        @target_location = T.let(nil, T.nilable(Prism::Location))
 
         super(dispatcher)
         dispatcher.register(
@@ -63,15 +64,16 @@ module RubyLsp
       sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
       def merge_response!(other)
         other_response = other.response
-        return self unless other_response
-
-        if @_response.nil?
-          @_response = other.response
-        else
-          @_response.contents.value << "\n\n" << other_response.contents.value
-        end
-
+        T.must(@_response).concat(other_response) if other_response
         self
+      end
+
+      sig { returns(T.nilable(Interface::Hover)) }
+      def response
+        return unless @target_location && @_response
+
+        merge_external_listeners_responses! unless @response_merged
+        formatted_hover(@_response, @target_location)
       end
 
       sig { params(node: Prism::ConstantReadNode).void }
@@ -108,10 +110,8 @@ module RubyLsp
 
         location = target_method.location
 
-        @_response = Interface::Hover.new(
-          range: range_from_location(location),
-          contents: markdown_from_index_entries(message, target_method),
-        )
+        @target_location = location
+        T.must(@_response).concat(markdown_from_index_entries(message, target_method))
       end
 
       private
@@ -126,10 +126,8 @@ module RubyLsp
         first_entry = T.must(entries.first)
         return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{name}"
 
-        @_response = Interface::Hover.new(
-          range: range_from_location(location),
-          contents: markdown_from_index_entries(name, entries),
-        )
+        @target_location = location
+        T.must(@_response).concat(markdown_from_index_entries(name, entries))
       end
     end
   end
