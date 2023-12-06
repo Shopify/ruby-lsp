@@ -1,8 +1,6 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "ruby_lsp/document"
-
 module RubyLsp
   class Store
     extend T::Sig
@@ -19,6 +17,12 @@ module RubyLsp
     sig { returns(T::Boolean) }
     attr_accessor :experimental_features
 
+    sig { returns(URI::Generic) }
+    attr_accessor :workspace_uri
+
+    sig { returns(T::Hash[Symbol, RequestConfig]) }
+    attr_accessor :features_configuration
+
     sig { void }
     def initialize
       @state = T.let({}, T::Hash[String, Document])
@@ -26,6 +30,21 @@ module RubyLsp
       @formatter = T.let("auto", String)
       @supports_progress = T.let(true, T::Boolean)
       @experimental_features = T.let(false, T::Boolean)
+      @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
+      @features_configuration = T.let(
+        {
+          codeLens: RequestConfig.new({
+            enableAll: false,
+            gemfileLinks: true,
+          }),
+          inlayHint: RequestConfig.new({
+            enableAll: false,
+            implicitRescue: false,
+            implicitHashValue: false,
+          }),
+        },
+        T::Hash[Symbol, RequestConfig],
+      )
     end
 
     sig { params(uri: URI::Generic).returns(Document) }
@@ -40,7 +59,7 @@ module RubyLsp
 
     sig { params(uri: URI::Generic, source: String, version: Integer).void }
     def set(uri:, source:, version:)
-      document = Document.new(source: source, version: version, uri: uri, encoding: @encoding)
+      document = RubyDocument.new(source: source, version: version, uri: uri, encoding: @encoding)
       @state[uri.to_s] = document
     end
 

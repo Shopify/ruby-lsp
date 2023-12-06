@@ -14,7 +14,7 @@ group :development do
   gem "minitest-reporters", "~> 1.6"
   gem "mocha", "~> 2.1"
   gem "rake", "~> 13.1"
-  gem "rubocop", "~> 1.57"
+  gem "rubocop", "~> 1.58"
   gem "rubocop-shopify", "~> 2.14", require: false
   gem "rubocop-minitest", "~> 0.33.0", require: false
   gem "rubocop-rake", "~> 0.6.0", require: false

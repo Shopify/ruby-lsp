@@ -9,7 +9,12 @@ module RubyLsp
     # request](https://microsoft.github.io/language-server-protocol/specification#textDocument_definition) jumps to the
     # definition of the symbol under the cursor.
     #
-    # Currently, only jumping to classes, modules and required files is supported.
+    # Currently supported targets:
+    # - Classes
+    # - Modules
+    # - Constants
+    # - Require paths
+    # - Methods invoked on self only
     #
     # # Example
     #
@@ -32,16 +37,15 @@ module RubyLsp
           nesting: T::Array[String],
           index: RubyIndexer::Index,
           dispatcher: Prism::Dispatcher,
-          message_queue: Thread::Queue,
         ).void
       end
-      def initialize(uri, nesting, index, dispatcher, message_queue)
+      def initialize(uri, nesting, index, dispatcher)
         @uri = uri
         @nesting = nesting
         @index = index
         @_response = T.let(nil, ResponseType)
 
-        super(dispatcher, message_queue)
+        super(dispatcher)
 
         dispatcher.register(
           self,
@@ -53,7 +57,7 @@ module RubyLsp
 
       sig { override.params(addon: Addon).returns(T.nilable(RubyLsp::Listener[ResponseType])) }
       def initialize_external_listener(addon)
-        addon.create_definition_listener(@uri, @nesting, @index, @dispatcher, @message_queue)
+        addon.create_definition_listener(@uri, @nesting, @index, @dispatcher)
       end
 
       sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
@@ -75,8 +79,52 @@ module RubyLsp
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
         message = node.name
-        return unless message == :require || message == :require_relative
 
+        if message == :require || message == :require_relative
+          handle_require_definition(node)
+        else
+          handle_method_definition(node)
+        end
+      end
+
+      sig { params(node: Prism::ConstantPathNode).void }
+      def on_constant_path_node_enter(node)
+        find_in_index(node.slice)
+      end
+
+      sig { params(node: Prism::ConstantReadNode).void }
+      def on_constant_read_node_enter(node)
+        find_in_index(node.slice)
+      end
+
+      private
+
+      sig { params(node: Prism::CallNode).void }
+      def handle_method_definition(node)
+        return unless self_receiver?(node)
+
+        message = node.message
+        return unless message
+
+        target_method = @index.resolve_method(message, @nesting.join("::"))
+        return unless target_method
+
+        location = target_method.location
+        file_path = target_method.file_path
+        return if defined_in_gem?(file_path)
+
+        @_response = Interface::Location.new(
+          uri: URI::Generic.from_path(path: file_path).to_s,
+          range: Interface::Range.new(
+            start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
+            end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
+          ),
+        )
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def handle_require_definition(node)
+        message = node.name
         arguments = node.arguments
         return unless arguments
 
@@ -116,18 +164,6 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::ConstantPathNode).void }
-      def on_constant_path_node_enter(node)
-        find_in_index(node.slice)
-      end
-
-      sig { params(node: Prism::ConstantReadNode).void }
-      def on_constant_read_node_enter(node)
-        find_in_index(node.slice)
-      end
-
-      private
-
       sig { params(value: String).void }
       def find_in_index(value)
         entries = @index.resolve(value, @nesting)
@@ -138,23 +174,13 @@ module RubyLsp
         first_entry = T.must(entries.first)
         return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{value}"
 
-        bundle_path = begin
-          Bundler.bundle_path.to_s
-        rescue Bundler::GemfileNotFound
-          nil
-        end
-
         @_response = entries.filter_map do |entry|
           location = entry.location
           # If the project has Sorbet, then we only want to handle go to definition for constants defined in gems, as an
           # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
           # in the project, even if the files are typed false
           file_path = entry.file_path
-          if DependencyDetector.instance.typechecker && bundle_path && !file_path.start_with?(bundle_path) &&
-              !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
-
-            next
-          end
+          next if defined_in_gem?(file_path)
 
           Interface::Location.new(
             uri: URI::Generic.from_path(path: file_path).to_s,

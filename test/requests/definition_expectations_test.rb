@@ -223,22 +223,122 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_jumping_to_method_definitions_when_declaration_exists
+    message_queue = Thread::Queue.new
+    store = RubyLsp::Store.new
+
+    uri = URI("file:///folder/fake.rb")
+    source = <<~RUBY
+      class A
+        def bar
+          foo
+        end
+
+        def foo; end
+      end
+    RUBY
+
+    store.set(uri: uri, source: source, version: 1)
+
+    executor = RubyLsp::Executor.new(store, message_queue)
+
+    executor.instance_variable_get(:@index).index_single(
+      RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
+    )
+
+    stub_no_typechecker
+    response = executor.execute({
+      method: "textDocument/definition",
+      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 4, line: 2 } },
+    }).response
+
+    assert_equal(uri.to_s, response.attributes[:uri])
+  ensure
+    T.must(message_queue).close
+  end
+
+  def test_jumping_to_method_method_calls_on_explicit_self
+    message_queue = Thread::Queue.new
+    store = RubyLsp::Store.new
+
+    uri = URI("file:///folder/fake.rb")
+    source = <<~RUBY
+      class A
+        def bar
+          self.foo
+        end
+
+        def foo; end
+      end
+    RUBY
+
+    store.set(uri: uri, source: source, version: 1)
+
+    executor = RubyLsp::Executor.new(store, message_queue)
+
+    executor.instance_variable_get(:@index).index_single(
+      RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
+    )
+
+    stub_no_typechecker
+    response = executor.execute({
+      method: "textDocument/definition",
+      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 9, line: 2 } },
+    }).response
+
+    assert_equal(uri.to_s, response.attributes[:uri])
+  ensure
+    T.must(message_queue).close
+  end
+
+  def test_jumping_to_method_definitions_when_declaration_does_not_exist
+    message_queue = Thread::Queue.new
+    store = RubyLsp::Store.new
+
+    uri = URI("file:///folder/fake.rb")
+    source = <<~RUBY
+      class A
+        def bar
+          foo
+        end
+      end
+    RUBY
+
+    store.set(uri: uri, source: source, version: 1)
+
+    executor = RubyLsp::Executor.new(store, message_queue)
+
+    executor.instance_variable_get(:@index).index_single(
+      RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
+    )
+
+    stub_no_typechecker
+    response = executor.execute({
+      method: "textDocument/definition",
+      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 4, line: 2 } },
+    }).response
+
+    assert_nil(response)
+  ensure
+    T.must(message_queue).close
+  end
+
   private
 
   def create_definition_addon
     Class.new(RubyLsp::Addon) do
-      def activate; end
+      def activate(message_queue); end
 
       def name
         "Definition Addon"
       end
 
-      def create_definition_listener(uri, nesting, index, dispatcher, message_queue)
+      def create_definition_listener(uri, nesting, index, dispatcher)
         klass = Class.new(RubyLsp::Listener) do
           attr_reader :_response
 
-          def initialize(uri, _, _, dispatcher, message_queue)
-            super(dispatcher, message_queue)
+          def initialize(uri, _, _, dispatcher)
+            super(dispatcher)
             @uri = uri
             dispatcher.register(self, :on_constant_read_node_enter)
           end
@@ -258,7 +358,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        T.unsafe(klass).new(uri, nesting, index, dispatcher, message_queue)
+        T.unsafe(klass).new(uri, nesting, index, dispatcher)
       end
     end
   end

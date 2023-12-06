@@ -216,5 +216,46 @@ module RubyIndexer
         end
       RUBY
     end
+
+    def test_resolve_method_with_known_receiver
+      index(<<~RUBY)
+        module Foo
+          module Bar
+            def baz; end
+          end
+        end
+      RUBY
+
+      entry = T.must(@index.resolve_method("baz", "Foo::Bar"))
+      assert_equal("baz", entry.name)
+      assert_equal("Foo::Bar", T.must(entry.owner).name)
+    end
+
+    def test_prefix_search_for_methods
+      index(<<~RUBY)
+        module Foo
+          module Bar
+            def baz; end
+          end
+        end
+      RUBY
+
+      entries = @index.prefix_search("ba")
+      refute_empty(entries)
+
+      entry = T.must(entries.first).first
+      assert_equal("baz", entry.name)
+    end
+
+    def test_indexing_prism_fixtures_succeeds
+      fixtures = Dir.glob("test/fixtures/prism/test/prism/fixtures/**/*.txt")
+
+      fixtures.each do |fixture|
+        indexable_path = IndexablePath.new("", fixture)
+        @index.index_single(indexable_path)
+      end
+
+      refute_empty(@index.instance_variable_get(:@entries))
+    end
   end
 end

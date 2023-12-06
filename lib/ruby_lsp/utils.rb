@@ -4,9 +4,14 @@
 module RubyLsp
   # Used to indicate that a request shouldn't return a response
   VOID = T.let(Object.new.freeze, Object)
-
-  # This freeze is not redundant since the interpolated string is mutable
-  WORKSPACE_URI = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
+  BUNDLE_PATH = T.let(
+    begin
+      Bundler.bundle_path.to_s
+    rescue Bundler::GemfileNotFound
+      nil
+    end,
+    T.nilable(String),
+  )
 
   # A notification to be sent to the client
   class Message
@@ -67,6 +72,24 @@ module RubyLsp
     sig { void }
     def cancel
       @cancelled = true
+    end
+  end
+
+  # A request configuration, to turn on/off features
+  class RequestConfig
+    extend T::Sig
+
+    sig { returns(T::Hash[Symbol, T::Boolean]) }
+    attr_accessor :configuration
+
+    sig { params(configuration: T::Hash[Symbol, T::Boolean]).void }
+    def initialize(configuration)
+      @configuration = configuration
+    end
+
+    sig { params(feature: Symbol).returns(T.nilable(T::Boolean)) }
+    def enabled?(feature)
+      @configuration[:enableAll] || @configuration[feature]
     end
   end
 end

@@ -49,8 +49,8 @@ module RubyLsp
       sig { override.returns(T::Array[Interface::DocumentSymbol]) }
       attr_reader :_response
 
-      sig { params(dispatcher: Prism::Dispatcher, message_queue: Thread::Queue).void }
-      def initialize(dispatcher, message_queue)
+      sig { params(dispatcher: Prism::Dispatcher).void }
+      def initialize(dispatcher)
         @root = T.let(SymbolHierarchyRoot.new, SymbolHierarchyRoot)
         @_response = T.let(@root.children, T::Array[Interface::DocumentSymbol])
         @stack = T.let(
@@ -80,7 +80,7 @@ module RubyLsp
 
       sig { override.params(addon: Addon).returns(T.nilable(Listener[ResponseType])) }
       def initialize_external_listener(addon)
-        addon.create_document_symbol_listener(@dispatcher, @message_queue)
+        addon.create_document_symbol_listener(@dispatcher)
       end
 
       # Merges responses from other listeners

@@ -37,26 +37,26 @@ module RubyLsp
           index: RubyIndexer::Index,
           nesting: T::Array[String],
           dispatcher: Prism::Dispatcher,
-          message_queue: Thread::Queue,
         ).void
       end
-      def initialize(index, nesting, dispatcher, message_queue)
+      def initialize(index, nesting, dispatcher)
         @index = index
         @nesting = nesting
         @_response = T.let(nil, ResponseType)
 
-        super(dispatcher, message_queue)
+        super(dispatcher)
         dispatcher.register(
           self,
           :on_constant_read_node_enter,
           :on_constant_write_node_enter,
           :on_constant_path_node_enter,
+          :on_call_node_enter,
         )
       end
 
       sig { override.params(addon: Addon).returns(T.nilable(Listener[ResponseType])) }
       def initialize_external_listener(addon)
-        addon.create_hover_listener(@nesting, @index, @dispatcher, @message_queue)
+        addon.create_hover_listener(@nesting, @index, @dispatcher)
       end
 
       # Merges responses from other hover listeners
@@ -93,6 +93,25 @@ module RubyLsp
         return if DependencyDetector.instance.typechecker
 
         generate_hover(node.slice, node.location)
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def on_call_node_enter(node)
+        return if DependencyDetector.instance.typechecker
+        return unless self_receiver?(node)
+
+        message = node.message
+        return unless message
+
+        target_method = @index.resolve_method(message, @nesting.join("::"))
+        return unless target_method
+
+        location = target_method.location
+
+        @_response = Interface::Hover.new(
+          range: range_from_location(location),
+          contents: markdown_from_index_entries(message, target_method),
+        )
       end
 
       private

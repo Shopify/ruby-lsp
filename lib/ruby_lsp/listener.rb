@@ -14,10 +14,9 @@ module RubyLsp
 
     abstract!
 
-    sig { params(dispatcher: Prism::Dispatcher, message_queue: Thread::Queue).void }
-    def initialize(dispatcher, message_queue)
+    sig { params(dispatcher: Prism::Dispatcher).void }
+    def initialize(dispatcher)
       @dispatcher = dispatcher
-      @message_queue = message_queue
     end
 
     sig { returns(ResponseType) }
@@ -43,8 +42,8 @@ module RubyLsp
     # When inheriting from ExtensibleListener, the `super` of constructor must be called **after** the subclass's own
     # ivars have been initialized. This is because the constructor of ExtensibleListener calls
     # `initialize_external_listener` which may depend on the subclass's ivars.
-    sig { params(dispatcher: Prism::Dispatcher, message_queue: Thread::Queue).void }
-    def initialize(dispatcher, message_queue)
+    sig { params(dispatcher: Prism::Dispatcher).void }
+    def initialize(dispatcher)
       super
       @response_merged = T.let(false, T::Boolean)
       @external_listeners = T.let(

@@ -1,162 +1,194 @@
 {
-    "params": {
-        "range": {
+  "params": {
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 0
+      },
+      "end": {
+        "line": 3,
+        "character": 0
+      }
+    },
+    "textDocument": {
+      "uri": "file:///fake",
+      "version": null
+    },
+    "context": {
+      "diagnostics": [
+        {
+          "range": {
             "start": {
-                "line": 3,
-                "character": 0
+              "line": 2,
+              "character": 0
             },
             "end": {
-                "line": 3,
-                "character": 0
+              "line": 3,
+              "character": 0
             }
-        },
-        "textDocument": {
-            "uri": "file:///fake",
-            "version": null
-        },
-        "context": {
-            "diagnostics": [
-                {
-                    "range": {
-                        "start": {
-                            "line": 2,
-                            "character": 0
-                        },
-                        "end": {
-                            "line": 3,
-                            "character": 0
-                        }
-                    },
-                    "message": "Layout/EmptyLines: Extra blank line detected.",
-                    "data": {
-                        "correctable": true,
-                        "code_action": {
-                            "title": "Autocorrect Layout/EmptyLines",
-                            "kind": "quickfix",
-                            "isPreferred": true,
-                            "edit": {
-                                "documentChanges": [
-                                    {
-                                        "textDocument": {
-                                            "uri": "file:///fake",
-                                            "version": null
-                                        },
-                                        "edits": [
-                                            {
-                                                "range": {
-                                                    "start": {
-                                                        "line": 2,
-                                                        "character": 0
-                                                    },
-                                                    "end": {
-                                                        "line": 3,
-                                                        "character": 0
-                                                    }
-                                                },
-                                                "newText": ""
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        }
-                    },
-                    "code": "Layout/EmptyLines",
-                    "codeDescription": {
-                        "href": "https://docs.rubocop.org/rubocop/cops_layout.html#layoutemptylines"
-                    },
-                    "severity": 3,
-                    "source": "RuboCop"
-                },
-                {
-                    "range": {
-                        "start": {
-                            "line": 3,
-                            "character": 0
-                        },
-                        "end": {
-                            "line": 3,
-                            "character": 0
-                        }
-                    },
-                    "message": "Layout/IndentationWidth: Use 2 (not 0) spaces for indentation.",
-                    "data": {
-                        "correctable": true,
-                        "code_action": {
-                            "title": "Autocorrect Layout/IndentationWidth",
-                            "kind": "quickfix",
-                            "isPreferred": true,
-                            "edit": {
-                                "documentChanges": [
-                                    {
-                                        "textDocument": {
-                                            "uri": "file:///fake",
-                                            "version": null
-                                        },
-                                        "edits": [
-                                            {
-                                                "range": {
-                                                    "start": {
-                                                        "line": 3,
-                                                        "character": 0
-                                                    },
-                                                    "end": {
-                                                        "line": 3,
-                                                        "character": 0
-                                                    }
-                                                },
-                                                "newText": "  "
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        }
-                    },
-                    "code": "Layout/IndentationWidth",
-                    "codeDescription": {
-                        "href": "https://docs.rubocop.org/rubocop/cops_layout.html#layoutindentationwidth"
-                    },
-                    "severity": 3,
-                    "source": "RuboCop"
-                }
-            ],
-            "only": [
-                "quickfix"
-            ],
-            "triggerKind": 1
-        }
-    },
-    "result": [
-        {
-            "title": "Autocorrect Layout/IndentationWidth",
-            "kind": "quickfix",
-            "isPreferred": true,
-            "edit": {
-                "documentChanges": [
+          },
+          "message": "Layout/EmptyLines: Extra blank line detected.",
+          "data": {
+            "correctable": true,
+            "code_actions": [
+              {
+                "title": "Autocorrect Layout/EmptyLines",
+                "kind": "quickfix",
+                "isPreferred": true,
+                "edit": {
+                  "documentChanges": [
                     {
-                        "textDocument": {
-                            "uri": "file:///fake",
-                            "version": null
-                        },
-                        "edits": [
-                            {
-                                "range": {
-                                    "start": {
-                                        "line": 3,
-                                        "character": 0
-                                    },
-                                    "end": {
-                                        "line": 3,
-                                        "character": 0
-                                    }
-                                },
-                                "newText": "  "
+                      "textDocument": {
+                        "uri": "file:///fake",
+                        "version": null
+                      },
+                      "edits": [
+                        {
+                          "range": {
+                            "start": {
+                              "line": 2,
+                              "character": 0
+                            },
+                            "end": {
+                              "line": 3,
+                              "character": 0
                             }
-                        ]
+                          },
+                          "newText": ""
+                        }
+                      ]
                     }
-                ]
+                  ]
+                }
+              }
+            ]
+          },
+          "code": "Layout/EmptyLines",
+          "codeDescription": {
+            "href": "https://docs.rubocop.org/rubocop/cops_layout.html#layoutemptylines"
+          },
+          "severity": 3,
+          "source": "RuboCop"
+        },
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 0
+            },
+            "end": {
+              "line": 3,
+              "character": 0
             }
+          },
+          "message": "Layout/IndentationWidth: Use 2 (not 0) spaces for indentation.",
+          "data": {
+            "correctable": true,
+            "code_actions": [
+              {
+                "title": "Autocorrect Layout/IndentationWidth",
+                "kind": "quickfix",
+                "isPreferred": true,
+                "edit": {
+                  "documentChanges": [
+                    {
+                      "textDocument": {
+                        "uri": "file:///fake",
+                        "version": null
+                      },
+                      "edits": [
+                        {
+                          "range": {
+                            "start": {
+                              "line": 3,
+                              "character": 0
+                            },
+                            "end": {
+                              "line": 3,
+                              "character": 0
+                            }
+                          },
+                          "newText": "  "
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "code": "Layout/IndentationWidth",
+          "codeDescription": {
+            "href": "https://docs.rubocop.org/rubocop/cops_layout.html#layoutindentationwidth"
+          },
+          "severity": 3,
+          "source": "RuboCop"
         }
-    ]
+      ],
+      "only": ["quickfix"],
+      "triggerKind": 1
+    }
+  },
+  "result": [
+    {
+      "title": "Autocorrect Layout/EmptyLines",
+      "kind": "quickfix",
+      "isPreferred": true,
+      "edit": {
+        "documentChanges": [
+          {
+            "textDocument": {
+              "uri": "file:///fake",
+              "version": null
+            },
+            "edits": [
+              {
+                "range": {
+                  "start": {
+                    "line": 2,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 3,
+                    "character": 0
+                  }
+                },
+                "newText": ""
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "title": "Autocorrect Layout/IndentationWidth",
+      "kind": "quickfix",
+      "isPreferred": true,
+      "edit": {
+        "documentChanges": [
+          {
+            "textDocument": {
+              "uri": "file:///fake",
+              "version": null
+            },
+            "edits": [
+              {
+                "range": {
+                  "start": {
+                    "line": 3,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 3,
+                    "character": 0
+                  }
+                },
+                "newText": "  "
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
 }

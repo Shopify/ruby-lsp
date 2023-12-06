@@ -2,3 +2,4 @@
 .
 --ignore=vendor/
 --ignore=test/fixtures/
+--enable-experimental-requires-ancestor

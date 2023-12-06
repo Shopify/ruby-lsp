@@ -9,7 +9,7 @@ module RubyLsp
       @addon = Class.new(Addon) do
         attr_reader :activated
 
-        def activate
+        def activate(message_queue)
           @activated = true
         end
 
@@ -42,7 +42,7 @@ module RubyLsp
 
     def test_load_addons_returns_errors
       Class.new(Addon) do
-        def activate
+        def activate(message_queue)
           raise StandardError, "Failed to activate"
         end
 
@@ -51,8 +51,10 @@ module RubyLsp
         end
       end
 
-      Addon.load_addons
+      queue = Thread::Queue.new
+      Addon.load_addons(queue)
       error_addon = T.must(Addon.addons.find(&:error?))
+      queue.close
 
       assert_predicate(error_addon, :error?)
       assert_equal(<<~MESSAGE, error_addon.formatted_errors)

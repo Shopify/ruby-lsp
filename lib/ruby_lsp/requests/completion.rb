@@ -6,9 +6,14 @@ module RubyLsp
     # ![Completion demo](../../completion.gif)
     #
     # The [completion](https://microsoft.github.io/language-server-protocol/specification#textDocument_completion)
-    # suggests possible completions according to what the developer is typing. Currently, completion is support for
-    # - require paths
-    # - classes, modules and constant names
+    # suggests possible completions according to what the developer is typing.
+    #
+    # Currently supported targets:
+    # - Classes
+    # - Modules
+    # - Constants
+    # - Require paths
+    # - Methods invoked on self only
     #
     # # Example
     #
@@ -31,11 +36,10 @@ module RubyLsp
           index: RubyIndexer::Index,
           nesting: T::Array[String],
           dispatcher: Prism::Dispatcher,
-          message_queue: Thread::Queue,
         ).void
       end
-      def initialize(index, nesting, dispatcher, message_queue)
-        super(dispatcher, message_queue)
+      def initialize(index, nesting, dispatcher)
+        super(dispatcher)
         @_response = T.let([], ResponseType)
         @index = index
         @nesting = nesting
@@ -45,6 +49,7 @@ module RubyLsp
           :on_string_node_enter,
           :on_constant_path_node_enter,
           :on_constant_read_node_enter,
+          :on_call_node_enter,
         )
       end
 
@@ -118,17 +123,64 @@ module RubyLsp
         end
       end
 
+      sig { params(node: Prism::CallNode).void }
+      def on_call_node_enter(node)
+        return if DependencyDetector.instance.typechecker
+        return unless self_receiver?(node)
+
+        name = node.message
+        return unless name
+
+        receiver_entries = @index[@nesting.join("::")]
+        return unless receiver_entries
+
+        receiver = T.must(receiver_entries.first)
+
+        @index.prefix_search(name).each do |entries|
+          entry = entries.find { |e| e.is_a?(RubyIndexer::Entry::Member) && e.owner&.name == receiver.name }
+          next unless entry
+
+          @_response << build_method_completion(T.cast(entry, RubyIndexer::Entry::Member), node)
+        end
+      end
+
       private
+
+      sig do
+        params(
+          entry: RubyIndexer::Entry::Member,
+          node: Prism::CallNode,
+        ).returns(Interface::CompletionItem)
+      end
+      def build_method_completion(entry, node)
+        name = entry.name
+        parameters = entry.parameters
+        new_text = parameters.empty? ? name : "#{name}(#{parameters.map(&:name).join(", ")})"
+
+        Interface::CompletionItem.new(
+          label: name,
+          filter_text: name,
+          text_edit: Interface::TextEdit.new(range: range_from_node(node), new_text: new_text),
+          kind: Constant::CompletionItemKind::METHOD,
+          label_details: Interface::CompletionItemLabelDetails.new(
+            description: entry.file_name,
+          ),
+          documentation: markdown_from_index_entries(name, entry),
+        )
+      end
 
       sig { params(label: String, node: Prism::StringNode).returns(Interface::CompletionItem) }
       def build_completion(label, node)
+        # We should use the content location as we only replace the content and not the delimiters of the string
+        loc = node.content_loc
+
         Interface::CompletionItem.new(
           label: label,
           text_edit: Interface::TextEdit.new(
-            range: range_from_node(node),
+            range: range_from_location(loc),
             new_text: label,
           ),
-          kind: Constant::CompletionItemKind::REFERENCE,
+          kind: Constant::CompletionItemKind::FILE,
         )
       end
 

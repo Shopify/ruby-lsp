@@ -9,11 +9,11 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
   def run_expectations(source)
     uri = URI("file://#{@_path}")
-    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher, @message_queue)
+    listener = RubyLsp::Requests::CodeLens.new(uri, default_lenses_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
     listener.response
   end
@@ -27,10 +27,10 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     RUBY
     uri = URI("file:///fake.rb")
 
-    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher, @message_queue)
+    listener = RubyLsp::Requests::CodeLens.new(uri, default_lenses_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.response
 
@@ -53,11 +53,11 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     RUBY
     uri = URI("file:///fake.rb")
 
-    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("unknown")
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher, @message_queue)
+    listener = RubyLsp::Requests::CodeLens.new(uri, default_lenses_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.response
 
@@ -72,11 +72,11 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     RUBY
     uri = URI("file:///fake.rb")
 
-    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("rspec")
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher, @message_queue)
+    listener = RubyLsp::Requests::CodeLens.new(uri, default_lenses_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.response
 
@@ -91,14 +91,28 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     RUBY
     uri = URI::Generic.build(scheme: "untitled", opaque: "Untitled-1")
 
-    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher, @message_queue)
+    listener = RubyLsp::Requests::CodeLens.new(uri, default_lenses_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.response
 
+    assert_empty(response)
+  end
+
+  def test_skip_gemfile_links
+    uri = URI("file:///Gemfile")
+    document = RubyLsp::RubyDocument.new(uri: uri, source: <<~RUBY, version: 1)
+      gem 'minitest'
+    RUBY
+
+    dispatcher = Prism::Dispatcher.new
+    lenses_configuration = RubyLsp::RequestConfig.new({ gemfileLinks: false })
+    listener = RubyLsp::Requests::CodeLens.new(uri, lenses_configuration, dispatcher)
+    dispatcher.dispatch(document.tree)
+    response = listener.response
     assert_empty(response)
   end
 
@@ -123,22 +137,26 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
   private
 
+  def default_lenses_configuration
+    RubyLsp::RequestConfig.new({ gemfileLinks: true })
+  end
+
   def create_code_lens_addon
     Class.new(RubyLsp::Addon) do
-      def activate; end
+      def activate(message_queue); end
 
       def name
         "CodeLensAddon"
       end
 
-      def create_code_lens_listener(uri, dispatcher, message_queue)
+      def create_code_lens_listener(uri, dispatcher)
         raise "uri can't be nil" unless uri
 
         klass = Class.new(RubyLsp::Listener) do
           attr_reader :_response
 
-          def initialize(uri, dispatcher, message_queue)
-            super(dispatcher, message_queue)
+          def initialize(uri, dispatcher)
+            super(dispatcher)
             dispatcher.register(self, :on_class_node_enter)
           end
 
@@ -155,7 +173,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        T.unsafe(klass).new(uri, dispatcher, message_queue)
+        T.unsafe(klass).new(uri, dispatcher)
       end
     end
   end

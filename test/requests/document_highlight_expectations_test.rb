@@ -10,12 +10,12 @@ class DocumentHighlightExpectationsTest < ExpectationsTestRunner
   def run_expectations(source)
     uri = URI("file://#{@_path}")
     params = @__params&.any? ? @__params : default_args
-    document = RubyLsp::Document.new(source: source, version: 1, uri: uri)
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
     target, parent = document.locate_node(params.first)
 
     dispatcher = Prism::Dispatcher.new
 
-    listener = RubyLsp::Requests::DocumentHighlight.new(target, parent, dispatcher, @message_queue)
+    listener = RubyLsp::Requests::DocumentHighlight.new(target, parent, dispatcher)
     dispatcher.dispatch(document.tree)
     listener.response
   end

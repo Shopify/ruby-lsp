@@ -8,7 +8,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Diagnostics, "diagnostics"
 
   def run_expectations(source)
-    document = RubyLsp::Document.new(source: source, version: 1, uri: URI::Generic.from_path(path: __FILE__))
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI::Generic.from_path(path: __FILE__))
     RubyLsp::Requests::Diagnostics.new(document).run
     result = T.let(nil, T.nilable(T::Array[RubyLsp::Interface::Diagnostic]))
 
@@ -32,12 +32,14 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     actual.each do |diagnostic|
       attributes = diagnostic.attributes
 
-      text_document_identifier = attributes[:data][:code_action]
-        .attributes[:edit]
-        .attributes[:documentChanges][0]
-        .attributes[:textDocument]
-
-      text_document_identifier.instance_variable_set(:@attributes, { uri: "file:///fake", version: nil })
+      attributes[:data][:code_actions].each do |code_action|
+        code_action_changes = code_action.attributes[:edit].attributes[:documentChanges]
+        code_action_changes.each do |code_action_change|
+          code_action_change
+            .attributes[:textDocument]
+            .instance_variable_set(:@attributes, { uri: "file:///fake", version: nil })
+        end
+      end
     end
 
     assert_equal(JSON.parse(map_diagnostics(json_expectations(expected))), JSON.parse(actual.to_json))

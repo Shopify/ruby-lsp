@@ -4,6 +4,9 @@
 module RubyLsp
   class Document
     extend T::Sig
+    extend T::Helpers
+
+    abstract!
 
     PositionShape = T.type_alias { { line: Integer, character: Integer } }
     RangeShape = T.type_alias { { start: PositionShape, end: PositionShape } }
@@ -21,6 +24,9 @@ module RubyLsp
     sig { returns(URI::Generic) }
     attr_reader :uri
 
+    sig { returns(String) }
+    attr_reader :encoding
+
     sig { params(source: String, version: Integer, uri: URI::Generic, encoding: String).void }
     def initialize(source:, version:, uri:, encoding: Constant::PositionEncodingKind::UTF8)
       @cache = T.let({}, T::Hash[String, T.untyped])
@@ -28,8 +34,8 @@ module RubyLsp
       @source = T.let(source, String)
       @version = T.let(version, Integer)
       @uri = T.let(uri, URI::Generic)
-      @needs_parsing = T.let(false, T::Boolean)
-      @parse_result = T.let(Prism.parse(@source), Prism::ParseResult)
+      @needs_parsing = T.let(true, T::Boolean)
+      @parse_result = T.let(parse, Prism::ParseResult)
     end
 
     sig { returns(Prism::ProgramNode) }
@@ -91,13 +97,8 @@ module RubyLsp
       @cache.clear
     end
 
-    sig { void }
-    def parse
-      return unless @needs_parsing
-
-      @needs_parsing = false
-      @parse_result = Prism.parse(@source)
-    end
+    sig { abstract.returns(Prism::ParseResult) }
+    def parse; end
 
     sig { returns(T::Boolean) }
     def syntax_error?

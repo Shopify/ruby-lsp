@@ -41,7 +41,7 @@ module RubyLsp
       when "initialize"
         initialize_request(request.dig(:params))
       when "initialized"
-        Addon.load_addons
+        Addon.load_addons(@message_queue)
 
         errored_addons = Addon.addons.select(&:error?)
 
@@ -95,12 +95,13 @@ module RubyLsp
 
         # Run listeners for the document
         dispatcher = Prism::Dispatcher.new
-        folding_range = Requests::FoldingRanges.new(document.parse_result.comments, dispatcher, @message_queue)
-        document_symbol = Requests::DocumentSymbol.new(dispatcher, @message_queue)
-        document_link = Requests::DocumentLink.new(uri, document.comments, dispatcher, @message_queue)
-        code_lens = Requests::CodeLens.new(uri, dispatcher, @message_queue)
+        folding_range = Requests::FoldingRanges.new(document.parse_result.comments, dispatcher)
+        document_symbol = Requests::DocumentSymbol.new(dispatcher)
+        document_link = Requests::DocumentLink.new(uri, document.comments, dispatcher)
+        lenses_configuration = T.must(@store.features_configuration.dig(:codeLens))
+        code_lens = Requests::CodeLens.new(uri, lenses_configuration, dispatcher)
 
-        semantic_highlighting = Requests::SemanticHighlighting.new(dispatcher, @message_queue)
+        semantic_highlighting = Requests::SemanticHighlighting.new(dispatcher)
         dispatcher.dispatch(document.tree)
 
         # Store all responses retrieve in this round of visits in the cache and then return the response for the request
@@ -265,13 +266,7 @@ module RubyLsp
       target = parent if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)
 
       dispatcher = Prism::Dispatcher.new
-      base_listener = Requests::Definition.new(
-        uri,
-        nesting,
-        @index,
-        dispatcher,
-        @message_queue,
-      )
+      base_listener = Requests::Definition.new(uri, nesting, @index, dispatcher)
       dispatcher.dispatch_once(target)
       base_listener.response
     end
@@ -297,7 +292,7 @@ module RubyLsp
 
       # Instantiate all listeners
       dispatcher = Prism::Dispatcher.new
-      hover = Requests::Hover.new(@index, nesting, dispatcher, @message_queue)
+      hover = Requests::Hover.new(@index, nesting, dispatcher)
 
       # Emit events for all listeners
       dispatcher.dispatch_once(target)
@@ -355,6 +350,11 @@ module RubyLsp
       # If formatter is set to `auto` but no supported formatting gem is found, don't attempt to format
       return if @store.formatter == "none"
 
+      # Do not format files outside of the workspace. For example, if someone is looking at a gem's source code, we
+      # don't want to format it
+      path = uri.to_standardized_path
+      return unless path.nil? || path.start_with?(T.must(@store.workspace_uri.to_standardized_path))
+
       Requests::Formatting.new(@store.get(uri), formatter: @store.formatter).run
     end
 
@@ -380,7 +380,7 @@ module RubyLsp
 
       target, parent = document.locate_node(position)
       dispatcher = Prism::Dispatcher.new
-      listener = Requests::DocumentHighlight.new(target, parent, dispatcher, @message_queue)
+      listener = Requests::DocumentHighlight.new(target, parent, dispatcher)
       dispatcher.visit(document.tree)
       listener.response
     end
@@ -393,7 +393,8 @@ module RubyLsp
       end_line = range.dig(:end, :line)
 
       dispatcher = Prism::Dispatcher.new
-      listener = Requests::InlayHints.new(start_line..end_line, dispatcher, @message_queue)
+      hints_configurations = T.must(@store.features_configuration.dig(:inlayHint))
+      listener = Requests::InlayHints.new(start_line..end_line, hints_configurations, dispatcher)
       dispatcher.visit(document.tree)
       listener.response
     end
@@ -443,6 +444,11 @@ module RubyLsp
 
     sig { params(uri: URI::Generic).returns(T.nilable(Interface::FullDocumentDiagnosticReport)) }
     def diagnostic(uri)
+      # Do not compute diagnostics for files outside of the workspace. For example, if someone is looking at a gem's
+      # source code, we don't want to show diagnostics for it
+      path = uri.to_standardized_path
+      return unless path.nil? || path.start_with?(T.must(@store.workspace_uri.to_standardized_path))
+
       response = @store.cache_fetch(uri, "textDocument/diagnostic") do |document|
         Requests::Diagnostics.new(document).run
       end
@@ -457,11 +463,7 @@ module RubyLsp
       end_line = range.dig(:end, :line)
 
       dispatcher = Prism::Dispatcher.new
-      listener = Requests::SemanticHighlighting.new(
-        dispatcher,
-        @message_queue,
-        range: start_line..end_line,
-      )
+      listener = Requests::SemanticHighlighting.new(dispatcher, range: start_line..end_line)
       dispatcher.visit(document.tree)
 
       Requests::Support::SemanticTokenEncoder.new.encode(listener.response)
@@ -476,34 +478,32 @@ module RubyLsp
     def completion(uri, position)
       document = @store.get(uri)
 
-      char_position = document.create_scanner.find_char_position(position)
-
-      # When the user types in the first letter of a constant name, we actually receive the position of the next
-      # immediate character. We check to see if the character is uppercase and then remove the offset to try to locate
-      # the node, as it could not be a constant
-      target_node_types = if ("A".."Z").cover?(document.source[char_position - 1])
-        char_position -= 1
-        [Prism::ConstantReadNode, Prism::ConstantPathNode]
-      else
-        [Prism::CallNode]
-      end
-
-      matched, parent, nesting = document.locate(document.tree, char_position, node_types: target_node_types)
+      # Completion always receives the position immediately after the character that was just typed. Here we adjust it
+      # back by 1, so that we find the right node
+      char_position = document.create_scanner.find_char_position(position) - 1
+      matched, parent, nesting = document.locate(
+        document.tree,
+        char_position,
+        node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode],
+      )
       return unless matched && parent
 
       target = case matched
       when Prism::CallNode
         message = matched.message
-        return unless message == "require"
 
-        args = matched.arguments&.arguments
-        return if args.nil? || args.is_a?(Prism::ForwardingArgumentsNode)
+        if message == "require"
+          args = matched.arguments&.arguments
+          return if args.nil? || args.is_a?(Prism::ForwardingArgumentsNode)
 
-        argument = args.first
-        return unless argument.is_a?(Prism::StringNode)
-        return unless (argument.location.start_offset..argument.location.end_offset).cover?(char_position)
+          argument = args.first
+          return unless argument.is_a?(Prism::StringNode)
+          return unless (argument.location.start_offset..argument.location.end_offset).cover?(char_position)
 
-        argument
+          argument
+        else
+          matched
+        end
       when Prism::ConstantReadNode, Prism::ConstantPathNode
         if parent.is_a?(Prism::ConstantPathNode) && matched.is_a?(Prism::ConstantReadNode)
           parent
@@ -515,12 +515,7 @@ module RubyLsp
       return unless target
 
       dispatcher = Prism::Dispatcher.new
-      listener = Requests::Completion.new(
-        @index,
-        nesting,
-        dispatcher,
-        @message_queue,
-      )
+      listener = Requests::Completion.new(@index, nesting, dispatcher)
       dispatcher.dispatch_once(target)
       listener.response
     end
@@ -581,9 +576,12 @@ module RubyLsp
       # notification
     end
 
-    sig { params(options: T::Hash[Symbol, T.untyped]).returns(Interface::InitializeResult) }
+    sig { params(options: T::Hash[Symbol, T.untyped]).returns(T::Hash[Symbol, T.untyped]) }
     def initialize_request(options)
       @store.clear
+
+      workspace_uri = options.dig(:workspaceFolders, 0, :uri)
+      @store.workspace_uri = URI(workspace_uri) if workspace_uri
 
       encodings = options.dig(:capabilities, :general, :positionEncodings)
       @store.encoding = if encodings.nil? || encodings.empty?
@@ -605,6 +603,11 @@ module RubyLsp
 
       configured_features = options.dig(:initializationOptions, :enabledFeatures)
       @store.experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled) || false
+
+      configured_hints = options.dig(:initializationOptions, :featuresConfiguration, :inlayHint)
+      configured_lenses = options.dig(:initializationOptions, :featuresConfiguration, :codeLens)
+      T.must(@store.features_configuration.dig(:inlayHint)).configuration.merge!(configured_hints) if configured_hints
+      T.must(@store.features_configuration.dig(:codeLens)).configuration.merge!(configured_lenses) if configured_lenses
 
       enabled_features = case configured_features
       when Array
@@ -682,7 +685,7 @@ module RubyLsp
       completion_provider = if enabled_features["completion"]
         Interface::CompletionOptions.new(
           resolve_provider: false,
-          trigger_characters: ["/", *"A".."Z"],
+          trigger_characters: ["/"],
           completion_item: {
             labelDetailsSupport: true,
           },
@@ -718,7 +721,7 @@ module RubyLsp
 
       begin_progress("indexing-progress", "Ruby LSP: indexing files")
 
-      Interface::InitializeResult.new(
+      {
         capabilities: Interface::ServerCapabilities.new(
           text_document_sync: Interface::TextDocumentSyncOptions.new(
             change: Constant::TextDocumentSyncKind::INCREMENTAL,
@@ -742,7 +745,12 @@ module RubyLsp
           definition_provider: enabled_features["definition"],
           workspace_symbol_provider: enabled_features["workspaceSymbol"],
         ),
-      )
+        serverInfo: {
+          name: "Ruby LSP",
+          version: VERSION,
+        },
+        formatter: @store.formatter,
+      }
     end
 
     sig { void }

@@ -19,19 +19,13 @@ class CompletionTest < Minitest::Test
   def test_completion_command
     prefix = "foo/"
 
-    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri)
       require "#{prefix}"
     RUBY
 
     end_char = T.must(document.source.rindex('"'))
-    start_position = {
-      line: 0,
-      character: T.must(document.source.index('"')),
-    }
-    end_position = {
-      line: 0,
-      character: end_char + 1,
-    }
+    start_position = { line: 0, character: T.must(document.source.index('"')) + 1 }
+    end_position = { line: 0, character: end_char }
 
     result = with_file_structure do
       @store.set(uri: @uri, source: document.source, version: 1)
@@ -56,19 +50,13 @@ class CompletionTest < Minitest::Test
   def test_completion_call
     prefix = "foo/"
 
-    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri)
       require("#{prefix}")
     RUBY
 
     end_char = T.must(document.source.rindex('"'))
-    start_position = {
-      line: 0,
-      character: T.must(document.source.index('"')),
-    }
-    end_position = {
-      line: 0,
-      character: end_char + 1,
-    }
+    start_position = { line: 0, character: T.must(document.source.index('"')) + 1 }
+    end_position = { line: 0, character: end_char }
 
     result = with_file_structure do
       @store.set(uri: @uri, source: document.source, version: 1)
@@ -93,19 +81,13 @@ class CompletionTest < Minitest::Test
   def test_completion_command_call
     prefix = "foo/"
 
-    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri)
       Kernel.require "#{prefix}"
     RUBY
 
     end_char = T.must(document.source.rindex('"'))
-    start_position = {
-      line: 0,
-      character: T.must(document.source.index('"')),
-    }
-    end_position = {
-      line: 0,
-      character: end_char + 1,
-    }
+    start_position = { line: 0, character: T.must(document.source.index('"')) + 1 }
+    end_position = { line: 0, character: end_char }
 
     result = with_file_structure do
       @store.set(uri: @uri, source: document.source, version: 1)
@@ -130,19 +112,13 @@ class CompletionTest < Minitest::Test
   def test_completion_with_partial_path
     prefix = "foo/suppo"
 
-    document = RubyLsp::Document.new(source: <<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri)
       require "#{prefix}"
     RUBY
 
     end_char = T.must(document.source.rindex('"'))
-    start_position = {
-      line: 0,
-      character: T.must(document.source.index('"')),
-    }
-    end_position = {
-      line: 0,
-      character: end_char + 1,
-    }
+    start_position = { line: 0, character: T.must(document.source.index('"')) + 1 }
+    end_position = { line: 0, character: end_char }
 
     result = with_file_structure do
       @store.set(uri: @uri, source: document.source, version: 1)
@@ -162,7 +138,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_does_not_fail_when_there_are_syntax_errors
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       require "ruby_lsp/requests/"
 
       def foo
@@ -181,7 +157,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_is_not_triggered_if_argument_is_not_a_string
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       require foo
     RUBY
 
@@ -195,11 +171,11 @@ class CompletionTest < Minitest::Test
       method: "textDocument/completion",
       params: { textDocument: { uri: @uri.to_s }, position: end_position },
     )
-    assert_nil(result)
+    assert_empty(result)
   end
 
   def test_completion_for_constants
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Foo
       end
 
@@ -220,7 +196,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_constant_paths
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Bar
       end
 
@@ -259,7 +235,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_conflicting_constants
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       module Foo
         class Qux; end
 
@@ -288,7 +264,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_top_level_constants_inside_nesting
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Bar
       end
 
@@ -316,7 +292,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_private_constants_inside_the_same_namespace
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class A
         CONST = 1
         private_constant(:CONST)
@@ -339,7 +315,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_private_constants_from_different_namespace
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class A
         CONST = 1
         private_constant(:CONST)
@@ -363,7 +339,7 @@ class CompletionTest < Minitest::Test
 
   def test_completion_for_aliased_constants
     stub_no_typechecker
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       module A
         module B
           CONST = 1
@@ -395,7 +371,7 @@ class CompletionTest < Minitest::Test
 
   def test_completion_for_aliased_complex_constants
     stub_no_typechecker
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       module A
         module B
           CONST = 1
@@ -428,7 +404,7 @@ class CompletionTest < Minitest::Test
 
   def test_completion_uses_shortest_possible_name_for_filter_text
     stub_no_typechecker
-    document = RubyLsp::Document.new(source: +<<~RUBY, version: 1, uri: @uri)
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       module A
         module B
           class Foo
@@ -462,6 +438,108 @@ class CompletionTest < Minitest::Test
     assert_equal(["A::B::Foo"], result.map(&:label))
     assert_equal(["A::B::Foo"], result.map(&:filter_text))
     assert_equal(["Foo"], result.map { |completion| completion.text_edit.new_text })
+  end
+
+  def test_completion_for_methods_invoked_on_self
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+      class Foo
+        def bar(a, b); end
+        def baz(c, d); end
+
+        def process
+          b
+        end
+      end
+    RUBY
+
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: { line: 5, character: 5 } },
+    )
+    assert_equal(["bar", "baz"], result.map(&:label))
+    assert_equal(["bar", "baz"], result.map(&:filter_text))
+    assert_equal(["bar(a, b)", "baz(c, d)"], result.map { |completion| completion.text_edit.new_text })
+  end
+
+  def test_completion_for_methods_invoked_on_explicit_self
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+      class Foo
+        def bar(a, b); end
+        def baz(c, d); end
+
+        def process
+          self.b
+        end
+      end
+    RUBY
+
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: { line: 5, character: 10 } },
+    )
+    assert_equal(["bar", "baz"], result.map(&:label))
+    assert_equal(["bar", "baz"], result.map(&:filter_text))
+    assert_equal(["bar(a, b)", "baz(c, d)"], result.map { |completion| completion.text_edit.new_text })
+  end
+
+  def test_completion_for_methods_named_with_uppercase_characters
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+      class Kernel
+        def Array(a); end
+
+        def process
+          Array(
+        end
+      end
+    RUBY
+
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: { line: 4, character: 10 } },
+    )
+    assert_equal(["Array"], result.map(&:label))
+    assert_equal(["Array"], result.map(&:filter_text))
+    assert_equal(["Array(a)"], result.map { |completion| completion.text_edit.new_text })
+  end
+
+  def test_completion_for_attributes
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+      class Foo
+        attr_accessor :bar
+
+        def qux
+          b
+        end
+      end
+    RUBY
+
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: { line: 4, character: 5 } },
+    )
+    assert_equal(["bar", "bar="], result.map(&:label))
+    assert_equal(["bar", "bar="], result.map(&:filter_text))
+    assert_equal(["bar", "bar=(bar)"], result.map { |completion| completion.text_edit.new_text })
   end
 
   private
@@ -521,7 +599,7 @@ class CompletionTest < Minitest::Test
         ),
         new_text: path,
       ),
-      kind: LanguageServer::Protocol::Constant::CompletionItemKind::REFERENCE,
+      kind: LanguageServer::Protocol::Constant::CompletionItemKind::FILE,
     )
   end
 end

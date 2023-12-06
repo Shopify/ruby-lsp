@@ -19,6 +19,7 @@ module RubyIndexer
         T::Hash[Integer, Prism::Comment],
       )
       @queue = T.let([], T::Array[Object])
+      @current_owner = T.let(nil, T.nilable(Entry::Namespace))
 
       super()
     end
@@ -140,8 +141,18 @@ module RubyIndexer
 
     sig { params(node: Prism::CallNode).void }
     def handle_call_node(node)
-      message = node.message
-      handle_private_constant(node) if message == "private_constant"
+      message = node.name
+
+      case message
+      when :private_constant
+        handle_private_constant(node)
+      when :attr_reader
+        handle_attribute(node, reader: true, writer: false)
+      when :attr_writer
+        handle_attribute(node, reader: false, writer: true)
+      when :attr_accessor
+        handle_attribute(node, reader: true, writer: true)
+      end
     end
 
     sig { params(node: Prism::DefNode).void }
@@ -150,9 +161,23 @@ module RubyIndexer
       comments = collect_comments(node)
       case node.receiver
       when nil
-        @index << Entry::InstanceMethod.new(method_name, @file_path, node.location, comments, node.parameters)
+        @index << Entry::InstanceMethod.new(
+          method_name,
+          @file_path,
+          node.location,
+          comments,
+          node.parameters,
+          @current_owner,
+        )
       when Prism::SelfNode
-        @index << Entry::SingletonMethod.new(method_name, @file_path, node.location, comments, node.parameters)
+        @index << Entry::SingletonMethod.new(
+          method_name,
+          @file_path,
+          node.location,
+          comments,
+          node.parameters,
+          @current_owner,
+        )
       end
     end
 
@@ -232,8 +257,8 @@ module RubyIndexer
       end
 
       comments = collect_comments(node)
-
-      @index << Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments)
+      @current_owner = Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments)
+      @index << @current_owner
       @stack << name
       @queue.prepend(node.body, LEAVE_EVENT)
     end
@@ -255,13 +280,14 @@ module RubyIndexer
         superclass.slice
       end
 
-      @index << Entry::Class.new(
+      @current_owner = Entry::Class.new(
         fully_qualify_name(name),
         @file_path,
         node.location,
         comments,
         parent_class,
       )
+      @index << @current_owner
       @stack << name
       @queue.prepend(node.body, LEAVE_EVENT)
     end
@@ -295,6 +321,30 @@ module RubyIndexer
       else
         "#{@stack.join("::")}::#{name}"
       end.delete_prefix("::")
+    end
+
+    sig { params(node: Prism::CallNode, reader: T::Boolean, writer: T::Boolean).void }
+    def handle_attribute(node, reader:, writer:)
+      arguments = node.arguments&.arguments
+      return unless arguments
+
+      receiver = node.receiver
+      return unless receiver.nil? || receiver.is_a?(Prism::SelfNode)
+
+      comments = collect_comments(node)
+      arguments.each do |argument|
+        name, loc = case argument
+        when Prism::SymbolNode
+          [argument.value, argument.value_loc]
+        when Prism::StringNode
+          [argument.content, argument.content_loc]
+        end
+
+        next unless name && loc
+
+        @index << Entry::Accessor.new(name, @file_path, loc, comments, @current_owner) if reader
+        @index << Entry::Accessor.new("#{name}=", @file_path, loc, comments, @current_owner) if writer
+      end
     end
   end
 end

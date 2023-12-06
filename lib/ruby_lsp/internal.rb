@@ -24,6 +24,10 @@ require "ruby_lsp/server"
 require "ruby_lsp/executor"
 require "ruby_lsp/requests"
 require "ruby_lsp/listener"
+require "ruby_lsp/document"
+require "ruby_lsp/ruby_document"
 require "ruby_lsp/store"
 require "ruby_lsp/addon"
 require "ruby_lsp/requests/support/rubocop_runner"
+
+Bundler.ui.level = :silent

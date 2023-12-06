@@ -5,7 +5,7 @@ require "test_helper"
 
 class OnTypeFormattingTest < Minitest::Test
   def test_adding_missing_ends
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -35,7 +35,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_adding_missing_curly_brace_in_string_interpolation
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -61,7 +61,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_adding_missing_pipe
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -87,7 +87,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_pipe_is_not_added_in_regular_or_pipe
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -103,7 +103,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_pipe_is_removed_if_user_adds_manually_after_completion
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -159,7 +159,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_pipe_is_removed_if_user_adds_manually_after_block_argument
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -192,7 +192,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_comment_continuation
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -209,16 +209,12 @@ class OnTypeFormattingTest < Minitest::Test
         range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } },
         newText: "#    ",
       },
-      {
-        range: { start: { line: 0, character: 9 }, end: { line: 0, character: 9 } },
-        newText: "$0",
-      },
     ]
     assert_equal(expected_edits.to_json, T.must(edits).to_json)
   end
 
   def test_keyword_handling
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -234,7 +230,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_comment_continuation_with_other_line_break_matches
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     # If the current comment line has another word we match for, such as `while`, we still only want to complete the new
     # comment, but avoid adding an incorrect end to the comment's `while` word
@@ -253,16 +249,12 @@ class OnTypeFormattingTest < Minitest::Test
         range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } },
         newText: "#    ",
       },
-      {
-        range: { start: { line: 0, character: 9 }, end: { line: 0, character: 9 } },
-        newText: "$0",
-      },
     ]
     assert_equal(expected_edits.to_json, T.must(edits).to_json)
   end
 
   def test_comment_continuation_when_inserting_new_line_in_the_middle
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     # When inserting a new line between while and blah, the document will have a syntax error momentarily before we auto
     # insert the comment continuation. We must avoid accidentally trying to add an `end` token to `while` while the
@@ -282,16 +274,12 @@ class OnTypeFormattingTest < Minitest::Test
         range: { start: { line: 0, character: 7 }, end: { line: 0, character: 7 } },
         newText: "# ",
       },
-      {
-        range: { start: { line: 0, character: 2 }, end: { line: 0, character: 2 } },
-        newText: "$0",
-      },
     ]
     assert_equal(expected_edits.to_json, T.must(edits).to_json)
   end
 
   def test_breaking_line_between_keyword_and_more_content
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -322,7 +310,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_breaking_line_between_keyword_when_there_is_content_on_the_next_line
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -338,7 +326,7 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_breaking_line_immediately_after_keyword
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
 
     document.push_edits(
       [{
@@ -379,6 +367,104 @@ class OnTypeFormattingTest < Minitest::Test
       },
     ]
 
+    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+  end
+    
+  def test_breaking_line_if_a_keyword_is_part_of_method_call
+    document = RubyLsp::RubyDocument.new(source: +"  force({", version: 1, uri: URI("file:///fake.rb"))
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").run
+    assert_empty(edits)
+  end
+
+  def test_breaking_line_if_a_keyword_in_a_subexpression
+    document = RubyLsp::RubyDocument.new(source: +"  var = (if", version: 1, uri: URI("file:///fake.rb"))
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").run
+    expected_edits = [
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: "\n",
+      },
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: "  end",
+      },
+      {
+        range: { start: { line: 1, character: 4 }, end: { line: 1, character: 4 } },
+        newText: "$0",
+      },
+    ]
+    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+  end
+
+  def test_adding_heredoc_delimiter
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "str = <<~STR",
+      }],
+      version: 2,
+    )
+    document.parse
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").run
+    expected_edits = [
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: "\n",
+      },
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: "STR",
+      },
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: "$0",
+      },
+    ]
+    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+  end
+
+  def test_completing_end_token_inside_parameters
+    document = RubyLsp::RubyDocument.new(source: +"foo(proc do\n)", version: 1, uri: URI("file:///fake.rb"))
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 0 }, "\n").run
+    expected_edits = [
+      {
+        range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } },
+        newText: "\n",
+      },
+      {
+        range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } },
+        newText: "end",
+      },
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: "$0",
+      },
+    ]
+    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+  end
+
+  def test_completing_end_token_inside_brackets
+    document = RubyLsp::RubyDocument.new(source: +"foo[proc do\n]", version: 1, uri: URI("file:///fake.rb"))
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 0 }, "\n").run
+    expected_edits = [
+      {
+        range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } },
+        newText: "\n",
+      },
+      {
+        range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } },
+        newText: "end",
+      },
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: "$0",
+      },
+    ]
     assert_equal(expected_edits.to_json, T.must(edits).to_json)
   end
 end

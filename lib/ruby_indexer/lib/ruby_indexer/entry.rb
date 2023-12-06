@@ -90,15 +90,82 @@ module RubyIndexer
       end
     end
 
+    # A required method parameter, e.g. `def foo(a)`
     class RequiredParameter < Parameter
     end
 
-    class Method < Entry
+    # An optional method parameter, e.g. `def foo(a = 123)`
+    class OptionalParameter < Parameter
+    end
+
+    # An required keyword method parameter, e.g. `def foo(a:)`
+    class KeywordParameter < Parameter
+    end
+
+    # An optional keyword method parameter, e.g. `def foo(a: 123)`
+    class OptionalKeywordParameter < Parameter
+    end
+
+    # A rest method parameter, e.g. `def foo(*a)`
+    class RestParameter < Parameter
+      DEFAULT_NAME = T.let(:"<anonymous splat>", Symbol)
+    end
+
+    # A keyword rest method parameter, e.g. `def foo(**a)`
+    class KeywordRestParameter < Parameter
+      DEFAULT_NAME = T.let(:"<anonymous keyword splat>", Symbol)
+    end
+
+    # A block method parameter, e.g. `def foo(&block)`
+    class BlockParameter < Parameter
+      DEFAULT_NAME = T.let(:"<anonymous block>", Symbol)
+    end
+
+    class Member < Entry
       extend T::Sig
       extend T::Helpers
+
       abstract!
 
-      sig { returns(T::Array[Parameter]) }
+      sig { returns(T.nilable(Entry::Namespace)) }
+      attr_reader :owner
+
+      sig do
+        params(
+          name: String,
+          file_path: String,
+          location: Prism::Location,
+          comments: T::Array[String],
+          owner: T.nilable(Entry::Namespace),
+        ).void
+      end
+      def initialize(name, file_path, location, comments, owner)
+        super(name, file_path, location, comments)
+        @owner = owner
+      end
+
+      sig { abstract.returns(T::Array[Parameter]) }
+      def parameters; end
+    end
+
+    class Accessor < Member
+      extend T::Sig
+
+      sig { override.returns(T::Array[Parameter]) }
+      def parameters
+        params = []
+        params << RequiredParameter.new(name: name.delete_suffix("=").to_sym) if name.end_with?("=")
+        params
+      end
+    end
+
+    class Method < Member
+      extend T::Sig
+      extend T::Helpers
+
+      abstract!
+
+      sig { override.returns(T::Array[Parameter]) }
       attr_reader :parameters
 
       sig do
@@ -108,10 +175,12 @@ module RubyIndexer
           location: Prism::Location,
           comments: T::Array[String],
           parameters_node: T.nilable(Prism::ParametersNode),
+          owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, parameters_node)
-        super(name, file_path, location, comments)
+      def initialize(name, file_path, location, comments, parameters_node, owner) # rubocop:disable Metrics/ParameterLists
+        super(name, file_path, location, comments, owner)
+
         @parameters = T.let(list_params(parameters_node), T::Array[Parameter])
       end
 
@@ -121,23 +190,78 @@ module RubyIndexer
       def list_params(parameters_node)
         return [] unless parameters_node
 
-        parameters_node.requireds.filter_map do |required|
+        parameters = []
+
+        parameters_node.requireds.each do |required|
           name = parameter_name(required)
           next unless name
 
-          RequiredParameter.new(name: name)
+          parameters << RequiredParameter.new(name: name)
         end
+
+        parameters_node.optionals.each do |optional|
+          name = parameter_name(optional)
+          next unless name
+
+          parameters << OptionalParameter.new(name: name)
+        end
+
+        parameters_node.keywords.each do |keyword|
+          name = parameter_name(keyword)
+          next unless name
+
+          case keyword
+          when Prism::RequiredKeywordParameterNode
+            parameters << KeywordParameter.new(name: name)
+          when Prism::OptionalKeywordParameterNode
+            parameters << OptionalKeywordParameter.new(name: name)
+          end
+        end
+
+        rest = parameters_node.rest
+
+        if rest
+          rest_name = rest.name || RestParameter::DEFAULT_NAME
+          parameters << RestParameter.new(name: rest_name)
+        end
+
+        keyword_rest = parameters_node.keyword_rest
+
+        if keyword_rest.is_a?(Prism::KeywordRestParameterNode)
+          keyword_rest_name = parameter_name(keyword_rest) || KeywordRestParameter::DEFAULT_NAME
+          parameters << KeywordRestParameter.new(name: keyword_rest_name)
+        end
+
+        parameters_node.posts.each do |post|
+          name = parameter_name(post)
+          next unless name
+
+          parameters << RequiredParameter.new(name: name)
+        end
+
+        block = parameters_node.block
+        parameters << BlockParameter.new(name: block.name || BlockParameter::DEFAULT_NAME) if block
+
+        parameters
       end
 
-      sig do
-        params(node: Prism::Node).returns(T.nilable(Symbol))
-      end
+      sig { params(node: T.nilable(Prism::Node)).returns(T.nilable(Symbol)) }
       def parameter_name(node)
         case node
-        when Prism::RequiredParameterNode
+        when Prism::RequiredParameterNode, Prism::OptionalParameterNode,
+          Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode,
+          Prism::RestParameterNode, Prism::KeywordRestParameterNode
           node.name
         when Prism::MultiTargetNode
-          names = [*node.lefts, *node.rest, *node.rights].map { |parameter_node| parameter_name(parameter_node) }
+          names = node.lefts.map { |parameter_node| parameter_name(parameter_node) }
+
+          rest = node.rest
+          if rest.is_a?(Prism::SplatNode)
+            name = rest.expression&.slice
+            names << (rest.operator == "*" ? "*#{name}".to_sym : name&.to_sym)
+          end
+
+          names.concat(node.rights.map { |parameter_node| parameter_name(parameter_node) })
 
           names_with_commas = names.join(", ")
           :"(#{names_with_commas})"

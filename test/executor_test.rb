@@ -108,6 +108,33 @@ class ExecutorTest < Minitest::Test
     assert_includes("utf-16", hash.dig("capabilities", "positionEncoding"))
   end
 
+  def test_server_info_includes_version
+    response = @executor.execute({
+      method: "initialize",
+      params: {
+        initializationOptions: {},
+        capabilities: {},
+      },
+    }).response
+
+    hash = JSON.parse(response.to_json)
+    assert_equal(RubyLsp::VERSION, hash.dig("serverInfo", "version"))
+  end
+
+  def test_server_info_includes_formatter
+    RubyLsp::DependencyDetector.instance.expects(:detected_formatter).returns("rubocop")
+    response = @executor.execute({
+      method: "initialize",
+      params: {
+        initializationOptions: {},
+        capabilities: {},
+      },
+    }).response
+
+    hash = JSON.parse(response.to_json)
+    assert_equal("rubocop", hash.dig("formatter"))
+  end
+
   def test_initialized_populates_index
     @executor.execute({ method: "initialized", params: {} })
 
@@ -148,6 +175,35 @@ class ExecutorTest < Minitest::Test
     )
   end
 
+  def test_returns_nil_diagnostics_and_formatting_for_files_outside_workspace
+    @executor.execute({
+      method: "initialize",
+      params: {
+        initializationOptions: { enabledFeatures: ["formatting", "diagnostics"] },
+        capabilities: { general: { positionEncodings: ["utf-8"] } },
+        workspaceFolders: [{ uri: URI::Generic.from_path(path: Dir.pwd).to_standardized_path }],
+      },
+    })
+
+    result = @executor.execute({
+      method: "textDocument/formatting",
+      params: {
+        textDocument: { uri: "file:///foo.rb" },
+      },
+    })
+
+    assert_nil(result.response)
+
+    result = @executor.execute({
+      method: "textDocument/diagnostic",
+      params: {
+        textDocument: { uri: "file:///foo.rb" },
+      },
+    })
+
+    assert_nil(result.response)
+  end
+
   def test_did_close_clears_diagnostics
     uri = URI("file:///foo.rb")
     @store.set(uri: uri, source: "", version: 1)
@@ -163,6 +219,76 @@ class ExecutorTest < Minitest::Test
     assert_empty(T.cast(notification.params, RubyLsp::Interface::PublishDiagnosticsParams).diagnostics)
   ensure
     @store.delete(uri)
+  end
+
+  def test_initialize_features_with_default_configuration
+    RubyLsp::Executor.new(@store, @message_queue)
+      .execute(method: "initialize", params: { initializationOptions: {} })
+
+    assert(@store.features_configuration.dig(:codeLens).enabled?(:gemfileLinks))
+    refute(@store.features_configuration.dig(:inlayHint).enabled?(:implicitRescue))
+    refute(@store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
+  end
+
+  def test_initialize_features_with_provided_configuration
+    RubyLsp::Executor.new(@store, @message_queue)
+      .execute(method: "initialize", params: {
+        initializationOptions: {
+          featuresConfiguration: {
+            codeLens: {
+              gemfileLinks: false,
+            },
+            inlayHint: {
+              implicitRescue: true,
+              implicitHashValue: true,
+            },
+          },
+        },
+      })
+
+    refute(@store.features_configuration.dig(:codeLens).enabled?(:gemfileLinks))
+    assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitRescue))
+    assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
+  end
+
+  def test_initialize_features_with_partially_provided_configuration
+    RubyLsp::Executor.new(@store, @message_queue)
+      .execute(method: "initialize", params: {
+        initializationOptions: {
+          featuresConfiguration: {
+            codeLens: {
+              gemfileLinks: false,
+            },
+            inlayHint: {
+              implicitHashValue: true,
+            },
+          },
+        },
+      })
+
+    refute(@store.features_configuration.dig(:codeLens).enabled?(:gemfileLinks))
+    refute(@store.features_configuration.dig(:inlayHint).enabled?(:implicitRescue))
+    assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
+  end
+
+  def test_initialize_features_with_enable_all_configuration
+    RubyLsp::Executor.new(@store, @message_queue)
+      .execute(method: "initialize", params: {
+        initializationOptions: {
+          featuresConfiguration: {
+            codeLens: {
+              enableAll: true,
+            },
+            inlayHint: {
+              enableAll: true,
+            },
+          },
+        },
+      })
+
+    assert(@store.features_configuration.dig(:codeLens).enabled?(:gemfileLinks))
+    assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitRescue))
+    assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
   end
 
   def test_detects_rubocop_if_direct_dependency

@@ -191,7 +191,7 @@ class IntegrationTest < Minitest::Test
               message: "Layout/EmptyLines: Extra blank line detected.",
               data: {
                 correctable: true,
-                code_action: {
+                code_actions: [{
                   title: "Autocorrect Layout/EmptyLines",
                   kind: "quickfix",
                   isPreferred: true,
@@ -211,7 +211,7 @@ class IntegrationTest < Minitest::Test
                       },
                     ],
                   },
-                },
+                }],
               },
               code: "Layout/EmptyLines",
               severity: 3,
@@ -221,6 +221,7 @@ class IntegrationTest < Minitest::Test
         },
       },
     )
+
     quickfix = response[:result].detect { |action| action[:kind] == "quickfix" }
     assert(quickfix)
     assert_match(%r{Autocorrect .*/.*}, quickfix[:title])

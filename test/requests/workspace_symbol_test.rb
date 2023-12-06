@@ -54,10 +54,7 @@ class WorkspaceSymbolTest < Minitest::Test
   def test_matches_only_gem_symbols_if_typechecker_is_present
     # reset the singleton so that the stub is not used
     Singleton.__init__(RubyLsp::DependencyDetector)
-    indexable = RubyIndexer::IndexablePath.new(
-      nil,
-      "#{RubyLsp::WORKSPACE_URI.to_standardized_path}/workspace_symbol_foo.rb",
-    )
+    indexable = RubyIndexer::IndexablePath.new(nil, "#{Dir.pwd}/workspace_symbol_foo.rb")
 
     @index.index_single(indexable, <<~RUBY)
       class Foo; end
@@ -104,5 +101,28 @@ class WorkspaceSymbolTest < Minitest::Test
     result = RubyLsp::Requests::WorkspaceSymbol.new("Foo::CONSTANT", @index).run
     assert_equal(1, result.length)
     assert_equal("Foo", T.must(result.first).name)
+  end
+
+  def test_returns_method_symbols
+    @index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake.rb"), <<~RUBY)
+      class Foo
+        attr_reader :baz
+
+        def initialize; end
+        def bar; end
+      end
+    RUBY
+
+    result = RubyLsp::Requests::WorkspaceSymbol.new("bar", @index).run.first
+    assert_equal("bar", T.must(result).name)
+    assert_equal(RubyLsp::Constant::SymbolKind::METHOD, T.must(result).kind)
+
+    result = RubyLsp::Requests::WorkspaceSymbol.new("initialize", @index).run.first
+    assert_equal("initialize", T.must(result).name)
+    assert_equal(RubyLsp::Constant::SymbolKind::CONSTRUCTOR, T.must(result).kind)
+
+    result = RubyLsp::Requests::WorkspaceSymbol.new("baz", @index).run.first
+    assert_equal("baz", T.must(result).name)
+    assert_equal(RubyLsp::Constant::SymbolKind::PROPERTY, T.must(result).kind)
   end
 end

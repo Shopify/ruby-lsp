@@ -20,8 +20,8 @@ module RubyLsp
 
       END_REGEXES = T.let(
         [
-          /(if|unless|for|while|class|module|until|def|case).*/,
-          /.*\sdo/,
+          /\b(if|unless|for|while|class|module|until|def|case)\b.*/,
+          /.*\s\bdo\b/,
         ],
         T::Array[Regexp],
       )
@@ -51,7 +51,14 @@ module RubyLsp
           if (comment_match = @previous_line.match(/^#(\s*)/))
             handle_comment_line(T.must(comment_match[1]))
           elsif @document.syntax_error?
-            handle_statement_end
+            match = /(?<=<<(-|~))(?<quote>['"`]?)(?<delimiter>\w+)\k<quote>/.match(@previous_line)
+            heredoc_delimiter = match && match.named_captures["delimiter"]
+
+            if heredoc_delimiter
+              handle_heredoc_end(heredoc_delimiter)
+            else
+              handle_statement_end
+            end
           end
         when "d"
           auto_indent_after_end_keyword
@@ -113,7 +120,7 @@ module RubyLsp
         current_line = @lines[@position[:line]]
         next_line = @lines[@position[:line] + 1]
 
-        if current_line.nil? || current_line.strip.empty?
+        if current_line.nil? || current_line.strip.empty? || current_line.include?(")") || current_line.include?("]")
           add_edit_with_text("\n")
           add_edit_with_text("#{indents}end")
           move_cursor_to(@position[:line], @indentation + 2)
@@ -123,10 +130,17 @@ module RubyLsp
         end
       end
 
+      sig { params(delimiter: String).void }
+      def handle_heredoc_end(delimiter)
+        indents = " " * @indentation
+        add_edit_with_text("\n")
+        add_edit_with_text("#{indents}#{delimiter}")
+        move_cursor_to(@position[:line], @indentation + 2)
+      end
+
       sig { params(spaces: String).void }
       def handle_comment_line(spaces)
         add_edit_with_text("##{spaces}")
-        move_cursor_to(@position[:line], @indentation + spaces.size + 1)
       end
 
       sig { params(text: String, position: Document::PositionShape).void }

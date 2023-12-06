@@ -66,7 +66,6 @@ module RubyLsp
 
     sig { returns(T::Array[String]) }
     def dependencies
-      # NOTE: If changing this behaviour, it's likely that the VS Code extension will also need changed.
       @dependencies ||= T.let(
         begin
           Bundler.with_original_env { Bundler.default_gemfile }

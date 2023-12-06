@@ -28,7 +28,9 @@
       },
       "data": {
         "type": "test",
-        "kind": "group"
+        "group_id": null,
+        "kind": "group",
+        "id": 1
       }
     },
     {
@@ -59,7 +61,9 @@
       },
       "data": {
         "type": "test_in_terminal",
-        "kind": "group"
+        "group_id": null,
+        "kind": "group",
+        "id": 1
       }
     },
     {
@@ -90,7 +94,9 @@
       },
       "data": {
         "type": "debug",
-        "kind": "group"
+        "group_id": null,
+        "kind": "group",
+        "id": 1
       }
     },
     {
@@ -121,6 +127,7 @@
       },
       "data": {
         "type": "test",
+        "group_id": 1,
         "kind": "example"
       }
     },
@@ -152,6 +159,7 @@
       },
       "data": {
         "type": "test_in_terminal",
+        "group_id": 1,
         "kind": "example"
       }
     },
@@ -183,6 +191,7 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 1,
         "kind": "example"
       }
     },
@@ -214,6 +223,7 @@
       },
       "data": {
         "type": "test",
+        "group_id": 1,
         "kind": "example"
       }
     },
@@ -245,6 +255,7 @@
       },
       "data": {
         "type": "test_in_terminal",
+        "group_id": 1,
         "kind": "example"
       }
     },
@@ -276,6 +287,7 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 1,
         "kind": "example"
       }
     },
@@ -307,6 +319,7 @@
       },
       "data": {
         "type": "test",
+        "group_id": 1,
         "kind": "example"
       }
     },
@@ -338,6 +351,7 @@
       },
       "data": {
         "type": "test_in_terminal",
+        "group_id": 1,
         "kind": "example"
       }
     },
@@ -369,6 +383,7 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 1,
         "kind": "example"
       }
     },
@@ -400,6 +415,7 @@
       },
       "data": {
         "type": "test",
+        "group_id": 1,
         "kind": "example"
       }
     },
@@ -431,6 +447,7 @@
       },
       "data": {
         "type": "test_in_terminal",
+        "group_id": 1,
         "kind": "example"
       }
     },
@@ -462,6 +479,7 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 1,
         "kind": "example"
       }
     },
@@ -493,6 +511,7 @@
       },
       "data": {
         "type": "test",
+        "group_id": 1,
         "kind": "example"
       }
     },
@@ -524,6 +543,7 @@
       },
       "data": {
         "type": "test_in_terminal",
+        "group_id": 1,
         "kind": "example"
       }
     },
@@ -555,6 +575,7 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 1,
         "kind": "example"
       }
     },
@@ -586,7 +607,9 @@
       },
       "data": {
         "type": "test",
-        "kind": "group"
+        "group_id": null,
+        "kind": "group",
+        "id": 2
       }
     },
     {
@@ -617,7 +640,9 @@
       },
       "data": {
         "type": "test_in_terminal",
-        "kind": "group"
+        "group_id": null,
+        "kind": "group",
+        "id": 2
       }
     },
     {
@@ -648,7 +673,9 @@
       },
       "data": {
         "type": "debug",
-        "kind": "group"
+        "group_id": null,
+        "kind": "group",
+        "id": 2
       }
     },
     {
@@ -679,6 +706,7 @@
       },
       "data": {
         "type": "test",
+        "group_id": 2,
         "kind": "example"
       }
     },
@@ -710,6 +738,7 @@
       },
       "data": {
         "type": "test_in_terminal",
+        "group_id": 2,
         "kind": "example"
       }
     },
@@ -741,6 +770,7 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 2,
         "kind": "example"
       }
     },
@@ -772,6 +802,7 @@
       },
       "data": {
         "type": "test",
+        "group_id": 2,
         "kind": "example"
       }
     },
@@ -803,6 +834,7 @@
       },
       "data": {
         "type": "test_in_terminal",
+        "group_id": 2,
         "kind": "example"
       }
     },
@@ -834,9 +866,12 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 2,
         "kind": "example"
       }
     }
   ],
-  "params": []
+  "params": [
+
+  ]
 }

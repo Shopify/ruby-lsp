@@ -11,6 +11,10 @@ module RubyLsp
     # [code lens](https://microsoft.github.io/language-server-protocol/specification#textDocument_codeLens)
     # request informs the editor of runnable commands such as tests
     #
+    # # Configuration
+    #
+    # To disable gem code lenses, set `rubyLsp.featuresConfiguration.codeLens.gemfileLinks` to `false`.
+    #
     # # Example
     #
     # ```ruby
@@ -47,16 +51,25 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      sig { params(uri: URI::Generic, dispatcher: Prism::Dispatcher, message_queue: Thread::Queue).void }
-      def initialize(uri, dispatcher, message_queue)
+      sig do
+        params(
+          uri: URI::Generic,
+          lenses_configuration: RequestConfig,
+          dispatcher: Prism::Dispatcher,
+        ).void
+      end
+      def initialize(uri, lenses_configuration, dispatcher)
         @uri = T.let(uri, URI::Generic)
         @_response = T.let([], ResponseType)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
         # visibility_stack is a stack of [current_visibility, previous_visibility]
         @visibility_stack = T.let([[:public, :public]], T::Array[T::Array[T.nilable(Symbol)]])
         @class_stack = T.let([], T::Array[String])
+        @group_id = T.let(1, Integer)
+        @group_id_stack = T.let([], T::Array[Integer])
+        @lenses_configuration = lenses_configuration
 
-        super(dispatcher, message_queue)
+        super(dispatcher)
 
         dispatcher.register(
           self,
@@ -82,12 +95,16 @@ module RubyLsp
             kind: :group,
           )
         end
+
+        @group_id_stack.push(@group_id)
+        @group_id += 1
       end
 
       sig { params(node: Prism::ClassNode).void }
       def on_class_node_leave(node)
         @visibility_stack.pop
         @class_stack.pop
+        @group_id_stack.pop
       end
 
       sig { params(node: Prism::DefNode).void }
@@ -128,6 +145,8 @@ module RubyLsp
         end
 
         if @path&.include?(GEMFILE_NAME) && name == :gem && arguments
+          return unless @lenses_configuration.enabled?(:gemfileLinks)
+
           first_argument = arguments.arguments.first
           return unless first_argument.is_a?(Prism::StringNode)
 
@@ -146,7 +165,7 @@ module RubyLsp
 
       sig { override.params(addon: Addon).returns(T.nilable(Listener[ResponseType])) }
       def initialize_external_listener(addon)
-        addon.create_code_lens_listener(@uri, @dispatcher, @message_queue)
+        addon.create_code_lens_listener(@uri, @dispatcher)
       end
 
       sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
@@ -174,12 +193,15 @@ module RubyLsp
           },
         ]
 
+        grouping_data = { group_id: @group_id_stack.last, kind: kind }
+        grouping_data[:id] = @group_id if kind == :group
+
         @_response << create_code_lens(
           node,
           title: "Run",
           command_name: "rubyLsp.runTest",
           arguments: arguments,
-          data: { type: "test", kind: kind },
+          data: { type: "test", **grouping_data },
         )
 
         @_response << create_code_lens(
@@ -187,7 +209,7 @@ module RubyLsp
           title: "Run In Terminal",
           command_name: "rubyLsp.runTestInTerminal",
           arguments: arguments,
-          data: { type: "test_in_terminal", kind: kind },
+          data: { type: "test_in_terminal", **grouping_data },
         )
 
         @_response << create_code_lens(
@@ -195,7 +217,7 @@ module RubyLsp
           title: "Debug",
           command_name: "rubyLsp.debugTest",
           arguments: arguments,
-          data: { type: "debug", kind: kind },
+          data: { type: "debug", **grouping_data },
         )
       end
 

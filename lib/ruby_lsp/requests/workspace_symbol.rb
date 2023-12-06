@@ -20,6 +20,7 @@ module RubyLsp
     #
     class WorkspaceSymbol
       extend T::Sig
+      include Support::Common
 
       sig { params(query: T.nilable(String), index: RubyIndexer::Index).void }
       def initialize(query, index)
@@ -29,21 +30,11 @@ module RubyLsp
 
       sig { returns(T::Array[Interface::WorkspaceSymbol]) }
       def run
-        bundle_path = begin
-          Bundler.bundle_path.to_s
-        rescue Bundler::GemfileNotFound
-          nil
-        end
-
         @index.fuzzy_search(@query).filter_map do |entry|
           # If the project is using Sorbet, we let Sorbet handle symbols defined inside the project itself and RBIs, but
           # we still return entries defined in gems to allow developers to jump directly to the source
           file_path = entry.file_path
-          if DependencyDetector.instance.typechecker && bundle_path && !file_path.start_with?(bundle_path) &&
-              !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
-
-            next
-          end
+          next if defined_in_gem?(file_path)
 
           # We should never show private symbols when searching the entire workspace
           next if entry.visibility == :private
@@ -82,6 +73,10 @@ module RubyLsp
           Constant::SymbolKind::NAMESPACE
         when RubyIndexer::Entry::Constant
           Constant::SymbolKind::CONSTANT
+        when RubyIndexer::Entry::Method
+          entry.name == "initialize" ? Constant::SymbolKind::CONSTRUCTOR : Constant::SymbolKind::METHOD
+        when RubyIndexer::Entry::Accessor
+          Constant::SymbolKind::PROPERTY
         end
       end
     end
