@@ -299,12 +299,18 @@ export class RubyLsp {
   private currentActiveWorkspace(
     activeEditor = vscode.window.activeTextEditor,
   ): Workspace | undefined {
-    if (!activeEditor) {
-      return;
-    }
+    let workspaceFolder: vscode.WorkspaceFolder | undefined;
 
-    const document = activeEditor.document;
-    const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
+    if (activeEditor) {
+      workspaceFolder = vscode.workspace.getWorkspaceFolder(
+        activeEditor.document.uri,
+      );
+    } else {
+      // If there's no active editor, we search based on the current workspace name
+      workspaceFolder = vscode.workspace.workspaceFolders?.find(
+        (folder) => folder.name === vscode.workspace.name,
+      );
+    }
 
     if (!workspaceFolder) {
       return;
