@@ -25,6 +25,7 @@ module RubyLsp
       begin
         response = run(request)
       rescue StandardError, LoadError => e
+        warn(e.message)
         error = e
       end
 
@@ -171,6 +172,8 @@ module RubyLsp
         completion(uri, request.dig(:params, :position))
       when "textDocument/definition"
         definition(uri, request.dig(:params, :position))
+      when "textDocument/signatureHelp"
+        signature_help(uri, request.dig(:params, :position), request.dig(:params, :context))
       when "workspace/didChangeWatchedFiles"
         did_change_watched_files(request.dig(:params, :changes))
       when "workspace/symbol"
@@ -238,6 +241,38 @@ module RubyLsp
         # way of dismissing it
         end_progress("indexing-progress")
       end
+    end
+
+    sig do
+      params(
+        uri: URI::Generic,
+        position: Document::PositionShape,
+        context: T::Hash[Symbol, T.untyped],
+      ).returns(T.any(T.nilable(Interface::SignatureHelp), T::Hash[Symbol, T.untyped]))
+    end
+    def signature_help(uri, position, context)
+      current_signature = context[:activeSignatureHelp]
+      document = @store.get(uri)
+      target, parent, nesting = document.locate_node(
+        { line: position[:line], character: position[:character] - 2 },
+        node_types: [Prism::CallNode],
+      )
+
+      # If we're typing a nested method call (e.g.: `foo(bar)`), then we may end up locating `bar` as the target method
+      # call incorrectly. To correct that, we check if there's an active signature with the same name as the parent node
+      # and then replace the target
+      if current_signature && parent.is_a?(Prism::CallNode)
+        active_signature = current_signature[:activeSignature] || 0
+
+        if current_signature.dig(:signatures, active_signature, :label)&.start_with?(parent.message)
+          target = parent
+        end
+      end
+
+      dispatcher = Prism::Dispatcher.new
+      listener = Requests::SignatureHelp.new(context, nesting, @index, dispatcher)
+      dispatcher.dispatch_once(target)
+      listener.response
     end
 
     sig { params(query: T.nilable(String)).returns(T::Array[Interface::WorkspaceSymbol]) }
@@ -692,6 +727,13 @@ module RubyLsp
         )
       end
 
+      signature_help_provider = if enabled_features["signatureHelp"]
+        # Identifier characters are automatically included, such as A-Z, a-z, 0-9, _, * or :
+        Interface::SignatureHelpOptions.new(
+          trigger_characters: ["(", " ", ","],
+        )
+      end
+
       # Dynamically registered capabilities
       file_watching_caps = options.dig(:capabilities, :workspace, :didChangeWatchedFiles)
 
@@ -744,6 +786,7 @@ module RubyLsp
           code_lens_provider: code_lens_provider,
           definition_provider: enabled_features["definition"],
           workspace_symbol_provider: enabled_features["workspaceSymbol"],
+          signature_help_provider: signature_help_provider,
         ),
         serverInfo: {
           name: "Ruby LSP",
