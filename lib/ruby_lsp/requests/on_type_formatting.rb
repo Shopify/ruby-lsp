@@ -188,6 +188,7 @@ module RubyLsp
         count
       end
 
+      sig { void }
       def auto_indent_after_end_keyword
         current_line = @lines[@position[:line]]
         return unless current_line&.strip == "end"
