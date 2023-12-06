@@ -154,13 +154,11 @@ module RubyLsp
       end
       def build_method_completion(entry, node)
         name = entry.name
-        parameters = entry.parameters
-        new_text = parameters.empty? ? name : "#{name}(#{parameters.map(&:name).join(", ")})"
 
         Interface::CompletionItem.new(
           label: name,
           filter_text: name,
-          text_edit: Interface::TextEdit.new(range: range_from_node(node), new_text: new_text),
+          text_edit: Interface::TextEdit.new(range: range_from_node(node), new_text: name),
           kind: Constant::CompletionItemKind::METHOD,
           label_details: Interface::CompletionItemLabelDetails.new(
             description: entry.file_name,
