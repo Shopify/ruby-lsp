@@ -25,7 +25,7 @@ module RubyLsp
           @runner.run(filename, document.source)
 
           @runner.offenses.map do |offense|
-            Support::RuboCopDiagnostic.new(offense, uri)
+            Support::RuboCopDiagnostic.new(document, offense, uri)
           end
         end
       end

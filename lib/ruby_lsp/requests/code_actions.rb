@@ -38,14 +38,8 @@ module RubyLsp
       def run
         diagnostics = @context[:diagnostics]
 
-        code_actions = diagnostics.filter_map do |diagnostic|
-          code_action = diagnostic.dig(:data, :code_action)
-          next if code_action.nil?
-
-          # We want to return only code actions that are within range or that do not have any edits, such as refactor
-          # code actions
-          range = code_action.dig(:edit, :documentChanges, 0, :edits, 0, :range)
-          code_action if diagnostic.dig(:data, :correctable) && cover?(range)
+        code_actions = diagnostics.flat_map do |diagnostic|
+          diagnostic.dig(:data, :code_actions) || []
         end
 
         # Only add refactor actions if there's a non empty selection in the editor
@@ -54,14 +48,6 @@ module RubyLsp
       end
 
       private
-
-      sig { params(range: T.nilable(Document::RangeShape)).returns(T::Boolean) }
-      def cover?(range)
-        range.nil? ||
-          ((@range.dig(:start, :line))..(@range.dig(:end, :line))).cover?(
-            (range.dig(:start, :line))..(range.dig(:end, :line)),
-          )
-      end
 
       sig { params(range: Document::RangeShape, uri: URI::Generic).returns(Interface::CodeAction) }
       def refactor_code_action(range, uri)

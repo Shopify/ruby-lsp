@@ -24,6 +24,9 @@ module RubyLsp
     sig { returns(URI::Generic) }
     attr_reader :uri
 
+    sig { returns(String) }
+    attr_reader :encoding
+
     sig { params(source: String, version: Integer, uri: URI::Generic, encoding: String).void }
     def initialize(source:, version:, uri:, encoding: Constant::PositionEncodingKind::UTF8)
       @cache = T.let({}, T::Hash[String, T.untyped])

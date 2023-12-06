@@ -19,30 +19,23 @@ module RubyLsp
           T::Hash[Symbol, Integer],
         )
 
-        sig { params(offense: RuboCop::Cop::Offense, uri: URI::Generic).void }
-        def initialize(offense, uri)
+        # TODO: avoid passing document once we have alternative ways to get at
+        # encoding and file source
+        sig { params(document: Document, offense: RuboCop::Cop::Offense, uri: URI::Generic).void }
+        def initialize(document, offense, uri)
+          @document = document
           @offense = offense
           @uri = uri
         end
 
-        sig { returns(Interface::CodeAction) }
-        def to_lsp_code_action
-          Interface::CodeAction.new(
-            title: "Autocorrect #{@offense.cop_name}",
-            kind: Constant::CodeActionKind::QUICK_FIX,
-            edit: Interface::WorkspaceEdit.new(
-              document_changes: [
-                Interface::TextDocumentEdit.new(
-                  text_document: Interface::OptionalVersionedTextDocumentIdentifier.new(
-                    uri: @uri.to_s,
-                    version: nil,
-                  ),
-                  edits: @offense.correctable? ? offense_replacements : [],
-                ),
-              ],
-            ),
-            is_preferred: true,
-          )
+        sig { returns(T::Array[Interface::CodeAction]) }
+        def to_lsp_code_actions
+          code_actions = []
+
+          code_actions << autocorrect_action if @offense.correctable?
+          code_actions << disable_line_action
+
+          code_actions
         end
 
         sig { returns(Interface::Diagnostic) }
@@ -65,7 +58,7 @@ module RubyLsp
             ),
             data: {
               correctable: @offense.correctable?,
-              code_action: to_lsp_code_action,
+              code_actions: to_lsp_code_actions,
             },
           )
         end
@@ -90,6 +83,26 @@ module RubyLsp
           Interface::CodeDescription.new(href: doc_url) if doc_url
         end
 
+        sig { returns(Interface::CodeAction) }
+        def autocorrect_action
+          Interface::CodeAction.new(
+            title: "Autocorrect #{@offense.cop_name}",
+            kind: Constant::CodeActionKind::QUICK_FIX,
+            edit: Interface::WorkspaceEdit.new(
+              document_changes: [
+                Interface::TextDocumentEdit.new(
+                  text_document: Interface::OptionalVersionedTextDocumentIdentifier.new(
+                    uri: @uri.to_s,
+                    version: nil,
+                  ),
+                  edits: @offense.correctable? ? offense_replacements : [],
+                ),
+              ],
+            ),
+            is_preferred: true,
+          )
+        end
+
         sig { returns(T::Array[Interface::TextEdit]) }
         def offense_replacements
           @offense.corrector.as_replacements.map do |range, replacement|
@@ -100,6 +113,64 @@ module RubyLsp
               ),
               new_text: replacement,
             )
+          end
+        end
+
+        sig { returns(Interface::CodeAction) }
+        def disable_line_action
+          Interface::CodeAction.new(
+            title: "Disable #{@offense.cop_name} for this line",
+            kind: Constant::CodeActionKind::QUICK_FIX,
+            edit: Interface::WorkspaceEdit.new(
+              document_changes: [
+                Interface::TextDocumentEdit.new(
+                  text_document: Interface::OptionalVersionedTextDocumentIdentifier.new(
+                    uri: @uri.to_s,
+                    version: nil,
+                  ),
+                  edits: line_disable_comment,
+                ),
+              ],
+            ),
+          )
+        end
+
+        sig { returns(T::Array[Interface::TextEdit]) }
+        def line_disable_comment
+          new_text = if @offense.source_line.include?(" # rubocop:disable ")
+            ",#{@offense.cop_name}"
+          else
+            " # rubocop:disable #{@offense.cop_name}"
+          end
+
+          eol = Interface::Position.new(
+            line: @offense.line - 1,
+            character: length_of_line(@offense.source_line),
+          )
+
+          # TODO: fails for multiline strings - may be preferable to use block
+          # comments to disable some offenses
+          inline_comment = Interface::TextEdit.new(
+            range: Interface::Range.new(start: eol, end: eol),
+            new_text: new_text,
+          )
+
+          [inline_comment]
+        end
+
+        sig { params(line: String).returns(Integer) }
+        def length_of_line(line)
+          if @document.encoding == Constant::PositionEncodingKind::UTF16
+            line_length = 0
+            line.codepoints.each do |codepoint|
+              line_length += 1
+              if codepoint > RubyLsp::Document::Scanner::SURROGATE_PAIR_START
+                line_length += 1
+              end
+            end
+            line_length
+          else
+            line.length
           end
         end
       end
