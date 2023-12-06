@@ -241,6 +241,31 @@ These are the settings that may impact the Ruby LSP's behavior and their explana
 }
 ```
 
+### Multi-root workspaces
+
+The Ruby LSP supports multi-root workspaces by spawning a separate language server for each one of them. This strategy
+is preferred over a single language server that supports multiple workspaces because each workspace could be using a
+different Ruby version and completely different gems - which would be impossible to support in a single Ruby process.
+
+Please see the [VS Code workspaces documentation](https://code.visualstudio.com/docs/editor/workspaces) on how to
+configure the editor for multi-root workspaces. The Ruby LSP should work properly out of the box as long as the
+workspace configuration is following the guidelines.
+
+#### Monorepos containing multiple workspaces
+
+A common setup is using a monorepo with directories for sub-projects. For example:
+
+```
+my_project/
+  client/
+  server/
+```
+
+This situation also falls under the category of multi-root workspaces. In this context, `client` and `server` are distinct
+workspaces. The Ruby LSP supports this use case out of the box as long as `my_project` contains configuration that
+follows [VS Code's guidelines](https://code.visualstudio.com/docs/editor/workspaces#_multiroot-workspaces) for
+multi-root workspaces.
+
 ## Telemetry
 
 On its own, the Ruby LSP does not collect any telemetry by default, but it does support hooking up to a private metrics
