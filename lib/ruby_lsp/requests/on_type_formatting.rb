@@ -60,6 +60,8 @@ module RubyLsp
               handle_statement_end
             end
           end
+        when "d"
+          auto_indent_after_end_keyword
         end
 
         @edits
@@ -184,6 +186,32 @@ module RubyLsp
         end
 
         count
+      end
+
+      sig { void }
+      def auto_indent_after_end_keyword
+        current_line = @lines[@position[:line]]
+        return unless current_line&.strip == "end"
+
+        target, _parent, _nesting = @document.locate_node({
+          line: @position[:line],
+          character: @position[:character] - 1,
+        })
+
+        statements = case target
+        when Prism::IfNode, Prism::UnlessNode, Prism::ForNode, Prism::WhileNode, Prism::UntilNode
+          target.statements
+        end
+        return unless statements
+
+        statements.body.each do |node|
+          loc = node.location
+          next unless loc.start_column == @indentation
+
+          add_edit_with_text("  ", { line: loc.start_line - 1, character: 0 })
+        end
+
+        move_cursor_to(@position[:line], @position[:character])
       end
     end
   end
