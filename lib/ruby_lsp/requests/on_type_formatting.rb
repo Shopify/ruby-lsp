@@ -174,22 +174,26 @@ module RubyLsp
         count
       end
 
-      sig { void }
       def auto_indent_after_end_keyword
         current_line = @lines[@position[:line]]
         return unless current_line&.strip == "end"
 
-        target, _parent, _nesting = T.cast(
-          @document.locate_node(@position, node_types: [YARP::StatementsNode]),
-          [T.nilable(YARP::StatementsNode), T.nilable(YARP::Node), T::Array[String]],
-        )
-        return unless target
+        target, _parent, _nesting = @document.locate_node({
+          line: @position[:line],
+          character: @position[:character] - 1,
+        })
 
-        target.body.each do |node|
-          start_line = node.location.start_line
-          unless @lines[start_line]&.start_with?("  ")
-            add_edit_with_text("  ", { line: start_line, character: 0 })
-          end
+        statements = case target
+        when Prism::IfNode, Prism::UnlessNode, Prism::ForNode, Prism::WhileNode, Prism::UntilNode
+          target.statements
+        end
+        return unless statements
+
+        statements.body.each do |node|
+          loc = node.location
+          next unless loc.start_column == @indentation
+
+          add_edit_with_text("  ", { line: loc.start_line - 1, character: 0 })
         end
 
         move_cursor_to(@position[:line], @position[:character])

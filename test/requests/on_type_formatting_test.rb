@@ -365,18 +365,8 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_auto_indent_after_end_keyword
-    document = RubyLsp::Document.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
-
-    document.push_edits(
-      [{
-        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
-        text: "if true\nputs \"a\"\nend",
-      }],
-      version: 2,
-    )
-    document.parse
-
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 2, character: 0 }, "d").run
+    document = RubyLsp::RubyDocument.new(source: +"if foo\nbar\nend", version: 1, uri: URI("file:///fake.rb"))
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 2, character: 2 }, "d").run
 
     expected_edits = [
       {
@@ -384,7 +374,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "  ",
       },
       {
-        range: { start: { line: 2, character: 0 }, end: { line: 2, character: 0 } },
+        range: { start: { line: 2, character: 2 }, end: { line: 2, character: 2 } },
         newText: "$0",
       },
     ]
