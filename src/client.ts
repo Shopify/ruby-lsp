@@ -114,6 +114,7 @@ function collectClientOptions(
       experimentalFeaturesEnabled: configuration.get(
         "enableExperimentalFeatures",
       ),
+      featuresConfiguration: configuration.get("featuresConfiguration"),
       formatter: configuration.get("formatter"),
     },
   };

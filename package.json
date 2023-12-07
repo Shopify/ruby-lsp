@@ -207,6 +207,42 @@
             "references": true
           }
         },
+        "rubyLsp.featuresConfiguration": {
+          "description": "Turn on/off specific features from request",
+          "type": "object",
+          "properties": {
+            "codeLens": {
+              "description": "Customize code lens features",
+              "type": "object",
+              "properties": {
+                "enableAll": {
+                  "type": "boolean"
+                },
+                "gemfileLinks": {
+                  "description": "Enable codelens in the Gemfile to open the gem repository",
+                  "type": "boolean"
+                }
+              }
+            },
+            "inlayHint": {
+              "description": "Customize inlay hint features",
+              "type": "object",
+              "properties": {
+                "enableAll": {
+                  "type": "boolean"
+                },
+                "implicitRescue": {
+                  "description": "Enable inlay hints for bare rescues",
+                  "type": "boolean"
+                },
+                "implicitHashValue": {
+                  "description": "Enable inlay hints for omitted hash values",
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
         "rubyLsp.rubyVersionManager": {
           "description": "The Ruby version manager to use",
           "type": "string",

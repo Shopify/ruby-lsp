@@ -70,10 +70,13 @@ test boilerplates. Find the full list [here](https://github.com/Shopify/vscode-r
 
 #### Enable or disable features
 
-The Ruby LSP has all its features enabled by default, but disabling specific features is supported. To do so, open the
+The Ruby LSP allows disabling specific features. To do so, open the
 language status center right next to the language mode Ruby and select `Manage` right next to enabled features.
 
 ![Ruby LSP status center](extras/ruby_lsp_status_center.png)
+
+It's also possible to configure with more granularity code lens and inlay hint features, see the [Ruby LSP server
+documentation](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html).
 
 #### Ruby version managers
 
