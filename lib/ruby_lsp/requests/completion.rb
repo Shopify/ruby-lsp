@@ -36,13 +36,15 @@ module RubyLsp
           index: RubyIndexer::Index,
           nesting: T::Array[String],
           dispatcher: Prism::Dispatcher,
+          typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(index, nesting, dispatcher)
+      def initialize(index, nesting, dispatcher, typechecker_enabled)
         super(dispatcher)
         @_response = T.let([], ResponseType)
         @index = index
         @nesting = nesting
+        @typechecker_enabled = typechecker_enabled
 
         dispatcher.register(
           self,
@@ -63,7 +65,7 @@ module RubyLsp
       # Handle completion on regular constant references (e.g. `Bar`)
       sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read_node_enter(node)
-        return if DependencyDetector.instance.typechecker
+        return if @typechecker_enabled
 
         name = node.slice
         candidates = @index.prefix_search(name, @nesting)
@@ -82,7 +84,7 @@ module RubyLsp
       # Handle completion on namespaced constant references (e.g. `Foo::Bar`)
       sig { params(node: Prism::ConstantPathNode).void }
       def on_constant_path_node_enter(node)
-        return if DependencyDetector.instance.typechecker
+        return if @typechecker_enabled
 
         name = node.slice
 
@@ -125,7 +127,7 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
-        return if DependencyDetector.instance.typechecker
+        return if @typechecker_enabled
         return unless self_receiver?(node)
 
         name = node.message

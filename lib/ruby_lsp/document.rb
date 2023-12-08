@@ -177,6 +177,16 @@ module RubyLsp
       [closest, parent, nesting.map { |n| n.constant_path.location.slice }]
     end
 
+    sig { returns(T::Boolean) }
+    def sigil_is_true_or_higher?
+      [/# typed: true/, /# typed: strict/, /# typed: strong/].any? { |pattern| pattern.match?(@source) }
+    end
+
+    sig { returns(T::Boolean) }
+    def typechecker_enabled?
+      DependencyDetector.instance.typechecker && sigil_is_true_or_higher?
+    end
+
     class Scanner
       extend T::Sig
 
