@@ -62,4 +62,4 @@ jobs:
         if: "!github.event.release.prerelease"
         run: |
           yarn run package
-          node_modules/.bin/ovs publish vscode-ruby-lsp.vsix -p ${{ secrets.OPENVSX_TOKEN }} --yarn
+          node_modules/.bin/ovsx publish vscode-ruby-lsp.vsix -p ${{ secrets.OPENVSX_TOKEN }} --yarn
