@@ -9,7 +9,6 @@ class CompletionTest < Minitest::Test
     @uri = URI("file:///fake.rb")
     @store = RubyLsp::Store.new
     @executor = RubyLsp::Executor.new(@store, @message_queue)
-    stub_no_typechecker
   end
 
   def teardown
@@ -338,7 +337,6 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_aliased_constants
-    stub_no_typechecker
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       module A
         module B
@@ -370,7 +368,6 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_aliased_complex_constants
-    stub_no_typechecker
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       module A
         module B
@@ -403,7 +400,6 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_uses_shortest_possible_name_for_filter_text
-    stub_no_typechecker
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       module A
         module B
@@ -540,6 +536,50 @@ class CompletionTest < Minitest::Test
     assert_equal(["bar", "bar="], result.map(&:label))
     assert_equal(["bar", "bar="], result.map(&:filter_text))
     assert_equal(["bar", "bar=(bar)"], result.map { |completion| completion.text_edit.new_text })
+  end
+
+  def test_with_typed_false
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+      # typed: false
+      class Foo
+      end
+
+      F
+    RUBY
+
+    end_position = { line: 4, character: 1 }
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: end_position },
+    )
+    assert_equal(["Foo"], result.map(&:label))
+  end
+
+  def test_with_typed_true
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+      # typed: true
+      class Foo
+      end
+
+      F
+    RUBY
+
+    end_position = { line: 4, character: 1 }
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: end_position },
+    )
+    assert_empty(result)
   end
 
   private
