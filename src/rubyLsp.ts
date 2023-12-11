@@ -187,7 +187,7 @@ export class RubyLsp {
             .contributes.configuration.properties["rubyLsp.enabledFeatures"]
             .properties;
 
-        const descriptions: { [key: string]: string } = {};
+        const descriptions: Record<string, string> = {};
         Object.entries(enabledFeaturesProperties).forEach(
           ([key, value]: [string, any]) => {
             descriptions[key] = value.description;
@@ -195,7 +195,7 @@ export class RubyLsp {
         );
 
         const configuration = vscode.workspace.getConfiguration("rubyLsp");
-        const features: { [key: string]: boolean } =
+        const features: Record<string, boolean> =
           configuration.get("enabledFeatures")!;
         const allFeatures = Object.keys(features);
         const options: vscode.QuickPickItem[] = allFeatures.map((label) => {

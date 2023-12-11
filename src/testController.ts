@@ -75,7 +75,7 @@ export class TestController {
       this.testCommands.delete(test);
     });
 
-    const groupIdMap: { [key: string]: vscode.TestItem } = {};
+    const groupIdMap: Record<string, vscode.TestItem> = {};
     let classTest: vscode.TestItem;
 
     const uri = vscode.Uri.from({

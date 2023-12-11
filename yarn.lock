@@ -467,10 +467,10 @@
     picocolors "^1.0.0"
     tslib "^2.6.0"
 
-"@shopify/eslint-plugin@^43.0.0":
-  version "43.0.0"
-  resolved "https://registry.yarnpkg.com/@shopify/eslint-plugin/-/eslint-plugin-43.0.0.tgz#6e5be2f9b063216f0d97f4424a1a7a804bd91e72"
-  integrity sha512-+/bLrmODh+OtPzf4YafsfpAbcdZfHOHBQGXgzoXPge6yUuyOo+NJiNvq0LOwo6jaRkaBgWQTUZB8HRlx4swHag==
+"@shopify/eslint-plugin@^44.0.0":
+  version "44.0.0"
+  resolved "https://registry.yarnpkg.com/@shopify/eslint-plugin/-/eslint-plugin-44.0.0.tgz#b8c45695bd88126f51b00cf6cad87a1ed6cc306d"
+  integrity sha512-p0BozXrvE7Z8EmnRJKg9QhS+8xbFPRY5u0mUFE2x8iOsSA1Yv1pGh+spR8QTz+zQCxv8DtJ0Hval9XSPFGxw4Q==
   dependencies:
     "@babel/eslint-parser" "^7.16.3"
     "@babel/eslint-plugin" "^7.14.5"

@@ -175,7 +175,7 @@ export class FeaturesStatus extends StatusItem {
 
   refresh(_workspace: WorkspaceInterface): void {
     const configuration = vscode.workspace.getConfiguration("rubyLsp");
-    const features: { [key: string]: boolean } =
+    const features: Record<string, boolean> =
       configuration.get("enabledFeatures")!;
     const enabledFeatures = Object.keys(features).filter(
       (key) => features[key],

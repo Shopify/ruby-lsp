@@ -18,9 +18,7 @@ import { LOG_CHANNEL, LSP_NAME, ClientInterface } from "./common";
 import { Telemetry, RequestEvent } from "./telemetry";
 import { Ruby } from "./ruby";
 
-interface EnabledFeatures {
-  [key: string]: boolean;
-}
+type EnabledFeatures = Record<string, boolean>;
 
 // Get the executables to start the server based on the user's configuration
 function getLspExecutables(

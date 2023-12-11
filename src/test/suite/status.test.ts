@@ -209,7 +209,7 @@ suite("StatusItems", () => {
 
   suite("FeaturesStatus", () => {
     const configuration = vscode.workspace.getConfiguration("rubyLsp");
-    const originalFeatures: { [key: string]: boolean } =
+    const originalFeatures: Record<string, boolean> =
       configuration.get("enabledFeatures")!;
     const numberOfExperimentalFeatures = Object.values(originalFeatures).filter(
       (feature) => feature === false,
@@ -256,7 +256,7 @@ suite("StatusItems", () => {
         .getConfiguration("rubyLsp")
         .update("enabledFeatures", { completion: false }, true, true);
 
-      const currentFeatures: { [key: string]: boolean } = vscode.workspace
+      const currentFeatures: Record<string, boolean> = vscode.workspace
         .getConfiguration("rubyLsp")
         .get("enabledFeatures")!;
 
