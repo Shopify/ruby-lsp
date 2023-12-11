@@ -471,7 +471,7 @@
     "ws": ">= 7.4.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.23.5",
+    "@babel/core": "^7.23.6",
     "@shopify/eslint-plugin": "^43.0.0",
     "@shopify/prettier-config": "^1.1.2",
     "@types/glob": "^8.1.0",
@@ -482,15 +482,15 @@
     "@typescript-eslint/parser": "^5.62.0",
     "@vscode/test-electron": "^2.3.8",
     "@vscode/vsce": "^2.22.0",
-    "esbuild": "^0.19.8",
+    "esbuild": "^0.19.9",
     "eslint": "^8.55.0",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-prettier": "^5.0.1",
     "glob": "^10.3.7",
     "mocha": "^10.2.0",
     "ovsx": "^0.8.3",
-    "prettier": "^3.1.0",
-    "typescript": "^5.2.2",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.0.0"
   },
