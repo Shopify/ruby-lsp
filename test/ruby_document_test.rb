@@ -542,44 +542,32 @@ class RubyDocumentTest < Minitest::Test
       version: 1,
       uri: URI("file:///foo/bar.rb"),
     )
-    value = false
-
-    assert_equal(value, document.sigil_is_true_or_higher?)
+    refute(document.sorbet_sigil_is_true_or_higher)
   end
 
   def test_sigil_ignore
     document = RubyLsp::RubyDocument.new(source: +"# typed: ignored", version: 1, uri: URI("file:///foo/bar.rb"))
-    value = false
-
-    assert_equal(value, document.sigil_is_true_or_higher?)
+    refute(document.sorbet_sigil_is_true_or_higher)
   end
 
   def test_sigil_false
     document = RubyLsp::RubyDocument.new(source: +"# typed: false", version: 1, uri: URI("file:///foo/bar.rb"))
-    value = false
-
-    assert_equal(value, document.sigil_is_true_or_higher?)
+    refute(document.sorbet_sigil_is_true_or_higher)
   end
 
   def test_sigil_true
     document = RubyLsp::RubyDocument.new(source: +"# typed: true", version: 1, uri: URI("file:///foo/bar.rb"))
-    value = true
-
-    assert_equal(value, document.sigil_is_true_or_higher?)
+    assert(document.sorbet_sigil_is_true_or_higher)
   end
 
   def test_sigil_strict
     document = RubyLsp::RubyDocument.new(source: +"# typed: strict", version: 1, uri: URI("file:///foo/bar.rb"))
-    value = true
-
-    assert_equal(value, document.sigil_is_true_or_higher?)
+    assert(document.sorbet_sigil_is_true_or_higher)
   end
 
   def test_sigil_strong
     document = RubyLsp::RubyDocument.new(source: +"# typed: strong", version: 1, uri: URI("file:///foo/bar.rb"))
-    value = true
-
-    assert_equal(value, document.sigil_is_true_or_higher?)
+    assert(document.sorbet_sigil_is_true_or_higher)
   end
 
   private

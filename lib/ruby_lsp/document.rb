@@ -178,7 +178,7 @@ module RubyLsp
     end
 
     sig { returns(T::Boolean) }
-    def sigil_is_true_or_higher?
+    def sorbet_sigil_is_true_or_higher
       parse_result.magic_comments.any? do |comment|
         comment.key == "typed" && ["true", "strict", "strong"].include?(comment.value)
       end
@@ -186,7 +186,7 @@ module RubyLsp
 
     sig { returns(T::Boolean) }
     def typechecker_enabled?
-      DependencyDetector.instance.typechecker && sigil_is_true_or_higher?
+      DependencyDetector.instance.typechecker && sorbet_sigil_is_true_or_higher
     end
 
     class Scanner
