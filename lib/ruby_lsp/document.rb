@@ -179,7 +179,9 @@ module RubyLsp
 
     sig { returns(T::Boolean) }
     def sigil_is_true_or_higher?
-      [/# typed: true/, /# typed: strict/, /# typed: strong/].any? { |pattern| pattern.match?(@source) }
+      parse_result.magic_comments.any? do |comment|
+        comment.key == "typed" && ["true", "strict", "strong"].include?(comment.value)
+      end
     end
 
     sig { returns(T::Boolean) }
