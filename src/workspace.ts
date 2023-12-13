@@ -1,8 +1,7 @@
 import fs from "fs/promises";
-import path from "path";
 
 import * as vscode from "vscode";
-import { CodeLens } from "vscode-languageclient/node";
+import { CodeLens, State } from "vscode-languageclient/node";
 
 import { Ruby } from "./ruby";
 import { Telemetry } from "./telemetry";
@@ -12,7 +11,6 @@ import {
   LOG_CHANNEL,
   WorkspaceInterface,
   STATUS_EMITTER,
-  pathExists,
 } from "./common";
 
 export class Workspace implements WorkspaceInterface {
@@ -22,6 +20,8 @@ export class Workspace implements WorkspaceInterface {
   public readonly workspaceFolder: vscode.WorkspaceFolder;
   private readonly context: vscode.ExtensionContext;
   private readonly telemetry: Telemetry;
+  private needsRestart = false;
+  #rebaseInProgress = false;
   #error = false;
 
   constructor(
@@ -37,6 +37,7 @@ export class Workspace implements WorkspaceInterface {
     this.createTestItems = createTestItems;
 
     this.registerRestarts(context);
+    this.registerRebaseWatcher(context);
   }
 
   async start() {
@@ -91,8 +92,14 @@ export class Workspace implements WorkspaceInterface {
     try {
       STATUS_EMITTER.fire(this);
       await this.lspClient.start();
-      this.lspClient.performAfterStart();
       STATUS_EMITTER.fire(this);
+
+      // If something triggered a restart while we were still booting, then now we need to perform the restart since the
+      // server can now handle shutdown requests
+      if (this.needsRestart) {
+        this.needsRestart = false;
+        await this.restart();
+      }
     } catch (error: any) {
       this.error = true;
       LOG_CHANNEL.error(`Error starting the server: ${error.message}`);
@@ -105,16 +112,35 @@ export class Workspace implements WorkspaceInterface {
 
   async restart() {
     try {
-      if (await this.rebaseInProgress()) {
+      if (this.#rebaseInProgress) {
         return;
       }
 
-      if (this.lspClient) {
-        await this.stop();
-        await this.lspClient.dispose();
-        await this.start();
-      } else {
-        await this.start();
+      // If there's no client, then we can just start a new one
+      if (!this.lspClient) {
+        return this.start();
+      }
+
+      switch (this.lspClient.state) {
+        // If the server is still starting, then it may not be ready to handle a shutdown request yet. Trying to send
+        // one could lead to a hanging process. Instead we set a flag and only restart once the server finished booting
+        // in `start`
+        case State.Starting:
+          this.needsRestart = true;
+          break;
+        // If the server is running, we want to stop it, dispose of the client and start a new one
+        case State.Running:
+          await this.stop();
+          await this.lspClient.dispose();
+          this.lspClient = undefined;
+          await this.start();
+          break;
+        // If the server is already stopped, then we need to dispose it and start a new one
+        case State.Stopped:
+          await this.lspClient.dispose();
+          this.lspClient = undefined;
+          await this.start();
+          break;
       }
     } catch (error: any) {
       this.error = true;
@@ -187,6 +213,10 @@ export class Workspace implements WorkspaceInterface {
     this.#error = value;
   }
 
+  get rebaseInProgress() {
+    return this.#rebaseInProgress;
+  }
+
   private registerRestarts(context: vscode.ExtensionContext) {
     this.createRestartWatcher(context, "Gemfile.lock");
     this.createRestartWatcher(context, "gems.locked");
@@ -215,7 +245,7 @@ export class Workspace implements WorkspaceInterface {
     pattern: string,
   ) {
     const watcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(this.workspaceFolder.uri.fsPath, pattern),
+      new vscode.RelativePattern(this.workspaceFolder, pattern),
     );
     context.subscriptions.push(watcher);
 
@@ -224,22 +254,33 @@ export class Workspace implements WorkspaceInterface {
     watcher.onDidDelete(this.restart.bind(this));
   }
 
-  // If the `.git` folder exists and `.git/rebase-merge` or `.git/rebase-apply` exists, then we're in the middle of a
-  // rebase
-  private async rebaseInProgress() {
-    const gitFolder = path.join(this.workspaceFolder.uri.fsPath, ".git");
+  private registerRebaseWatcher(context: vscode.ExtensionContext) {
+    const parentWatcher = vscode.workspace.createFileSystemWatcher(
+      new vscode.RelativePattern(
+        this.workspaceFolder,
+        "../.git/{rebase-merge,rebase-apply}",
+      ),
+    );
+    const workspaceWatcher = vscode.workspace.createFileSystemWatcher(
+      new vscode.RelativePattern(
+        this.workspaceFolder,
+        ".git/{rebase-merge,rebase-apply}",
+      ),
+    );
+    context.subscriptions.push(workspaceWatcher, parentWatcher);
 
-    if (!(await pathExists(gitFolder))) {
-      return false;
-    }
+    const startRebase = () => {
+      this.#rebaseInProgress = true;
+    };
+    const stopRebase = async () => {
+      this.#rebaseInProgress = false;
+      await this.restart();
+    };
 
-    if (
-      (await pathExists(path.join(gitFolder, "rebase-merge"))) ||
-      (await pathExists(path.join(gitFolder, "rebase-apply")))
-    ) {
-      return true;
-    }
+    // When one of the rebase files are created, we set this flag to prevent restarting during the rebase
+    workspaceWatcher.onDidCreate(startRebase);
 
-    return false;
+    // Once they are deleted and the rebase is complete, then we restart
+    workspaceWatcher.onDidDelete(stopRebase);
   }
 }

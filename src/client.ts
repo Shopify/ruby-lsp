@@ -159,9 +159,8 @@ export default class Client extends LanguageClient implements ClientInterface {
     this.#formatter = "";
   }
 
-  // Perform tasks that can only happen once the custom bundle logic from the server is finalized and the client is
-  // already running
-  performAfterStart() {
+  override async start() {
+    await super.start();
     this.#formatter = this.initializeResult?.formatter;
     this.serverVersion = this.initializeResult?.serverInfo?.version;
   }
