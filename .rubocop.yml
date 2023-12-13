@@ -18,6 +18,9 @@ AllCops:
     - "test/fixtures/**/*"
     - "test/expectations/**/*"
 
+Minitest/AssertPredicate:
+  Enabled: true
+
 Naming/FileName:
   Exclude:
     - "lib/ruby-lsp.rb"
