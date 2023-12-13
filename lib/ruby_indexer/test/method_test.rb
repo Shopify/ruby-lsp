@@ -78,7 +78,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_equal(1, entry.parameters.length)
       parameter = entry.parameters.first
@@ -94,7 +94,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_equal(2, entry.parameters.length)
       a, b = entry.parameters
@@ -114,7 +114,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_equal(2, entry.parameters.length)
       a, b = entry.parameters
@@ -139,7 +139,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_equal(2, entry.parameters.length)
       a, b = entry.parameters
@@ -176,7 +176,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_equal(1, entry.parameters.length)
       param = entry.parameters.first
@@ -217,7 +217,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_equal(2, entry.parameters.length)
       first, second = entry.parameters
@@ -237,7 +237,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_empty(entry.parameters)
     end

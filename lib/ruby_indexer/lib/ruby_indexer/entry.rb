@@ -40,13 +40,19 @@ module RubyIndexer
 
       abstract!
 
-      sig { returns(SingletonClass) }
+      sig { returns(Entry::Class) }
       attr_reader :singleton_klass
 
       sig { params(name: String, file_path: String, location: Prism::Location, comments: T::Array[String]).void }
       def initialize(name, file_path, location, comments)
         super
-        @singleton_klass = T.let(SingletonClass.new(name, self), SingletonClass)
+
+        singleton = if name.start_with?("Class:")
+          T.cast(self, Entry::Class)
+        else
+          Entry::Class.new("Class:#{name}", file_path, location, comments, nil)
+        end
+        @singleton_klass = T.let(singleton, Entry::Class)
       end
 
       sig { returns(String) }
@@ -78,25 +84,24 @@ module RubyIndexer
       def initialize(name, file_path, location, comments, parent_class)
         super(name, file_path, location, comments)
         @parent_class = T.let(parent_class, T.nilable(String))
-        @singleton_klass = T.let(SingletonClass.new(name, self), SingletonClass)
       end
     end
 
-    class SingletonClass
-      extend T::Sig
+    # class SingletonClass
+    #   extend T::Sig
 
-      sig { returns(Namespace) }
-      attr_reader :attached_class
+    #   sig { returns(Namespace) }
+    #   attr_reader :attached_class
 
-      sig { returns(String) }
-      attr_reader :name
+    #   sig { returns(String) }
+    #   attr_reader :name
 
-      sig { params(name: String, attached_class: Namespace).void }
-      def initialize(name, attached_class)
-        @name = T.let("Class:#{name}", String)
-        @attached_class = attached_class
-      end
-    end
+    #   sig { params(name: String, attached_class: Namespace).void }
+    #   def initialize(name, attached_class)
+    #     @name = T.let("Class:#{name}", String)
+    #     @attached_class = attached_class
+    #   end
+    # end
 
     class Constant < Entry
     end
@@ -153,7 +158,7 @@ module RubyIndexer
 
       abstract!
 
-      sig { returns(T.nilable(T.any(Namespace, SingletonClass))) }
+      sig { returns(T.nilable(Namespace)) }
       attr_reader :owner
 
       sig do
@@ -162,7 +167,7 @@ module RubyIndexer
           file_path: String,
           location: Prism::Location,
           comments: T::Array[String],
-          owner: T.nilable(Entry::Namespace),
+          owner: T.nilable(Namespace),
         ).void
       end
       def initialize(name, file_path, location, comments, owner)
@@ -189,8 +194,6 @@ module RubyIndexer
       extend T::Sig
       extend T::Helpers
 
-      abstract!
-
       sig { override.returns(T::Array[Parameter]) }
       attr_reader :parameters
 
@@ -201,7 +204,7 @@ module RubyIndexer
           location: Prism::Location,
           comments: T::Array[String],
           parameters_node: T.nilable(Prism::ParametersNode),
-          owner: T.nilable(T.any(Namespace, SingletonClass)),
+          owner: T.nilable(Namespace),
         ).void
       end
       def initialize(name, file_path, location, comments, parameters_node, owner) # rubocop:disable Metrics/ParameterLists
