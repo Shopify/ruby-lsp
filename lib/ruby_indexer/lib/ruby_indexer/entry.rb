@@ -81,8 +81,12 @@ module RubyIndexer
 
       abstract!
 
+      # Name includes just the name of the parameter, excluding symbols like splats
       sig { returns(Symbol) }
       attr_reader :name
+
+      # Decorated name is the parameter name including the splat or block prefix, e.g.: `*foo`, `**foo` or `&block`
+      alias_method :decorated_name, :name
 
       sig { params(name: Symbol).void }
       def initialize(name:)
@@ -100,25 +104,48 @@ module RubyIndexer
 
     # An required keyword method parameter, e.g. `def foo(a:)`
     class KeywordParameter < Parameter
+      sig { override.returns(Symbol) }
+      def decorated_name
+        :"#{@name}:"
+      end
     end
 
     # An optional keyword method parameter, e.g. `def foo(a: 123)`
     class OptionalKeywordParameter < Parameter
+      sig { override.returns(Symbol) }
+      def decorated_name
+        :"#{@name}:"
+      end
     end
 
     # A rest method parameter, e.g. `def foo(*a)`
     class RestParameter < Parameter
       DEFAULT_NAME = T.let(:"<anonymous splat>", Symbol)
+
+      sig { override.returns(Symbol) }
+      def decorated_name
+        :"*#{@name}"
+      end
     end
 
     # A keyword rest method parameter, e.g. `def foo(**a)`
     class KeywordRestParameter < Parameter
       DEFAULT_NAME = T.let(:"<anonymous keyword splat>", Symbol)
+
+      sig { override.returns(Symbol) }
+      def decorated_name
+        :"**#{@name}"
+      end
     end
 
     # A block method parameter, e.g. `def foo(&block)`
     class BlockParameter < Parameter
       DEFAULT_NAME = T.let(:"<anonymous block>", Symbol)
+
+      sig { override.returns(Symbol) }
+      def decorated_name
+        :"&#{@name}"
+      end
     end
 
     class Member < Entry

@@ -22,6 +22,7 @@ module RubyLsp
   # - [Definition](rdoc-ref:RubyLsp::Requests::Definition)
   # - [ShowSyntaxTree](rdoc-ref:RubyLsp::Requests::ShowSyntaxTree)
   # - [WorkspaceSymbol](rdoc-ref:RubyLsp::Requests::WorkspaceSymbol)
+  # - [SignatureHelp](rdoc-ref:RubyLsp::Requests::SignatureHelp)
 
   module Requests
     autoload :BaseRequest, "ruby_lsp/requests/base_request"
@@ -43,6 +44,7 @@ module RubyLsp
     autoload :Definition, "ruby_lsp/requests/definition"
     autoload :ShowSyntaxTree, "ruby_lsp/requests/show_syntax_tree"
     autoload :WorkspaceSymbol, "ruby_lsp/requests/workspace_symbol"
+    autoload :SignatureHelp, "ruby_lsp/requests/signature_help"
 
     # :nodoc:
     module Support

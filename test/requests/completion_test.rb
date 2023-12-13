@@ -463,7 +463,7 @@ class CompletionTest < Minitest::Test
     )
     assert_equal(["bar", "baz"], result.map(&:label))
     assert_equal(["bar", "baz"], result.map(&:filter_text))
-    assert_equal(["bar(a, b)", "baz(c, d)"], result.map { |completion| completion.text_edit.new_text })
+    assert_equal(["bar", "baz"], result.map { |completion| completion.text_edit.new_text })
   end
 
   def test_completion_for_methods_invoked_on_explicit_self
@@ -489,7 +489,7 @@ class CompletionTest < Minitest::Test
     )
     assert_equal(["bar", "baz"], result.map(&:label))
     assert_equal(["bar", "baz"], result.map(&:filter_text))
-    assert_equal(["bar(a, b)", "baz(c, d)"], result.map { |completion| completion.text_edit.new_text })
+    assert_equal(["bar", "baz"], result.map { |completion| completion.text_edit.new_text })
   end
 
   def test_completion_for_methods_named_with_uppercase_characters
@@ -514,7 +514,7 @@ class CompletionTest < Minitest::Test
     )
     assert_equal(["Array"], result.map(&:label))
     assert_equal(["Array"], result.map(&:filter_text))
-    assert_equal(["Array(a)"], result.map { |completion| completion.text_edit.new_text })
+    assert_equal(["Array"], result.map { |completion| completion.text_edit.new_text })
   end
 
   def test_completion_for_attributes
@@ -539,7 +539,7 @@ class CompletionTest < Minitest::Test
     )
     assert_equal(["bar", "bar="], result.map(&:label))
     assert_equal(["bar", "bar="], result.map(&:filter_text))
-    assert_equal(["bar", "bar=(bar)"], result.map { |completion| completion.text_edit.new_text })
+    assert_equal(["bar", "bar="], result.map { |completion| completion.text_edit.new_text })
   end
 
   private
