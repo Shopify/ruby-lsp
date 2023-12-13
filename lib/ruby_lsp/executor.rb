@@ -147,7 +147,15 @@ module RubyLsp
       when "textDocument/onTypeFormatting"
         on_type_formatting(uri, request.dig(:params, :position), request.dig(:params, :ch))
       when "textDocument/hover"
-        hover(uri, request.dig(:params, :position))
+        dispatcher = Prism::Dispatcher.new
+        document = @store.get(uri)
+        Requests::Hover.new(
+          document,
+          @index,
+          request.dig(:params, :position),
+          dispatcher,
+          document.typechecker_enabled?,
+        ).response
       when "textDocument/inlayHint"
         inlay_hint(uri, request.dig(:params, :range))
       when "textDocument/codeAction"
@@ -304,35 +312,6 @@ module RubyLsp
       base_listener = Requests::Definition.new(uri, nesting, @index, dispatcher, document.typechecker_enabled?)
       dispatcher.dispatch_once(target)
       base_listener.response
-    end
-
-    sig do
-      params(
-        uri: URI::Generic,
-        position: T::Hash[Symbol, T.untyped],
-      ).returns(T.nilable(Interface::Hover))
-    end
-    def hover(uri, position)
-      document = @store.get(uri)
-      target, parent, nesting = document.locate_node(
-        position,
-        node_types: Requests::Hover::ALLOWED_TARGETS,
-      )
-
-      if (Requests::Hover::ALLOWED_TARGETS.include?(parent.class) &&
-          !Requests::Hover::ALLOWED_TARGETS.include?(target.class)) ||
-          (parent.is_a?(Prism::ConstantPathNode) && target.is_a?(Prism::ConstantReadNode))
-        target = parent
-      end
-
-      # Instantiate all listeners
-      dispatcher = Prism::Dispatcher.new
-      hover = Requests::Hover.new(uri, @index, nesting, dispatcher, document.typechecker_enabled?)
-
-      # Emit events for all listeners
-      dispatcher.dispatch_once(target)
-
-      hover.response
     end
 
     sig do

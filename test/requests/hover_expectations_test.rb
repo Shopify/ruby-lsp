@@ -244,9 +244,10 @@ class HoverExpectationsTest < ExpectationsTestRunner
       response = executor.execute({
         method: "textDocument/hover",
         params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 4, character: 0 } },
-      }).response
+      })
 
-      assert_match("Hello\n\nHello from middleware: Post", response.contents.value)
+      assert_nil(response.error, response.error&.full_message)
+      assert_match("Hello\n\nHello from middleware: Post", response.response.contents.value)
     end
   end
 
