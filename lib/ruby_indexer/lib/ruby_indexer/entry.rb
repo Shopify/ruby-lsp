@@ -87,22 +87,6 @@ module RubyIndexer
       end
     end
 
-    # class SingletonClass
-    #   extend T::Sig
-
-    #   sig { returns(Namespace) }
-    #   attr_reader :attached_class
-
-    #   sig { returns(String) }
-    #   attr_reader :name
-
-    #   sig { params(name: String, attached_class: Namespace).void }
-    #   def initialize(name, attached_class)
-    #     @name = T.let("Class:#{name}", String)
-    #     @attached_class = attached_class
-    #   end
-    # end
-
     class Constant < Entry
     end
 
