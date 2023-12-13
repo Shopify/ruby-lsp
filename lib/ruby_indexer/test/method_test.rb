@@ -285,5 +285,64 @@ module RubyIndexer
 
       assert_no_entry("bar")
     end
+
+    def test_singleton_method_using_class_self
+      index(<<~RUBY)
+        class Foo
+          class << self
+            def bar
+            end
+          end
+          def baz
+          end
+        end
+      RUBY
+
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:2-4:3-7")
+      assert_entry("baz", Entry::Method, "/fake/path/foo.rb:6-2:7-5")
+
+      bar_entry = T.must(@index["bar"].first)
+      bar_owner_name = T.must(bar_entry.owner).name
+      assert_equal("Class:Foo", bar_owner_name)
+
+      baz_entry = T.must(@index["baz"].first)
+      baz_owner_name = T.must(baz_entry.owner).name
+      assert_equal("Foo", baz_owner_name)
+    end
+
+    def test_singleton_method_using_class_self_with_nesting
+      index(<<~RUBY)
+        class Foo
+          class << self
+            class Nested
+              def bar
+              end
+            end
+          end
+        end
+      RUBY
+
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:3-6:4-9")
+
+      bar_entry = T.must(@index["bar"].first)
+      bar_owner_name = T.must(bar_entry.owner).name
+      assert_equal("Class:Foo::Nested", bar_owner_name)
+    end
+
+    def test_singleton_method_with_named_class
+      index(<<~RUBY)
+        class Foo; end
+        class << Foo
+          def bar
+          end
+        end
+      RUBY
+
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:3-2:4-5")
+
+      bar_entry = T.must(@index["bar"].first)
+      bar_owner_name = T.must(bar_entry.owner).name
+      assert_equal("Foo", bar_owner_name)
+    end
   end
 end
