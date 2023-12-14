@@ -27,24 +27,25 @@ class ShowSyntaxTreeTest < Minitest::Test
           @ StatementsNode (location: (1,0)-(1,6))
           └── body: (length: 1)
               └── @ CallNode (location: (1,0)-(1,6))
+                  ├── flags: ∅
                   ├── receiver: ∅
                   ├── call_operator_loc: ∅
+                  ├── name: :foo
                   ├── message_loc: (1,0)-(1,3) = "foo"
                   ├── opening_loc: ∅
                   ├── arguments: ∅
                   ├── closing_loc: ∅
-                  ├── block:
-                  │   @ BlockNode (location: (1,4)-(1,6))
-                  │   ├── locals: []
-                  │   ├── parameters: ∅
-                  │   ├── body:
-                  │   │   @ StatementsNode (location: (1,4)-(1,6))
-                  │   │   └── body: (length: 1)
-                  │   │       └── @ MissingNode (location: (1,4)-(1,6))
-                  │   ├── opening_loc: (1,4)-(1,6) = "do"
-                  │   └── closing_loc: (1,6)-(1,6) = ""
-                  ├── flags: ∅
-                  └── name: :foo
+                  └── block:
+                      @ BlockNode (location: (1,4)-(1,6))
+                      ├── locals: []
+                      ├── locals_body_index: 0
+                      ├── parameters: ∅
+                      ├── body:
+                      │   @ StatementsNode (location: (1,4)-(1,6))
+                      │   └── body: (length: 1)
+                      │       └── @ MissingNode (location: (1,4)-(1,6))
+                      ├── opening_loc: (1,4)-(1,6) = "do"
+                      └── closing_loc: (1,6)-(1,6) = ""
     AST
   end
 
