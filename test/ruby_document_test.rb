@@ -570,6 +570,31 @@ class RubyDocumentTest < Minitest::Test
     assert_predicate(document, :sorbet_sigil_is_true_or_higher)
   end
 
+  def test_sorbet_sigil_only_in_magic_comment
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      # typed: false
+
+      def foo
+        some_string = "# typed: true"
+      end
+
+      # Shouldn't be tricked by the following comment:
+      # ```
+      # # typed: strict
+      #
+      # def main; end
+      # ```
+      def bar; end
+
+      def baz
+        <<-CODE
+          # typed: strong
+        CODE
+      end
+    RUBY
+    refute_predicate(document, :sorbet_sigil_is_true_or_higher)
+  end
+
   private
 
   def assert_error_edit(actual, error_range)
