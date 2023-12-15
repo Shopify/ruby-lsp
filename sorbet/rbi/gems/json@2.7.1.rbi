@@ -6,7 +6,7 @@
 
 # Extends any Class to include _json_creatable?_ method.
 #
-# source://json//lib/json/common.rb#679
+# source://json//lib/json/common.rb#689
 class Class < ::Module
   # Returns true if this class can be used to create an instance
   # from a serialised JSON string. The class has to implement a class
@@ -15,7 +15,7 @@ class Class < ::Module
   #
   # @return [Boolean]
   #
-  # source://json//lib/json/common.rb#684
+  # source://json//lib/json/common.rb#694
   def json_creatable?; end
 end
 
@@ -631,7 +631,7 @@ module JSON
   #   {"foo":[0,1],"bar":{"baz":2,"bat":3},"bam":"bad"}
   #
   # source://json//lib/json/common.rb#614
-  def dump(obj, anIO = T.unsafe(nil), limit = T.unsafe(nil), strict: T.unsafe(nil)); end
+  def dump(obj, anIO = T.unsafe(nil), limit = T.unsafe(nil), kwargs = T.unsafe(nil)); end
 
   # :call-seq:
   #   JSON.fast_generate(obj, opts) -> new_string
@@ -848,6 +848,9 @@ module JSON
   # source://json//lib/json/common.rb#259
   def load_file!(filespec, opts = T.unsafe(nil)); end
 
+  # source://json//lib/json/common.rb#642
+  def merge_dump_options(opts, strict: T.unsafe(nil)); end
+
   # :call-seq:
   #   JSON.parse(source, opts) -> object
   #
@@ -1040,7 +1043,7 @@ module JSON
     #   {"foo":[0,1],"bar":{"baz":2,"bat":3},"bam":"bad"}
     #
     # source://json//lib/json/common.rb#614
-    def dump(obj, anIO = T.unsafe(nil), limit = T.unsafe(nil), strict: T.unsafe(nil)); end
+    def dump(obj, anIO = T.unsafe(nil), limit = T.unsafe(nil), kwargs = T.unsafe(nil)); end
 
     # Sets or returns the default options for the JSON.dump method.
     # Initially:
@@ -1134,7 +1137,7 @@ module JSON
 
     # Encodes string using String.encode.
     #
-    # source://json//lib/json/common.rb#637
+    # source://json//lib/json/common.rb#638
     def iconv(to, from, string); end
 
     # :call-seq:
@@ -1451,6 +1454,11 @@ module JSON
     #
     # source://json//lib/json/common.rb#299
     def unparse(obj, opts = T.unsafe(nil)); end
+
+    private
+
+    # source://json//lib/json/common.rb#642
+    def merge_dump_options(opts, strict: T.unsafe(nil)); end
   end
 end
 
@@ -1525,7 +1533,7 @@ JSON::State = JSON::Ext::Generator::State
 # source://json//lib/json/common.rb#162
 JSON::UnparserError = JSON::GeneratorError
 
-# source://json//lib/json/common.rb#642
+# source://json//lib/json/common.rb#652
 module Kernel
   private
 
@@ -1536,18 +1544,18 @@ module Kernel
   # The _opts_ argument is passed through to generate/parse respectively. See
   # generate and parse for their documentation.
   #
-  # source://json//lib/json/common.rb#669
+  # source://json//lib/json/common.rb#679
   def JSON(object, *args); end
 
   # Outputs _objs_ to STDOUT as JSON strings in the shortest form, that is in
   # one line.
   #
-  # source://json//lib/json/common.rb#647
+  # source://json//lib/json/common.rb#657
   def j(*objs); end
 
   # Outputs _objs_ to STDOUT as JSON strings in a pretty format, with
   # indentation and over many lines.
   #
-  # source://json//lib/json/common.rb#656
+  # source://json//lib/json/common.rb#666
   def jj(*objs); end
 end

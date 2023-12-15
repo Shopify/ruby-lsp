@@ -869,6 +869,38 @@ RuboCop::Cop::Sorbet::ForbidTUntyped::MSG = T.let(T.unsafe(nil), String)
 # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_t_untyped.rb#22
 RuboCop::Cop::Sorbet::ForbidTUntyped::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
 
+# Disallows defining type aliases that contain shapes
+#
+# @example
+#
+#   # bad
+#   Foo = T.type_alias { { foo: Integer } }
+#
+#   # good
+#   class Foo
+#   extend T::Sig
+#
+#   sig { params(foo: Integer).void }
+#   def initialize(foo)
+#   @foo = foo
+#   end
+#   end
+#
+# source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_type_aliased_shapes.rb#24
+class RuboCop::Cop::Sorbet::ForbidTypeAliasedShapes < ::RuboCop::Cop::Base
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_type_aliased_shapes.rb#36
+  def on_block(node); end
+
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_type_aliased_shapes.rb#36
+  def on_numblock(node); end
+
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_type_aliased_shapes.rb#28
+  def shape_type_alias?(param0 = T.unsafe(nil)); end
+end
+
+# source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_type_aliased_shapes.rb#25
+RuboCop::Cop::Sorbet::ForbidTypeAliasedShapes::MSG = T.let(T.unsafe(nil), String)
+
 # Disallows use of `T.untyped` or `T.nilable(T.untyped)`
 # as a prop type for `T::Struct` or `T::ImmutableStruct`.
 #
