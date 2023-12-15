@@ -246,7 +246,7 @@ module RubyLsp
     sig do
       params(
         uri: URI::Generic,
-        position: Document::PositionShape,
+        position: T::Hash[Symbol, T.untyped],
         context: T::Hash[Symbol, T.untyped],
       ).returns(T.any(T.nilable(Interface::SignatureHelp), T::Hash[Symbol, T.untyped]))
     end
@@ -280,7 +280,7 @@ module RubyLsp
       Requests::WorkspaceSymbol.new(query, @index).run
     end
 
-    sig { params(uri: URI::Generic, range: T.nilable(Document::RangeShape)).returns({ ast: String }) }
+    sig { params(uri: URI::Generic, range: T.nilable(T::Hash[Symbol, T.untyped])).returns({ ast: String }) }
     def show_syntax_tree(uri, range)
       { ast: Requests::ShowSyntaxTree.new(@store.get(uri), range).run }
     end
@@ -288,7 +288,7 @@ module RubyLsp
     sig do
       params(
         uri: URI::Generic,
-        position: Document::PositionShape,
+        position: T::Hash[Symbol, T.untyped],
       ).returns(T.nilable(T.any(T::Array[Interface::Location], Interface::Location)))
     end
     def definition(uri, position)
@@ -309,7 +309,7 @@ module RubyLsp
     sig do
       params(
         uri: URI::Generic,
-        position: Document::PositionShape,
+        position: T::Hash[Symbol, T.untyped],
       ).returns(T.nilable(Interface::Hover))
     end
     def hover(uri, position)
@@ -336,7 +336,7 @@ module RubyLsp
     end
 
     sig do
-      params(uri: URI::Generic, content_changes: T::Array[Document::EditShape], version: Integer).returns(Object)
+      params(uri: URI::Generic, content_changes: T::Array[T::Hash[Symbol, T.untyped]], version: Integer).returns(Object)
     end
     def text_document_did_change(uri, content_changes, version)
       @store.push_edits(uri: uri, edits: content_changes, version: version)
@@ -358,7 +358,7 @@ module RubyLsp
     sig do
       params(
         uri: URI::Generic,
-        positions: T::Array[Document::PositionShape],
+        positions: T::Array[T::Hash[Symbol, T.untyped]],
       ).returns(T.nilable(T::Array[T.nilable(Requests::Support::SelectionRange)]))
     end
     def selection_range(uri, positions)
@@ -396,7 +396,7 @@ module RubyLsp
     sig do
       params(
         uri: URI::Generic,
-        position: Document::PositionShape,
+        position: T::Hash[Symbol, T.untyped],
         character: String,
       ).returns(T::Array[Interface::TextEdit])
     end
@@ -407,7 +407,7 @@ module RubyLsp
     sig do
       params(
         uri: URI::Generic,
-        position: Document::PositionShape,
+        position: T::Hash[Symbol, T.untyped],
       ).returns(T.nilable(T::Array[Interface::DocumentHighlight]))
     end
     def document_highlight(uri, position)
@@ -420,7 +420,12 @@ module RubyLsp
       listener.response
     end
 
-    sig { params(uri: URI::Generic, range: Document::RangeShape).returns(T.nilable(T::Array[Interface::InlayHint])) }
+    sig do
+      params(
+        uri: URI::Generic,
+        range: T::Hash[Symbol, T.untyped],
+      ).returns(T.nilable(T::Array[Interface::InlayHint]))
+    end
     def inlay_hint(uri, range)
       document = @store.get(uri)
 
@@ -437,7 +442,7 @@ module RubyLsp
     sig do
       params(
         uri: URI::Generic,
-        range: Document::RangeShape,
+        range: T::Hash[Symbol, T.untyped],
         context: T::Hash[Symbol, T.untyped],
       ).returns(T.nilable(T::Array[Interface::CodeAction]))
     end
@@ -491,7 +496,7 @@ module RubyLsp
       Interface::FullDocumentDiagnosticReport.new(kind: "full", items: response) if response
     end
 
-    sig { params(uri: URI::Generic, range: Document::RangeShape).returns(Interface::SemanticTokens) }
+    sig { params(uri: URI::Generic, range: T::Hash[Symbol, T.untyped]).returns(Interface::SemanticTokens) }
     def semantic_tokens_range(uri, range)
       document = @store.get(uri)
       start_line = range.dig(:start, :line)
@@ -507,7 +512,7 @@ module RubyLsp
     sig do
       params(
         uri: URI::Generic,
-        position: Document::PositionShape,
+        position: T::Hash[Symbol, T.untyped],
       ).returns(T.nilable(T::Array[Interface::CompletionItem]))
     end
     def completion(uri, position)

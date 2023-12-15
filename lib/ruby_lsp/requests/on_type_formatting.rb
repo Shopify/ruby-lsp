@@ -26,7 +26,7 @@ module RubyLsp
         T::Array[Regexp],
       )
 
-      sig { params(document: Document, position: Document::PositionShape, trigger_character: String).void }
+      sig { params(document: Document, position: T::Hash[Symbol, T.untyped], trigger_character: String).void }
       def initialize(document, position, trigger_character)
         super(document)
 
@@ -143,7 +143,7 @@ module RubyLsp
         add_edit_with_text("##{spaces}")
       end
 
-      sig { params(text: String, position: Document::PositionShape).void }
+      sig { params(text: String, position: T::Hash[Symbol, T.untyped]).void }
       def add_edit_with_text(text, position = @position)
         pos = Interface::Position.new(
           line: position[:line],
