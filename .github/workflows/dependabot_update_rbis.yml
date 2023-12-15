@@ -14,7 +14,7 @@ jobs:
   update-gem-rbis:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && github.actor == 'dependabot[bot]' }}
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
