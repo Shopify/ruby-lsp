@@ -247,7 +247,7 @@ module RubyIndexer
 
         rest = parameters_node.rest
 
-        if rest
+        if rest.is_a?(Prism::RestParameterNode)
           rest_name = rest.name || RestParameter::DEFAULT_NAME
           parameters << RestParameter.new(name: rest_name)
         end
@@ -287,6 +287,8 @@ module RubyIndexer
             name = rest.expression&.slice
             names << (rest.operator == "*" ? "*#{name}".to_sym : name&.to_sym)
           end
+
+          names << nil if rest.is_a?(Prism::ImplicitRestNode)
 
           names.concat(node.rights.map { |parameter_node| parameter_name(parameter_node) })
 

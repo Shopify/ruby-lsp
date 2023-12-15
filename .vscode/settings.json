@@ -4,6 +4,9 @@
   "[ruby]": {
     "editor.defaultFormatter": "Shopify.ruby-lsp",
   },
+  "search.exclude": {
+    "**/test/fixtures/prism": true
+  },
   "cSpell.languageSettings": [
     {
       "languageId": "*",
