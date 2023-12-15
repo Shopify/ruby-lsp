@@ -8,10 +8,6 @@ module RubyLsp
 
     abstract!
 
-    PositionShape = T.type_alias { { line: Integer, character: Integer } }
-    RangeShape = T.type_alias { { start: PositionShape, end: PositionShape } }
-    EditShape = T.type_alias { { range: RangeShape, text: String } }
-
     sig { returns(Prism::ParseResult) }
     attr_reader :parse_result
 
@@ -80,7 +76,7 @@ module RubyLsp
       @cache[request_name]
     end
 
-    sig { params(edits: T::Array[EditShape], version: Integer).void }
+    sig { params(edits: T::Array[T::Hash[Symbol, T.untyped]], version: Integer).void }
     def push_edits(edits, version:)
       edits.each do |edit|
         range = edit[:range]
@@ -112,7 +108,7 @@ module RubyLsp
 
     sig do
       params(
-        position: PositionShape,
+        position: T::Hash[Symbol, T.untyped],
         node_types: T::Array[T.class_of(Prism::Node)],
       ).returns([T.nilable(Prism::Node), T.nilable(Prism::Node), T::Array[String]])
     end
@@ -193,7 +189,7 @@ module RubyLsp
       end
 
       # Finds the character index inside the source string for a given line and column
-      sig { params(position: PositionShape).returns(Integer) }
+      sig { params(position: T::Hash[Symbol, T.untyped]).returns(Integer) }
       def find_char_position(position)
         # Find the character index for the beginning of the requested line
         until @current_line == position[:line]

@@ -63,7 +63,7 @@ module RubyLsp
       @state[uri.to_s] = document
     end
 
-    sig { params(uri: URI::Generic, edits: T::Array[Document::EditShape], version: Integer).void }
+    sig { params(uri: URI::Generic, edits: T::Array[T::Hash[Symbol, T.untyped]], version: Integer).void }
     def push_edits(uri:, edits:, version:)
       T.must(@state[uri.to_s]).push_edits(edits, version: version)
     end

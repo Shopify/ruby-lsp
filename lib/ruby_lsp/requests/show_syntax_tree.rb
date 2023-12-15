@@ -20,7 +20,7 @@ module RubyLsp
     class ShowSyntaxTree < BaseRequest
       extend T::Sig
 
-      sig { params(document: Document, range: T.nilable(Document::RangeShape)).void }
+      sig { params(document: Document, range: T.nilable(T::Hash[Symbol, T.untyped])).void }
       def initialize(document, range)
         super(document)
 

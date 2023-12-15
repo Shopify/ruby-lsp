@@ -137,7 +137,7 @@ module RubyLsp
 
       private
 
-      sig { params(range: Document::RangeShape, new_text: String).returns(Interface::TextEdit) }
+      sig { params(range: T::Hash[Symbol, T.untyped], new_text: String).returns(Interface::TextEdit) }
       def create_text_edit(range, new_text)
         Interface::TextEdit.new(
           range: Interface::Range.new(

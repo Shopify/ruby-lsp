@@ -22,7 +22,7 @@ module RubyLsp
       sig do
         params(
           document: Document,
-          range: Document::RangeShape,
+          range: T::Hash[Symbol, T.untyped],
           context: T::Hash[Symbol, T.untyped],
         ).void
       end
@@ -49,7 +49,7 @@ module RubyLsp
 
       private
 
-      sig { params(range: Document::RangeShape, uri: URI::Generic).returns(Interface::CodeAction) }
+      sig { params(range: T::Hash[Symbol, T.untyped], uri: URI::Generic).returns(Interface::CodeAction) }
       def refactor_code_action(range, uri)
         Interface::CodeAction.new(
           title: "Refactor: Extract Variable",
