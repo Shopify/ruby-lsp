@@ -177,7 +177,15 @@ module RubyLsp
           nil
         end
       when "textDocument/completion"
-        completion(uri, request.dig(:params, :position))
+        dispatcher = Prism::Dispatcher.new
+        document = @store.get(uri)
+        Requests::Completion.new(
+          document,
+          @index,
+          request.dig(:params, :position),
+          document.typechecker_enabled?,
+          dispatcher,
+        ).response
       when "textDocument/signatureHelp"
         signature_help(uri, request.dig(:params, :position), request.dig(:params, :context))
       when "textDocument/definition"
@@ -473,57 +481,6 @@ module RubyLsp
       dispatcher.visit(document.tree)
 
       Requests::Support::SemanticTokenEncoder.new.encode(listener.response)
-    end
-
-    sig do
-      params(
-        uri: URI::Generic,
-        position: T::Hash[Symbol, T.untyped],
-      ).returns(T.nilable(T::Array[Interface::CompletionItem]))
-    end
-    def completion(uri, position)
-      document = @store.get(uri)
-
-      # Completion always receives the position immediately after the character that was just typed. Here we adjust it
-      # back by 1, so that we find the right node
-      char_position = document.create_scanner.find_char_position(position) - 1
-      matched, parent, nesting = document.locate(
-        document.tree,
-        char_position,
-        node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode],
-      )
-      return unless matched && parent
-
-      target = case matched
-      when Prism::CallNode
-        message = matched.message
-
-        if message == "require"
-          args = matched.arguments&.arguments
-          return if args.nil? || args.is_a?(Prism::ForwardingArgumentsNode)
-
-          argument = args.first
-          return unless argument.is_a?(Prism::StringNode)
-          return unless (argument.location.start_offset..argument.location.end_offset).cover?(char_position)
-
-          argument
-        else
-          matched
-        end
-      when Prism::ConstantReadNode, Prism::ConstantPathNode
-        if parent.is_a?(Prism::ConstantPathNode) && matched.is_a?(Prism::ConstantReadNode)
-          parent
-        else
-          matched
-        end
-      end
-
-      return unless target
-
-      dispatcher = Prism::Dispatcher.new
-      listener = Requests::Completion.new(@index, nesting, dispatcher, document.typechecker_enabled?)
-      dispatcher.dispatch_once(target)
-      listener.response
     end
 
     sig { params(id: String, title: String, percentage: Integer).void }
