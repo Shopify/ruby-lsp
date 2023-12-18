@@ -15,7 +15,7 @@ module RubyLsp
 
         sig do
           params(
-            tokens: T::Array[SemanticHighlighting::SemanticToken],
+            tokens: T::Array[Listeners::SemanticHighlighting::SemanticToken],
           ).returns(Interface::SemanticTokens)
         end
         def encode(tokens)
@@ -39,7 +39,7 @@ module RubyLsp
 
         # For more information on how each number is calculated, read:
         # https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_semanticTokens
-        sig { params(token: SemanticHighlighting::SemanticToken).returns(T::Array[Integer]) }
+        sig { params(token: Listeners::SemanticHighlighting::SemanticToken).returns(T::Array[Integer]) }
         def compute_delta(token)
           row = token.location.start_line - 1
           column = token.location.start_column

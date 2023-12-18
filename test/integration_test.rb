@@ -132,6 +132,7 @@ class IntegrationTest < Minitest::Test
     open_file_with("class Foo\nend")
 
     response = make_request("textDocument/semanticTokens/full", { textDocument: { uri: @uri } })
+    assert_nil(response[:error])
     assert_equal([0, 6, 3, 2, 1], response[:result][:data])
   end
 
@@ -396,7 +397,11 @@ class IntegrationTest < Minitest::Test
           window: { workDoneProgress: false },
         },
       },
-    )[:result]
+    )
+
+    assert_nil(response[:error])
+
+    response = response[:result]
 
     assert(true, response.dig(:capabilities, :textDocumentSync, :openClose))
     assert(

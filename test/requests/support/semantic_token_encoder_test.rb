@@ -100,7 +100,7 @@ class SemanticTokenEncoderTest < Minitest::Test
     location.expects(:start_line).returns(start_line).at_least_once
     location.expects(:start_column).returns(start_column).at_least_once
 
-    RubyLsp::Requests::SemanticHighlighting::SemanticToken.new(
+    RubyLsp::Listeners::SemanticHighlighting::SemanticToken.new(
       location: location,
       length: length,
       type: type,
