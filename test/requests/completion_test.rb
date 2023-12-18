@@ -174,6 +174,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_constants
+    stub_no_typechecker
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Foo
       end
@@ -195,6 +196,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_constant_paths
+    stub_no_typechecker
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Bar
       end
@@ -234,6 +236,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_conflicting_constants
+    stub_no_typechecker
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       module Foo
         class Qux; end
@@ -263,6 +266,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_top_level_constants_inside_nesting
+    stub_no_typechecker
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Bar
       end
@@ -291,6 +295,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_private_constants_inside_the_same_namespace
+    stub_no_typechecker
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class A
         CONST = 1
@@ -337,6 +342,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_aliased_constants
+    stub_no_typechecker
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       module A
         module B
@@ -368,6 +374,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_aliased_complex_constants
+    stub_no_typechecker
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       module A
         module B
@@ -400,6 +407,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_uses_shortest_possible_name_for_filter_text
+    stub_no_typechecker
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       module A
         module B
@@ -542,12 +550,16 @@ class CompletionTest < Minitest::Test
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       # typed: false
       class Foo
-      end
+        def complete_me
+        end
 
-      F
+        def you
+          comp
+        end
+      end
     RUBY
 
-    end_position = { line: 4, character: 1 }
+    end_position = { line: 6, character: 8 }
     @store.set(uri: @uri, source: document.source, version: 1)
 
     index = @executor.instance_variable_get(:@index)
@@ -557,19 +569,23 @@ class CompletionTest < Minitest::Test
       method: "textDocument/completion",
       params: { textDocument: { uri: @uri.to_s }, position: end_position },
     )
-    assert_equal(["Foo"], result.map(&:label))
+    assert_equal(["complete_me"], result.map(&:label))
   end
 
   def test_with_typed_true
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       # typed: true
       class Foo
-      end
+        def complete_me
+        end
 
-      F
+        def you
+          comp
+        end
+      end
     RUBY
 
-    end_position = { line: 4, character: 1 }
+    end_position = { line: 6, character: 8 }
     @store.set(uri: @uri, source: document.source, version: 1)
 
     index = @executor.instance_variable_get(:@index)
