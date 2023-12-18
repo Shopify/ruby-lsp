@@ -78,7 +78,14 @@ module Parallel
     # source://parallel//lib/parallel.rb#642
     def instrument_finish(item, index, result, options); end
 
-    # source://parallel//lib/parallel.rb#647
+    # yield results in the order of the input items
+    # needs to use `options` to store state between executions
+    # needs to use `done` index since a nil result would also be valid
+    #
+    # source://parallel//lib/parallel.rb#651
+    def instrument_finish_in_order(item, index, result, options); end
+
+    # source://parallel//lib/parallel.rb#671
     def instrument_start(item, index, options); end
 
     # source://parallel//lib/parallel.rb#590
