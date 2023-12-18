@@ -111,7 +111,7 @@ class IntegrationTest < Minitest::Test
     )
 
     assert_nil(response[:error])
-    assert(response[:result][:uri].end_with?("ruby_lsp/utils.rb"))
+    assert(response[:result].first[:uri].end_with?("ruby_lsp/utils.rb"))
   end
 
   def test_document_highlight_with_syntax_error

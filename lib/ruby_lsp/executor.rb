@@ -178,10 +178,18 @@ module RubyLsp
         end
       when "textDocument/completion"
         completion(uri, request.dig(:params, :position))
-      when "textDocument/definition"
-        definition(uri, request.dig(:params, :position))
       when "textDocument/signatureHelp"
         signature_help(uri, request.dig(:params, :position), request.dig(:params, :context))
+      when "textDocument/definition"
+        dispatcher = Prism::Dispatcher.new
+        document = @store.get(uri)
+        Requests::Definition.new(
+          document,
+          @index,
+          request.dig(:params, :position),
+          dispatcher,
+          document.typechecker_enabled?,
+        ).response
       when "workspace/didChangeWatchedFiles"
         did_change_watched_files(request.dig(:params, :changes))
       when "workspace/symbol"
@@ -291,27 +299,6 @@ module RubyLsp
     sig { params(uri: URI::Generic, range: T.nilable(T::Hash[Symbol, T.untyped])).returns({ ast: String }) }
     def show_syntax_tree(uri, range)
       { ast: Requests::ShowSyntaxTree.new(@store.get(uri), range).response }
-    end
-
-    sig do
-      params(
-        uri: URI::Generic,
-        position: T::Hash[Symbol, T.untyped],
-      ).returns(T.nilable(T.any(T::Array[Interface::Location], Interface::Location)))
-    end
-    def definition(uri, position)
-      document = @store.get(uri)
-      target, parent, nesting = document.locate_node(
-        position,
-        node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode],
-      )
-
-      target = parent if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)
-
-      dispatcher = Prism::Dispatcher.new
-      base_listener = Requests::Definition.new(uri, nesting, @index, dispatcher, document.typechecker_enabled?)
-      dispatcher.dispatch_once(target)
-      base_listener.response
     end
 
     sig do
