@@ -53,13 +53,16 @@ module RubyLsp
       # documented
       features = ObjectSpace.each_object(Class).filter_map do |k|
         klass = T.unsafe(k)
-        klass if klass < Requests::BaseRequest || (klass < Listener && klass != ExtensibleListener)
+        klass_name = klass.name
+        next unless klass_name
+
+        klass if klass_name.match?(/RubyLsp::Requests::\w[^:]+$/) && !klass_name.include?("Support")
       end
 
       missing_docs = T.let(Hash.new { |h, k| h[k] = [] }, T::Hash[String, T::Array[String]])
 
       features.each do |klass|
-        class_name = T.must(klass.name)
+        class_name = klass.name
         file_path, line_number = Module.const_source_location(class_name)
         next unless file_path && line_number
 
