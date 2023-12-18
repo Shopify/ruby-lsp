@@ -16,7 +16,7 @@ module RubyLsp
     # puts "Hello" # --> code action: quick fix indentation
     # end
     # ```
-    class CodeActions < BaseRequest
+    class CodeActions
       extend T::Sig
 
       sig do
@@ -27,14 +27,13 @@ module RubyLsp
         ).void
       end
       def initialize(document, range, context)
-        super(document)
-
+        @document = document
         @uri = T.let(document.uri, URI::Generic)
         @range = range
         @context = context
       end
 
-      sig { override.returns(T.nilable(T.all(T::Array[Interface::CodeAction], Object))) }
+      sig { returns(T.nilable(T.all(T::Array[Interface::CodeAction], Object))) }
       def run
         diagnostics = @context[:diagnostics]
 

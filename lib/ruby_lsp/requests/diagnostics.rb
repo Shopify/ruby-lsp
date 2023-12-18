@@ -18,17 +18,16 @@ module RubyLsp
     # puts "Hello" # --> diagnostics: incorrect indentation
     # end
     # ```
-    class Diagnostics < BaseRequest
+    class Diagnostics
       extend T::Sig
 
       sig { params(document: Document).void }
       def initialize(document)
-        super(document)
-
+        @document = document
         @uri = T.let(document.uri, URI::Generic)
       end
 
-      sig { override.returns(T.nilable(T.all(T::Array[Interface::Diagnostic], Object))) }
+      sig { returns(T.nilable(T.all(T::Array[Interface::Diagnostic], Object))) }
       def run
         # Running RuboCop is slow, so to avoid excessive runs we only do so if the file is syntactically valid
         return syntax_error_diagnostics if @document.syntax_error?
