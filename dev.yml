@@ -20,7 +20,6 @@ commands:
     run: "bundle exec srb tc"
   ci:
     run: "bundle exec rake ruby_lsp:check_docs &&
-      bundle exec rake check_visit_overrides &&
       bundle exec srb tc &&
       bin/rubocop &&
       bin/test &&
