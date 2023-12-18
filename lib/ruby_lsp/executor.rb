@@ -192,7 +192,16 @@ module RubyLsp
           dispatcher,
         ).response
       when "textDocument/signatureHelp"
-        signature_help(uri, request.dig(:params, :position), request.dig(:params, :context))
+        dispatcher = Prism::Dispatcher.new
+        document = @store.get(uri)
+
+        Requests::SignatureHelp.new(
+          document,
+          @index,
+          request.dig(:params, :position),
+          request.dig(:params, :context),
+          dispatcher,
+        ).response
       when "textDocument/definition"
         dispatcher = Prism::Dispatcher.new
         document = @store.get(uri)
@@ -270,38 +279,6 @@ module RubyLsp
         # way of dismissing it
         end_progress("indexing-progress")
       end
-    end
-
-    sig do
-      params(
-        uri: URI::Generic,
-        position: T::Hash[Symbol, T.untyped],
-        context: T.nilable(T::Hash[Symbol, T.untyped]),
-      ).returns(T.any(T.nilable(Interface::SignatureHelp), T::Hash[Symbol, T.untyped]))
-    end
-    def signature_help(uri, position, context)
-      current_signature = context && context[:activeSignatureHelp]
-      document = @store.get(uri)
-      target, parent, nesting = document.locate_node(
-        { line: position[:line], character: position[:character] - 2 },
-        node_types: [Prism::CallNode],
-      )
-
-      # If we're typing a nested method call (e.g.: `foo(bar)`), then we may end up locating `bar` as the target method
-      # call incorrectly. To correct that, we check if there's an active signature with the same name as the parent node
-      # and then replace the target
-      if current_signature && parent.is_a?(Prism::CallNode)
-        active_signature = current_signature[:activeSignature] || 0
-
-        if current_signature.dig(:signatures, active_signature, :label)&.start_with?(parent.message)
-          target = parent
-        end
-      end
-
-      dispatcher = Prism::Dispatcher.new
-      listener = Requests::SignatureHelp.new(nesting, @index, dispatcher)
-      dispatcher.dispatch_once(target)
-      listener.response
     end
 
     sig { params(query: T.nilable(String)).returns(T::Array[Interface::WorkspaceSymbol]) }

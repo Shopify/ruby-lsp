@@ -1,6 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "ruby_lsp/listeners/signature_help"
+
 module RubyLsp
   module Requests
     # ![Signature help demo](../../signature_help.gif)
@@ -22,7 +24,7 @@ module RubyLsp
     #    bar( # -> Signature help will show the parameters of `bar`
     #  end
     # ```
-    class SignatureHelp < Listener
+    class SignatureHelp < Request
       extend T::Sig
       extend T::Generic
 
@@ -40,65 +42,45 @@ module RubyLsp
 
       ResponseType = type_member { { fixed: T.nilable(T.any(Interface::SignatureHelp, T::Hash[Symbol, T.untyped])) } }
 
-      sig { override.returns(ResponseType) }
-      attr_reader :_response
-
       sig do
         params(
-          nesting: T::Array[String],
+          document: Document,
           index: RubyIndexer::Index,
+          position: T::Hash[Symbol, T.untyped],
+          context: T.nilable(T::Hash[Symbol, T.untyped]),
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(nesting, index, dispatcher)
-        @nesting = nesting
-        @index = index
-        @_response = T.let(nil, ResponseType)
+      def initialize(document, index, position, context, dispatcher)
+        super()
+        current_signature = context && context[:activeSignatureHelp]
+        target, parent, nesting = document.locate_node(
+          { line: position[:line], character: position[:character] - 2 },
+          node_types: [Prism::CallNode],
+        )
 
-        super(dispatcher)
-        dispatcher.register(self, :on_call_node_enter)
-      end
+        # If we're typing a nested method call (e.g.: `foo(bar)`), then we may end up locating `bar` as the target
+        # method call incorrectly. To correct that, we check if there's an active signature with the same name as the
+        # parent node and then replace the target
+        if current_signature && parent.is_a?(Prism::CallNode)
+          active_signature = current_signature[:activeSignature] || 0
 
-      sig { params(node: Prism::CallNode).void }
-      def on_call_node_enter(node)
-        return if DependencyDetector.instance.typechecker
-        return unless self_receiver?(node)
-
-        message = node.message
-        return unless message
-
-        target_method = @index.resolve_method(message, @nesting.join("::"))
-        return unless target_method
-
-        parameters = target_method.parameters
-        name = target_method.name
-
-        # If the method doesn't have any parameters, there's no need to show signature help
-        return if parameters.empty?
-
-        label = "#{name}(#{parameters.map(&:decorated_name).join(", ")})"
-
-        arguments_node = node.arguments
-        arguments = arguments_node&.arguments || []
-        active_parameter = (arguments.length - 1).clamp(0, parameters.length - 1)
-
-        # If there are arguments, then we need to check if there's a trailing comma after the end of the last argument
-        # to advance the active parameter to the next one
-        if arguments_node &&
-            node.slice.byteslice(arguments_node.location.end_offset - node.location.start_offset) == ","
-          active_parameter += 1
+          if current_signature.dig(:signatures, active_signature, :label)&.start_with?(parent.message)
+            target = parent
+          end
         end
 
-        @_response = Interface::SignatureHelp.new(
-          signatures: [
-            Interface::SignatureInformation.new(
-              label: label,
-              parameters: parameters.map { |param| Interface::ParameterInformation.new(label: param.name) },
-              documentation: markdown_from_index_entries("", target_method),
-            ),
-          ],
-          active_parameter: active_parameter,
-        )
+        @target = T.let(target, T.nilable(Prism::Node))
+        @dispatcher = dispatcher
+        @listener = T.let(Listeners::SignatureHelp.new(nesting, index, dispatcher), Listener[ResponseType])
+      end
+
+      sig { override.returns(ResponseType) }
+      def response
+        return unless @target
+
+        @dispatcher.dispatch_once(@target)
+        @listener.response
       end
     end
   end
