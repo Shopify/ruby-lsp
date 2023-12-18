@@ -143,7 +143,11 @@ module RubyLsp
           nil
         end
       when "textDocument/documentHighlight"
-        document_highlight(uri, request.dig(:params, :position))
+        dispatcher = Prism::Dispatcher.new
+        document = @store.get(uri)
+        request = Requests::DocumentHighlight.new(document, request.dig(:params, :position), dispatcher)
+        dispatcher.dispatch(document.tree)
+        request.response
       when "textDocument/onTypeFormatting"
         on_type_formatting(uri, request.dig(:params, :position), request.dig(:params, :ch))
       when "textDocument/hover"
@@ -358,22 +362,6 @@ module RubyLsp
     end
     def on_type_formatting(uri, position, character)
       Requests::OnTypeFormatting.new(@store.get(uri), position, character).response
-    end
-
-    sig do
-      params(
-        uri: URI::Generic,
-        position: T::Hash[Symbol, T.untyped],
-      ).returns(T.nilable(T::Array[Interface::DocumentHighlight]))
-    end
-    def document_highlight(uri, position)
-      document = @store.get(uri)
-
-      target, parent = document.locate_node(position)
-      dispatcher = Prism::Dispatcher.new
-      listener = Requests::DocumentHighlight.new(target, parent, dispatcher)
-      dispatcher.visit(document.tree)
-      listener.response
     end
 
     sig do
