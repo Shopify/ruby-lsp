@@ -536,6 +536,65 @@ class RubyDocumentTest < Minitest::Test
     assert_equal(value, document.cache_get("textDocument/semanticHighlighting"))
   end
 
+  def test_no_sigil
+    document = RubyLsp::RubyDocument.new(
+      source: +"# frozen_string_literal: true",
+      version: 1,
+      uri: URI("file:///foo/bar.rb"),
+    )
+    refute_predicate(document, :sorbet_sigil_is_true_or_higher)
+  end
+
+  def test_sigil_ignore
+    document = RubyLsp::RubyDocument.new(source: +"# typed: ignored", version: 1, uri: URI("file:///foo/bar.rb"))
+    refute_predicate(document, :sorbet_sigil_is_true_or_higher)
+  end
+
+  def test_sigil_false
+    document = RubyLsp::RubyDocument.new(source: +"# typed: false", version: 1, uri: URI("file:///foo/bar.rb"))
+    refute_predicate(document, :sorbet_sigil_is_true_or_higher)
+  end
+
+  def test_sigil_true
+    document = RubyLsp::RubyDocument.new(source: +"# typed: true", version: 1, uri: URI("file:///foo/bar.rb"))
+    assert_predicate(document, :sorbet_sigil_is_true_or_higher)
+  end
+
+  def test_sigil_strict
+    document = RubyLsp::RubyDocument.new(source: +"# typed: strict", version: 1, uri: URI("file:///foo/bar.rb"))
+    assert_predicate(document, :sorbet_sigil_is_true_or_higher)
+  end
+
+  def test_sigil_strong
+    document = RubyLsp::RubyDocument.new(source: +"# typed: strong", version: 1, uri: URI("file:///foo/bar.rb"))
+    assert_predicate(document, :sorbet_sigil_is_true_or_higher)
+  end
+
+  def test_sorbet_sigil_only_in_magic_comment
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      # typed: false
+
+      def foo
+        some_string = "# typed: true"
+      end
+
+      # Shouldn't be tricked by the following comment:
+      # ```
+      # # typed: strict
+      #
+      # def main; end
+      # ```
+      def bar; end
+
+      def baz
+        <<-CODE
+          # typed: strong
+        CODE
+      end
+    RUBY
+    refute_predicate(document, :sorbet_sigil_is_true_or_higher)
+  end
+
   private
 
   def assert_error_edit(actual, error_range)

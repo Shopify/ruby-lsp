@@ -9,7 +9,6 @@ class CompletionTest < Minitest::Test
     @uri = URI("file:///fake.rb")
     @store = RubyLsp::Store.new
     @executor = RubyLsp::Executor.new(@store, @message_queue)
-    stub_no_typechecker
   end
 
   def teardown
@@ -175,6 +174,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_constants
+    stub_no_typechecker
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Foo
       end
@@ -196,6 +196,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_constant_paths
+    stub_no_typechecker
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Bar
       end
@@ -235,6 +236,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_conflicting_constants
+    stub_no_typechecker
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       module Foo
         class Qux; end
@@ -264,6 +266,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_top_level_constants_inside_nesting
+    stub_no_typechecker
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Bar
       end
@@ -292,6 +295,7 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_private_constants_inside_the_same_namespace
+    stub_no_typechecker
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class A
         CONST = 1
@@ -540,6 +544,58 @@ class CompletionTest < Minitest::Test
     assert_equal(["bar", "bar="], result.map(&:label))
     assert_equal(["bar", "bar="], result.map(&:filter_text))
     assert_equal(["bar", "bar="], result.map { |completion| completion.text_edit.new_text })
+  end
+
+  def test_with_typed_false
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+      # typed: false
+      class Foo
+        def complete_me
+        end
+
+        def you
+          comp
+        end
+      end
+    RUBY
+
+    end_position = { line: 6, character: 8 }
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: end_position },
+    )
+    assert_equal(["complete_me"], result.map(&:label))
+  end
+
+  def test_with_typed_true
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+      # typed: true
+      class Foo
+        def complete_me
+        end
+
+        def you
+          comp
+        end
+      end
+    RUBY
+
+    end_position = { line: 6, character: 8 }
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: end_position },
+    )
+    assert_empty(result)
   end
 
   private

@@ -555,7 +555,7 @@ module RubyLsp
       return unless target
 
       dispatcher = Prism::Dispatcher.new
-      listener = Requests::Completion.new(@index, nesting, dispatcher)
+      listener = Requests::Completion.new(@index, nesting, dispatcher, document.typechecker_enabled?)
       dispatcher.dispatch_once(target)
       listener.response
     end
