@@ -157,7 +157,12 @@ module RubyLsp
           document.typechecker_enabled?,
         ).response
       when "textDocument/inlayHint"
-        inlay_hint(uri, request.dig(:params, :range))
+        hints_configurations = T.must(@store.features_configuration.dig(:inlayHint))
+        dispatcher = Prism::Dispatcher.new
+        document = @store.get(uri)
+        request = Requests::InlayHints.new(document, request.dig(:params, :range), hints_configurations, dispatcher)
+        dispatcher.visit(document.tree)
+        request.response
       when "textDocument/codeAction"
         code_action(uri, request.dig(:params, :range), request.dig(:params, :context))
       when "codeAction/resolve"
@@ -390,25 +395,6 @@ module RubyLsp
       target, parent = document.locate_node(position)
       dispatcher = Prism::Dispatcher.new
       listener = Requests::DocumentHighlight.new(target, parent, dispatcher)
-      dispatcher.visit(document.tree)
-      listener.response
-    end
-
-    sig do
-      params(
-        uri: URI::Generic,
-        range: T::Hash[Symbol, T.untyped],
-      ).returns(T.nilable(T::Array[Interface::InlayHint]))
-    end
-    def inlay_hint(uri, range)
-      document = @store.get(uri)
-
-      start_line = range.dig(:start, :line)
-      end_line = range.dig(:end, :line)
-
-      dispatcher = Prism::Dispatcher.new
-      hints_configurations = T.must(@store.features_configuration.dig(:inlayHint))
-      listener = Requests::InlayHints.new(start_line..end_line, hints_configurations, dispatcher)
       dispatcher.visit(document.tree)
       listener.response
     end
