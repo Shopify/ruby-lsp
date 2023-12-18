@@ -26,6 +26,21 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
+      class << self
+        extend T::Sig
+
+        sig { returns(Interface::CompletionOptions) }
+        def provider
+          Interface::CompletionOptions.new(
+            resolve_provider: false,
+            trigger_characters: ["/"],
+            completion_item: {
+              labelDetailsSupport: true,
+            },
+          )
+        end
+      end
+
       ResponseType = type_member { { fixed: T::Array[Interface::CompletionItem] } }
 
       sig { override.returns(ResponseType) }

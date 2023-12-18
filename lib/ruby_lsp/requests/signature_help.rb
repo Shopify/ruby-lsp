@@ -26,6 +26,18 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
+      class << self
+        extend T::Sig
+
+        sig { returns(Interface::SignatureHelpOptions) }
+        def provider
+          # Identifier characters are automatically included, such as A-Z, a-z, 0-9, _, * or :
+          Interface::SignatureHelpOptions.new(
+            trigger_characters: ["(", " ", ","],
+          )
+        end
+      end
+
       ResponseType = type_member { { fixed: T.nilable(T.any(Interface::SignatureHelp, T::Hash[Symbol, T.untyped])) } }
 
       sig { override.returns(ResponseType) }

@@ -26,6 +26,15 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
+      class << self
+        extend T::Sig
+
+        sig { returns(Interface::CodeLensOptions) }
+        def provider
+          Interface::CodeLensOptions.new(resolve_provider: false)
+        end
+      end
+
       ResponseType = type_member { { fixed: T::Array[Interface::CodeLens] } }
 
       BASE_COMMAND = T.let(

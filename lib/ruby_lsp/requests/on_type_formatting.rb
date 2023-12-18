@@ -18,6 +18,18 @@ module RubyLsp
     class OnTypeFormatting
       extend T::Sig
 
+      class << self
+        extend T::Sig
+
+        sig { returns(Interface::DocumentOnTypeFormattingOptions) }
+        def provider
+          Interface::DocumentOnTypeFormattingOptions.new(
+            first_trigger_character: "{",
+            more_trigger_character: ["\n", "|", "d"],
+          )
+        end
+      end
+
       END_REGEXES = T.let(
         [
           /\b(if|unless|for|while|class|module|until|def|case)\b.*/,

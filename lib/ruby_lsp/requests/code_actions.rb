@@ -19,6 +19,15 @@ module RubyLsp
     class CodeActions
       extend T::Sig
 
+      class << self
+        extend T::Sig
+
+        sig { returns(Interface::CodeActionOptions) }
+        def provider
+          Interface::CodeActionOptions.new(resolve_provider: true)
+        end
+      end
+
       sig do
         params(
           document: Document,
