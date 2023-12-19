@@ -22,11 +22,8 @@ jobs:
       - name: Typecheck
         run: bundle exec srb tc
 
-      - name: Lint Ruby files
+      - name: Lint Ruby files and RBI shims
         run: bundle exec rubocop
-
-      - name: Lint RBI shims
-        run: bundle exec rubocop sorbet/rbi/shims
   build:
     strategy:
       fail-fast: false
