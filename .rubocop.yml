@@ -12,6 +12,8 @@ AllCops:
   NewCops: disable
   SuggestExtensions: false
   TargetRubyVersion: 3.0
+  Include:
+    - "sorbet/rbi/shims/**/*.rbi"
   Exclude:
     - "vendor/**/*"
     - "features/**/*"
