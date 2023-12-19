@@ -15,7 +15,7 @@ module RubyLsp
     #   # <-- cursor ends up here
     # end # <-- end is automatically added
     # ```
-    class OnTypeFormatting < BaseRequest
+    class OnTypeFormatting
       extend T::Sig
 
       END_REGEXES = T.let(
@@ -28,8 +28,7 @@ module RubyLsp
 
       sig { params(document: Document, position: T::Hash[Symbol, T.untyped], trigger_character: String).void }
       def initialize(document, position, trigger_character)
-        super(document)
-
+        @document = document
         @lines = T.let(@document.source.lines, T::Array[String])
         line = @lines[[position[:line] - 1, 0].max]
 
@@ -40,7 +39,7 @@ module RubyLsp
         @trigger_character = trigger_character
       end
 
-      sig { override.returns(T.all(T::Array[Interface::TextEdit], Object)) }
+      sig { returns(T.all(T::Array[Interface::TextEdit], Object)) }
       def run
         case @trigger_character
         when "{"

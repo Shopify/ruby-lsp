@@ -25,7 +25,7 @@ module RubyLsp
     # puts "Hello" # --> formatting: fixes the indentation on save
     # end
     # ```
-    class Formatting < BaseRequest
+    class Formatting
       class Error < StandardError; end
       class InvalidFormatter < StandardError; end
 
@@ -55,13 +55,12 @@ module RubyLsp
 
       sig { params(document: Document, formatter: String).void }
       def initialize(document, formatter: "auto")
-        super(document)
-
+        @document = document
         @uri = T.let(document.uri, URI::Generic)
         @formatter = formatter
       end
 
-      sig { override.returns(T.nilable(T.all(T::Array[Interface::TextEdit], Object))) }
+      sig { returns(T.nilable(T.all(T::Array[Interface::TextEdit], Object))) }
       def run
         return if @formatter == "none"
         return if @document.syntax_error?
