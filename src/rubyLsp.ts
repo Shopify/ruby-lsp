@@ -116,9 +116,31 @@ export class RubyLsp {
     // `workspaceContains` activation events in package.json
     if (
       !(await pathExists(path.join(workspaceDir, "Gemfile.lock"))) &&
-      !(await pathExists(path.join(workspaceDir, "gems.locked")))
+      !(await pathExists(path.join(workspaceDir, "gems.locked"))) &&
+      !this.context.globalState.get("rubyLsp.disableMultirootLockfileWarning")
     ) {
-      return;
+      const answer = await vscode.window.showWarningMessage(
+        `Tried to activate the Ruby LSP in ${workspaceDir}, but no lockfile was found. Are you using a monorepo setup?`,
+        "No - launch without bundle",
+        "Yes - see multi-root workspace docs",
+        "Don't show again",
+      );
+
+      if (answer === "Yes - see multi-root workspace docs") {
+        vscode.env.openExternal(
+          vscode.Uri.parse(
+            "https://github.com/Shopify/vscode-ruby-lsp?tab=readme-ov-file#multi-root-workspaces",
+          ),
+        );
+        return;
+      }
+
+      if (answer === "Don't show again") {
+        this.context.globalState.update(
+          "rubyLsp.disableMultirootLockfileWarning",
+          true,
+        );
+      }
     }
 
     const workspace = new Workspace(
