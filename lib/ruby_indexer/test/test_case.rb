@@ -15,6 +15,24 @@ module RubyIndexer
       @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), source)
     end
 
+    def assert_method_entry(expected_name, owner_name, type, expected_location)
+      entries = @index[expected_name]
+      refute_empty(entries, "Expected #{expected_name} to be indexed")
+
+      entry = entries.first
+      assert_instance_of(type, entry, "Expected #{expected_name} to be a #{type}")
+
+      owner = entry.owner
+      assert_equal(owner_name, owner.name)
+
+      location = entry.location
+      location_string =
+        "#{entry.file_path}:#{location.start_line - 1}-#{location.start_column}" \
+          ":#{location.end_line - 1}-#{location.end_column}"
+
+      assert_equal(expected_location, location_string)
+    end
+
     def assert_entry(expected_name, type, expected_location)
       entries = @index[expected_name]
       refute_empty(entries, "Expected #{expected_name} to be indexed")

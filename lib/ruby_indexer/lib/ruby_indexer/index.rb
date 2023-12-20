@@ -255,7 +255,7 @@ module RubyIndexer
     # that doesn't exist, then we return the same UnresolvedAlias
     sig { params(entry: Entry::UnresolvedAlias).returns(T.any(Entry::Alias, Entry::UnresolvedAlias)) }
     def resolve_alias(entry)
-      target = resolve(entry.target, entry.nesting)
+      target = resolve(entry.target, Array(entry.namespace&.name))
       return entry unless target
 
       target_name = T.must(target.first).name

@@ -198,7 +198,7 @@ module RubyIndexer
 
       unresolve_entry = @index["A::FIRST"].first
       assert_instance_of(Entry::UnresolvedAlias, unresolve_entry)
-      assert_equal(["A"], unresolve_entry.nesting)
+      assert_equal("A", unresolve_entry.namespace.name)
       assert_equal("B::C", unresolve_entry.target)
 
       resolved_entry = @index.resolve("A::FIRST", []).first
@@ -224,7 +224,7 @@ module RubyIndexer
 
       unresolve_entry = @index["A::ALIAS"].first
       assert_instance_of(Entry::UnresolvedAlias, unresolve_entry)
-      assert_equal(["A"], unresolve_entry.nesting)
+      assert_equal("A", unresolve_entry.namespace.name)
       assert_equal("B", unresolve_entry.target)
 
       resolved_entry = @index.resolve("ALIAS", ["A"]).first
@@ -237,7 +237,7 @@ module RubyIndexer
 
       unresolve_entry = @index["Other::ONE_MORE"].first
       assert_instance_of(Entry::UnresolvedAlias, unresolve_entry)
-      assert_equal(["Other"], unresolve_entry.nesting)
+      assert_equal("Other", unresolve_entry.namespace.name)
       assert_equal("A::ALIAS", unresolve_entry.target)
 
       resolved_entry = @index.resolve("Other::ONE_MORE::C", []).first
@@ -252,12 +252,14 @@ module RubyIndexer
           F = G::H &&= 1
           I::J = K::L = M = 1
         end
+
+        N = O::P = Q::R = 1
       RUBY
 
       # B and C
       unresolve_entry = @index["A::B"].first
       assert_instance_of(Entry::UnresolvedAlias, unresolve_entry)
-      assert_equal(["A"], unresolve_entry.nesting)
+      assert_equal("A", unresolve_entry.namespace.name)
       assert_equal("C", unresolve_entry.target)
 
       resolved_entry = @index.resolve("A::B", []).first
@@ -270,7 +272,7 @@ module RubyIndexer
       # D and E
       unresolve_entry = @index["A::D"].first
       assert_instance_of(Entry::UnresolvedAlias, unresolve_entry)
-      assert_equal(["A"], unresolve_entry.nesting)
+      assert_equal("A", unresolve_entry.namespace.name)
       assert_equal("E", unresolve_entry.target)
 
       resolved_entry = @index.resolve("A::D", []).first
@@ -280,7 +282,7 @@ module RubyIndexer
       # F and G::H
       unresolve_entry = @index["A::F"].first
       assert_instance_of(Entry::UnresolvedAlias, unresolve_entry)
-      assert_equal(["A"], unresolve_entry.nesting)
+      assert_equal("A", unresolve_entry.namespace.name)
       assert_equal("G::H", unresolve_entry.target)
 
       resolved_entry = @index.resolve("A::F", []).first
@@ -290,7 +292,7 @@ module RubyIndexer
       # I::J, K::L and M
       unresolve_entry = @index["A::I::J"].first
       assert_instance_of(Entry::UnresolvedAlias, unresolve_entry)
-      assert_equal(["A"], unresolve_entry.nesting)
+      assert_equal("A", unresolve_entry.namespace.name)
       assert_equal("K::L", unresolve_entry.target)
 
       resolved_entry = @index.resolve("A::I::J", []).first
@@ -304,6 +306,25 @@ module RubyIndexer
       assert_equal("A::M", resolved_entry.target)
 
       constant = @index["A::M"].first
+      assert_instance_of(Entry::Constant, constant)
+
+      # N, O::P and Q::R
+      unresolve_entry = @index["N"].first
+      assert_instance_of(Entry::UnresolvedAlias, unresolve_entry)
+      assert_nil(unresolve_entry.namespace)
+      assert_equal("O::P", unresolve_entry.target)
+
+      resolved_entry = @index.resolve("N", []).first
+      assert_instance_of(Entry::Alias, resolved_entry)
+      assert_equal("O::P", resolved_entry.target)
+
+      # When we are resolving A::I::J, we invoke `resolve("K::L", ["A"])`, which recursively resolves A::K::L too.
+      # Therefore, both A::I::J and A::K::L point to A::M by the end of the previous resolve invocation
+      resolved_entry = @index["O::P"].first
+      assert_instance_of(Entry::Alias, resolved_entry)
+      assert_equal("Q::R", resolved_entry.target)
+
+      constant = @index["Q::R"].first
       assert_instance_of(Entry::Constant, constant)
     end
 

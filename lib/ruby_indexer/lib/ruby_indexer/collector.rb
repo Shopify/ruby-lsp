@@ -11,7 +11,7 @@ module RubyIndexer
     def initialize(index, parse_result, file_path)
       @index = index
       @file_path = file_path
-      @stack = T.let([], T::Array[String])
+      @stack = T.let([], T::Array[Entry::Namespace])
       @comments_by_line = T.let(
         parse_result.comments.to_h do |c|
           [c.location.start_line, c]
@@ -19,7 +19,6 @@ module RubyIndexer
         T::Hash[Integer, Prism::Comment],
       )
       @queue = T.let([], T::Array[Object])
-      @current_owner = T.let(nil, T.nilable(Entry::Namespace))
 
       super()
     end
@@ -167,7 +166,7 @@ module RubyIndexer
           node.location,
           comments,
           node.parameters,
-          @current_owner,
+          current_namespace,
         )
       when Prism::SelfNode
         @index << Entry::SingletonMethod.new(
@@ -176,7 +175,7 @@ module RubyIndexer
           node.location,
           comments,
           node.parameters,
-          @current_owner,
+          current_namespace,
         )
       end
     end
@@ -230,19 +229,40 @@ module RubyIndexer
 
       @index << case value
       when Prism::ConstantReadNode, Prism::ConstantPathNode
-        Entry::UnresolvedAlias.new(value.slice, @stack.dup, name, @file_path, node.location, comments)
+        Entry::UnresolvedAlias.new(
+          value.slice,
+          current_namespace,
+          name,
+          @file_path,
+          node.location,
+          comments,
+        )
       when Prism::ConstantWriteNode, Prism::ConstantAndWriteNode, Prism::ConstantOrWriteNode,
         Prism::ConstantOperatorWriteNode
 
         # If the right hand side is another constant assignment, we need to visit it because that constant has to be
         # indexed too
         @queue.prepend(value)
-        Entry::UnresolvedAlias.new(value.name.to_s, @stack.dup, name, @file_path, node.location, comments)
+        Entry::UnresolvedAlias.new(
+          value.name.to_s,
+          current_namespace,
+          name,
+          @file_path,
+          node.location,
+          comments,
+        )
       when Prism::ConstantPathWriteNode, Prism::ConstantPathOrWriteNode, Prism::ConstantPathOperatorWriteNode,
         Prism::ConstantPathAndWriteNode
 
         @queue.prepend(value)
-        Entry::UnresolvedAlias.new(value.target.slice, @stack.dup, name, @file_path, node.location, comments)
+        Entry::UnresolvedAlias.new(
+          value.target.slice,
+          current_namespace,
+          name,
+          @file_path,
+          node.location,
+          comments,
+        )
       else
         Entry::Constant.new(name, @file_path, node.location, comments)
       end
@@ -257,9 +277,9 @@ module RubyIndexer
       end
 
       comments = collect_comments(node)
-      @current_owner = Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments)
-      @index << @current_owner
-      @stack << name
+      entry = Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments)
+      @index << entry
+      push_namespace(entry)
       @queue.prepend(node.body, LEAVE_EVENT)
     end
 
@@ -280,15 +300,15 @@ module RubyIndexer
         superclass.slice
       end
 
-      @current_owner = Entry::Class.new(
+      entry = Entry::Class.new(
         fully_qualify_name(name),
         @file_path,
         node.location,
         comments,
         parent_class,
       )
-      @index << @current_owner
-      @stack << name
+      @index << entry
+      push_namespace(entry)
       @queue.prepend(node.body, LEAVE_EVENT)
     end
 
@@ -314,12 +334,22 @@ module RubyIndexer
       comments
     end
 
+    sig { returns(T.nilable(Entry::Namespace)) }
+    def current_namespace
+      @stack.last
+    end
+
+    sig { params(namespace: Entry::Namespace).void }
+    def push_namespace(namespace)
+      @stack << namespace
+    end
+
     sig { params(name: String).returns(String) }
     def fully_qualify_name(name)
       if @stack.empty? || name.start_with?("::")
         name
       else
-        "#{@stack.join("::")}::#{name}"
+        "#{current_namespace&.name}::#{name}"
       end.delete_prefix("::")
     end
 
@@ -342,8 +372,8 @@ module RubyIndexer
 
         next unless name && loc
 
-        @index << Entry::Accessor.new(name, @file_path, loc, comments, @current_owner) if reader
-        @index << Entry::Accessor.new("#{name}=", @file_path, loc, comments, @current_owner) if writer
+        @index << Entry::Accessor.new(name, @file_path, loc, comments, current_namespace) if reader
+        @index << Entry::Accessor.new("#{name}=", @file_path, loc, comments, current_namespace) if writer
       end
     end
   end

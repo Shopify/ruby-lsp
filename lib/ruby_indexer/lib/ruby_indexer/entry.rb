@@ -320,24 +320,24 @@ module RubyIndexer
       sig { returns(String) }
       attr_reader :target
 
-      sig { returns(T::Array[String]) }
-      attr_reader :nesting
+      sig { returns(T.nilable(Namespace)) }
+      attr_reader :namespace
 
       sig do
         params(
           target: String,
-          nesting: T::Array[String],
+          namespace: T.nilable(Namespace),
           name: String,
           file_path: String,
           location: Prism::Location,
           comments: T::Array[String],
         ).void
       end
-      def initialize(target, nesting, name, file_path, location, comments) # rubocop:disable Metrics/ParameterLists
+      def initialize(target, namespace, name, file_path, location, comments) # rubocop:disable Metrics/ParameterLists
         super(name, file_path, location, comments)
 
         @target = target
-        @nesting = nesting
+        @namespace = namespace
       end
     end
 
