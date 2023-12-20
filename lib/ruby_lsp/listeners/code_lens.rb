@@ -21,7 +21,8 @@ module RubyLsp
       )
       ACCESS_MODIFIERS = T.let([:public, :private, :protected], T::Array[Symbol])
       SUPPORTED_TEST_LIBRARIES = T.let(["minitest", "test-unit"], T::Array[String])
-
+      DESCRIBE_KEYWORD = T.let(:describe, Symbol)
+      IT_KEYWORD = T.let(:it, Symbol)
       ResponseType = type_member { { fixed: T::Array[Interface::CodeLens] } }
 
       sig { override.returns(ResponseType) }
@@ -40,7 +41,7 @@ module RubyLsp
         @path = T.let(uri.to_standardized_path, T.nilable(String))
         # visibility_stack is a stack of [current_visibility, previous_visibility]
         @visibility_stack = T.let([[:public, :public]], T::Array[T::Array[T.nilable(Symbol)]])
-        @class_stack = T.let([], T::Array[String])
+        @group_stack = T.let([], T::Array[String])
         @group_id = T.let(1, Integer)
         @group_id_stack = T.let([], T::Array[Integer])
         @lenses_configuration = lenses_configuration
@@ -61,13 +62,13 @@ module RubyLsp
       def on_class_node_enter(node)
         @visibility_stack.push([:public, :public])
         class_name = node.constant_path.slice
-        @class_stack.push(class_name)
+        @group_stack.push(class_name)
 
         if @path && class_name.end_with?("Test")
           add_test_code_lens(
             node,
             name: class_name,
-            command: generate_test_command(class_name: class_name),
+            command: generate_test_command(group_name: class_name),
             kind: :group,
           )
         end
@@ -79,13 +80,13 @@ module RubyLsp
       sig { params(node: Prism::ClassNode).void }
       def on_class_node_leave(node)
         @visibility_stack.pop
-        @class_stack.pop
+        @group_stack.pop
         @group_id_stack.pop
       end
 
       sig { params(node: Prism::DefNode).void }
       def on_def_node_enter(node)
-        class_name = @class_stack.last
+        class_name = @group_stack.last
         return unless class_name&.end_with?("Test")
 
         visibility, _ = @visibility_stack.last
@@ -95,7 +96,7 @@ module RubyLsp
             add_test_code_lens(
               node,
               name: method_name,
-              command: generate_test_command(method_name: method_name, class_name: class_name),
+              command: generate_test_command(method_name: method_name, group_name: class_name),
               kind: :example,
             )
           end
@@ -120,6 +121,19 @@ module RubyLsp
           return
         end
 
+        if [DESCRIBE_KEYWORD, IT_KEYWORD].include?(name)
+          case name
+          when DESCRIBE_KEYWORD
+            add_spec_code_lens(node, kind: :group)
+            @group_id_stack.push(@group_id)
+            @group_id += 1
+          when IT_KEYWORD
+            add_spec_code_lens(node, kind: :example)
+          end
+
+          return
+        end
+
         if @path&.include?(GEMFILE_NAME) && name == :gem && arguments
           return unless @lenses_configuration.enabled?(:gemfileLinks)
 
@@ -137,6 +151,9 @@ module RubyLsp
       def on_call_node_leave(node)
         _, prev_visibility = @visibility_stack.pop
         @visibility_stack.push([prev_visibility, prev_visibility])
+        if node.name == DESCRIBE_KEYWORD
+          @group_id_stack.pop
+        end
       end
 
       private
@@ -196,19 +213,19 @@ module RubyLsp
         end
       end
 
-      sig { params(class_name: String, method_name: T.nilable(String)).returns(String) }
-      def generate_test_command(class_name:, method_name: nil)
+      sig { params(group_name: String, method_name: T.nilable(String)).returns(String) }
+      def generate_test_command(group_name:, method_name: nil)
         command = BASE_COMMAND + T.must(@path)
 
         case DependencyDetector.instance.detected_test_library
         when "minitest"
           command += if method_name
-            " --name " + "/#{Shellwords.escape(class_name + "#" + method_name)}/"
+            " --name " + "/#{Shellwords.escape(group_name + "#" + method_name)}/"
           else
-            " --name " + "/#{Shellwords.escape(class_name)}/"
+            " --name " + "/#{Shellwords.escape(group_name)}/"
           end
         when "test-unit"
-          command += " --testcase " + "/#{Shellwords.escape(class_name)}/"
+          command += " --testcase " + "/#{Shellwords.escape(group_name)}/"
 
           if method_name
             command += " --name " + Shellwords.escape(method_name)
@@ -226,6 +243,31 @@ module RubyLsp
           command_name: "rubyLsp.openLink",
           arguments: [remote],
           data: { type: "link" },
+        )
+      end
+
+      sig { params(node: Prism::CallNode, kind: Symbol).void }
+      def add_spec_code_lens(node, kind:)
+        arguments = node.arguments
+        return unless arguments
+
+        first_argument = arguments.arguments.first
+        return unless first_argument
+
+        name = case first_argument
+        when Prism::StringNode
+          first_argument.content
+        when Prism::ConstantReadNode
+          first_argument.full_name
+        end
+
+        return unless name
+
+        add_test_code_lens(
+          node,
+          name: name,
+          command: generate_test_command(group_name: name),
+          kind: kind,
         )
       end
     end
