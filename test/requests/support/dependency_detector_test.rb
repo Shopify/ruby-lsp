@@ -37,10 +37,16 @@ module RubyLsp
       assert(DependencyDetector.instance.direct_dependency?(/^prism$/))
     end
 
-    def test_detects_rails_if_both_rails_and_minitest_are_present
-      stub_dependencies("minitest" => "1.2.3", "rails" => "1.2.3")
+    def test_detects_rails_if_rails_and_minitest_and_ruby_lsp_rails_are_present
+      stub_dependencies("minitest" => "1.2.3", "rails" => "1.2.3", "ruby-lsp-rails" => "1.2.3")
 
       assert_equal("rails", DependencyDetector.instance.detected_test_library)
+    end
+
+    def test_detects_rails_if_both_rails_and_minitest_are_present_but_not_ruby_lsp_rails
+      stub_dependencies("minitest" => "1.2.3", "rails" => "1.2.3")
+
+      assert_equal("minitest", DependencyDetector.instance.detected_test_library)
     end
 
     def test_direct_dependency_returns_false_outside_of_bundle
