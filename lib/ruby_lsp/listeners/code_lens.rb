@@ -177,11 +177,14 @@ module RubyLsp
           data: { type: "test_in_terminal", **grouping_data },
         )
 
+        shell_escaped_arguments = arguments.clone
+        shell_escaped_arguments[2] = Shellwords.escape(shell_escaped_arguments[2])
+
         @_response << create_code_lens(
           node,
           title: "Debug",
           command_name: "rubyLsp.debugTest",
-          arguments: arguments,
+          arguments: shell_escaped_arguments,
           data: { type: "debug", **grouping_data },
         )
       end
