@@ -61,6 +61,8 @@ module RubyLsp
 
     sig { returns(T::Boolean) }
     def detect_typechecker
+      return false if ENV["RUBY_LSP_BYPASS_TYPECHECKER"]
+
       direct_dependency?(/^sorbet/) || direct_dependency?(/^sorbet-static-and-runtime/)
     end
 
