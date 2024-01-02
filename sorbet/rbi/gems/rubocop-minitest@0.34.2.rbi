@@ -2460,7 +2460,7 @@ module RuboCop::Cop::MinitestExplorationHelpers
   # @api private
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#115
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#116
   def lifecycle_hook_method?(node); end
 
   # @api private
