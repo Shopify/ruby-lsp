@@ -38,6 +38,10 @@ const EMBEDDED_HEREDOC_LANGUAGES: InferrableLanguageConfigOrLabel[] = [
     label: "C++",
   },
   {
+    label: "HAML",
+    contentName: "text.haml",
+  },
+  {
     label: "HTML",
     contentName: "text.html",
     includeName: "text.html.basic",
