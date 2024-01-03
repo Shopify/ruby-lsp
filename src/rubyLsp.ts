@@ -110,11 +110,15 @@ export class RubyLsp {
 
   private async activateWorkspace(workspaceFolder: vscode.WorkspaceFolder) {
     const workspaceDir = workspaceFolder.uri.fsPath;
+    const customBundleGemfile: string = vscode.workspace
+      .getConfiguration("rubyLsp")
+      .get("bundleGemfile")!;
 
     // If one of the workspaces does not contain a lockfile, then we don't try to start a language server. If the user
     // ends up opening a Ruby file inside that workspace, then we lazily activate the workspace. These need to match our
     // `workspaceContains` activation events in package.json
     if (
+      customBundleGemfile.length === 0 &&
       !(await pathExists(path.join(workspaceDir, "Gemfile.lock"))) &&
       !(await pathExists(path.join(workspaceDir, "gems.locked"))) &&
       !this.context.globalState.get("rubyLsp.disableMultirootLockfileWarning")
