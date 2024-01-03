@@ -31,10 +31,13 @@ function getLspExecutables(
   const branch: string = config.get("branch")!;
   const customBundleGemfile: string = config.get("bundleGemfile")!;
   const useBundlerCompose: boolean = config.get("useBundlerCompose")!;
+  const bypassTypechecker: boolean = config.get("bypassTypechecker")!;
 
   const executableOptions: ExecutableOptions = {
     cwd: workspaceFolder.uri.fsPath,
-    env,
+    env: bypassTypechecker
+      ? { ...env, RUBY_LSP_BYPASS_TYPECHECKER: "true" }
+      : env,
     shell: true,
   };
 

@@ -307,6 +307,11 @@
           "description": "This is a temporary setting for testing purposes, do not use it! Replace the custom bundle logic by bundler-compose.",
           "type": "boolean",
           "default": false
+        },
+        "rubyLsp.bypassTypechecker": {
+          "description": "Ignores if the project uses a typechecker. Only intended to be used while working on the Ruby LSP itself",
+          "type": "boolean",
+          "default": false
         }
       }
     },
