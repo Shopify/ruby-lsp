@@ -46,6 +46,36 @@ See the [documentation](https://shopify.github.io/ruby-lsp) for more in-depth de
 For creating rich themes for Ruby using the semantic highlighting information, see the [semantic highlighting
 documentation](SEMANTIC_HIGHLIGHTING.md).
 
+### Configuring code indexing
+
+By default, the Ruby LSP indexes all Ruby files defined in the current project and all of its dependencies, including
+default gems, except for
+
+- Gems that only appear under the development group
+- All Ruby files under `test/**/*.rb`
+
+By creating an `.index.yml` file, these configurations can be overridden and tuned.
+
+```yaml
+# Exclude files based on a given pattern. Often used to exclude test files or fixtures
+excluded_patterns:
+  - "**/spec/**/*.rb"
+
+# Include files based on a given pattern. Can be used to index Ruby files that use different extensions
+included_patterns:
+  - "**/bin/*"
+
+# Exclude gems by name. If a gem is never referenced in the project's code and is only used as a tool, excluding it will
+# speed up indexing and reduce the amount of results in features like definition or completion
+excluded_gems:
+  - rubocop
+  - pathname
+
+# Include gems by name. Normally used to include development gems that are excluded by default
+included_gems:
+  - prism
+```
+
 ### Addons
 
 The Ruby LSP provides an addon system that allows other gems to enhance the base functionality with more editor
