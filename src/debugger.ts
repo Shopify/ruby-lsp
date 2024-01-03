@@ -123,7 +123,7 @@ export class Debugger
     }
   }
 
-  private attachDebuggee(): Promise<vscode.DebugAdapterDescriptor | undefined> {
+  private async attachDebuggee(): Promise<vscode.DebugAdapterDescriptor> {
     // When using attach, a process will be launched using Ruby debug and it will create a socket automatically. We have
     // to find the available sockets and ask the user which one they want to attach to
     const socketsDir = path.join("/", "tmp", "ruby-lsp-debug-sockets");
@@ -132,33 +132,25 @@ export class Debugger
       .map((file) => file)
       .filter((file) => file.endsWith(".sock"));
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    return new Promise((resolve, reject) => {
-      if (sockets.length === 0) {
-        reject(
-          new Error(
-            `No debuggee processes found. Was a socket created in ${socketsDir}?`,
-          ),
-        );
-      }
+    if (sockets.length === 0) {
+      throw new Error(
+        `No debuggee processes found. Was a socket created in ${socketsDir}?`,
+      );
+    }
 
-      return vscode.window
-        .showQuickPick(sockets, {
-          placeHolder: "Select a debuggee",
-          ignoreFocusOut: true,
-        })
-        .then((selectedSocket) => {
-          if (selectedSocket === undefined) {
-            reject(new Error("No debuggee selected"));
-          } else {
-            resolve(
-              new vscode.DebugAdapterNamedPipeServer(
-                path.join(socketsDir, selectedSocket),
-              ),
-            );
-          }
-        });
-    });
+    const selectedSocketPath = await vscode.window
+      .showQuickPick(sockets, {
+        placeHolder: "Select a debuggee",
+        ignoreFocusOut: true,
+      })
+      .then((value) => {
+        if (value === undefined) {
+          throw new Error("No debuggee selected");
+        }
+        return path.join(socketsDir, value);
+      });
+
+    return new vscode.DebugAdapterNamedPipeServer(selectedSocketPath);
   }
 
   private spawnDebuggeeForLaunch(
