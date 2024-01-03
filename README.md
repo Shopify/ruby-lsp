@@ -185,10 +185,13 @@ the version manager configuration, use the following configuration in VS Code to
 
 ```jsonc
 {
-  "rubyLsp.bundleGemfile": "../../relative/path/to/the/directory/Gemfile",
-  "rubyLsp.bundleGemfile": "/absolute/path/to/the/directory/Gemfile"
+  "rubyLsp.bundleGemfile": "../../path/to/the/directory/Gemfile"
 }
 ```
+
+> [!NOTE]
+>
+> `rubyLsp.bundleGemfile` can be a relative or absolute path.
 
 #### Configuring VS Code debugger
 
