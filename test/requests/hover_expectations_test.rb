@@ -177,12 +177,11 @@ class HoverExpectationsTest < ExpectationsTestRunner
       params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
     }).response
 
-    assert_includes(response.contents.value, "bundler")
-    assert_includes(
-      response.contents.value,
-      "Bundler manages an application's dependencies through its entire life, " \
-        "across many machines, systematically and repeatably",
-    )
+    spec = Gem.loaded_specs["bundler"]
+
+    assert_includes(response.contents.value, spec.name)
+    assert_includes(response.contents.value, spec.version.to_s)
+    assert_includes(response.contents.value, spec.description)
   ensure
     T.must(message_queue).close
   end
