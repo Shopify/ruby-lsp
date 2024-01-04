@@ -157,6 +157,36 @@ class HoverExpectationsTest < ExpectationsTestRunner
     T.must(message_queue).close
   end
 
+  def test_hovering_over_gemfile_dependency
+    message_queue = Thread::Queue.new
+    store = RubyLsp::Store.new
+
+    uri = URI("file:///Gemfile")
+    source = <<~RUBY
+      gem 'bundler'
+    RUBY
+    store.set(uri: uri, source: source, version: 1)
+
+    executor = RubyLsp::Executor.new(store, message_queue)
+    index = executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
+
+    stub_no_typechecker
+    response = executor.execute({
+      method: "textDocument/hover",
+      params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
+    }).response
+
+    assert_includes(response.contents.value, "bundler")
+    assert_includes(
+      response.contents.value,
+      "Bundler manages an application's dependencies through its entire life, " \
+        "across many machines, systematically and repeatably",
+    )
+  ensure
+    T.must(message_queue).close
+  end
+
   def test_hover_addons
     source = <<~RUBY
       # Hello
