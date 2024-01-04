@@ -51,10 +51,10 @@ documentation](SEMANTIC_HIGHLIGHTING.md).
 By default, the Ruby LSP indexes all Ruby files defined in the current project and all of its dependencies, including
 default gems, except for
 
-- Gems that only appear under the development group
+- Gems that only appear under the `:development` group
 - All Ruby files under `test/**/*.rb`
 
-By creating an `.index.yml` file, these configurations can be overridden and tuned.
+By creating a `.index.yml` file, these configurations can be overridden and tuned.
 
 ```yaml
 # Exclude files based on a given pattern. Often used to exclude test files or fixtures
