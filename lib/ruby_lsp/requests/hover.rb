@@ -37,19 +37,30 @@ module RubyLsp
         ],
         T::Array[T.class_of(Prism::Node)],
       )
+      GEMFILE_NAME = T.let(
+        begin
+          Bundler.with_original_env { Bundler.default_gemfile.basename.to_s }
+        rescue Bundler::GemfileNotFound
+          "Gemfile"
+        end,
+        String,
+      )
 
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
       sig do
         params(
+          uri: URI::Generic,
           index: RubyIndexer::Index,
           nesting: T::Array[String],
           dispatcher: Prism::Dispatcher,
           typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(index, nesting, dispatcher, typechecker_enabled)
+      def initialize(uri, index, nesting, dispatcher, typechecker_enabled)
+        @uri = T.let(uri, URI::Generic)
+        @path = T.let(uri.to_standardized_path, T.nilable(String))
         @index = index
         @nesting = nesting
         @_response = T.let(nil, ResponseType)
@@ -111,6 +122,13 @@ module RubyLsp
         return if @typechecker_enabled
         return unless self_receiver?(node)
 
+        if @path&.include?(GEMFILE_NAME) && node.name == :gem
+          generate_gem_hover(node)
+          return
+        end
+
+        return if DependencyDetector.instance.typechecker
+
         message = node.message
         return unless message
 
@@ -141,6 +159,37 @@ module RubyLsp
           range: range_from_location(location),
           contents: markdown_from_index_entries(name, entries),
         )
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def generate_gem_hover(node)
+        first_argument = node.arguments&.arguments&.first
+        return unless first_argument.is_a?(Prism::StringNode)
+
+        spec = resolve_gem_spec(first_argument)
+        return unless spec
+
+        markdown = <<~MARKDOWN
+          **#{spec.name}** (#{spec.version})
+
+          #{spec.description || spec.summary}
+        MARKDOWN
+
+        @_response = Interface::Hover.new(
+          range: range_from_location(node.location),
+          contents: Interface::MarkupContent.new(
+            kind: Constant::MarkupKind::MARKDOWN,
+            value: markdown,
+          ),
+        )
+      end
+
+      sig { params(gem_name: Prism::StringNode).returns(T.nilable(Gem::Specification)) }
+      def resolve_gem_spec(gem_name)
+        spec = Gem::Specification.stubs.find { |gem| gem.name == gem_name.content }&.to_spec
+        return if spec.nil?
+
+        spec
       end
     end
   end
