@@ -229,6 +229,8 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
     uri = URI("file:///folder/fake.rb")
     source = <<~RUBY
+      # typed: false
+
       class A
         def bar
           foo
@@ -246,10 +248,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
     )
 
-    stub_no_typechecker
     response = executor.execute({
       method: "textDocument/definition",
-      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 4, line: 2 } },
+      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 4, line: 4 } },
     }).response
 
     assert_equal(uri.to_s, response.attributes[:uri])
@@ -263,6 +264,8 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
     uri = URI("file:///folder/fake.rb")
     source = <<~RUBY
+      # typed: false
+
       class A
         def bar
           self.foo
@@ -280,10 +283,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
     )
 
-    stub_no_typechecker
     response = executor.execute({
       method: "textDocument/definition",
-      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 9, line: 2 } },
+      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 9, line: 4 } },
     }).response
 
     assert_equal(uri.to_s, response.attributes[:uri])
@@ -297,6 +299,8 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
     uri = URI("file:///folder/fake.rb")
     source = <<~RUBY
+      # typed: false
+
       class A
         def bar
           foo
@@ -312,10 +316,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
     )
 
-    stub_no_typechecker
     response = executor.execute({
       method: "textDocument/definition",
-      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 4, line: 2 } },
+      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 4, line: 4 } },
     }).response
 
     assert_nil(response)

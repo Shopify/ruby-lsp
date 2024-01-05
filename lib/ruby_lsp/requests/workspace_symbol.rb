@@ -34,7 +34,7 @@ module RubyLsp
           # If the project is using Sorbet, we let Sorbet handle symbols defined inside the project itself and RBIs, but
           # we still return entries defined in gems to allow developers to jump directly to the source
           file_path = entry.file_path
-          next if defined_in_gem?(file_path)
+          next if DependencyDetector.instance.typechecker && defined_in_gem?(file_path)
 
           # We should never show private symbols when searching the entire workspace
           next if entry.visibility == :private

@@ -46,12 +46,14 @@ module RubyLsp
           index: RubyIndexer::Index,
           nesting: T::Array[String],
           dispatcher: Prism::Dispatcher,
+          typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(index, nesting, dispatcher)
+      def initialize(index, nesting, dispatcher, typechecker_enabled)
         @index = index
         @nesting = nesting
         @_response = T.let(nil, ResponseType)
+        @typechecker_enabled = typechecker_enabled
 
         super(dispatcher)
         dispatcher.register(
@@ -106,7 +108,7 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
-        return if DependencyDetector.instance.typechecker
+        return if @typechecker_enabled
         return unless self_receiver?(node)
 
         message = node.message
