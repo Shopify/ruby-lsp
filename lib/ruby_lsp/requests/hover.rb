@@ -17,6 +17,15 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
+      class << self
+        extend T::Sig
+
+        sig { returns(Interface::HoverClientCapabilities) }
+        def provider
+          Interface::HoverClientCapabilities.new(dynamic_registration: false)
+        end
+      end
+
       ResponseType = type_member { { fixed: T.nilable(Interface::Hover) } }
 
       ALLOWED_TARGETS = T.let(

@@ -19,6 +19,15 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
+      class << self
+        extend T::Sig
+
+        sig { returns(Interface::FoldingRangeClientCapabilities) }
+        def provider
+          Interface::FoldingRangeClientCapabilities.new(line_folding_only: true)
+        end
+      end
+
       ResponseType = type_member { { fixed: T::Array[Interface::FoldingRange] } }
 
       sig { params(comments: T::Array[Prism::Comment], dispatcher: Prism::Dispatcher).void }

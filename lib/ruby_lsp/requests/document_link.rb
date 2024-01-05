@@ -22,6 +22,15 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
+      class << self
+        extend T::Sig
+
+        sig { returns(Interface::DocumentLinkOptions) }
+        def provider
+          Interface::DocumentLinkOptions.new(resolve_provider: false)
+        end
+      end
+
       ResponseType = type_member { { fixed: T::Array[Interface::DocumentLink] } }
 
       GEM_TO_VERSION_MAP = T.let(

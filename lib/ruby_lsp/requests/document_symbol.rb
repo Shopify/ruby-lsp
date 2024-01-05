@@ -30,6 +30,20 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
+      class << self
+        extend T::Sig
+
+        sig { returns(Interface::DocumentSymbolClientCapabilities) }
+        def provider
+          Interface::DocumentSymbolClientCapabilities.new(
+            hierarchical_document_symbol_support: true,
+            symbol_kind: {
+              value_set: (Constant::SymbolKind::FILE..Constant::SymbolKind::TYPE_PARAMETER).to_a,
+            },
+          )
+        end
+      end
+
       ResponseType = type_member { { fixed: T::Array[Interface::DocumentSymbol] } }
 
       ATTR_ACCESSORS = T.let([:attr_reader, :attr_writer, :attr_accessor].freeze, T::Array[Symbol])

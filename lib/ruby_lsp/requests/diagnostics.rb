@@ -21,6 +21,18 @@ module RubyLsp
     class Diagnostics
       extend T::Sig
 
+      class << self
+        extend T::Sig
+
+        sig { returns(T::Hash[Symbol, T::Boolean]) }
+        def provider
+          {
+            interFileDependencies: false,
+            workspaceDiagnostics: false,
+          }
+        end
+      end
+
       sig { params(document: Document).void }
       def initialize(document)
         @document = document

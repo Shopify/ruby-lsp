@@ -663,81 +663,18 @@ module RubyLsp
         Hash.new(true)
       end
 
-      document_symbol_provider = if enabled_features["documentSymbols"]
-        Interface::DocumentSymbolClientCapabilities.new(
-          hierarchical_document_symbol_support: true,
-          symbol_kind: {
-            value_set: (Constant::SymbolKind::FILE..Constant::SymbolKind::TYPE_PARAMETER).to_a,
-          },
-        )
-      end
-
-      document_link_provider = if enabled_features["documentLink"]
-        Interface::DocumentLinkOptions.new(resolve_provider: false)
-      end
-
-      code_lens_provider = if enabled_features["codeLens"]
-        Interface::CodeLensOptions.new(resolve_provider: false)
-      end
-
-      hover_provider = if enabled_features["hover"]
-        Interface::HoverClientCapabilities.new(dynamic_registration: false)
-      end
-
-      folding_ranges_provider = if enabled_features["foldingRanges"]
-        Interface::FoldingRangeClientCapabilities.new(line_folding_only: true)
-      end
-
-      semantic_tokens_provider = if enabled_features["semanticHighlighting"]
-        Interface::SemanticTokensRegistrationOptions.new(
-          document_selector: { scheme: "file", language: "ruby" },
-          legend: Interface::SemanticTokensLegend.new(
-            token_types: Requests::SemanticHighlighting::TOKEN_TYPES.keys,
-            token_modifiers: Requests::SemanticHighlighting::TOKEN_MODIFIERS.keys,
-          ),
-          range: true,
-          full: { delta: false },
-        )
-      end
-
-      diagnostics_provider = if enabled_features["diagnostics"]
-        {
-          interFileDependencies: false,
-          workspaceDiagnostics: false,
-        }
-      end
-
-      on_type_formatting_provider = if enabled_features["onTypeFormatting"]
-        Interface::DocumentOnTypeFormattingOptions.new(
-          first_trigger_character: "{",
-          more_trigger_character: ["\n", "|", "d"],
-        )
-      end
-
-      code_action_provider = if enabled_features["codeActions"]
-        Interface::CodeActionOptions.new(resolve_provider: true)
-      end
-
-      inlay_hint_provider = if enabled_features["inlayHint"]
-        Interface::InlayHintOptions.new(resolve_provider: false)
-      end
-
-      completion_provider = if enabled_features["completion"]
-        Interface::CompletionOptions.new(
-          resolve_provider: false,
-          trigger_characters: ["/"],
-          completion_item: {
-            labelDetailsSupport: true,
-          },
-        )
-      end
-
-      signature_help_provider = if enabled_features["signatureHelp"]
-        # Identifier characters are automatically included, such as A-Z, a-z, 0-9, _, * or :
-        Interface::SignatureHelpOptions.new(
-          trigger_characters: ["(", " ", ","],
-        )
-      end
+      document_symbol_provider = Requests::DocumentSymbol.provider if enabled_features["documentSymbols"]
+      document_link_provider = Requests::DocumentLink.provider if enabled_features["documentLink"]
+      code_lens_provider = Requests::CodeLens.provider if enabled_features["codeLens"]
+      hover_provider = Requests::Hover.provider if enabled_features["hover"]
+      folding_ranges_provider = Requests::FoldingRanges.provider if enabled_features["foldingRanges"]
+      semantic_tokens_provider = Requests::SemanticHighlighting.provider if enabled_features["semanticHighlighting"]
+      diagnostics_provider = Requests::Diagnostics.provider if enabled_features["diagnostics"]
+      on_type_formatting_provider = Requests::OnTypeFormatting.provider if enabled_features["onTypeFormatting"]
+      code_action_provider = Requests::CodeActions.provider if enabled_features["codeActions"]
+      inlay_hint_provider = Requests::InlayHints.provider if enabled_features["inlayHint"]
+      completion_provider = Requests::Completion.provider if enabled_features["completion"]
+      signature_help_provider = Requests::SignatureHelp.provider if enabled_features["signatureHelp"]
 
       # Dynamically registered capabilities
       file_watching_caps = options.dig(:capabilities, :workspace, :didChangeWatchedFiles)

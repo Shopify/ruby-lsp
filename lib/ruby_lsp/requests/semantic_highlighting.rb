@@ -22,6 +22,23 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
+      class << self
+        extend T::Sig
+
+        sig { returns(Interface::SemanticTokensRegistrationOptions) }
+        def provider
+          Interface::SemanticTokensRegistrationOptions.new(
+            document_selector: { scheme: "file", language: "ruby" },
+            legend: Interface::SemanticTokensLegend.new(
+              token_types: Requests::SemanticHighlighting::TOKEN_TYPES.keys,
+              token_modifiers: Requests::SemanticHighlighting::TOKEN_MODIFIERS.keys,
+            ),
+            range: true,
+            full: { delta: false },
+          )
+        end
+      end
+
       ResponseType = type_member { { fixed: T::Array[SemanticToken] } }
 
       TOKEN_TYPES = T.let(

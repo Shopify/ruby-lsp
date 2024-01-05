@@ -40,6 +40,15 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
+      class << self
+        extend T::Sig
+
+        sig { returns(Interface::InlayHintOptions) }
+        def provider
+          Interface::InlayHintOptions.new(resolve_provider: false)
+        end
+      end
+
       ResponseType = type_member { { fixed: T::Array[Interface::InlayHint] } }
 
       RESCUE_STRING_LENGTH = T.let("rescue".length, Integer)
