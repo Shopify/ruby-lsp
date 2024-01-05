@@ -400,14 +400,19 @@ export class TestController {
     testItems.forEach((test) => {
       if (testItem) return;
 
-      if (test.children.size > 0) {
-        testItem = this.findTestByActiveLine(editor, test.children);
-      } else if (
+      if (
         test.uri?.toString() === editor.document.uri.toString() &&
         test.range?.start.line! <= line &&
         test.range?.end.line! >= line
       ) {
         testItem = test;
+      }
+
+      if (test.children.size > 0) {
+        const childInRange = this.findTestByActiveLine(editor, test.children);
+        if (childInRange) {
+          testItem = childInRange;
+        }
       }
     });
 
