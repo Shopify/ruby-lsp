@@ -197,7 +197,7 @@ export class TestController {
       );
     }
 
-    return vscode.debug.startDebugging(undefined, {
+    return vscode.debug.startDebugging(workspace.workspaceFolder, {
       type: "ruby_lsp",
       name: "Debug",
       request: "launch",
@@ -264,6 +264,7 @@ export class TestController {
     } else {
       this.testController.items.forEach(enqueue);
     }
+    const workspace = this.currentWorkspace();
 
     while (queue.length > 0 && !token.isCancellationRequested) {
       const test = queue.pop()!;
@@ -277,8 +278,6 @@ export class TestController {
       if (test.tags.find((tag) => tag.id === "example")) {
         const start = Date.now();
         try {
-          const workspace = this.currentWorkspace();
-
           if (!workspace) {
             run.errored(test, new vscode.TestMessage("No workspace found"));
             continue;
@@ -334,8 +333,6 @@ export class TestController {
 
     // Make sure to end the run after all tests have been executed
     run.end();
-
-    const workspace = this.currentWorkspace();
 
     if (workspace?.lspClient?.serverVersion) {
       await this.telemetry.sendCodeLensEvent(

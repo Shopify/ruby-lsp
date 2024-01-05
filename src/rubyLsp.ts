@@ -31,7 +31,7 @@ export class RubyLsp {
       this.telemetry,
       this.currentActiveWorkspace.bind(this),
     );
-    this.debug = new Debugger(context, this.currentActiveWorkspace.bind(this));
+    this.debug = new Debugger(context, this.getWorkspace.bind(this));
     this.registerCommands(context);
 
     this.statusItems = new StatusItems();
