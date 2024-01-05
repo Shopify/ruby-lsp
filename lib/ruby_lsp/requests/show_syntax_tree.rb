@@ -17,17 +17,18 @@ module RubyLsp
     # # (program (statements ((binary (int "1") + (int "1")))))
     # ```
     #
-    class ShowSyntaxTree
+    class ShowSyntaxTree < Request
       extend T::Sig
 
       sig { params(document: Document, range: T.nilable(T::Hash[Symbol, T.untyped])).void }
       def initialize(document, range)
+        super()
         @document = document
         @range = range
       end
 
-      sig { returns(String) }
-      def run
+      sig { override.returns(String) }
+      def response
         return ast_for_range if @range
 
         output_string = +""

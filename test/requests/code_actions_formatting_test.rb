@@ -75,12 +75,12 @@ class CodeActionsFormattingTest < Minitest::Test
       encoding: LanguageServer::Protocol::Constant::PositionEncodingKind::UTF16,
     )
 
-    diagnostics = RubyLsp::Requests::Diagnostics.new(document).run
+    diagnostics = RubyLsp::Requests::Diagnostics.new(document).response
     diagnostic = T.must(T.must(diagnostics).find { |d| d.code == diagnostic_code })
     range = diagnostic.range.to_hash.transform_values(&:to_hash)
     result = RubyLsp::Requests::CodeActions.new(document, range, {
       diagnostics: [JSON.parse(T.must(diagnostic).to_json, symbolize_names: true)],
-    }).run
+    }).response
 
     # CodeActions#run returns Array<CodeAction, Hash>. We're interested in the
     # hashes here, so cast to untyped and only look at those.

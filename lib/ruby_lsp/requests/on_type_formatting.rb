@@ -15,7 +15,7 @@ module RubyLsp
     #   # <-- cursor ends up here
     # end # <-- end is automatically added
     # ```
-    class OnTypeFormatting
+    class OnTypeFormatting < Request
       extend T::Sig
 
       class << self
@@ -40,6 +40,7 @@ module RubyLsp
 
       sig { params(document: Document, position: T::Hash[Symbol, T.untyped], trigger_character: String).void }
       def initialize(document, position, trigger_character)
+        super()
         @document = document
         @lines = T.let(@document.source.lines, T::Array[String])
         line = @lines[[position[:line] - 1, 0].max]
@@ -51,8 +52,8 @@ module RubyLsp
         @trigger_character = trigger_character
       end
 
-      sig { returns(T.all(T::Array[Interface::TextEdit], Object)) }
-      def run
+      sig { override.returns(T.all(T::Array[Interface::TextEdit], Object)) }
+      def response
         case @trigger_character
         when "{"
           handle_curly_brace if @document.syntax_error?

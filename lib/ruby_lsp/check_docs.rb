@@ -56,7 +56,7 @@ module RubyLsp
         klass_name = klass.name
         next unless klass_name
 
-        klass if klass_name.match?(/RubyLsp::Requests::\w[^:]+$/) && !klass_name.include?("Support")
+        klass if klass.ancestors.include?(Request) && !klass == Request
       end
 
       missing_docs = T.let(Hash.new { |h, k| h[k] = [] }, T::Hash[String, T::Array[String]])
