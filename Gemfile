@@ -16,7 +16,7 @@ group :development do
   gem "rake", "~> 13.1"
   gem "rubocop", "~> 1.59"
   gem "rubocop-shopify", "~> 2.14", require: false
-  gem "rubocop-minitest", "~> 0.34.2", require: false
+  gem "rubocop-minitest", "~> 0.34.3", require: false
   gem "rubocop-rake", "~> 0.6.0", require: false
   gem "rubocop-sorbet", "~> 0.7", require: false
   gem "sorbet-static-and-runtime", platforms: NON_WINDOWS_PLATFORMS
