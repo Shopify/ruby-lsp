@@ -37,14 +37,6 @@ module RubyLsp
         ],
         T::Array[T.class_of(Prism::Node)],
       )
-      GEMFILE_NAME = T.let(
-        begin
-          Bundler.with_original_env { Bundler.default_gemfile.basename.to_s }
-        rescue Bundler::GemfileNotFound
-          "Gemfile"
-        end,
-        String,
-      )
 
       sig { override.returns(ResponseType) }
       attr_reader :_response
@@ -119,15 +111,14 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
-        return if @typechecker_enabled
         return unless self_receiver?(node)
 
-        if @path&.include?(GEMFILE_NAME) && node.name == :gem
+        if @path && File.basename(@path) == GEMFILE_NAME && node.name == :gem
           generate_gem_hover(node)
           return
         end
 
-        return if DependencyDetector.instance.typechecker
+        return if @typechecker_enabled
 
         message = node.message
         return unless message
@@ -166,13 +157,17 @@ module RubyLsp
         first_argument = node.arguments&.arguments&.first
         return unless first_argument.is_a?(Prism::StringNode)
 
-        spec = resolve_gem_spec(first_argument)
+        spec = Gem::Specification.find_by_name(first_argument.content)
         return unless spec
+
+        info = [spec.description, spec.summary, "This rubygem does not have a description or summary."].find do |text|
+          !text.nil? && !text.empty?
+        end
 
         markdown = <<~MARKDOWN
           **#{spec.name}** (#{spec.version})
 
-          #{spec.description || spec.summary}
+          #{info}
         MARKDOWN
 
         @_response = Interface::Hover.new(
@@ -182,14 +177,8 @@ module RubyLsp
             value: markdown,
           ),
         )
-      end
-
-      sig { params(gem_name: Prism::StringNode).returns(T.nilable(Gem::Specification)) }
-      def resolve_gem_spec(gem_name)
-        spec = Gem::Specification.stubs.find { |gem| gem.name == gem_name.content }&.to_spec
-        return if spec.nil?
-
-        spec
+      rescue Gem::MissingSpecError
+        # Do nothing if the spec cannot be found
       end
     end
   end

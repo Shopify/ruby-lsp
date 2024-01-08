@@ -12,6 +12,14 @@ module RubyLsp
     end,
     T.nilable(String),
   )
+  GEMFILE_NAME = T.let(
+    begin
+      Bundler.with_original_env { Bundler.default_gemfile.basename.to_s }
+    rescue Bundler::GemfileNotFound
+      "Gemfile"
+    end,
+    String,
+  )
 
   # A notification to be sent to the client
   class Message
