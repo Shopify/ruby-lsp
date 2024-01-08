@@ -2313,11 +2313,6 @@
           "include": "$self"
         }
       ]
-    },
-    {
-      "comment": "This is kindof experimental. There really is no way to perfectly match all regular variables, but you can pretty well assume that any normal word in certain curcumstances that haven't already been scoped as something else are probably variables, and the advantages beat the potential errors",
-      "match": "((?<=\\W)\\b|^)\\w+\\b(?=\\s*([\\]\\)\\}\\=\\+\\-\\*\\/\\^\\$\\,\\.\\&]|<\\s|<<[\\s|\\.])?)",
-      "name": "variable.other.ruby"
     }
   ],
   "repository": {
