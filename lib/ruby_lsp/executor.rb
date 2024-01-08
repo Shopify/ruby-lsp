@@ -247,11 +247,11 @@ module RubyLsp
       params(
         uri: URI::Generic,
         position: T::Hash[Symbol, T.untyped],
-        context: T::Hash[Symbol, T.untyped],
+        context: T.nilable(T::Hash[Symbol, T.untyped]),
       ).returns(T.any(T.nilable(Interface::SignatureHelp), T::Hash[Symbol, T.untyped]))
     end
     def signature_help(uri, position, context)
-      current_signature = context[:activeSignatureHelp]
+      current_signature = context && context[:activeSignatureHelp]
       document = @store.get(uri)
       target, parent, nesting = document.locate_node(
         { line: position[:line], character: position[:character] - 2 },
@@ -270,7 +270,7 @@ module RubyLsp
       end
 
       dispatcher = Prism::Dispatcher.new
-      listener = Requests::SignatureHelp.new(context, nesting, @index, dispatcher)
+      listener = Requests::SignatureHelp.new(nesting, @index, dispatcher)
       dispatcher.dispatch_once(target)
       listener.response
     end
