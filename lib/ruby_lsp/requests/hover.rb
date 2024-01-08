@@ -51,7 +51,6 @@ module RubyLsp
         ).void
       end
       def initialize(uri, index, nesting, dispatcher, typechecker_enabled)
-        @uri = T.let(uri, URI::Generic)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
         @index = index
         @nesting = nesting
