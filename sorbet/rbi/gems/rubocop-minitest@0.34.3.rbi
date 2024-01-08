@@ -1240,10 +1240,16 @@ class RuboCop::Cop::Minitest::MultipleAssertions < ::RuboCop::Cop::Base
   # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#53
   def assertions_count(node); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#72
-  def assertions_count_in_branches(branches); end
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#61
+  def assertions_count_based_on_type(node); end
 
   # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#76
+  def assertions_count_in_assignment(node); end
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#84
+  def assertions_count_in_branches(branches); end
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#88
   def max_assertions; end
 end
 
