@@ -301,7 +301,7 @@ module RubyLsp
       target = parent if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)
 
       dispatcher = Prism::Dispatcher.new
-      base_listener = Requests::Definition.new(uri, nesting, @index, dispatcher)
+      base_listener = Requests::Definition.new(uri, nesting, @index, dispatcher, document.typechecker_enabled?)
       dispatcher.dispatch_once(target)
       base_listener.response
     end
@@ -327,7 +327,7 @@ module RubyLsp
 
       # Instantiate all listeners
       dispatcher = Prism::Dispatcher.new
-      hover = Requests::Hover.new(@index, nesting, dispatcher)
+      hover = Requests::Hover.new(@index, nesting, dispatcher, document.typechecker_enabled?)
 
       # Emit events for all listeners
       dispatcher.dispatch_once(target)

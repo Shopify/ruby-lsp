@@ -71,7 +71,8 @@ module RubyLsp
 
         sig { params(file_path: String).returns(T.nilable(T::Boolean)) }
         def defined_in_gem?(file_path)
-          DependencyDetector.instance.typechecker && BUNDLE_PATH && !file_path.start_with?(T.must(BUNDLE_PATH)) &&
+          BUNDLE_PATH &&
+            !file_path.start_with?(T.must(BUNDLE_PATH)) &&
             !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
         end
 

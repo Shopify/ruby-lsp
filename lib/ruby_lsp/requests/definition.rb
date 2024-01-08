@@ -37,13 +37,15 @@ module RubyLsp
           nesting: T::Array[String],
           index: RubyIndexer::Index,
           dispatcher: Prism::Dispatcher,
+          typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(uri, nesting, index, dispatcher)
+      def initialize(uri, nesting, index, dispatcher, typechecker_enabled)
         @uri = uri
         @nesting = nesting
         @index = index
         @_response = T.let(nil, ResponseType)
+        @typechecker_enabled = typechecker_enabled
 
         super(dispatcher)
 
@@ -111,7 +113,7 @@ module RubyLsp
 
         location = target_method.location
         file_path = target_method.file_path
-        return if defined_in_gem?(file_path)
+        return if @typechecker_enabled && defined_in_gem?(file_path)
 
         @_response = Interface::Location.new(
           uri: URI::Generic.from_path(path: file_path).to_s,
@@ -180,7 +182,7 @@ module RubyLsp
           # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
           # in the project, even if the files are typed false
           file_path = entry.file_path
-          next if defined_in_gem?(file_path)
+          next if DependencyDetector.instance.typechecker && defined_in_gem?(file_path)
 
           Interface::Location.new(
             uri: URI::Generic.from_path(path: file_path).to_s,

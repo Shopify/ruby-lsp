@@ -67,6 +67,8 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
     uri = URI("file:///fake.rb")
     source = <<~RUBY
+      # typed: false
+
       class A
         # Hello from `foo`
         def foo; end
@@ -82,10 +84,9 @@ class HoverExpectationsTest < ExpectationsTestRunner
     index = executor.instance_variable_get(:@index)
     index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
 
-    stub_no_typechecker
     response = executor.execute({
       method: "textDocument/hover",
-      params: { textDocument: { uri: uri }, position: { character: 4, line: 5 } },
+      params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
     }).response
 
     assert_match("Hello from `foo`", response.contents.value)
@@ -99,6 +100,8 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
     uri = URI("file:///fake.rb")
     source = <<~RUBY
+      # typed: false
+
       class A
         # Hello from `foo`
         def foo; end
@@ -114,10 +117,9 @@ class HoverExpectationsTest < ExpectationsTestRunner
     index = executor.instance_variable_get(:@index)
     index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
 
-    stub_no_typechecker
     response = executor.execute({
       method: "textDocument/hover",
-      params: { textDocument: { uri: uri }, position: { character: 9, line: 5 } },
+      params: { textDocument: { uri: uri }, position: { character: 9, line: 7 } },
     }).response
 
     assert_match("Hello from `foo`", response.contents.value)
