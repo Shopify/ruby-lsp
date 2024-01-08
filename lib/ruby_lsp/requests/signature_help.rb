@@ -45,14 +45,12 @@ module RubyLsp
 
       sig do
         params(
-          context: T::Hash[Symbol, T.untyped],
           nesting: T::Array[String],
           index: RubyIndexer::Index,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(context, nesting, index, dispatcher)
-        @context = context
+      def initialize(nesting, index, dispatcher)
         @nesting = nesting
         @index = index
         @_response = T.let(nil, ResponseType)

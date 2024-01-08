@@ -219,6 +219,37 @@ class SignatureHelpTest < Minitest::Test
     assert_equal(1, result.active_parameter)
   end
 
+  def test_requests_missing_context
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+      class Foo
+        def bar(a, b)
+        end
+
+        def baz
+          bar()
+        end
+      end
+    RUBY
+
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    result = run_request(
+      method: "textDocument/signatureHelp",
+      params: {
+        textDocument: { uri: @uri.to_s },
+        position: { line: 5, character: 7 },
+      },
+    )
+
+    signature = result.signatures.first
+
+    assert_equal("bar(a, b)", signature.label)
+    assert_equal(0, result.active_parameter)
+  end
+
   private
 
   def run_request(method:, params: {})
