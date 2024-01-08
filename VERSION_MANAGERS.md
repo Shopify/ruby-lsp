@@ -26,14 +26,14 @@ command that will activate the right Ruby version or add the Ruby `bin` folder t
 }
 ```
 
-### rtx
+### mise (formerly rtx)
 
-[rtx](https://github.com/jdxcode/rtx) is a Rust clone compatible with asdf. You can use it by adding the following
+[mise](https://github.com/jdx/mise) is a Rust clone compatible with asdf. You can use it by adding the following
 snippet to your user configuration JSON
 
 ```json
 {
   "rubyLsp.rubyVersionManager": "custom",
-  "rubyLsp.customRubyCommand": "eval \"$(rtx env -s zsh)\"" // Instructions for zsh, change for bash or fish
+  "rubyLsp.customRubyCommand": "eval \"$(mise env -s zsh)\"" // Instructions for zsh, change for bash or fish
 }
 ```
