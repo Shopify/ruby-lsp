@@ -163,6 +163,9 @@ module RubyLsp
           !text.nil? && !text.empty?
         end
 
+        # Remove leading whitespace if a heredoc was used for the summary or description
+        info = info.gsub(/^ +/, "") if info
+
         markdown = <<~MARKDOWN
           **#{spec.name}** (#{spec.version})
 
