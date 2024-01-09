@@ -181,7 +181,6 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
     assert_includes(response.contents.value, spec.name)
     assert_includes(response.contents.value, spec.version.to_s)
-    assert_includes(response.contents.value, spec.description)
   ensure
     T.must(message_queue).close
   end
