@@ -353,6 +353,17 @@ class ExecutorTest < Minitest::Test
     assert_same(RubyLsp::VOID, result.response)
   end
 
+  def test_initialize_sets_client_name
+    @executor.execute({
+      method: "initialize",
+      params: {
+        clientInfo: { name: "Foo" },
+      },
+    })
+
+    assert_equal("Foo", @store.client_name)
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)

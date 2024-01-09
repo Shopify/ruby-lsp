@@ -361,7 +361,7 @@ module RubyLsp
       ).returns(T::Array[Interface::TextEdit])
     end
     def on_type_formatting(uri, position, character)
-      Requests::OnTypeFormatting.new(@store.get(uri), position, character).perform
+      Requests::OnTypeFormatting.new(@store.get(uri), position, character, @store.client_name).perform
     end
 
     sig do
@@ -496,6 +496,9 @@ module RubyLsp
 
       workspace_uri = options.dig(:workspaceFolders, 0, :uri)
       @store.workspace_uri = URI(workspace_uri) if workspace_uri
+
+      client_name = options.dig(:clientInfo, :name)
+      @store.client_name = client_name if client_name
 
       encodings = options.dig(:capabilities, :general, :positionEncodings)
       @store.encoding = if encodings.nil? || encodings.empty?

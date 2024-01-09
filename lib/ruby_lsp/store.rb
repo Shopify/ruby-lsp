@@ -23,6 +23,9 @@ module RubyLsp
     sig { returns(T::Hash[Symbol, RequestConfig]) }
     attr_accessor :features_configuration
 
+    sig { returns(String) }
+    attr_accessor :client_name
+
     sig { void }
     def initialize
       @state = T.let({}, T::Hash[String, Document])
@@ -45,6 +48,7 @@ module RubyLsp
         },
         T::Hash[Symbol, RequestConfig],
       )
+      @client_name = T.let("Unknown", String)
     end
 
     sig { params(uri: URI::Generic).returns(Document) }

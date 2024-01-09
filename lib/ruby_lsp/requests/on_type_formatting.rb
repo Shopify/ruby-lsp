@@ -38,8 +38,15 @@ module RubyLsp
         T::Array[Regexp],
       )
 
-      sig { params(document: Document, position: T::Hash[Symbol, T.untyped], trigger_character: String).void }
-      def initialize(document, position, trigger_character)
+      sig do
+        params(
+          document: Document,
+          position: T::Hash[Symbol, T.untyped],
+          trigger_character: String,
+          client_name: String,
+        ).void
+      end
+      def initialize(document, position, trigger_character, client_name)
         super()
         @document = document
         @lines = T.let(@document.source.lines, T::Array[String])
@@ -50,6 +57,7 @@ module RubyLsp
         @position = position
         @edits = T.let([], T::Array[Interface::TextEdit])
         @trigger_character = trigger_character
+        @client_name = client_name
       end
 
       sig { override.returns(T.all(T::Array[Interface::TextEdit], Object)) }
@@ -170,6 +178,8 @@ module RubyLsp
 
       sig { params(line: Integer, character: Integer).void }
       def move_cursor_to(line, character)
+        return if @client_name != "Visual Studio Code"
+
         position = Interface::Position.new(
           line: line,
           character: character,
