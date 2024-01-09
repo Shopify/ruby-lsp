@@ -159,12 +159,17 @@ module RubyLsp
         spec = Gem::Specification.find_by_name(first_argument.content)
         return unless spec
 
-        info = [spec.description, spec.summary, "This rubygem does not have a description or summary."].find do |text|
-          !text.nil? && !text.empty?
-        end
+        info = T.let(
+          [
+            spec.description,
+            spec.summary,
+            "This rubygem does not have a description or summary.",
+          ].find { |text| !text.nil? && !text.empty? },
+          String,
+        )
 
         # Remove leading whitespace if a heredoc was used for the summary or description
-        info = info&.gsub(/^ +/, "")
+        info = info.gsub(/^ +/, "")
 
         markdown = <<~MARKDOWN
           **#{spec.name}** (#{spec.version})
