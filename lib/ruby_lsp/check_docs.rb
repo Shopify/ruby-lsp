@@ -51,18 +51,15 @@ module RubyLsp
 
       # Find all classes that inherit from BaseRequest or Listener, which are the ones we want to make sure are
       # documented
-      features = ObjectSpace.each_object(Class).filter_map do |k|
+      features = ObjectSpace.each_object(Class).select do |k|
         klass = T.unsafe(k)
-        klass_name = klass.name
-        next unless klass_name
-
-        klass if klass.ancestors.include?(Request) && !klass == Request
+        klass < Requests::Request && klass != Listener && klass != ExtensibleListener
       end
 
       missing_docs = T.let(Hash.new { |h, k| h[k] = [] }, T::Hash[String, T::Array[String]])
 
       features.each do |klass|
-        class_name = klass.name
+        class_name = T.unsafe(klass).name
         file_path, line_number = Module.const_source_location(class_name)
         next unless file_path && line_number
 
