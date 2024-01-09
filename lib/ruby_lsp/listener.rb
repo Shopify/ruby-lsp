@@ -4,7 +4,7 @@
 module RubyLsp
   # Listener is an abstract class to be used by requests for listening to events emitted when visiting an AST using the
   # Prism::Dispatcher.
-  class Listener
+  class Listener < Requests::Request
     extend T::Sig
     extend T::Helpers
     extend T::Generic
@@ -16,10 +16,11 @@ module RubyLsp
 
     sig { params(dispatcher: Prism::Dispatcher).void }
     def initialize(dispatcher)
+      super()
       @dispatcher = dispatcher
     end
 
-    sig { returns(ResponseType) }
+    sig { override.returns(ResponseType) }
     def response
       _response
     end
@@ -61,7 +62,7 @@ module RubyLsp
       @external_listeners.each { |l| merge_response!(l) }
     end
 
-    sig { returns(ResponseType) }
+    sig { override.returns(ResponseType) }
     def response
       merge_external_listeners_responses! unless @response_merged
       super

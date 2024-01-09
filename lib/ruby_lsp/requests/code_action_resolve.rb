@@ -21,7 +21,7 @@ module RubyLsp
     #
     # ```
     #
-    class CodeActionResolve
+    class CodeActionResolve < Request
       extend T::Sig
       NEW_VARIABLE_NAME = "new_variable"
 
@@ -36,12 +36,13 @@ module RubyLsp
 
       sig { params(document: Document, code_action: T::Hash[Symbol, T.untyped]).void }
       def initialize(document, code_action)
+        super()
         @document = document
         @code_action = code_action
       end
 
-      sig { returns(T.any(Interface::CodeAction, Error)) }
-      def run
+      sig { override.returns(T.any(Interface::CodeAction, Error)) }
+      def response
         return Error::EmptySelection if @document.source.empty?
 
         source_range = @code_action.dig(:data, :range)

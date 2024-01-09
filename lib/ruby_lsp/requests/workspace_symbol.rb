@@ -18,18 +18,19 @@ module RubyLsp
     # end
     # ```
     #
-    class WorkspaceSymbol
+    class WorkspaceSymbol < Request
       extend T::Sig
       include Support::Common
 
       sig { params(query: T.nilable(String), index: RubyIndexer::Index).void }
       def initialize(query, index)
+        super()
         @query = query
         @index = index
       end
 
-      sig { returns(T::Array[Interface::WorkspaceSymbol]) }
-      def run
+      sig { override.returns(T::Array[Interface::WorkspaceSymbol]) }
+      def response
         @index.fuzzy_search(@query).filter_map do |entry|
           # If the project is using Sorbet, we let Sorbet handle symbols defined inside the project itself and RBIs, but
           # we still return entries defined in gems to allow developers to jump directly to the source

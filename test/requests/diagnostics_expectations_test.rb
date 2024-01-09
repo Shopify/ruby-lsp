@@ -9,12 +9,12 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
 
   def run_expectations(source)
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI::Generic.from_path(path: __FILE__))
-    RubyLsp::Requests::Diagnostics.new(document).run
+    RubyLsp::Requests::Diagnostics.new(document).response
     result = T.let(nil, T.nilable(T::Array[RubyLsp::Interface::Diagnostic]))
 
     stdout, _ = capture_io do
       result = T.cast(
-        RubyLsp::Requests::Diagnostics.new(document).run,
+        RubyLsp::Requests::Diagnostics.new(document).response,
         T::Array[RubyLsp::Interface::Diagnostic],
       )
     end

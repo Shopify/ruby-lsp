@@ -9,7 +9,7 @@ class SelectionRangesExpectationsTest < ExpectationsTestRunner
 
   def run_expectations(source)
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI("file:///fake.rb"))
-    actual = RubyLsp::Requests::SelectionRanges.new(document).run
+    actual = RubyLsp::Requests::SelectionRanges.new(document).response
     params = @__params&.any? ? @__params : default_args
 
     filtered = params.map { |position| actual.find { |range| range.cover?(position) } }

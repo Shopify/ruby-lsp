@@ -277,12 +277,12 @@ module RubyLsp
 
     sig { params(query: T.nilable(String)).returns(T::Array[Interface::WorkspaceSymbol]) }
     def workspace_symbol(query)
-      Requests::WorkspaceSymbol.new(query, @index).run
+      Requests::WorkspaceSymbol.new(query, @index).response
     end
 
     sig { params(uri: URI::Generic, range: T.nilable(T::Hash[Symbol, T.untyped])).returns({ ast: String }) }
     def show_syntax_tree(uri, range)
-      { ast: Requests::ShowSyntaxTree.new(@store.get(uri), range).run }
+      { ast: Requests::ShowSyntaxTree.new(@store.get(uri), range).response }
     end
 
     sig do
@@ -363,7 +363,7 @@ module RubyLsp
     end
     def selection_range(uri, positions)
       ranges = @store.cache_fetch(uri, "textDocument/selectionRange") do |document|
-        Requests::SelectionRanges.new(document).run
+        Requests::SelectionRanges.new(document).response
       end
 
       # Per the selection range request spec (https://microsoft.github.io/language-server-protocol/specification#textDocument_selectionRange),
@@ -390,7 +390,7 @@ module RubyLsp
       path = uri.to_standardized_path
       return unless path.nil? || path.start_with?(T.must(@store.workspace_uri.to_standardized_path))
 
-      Requests::Formatting.new(@store.get(uri), formatter: @store.formatter).run
+      Requests::Formatting.new(@store.get(uri), formatter: @store.formatter).response
     end
 
     sig do
@@ -401,7 +401,7 @@ module RubyLsp
       ).returns(T::Array[Interface::TextEdit])
     end
     def on_type_formatting(uri, position, character)
-      Requests::OnTypeFormatting.new(@store.get(uri), position, character).run
+      Requests::OnTypeFormatting.new(@store.get(uri), position, character).response
     end
 
     sig do
@@ -449,14 +449,14 @@ module RubyLsp
     def code_action(uri, range, context)
       document = @store.get(uri)
 
-      Requests::CodeActions.new(document, range, context).run
+      Requests::CodeActions.new(document, range, context).response
     end
 
     sig { params(params: T::Hash[Symbol, T.untyped]).returns(Interface::CodeAction) }
     def code_action_resolve(params)
       uri = URI(params.dig(:data, :uri))
       document = @store.get(uri)
-      result = Requests::CodeActionResolve.new(document, params).run
+      result = Requests::CodeActionResolve.new(document, params).response
 
       case result
       when Requests::CodeActionResolve::Error::EmptySelection
@@ -490,7 +490,7 @@ module RubyLsp
       return unless path.nil? || path.start_with?(T.must(@store.workspace_uri.to_standardized_path))
 
       response = @store.cache_fetch(uri, "textDocument/diagnostic") do |document|
-        Requests::Diagnostics.new(document).run
+        Requests::Diagnostics.new(document).response
       end
 
       Interface::FullDocumentDiagnosticReport.new(kind: "full", items: response) if response

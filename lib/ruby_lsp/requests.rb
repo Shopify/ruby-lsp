@@ -25,6 +25,7 @@ module RubyLsp
   # - [SignatureHelp](rdoc-ref:RubyLsp::Requests::SignatureHelp)
 
   module Requests
+    autoload :Request, "ruby_lsp/requests/request"
     autoload :DocumentSymbol, "ruby_lsp/requests/document_symbol"
     autoload :DocumentLink, "ruby_lsp/requests/document_link"
     autoload :Hover, "ruby_lsp/requests/hover"
