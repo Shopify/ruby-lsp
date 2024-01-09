@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "ruby_lsp/requests/support/rubocop_diagnostics_runner"
 
 class DiagnosticsTest < Minitest::Test
   def test_empty_diagnostics_for_ignored_file
@@ -35,12 +34,14 @@ class DiagnosticsTest < Minitest::Test
       end
     RUBY
 
+    # We want to unload the rubocop runner for this test; first make sure that it's loaded
+    require "ruby_lsp/requests/support/rubocop_diagnostics_runner"
     klass = RubyLsp::Requests::Support::RuboCopDiagnosticsRunner
     RubyLsp::Requests::Support.send(:remove_const, :RuboCopDiagnosticsRunner)
 
     diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(document).response)
 
-    assert_equal(0, diagnostics.length)
+    assert_empty(diagnostics)
   ensure
     # Restore the class
     RubyLsp::Requests::Support.const_set(:RuboCopDiagnosticsRunner, klass)
@@ -53,9 +54,8 @@ class DiagnosticsTest < Minitest::Test
       end
     RUBY
 
-    # Make sure the rubocop runner is loaded
     diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(document).response)
 
-    assert_operator(diagnostics.length, :>, 0)
+    refute_empty(diagnostics)
   end
 end
