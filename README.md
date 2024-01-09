@@ -333,7 +333,7 @@ extension in development mode or run tests, set up some breakpoints and start wi
 
 ### Tracing LSP requests and responses
 
-LSP server tracing can be controlled through the `ruby lsp.trace.server` config key in the `.vscode/settings.json`
+LSP server tracing (logging) can be controlled through the `ruby lsp.trace.server` config key in the `.vscode/settings.json`
 config file.
 
 Possible values are:
