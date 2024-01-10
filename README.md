@@ -289,7 +289,7 @@ For example,
 
 ```typescript
 // Create the API class in a private plugin
-class MyApi implements TemeletryApi {
+class MyApi implements TelemetryApi {
   sendEvent(event: TelemetryEvent): Promise<void> {
     // Add timestamp to collected metrics
     const payload = {
