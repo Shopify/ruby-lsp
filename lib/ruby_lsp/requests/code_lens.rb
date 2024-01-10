@@ -46,14 +46,6 @@ module RubyLsp
         end + " -Itest ",
         String,
       )
-      GEMFILE_NAME = T.let(
-        begin
-          Bundler.with_original_env { Bundler.default_gemfile.basename.to_s }
-        rescue Bundler::GemfileNotFound
-          "Gemfile"
-        end,
-        String,
-      )
       ACCESS_MODIFIERS = T.let([:public, :private, :protected], T::Array[Symbol])
       SUPPORTED_TEST_LIBRARIES = T.let(["minitest", "test-unit"], T::Array[String])
 

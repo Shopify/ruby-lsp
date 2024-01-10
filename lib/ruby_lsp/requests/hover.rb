@@ -43,13 +43,15 @@ module RubyLsp
 
       sig do
         params(
+          uri: URI::Generic,
           index: RubyIndexer::Index,
           nesting: T::Array[String],
           dispatcher: Prism::Dispatcher,
           typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(index, nesting, dispatcher, typechecker_enabled)
+      def initialize(uri, index, nesting, dispatcher, typechecker_enabled)
+        @path = T.let(uri.to_standardized_path, T.nilable(String))
         @index = index
         @nesting = nesting
         @_response = T.let(nil, ResponseType)
@@ -108,8 +110,14 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
-        return if @typechecker_enabled
         return unless self_receiver?(node)
+
+        if @path && File.basename(@path) == GEMFILE_NAME && node.name == :gem
+          generate_gem_hover(node)
+          return
+        end
+
+        return if @typechecker_enabled
 
         message = node.message
         return unless message
@@ -141,6 +149,43 @@ module RubyLsp
           range: range_from_location(location),
           contents: markdown_from_index_entries(name, entries),
         )
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def generate_gem_hover(node)
+        first_argument = node.arguments&.arguments&.first
+        return unless first_argument.is_a?(Prism::StringNode)
+
+        spec = Gem::Specification.find_by_name(first_argument.content)
+        return unless spec
+
+        info = T.let(
+          [
+            spec.description,
+            spec.summary,
+            "This rubygem does not have a description or summary.",
+          ].find { |text| !text.nil? && !text.empty? },
+          String,
+        )
+
+        # Remove leading whitespace if a heredoc was used for the summary or description
+        info = info.gsub(/^ +/, "")
+
+        markdown = <<~MARKDOWN
+          **#{spec.name}** (#{spec.version})
+
+          #{info}
+        MARKDOWN
+
+        @_response = Interface::Hover.new(
+          range: range_from_location(node.location),
+          contents: Interface::MarkupContent.new(
+            kind: Constant::MarkupKind::MARKDOWN,
+            value: markdown,
+          ),
+        )
+      rescue Gem::MissingSpecError
+        # Do nothing if the spec cannot be found
       end
     end
   end
