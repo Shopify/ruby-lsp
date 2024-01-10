@@ -113,7 +113,7 @@ module RubyLsp
 
         location = target_method.location
         file_path = target_method.file_path
-        return if @typechecker_enabled && defined_in_gem?(file_path)
+        return if @typechecker_enabled && not_in_dependencies?(file_path)
 
         @_response = Interface::Location.new(
           uri: URI::Generic.from_path(path: file_path).to_s,
@@ -182,7 +182,7 @@ module RubyLsp
           # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
           # in the project, even if the files are typed false
           file_path = entry.file_path
-          next if DependencyDetector.instance.typechecker && defined_in_gem?(file_path)
+          next if DependencyDetector.instance.typechecker && not_in_dependencies?(file_path)
 
           Interface::Location.new(
             uri: URI::Generic.from_path(path: file_path).to_s,
