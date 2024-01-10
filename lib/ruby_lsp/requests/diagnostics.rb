@@ -44,7 +44,7 @@ module RubyLsp
       def response
         # Running RuboCop is slow, so to avoid excessive runs we only do so if the file is syntactically valid
         return syntax_error_diagnostics if @document.syntax_error?
-        return unless defined?(Support::RuboCopDiagnosticsRunner)
+        return [] unless defined?(Support::RuboCopDiagnosticsRunner)
 
         Support::RuboCopDiagnosticsRunner.instance.run(@uri, @document).map!(&:to_lsp_diagnostic)
       end

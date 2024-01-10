@@ -26,4 +26,36 @@ class DiagnosticsTest < Minitest::Test
     assert_equal(2, diagnostics.length)
     assert_equal("expected an `end` to close the `def` statement", T.must(diagnostics.last).message)
   end
+
+  def test_empty_diagnostics_without_rubocop
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///fake/file.rb"))
+      def foo
+        "Hello, world!"
+      end
+    RUBY
+
+    # We want to unload the rubocop runner for this test; first make sure that it's loaded
+    require "ruby_lsp/requests/support/rubocop_diagnostics_runner"
+    klass = RubyLsp::Requests::Support::RuboCopDiagnosticsRunner
+    RubyLsp::Requests::Support.send(:remove_const, :RuboCopDiagnosticsRunner)
+
+    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(document).response)
+
+    assert_empty(diagnostics)
+  ensure
+    # Restore the class
+    RubyLsp::Requests::Support.const_set(:RuboCopDiagnosticsRunner, klass)
+  end
+
+  def test_empty_diagnostics_with_rubocop
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///fake/file.rb"))
+      def foo
+        "Hello, world!"
+      end
+    RUBY
+
+    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(document).response)
+
+    refute_empty(diagnostics)
+  end
 end
