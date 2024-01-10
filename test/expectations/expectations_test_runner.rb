@@ -9,23 +9,15 @@ class ExpectationsTestRunner < Minitest::Test
 
   class << self
     def expectations_tests(handler_class, expectation_suffix)
-      execute_request = if handler_class < RubyLsp::Listener
-        <<~RUBY
-          dispatcher = Prism::Dispatcher.new
-          listener = #{handler_class}.new(dispatcher)
-          dispatcher.dispatch(document.tree)
-          listener.response
-        RUBY
-      else
-        "#{handler_class}.new(document, *params).run"
-      end
-
       class_eval(<<~RB, __FILE__, __LINE__ + 1)
         module ExpectationsRunnerMethods
           def run_expectations(source)
             params = @__params&.any? ? @__params : default_args
             document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI("file:///fake.rb"))
-            #{execute_request}
+            dispatcher = Prism::Dispatcher.new
+            listener = #{handler_class}.new(dispatcher)
+            dispatcher.dispatch(document.tree)
+            listener.response
           end
 
           def assert_expectations(source, expected)
