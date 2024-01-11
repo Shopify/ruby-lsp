@@ -1,5 +1,5 @@
 {
-    "result": {
+    "result": [{
         "uri": "file:///ruby_lsp/listener.rb",
         "range": {
             "start": {
@@ -11,7 +11,7 @@
                 "character": 0
             }
         }
-    },
+    }],
     "params": [
         {
             "line": 0,

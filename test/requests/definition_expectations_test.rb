@@ -125,7 +125,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 10, line: 0 } },
     }).response
 
-    assert_equal(uri.to_s, response.attributes[:uri])
+    assert_equal(uri.to_s, response.first.attributes[:uri])
   ensure
     T.must(message_queue).close
   end
@@ -156,9 +156,10 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     response = executor.execute({
       method: "textDocument/definition",
       params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 2, line: 4 } },
-    }).response
+    })
 
-    assert_equal(uri.to_s, response.first.attributes[:uri])
+    assert_nil(response.error, response.error&.full_message)
+    assert_equal(uri.to_s, response.response.first.attributes[:uri])
   ensure
     T.must(message_queue).close
   end
@@ -253,7 +254,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 4, line: 4 } },
     }).response
 
-    assert_equal(uri.to_s, response.attributes[:uri])
+    assert_equal(uri.to_s, response.first.attributes[:uri])
   ensure
     T.must(message_queue).close
   end
@@ -288,7 +289,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 9, line: 4 } },
     }).response
 
-    assert_equal(uri.to_s, response.attributes[:uri])
+    assert_equal(uri.to_s, response.first.attributes[:uri])
   ensure
     T.must(message_queue).close
   end

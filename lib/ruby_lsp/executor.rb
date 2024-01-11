@@ -143,13 +143,30 @@ module RubyLsp
           nil
         end
       when "textDocument/documentHighlight"
-        document_highlight(uri, request.dig(:params, :position))
+        dispatcher = Prism::Dispatcher.new
+        document = @store.get(uri)
+        request = Requests::DocumentHighlight.new(document, request.dig(:params, :position), dispatcher)
+        dispatcher.dispatch(document.tree)
+        request.response
       when "textDocument/onTypeFormatting"
         on_type_formatting(uri, request.dig(:params, :position), request.dig(:params, :ch))
       when "textDocument/hover"
-        hover(uri, request.dig(:params, :position))
+        dispatcher = Prism::Dispatcher.new
+        document = @store.get(uri)
+        Requests::Hover.new(
+          document,
+          @index,
+          request.dig(:params, :position),
+          dispatcher,
+          document.typechecker_enabled?,
+        ).response
       when "textDocument/inlayHint"
-        inlay_hint(uri, request.dig(:params, :range))
+        hints_configurations = T.must(@store.features_configuration.dig(:inlayHint))
+        dispatcher = Prism::Dispatcher.new
+        document = @store.get(uri)
+        request = Requests::InlayHints.new(document, request.dig(:params, :range), hints_configurations, dispatcher)
+        dispatcher.visit(document.tree)
+        request.response
       when "textDocument/codeAction"
         code_action(uri, request.dig(:params, :range), request.dig(:params, :context))
       when "codeAction/resolve"
@@ -169,11 +186,36 @@ module RubyLsp
           nil
         end
       when "textDocument/completion"
-        completion(uri, request.dig(:params, :position))
-      when "textDocument/definition"
-        definition(uri, request.dig(:params, :position))
+        dispatcher = Prism::Dispatcher.new
+        document = @store.get(uri)
+        Requests::Completion.new(
+          document,
+          @index,
+          request.dig(:params, :position),
+          document.typechecker_enabled?,
+          dispatcher,
+        ).response
       when "textDocument/signatureHelp"
-        signature_help(uri, request.dig(:params, :position), request.dig(:params, :context))
+        dispatcher = Prism::Dispatcher.new
+        document = @store.get(uri)
+
+        Requests::SignatureHelp.new(
+          document,
+          @index,
+          request.dig(:params, :position),
+          request.dig(:params, :context),
+          dispatcher,
+        ).response
+      when "textDocument/definition"
+        dispatcher = Prism::Dispatcher.new
+        document = @store.get(uri)
+        Requests::Definition.new(
+          document,
+          @index,
+          request.dig(:params, :position),
+          dispatcher,
+          document.typechecker_enabled?,
+        ).response
       when "workspace/didChangeWatchedFiles"
         did_change_watched_files(request.dig(:params, :changes))
       when "workspace/symbol"
@@ -243,38 +285,6 @@ module RubyLsp
       end
     end
 
-    sig do
-      params(
-        uri: URI::Generic,
-        position: T::Hash[Symbol, T.untyped],
-        context: T.nilable(T::Hash[Symbol, T.untyped]),
-      ).returns(T.any(T.nilable(Interface::SignatureHelp), T::Hash[Symbol, T.untyped]))
-    end
-    def signature_help(uri, position, context)
-      current_signature = context && context[:activeSignatureHelp]
-      document = @store.get(uri)
-      target, parent, nesting = document.locate_node(
-        { line: position[:line], character: position[:character] - 2 },
-        node_types: [Prism::CallNode],
-      )
-
-      # If we're typing a nested method call (e.g.: `foo(bar)`), then we may end up locating `bar` as the target method
-      # call incorrectly. To correct that, we check if there's an active signature with the same name as the parent node
-      # and then replace the target
-      if current_signature && parent.is_a?(Prism::CallNode)
-        active_signature = current_signature[:activeSignature] || 0
-
-        if current_signature.dig(:signatures, active_signature, :label)&.start_with?(parent.message)
-          target = parent
-        end
-      end
-
-      dispatcher = Prism::Dispatcher.new
-      listener = Requests::SignatureHelp.new(nesting, @index, dispatcher)
-      dispatcher.dispatch_once(target)
-      listener.response
-    end
-
     sig { params(query: T.nilable(String)).returns(T::Array[Interface::WorkspaceSymbol]) }
     def workspace_symbol(query)
       Requests::WorkspaceSymbol.new(query, @index).response
@@ -283,56 +293,6 @@ module RubyLsp
     sig { params(uri: URI::Generic, range: T.nilable(T::Hash[Symbol, T.untyped])).returns({ ast: String }) }
     def show_syntax_tree(uri, range)
       { ast: Requests::ShowSyntaxTree.new(@store.get(uri), range).response }
-    end
-
-    sig do
-      params(
-        uri: URI::Generic,
-        position: T::Hash[Symbol, T.untyped],
-      ).returns(T.nilable(T.any(T::Array[Interface::Location], Interface::Location)))
-    end
-    def definition(uri, position)
-      document = @store.get(uri)
-      target, parent, nesting = document.locate_node(
-        position,
-        node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode],
-      )
-
-      target = parent if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)
-
-      dispatcher = Prism::Dispatcher.new
-      base_listener = Requests::Definition.new(uri, nesting, @index, dispatcher, document.typechecker_enabled?)
-      dispatcher.dispatch_once(target)
-      base_listener.response
-    end
-
-    sig do
-      params(
-        uri: URI::Generic,
-        position: T::Hash[Symbol, T.untyped],
-      ).returns(T.nilable(Interface::Hover))
-    end
-    def hover(uri, position)
-      document = @store.get(uri)
-      target, parent, nesting = document.locate_node(
-        position,
-        node_types: Requests::Hover::ALLOWED_TARGETS,
-      )
-
-      if (Requests::Hover::ALLOWED_TARGETS.include?(parent.class) &&
-          !Requests::Hover::ALLOWED_TARGETS.include?(target.class)) ||
-          (parent.is_a?(Prism::ConstantPathNode) && target.is_a?(Prism::ConstantReadNode))
-        target = parent
-      end
-
-      # Instantiate all listeners
-      dispatcher = Prism::Dispatcher.new
-      hover = Requests::Hover.new(uri, @index, nesting, dispatcher, document.typechecker_enabled?)
-
-      # Emit events for all listeners
-      dispatcher.dispatch_once(target)
-
-      hover.response
     end
 
     sig do
@@ -407,41 +367,6 @@ module RubyLsp
     sig do
       params(
         uri: URI::Generic,
-        position: T::Hash[Symbol, T.untyped],
-      ).returns(T.nilable(T::Array[Interface::DocumentHighlight]))
-    end
-    def document_highlight(uri, position)
-      document = @store.get(uri)
-
-      target, parent = document.locate_node(position)
-      dispatcher = Prism::Dispatcher.new
-      listener = Requests::DocumentHighlight.new(target, parent, dispatcher)
-      dispatcher.visit(document.tree)
-      listener.response
-    end
-
-    sig do
-      params(
-        uri: URI::Generic,
-        range: T::Hash[Symbol, T.untyped],
-      ).returns(T.nilable(T::Array[Interface::InlayHint]))
-    end
-    def inlay_hint(uri, range)
-      document = @store.get(uri)
-
-      start_line = range.dig(:start, :line)
-      end_line = range.dig(:end, :line)
-
-      dispatcher = Prism::Dispatcher.new
-      hints_configurations = T.must(@store.features_configuration.dig(:inlayHint))
-      listener = Requests::InlayHints.new(start_line..end_line, hints_configurations, dispatcher)
-      dispatcher.visit(document.tree)
-      listener.response
-    end
-
-    sig do
-      params(
-        uri: URI::Generic,
         range: T::Hash[Symbol, T.untyped],
         context: T::Hash[Symbol, T.untyped],
       ).returns(T.nilable(T::Array[Interface::CodeAction]))
@@ -507,57 +432,6 @@ module RubyLsp
       dispatcher.visit(document.tree)
 
       Requests::Support::SemanticTokenEncoder.new.encode(listener.response)
-    end
-
-    sig do
-      params(
-        uri: URI::Generic,
-        position: T::Hash[Symbol, T.untyped],
-      ).returns(T.nilable(T::Array[Interface::CompletionItem]))
-    end
-    def completion(uri, position)
-      document = @store.get(uri)
-
-      # Completion always receives the position immediately after the character that was just typed. Here we adjust it
-      # back by 1, so that we find the right node
-      char_position = document.create_scanner.find_char_position(position) - 1
-      matched, parent, nesting = document.locate(
-        document.tree,
-        char_position,
-        node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode],
-      )
-      return unless matched && parent
-
-      target = case matched
-      when Prism::CallNode
-        message = matched.message
-
-        if message == "require"
-          args = matched.arguments&.arguments
-          return if args.nil? || args.is_a?(Prism::ForwardingArgumentsNode)
-
-          argument = args.first
-          return unless argument.is_a?(Prism::StringNode)
-          return unless (argument.location.start_offset..argument.location.end_offset).cover?(char_position)
-
-          argument
-        else
-          matched
-        end
-      when Prism::ConstantReadNode, Prism::ConstantPathNode
-        if parent.is_a?(Prism::ConstantPathNode) && matched.is_a?(Prism::ConstantReadNode)
-          parent
-        else
-          matched
-        end
-      end
-
-      return unless target
-
-      dispatcher = Prism::Dispatcher.new
-      listener = Requests::Completion.new(@index, nesting, dispatcher, document.typechecker_enabled?)
-      dispatcher.dispatch_once(target)
-      listener.response
     end
 
     sig { params(id: String, title: String, percentage: Integer).void }
