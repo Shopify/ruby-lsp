@@ -15,7 +15,7 @@ class DocumentHighlightExpectationsTest < ExpectationsTestRunner
     dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::DocumentHighlight.new(document, params.first, dispatcher)
     dispatcher.dispatch(document.tree)
-    listener.response
+    listener.perform
   end
 
   def default_args

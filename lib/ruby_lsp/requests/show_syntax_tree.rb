@@ -28,7 +28,7 @@ module RubyLsp
       end
 
       sig { override.returns(String) }
-      def response
+      def perform
         return ast_for_range if @range
 
         output_string = +""

@@ -17,7 +17,7 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
         document,
         params[:range],
         params[:context],
-      ).response
+      ).perform
     end
 
     assert_empty(stdout)

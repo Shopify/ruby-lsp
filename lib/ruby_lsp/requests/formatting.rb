@@ -62,7 +62,7 @@ module RubyLsp
       end
 
       sig { override.returns(T.nilable(T.all(T::Array[Interface::TextEdit], Object))) }
-      def response
+      def perform
         return if @formatter == "none"
         return if @document.syntax_error?
 

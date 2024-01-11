@@ -15,9 +15,9 @@ class ExpectationsTestRunner < Minitest::Test
             params = @__params&.any? ? @__params : default_args
             document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI("file:///fake.rb"))
             dispatcher = Prism::Dispatcher.new
-            listener = #{handler_class}.new(dispatcher)
+            request = #{handler_class}.new(dispatcher)
             dispatcher.dispatch(document.tree)
-            listener.response
+            request.perform
           end
 
           def assert_expectations(source, expected)

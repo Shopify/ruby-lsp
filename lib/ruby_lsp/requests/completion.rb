@@ -100,7 +100,7 @@ module RubyLsp
       end
 
       sig { override.returns(ResponseType) }
-      def response
+      def perform
         return [] unless @target
 
         @dispatcher.dispatch_once(@target)

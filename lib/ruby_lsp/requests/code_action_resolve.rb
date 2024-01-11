@@ -42,7 +42,7 @@ module RubyLsp
       end
 
       sig { override.returns(T.any(Interface::CodeAction, Error)) }
-      def response
+      def perform
         return Error::EmptySelection if @document.source.empty?
 
         source_range = @code_action.dig(:data, :range)

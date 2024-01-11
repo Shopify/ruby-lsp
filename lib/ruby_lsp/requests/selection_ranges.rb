@@ -32,7 +32,7 @@ module RubyLsp
       end
 
       sig { override.returns(T.all(T::Array[Support::SelectionRange], Object)) }
-      def response
+      def perform
         # [node, parent]
         queue = [[@document.tree, nil]]
 

@@ -12,7 +12,7 @@ class DiagnosticsTest < Minitest::Test
       uri: URI::Generic.from_path(path: fixture_path),
     )
 
-    result = RubyLsp::Requests::Diagnostics.new(document).response
+    result = RubyLsp::Requests::Diagnostics.new(document).perform
     assert_empty(result)
   end
 
@@ -21,7 +21,7 @@ class DiagnosticsTest < Minitest::Test
       def foo
     RUBY
 
-    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(document).response)
+    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(document).perform)
 
     assert_equal(2, diagnostics.length)
     assert_equal("expected an `end` to close the `def` statement", T.must(diagnostics.last).message)
@@ -39,7 +39,7 @@ class DiagnosticsTest < Minitest::Test
     klass = RubyLsp::Requests::Support::RuboCopDiagnosticsRunner
     RubyLsp::Requests::Support.send(:remove_const, :RuboCopDiagnosticsRunner)
 
-    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(document).response)
+    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(document).perform)
 
     assert_empty(diagnostics)
   ensure
@@ -54,7 +54,7 @@ class DiagnosticsTest < Minitest::Test
       end
     RUBY
 
-    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(document).response)
+    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(document).perform)
 
     refute_empty(diagnostics)
   end

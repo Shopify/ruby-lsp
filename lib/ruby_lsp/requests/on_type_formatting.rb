@@ -53,7 +53,7 @@ module RubyLsp
       end
 
       sig { override.returns(T.all(T::Array[Interface::TextEdit], Object)) }
-      def response
+      def perform
         case @trigger_character
         when "{"
           handle_curly_brace if @document.syntax_error?

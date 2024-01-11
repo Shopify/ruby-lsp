@@ -43,7 +43,7 @@ module RubyLsp
       end
 
       sig { override.returns(ResponseType) }
-      def response
+      def perform
         @listener.response
       end
     end

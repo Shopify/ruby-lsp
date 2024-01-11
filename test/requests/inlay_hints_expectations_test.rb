@@ -16,7 +16,7 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
     hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: true, implicitHashValue: true })
     request = RubyLsp::Requests::InlayHints.new(document, params.first, hints_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
-    request.response
+    request.perform
   end
 
   def default_args
@@ -33,7 +33,7 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
     hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: true, implicitHashValue: false })
     request = RubyLsp::Requests::InlayHints.new(document, default_args.first, hints_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
-    request.response
+    request.perform
   end
 
   def test_skip_implicit_rescue
@@ -48,6 +48,6 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
     hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: false, implicitHashValue: true })
     request = RubyLsp::Requests::InlayHints.new(document, default_args.first, hints_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
-    assert_empty(request.response)
+    assert_empty(request.perform)
   end
 end

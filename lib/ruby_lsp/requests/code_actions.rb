@@ -44,7 +44,7 @@ module RubyLsp
       end
 
       sig { override.returns(T.nilable(T.all(T::Array[Interface::CodeAction], Object))) }
-      def response
+      def perform
         diagnostics = @context[:diagnostics]
 
         code_actions = diagnostics.flat_map do |diagnostic|
