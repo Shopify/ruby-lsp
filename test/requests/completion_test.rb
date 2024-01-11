@@ -494,6 +494,7 @@ class CompletionTest < Minitest::Test
     assert_equal(["bar", "baz"], result.map(&:label))
     assert_equal(["bar", "baz"], result.map(&:filter_text))
     assert_equal(["bar", "baz"], result.map { |completion| completion.text_edit.new_text })
+    assert_equal(["(a, b)", "(c, d)"], result.map { |completion| completion.label_details.detail })
   end
 
   def test_completion_for_methods_named_with_uppercase_characters

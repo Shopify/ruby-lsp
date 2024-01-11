@@ -178,6 +178,7 @@ module RubyLsp
           text_edit: Interface::TextEdit.new(range: range_from_node(node), new_text: name),
           kind: Constant::CompletionItemKind::METHOD,
           label_details: Interface::CompletionItemLabelDetails.new(
+            detail: "(#{entry.parameters.map(&:decorated_name).join(", ")})",
             description: entry.file_name,
           ),
           documentation: markdown_from_index_entries(name, entry),
