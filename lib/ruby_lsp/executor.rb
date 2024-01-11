@@ -94,7 +94,7 @@ module RubyLsp
         cached_response = document.cache_get(request[:method])
         return cached_response if cached_response
 
-        # Run listeners for the document
+        # Run requests for the document
         dispatcher = Prism::Dispatcher.new
         folding_range = Requests::FoldingRanges.new(document.parse_result.comments, dispatcher)
         document_symbol = Requests::DocumentSymbol.new(dispatcher)
@@ -107,13 +107,13 @@ module RubyLsp
 
         # Store all responses retrieve in this round of visits in the cache and then return the response for the request
         # we actually received
-        document.cache_set("textDocument/foldingRange", folding_range.response)
-        document.cache_set("textDocument/documentSymbol", document_symbol.response)
-        document.cache_set("textDocument/documentLink", document_link.response)
-        document.cache_set("textDocument/codeLens", code_lens.response)
+        document.cache_set("textDocument/foldingRange", folding_range.perform)
+        document.cache_set("textDocument/documentSymbol", document_symbol.perform)
+        document.cache_set("textDocument/documentLink", document_link.perform)
+        document.cache_set("textDocument/codeLens", code_lens.perform)
         document.cache_set(
           "textDocument/semanticTokens/full",
-          Requests::Support::SemanticTokenEncoder.new.encode(semantic_highlighting.response),
+          Requests::Support::SemanticTokenEncoder.new.encode(semantic_highlighting.perform),
         )
         document.cache_get(request[:method])
       when "textDocument/semanticTokens/range"
@@ -147,7 +147,7 @@ module RubyLsp
         document = @store.get(uri)
         request = Requests::DocumentHighlight.new(document, request.dig(:params, :position), dispatcher)
         dispatcher.dispatch(document.tree)
-        request.response
+        request.perform
       when "textDocument/onTypeFormatting"
         on_type_formatting(uri, request.dig(:params, :position), request.dig(:params, :ch))
       when "textDocument/hover"
@@ -159,14 +159,14 @@ module RubyLsp
           request.dig(:params, :position),
           dispatcher,
           document.typechecker_enabled?,
-        ).response
+        ).perform
       when "textDocument/inlayHint"
         hints_configurations = T.must(@store.features_configuration.dig(:inlayHint))
         dispatcher = Prism::Dispatcher.new
         document = @store.get(uri)
         request = Requests::InlayHints.new(document, request.dig(:params, :range), hints_configurations, dispatcher)
         dispatcher.visit(document.tree)
-        request.response
+        request.perform
       when "textDocument/codeAction"
         code_action(uri, request.dig(:params, :range), request.dig(:params, :context))
       when "codeAction/resolve"
@@ -194,7 +194,7 @@ module RubyLsp
           request.dig(:params, :position),
           document.typechecker_enabled?,
           dispatcher,
-        ).response
+        ).perform
       when "textDocument/signatureHelp"
         dispatcher = Prism::Dispatcher.new
         document = @store.get(uri)
@@ -205,7 +205,7 @@ module RubyLsp
           request.dig(:params, :position),
           request.dig(:params, :context),
           dispatcher,
-        ).response
+        ).perform
       when "textDocument/definition"
         dispatcher = Prism::Dispatcher.new
         document = @store.get(uri)
@@ -215,7 +215,7 @@ module RubyLsp
           request.dig(:params, :position),
           dispatcher,
           document.typechecker_enabled?,
-        ).response
+        ).perform
       when "workspace/didChangeWatchedFiles"
         did_change_watched_files(request.dig(:params, :changes))
       when "workspace/symbol"
@@ -287,12 +287,12 @@ module RubyLsp
 
     sig { params(query: T.nilable(String)).returns(T::Array[Interface::WorkspaceSymbol]) }
     def workspace_symbol(query)
-      Requests::WorkspaceSymbol.new(query, @index).response
+      Requests::WorkspaceSymbol.new(query, @index).perform
     end
 
     sig { params(uri: URI::Generic, range: T.nilable(T::Hash[Symbol, T.untyped])).returns({ ast: String }) }
     def show_syntax_tree(uri, range)
-      { ast: Requests::ShowSyntaxTree.new(@store.get(uri), range).response }
+      { ast: Requests::ShowSyntaxTree.new(@store.get(uri), range).perform }
     end
 
     sig do
@@ -323,7 +323,7 @@ module RubyLsp
     end
     def selection_range(uri, positions)
       ranges = @store.cache_fetch(uri, "textDocument/selectionRange") do |document|
-        Requests::SelectionRanges.new(document).response
+        Requests::SelectionRanges.new(document).perform
       end
 
       # Per the selection range request spec (https://microsoft.github.io/language-server-protocol/specification#textDocument_selectionRange),
@@ -350,7 +350,7 @@ module RubyLsp
       path = uri.to_standardized_path
       return unless path.nil? || path.start_with?(T.must(@store.workspace_uri.to_standardized_path))
 
-      Requests::Formatting.new(@store.get(uri), formatter: @store.formatter).response
+      Requests::Formatting.new(@store.get(uri), formatter: @store.formatter).perform
     end
 
     sig do
@@ -361,7 +361,7 @@ module RubyLsp
       ).returns(T::Array[Interface::TextEdit])
     end
     def on_type_formatting(uri, position, character)
-      Requests::OnTypeFormatting.new(@store.get(uri), position, character).response
+      Requests::OnTypeFormatting.new(@store.get(uri), position, character).perform
     end
 
     sig do
@@ -374,14 +374,14 @@ module RubyLsp
     def code_action(uri, range, context)
       document = @store.get(uri)
 
-      Requests::CodeActions.new(document, range, context).response
+      Requests::CodeActions.new(document, range, context).perform
     end
 
     sig { params(params: T::Hash[Symbol, T.untyped]).returns(Interface::CodeAction) }
     def code_action_resolve(params)
       uri = URI(params.dig(:data, :uri))
       document = @store.get(uri)
-      result = Requests::CodeActionResolve.new(document, params).response
+      result = Requests::CodeActionResolve.new(document, params).perform
 
       case result
       when Requests::CodeActionResolve::Error::EmptySelection
@@ -415,7 +415,7 @@ module RubyLsp
       return unless path.nil? || path.start_with?(T.must(@store.workspace_uri.to_standardized_path))
 
       response = @store.cache_fetch(uri, "textDocument/diagnostic") do |document|
-        Requests::Diagnostics.new(document).response
+        Requests::Diagnostics.new(document).perform
       end
 
       Interface::FullDocumentDiagnosticReport.new(kind: "full", items: response) if response
@@ -428,10 +428,10 @@ module RubyLsp
       end_line = range.dig(:end, :line)
 
       dispatcher = Prism::Dispatcher.new
-      listener = Requests::SemanticHighlighting.new(dispatcher, range: start_line..end_line)
+      request = Requests::SemanticHighlighting.new(dispatcher, range: start_line..end_line)
       dispatcher.visit(document.tree)
 
-      Requests::Support::SemanticTokenEncoder.new.encode(listener.response)
+      Requests::Support::SemanticTokenEncoder.new.encode(request.perform)
     end
 
     sig { params(id: String, title: String, percentage: Integer).void }

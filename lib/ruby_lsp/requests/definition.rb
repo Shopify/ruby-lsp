@@ -62,7 +62,7 @@ module RubyLsp
       end
 
       sig { override.returns(ResponseType) }
-      def response
+      def perform
         @dispatcher.dispatch_once(@target)
         result = []
 

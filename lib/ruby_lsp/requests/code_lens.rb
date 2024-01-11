@@ -60,7 +60,7 @@ module RubyLsp
       end
 
       sig { override.returns(ResponseType) }
-      def response
+      def perform
         @listeners.flat_map(&:response)
       end
     end

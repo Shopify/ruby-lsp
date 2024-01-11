@@ -30,7 +30,7 @@ module RubyLsp
       end
 
       sig { override.returns(T::Array[Interface::WorkspaceSymbol]) }
-      def response
+      def perform
         @index.fuzzy_search(@query).filter_map do |entry|
           # If the project is using Sorbet, we let Sorbet handle symbols defined inside the project itself and RBIs, but
           # we still return entries defined in gems to allow developers to jump directly to the source

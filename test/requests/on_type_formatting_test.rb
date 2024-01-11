@@ -16,7 +16,7 @@ class OnTypeFormattingTest < Minitest::Test
     )
     document.parse
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").perform
     expected_edits = [
       {
         range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
@@ -46,7 +46,7 @@ class OnTypeFormattingTest < Minitest::Test
     )
     document.parse
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 11 }, "{").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 11 }, "{").perform
     expected_edits = [
       {
         range: { start: { line: 0, character: 11 }, end: { line: 0, character: 11 } },
@@ -72,7 +72,7 @@ class OnTypeFormattingTest < Minitest::Test
     )
     document.parse
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 12 }, "|").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 12 }, "|").perform
     expected_edits = [
       {
         range: { start: { line: 0, character: 12 }, end: { line: 0, character: 12 } },
@@ -98,7 +98,7 @@ class OnTypeFormattingTest < Minitest::Test
     )
     document.parse
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 2 }, "|").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 2 }, "|").perform
     assert_empty(T.must(edits))
   end
 
@@ -121,7 +121,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 3,
     )
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 12 }, "|").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 12 }, "|").perform
     expected_edits = [
       {
         range: { start: { line: 0, character: 12 }, end: { line: 0, character: 12 } },
@@ -144,7 +144,7 @@ class OnTypeFormattingTest < Minitest::Test
       version: 3,
     )
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 13 }, "|").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 13 }, "|").perform
     expected_edits = [
       {
         range: { start: { line: 0, character: 13 }, end: { line: 0, character: 14 } },
@@ -177,7 +177,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 3,
     )
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 17 }, "|").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 17 }, "|").perform
     expected_edits = [
       {
         range: { start: { line: 0, character: 17 }, end: { line: 0, character: 18 } },
@@ -203,7 +203,7 @@ class OnTypeFormattingTest < Minitest::Test
     )
     document.parse
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 14 }, "\n").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 14 }, "\n").perform
     expected_edits = [
       {
         range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } },
@@ -225,7 +225,7 @@ class OnTypeFormattingTest < Minitest::Test
     )
     document.parse
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 5 }, "\n").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 5 }, "\n").perform
     assert_empty(edits)
   end
 
@@ -243,7 +243,7 @@ class OnTypeFormattingTest < Minitest::Test
     )
     document.parse
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 14 }, "\n").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 14 }, "\n").perform
     expected_edits = [
       {
         range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } },
@@ -268,7 +268,7 @@ class OnTypeFormattingTest < Minitest::Test
     )
     document.parse
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 7 }, "\n").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 7 }, "\n").perform
     expected_edits = [
       {
         range: { start: { line: 0, character: 7 }, end: { line: 0, character: 7 } },
@@ -290,7 +290,7 @@ class OnTypeFormattingTest < Minitest::Test
     )
     document.parse
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").perform
     expected_edits = [
       {
         range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
@@ -321,7 +321,7 @@ class OnTypeFormattingTest < Minitest::Test
     )
     document.parse
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 2 }, "\n").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 0, character: 2 }, "\n").perform
     assert_empty(edits)
   end
 
@@ -337,7 +337,7 @@ class OnTypeFormattingTest < Minitest::Test
     )
     document.parse
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").perform
     expected_edits = [
       {
         range: { start: { line: 2, character: 2 }, end: { line: 2, character: 2 } },
@@ -354,7 +354,7 @@ class OnTypeFormattingTest < Minitest::Test
 
   def test_auto_indent_after_end_keyword
     document = RubyLsp::RubyDocument.new(source: +"if foo\nbar\nend", version: 1, uri: URI("file:///fake.rb"))
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 2, character: 2 }, "d").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 2, character: 2 }, "d").perform
 
     expected_edits = [
       {
@@ -372,13 +372,13 @@ class OnTypeFormattingTest < Minitest::Test
 
   def test_breaking_line_if_a_keyword_is_part_of_method_call
     document = RubyLsp::RubyDocument.new(source: +"  force({", version: 1, uri: URI("file:///fake.rb"))
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").perform
     assert_empty(edits)
   end
 
   def test_breaking_line_if_a_keyword_in_a_subexpression
     document = RubyLsp::RubyDocument.new(source: +"  var = (if", version: 1, uri: URI("file:///fake.rb"))
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").perform
     expected_edits = [
       {
         range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
@@ -408,7 +408,7 @@ class OnTypeFormattingTest < Minitest::Test
     )
     document.parse
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 2 }, "\n").perform
     expected_edits = [
       {
         range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
@@ -429,7 +429,7 @@ class OnTypeFormattingTest < Minitest::Test
   def test_completing_end_token_inside_parameters
     document = RubyLsp::RubyDocument.new(source: +"foo(proc do\n)", version: 1, uri: URI("file:///fake.rb"))
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 0 }, "\n").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 0 }, "\n").perform
     expected_edits = [
       {
         range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } },
@@ -450,7 +450,7 @@ class OnTypeFormattingTest < Minitest::Test
   def test_completing_end_token_inside_brackets
     document = RubyLsp::RubyDocument.new(source: +"foo[proc do\n]", version: 1, uri: URI("file:///fake.rb"))
 
-    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 0 }, "\n").response
+    edits = RubyLsp::Requests::OnTypeFormatting.new(document, { line: 1, character: 0 }, "\n").perform
     expected_edits = [
       {
         range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } },

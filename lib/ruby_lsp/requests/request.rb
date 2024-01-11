@@ -11,7 +11,7 @@ module RubyLsp
       abstract!
 
       sig { abstract.returns(T.anything) }
-      def response; end
+      def perform; end
     end
   end
 end

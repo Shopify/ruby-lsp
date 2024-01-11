@@ -15,7 +15,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     stub_test_library("minitest")
     listener = RubyLsp::Requests::CodeLens.new(uri, default_lenses_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
-    listener.response
+    listener.perform
   end
 
   def test_command_generation_for_test_unit
@@ -32,7 +32,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::CodeLens.new(uri, default_lenses_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
-    response = listener.response
+    response = listener.perform
 
     assert_equal(6, response.size)
 
@@ -59,7 +59,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     stub_test_library("unknown")
     listener = RubyLsp::Requests::CodeLens.new(uri, default_lenses_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
-    response = listener.response
+    response = listener.perform
 
     assert_empty(response)
   end
@@ -78,7 +78,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     stub_test_library("rspec")
     listener = RubyLsp::Requests::CodeLens.new(uri, default_lenses_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
-    response = listener.response
+    response = listener.perform
 
     assert_empty(response)
   end
@@ -97,7 +97,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     stub_test_library("minitest")
     listener = RubyLsp::Requests::CodeLens.new(uri, default_lenses_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
-    response = listener.response
+    response = listener.perform
 
     assert_empty(response)
   end
@@ -112,7 +112,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     lenses_configuration = RubyLsp::RequestConfig.new({ gemfileLinks: false })
     listener = RubyLsp::Requests::CodeLens.new(uri, lenses_configuration, dispatcher)
     dispatcher.dispatch(document.tree)
-    response = listener.response
+    response = listener.perform
     assert_empty(response)
   end
 
