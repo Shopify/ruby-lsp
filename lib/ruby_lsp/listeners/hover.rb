@@ -134,6 +134,7 @@ module RubyLsp
 
         markdown = <<~MARKDOWN
           **#{spec.name}** (#{spec.version})
+
           #{info}
         MARKDOWN
 
