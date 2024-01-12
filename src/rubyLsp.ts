@@ -31,7 +31,7 @@ export class RubyLsp {
       this.telemetry,
       this.currentActiveWorkspace.bind(this),
     );
-    this.debug = new Debugger(context, this.getWorkspace.bind(this));
+    this.debug = new Debugger(context, this.workspaceResolver.bind(this));
     this.registerCommands(context);
 
     this.statusItems = new StatusItems();
@@ -357,6 +357,28 @@ export class RubyLsp {
 
   private getWorkspace(uri: vscode.Uri): Workspace | undefined {
     return this.workspaces.get(uri.toString());
+  }
+
+  private workspaceResolver(
+    uri: vscode.Uri | undefined,
+  ): Workspace | undefined {
+    // If no URI is passed, we try to figured out what the active workspace is
+    if (!uri) {
+      return this.currentActiveWorkspace();
+    }
+
+    // If a workspace is found for that URI, then we return that one
+    const workspace = this.workspaces.get(uri.toString());
+    if (workspace) {
+      return workspace;
+    }
+
+    // Otherwise, if there's a URI, but we can't find a workspace for it, we fallback to trying to figure out what the
+    // active workspace is. This situation may happen if we receive a workspace folder URI that is not the actual
+    // workspace where the Ruby application exists. For example, if you have a monorepo with client and server
+    // directories and the `launch.json` file is in the top level directory, then we may receive the URI for the top
+    // level, but the actual workspace is the server directory
+    return this.currentActiveWorkspace();
   }
 
   // Displays a quick pick to select which workspace to perform an action on. For example, if multiple workspaces exist,

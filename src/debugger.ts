@@ -15,12 +15,12 @@ export class Debugger
   private debugProcess?: ChildProcessWithoutNullStreams;
   private readonly console = vscode.debug.activeDebugConsole;
   private readonly workspaceResolver: (
-    uri: vscode.Uri,
+    uri: vscode.Uri | undefined,
   ) => Workspace | undefined;
 
   constructor(
     context: vscode.ExtensionContext,
-    workspaceResolver: (uri: vscode.Uri) => Workspace | undefined,
+    workspaceResolver: (uri: vscode.Uri | undefined) => Workspace | undefined,
   ) {
     this.workspaceResolver = workspaceResolver;
 
@@ -86,14 +86,12 @@ export class Debugger
     debugConfiguration: vscode.DebugConfiguration,
     _token?: vscode.CancellationToken,
   ): vscode.ProviderResult<vscode.DebugConfiguration> {
-    if (!folder) {
-      throw new Error("Debugging requires a workspace folder to be opened");
-    }
-
-    const workspace = this.workspaceResolver(folder.uri);
+    const workspace = this.workspaceResolver(folder?.uri);
 
     if (!workspace) {
-      throw new Error(`Couldn't find workspace ${folder.name}`);
+      throw new Error(
+        `Couldn't find a workspace for URI: ${folder?.uri} or editor: ${vscode.window.activeTextEditor}`,
+      );
     }
 
     if (debugConfiguration.env) {
@@ -105,6 +103,8 @@ export class Debugger
     } else {
       debugConfiguration.env = workspace.ruby.env;
     }
+
+    debugConfiguration.workspace = workspace;
 
     const workspacePath = workspace.workspaceFolder.uri.fsPath;
 
@@ -165,14 +165,11 @@ export class Debugger
     let initialMessage = "";
     let initialized = false;
 
-    const workspaceFolder = session.workspaceFolder;
-    if (!workspaceFolder) {
-      throw new Error("Debugging requires a workspace folder to be opened");
-    }
-
-    const cwd = workspaceFolder.uri.fsPath;
-    const sockPath = this.socketPath(cwd);
     const configuration = session.configuration;
+    const workspaceFolder: vscode.WorkspaceFolder =
+      configuration.workspace.workspaceFolder;
+    const cwd = workspaceFolder.uri.fsPath;
+    const sockPath = this.socketPath(workspaceFolder.name);
 
     return new Promise((resolve, reject) => {
       const args = [
@@ -241,14 +238,14 @@ export class Debugger
 
   // Generate a socket path so that Ruby debug doesn't have to create one for us. This makes coordination easier since
   // we always know the path to the socket
-  private socketPath(cwd: string) {
+  private socketPath(workspaceName: string) {
     const socketsDir = path.join("/", "tmp", "ruby-lsp-debug-sockets");
     if (!fs.existsSync(socketsDir)) {
       fs.mkdirSync(socketsDir);
     }
 
     let socketIndex = 0;
-    const prefix = `ruby-debug-${path.basename(cwd)}`;
+    const prefix = `ruby-debug-${workspaceName}`;
     const existingSockets = fs
       .readdirSync(socketsDir)
       .map((file) => file)
