@@ -4,7 +4,7 @@ PATH
     ruby-lsp (0.13.3)
       language_server-protocol (~> 3.17.0)
       prism (>= 0.19.0, < 0.20)
-      sorbet-runtime (>= 0.5.5685)
+      sorbet-runtime (>= 0.5.10782)
 
 GEM
   remote: https://rubygems.org/
