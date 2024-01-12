@@ -3,39 +3,21 @@
 
 module RubyLsp
   module Listeners
-    class DocumentSymbol < Listener
+    class DocumentSymbol
       extend T::Sig
       extend T::Generic
-
-      ResponseType = type_member { { fixed: T::Array[Interface::DocumentSymbol] } }
+      include Requests::Support::Common
 
       ATTR_ACCESSORS = T.let([:attr_reader, :attr_writer, :attr_accessor].freeze, T::Array[Symbol])
 
-      class SymbolHierarchyRoot
-        extend T::Sig
-
-        sig { returns(T::Array[Interface::DocumentSymbol]) }
-        attr_reader :children
-
-        sig { void }
-        def initialize
-          @children = T.let([], T::Array[Interface::DocumentSymbol])
-        end
+      sig do
+        params(
+          stack: Response::DocumentSymbolStack,
+          dispatcher: Prism::Dispatcher,
+        ).void
       end
-
-      sig { override.returns(T::Array[Interface::DocumentSymbol]) }
-      attr_reader :_response
-
-      sig { params(dispatcher: Prism::Dispatcher).void }
-      def initialize(dispatcher)
-        @root = T.let(SymbolHierarchyRoot.new, SymbolHierarchyRoot)
-        @_response = T.let(@root.children, T::Array[Interface::DocumentSymbol])
-        @stack = T.let(
-          [@root],
-          T::Array[T.any(SymbolHierarchyRoot, Interface::DocumentSymbol)],
-        )
-
-        super
+      def initialize(stack, dispatcher)
+        @stack = stack
 
         dispatcher.register(
           self,
@@ -214,7 +196,7 @@ module RubyLsp
           children: [],
         )
 
-        T.must(@stack.last).children << symbol
+        @stack.last.children << symbol
 
         symbol
       end
