@@ -83,6 +83,7 @@ features. This is the mechanism that powers addons like
 
 - [Ruby LSP Rails](https://github.com/Shopify/ruby-lsp-rails)
 - [Ruby LSP RSpec](https://github.com/st0012/ruby-lsp-rspec)
+- [Ruby LSP rubyfmt](https://github.com/jscharf/ruby-lsp-rubyfmt)
 
 For instructions on how to create addons, see the [addons documentation](ADDONS.md).
 
