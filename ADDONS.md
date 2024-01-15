@@ -129,6 +129,7 @@ module RubyLsp
     end
 
     # All listeners have to inherit from ::RubyLsp::Listener
+    # NOTE: Listeners are currently being refactored, but this implementation embodies the current approach for most listeners.
     class Hover < ::RubyLsp::Listener
       extend T::Sig
       extend T::Generic

@@ -1,6 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
+require_relative "response_builder"
+
 module RubyLsp
   # To register an addon, inherit from this class and implement both `name` and `activate`
   #
@@ -118,12 +120,13 @@ module RubyLsp
     # Creates a new Hover listener. This method is invoked on every Hover request
     sig do
       overridable.params(
+        response_builder: RubyLsp::HoverResponseBuilder,
         nesting: T::Array[String],
         index: RubyIndexer::Index,
         dispatcher: Prism::Dispatcher,
       ).returns(T.nilable(Listener[T.nilable(Interface::Hover)]))
     end
-    def create_hover_listener(nesting, index, dispatcher); end
+    def create_hover_listener(response_builder, nesting, index, dispatcher); end
 
     # Creates a new DocumentSymbol listener. This method is invoked on every DocumentSymbol request
     sig do

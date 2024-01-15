@@ -1,13 +1,13 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "ruby_lsp/response_builder"
+
 module RubyLsp
   module Listeners
-    class Hover < Listener
+    class Hover
       extend T::Sig
-      extend T::Generic
-
-      ResponseType = type_member { { fixed: T.nilable(Interface::Hover) } }
+      include Requests::Support::Common
 
       ALLOWED_TARGETS = T.let(
         [
@@ -19,11 +19,9 @@ module RubyLsp
         T::Array[T.class_of(Prism::Node)],
       )
 
-      sig { override.returns(ResponseType) }
-      attr_reader :_response
-
       sig do
         params(
+          response_builder: RubyLsp::HoverResponseBuilder,
           uri: URI::Generic,
           nesting: T::Array[String],
           index: RubyIndexer::Index,
@@ -31,14 +29,13 @@ module RubyLsp
           typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(uri, nesting, index, dispatcher, typechecker_enabled)
+      def initialize(response_builder, uri, nesting, index, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
+        @response_builder = response_builder
         @path = T.let(uri.to_standardized_path, T.nilable(String))
         @nesting = nesting
         @index = index
         @typechecker_enabled = typechecker_enabled
-        @_response = T.let(nil, ResponseType)
 
-        super(dispatcher)
         dispatcher.register(
           self,
           :on_constant_read_node_enter,
@@ -86,12 +83,7 @@ module RubyLsp
         target_method = @index.resolve_method(message, @nesting.join("::"))
         return unless target_method
 
-        location = target_method.location
-
-        @_response = Interface::Hover.new(
-          range: range_from_location(location),
-          contents: markdown_from_index_entries(message, target_method),
-        )
+        @response_builder << markdown_from_index_entries(message, target_method)
       end
 
       private
@@ -106,10 +98,7 @@ module RubyLsp
         first_entry = T.must(entries.first)
         return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{name}"
 
-        @_response = Interface::Hover.new(
-          range: range_from_location(location),
-          contents: markdown_from_index_entries(name, entries),
-        )
+        @response_builder << markdown_from_index_entries(name, entries)
       end
 
       sig { params(node: Prism::CallNode).void }
@@ -138,13 +127,7 @@ module RubyLsp
           #{info}
         MARKDOWN
 
-        @_response = Interface::Hover.new(
-          range: range_from_location(node.location),
-          contents: Interface::MarkupContent.new(
-            kind: Constant::MarkupKind::MARKDOWN,
-            value: markdown,
-          ),
-        )
+        @response_builder << markdown
       rescue Gem::MissingSpecError
         # Do nothing if the spec cannot be found
       end
