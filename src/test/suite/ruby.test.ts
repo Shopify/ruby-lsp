@@ -6,6 +6,8 @@ import * as os from "os";
 import * as vscode from "vscode";
 
 import { Ruby, VersionManager } from "../../ruby";
+import { WorkspaceChannel } from "../../workspaceChannel";
+import { LOG_CHANNEL } from "../../common";
 
 suite("Ruby environment activation", () => {
   let ruby: Ruby;
@@ -22,10 +24,15 @@ suite("Ruby environment activation", () => {
     const context = {
       extensionMode: vscode.ExtensionMode.Test,
     } as vscode.ExtensionContext;
+    const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
 
-    ruby = new Ruby(context, {
-      uri: { fsPath: tmpPath },
-    } as vscode.WorkspaceFolder);
+    ruby = new Ruby(
+      context,
+      {
+        uri: { fsPath: tmpPath },
+      } as vscode.WorkspaceFolder,
+      outputChannel,
+    );
     await ruby.activateRuby(
       // eslint-disable-next-line no-process-env
       process.env.CI ? VersionManager.None : VersionManager.Chruby,

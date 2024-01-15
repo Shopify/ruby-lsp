@@ -10,7 +10,8 @@ import { State } from "vscode-languageclient/node";
 import { Ruby, VersionManager } from "../../ruby";
 import { Telemetry, TelemetryApi, TelemetryEvent } from "../../telemetry";
 import Client from "../../client";
-import { asyncExec } from "../../common";
+import { LOG_CHANNEL, asyncExec } from "../../common";
+import { WorkspaceChannel } from "../../workspaceChannel";
 
 class FakeApi implements TelemetryApi {
   public sentEvents: TelemetryEvent[];
@@ -66,8 +67,9 @@ suite("Client", () => {
         update: (_name: string, _value: any) => Promise.resolve(),
       },
     } as unknown as vscode.ExtensionContext;
+    const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
 
-    const ruby = new Ruby(context, workspaceFolder);
+    const ruby = new Ruby(context, workspaceFolder, outputChannel);
     await ruby.activateRuby();
 
     await asyncExec("gem install ruby-lsp", {
@@ -82,6 +84,7 @@ suite("Client", () => {
       ruby,
       () => {},
       workspaceFolder,
+      outputChannel,
     );
 
     try {

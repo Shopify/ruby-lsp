@@ -12,6 +12,7 @@ import {
   WorkspaceInterface,
   STATUS_EMITTER,
 } from "./common";
+import { WorkspaceChannel } from "./workspaceChannel";
 
 export class Workspace implements WorkspaceInterface {
   public lspClient?: Client;
@@ -20,6 +21,7 @@ export class Workspace implements WorkspaceInterface {
   public readonly workspaceFolder: vscode.WorkspaceFolder;
   private readonly context: vscode.ExtensionContext;
   private readonly telemetry: Telemetry;
+  private readonly outputChannel: WorkspaceChannel;
   private needsRestart = false;
   #rebaseInProgress = false;
   #error = false;
@@ -32,8 +34,12 @@ export class Workspace implements WorkspaceInterface {
   ) {
     this.context = context;
     this.workspaceFolder = workspaceFolder;
+    this.outputChannel = new WorkspaceChannel(
+      workspaceFolder.name,
+      LOG_CHANNEL,
+    );
     this.telemetry = telemetry;
-    this.ruby = new Ruby(context, workspaceFolder);
+    this.ruby = new Ruby(context, workspaceFolder, this.outputChannel);
     this.createTestItems = createTestItems;
 
     this.registerRestarts(context);
@@ -87,6 +93,7 @@ export class Workspace implements WorkspaceInterface {
       this.ruby,
       this.createTestItems,
       this.workspaceFolder,
+      this.outputChannel,
     );
 
     try {
@@ -102,7 +109,7 @@ export class Workspace implements WorkspaceInterface {
       }
     } catch (error: any) {
       this.error = true;
-      LOG_CHANNEL.error(`Error starting the server: ${error.message}`);
+      this.outputChannel.error(`Error starting the server: ${error.message}`);
     }
   }
 
@@ -144,7 +151,7 @@ export class Workspace implements WorkspaceInterface {
       }
     } catch (error: any) {
       this.error = true;
-      LOG_CHANNEL.error(`Error restarting the server: ${error.message}`);
+      this.outputChannel.error(`Error restarting the server: ${error.message}`);
     }
   }
 
@@ -199,7 +206,9 @@ export class Workspace implements WorkspaceInterface {
         this.context.workspaceState.update("rubyLsp.lastGemUpdate", Date.now());
       } catch (error) {
         // If we fail to update the global installation of `ruby-lsp`, we don't want to prevent the server from starting
-        LOG_CHANNEL.error(`Failed to update global ruby-lsp gem: ${error}`);
+        this.outputChannel.error(
+          `Failed to update global ruby-lsp gem: ${error}`,
+        );
       }
     }
   }
