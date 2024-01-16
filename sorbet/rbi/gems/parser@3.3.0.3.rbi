@@ -2503,93 +2503,93 @@ Parser::Lexer::LEX_STATES = T.let(T.unsafe(nil), Hash)
 
 # source://parser//lib/parser/lexer/literal.rb#6
 class Parser::Lexer::Literal
-  # source://parser//lib/parser/lexer/literal.rb#41
+  # source://parser//lib/parser/lexer/literal.rb#42
   def initialize(lexer, str_type, delimiter, str_s, heredoc_e = T.unsafe(nil), indent = T.unsafe(nil), dedent_body = T.unsafe(nil), label_allowed = T.unsafe(nil)); end
 
-  # source://parser//lib/parser/lexer/literal.rb#115
+  # source://parser//lib/parser/lexer/literal.rb#116
   def backslash_delimited?; end
 
-  # source://parser//lib/parser/lexer/literal.rb#38
+  # source://parser//lib/parser/lexer/literal.rb#39
   def dedent_level; end
 
-  # source://parser//lib/parser/lexer/literal.rb#190
+  # source://parser//lib/parser/lexer/literal.rb#191
   def end_interp_brace_and_try_closing; end
 
-  # source://parser//lib/parser/lexer/literal.rb#217
+  # source://parser//lib/parser/lexer/literal.rb#218
   def extend_content; end
 
-  # source://parser//lib/parser/lexer/literal.rb#221
+  # source://parser//lib/parser/lexer/literal.rb#222
   def extend_space(ts, te); end
 
-  # source://parser//lib/parser/lexer/literal.rb#196
+  # source://parser//lib/parser/lexer/literal.rb#197
   def extend_string(string, ts, te); end
 
-  # source://parser//lib/parser/lexer/literal.rb#203
+  # source://parser//lib/parser/lexer/literal.rb#204
   def flush_string; end
 
-  # source://parser//lib/parser/lexer/literal.rb#103
+  # source://parser//lib/parser/lexer/literal.rb#104
   def heredoc?; end
 
-  # source://parser//lib/parser/lexer/literal.rb#38
+  # source://parser//lib/parser/lexer/literal.rb#39
   def heredoc_e; end
 
-  # source://parser//lib/parser/lexer/literal.rb#167
+  # source://parser//lib/parser/lexer/literal.rb#168
   def infer_indent_level(line); end
 
-  # source://parser//lib/parser/lexer/literal.rb#90
+  # source://parser//lib/parser/lexer/literal.rb#91
   def interpolate?; end
 
-  # source://parser//lib/parser/lexer/literal.rb#123
+  # source://parser//lib/parser/lexer/literal.rb#124
   def munge_escape?(character); end
 
-  # source://parser//lib/parser/lexer/literal.rb#133
+  # source://parser//lib/parser/lexer/literal.rb#134
   def nest_and_try_closing(delimiter, ts, te, lookahead = T.unsafe(nil)); end
 
-  # source://parser//lib/parser/lexer/literal.rb#107
+  # source://parser//lib/parser/lexer/literal.rb#108
   def plain_heredoc?; end
 
-  # source://parser//lib/parser/lexer/literal.rb#99
+  # source://parser//lib/parser/lexer/literal.rb#100
   def regexp?; end
 
-  # source://parser//lib/parser/lexer/literal.rb#39
+  # source://parser//lib/parser/lexer/literal.rb#40
   def saved_herebody_s; end
 
-  # source://parser//lib/parser/lexer/literal.rb#39
+  # source://parser//lib/parser/lexer/literal.rb#40
   def saved_herebody_s=(_arg0); end
 
-  # source://parser//lib/parser/lexer/literal.rb#111
+  # source://parser//lib/parser/lexer/literal.rb#112
   def squiggly_heredoc?; end
 
-  # source://parser//lib/parser/lexer/literal.rb#186
+  # source://parser//lib/parser/lexer/literal.rb#187
   def start_interp_brace; end
 
-  # source://parser//lib/parser/lexer/literal.rb#38
+  # source://parser//lib/parser/lexer/literal.rb#39
   def str_s; end
 
-  # source://parser//lib/parser/lexer/literal.rb#231
+  # source://parser//lib/parser/lexer/literal.rb#232
   def supports_line_continuation_via_slash?; end
 
-  # source://parser//lib/parser/lexer/literal.rb#119
+  # source://parser//lib/parser/lexer/literal.rb#120
   def type; end
 
-  # source://parser//lib/parser/lexer/literal.rb#94
+  # source://parser//lib/parser/lexer/literal.rb#95
   def words?; end
 
   protected
 
-  # source://parser//lib/parser/lexer/literal.rb#262
+  # source://parser//lib/parser/lexer/literal.rb#263
   def clear_buffer; end
 
-  # source://parser//lib/parser/lexer/literal.rb#258
+  # source://parser//lib/parser/lexer/literal.rb#259
   def coerce_encoding(string); end
 
-  # source://parser//lib/parser/lexer/literal.rb#237
+  # source://parser//lib/parser/lexer/literal.rb#238
   def delimiter?(delimiter); end
 
-  # source://parser//lib/parser/lexer/literal.rb#278
+  # source://parser//lib/parser/lexer/literal.rb#279
   def emit(token, type, s, e); end
 
-  # source://parser//lib/parser/lexer/literal.rb#273
+  # source://parser//lib/parser/lexer/literal.rb#274
   def emit_start_tok; end
 end
 
@@ -2599,7 +2599,10 @@ Parser::Lexer::Literal::DELIMITERS = T.let(T.unsafe(nil), Hash)
 # source://parser//lib/parser/lexer/literal.rb#8
 Parser::Lexer::Literal::SPACE = T.let(T.unsafe(nil), Integer)
 
-# source://parser//lib/parser/lexer/literal.rb#10
+# source://parser//lib/parser/lexer/literal.rb#9
+Parser::Lexer::Literal::TAB = T.let(T.unsafe(nil), Integer)
+
+# source://parser//lib/parser/lexer/literal.rb#11
 Parser::Lexer::Literal::TYPES = T.let(T.unsafe(nil), Hash)
 
 # Mapping of strings to parser tokens.

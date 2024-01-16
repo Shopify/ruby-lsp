@@ -1246,10 +1246,10 @@ class RuboCop::Cop::Minitest::MultipleAssertions < ::RuboCop::Cop::Base
   # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#76
   def assertions_count_in_assignment(node); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#84
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#94
   def assertions_count_in_branches(branches); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#88
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#98
   def max_assertions; end
 end
 
@@ -1379,14 +1379,16 @@ class RuboCop::Cop::Minitest::NonExecutableTestMethod < ::RuboCop::Cop::Base
   # source://rubocop-minitest//lib/rubocop/cop/minitest/non_executable_test_method.rb#32
   def on_def(node); end
 
+  private
+
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/non_executable_test_method.rb#45
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/non_executable_test_method.rb#47
   def possible_test_class?(node); end
 
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/non_executable_test_method.rb#39
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/non_executable_test_method.rb#41
   def use_test_class?; end
 end
 
