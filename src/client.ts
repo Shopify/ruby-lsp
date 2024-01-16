@@ -102,11 +102,10 @@ function collectClientOptions(
 
   const features: EnabledFeatures = configuration.get("enabledFeatures")!;
   const enabledFeatures = Object.keys(features).filter((key) => features[key]);
+  const pattern = `${path.join(workspaceFolder.uri.fsPath, "**", "*")}`;
 
   return {
-    documentSelector: [
-      { language: "ruby", pattern: `${workspaceFolder.uri.fsPath}/**/*` },
-    ],
+    documentSelector: [{ language: "ruby", pattern }],
     workspaceFolder,
     diagnosticCollectionName: LSP_NAME,
     outputChannel,
