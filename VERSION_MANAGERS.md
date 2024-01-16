@@ -22,7 +22,7 @@ command that will activate the right Ruby version or add the Ruby `bin` folder t
   "rubyLsp.customRubyCommand": "my_custom_version_manager activate",
 
   // Adding a custom Ruby bin folder to the PATH
-  "rubyLsp.customRubyCommand": "PATH=/path/to/ruby/bin:$PATH"
+  "rubyLsp.customRubyCommand": "PATH=/path/to/ruby/bin:$PATH",
 }
 ```
 
