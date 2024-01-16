@@ -185,7 +185,7 @@ the version manager configuration, use the following configuration in VS Code to
 
 ```jsonc
 {
-  "rubyLsp.bundleGemfile": "../../path/to/the/directory/Gemfile"
+  "rubyLsp.bundleGemfile": "../../path/to/the/directory/Gemfile",
 }
 ```
 
@@ -208,20 +208,20 @@ This command would generate the following configuration:
       "type": "ruby_lsp",
       "name": "Debug",
       "request": "launch",
-      "program": "ruby ${file}"
+      "program": "ruby ${file}",
     },
     {
       "type": "ruby_lsp",
       "request": "launch",
       "name": "Debug test file",
-      "program": "ruby -Itest ${relativeFile}"
+      "program": "ruby -Itest ${relativeFile}",
     },
     {
       "type": "ruby_lsp",
       "request": "attach",
-      "name": "Attach to existing server"
-    }
-  ]
+      "name": "Attach to existing server",
+    },
+  ],
 }
 ```
 
@@ -242,8 +242,8 @@ These are the settings that may impact the Ruby LSP's behavior and their explana
     "editor.tabSize": 2, // Use 2 spaces for indentation
     "editor.insertSpaces": true, // Use spaces and not tabs for indentantion
     "editor.semanticHighlighting.enabled": true, // Enable semantic highlighting
-    "editor.formatOnType": true // Enable formatting while typing
-  }
+    "editor.formatOnType": true, // Enable formatting while typing
+  },
 }
 ```
 
