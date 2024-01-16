@@ -104,7 +104,7 @@ export class Debugger
       debugConfiguration.env = workspace.ruby.env;
     }
 
-    debugConfiguration.workspace = workspace;
+    debugConfiguration.targetFolder = workspace.workspaceFolder;
 
     const workspacePath = workspace.workspaceFolder.uri.fsPath;
 
@@ -166,8 +166,7 @@ export class Debugger
     let initialized = false;
 
     const configuration = session.configuration;
-    const workspaceFolder: vscode.WorkspaceFolder =
-      configuration.workspace.workspaceFolder;
+    const workspaceFolder: vscode.WorkspaceFolder = configuration.targetFolder;
     const cwd = workspaceFolder.uri.fsPath;
     const sockPath = this.socketPath(workspaceFolder.name);
 
