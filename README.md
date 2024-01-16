@@ -272,6 +272,21 @@ workspaces. The Ruby LSP supports this use case out of the box as long as `my_pr
 follows [VS Code's guidelines](https://code.visualstudio.com/docs/editor/workspaces#_multiroot-workspaces) for
 multi-root workspaces.
 
+### Developing on containers
+
+The Ruby LSP is a detached language server, which means it's a background process that runs separately from the VS Code
+instance. To provide its functionality, the Ruby LSP must be running in the same place where your project files exist
+and dependencies are installed.
+
+VS Code supports connecting to containers out of the box, which makes all editor features work seamlessly. That includes
+language servers, the integrated terminal, etc. The VS Code documentation has instructions on how to develop on
+containers locally or remotely. Please check the following resources before opening an issue:
+
+- [Developing inside a Container](https://code.visualstudio.com/docs/devcontainers/containers)
+- [Advanced container configuration](https://code.visualstudio.com/remote/advancedcontainers/overview)
+
+Please note that only Docker is officially supported as a backend by the Dev Container extension. <sup>[1](https://code.visualstudio.com/remote/advancedcontainers/docker-options)</sup>
+
 ## Telemetry
 
 On its own, the Ruby LSP does not collect any telemetry by default, but it does support hooking up to a private metrics

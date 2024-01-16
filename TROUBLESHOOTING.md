@@ -100,16 +100,7 @@ steps that led to the server getting stuck.
 
 ### Developing on containers
 
-The Ruby LSP is a detached language server, which means it's a background process that runs separately from the VS Code
-instance. To provide its functionality, the Ruby LSP must be running in the same place where your project files exist
-and dependencies are installed.
-
-VS Code supports connecting to containers out of the box, which makes all editor features work seamlessly. That includes
-language servers, the integrated terminal, etc. The VS Code documentation has instructions on how to develop on
-containers locally or remotely. Please check the following resources before opening an issue:
-
-- [Developing inside a Container](https://code.visualstudio.com/docs/devcontainers/containers)
-- [Advanced container configuration](https://code.visualstudio.com/remote/advancedcontainers/overview)
+See the [documentation](README.md#developing-on-containers).
 
 ## Diagnosing the problem
 
