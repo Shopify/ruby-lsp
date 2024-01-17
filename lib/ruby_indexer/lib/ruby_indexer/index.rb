@@ -184,7 +184,7 @@ module RubyIndexer
 
     sig { params(indexable_path: IndexablePath, source: T.nilable(String)).void }
     def index_single(indexable_path, source = nil)
-      content = source || File.read(indexable_path.full_path)
+      content = source || File.read(indexable_path.full_path).force_encoding("UTF-8")
       result = Prism.parse(content)
       collector = Collector.new(self, result, indexable_path.full_path)
       collector.collect(result.value)
