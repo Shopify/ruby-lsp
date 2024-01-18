@@ -304,7 +304,11 @@ module RubyIndexer
         break unless comment
 
         comment_content = comment.location.slice.chomp
-        next if comment_content.match?(RubyIndexer.configuration.magic_comment_regex)
+
+        # invalid encodings would raise an "invalid byte sequence" exception
+        if !comment_content.valid_encoding? || comment_content.match?(RubyIndexer.configuration.magic_comment_regex)
+          next
+        end
 
         comment_content.delete_prefix!("#")
         comment_content.delete_prefix!(" ")

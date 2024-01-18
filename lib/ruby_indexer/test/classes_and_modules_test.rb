@@ -168,6 +168,15 @@ module RubyIndexer
       assert_equal("This Bar comment has 1 line padding", bar_entry.comments.join("\n"))
     end
 
+    def test_skips_comments_containing_invalid_encodings
+      index(<<~RUBY)
+        # comment \xBA
+        class Foo
+        end
+      RUBY
+      assert(@index["Foo"].first)
+    end
+
     def test_comments_can_be_attached_to_a_namespaced_class
       index(<<~RUBY)
         # This is a Foo comment
