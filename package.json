@@ -181,8 +181,8 @@
               "type": "boolean",
               "default": true
             },
-            "references": {
-              "description": "Enable references, which finds all references to the symbol under the cursor",
+            "signatureHelp": {
+              "description": "Enable signature help, which shows the parameters and documentation for the method being invoked",
               "type": "boolean",
               "default": true
             }
@@ -204,7 +204,7 @@
             "codeLens": true,
             "definition": true,
             "workspaceSymbol": true,
-            "references": true
+            "signatureHelp": true
           }
         },
         "rubyLsp.featuresConfiguration": {
