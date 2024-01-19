@@ -9,7 +9,9 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
 
   def test_document_symbol_addons
     source = <<~RUBY
-      test "foo" do
+      class Foo
+        test "foo" do
+        end
       end
     RUBY
 
@@ -17,10 +19,17 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
       response = executor.execute({
         method: "textDocument/documentSymbol",
         params: { textDocument: { uri: "file:///fake.rb" } },
-      }).response
+      })
 
-      assert_equal("foo", response.first.name)
-      assert_equal(LanguageServer::Protocol::Constant::SymbolKind::METHOD, response.first.kind)
+      assert_nil(response.error, response.error&.full_message)
+
+      response = response.response
+
+      assert_equal(1, response.count)
+      assert_equal("Foo", response.first.name)
+
+      test_symbol = response.first.children.first
+      assert_equal(LanguageServer::Protocol::Constant::SymbolKind::METHOD, test_symbol.kind)
     end
   end
 
@@ -34,31 +43,32 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
         "Document SymbolsAddon"
       end
 
-      def create_document_symbol_listener(dispatcher)
-        klass = Class.new(RubyLsp::Listener) do
-          attr_reader :_response
+      def create_document_symbol_listener(stack, dispatcher)
+        klass = Class.new do
+          include RubyLsp::Requests::Support::Common
 
-          def initialize(dispatcher)
-            super
+          def initialize(stack, dispatcher)
+            @stack = stack
             dispatcher.register(self, :on_call_node_enter)
           end
 
           def on_call_node_enter(node)
-            T.bind(self, RubyLsp::Listener[T.untyped])
+            parent = @stack.last
+            T.bind(self, RubyLsp::Requests::Support::Common)
             message_value = node.message
             arguments = node.arguments&.arguments
             return unless message_value == "test" && arguments&.any?
 
-            @_response = [RubyLsp::Interface::DocumentSymbol.new(
+            parent.children << RubyLsp::Interface::DocumentSymbol.new(
               name: arguments.first.content,
               kind: LanguageServer::Protocol::Constant::SymbolKind::METHOD,
               selection_range: range_from_node(node),
               range: range_from_node(node),
-            )]
+            )
           end
         end
 
-        klass.new(dispatcher)
+        T.unsafe(klass).new(stack, dispatcher)
       end
     end
   end

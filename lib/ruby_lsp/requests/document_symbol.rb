@@ -46,25 +46,20 @@ module RubyLsp
         end
       end
 
-      ResponseType = type_member { { fixed: T::Array[Interface::DocumentSymbol] } }
-
       sig { params(dispatcher: Prism::Dispatcher).void }
       def initialize(dispatcher)
         super()
-        @listeners = T.let(
-          [Listeners::DocumentSymbol.new(dispatcher)],
-          T::Array[Listener[ResponseType]],
-        )
+        @stack = T.let(Response::DocumentSymbolStack.new, Response::DocumentSymbolStack)
+        Listeners::DocumentSymbol.new(@stack, dispatcher)
 
         Addon.addons.each do |addon|
-          addon_listener = addon.create_document_symbol_listener(dispatcher)
-          @listeners << addon_listener if addon_listener
+          addon.create_document_symbol_listener(@stack, dispatcher)
         end
       end
 
-      sig { override.returns(ResponseType) }
+      sig { override.returns(T::Array[Interface::DocumentSymbol]) }
       def perform
-        @listeners.flat_map(&:response).compact
+        @stack.result
       end
     end
   end
