@@ -24,8 +24,6 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
-      ResponseType = type_member { { fixed: T::Array[Listeners::SemanticHighlighting::SemanticToken] } }
-
       class << self
         extend T::Sig
 
@@ -34,8 +32,8 @@ module RubyLsp
           Interface::SemanticTokensRegistrationOptions.new(
             document_selector: { scheme: "file", language: "ruby" },
             legend: Interface::SemanticTokensLegend.new(
-              token_types: Listeners::SemanticHighlighting::TOKEN_TYPES.keys,
-              token_modifiers: Listeners::SemanticHighlighting::TOKEN_MODIFIERS.keys,
+              token_types: Response::SemanticHighlighting::TOKEN_TYPES.keys,
+              token_modifiers: Response::SemanticHighlighting::TOKEN_MODIFIERS.keys,
             ),
             range: true,
             full: { delta: false },
@@ -46,12 +44,16 @@ module RubyLsp
       sig { params(dispatcher: Prism::Dispatcher, range: T.nilable(T::Range[Integer])).void }
       def initialize(dispatcher, range: nil)
         super()
-        @listener = T.let(Listeners::SemanticHighlighting.new(dispatcher, range: range), Listener[ResponseType])
+        @stack = T.let(
+          Response::SemanticHighlighting::SemanticTokenStack.new,
+          Response::SemanticHighlighting::SemanticTokenStack,
+        )
+        Listeners::SemanticHighlighting.new(dispatcher, @stack, range: range)
       end
 
-      sig { override.returns(ResponseType) }
+      sig { override.returns(Interface::SemanticTokens) }
       def perform
-        @listener.response
+        @stack.result
       end
     end
   end

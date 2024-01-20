@@ -21,7 +21,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
     listener = RubyLsp::Requests::SemanticHighlighting.new(dispatcher, range: processed_range)
 
     dispatcher.dispatch(document.tree)
-    RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode(listener.perform)
+    listener.perform
   end
 
   def assert_expectations(source, expected)

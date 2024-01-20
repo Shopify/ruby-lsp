@@ -37,7 +37,7 @@ class SemanticTokenEncoderTest < Minitest::Test
 
     assert_equal(
       expected_encoding,
-      RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode(tokens).data,
+      RubyLsp::Response::SemanticHighlighting::SemanticTokenEncoder.new.encode(tokens).data,
     )
   end
 
@@ -74,22 +74,22 @@ class SemanticTokenEncoderTest < Minitest::Test
 
     assert_equal(
       expected_encoding,
-      RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode(tokens).data,
+      RubyLsp::Response::SemanticHighlighting::SemanticTokenEncoder.new.encode(tokens).data,
     )
   end
 
   def test_encoded_modifiers_with_no_modifiers
-    bit_flag = RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode_modifiers([])
+    bit_flag = RubyLsp::Response::SemanticHighlighting::SemanticTokenEncoder.new.encode_modifiers([])
     assert_equal(0b0000000000, bit_flag)
   end
 
   def test_encoded_modifiers_with_one_modifier
-    bit_flag = RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode_modifiers([9])
+    bit_flag = RubyLsp::Response::SemanticHighlighting::SemanticTokenEncoder.new.encode_modifiers([9])
     assert_equal(0b1000000000, bit_flag)
   end
 
   def test_encoded_modifiers_with_some_modifiers
-    bit_flag = RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode_modifiers([1, 3, 9, 7, 5])
+    bit_flag = RubyLsp::Response::SemanticHighlighting::SemanticTokenEncoder.new.encode_modifiers([1, 3, 9, 7, 5])
     assert_equal(0b1010101010, bit_flag)
   end
 
@@ -100,7 +100,7 @@ class SemanticTokenEncoderTest < Minitest::Test
     location.expects(:start_line).returns(start_line).at_least_once
     location.expects(:start_column).returns(start_column).at_least_once
 
-    RubyLsp::Listeners::SemanticHighlighting::SemanticToken.new(
+    RubyLsp::Response::SemanticHighlighting::SemanticToken.new(
       location: location,
       length: length,
       type: type,

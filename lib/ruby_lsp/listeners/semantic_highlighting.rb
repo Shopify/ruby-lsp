@@ -3,56 +3,10 @@
 
 module RubyLsp
   module Listeners
-    class SemanticHighlighting < Listener
+    class SemanticHighlighting
+      include Requests::Support::Common
       extend T::Sig
       extend T::Generic
-
-      ResponseType = type_member { { fixed: T::Array[SemanticToken] } }
-
-      TOKEN_TYPES = T.let(
-        {
-          namespace: 0,
-          type: 1,
-          class: 2,
-          enum: 3,
-          interface: 4,
-          struct: 5,
-          typeParameter: 6,
-          parameter: 7,
-          variable: 8,
-          property: 9,
-          enumMember: 10,
-          event: 11,
-          function: 12,
-          method: 13,
-          macro: 14,
-          keyword: 15,
-          modifier: 16,
-          comment: 17,
-          string: 18,
-          number: 19,
-          regexp: 20,
-          operator: 21,
-          decorator: 22,
-        }.freeze,
-        T::Hash[Symbol, Integer],
-      )
-
-      TOKEN_MODIFIERS = T.let(
-        {
-          declaration: 0,
-          definition: 1,
-          readonly: 2,
-          static: 3,
-          deprecated: 4,
-          abstract: 5,
-          async: 6,
-          modification: 7,
-          documentation: 8,
-          default_library: 9,
-        }.freeze,
-        T::Hash[Symbol, Integer],
-      )
 
       SPECIAL_RUBY_METHODS = T.let(
         [
@@ -65,38 +19,15 @@ module RubyLsp
         T::Array[String],
       )
 
-      class SemanticToken
-        extend T::Sig
-
-        sig { returns(Prism::Location) }
-        attr_reader :location
-
-        sig { returns(Integer) }
-        attr_reader :length
-
-        sig { returns(Integer) }
-        attr_reader :type
-
-        sig { returns(T::Array[Integer]) }
-        attr_reader :modifier
-
-        sig { params(location: Prism::Location, length: Integer, type: Integer, modifier: T::Array[Integer]).void }
-        def initialize(location:, length:, type:, modifier:)
-          @location = location
-          @length = length
-          @type = type
-          @modifier = modifier
-        end
+      sig do
+        params(
+          dispatcher: Prism::Dispatcher,
+          stack: Response::SemanticHighlighting::SemanticTokenStack,
+          range: T.nilable(T::Range[Integer]),
+        ).void
       end
-
-      sig { override.returns(ResponseType) }
-      attr_reader :_response
-
-      sig { params(dispatcher: Prism::Dispatcher, range: T.nilable(T::Range[Integer])).void }
-      def initialize(dispatcher, range: nil)
-        super(dispatcher)
-
-        @_response = T.let([], ResponseType)
+      def initialize(dispatcher, stack, range: nil)
+        @stack = stack
         @range = range
         @special_methods = T.let(nil, T.nilable(T::Array[String]))
         @current_scope = T.let(ParameterScope.new, ParameterScope)
@@ -151,7 +82,7 @@ module RubyLsp
         return if special_method?(message)
 
         type = Requests::Support::Sorbet.annotation?(node) ? :type : :method
-        add_token(T.must(node.message_loc), type)
+        @stack.add_token(T.must(node.message_loc), type)
       end
 
       sig { params(node: Prism::MatchWriteNode).void }
@@ -173,42 +104,42 @@ module RubyLsp
       def on_constant_read_node_enter(node)
         return unless visible?(node, @range)
 
-        add_token(node.location, :namespace)
+        @stack.add_token(node.location, :namespace)
       end
 
       sig { params(node: Prism::ConstantWriteNode).void }
       def on_constant_write_node_enter(node)
         return unless visible?(node, @range)
 
-        add_token(node.name_loc, :namespace)
+        @stack.add_token(node.name_loc, :namespace)
       end
 
       sig { params(node: Prism::ConstantAndWriteNode).void }
       def on_constant_and_write_node_enter(node)
         return unless visible?(node, @range)
 
-        add_token(node.name_loc, :namespace)
+        @stack.add_token(node.name_loc, :namespace)
       end
 
       sig { params(node: Prism::ConstantOperatorWriteNode).void }
       def on_constant_operator_write_node_enter(node)
         return unless visible?(node, @range)
 
-        add_token(node.name_loc, :namespace)
+        @stack.add_token(node.name_loc, :namespace)
       end
 
       sig { params(node: Prism::ConstantOrWriteNode).void }
       def on_constant_or_write_node_enter(node)
         return unless visible?(node, @range)
 
-        add_token(node.name_loc, :namespace)
+        @stack.add_token(node.name_loc, :namespace)
       end
 
       sig { params(node: Prism::ConstantTargetNode).void }
       def on_constant_target_node_enter(node)
         return unless visible?(node, @range)
 
-        add_token(node.location, :namespace)
+        @stack.add_token(node.location, :namespace)
       end
 
       sig { params(node: Prism::DefNode).void }
@@ -216,7 +147,7 @@ module RubyLsp
         @current_scope = ParameterScope.new(@current_scope)
         return unless visible?(node, @range)
 
-        add_token(node.name_loc, :method, [:declaration])
+        @stack.add_token(node.name_loc, :method, [:declaration])
       end
 
       sig { params(node: Prism::DefNode).void }
@@ -236,7 +167,7 @@ module RubyLsp
 
       sig { params(node: Prism::BlockLocalVariableNode).void }
       def on_block_local_variable_node_enter(node)
-        add_token(node.location, :variable)
+        @stack.add_token(node.location, :variable)
       end
 
       sig { params(node: Prism::BlockParameterNode).void }
@@ -251,7 +182,7 @@ module RubyLsp
         return unless visible?(node, @range)
 
         location = node.name_loc
-        add_token(location.copy(length: location.length - 1), :parameter)
+        @stack.add_token(location.copy(length: location.length - 1), :parameter)
       end
 
       sig { params(node: Prism::OptionalKeywordParameterNode).void }
@@ -260,7 +191,7 @@ module RubyLsp
         return unless visible?(node, @range)
 
         location = node.name_loc
-        add_token(location.copy(length: location.length - 1), :parameter)
+        @stack.add_token(location.copy(length: location.length - 1), :parameter)
       end
 
       sig { params(node: Prism::KeywordRestParameterNode).void }
@@ -270,7 +201,7 @@ module RubyLsp
         if name
           @current_scope << name.to_sym
 
-          add_token(T.must(node.name_loc), :parameter) if visible?(node, @range)
+          @stack.add_token(T.must(node.name_loc), :parameter) if visible?(node, @range)
         end
       end
 
@@ -279,7 +210,7 @@ module RubyLsp
         @current_scope << node.name
         return unless visible?(node, @range)
 
-        add_token(node.name_loc, :parameter)
+        @stack.add_token(node.name_loc, :parameter)
       end
 
       sig { params(node: Prism::RequiredParameterNode).void }
@@ -287,7 +218,7 @@ module RubyLsp
         @current_scope << node.name
         return unless visible?(node, @range)
 
-        add_token(node.location, :parameter)
+        @stack.add_token(node.location, :parameter)
       end
 
       sig { params(node: Prism::RestParameterNode).void }
@@ -297,7 +228,7 @@ module RubyLsp
         if name
           @current_scope << name.to_sym
 
-          add_token(T.must(node.name_loc), :parameter) if visible?(node, @range)
+          @stack.add_token(T.must(node.name_loc), :parameter) if visible?(node, @range)
         end
       end
 
@@ -305,14 +236,14 @@ module RubyLsp
       def on_self_node_enter(node)
         return unless visible?(node, @range)
 
-        add_token(node.location, :variable, [:default_library])
+        @stack.add_token(node.location, :variable, [:default_library])
       end
 
       sig { params(node: Prism::LocalVariableWriteNode).void }
       def on_local_variable_write_node_enter(node)
         return unless visible?(node, @range)
 
-        add_token(node.name_loc, @current_scope.type_for(node.name))
+        @stack.add_token(node.name_loc, @current_scope.type_for(node.name))
       end
 
       sig { params(node: Prism::LocalVariableReadNode).void }
@@ -321,32 +252,32 @@ module RubyLsp
 
         # Numbered parameters
         if /_\d+/.match?(node.name)
-          add_token(node.location, :parameter)
+          @stack.add_token(node.location, :parameter)
           return
         end
 
-        add_token(node.location, @current_scope.type_for(node.name))
+        @stack.add_token(node.location, @current_scope.type_for(node.name))
       end
 
       sig { params(node: Prism::LocalVariableAndWriteNode).void }
       def on_local_variable_and_write_node_enter(node)
         return unless visible?(node, @range)
 
-        add_token(node.name_loc, @current_scope.type_for(node.name))
+        @stack.add_token(node.name_loc, @current_scope.type_for(node.name))
       end
 
       sig { params(node: Prism::LocalVariableOperatorWriteNode).void }
       def on_local_variable_operator_write_node_enter(node)
         return unless visible?(node, @range)
 
-        add_token(node.name_loc, @current_scope.type_for(node.name))
+        @stack.add_token(node.name_loc, @current_scope.type_for(node.name))
       end
 
       sig { params(node: Prism::LocalVariableOrWriteNode).void }
       def on_local_variable_or_write_node_enter(node)
         return unless visible?(node, @range)
 
-        add_token(node.name_loc, @current_scope.type_for(node.name))
+        @stack.add_token(node.name_loc, @current_scope.type_for(node.name))
       end
 
       sig { params(node: Prism::LocalVariableTargetNode).void }
@@ -359,41 +290,27 @@ module RubyLsp
 
         return unless visible?(node, @range)
 
-        add_token(node.location, @current_scope.type_for(node.name))
+        @stack.add_token(node.location, @current_scope.type_for(node.name))
       end
 
       sig { params(node: Prism::ClassNode).void }
       def on_class_node_enter(node)
         return unless visible?(node, @range)
 
-        add_token(node.constant_path.location, :class, [:declaration])
+        @stack.add_token(node.constant_path.location, :class, [:declaration])
 
         superclass = node.superclass
-        add_token(superclass.location, :class) if superclass
+        @stack.add_token(superclass.location, :class) if superclass
       end
 
       sig { params(node: Prism::ModuleNode).void }
       def on_module_node_enter(node)
         return unless visible?(node, @range)
 
-        add_token(node.constant_path.location, :namespace, [:declaration])
+        @stack.add_token(node.constant_path.location, :namespace, [:declaration])
       end
 
       private
-
-      sig { params(location: Prism::Location, type: Symbol, modifiers: T::Array[Symbol]).void }
-      def add_token(location, type, modifiers = [])
-        length = location.end_offset - location.start_offset
-        modifiers_indices = modifiers.filter_map { |modifier| TOKEN_MODIFIERS[modifier] }
-        @_response.push(
-          SemanticToken.new(
-            location: location,
-            length: length,
-            type: T.must(TOKEN_TYPES[type]),
-            modifier: modifiers_indices,
-          ),
-        )
-      end
 
       # Textmate provides highlighting for a subset of these special Ruby-specific methods.  We want to utilize that
       # highlighting, so we avoid making a semantic token for it.
@@ -418,7 +335,7 @@ module RubyLsp
           capture_name_offset = T.must(content.index("(?<#{name}>")) + 3
           local_var_loc = loc.copy(start_offset: loc.start_offset + capture_name_offset, length: name.length)
 
-          add_token(local_var_loc, @current_scope.type_for(name))
+          @stack.add_token(local_var_loc, @current_scope.type_for(name))
         end
       end
     end
