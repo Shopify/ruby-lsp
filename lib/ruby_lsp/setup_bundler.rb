@@ -89,6 +89,7 @@ module RubyLsp
       end
 
       FileUtils.cp(@lockfile.to_s, @custom_lockfile.to_s)
+      correct_relative_remote_paths
       @lockfile_hash_path.write(current_lockfile_hash)
       run_bundle_install(@custom_gemfile)
     end
@@ -226,6 +227,26 @@ module RubyLsp
 
       # If the last updated file doesn't exist or was updated more than 4 hours ago, we should update
       !@last_updated_path.exist? || Time.parse(@last_updated_path.read) < (Time.now - FOUR_HOURS)
+    end
+
+    # When a lockfile has remote references based on relative file paths, we need to ensure that they are pointing to
+    # the correct place since after copying the relative path is no longer valid
+    sig { void }
+    def correct_relative_remote_paths
+      content = @custom_lockfile.read
+      content.gsub!(/remote: (.*)/) do |match|
+        path = T.must(Regexp.last_match)[1]
+
+        # We should only apply the correction if the remote is a relative path. It might also be a URI, like
+        # `https://rubygems.org` or an absolute path, in which case we shouldn't do anything
+        if path&.start_with?(".")
+          "remote: #{File.expand_path(path, T.must(@gemfile).dirname)}"
+        else
+          match
+        end
+      end
+
+      @custom_lockfile.write(content)
     end
   end
 end

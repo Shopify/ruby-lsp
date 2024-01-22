@@ -347,6 +347,81 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_ensures_lockfile_remotes_are_relative_to_default_gemfile
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        # The structure used in Rails uncovered a bug in our custom bundle logic. Rails is an empty gem with a bunch of
+        # nested gems. The lockfile includes remotes that use relative paths and we need to adjust those when we copy
+        # the lockfile
+
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          # frozen_string_literal: true
+          source "https://rubygems.org"
+          gemspec
+          gem "importmap-rails", ">= 1.2.3"
+        GEMFILE
+
+        FileUtils.mkdir(File.join(dir, "lib"))
+        FileUtils.mkdir_p(File.join(dir, "activesupport", "lib"))
+
+        File.write(File.join(dir, "activesupport", "activesupport.gemspec"), <<~GEMSPEC)
+          Gem::Specification.new do |s|
+            s.platform    = Gem::Platform::RUBY
+            s.name        = "activesupport"
+            s.version     = "7.2.0.alpha"
+            s.summary     = "Nested gemspec"
+            s.description = "Nested gemspec"
+            s.license = "MIT"
+            s.author   = "User"
+            s.email    = "user@example.com"
+            s.homepage = "https://rubyonrails.org"
+            s.files        = Dir["CHANGELOG.md", "MIT-LICENSE", "README.rdoc", "lib/**/*"]
+            s.require_path = "lib"
+            s.add_dependency "i18n",            ">= 1.6", "< 2"
+            s.add_dependency "tzinfo",          "~> 2.0", ">= 2.0.5"
+            s.add_dependency "concurrent-ruby", "~> 1.0", ">= 1.0.2"
+            s.add_dependency "connection_pool", ">= 2.2.5"
+            s.add_dependency "minitest",        ">= 5.1"
+            s.add_dependency "base64"
+            s.add_dependency "drb"
+            s.add_dependency "bigdecimal"
+          end
+        GEMSPEC
+
+        File.write(File.join(dir, "activesupport", "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+        GEMFILE
+
+        File.write(File.join(dir, "rails.gemspec"), <<~GEMSPEC)
+          Gem::Specification.new do |s|
+            s.platform    = Gem::Platform::RUBY
+            s.name        = "rails"
+            s.version     = "7.2.0.alpha"
+            s.summary     = "Top level gem"
+            s.description = "Top level gem"
+            s.license = "MIT"
+            s.author   = "User"
+            s.email    = "user@example.com"
+            s.homepage = "https://rubyonrails.org"
+            s.files = ["README.md", "MIT-LICENSE"]
+            s.add_dependency "activesupport", "7.2.0.alpha"
+          end
+        GEMSPEC
+
+        Bundler.with_unbundled_env do
+          capture_subprocess_io do
+            system("bundle install")
+            run_script
+          end
+        end
+
+        assert_path_exists(".ruby-lsp")
+        assert_path_exists(".ruby-lsp/Gemfile.lock")
+        assert_match("remote: ..", File.read(".ruby-lsp/Gemfile.lock"))
+      end
+    end
+  end
+
   private
 
   # This method runs the script and then immediately unloads it. This allows us to make assertions against the effects
