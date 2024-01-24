@@ -172,10 +172,6 @@ module RubyLsp
       sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read_node_enter(node)
         return unless visible?(node, @range)
-        # When finding a module or class definition, we will have already pushed a token related to this constant. We
-        # need to look at the previous two tokens and if they match this locatione exactly, avoid pushing another token
-        # on top of the previous one
-        return if @_response.last(2).any? { |token| token.location == node.location }
 
         add_token(node.location, :namespace)
       end
