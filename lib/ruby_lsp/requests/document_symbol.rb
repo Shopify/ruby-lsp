@@ -30,7 +30,6 @@ module RubyLsp
     # ```
     class DocumentSymbol < Request
       extend T::Sig
-      extend T::Generic
 
       class << self
         extend T::Sig

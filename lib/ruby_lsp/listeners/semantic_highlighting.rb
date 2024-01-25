@@ -6,7 +6,6 @@ module RubyLsp
     class SemanticHighlighting
       include Requests::Support::Common
       extend T::Sig
-      extend T::Generic
 
       SPECIAL_RUBY_METHODS = T.let(
         [

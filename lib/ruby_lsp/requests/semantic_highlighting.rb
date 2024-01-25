@@ -22,7 +22,6 @@ module RubyLsp
     # ```
     class SemanticHighlighting < Request
       extend T::Sig
-      extend T::Generic
 
       class << self
         extend T::Sig
