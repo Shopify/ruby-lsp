@@ -19,13 +19,16 @@ module RubyLsp
           ).returns(Interface::SemanticTokens)
         end
         def encode(tokens)
-          delta = tokens
-            .sort_by do |token|
-              [token.location.start_line, token.location.start_column]
-            end
-            .flat_map do |token|
-              compute_delta(token)
-            end
+          sorted_tokens = tokens.sort_by.with_index do |token, index|
+            # Enumerable#sort_by is not deterministic when the compared values are equal.
+            # When that happens, we need to use the index as a tie breaker to ensure
+            # that the order of the tokens is always the same.
+            [token.location.start_line, token.location.start_column, index]
+          end
+
+          delta = sorted_tokens.flat_map do |token|
+            compute_delta(token)
+          end
 
           Interface::SemanticTokens.new(data: delta)
         end
