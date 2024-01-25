@@ -34,6 +34,7 @@ module RubyLsp
           regexp: 20,
           operator: 21,
           decorator: 22,
+          constant: 23
         }.freeze,
         T::Hash[Symbol, Integer],
       )
