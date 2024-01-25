@@ -34,6 +34,7 @@ module RubyLsp
           regexp: 20,
           operator: 21,
           decorator: 22,
+          constant: 23
         }.freeze,
         T::Hash[Symbol, Integer],
       )
@@ -92,26 +93,36 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       attr_reader :_response
 
-      sig { params(dispatcher: Prism::Dispatcher, range: T.nilable(T::Range[Integer])).void }
-      def initialize(dispatcher, range: nil)
+      sig {
+        params(
+          dispatcher: Prism::Dispatcher,
+          index: RubyIndexer::Index,
+          range: T.nilable(T::Range[Integer])
+        ).void
+      }
+      def initialize(dispatcher, index, range: nil)
         super(dispatcher)
 
         @_response = T.let([], ResponseType)
         @range = range
         @special_methods = T.let(nil, T.nilable(T::Array[String]))
         @current_scope = T.let(ParameterScope.new, ParameterScope)
+        @index = index
+        @nesting = T.let([], T::Array[String])
         @inside_regex_capture = T.let(false, T::Boolean)
 
         dispatcher.register(
           self,
           :on_call_node_enter,
           :on_class_node_enter,
+          :on_class_node_leave,
           :on_def_node_enter,
           :on_def_node_leave,
           :on_block_node_enter,
           :on_block_node_leave,
           :on_self_node_enter,
           :on_module_node_enter,
+          :on_module_node_leave,
           :on_local_variable_write_node_enter,
           :on_local_variable_read_node_enter,
           :on_block_parameter_node_enter,
@@ -171,9 +182,25 @@ module RubyLsp
 
       sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read_node_enter(node)
-        return unless visible?(node, @range)
+        entries = @index.resolve(node.name, @nesting)
+        # if entries is nil, we didn't find the declaration for it
+        # it might be defined with meta-programming or using C code
+        unless entries
+          add_token(node.location, :constant)
+        end
 
-        add_token(node.location, :namespace)
+        # Otherwise, we can check the type of entry to determine the
+        # type of constant
+        first_entry = T.must(entries.first)
+
+        case first_entry
+        when RubyIndexer::Entry::Class
+          add_token(node.location, :class, [:declaration])
+        when RubyIndexer::Entry::Module
+          add_token(node.location, :namespace, [:declaration])
+        when RubyIndexer::Entry::Constant
+          add_token(node.location, :constant, [:declaration])
+        end
       end
 
       sig { params(node: Prism::ConstantWriteNode).void }
@@ -366,17 +393,29 @@ module RubyLsp
       def on_class_node_enter(node)
         return unless visible?(node, @range)
 
+        @nesting.push(node.name)
         add_token(node.constant_path.location, :class, [:declaration])
 
         superclass = node.superclass
         add_token(superclass.location, :class) if superclass
       end
 
+      sig { params(node: Prism::ClassNode).void }
+      def on_class_node_leave(node)
+        @nesting.pop
+      end
+
       sig { params(node: Prism::ModuleNode).void }
       def on_module_node_enter(node)
         return unless visible?(node, @range)
 
+        @nesting.push(node.name)
         add_token(node.constant_path.location, :namespace, [:declaration])
+      end
+
+      sig { params(node: Prism::ClassNode).void }
+      def on_module_node_leave(node)
+        @nesting.pop
       end
 
       private
