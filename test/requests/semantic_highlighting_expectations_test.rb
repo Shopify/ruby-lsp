@@ -59,7 +59,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
       )
       # This is the token modified by the addon
       assert_equal(
-        { delta_line: 1, delta_start_char: 2, length: 13, token_type: 13, token_modifiers: 1 },
+        { delta_line: 1, delta_start_char: 2, length: 13, token_type: 15, token_modifiers: 1 },
         decoded_response[3],
       )
     end
@@ -79,8 +79,10 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
           end
 
           def on_call_node_enter(node)
-            if node.message == "before_create"
-              @response_builder.last.modifier << 0
+            current_token = @response_builder.last
+            if node.message == "before_create" && node.message_loc == current_token.location
+              current_token.replace_type(:keyword)
+              current_token.replace_modifier([:declaration])
             end
           end
         end

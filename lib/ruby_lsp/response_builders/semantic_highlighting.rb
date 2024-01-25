@@ -4,6 +4,8 @@
 module RubyLsp
   module ResponseBuilders
     class SemanticHighlighting < ResponseBuilder
+      class UndefinedTokenType < StandardError; end
+
       TOKEN_TYPES = T.let(
         {
           namespace: 0,
@@ -104,6 +106,24 @@ module RubyLsp
           @length = length
           @type = type
           @modifier = modifier
+        end
+
+        sig { params(type_symbol: Symbol).void }
+        def replace_type(type_symbol)
+          type_int = TOKEN_TYPES[type_symbol]
+          raise UndefinedTokenType, "Undefined token type: #{type_symbol}" unless type_int
+
+          @type = type_int
+        end
+
+        sig { params(modifier_symbols: T::Array[Symbol]).void }
+        def replace_modifier(modifier_symbols)
+          @modifier = modifier_symbols.filter_map do |modifier_symbol|
+            modifier_index = TOKEN_MODIFIERS[modifier_symbol]
+            raise UndefinedTokenType, "Undefined token modifier: #{modifier_symbol}" unless modifier_index
+
+            modifier_index
+          end
         end
       end
 
