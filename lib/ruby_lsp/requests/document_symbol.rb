@@ -49,17 +49,17 @@ module RubyLsp
       sig { params(dispatcher: Prism::Dispatcher).void }
       def initialize(dispatcher)
         super()
-        @stack = T.let(Response::DocumentSymbolStack.new, Response::DocumentSymbolStack)
-        Listeners::DocumentSymbol.new(@stack, dispatcher)
+        @response_builder = T.let(ResponseBuilders::DocumentSymbol.new, ResponseBuilders::DocumentSymbol)
+        Listeners::DocumentSymbol.new(@response_builder, dispatcher)
 
         Addon.addons.each do |addon|
-          addon.create_document_symbol_listener(@stack, dispatcher)
+          addon.create_document_symbol_listener(@response_builder, dispatcher)
         end
       end
 
       sig { override.returns(T::Array[Interface::DocumentSymbol]) }
       def perform
-        @stack.result
+        @response_builder.response
       end
     end
   end

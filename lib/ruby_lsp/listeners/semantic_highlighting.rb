@@ -22,12 +22,12 @@ module RubyLsp
       sig do
         params(
           dispatcher: Prism::Dispatcher,
-          stack: Response::SemanticHighlighting::SemanticTokenStack,
+          response_builder: ResponseBuilders::SemanticHighlighting,
           range: T.nilable(T::Range[Integer]),
         ).void
       end
-      def initialize(dispatcher, stack, range: nil)
-        @stack = stack
+      def initialize(dispatcher, response_builder, range: nil)
+        @response_builder = response_builder
         @range = range
         @special_methods = T.let(nil, T.nilable(T::Array[String]))
         @current_scope = T.let(ParameterScope.new, ParameterScope)
@@ -82,7 +82,7 @@ module RubyLsp
         return if special_method?(message)
 
         type = Requests::Support::Sorbet.annotation?(node) ? :type : :method
-        @stack.add_token(T.must(node.message_loc), type)
+        @response_builder.add_token(T.must(node.message_loc), type)
       end
 
       sig { params(node: Prism::MatchWriteNode).void }
@@ -104,42 +104,42 @@ module RubyLsp
       def on_constant_read_node_enter(node)
         return unless visible?(node, @range)
 
-        @stack.add_token(node.location, :namespace)
+        @response_builder.add_token(node.location, :namespace)
       end
 
       sig { params(node: Prism::ConstantWriteNode).void }
       def on_constant_write_node_enter(node)
         return unless visible?(node, @range)
 
-        @stack.add_token(node.name_loc, :namespace)
+        @response_builder.add_token(node.name_loc, :namespace)
       end
 
       sig { params(node: Prism::ConstantAndWriteNode).void }
       def on_constant_and_write_node_enter(node)
         return unless visible?(node, @range)
 
-        @stack.add_token(node.name_loc, :namespace)
+        @response_builder.add_token(node.name_loc, :namespace)
       end
 
       sig { params(node: Prism::ConstantOperatorWriteNode).void }
       def on_constant_operator_write_node_enter(node)
         return unless visible?(node, @range)
 
-        @stack.add_token(node.name_loc, :namespace)
+        @response_builder.add_token(node.name_loc, :namespace)
       end
 
       sig { params(node: Prism::ConstantOrWriteNode).void }
       def on_constant_or_write_node_enter(node)
         return unless visible?(node, @range)
 
-        @stack.add_token(node.name_loc, :namespace)
+        @response_builder.add_token(node.name_loc, :namespace)
       end
 
       sig { params(node: Prism::ConstantTargetNode).void }
       def on_constant_target_node_enter(node)
         return unless visible?(node, @range)
 
-        @stack.add_token(node.location, :namespace)
+        @response_builder.add_token(node.location, :namespace)
       end
 
       sig { params(node: Prism::DefNode).void }
@@ -147,7 +147,7 @@ module RubyLsp
         @current_scope = ParameterScope.new(@current_scope)
         return unless visible?(node, @range)
 
-        @stack.add_token(node.name_loc, :method, [:declaration])
+        @response_builder.add_token(node.name_loc, :method, [:declaration])
       end
 
       sig { params(node: Prism::DefNode).void }
@@ -167,7 +167,7 @@ module RubyLsp
 
       sig { params(node: Prism::BlockLocalVariableNode).void }
       def on_block_local_variable_node_enter(node)
-        @stack.add_token(node.location, :variable)
+        @response_builder.add_token(node.location, :variable)
       end
 
       sig { params(node: Prism::BlockParameterNode).void }
@@ -182,7 +182,7 @@ module RubyLsp
         return unless visible?(node, @range)
 
         location = node.name_loc
-        @stack.add_token(location.copy(length: location.length - 1), :parameter)
+        @response_builder.add_token(location.copy(length: location.length - 1), :parameter)
       end
 
       sig { params(node: Prism::OptionalKeywordParameterNode).void }
@@ -191,7 +191,7 @@ module RubyLsp
         return unless visible?(node, @range)
 
         location = node.name_loc
-        @stack.add_token(location.copy(length: location.length - 1), :parameter)
+        @response_builder.add_token(location.copy(length: location.length - 1), :parameter)
       end
 
       sig { params(node: Prism::KeywordRestParameterNode).void }
@@ -201,7 +201,7 @@ module RubyLsp
         if name
           @current_scope << name.to_sym
 
-          @stack.add_token(T.must(node.name_loc), :parameter) if visible?(node, @range)
+          @response_builder.add_token(T.must(node.name_loc), :parameter) if visible?(node, @range)
         end
       end
 
@@ -210,7 +210,7 @@ module RubyLsp
         @current_scope << node.name
         return unless visible?(node, @range)
 
-        @stack.add_token(node.name_loc, :parameter)
+        @response_builder.add_token(node.name_loc, :parameter)
       end
 
       sig { params(node: Prism::RequiredParameterNode).void }
@@ -218,7 +218,7 @@ module RubyLsp
         @current_scope << node.name
         return unless visible?(node, @range)
 
-        @stack.add_token(node.location, :parameter)
+        @response_builder.add_token(node.location, :parameter)
       end
 
       sig { params(node: Prism::RestParameterNode).void }
@@ -228,7 +228,7 @@ module RubyLsp
         if name
           @current_scope << name.to_sym
 
-          @stack.add_token(T.must(node.name_loc), :parameter) if visible?(node, @range)
+          @response_builder.add_token(T.must(node.name_loc), :parameter) if visible?(node, @range)
         end
       end
 
@@ -236,14 +236,14 @@ module RubyLsp
       def on_self_node_enter(node)
         return unless visible?(node, @range)
 
-        @stack.add_token(node.location, :variable, [:default_library])
+        @response_builder.add_token(node.location, :variable, [:default_library])
       end
 
       sig { params(node: Prism::LocalVariableWriteNode).void }
       def on_local_variable_write_node_enter(node)
         return unless visible?(node, @range)
 
-        @stack.add_token(node.name_loc, @current_scope.type_for(node.name))
+        @response_builder.add_token(node.name_loc, @current_scope.type_for(node.name))
       end
 
       sig { params(node: Prism::LocalVariableReadNode).void }
@@ -252,32 +252,32 @@ module RubyLsp
 
         # Numbered parameters
         if /_\d+/.match?(node.name)
-          @stack.add_token(node.location, :parameter)
+          @response_builder.add_token(node.location, :parameter)
           return
         end
 
-        @stack.add_token(node.location, @current_scope.type_for(node.name))
+        @response_builder.add_token(node.location, @current_scope.type_for(node.name))
       end
 
       sig { params(node: Prism::LocalVariableAndWriteNode).void }
       def on_local_variable_and_write_node_enter(node)
         return unless visible?(node, @range)
 
-        @stack.add_token(node.name_loc, @current_scope.type_for(node.name))
+        @response_builder.add_token(node.name_loc, @current_scope.type_for(node.name))
       end
 
       sig { params(node: Prism::LocalVariableOperatorWriteNode).void }
       def on_local_variable_operator_write_node_enter(node)
         return unless visible?(node, @range)
 
-        @stack.add_token(node.name_loc, @current_scope.type_for(node.name))
+        @response_builder.add_token(node.name_loc, @current_scope.type_for(node.name))
       end
 
       sig { params(node: Prism::LocalVariableOrWriteNode).void }
       def on_local_variable_or_write_node_enter(node)
         return unless visible?(node, @range)
 
-        @stack.add_token(node.name_loc, @current_scope.type_for(node.name))
+        @response_builder.add_token(node.name_loc, @current_scope.type_for(node.name))
       end
 
       sig { params(node: Prism::LocalVariableTargetNode).void }
@@ -290,24 +290,24 @@ module RubyLsp
 
         return unless visible?(node, @range)
 
-        @stack.add_token(node.location, @current_scope.type_for(node.name))
+        @response_builder.add_token(node.location, @current_scope.type_for(node.name))
       end
 
       sig { params(node: Prism::ClassNode).void }
       def on_class_node_enter(node)
         return unless visible?(node, @range)
 
-        @stack.add_token(node.constant_path.location, :class, [:declaration])
+        @response_builder.add_token(node.constant_path.location, :class, [:declaration])
 
         superclass = node.superclass
-        @stack.add_token(superclass.location, :class) if superclass
+        @response_builder.add_token(superclass.location, :class) if superclass
       end
 
       sig { params(node: Prism::ModuleNode).void }
       def on_module_node_enter(node)
         return unless visible?(node, @range)
 
-        @stack.add_token(node.constant_path.location, :namespace, [:declaration])
+        @response_builder.add_token(node.constant_path.location, :namespace, [:declaration])
       end
 
       private
@@ -335,7 +335,7 @@ module RubyLsp
           capture_name_offset = T.must(content.index("(?<#{name}>")) + 3
           local_var_loc = loc.copy(start_offset: loc.start_offset + capture_name_offset, length: name.length)
 
-          @stack.add_token(local_var_loc, @current_scope.type_for(name))
+          @response_builder.add_token(local_var_loc, @current_scope.type_for(name))
         end
       end
     end

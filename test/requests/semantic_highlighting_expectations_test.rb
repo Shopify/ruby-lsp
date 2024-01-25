@@ -69,23 +69,23 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
 
   def create_semantic_highlighting_addon
     Class.new(RubyLsp::Addon) do
-      def create_semantic_highlighting_listener(stack, dispatcher)
+      def create_semantic_highlighting_listener(response_builder, dispatcher)
         klass = Class.new do
           include RubyLsp::Requests::Support::Common
 
-          def initialize(stack, dispatcher)
-            @stack = stack
+          def initialize(response_builder, dispatcher)
+            @response_builder = response_builder
             dispatcher.register(self, :on_call_node_enter)
           end
 
           def on_call_node_enter(node)
             if node.message == "before_create"
-              @stack.last.modifier << 0
+              @response_builder.last.modifier << 0
             end
           end
         end
 
-        T.unsafe(klass).new(stack, dispatcher)
+        T.unsafe(klass).new(response_builder, dispatcher)
       end
     end
   end
