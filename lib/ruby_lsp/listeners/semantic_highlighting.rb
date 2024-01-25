@@ -182,9 +182,25 @@ module RubyLsp
 
       sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read_node_enter(node)
-        return unless visible?(node, @range)
+        entries = @index.resolve(node.name, @nesting)
+        # if entries is nil, we didn't find the declaration for it
+        # it might be defined with meta-programming or using C code
+        unless entries
+          add_token(node.location, :constant)
+        end
 
-        add_token(node.location, :namespace)
+        # Otherwise, we can check the type of entry to determine the
+        # type of constant
+        first_entry = T.must(entries.first)
+
+        case first_entry
+        when RubyIndexer::Entry::Class
+          add_token(node.location, :class, [:declaration])
+        when RubyIndexer::Entry::Module
+          add_token(node.location, :namespace, [:declaration])
+        when RubyIndexer::Entry::Constant
+          add_token(node.location, :constant, [:declaration])
+        end
       end
 
       sig { params(node: Prism::ConstantWriteNode).void }
