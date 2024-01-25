@@ -133,7 +133,7 @@ class IntegrationTest < Minitest::Test
 
     response = make_request("textDocument/semanticTokens/full", { textDocument: { uri: @uri } })
     assert_nil(response[:error])
-    assert_equal([0, 6, 3, 2, 1], response[:result][:data])
+    assert_equal([0, 6, 3, 2, 1, 0, 0, 3, 0, 0], response[:result][:data])
   end
 
   def test_document_link
