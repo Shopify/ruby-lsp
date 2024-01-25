@@ -134,6 +134,14 @@ module RubyLsp
     end
     def create_document_symbol_listener(stack, dispatcher); end
 
+    sig do
+      overridable.params(
+        stack: Response::SemanticHighlighting::SemanticTokenStack,
+        dispatcher: Prism::Dispatcher,
+      ).void
+    end
+    def create_semantic_highlighting_listener(stack, dispatcher); end
+
     # Creates a new Definition listener. This method is invoked on every Definition request
     sig do
       overridable.params(

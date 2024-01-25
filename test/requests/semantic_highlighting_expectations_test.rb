@@ -29,7 +29,66 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
     assert_equal(json_expectations(expected).to_json, decode_tokens(actual).to_json)
   end
 
+  def test_semantic_highlighting_addon
+    source = <<~RUBY
+      class Post
+        custom_method :foo
+        before_create :set_defaults
+      end
+    RUBY
+
+    test_addon(:create_semantic_highlighting_addon, source: source) do |executor|
+      response = executor.execute({
+        method: "textDocument/semanticTokens/full",
+        params: { textDocument: { uri: "file:///fake.rb" } },
+      })
+
+      assert_nil(response.error, response.error&.full_message)
+      decoded_response = decode_tokens(response.response.data)
+      assert_equal(
+        { delta_line: 0, delta_start_char: 6, length: 4, token_type: 2, token_modifiers: 1 },
+        decoded_response[0],
+      )
+      assert_equal(
+        { delta_line: 0, delta_start_char: 0, length: 4, token_type: 0, token_modifiers: 0 },
+        decoded_response[1],
+      )
+      assert_equal(
+        { delta_line: 1, delta_start_char: 2, length: 13, token_type: 13, token_modifiers: 0 },
+        decoded_response[2],
+      )
+      # This is the token modified by the addon
+      assert_equal(
+        { delta_line: 1, delta_start_char: 2, length: 13, token_type: 13, token_modifiers: 1 },
+        decoded_response[3],
+      )
+    end
+  end
+
   private
+
+  def create_semantic_highlighting_addon
+    Class.new(RubyLsp::Addon) do
+      def create_semantic_highlighting_listener(stack, dispatcher)
+        klass = Class.new do
+          include RubyLsp::Requests::Support::Common
+
+          def initialize(stack, dispatcher)
+            @stack = stack
+            dispatcher.register(self, :on_call_node_enter)
+          end
+
+          def on_call_node_enter(node)
+            if node.message == "before_create"
+              @stack.last.modifier << 0
+            end
+          end
+        end
+
+        T.unsafe(klass).new(stack, dispatcher)
+      end
+    end
+  end
 
   def decode_tokens(array)
     tokens = []

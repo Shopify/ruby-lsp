@@ -49,6 +49,10 @@ module RubyLsp
           Response::SemanticHighlighting::SemanticTokenStack,
         )
         Listeners::SemanticHighlighting.new(dispatcher, @stack, range: range)
+
+        Addon.addons.each do |addon|
+          addon.create_semantic_highlighting_listener(@stack, dispatcher)
+        end
       end
 
       sig { override.returns(Interface::SemanticTokens) }
