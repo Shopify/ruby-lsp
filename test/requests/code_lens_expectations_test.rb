@@ -125,7 +125,10 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
       response = executor.execute({
         method: "textDocument/codeLens",
         params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 1, character: 2 } },
-      }).response
+      })
+
+      assert_nil(response.error, response.error&.full_message)
+      response = response.response
 
       assert_equal(response.size, 4)
       assert_match("Run", response[0].command.title)
@@ -143,37 +146,31 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
   def create_code_lens_addon
     Class.new(RubyLsp::Addon) do
-      def activate(message_queue); end
-
-      def name
-        "CodeLensAddon"
-      end
-
-      def create_code_lens_listener(uri, dispatcher)
+      def create_code_lens_listener(response_builder, uri, dispatcher)
         raise "uri can't be nil" unless uri
 
-        klass = Class.new(RubyLsp::Listener) do
-          attr_reader :_response
+        klass = Class.new do
+          include RubyLsp::Requests::Support::Common
 
-          def initialize(uri, dispatcher)
-            super(dispatcher)
+          def initialize(response_builder, uri, dispatcher)
+            @response_builder = response_builder
             dispatcher.register(self, :on_class_node_enter)
           end
 
           def on_class_node_enter(node)
-            T.bind(self, RubyLsp::Listener[T.untyped])
+            T.bind(self, RubyLsp::Requests::Support::Common)
 
-            @_response = [RubyLsp::Interface::CodeLens.new(
+            @response_builder << RubyLsp::Interface::CodeLens.new(
               range: range_from_node(node),
               command: RubyLsp::Interface::Command.new(
                 title: "Run #{node.constant_path.slice}",
                 command: "rubyLsp.runTest",
               ),
-            )]
+            )
           end
         end
 
-        T.unsafe(klass).new(uri, dispatcher)
+        T.unsafe(klass).new(response_builder, uri, dispatcher)
       end
     end
   end
