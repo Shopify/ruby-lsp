@@ -33,7 +33,10 @@ jobs:
               repo: context.repo.repo,
             });
 
+            const includePrereleases = context.payload.release.prerelease;
+
             const changelog = releases
+              .filter((release) => includePrereleases || !release.prerelease)
               .map((release) => `# ${release.tag_name}\n${release.body}\n`)
               .join("\n");
 
