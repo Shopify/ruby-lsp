@@ -1,6 +1,6 @@
 import path from "path";
 import fs from "fs";
-import { ChildProcessWithoutNullStreams, spawn } from "child_process";
+import { ChildProcessWithoutNullStreams, spawn, execSync } from "child_process";
 
 import * as vscode from "vscode";
 
@@ -39,7 +39,7 @@ export class Debugger
     if (session.configuration.request === "launch") {
       return this.spawnDebuggeeForLaunch(session);
     } else if (session.configuration.request === "attach") {
-      return this.attachDebuggee();
+      return this.attachDebuggee(session);
     } else {
       return new Promise((_resolve, reject) =>
         reject(
@@ -132,19 +132,40 @@ export class Debugger
     }
   }
 
-  private async attachDebuggee(): Promise<vscode.DebugAdapterDescriptor> {
+  private getSockets(session: vscode.DebugSession): string[] {
+    const cmd = "bundle exec rdbg --util=list-socks";
+    const workspaceFolder = session.workspaceFolder;
+    if (!workspaceFolder) {
+      throw new Error("Debugging requires a workspace folder to be opened");
+    }
+    const configuration = session.configuration;
+    let sockets: string[] = [];
+    try {
+      sockets = execSync(cmd, {
+        cwd: workspaceFolder.uri.fsPath,
+        env: configuration.env,
+      })
+        .toString()
+        .split("\n")
+        .filter((socket) => socket.length > 0);
+    } catch (error: any) {
+      this.console.append(`Error listing sockets: ${error.message}`);
+    }
+    return sockets;
+  }
+
+  private async attachDebuggee(
+    session: vscode.DebugSession,
+  ): Promise<vscode.DebugAdapterDescriptor> {
     // When using attach, a process will be launched using Ruby debug and it will create a socket automatically. We have
     // to find the available sockets and ask the user which one they want to attach to
-    const socketsDir = path.join("/", "tmp", "ruby-lsp-debug-sockets");
-    const sockets = fs
-      .readdirSync(socketsDir)
-      .map((file) => file)
-      .filter((file) => file.endsWith(".sock"));
-
+    const sockets = this.getSockets(session);
     if (sockets.length === 0) {
-      throw new Error(
-        `No debuggee processes found. Was a socket created in ${socketsDir}?`,
-      );
+      throw new Error(`No debuggee processes found. Is the process running?`);
+    }
+
+    if (sockets.length === 1) {
+      return new vscode.DebugAdapterNamedPipeServer(sockets[0]);
     }
 
     const selectedSocketPath = await vscode.window
@@ -156,7 +177,7 @@ export class Debugger
         if (value === undefined) {
           throw new Error("No debuggee selected");
         }
-        return path.join(socketsDir, value);
+        return value;
       });
 
     return new vscode.DebugAdapterNamedPipeServer(selectedSocketPath);
@@ -171,7 +192,6 @@ export class Debugger
     const configuration = session.configuration;
     const workspaceFolder = configuration.targetFolder;
     const cwd = workspaceFolder.path;
-    const sockPath = this.socketPath(workspaceFolder.name);
 
     return new Promise((resolve, reject) => {
       const args = [
@@ -179,7 +199,6 @@ export class Debugger
         "rdbg",
         "--open",
         "--command",
-        `--sock-path=${sockPath}`,
         "--",
         configuration.program,
       ];
@@ -209,7 +228,14 @@ export class Debugger
           initialMessage.includes("DEBUGGER: wait for debugger connection...")
         ) {
           initialized = true;
-          resolve(new vscode.DebugAdapterNamedPipeServer(sockPath));
+          const regex =
+            /DEBUGGER: Debugger can attach via UNIX domain socket \((.*)\)/;
+          const sockPath = RegExp(regex).exec(initialMessage);
+          if (sockPath && sockPath.length === 2) {
+            resolve(new vscode.DebugAdapterNamedPipeServer(sockPath[1]));
+          } else {
+            reject(new Error("Debugger not found on UNIX socket"));
+          }
         }
       });
 
@@ -236,31 +262,5 @@ export class Debugger
         }
       });
     });
-  }
-
-  // Generate a socket path so that Ruby debug doesn't have to create one for us. This makes coordination easier since
-  // we always know the path to the socket
-  private socketPath(workspaceName: string) {
-    const socketsDir = path.join("/", "tmp", "ruby-lsp-debug-sockets");
-    if (!fs.existsSync(socketsDir)) {
-      fs.mkdirSync(socketsDir);
-    }
-
-    let socketIndex = 0;
-    const prefix = `ruby-debug-${workspaceName}`;
-    const existingSockets = fs
-      .readdirSync(socketsDir)
-      .map((file) => file)
-      .filter((file) => file.startsWith(prefix))
-      .sort();
-
-    if (existingSockets.length > 0) {
-      socketIndex =
-        Number(
-          /-(\d+).sock$/.exec(existingSockets[existingSockets.length - 1])![1],
-        ) + 1;
-    }
-
-    return `${socketsDir}/${prefix}-${socketIndex}.sock`;
   }
 }

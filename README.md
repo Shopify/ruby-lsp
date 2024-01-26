@@ -225,6 +225,20 @@ This command would generate the following configuration:
 }
 ```
 
+### Debugging live processes
+
+Instead of launching a process to debug every time, you may want to attach the VS Code debugger to an existing process, such as a Rails server. Follow these instructions to do so.
+
+Install `debug` gem. Verify by running `bundle exec rdbg -v`
+
+Run your application with the debugger attached, so that the extension can connect to it.
+
+```shell
+bundle exec rdbg -O -n -c -- bin/rails server -p 3000
+```
+
+For better integrated rails tests support also install `ruby-lsp-rails` gem.
+
 #### VS Code configurations
 
 In addition to the Ruby LSP's own configuration, there are some VS Code settings that may need to be changed to get the
