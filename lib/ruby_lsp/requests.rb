@@ -50,7 +50,6 @@ module RubyLsp
     module Support
       autoload :RuboCopDiagnostic, "ruby_lsp/requests/support/rubocop_diagnostic"
       autoload :SelectionRange, "ruby_lsp/requests/support/selection_range"
-      autoload :SemanticTokenEncoder, "ruby_lsp/requests/support/semantic_token_encoder"
       autoload :Annotation, "ruby_lsp/requests/support/annotation"
       autoload :Sorbet, "ruby_lsp/requests/support/sorbet"
       autoload :RailsDocumentClient, "ruby_lsp/requests/support/rails_document_client"

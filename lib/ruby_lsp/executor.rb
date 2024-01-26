@@ -113,7 +113,7 @@ module RubyLsp
         document.cache_set("textDocument/codeLens", code_lens.perform)
         document.cache_set(
           "textDocument/semanticTokens/full",
-          Requests::Support::SemanticTokenEncoder.new.encode(semantic_highlighting.perform),
+          semantic_highlighting.perform,
         )
         document.cache_get(request[:method])
       when "textDocument/semanticTokens/range"
@@ -431,7 +431,7 @@ module RubyLsp
       request = Requests::SemanticHighlighting.new(dispatcher, range: start_line..end_line)
       dispatcher.visit(document.tree)
 
-      Requests::Support::SemanticTokenEncoder.new.encode(request.perform)
+      request.perform
     end
 
     sig { params(id: String, title: String, percentage: Integer).void }

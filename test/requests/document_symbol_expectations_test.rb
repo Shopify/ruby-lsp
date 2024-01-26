@@ -43,17 +43,17 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
         "Document SymbolsAddon"
       end
 
-      def create_document_symbol_listener(stack, dispatcher)
+      def create_document_symbol_listener(response_builder, dispatcher)
         klass = Class.new do
           include RubyLsp::Requests::Support::Common
 
-          def initialize(stack, dispatcher)
-            @stack = stack
+          def initialize(response_builder, dispatcher)
+            @response_builder = response_builder
             dispatcher.register(self, :on_call_node_enter)
           end
 
           def on_call_node_enter(node)
-            parent = @stack.last
+            parent = @response_builder.last
             T.bind(self, RubyLsp::Requests::Support::Common)
             message_value = node.message
             arguments = node.arguments&.arguments
@@ -68,7 +68,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        T.unsafe(klass).new(stack, dispatcher)
+        T.unsafe(klass).new(response_builder, dispatcher)
       end
     end
   end

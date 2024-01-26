@@ -5,19 +5,18 @@ module RubyLsp
   module Listeners
     class DocumentSymbol
       extend T::Sig
-      extend T::Generic
       include Requests::Support::Common
 
       ATTR_ACCESSORS = T.let([:attr_reader, :attr_writer, :attr_accessor].freeze, T::Array[Symbol])
 
       sig do
         params(
-          stack: Response::DocumentSymbolStack,
+          response_builder: ResponseBuilders::DocumentSymbol,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(stack, dispatcher)
-        @stack = stack
+      def initialize(response_builder, dispatcher)
+        @response_builder = response_builder
 
         dispatcher.register(
           self,
@@ -39,7 +38,7 @@ module RubyLsp
 
       sig { params(node: Prism::ClassNode).void }
       def on_class_node_enter(node)
-        @stack << create_document_symbol(
+        @response_builder << create_document_symbol(
           name: node.constant_path.location.slice,
           kind: Constant::SymbolKind::CLASS,
           range_location: node.location,
@@ -49,14 +48,14 @@ module RubyLsp
 
       sig { params(node: Prism::ClassNode).void }
       def on_class_node_leave(node)
-        @stack.pop
+        @response_builder.pop
       end
 
       sig { params(node: Prism::SingletonClassNode).void }
       def on_singleton_class_node_enter(node)
         expression = node.expression
 
-        @stack << create_document_symbol(
+        @response_builder << create_document_symbol(
           name: "<< #{expression.slice}",
           kind: Constant::SymbolKind::NAMESPACE,
           range_location: node.location,
@@ -66,7 +65,7 @@ module RubyLsp
 
       sig { params(node: Prism::SingletonClassNode).void }
       def on_singleton_class_node_leave(node)
-        @stack.pop
+        @response_builder.pop
       end
 
       sig { params(node: Prism::CallNode).void }
@@ -113,12 +112,12 @@ module RubyLsp
 
       sig { params(node: Prism::DefNode).void }
       def on_def_node_leave(node)
-        @stack.pop
+        @response_builder.pop
       end
 
       sig { params(node: Prism::ModuleNode).void }
       def on_module_node_enter(node)
-        @stack << create_document_symbol(
+        @response_builder << create_document_symbol(
           name: node.constant_path.location.slice,
           kind: Constant::SymbolKind::MODULE,
           range_location: node.location,
@@ -129,7 +128,7 @@ module RubyLsp
       sig { params(node: Prism::DefNode).void }
       def on_def_node_enter(node)
         receiver = node.receiver
-        previous_symbol = @stack.last
+        previous_symbol = @response_builder.last
 
         if receiver.is_a?(Prism::SelfNode)
           name = "self.#{node.name}"
@@ -149,12 +148,12 @@ module RubyLsp
           selection_range_location: node.name_loc,
         )
 
-        @stack << symbol
+        @response_builder << symbol
       end
 
       sig { params(node: Prism::ModuleNode).void }
       def on_module_node_leave(node)
-        @stack.pop
+        @response_builder.pop
       end
 
       sig { params(node: Prism::InstanceVariableWriteNode).void }
@@ -196,7 +195,7 @@ module RubyLsp
           children: [],
         )
 
-        @stack.last.children << symbol
+        @response_builder.last.children << symbol
 
         symbol
       end
