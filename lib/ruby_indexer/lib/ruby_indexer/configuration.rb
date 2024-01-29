@@ -213,7 +213,7 @@ module RubyIndexer
 
           # If the transitive dependency is included as a transitive dependency of a gem outside of the development
           # group, skip it
-          next if others.any? { |d| d.to_spec.dependencies.include?(transitive_dependency) }
+          next if others.any? { |d| d.to_spec&.dependencies&.include?(transitive_dependency) }
 
           excluded << transitive_dependency
         end
