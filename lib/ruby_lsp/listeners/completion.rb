@@ -3,26 +3,21 @@
 
 module RubyLsp
   module Listeners
-    class Completion < Listener
+    class Completion
       extend T::Sig
-      extend T::Generic
-
-      ResponseType = type_member { { fixed: T::Array[Interface::CompletionItem] } }
-
-      sig { override.returns(ResponseType) }
-      attr_reader :_response
+      include Requests::Support::Common
 
       sig do
         params(
+          response_builder: ResponseBuilders::Completion,
           index: RubyIndexer::Index,
           nesting: T::Array[String],
           typechecker_enabled: T::Boolean,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(index, nesting, typechecker_enabled, dispatcher)
-        super(dispatcher)
-        @_response = T.let([], ResponseType)
+      def initialize(response_builder, index, nesting, typechecker_enabled, dispatcher)
+        @response_builder = response_builder
         @index = index
         @nesting = nesting
         @typechecker_enabled = typechecker_enabled
@@ -39,7 +34,7 @@ module RubyLsp
       sig { params(node: Prism::StringNode).void }
       def on_string_node_enter(node)
         @index.search_require_paths(node.content).map!(&:require_path).sort!.each do |path|
-          @_response << build_completion(T.must(path), node)
+          @response_builder << build_completion(T.must(path), node)
         end
       end
 
@@ -52,7 +47,7 @@ module RubyLsp
         candidates = @index.prefix_search(name, @nesting)
         candidates.each do |entries|
           complete_name = T.must(entries.first).name
-          @_response << build_entry_completion(
+          @response_builder << build_entry_completion(
             complete_name,
             name,
             node,
@@ -96,7 +91,7 @@ module RubyLsp
 
           full_name = aliased_namespace.empty? ? constant_name : "#{aliased_namespace}::#{constant_name}"
 
-          @_response << build_entry_completion(
+          @response_builder << build_entry_completion(
             full_name,
             name,
             node,
@@ -123,7 +118,7 @@ module RubyLsp
           entry = entries.find { |e| e.is_a?(RubyIndexer::Entry::Member) && e.owner&.name == receiver.name }
           next unless entry
 
-          @_response << build_method_completion(T.cast(entry, RubyIndexer::Entry::Member), node)
+          @response_builder << build_method_completion(T.cast(entry, RubyIndexer::Entry::Member), node)
         end
       end
 

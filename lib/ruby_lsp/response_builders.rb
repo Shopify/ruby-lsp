@@ -5,6 +5,7 @@ module RubyLsp
   module ResponseBuilders
     autoload :ResponseBuilder, "ruby_lsp/response_builders/response_builder"
     autoload :CodeLens, "ruby_lsp/response_builders/code_lens"
+    autoload :Completion, "ruby_lsp/response_builders/completion"
     autoload :Definition, "ruby_lsp/response_builders/definition"
     autoload :DocumentSymbol, "ruby_lsp/response_builders/document_symbol"
     autoload :Hover, "ruby_lsp/response_builders/hover"
