@@ -7,6 +7,7 @@ module RubyLsp
     autoload :CodeLens, "ruby_lsp/response_builders/code_lens"
     autoload :Completion, "ruby_lsp/response_builders/completion"
     autoload :Definition, "ruby_lsp/response_builders/definition"
+    autoload :DocumentHighlight, "ruby_lsp/response_builders/document_highlight"
     autoload :DocumentSymbol, "ruby_lsp/response_builders/document_symbol"
     autoload :Hover, "ruby_lsp/response_builders/hover"
     autoload :SemanticHighlighting, "ruby_lsp/response_builders/semantic_highlighting"
