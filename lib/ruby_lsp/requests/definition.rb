@@ -28,8 +28,6 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
-      ResponseType = type_member { { fixed: T.nilable(T.any(T::Array[Interface::Location], Interface::Location)) } }
-
       sig do
         params(
           document: Document,
@@ -41,6 +39,8 @@ module RubyLsp
       end
       def initialize(document, index, position, dispatcher, typechecker_enabled)
         super()
+        @response_builder = T.let(ResponseBuilders::Definition.new, ResponseBuilders::Definition)
+
         target, parent, nesting = document.locate_node(
           position,
           node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode],
@@ -48,35 +48,20 @@ module RubyLsp
 
         target = parent if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)
 
-        @listeners = T.let(
-          [Listeners::Definition.new(document.uri, nesting, index, dispatcher, typechecker_enabled)],
-          T::Array[Listener[T.nilable(T.any(T::Array[Interface::Location], Interface::Location))]],
-        )
+        Listeners::Definition.new(@response_builder, document.uri, nesting, index, dispatcher, typechecker_enabled)
+
         Addon.addons.each do |addon|
-          addon_listener = addon.create_definition_listener(document.uri, nesting, index, dispatcher)
-          @listeners << addon_listener if addon_listener
+          addon.create_definition_listener(@response_builder, document.uri, nesting, index, dispatcher)
         end
 
         @target = T.let(target, T.nilable(Prism::Node))
         @dispatcher = dispatcher
       end
 
-      sig { override.returns(ResponseType) }
+      sig { override.returns(T::Array[Interface::Location]) }
       def perform
         @dispatcher.dispatch_once(@target)
-        result = []
-
-        @listeners.each do |listener|
-          res = listener.response
-          case res
-          when Interface::Location
-            result << res
-          when Array
-            result.concat(res)
-          end
-        end
-
-        result if result.any?
+        @response_builder.response
       end
     end
   end

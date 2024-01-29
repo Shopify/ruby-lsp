@@ -192,7 +192,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 0, line: 5 } },
     }).response
 
-    assert_nil(response)
+    assert_empty(response)
   ensure
     T.must(message_queue).close
   end
@@ -322,7 +322,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 4, line: 4 } },
     }).response
 
-    assert_nil(response)
+    assert_empty(response)
   ensure
     T.must(message_queue).close
   end
@@ -331,25 +331,17 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
   def create_definition_addon
     Class.new(RubyLsp::Addon) do
-      def activate(message_queue); end
-
-      def name
-        "Definition Addon"
-      end
-
-      def create_definition_listener(uri, nesting, index, dispatcher)
-        klass = Class.new(RubyLsp::Listener) do
-          attr_reader :_response
-
-          def initialize(uri, _, _, dispatcher)
-            super(dispatcher)
+      def create_definition_listener(response_builder, uri, nesting, index, dispatcher)
+        klass = Class.new do
+          def initialize(response_builder, uri, _, _, dispatcher)
             @uri = uri
+            @response_builder = response_builder
             dispatcher.register(self, :on_constant_read_node_enter)
           end
 
           def on_constant_read_node_enter(node)
             location = node.location
-            @_response = RubyLsp::Interface::Location.new(
+            @response_builder << RubyLsp::Interface::Location.new(
               uri: "file:///generated_by_addon.rb",
               range: RubyLsp::Interface::Range.new(
                 start: RubyLsp::Interface::Position.new(
@@ -362,7 +354,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        T.unsafe(klass).new(uri, nesting, index, dispatcher)
+        T.unsafe(klass).new(response_builder, uri, nesting, index, dispatcher)
       end
     end
   end

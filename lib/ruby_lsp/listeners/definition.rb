@@ -3,17 +3,13 @@
 
 module RubyLsp
   module Listeners
-    class Definition < Listener
+    class Definition
       extend T::Sig
-      extend T::Generic
-
-      ResponseType = type_member { { fixed: T.nilable(T.any(T::Array[Interface::Location], Interface::Location)) } }
-
-      sig { override.returns(ResponseType) }
-      attr_reader :_response
+      include Requests::Support::Common
 
       sig do
         params(
+          response_builder: ResponseBuilders::Definition,
           uri: URI::Generic,
           nesting: T::Array[String],
           index: RubyIndexer::Index,
@@ -21,14 +17,12 @@ module RubyLsp
           typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(uri, nesting, index, dispatcher, typechecker_enabled)
+      def initialize(response_builder, uri, nesting, index, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
+        @response_builder = response_builder
         @uri = uri
         @nesting = nesting
         @index = index
         @typechecker_enabled = typechecker_enabled
-        @_response = T.let(nil, ResponseType)
-
-        super(dispatcher)
 
         dispatcher.register(
           self,
@@ -75,7 +69,7 @@ module RubyLsp
         file_path = target_method.file_path
         return if @typechecker_enabled && not_in_dependencies?(file_path)
 
-        @_response = Interface::Location.new(
+        @response_builder << Interface::Location.new(
           uri: URI::Generic.from_path(path: file_path).to_s,
           range: Interface::Range.new(
             start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
@@ -102,7 +96,7 @@ module RubyLsp
           if entry
             candidate = entry.full_path
 
-            @_response = Interface::Location.new(
+            @response_builder << Interface::Location.new(
               uri: URI::Generic.from_path(path: candidate).to_s,
               range: Interface::Range.new(
                 start: Interface::Position.new(line: 0, character: 0),
@@ -116,7 +110,7 @@ module RubyLsp
           current_folder = path ? Pathname.new(CGI.unescape(path)).dirname : Dir.pwd
           candidate = File.expand_path(File.join(current_folder, required_file))
 
-          @_response = Interface::Location.new(
+          @response_builder << Interface::Location.new(
             uri: URI::Generic.from_path(path: candidate).to_s,
             range: Interface::Range.new(
               start: Interface::Position.new(line: 0, character: 0),
@@ -136,7 +130,7 @@ module RubyLsp
         first_entry = T.must(entries.first)
         return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{value}"
 
-        @_response = entries.filter_map do |entry|
+        entries.each do |entry|
           location = entry.location
           # If the project has Sorbet, then we only want to handle go to definition for constants defined in gems, as an
           # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
@@ -144,7 +138,7 @@ module RubyLsp
           file_path = entry.file_path
           next if @typechecker_enabled && not_in_dependencies?(file_path)
 
-          Interface::Location.new(
+          @response_builder << Interface::Location.new(
             uri: URI::Generic.from_path(path: file_path).to_s,
             range: Interface::Range.new(
               start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
