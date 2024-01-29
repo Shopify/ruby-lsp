@@ -14,5 +14,6 @@ module RubyLsp
     autoload :Hover, "ruby_lsp/response_builders/hover"
     autoload :InlayHints, "ruby_lsp/response_builders/inlay_hints"
     autoload :SemanticHighlighting, "ruby_lsp/response_builders/semantic_highlighting"
+    autoload :SignatureHelp, "ruby_lsp/response_builders/signature_help"
   end
 end

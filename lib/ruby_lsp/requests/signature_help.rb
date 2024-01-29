@@ -26,7 +26,6 @@ module RubyLsp
     # ```
     class SignatureHelp < Request
       extend T::Sig
-      extend T::Generic
 
       class << self
         extend T::Sig
@@ -39,8 +38,6 @@ module RubyLsp
           )
         end
       end
-
-      ResponseType = type_member { { fixed: T.nilable(T.any(Interface::SignatureHelp, T::Hash[Symbol, T.untyped])) } }
 
       sig do
         params(
@@ -72,15 +69,16 @@ module RubyLsp
 
         @target = T.let(target, T.nilable(Prism::Node))
         @dispatcher = dispatcher
-        @listener = T.let(Listeners::SignatureHelp.new(nesting, index, dispatcher), Listener[ResponseType])
+        @response_builder = T.let(ResponseBuilders::SignatureHelp.new, ResponseBuilders::SignatureHelp)
+        Listeners::SignatureHelp.new(@response_builder, nesting, index, dispatcher)
       end
 
-      sig { override.returns(ResponseType) }
+      sig { override.returns(T.nilable(Interface::SignatureHelp)) }
       def perform
         return unless @target
 
         @dispatcher.dispatch_once(@target)
-        @listener.response
+        @response_builder.response
       end
     end
   end
