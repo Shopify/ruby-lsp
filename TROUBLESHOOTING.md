@@ -19,7 +19,7 @@ As an example, the activation script for `zsh` using `rbenv` as a version manage
 # specified Ruby version
 # We then print the activated environment as JSON. We read that JSON from the NodeJS process to insert the needed
 # environment variables in order to run Ruby correctly
-/bin/zsh -ic 'rbenv exec ruby -rjson -e "puts JSON.dump(ENV)"'
+/bin/zsh -ic 'rbenv exec ruby -rjson -e "puts JSON.dump(ENV.to_h)"'
 ```
 
 After activating the Ruby version, we then proceed to boot the server gem (`ruby-lsp`). To avoid having users include
