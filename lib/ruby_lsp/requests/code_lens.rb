@@ -26,7 +26,6 @@ module RubyLsp
     # ```
     class CodeLens < Request
       extend T::Sig
-      extend T::Generic
 
       class << self
         extend T::Sig
@@ -37,8 +36,6 @@ module RubyLsp
         end
       end
 
-      ResponseType = type_member { { fixed: T::Array[Interface::CodeLens] } }
-
       sig do
         params(
           uri: URI::Generic,
@@ -47,21 +44,18 @@ module RubyLsp
         ).void
       end
       def initialize(uri, lenses_configuration, dispatcher)
+        @response_builder = T.let(ResponseBuilders::CodeLens.new, ResponseBuilders::CodeLens)
         super()
-        @listeners = T.let(
-          [Listeners::CodeLens.new(uri, lenses_configuration, dispatcher)],
-          T::Array[Listener[ResponseType]],
-        )
+        Listeners::CodeLens.new(@response_builder, uri, lenses_configuration, dispatcher)
 
         Addon.addons.each do |addon|
-          addon_listener = addon.create_code_lens_listener(uri, dispatcher)
-          @listeners << addon_listener if addon_listener
+          addon.create_code_lens_listener(@response_builder, uri, dispatcher)
         end
       end
 
-      sig { override.returns(ResponseType) }
+      sig { override.returns(T::Array[Interface::CodeLens]) }
       def perform
-        @listeners.flat_map(&:response)
+        @response_builder.response
       end
     end
   end

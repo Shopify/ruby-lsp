@@ -2,13 +2,12 @@
 # frozen_string_literal: true
 
 require "shellwords"
-require_relative "../listener"
 
 module RubyLsp
   module Listeners
-    class CodeLens < Listener
+    class CodeLens
       extend T::Sig
-      extend T::Generic
+      include Requests::Support::Common
 
       BASE_COMMAND = T.let(
         begin
@@ -23,21 +22,18 @@ module RubyLsp
       SUPPORTED_TEST_LIBRARIES = T.let(["minitest", "test-unit"], T::Array[String])
       DESCRIBE_KEYWORD = T.let(:describe, Symbol)
       IT_KEYWORD = T.let(:it, Symbol)
-      ResponseType = type_member { { fixed: T::Array[Interface::CodeLens] } }
-
-      sig { override.returns(ResponseType) }
-      attr_reader :_response
 
       sig do
         params(
+          response_builder: ResponseBuilders::CodeLens,
           uri: URI::Generic,
           lenses_configuration: RequestConfig,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(uri, lenses_configuration, dispatcher)
+      def initialize(response_builder, uri, lenses_configuration, dispatcher)
+        @response_builder = response_builder
         @uri = T.let(uri, URI::Generic)
-        @_response = T.let([], ResponseType)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
         # visibility_stack is a stack of [current_visibility, previous_visibility]
         @visibility_stack = T.let([[:public, :public]], T::Array[T::Array[T.nilable(Symbol)]])
@@ -45,8 +41,6 @@ module RubyLsp
         @group_id = T.let(1, Integer)
         @group_id_stack = T.let([], T::Array[Integer])
         @lenses_configuration = lenses_configuration
-
-        super(dispatcher)
 
         dispatcher.register(
           self,
@@ -178,7 +172,7 @@ module RubyLsp
         grouping_data = { group_id: @group_id_stack.last, kind: kind }
         grouping_data[:id] = @group_id if kind == :group
 
-        @_response << create_code_lens(
+        @response_builder << create_code_lens(
           node,
           title: "Run",
           command_name: "rubyLsp.runTest",
@@ -186,7 +180,7 @@ module RubyLsp
           data: { type: "test", **grouping_data },
         )
 
-        @_response << create_code_lens(
+        @response_builder << create_code_lens(
           node,
           title: "Run In Terminal",
           command_name: "rubyLsp.runTestInTerminal",
@@ -194,7 +188,7 @@ module RubyLsp
           data: { type: "test_in_terminal", **grouping_data },
         )
 
-        @_response << create_code_lens(
+        @response_builder << create_code_lens(
           node,
           title: "Debug",
           command_name: "rubyLsp.debugTest",
@@ -237,7 +231,7 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode, remote: String).void }
       def add_open_gem_remote_code_lens(node, remote)
-        @_response << create_code_lens(
+        @response_builder << create_code_lens(
           node,
           title: "Open remote",
           command_name: "rubyLsp.openLink",
