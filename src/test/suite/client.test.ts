@@ -57,7 +57,7 @@ suite("Client", () => {
       name: path.basename(tmpPath),
       index: 0,
     };
-    fs.writeFileSync(path.join(tmpPath, ".ruby-version"), "3.2.2");
+    fs.writeFileSync(path.join(tmpPath, ".ruby-version"), "3.3.0");
 
     const context = {
       extensionMode: vscode.ExtensionMode.Test,

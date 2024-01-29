@@ -1,11 +1,25 @@
 import path from "path";
 import fs from "fs";
-import { ChildProcessWithoutNullStreams, spawn, execSync } from "child_process";
+import net from "net";
+import os from "os";
+import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 
 import * as vscode from "vscode";
 
-import { LOG_CHANNEL } from "./common";
+import { LOG_CHANNEL, asyncExec } from "./common";
 import { Workspace } from "./workspace";
+
+class TerminalLogger {
+  append(message: string) {
+    // eslint-disable-next-line no-console
+    console.log(message);
+  }
+
+  appendLine(value: string): void {
+    // eslint-disable-next-line no-console
+    console.log(value);
+  }
+}
 
 export class Debugger
   implements
@@ -13,7 +27,11 @@ export class Debugger
     vscode.DebugConfigurationProvider
 {
   private debugProcess?: ChildProcessWithoutNullStreams;
-  private readonly console = vscode.debug.activeDebugConsole;
+  // eslint-disable-next-line no-process-env
+  private readonly console = process.env.CI
+    ? new TerminalLogger()
+    : vscode.debug.activeDebugConsole;
+
   private readonly workspaceResolver: (
     uri: vscode.Uri | undefined,
   ) => Workspace | undefined;
@@ -132,19 +150,17 @@ export class Debugger
     }
   }
 
-  private getSockets(session: vscode.DebugSession): string[] {
-    const cmd = "bundle exec rdbg --util=list-socks";
-    const workspaceFolder = session.workspaceFolder;
-    if (!workspaceFolder) {
-      throw new Error("Debugging requires a workspace folder to be opened");
-    }
+  private async getSockets(session: vscode.DebugSession) {
     const configuration = session.configuration;
     let sockets: string[] = [];
+
     try {
-      sockets = execSync(cmd, {
-        cwd: workspaceFolder.uri.fsPath,
+      const result = await asyncExec("bundle exec rdbg --util=list-socks", {
+        cwd: session.workspaceFolder?.uri.fsPath,
         env: configuration.env,
-      })
+      });
+
+      sockets = result.stdout
         .toString()
         .split("\n")
         .filter((socket) => socket.length > 0);
@@ -159,7 +175,8 @@ export class Debugger
   ): Promise<vscode.DebugAdapterDescriptor> {
     // When using attach, a process will be launched using Ruby debug and it will create a socket automatically. We have
     // to find the available sockets and ask the user which one they want to attach to
-    const sockets = this.getSockets(session);
+    const sockets = await this.getSockets(session);
+
     if (sockets.length === 0) {
       throw new Error(`No debuggee processes found. Is the process running?`);
     }
@@ -183,7 +200,7 @@ export class Debugger
     return new vscode.DebugAdapterNamedPipeServer(selectedSocketPath);
   }
 
-  private spawnDebuggeeForLaunch(
+  private async spawnDebuggeeForLaunch(
     session: vscode.DebugSession,
   ): Promise<vscode.DebugAdapterDescriptor | undefined> {
     let initialMessage = "";
@@ -192,16 +209,18 @@ export class Debugger
     const configuration = session.configuration;
     const workspaceFolder = configuration.targetFolder;
     const cwd = workspaceFolder.path;
+    const port =
+      os.platform() === "win32" ? await this.availablePort() : undefined;
 
     return new Promise((resolve, reject) => {
-      const args = [
-        "exec",
-        "rdbg",
-        "--open",
-        "--command",
-        "--",
-        configuration.program,
-      ];
+      const args = ["exec", "rdbg"];
+
+      // On Windows, we spawn the debugger with any available port. On Linux and macOS, we spawn it with a UNIX socket
+      if (port) {
+        args.push("--port", port.toString());
+      }
+
+      args.push("--open", "--command", "--", configuration.program);
 
       LOG_CHANNEL.info(`Spawning debugger in directory ${cwd}`);
       LOG_CHANNEL.info(`   Command bundle ${args.join(" ")}`);
@@ -228,10 +247,14 @@ export class Debugger
           initialMessage.includes("DEBUGGER: wait for debugger connection...")
         ) {
           initialized = true;
+
           const regex =
             /DEBUGGER: Debugger can attach via UNIX domain socket \((.*)\)/;
           const sockPath = RegExp(regex).exec(initialMessage);
-          if (sockPath && sockPath.length === 2) {
+
+          if (port) {
+            resolve(new vscode.DebugAdapterServer(port));
+          } else if (sockPath && sockPath.length === 2) {
             resolve(new vscode.DebugAdapterNamedPipeServer(sockPath[1]));
           } else {
             reject(new Error("Debugger not found on UNIX socket"));
@@ -253,13 +276,35 @@ export class Debugger
       // If the Ruby debug exits with an exit code > 1, then an error might've occurred. The reason we don't use only
       // code zero here is because debug actually exits with 1 if the user cancels the debug session, which is not
       // actually an error
-      this.debugProcess.on("exit", (code) => {
+      this.debugProcess.on("close", (code) => {
         if (code) {
           const message = `Debugger exited with status ${code}. Check the output channel for more information.`;
           this.console.append(message);
           LOG_CHANNEL.show();
           reject(new Error(message));
         }
+      });
+    });
+  }
+
+  // Find an available port for the debug server to listen on
+  private async availablePort(): Promise<number | undefined> {
+    return new Promise((resolve, reject) => {
+      const server = net.createServer();
+      server.unref();
+
+      server.on("error", reject);
+
+      // By listening on port 0, the system will assign an available port automatically. We close the server and return
+      // the port that was assigned
+      server.listen(0, () => {
+        const address = server.address();
+        const port =
+          typeof address === "string" ? Number(address) : address?.port;
+
+        server.close(() => {
+          resolve(port);
+        });
       });
     });
   }

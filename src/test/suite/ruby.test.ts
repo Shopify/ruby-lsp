@@ -19,7 +19,7 @@ suite("Ruby environment activation", () => {
     }
 
     const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
-    fs.writeFileSync(path.join(tmpPath, ".ruby-version"), "3.2.2");
+    fs.writeFileSync(path.join(tmpPath, ".ruby-version"), "3.3.0");
 
     const context = {
       extensionMode: vscode.ExtensionMode.Test,
