@@ -41,19 +41,20 @@ module RubyLsp
       end
       def initialize(document, index, position, dispatcher, typechecker_enabled)
         super()
-        target, parent, nesting = document.locate_node(
+        @target = T.let(nil, T.nilable(Prism::Node))
+        @target, parent, nesting = document.locate_node(
           position,
           node_types: Listeners::Hover::ALLOWED_TARGETS,
         )
 
         if (Listeners::Hover::ALLOWED_TARGETS.include?(parent.class) &&
-            !Listeners::Hover::ALLOWED_TARGETS.include?(target.class)) ||
-            (parent.is_a?(Prism::ConstantPathNode) && target.is_a?(Prism::ConstantReadNode))
-          target = parent
+            !Listeners::Hover::ALLOWED_TARGETS.include?(@target.class)) ||
+            (parent.is_a?(Prism::ConstantPathNode) && @target.is_a?(Prism::ConstantReadNode))
+          @target = parent
         end
 
         # Don't need to instantiate any listeners if there's no target
-        return unless target
+        return unless @target
 
         uri = document.uri
         @response_builder = T.let(ResponseBuilders::Hover.new, ResponseBuilders::Hover)
@@ -62,12 +63,13 @@ module RubyLsp
           addon.create_hover_listener(@response_builder, nesting, index, dispatcher)
         end
 
-        @target = T.let(target, Prism::Node)
         @dispatcher = dispatcher
       end
 
       sig { override.returns(ResponseType) }
       def perform
+        return unless @target
+
         @dispatcher.dispatch_once(@target)
 
         return if @response_builder.empty?
