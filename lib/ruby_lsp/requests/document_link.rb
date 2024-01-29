@@ -20,7 +20,6 @@ module RubyLsp
     # ```
     class DocumentLink < Request
       extend T::Sig
-      extend T::Generic
 
       class << self
         extend T::Sig
@@ -31,8 +30,6 @@ module RubyLsp
         end
       end
 
-      ResponseType = type_member { { fixed: T::Array[Interface::DocumentLink] } }
-
       sig do
         params(
           uri: URI::Generic,
@@ -42,12 +39,13 @@ module RubyLsp
       end
       def initialize(uri, comments, dispatcher)
         super()
-        @listener = T.let(Listeners::DocumentLink.new(uri, comments, dispatcher), Listener[ResponseType])
+        @response_builder = T.let(ResponseBuilders::DocumentLink.new, ResponseBuilders::DocumentLink)
+        Listeners::DocumentLink.new(@response_builder, uri, comments, dispatcher)
       end
 
-      sig { override.returns(ResponseType) }
+      sig { override.returns(T::Array[Interface::DocumentLink]) }
       def perform
-        @listener.response
+        @response_builder.response
       end
     end
   end
