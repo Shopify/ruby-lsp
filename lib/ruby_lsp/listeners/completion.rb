@@ -147,7 +147,10 @@ module RubyLsp
             detail: "(#{entry.parameters.map(&:decorated_name).join(", ")})",
             description: entry.file_name,
           ),
-          documentation: markdown_from_index_entries(name, entry),
+          documentation: Interface::MarkupContent.new(
+            kind: "markdown",
+            value: markdown_from_index_entries(name, entry),
+          ),
         )
       end
 
@@ -240,7 +243,10 @@ module RubyLsp
           label_details: Interface::CompletionItemLabelDetails.new(
             description: entries.map(&:file_name).join(","),
           ),
-          documentation: markdown_from_index_entries(real_name, entries),
+          documentation: Interface::MarkupContent.new(
+            kind: "markdown",
+            value: markdown_from_index_entries(real_name, entries),
+          ),
         )
       end
 

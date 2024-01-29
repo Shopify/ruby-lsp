@@ -86,7 +86,7 @@ module RubyLsp
           params(
             title: String,
             entries: T.any(T::Array[RubyIndexer::Entry], RubyIndexer::Entry),
-          ).returns(Interface::MarkupContent)
+          ).returns(String)
         end
         def markdown_from_index_entries(title, entries)
           markdown_title = "```ruby\n#{title}\n```"
@@ -108,16 +108,13 @@ module RubyLsp
             content << "\n\n#{entry.comments.join("\n")}" unless entry.comments.empty?
           end
 
-          Interface::MarkupContent.new(
-            kind: "markdown",
-            value: <<~MARKDOWN.chomp,
-              #{markdown_title}
+          <<~MARKDOWN.chomp
+            #{markdown_title}
 
-              **Definitions**: #{definitions.join(" | ")}
+            **Definitions**: #{definitions.join(" | ")}
 
-              #{content}
-            MARKDOWN
-          )
+            #{content}
+          MARKDOWN
         end
       end
     end
