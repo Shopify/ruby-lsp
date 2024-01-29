@@ -40,7 +40,6 @@ module RubyLsp
     # ```
     class InlayHints < Request
       extend T::Sig
-      extend T::Generic
 
       class << self
         extend T::Sig
@@ -50,8 +49,6 @@ module RubyLsp
           Interface::InlayHintOptions.new(resolve_provider: false)
         end
       end
-
-      ResponseType = type_member { { fixed: T::Array[Interface::InlayHint] } }
 
       sig do
         params(
@@ -65,15 +62,14 @@ module RubyLsp
         super()
         start_line = range.dig(:start, :line)
         end_line = range.dig(:end, :line)
-        @listener = T.let(
-          Listeners::InlayHints.new(start_line..end_line, hints_configuration, dispatcher),
-          Listener[ResponseType],
-        )
+
+        @response_builder = T.let(ResponseBuilders::InlayHints.new, ResponseBuilders::InlayHints)
+        Listeners::InlayHints.new(@response_builder, start_line..end_line, hints_configuration, dispatcher)
       end
 
-      sig { override.returns(ResponseType) }
+      sig { override.returns(T::Array[Interface::InlayHint]) }
       def perform
-        @listener.response
+        @response_builder.response
       end
     end
   end

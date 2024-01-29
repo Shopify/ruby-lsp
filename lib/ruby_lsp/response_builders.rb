@@ -12,6 +12,7 @@ module RubyLsp
     autoload :DocumentSymbol, "ruby_lsp/response_builders/document_symbol"
     autoload :FoldingRanges, "ruby_lsp/response_builders/folding_ranges"
     autoload :Hover, "ruby_lsp/response_builders/hover"
+    autoload :InlayHints, "ruby_lsp/response_builders/inlay_hints"
     autoload :SemanticHighlighting, "ruby_lsp/response_builders/semantic_highlighting"
   end
 end
