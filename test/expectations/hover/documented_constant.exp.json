@@ -9,16 +9,6 @@
         "contents": {
             "kind": "markdown",
             "value": "```ruby\nBAZ\n```\n\n**Definitions**: [fake.rb](file:///fake.rb#L2,1-2,10)\n\n\n\nThis is the documentation for Baz"
-        },
-        "range": {
-            "start": {
-                "line": 1,
-                "character": 0
-            },
-            "end": {
-                "line": 1,
-                "character": 3
-            }
         }
     }
 }

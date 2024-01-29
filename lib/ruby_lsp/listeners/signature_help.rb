@@ -63,7 +63,10 @@ module RubyLsp
             Interface::SignatureInformation.new(
               label: label,
               parameters: parameters.map { |param| Interface::ParameterInformation.new(label: param.name) },
-              documentation: markdown_from_index_entries("", target_method),
+              documentation: Interface::MarkupContent.new(
+                kind: "markdown",
+                value: markdown_from_index_entries("", target_method),
+              ),
             ),
           ],
           active_parameter: active_parameter,

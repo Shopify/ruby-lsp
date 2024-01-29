@@ -22,9 +22,6 @@ module RubyLsp
     # ```
     class SemanticHighlighting < Request
       extend T::Sig
-      extend T::Generic
-
-      ResponseType = type_member { { fixed: T::Array[Listeners::SemanticHighlighting::SemanticToken] } }
 
       class << self
         extend T::Sig
@@ -34,8 +31,8 @@ module RubyLsp
           Interface::SemanticTokensRegistrationOptions.new(
             document_selector: { scheme: "file", language: "ruby" },
             legend: Interface::SemanticTokensLegend.new(
-              token_types: Listeners::SemanticHighlighting::TOKEN_TYPES.keys,
-              token_modifiers: Listeners::SemanticHighlighting::TOKEN_MODIFIERS.keys,
+              token_types: ResponseBuilders::SemanticHighlighting::TOKEN_TYPES.keys,
+              token_modifiers: ResponseBuilders::SemanticHighlighting::TOKEN_MODIFIERS.keys,
             ),
             range: true,
             full: { delta: false },
@@ -46,12 +43,17 @@ module RubyLsp
       sig { params(dispatcher: Prism::Dispatcher, range: T.nilable(T::Range[Integer])).void }
       def initialize(dispatcher, range: nil)
         super()
-        @listener = T.let(Listeners::SemanticHighlighting.new(dispatcher, range: range), Listener[ResponseType])
+        @response_builder = T.let(ResponseBuilders::SemanticHighlighting.new, ResponseBuilders::SemanticHighlighting)
+        Listeners::SemanticHighlighting.new(dispatcher, @response_builder, range: range)
+
+        Addon.addons.each do |addon|
+          addon.create_semantic_highlighting_listener(@response_builder, dispatcher)
+        end
       end
 
-      sig { override.returns(ResponseType) }
+      sig { override.returns(Interface::SemanticTokens) }
       def perform
-        @listener.response
+        @response_builder.response
       end
     end
   end

@@ -41,51 +41,45 @@ module RubyLsp
       end
       def initialize(document, index, position, dispatcher, typechecker_enabled)
         super()
-        target, parent, nesting = document.locate_node(
+        @target = T.let(nil, T.nilable(Prism::Node))
+        @target, parent, nesting = document.locate_node(
           position,
           node_types: Listeners::Hover::ALLOWED_TARGETS,
         )
 
         if (Listeners::Hover::ALLOWED_TARGETS.include?(parent.class) &&
-            !Listeners::Hover::ALLOWED_TARGETS.include?(target.class)) ||
-            (parent.is_a?(Prism::ConstantPathNode) && target.is_a?(Prism::ConstantReadNode))
-          target = parent
+            !Listeners::Hover::ALLOWED_TARGETS.include?(@target.class)) ||
+            (parent.is_a?(Prism::ConstantPathNode) && @target.is_a?(Prism::ConstantReadNode))
+          @target = parent
         end
-
-        @listeners = T.let([], T::Array[Listener[ResponseType]])
 
         # Don't need to instantiate any listeners if there's no target
-        return unless target
+        return unless @target
 
         uri = document.uri
-        @listeners = T.let(
-          [Listeners::Hover.new(uri, nesting, index, dispatcher, typechecker_enabled)],
-          T::Array[Listener[ResponseType]],
-        )
+        @response_builder = T.let(ResponseBuilders::Hover.new, ResponseBuilders::Hover)
+        Listeners::Hover.new(@response_builder, uri, nesting, index, dispatcher, typechecker_enabled)
         Addon.addons.each do |addon|
-          addon_listener = addon.create_hover_listener(nesting, index, dispatcher)
-          @listeners << addon_listener if addon_listener
+          addon.create_hover_listener(@response_builder, nesting, index, dispatcher)
         end
 
-        @target = T.let(target, Prism::Node)
         @dispatcher = dispatcher
       end
 
       sig { override.returns(ResponseType) }
       def perform
+        return unless @target
+
         @dispatcher.dispatch_once(@target)
-        responses = @listeners.map(&:response).compact
 
-        first_response, *other_responses = responses
+        return if @response_builder.empty?
 
-        return unless first_response
-
-        # TODO: other_responses should never be nil. Check Sorbet
-        T.must(other_responses).each do |other_response|
-          first_response.contents.value << "\n\n" << other_response.contents.value
-        end
-
-        first_response
+        Interface::Hover.new(
+          contents: Interface::MarkupContent.new(
+            kind: "markdown",
+            value: @response_builder.response,
+          ),
+        )
       end
     end
   end

@@ -2,18 +2,8 @@
 # frozen_string_literal: true
 
 module RubyLsp
-  class Response
-    extend T::Sig
-    extend T::Generic
-
-    abstract!
-
-    ResponseType = type_member
-
-    sig { abstract.returns(ResponseType) }
-    def result; end
-
-    class DocumentSymbolStack < Response
+  module ResponseBuilders
+    class DocumentSymbol < ResponseBuilder
       ResponseType = type_member { { fixed: T::Array[Interface::DocumentSymbol] } }
 
       class SymbolHierarchyRoot
@@ -59,7 +49,7 @@ module RubyLsp
       end
 
       sig { override.returns(T::Array[Interface::DocumentSymbol]) }
-      def result
+      def response
         T.must(@stack.first).children
       end
     end
