@@ -147,12 +147,13 @@ module RubyLsp
     # Creates a new Definition listener. This method is invoked on every Definition request
     sig do
       overridable.params(
+        response_builder: ResponseBuilders::Definition,
         uri: URI::Generic,
         nesting: T::Array[String],
         index: RubyIndexer::Index,
         dispatcher: Prism::Dispatcher,
-      ).returns(T.nilable(Listener[T.nilable(T.any(T::Array[Interface::Location], Interface::Location))]))
+      ).void
     end
-    def create_definition_listener(uri, nesting, index, dispatcher); end
+    def create_definition_listener(response_builder, uri, nesting, index, dispatcher); end
   end
 end
