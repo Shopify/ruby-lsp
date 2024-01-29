@@ -19,7 +19,6 @@ module RubyLsp
     # ```
     class FoldingRanges < Request
       extend T::Sig
-      extend T::Generic
 
       class << self
         extend T::Sig
@@ -30,17 +29,20 @@ module RubyLsp
         end
       end
 
-      ResponseType = type_member { { fixed: T::Array[Interface::FoldingRange] } }
-
       sig { params(comments: T::Array[Prism::Comment], dispatcher: Prism::Dispatcher).void }
       def initialize(comments, dispatcher)
         super()
-        @listener = T.let(Listeners::FoldingRanges.new(comments, dispatcher), Listener[ResponseType])
+        @response_builder = T.let(ResponseBuilders::FoldingRanges.new, ResponseBuilders::FoldingRanges)
+        @listener = T.let(
+          Listeners::FoldingRanges.new(@response_builder, comments, dispatcher),
+          Listeners::FoldingRanges,
+        )
       end
 
-      sig { override.returns(ResponseType) }
+      sig { override.returns(T::Array[Interface::FoldingRange]) }
       def perform
-        @listener.response
+        @listener.finalize_response!
+        @response_builder.response
       end
     end
   end
