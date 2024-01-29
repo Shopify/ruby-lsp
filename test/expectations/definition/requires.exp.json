@@ -1,6 +1,6 @@
 {
     "result": [{
-        "uri": "file:///ruby_lsp/listener.rb",
+        "uri": "file:///ruby_lsp/executor.rb",
         "range": {
             "start": {
                 "line": 0,

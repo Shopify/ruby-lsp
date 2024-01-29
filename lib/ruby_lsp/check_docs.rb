@@ -49,7 +49,7 @@ module RubyLsp
       # Require all files configured to make sure all listeners are loaded
       @file_list.each { |f| require(f.delete_suffix(".rb")) }
 
-      # Find all classes that inherit from BaseRequest or Listener, which are the ones we want to make sure are
+      # Find all classes that inherit from BaseRequest, which are the ones we want to make sure are
       # documented
       features = ObjectSpace.each_object(Class).select do |k|
         klass = T.unsafe(k)

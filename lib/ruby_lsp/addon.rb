@@ -123,7 +123,7 @@ module RubyLsp
         nesting: T::Array[String],
         index: RubyIndexer::Index,
         dispatcher: Prism::Dispatcher,
-      ).returns(T.nilable(Listener[T.nilable(Interface::Hover)]))
+      ).void
     end
     def create_hover_listener(response_builder, nesting, index, dispatcher); end
 
