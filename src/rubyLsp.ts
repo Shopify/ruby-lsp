@@ -53,11 +53,6 @@ export class RubyLsp {
           this.workspaces.delete(workspaceFolder.uri.toString());
         }
       }
-
-      // Create and activate new workspaces for the added folders
-      for (const workspaceFolder of event.added) {
-        await this.activateWorkspace(workspaceFolder, true);
-      }
     });
 
     // Lazily activate workspaces that do not contain a lockfile
@@ -86,8 +81,13 @@ export class RubyLsp {
   async activate() {
     await this.telemetry.sendConfigurationEvents();
 
-    for (const workspaceFolder of vscode.workspace.workspaceFolders!) {
-      await this.activateWorkspace(workspaceFolder, true);
+    const firstWorkspace = vscode.workspace.workspaceFolders?.[0];
+
+    // We only activate the first workspace eagerly to avoid running into performance and memory issues. Having too many
+    // workspaces spawning the Ruby LSP server and indexing can grind the editor to a halt. All other workspaces are
+    // activated lazily once a Ruby document is opened inside of it through the `onDidOpenTextDocument` event
+    if (firstWorkspace) {
+      await this.activateWorkspace(firstWorkspace, true);
     }
 
     this.context.subscriptions.push(
