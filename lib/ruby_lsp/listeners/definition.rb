@@ -17,7 +17,7 @@ module RubyLsp
           typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(response_builder, uri, nesting, index, dispatcher, typechecker_enabled)
+      def initialize(response_builder, uri, nesting, index, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @uri = uri
         @nesting = nesting
