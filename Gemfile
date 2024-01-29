@@ -8,7 +8,7 @@ gemspec
 NON_WINDOWS_PLATFORMS = [:ruby] # C Ruby (MRI), Rubinius or TruffleRuby, but NOT Windows
 
 group :development do
-  gem "bundler", "~> 2.4.2"
+  gem "bundler", "~> 2.5"
   gem "debug", "~> 1.9", require: false
   gem "minitest", "~> 5.21"
   gem "minitest-reporters", "~> 1.6"
