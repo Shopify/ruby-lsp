@@ -1,4 +1,13 @@
 # Ruby LSP design and roadmap
+
+- [Design principles](#design-principles)
+    - [Favoring common development setups](#favoring-common-development-setups)
+    - [Stability and performance over features](#stability-and-performance-over-features)
+    - [Accuracy, correctness and type checking](#accuracy-correctness-and-type-checking)
+    - [Extensibility](#extensibility)
+    - [Relying on Bundler](#relying-on-bundler)
+- [Long term roadmap](#long-term-roadmap)
+
 ## Design principles
 
 These are the mental models used to make decisions in respect to the Ruby LSP.
