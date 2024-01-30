@@ -63,7 +63,10 @@ module RubyLsp
         start_line = range.dig(:start, :line)
         end_line = range.dig(:end, :line)
 
-        @response_builder = T.let(ResponseBuilders::InlayHints.new, ResponseBuilders::InlayHints)
+        @response_builder = T.let(
+          ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint].new,
+          ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint],
+        )
         Listeners::InlayHints.new(@response_builder, start_line..end_line, hints_configuration, dispatcher)
       end
 

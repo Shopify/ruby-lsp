@@ -32,7 +32,10 @@ module RubyLsp
       sig { params(comments: T::Array[Prism::Comment], dispatcher: Prism::Dispatcher).void }
       def initialize(comments, dispatcher)
         super()
-        @response_builder = T.let(ResponseBuilders::FoldingRanges.new, ResponseBuilders::FoldingRanges)
+        @response_builder = T.let(
+          ResponseBuilders::CollectionResponseBuilder[Interface::FoldingRange].new,
+          ResponseBuilders::CollectionResponseBuilder[Interface::FoldingRange],
+        )
         @listener = T.let(
           Listeners::FoldingRanges.new(@response_builder, comments, dispatcher),
           Listeners::FoldingRanges,

@@ -9,7 +9,7 @@ module RubyLsp
 
       sig do
         params(
-          response_builder: ResponseBuilders::FoldingRanges,
+          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::FoldingRange],
           comments: T::Array[Prism::Comment],
           dispatcher: Prism::Dispatcher,
         ).void

@@ -9,7 +9,7 @@ module RubyLsp
 
       sig do
         params(
-          response_builder: ResponseBuilders::Completion,
+          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
           index: RubyIndexer::Index,
           nesting: T::Array[String],
           typechecker_enabled: T::Boolean,

@@ -3,23 +3,24 @@
 
 module RubyLsp
   module ResponseBuilders
-    class Completion < ResponseBuilder
-      ResponseType = type_member { { fixed: T::Array[Interface::CompletionItem] } }
-
+    class CollectionResponseBuilder < ResponseBuilder
       extend T::Sig
+      extend T::Generic
+
+      ResponseType = type_member { { upper: Object } }
 
       sig { void }
       def initialize
         super
-        @items = T.let([], ResponseType)
+        @items = T.let([], T::Array[ResponseType])
       end
 
-      sig { params(item: Interface::CompletionItem).void }
+      sig { params(item: ResponseType).void }
       def <<(item)
         @items << item
       end
 
-      sig { override.returns(ResponseType) }
+      sig { override.returns(T::Array[ResponseType]) }
       def response
         @items
       end

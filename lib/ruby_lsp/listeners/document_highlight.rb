@@ -88,7 +88,7 @@ module RubyLsp
 
       sig do
         params(
-          response_builder: ResponseBuilders::DocumentHighlight,
+          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight],
           target: T.nilable(Prism::Node),
           parent: T.nilable(Prism::Node),
           dispatcher: Prism::Dispatcher,

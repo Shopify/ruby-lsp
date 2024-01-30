@@ -63,7 +63,10 @@ module RubyLsp
           char_position,
           node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode],
         )
-        @response_builder = T.let(ResponseBuilders::Completion.new, ResponseBuilders::Completion)
+        @response_builder = T.let(
+          ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem].new,
+          ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
+        )
 
         Listeners::Completion.new(@response_builder, index, nesting, typechecker_enabled, dispatcher)
 

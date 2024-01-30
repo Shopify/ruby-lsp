@@ -109,7 +109,7 @@ module RubyLsp
     # Creates a new CodeLens listener. This method is invoked on every CodeLens request
     sig do
       overridable.params(
-        response_builder: ResponseBuilders::CodeLens,
+        response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
         uri: URI::Generic,
         dispatcher: Prism::Dispatcher,
       ).void
@@ -147,7 +147,7 @@ module RubyLsp
     # Creates a new Definition listener. This method is invoked on every Definition request
     sig do
       overridable.params(
-        response_builder: ResponseBuilders::Definition,
+        response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::Location],
         uri: URI::Generic,
         nesting: T::Array[String],
         index: RubyIndexer::Index,

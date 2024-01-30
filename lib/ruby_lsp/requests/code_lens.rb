@@ -44,7 +44,10 @@ module RubyLsp
         ).void
       end
       def initialize(uri, lenses_configuration, dispatcher)
-        @response_builder = T.let(ResponseBuilders::CodeLens.new, ResponseBuilders::CodeLens)
+        @response_builder = T.let(
+          ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens].new,
+          ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
+        )
         super()
         Listeners::CodeLens.new(@response_builder, uri, lenses_configuration, dispatcher)
 

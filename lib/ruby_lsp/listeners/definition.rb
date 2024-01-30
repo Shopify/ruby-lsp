@@ -9,7 +9,7 @@ module RubyLsp
 
       sig do
         params(
-          response_builder: ResponseBuilders::Definition,
+          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::Location],
           uri: URI::Generic,
           nesting: T::Array[String],
           index: RubyIndexer::Index,

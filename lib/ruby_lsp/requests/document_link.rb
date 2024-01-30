@@ -39,7 +39,10 @@ module RubyLsp
       end
       def initialize(uri, comments, dispatcher)
         super()
-        @response_builder = T.let(ResponseBuilders::DocumentLink.new, ResponseBuilders::DocumentLink)
+        @response_builder = T.let(
+          ResponseBuilders::CollectionResponseBuilder[Interface::DocumentLink].new,
+          ResponseBuilders::CollectionResponseBuilder[Interface::DocumentLink],
+        )
         Listeners::DocumentLink.new(@response_builder, uri, comments, dispatcher)
       end
 

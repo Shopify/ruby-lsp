@@ -59,7 +59,7 @@ module RubyLsp
 
       sig do
         params(
-          response_builder: ResponseBuilders::DocumentLink,
+          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::DocumentLink],
           uri: URI::Generic,
           comments: T::Array[Prism::Comment],
           dispatcher: Prism::Dispatcher,

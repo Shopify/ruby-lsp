@@ -11,7 +11,7 @@ module RubyLsp
 
       sig do
         params(
-          response_builder: ResponseBuilders::InlayHints,
+          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint],
           range: T::Range[Integer],
           hints_configuration: RequestConfig,
           dispatcher: Prism::Dispatcher,

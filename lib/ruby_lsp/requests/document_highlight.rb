@@ -37,7 +37,10 @@ module RubyLsp
       def initialize(document, position, dispatcher)
         super()
         target, parent = document.locate_node(position)
-        @response_builder = T.let(ResponseBuilders::DocumentHighlight.new, ResponseBuilders::DocumentHighlight)
+        @response_builder = T.let(
+          ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight].new,
+          ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight],
+        )
         Listeners::DocumentHighlight.new(@response_builder, target, parent, dispatcher)
       end
 
