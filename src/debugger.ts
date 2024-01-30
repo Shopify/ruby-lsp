@@ -280,7 +280,6 @@ export class Debugger
         if (code) {
           const message = `Debugger exited with status ${code}. Check the output channel for more information.`;
           this.console.append(message);
-          LOG_CHANNEL.show();
           reject(new Error(message));
         }
       });
