@@ -4,25 +4,25 @@ source "https://rubygems.org"
 
 gemspec
 
-# sorbet-static is not available on Windows. We also skip Tapioca since it depends on sorbet-static-and-runtime
-NON_WINDOWS_PLATFORMS = [:ruby] # C Ruby (MRI), Rubinius or TruffleRuby, but NOT Windows
-
 group :development do
   gem "bundler", "~> 2.5"
   gem "debug", "~> 1.9", require: false
-  gem "minitest", "~> 5.21"
   gem "minitest-reporters", "~> 1.6"
+  gem "minitest", "~> 5.21"
   gem "mocha", "~> 2.1"
+  gem "psych", "~> 5.1", require: false
   gem "rake", "~> 13.1"
-  gem "rubocop", "~> 1.60"
-  gem "rubocop-shopify", "~> 2.14", require: false
+  gem "rdoc", require: false
   gem "rubocop-minitest", "~> 0.34.5", require: false
   gem "rubocop-rake", "~> 0.6.0", require: false
+  gem "rubocop-shopify", "~> 2.14", require: false
   gem "rubocop-sorbet", "~> 0.7", require: false
-  gem "sorbet-static-and-runtime", platforms: NON_WINDOWS_PLATFORMS
-  gem "tapioca", "~> 0.12", require: false, platforms: NON_WINDOWS_PLATFORMS
-  gem "rdoc", require: false
-  gem "psych", "~> 5.1", require: false
-
+  gem "rubocop", "~> 1.60"
   gem "syntax_tree", ">= 6.1.1", "< 7"
+
+  platforms :ruby do # C Ruby (MRI), Rubinius or TruffleRuby, but NOT Windows
+    # sorbet-static is not available on Windows. We also skip Tapioca since it depends on sorbet-static-and-runtime
+    gem "sorbet-static-and-runtime"
+    gem "tapioca", "~> 0.12", require: false
+  end
 end
