@@ -289,7 +289,7 @@ export class TestController {
             workspace.ruby.env,
           );
 
-          run.appendOutput(output, undefined, test);
+          run.appendOutput(output.replace(/\r?\n/g, "\r\n"), undefined, test);
           run.passed(test, Date.now() - start);
         } catch (err: any) {
           const duration = Date.now() - start;
