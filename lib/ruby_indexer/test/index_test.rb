@@ -231,6 +231,33 @@ module RubyIndexer
       assert_equal("Foo::Bar", T.must(entry.owner).name)
     end
 
+    def test_resolve_method_with_class_name_conflict
+      index(<<~RUBY)
+        class Array
+        end
+
+        class Foo
+          def Array(*args); end
+        end
+      RUBY
+
+      entry = T.must(@index.resolve_method("Array", "Foo"))
+      assert_equal("Array", entry.name)
+      assert_equal("Foo", T.must(entry.owner).name)
+    end
+
+    def test_resolve_method_attribute
+      index(<<~RUBY)
+        class Foo
+          attr_reader :bar
+        end
+      RUBY
+
+      entry = T.must(@index.resolve_method("bar", "Foo"))
+      assert_equal("bar", entry.name)
+      assert_equal("Foo", T.must(entry.owner).name)
+    end
+
     def test_prefix_search_for_methods
       index(<<~RUBY)
         module Foo
