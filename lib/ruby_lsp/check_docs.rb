@@ -6,7 +6,7 @@ require "objspace"
 
 module RubyLsp
   # This rake task checks that all requests or addons are fully documented. Add the rake task to your Rakefile and
-  # specify the absolute path for all files that must be required in order to discover all listeners and their related
+  # specify the absolute path for all files that must be required in order to discover all requests and their related
   # GIFs
   #
   #   # Rakefile
@@ -33,7 +33,7 @@ module RubyLsp
 
     sig { void }
     def define_task
-      desc("Checks if all Ruby LSP listeners are documented")
+      desc("Checks if all Ruby LSP requests are documented")
       task(@name) { run_task }
     end
 
@@ -46,10 +46,10 @@ module RubyLsp
 
     sig { void }
     def run_task
-      # Require all files configured to make sure all listeners are loaded
+      # Require all files configured to make sure all requests are loaded
       @file_list.each { |f| require(f.delete_suffix(".rb")) }
 
-      # Find all classes that inherit from BaseRequest or Listener, which are the ones we want to make sure are
+      # Find all classes that inherit from BaseRequest, which are the ones we want to make sure are
       # documented
       features = ObjectSpace.each_object(Class).select do |k|
         klass = T.unsafe(k)
@@ -69,7 +69,7 @@ module RubyLsp
         lines = File.readlines(file_path)
         docs = []
 
-        # Extract the documentation on top of the listener constant
+        # Extract the documentation on top of the request constant
         while (line = lines[line_number]&.strip) && line.start_with?("#")
           docs.unshift(line)
           line_number -= 1
@@ -116,7 +116,7 @@ module RubyLsp
 
       if missing_docs.any?
         warn(<<~WARN)
-          The following listeners are missing documentation:
+          The following requests are missing documentation:
 
           #{missing_docs.map { |k, v| "#{k}\n\n#{v.join("\n")}" }.join("\n\n")}
         WARN
@@ -124,7 +124,7 @@ module RubyLsp
         abort
       end
 
-      puts "All listeners are documented!"
+      puts "All requests are documented!"
     end
   end
 end

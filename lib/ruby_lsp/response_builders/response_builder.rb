@@ -9,9 +9,7 @@ module RubyLsp
 
       abstract!
 
-      ResponseType = type_member { { upper: Object } }
-
-      sig { abstract.returns(ResponseType) }
+      sig { abstract.returns(T.anything) }
       def response; end
     end
   end

@@ -27,8 +27,6 @@ module RubyLsp
     class DocumentHighlight < Request
       extend T::Sig
 
-      ResponseType = type_member { { fixed: T::Array[Interface::DocumentHighlight] } }
-
       sig do
         params(
           document: Document,
@@ -39,12 +37,16 @@ module RubyLsp
       def initialize(document, position, dispatcher)
         super()
         target, parent = document.locate_node(position)
-        @listener = T.let(Listeners::DocumentHighlight.new(target, parent, dispatcher), Listener[ResponseType])
+        @response_builder = T.let(
+          ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight].new,
+          ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight],
+        )
+        Listeners::DocumentHighlight.new(@response_builder, target, parent, dispatcher)
       end
 
-      sig { override.returns(ResponseType) }
+      sig { override.returns(T::Array[Interface::DocumentHighlight]) }
       def perform
-        @listener.response
+        @response_builder.response
       end
     end
   end

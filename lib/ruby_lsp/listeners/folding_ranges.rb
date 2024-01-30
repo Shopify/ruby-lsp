@@ -3,19 +3,20 @@
 
 module RubyLsp
   module Listeners
-    class FoldingRanges < Listener
+    class FoldingRanges
       extend T::Sig
-      extend T::Generic
+      include Requests::Support::Common
 
-      ResponseType = type_member { { fixed: T::Array[Interface::FoldingRange] } }
-
-      sig { params(comments: T::Array[Prism::Comment], dispatcher: Prism::Dispatcher).void }
-      def initialize(comments, dispatcher)
-        super(dispatcher)
-
-        @_response = T.let([], ResponseType)
+      sig do
+        params(
+          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::FoldingRange],
+          comments: T::Array[Prism::Comment],
+          dispatcher: Prism::Dispatcher,
+        ).void
+      end
+      def initialize(response_builder, comments, dispatcher)
+        @response_builder = response_builder
         @requires = T.let([], T::Array[Prism::CallNode])
-        @finalized_response = T.let(false, T::Boolean)
         @comments = comments
 
         dispatcher.register(
@@ -46,15 +47,10 @@ module RubyLsp
         )
       end
 
-      sig { override.returns(ResponseType) }
-      def _response
-        unless @finalized_response
-          push_comment_ranges
-          emit_requires_range
-          @finalized_response = true
-        end
-
-        @_response
+      sig { void }
+      def finalize_response!
+        push_comment_ranges
+        emit_requires_range
       end
 
       sig { params(node: Prism::IfNode).void }
@@ -203,7 +199,7 @@ module RubyLsp
         end.each do |chunk|
           next if chunk.length == 1
 
-          @_response << Interface::FoldingRange.new(
+          @response_builder << Interface::FoldingRange.new(
             start_line: T.must(chunk.first).location.start_line - 1,
             end_line: T.must(chunk.last).location.end_line - 1,
             kind: "comment",
@@ -214,7 +210,7 @@ module RubyLsp
       sig { void }
       def emit_requires_range
         if @requires.length > 1
-          @_response << Interface::FoldingRange.new(
+          @response_builder << Interface::FoldingRange.new(
             start_line: T.must(@requires.first).location.start_line - 1,
             end_line: T.must(@requires.last).location.end_line - 1,
             kind: "imports",
@@ -260,7 +256,7 @@ module RubyLsp
         emit_requires_range
         return if start_line >= end_line
 
-        @_response << Interface::FoldingRange.new(
+        @response_builder << Interface::FoldingRange.new(
           start_line: start_line - 1,
           end_line: end_line - 1,
           kind: "region",

@@ -5,11 +5,9 @@ require "ruby_lsp/requests/support/source_uri"
 
 module RubyLsp
   module Listeners
-    class DocumentLink < Listener
+    class DocumentLink
       extend T::Sig
-      extend T::Generic
-
-      ResponseType = type_member { { fixed: T::Array[Interface::DocumentLink] } }
+      include Requests::Support::Common
 
       GEM_TO_VERSION_MAP = T.let(
         [*::Gem::Specification.default_stubs, *::Gem::Specification.stubs].map! do |s|
@@ -59,25 +57,21 @@ module RubyLsp
         end
       end
 
-      sig { override.returns(ResponseType) }
-      attr_reader :_response
-
       sig do
         params(
+          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::DocumentLink],
           uri: URI::Generic,
           comments: T::Array[Prism::Comment],
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(uri, comments, dispatcher)
-        super(dispatcher)
-
+      def initialize(response_builder, uri, comments, dispatcher)
         # Match the version based on the version in the RBI file name. Notice that the `@` symbol is sanitized to `%40`
         # in the URI
+        @response_builder = response_builder
         path = uri.to_standardized_path
         version_match = path ? /(?<=%40)[\d.]+(?=\.rbi$)/.match(path) : nil
         @gem_version = T.let(version_match && version_match[0], T.nilable(String))
-        @_response = T.let([], T::Array[Interface::DocumentLink])
         @lines_to_comments = T.let(
           comments.to_h do |comment|
             [comment.location.end_line, comment]
@@ -137,7 +131,7 @@ module RubyLsp
         file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, CGI.unescape(uri.path))
         return if file_path.nil?
 
-        @_response << Interface::DocumentLink.new(
+        @response_builder << Interface::DocumentLink.new(
           range: range_from_location(comment.location),
           target: "file://#{file_path}##{uri.line_number}",
           tooltip: "Jump to #{file_path}##{uri.line_number}",

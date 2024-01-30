@@ -39,7 +39,10 @@ module RubyLsp
       end
       def initialize(document, index, position, dispatcher, typechecker_enabled)
         super()
-        @response_builder = T.let(ResponseBuilders::Definition.new, ResponseBuilders::Definition)
+        @response_builder = T.let(
+          ResponseBuilders::CollectionResponseBuilder[Interface::Location].new,
+          ResponseBuilders::CollectionResponseBuilder[Interface::Location],
+        )
 
         target, parent, nesting = document.locate_node(
           position,

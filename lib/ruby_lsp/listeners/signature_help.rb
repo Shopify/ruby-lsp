@@ -3,28 +3,22 @@
 
 module RubyLsp
   module Listeners
-    class SignatureHelp < Listener
+    class SignatureHelp
       extend T::Sig
-      extend T::Generic
-
-      ResponseType = type_member { { fixed: T.nilable(T.any(Interface::SignatureHelp, T::Hash[Symbol, T.untyped])) } }
-
-      sig { override.returns(ResponseType) }
-      attr_reader :_response
+      include Requests::Support::Common
 
       sig do
         params(
+          response_builder: ResponseBuilders::SignatureHelp,
           nesting: T::Array[String],
           index: RubyIndexer::Index,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(nesting, index, dispatcher)
+      def initialize(response_builder, nesting, index, dispatcher)
+        @response_builder = response_builder
         @nesting = nesting
         @index = index
-        @_response = T.let(nil, ResponseType)
-
-        super(dispatcher)
         dispatcher.register(self, :on_call_node_enter)
       end
 
@@ -58,7 +52,7 @@ module RubyLsp
           active_parameter += 1
         end
 
-        @_response = Interface::SignatureHelp.new(
+        signature_help = Interface::SignatureHelp.new(
           signatures: [
             Interface::SignatureInformation.new(
               label: label,
@@ -71,6 +65,7 @@ module RubyLsp
           ],
           active_parameter: active_parameter,
         )
+        @response_builder.replace(signature_help)
       end
     end
   end

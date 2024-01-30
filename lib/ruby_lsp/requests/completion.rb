@@ -26,7 +26,6 @@ module RubyLsp
     # ```
     class Completion < Request
       extend T::Sig
-      extend T::Generic
 
       class << self
         extend T::Sig
@@ -42,8 +41,6 @@ module RubyLsp
           )
         end
       end
-
-      ResponseType = type_member { { fixed: T::Array[Interface::CompletionItem] } }
 
       sig do
         params(
@@ -66,11 +63,12 @@ module RubyLsp
           char_position,
           node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode],
         )
-
-        @listener = T.let(
-          Listeners::Completion.new(index, nesting, typechecker_enabled, dispatcher),
-          Listener[ResponseType],
+        @response_builder = T.let(
+          ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem].new,
+          ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
         )
+
+        Listeners::Completion.new(@response_builder, index, nesting, typechecker_enabled, dispatcher)
 
         return unless matched && parent
 
@@ -99,12 +97,12 @@ module RubyLsp
         end
       end
 
-      sig { override.returns(ResponseType) }
+      sig { override.returns(T::Array[Interface::CompletionItem]) }
       def perform
         return [] unless @target
 
         @dispatcher.dispatch_once(@target)
-        @listener.response
+        @response_builder.response
       end
     end
   end

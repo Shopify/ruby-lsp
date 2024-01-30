@@ -3,28 +3,22 @@
 
 module RubyLsp
   module Listeners
-    class InlayHints < Listener
+    class InlayHints
       extend T::Sig
-      extend T::Generic
-
-      ResponseType = type_member { { fixed: T::Array[Interface::InlayHint] } }
+      include Requests::Support::Common
 
       RESCUE_STRING_LENGTH = T.let("rescue".length, Integer)
 
-      sig { override.returns(ResponseType) }
-      attr_reader :_response
-
       sig do
         params(
+          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint],
           range: T::Range[Integer],
           hints_configuration: RequestConfig,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(range, hints_configuration, dispatcher)
-        super(dispatcher)
-
-        @_response = T.let([], ResponseType)
+      def initialize(response_builder, range, hints_configuration, dispatcher)
+        @response_builder = response_builder
         @range = range
         @hints_configuration = hints_configuration
 
@@ -39,7 +33,7 @@ module RubyLsp
         loc = node.location
         return unless visible?(node, @range)
 
-        @_response << Interface::InlayHint.new(
+        @response_builder << Interface::InlayHint.new(
           position: { line: loc.start_line - 1, character: loc.start_column + RESCUE_STRING_LENGTH },
           label: "StandardError",
           padding_left: true,
@@ -68,7 +62,7 @@ module RubyLsp
           tooltip = "This is a local variable: #{node_name}"
         end
 
-        @_response << Interface::InlayHint.new(
+        @response_builder << Interface::InlayHint.new(
           position: { line: loc.start_line - 1, character: loc.start_column + node_name.length + 1 },
           label: node_name,
           padding_left: true,

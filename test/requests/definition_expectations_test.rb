@@ -38,7 +38,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       RubyIndexer::IndexablePath.new(
         "#{Dir.pwd}/lib",
         File.expand_path(
-          "../../lib/ruby_lsp/listener.rb",
+          "../../lib/ruby_lsp/executor.rb",
           __dir__,
         ),
       ),

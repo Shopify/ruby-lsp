@@ -3,10 +3,9 @@
 
 module RubyLsp
   module Listeners
-    class DocumentHighlight < Listener
+    class DocumentHighlight
       extend T::Sig
-
-      ResponseType = type_member { { fixed: T::Array[Interface::DocumentHighlight] } }
+      include Requests::Support::Common
 
       GLOBAL_VARIABLE_NODES = T.let(
         [
@@ -87,20 +86,16 @@ module RubyLsp
         T::Array[T.class_of(Prism::Node)],
       )
 
-      sig { override.returns(ResponseType) }
-      attr_reader :_response
-
       sig do
         params(
+          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight],
           target: T.nilable(Prism::Node),
           parent: T.nilable(Prism::Node),
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(target, parent, dispatcher)
-        super(dispatcher)
-
-        @_response = T.let([], T::Array[Interface::DocumentHighlight])
+      def initialize(response_builder, target, parent, dispatcher)
+        @response_builder = response_builder
 
         return unless target && parent
 
@@ -521,7 +516,7 @@ module RubyLsp
 
       sig { params(kind: Integer, location: Prism::Location).void }
       def add_highlight(kind, location)
-        @_response << Interface::DocumentHighlight.new(range: range_from_location(location), kind: kind)
+        @response_builder << Interface::DocumentHighlight.new(range: range_from_location(location), kind: kind)
       end
 
       sig { params(node: T.nilable(Prism::Node)).returns(T.nilable(String)) }

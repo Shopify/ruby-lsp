@@ -1,1 +1,1 @@
-require "ruby_lsp/listener"
+require "ruby_lsp/executor"

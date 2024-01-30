@@ -25,7 +25,7 @@ module RubyLsp
 
       sig do
         params(
-          response_builder: ResponseBuilders::CodeLens,
+          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
           uri: URI::Generic,
           lenses_configuration: RequestConfig,
           dispatcher: Prism::Dispatcher,

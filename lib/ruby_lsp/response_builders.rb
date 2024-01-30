@@ -3,11 +3,11 @@
 
 module RubyLsp
   module ResponseBuilders
-    autoload :ResponseBuilder, "ruby_lsp/response_builders/response_builder"
-    autoload :CodeLens, "ruby_lsp/response_builders/code_lens"
-    autoload :Definition, "ruby_lsp/response_builders/definition"
+    autoload :CollectionResponseBuilder, "ruby_lsp/response_builders/collection_response_builder"
     autoload :DocumentSymbol, "ruby_lsp/response_builders/document_symbol"
     autoload :Hover, "ruby_lsp/response_builders/hover"
+    autoload :ResponseBuilder, "ruby_lsp/response_builders/response_builder"
     autoload :SemanticHighlighting, "ruby_lsp/response_builders/semantic_highlighting"
+    autoload :SignatureHelp, "ruby_lsp/response_builders/signature_help"
   end
 end
