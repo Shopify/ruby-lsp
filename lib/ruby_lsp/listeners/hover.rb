@@ -17,6 +17,14 @@ module RubyLsp
         T::Array[T.class_of(Prism::Node)],
       )
 
+      ALLOWED_REMOTE_PROVIDERS = T.let(
+        [
+          "https://github.com",
+          "https://gitlab.com",
+        ].freeze,
+        T::Array[String],
+      )
+
       sig do
         params(
           response_builder: ResponseBuilders::Hover,
@@ -119,8 +127,12 @@ module RubyLsp
         # Remove leading whitespace if a heredoc was used for the summary or description
         info = info.gsub(/^ +/, "")
 
+        remote_url = [spec.homepage, spec.metadata["source_code_uri"]].compact.find do |page|
+          page.start_with?(*ALLOWED_REMOTE_PROVIDERS)
+        end
+
         markdown = <<~MARKDOWN
-          **#{spec.name}** (#{spec.version})
+          **#{spec.name}** (#{spec.version}) #{remote_url && " - [open remote](#{remote_url})"}
 
           #{info}
         MARKDOWN

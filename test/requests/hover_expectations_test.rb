@@ -163,7 +163,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
     uri = URI("file:///Gemfile")
     source = <<~RUBY
-      gem 'bundler'
+      gem 'rake'
     RUBY
     store.set(uri: uri, source: source, version: 1)
 
@@ -177,10 +177,11 @@ class HoverExpectationsTest < ExpectationsTestRunner
       params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
     }).response
 
-    spec = Gem.loaded_specs["bundler"]
+    spec = Gem.loaded_specs["rake"]
 
     assert_includes(response.contents.value, spec.name)
     assert_includes(response.contents.value, spec.version.to_s)
+    assert_includes(response.contents.value, spec.homepage)
   ensure
     T.must(message_queue).close
   end
