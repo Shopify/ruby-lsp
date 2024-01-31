@@ -27,11 +27,10 @@ module RubyLsp
         params(
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
           uri: URI::Generic,
-          lenses_configuration: RequestConfig,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(response_builder, uri, lenses_configuration, dispatcher)
+      def initialize(response_builder, uri, dispatcher)
         @response_builder = response_builder
         @uri = T.let(uri, URI::Generic)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
@@ -40,7 +39,6 @@ module RubyLsp
         @group_stack = T.let([], T::Array[String])
         @group_id = T.let(1, Integer)
         @group_id_stack = T.let([], T::Array[Integer])
-        @lenses_configuration = lenses_configuration
 
         dispatcher.register(
           self,
@@ -124,20 +122,6 @@ module RubyLsp
           when IT_KEYWORD
             add_spec_code_lens(node, kind: :example)
           end
-
-          return
-        end
-
-        if @path&.include?(GEMFILE_NAME) && name == :gem && arguments
-          return unless @lenses_configuration.enabled?(:gemfileLinks)
-
-          first_argument = arguments.arguments.first
-          return unless first_argument.is_a?(Prism::StringNode)
-
-          remote = resolve_gem_remote(first_argument)
-          return unless remote
-
-          add_open_gem_remote_code_lens(node, remote)
         end
       end
 
@@ -197,16 +181,6 @@ module RubyLsp
         )
       end
 
-      sig { params(gem_name: Prism::StringNode).returns(T.nilable(String)) }
-      def resolve_gem_remote(gem_name)
-        spec = Gem::Specification.stubs.find { |gem| gem.name == gem_name.content }&.to_spec
-        return if spec.nil?
-
-        [spec.homepage, spec.metadata["source_code_uri"]].compact.find do |page|
-          page.start_with?("https://github.com", "https://gitlab.com")
-        end
-      end
-
       sig { params(group_name: String, method_name: T.nilable(String)).returns(String) }
       def generate_test_command(group_name:, method_name: nil)
         command = BASE_COMMAND + T.must(@path)
@@ -227,17 +201,6 @@ module RubyLsp
         end
 
         command
-      end
-
-      sig { params(node: Prism::CallNode, remote: String).void }
-      def add_open_gem_remote_code_lens(node, remote)
-        @response_builder << create_code_lens(
-          node,
-          title: "Open remote",
-          command_name: "rubyLsp.openLink",
-          arguments: [remote],
-          data: { type: "link" },
-        )
       end
 
       sig { params(node: Prism::CallNode, kind: Symbol).void }
