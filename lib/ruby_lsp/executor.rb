@@ -222,6 +222,16 @@ module RubyLsp
         workspace_symbol(request.dig(:params, :query))
       when "rubyLsp/textDocument/showSyntaxTree"
         show_syntax_tree(uri, request.dig(:params, :range))
+      when "rubyLsp/workspace/dependencies"
+        dep_keys = Bundler.definition.locked_deps.keys.to_set
+        Bundler.definition.specs.map do |spec|
+          {
+            name: spec.name,
+            version: spec.version,
+            path: spec.full_gem_path,
+            dependency: dep_keys.include?(spec.name),
+          }
+        end
       else
         VOID
       end
