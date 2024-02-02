@@ -247,8 +247,8 @@ module RubyIndexer
 
       owner_name = T.must(owner_entries.first).name
       T.cast(
-        method_entries.find do |entry|
-          entry.is_a?(Entry::Member) && entry.owner&.name == owner_name
+        method_entries.grep(Entry::Member).find do |entry|
+          T.cast(entry, Entry::Member).owner&.name == owner_name
         end,
         T.nilable(Entry::Member),
       )
