@@ -223,15 +223,7 @@ module RubyLsp
       when "rubyLsp/textDocument/showSyntaxTree"
         show_syntax_tree(uri, request.dig(:params, :range))
       when "rubyLsp/workspace/dependencies"
-        dep_keys = Bundler.definition.locked_deps.keys.to_set
-        Bundler.definition.specs.map do |spec|
-          {
-            name: spec.name,
-            version: spec.version,
-            path: spec.full_gem_path,
-            dependency: dep_keys.include?(spec.name),
-          }
-        end
+        workspace_dependencies
       else
         VOID
       end
@@ -260,6 +252,22 @@ module RubyLsp
       end
 
       VOID
+    end
+
+    sig { returns(T::Array[T::Hash[Symbol, T.untyped]]) }
+    def workspace_dependencies
+      definition = Bundler.definition
+      dep_keys = definition.locked_deps.keys.to_set
+      definition.specs.map do |spec|
+        {
+          name: spec.name,
+          version: spec.version,
+          path: spec.full_gem_path,
+          dependency: dep_keys.include?(spec.name),
+        }
+      end
+    rescue Bundler::GemfileNotFound
+      []
     end
 
     sig { void }
