@@ -33,6 +33,7 @@ module RubyLsp
           :on_class_variable_write_node_enter,
           :on_singleton_class_node_enter,
           :on_singleton_class_node_leave,
+          :on_alias_method_node_enter,
         )
       end
 
@@ -188,6 +189,22 @@ module RubyLsp
           kind: Constant::SymbolKind::VARIABLE,
           range_location: node.name_loc,
           selection_range_location: node.name_loc,
+        )
+      end
+
+      sig { params(node: Prism::AliasMethodNode).void }
+      def on_alias_method_node_enter(node)
+        new_name_node = node.new_name
+        return unless new_name_node.is_a?(Prism::SymbolNode)
+
+        name = new_name_node.value
+        return unless name
+
+        create_document_symbol(
+          name: name,
+          kind: Constant::SymbolKind::METHOD,
+          range_location: new_name_node.location,
+          selection_range_location: T.must(new_name_node.value_loc),
         )
       end
 
