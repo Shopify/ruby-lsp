@@ -1,0 +1,29 @@
+{
+  "result": [
+    {
+      "name": "foo",
+      "kind": 6,
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 13
+        },
+        "end": {
+          "line": 0,
+          "character": 17
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 0,
+          "character": 14
+        },
+        "end": {
+          "line": 0,
+          "character": 17
+        }
+      },
+      "children": []
+    }
+  ]
+}
