@@ -71,38 +71,10 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
-        return unless node.receiver.nil?
-
-        arguments = node.arguments
-        return unless arguments
-
         if ATTR_ACCESSORS.include?(node.name)
-          arguments.arguments.each do |argument|
-            next unless argument.is_a?(Prism::SymbolNode)
-
-            name = argument.value
-            next unless name
-
-            create_document_symbol(
-              name: name,
-              kind: Constant::SymbolKind::FIELD,
-              range_location: argument.location,
-              selection_range_location: T.must(argument.value_loc),
-            )
-          end
+          handle_attr_accessor(node)
         elsif node.name == :alias_method
-          new_name_argument = arguments.arguments.first
-          return unless new_name_argument.is_a?(Prism::SymbolNode)
-
-          name = new_name_argument.value
-          return unless name
-
-          create_document_symbol(
-            name: name,
-            kind: Constant::SymbolKind::METHOD,
-            range_location: new_name_argument.location,
-            selection_range_location: T.must(new_name_argument.value_loc),
-          )
+          handle_alias_method(node)
         end
       end
 
@@ -230,6 +202,49 @@ module RubyLsp
         @response_builder.last.children << symbol
 
         symbol
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def handle_attr_accessor(node)
+        return unless node.receiver.nil?
+
+        arguments = node.arguments
+        return unless arguments
+
+        arguments.arguments.each do |argument|
+          next unless argument.is_a?(Prism::SymbolNode)
+
+          name = argument.value
+          next unless name
+
+          create_document_symbol(
+            name: name,
+            kind: Constant::SymbolKind::FIELD,
+            range_location: argument.location,
+            selection_range_location: T.must(argument.value_loc),
+          )
+        end
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def handle_alias_method(node)
+        return unless node.receiver.nil?
+
+        arguments = node.arguments
+        return unless arguments
+
+        new_name_argument = arguments.arguments.first
+        return unless new_name_argument.is_a?(Prism::SymbolNode)
+
+        name = new_name_argument.value
+        return unless name
+
+        create_document_symbol(
+          name: name,
+          kind: Constant::SymbolKind::METHOD,
+          range_location: new_name_argument.location,
+          selection_range_location: T.must(new_name_argument.value_loc),
+        )
       end
     end
   end
