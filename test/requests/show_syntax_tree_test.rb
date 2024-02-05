@@ -27,7 +27,7 @@ class ShowSyntaxTreeTest < Minitest::Test
           @ StatementsNode (location: (1,0)-(1,6))
           └── body: (length: 1)
               └── @ CallNode (location: (1,0)-(1,6))
-                  ├── flags: ∅
+                  ├── flags: ignore_visibility
                   ├── receiver: ∅
                   ├── call_operator_loc: ∅
                   ├── name: :foo
@@ -38,7 +38,6 @@ class ShowSyntaxTreeTest < Minitest::Test
                   └── block:
                       @ BlockNode (location: (1,4)-(1,6))
                       ├── locals: []
-                      ├── locals_body_index: 0
                       ├── parameters: ∅
                       ├── body:
                       │   @ StatementsNode (location: (1,4)-(1,6))
