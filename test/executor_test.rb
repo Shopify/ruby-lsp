@@ -364,6 +364,20 @@ class ExecutorTest < Minitest::Test
     assert_equal("Foo", @store.client_name)
   end
 
+  def test_workspace_dependencies
+    result = @executor.execute({
+      method: "rubyLsp/workspace/dependencies",
+      params: {},
+    })
+
+    result.response.each do |gem_info|
+      assert_instance_of(String, gem_info[:name])
+      assert_instance_of(Gem::Version, gem_info[:version])
+      assert_instance_of(String, gem_info[:path])
+      assert(gem_info[:dependency].is_a?(TrueClass) || gem_info[:dependency].is_a?(FalseClass))
+    end
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)
