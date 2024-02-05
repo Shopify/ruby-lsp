@@ -99,8 +99,7 @@ module RubyLsp
         folding_range = Requests::FoldingRanges.new(document.parse_result.comments, dispatcher)
         document_symbol = Requests::DocumentSymbol.new(dispatcher)
         document_link = Requests::DocumentLink.new(uri, document.comments, dispatcher)
-        lenses_configuration = T.must(@store.features_configuration.dig(:codeLens))
-        code_lens = Requests::CodeLens.new(uri, lenses_configuration, dispatcher)
+        code_lens = Requests::CodeLens.new(uri, dispatcher)
 
         semantic_highlighting = Requests::SemanticHighlighting.new(dispatcher)
         dispatcher.dispatch(document.tree)
@@ -540,9 +539,7 @@ module RubyLsp
       @store.experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled) || false
 
       configured_hints = options.dig(:initializationOptions, :featuresConfiguration, :inlayHint)
-      configured_lenses = options.dig(:initializationOptions, :featuresConfiguration, :codeLens)
       T.must(@store.features_configuration.dig(:inlayHint)).configuration.merge!(configured_hints) if configured_hints
-      T.must(@store.features_configuration.dig(:codeLens)).configuration.merge!(configured_lenses) if configured_lenses
 
       enabled_features = case configured_features
       when Array

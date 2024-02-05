@@ -225,7 +225,6 @@ class ExecutorTest < Minitest::Test
     RubyLsp::Executor.new(@store, @message_queue)
       .execute(method: "initialize", params: { initializationOptions: {} })
 
-    assert(@store.features_configuration.dig(:codeLens).enabled?(:gemfileLinks))
     refute(@store.features_configuration.dig(:inlayHint).enabled?(:implicitRescue))
     refute(@store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
   end
@@ -235,9 +234,6 @@ class ExecutorTest < Minitest::Test
       .execute(method: "initialize", params: {
         initializationOptions: {
           featuresConfiguration: {
-            codeLens: {
-              gemfileLinks: false,
-            },
             inlayHint: {
               implicitRescue: true,
               implicitHashValue: true,
@@ -246,7 +242,6 @@ class ExecutorTest < Minitest::Test
         },
       })
 
-    refute(@store.features_configuration.dig(:codeLens).enabled?(:gemfileLinks))
     assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitRescue))
     assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
   end
@@ -256,9 +251,6 @@ class ExecutorTest < Minitest::Test
       .execute(method: "initialize", params: {
         initializationOptions: {
           featuresConfiguration: {
-            codeLens: {
-              gemfileLinks: false,
-            },
             inlayHint: {
               implicitHashValue: true,
             },
@@ -266,7 +258,6 @@ class ExecutorTest < Minitest::Test
         },
       })
 
-    refute(@store.features_configuration.dig(:codeLens).enabled?(:gemfileLinks))
     refute(@store.features_configuration.dig(:inlayHint).enabled?(:implicitRescue))
     assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
   end
@@ -276,9 +267,6 @@ class ExecutorTest < Minitest::Test
       .execute(method: "initialize", params: {
         initializationOptions: {
           featuresConfiguration: {
-            codeLens: {
-              enableAll: true,
-            },
             inlayHint: {
               enableAll: true,
             },
@@ -286,7 +274,6 @@ class ExecutorTest < Minitest::Test
         },
       })
 
-    assert(@store.features_configuration.dig(:codeLens).enabled?(:gemfileLinks))
     assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitRescue))
     assert(@store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
   end
