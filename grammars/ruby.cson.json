@@ -1671,13 +1671,13 @@
       ]
     },
     {
-      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)GRAPHQL)\\b\\1))",
+      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)(?:GRAPHQL|GQL))\\b\\1))",
       "comment": "Heredoc with embedded GraphQL",
       "end": "(?!\\G)",
       "name": "meta.embedded.block.graphql",
       "patterns": [
         {
-          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)GRAPHQL)\\b\\1)",
+          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)(?:GRAPHQL|GQL))\\b\\1)",
           "beginCaptures": {
             "0": {
               "name": "punctuation.definition.string.begin.ruby"

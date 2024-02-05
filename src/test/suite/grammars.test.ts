@@ -27,7 +27,6 @@ const EMBEDDED_HEREDOC_LANGUAGES: InferrableLanguageConfigOrLabel[] = [
   // Languages for which we can infer everything from the comment label
   "C",
   "CSS",
-  "GraphQL",
   "Lua",
   "Ruby",
   "SQL",
@@ -36,6 +35,10 @@ const EMBEDDED_HEREDOC_LANGUAGES: InferrableLanguageConfigOrLabel[] = [
   {
     id: "cpp",
     label: "C++",
+  },
+  {
+    label: "GraphQL",
+    delimiters: ["GRAPHQL", "GQL"],
   },
   {
     label: "HAML",
