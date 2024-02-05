@@ -239,14 +239,19 @@ module RubyIndexer
 
     # Attempts to find a given method for a resolved fully qualified receiver name. Returns `nil` if the method does not
     # exist on that receiver
-    sig { params(method_name: String, receiver_name: String).returns(T.nilable(Entry::Method)) }
+    sig { params(method_name: String, receiver_name: String).returns(T.nilable(Entry::Member)) }
     def resolve_method(method_name, receiver_name)
-      method_entries = T.cast(self[method_name], T.nilable(T::Array[Entry::Method]))
+      method_entries = self[method_name]
       owner_entries = self[receiver_name]
       return unless owner_entries && method_entries
 
       owner_name = T.must(owner_entries.first).name
-      method_entries.find { |entry| entry.owner&.name == owner_name }
+      T.cast(
+        method_entries.grep(Entry::Member).find do |entry|
+          T.cast(entry, Entry::Member).owner&.name == owner_name
+        end,
+        T.nilable(Entry::Member),
+      )
     end
 
     private
