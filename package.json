@@ -494,7 +494,7 @@
     "glob": "^10.3.7",
     "mocha": "^10.2.0",
     "ovsx": "^0.8.3",
-    "prettier": "^3.2.4",
+    "prettier": "^3.2.5",
     "typescript": "^5.3.3",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.0.0"

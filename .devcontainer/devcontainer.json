@@ -7,9 +7,9 @@
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/rust:1": {},
-    "ghcr.io/devcontainers/features/ruby:1": {},
+    "ghcr.io/devcontainers/features/ruby:1": {}
   },
-  "overrideFeatureInstallOrder": ["ghcr.io/devcontainers/features/rust"],
+  "overrideFeatureInstallOrder": ["ghcr.io/devcontainers/features/rust"]
 
   // Features to add to the dev container. More info: https://containers.dev/features.
   // "features": {},
