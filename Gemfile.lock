@@ -3,7 +3,7 @@ PATH
   specs:
     ruby-lsp (0.13.4)
       language_server-protocol (~> 3.17.0)
-      prism (>= 0.19.0, < 0.21)
+      prism (>= 0.19.0, < 0.22)
       sorbet-runtime (>= 0.5.10782)
 
 GEM
@@ -36,7 +36,7 @@ GEM
       ast (~> 2.4.1)
       racc
     prettier_print (1.2.1)
-    prism (0.20.0)
+    prism (0.21.0)
     psych (5.1.2)
       stringio
     racc (1.7.3)
@@ -109,6 +109,8 @@ GEM
 
 PLATFORMS
   arm64-darwin
+  x64-mingw-ucrt
+  x64-mingw32
   x86_64-darwin
   x86_64-linux
 
