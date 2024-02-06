@@ -31,6 +31,7 @@ module RubyLsp
         @special_methods = T.let(nil, T.nilable(T::Array[String]))
         @current_scope = T.let(ParameterScope.new, ParameterScope)
         @inside_regex_capture = T.let(false, T::Boolean)
+        @inside_implicit_node = T.let(false, T::Boolean)
 
         dispatcher.register(
           self,
@@ -64,11 +65,14 @@ module RubyLsp
           :on_block_local_variable_node_enter,
           :on_match_write_node_enter,
           :on_match_write_node_leave,
+          :on_implicit_node_enter,
+          :on_implicit_node_leave,
         )
       end
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
+        return if @inside_implicit_node
         return unless visible?(node, @range)
 
         message = node.message
@@ -101,6 +105,7 @@ module RubyLsp
 
       sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read_node_enter(node)
+        return if @inside_implicit_node
         return unless visible?(node, @range)
 
         @response_builder.add_token(node.location, :namespace)
@@ -307,6 +312,18 @@ module RubyLsp
         return unless visible?(node, @range)
 
         @response_builder.add_token(node.constant_path.location, :namespace, [:declaration])
+      end
+
+      sig { params(node: Prism::ImplicitNode).void }
+      def on_implicit_node_enter(node)
+        return unless visible?(node, @range)
+
+        @inside_implicit_node = true
+      end
+
+      sig { params(node: Prism::ImplicitNode).void }
+      def on_implicit_node_leave(node)
+        @inside_implicit_node = false
       end
 
       private
