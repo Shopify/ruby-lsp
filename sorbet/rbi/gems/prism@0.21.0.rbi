@@ -28244,19 +28244,19 @@ class Prism::Translation::Parser < ::Parser::Base
 
   # Parses a source buffer and returns the AST and the source code comments.
   #
-  # source://prism//lib/prism/translation/parser.rb#53
+  # source://prism//lib/prism/translation/parser.rb#54
   def parse_with_comments(source_buffer); end
 
   # Parses a source buffer and returns the AST, the source code comments,
   # and the tokens emitted by the lexer.
   #
-  # source://prism//lib/prism/translation/parser.rb#70
+  # source://prism//lib/prism/translation/parser.rb#71
   def tokenize(source_buffer, _recover = T.unsafe(nil)); end
 
   # Since prism resolves num params for us, we don't need to support this
   # kind of logic here.
   #
-  # source://prism//lib/prism/translation/parser.rb#90
+  # source://prism//lib/prism/translation/parser.rb#91
   def try_declare_numparam(node); end
 
   # source://prism//lib/prism/translation/parser.rb#28
@@ -28269,12 +28269,12 @@ class Prism::Translation::Parser < ::Parser::Base
 
   # Build the parser gem AST from the prism AST.
   #
-  # source://prism//lib/prism/translation/parser.rb#131
+  # source://prism//lib/prism/translation/parser.rb#139
   def build_ast(program, offset_cache); end
 
   # Build the parser gem comments from the prism comments.
   #
-  # source://prism//lib/prism/translation/parser.rb#136
+  # source://prism//lib/prism/translation/parser.rb#144
   def build_comments(comments, offset_cache); end
 
   # Prism deals with offsets in bytes, while the parser gem deals with
@@ -28290,26 +28290,32 @@ class Prism::Translation::Parser < ::Parser::Base
   # translator. We could make this significantly faster by using a
   # different data structure for the cache.
   #
-  # source://prism//lib/prism/translation/parser.rb#120
+  # source://prism//lib/prism/translation/parser.rb#128
   def build_offset_cache(source); end
 
   # Build a range from a prism location.
   #
-  # source://prism//lib/prism/translation/parser.rb#148
+  # source://prism//lib/prism/translation/parser.rb#156
   def build_range(location, offset_cache); end
 
   # Build the parser gem tokens from the prism tokens.
   #
-  # source://prism//lib/prism/translation/parser.rb#143
+  # source://prism//lib/prism/translation/parser.rb#151
   def build_tokens(tokens, offset_cache); end
 
   # If there was a error generated during the parse, then raise an
   # appropriate syntax error. Otherwise return the result.
   #
-  # @raise [::Parser::SyntaxError]
+  # source://prism//lib/prism/translation/parser.rb#105
+  def unwrap(result, offset_cache); end
+
+  # This is a hook to allow consumers to disable some errors if they don't
+  # want them to block creating the syntax tree.
   #
-  # source://prism//lib/prism/translation/parser.rb#98
-  def unwrap(result); end
+  # @return [Boolean]
+  #
+  # source://prism//lib/prism/translation/parser.rb#99
+  def valid_error?(error); end
 end
 
 # A visitor that knows how to convert a prism syntax tree into the
@@ -28417,49 +28423,49 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # { **foo }
   #   ^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#137
+  # source://prism//lib/prism/translation/parser/compiler.rb#141
   def visit_assoc_splat_node(node); end
 
   # $+
   # ^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#147
+  # source://prism//lib/prism/translation/parser/compiler.rb#151
   def visit_back_reference_read_node(node); end
 
   # begin end
   # ^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#153
+  # source://prism//lib/prism/translation/parser/compiler.rb#157
   def visit_begin_node(node); end
 
   # foo(&bar)
   #     ^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#191
+  # source://prism//lib/prism/translation/parser/compiler.rb#195
   def visit_block_argument_node(node); end
 
   # foo { |; bar| }
   #          ^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#197
+  # source://prism//lib/prism/translation/parser/compiler.rb#201
   def visit_block_local_variable_node(node); end
 
   # A block on a keyword or method call.
   #
   # @raise [CompilationError]
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#202
+  # source://prism//lib/prism/translation/parser/compiler.rb#206
   def visit_block_node(node); end
 
   # def foo(&bar); end
   #         ^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#208
+  # source://prism//lib/prism/translation/parser/compiler.rb#212
   def visit_block_parameter_node(node); end
 
   # A block's parameters.
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#213
+  # source://prism//lib/prism/translation/parser/compiler.rb#217
   def visit_block_parameters_node(node); end
 
   # break
@@ -28468,7 +28474,7 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # break foo
   # ^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#222
+  # source://prism//lib/prism/translation/parser/compiler.rb#226
   def visit_break_node(node); end
 
   # foo.bar += baz
@@ -28476,7 +28482,7 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # foo.bar &&= baz
   # ^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#298
+  # source://prism//lib/prism/translation/parser/compiler.rb#300
   def visit_call_and_write_node(node); end
 
   # foo
@@ -28488,13 +28494,13 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # foo.bar() {}
   # ^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#234
+  # source://prism//lib/prism/translation/parser/compiler.rb#238
   def visit_call_node(node); end
 
   # foo.bar += baz
   # ^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#298
+  # source://prism//lib/prism/translation/parser/compiler.rb#300
   def visit_call_operator_write_node(node); end
 
   # foo.bar += baz
@@ -28502,37 +28508,37 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # foo.bar ||= baz
   # ^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#298
+  # source://prism//lib/prism/translation/parser/compiler.rb#300
   def visit_call_or_write_node(node); end
 
   # foo.bar, = 1
   # ^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#325
+  # source://prism//lib/prism/translation/parser/compiler.rb#327
   def visit_call_target_node(node); end
 
   # foo => bar => baz
   #        ^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#337
+  # source://prism//lib/prism/translation/parser/compiler.rb#339
   def visit_capture_pattern_node(node); end
 
   # case foo; in bar; end
   # ^^^^^^^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#356
+  # source://prism//lib/prism/translation/parser/compiler.rb#358
   def visit_case_match_node(node); end
 
   # case foo; when bar; end
   # ^^^^^^^^^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#343
+  # source://prism//lib/prism/translation/parser/compiler.rb#345
   def visit_case_node(node); end
 
   # class Foo; end
   # ^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#369
+  # source://prism//lib/prism/translation/parser/compiler.rb#371
   def visit_class_node(node); end
 
   # @@foo += bar
@@ -28540,13 +28546,13 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # @@foo &&= bar
   # ^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#401
+  # source://prism//lib/prism/translation/parser/compiler.rb#403
   def visit_class_variable_and_write_node(node); end
 
   # @@foo += bar
   # ^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#401
+  # source://prism//lib/prism/translation/parser/compiler.rb#403
   def visit_class_variable_operator_write_node(node); end
 
   # @@foo += bar
@@ -28554,19 +28560,19 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # @@foo ||= bar
   # ^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#401
+  # source://prism//lib/prism/translation/parser/compiler.rb#403
   def visit_class_variable_or_write_node(node); end
 
   # @@foo
   # ^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#382
+  # source://prism//lib/prism/translation/parser/compiler.rb#384
   def visit_class_variable_read_node(node); end
 
   # @@foo, = bar
   # ^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#419
+  # source://prism//lib/prism/translation/parser/compiler.rb#421
   def visit_class_variable_target_node(node); end
 
   # @@foo = 1
@@ -28575,7 +28581,7 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # @@foo, @@bar = 1
   # ^^^^^  ^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#391
+  # source://prism//lib/prism/translation/parser/compiler.rb#393
   def visit_class_variable_write_node(node); end
 
   # Foo += bar
@@ -28583,13 +28589,13 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # Foo &&= bar
   # ^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#440
+  # source://prism//lib/prism/translation/parser/compiler.rb#442
   def visit_constant_and_write_node(node); end
 
   # Foo += bar
   # ^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#440
+  # source://prism//lib/prism/translation/parser/compiler.rb#442
   def visit_constant_operator_write_node(node); end
 
   # Foo += bar
@@ -28597,7 +28603,7 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # Foo ||= bar
   # ^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#440
+  # source://prism//lib/prism/translation/parser/compiler.rb#442
   def visit_constant_or_write_node(node); end
 
   # Foo::Bar += baz
@@ -28605,19 +28611,19 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # Foo::Bar &&= baz
   # ^^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#494
+  # source://prism//lib/prism/translation/parser/compiler.rb#496
   def visit_constant_path_and_write_node(node); end
 
   # Foo::Bar
   # ^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#464
+  # source://prism//lib/prism/translation/parser/compiler.rb#466
   def visit_constant_path_node(node); end
 
   # Foo::Bar += baz
   # ^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#494
+  # source://prism//lib/prism/translation/parser/compiler.rb#496
   def visit_constant_path_operator_write_node(node); end
 
   # Foo::Bar += baz
@@ -28625,13 +28631,13 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # Foo::Bar ||= baz
   # ^^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#494
+  # source://prism//lib/prism/translation/parser/compiler.rb#496
   def visit_constant_path_or_write_node(node); end
 
   # Foo::Bar, = baz
   # ^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#512
+  # source://prism//lib/prism/translation/parser/compiler.rb#514
   def visit_constant_path_target_node(node); end
 
   # Foo::Bar = 1
@@ -28640,19 +28646,19 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # Foo::Foo, Bar::Bar = 1
   # ^^^^^^^^  ^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#484
+  # source://prism//lib/prism/translation/parser/compiler.rb#486
   def visit_constant_path_write_node(node); end
 
   # Foo
   # ^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#425
+  # source://prism//lib/prism/translation/parser/compiler.rb#427
   def visit_constant_read_node(node); end
 
   # Foo, = bar
   # ^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#458
+  # source://prism//lib/prism/translation/parser/compiler.rb#460
   def visit_constant_target_node(node); end
 
   # Foo = 1
@@ -28661,7 +28667,7 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # Foo, Bar = 1
   # ^^^  ^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#434
+  # source://prism//lib/prism/translation/parser/compiler.rb#436
   def visit_constant_write_node(node); end
 
   # def foo; end
@@ -28670,7 +28676,7 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # def self.foo; end
   # ^^^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#521
+  # source://prism//lib/prism/translation/parser/compiler.rb#523
   def visit_def_node(node); end
 
   # defined? a
@@ -28725,31 +28731,31 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # if foo .. bar; end
   #    ^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1294
+  # source://prism//lib/prism/translation/parser/compiler.rb#1292
   def visit_flip_flop_node(node); end
 
   # 1.0
   # ^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#630
+  # source://prism//lib/prism/translation/parser/compiler.rb#628
   def visit_float_node(node); end
 
   # for foo in bar do end
   # ^^^^^^^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#636
+  # source://prism//lib/prism/translation/parser/compiler.rb#634
   def visit_for_node(node); end
 
   # def foo(...); bar(...); end
   #                   ^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#654
+  # source://prism//lib/prism/translation/parser/compiler.rb#652
   def visit_forwarding_arguments_node(node); end
 
   # def foo(...); end
   #         ^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#660
+  # source://prism//lib/prism/translation/parser/compiler.rb#658
   def visit_forwarding_parameter_node(node); end
 
   # super
@@ -28758,7 +28764,7 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # super {}
   # ^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#669
+  # source://prism//lib/prism/translation/parser/compiler.rb#667
   def visit_forwarding_super_node(node); end
 
   # $foo += bar
@@ -28766,13 +28772,13 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # $foo &&= bar
   # ^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#700
+  # source://prism//lib/prism/translation/parser/compiler.rb#698
   def visit_global_variable_and_write_node(node); end
 
   # $foo += bar
   # ^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#700
+  # source://prism//lib/prism/translation/parser/compiler.rb#698
   def visit_global_variable_operator_write_node(node); end
 
   # $foo += bar
@@ -28780,19 +28786,19 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # $foo ||= bar
   # ^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#700
+  # source://prism//lib/prism/translation/parser/compiler.rb#698
   def visit_global_variable_or_write_node(node); end
 
   # $foo
   # ^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#681
+  # source://prism//lib/prism/translation/parser/compiler.rb#679
   def visit_global_variable_read_node(node); end
 
   # $foo, = bar
   # ^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#718
+  # source://prism//lib/prism/translation/parser/compiler.rb#716
   def visit_global_variable_target_node(node); end
 
   # $foo = 1
@@ -28801,19 +28807,19 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # $foo, $bar = 1
   # ^^^^  ^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#690
+  # source://prism//lib/prism/translation/parser/compiler.rb#688
   def visit_global_variable_write_node(node); end
 
   # {}
   # ^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#724
+  # source://prism//lib/prism/translation/parser/compiler.rb#722
   def visit_hash_node(node); end
 
   # foo => {}
   #        ^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#734
+  # source://prism//lib/prism/translation/parser/compiler.rb#732
   def visit_hash_pattern_node(node); end
 
   # if foo then bar end
@@ -28825,12 +28831,12 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # foo ? bar : baz
   # ^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#752
+  # source://prism//lib/prism/translation/parser/compiler.rb#750
   def visit_if_node(node); end
 
   # 1i
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#793
+  # source://prism//lib/prism/translation/parser/compiler.rb#791
   def visit_imaginary_node(node); end
 
   # { foo: }
@@ -28838,7 +28844,7 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   #
   # @raise [CompilationError]
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#799
+  # source://prism//lib/prism/translation/parser/compiler.rb#797
   def visit_implicit_node(node); end
 
   # foo { |bar,| }
@@ -28846,13 +28852,13 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   #
   # @raise [CompilationError]
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#805
+  # source://prism//lib/prism/translation/parser/compiler.rb#803
   def visit_implicit_rest_node(node); end
 
   # case foo; in bar; end
   # ^^^^^^^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#811
+  # source://prism//lib/prism/translation/parser/compiler.rb#809
   def visit_in_node(node); end
 
   # foo[bar] += baz
@@ -28860,13 +28866,13 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # foo[bar] &&= baz
   # ^^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#837
+  # source://prism//lib/prism/translation/parser/compiler.rb#835
   def visit_index_and_write_node(node); end
 
   # foo[bar] += baz
   # ^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#837
+  # source://prism//lib/prism/translation/parser/compiler.rb#835
   def visit_index_operator_write_node(node); end
 
   # foo[bar] += baz
@@ -28874,41 +28880,41 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # foo[bar] ||= baz
   # ^^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#837
+  # source://prism//lib/prism/translation/parser/compiler.rb#835
   def visit_index_or_write_node(node); end
 
   # foo[bar], = 1
   # ^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#863
+  # source://prism//lib/prism/translation/parser/compiler.rb#861
   def visit_index_target_node(node); end
 
   # ^^^^^^^^^^^
   # ^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#893
+  # source://prism//lib/prism/translation/parser/compiler.rb#891
   def visit_instance_variable_and_write_node(node); end
 
   # ^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#893
+  # source://prism//lib/prism/translation/parser/compiler.rb#891
   def visit_instance_variable_operator_write_node(node); end
 
   # ^^^^^^^^^^^
   # ^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#893
+  # source://prism//lib/prism/translation/parser/compiler.rb#891
   def visit_instance_variable_or_write_node(node); end
 
   # ^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#874
+  # source://prism//lib/prism/translation/parser/compiler.rb#872
   def visit_instance_variable_read_node(node); end
 
   # @foo, = bar
   # ^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#911
+  # source://prism//lib/prism/translation/parser/compiler.rb#909
   def visit_instance_variable_target_node(node); end
 
   # ^^^^^^^^
@@ -28916,13 +28922,13 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # @foo, @bar = 1
   # ^^^^  ^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#883
+  # source://prism//lib/prism/translation/parser/compiler.rb#881
   def visit_instance_variable_write_node(node); end
 
   # 1
   # ^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#917
+  # source://prism//lib/prism/translation/parser/compiler.rb#915
   def visit_integer_node(node); end
 
   # /foo #{bar}/
@@ -28930,37 +28936,37 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # if /foo #{bar}/ then end
   #    ^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#923
+  # source://prism//lib/prism/translation/parser/compiler.rb#921
   def visit_interpolated_match_last_line_node(node); end
 
   # /foo #{bar}/
   # ^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#923
+  # source://prism//lib/prism/translation/parser/compiler.rb#921
   def visit_interpolated_regular_expression_node(node); end
 
   # "foo #{bar}"
   # ^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#938
+  # source://prism//lib/prism/translation/parser/compiler.rb#936
   def visit_interpolated_string_node(node); end
 
   # :"foo #{bar}"
   # ^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#953
+  # source://prism//lib/prism/translation/parser/compiler.rb#951
   def visit_interpolated_symbol_node(node); end
 
   # `foo #{bar}`
   # ^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#963
+  # source://prism//lib/prism/translation/parser/compiler.rb#961
   def visit_interpolated_x_string_node(node); end
 
   # foo(bar: baz)
   #     ^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#978
+  # source://prism//lib/prism/translation/parser/compiler.rb#976
   def visit_keyword_hash_node(node); end
 
   # def foo(**bar); end
@@ -28969,12 +28975,12 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # def foo(**); end
   #         ^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#987
+  # source://prism//lib/prism/translation/parser/compiler.rb#985
   def visit_keyword_rest_parameter_node(node); end
 
   # -> {}
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#995
+  # source://prism//lib/prism/translation/parser/compiler.rb#993
   def visit_lambda_node(node); end
 
   # foo += bar
@@ -28982,13 +28988,13 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # foo &&= bar
   # ^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1039
+  # source://prism//lib/prism/translation/parser/compiler.rb#1037
   def visit_local_variable_and_write_node(node); end
 
   # foo += bar
   # ^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1039
+  # source://prism//lib/prism/translation/parser/compiler.rb#1037
   def visit_local_variable_operator_write_node(node); end
 
   # foo += bar
@@ -28996,19 +29002,19 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # foo ||= bar
   # ^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1039
+  # source://prism//lib/prism/translation/parser/compiler.rb#1037
   def visit_local_variable_or_write_node(node); end
 
   # foo
   # ^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1020
+  # source://prism//lib/prism/translation/parser/compiler.rb#1018
   def visit_local_variable_read_node(node); end
 
   # foo, = bar
   # ^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1057
+  # source://prism//lib/prism/translation/parser/compiler.rb#1055
   def visit_local_variable_target_node(node); end
 
   # foo = 1
@@ -29017,7 +29023,7 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # foo, bar = 1
   # ^^^  ^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1029
+  # source://prism//lib/prism/translation/parser/compiler.rb#1027
   def visit_local_variable_write_node(node); end
 
   # /foo/
@@ -29025,52 +29031,50 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # if /foo/ then end
   #    ^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1328
+  # source://prism//lib/prism/translation/parser/compiler.rb#1326
   def visit_match_last_line_node(node); end
 
   # foo in bar
   # ^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1067
+  # source://prism//lib/prism/translation/parser/compiler.rb#1065
   def visit_match_predicate_node(node); end
 
   # foo => bar
   # ^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1077
+  # source://prism//lib/prism/translation/parser/compiler.rb#1075
   def visit_match_required_node(node); end
 
   # /(?<foo>foo)/ =~ bar
   # ^^^^^^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1087
+  # source://prism//lib/prism/translation/parser/compiler.rb#1085
   def visit_match_write_node(node); end
 
   # A node that is missing from the syntax tree. This is only used in the
   # case of a syntax error. The parser gem doesn't have such a concept, so
   # we invent our own here.
   #
-  # @raise [CompilationError]
-  #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1098
+  # source://prism//lib/prism/translation/parser/compiler.rb#1096
   def visit_missing_node(node); end
 
   # module Foo; end
   # ^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1104
+  # source://prism//lib/prism/translation/parser/compiler.rb#1102
   def visit_module_node(node); end
 
   # foo, bar = baz
   # ^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1115
+  # source://prism//lib/prism/translation/parser/compiler.rb#1113
   def visit_multi_target_node(node); end
 
   # foo, bar = baz
   # ^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1129
+  # source://prism//lib/prism/translation/parser/compiler.rb#1127
   def visit_multi_write_node(node); end
 
   # next
@@ -29079,55 +29083,55 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # next foo
   # ^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1150
+  # source://prism//lib/prism/translation/parser/compiler.rb#1148
   def visit_next_node(node); end
 
   # nil
   # ^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1162
+  # source://prism//lib/prism/translation/parser/compiler.rb#1160
   def visit_nil_node(node); end
 
   # def foo(**nil); end
   #         ^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1168
+  # source://prism//lib/prism/translation/parser/compiler.rb#1166
   def visit_no_keywords_parameter_node(node); end
 
   # -> { _1 + _2 }
   # ^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1178
+  # source://prism//lib/prism/translation/parser/compiler.rb#1176
   def visit_numbered_parameters_node(node); end
 
   # $1
   # ^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1184
+  # source://prism//lib/prism/translation/parser/compiler.rb#1182
   def visit_numbered_reference_read_node(node); end
 
   # def foo(bar: baz); end
   #         ^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1190
+  # source://prism//lib/prism/translation/parser/compiler.rb#1188
   def visit_optional_keyword_parameter_node(node); end
 
   # def foo(bar = 1); end
   #         ^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1196
+  # source://prism//lib/prism/translation/parser/compiler.rb#1194
   def visit_optional_parameter_node(node); end
 
   # a or b
   # ^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1202
+  # source://prism//lib/prism/translation/parser/compiler.rb#1200
   def visit_or_node(node); end
 
   # def foo(bar, *baz); end
   #         ^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1208
+  # source://prism//lib/prism/translation/parser/compiler.rb#1206
   def visit_parameters_node(node); end
 
   # ()
@@ -29136,76 +29140,76 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # (1)
   # ^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1247
+  # source://prism//lib/prism/translation/parser/compiler.rb#1245
   def visit_parentheses_node(node); end
 
   # foo => ^(bar)
   #        ^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1257
+  # source://prism//lib/prism/translation/parser/compiler.rb#1255
   def visit_pinned_expression_node(node); end
 
   # foo = 1 and bar => ^foo
   #                    ^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1263
+  # source://prism//lib/prism/translation/parser/compiler.rb#1261
   def visit_pinned_variable_node(node); end
 
   # END {}
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1268
+  # source://prism//lib/prism/translation/parser/compiler.rb#1266
   def visit_post_execution_node(node); end
 
   # BEGIN {}
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1278
+  # source://prism//lib/prism/translation/parser/compiler.rb#1276
   def visit_pre_execution_node(node); end
 
   # The top-level program node.
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1288
+  # source://prism//lib/prism/translation/parser/compiler.rb#1286
   def visit_program_node(node); end
 
   # 0..5
   # ^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1294
+  # source://prism//lib/prism/translation/parser/compiler.rb#1292
   def visit_range_node(node); end
 
   # 1r
   # ^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1316
+  # source://prism//lib/prism/translation/parser/compiler.rb#1314
   def visit_rational_node(node); end
 
   # redo
   # ^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1322
+  # source://prism//lib/prism/translation/parser/compiler.rb#1320
   def visit_redo_node(node); end
 
   # /foo/
   # ^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1328
+  # source://prism//lib/prism/translation/parser/compiler.rb#1326
   def visit_regular_expression_node(node); end
 
   # def foo(bar:); end
   #         ^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1343
+  # source://prism//lib/prism/translation/parser/compiler.rb#1341
   def visit_required_keyword_parameter_node(node); end
 
   # def foo(bar); end
   #         ^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1349
+  # source://prism//lib/prism/translation/parser/compiler.rb#1347
   def visit_required_parameter_node(node); end
 
   # foo rescue bar
   # ^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1355
+  # source://prism//lib/prism/translation/parser/compiler.rb#1353
   def visit_rescue_modifier_node(node); end
 
   # begin; rescue; end
@@ -29213,7 +29217,7 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   #
   # @raise [CompilationError]
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1373
+  # source://prism//lib/prism/translation/parser/compiler.rb#1371
   def visit_rescue_node(node); end
 
   # def foo(*bar); end
@@ -29222,13 +29226,13 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # def foo(*); end
   #         ^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1382
+  # source://prism//lib/prism/translation/parser/compiler.rb#1380
   def visit_rest_parameter_node(node); end
 
   # retry
   # ^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1388
+  # source://prism//lib/prism/translation/parser/compiler.rb#1386
   def visit_retry_node(node); end
 
   # return
@@ -29237,37 +29241,37 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # return 1
   # ^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1397
+  # source://prism//lib/prism/translation/parser/compiler.rb#1395
   def visit_return_node(node); end
 
   # self
   # ^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1409
+  # source://prism//lib/prism/translation/parser/compiler.rb#1407
   def visit_self_node(node); end
 
   # class << self; end
   # ^^^^^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1415
+  # source://prism//lib/prism/translation/parser/compiler.rb#1413
   def visit_singleton_class_node(node); end
 
   # __ENCODING__
   # ^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1427
+  # source://prism//lib/prism/translation/parser/compiler.rb#1425
   def visit_source_encoding_node(node); end
 
   # __FILE__
   # ^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1433
+  # source://prism//lib/prism/translation/parser/compiler.rb#1431
   def visit_source_file_node(node); end
 
   # __LINE__
   # ^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1439
+  # source://prism//lib/prism/translation/parser/compiler.rb#1437
   def visit_source_line_node(node); end
 
   # foo(*bar)
@@ -29279,42 +29283,42 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # def foo(*); bar(*); end
   #                 ^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1451
+  # source://prism//lib/prism/translation/parser/compiler.rb#1449
   def visit_splat_node(node); end
 
   # A list of statements.
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1464
+  # source://prism//lib/prism/translation/parser/compiler.rb#1462
   def visit_statements_node(node); end
 
   # "foo"
   # ^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1470
+  # source://prism//lib/prism/translation/parser/compiler.rb#1468
   def visit_string_node(node); end
 
   # super(foo)
   # ^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1487
+  # source://prism//lib/prism/translation/parser/compiler.rb#1485
   def visit_super_node(node); end
 
   # :foo
   # ^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1510
+  # source://prism//lib/prism/translation/parser/compiler.rb#1508
   def visit_symbol_node(node); end
 
   # true
   # ^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1528
+  # source://prism//lib/prism/translation/parser/compiler.rb#1526
   def visit_true_node(node); end
 
   # undef foo
   # ^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1534
+  # source://prism//lib/prism/translation/parser/compiler.rb#1532
   def visit_undef_node(node); end
 
   # unless foo; bar end
@@ -29323,7 +29327,7 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # bar unless foo
   # ^^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1543
+  # source://prism//lib/prism/translation/parser/compiler.rb#1541
   def visit_unless_node(node); end
 
   # until foo; bar end
@@ -29332,13 +29336,13 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # bar until foo
   # ^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1573
+  # source://prism//lib/prism/translation/parser/compiler.rb#1571
   def visit_until_node(node); end
 
   # case foo; when bar; end
   #           ^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1595
+  # source://prism//lib/prism/translation/parser/compiler.rb#1593
   def visit_when_node(node); end
 
   # while foo; bar end
@@ -29347,13 +29351,13 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # bar while foo
   # ^^^^^^^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1609
+  # source://prism//lib/prism/translation/parser/compiler.rb#1607
   def visit_while_node(node); end
 
   # `foo`
   # ^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1631
+  # source://prism//lib/prism/translation/parser/compiler.rb#1629
   def visit_x_string_node(node); end
 
   # yield
@@ -29362,7 +29366,7 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # yield 1
   # ^^^^^^^
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1649
+  # source://prism//lib/prism/translation/parser/compiler.rb#1647
   def visit_yield_node(node); end
 
   private
@@ -29370,14 +29374,14 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   # Initialize a new compiler with the given option overrides, used to
   # visit a subtree with the given options.
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1663
+  # source://prism//lib/prism/translation/parser/compiler.rb#1661
   def copy_compiler(forwarding: T.unsafe(nil), in_destructure: T.unsafe(nil), in_pattern: T.unsafe(nil)); end
 
   # When *, **, &, or ... are used as an argument in a method call, we
   # check if they were allowed by the current context. To determine that
   # we build this lookup table.
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1670
+  # source://prism//lib/prism/translation/parser/compiler.rb#1668
   def find_forwarding(node); end
 
   # Blocks can have a special set of parameters that automatically expand
@@ -29386,49 +29390,49 @@ class Prism::Translation::Parser::Compiler < ::Prism::Compiler
   #
   # @return [Boolean]
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1685
+  # source://prism//lib/prism/translation/parser/compiler.rb#1683
   def procarg0?(parameters); end
 
   # Constructs a new source range from the given start and end offsets.
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1702
+  # source://prism//lib/prism/translation/parser/compiler.rb#1700
   def srange(location); end
 
   # Constructs a new source range by finding the given tokens between the
   # given start offset and end offset. If the needle is not found, it
   # returns nil.
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1714
+  # source://prism//lib/prism/translation/parser/compiler.rb#1712
   def srange_find(start_offset, end_offset, tokens); end
 
   # Constructs a new source range from the given start and end offsets.
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1707
+  # source://prism//lib/prism/translation/parser/compiler.rb#1705
   def srange_offsets(start_offset, end_offset); end
 
   # Transform a location into a token that the parser gem expects.
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1723
+  # source://prism//lib/prism/translation/parser/compiler.rb#1721
   def token(location); end
 
   # Visit a block node on a call.
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1728
+  # source://prism//lib/prism/translation/parser/compiler.rb#1726
   def visit_block(call, block); end
 
   # Visit a heredoc that can be either a string or an xstring.
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1761
+  # source://prism//lib/prism/translation/parser/compiler.rb#1759
   def visit_heredoc(node); end
 
   # Visit a numeric node and account for the optional sign.
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1808
+  # source://prism//lib/prism/translation/parser/compiler.rb#1805
   def visit_numeric(node, value); end
 
   # Within the given block, track that we're within a pattern.
   #
-  # source://prism//lib/prism/translation/parser/compiler.rb#1820
+  # source://prism//lib/prism/translation/parser/compiler.rb#1817
   def within_pattern; end
 end
 
@@ -29441,7 +29445,7 @@ class Prism::Translation::Parser::Compiler::CompilationError < ::StandardError; 
 # store a reference to its constant to make it slightly faster to look
 # up.
 #
-# source://prism//lib/prism/translation/parser/compiler.rb#1699
+# source://prism//lib/prism/translation/parser/compiler.rb#1697
 Prism::Translation::Parser::Compiler::Range = Parser::Source::Range
 
 # The parser gem has a list of diagnostics with a hard-coded set of error
