@@ -31,20 +31,70 @@
       "range": {
         "start": {
           "line": 1,
-          "character": 18
+          "character": 13
         },
         "end": {
           "line": 1,
-          "character": 22
+          "character": 18
         }
       },
       "selectionRange": {
         "start": {
           "line": 1,
-          "character": 19
+          "character": 14
         },
         "end": {
           "line": 1,
+          "character": 17
+        }
+      },
+      "children": []
+    },
+    {
+      "name": "foo",
+      "kind": 6,
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 18
+        },
+        "end": {
+          "line": 4,
+          "character": 22
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 4,
+          "character": 19
+        },
+        "end": {
+          "line": 4,
+          "character": 22
+        }
+      },
+      "children": []
+    },
+    {
+      "name": "foo",
+      "kind": 6,
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 18
+        },
+        "end": {
+          "line": 5,
+          "character": 23
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 5,
+          "character": 19
+        },
+        "end": {
+          "line": 5,
           "character": 22
         }
       },

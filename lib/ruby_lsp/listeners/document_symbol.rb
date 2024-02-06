@@ -235,17 +235,28 @@ module RubyLsp
         return unless arguments
 
         new_name_argument = arguments.arguments.first
-        return unless new_name_argument.is_a?(Prism::SymbolNode)
 
-        name = new_name_argument.value
-        return unless name
+        if new_name_argument.is_a?(Prism::SymbolNode)
+          name = new_name_argument.value
+          return unless name
 
-        create_document_symbol(
-          name: name,
-          kind: Constant::SymbolKind::METHOD,
-          range_location: new_name_argument.location,
-          selection_range_location: T.must(new_name_argument.value_loc),
-        )
+          create_document_symbol(
+            name: name,
+            kind: Constant::SymbolKind::METHOD,
+            range_location: new_name_argument.location,
+            selection_range_location: T.must(new_name_argument.value_loc),
+          )
+        elsif new_name_argument.is_a?(Prism::StringNode)
+          name = new_name_argument.content
+          return if name.empty?
+
+          create_document_symbol(
+            name: name,
+            kind: Constant::SymbolKind::METHOD,
+            range_location: new_name_argument.location,
+            selection_range_location: new_name_argument.content_loc,
+          )
+        end
       end
     end
   end
