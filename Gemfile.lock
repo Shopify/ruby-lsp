@@ -42,8 +42,8 @@ GEM
     racc (1.7.3)
     rainbow (3.1.1)
     rake (13.1.0)
-    rbi (0.1.7)
-      prism (>= 0.18.0, < 0.21)
+    rbi (0.1.8)
+      prism (>= 0.18.0, < 0.22)
       sorbet-runtime (>= 0.5.9204)
     rdoc (6.6.2)
       psych (>= 4.0.0)
@@ -109,8 +109,6 @@ GEM
 
 PLATFORMS
   arm64-darwin
-  x64-mingw-ucrt
-  x64-mingw32
   x86_64-darwin
   x86_64-linux
 
