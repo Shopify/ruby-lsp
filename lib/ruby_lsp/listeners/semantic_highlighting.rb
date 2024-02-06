@@ -252,6 +252,7 @@ module RubyLsp
 
       sig { params(node: Prism::LocalVariableReadNode).void }
       def on_local_variable_read_node_enter(node)
+        return if @inside_implicit_node
         return unless visible?(node, @range)
 
         # Numbered parameters
