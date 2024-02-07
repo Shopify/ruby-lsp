@@ -4,7 +4,7 @@
 
 [![Build Status](https://github.com/Shopify/vscode-ruby-lsp/workflows/CI/badge.svg)](https://github.com/Shopify/vscode-ruby-lsp/actions/workflows/ci.yml)
 [![Ruby LSP extension](https://img.shields.io/badge/VS%20Code-Ruby%20LSP-success?logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=Shopify.ruby-lsp)
-[![Ruby DX Slack](https://img.shields.io/badge/Slack-Ruby%20DX-success?logo=slack)](https://join.slack.com/t/ruby-dx/shared_invite/zt-1zjp7lmgk-zL7bGvze8gj5hFaYS~r5vg)
+[![Ruby DX Slack](https://img.shields.io/badge/Slack-Ruby%20DX-success?logo=slack)](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q)
 
 # Ruby LSP (VS Code extension)
 
@@ -13,7 +13,7 @@ The Ruby LSP is an extension that provides performant rich features for Ruby. It
 experience.
 
 Want to discuss Ruby developer experience? Consider joining the public
-[Ruby DX Slack workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-1zjp7lmgk-zL7bGvze8gj5hFaYS~r5vg).
+[Ruby DX Slack workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q).
 
 ## Usage
 
