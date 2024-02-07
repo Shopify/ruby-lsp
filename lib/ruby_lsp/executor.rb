@@ -304,7 +304,8 @@ module RubyLsp
 
     sig { params(uri: URI::Generic, query: T.nilable(String)).returns(T::Array[Interface::WorkspaceSymbol]) }
     def workspace_symbol(uri, query)
-      Requests::WorkspaceSymbol.new(query, @index, uri).perform
+      document = @store.get(uri)
+      Requests::WorkspaceSymbol.new(query, @index, document.typechecker_enabled?).perform
     end
 
     sig { params(uri: URI::Generic, range: T.nilable(T::Hash[Symbol, T.untyped])).returns({ ast: String }) }
