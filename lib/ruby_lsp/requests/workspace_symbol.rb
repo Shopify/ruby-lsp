@@ -24,7 +24,7 @@ module RubyLsp
 
       sig { params(query: T.nilable(String), index: RubyIndexer::Index, uri: URI::Generic).void }
       def initialize(query, index, uri)
-        super
+        super()
         @query = query
         @index = index
         @uri = uri

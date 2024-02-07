@@ -4,7 +4,7 @@
 module RubyLsp
   class Store
     extend T::Sig
-    include Support::Common
+    include Requests::Support::Common
 
     sig { returns(String) }
     attr_accessor :encoding
