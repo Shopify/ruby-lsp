@@ -4,7 +4,7 @@
 > The Ruby LSP addon system is currently experimental and subject to changes in the API
 
 Need help writing addons? Consider joining the #ruby-lsp-addons channel in the [Ruby DX Slack
-workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-1zjp7lmgk-zL7bGvze8gj5hFaYS~r5vg).
+workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q).
 
 ## Motivation and goals
 
