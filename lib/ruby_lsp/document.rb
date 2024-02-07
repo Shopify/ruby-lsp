@@ -180,6 +180,11 @@ module RubyLsp
       end
     end
 
+    sig { returns(T::Boolean) }
+    def typechecker_enabled?
+      DependencyDetector.instance.typechecker_for_uri?(uri) && sorbet_sigil_is_true_or_higher
+    end
+
     class Scanner
       extend T::Sig
 

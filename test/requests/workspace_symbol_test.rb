@@ -18,15 +18,15 @@ class WorkspaceSymbolTest < Minitest::Test
       CONSTANT = 1
     RUBY
 
-    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Foo").perform.first
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Foo", uri).perform.first
     assert_equal("Foo", T.must(result).name)
     assert_equal(RubyLsp::Constant::SymbolKind::CLASS, T.must(result).kind)
 
-    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Bar").perform.first
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Bar", uri).perform.first
     assert_equal("Bar", T.must(result).name)
     assert_equal(RubyLsp::Constant::SymbolKind::NAMESPACE, T.must(result).kind)
 
-    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "CONST").perform.first
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "CONST", uri).perform.first
     assert_equal("CONSTANT", T.must(result).name)
     assert_equal(RubyLsp::Constant::SymbolKind::CONSTANT, T.must(result).kind)
   end
@@ -39,15 +39,15 @@ class WorkspaceSymbolTest < Minitest::Test
       CONSTANT = 1
     RUBY
 
-    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Floo").perform.first
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Floo", uri).perform.first
     assert_equal("Foo", T.must(result).name)
     assert_equal(RubyLsp::Constant::SymbolKind::CLASS, T.must(result).kind)
 
-    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Bear").perform.first
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Bear", uri).perform.first
     assert_equal("Bar", T.must(result).name)
     assert_equal(RubyLsp::Constant::SymbolKind::NAMESPACE, T.must(result).kind)
 
-    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "CONF").perform.first
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "CONF", uri).perform.first
     assert_equal("CONSTANT", T.must(result).name)
     assert_equal(RubyLsp::Constant::SymbolKind::CONSTANT, T.must(result).kind)
   end
@@ -67,7 +67,7 @@ class WorkspaceSymbolTest < Minitest::Test
       class Foo; end
     RUBY
 
-    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Foo").perform
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Foo", uri).perform
     assert_equal(1, result.length)
     assert_equal(URI::Generic.from_path(path: path).to_s, T.must(result.first).location.uri)
   end
@@ -79,7 +79,7 @@ class WorkspaceSymbolTest < Minitest::Test
       end
     RUBY
 
-    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Foo::Bar").perform.first
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Foo::Bar", uri).perform.first
     assert_equal("Foo::Bar", T.must(result).name)
     assert_equal(RubyLsp::Constant::SymbolKind::CLASS, T.must(result).kind)
     assert_equal("Foo", T.must(result).container_name)
@@ -88,7 +88,7 @@ class WorkspaceSymbolTest < Minitest::Test
   def test_finds_default_gem_symbols
     @index.index_single(RubyIndexer::IndexablePath.new(nil, "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb"))
 
-    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Pathname").perform
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Pathname", uri).perform
     refute_empty(result)
   end
 
@@ -100,7 +100,7 @@ class WorkspaceSymbolTest < Minitest::Test
       end
     RUBY
 
-    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Foo::CONSTANT").perform
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Foo::CONSTANT", uri).perform
     assert_equal(1, result.length)
     assert_equal("Foo", T.must(result.first).name)
   end
@@ -115,15 +115,15 @@ class WorkspaceSymbolTest < Minitest::Test
       end
     RUBY
 
-    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "bar").perform.first
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "bar", uri).perform.first
     assert_equal("bar", T.must(result).name)
     assert_equal(RubyLsp::Constant::SymbolKind::METHOD, T.must(result).kind)
 
-    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "initialize").perform.first
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "initialize", uri).perform.first
     assert_equal("initialize", T.must(result).name)
     assert_equal(RubyLsp::Constant::SymbolKind::CONSTRUCTOR, T.must(result).kind)
 
-    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "baz").perform.first
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "baz", uri).perform.first
     assert_equal("baz", T.must(result).name)
     assert_equal(RubyLsp::Constant::SymbolKind::PROPERTY, T.must(result).kind)
   end
