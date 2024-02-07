@@ -116,6 +116,13 @@ module RubyLsp
             #{content}
           MARKDOWN
         end
+
+        sig { params(node: Prism::Node).returns(T.nilable(String)) }
+        def constant_name(node)
+          node.full_name
+        rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError
+          nil
+        end
       end
     end
   end

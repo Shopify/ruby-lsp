@@ -45,12 +45,12 @@ module RubyLsp
 
       sig { params(node: Prism::ConstantPathNode).void }
       def on_constant_path_node_enter(node)
-        find_in_index(node.slice)
+        find_in_index(constant_name(node))
       end
 
       sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read_node_enter(node)
-        find_in_index(node.slice)
+        find_in_index(constant_name(node))
       end
 
       private
