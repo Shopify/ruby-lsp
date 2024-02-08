@@ -146,7 +146,7 @@ class ExecutorTest < Minitest::Test
   end
 
   def test_initialized_recovers_from_indexing_failures
-    RubyIndexer::Index.any_instance.expects(:index_all).once.raises(StandardError, "boom!")
+    @executor.instance_variable_get(:@index).expects(:index_all).once.raises(StandardError, "boom!")
 
     @executor.execute({ method: "initialized", params: {} })
     notification = T.must(@message_queue.pop)
