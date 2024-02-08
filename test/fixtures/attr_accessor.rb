@@ -1,7 +1,7 @@
-attr_reader :a
-attr_writer :b, :c
-attr_accessor :d
+attr_reader :a, "b", some_variable
+attr_writer :c, "d", some_variable
+attr_accessor :e, "f", some_variable
 
-self.attr_reader :a
-self.attr_writer :b, :c
-self.attr_accessor :d
+self.attr_reader :a, "b", some_variable
+self.attr_writer :c, "d", some_variable
+self.attr_accessor :e, "f", some_variable
