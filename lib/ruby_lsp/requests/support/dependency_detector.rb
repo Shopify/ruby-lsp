@@ -63,7 +63,11 @@ module RubyLsp
     def detect_typechecker
       return false if ENV["RUBY_LSP_BYPASS_TYPECHECKER"]
 
-      direct_dependency?(/^sorbet/) || direct_dependency?(/^sorbet-static-and-runtime/)
+      Bundler.with_original_env do
+        Bundler.locked_gems.specs.any? { |spec| spec.name == "sorbet-static" }
+      end
+    rescue Bundler::GemfileNotFound
+      false
     end
 
     sig { returns(T::Array[String]) }
