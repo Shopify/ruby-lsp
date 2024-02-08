@@ -250,6 +250,76 @@ class SignatureHelpTest < Minitest::Test
     assert_equal(0, result.active_parameter)
   end
 
+  def test_help_in_nested_method_calls_no_arguments
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+      class Foo
+        def bar(a)
+        end
+
+        def baz(b)
+        end
+
+        def qux
+          bar(baz())
+        end
+      end
+    RUBY
+
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    result = run_request(
+      method: "textDocument/signatureHelp",
+      params: {
+        textDocument: { uri: @uri.to_s },
+        position: { line: 8, character: 11 },
+        context: {},
+      },
+    )
+
+    signature = result.signatures.first
+
+    assert_equal("bar(a)", signature.label)
+    assert_equal(0, result.active_parameter)
+  end
+
+  def test_help_in_nested_method_calls_with_arguments
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+      class Foo
+        def bar(a)
+        end
+
+        def baz(b)
+        end
+
+        def qux
+          bar(baz(123))
+        end
+      end
+    RUBY
+
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    result = run_request(
+      method: "textDocument/signatureHelp",
+      params: {
+        textDocument: { uri: @uri.to_s },
+        position: { line: 8, character: 11 },
+        context: {},
+      },
+    )
+
+    signature = result.signatures.first
+
+    assert_equal("bar(a)", signature.label)
+    assert_equal(0, result.active_parameter)
+  end
+
   private
 
   def run_request(method:, params: {})
