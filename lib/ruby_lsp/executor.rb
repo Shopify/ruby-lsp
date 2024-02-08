@@ -25,7 +25,7 @@ module RubyLsp
       begin
         response = run(request)
       rescue StandardError, LoadError => e
-        warn(e.message)
+        $stderr.puts(e.full_message)
         error = e
       end
 
@@ -55,7 +55,7 @@ module RubyLsp
             ),
           )
 
-          warn(errored_addons.map(&:backtraces).join("\n\n"))
+          $stderr.puts(errored_addons.map(&:backtraces).join("\n\n"))
         end
 
         RubyVM::YJIT.enable if defined? RubyVM::YJIT.enable
@@ -63,7 +63,7 @@ module RubyLsp
         perform_initial_indexing
         check_formatter_is_available
 
-        warn("Ruby LSP is ready")
+        $stderr.puts("Ruby LSP is ready")
         VOID
       when "textDocument/didOpen"
         text_document_did_open(
