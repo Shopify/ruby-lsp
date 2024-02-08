@@ -16,7 +16,6 @@ module RubyLsp
         @response = T.let(
           {
             title: +"",
-            signature: +"",
             links: +"",
             documentation: +"",
           },
@@ -40,7 +39,6 @@ module RubyLsp
       sig { override.returns(ResponseType) }
       def response
         result = T.must(@response[:title])
-        result << @response[:signature] if @response[:signature]
         result << "\n" << @response[:links] if @response[:links]
         result << "\n" << @response[:documentation] if @response[:documentation]
 

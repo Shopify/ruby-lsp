@@ -288,10 +288,10 @@ class HoverExpectationsTest < ExpectationsTestRunner
               "Links", :links
             )
             @response_builder.push(
-              "Signature", :signature
+              "Title", :title
             )
             @response_builder.push(
-              "Title", :title
+              "Signature", :title
             )
           end
         end
