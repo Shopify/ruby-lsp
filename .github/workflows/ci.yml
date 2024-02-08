@@ -45,7 +45,7 @@ jobs:
           cache-version: 1
 
       - name: Run tests
-        run: bundle exec rake
+        run: RUBY_LSP_BACKTRACE=1 bundle exec rake
 
       - name: Run index troubleshooting tool
         run: bundle exec ruby-lsp-doctor
