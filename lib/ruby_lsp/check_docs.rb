@@ -115,7 +115,7 @@ module RubyLsp
       end
 
       if missing_docs.any?
-        warn(<<~WARN)
+        $stderr.puts(<<~WARN)
           The following requests are missing documentation:
 
           #{missing_docs.map { |k, v| "#{k}\n\n#{v.join("\n")}" }.join("\n\n")}

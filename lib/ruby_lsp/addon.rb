@@ -48,8 +48,7 @@ module RubyLsp
         Gem.find_files("ruby_lsp/**/addon.rb").each do |addon|
           require File.expand_path(addon)
         rescue => e
-          warn(e.message)
-          warn(e.backtrace.to_s) # rubocop:disable Lint/RedundantStringCoercion
+          $stderr.puts(e.full_message)
         end
 
         # Activate each one of the discovered addons. If any problems occur in the addons, we don't want to

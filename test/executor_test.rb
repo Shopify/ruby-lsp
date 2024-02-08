@@ -365,6 +365,20 @@ class ExecutorTest < Minitest::Test
     end
   end
 
+  def test_backtrace_is_printed_to_stderr_on_exceptions
+    @executor.expects(:run).raises(StandardError, "boom")
+
+    _stdout, stderr = capture_io do
+      @executor.execute({
+        method: "rubyLsp/workspace/dependencies",
+        params: {},
+      })
+    end
+
+    assert_match(/boom/, stderr)
+    assert_match(%r{ruby-lsp/lib/ruby_lsp/executor\.rb:\d+:in `execute'}, stderr)
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)

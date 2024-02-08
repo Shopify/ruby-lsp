@@ -54,6 +54,3 @@ Sorbet/StrictSigil:
     - "lib/ruby_indexer/test/**/*.rb"
     - "lib/ruby-lsp.rb"
     - "lib/ruby_indexer/lib/ruby_indexer/prefix_tree.rb"
-
-Style/StderrPuts:
-  Enabled: true

@@ -59,7 +59,9 @@ module RubyLsp
 
       # Do not setup a custom bundle if both `ruby-lsp` and `debug` are already in the Gemfile
       if @dependencies["ruby-lsp"] && @dependencies["debug"]
-        warn("Ruby LSP> Skipping custom bundle setup since both `ruby-lsp` and `debug` are already in #{@gemfile}")
+        $stderr.puts(
+          "Ruby LSP> Skipping custom bundle setup since both `ruby-lsp` and `debug` are already in #{@gemfile}",
+        )
 
         # If the user decided to add the `ruby-lsp` and `debug` to their Gemfile after having already run the Ruby LSP,
         # then we need to remove the `.ruby-lsp` folder, otherwise we will run `bundle install` for the top level and
@@ -76,7 +78,7 @@ module RubyLsp
       write_custom_gemfile
 
       unless @gemfile&.exist? && @lockfile&.exist?
-        warn("Ruby LSP> Skipping lockfile copies because there's no top level bundle")
+        $stderr.puts("Ruby LSP> Skipping lockfile copies because there's no top level bundle")
         return run_bundle_install(@custom_gemfile)
       end
 
@@ -84,7 +86,9 @@ module RubyLsp
       current_lockfile_hash = Digest::SHA256.hexdigest(lockfile_contents)
 
       if @custom_lockfile.exist? && @lockfile_hash_path.exist? && @lockfile_hash_path.read == current_lockfile_hash
-        warn("Ruby LSP> Skipping custom bundle setup since #{@custom_lockfile} already exists and is up to date")
+        $stderr.puts(
+          "Ruby LSP> Skipping custom bundle setup since #{@custom_lockfile} already exists and is up to date",
+        )
         return run_bundle_install(@custom_gemfile)
       end
 
@@ -209,8 +213,8 @@ module RubyLsp
       command << "1>&2"
 
       # Add bundle update
-      warn("Ruby LSP> Running bundle install for the custom bundle. This may take a while...")
-      warn("Ruby LSP> Command: #{command}")
+      $stderr.puts("Ruby LSP> Running bundle install for the custom bundle. This may take a while...")
+      $stderr.puts("Ruby LSP> Command: #{command}")
       system(env, command)
       [bundle_gemfile.to_s, expanded_path, env["BUNDLE_APP_CONFIG"]]
     end

@@ -46,7 +46,7 @@ class IntegrationTest < Minitest::Test
 
     if @wait_thr.value != 0
       # If the process didn't exit cleanly, print the stderr
-      warn(@stderr.read)
+      $stderr.puts(@stderr.read)
     end
 
     # Make sure IOs are closed

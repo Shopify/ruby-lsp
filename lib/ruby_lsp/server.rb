@@ -58,7 +58,7 @@ module RubyLsp
 
     sig { void }
     def start
-      warn("Starting Ruby LSP v#{VERSION}...")
+      $stderr.puts("Starting Ruby LSP v#{VERSION}...")
 
       # Requests that have to be executed sequentially or in the main process are implemented here. All other requests
       # fall under the else branch which just pushes requests to the queue
@@ -73,7 +73,7 @@ module RubyLsp
         when "$/setTrace"
           VOID
         when "shutdown"
-          warn("Shutting down Ruby LSP...")
+          $stderr.puts("Shutting down Ruby LSP...")
 
           @message_queue.close
           # Close the queue so that we can no longer receive items
@@ -92,7 +92,7 @@ module RubyLsp
           # We return zero if shutdown has already been received or one otherwise as per the recommendation in the spec
           # https://microsoft.github.io/language-server-protocol/specification/#exit
           status = @store.empty? ? 0 : 1
-          warn("Shutdown complete with status #{status}")
+          $stderr.puts("Shutdown complete with status #{status}")
           exit(status)
         else
           # Default case: push the request to the queue to be executed by the worker
