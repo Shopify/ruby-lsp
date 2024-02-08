@@ -248,7 +248,17 @@ class HoverExpectationsTest < ExpectationsTestRunner
       })
 
       assert_nil(response.error, response.error&.full_message)
-      assert_match("Hello\n\nHello from middleware: Post", response.response.contents.value)
+      assert_match(<<~RESPONSE.strip, response.response.contents.value)
+        Title
+
+        **Definitions**: [fake.rb](file:///fake.rb#L2,1-3,4)
+        Links
+
+
+
+        Hello
+        Documentation from middleware: Post
+      RESPONSE
     end
   end
 
@@ -270,7 +280,15 @@ class HoverExpectationsTest < ExpectationsTestRunner
           end
 
           def on_constant_read_node_enter(node)
-            @response_builder << "Hello from middleware: #{node.slice}"
+            @response_builder.push(
+              "Documentation from middleware: #{node.slice}", category: :documentation
+            )
+            @response_builder.push(
+              "Links", category: :links
+            )
+            @response_builder.push(
+              "Title", category: :title
+            )
           end
         end
 
