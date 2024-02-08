@@ -206,7 +206,8 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def handle_attr_accessor(node)
-        return unless node.receiver.nil?
+        receiver = node.receiver
+        return if receiver && !receiver.is_a?(Prism::SelfNode)
 
         arguments = node.arguments
         return unless arguments

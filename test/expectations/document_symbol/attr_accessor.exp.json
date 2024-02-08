@@ -99,6 +99,106 @@
         }
       },
       "children": []
+    },
+    {
+      "name": "a",
+      "kind": 8,
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 17
+        },
+        "end": {
+          "line": 4,
+          "character": 19
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 4,
+          "character": 18
+        },
+        "end": {
+          "line": 4,
+          "character": 19
+        }
+      },
+      "children": []
+    },
+    {
+      "name": "b",
+      "kind": 8,
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 17
+        },
+        "end": {
+          "line": 5,
+          "character": 19
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 5,
+          "character": 18
+        },
+        "end": {
+          "line": 5,
+          "character": 19
+        }
+      },
+      "children": []
+    },
+    {
+      "name": "c",
+      "kind": 8,
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 21
+        },
+        "end": {
+          "line": 5,
+          "character": 23
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 5,
+          "character": 22
+        },
+        "end": {
+          "line": 5,
+          "character": 23
+        }
+      },
+      "children": []
+    },
+    {
+      "name": "d",
+      "kind": 8,
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 19
+        },
+        "end": {
+          "line": 6,
+          "character": 21
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 6,
+          "character": 20
+        },
+        "end": {
+          "line": 6,
+          "character": 21
+        }
+      },
+      "children": []
     }
   ]
 }
