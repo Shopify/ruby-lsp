@@ -25,8 +25,12 @@ module RubyLsp
       begin
         response = run(request)
       rescue StandardError, LoadError => e
-        warn(e.message)
-        error = e
+        if ENV["RUBY_LSP_BACKTRACE"]
+          raise
+        else
+          warn(e.message)
+          error = e
+        end
       end
 
       Result.new(response: response, error: error)
