@@ -86,9 +86,9 @@ module RubyLsp
           params(
             title: String,
             entries: T.any(T::Array[RubyIndexer::Entry], RubyIndexer::Entry),
-          ).returns(String)
+          ).returns(T::Hash[Symbol, String])
         end
-        def markdown_from_index_entries(title, entries)
+        def categorized_markdown_from_index_entries(title, entries)
           markdown_title = "```ruby\n#{title}\n```"
           definitions = []
           content = +""
@@ -108,12 +108,28 @@ module RubyLsp
             content << "\n\n#{entry.comments.join("\n")}" unless entry.comments.empty?
           end
 
+          {
+            title: markdown_title,
+            links: "**Definitions**: #{definitions.join(" | ")}",
+            documentation: content,
+          }
+        end
+
+        sig do
+          params(
+            title: String,
+            entries: T.any(T::Array[RubyIndexer::Entry], RubyIndexer::Entry),
+          ).returns(String)
+        end
+        def markdown_from_index_entries(title, entries)
+          categorized_markdown = categorized_markdown_from_index_entries(title, entries)
+
           <<~MARKDOWN.chomp
-            #{markdown_title}
+            #{categorized_markdown[:title]}
 
-            **Definitions**: #{definitions.join(" | ")}
+            #{categorized_markdown[:links]}
 
-            #{content}
+            #{categorized_markdown[:documentation]}
           MARKDOWN
         end
       end

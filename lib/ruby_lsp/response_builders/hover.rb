@@ -12,27 +12,39 @@ module RubyLsp
       sig { void }
       def initialize
         super
-        @stack = T.let(
-          [],
-          T::Array[String],
+
+        @response = T.let(
+          {
+            title: +"",
+            signature: +"",
+            links: +"",
+            documentation: +"",
+          },
+          T::Hash[Symbol, String],
         )
       end
 
-      sig { params(hover_response: String).void }
-      def push(hover_response)
-        @stack << hover_response
+      sig { params(content: String, category: Symbol).void }
+      def push(content, category)
+        hover_content = @response[category]
+        if hover_content
+          hover_content << content + "\n"
+        end
       end
-
-      alias_method(:<<, :push)
 
       sig { returns(T::Boolean) }
       def empty?
-        @stack.empty?
+        @response.all? { |_key, value| value.empty? }
       end
 
-      sig { override.returns(String) }
+      sig { override.returns(ResponseType) }
       def response
-        @stack.join("\n\n")
+        result = T.must(@response[:title])
+        result << @response[:signature] if @response[:signature]
+        result << "\n" << @response[:links] if @response[:links]
+        result << "\n" << @response[:documentation] if @response[:documentation]
+
+        result.strip
       end
     end
   end

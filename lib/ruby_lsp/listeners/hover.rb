@@ -89,7 +89,9 @@ module RubyLsp
         target_method = @index.resolve_method(message, @nesting.join("::"))
         return unless target_method
 
-        @response_builder << markdown_from_index_entries(message, target_method)
+        categorized_markdown_from_index_entries(message, target_method).each do |category, content|
+          @response_builder.push(content, category)
+        end
       end
 
       private
@@ -104,7 +106,9 @@ module RubyLsp
         first_entry = T.must(entries.first)
         return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{name}"
 
-        @response_builder << markdown_from_index_entries(name, entries)
+        categorized_markdown_from_index_entries(name, entries).each do |category, content|
+          @response_builder.push(content, category)
+        end
       end
 
       sig { params(node: Prism::CallNode).void }
@@ -131,13 +135,8 @@ module RubyLsp
           page.start_with?(*ALLOWED_REMOTE_PROVIDERS)
         end
 
-        markdown = <<~MARKDOWN
-          **#{spec.name}** (#{spec.version}) #{remote_url && " - [open remote](#{remote_url})"}
-
-          #{info}
-        MARKDOWN
-
-        @response_builder << markdown
+        @response_builder.push("**#{spec.name}** (#{spec.version}) #{remote_url && " - [open remote](#{remote_url})"}", :title)
+        @response_builder.push(info, :documentation)
       rescue Gem::MissingSpecError
         # Do nothing if the spec cannot be found
       end
