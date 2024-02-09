@@ -55,7 +55,10 @@ module RubyLsp
       def on_constant_read_node_enter(node)
         return if @typechecker_enabled
 
-        generate_hover(constant_name(node), node.location)
+        name = constant_name(node)
+        return if name.nil?
+
+        generate_hover(name, node.location)
       end
 
       sig { params(node: Prism::ConstantWriteNode).void }
@@ -69,7 +72,10 @@ module RubyLsp
       def on_constant_path_node_enter(node)
         return if DependencyDetector.instance.typechecker
 
-        generate_hover(constant_name(node), node.location)
+        name = constant_name(node)
+        return if name.nil?
+
+        generate_hover(name, node.location)
       end
 
       sig { params(node: Prism::CallNode).void }

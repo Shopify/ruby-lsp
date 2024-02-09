@@ -44,6 +44,8 @@ module RubyLsp
         return if DependencyDetector.instance.typechecker
 
         name = constant_name(node)
+        return if name.nil?
+
         candidates = @index.prefix_search(name, @nesting)
         candidates.each do |entries|
           complete_name = T.must(entries.first).name
@@ -63,6 +65,7 @@ module RubyLsp
         return if DependencyDetector.instance.typechecker
 
         name = constant_name(node)
+        return if name.nil?
 
         top_level_reference = if name.start_with?("::")
           name = name.delete_prefix("::")
