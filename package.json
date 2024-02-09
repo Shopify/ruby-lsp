@@ -21,7 +21,8 @@
   "activationEvents": [
     "onLanguage:ruby",
     "workspaceContains:Gemfile.lock",
-    "workspaceContains:gems.locked"
+    "workspaceContains:gems.locked",
+    "onView:dependencies"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -314,6 +315,17 @@
           "default": false
         }
       }
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "dependencies",
+          "name": "Dependencies",
+          "icon": "$(package)",
+          "description": "View and manage dependencies",
+          "contextualTitle": "Dependencies"
+        }
+      ]
     },
     "breakpoints": [
       {

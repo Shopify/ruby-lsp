@@ -35,6 +35,7 @@ suite("StatusItems", () => {
           state: State.Running,
           formatter: "none",
           serverVersion: "1.0.0",
+          sendRequest: <T>() => Promise.resolve([] as T),
         },
         error: false,
       };
@@ -70,6 +71,7 @@ suite("StatusItems", () => {
           state: State.Running,
           formatter: "none",
           serverVersion: "1.0.0",
+          sendRequest: <T>() => Promise.resolve([] as T),
         },
         error: false,
       };
@@ -127,6 +129,7 @@ suite("StatusItems", () => {
           state: State.Running,
           formatter,
           serverVersion: "1.0.0",
+          sendRequest: <T>() => Promise.resolve([] as T),
         },
         error: false,
       };
@@ -154,6 +157,7 @@ suite("StatusItems", () => {
           state: State.Running,
           formatter: "none",
           serverVersion: "1.0.0",
+          sendRequest: <T>() => Promise.resolve([] as T),
         },
         error: false,
       };
@@ -186,6 +190,7 @@ suite("StatusItems", () => {
           state: State.Running,
           formatter: "none",
           serverVersion: "1.0.0",
+          sendRequest: <T>() => Promise.resolve([] as T),
         },
         error: false,
       };
@@ -224,6 +229,7 @@ suite("StatusItems", () => {
           state: State.Running,
           formatter: "none",
           serverVersion: "1.0.0",
+          sendRequest: <T>() => Promise.resolve([] as T),
         },
         error: false,
       };
@@ -290,6 +296,7 @@ suite("StatusItems", () => {
           state: State.Running,
           formatter: "auto",
           serverVersion: "1.0.0",
+          sendRequest: <T>() => Promise.resolve([] as T),
         },
         error: false,
       };

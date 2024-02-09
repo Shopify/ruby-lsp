@@ -34,6 +34,11 @@ export interface ClientInterface {
   state: State;
   formatter: string;
   serverVersion?: string;
+  sendRequest<T>(
+    method: string,
+    param: any,
+    token?: vscode.CancellationToken,
+  ): Promise<T>;
 }
 
 export interface WorkspaceInterface {

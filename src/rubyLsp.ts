@@ -11,6 +11,7 @@ import { VersionManager } from "./ruby";
 import { StatusItems } from "./status";
 import { TestController } from "./testController";
 import { Debugger } from "./debugger";
+import { DependenciesTree } from "./dependenciesTree";
 
 // The RubyLsp class represents an instance of the entire extension. This should only be instantiated once at the
 // activation event. One instance of this class controls all of the existing workspaces, telemetry and handles all
@@ -35,7 +36,8 @@ export class RubyLsp {
     this.registerCommands(context);
 
     this.statusItems = new StatusItems();
-    context.subscriptions.push(this.statusItems, this.debug);
+    const dependenciesTree = new DependenciesTree();
+    context.subscriptions.push(this.statusItems, this.debug, dependenciesTree);
 
     // Switch the status items based on which workspace is currently active
     vscode.window.onDidChangeActiveTextEditor((editor) => {
