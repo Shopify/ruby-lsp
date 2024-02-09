@@ -206,23 +206,34 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def handle_attr_accessor(node)
-        return unless node.receiver.nil?
+        receiver = node.receiver
+        return if receiver && !receiver.is_a?(Prism::SelfNode)
 
         arguments = node.arguments
         return unless arguments
 
         arguments.arguments.each do |argument|
-          next unless argument.is_a?(Prism::SymbolNode)
+          if argument.is_a?(Prism::SymbolNode)
+            name = argument.value
+            next unless name
 
-          name = argument.value
-          next unless name
+            create_document_symbol(
+              name: name,
+              kind: Constant::SymbolKind::FIELD,
+              range_location: argument.location,
+              selection_range_location: T.must(argument.value_loc),
+            )
+          elsif argument.is_a?(Prism::StringNode)
+            name = argument.content
+            next if name.empty?
 
-          create_document_symbol(
-            name: name,
-            kind: Constant::SymbolKind::FIELD,
-            range_location: argument.location,
-            selection_range_location: T.must(argument.value_loc),
-          )
+            create_document_symbol(
+              name: name,
+              kind: Constant::SymbolKind::FIELD,
+              range_location: argument.location,
+              selection_range_location: argument.content_loc,
+            )
+          end
         end
       end
 
