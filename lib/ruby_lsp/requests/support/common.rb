@@ -132,6 +132,21 @@ module RubyLsp
             #{categorized_markdown[:documentation]}
           MARKDOWN
         end
+
+        sig do
+          params(
+            node: T.any(
+              Prism::ConstantPathNode,
+              Prism::ConstantReadNode,
+              Prism::ConstantPathTargetNode,
+            ),
+          ).returns(T.nilable(String))
+        end
+        def constant_name(node)
+          node.full_name
+        rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError
+          nil
+        end
       end
     end
   end
