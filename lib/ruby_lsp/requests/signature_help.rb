@@ -60,7 +60,7 @@ module RubyLsp
         @target = T.let(target, T.nilable(Prism::Node))
         @dispatcher = dispatcher
         @response_builder = T.let(ResponseBuilders::SignatureHelp.new, ResponseBuilders::SignatureHelp)
-        Listeners::SignatureHelp.new(@response_builder, nesting, index, dispatcher)
+        Listeners::SignatureHelp.new(@response_builder, nesting, index, dispatcher, document.typechecker_enabled?)
       end
 
       sig { override.returns(T.nilable(Interface::SignatureHelp)) }

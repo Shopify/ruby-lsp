@@ -4,6 +4,7 @@
 module RubyLsp
   class Store
     extend T::Sig
+    include Requests::Support::Common
 
     sig { returns(String) }
     attr_accessor :encoding
@@ -59,7 +60,11 @@ module RubyLsp
 
     sig { params(uri: URI::Generic, source: String, version: Integer).void }
     def set(uri:, source:, version:)
-      document = RubyDocument.new(source: source, version: version, uri: uri, encoding: @encoding)
+      document = if erb?(uri)
+        ERBDocument.new(source: source, version: version, uri: uri, encoding: @encoding)
+      else
+        RubyDocument.new(source: source, version: version, uri: uri, encoding: @encoding)
+      end
       @state[uri.to_s] = document
     end
 

@@ -60,14 +60,14 @@ module RubyLsp
 
       sig { params(node: Prism::ConstantWriteNode).void }
       def on_constant_write_node_enter(node)
-        return if DependencyDetector.instance.typechecker
+        return if @typechecker_enabled
 
         generate_hover(node.name.to_s, node.name_loc)
       end
 
       sig { params(node: Prism::ConstantPathNode).void }
       def on_constant_path_node_enter(node)
-        return if DependencyDetector.instance.typechecker
+        return if @typechecker_enabled
 
         generate_hover(node.slice, node.location)
       end

@@ -3,9 +3,12 @@
 
 require "singleton"
 
+require "ruby_lsp/requests/support/common"
+
 module RubyLsp
   class DependencyDetector
     include Singleton
+    include Requests::Support::Common
     extend T::Sig
 
     sig { returns(String) }
@@ -68,6 +71,11 @@ module RubyLsp
       end
     rescue Bundler::GemfileNotFound
       false
+    end
+
+    sig { params(uri: URI::Generic).returns(T::Boolean) }
+    def typechecker_for_uri?(uri)
+      typechecker && !erb?(uri)
     end
 
     sig { returns(T::Array[String]) }
