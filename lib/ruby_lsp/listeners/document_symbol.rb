@@ -31,6 +31,8 @@ module RubyLsp
           :on_constant_or_write_node_enter,
           :on_constant_operator_write_node_enter,
           :on_constant_and_write_node_enter,
+          :on_constant_target_node_enter,
+          :on_constant_path_target_node_enter,
           :on_def_node_enter,
           :on_def_node_leave,
           :on_module_node_enter,
@@ -162,6 +164,31 @@ module RubyLsp
           range_location: node.location,
           selection_range_location: node.name_loc,
         )
+      end
+
+      sig { params(node: Prism::ConstantTargetNode).void }
+      def on_constant_target_node_enter(node)
+        create_document_symbol(
+          name: node.name.to_s,
+          kind: Constant::SymbolKind::CONSTANT,
+          range_location: node.location,
+          selection_range_location: node.location,
+        )
+      end
+
+      sig { params(node: Prism::ConstantPathTargetNode).void }
+      def on_constant_path_target_node_enter(node)
+        name = constant_name(node)
+        return unless name
+
+        create_document_symbol(
+          name: name,
+          kind: Constant::SymbolKind::CONSTANT,
+          range_location: node.location,
+          selection_range_location: node.location,
+        )
+      rescue NoMethodError
+        nil
       end
 
       sig { params(node: Prism::DefNode).void }

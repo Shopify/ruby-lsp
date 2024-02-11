@@ -399,6 +399,131 @@
         }
       },
       "children": []
+    },
+    {
+      "name": "G",
+      "kind": 14,
+      "range": {
+        "start": {
+          "line": 24,
+          "character": 0
+        },
+        "end": {
+          "line": 24,
+          "character": 1
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 24,
+          "character": 0
+        },
+        "end": {
+          "line": 24,
+          "character": 1
+        }
+      },
+      "children": []
+    },
+    {
+      "name": "::H",
+      "kind": 14,
+      "range": {
+        "start": {
+          "line": 24,
+          "character": 3
+        },
+        "end": {
+          "line": 24,
+          "character": 6
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 24,
+          "character": 3
+        },
+        "end": {
+          "line": 24,
+          "character": 6
+        }
+      },
+      "children": []
+    },
+    {
+      "name": "::G::H",
+      "kind": 14,
+      "range": {
+        "start": {
+          "line": 24,
+          "character": 8
+        },
+        "end": {
+          "line": 24,
+          "character": 14
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 24,
+          "character": 8
+        },
+        "end": {
+          "line": 24,
+          "character": 14
+        }
+      },
+      "children": []
+    },
+    {
+      "name": "self::I",
+      "kind": 14,
+      "range": {
+        "start": {
+          "line": 25,
+          "character": 0
+        },
+        "end": {
+          "line": 25,
+          "character": 12
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 25,
+          "character": 0
+        },
+        "end": {
+          "line": 25,
+          "character": 7
+        }
+      },
+      "children": []
+    },
+    {
+      "name": "K",
+      "kind": 14,
+      "range": {
+        "start": {
+          "line": 27,
+          "character": 0
+        },
+        "end": {
+          "line": 27,
+          "character": 1
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 27,
+          "character": 0
+        },
+        "end": {
+          "line": 27,
+          "character": 1
+        }
+      },
+      "children": []
     }
   ],
   "params": []
