@@ -28,6 +28,6 @@ jobs:
 
       - name: Commit to gh-pages
         run: |
-          git add docs
+          git add docs -f
           git commit -m "Publish website $(git log --format=format:%h -1)"
           git push --force origin main:gh-pages
