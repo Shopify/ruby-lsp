@@ -25,6 +25,14 @@ module RubyLsp
           :on_call_node_enter,
           :on_constant_path_write_node_enter,
           :on_constant_write_node_enter,
+          :on_constant_path_or_write_node_enter,
+          :on_constant_path_operator_write_node_enter,
+          :on_constant_path_and_write_node_enter,
+          :on_constant_or_write_node_enter,
+          :on_constant_operator_write_node_enter,
+          :on_constant_and_write_node_enter,
+          :on_constant_target_node_enter,
+          :on_constant_path_target_node_enter,
           :on_def_node_enter,
           :on_def_node_leave,
           :on_module_node_enter,
@@ -95,6 +103,86 @@ module RubyLsp
           kind: Constant::SymbolKind::CONSTANT,
           range_location: node.location,
           selection_range_location: node.name_loc,
+        )
+      end
+
+      sig { params(node: Prism::ConstantPathAndWriteNode).void }
+      def on_constant_path_and_write_node_enter(node)
+        create_document_symbol(
+          name: node.target.location.slice,
+          kind: Constant::SymbolKind::CONSTANT,
+          range_location: node.location,
+          selection_range_location: node.target.location,
+        )
+      end
+
+      sig { params(node: Prism::ConstantPathOrWriteNode).void }
+      def on_constant_path_or_write_node_enter(node)
+        create_document_symbol(
+          name: node.target.location.slice,
+          kind: Constant::SymbolKind::CONSTANT,
+          range_location: node.location,
+          selection_range_location: node.target.location,
+        )
+      end
+
+      sig { params(node: Prism::ConstantPathOperatorWriteNode).void }
+      def on_constant_path_operator_write_node_enter(node)
+        create_document_symbol(
+          name: node.target.location.slice,
+          kind: Constant::SymbolKind::CONSTANT,
+          range_location: node.location,
+          selection_range_location: node.target.location,
+        )
+      end
+
+      sig { params(node: Prism::ConstantOrWriteNode).void }
+      def on_constant_or_write_node_enter(node)
+        create_document_symbol(
+          name: node.name.to_s,
+          kind: Constant::SymbolKind::CONSTANT,
+          range_location: node.location,
+          selection_range_location: node.name_loc,
+        )
+      end
+
+      sig { params(node: Prism::ConstantAndWriteNode).void }
+      def on_constant_and_write_node_enter(node)
+        create_document_symbol(
+          name: node.name.to_s,
+          kind: Constant::SymbolKind::CONSTANT,
+          range_location: node.location,
+          selection_range_location: node.name_loc,
+        )
+      end
+
+      sig { params(node: Prism::ConstantOperatorWriteNode).void }
+      def on_constant_operator_write_node_enter(node)
+        create_document_symbol(
+          name: node.name.to_s,
+          kind: Constant::SymbolKind::CONSTANT,
+          range_location: node.location,
+          selection_range_location: node.name_loc,
+        )
+      end
+
+      sig { params(node: Prism::ConstantTargetNode).void }
+      def on_constant_target_node_enter(node)
+        create_document_symbol(
+          name: node.name.to_s,
+          kind: Constant::SymbolKind::CONSTANT,
+          range_location: node.location,
+          selection_range_location: node.location,
+        )
+      end
+
+      sig { params(node: Prism::ConstantPathTargetNode).void }
+      def on_constant_path_target_node_enter(node)
+        create_document_symbol(
+          name: node.slice,
+          kind: Constant::SymbolKind::CONSTANT,
+          range_location: node.location,
+          selection_range_location: node.location,
         )
       end
 
