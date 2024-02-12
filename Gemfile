@@ -8,7 +8,7 @@ group :development do
   gem "bundler", "~> 2.5"
   gem "debug", "~> 1.9", require: false
   gem "minitest-reporters", "~> 1.6"
-  gem "minitest", "~> 5.21"
+  gem "minitest", "~> 5.22"
   gem "mocha", "~> 2.1"
   gem "psych", "~> 5.1", require: false
   gem "rake", "~> 13.1"
