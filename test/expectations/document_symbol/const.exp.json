@@ -501,6 +501,31 @@
       "children": []
     },
     {
+      "name": "self::J",
+      "kind": 14,
+      "range": {
+        "start": {
+          "line": 26,
+          "character": 0
+        },
+        "end": {
+          "line": 26,
+          "character": 7
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 26,
+          "character": 0
+        },
+        "end": {
+          "line": 26,
+          "character": 7
+        }
+      },
+      "children": []
+    },
+    {
       "name": "K",
       "kind": 14,
       "range": {
@@ -521,6 +546,31 @@
         "end": {
           "line": 27,
           "character": 1
+        }
+      },
+      "children": []
+    },
+    {
+      "name": "foo::K",
+      "kind": 14,
+      "range": {
+        "start": {
+          "line": 27,
+          "character": 3
+        },
+        "end": {
+          "line": 27,
+          "character": 9
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 27,
+          "character": 3
+        },
+        "end": {
+          "line": 27,
+          "character": 9
         }
       },
       "children": []

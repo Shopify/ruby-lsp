@@ -178,17 +178,12 @@ module RubyLsp
 
       sig { params(node: Prism::ConstantPathTargetNode).void }
       def on_constant_path_target_node_enter(node)
-        name = constant_name(node)
-        return unless name
-
         create_document_symbol(
-          name: name,
+          name: node.slice,
           kind: Constant::SymbolKind::CONSTANT,
           range_location: node.location,
           selection_range_location: node.location,
         )
-      rescue NoMethodError
-        nil
       end
 
       sig { params(node: Prism::DefNode).void }
