@@ -85,6 +85,9 @@ features. This is the mechanism that powers addons like
 - [Ruby LSP RSpec](https://github.com/st0012/ruby-lsp-rspec)
 - [Ruby LSP rubyfmt](https://github.com/jscharf/ruby-lsp-rubyfmt)
 
+Other community driven addons can be found in [rubygems](https://rubygems.org/search?query=name%3A+ruby-lsp) by
+searching for the `ruby-lsp` prefix.
+
 For instructions on how to create addons, see the [addons documentation](ADDONS.md).
 
 ## Learn More
