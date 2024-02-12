@@ -22,7 +22,7 @@ GEM
       reline (>= 0.3.8)
     json (2.7.1)
     language_server-protocol (3.17.0.3)
-    minitest (5.21.2)
+    minitest (5.22.2)
     minitest-reporters (1.6.1)
       ansi
       builder
@@ -71,18 +71,18 @@ GEM
       rubocop (~> 1.0)
     rubocop-shopify (2.14.0)
       rubocop (~> 1.51)
-    rubocop-sorbet (0.7.6)
+    rubocop-sorbet (0.7.7)
       rubocop (>= 0.90.0)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
-    sorbet (0.5.11226)
-      sorbet-static (= 0.5.11226)
-    sorbet-runtime (0.5.11226)
-    sorbet-static (0.5.11226-universal-darwin)
-    sorbet-static (0.5.11226-x86_64-linux)
-    sorbet-static-and-runtime (0.5.11226)
-      sorbet (= 0.5.11226)
-      sorbet-runtime (= 0.5.11226)
+    sorbet (0.5.11247)
+      sorbet-static (= 0.5.11247)
+    sorbet-runtime (0.5.11247)
+    sorbet-static (0.5.11247-universal-darwin)
+    sorbet-static (0.5.11247-x86_64-linux)
+    sorbet-static-and-runtime (0.5.11247)
+      sorbet (= 0.5.11247)
+      sorbet-runtime (= 0.5.11247)
     spoom (1.2.4)
       erubi (>= 1.10.0)
       sorbet-static-and-runtime (>= 0.5.10187)
@@ -109,15 +109,13 @@ GEM
 
 PLATFORMS
   arm64-darwin
-  x64-mingw-ucrt
-  x64-mingw32
   x86_64-darwin
   x86_64-linux
 
 DEPENDENCIES
   bundler (~> 2.5)
   debug (~> 1.9)
-  minitest (~> 5.21)
+  minitest (~> 5.22)
   minitest-reporters (~> 1.6)
   mocha (~> 2.1)
   psych (~> 5.1)
