@@ -91,6 +91,7 @@ function collectClientOptions(
   configuration: vscode.WorkspaceConfiguration,
   workspaceFolder: vscode.WorkspaceFolder,
   outputChannel: WorkspaceChannel,
+  ruby: Ruby,
 ): LanguageClientOptions {
   const pullOn: "change" | "save" | "both" =
     configuration.get("pullDiagnosticsOn")!;
@@ -102,10 +103,27 @@ function collectClientOptions(
 
   const features: EnabledFeatures = configuration.get("enabledFeatures")!;
   const enabledFeatures = Object.keys(features).filter((key) => features[key]);
-  const pattern = `${path.join(workspaceFolder.uri.fsPath, "**", "*")}`;
+
+  const documentSelector = [
+    {
+      language: "ruby",
+      pattern: path.join(workspaceFolder.uri.fsPath, "**", "*"),
+    },
+  ];
+
+  if (ruby.env.GEM_PATH) {
+    const parts = ruby.env.GEM_PATH.split(path.delimiter);
+
+    parts.forEach((gemPath) => {
+      documentSelector.push({
+        language: "ruby",
+        pattern: path.join(gemPath, "**", "*"),
+      });
+    });
+  }
 
   return {
-    documentSelector: [{ language: "ruby", pattern }],
+    documentSelector,
     workspaceFolder,
     diagnosticCollectionName: LSP_NAME,
     outputChannel,
@@ -149,6 +167,7 @@ export default class Client extends LanguageClient implements ClientInterface {
         vscode.workspace.getConfiguration("rubyLsp"),
         workspaceFolder,
         outputChannel,
+        ruby,
       ),
     );
 
