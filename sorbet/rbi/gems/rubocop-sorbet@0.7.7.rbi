@@ -1199,18 +1199,18 @@ RuboCop::Cop::Sorbet::RedundantExtendTSig::RESTRICT_ON_SEND = T.let(T.unsafe(nil
 # - returns, or void
 # - soft, checked, or on_failure
 #
-#  # bad
-#  sig { returns(Integer).params(x: Integer) }
-#
-#  # good
-#  sig { params(x: Integer).returns(Integer) }
-#
 # @example
 #   # bad
 #   sig { void.abstract }
 #
 #   # good
 #   sig { abstract.void }
+#
+#   # bad
+#   sig { returns(Integer).params(x: Integer) }
+#
+#   # good
+#   sig { params(x: Integer).returns(Integer) }
 #
 # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#31
 class RuboCop::Cop::Sorbet::SignatureBuildOrder < ::RuboCop::Cop::Cop
@@ -1473,6 +1473,53 @@ RuboCop::Cop::Sorbet::ValidSigil::SIGIL_REGEX = T.let(T.unsafe(nil), Regexp)
 
 # source://rubocop-sorbet//lib/rubocop/cop/sorbet/sigils/valid_sigil.rb#53
 RuboCop::Cop::Sorbet::ValidSigil::STRICTNESS_LEVELS = T.let(T.unsafe(nil), Array)
+
+# Disallows the usage of `.void.checked(:tests)`.
+#
+# Using `.void` changes the value returned from the method, but only if
+# runtime type checking is enabled for the method. Methods marked `.void`
+# will return different values in tests compared with non-test
+# environments. This is particularly troublesome if branching on the
+# result of a `.void` method, because the returned value in test code
+# will be the truthy `VOID` value, while the non-test return value may be
+# falsy depending on the method's implementation.
+#
+# - Use `.returns(T.anything).checked(:tests)` to keep the runtime type
+#   checking for the rest of the parameters.
+# - Use `.void.checked(:never)` if you are on an older version of Sorbet
+#   which does not have `T.anything` (meaning versions 0.5.10781 or
+#   earlier. Versions released after 2023-04-14 include `T.anything`.)
+#
+# @example
+#
+#   # bad
+#   sig { void.checked(:tests) }
+#
+#   # good
+#   sig { void }
+#   sig { returns(T.anything).checked(:tests) }
+#   sig { void.checked(:never) }
+#
+# source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/void_checked_tests.rb#31
+class RuboCop::Cop::Sorbet::VoidCheckedTests < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::RangeHelp
+  include ::RuboCop::Cop::Sorbet::SignatureHelp
+  extend ::RuboCop::Cop::AutoCorrector
+
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/void_checked_tests.rb#37
+  def checked_tests(param0); end
+
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/void_checked_tests.rb#58
+  def on_signature(node); end
+
+  private
+
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/void_checked_tests.rb#48
+  def top_level_void(node); end
+end
+
+# source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/void_checked_tests.rb#41
+RuboCop::Cop::Sorbet::VoidCheckedTests::MESSAGE = T.let(T.unsafe(nil), String)
 
 module RuboCop::Cop::Style; end
 
