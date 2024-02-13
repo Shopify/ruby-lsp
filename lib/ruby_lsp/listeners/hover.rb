@@ -92,10 +92,10 @@ module RubyLsp
         message = node.message
         return unless message
 
-        target_method = @index.resolve_method(message, @nesting.join("::"))
-        return unless target_method
+        methods = @index.resolve_method(message, @nesting.join("::"))
+        return if methods.none?
 
-        categorized_markdown_from_index_entries(message, target_method).each do |category, content|
+        categorized_markdown_from_index_entries(message, methods).each do |category, content|
           @response_builder.push(content, category: category)
         end
       end
