@@ -82,11 +82,50 @@ module RubyLsp
 end
 ```
 
+### Listeners
+
+An essential component to addons are listeners. All Ruby LSP requests are listeners that handle specific node types.
+
+Listeners work in conjunction with a `Prism::Dispatcher`, which is responsible for dispatching events during the parsing of Ruby code. Each event corresponds to a specific node in the Abstract Syntax Tree (AST) of the code being parsed.
+
+Here's a simple example of a listener:
+
+```ruby
+# frozen_string_literal: true
+
+class MyListener
+  def initialize(dispatcher)
+    # Register to listen to `on_class_node_enter` events
+    dispatcher.register(self, :on_class_node_enter)
+  end
+
+  # Define the handler method for the `on_class_node_enter` event
+  def on_class_node_enter(node)
+    puts "Hello, #{node.constant_path.slice}!"
+  end
+end
+
+dispatcher = Prism::Dispatcher.new
+MyListener.new(dispatcher)
+
+parse_result = Prism.parse("class Foo; end")
+dispatcher.dispatch(parse_result.value)
+
+# Prints
+# => Hello, Foo!
+
+```
+
+In this example, the listener is registered to the dispatcher to listen for the `:on_class_node_enter` event. When a class node is encountered during the parsing of the code, a greeting message is outputted with the class name.
+
+This approach enables all addon responses to be captured in a single round of AST visits, greatly improving performance.
+
+
 ### Enhancing features
 
-All Ruby LSP requests are listeners that handle specific node types. To enhance a request, the addon must create a
-listener that will collect extra results that will be automatically appended to the base language server response.
-Additionally, `Addon` has to implement a factory method that instantiates the listener.
+To enhance a request, the addon must create a listener that will collect extra results that will be automatically appended to the 
+base language server response. Additionally, `Addon` has to implement a factory method that instantiates the listener. When instantiating the 
+listener, also note that a `ResponseBuilders` object is passed in. This object should be used to return responses back to the Ruby LSP.
 
 For example: to add a message on hover saying "Hello!" on top of the base hover behavior of the Ruby LSP, we can use the
 following listener implementation.
@@ -116,38 +155,37 @@ module RubyLsp
 
       sig do
         override.params(
+          response_builder: ResponseBuilders::Hover,
           nesting: T::Array[String],
           index: RubyIndexer::Index,
           dispatcher: Prism::Dispatcher,
-        ).returns(T.nilable(Listener[T.nilable(Interface::Hover)]))
+        ).void
       end
-      def create_hover_listener(nesting, index, dispatcher)
+      def create_hover_listener(response_builder, nesting, index, dispatcher)
         # Use the listener factory methods to instantiate listeners with parameters sent by the LSP combined with any
         # pre-computed information in the addon. These factory methods are invoked on every request
-        Hover.new(@config, dispatcher)
+        Hover.new(client, response_builder, @config, dispatcher)
       end
-    end
 
-    # All listeners have to inherit from ::RubyLsp::Listener
-    class Hover < ::RubyLsp::Listener
+    class Hover
       extend T::Sig
-      extend T::Generic
 
-      ResponseType = type_member { { fixed: T.nilable(::RubyLsp::Interface::Hover) } }
-
-      sig { override.returns(ResponseType) }
-      attr_reader :_response
+      # The Requests::Support::Common module provides some helper methods you may find helpful.
+      include Requests::Support::Common
 
       # Listeners are initialized with the Prism::Dispatcher. This object is used by the Ruby LSP to emit the events
       # when it finds nodes during AST analysis. Listeners must register which nodes they want to handle with the
       # dispatcher (see below).
+      # Listeners are initialized with a `ResponseBuilders` object. The listener will push the associated content 
+      # to this object, which will then build the Ruby LSP's response.
       # Additionally, listeners are instantiated with a message_queue to push notifications (not used in this example).
       # See "Sending notifications to the client" for more information.
-      sig { params(config: SomeConfiguration, dispatcher: Prism::Dispatcher).void }
-      def initialize(config, dispatcher)
+      sig { params(client: RailsClient, response_builder: ResponseBuilders::Hover, config: SomeConfiguration, dispatcher: Prism::Dispatcher).void }
+      def initialize(client, response_builder, config, dispatcher)
         super(dispatcher)
 
-        @_response = T.let(nil, ResponseType)
+        @client = client
+        @response_builder = response_builder
         @config = config
 
         # Register that this listener will handle `on_constant_read_node_enter` events (i.e.: whenever a constant read
@@ -159,10 +197,10 @@ module RubyLsp
       # define `on_constant_read_node_enter` to specify what this listener should do every time we find a constant
       sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read_node_enter(node)
-        # Certain helpers are made available to listeners to build LSP responses. The classes under `RubyLsp::Interface`
-        # are generally used to build responses and they match exactly what the specification requests.
-        contents = RubyLsp::Interface::MarkupContent.new(kind: "markdown", value: "Hello!")
-        @_response = RubyLsp::Interface::Hover.new(range: range_from_node(node), contents: contents)
+        # Certain builders are made available to listeners to build LSP responses. The classes under `RubyLsp::ResponseBuilders`
+        # are used to build responses conforming to the LSP Specification.
+        # ResponseBuilders::Hover itself also requires a content category to be specified (title, links, or documentation).
+        @response_builder.push("Hello!", category: :documentation)
       end
     end
   end
@@ -236,15 +274,13 @@ module RubyLsp
         "Ruby LSP My Gem"
       end
 
-      def create_hover_listener(nesting, index, dispatcher)
-        MyHoverListener.new(@message_queue, nesting, index, dispatcher)
+      def create_hover_listener(response_builder, nesting, index, dispatcher)
+        MyHoverListener.new(@message_queue, response_builder, nesting, index, dispatcher)
       end
     end
 
-    class MyHoverListener < ::RubyLsp::Listener
-      def initialize(message_queue, nesting, index, dispatcher)
-        super(dispatcher)
-
+    class MyHoverListener
+      def initialize(message_queue, response_builder, nesting, index, dispatcher)
         @message_queue = message_queue
 
         @message_queue << Notification.new(
