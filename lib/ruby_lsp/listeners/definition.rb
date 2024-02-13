@@ -68,20 +68,22 @@ module RubyLsp
         message = node.message
         return unless message
 
-        target_method = @index.resolve_method(message, @nesting.join("::"))
-        return unless target_method
+        methods = @index.resolve_method(message, @nesting.join("::"))
+        return if methods.none?
 
-        location = target_method.location
-        file_path = target_method.file_path
-        return if @typechecker_enabled && not_in_dependencies?(file_path)
+        methods.each do |target_method|
+          location = target_method.location
+          file_path = target_method.file_path
+          next if @typechecker_enabled && not_in_dependencies?(file_path)
 
-        @response_builder << Interface::Location.new(
-          uri: URI::Generic.from_path(path: file_path).to_s,
-          range: Interface::Range.new(
-            start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
-            end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
-          ),
-        )
+          @response_builder << Interface::Location.new(
+            uri: URI::Generic.from_path(path: file_path).to_s,
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
+              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
+            ),
+          )
+        end
       end
 
       sig { params(node: Prism::CallNode).void }
