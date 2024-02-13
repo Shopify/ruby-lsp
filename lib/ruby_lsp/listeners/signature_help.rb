@@ -30,9 +30,10 @@ module RubyLsp
         message = node.message
         return unless message
 
-        target_method = @index.resolve_method(message, @nesting.join("::"))
-        return unless target_method
+        methods = @index.resolve_method(message, @nesting.join("::"))
+        return if methods.none?
 
+        target_method = T.must(methods.first)
         parameters = target_method.parameters
         name = target_method.name
 
@@ -59,7 +60,7 @@ module RubyLsp
               parameters: parameters.map { |param| Interface::ParameterInformation.new(label: param.name) },
               documentation: Interface::MarkupContent.new(
                 kind: "markdown",
-                value: markdown_from_index_entries("", target_method),
+                value: markdown_from_index_entries("", methods),
               ),
             ),
           ],
