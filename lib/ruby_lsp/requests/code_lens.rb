@@ -11,12 +11,12 @@ module RubyLsp
     #
     # The
     # [code lens](https://microsoft.github.io/language-server-protocol/specification#textDocument_codeLens)
-    # request informs the editor of runnable commands such as tests
+    # request informs the editor of runnable commands such as testing and debugging
     #
     # # Example
     #
     # ```ruby
-    # # Run
+    # # Run | Run in Terminal | Debug
     # class Test < Minitest::Test
     # end
     # ```
