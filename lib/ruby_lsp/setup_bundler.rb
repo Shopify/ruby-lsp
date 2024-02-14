@@ -208,6 +208,9 @@ module RubyLsp
 
       command << " || bundle install) "
 
+       # Safely silence output
+      command << " /dev/null "
+
       # Redirect stdout to stderr to prevent going into an infinite loop. The extension might confuse stdout output with
       # responses
       command << "1>&2"
