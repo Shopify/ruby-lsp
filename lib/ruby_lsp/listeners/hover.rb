@@ -93,7 +93,7 @@ module RubyLsp
         return unless message
 
         methods = @index.resolve_method(message, @nesting.join("::"))
-        return if methods.none?
+        return unless methods
 
         categorized_markdown_from_index_entries(message, methods).each do |category, content|
           @response_builder.push(content, category: category)

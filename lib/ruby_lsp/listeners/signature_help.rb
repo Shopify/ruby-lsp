@@ -31,9 +31,11 @@ module RubyLsp
         return unless message
 
         methods = @index.resolve_method(message, @nesting.join("::"))
-        return if methods.none?
+        return unless methods
 
-        target_method = T.must(methods.first)
+        target_method = methods.first
+        return unless target_method
+
         parameters = target_method.parameters
         name = target_method.name
 

@@ -69,7 +69,7 @@ module RubyLsp
         return unless message
 
         methods = @index.resolve_method(message, @nesting.join("::"))
-        return if methods.none?
+        return unless methods
 
         methods.each do |target_method|
           location = target_method.location
