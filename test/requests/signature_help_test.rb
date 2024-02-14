@@ -51,6 +51,49 @@ class SignatureHelpTest < Minitest::Test
     assert_equal(0, result.active_parameter)
   end
 
+  def test_concats_documentations_from_both_definitions
+    source = <<~RUBY
+      class Foo
+        # first definition
+        def bar(a, b)
+        end
+
+        def baz
+          bar()
+        end
+      end
+
+      class Foo
+        # second definition
+        def bar(c, d)
+        end
+      end
+    RUBY
+
+    @store.set(uri: @uri, source: source, version: 1)
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(@uri.to_standardized_path)), source)
+
+    result = run_request(
+      method: "textDocument/signatureHelp",
+      params: {
+        textDocument: { uri: @uri.to_s },
+        position: { line: 6, character: 7 },
+        context: {
+          triggerCharacter: "(",
+          activeSignatureHelp: nil,
+        },
+      },
+    )
+
+    signature = result.signatures.first
+
+    assert_equal("bar(a, b)", signature.label)
+    assert_equal(0, result.active_parameter)
+    assert_match("first definition", signature.documentation.value)
+    assert_match("second definition", signature.documentation.value)
+  end
+
   def test_help_after_comma
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Foo

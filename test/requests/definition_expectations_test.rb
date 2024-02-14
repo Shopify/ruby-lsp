@@ -259,6 +259,56 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     T.must(message_queue).close
   end
 
+  def test_can_jump_to_method_with_two_definitions
+    message_queue = Thread::Queue.new
+    store = RubyLsp::Store.new
+
+    first_uri = URI("file:///folder/fake.rb")
+    first_source = <<~RUBY
+      # typed: false
+
+      class A
+        def bar
+          foo
+        end
+
+        def foo; end
+      end
+    RUBY
+
+    second_uri = URI("file:///folder/fake2.rb")
+    second_source = <<~RUBY
+      # typed: false
+
+      class A
+        def foo; end
+      end
+    RUBY
+
+    store.set(uri: first_uri, source: first_source, version: 1)
+    store.set(uri: second_uri, source: second_source, version: 1)
+
+    executor = RubyLsp::Executor.new(store, message_queue)
+
+    executor.instance_variable_get(:@index).index_single(
+      RubyIndexer::IndexablePath.new(nil, T.must(first_uri.to_standardized_path)), first_source
+    )
+    executor.instance_variable_get(:@index).index_single(
+      RubyIndexer::IndexablePath.new(nil, T.must(second_uri.to_standardized_path)), second_source
+    )
+
+    response = executor.execute({
+      method: "textDocument/definition",
+      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 4, line: 4 } },
+    }).response
+
+    first_definition, second_definition = response
+    assert_equal(first_uri.to_s, first_definition.attributes[:uri])
+    assert_equal(second_uri.to_s, second_definition.attributes[:uri])
+  ensure
+    T.must(message_queue).close
+  end
+
   def test_jumping_to_method_method_calls_on_explicit_self
     message_queue = Thread::Queue.new
     store = RubyLsp::Store.new
@@ -294,7 +344,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     T.must(message_queue).close
   end
 
-  def test_jumping_to_method_definitions_when_declaration_does_not_exist
+  def test_does_nothing_when_declaration_does_not_exist
     message_queue = Thread::Queue.new
     store = RubyLsp::Store.new
 

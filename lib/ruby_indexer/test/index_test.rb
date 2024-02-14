@@ -226,9 +226,9 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index.resolve_method("baz", "Foo::Bar"))
-      assert_equal("baz", entry.name)
-      assert_equal("Foo::Bar", T.must(entry.owner).name)
+      entries = T.must(@index.resolve_method("baz", "Foo::Bar"))
+      assert_equal("baz", entries.first.name)
+      assert_equal("Foo::Bar", T.must(entries.first.owner).name)
     end
 
     def test_resolve_method_with_class_name_conflict
@@ -241,9 +241,9 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index.resolve_method("Array", "Foo"))
-      assert_equal("Array", entry.name)
-      assert_equal("Foo", T.must(entry.owner).name)
+      entries = T.must(@index.resolve_method("Array", "Foo"))
+      assert_equal("Array", entries.first.name)
+      assert_equal("Foo", T.must(entries.first.owner).name)
     end
 
     def test_resolve_method_attribute
@@ -253,9 +253,33 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index.resolve_method("bar", "Foo"))
-      assert_equal("bar", entry.name)
-      assert_equal("Foo", T.must(entry.owner).name)
+      entries = T.must(@index.resolve_method("bar", "Foo"))
+      assert_equal("bar", entries.first.name)
+      assert_equal("Foo", T.must(entries.first.owner).name)
+    end
+
+    def test_resolve_method_with_two_definitions
+      index(<<~RUBY)
+        class Foo
+          # Hello from first `bar`
+          def bar; end
+        end
+
+        class Foo
+          # Hello from second `bar`
+          def bar; end
+        end
+      RUBY
+
+      first_entry, second_entry = T.must(@index.resolve_method("bar", "Foo"))
+
+      assert_equal("bar", first_entry.name)
+      assert_equal("Foo", T.must(first_entry.owner).name)
+      assert_includes(first_entry.comments, "Hello from first `bar`")
+
+      assert_equal("bar", second_entry.name)
+      assert_equal("Foo", T.must(second_entry.owner).name)
+      assert_includes(second_entry.comments, "Hello from second `bar`")
     end
 
     def test_prefix_search_for_methods

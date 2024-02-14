@@ -94,6 +94,45 @@ class HoverExpectationsTest < ExpectationsTestRunner
     T.must(message_queue).close
   end
 
+  def test_hovering_methods_with_two_definitions
+    message_queue = Thread::Queue.new
+    store = RubyLsp::Store.new
+
+    uri = URI("file:///fake.rb")
+    source = <<~RUBY
+      # typed: false
+
+      class A
+        # Hello from first `foo`
+        def foo; end
+
+        def bar
+          foo
+        end
+      end
+
+      class A
+        # Hello from second `foo`
+        def foo; end
+      end
+    RUBY
+    store.set(uri: uri, source: source, version: 1)
+
+    executor = RubyLsp::Executor.new(store, message_queue)
+    index = executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
+
+    response = executor.execute({
+      method: "textDocument/hover",
+      params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+    }).response
+
+    assert_match("Hello from first `foo`", response.contents.value)
+    assert_match("Hello from second `foo`", response.contents.value)
+  ensure
+    T.must(message_queue).close
+  end
+
   def test_hovering_methods_invoked_on_explicit_self
     message_queue = Thread::Queue.new
     store = RubyLsp::Store.new
