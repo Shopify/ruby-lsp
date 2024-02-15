@@ -1,5 +1,5 @@
 def foo
   # some code
 rescue => e
-  # more code
+  bar
 end
