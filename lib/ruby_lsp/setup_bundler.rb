@@ -57,15 +57,18 @@ module RubyLsp
     def setup!
       raise BundleNotLocked if @gemfile&.exist? && !@lockfile&.exist?
 
-      # Do not setup a custom bundle if both `ruby-lsp` and `debug` are already in the Gemfile
-      if @dependencies["ruby-lsp"] && @dependencies["debug"]
+      # Do not set up a custom bundle if LSP dependencies are already in the Gemfile
+      if @dependencies["ruby-lsp"] &&
+          @dependencies["debug"] &&
+          (@dependencies["rails"] ? @dependencies["ruby-lsp-rails"] : true)
         $stderr.puts(
-          "Ruby LSP> Skipping custom bundle setup since both `ruby-lsp` and `debug` are already in #{@gemfile}",
+          "Ruby LSP> Skipping custom bundle setup since LSP dependencies are already in #{@gemfile}",
         )
 
-        # If the user decided to add the `ruby-lsp` and `debug` to their Gemfile after having already run the Ruby LSP,
-        # then we need to remove the `.ruby-lsp` folder, otherwise we will run `bundle install` for the top level and
-        # try to execute the Ruby LSP using the custom bundle, which will fail since the gems are not installed there
+        # If the user decided to add `ruby-lsp` and `debug` (and potentially `ruby-lsp-rails`) to their Gemfile after
+        # having already run the Ruby LSP, then we need to remove the `.ruby-lsp` folder, otherwise we will run `bundle
+        # install` for the top level and try to execute the Ruby LSP using the custom bundle, which will fail since the
+        # gems are not installed there
         @custom_dir.rmtree if @custom_dir.exist?
         return run_bundle_install
       end
@@ -143,6 +146,10 @@ module RubyLsp
         parts << 'gem "debug", require: false, group: :development, platforms: :mri'
       end
 
+      if @dependencies["rails"] && !@dependencies["ruby-lsp-rails"]
+        parts << 'gem "ruby-lsp-rails", require: false, group: :development'
+      end
+
       content = parts.join("\n")
       @custom_gemfile.write(content) unless @custom_gemfile.exist? && @custom_gemfile.read == content
     end
@@ -183,22 +190,24 @@ module RubyLsp
       local_config_path = File.join(Dir.pwd, ".bundle")
       env["BUNDLE_APP_CONFIG"] = local_config_path if Dir.exist?(local_config_path)
 
-      # If both `ruby-lsp` and `debug` are already in the Gemfile, then we shouldn't try to upgrade them or else we'll
-      # produce undesired source control changes. If the custom bundle was just created and either `ruby-lsp` or `debug`
-      # weren't a part of the Gemfile, then we need to run `bundle install` for the first time to generate the
-      # Gemfile.lock with them included or else Bundler will complain that they're missing. We can only update if the
-      # custom `.ruby-lsp/Gemfile.lock` already exists and includes both gems
+      # If `ruby-lsp` and `debug` (and potentially `ruby-lsp-rails`) are already in the Gemfile, then we shouldn't try
+      # to upgrade them or else we'll produce undesired source control changes. If the custom bundle was just created
+      # and any of `ruby-lsp`, `ruby-lsp-rails` or `debug` weren't a part of the Gemfile, then we need to run `bundle
+      # install` for the first time to generate the Gemfile.lock with them included or else Bundler will complain that
+      # they're missing. We can only update if the custom `.ruby-lsp/Gemfile.lock` already exists and includes all gems
 
       # When not updating, we run `(bundle check || bundle install)`
       # When updating, we run `((bundle check && bundle update ruby-lsp debug) || bundle install)`
       command = +"(bundle check"
 
       if should_bundle_update?
-        # If ruby-lsp or debug are not in the Gemfile, try to update them to the latest version
+        # If any of `ruby-lsp`, `ruby-lsp-rails` or `debug` are not in the Gemfile, try to update them to the latest
+        # version
         command.prepend("(")
         command << " && bundle update "
         command << "ruby-lsp " unless @dependencies["ruby-lsp"]
         command << "debug " unless @dependencies["debug"]
+        command << "ruby-lsp-rails " if @dependencies["rails"] && !@dependencies["ruby-lsp-rails"]
         command << "--pre" if @experimental
         command.delete_suffix!(" ")
         command << ")"
@@ -221,13 +230,20 @@ module RubyLsp
 
     sig { returns(T::Boolean) }
     def should_bundle_update?
-      # If both `ruby-lsp` and `debug` are in the Gemfile, then we shouldn't try to upgrade them or else it will produce
-      # version control changes
-      return false if @dependencies["ruby-lsp"] && @dependencies["debug"]
+      # If `ruby-lsp`, `ruby-lsp-rails` and `debug` are in the Gemfile, then we shouldn't try to upgrade them or else it
+      # will produce version control changes
+      if @dependencies["rails"]
+        return false if @dependencies.values_at("ruby-lsp", "ruby-lsp-rails", "debug").all?
 
-      # If the custom lockfile doesn't include either the `ruby-lsp` or `debug`, we need to run bundle install before
-      # updating
-      return false if custom_bundle_dependencies["ruby-lsp"].nil? || custom_bundle_dependencies["debug"].nil?
+        # If the custom lockfile doesn't include `ruby-lsp`, `ruby-lsp-rails` or `debug`, we need to run bundle install
+        # before updating
+        return false if custom_bundle_dependencies.values_at("ruby-lsp", "debug", "ruby-lsp-rails").any?(&:nil?)
+      else
+        return false if @dependencies.values_at("ruby-lsp", "debug").all?
+
+        # If the custom lockfile doesn't include `ruby-lsp` or `debug`, we need to run bundle install before updating
+        return false if custom_bundle_dependencies.values_at("ruby-lsp", "debug").any?(&:nil?)
+      end
 
       # If the last updated file doesn't exist or was updated more than 4 hours ago, we should update
       !@last_updated_path.exist? || Time.parse(@last_updated_path.read) < (Time.now - FOUR_HOURS)

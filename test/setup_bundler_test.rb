@@ -12,9 +12,42 @@ class SetupBundlerTest < Minitest::Test
     refute_path_exists(".ruby-lsp")
   end
 
+  def test_does_nothing_if_both_ruby_lsp_and_debug_are_in_the_bundle2
+    Object.any_instance.expects(:system).with(bundle_env, "(bundle check || bundle install) 1>&2")
+    Bundler::LockfileParser.any_instance.expects(:dependencies).returns({
+      "ruby-lsp" => true,
+      "rails" => true,
+      "ruby-lsp-rails" => true,
+      "debug" => true,
+    })
+    run_script
+    refute_path_exists(".ruby-lsp")
+  end
+
   def test_removes_ruby_lsp_folder_if_both_gems_were_added_to_the_bundle
     Object.any_instance.expects(:system).with(bundle_env, "(bundle check || bundle install) 1>&2")
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({ "ruby-lsp" => true, "debug" => true })
+    FileUtils.mkdir(".ruby-lsp")
+    run_script
+    refute_path_exists(".ruby-lsp")
+  ensure
+    FileUtils.rm_r(".ruby-lsp") if Dir.exist?(".ruby-lsp")
+  end
+
+  def test_in_a_rails_app_does_nothing_if_ruby_lsp_and_ruby_lsp_rails_and_debug_are_in_the_bundle
+    Object.any_instance.expects(:system).with(bundle_env, "(bundle check || bundle install) 1>&2")
+    Bundler::LockfileParser.any_instance.expects(:dependencies)
+      .returns({ "ruby-lsp" => true, "ruby-lsp-rails" => true, "debug" => true })
+    run_script
+    refute_path_exists(".ruby-lsp")
+  ensure
+    FileUtils.rm_r(".ruby-lsp") if Dir.exist?(".ruby-lsp")
+  end
+
+  def test_in_a_rails_app_removes_ruby_lsp_folder_if_all_gems_were_added_to_the_bundle
+    Object.any_instance.expects(:system).with(bundle_env, "(bundle check || bundle install) 1>&2")
+    Bundler::LockfileParser.any_instance.expects(:dependencies)
+      .returns({ "ruby-lsp" => true, "ruby-lsp-rails" => true, "debug" => true })
     FileUtils.mkdir(".ruby-lsp")
     run_script
     refute_path_exists(".ruby-lsp")
@@ -32,9 +65,26 @@ class SetupBundlerTest < Minitest::Test
     assert_path_exists(".ruby-lsp/Gemfile.lock")
     assert_path_exists(".ruby-lsp/main_lockfile_hash")
     assert_match("ruby-lsp", File.read(".ruby-lsp/Gemfile"))
+    refute_match("ruby-lsp-rails", File.read(".ruby-lsp/Gemfile"))
     assert_match("debug", File.read(".ruby-lsp/Gemfile"))
   ensure
-    FileUtils.rm_r(".ruby-lsp")
+    FileUtils.rm_r(".ruby-lsp") if Dir.exist?(".ruby-lsp")
+  end
+
+  def test_creates_custom_bundle_for_a_rails_app
+    Object.any_instance.expects(:system).with(bundle_env(".ruby-lsp/Gemfile"), "(bundle check || bundle install) 1>&2")
+    Bundler::LockfileParser.any_instance.expects(:dependencies).returns({ "rails" => true }).at_least_once
+    run_script
+
+    assert_path_exists(".ruby-lsp")
+    assert_path_exists(".ruby-lsp/Gemfile")
+    assert_path_exists(".ruby-lsp/Gemfile.lock")
+    assert_path_exists(".ruby-lsp/main_lockfile_hash")
+    assert_match("ruby-lsp", File.read(".ruby-lsp/Gemfile"))
+    assert_match("debug", File.read(".ruby-lsp/Gemfile"))
+    assert_match("ruby-lsp-rails", File.read(".ruby-lsp/Gemfile"))
+  ensure
+    FileUtils.rm_r(".ruby-lsp") if Dir.exist?(".ruby-lsp")
   end
 
   def test_changing_lockfile_causes_custom_bundle_to_be_rebuilt
@@ -418,6 +468,35 @@ class SetupBundlerTest < Minitest::Test
         assert_path_exists(".ruby-lsp")
         assert_path_exists(".ruby-lsp/Gemfile.lock")
         assert_match("remote: ..", File.read(".ruby-lsp/Gemfile.lock"))
+      end
+    end
+  end
+
+  def test_ruby_lsp_rails_is_automatically_included_in_rails_apps
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "rails"
+        GEMFILE
+
+        capture_subprocess_io do
+          Bundler.with_unbundled_env do
+            # Run bundle install to generate the lockfile
+            system("bundle install")
+          end
+        end
+
+        Object.any_instance.expects(:system).with(
+          bundle_env(".ruby-lsp/Gemfile"),
+          "(bundle check || bundle install) 1>&2",
+        )
+        Bundler.with_unbundled_env do
+          run_script
+        end
+
+        assert_path_exists(".ruby-lsp/Gemfile")
+        assert_match('gem "ruby-lsp-rails"', File.read(".ruby-lsp/Gemfile"))
       end
     end
   end
