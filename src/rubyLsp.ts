@@ -173,6 +173,7 @@ export class RubyLsp {
     // If we successfully activated a workspace, then we can start showing the dependencies tree view. This is necessary
     // so that we can avoid showing it on non Ruby projects
     vscode.commands.executeCommand("setContext", "rubyLsp.activated", true);
+    this.showFormatOnSaveModeWarning(workspace);
   }
 
   // Registers all extension commands. Commands can only be registered once, so this happens in the constructor. For
@@ -467,6 +468,32 @@ export class RubyLsp {
           preserveFocus: true,
         });
       }
+    }
+  }
+
+  private async showFormatOnSaveModeWarning(workspace: Workspace) {
+    const setting = vscode.workspace.getConfiguration("editor", {
+      languageId: "ruby",
+    });
+    const value: string = setting.get("formatOnSaveMode")!;
+
+    if (value === "file") {
+      return;
+    }
+
+    const answer = await vscode.window.showWarningMessage(
+      `The "editor.formatOnSaveMode" setting is set to ${value} in workspace ${workspace.workspaceFolder.name}, which
+      is currently unsupported by the Ruby LSP. If you'd like to have formatting enabled, please set it to 'file'`,
+      "Change setting to 'file'",
+      "Use without formatting",
+    );
+
+    if (answer === "Change setting to 'file'") {
+      await setting.update(
+        "formatOnSaveMode",
+        "file",
+        vscode.ConfigurationTarget.Global,
+      );
     }
   }
 }
