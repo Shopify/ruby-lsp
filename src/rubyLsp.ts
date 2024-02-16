@@ -169,6 +169,10 @@ export class RubyLsp {
 
     await workspace.start();
     this.context.subscriptions.push(workspace);
+
+    // If we successfully activated a workspace, then we can start showing the dependencies tree view. This is necessary
+    // so that we can avoid showing it on non Ruby projects
+    vscode.commands.executeCommand("setContext", "rubyLsp.activated", true);
   }
 
   // Registers all extension commands. Commands can only be registered once, so this happens in the constructor. For

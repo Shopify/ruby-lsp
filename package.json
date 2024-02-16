@@ -323,7 +323,8 @@
           "name": "Dependencies",
           "icon": "$(package)",
           "description": "View and manage dependencies",
-          "contextualTitle": "Dependencies"
+          "contextualTitle": "Dependencies",
+          "when": "rubyLsp.activated"
         }
       ]
     },
