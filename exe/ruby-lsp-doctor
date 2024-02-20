@@ -6,6 +6,8 @@ require "ruby_lsp/internal"
 
 index = RubyIndexer::Index.new
 
+puts "Globbing for indexable files"
+
 RubyIndexer.configuration.indexables.each do |indexable|
   puts "indexing: #{indexable.full_path}"
   content = File.read(indexable.full_path)
