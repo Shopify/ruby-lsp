@@ -6,6 +6,7 @@ Gem::Specification.new do |s|
   s.authors = ["Shopify"]
   s.email = ["ruby@shopify.com"]
   s.metadata["allowed_push_host"] = "https://rubygems.org"
+  s.metadata["documentation_uri"] = "https://shopify.github.io/ruby-lsp/"
 
   s.summary = "An opinionated language server for Ruby"
   s.description = "An opinionated language server for Ruby"
