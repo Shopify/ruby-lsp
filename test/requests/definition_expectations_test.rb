@@ -377,6 +377,42 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     T.must(message_queue).close
   end
 
+  def test_finds_matching_local_variable
+    message_queue = Thread::Queue.new
+    store = RubyLsp::Store.new
+
+    uri = URI("file:///folder/fake.rb")
+    source = <<~RUBY
+      class Foo
+        local_var = 1
+        def foo
+          local_var = 1
+          local_var = 2
+
+          local_var += 1
+        end
+      end
+    RUBY
+
+    store.set(uri: uri, source: source, version: 1)
+
+    executor = RubyLsp::Executor.new(store, message_queue)
+
+    executor.instance_variable_get(:@index).index_single(
+      RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
+    )
+
+    response = executor.execute({
+      method: "textDocument/definition",
+      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 10, line: 6 } },
+    }).response
+
+    assert_equal(1, response.size)
+    assert_equal(4, response.first.range.start.line)
+  ensure
+    T.must(message_queue).close
+  end
+
   private
 
   def create_definition_addon

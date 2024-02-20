@@ -12,23 +12,30 @@ module RubyLsp
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::Location],
           uri: URI::Generic,
           nesting: T::Array[String],
+          local_variables: T::Array[Prism::LocalVariableNode],
           index: RubyIndexer::Index,
           dispatcher: Prism::Dispatcher,
           typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(response_builder, uri, nesting, index, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, uri, nesting, local_variables, index, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @uri = uri
         @nesting = nesting
         @index = index
         @typechecker_enabled = typechecker_enabled
+        @local_variables = local_variables
 
         dispatcher.register(
           self,
           :on_call_node_enter,
           :on_constant_read_node_enter,
           :on_constant_path_node_enter,
+          :on_local_variable_read_node_enter,
+          :on_local_variable_and_write_node_enter,
+          :on_local_variable_or_write_node_enter,
+          :on_local_variable_operator_write_node_enter,
+          :on_local_variable_write_node_enter,
         )
       end
 
@@ -57,6 +64,31 @@ module RubyLsp
         return if name.nil?
 
         find_in_index(name)
+      end
+
+      sig { params(node: Prism::LocalVariableReadNode).void }
+      def on_local_variable_read_node_enter(node)
+        find_local_variables(node)
+      end
+
+      sig { params(node: Prism::LocalVariableOrWriteNode).void }
+      def on_local_variable_or_write_node_enter(node)
+        find_local_variables(node)
+      end
+
+      sig { params(node: Prism::LocalVariableAndWriteNode).void }
+      def on_local_variable_and_write_node_enter(node)
+        find_local_variables(node)
+      end
+
+      sig { params(node: Prism::LocalVariableOperatorWriteNode).void }
+      def on_local_variable_operator_write_node_enter(node)
+        find_local_variables(node)
+      end
+
+      sig { params(node: Prism::LocalVariableWriteNode).void }
+      def on_local_variable_write_node_enter(node)
+        find_local_variables(node)
       end
 
       private
@@ -148,6 +180,24 @@ module RubyLsp
 
           @response_builder << Interface::Location.new(
             uri: URI::Generic.from_path(path: file_path).to_s,
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
+              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
+            ),
+          )
+        end
+      end
+
+      sig { params(node: Prism::LocalVariableNode).void }
+      def find_local_variables(node)
+        @local_variables.reverse.find do |variable_node|
+          next if variable_node == node
+          next unless variable_node.name == node.name
+
+          location = variable_node.location
+
+          @response_builder << Interface::Location.new(
+            uri: @uri.to_s,
             range: Interface::Range.new(
               start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
               end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),

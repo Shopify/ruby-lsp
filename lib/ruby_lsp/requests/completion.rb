@@ -16,6 +16,7 @@ module RubyLsp
     # - Constants
     # - Require paths
     # - Methods invoked on self only
+    # - Local variables
     #
     # # Example
     #
@@ -63,12 +64,22 @@ module RubyLsp
           char_position,
           node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode],
         )
+        local_variables = document.locate_local_variables(document.tree, char_position)
+
         @response_builder = T.let(
           ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem].new,
           ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
         )
 
-        Listeners::Completion.new(@response_builder, index, nesting, typechecker_enabled, dispatcher, document.uri)
+        Listeners::Completion.new(
+          @response_builder,
+          index,
+          nesting,
+          local_variables,
+          typechecker_enabled,
+          dispatcher,
+          document.uri,
+        )
 
         return unless matched && parent
 

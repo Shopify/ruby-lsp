@@ -523,6 +523,60 @@ class CompletionTest < Minitest::Test
     assert_equal(["Array"], result.map { |completion| completion.text_edit.new_text })
   end
 
+  def test_completion_for_local_variables
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+      class Foo
+        class_var = 1
+        def foo(a_required_param, an_optional_param = 1, *a_rest, a_required_named_param:, an_optional_named_param:, **an_options)
+          a_method_var = 1
+          a_method_var = 1
+          a_if_var = 1 if false
+          proc { a_proc_var_outside = 1 }
+
+          an_and_var &&= 1
+          an_or_var ||= 1
+          an_array_var1, an_array_var2 = [1, 2]
+
+          proc do |a_proc_arg|
+            a_proc_var = 1
+            a
+          end
+        end
+      end
+    RUBY
+
+    @store.set(uri: @uri, source: document.source, version: 1)
+
+    index = @executor.instance_variable_get(:@index)
+    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+
+    result = run_request(
+      method: "textDocument/completion",
+      params: { textDocument: { uri: @uri.to_s }, position: { line: 14, character: 7 } },
+    )
+
+    expected_variables = [
+      "a_required_param",
+      "an_optional_param",
+      "a_rest",
+      "a_required_named_param",
+      "an_optional_named_param",
+      "an_options",
+      "a_method_var",
+      "a_if_var",
+      "an_and_var",
+      "an_or_var",
+      "an_array_var1",
+      "an_array_var2",
+      "a_proc_arg",
+      "a_proc_var",
+    ]
+
+    assert_equal(expected_variables, result.map(&:label))
+    assert_equal(expected_variables, result.map(&:filter_text))
+    assert_equal(expected_variables, result.map { |completion| completion.text_edit.new_text })
+  end
+
   def test_completion_for_attributes
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
       class Foo

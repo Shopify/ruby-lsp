@@ -17,6 +17,7 @@ module RubyLsp
     # - Constants
     # - Require paths
     # - Methods invoked on self only
+    # - Local variables
     #
     # # Example
     #
@@ -46,12 +47,31 @@ module RubyLsp
 
         target, parent, nesting = document.locate_node(
           position,
-          node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode],
+          node_types: [
+            Prism::CallNode,
+            Prism::ConstantReadNode,
+            Prism::ConstantPathNode,
+            Prism::LocalVariableReadNode,
+            Prism::LocalVariableOrWriteNode,
+            Prism::LocalVariableAndWriteNode,
+            Prism::LocalVariableOperatorWriteNode,
+            Prism::LocalVariableWriteNode,
+          ],
         )
 
         target = parent if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)
 
-        Listeners::Definition.new(@response_builder, document.uri, nesting, index, dispatcher, typechecker_enabled)
+        local_variables = document.locate_local_variable_nodes(position)
+
+        Listeners::Definition.new(
+          @response_builder,
+          document.uri,
+          nesting,
+          local_variables,
+          index,
+          dispatcher,
+          typechecker_enabled,
+        )
 
         Addon.addons.each do |addon|
           addon.create_definition_listener(@response_builder, document.uri, nesting, index, dispatcher)
