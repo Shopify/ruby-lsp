@@ -35,12 +35,12 @@ class CompletionTest < Minitest::Test
     end
 
     expected = [
-      path_completion("foo/bar", prefix, start_position, end_position),
-      path_completion("foo/baz", prefix, start_position, end_position),
-      path_completion("foo/quux", prefix, start_position, end_position),
-      path_completion("foo/support/bar", prefix, start_position, end_position),
-      path_completion("foo/support/baz", prefix, start_position, end_position),
-      path_completion("foo/support/quux", prefix, start_position, end_position),
+      path_completion("foo/bar", start_position, end_position),
+      path_completion("foo/baz", start_position, end_position),
+      path_completion("foo/quux", start_position, end_position),
+      path_completion("foo/support/bar", start_position, end_position),
+      path_completion("foo/support/baz", start_position, end_position),
+      path_completion("foo/support/quux", start_position, end_position),
     ]
 
     assert_equal(expected.to_json, result.to_json)
@@ -66,12 +66,12 @@ class CompletionTest < Minitest::Test
     end
 
     expected = [
-      path_completion("foo/bar", prefix, start_position, end_position),
-      path_completion("foo/baz", prefix, start_position, end_position),
-      path_completion("foo/quux", prefix, start_position, end_position),
-      path_completion("foo/support/bar", prefix, start_position, end_position),
-      path_completion("foo/support/baz", prefix, start_position, end_position),
-      path_completion("foo/support/quux", prefix, start_position, end_position),
+      path_completion("foo/bar", start_position, end_position),
+      path_completion("foo/baz", start_position, end_position),
+      path_completion("foo/quux", start_position, end_position),
+      path_completion("foo/support/bar", start_position, end_position),
+      path_completion("foo/support/baz", start_position, end_position),
+      path_completion("foo/support/quux", start_position, end_position),
     ]
 
     assert_equal(expected.to_json, result.to_json)
@@ -97,12 +97,12 @@ class CompletionTest < Minitest::Test
     end
 
     expected = [
-      path_completion("foo/bar", prefix, start_position, end_position),
-      path_completion("foo/baz", prefix, start_position, end_position),
-      path_completion("foo/quux", prefix, start_position, end_position),
-      path_completion("foo/support/bar", prefix, start_position, end_position),
-      path_completion("foo/support/baz", prefix, start_position, end_position),
-      path_completion("foo/support/quux", prefix, start_position, end_position),
+      path_completion("foo/bar", start_position, end_position),
+      path_completion("foo/baz", start_position, end_position),
+      path_completion("foo/quux", start_position, end_position),
+      path_completion("foo/support/bar", start_position, end_position),
+      path_completion("foo/support/baz", start_position, end_position),
+      path_completion("foo/support/quux", start_position, end_position),
     ]
 
     assert_equal(expected.to_json, result.to_json)
@@ -128,9 +128,9 @@ class CompletionTest < Minitest::Test
     end
 
     expected = [
-      path_completion("foo/support/bar", prefix, start_position, end_position),
-      path_completion("foo/support/baz", prefix, start_position, end_position),
-      path_completion("foo/support/quux", prefix, start_position, end_position),
+      path_completion("foo/support/bar", start_position, end_position),
+      path_completion("foo/support/baz", start_position, end_position),
+      path_completion("foo/support/quux", start_position, end_position),
     ]
 
     assert_equal(expected.to_json, result.to_json)
@@ -600,6 +600,125 @@ class CompletionTest < Minitest::Test
     assert_empty(result)
   end
 
+  def test_relative_completion_command
+    prefix = "support/"
+    source = <<~RUBY
+      require_relative "#{prefix}"
+    RUBY
+
+    end_char = T.must(source.rindex('"'))
+    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
+    end_position = { line: 0, character: end_char }
+
+    result = with_file_structure do |tmpdir|
+      uri = URI("file://#{tmpdir}/foo/fake.rb")
+      document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+      @store.set(uri: uri, source: document.source, version: 1)
+      run_request(
+        method: "textDocument/completion",
+        params: { textDocument: { uri: uri.to_s }, position: { line: 0, character: end_char } },
+      )
+    end
+
+    expected = [
+      path_completion("support/bar", start_position, end_position),
+      path_completion("support/baz", start_position, end_position),
+      path_completion("support/quux", start_position, end_position),
+    ]
+
+    assert_equal(expected.to_json, result.to_json)
+  end
+
+  def test_relative_completion_call
+    prefix = "../"
+    source = <<~RUBY
+      require_relative("#{prefix}")
+    RUBY
+
+    end_char = T.must(source.rindex('"'))
+    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
+    end_position = { line: 0, character: end_char }
+
+    result = with_file_structure do |tmpdir|
+      uri = URI("file://#{tmpdir}/foo/fake.rb")
+      document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+      @store.set(uri: uri, source: document.source, version: 1)
+      run_request(
+        method: "textDocument/completion",
+        params: { textDocument: { uri: uri.to_s }, position: { line: 0, character: end_char } },
+      )
+    end
+
+    expected = [
+      path_completion("../foo/bar", start_position, end_position),
+      path_completion("../foo/baz", start_position, end_position),
+      path_completion("../foo/quux", start_position, end_position),
+      path_completion("../foo/support/bar", start_position, end_position),
+      path_completion("../foo/support/baz", start_position, end_position),
+      path_completion("../foo/support/quux", start_position, end_position),
+    ]
+
+    assert_equal(expected.to_json, result.to_json)
+  end
+
+  def test_relative_completion_command_call
+    prefix = "./"
+    source = <<~RUBY
+      Kernel.require_relative "#{prefix}"
+    RUBY
+
+    end_char = T.must(source.rindex('"'))
+    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
+    end_position = { line: 0, character: end_char }
+
+    result = with_file_structure do |tmpdir|
+      uri = URI("file://#{tmpdir}/foo/support/fake.rb")
+      document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+      @store.set(uri: uri, source: document.source, version: 1)
+      run_request(
+        method: "textDocument/completion",
+        params: { textDocument: { uri: uri.to_s }, position: { line: 0, character: end_char } },
+      )
+    end
+
+    expected = [
+      path_completion("./bar", start_position, end_position),
+      path_completion("./baz", start_position, end_position),
+      path_completion("./quux", start_position, end_position),
+    ]
+
+    assert_equal(expected.to_json, result.to_json)
+  end
+
+  def test_relative_completion_with_partial_path
+    prefix = "../suppo"
+    source = <<~RUBY
+      require_relative "#{prefix}"
+    RUBY
+
+    end_char = T.must(source.rindex('"'))
+    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
+    end_position = { line: 0, character: end_char }
+
+    result = with_file_structure do |tmpdir|
+      uri = URI("file://#{tmpdir}/foo/support/fake.rb")
+      document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+      @store.set(uri: uri, source: document.source, version: 1)
+      run_request(
+        method: "textDocument/completion",
+        params: { textDocument: { uri: uri.to_s }, position: { line: 0, character: end_char } },
+      )
+    end
+
+    expected = [
+      path_completion("../support/bar", start_position, end_position),
+      path_completion("../support/baz", start_position, end_position),
+      path_completion("../support/quux", start_position, end_position),
+    ]
+
+    assert_equal(expected.to_json, result.to_json)
+  end
+
   private
 
   def run_request(method:, params: {})
@@ -641,13 +760,13 @@ class CompletionTest < Minitest::Test
 
       index.index_all(indexable_paths: indexables)
 
-      return block.call
+      return block.call(tmpdir)
     ensure
       $LOAD_PATH.delete(tmpdir)
     end
   end
 
-  def path_completion(path, prefix, start_position, end_position)
+  def path_completion(path, start_position, end_position)
     LanguageServer::Protocol::Interface::CompletionItem.new(
       label: path,
       text_edit: LanguageServer::Protocol::Interface::TextEdit.new(
