@@ -97,7 +97,7 @@
         "href": "https://docs.rubocop.org/rubocop/cops_style.html#stylefrozenstringliteralcomment"
       },
       "source": "RuboCop",
-      "message": "Style/FrozenStringLiteralComment: Missing frozen string literal comment.",
+      "message": "Style/FrozenStringLiteralComment: Missing magic comment `# frozen_string_literal: true`.",
       "data": {
         "correctable": true,
         "code_actions": [
