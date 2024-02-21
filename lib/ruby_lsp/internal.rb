@@ -7,13 +7,17 @@ yarp_require_paths = Gem.loaded_specs["yarp"]&.full_require_paths
 $LOAD_PATH.delete_if { |path| yarp_require_paths.include?(path) } if yarp_require_paths
 
 require "sorbet-runtime"
-require "prism"
-require "prism/visitor"
-require "language_server-protocol"
+
+# Set Bundler's UI level to silent as soon as possible to prevent any prints to STDOUT
 require "bundler"
+Bundler.ui.level = :silent
+
 require "uri"
 require "cgi"
 require "set"
+require "prism"
+require "prism/visitor"
+require "language_server-protocol"
 
 require "ruby-lsp"
 require "ruby_indexer/ruby_indexer"
@@ -29,5 +33,3 @@ require "ruby_lsp/ruby_document"
 require "ruby_lsp/store"
 require "ruby_lsp/addon"
 require "ruby_lsp/requests/support/rubocop_runner"
-
-Bundler.ui.level = :silent
