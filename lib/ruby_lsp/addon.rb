@@ -25,19 +25,23 @@ module RubyLsp
 
     abstract!
 
+    @addons = T.let([], T::Array[Addon])
+    @addon_classes = T.let([], T::Array[T.class_of(Addon)])
+
     class << self
       extend T::Sig
+
+      sig { returns(T::Array[Addon]) }
+      attr_accessor :addons
+
+      sig { returns(T::Array[T.class_of(Addon)]) }
+      attr_reader :addon_classes
 
       # Automatically track and instantiate addon classes
       sig { params(child_class: T.class_of(Addon)).void }
       def inherited(child_class)
-        addons << child_class.new
+        addon_classes << child_class
         super
-      end
-
-      sig { returns(T::Array[Addon]) }
-      def addons
-        @addons ||= T.let([], T.nilable(T::Array[Addon]))
       end
 
       # Discovers and loads all addons. Returns the list of activated addons
@@ -51,11 +55,13 @@ module RubyLsp
           $stderr.puts(e.full_message)
         end
 
+        # Instantiate all discovered addon classes
+        self.addons = addon_classes.map(&:new)
+
         # Activate each one of the discovered addons. If any problems occur in the addons, we don't want to
         # fail to boot the server
         addons.each do |addon|
           addon.activate(message_queue)
-          nil
         rescue => e
           addon.add_error(e)
         end

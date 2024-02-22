@@ -114,6 +114,7 @@ class ExpectationsTestRunner < Minitest::Test
     message_queue = Thread::Queue.new
 
     send(addon_creation_method)
+    RubyLsp::Addon.load_addons(message_queue)
 
     store = RubyLsp::Store.new
     uri = URI::Generic.from_path(path: "/fake.rb")
@@ -127,6 +128,8 @@ class ExpectationsTestRunner < Minitest::Test
 
     yield(executor)
   ensure
+    RubyLsp::Addon.addons.each(&:deactivate)
+    RubyLsp::Addon.addon_classes.clear
     RubyLsp::Addon.addons.clear
     T.must(message_queue).close
   end
