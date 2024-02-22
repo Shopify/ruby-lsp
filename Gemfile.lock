@@ -9,7 +9,7 @@ GIT
 PATH
   remote: .
   specs:
-    ruby-lsp (0.14.2)
+    ruby-lsp (0.14.3)
       language_server-protocol (~> 3.17.0)
       prism (>= 0.22.0, < 0.25)
       sorbet-runtime (>= 0.5.10782)
