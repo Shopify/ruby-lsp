@@ -17,7 +17,7 @@ module RubyLsp
           uri: URI::Generic,
         ).void
       end
-      def initialize(response_builder, index, nesting, typechecker_enabled, dispatcher, uri)
+      def initialize(response_builder, index, nesting, typechecker_enabled, dispatcher, uri) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @index = index
         @nesting = nesting
@@ -128,7 +128,7 @@ module RubyLsp
 
         path_node_to_complete = arguments_node.arguments.first
 
-        return unless path_node_to_complete
+        return unless path_node_to_complete.is_a?(Prism::StringNode)
 
         @index.search_require_paths(path_node_to_complete.content).map!(&:require_path).sort!.each do |path|
           @response_builder << build_completion(T.must(path), path_node_to_complete)
@@ -142,7 +142,7 @@ module RubyLsp
 
         path_node_to_complete = arguments_node.arguments.first
 
-        return unless path_node_to_complete
+        return unless path_node_to_complete.is_a?(Prism::StringNode)
 
         origin_dir = Pathname.new(@uri.to_standardized_path).dirname
 
