@@ -406,6 +406,12 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
         T.unsafe(klass).new(response_builder, uri, nesting, index, dispatcher)
       end
+
+      def activate(message_queue); end
+
+      def deactivate; end
+
+      def name; end
     end
   end
 end

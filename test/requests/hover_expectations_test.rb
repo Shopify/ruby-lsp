@@ -311,6 +311,8 @@ class HoverExpectationsTest < ExpectationsTestRunner
         "HoverAddon"
       end
 
+      def deactivate; end
+
       def create_hover_listener(response_builder, nesting, index, dispatcher)
         klass = Class.new do
           def initialize(response_builder, dispatcher)

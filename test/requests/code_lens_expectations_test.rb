@@ -154,6 +154,12 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
         T.unsafe(klass).new(response_builder, uri, dispatcher)
       end
+
+      def activate(message_queue); end
+
+      def deactivate; end
+
+      def name; end
     end
   end
 
