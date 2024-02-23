@@ -54,7 +54,7 @@ default gems, except for
 - Gems that only appear under the `:development` group
 - All Ruby files under `test/**/*.rb`
 
-By creating a `.index.yml` file, these configurations can be overridden and tuned.
+By creating a `.index.yml` file, these configurations can be overridden and tuned. Note that indexing dependent behavior, such as definition, hover, completion or workspace symbol will be impacted by the configurations placed here.
 
 ```yaml
 # Exclude files based on a given pattern. Often used to exclude test files or fixtures
