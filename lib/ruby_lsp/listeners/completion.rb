@@ -108,15 +108,11 @@ module RubyLsp
         case name
         when "require"
           complete_require(node)
-          return
         when "require_relative"
           complete_require_relative(node)
-          return
+        else
+          complete_self_receiver_method(node, name) if self_receiver?(node)
         end
-
-        return unless self_receiver?(node)
-
-        complete_self_receiver_method(node, name)
       end
 
       private

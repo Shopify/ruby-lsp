@@ -760,7 +760,7 @@ class CompletionTest < Minitest::Test
 
       index.index_all(indexable_paths: indexables)
 
-      return block.call(tmpdir)
+      block.call(tmpdir)
     ensure
       $LOAD_PATH.delete(tmpdir)
     end
