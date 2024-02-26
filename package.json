@@ -168,7 +168,7 @@
               "default": true
             },
             "codeLens": {
-              "description": "Enable code lens, which generates clickable text to enrich editor experience (run tests, open Gem pages, ...)",
+              "description": "Enable code lens, which generates clickable text to enrich editor experience",
               "type": "boolean",
               "default": true
             },
@@ -212,19 +212,6 @@
           "description": "Turn on/off specific features from request",
           "type": "object",
           "properties": {
-            "codeLens": {
-              "description": "Customize code lens features",
-              "type": "object",
-              "properties": {
-                "enableAll": {
-                  "type": "boolean"
-                },
-                "gemfileLinks": {
-                  "description": "Enable codelens in the Gemfile to open the gem repository",
-                  "type": "boolean"
-                }
-              }
-            },
             "inlayHint": {
               "description": "Customize inlay hint features",
               "type": "object",

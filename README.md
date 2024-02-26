@@ -75,7 +75,7 @@ language status center right next to the language mode Ruby and select `Manage` 
 
 ![Ruby LSP status center](extras/ruby_lsp_status_center.png)
 
-It's also possible to configure with more granularity code lens and inlay hint features, see the [Ruby LSP server
+It's also possible to configure with more granularity inlay hint features, see the [Ruby LSP server
 documentation](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html).
 
 #### Ruby version managers

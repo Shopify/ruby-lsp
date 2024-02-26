@@ -198,21 +198,6 @@ export class RubyLsp {
         await workspace?.stop();
       }),
       vscode.commands.registerCommand(
-        Command.OpenLink,
-        async (link: string) => {
-          vscode.env.openExternal(vscode.Uri.parse(link));
-
-          const workspace = this.currentActiveWorkspace();
-
-          if (workspace?.lspClient?.serverVersion) {
-            await this.telemetry.sendCodeLensEvent(
-              "link",
-              workspace.lspClient.serverVersion,
-            );
-          }
-        },
-      ),
-      vscode.commands.registerCommand(
         Command.ShowSyntaxTree,
         this.showSyntaxTree.bind(this),
       ),

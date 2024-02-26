@@ -20,7 +20,7 @@ export interface ConfigurationEvent {
 }
 
 export interface CodeLensEvent {
-  type: "test" | "debug" | "test_in_terminal" | "link";
+  type: "test" | "debug" | "test_in_terminal";
   lspVersion: string;
 }
 
