@@ -1,0 +1,68 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout
+
+      - uses: actions/setup-node@v3
+        name: Use Node.js 18.x
+        with:
+          node-version: "18"
+          cache: "yarn"
+
+      - name: 📦 Install dependencies
+        run: yarn --frozen-lockfile
+
+      - name: Create CHANGELOG.md
+        uses: actions/github-script@v6
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          script: |
+            const fs = require("fs");
+
+            const { data: releases } = await github.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const includePrereleases = context.payload.release.prerelease;
+
+            const changelog = releases
+              .filter((release) => includePrereleases || !release.prerelease)
+              .map((release) => `# ${release.tag_name}\n${release.body}\n`)
+              .join("\n");
+
+            fs.writeFileSync("CHANGELOG.md", changelog);
+
+      # Stable releases
+      - name: Publish extension in the marketplace
+        if: "!github.event.release.prerelease"
+        run: |
+          yarn run package
+          node_modules/.bin/vsce publish --packagePath vscode-ruby-lsp.vsix
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      # Prereleases
+      - name: Package and publish prerelease extension in the marketplace
+        if: "github.event.release.prerelease"
+        run: |
+          yarn run package_prerelease
+          node_modules/.bin/vsce publish --pre-release --packagePath vscode-ruby-lsp.vsix
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      # Stable releases for OpenVSX
+      - name: Publish extension on OpenVSX
+        if: "!github.event.release.prerelease"
+        run: |
+          yarn run package
+          node_modules/.bin/ovsx publish vscode-ruby-lsp.vsix -p ${{ secrets.OPENVSX_TOKEN }} --yarn
