@@ -14,28 +14,22 @@ module RubyLsp
           nesting: T::Array[String],
           typechecker_enabled: T::Boolean,
           dispatcher: Prism::Dispatcher,
+          uri: URI::Generic,
         ).void
       end
-      def initialize(response_builder, index, nesting, typechecker_enabled, dispatcher)
+      def initialize(response_builder, index, nesting, typechecker_enabled, dispatcher, uri) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @index = index
         @nesting = nesting
         @typechecker_enabled = typechecker_enabled
+        @uri = uri
 
         dispatcher.register(
           self,
-          :on_string_node_enter,
           :on_constant_path_node_enter,
           :on_constant_read_node_enter,
           :on_call_node_enter,
         )
-      end
-
-      sig { params(node: Prism::StringNode).void }
-      def on_string_node_enter(node)
-        @index.search_require_paths(node.content).map!(&:require_path).sort!.each do |path|
-          @response_builder << build_completion(T.must(path), node)
-        end
       end
 
       # Handle completion on regular constant references (e.g. `Bar`)
@@ -107,11 +101,64 @@ module RubyLsp
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
         return if @typechecker_enabled
-        return unless self_receiver?(node)
 
         name = node.message
         return unless name
 
+        case name
+        when "require"
+          complete_require(node)
+        when "require_relative"
+          complete_require_relative(node)
+        else
+          complete_self_receiver_method(node, name) if self_receiver?(node)
+        end
+      end
+
+      private
+
+      sig { params(node: Prism::CallNode).void }
+      def complete_require(node)
+        arguments_node = node.arguments
+        return unless arguments_node
+
+        path_node_to_complete = arguments_node.arguments.first
+
+        return unless path_node_to_complete.is_a?(Prism::StringNode)
+
+        @index.search_require_paths(path_node_to_complete.content).map!(&:require_path).sort!.each do |path|
+          @response_builder << build_completion(T.must(path), path_node_to_complete)
+        end
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def complete_require_relative(node)
+        arguments_node = node.arguments
+        return unless arguments_node
+
+        path_node_to_complete = arguments_node.arguments.first
+
+        return unless path_node_to_complete.is_a?(Prism::StringNode)
+
+        origin_dir = Pathname.new(@uri.to_standardized_path).dirname
+
+        path_query = path_node_to_complete.content
+        # if the path is not a directory, glob all possible next characters
+        # for example ../somethi| (where | is the cursor position)
+        # should find files for ../somethi*/
+        path_query += "*/" unless path_query.end_with?("/")
+        path_query += "**/*.rb"
+
+        Dir.glob(path_query, base: origin_dir).sort!.each do |path|
+          @response_builder << build_completion(
+            path.delete_suffix(".rb"),
+            path_node_to_complete,
+          )
+        end
+      end
+
+      sig { params(node: Prism::CallNode, name: String).void }
+      def complete_self_receiver_method(node, name)
         receiver_entries = @index[@nesting.join("::")]
         return unless receiver_entries
 
@@ -124,8 +171,6 @@ module RubyLsp
           @response_builder << build_method_completion(T.cast(entry, RubyIndexer::Entry::Member), node)
         end
       end
-
-      private
 
       sig do
         params(

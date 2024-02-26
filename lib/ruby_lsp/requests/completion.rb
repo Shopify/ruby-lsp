@@ -68,26 +68,13 @@ module RubyLsp
           ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
         )
 
-        Listeners::Completion.new(@response_builder, index, nesting, typechecker_enabled, dispatcher)
+        Listeners::Completion.new(@response_builder, index, nesting, typechecker_enabled, dispatcher, document.uri)
 
         return unless matched && parent
 
         @target = case matched
         when Prism::CallNode
-          message = matched.message
-
-          if message == "require"
-            args = matched.arguments&.arguments
-            return if args.nil? || args.is_a?(Prism::ForwardingArgumentsNode)
-
-            argument = args.first
-            return unless argument.is_a?(Prism::StringNode)
-            return unless (argument.location.start_offset..argument.location.end_offset).cover?(char_position)
-
-            argument
-          else
-            matched
-          end
+          matched
         when Prism::ConstantReadNode, Prism::ConstantPathNode
           if parent.is_a?(Prism::ConstantPathNode) && matched.is_a?(Prism::ConstantReadNode)
             parent
