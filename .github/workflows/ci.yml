@@ -3,7 +3,7 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  lint:
+  lint_ruby:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -24,7 +24,7 @@ jobs:
 
       - name: Lint Ruby files and RBI shims
         run: bundle exec rubocop
-  build:
+  build_ruby:
     strategy:
       fail-fast: false
       matrix:
@@ -49,3 +49,51 @@ jobs:
 
       - name: Run index troubleshooting tool
         run: bundle exec ruby-lsp-doctor
+  lint_node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "yarn"
+          cache-dependency-path: "vscode"
+
+      - name: Lint
+        working-directory: ./vscode
+        run: |
+          yarn --frozen-lockfile
+          yarn run lint
+  build_node:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "yarn"
+          cache-dependency-path: "vscode"
+
+      # We need some Ruby installed for the environment activation tests
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+
+      - name: Run tests
+        working-directory: ./vscode
+        env:
+          DISPLAY: ":99.0"
+        run: |
+          yarn --frozen-lockfile
+          /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          yarn run test

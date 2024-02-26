@@ -75,7 +75,7 @@ export class Workspace implements WorkspaceInterface {
       this.error = true;
       vscode.window.showErrorMessage(
         `Failed to setup the bundle: ${error.message}. \
-        See [Troubleshooting](https://github.com/Shopify/vscode-ruby-lsp/blob/main/TROUBLESHOOTING.md) for help`,
+        See [Troubleshooting](https://github.com/Shopify/ruby-lsp/blob/main/TROUBLESHOOTING.md) for help`,
       );
 
       return;

@@ -214,7 +214,8 @@ export class Ruby implements RubyInterface {
     if (major < 3) {
       throw new Error(
         `The Ruby LSP requires Ruby 3.0 or newer to run. This project is using ${this.rubyVersion}. \
-        [See alternatives](https://github.com/Shopify/vscode-ruby-lsp?tab=readme-ov-file#ruby-version-requirement)`,
+        [See alternatives](https://github.com/Shopify/ruby-lsp/blob/main/VSCODE.md \
+        ?tab=readme-ov-file#ruby-version-requirement)`,
       );
     }
 
@@ -347,7 +348,7 @@ export class Ruby implements RubyInterface {
     if (customCommand === undefined) {
       throw new Error(
         "The customRubyCommand configuration must be set when 'custom' is selected as the version manager. \
-        See the [README](https://github.com/Shopify/vscode-ruby-lsp#custom-activation) for instructions.",
+        See the [README](https://github.com/Shopify/ruby-lsp/blob/main/vscode/VERSION_MANAGERS.md) for instructions.",
       );
     }
 

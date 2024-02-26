@@ -146,7 +146,7 @@ export class RubyLsp {
       if (answer === "See the multi-root workspace docs") {
         vscode.env.openExternal(
           vscode.Uri.parse(
-            "https://github.com/Shopify/vscode-ruby-lsp?tab=readme-ov-file#multi-root-workspaces",
+            "https://github.com/Shopify/ruby-lsp/blob/main/VSCODE.md?tab=readme-ov-file#multi-root-workspaces",
           ),
         );
       }
@@ -204,7 +204,7 @@ export class RubyLsp {
       vscode.commands.registerCommand(Command.FormatterHelp, () => {
         vscode.env.openExternal(
           vscode.Uri.parse(
-            "https://github.com/Shopify/vscode-ruby-lsp#formatting",
+            "https://github.com/Shopify/ruby-lsp/blob/main/VSCODE.md#formatting",
           ),
         );
       }),

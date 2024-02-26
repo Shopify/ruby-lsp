@@ -1,6 +1,19 @@
 # CONTRIBUTING
 
-## Manually testing a change
+## Testing changes
+
+### Tracing LSP requests and responses
+
+LSP server tracing (logging) can be controlled through the `ruby lsp.trace.server` config key in the
+`.vscode/settings.json` config file.
+
+Possible values are:
+
+- `off`: no tracing
+- `messages`: display requests and responses notifications
+- `verbose`: display each request and response as JSON
+
+### Manually testing a change
 
 There are a few options for manually testing changes to Ruby LSP:
 
@@ -14,9 +27,7 @@ gem "ruby-lsp", path: "../../Shopify/ruby-lsp"
 
 With both approaches, there is a risk of 'breaking' your local development experience, so keep an eye on the Ruby LSP output panel for exceptions as your make changes.
 
-You can also refer to the advice about [Debugging and Tracing](https://github.com/Shopify/vscode-ruby-lsp#debugging).
-
-## Running the test suite
+### Running the test suite
 
 The test suite can be executed by running
 ```shell
@@ -30,7 +41,7 @@ VERBOSE=1 bin/test
 bin/test test/requests/diagnostics_expectations_test.rb test_diagnostics__def_bad_formatting
 ```
 
-## Expectation testing
+### Expectation testing
 
 To simplify the way we run tests over different pieces of Ruby code, we use a custom expectations test framework against
 a set of Ruby fixtures.
@@ -99,14 +110,14 @@ end
 2. Set breakpoints in the code as desired
 3. Click the debug button on top of test examples
 
-## Debugging Running Ruby LSP Process
+## Live debugging
 
-1. Open [vscode-ruby-lsp](https://github.com/Shopify/vscode-ruby-lsp) in VS Code
-2. Under `Run and Debug`, select `Run extension` and click the start button (or press F5)
-3. The extension host window opened will be running a Ruby LSP process with the debugger attached. To start debugging
-the live process, go under `Run and Debug`, select `Attach to existing server` and click the start button (or
-press F5)
-4. Add breakpoints and perform the actions necessary for triggering the requests you wish to debug
+1. Under `Run and Debug`, select `Run extension` and click the start button (or press F5)
+2. The extension host window opened will be running the development version of the VS Code extension. Putting break
+points in the extension code will allow debugging
+3. If you wish to debug the server process, go under `Run and Debug` in the extension host window,
+select `Attach to existing server` and click the start button (or press F5)
+3. Add breakpoints and perform the actions necessary for triggering the requests you wish to debug
 
 ## Screen Captures
 

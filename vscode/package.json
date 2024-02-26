@@ -6,7 +6,7 @@
   "publisher": "Shopify",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Shopify/vscode-ruby-lsp.git"
+    "url": "https://github.com/Shopify/ruby-lsp.git"
   },
   "license": "MIT",
   "icon": "icon.png",

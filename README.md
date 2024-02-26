@@ -1,3 +1,7 @@
+<p align="center">
+  <img alt="Ruby LSP logo" width="200" src="vscode/icon.png" />
+</p>
+
 [![Build Status](https://github.com/Shopify/ruby-lsp/workflows/CI/badge.svg)](https://github.com/Shopify/ruby-lsp/actions/workflows/ci.yml)
 [![Ruby LSP extension](https://img.shields.io/badge/VS%20Code-Ruby%20LSP-success?logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=Shopify.ruby-lsp)
 [![Ruby DX Slack](https://img.shields.io/badge/Slack-Ruby%20DX-success?logo=slack)](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q)
@@ -11,12 +15,38 @@ experience to Ruby developers using modern standards for cross-editor features, 
 Want to discuss Ruby developer experience? Consider joining the public
 [Ruby DX Slack workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q).
 
+## Features
+
+![Ruby LSP demo](vscode/extras/ruby_lsp_demo.gif)
+
+The Ruby LSP features include
+
+- Semantic highlighting
+- Symbol search and code outline
+- RuboCop errors and warnings (diagnostics)
+- Format on save (with RuboCop or Syntax Tree)
+- Format on type
+- Debugging support
+- Running and debugging tests through VS Code's UI
+- Go to definition for classes, modules, constants and required files
+- Showing documentaton on hover for classes, modules and constants
+- Completion for classes, modules, constants and require paths
+- Fuzzy search classes, modules and constants anywhere in the project and its dependencies (workspace symbol)
+
+Adding method support for definition, completion, hover and workspace symbol is planned, but not yet completed.
+
+See complete information about features [here](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html).
+
+If you experience issues, please see the [troubleshooting
+guide](https://github.com/Shopify/ruby-lsp/blob/main/TROUBLESHOOTING.md).
+
 ## Usage
 
 ### With VS Code
 
-If using VS Code, all you have to do is install the [Ruby LSP extension](https://github.com/Shopify/vscode-ruby-lsp) to
-get the extra features in the editor. Do not install this gem manually.
+If using VS Code, all you have to do is install the [Ruby LSP
+extension](https://marketplace.visualstudio.com/items?itemName=Shopify.ruby-lsp) to get the extra features in the
+editor. Do not install the `ruby-lsp` gem manually.
 
 ### With other editors
 
@@ -27,16 +57,8 @@ The gem can be installed by doing
 gem install ruby-lsp
 ```
 
-**NOTE**: starting with v0.7.0, it is no longer recommended to add the `ruby-lsp` to the bundle. The gem will generate a
-custom bundle in `.ruby-lsp/Gemfile` which is used to identify the versions of dependencies that should be used for the
-application (e.g.: the correct RuboCop version).
-
-For older versions, if you decide to add the gem to the bundle, it is not necessary to require it.
-```ruby
-group :development do
-  gem "ruby-lsp", require: false
-end
-```
+and the language server can be launched running `ruby-lsp` (without bundle exec in order to properly hook into your
+project's dependencies).
 
 ### Documentation
 
@@ -98,16 +120,13 @@ For instructions on how to create addons, see the [addons documentation](ADDONS.
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/Shopify/ruby-lsp.
-This project is intended to be a safe, welcoming space for collaboration, and contributors
-are expected to adhere to the
-[Contributor Covenant](CODE_OF_CONDUCT.md)
-code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/Shopify/ruby-lsp.  This project is intended to
+be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor
+Covenant](CODE_OF_CONDUCT.md) code of conduct.
 
 If you wish to contribute, see [CONTRIBUTING](CONTRIBUTING.md) for development instructions and check out our pinned
 [roadmap issue](https://github.com/Shopify/ruby-lsp/issues) for a list of tasks to get started.
 
 ## License
 
-The gem is available as open source under the terms of the
-[MIT License](LICENSE.txt).
+The gem is available as open source under the terms of the [MIT License](LICENSE.txt).
