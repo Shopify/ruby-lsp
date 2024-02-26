@@ -11,6 +11,7 @@ import {
   LOG_CHANNEL,
   WorkspaceInterface,
   STATUS_EMITTER,
+  debounce,
 } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 
@@ -256,11 +257,15 @@ export class Workspace implements WorkspaceInterface {
     const watcher = vscode.workspace.createFileSystemWatcher(
       new vscode.RelativePattern(this.workspaceFolder, pattern),
     );
-    context.subscriptions.push(watcher);
 
-    watcher.onDidChange(this.restart.bind(this));
-    watcher.onDidCreate(this.restart.bind(this));
-    watcher.onDidDelete(this.restart.bind(this));
+    const debouncedRestart = debounce(this.restart.bind(this), 5000);
+
+    context.subscriptions.push(
+      watcher,
+      watcher.onDidChange(debouncedRestart),
+      watcher.onDidCreate(debouncedRestart),
+      watcher.onDidDelete(debouncedRestart),
+    );
   }
 
   private registerRebaseWatcher(context: vscode.ExtensionContext) {
@@ -276,7 +281,6 @@ export class Workspace implements WorkspaceInterface {
         ".git/{rebase-merge,rebase-apply}",
       ),
     );
-    context.subscriptions.push(workspaceWatcher, parentWatcher);
 
     const startRebase = () => {
       this.#rebaseInProgress = true;
@@ -286,10 +290,13 @@ export class Workspace implements WorkspaceInterface {
       await this.restart();
     };
 
-    // When one of the rebase files are created, we set this flag to prevent restarting during the rebase
-    workspaceWatcher.onDidCreate(startRebase);
-
-    // Once they are deleted and the rebase is complete, then we restart
-    workspaceWatcher.onDidDelete(stopRebase);
+    context.subscriptions.push(
+      workspaceWatcher,
+      parentWatcher,
+      // When one of the rebase files are created, we set this flag to prevent restarting during the rebase
+      workspaceWatcher.onDidCreate(startRebase),
+      // Once they are deleted and the rebase is complete, then we restart
+      workspaceWatcher.onDidDelete(stopRebase),
+    );
   }
 }
