@@ -4,7 +4,12 @@ on:
   push:
     tags:
       - v*
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+    version:
+      description: The version to bump the Ruby LSP to (e.g.: 0.1.0)
+      type: string
+      required: true
 
 jobs:
   publish:
@@ -21,7 +26,8 @@ jobs:
           bundler-cache: true
           cache-version: 1
 
-      - name: Bump patch version
+      - name: Automated patch version bump
+        if: ${{ inputs.version == '' }}
         id: version
         run: |
           version=$(ruby -e 'major, minor, patch = File.read("VERSION").split(".").map(&:to_i)
@@ -33,14 +39,28 @@ jobs:
           bundle install
           echo "VERSION=$version" >> "$GITHUB_OUTPUT"
 
+      - name: Manual version bump
+        if: ${{ inputs.version != '' }}
+        run: |
+          version=$(ruby -e 'major, minor, patch = File.read("VERSION").split(".").map(&:to_i)
+                    new_version = "#{major}.#{minor}.#{patch + 1}"
+                    File.write("VERSION", "#{new_version}\n")
+                    print(new_version)')
+
+          version="${{ inputs.version != '' }}"
+          echo $version > VERSION
+          bundle config unset deployment
+          bundle install
+
       - name: Commit version
         run: |
+          version="${{ inputs.version != '' ?  inputs.version : steps.version.outputs.VERSION }}"
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git checkout -b automated-bump-version-${{ steps.version.outputs.VERSION }}
+          git checkout -b automated-bump-version-$version
           git add VERSION Gemfile.lock
-          git commit -m "Bump version to v${{ steps.version.outputs.VERSION }}"
-          git push origin automated-bump-version-${{ steps.version.outputs.VERSION }}
+          git commit -m "Bump version to v$version"
+          git push origin automated-bump-version-$version
 
       - name: Open pull request and turn on auto-merge
         uses: actions/github-script@v6
@@ -49,13 +69,14 @@ jobs:
           github-token: "${{ secrets.RUBY_LSP_BOT_TOKEN }}"
           result-encoding: string
           script: |
+            const version="${{ inputs.version != '' ?  inputs.version : steps.version.outputs.VERSION }}"
             const response = await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              head: "automated-bump-version-${{ steps.version.outputs.VERSION }}",
+              head: `automated-bump-version-${version}`,
               base: "main",
-              title: "Bump version to v${{ steps.version.outputs.VERSION }}",
-              body: "This is an automated pull request to eagerly bump the gem version to v${{ steps.version.outputs.VERSION }}."
+              title: `Bump version to v${version}`,
+              body: `This is an automated pull request to eagerly bump the gem version to v${version}.`
             });
 
             const pullRequestNumber = response.data.number;
