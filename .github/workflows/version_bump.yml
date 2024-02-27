@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
     version:
-      description: The version to bump the Ruby LSP to (e.g.: 0.1.0)
+      description: "The version to bump the Ruby LSP to (e.g.: 0.1.0)"
       type: string
       required: true
 
