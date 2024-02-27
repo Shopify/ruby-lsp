@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - v*
+  workflow_dispatch: {}
 
 jobs:
   publish:
@@ -41,30 +42,24 @@ jobs:
           git commit -m "Bump version to v${{ steps.version.outputs.VERSION }}"
           git push origin automated-bump-version-${{ steps.version.outputs.VERSION }}
 
-      - name: Open pull request, approve and turn on auto-merge
+      - name: Open pull request and turn on auto-merge
         uses: actions/github-script@v6
+        id: open-pr
         with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          github-token: "${{ secrets.RUBY_LSP_BOT_TOKEN }}"
           script: |
             const response = await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               head: "automated-bump-version-${{ steps.version.outputs.VERSION }}",
               base: "main",
-              title: "Bump version to v${{ steps.version.outputs.VERSION }}"
+              title: "Bump version to v${{ steps.version.outputs.VERSION }}",
+              body: "This is an automated pull request to eagerly bump the gem version to v${{ steps.version.outputs.VERSION }}."
             });
 
             const pullRequestId = response.data.id;
             const pullRequestNumber = response.data.number;
             console.log(`Created pull request ${pullRequestNumber}`);
-
-            await github.rest.pulls.createReview({
-              pull_number: pullRequestNumber,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              event: 'APPROVE',
-            });
-            console.log(`Approved pull request ${pullRequestNumber}`);
 
             const enableAutoMergeQuery = `mutation ($pullRequestId: ID!, $mergeMethod: PullRequestMergeMethod!) {
               enablePullRequestAutoMerge(input: {
@@ -89,3 +84,20 @@ jobs:
 
             await github.graphql(enableAutoMergeQuery, data);
             console.log(`Enabled auto-merge for pull request ${pullRequestNumber}`);
+
+            return pullRequestNumber;
+
+      - name: Approve pull request
+        uses: actions/github-script@v6
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          script: |
+            const pullRequestNumber = "${{steps.open-pr.outputs.result}}";
+
+            await github.rest.pulls.createReview({
+              pull_number: pullRequestNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              event: 'APPROVE',
+            });
+            console.log(`Approved pull request ${pullRequestNumber}`);
