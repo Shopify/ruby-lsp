@@ -47,6 +47,7 @@ jobs:
         id: open-pr
         with:
           github-token: "${{ secrets.RUBY_LSP_BOT_TOKEN }}"
+          result-encoding: string
           script: |
             const response = await github.rest.pulls.create({
               owner: context.repo.owner,
@@ -57,9 +58,37 @@ jobs:
               body: "This is an automated pull request to eagerly bump the gem version to v${{ steps.version.outputs.VERSION }}."
             });
 
-            const pullRequestId = response.data.id;
             const pullRequestNumber = response.data.number;
             console.log(`Created pull request ${pullRequestNumber}`);
+            return pullRequestNumber;
+
+      - name: Approve pull request
+        uses: actions/github-script@v6
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          script: |
+            const pullRequestNumber = ${{steps.open-pr.outputs.result}};
+            const getPullRequestIdQuery = `query GetPullRequestId($owner: String!, $repo: String!, $pullRequestNumber: Int!) {
+              repository(owner: $owner, name: $repo) {
+                pullRequest(number: $pullRequestNumber) {
+                  id
+                }
+              }
+            }`
+
+            const repoInfo = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pullRequestNumber: pullRequestNumber,
+            }
+
+            await github.rest.pulls.createReview({
+              pull_number: pullRequestNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              event: 'APPROVE',
+            })
+            console.log(`Approved pull request ${pullRequestNumber}`);
 
             const enableAutoMergeQuery = `mutation ($pullRequestId: ID!, $mergeMethod: PullRequestMergeMethod!) {
               enablePullRequestAutoMerge(input: {
@@ -75,29 +104,13 @@ jobs:
                   }
                 }
               }
-            }`;
+            }`
 
+            const response = await github.graphql(getPullRequestIdQuery, repoInfo)
             const data = {
-              pullRequestId: pullRequestId,
+              pullRequestId: response.repository.pullRequest.id,
               mergeMethod: 'MERGE',
-            };
+            }
 
-            await github.graphql(enableAutoMergeQuery, data);
+            await github.graphql(enableAutoMergeQuery, data)
             console.log(`Enabled auto-merge for pull request ${pullRequestNumber}`);
-
-            return pullRequestNumber;
-
-      - name: Approve pull request
-        uses: actions/github-script@v6
-        with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
-          script: |
-            const pullRequestNumber = "${{steps.open-pr.outputs.result}}";
-
-            await github.rest.pulls.createReview({
-              pull_number: pullRequestNumber,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              event: 'APPROVE',
-            });
-            console.log(`Approved pull request ${pullRequestNumber}`);
