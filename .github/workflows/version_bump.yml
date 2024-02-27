@@ -6,10 +6,10 @@ on:
       - v*
   workflow_dispatch:
     inputs:
-    version:
-      description: "The version to bump the Ruby LSP to (e.g.: 0.1.0)"
-      type: string
-      required: true
+      version:
+        description: "The version to bump the Ruby LSP to (e.g.: 0.1.0)"
+        type: string
+        required: true
 
 jobs:
   publish:
@@ -42,19 +42,13 @@ jobs:
       - name: Manual version bump
         if: ${{ inputs.version != '' }}
         run: |
-          version=$(ruby -e 'major, minor, patch = File.read("VERSION").split(".").map(&:to_i)
-                    new_version = "#{major}.#{minor}.#{patch + 1}"
-                    File.write("VERSION", "#{new_version}\n")
-                    print(new_version)')
-
-          version="${{ inputs.version != '' }}"
-          echo $version > VERSION
+          echo "${{ inputs.version }}\n" > VERSION
           bundle config unset deployment
           bundle install
 
       - name: Commit version
         run: |
-          version="${{ inputs.version != '' ?  inputs.version : steps.version.outputs.VERSION }}"
+          version="${{ inputs.version != '' && inputs.version || steps.version.outputs.VERSION }}"
           git config user.name github-actions
           git config user.email github-actions@github.com
           git checkout -b automated-bump-version-$version
@@ -69,7 +63,7 @@ jobs:
           github-token: "${{ secrets.RUBY_LSP_BOT_TOKEN }}"
           result-encoding: string
           script: |
-            const version="${{ inputs.version != '' ?  inputs.version : steps.version.outputs.VERSION }}"
+            const version="${{ inputs.version != '' && inputs.version || steps.version.outputs.VERSION }}"
             const response = await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
