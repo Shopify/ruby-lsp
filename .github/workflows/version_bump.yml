@@ -42,7 +42,7 @@ jobs:
       - name: Manual version bump
         if: ${{ inputs.version != '' }}
         run: |
-          echo "${{ inputs.version }}\n" > VERSION
+          echo "${{ inputs.version }}" > VERSION
           bundle config unset deployment
           bundle install
 
