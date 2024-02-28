@@ -24,7 +24,6 @@ jobs:
               repo: context.repo.repo,
             });
             const previousRelease = data.find((release) => !release.tag_name.startsWith("vscode-ruby-lsp"));
-            console.log(`Found previous release ${previousRelease.tag_name}`);
 
             const commitResponse = await github.rest.repos.compareCommits({
               owner: context.repo.owner,
@@ -32,7 +31,6 @@ jobs:
               base: previousRelease.tag_name,
               head: "${{ github.ref }}"
             });
-            console.log(`Found commits ${commitResponse.data.commits}`);
 
             const pullRequests = [];
 
@@ -49,7 +47,6 @@ jobs:
                 }
               });
             }
-            console.log(`Discovered pull requests ${pullRequests.length}`);
 
             const relevantPulls = pullRequests.filter((pull) => {
               return pull.labels.some((label) => label === "server") &&
