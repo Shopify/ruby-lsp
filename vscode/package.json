@@ -1,0 +1,505 @@
+{
+  "name": "ruby-lsp",
+  "displayName": "Ruby LSP",
+  "description": "VS Code plugin for connecting with the Ruby LSP",
+  "version": "0.5.11",
+  "publisher": "Shopify",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Shopify/vscode-ruby-lsp.git"
+  },
+  "license": "MIT",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.68.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Testing"
+  ],
+  "activationEvents": [
+    "onLanguage:ruby",
+    "workspaceContains:Gemfile.lock",
+    "workspaceContains:gems.locked",
+    "onView:dependencies"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "menus": {
+      "editor/context": [
+        {
+          "when": "resourceLangId == ruby",
+          "command": "workbench.action.terminal.runSelectedText",
+          "group": "9_cutcopypaste"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "rubyLsp.start",
+        "title": "Start",
+        "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.restart",
+        "title": "Restart",
+        "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.stop",
+        "title": "Stop",
+        "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.update",
+        "title": "Update language server gem",
+        "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.selectRubyVersionManager",
+        "title": "Select Ruby version manager",
+        "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.toggleFeatures",
+        "title": "Toggle features",
+        "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.runTest",
+        "title": "Run current test",
+        "category": "Ruby LSP",
+        "when": "editorActive && editorLangId == ruby"
+      },
+      {
+        "command": "rubyLsp.runTestInTerminal",
+        "title": "Run current test in terminal",
+        "category": "Ruby LSP",
+        "when": "editorActive && editorLangId == ruby"
+      },
+      {
+        "command": "rubyLsp.debugTest",
+        "title": "Debug current test",
+        "category": "Ruby LSP",
+        "when": "editorActive && editorLangId == ruby"
+      },
+      {
+        "command": "rubyLsp.showSyntaxTree",
+        "title": "Show syntax tree",
+        "category": "Ruby LSP"
+      }
+    ],
+    "configuration": {
+      "title": "Ruby LSP",
+      "properties": {
+        "rubyLsp.enableExperimentalFeatures": {
+          "description": "Enable experimental and under development features",
+          "type": "boolean",
+          "default": false
+        },
+        "rubyLsp.enabledFeatures": {
+          "description": "List of enabled LSP features",
+          "type": "object",
+          "properties": {
+            "codeActions": {
+              "description": "Enable code actions, like RuboCop quick fixes",
+              "type": "boolean",
+              "default": true
+            },
+            "diagnostics": {
+              "description": "Enable diagnostics, like RuboCop violations",
+              "type": "boolean",
+              "default": true
+            },
+            "documentHighlights": {
+              "description": "Enable document highlight, which highlights the occurrences of the entity at cursor position",
+              "type": "boolean",
+              "default": true
+            },
+            "documentLink": {
+              "description": "Enable document link, which generates clickable link to 'PATH' based on '# source://PATH' comments",
+              "type": "boolean",
+              "default": true
+            },
+            "documentSymbols": {
+              "description": "Enable document symbols, which populates the file outline and breadcrumbs",
+              "type": "boolean",
+              "default": true
+            },
+            "foldingRanges": {
+              "description": "Enable folding ranges, which populates the places where code can be folded",
+              "type": "boolean",
+              "default": true
+            },
+            "formatting": {
+              "description": "Enable formatting",
+              "type": "boolean",
+              "default": true
+            },
+            "hover": {
+              "description": "Enable hover, which displays a widget with extra information when hovering over certain code",
+              "type": "boolean",
+              "default": true
+            },
+            "inlayHint": {
+              "description": "Enable inlay hints",
+              "type": "boolean",
+              "default": true
+            },
+            "onTypeFormatting": {
+              "description": "Enable on type formatting",
+              "type": "boolean",
+              "default": true
+            },
+            "selectionRanges": {
+              "description": "Enable selection ranges, which selects code based on the position of the cursor(s)",
+              "type": "boolean",
+              "default": true
+            },
+            "semanticHighlighting": {
+              "description": "Enable semantic highlighting, which highlights code based on Ruby's understanding of it",
+              "type": "boolean",
+              "default": true
+            },
+            "completion": {
+              "description": "Enable completion, which provides suggestions for code completion",
+              "type": "boolean",
+              "default": true
+            },
+            "codeLens": {
+              "description": "Enable code lens, which generates clickable text to enrich editor experience",
+              "type": "boolean",
+              "default": true
+            },
+            "definition": {
+              "description": "Enable go to definition, which navigates to the definition of the symbol under the cursor",
+              "type": "boolean",
+              "default": true
+            },
+            "workspaceSymbol": {
+              "description": "Enable workspace symbol, which allows fuzzy searching for symbols in the entire project with CTRL/CMD + T",
+              "type": "boolean",
+              "default": true
+            },
+            "signatureHelp": {
+              "description": "Enable signature help, which shows the parameters and documentation for the method being invoked",
+              "type": "boolean",
+              "default": true
+            }
+          },
+          "default": {
+            "codeActions": true,
+            "diagnostics": true,
+            "documentHighlights": true,
+            "documentLink": true,
+            "documentSymbols": true,
+            "foldingRanges": true,
+            "formatting": true,
+            "hover": true,
+            "inlayHint": true,
+            "onTypeFormatting": true,
+            "selectionRanges": true,
+            "semanticHighlighting": true,
+            "completion": true,
+            "codeLens": true,
+            "definition": true,
+            "workspaceSymbol": true,
+            "signatureHelp": true
+          }
+        },
+        "rubyLsp.featuresConfiguration": {
+          "description": "Turn on/off specific features from request",
+          "type": "object",
+          "properties": {
+            "inlayHint": {
+              "description": "Customize inlay hint features",
+              "type": "object",
+              "properties": {
+                "enableAll": {
+                  "type": "boolean"
+                },
+                "implicitRescue": {
+                  "description": "Enable inlay hints for bare rescues",
+                  "type": "boolean"
+                },
+                "implicitHashValue": {
+                  "description": "Enable inlay hints for omitted hash values",
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "rubyLsp.rubyVersionManager": {
+          "description": "The Ruby version manager to use",
+          "type": "string",
+          "enum": [
+            "asdf",
+            "auto",
+            "chruby",
+            "none",
+            "rbenv",
+            "rvm",
+            "shadowenv",
+            "custom"
+          ],
+          "default": "auto"
+        },
+        "rubyLsp.customRubyCommand": {
+          "description": "A shell command to activate the right Ruby version or add a custom Ruby bin folder to the PATH. Only used if rubyVersionManager is set to 'custom'",
+          "type": "string"
+        },
+        "rubyLsp.yjit": {
+          "description": "Use YJIT to speed up the Ruby LSP server",
+          "type": "boolean",
+          "default": true
+        },
+        "rubyLsp.formatter": {
+          "description": "Which tool the Ruby LSP should use for formatting files",
+          "type": "string",
+          "enum": [
+            "auto",
+            "rubocop",
+            "syntax_tree",
+            "none"
+          ],
+          "default": "auto"
+        },
+        "rubyLsp.bundleGemfile": {
+          "description": "Relative or absolute path to the Gemfile to use for bundling the Ruby LSP server. Only necessary when using a separate Gemfile for the Ruby LSP",
+          "type": "string",
+          "default": ""
+        },
+        "rubyLsp.testTimeout": {
+          "description": "The amount of time in seconds to wait for a test to finish before timing out. Only used when running tests from the test explorer",
+          "type": "integer",
+          "default": 30
+        },
+        "rubyLsp.branch": {
+          "description": "Run the Ruby LSP server from the specified branch rather than using the released gem. Only supported if not using bundleGemfile",
+          "type": "string",
+          "default": ""
+        },
+        "rubyLsp.pullDiagnosticsOn": {
+          "description": "When to pull diagnostics from the server (on change, save or both). Selecting 'save' may significantly improve performance on large files",
+          "type": "string",
+          "enum": [
+            "change",
+            "save",
+            "both"
+          ],
+          "default": "both"
+        },
+        "rubyLsp.useBundlerCompose": {
+          "description": "This is a temporary setting for testing purposes, do not use it! Replace the custom bundle logic by bundler-compose.",
+          "type": "boolean",
+          "default": false
+        },
+        "rubyLsp.bypassTypechecker": {
+          "description": "Ignores if the project uses a typechecker. Only intended to be used while working on the Ruby LSP itself",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "dependencies",
+          "name": "Dependencies",
+          "icon": "$(package)",
+          "description": "View and manage dependencies",
+          "contextualTitle": "Dependencies",
+          "when": "rubyLsp.activated"
+        }
+      ]
+    },
+    "breakpoints": [
+      {
+        "language": "ruby"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "ruby_lsp",
+        "label": "Ruby LSP debug client",
+        "languages": [
+          "ruby"
+        ],
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "program"
+            ],
+            "properties": {
+              "program": {
+                "type": "string",
+                "description": "The program to debug"
+              },
+              "env": {
+                "type": "object",
+                "description": "Environment variables defined as a key value pair. Example: { \"BACKTRACE\": \"1\" }",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "attach": {}
+        },
+        "configurationSnippets": [
+          {
+            "label": "Ruby: Debug program",
+            "description": "New configuration for debugging a Ruby program",
+            "body": {
+              "type": "ruby_lsp",
+              "request": "launch",
+              "name": "Debug program",
+              "program": "ruby ${file}"
+            }
+          },
+          {
+            "label": "Ruby: Debug a Minitest / Test Unit file",
+            "description": "New configuration for debugging a Minitest / Test Unit file",
+            "body": {
+              "type": "ruby_lsp",
+              "request": "launch",
+              "name": "Debug test file",
+              "program": "ruby -Itest ${relativeFile}"
+            }
+          },
+          {
+            "label": "Ruby: Attach the debugger to a running process",
+            "description": "New configuration for attaching the debugger to a process that was started with the debugger",
+            "body": {
+              "type": "ruby_lsp",
+              "request": "attach",
+              "name": "Attach to a debuggee"
+            }
+          }
+        ]
+      }
+    ],
+    "snippets": [
+      {
+        "language": "ruby",
+        "path": "./snippets.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "ruby",
+        "scopeName": "source.ruby",
+        "path": "./grammars/ruby.cson.json"
+      },
+      {
+        "language": "erb",
+        "scopeName": "text.html.erb",
+        "path": "./grammars/erb.cson.json",
+        "embeddedLanguages": {
+          "source.css": "css",
+          "source.js": "javascript",
+          "source.ruby": "ruby"
+        }
+      }
+    ],
+    "languages": [
+      {
+        "id": "ruby",
+        "aliases": [
+          "Ruby",
+          "ruby"
+        ],
+        "firstLine": "^#!\\s*/.*(?:ruby|rbx|rake)\\b",
+        "extensions": [
+          ".gemspec",
+          ".irbrc",
+          ".jbuilder",
+          ".pryrc",
+          ".rake",
+          ".rb",
+          ".ru",
+          ".ruby"
+        ],
+        "filenames": [
+          "brewfile",
+          "capfile",
+          "rakefile",
+          "gemfile"
+        ],
+        "configuration": "./languages/ruby.json"
+      },
+      {
+        "id": "erb",
+        "extensions": [
+          ".erb",
+          ".rhtml",
+          ".rhtm"
+        ],
+        "configuration": "./languages/erb.json"
+      }
+    ],
+    "configurationDefaults": {
+      "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/.ruby-lsp": true
+      },
+      "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/*.code-search": true,
+        "**/.ruby-lsp": true
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run esbuild-base --minify",
+    "package": "vsce package --out vscode-ruby-lsp.vsix",
+    "package_prerelease": "vsce package --pre-release --out vscode-ruby-lsp.vsix",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "yarn run compile",
+    "format": "eslint '**/*.ts' --fix && prettier '**/*.{json,md,yaml,yml}' --write",
+    "lint": "eslint '**/*.ts' && prettier '**/*.{json,md,yaml,yml}' --check",
+    "test": "node ./out/test/runTest.js"
+  },
+  "resolutions": {
+    "node-fetch": ">= 2.6.7",
+    "cross-fetch": ">= 3.1.5",
+    "ws": ">= 7.4.6"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.9",
+    "@shopify/eslint-plugin": "^44.0.0",
+    "@shopify/prettier-config": "^1.1.2",
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.68.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "@vscode/test-electron": "^2.3.9",
+    "@vscode/vsce": "^2.24.0",
+    "esbuild": "^0.20.1",
+    "eslint": "^8.57.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-prettier": "^5.1.3",
+    "glob": "^10.3.7",
+    "mocha": "^10.3.0",
+    "ovsx": "^0.8.3",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3",
+    "vscode-oniguruma": "^2.0.1",
+    "vscode-textmate": "^9.0.0"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  }
+}
