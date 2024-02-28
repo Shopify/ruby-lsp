@@ -9,7 +9,6 @@ import {
   RubyVersionStatus,
   ServerStatus,
   ExperimentalFeaturesStatus,
-  YjitStatus,
   StatusItem,
   FeaturesStatus,
   FormatterStatus,
@@ -145,70 +144,6 @@ suite("StatusItems", () => {
         status.item.command!.command,
         Command.ToggleExperimentalFeatures,
       );
-    });
-  });
-
-  suite("YjitStatus when Ruby supports it", () => {
-    beforeEach(() => {
-      ruby = { supportsYjit: true } as Ruby;
-      workspace = {
-        ruby,
-        lspClient: {
-          state: State.Running,
-          formatter: "none",
-          serverVersion: "1.0.0",
-          sendRequest: <T>() => Promise.resolve([] as T),
-        },
-        error: false,
-      };
-      status = new YjitStatus();
-      status.refresh(workspace);
-    });
-
-    test("Status is initialized with the right values", () => {
-      assert.strictEqual(status.item.text, "YJIT enabled");
-      assert.strictEqual(status.item.name, "YJIT");
-      assert.strictEqual(status.item.command?.title, "Disable");
-      assert.strictEqual(status.item.command.command, Command.ToggleYjit);
-    });
-
-    test("Refresh updates whether it's disabled or enabled", () => {
-      assert.strictEqual(status.item.text, "YJIT enabled");
-
-      workspace.ruby.supportsYjit = false;
-      status.refresh(workspace);
-      assert.strictEqual(status.item.text, "YJIT disabled");
-    });
-  });
-
-  suite("YjitStatus when Ruby does not support it", () => {
-    beforeEach(() => {
-      ruby = { supportsYjit: false } as Ruby;
-      workspace = {
-        ruby,
-        lspClient: {
-          state: State.Running,
-          formatter: "none",
-          serverVersion: "1.0.0",
-          sendRequest: <T>() => Promise.resolve([] as T),
-        },
-        error: false,
-      };
-      status = new YjitStatus();
-      status.refresh(workspace);
-    });
-
-    test("Refresh ignores YJIT configuration if Ruby doesn't support it", () => {
-      assert.strictEqual(status.item.text, "YJIT disabled");
-      assert.strictEqual(status.item.command, undefined);
-
-      const lspConfig = vscode.workspace.getConfiguration("rubyLsp");
-      lspConfig.update("yjit", true, true, true);
-      workspace.ruby.supportsYjit = false;
-      status.refresh(workspace);
-
-      assert.strictEqual(status.item.text, "YJIT disabled");
-      assert.strictEqual(status.item.command, undefined);
     });
   });
 

@@ -12,7 +12,6 @@ export enum Command {
   Update = "rubyLsp.update",
   ToggleExperimentalFeatures = "rubyLsp.toggleExperimentalFeatures",
   ServerOptions = "rubyLsp.serverOptions",
-  ToggleYjit = "rubyLsp.toggleYjit",
   SelectVersionManager = "rubyLsp.selectRubyVersionManager",
   ToggleFeatures = "rubyLsp.toggleFeatures",
   FormatterHelp = "rubyLsp.formatterHelp",

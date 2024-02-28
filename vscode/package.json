@@ -250,11 +250,6 @@
           "description": "A shell command to activate the right Ruby version or add a custom Ruby bin folder to the PATH. Only used if rubyVersionManager is set to 'custom'",
           "type": "string"
         },
-        "rubyLsp.yjit": {
-          "description": "Use YJIT to speed up the Ruby LSP server",
-          "type": "boolean",
-          "default": true
-        },
         "rubyLsp.formatter": {
           "description": "Which tool the Ruby LSP should use for formatting files",
           "type": "string",
