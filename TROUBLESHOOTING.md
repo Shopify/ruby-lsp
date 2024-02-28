@@ -95,7 +95,7 @@ requests, which means the dialogue will never go away.
 
 This is always the result of a bug in the server. It should always fail gracefully without getting into a corrupt state
 that prevents it from responding to new requests coming from the editor. If you encounter this, please submit a bug
-report [here](https://github.com/Shopify/vscode-ruby-lsp/issues/new?labels=bug&template=bug_template.yml) including the
+report [here](https://github.com/Shopify/ruby-lsp/issues/new?labels=bug&template=bug_template.yml) including the
 steps that led to the server getting stuck.
 
 ### Developing on containers
@@ -110,7 +110,7 @@ manner. Please include the steps taken to diagnose in your bug report.
 
 ### Check if the server is running
 
-Check the [status center](https://github.com/Shopify/vscode-ruby-lsp/blob/main/extras/ruby_lsp_status_center.png).
+Check the [status center](https://github.com/Shopify/ruby-lsp/blob/main/extras/ruby_lsp_status_center.png).
 Does the server status say it's running? If it is running, but you are missing certain features, please check our
 [documentation](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html) to ensure we already added support for it.
 
@@ -130,7 +130,7 @@ Did it select your preferred version manager? You can define which version manag
 
 We default to supporting the most common version managers, but that may not cover every single tool available. For these
 cases, we offer custom activation support. More context in the version manager
-[documentation](https://github.com/Shopify/vscode-ruby-lsp/blob/main/VERSION_MANAGERS.md).
+[documentation](https://github.com/Shopify/ruby-lsp/blob/main/vscode/VERSION_MANAGERS.md).
 
 ### Try to run the Ruby activation manually
 
@@ -154,5 +154,5 @@ extension?
 ## After troubleshooting
 
 If after troubleshooting the Ruby LSP is still not initializing properly, please report an issue
-[here](https://github.com/Shopify/vscode-ruby-lsp/issues/new?labels=bug&template=bug_template.yml) so that we can assist
+[here](https://github.com/Shopify/ruby-lsp/issues/new?labels=bug&template=bug_template.yml) so that we can assist
 in fixing the problem. Remember to include the steps taken when trying to diagnose the issue.
