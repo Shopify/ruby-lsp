@@ -5,28 +5,43 @@
     "editor.defaultFormatter": "Shopify.ruby-lsp"
   },
   // So features like completion can still be displayed with Sorbet in the dependencies
-  "rubyLsp.bypassTypechecker": true,
   "search.exclude": {
-    "**/test/fixtures/prism": true
+    "**/test/fixtures/prism": true,
+  },
+  // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
+  "[typescript]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
   },
   "cSpell.languageSettings": [
     {
       "languageId": "*",
       "locale": "en",
-      "dictionaries": ["wordsEn"]
+      "dictionaries": [
+        "wordsEn"
+      ]
     },
     {
       "languageId": "*",
       "locale": "en-US",
-      "dictionaries": ["wordsEn"]
+      "dictionaries": [
+        "wordsEn"
+      ]
     },
     {
       "languageId": "*",
-      "dictionaries": ["companies", "softwareTerms", "misc"]
+      "dictionaries": [
+        "companies",
+        "softwareTerms",
+        "misc"
+      ]
     },
     {
       "languageId": "ruby",
-      "dictionaries": ["ruby"]
+      "dictionaries": [
+        "ruby"
+      ]
     }
   ]
 }

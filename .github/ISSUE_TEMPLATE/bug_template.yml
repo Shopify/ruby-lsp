@@ -8,33 +8,39 @@ body:
     attributes:
       value: >
         Thank you for filing a bug report! Please answer the following questions to help us understand the issue.
-  - type: input
-    attributes:
-      label: Ruby version
-      description: The Ruby version being used to run the LSP
-    validations:
-      required: true
-  - type: textarea
-    attributes:
-      label: Code snippet
-      description: A code snippet that reproduces the issue
-      placeholder: >
-        If applicable, please include the smallest code snippet that reproduces the issue.
   - type: textarea
     attributes:
       label: Description
-      description: Reproduction steps and an explanation of the observed behavior
+      description: Reproduction steps
       placeholder: >
-        Before submitting the issue report, please try updating the ruby-lsp gem first. If the bug is related to a
-        feature that involves automatically changing code, such as refactors or formatting, please include an example of
-        the resulting code. You may want to include a screenshot or GIF of the issue.
-    validations:
-      required: true
-  - type: textarea
-    attributes:
-      label: Expected output
-      description: A description of the expected behavior
-      placeholder: >
-        Describe what you expected to happen.
+        ### Before submitting
+
+        Please follow the instructions on
+        [troubleshooting](https://github.com/Shopify/ruby-lsp/blob/main/TROUBLESHOOTING.md) and make sure you
+        are:
+        1. On the latest version of the Ruby LSP VS Code extension
+        2. On the latest version of the Ruby LSP server gem
+        3. On the latest version of VS Code
+
+        If the issue persist, please deleted this section and submit the report.
+
+        ### Reproduction steps
+
+        <!--
+        **IMPORTANT NOTE**
+        Please provide as much detail about your development setup as possible. Often issues with the Ruby LSP are
+        specific to a combination of operating system, Ruby version, Ruby version manager, the editor being used and
+        project setup. The easier it is to reproduce the problem, the quicker it will likely take to fix it.
+        -->
+
+        <!-- Suggested structure -->
+        1. Start the Ruby LSP using a certain editor
+        2. Open a Ruby file
+        3. Do something
+        4. See unexpected behavior
+
+        **Code snippet or error message**
+        ```ruby
+        ```
     validations:
       required: true
