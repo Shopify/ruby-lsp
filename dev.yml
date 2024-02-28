@@ -3,9 +3,8 @@ name: ruby-lsp
 type: ruby
 
 up:
-  - ruby: '3.3.0'
-  - bundler:
-      gemfile: Gemfile
+  - ruby
+  - bundler
 
 commands:
   docs:
