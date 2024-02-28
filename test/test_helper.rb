@@ -1,6 +1,17 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "sorbet-runtime"
+
+if ENV["COVERAGE"]
+  require "simplecov"
+
+  SimpleCov.start do
+    T.bind(self, SimpleCov::Configuration)
+    enable_coverage :branch
+  end
+end
+
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 $VERBOSE = nil unless ENV["VERBOSE"] || ENV["CI"]
 

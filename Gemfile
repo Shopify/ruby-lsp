@@ -18,6 +18,7 @@ group :development do
   gem "rubocop-shopify", "~> 2.15", require: false
   gem "rubocop-sorbet", "~> 0.7", require: false
   gem "rubocop", "~> 1.60"
+  gem "simplecov", require: false
   gem "syntax_tree", ">= 6.1.1", "< 7"
 
   platforms :ruby do # C Ruby (MRI), Rubinius or TruffleRuby, but NOT Windows
