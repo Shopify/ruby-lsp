@@ -37,12 +37,16 @@ jobs:
             const pullRequests = [];
 
             for (const commit of commitResponse.data.commits) {
-              const { data: response } = await github.request(`GET /repos/shopify/ruby-lsp/commits/${commit.sha}/pulls`);
+              const pullsResponse = await github.request(`GET /repos/shopify/ruby-lsp/commits/${commit.sha}/pulls`);
 
-              pullRequests.push({
-                title: response.title,
-                url: response.html_url,
-                labels: response.labels.map((label) => label.name)
+              pullsResponse.data.forEach((pr) => {
+                if (!pullRequests.some((pull) => pull.url === pr.html_url)) {
+                  pullRequests.push({
+                    title: pr.title,
+                    url: pr.html_url,
+                    labels: pr.labels.map((label) => label.name)
+                  });
+                }
               });
             }
             console.log(`Discovered pull requests ${pullRequests.length}`);
