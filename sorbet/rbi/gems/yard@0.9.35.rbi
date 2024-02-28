@@ -2480,7 +2480,7 @@ class YARD::CodeObjects::Base
   #   the paths are equal
   # @return [Boolean] whether or not the objects are considered the same
   #
-  # source://yard//lib/yard/code_objects/base.rb#322
+  # source://yard//lib/yard/code_objects/base.rb#323
   def ==(other); end
 
   # Accesses a custom attribute on the object
@@ -2489,7 +2489,7 @@ class YARD::CodeObjects::Base
   # @return [Object, nil] the custom attribute or nil if not found.
   # @see #[]=
   #
-  # source://yard//lib/yard/code_objects/base.rb#342
+  # source://yard//lib/yard/code_objects/base.rb#343
   def [](key); end
 
   # Sets a custom attribute on the object
@@ -2499,7 +2499,7 @@ class YARD::CodeObjects::Base
   # @return [void]
   # @see #[]
   #
-  # source://yard//lib/yard/code_objects/base.rb#355
+  # source://yard//lib/yard/code_objects/base.rb#356
   def []=(key, value); end
 
   # Associates a file with a code object, optionally adding the line where it was defined.
@@ -2520,7 +2520,7 @@ class YARD::CodeObjects::Base
   # @see Docstring#add_tag
   # @since 0.8.4
   #
-  # source://yard//lib/yard/code_objects/base.rb#560
+  # source://yard//lib/yard/code_objects/base.rb#561
   def add_tag(*tags); end
 
   # The non-localized documentation string associated with the object
@@ -2547,7 +2547,7 @@ class YARD::CodeObjects::Base
   #   the locale of the documentation string.
   # @return [Docstring] the documentation string
   #
-  # source://yard//lib/yard/code_objects/base.rb#404
+  # source://yard//lib/yard/code_objects/base.rb#405
   def docstring(locale = T.unsafe(nil)); end
 
   # Attaches a docstring to a code object by parsing the comments attached to the statement
@@ -2556,7 +2556,7 @@ class YARD::CodeObjects::Base
   # @param comments [String, Array<String>, Docstring] the comments attached to the code object to be parsed
   #   into a docstring and meta tags.
   #
-  # source://yard//lib/yard/code_objects/base.rb#426
+  # source://yard//lib/yard/code_objects/base.rb#427
   def docstring=(comments); end
 
   # Marks whether or not the method is conditionally defined at runtime
@@ -2587,7 +2587,7 @@ class YARD::CodeObjects::Base
   #   the paths are equal
   # @return [Boolean] whether or not the objects are considered the same
   #
-  # source://yard//lib/yard/code_objects/base.rb#322
+  # source://yard//lib/yard/code_objects/base.rb#323
   def eql?(other); end
 
   # Tests if another object is equal to this, including a proxy
@@ -2596,15 +2596,16 @@ class YARD::CodeObjects::Base
   #   the paths are equal
   # @return [Boolean] whether or not the objects are considered the same
   #
-  # source://yard//lib/yard/code_objects/base.rb#322
+  # source://yard//lib/yard/code_objects/base.rb#323
   def equal?(other); end
 
   # Returns the filename the object was first parsed at, taking
   # definitions with docstrings first.
   #
   # @return [String] a filename
+  # @return [nil] if there is no file associated with the object
   #
-  # source://yard//lib/yard/code_objects/base.rb#306
+  # source://yard//lib/yard/code_objects/base.rb#307
   def file; end
 
   # The files the object was defined in. To add a file, use {#add_file}.
@@ -2629,7 +2630,7 @@ class YARD::CodeObjects::Base
   # @return [String] the rendered template
   # @see Templates::Engine#render
   #
-  # source://yard//lib/yard/code_objects/base.rb#504
+  # source://yard//lib/yard/code_objects/base.rb#505
   def format(options = T.unsafe(nil)); end
 
   # @return [String] the group this object is associated with
@@ -2649,19 +2650,19 @@ class YARD::CodeObjects::Base
   # @return [Boolean]
   # @see Docstring#has_tag?
   #
-  # source://yard//lib/yard/code_objects/base.rb#555
+  # source://yard//lib/yard/code_objects/base.rb#556
   def has_tag?(name); end
 
   # @return [Integer] the object's hash value (for equality checking)
   #
-  # source://yard//lib/yard/code_objects/base.rb#333
+  # source://yard//lib/yard/code_objects/base.rb#334
   def hash; end
 
   # Inspects the object, returning the type and path
   #
   # @return [String] a string describing the object
   #
-  # source://yard//lib/yard/code_objects/base.rb#512
+  # source://yard//lib/yard/code_objects/base.rb#513
   def inspect; end
 
   # Returns the line the object was first parsed at (or nil)
@@ -2669,13 +2670,13 @@ class YARD::CodeObjects::Base
   # @return [Fixnum] the line where the object was first defined.
   # @return [nil] if there is no line associated with the object
   #
-  # source://yard//lib/yard/code_objects/base.rb#314
+  # source://yard//lib/yard/code_objects/base.rb#315
   def line; end
 
   # @overload dynamic_attr_name
   # @overload dynamic_attr_name=
   #
-  # source://yard//lib/yard/code_objects/base.rb#372
+  # source://yard//lib/yard/code_objects/base.rb#373
   def method_missing(meth, *args, &block); end
 
   # The name of the object
@@ -2703,7 +2704,7 @@ class YARD::CodeObjects::Base
   #   for {Registry.root}). If obj is nil, the object is unregistered
   #   from the Registry.
   #
-  # source://yard//lib/yard/code_objects/base.rb#521
+  # source://yard//lib/yard/code_objects/base.rb#522
   def namespace=(obj); end
 
   # The namespace the object is defined in. If the object is in the
@@ -2720,7 +2721,7 @@ class YARD::CodeObjects::Base
   #   for {Registry.root}). If obj is nil, the object is unregistered
   #   from the Registry.
   #
-  # source://yard//lib/yard/code_objects/base.rb#521
+  # source://yard//lib/yard/code_objects/base.rb#522
   def parent=(obj); end
 
   # Represents the unique path of the object. The default implementation
@@ -2733,19 +2734,19 @@ class YARD::CodeObjects::Base
   # @return [String] the unique path of the object
   # @see #sep
   #
-  # source://yard//lib/yard/code_objects/base.rb#452
+  # source://yard//lib/yard/code_objects/base.rb#453
   def path; end
 
   # @param other [Base, String] another code object (or object path)
   # @return [String] the shortest relative path from this object to +other+
   # @since 0.5.3
   #
-  # source://yard//lib/yard/code_objects/base.rb#474
+  # source://yard//lib/yard/code_objects/base.rb#475
   def relative_path(other); end
 
   # @return [Boolean] whether or not this object is a RootObject
   #
-  # source://yard//lib/yard/code_objects/base.rb#566
+  # source://yard//lib/yard/code_objects/base.rb#567
   def root?; end
 
   # Override this method with a custom component separator. For instance,
@@ -2756,7 +2757,7 @@ class YARD::CodeObjects::Base
   # @return [String] the component that separates the namespace path
   #   and the name (default is {NSEP})
   #
-  # source://yard//lib/yard/code_objects/base.rb#575
+  # source://yard//lib/yard/code_objects/base.rb#576
   def sep; end
 
   # The one line signature representing an object. For a method, this will
@@ -2789,7 +2790,7 @@ class YARD::CodeObjects::Base
   # @param statement [#source, String] the +Parser::Statement+ holding the source code or the raw source
   #   as a +String+ for the definition of the code object only (not the block)
   #
-  # source://yard//lib/yard/code_objects/base.rb#387
+  # source://yard//lib/yard/code_objects/base.rb#388
   def source=(statement); end
 
   # Language of the source code associated with the object. Defaults to
@@ -2812,14 +2813,14 @@ class YARD::CodeObjects::Base
   #
   # @see Docstring#tag
   #
-  # source://yard//lib/yard/code_objects/base.rb#547
+  # source://yard//lib/yard/code_objects/base.rb#548
   def tag(name); end
 
   # Gets a list of tags from the {#docstring}
   #
   # @see Docstring#tags
   #
-  # source://yard//lib/yard/code_objects/base.rb#551
+  # source://yard//lib/yard/code_objects/base.rb#552
   def tags(name = T.unsafe(nil)); end
 
   # @note Override this method if your object has a special title that does
@@ -2828,12 +2829,12 @@ class YARD::CodeObjects::Base
   # @return [String] the display title for an object
   # @see 0.8.4
   #
-  # source://yard//lib/yard/code_objects/base.rb#467
+  # source://yard//lib/yard/code_objects/base.rb#468
   def title; end
 
   # @return [nil] this object does not turn into an array
   #
-  # source://yard//lib/yard/code_objects/base.rb#336
+  # source://yard//lib/yard/code_objects/base.rb#337
   def to_ary; end
 
   # Represents the unique path of the object. The default implementation
@@ -2846,7 +2847,7 @@ class YARD::CodeObjects::Base
   # @return [String] the unique path of the object
   # @see #sep
   #
-  # source://yard//lib/yard/code_objects/base.rb#452
+  # source://yard//lib/yard/code_objects/base.rb#453
   def to_s; end
 
   # Default type is the lowercase class name without the "Object" suffix.
@@ -2854,7 +2855,7 @@ class YARD::CodeObjects::Base
   #
   # @return [Symbol] the type of code object this represents
   #
-  # source://yard//lib/yard/code_objects/base.rb#436
+  # source://yard//lib/yard/code_objects/base.rb#437
   def type; end
 
   # @return [Symbol] the visibility of an object (:public, :private, :protected)
@@ -2877,7 +2878,7 @@ class YARD::CodeObjects::Base
   # @see #copy_to
   # @since 0.8.0
   #
-  # source://yard//lib/yard/code_objects/base.rb#586
+  # source://yard//lib/yard/code_objects/base.rb#587
   def copyable_attributes; end
 
   private
@@ -2887,10 +2888,10 @@ class YARD::CodeObjects::Base
   # @param source [String] the source code to format
   # @return [String] formatted source
   #
-  # source://yard//lib/yard/code_objects/base.rb#598
+  # source://yard//lib/yard/code_objects/base.rb#599
   def format_source(source); end
 
-  # source://yard//lib/yard/code_objects/base.rb#605
+  # source://yard//lib/yard/code_objects/base.rb#606
   def translate_docstring(locale); end
 
   class << self
@@ -7405,13 +7406,13 @@ class YARD::I18n::Text
   #   block separated by one or more empty lines. Empty line is a
   #   line that contains only zero or more whitespaces. It may
   #   called many times.
-  # @yieldparam text [String] the text of extracted paragraph.
-  # @yieldparam start_line_no [Integer] the start line number of
-  #   extracted paragraph.
   # @yieldparam name [String] the name of extracted attribute.
   # @yieldparam value [String] the value of extracted attribute.
   # @yieldparam line_no [Integer] the defined line number of extracted
   #   attribute.
+  # @yieldparam text [String] the text of extracted paragraph.
+  # @yieldparam start_line_no [Integer] the start line number of
+  #   extracted paragraph.
   #
   # source://yard//lib/yard/i18n/text.rb#35
   def extract_messages; end
@@ -7635,7 +7636,7 @@ class YARD::Logger < ::Logger
   # source://yard//lib/yard/logging.rb#201
   def format_log(sev, _time, _prog, msg); end
 
-  # source://logger/1.5.3/logger.rb#682
+  # source://logger/1.6.0/logger.rb#684
   def print_no_newline(msg); end
 
   class << self
@@ -9972,7 +9973,7 @@ end
 
 # source://yard//lib/yard/parser/ruby/ast_node.rb#479
 class YARD::Parser::Ruby::MethodDefinitionNode < ::YARD::Parser::Ruby::AstNode
-  def block(*_arg0); end
+  def block(n = T.unsafe(nil)); end
 
   # @return [Boolean]
   #
@@ -11033,10 +11034,10 @@ class YARD::Parser::SourceParser
 
   # @since 0.5.6
   #
-  # source://yard//lib/yard/parser/source_parser.rb#516
+  # source://yard//lib/yard/parser/source_parser.rb#515
   def parser_class; end
 
-  # source://yard//lib/yard/parser/source_parser.rb#501
+  # source://yard//lib/yard/parser/source_parser.rb#500
   def parser_type=(value); end
 
   # Guesses the parser type to use depending on the file extension.
@@ -11044,14 +11045,14 @@ class YARD::Parser::SourceParser
   # @param filename [String] the filename to use to guess the parser type
   # @return [Symbol] a parser type that matches the filename
   #
-  # source://yard//lib/yard/parser/source_parser.rb#509
+  # source://yard//lib/yard/parser/source_parser.rb#508
   def parser_type_for_filename(filename); end
 
   # Runs a {Handlers::Processor} object to post process the parsed statements.
   #
   # @return [void]
   #
-  # source://yard//lib/yard/parser/source_parser.rb#491
+  # source://yard//lib/yard/parser/source_parser.rb#490
   def post_process; end
 
   class << self
@@ -11128,10 +11129,6 @@ class YARD::Parser::SourceParser
     # To register a callback that is called before the entire list of files
     # is processed, see {before_parse_list}.
     #
-    # @example Cancel parsing of any test_*.rb files
-    #   SourceParser.before_parse_file do |parser|
-    #   return false if parser.file =~ /^test_.+\.rb$/
-    #   end
     # @example Installing a simple callback
     #   SourceParser.before_parse_file do |parser|
     #   puts "I'm parsing #{parser.file}"
@@ -11141,9 +11138,13 @@ class YARD::Parser::SourceParser
     #   "I'm parsing lib/foo.rb"
     #   "I'm parsing lib/foo_bar.rb"
     #   "I'm parsing lib/last_file.rb"
+    # @example Cancel parsing of any test_*.rb files
+    #   SourceParser.before_parse_file do |parser|
+    #   return false if parser.file =~ /^test_.+\.rb$/
+    #   end
     # @return [Proc] the yielded block
-    # @see before_parse_list
     # @see after_parse_file
+    # @see before_parse_list
     # @since 0.7.0
     # @yield [parser] the yielded block is called once before each
     #   file that is parsed. This might happen many times for a single
@@ -11167,6 +11168,12 @@ class YARD::Parser::SourceParser
     # via {parse}. The block passed to this method will be called on
     # subsequent parse calls.
     #
+    # @example Installing a simple callback
+    #   SourceParser.before_parse_list do |files, globals|
+    #   puts "Starting to parse..."
+    #   end
+    #   YARD.parse('lib/**/*.rb')
+    #   # prints "Starting to parse..."
     # @example Setting global state
     #   SourceParser.before_parse_list do |files, globals|
     #   globals.method_count = 0
@@ -11180,12 +11187,6 @@ class YARD::Parser::SourceParser
     #   end
     #   YARD.parse
     #   # Prints: "Found 37 methods"
-    # @example Installing a simple callback
-    #   SourceParser.before_parse_list do |files, globals|
-    #   puts "Starting to parse..."
-    #   end
-    #   YARD.parse('lib/**/*.rb')
-    #   # prints "Starting to parse..."
     # @example Using a global callback to cancel parsing
     #   SourceParser.before_parse_list do |files, globals|
     #   return false if files.include?('foo.rb')
@@ -11194,8 +11195,8 @@ class YARD::Parser::SourceParser
     #   YARD.parse(['foo.rb', 'bar.rb']) # callback cancels this method
     #   YARD.parse('bar.rb') # parses normally
     # @return [Proc] the yielded block
-    # @see before_parse_file
     # @see after_parse_list
+    # @see before_parse_file
     # @since 0.7.0
     # @yield [files, globals] the yielded block is called once before
     #   parsing all files
@@ -11722,22 +11723,22 @@ module YARD::Registry
     # Attempts to find an object by name starting at +namespace+, performing
     # a lookup similar to Ruby's method of resolving a constant in a namespace.
     #
+    # @example Looks for instance method #reverse starting from A::B::C
+    #   Registry.resolve(P("A::B::C"), "#reverse")
     # @example Looks for a constant in the root namespace
     #   Registry.resolve(nil, 'CONSTANT')
     # @example Looks for a class method respecting the inheritance tree
     #   Registry.resolve(myclass, 'mymethod', true)
-    # @example Looks for instance method #reverse starting from A::B::C
-    #   Registry.resolve(P("A::B::C"), "#reverse")
     # @example Looks for a constant but returns a proxy if not found
     #   Registry.resolve(P('A::B::C'), 'D', false, true) # => #<yardoc proxy A::B::C::D>
     # @example Looks for a complex path from a namespace
     #   Registry.resolve(P('A::B'), 'B::D') # => #<yardoc class A::B::D>
-    # @param inheritance [Boolean] Follows inheritance chain (mixins, superclass)
-    #   when performing name resolution if set to +true+.
     # @param namespace [CodeObjects::NamespaceObject, nil] the starting namespace
     #   (module or class). If +nil+ or +:root+, starts from the {root} object.
     # @param name [String, Symbol] the name (or complex path) to look for from
     #   +namespace+.
+    # @param inheritance [Boolean] Follows inheritance chain (mixins, superclass)
+    #   when performing name resolution if set to +true+.
     # @param proxy_fallback [Boolean] If +true+, returns a proxy representing
     #   the unresolved path (namespace + name) if no object is found.
     # @param type [Symbol, nil] the {CodeObjects::Base#type} that the resolved
@@ -11895,12 +11896,12 @@ class YARD::RegistryResolver
   # object can be returned if the lookup fails for future resolution. The
   # proxy will be type hinted with the +type+ used in the original lookup.
   #
-  # @example A lookup on a method through the inheritance tree
-  #   resolver.lookup_by_math("A::B#foo", inheritance: true)
   # @example A lookup from root
   #   resolver.lookup_by_path("A::B::C")
   # @example A lookup from the A::B namespace
   #   resolver.lookup_by_path("C", namespace: P("A::B"))
+  # @example A lookup on a method through the inheritance tree
+  #   resolver.lookup_by_math("A::B#foo", inheritance: true)
   # @option opts
   # @option opts
   # @option opts
