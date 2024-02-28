@@ -129,39 +129,6 @@ export class ExperimentalFeaturesStatus extends StatusItem {
   refresh(_workspace: WorkspaceInterface): void {}
 }
 
-export class YjitStatus extends StatusItem {
-  constructor() {
-    super("yjit");
-
-    this.item.name = "YJIT";
-    this.item.text = "Fetching YJIT information";
-  }
-
-  refresh(workspace: WorkspaceInterface): void {
-    const useYjit: boolean | undefined = vscode.workspace
-      .getConfiguration("rubyLsp")
-      .get("yjit");
-
-    if (useYjit && workspace.ruby.supportsYjit) {
-      this.item.text = "YJIT enabled";
-
-      this.item.command = {
-        title: "Disable",
-        command: Command.ToggleYjit,
-      };
-    } else {
-      this.item.text = "YJIT disabled";
-
-      if (workspace.ruby.supportsYjit) {
-        this.item.command = {
-          title: "Enable",
-          command: Command.ToggleYjit,
-        };
-      }
-    }
-  }
-}
-
 export class FeaturesStatus extends StatusItem {
   constructor() {
     super("features");
@@ -219,7 +186,6 @@ export class StatusItems {
       new RubyVersionStatus(),
       new ServerStatus(),
       new ExperimentalFeaturesStatus(),
-      new YjitStatus(),
       new FeaturesStatus(),
       new FormatterStatus(),
     ];

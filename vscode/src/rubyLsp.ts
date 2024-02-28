@@ -253,17 +253,6 @@ export class RubyLsp {
             .update("enabledFeatures", features, true, true);
         }
       }),
-      vscode.commands.registerCommand(Command.ToggleYjit, () => {
-        const lspConfig = vscode.workspace.getConfiguration("rubyLsp");
-        const yjitEnabled = lspConfig.get("yjit");
-        lspConfig.update("yjit", !yjitEnabled, true, true);
-
-        const workspace = this.currentActiveWorkspace();
-
-        if (workspace) {
-          STATUS_EMITTER.fire(workspace);
-        }
-      }),
       vscode.commands.registerCommand(
         Command.ToggleExperimentalFeatures,
         async () => {

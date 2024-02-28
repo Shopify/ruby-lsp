@@ -99,7 +99,7 @@ suite("Telemetry", () => {
       .get("enabledFeatures")!;
 
     const expectedNumberOfEvents =
-      5 + Object.keys(featureConfigurations).length;
+      4 + Object.keys(featureConfigurations).length;
 
     assert.strictEqual(api.sentEvents.length, expectedNumberOfEvents);
 

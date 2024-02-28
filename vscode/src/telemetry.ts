@@ -74,7 +74,6 @@ export class Telemetry {
     const promises: Promise<void>[] = [
       { namespace: "workbench", field: "colorTheme" },
       { namespace: "rubyLsp", field: "enableExperimentalFeatures" },
-      { namespace: "rubyLsp", field: "yjit" },
       { namespace: "rubyLsp", field: "rubyVersionManager" },
       { namespace: "rubyLsp", field: "formatter" },
     ].map(({ namespace, field }) => {
