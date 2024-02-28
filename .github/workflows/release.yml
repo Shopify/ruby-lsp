@@ -37,7 +37,7 @@ jobs:
             const pullRequests = [];
 
             for (const commit of commitResponse.data.commits) {
-              const { data: response } = await octokit.request(`GET /repos/shopify/ruby-lsp/commits/${commit.sha}/pulls`);
+              const { data: response } = await github.request(`GET /repos/shopify/ruby-lsp/commits/${commit.sha}/pulls`);
 
               pullRequests.push({
                 title: response.title,

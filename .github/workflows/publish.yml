@@ -91,7 +91,7 @@ jobs:
             });
             const previousRelease = data.find((release) => release.tag_name.startsWith("vscode-ruby-lsp"));
 
-            const { data: commits } = await github.rest.repos.compareCommits({
+            const commitResponse = await github.rest.repos.compareCommits({
               owner: context.repo.owner,
               repo: context.repo.repo,
               base: previousRelease.tag_name,
@@ -100,8 +100,8 @@ jobs:
 
             const pullRequests = [];
 
-            for (const commit of commits) {
-              const { data: response } = await octokit.request(`GET /repos/shopify/ruby-lsp/commits/${commit.sha}/pulls`);
+            for (const commit of commitResponse.data.commits) {
+              const { data: response } = await github.request(`GET /repos/shopify/ruby-lsp/commits/${commit.sha}/pulls`);
 
               pullRequests.push({
                 title: response.title,
