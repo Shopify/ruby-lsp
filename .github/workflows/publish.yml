@@ -98,11 +98,17 @@ jobs:
               head: "${{ github.ref }}"
             });
 
-            const pullRequests = commits.map((commit) => {
+            const pullRequests = [];
+
+            for (const commit of commits) {
               const { data: response } = await octokit.request(`GET /repos/shopify/ruby-lsp/commits/${commit.sha}/pulls`);
 
-              { title: response.title, url: response.html_url, labels: response.labels.map((label) => label.name) }
-            });
+              pullRequests.push({
+                title: response.title,
+                url: response.html_url,
+                labels: response.labels.map((label) => label.name)
+              });
+            }
 
             const relevantPulls = pullRequests.filter((pull) => {
               return pull.labels.some((label) => label === "vscode") &&
