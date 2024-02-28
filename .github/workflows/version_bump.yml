@@ -129,3 +129,9 @@ jobs:
 
             await github.graphql(enableAutoMergeQuery, data)
             console.log(`Enabled auto-merge for pull request ${pullRequestNumber}`);
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pullRequestNumber,
+              labels: ["chore"],
+            });
