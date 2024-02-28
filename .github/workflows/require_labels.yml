@@ -1,0 +1,44 @@
+name: Pull Request Labels
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+jobs:
+  check-labels:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for Pull Request Labels
+        shell: bash
+        run: |
+          pr_labels=$(gh pr view --json labels --jq ".labels[] .name" ${{ github.event.pull_request.number }})
+          type_labels=("documentation" "bugfix" "chore" "enhancement" "dependencies" "breaking-change")
+          category_labels=("server" "vscode")
+          matched=0
+
+          for label in $pr_labels; do
+            if [[ "${type_labels[@]}" =~ "${label}" ]]; then
+              matched=1
+              break
+            fi
+          done
+
+          if [ $matched -eq 0 ]; then
+            echo "Please label this PR with one of the following types: ${type_labels[@]}"
+            exit 1
+          fi
+
+          for label in $pr_labels; do
+            if [[ "${category_labels[@]}" =~ "${label}" ]]; then
+              matched=1
+              break
+            fi
+          done
+
+          if [ $matched -eq 0 ]; then
+            echo "Please label this PR with one of the following categories: ${category_labels[@]}"
+            exit 1
+          fi

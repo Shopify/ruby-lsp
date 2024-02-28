@@ -7,6 +7,7 @@ on:
 
 jobs:
   publish:
+    if: ${{ ! startsWith(github.ref, 'refs/tags/vscode-ruby-lsp') }}
     runs-on: ubuntu-latest
 
     steps:
@@ -18,10 +19,58 @@ jobs:
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |
+            const { data }  = await github.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            const previousRelease = data.find((release) => !release.tag_name.startsWith("vscode-ruby-lsp"));
+
+            const { data: commits } = await github.rest.repos.compareCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              base: previousRelease.tag_name,
+              head: "${{ github.ref }}"
+            });
+
+            const pullRequests = commits.map((commit) => {
+              const { data: response } = await octokit.request(`GET /repos/shopify/ruby-lsp/commits/${commit.sha}/pulls`);
+
+              { title: response.title, url: response.html_url, labels: response.labels.map((label) => label.name) }
+            });
+
+            const relevantPulls = pullRequests.filter((pull) => {
+              return pull.labels.some((label) => label === "server") &&
+                !pull.labels.some((label) => label === "dependencies") &&
+                !pull.labels.some((label) => label === "chore")
+            });
+
+            const breakingChanges = relevantPulls.filter((pull) => pull.labels.some((label) => label === "breaking-change"));
+            const bugFixes = relevantPulls.filter((pull) => pull.labels.some((label) => label === "bugfix"));
+            const enhancements = relevantPulls.filter((pull) => pull.labels.some((label) => label === "enhancement"));
+            const otherChanges = relevantPulls.filter((pull) => !pull.labels.some((label) => ["bugfix", "enhancement", "breaking-change"].includes(label)));
+
+            const content = `# ${{ github.ref_name }}\n`;
+
+            if (breakingChanges.length > 0) {
+              content += `## 🚧 Breaking Changes\n\n${breakingChanges.map((pull) => `- ${pull.title} (${pull.url})`).join("\n")}\n\n`;
+            }
+
+            if (enhancements.length > 0) {
+              content += `## ✨ Enhancements\n\n${enhancements.map((pull) => `- ${pull.title} (${pull.url})`).join("\n")}\n\n`;
+            }
+
+            if (bugFixes.length > 0) {
+              content += `## 🐛 Bug Fixes\n\n${bugFixes.map((pull) => `- ${pull.title} (${pull.url})`).join("\n")}\n\n`;
+            }
+
+            if (otherChanges.length > 0) {
+              content += `## 📦 Other Changes\n\n${otherChanges.map((pull) => `- ${pull.title} (${pull.url})`).join("\n")}\n\n`;
+            }
+
             await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name: "${{ github.ref }}",
               name: "${{ github.ref_name }}",
-              generate_release_notes: true
-            })
+              body: content
+            });
