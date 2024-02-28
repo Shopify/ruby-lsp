@@ -28,5 +28,6 @@
       "languageId": "ruby",
       "dictionaries": ["ruby"]
     }
-  ]
+  ],
+  "sorbet.highlightUntyped": "everywhere-but-tests"
 }
