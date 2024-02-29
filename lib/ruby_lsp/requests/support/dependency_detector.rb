@@ -24,13 +24,18 @@ module RubyLsp
       @typechecker = T.let(detect_typechecker, T::Boolean)
     end
 
+    # TODO: this method is untested
     sig { returns(String) }
     def detect_formatter
       # NOTE: Intentionally no $ at end, since we want to match rubocop-shopify, etc.
       if direct_dependency?(/^rubocop/)
+        $stderr.puts("Picked rubocop formatter")
         "rubocop"
       elsif direct_dependency?(/^syntax_tree$/)
         "syntax_tree"
+      elsif direct_dependency?(/^standard$/)
+        $stderr.puts("Picked standard-rb formatter")
+        "standard-rb"
       else
         "none"
       end

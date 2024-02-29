@@ -285,6 +285,13 @@ class ExecutorTest < Minitest::Test
     assert_equal("rubocop", @store.formatter)
   end
 
+  def test_detects_standard_rb_if_direct_dependency
+    stub_dependencies(rubocop: false, syntax_tree: false, standard_rb: true)
+    RubyLsp::Executor.new(@store, @message_queue)
+      .execute(method: "initialize", params: { initializationOptions: { formatter: "auto" } })
+    assert_equal("standard-rb", @store.formatter)
+  end
+
   def test_detects_syntax_tree_if_direct_dependency
     stub_dependencies(rubocop: false, syntax_tree: true)
     RubyLsp::Executor.new(@store, @message_queue)
@@ -401,11 +408,12 @@ class ExecutorTest < Minitest::Test
     # Depending on which tests have run prior to this one, `RuboCopRunner` may or may not be defined
   end
 
-  def stub_dependencies(rubocop:, syntax_tree:)
+  def stub_dependencies(rubocop:, syntax_tree:, standard_rb: false)
     Singleton.__init__(RubyLsp::DependencyDetector)
     dependencies = {}
     dependencies["syntax_tree"] = "..." if syntax_tree
     dependencies["rubocop"] = "..." if rubocop
+    dependencies["standard"] = "..." if standard_rb
     Bundler.locked_gems.stubs(:dependencies).returns(dependencies)
   end
 end

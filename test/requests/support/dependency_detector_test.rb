@@ -49,6 +49,16 @@ module RubyLsp
       refute(DependencyDetector.instance.direct_dependency?(/^ruby-lsp/))
     end
 
+    # TODO: add tests for `detect_formatter`
+
+    def test_direct_dependency_on_detect_formatter
+      skip "TODO"
+    end
+
+    def test_direct_dependency_on_standard_rb_toooodooo
+      skip "TODO"
+    end
+
     private
 
     def stub_dependencies(dependencies)
