@@ -20,66 +20,6 @@ jobs:
           cache: "yarn"
           cache-dependency-path: "vscode"
 
-      - name: Create CHANGELOG.md
-        uses: actions/github-script@v6
-        with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
-          script: |
-            const fs = require("fs");
-
-            const { data: releases } = await github.rest.repos.listReleases({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
-
-            const includePrereleases = context.payload.release.prerelease;
-
-            const changelog = releases
-              .filter((release) => release.tag_name.startsWith?("vscode-ruby-lsp") && (includePrereleases || !release.prerelease))
-              .map((release) => `# ${release.tag_name}\n${release.body}\n`)
-              .join("\n");
-
-            fs.writeFileSync("vscode/CHANGELOG.md", changelog);
-
-      - name: Copy files needed for release
-        run: |
-          cp LICENSE.txt vscode/LICENSE.txt
-          cp README.md vscode/README.md
-          cp CODE_OF_CONDUCT.md vscode/CODE_OF_CONDUCT.md
-          cp TROUBLESHOOTING.md vscode/TROUBLESHOOTING.md
-
-      - name: 📦 Install dependencies
-        working-directory: ./vscode
-        run: yarn --frozen-lockfile
-
-      # Stable releases
-      - name: Publish extension in the marketplace
-        if: "!github.event.release.prerelease"
-        working-directory: ./vscode
-        run: |
-          yarn run package
-          node_modules/.bin/vsce publish --packagePath vscode-ruby-lsp.vsix
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-
-      # Prereleases
-      - name: Package and publish prerelease extension in the marketplace
-        if: "github.event.release.prerelease"
-        working-directory: ./vscode
-        run: |
-          yarn run package_prerelease
-          node_modules/.bin/vsce publish --pre-release --packagePath vscode-ruby-lsp.vsix
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-
-      # Stable releases for OpenVSX
-      - name: Publish extension on OpenVSX
-        if: "!github.event.release.prerelease"
-        working-directory: ./vscode
-        run: |
-          yarn run package
-          node_modules/.bin/ovsx publish vscode-ruby-lsp.vsix -p ${{ secrets.OPENVSX_TOKEN }} --yarn
-
       - name: Update release notes
         uses: actions/github-script@v6
         with:
@@ -155,3 +95,63 @@ jobs:
               release_id: id,
               body: content
             });
+
+      - name: Create CHANGELOG.md
+        uses: actions/github-script@v6
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          script: |
+            const fs = require("fs");
+
+            const { data: releases } = await github.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const includePrereleases = context.payload.release.prerelease;
+
+            const changelog = releases
+              .filter((release) => release.tag_name.startsWith?("vscode-ruby-lsp") && (includePrereleases || !release.prerelease))
+              .map((release) => `# ${release.tag_name}\n${release.body}\n`)
+              .join("\n");
+
+            fs.writeFileSync("vscode/CHANGELOG.md", changelog);
+
+      - name: Copy files needed for release
+        run: |
+          cp LICENSE.txt vscode/LICENSE.txt
+          cp README.md vscode/README.md
+          cp CODE_OF_CONDUCT.md vscode/CODE_OF_CONDUCT.md
+          cp TROUBLESHOOTING.md vscode/TROUBLESHOOTING.md
+
+      - name: 📦 Install dependencies
+        working-directory: ./vscode
+        run: yarn --frozen-lockfile
+
+      # Stable releases
+      - name: Publish extension in the marketplace
+        if: "!github.event.release.prerelease"
+        working-directory: ./vscode
+        run: |
+          yarn run package
+          node_modules/.bin/vsce publish --packagePath vscode-ruby-lsp.vsix
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      # Prereleases
+      - name: Package and publish prerelease extension in the marketplace
+        if: "github.event.release.prerelease"
+        working-directory: ./vscode
+        run: |
+          yarn run package_prerelease
+          node_modules/.bin/vsce publish --pre-release --packagePath vscode-ruby-lsp.vsix
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      # Stable releases for OpenVSX
+      - name: Publish extension on OpenVSX
+        if: "!github.event.release.prerelease"
+        working-directory: ./vscode
+        run: |
+          yarn run package
+          node_modules/.bin/ovsx publish vscode-ruby-lsp.vsix -p ${{ secrets.OPENVSX_TOKEN }} --yarn
