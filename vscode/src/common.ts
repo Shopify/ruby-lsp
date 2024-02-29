@@ -25,7 +25,6 @@ export interface RubyInterface {
   error: boolean;
   versionManager?: string;
   rubyVersion?: string;
-  supportsYjit?: boolean;
 }
 
 export interface ClientInterface {
