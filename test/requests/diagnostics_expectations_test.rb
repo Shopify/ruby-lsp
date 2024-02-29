@@ -22,7 +22,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     assert_empty(stdout)
 
     # On Windows, RuboCop will complain that the file is missing a carriage return at the end. We need to ignore these
-    T.must(result).reject { |diagnostic| diagnostic.code == "Layout/EndOfLine" }
+    T.must(result).reject { |diagnostic| diagnostic.source == "RuboCop" && diagnostic.code == "Layout/EndOfLine" }
   end
 
   def assert_expectations(source, expected)
@@ -32,7 +32,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     actual.each do |diagnostic|
       attributes = diagnostic.attributes
 
-      attributes[:data][:code_actions].each do |code_action|
+      attributes.fetch(:data, {}).fetch(:code_actions, []).each do |code_action|
         code_action_changes = code_action.attributes[:edit].attributes[:documentChanges]
         code_action_changes.each do |code_action_change|
           code_action_change
@@ -51,7 +51,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     diagnostics.map do |diagnostic|
       LanguageServer::Protocol::Interface::Diagnostic.new(
         message: diagnostic["message"],
-        source: "RuboCop",
+        source: diagnostic["source"],
         code: diagnostic["code"],
         severity: diagnostic["severity"],
         code_description: diagnostic["codeDescription"],
