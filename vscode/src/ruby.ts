@@ -19,8 +19,9 @@ export enum VersionManager {
 
 export class Ruby implements RubyInterface {
   public rubyVersion?: string;
+  // This property indicates that Ruby has been compiled with YJIT support and that we're running on a Ruby version
+  // where it will be activated, either by the extension or by the server
   public yjitEnabled?: boolean;
-  public supportsYjit?: boolean;
   private readonly workingFolderPath: string;
   #versionManager?: VersionManager;
   // eslint-disable-next-line no-process-env
@@ -164,8 +165,12 @@ export class Ruby implements RubyInterface {
     );
 
     const [rubyVersion, yjitIsDefined] = rubyInfo.stderr.trim().split(",");
+    const [major, minor, _patch] = rubyVersion.split(".").map(Number);
+
     this.rubyVersion = rubyVersion;
-    this.yjitEnabled = yjitIsDefined === "constant";
+    this.yjitEnabled =
+      (yjitIsDefined === "constant" && major >= 3) ||
+      (major === 3 && minor >= 2);
   }
 
   private async activateChruby() {
@@ -203,7 +208,11 @@ export class Ruby implements RubyInterface {
 
     this._env = rubyInfo.env;
     this.rubyVersion = rubyInfo.ruby_version;
-    this.yjitEnabled = rubyInfo.yjit === "constant";
+
+    const [major, minor, _patch] = rubyInfo.ruby_version.split(".").map(Number);
+    this.yjitEnabled =
+      (rubyInfo.yjit === "constant" && major >= 3) ||
+      (major === 3 && minor >= 2);
   }
 
   // Fetch information related to the Ruby version. This can only be invoked after activation, so that `rubyVersion` is
@@ -219,11 +228,8 @@ export class Ruby implements RubyInterface {
       );
     }
 
-    this.supportsYjit =
-      this.yjitEnabled && (major > 3 || (major === 3 && minor >= 2));
-
     // Starting with Ruby 3.3 the server enables YJIT itself
-    if (this.supportsYjit && major === 3 && minor === 2) {
+    if (this.yjitEnabled && major === 3 && minor === 2) {
       // RUBYOPT may be empty or it may contain bundler paths. In the second case, we must concat to avoid accidentally
       // removing the paths from the env variable
       if (this._env.RUBYOPT) {
