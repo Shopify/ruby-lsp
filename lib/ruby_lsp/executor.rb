@@ -255,7 +255,14 @@ module RubyLsp
     def perform_initial_indexing
       # The begin progress invocation happens during `initialize`, so that the notification is sent before we are
       # stuck indexing files
-      RubyIndexer.configuration.load_config
+
+      return unless File.exist?(".index.yml")
+
+      config = YAML.parse_file(".index.yml")
+      return unless config
+
+      config_hash = config.to_ruby
+      RubyIndexer.configuration.load_config(config_hash)
 
       Thread.new do
         begin

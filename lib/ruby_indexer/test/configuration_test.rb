@@ -10,7 +10,7 @@ module RubyIndexer
     end
 
     def test_load_configuration_executes_configure_block
-      @config.load_config
+      @config.load_config({ "excluded_patterns" => ["**/test/fixtures/**/*.rb"] })
       indexables = @config.indexables
 
       assert(indexables.none? { |indexable| indexable.full_path.include?("test/fixtures") })
@@ -21,7 +21,7 @@ module RubyIndexer
     end
 
     def test_indexables_only_includes_gem_require_paths
-      @config.load_config
+      @config.load_config({})
       indexables = @config.indexables
 
       Bundler.locked_gems.specs.each do |lazy_spec|
@@ -35,7 +35,7 @@ module RubyIndexer
     end
 
     def test_indexables_does_not_include_default_gem_path_when_in_bundle
-      @config.load_config
+      @config.load_config({})
       indexables = @config.indexables
 
       assert(
@@ -44,7 +44,7 @@ module RubyIndexer
     end
 
     def test_indexables_includes_default_gems
-      @config.load_config
+      @config.load_config({})
       indexables = @config.indexables.map(&:full_path)
 
       assert_includes(indexables, "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb")
@@ -53,7 +53,7 @@ module RubyIndexer
     end
 
     def test_indexables_includes_project_files
-      @config.load_config
+      @config.load_config({})
       indexables = @config.indexables.map(&:full_path)
 
       Dir.glob("#{Dir.pwd}/lib/**/*.rb").each do |path|
@@ -66,7 +66,7 @@ module RubyIndexer
     def test_indexables_avoids_duplicates_if_bundle_path_is_inside_project
       Bundler.settings.set_global("path", "vendor/bundle")
       config = Configuration.new
-      config.load_config
+      config.load_config({})
 
       assert_includes(config.instance_variable_get(:@excluded_patterns), "#{Dir.pwd}/vendor/bundle/**/*.rb")
     ensure
@@ -74,7 +74,7 @@ module RubyIndexer
     end
 
     def test_indexables_does_not_include_gems_own_installed_files
-      @config.load_config
+      @config.load_config({})
       indexables = @config.indexables
 
       assert(
@@ -95,17 +95,15 @@ module RubyIndexer
     end
 
     def test_paths_are_unique
-      @config.load_config
+      @config.load_config({})
       indexables = @config.indexables
 
       assert_equal(indexables.uniq.length, indexables.length)
     end
 
     def test_configuration_raises_for_unknown_keys
-      Psych::Nodes::Document.any_instance.expects(:to_ruby).returns({ "unknown_config" => 123 })
-
       assert_raises(ArgumentError) do
-        @config.load_config
+        @config.load_config({ "unknown_config" => 123 })
       end
     end
 

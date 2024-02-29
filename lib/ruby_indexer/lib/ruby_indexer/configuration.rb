@@ -43,14 +43,8 @@ module RubyIndexer
       )
     end
 
-    sig { void }
-    def load_config
-      return unless File.exist?(".index.yml")
-
-      config = YAML.parse_file(".index.yml")
-      return unless config
-
-      config_hash = config.to_ruby
+    sig { params(config_hash: T::Hash[String, String]).void }
+    def load_config(config_hash)
       validate_config!(config_hash)
       apply_config(config_hash)
     rescue Psych::SyntaxError => e
