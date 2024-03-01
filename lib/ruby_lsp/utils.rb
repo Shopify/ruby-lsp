@@ -41,7 +41,22 @@ module RubyLsp
     end
   end
 
-  class Notification < Message; end
+  class Notification < Message
+    class << self
+      extend T::Sig
+      sig { params(message: String).returns(Notification) }
+      def window_show_error(message)
+        new(
+          message: "window/showMessage",
+          params: Interface::ShowMessageParams.new(
+            type: Constant::MessageType::ERROR,
+            message: message,
+          ),
+        )
+      end
+    end
+  end
+
   class Request < Message; end
 
   # The final result of running a request before its IO is finalized

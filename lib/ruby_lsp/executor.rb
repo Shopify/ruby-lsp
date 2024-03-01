@@ -121,24 +121,10 @@ module RubyLsp
         begin
           formatting(uri)
         rescue Requests::Formatting::InvalidFormatter => error
-          @message_queue << Notification.new(
-            message: "window/showMessage",
-            params: Interface::ShowMessageParams.new(
-              type: Constant::MessageType::ERROR,
-              message: "Configuration error: #{error.message}",
-            ),
-          )
-
+          @message_queue << Notification.window_show_error("Configuration error: #{error.message}")
           nil
         rescue StandardError, LoadError => error
-          @message_queue << Notification.new(
-            message: "window/showMessage",
-            params: Interface::ShowMessageParams.new(
-              type: Constant::MessageType::ERROR,
-              message: "Formatting error: #{error.message}",
-            ),
-          )
-
+          @message_queue << Notification.window_show_error("Formatting error: #{error.message}")
           nil
         end
       when "textDocument/documentHighlight"
@@ -174,14 +160,7 @@ module RubyLsp
         begin
           diagnostic(uri)
         rescue StandardError, LoadError => error
-          @message_queue << Notification.new(
-            message: "window/showMessage",
-            params: Interface::ShowMessageParams.new(
-              type: Constant::MessageType::ERROR,
-              message: "Error running diagnostics: #{error.message}",
-            ),
-          )
-
+          @message_queue << Notification.window_show_error("Error running diagnostics: #{error.message}")
           nil
         end
       when "textDocument/completion"
@@ -287,13 +266,7 @@ module RubyLsp
             false
           end
         rescue StandardError => error
-          @message_queue << Notification.new(
-            message: "window/showMessage",
-            params: Interface::ShowMessageParams.new(
-              type: Constant::MessageType::ERROR,
-              message: "Error while indexing: #{error.message}",
-            ),
-          )
+          @message_queue << Notification.window_show_error("Error while indexing: #{error.message}")
         end
 
         # Always end the progress notification even if indexing failed or else it never goes away and the user has no
@@ -402,21 +375,11 @@ module RubyLsp
 
       case result
       when Requests::CodeActionResolve::Error::EmptySelection
-        @message_queue << Notification.new(
-          message: "window/showMessage",
-          params: Interface::ShowMessageParams.new(
-            type: Constant::MessageType::ERROR,
-            message: "Invalid selection for Extract Variable refactor",
-          ),
-        )
+        @message_queue << Notification.window_show_error("Invalid selection for Extract Variable refactor")
         raise Requests::CodeActionResolve::CodeActionError
       when Requests::CodeActionResolve::Error::InvalidTargetRange
-        @message_queue << Notification.new(
-          message: "window/showMessage",
-          params: Interface::ShowMessageParams.new(
-            type: Constant::MessageType::ERROR,
-            message: "Couldn't find an appropriate location to place extracted refactor",
-          ),
+        @message_queue << Notification.window_show_error(
+          "Couldn't find an appropriate location to place extracted refactor",
         )
         raise Requests::CodeActionResolve::CodeActionError
       else
@@ -639,12 +602,8 @@ module RubyLsp
       unless defined?(RubyLsp::Requests::Support::RuboCopRunner)
         @store.formatter = "none"
 
-        @message_queue << Notification.new(
-          message: "window/showMessage",
-          params: Interface::ShowMessageParams.new(
-            type: Constant::MessageType::ERROR,
-            message: "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the Gemfile or gemspec.",
-          ),
+        @message_queue << Notification.window_show_error(
+          "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the Gemfile or gemspec.",
         )
       end
     end
