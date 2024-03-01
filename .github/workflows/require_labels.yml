@@ -14,31 +14,4 @@ jobs:
       - name: Check for Pull Request Labels
         shell: bash
         run: |
-          pr_labels=$(gh pr view --json labels --jq ".labels[] .name" ${{ github.event.pull_request.number }})
-          type_labels=("documentation" "bugfix" "chore" "enhancement" "dependencies" "breaking-change")
-          category_labels=("server" "vscode")
-          matched=0
-
-          for label in $pr_labels; do
-            if [[ "${type_labels[@]}" =~ "${label}" ]]; then
-              matched=1
-              break
-            fi
-          done
-
-          if [ $matched -eq 0 ]; then
-            echo "Please label this PR with one of the following types: ${type_labels[@]}"
-            exit 1
-          fi
-
-          for label in $pr_labels; do
-            if [[ "${category_labels[@]}" =~ "${label}" ]]; then
-              matched=1
-              break
-            fi
-          done
-
-          if [ $matched -eq 0 ]; then
-            echo "Please label this PR with one of the following categories: ${category_labels[@]}"
-            exit 1
-          fi
+          bin/check_labels "$(gh pr view --json labels ${{ github.event.pull_request.number }})"
