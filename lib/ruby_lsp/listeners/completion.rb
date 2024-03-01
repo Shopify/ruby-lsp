@@ -100,8 +100,6 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
-        return if @typechecker_enabled
-
         name = node.message
         return unless name
 
@@ -111,7 +109,7 @@ module RubyLsp
         when "require_relative"
           complete_require_relative(node)
         else
-          complete_self_receiver_method(node, name) if self_receiver?(node)
+          complete_self_receiver_method(node, name) if !@typechecker_enabled && self_receiver?(node)
         end
       end
 
@@ -142,14 +140,17 @@ module RubyLsp
 
         origin_dir = Pathname.new(@uri.to_standardized_path).dirname
 
-        path_query = path_node_to_complete.content
+        content = path_node_to_complete.content
         # if the path is not a directory, glob all possible next characters
         # for example ../somethi| (where | is the cursor position)
         # should find files for ../somethi*/
-        path_query += "*/" unless path_query.end_with?("/")
-        path_query += "**/*.rb"
+        path_query = if content.end_with?("/") || content.empty?
+          "#{content}**/*.rb"
+        else
+          "{#{content}*/**/*.rb,**/#{content}*.rb}"
+        end
 
-        Dir.glob(path_query, base: origin_dir).sort!.each do |path|
+        Dir.glob(path_query, File::FNM_PATHNAME | File::FNM_EXTGLOB, base: origin_dir).sort!.each do |path|
           @response_builder << build_completion(
             path.delete_suffix(".rb"),
             path_node_to_complete,
