@@ -21,23 +21,10 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.SHOPIFY_GH_ACCESS_TOKEN }}
-      - name: Get Ruby version from dev.yml
-        id: ruby
-        shell: ruby -ryaml {0}
-        run: |
-          exit 1 unless File.exist?("dev.yml")
-          yaml = YAML.respond_to?(:unsafe_load_file) ? YAML.unsafe_load_file("dev.yml") : YAML.load_file("dev.yml")
-          ruby_version = yaml["up"]
-            &.find {|h| Hash === h && h.key?("ruby") }
-            &.dig("ruby")
-            .then {|c| Hash === c ? c["version"] : c }
-          exit 1 unless ruby_version
-          File.write(ENV.fetch("GITHUB_OUTPUT"), "ruby_version=#{ruby_version}\n", mode: "a")
       - uses: ruby/setup-ruby@v1
         id: setup
         with:
           bundler-cache: true
-          ruby-version: ${{ steps.ruby.outputs.ruby_version }}
       - name: Update gem RBIs
         run: |
           bin/tapioca gem
