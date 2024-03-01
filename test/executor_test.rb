@@ -157,6 +157,20 @@ class ExecutorTest < Minitest::Test
     )
   end
 
+  def test_handles_invalid_configuration
+    FileUtils.mv(".index.yml", ".index.yml.tmp")
+    File.write(".index.yml", "} invalid yaml")
+    @executor.execute({ method: "initialized", params: {} })
+    notification = T.must(@message_queue.pop)
+    assert_equal("window/showMessage", notification.message)
+    assert_match(
+      /Syntax error while loading \.index\.yml configuration: \(\.index\.yml\)/,
+      T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
+    )
+  ensure
+    FileUtils.mv(".index.yml.tmp", ".index.yml")
+  end
+
   def test_rubocop_errors_push_window_notification
     @executor.expects(:formatting).raises(StandardError, "boom").once
 

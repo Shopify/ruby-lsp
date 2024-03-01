@@ -43,14 +43,6 @@ module RubyIndexer
       )
     end
 
-    sig { params(config_hash: T::Hash[String, String]).void }
-    def load_config(config_hash)
-      validate_config!(config_hash)
-      apply_config(config_hash)
-    rescue Psych::SyntaxError => e
-      raise e, "Syntax error while loading .index.yml configuration: #{e.message}"
-    end
-
     sig { returns(T::Array[IndexablePath]) }
     def indexables
       excluded_gems = @excluded_gems - @included_gems
@@ -152,6 +144,17 @@ module RubyIndexer
       @magic_comment_regex ||= T.let(/^#\s*#{@excluded_magic_comments.join("|")}/, T.nilable(Regexp))
     end
 
+    sig { params(config: T::Hash[String, T.untyped]).void }
+    def apply_config(config)
+      validate_config!(config)
+
+      @excluded_gems.concat(config["excluded_gems"]) if config["excluded_gems"]
+      @included_gems.concat(config["included_gems"]) if config["included_gems"]
+      @excluded_patterns.concat(config["excluded_patterns"]) if config["excluded_patterns"]
+      @included_patterns.concat(config["included_patterns"]) if config["included_patterns"]
+      @excluded_magic_comments.concat(config["excluded_magic_comments"]) if config["excluded_magic_comments"]
+    end
+
     private
 
     sig { params(config: T::Hash[String, T.untyped]).void }
@@ -167,15 +170,6 @@ module RubyIndexer
       end
 
       raise ArgumentError, errors.join("\n") if errors.any?
-    end
-
-    sig { params(config: T::Hash[String, T.untyped]).void }
-    def apply_config(config)
-      @excluded_gems.concat(config["excluded_gems"]) if config["excluded_gems"]
-      @included_gems.concat(config["included_gems"]) if config["included_gems"]
-      @excluded_patterns.concat(config["excluded_patterns"]) if config["excluded_patterns"]
-      @included_patterns.concat(config["included_patterns"]) if config["included_patterns"]
-      @excluded_magic_comments.concat(config["excluded_magic_comments"]) if config["excluded_magic_comments"]
     end
 
     sig { returns(T::Array[String]) }

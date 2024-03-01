@@ -34,6 +34,9 @@ class ExpectationsTestRunner < Minitest::Test
         include ExpectationsRunnerMethods
       RB
 
+      # The fixtures tests take some time to run, this allows us to skip them locally if desired
+      return if ENV["RUBY_LSP_SKIP_FIXTURES_TEST"]
+
       Dir.glob(TEST_RUBY_LSP_FIXTURES).each do |path|
         test_name = File.basename(path, ".rb")
 

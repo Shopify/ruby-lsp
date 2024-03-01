@@ -60,7 +60,25 @@ module RubyLsp
 
         RubyVM::YJIT.enable if defined? RubyVM::YJIT.enable
 
-        perform_initial_indexing
+        indexing_config = {}
+
+        if File.exist?(".index.yml")
+          begin
+            indexing_config = YAML.parse_file(".index.yml").to_ruby
+          rescue Psych::SyntaxError => e
+            message = "Syntax error while loading .index.yml configuration: #{e.message}"
+            @message_queue << Notification.new(
+              message: "window/showMessage",
+              params: Interface::ShowMessageParams.new(
+                type: Constant::MessageType::ERROR,
+                message: message,
+              ),
+            )
+            return
+          end
+        end
+
+        perform_initial_indexing(indexing_config)
         check_formatter_is_available
 
         $stderr.puts("Ruby LSP is ready")
@@ -251,18 +269,11 @@ module RubyLsp
       []
     end
 
-    sig { void }
-    def perform_initial_indexing
+    sig { params(config_hash: T::Hash[String, T.untyped]).void }
+    def perform_initial_indexing(config_hash)
       # The begin progress invocation happens during `initialize`, so that the notification is sent before we are
       # stuck indexing files
-
-      return unless File.exist?(".index.yml")
-
-      config = YAML.parse_file(".index.yml")
-      return unless config
-
-      config_hash = config.to_ruby
-      RubyIndexer.configuration.load_config(config_hash)
+      RubyIndexer.configuration.apply_config(config_hash)
 
       Thread.new do
         begin
