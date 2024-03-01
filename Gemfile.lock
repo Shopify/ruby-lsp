@@ -115,15 +115,13 @@ GEM
       yard-sorbet
     thor (1.3.0)
     unicode-display_width (2.5.0)
-    yard (0.9.35)
+    yard (0.9.36)
     yard-sorbet (0.8.1)
       sorbet-runtime (>= 0.5)
       yard (>= 0.9)
 
 PLATFORMS
   arm64-darwin
-  x64-mingw-ucrt
-  x64-mingw32
   x86_64-darwin
   x86_64-linux
 
