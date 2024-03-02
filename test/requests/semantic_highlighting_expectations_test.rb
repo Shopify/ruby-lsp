@@ -37,14 +37,17 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    test_addon(:create_semantic_highlighting_addon, source: source) do |executor|
-      response = executor.execute({
+    test_addon(:create_semantic_highlighting_addon, source: source) do |server|
+      server.text_document_semantic_tokens_full({
+        id: 1,
         method: "textDocument/semanticTokens/full",
         params: { textDocument: { uri: "file:///fake.rb" } },
       })
 
-      assert_nil(response.error, response.error&.full_message)
-      decoded_response = decode_tokens(response.response.data)
+      result = server.pop_response
+      assert_instance_of(RubyLsp::Result, result)
+
+      decoded_response = decode_tokens(result.response.data)
       assert_equal(
         { delta_line: 0, delta_start_char: 6, length: 4, token_type: 2, token_modifiers: 1 },
         decoded_response[0],

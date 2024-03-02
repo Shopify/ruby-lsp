@@ -110,27 +110,32 @@ class ExpectationsTestRunner < Minitest::Test
   private
 
   def test_addon(addon_creation_method, source:)
-    stub_no_typechecker
     message_queue = Thread::Queue.new
+    stub_no_typechecker
+
+    uri = URI::Generic.from_path(path: "/fake.rb")
+    server = RubyLsp::Server.new(test_mode: true)
+    server.text_document_did_open({
+      params: {
+        textDocument: {
+          uri: uri,
+          text: source,
+          version: 1,
+        },
+      },
+    })
+    index = server.index
+    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
 
     send(addon_creation_method)
     RubyLsp::Addon.load_addons(message_queue)
 
-    store = RubyLsp::Store.new
-    uri = URI::Generic.from_path(path: "/fake.rb")
-    store.set(uri: uri, source: source, version: 1)
-
-    executor = RubyLsp::Executor.new(store, message_queue)
-    executor.instance_variable_get(:@index).index_single(
-      RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)),
-      source,
-    )
-
-    yield(executor)
+    yield(server)
   ensure
     RubyLsp::Addon.addons.each(&:deactivate)
     RubyLsp::Addon.addon_classes.clear
     RubyLsp::Addon.addons.clear
+    T.must(server).run_shutdown
     T.must(message_queue).close
   end
 

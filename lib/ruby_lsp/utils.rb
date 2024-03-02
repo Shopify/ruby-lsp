@@ -90,6 +90,9 @@ module RubyLsp
   class Error
     extend T::Sig
 
+    sig { returns(String) }
+    attr_reader :message
+
     sig { params(id: Integer, code: Integer, message: String, data: T.nilable(T::Hash[Symbol, T.untyped])).void }
     def initialize(id:, code:, message:, data: nil)
       @id = id

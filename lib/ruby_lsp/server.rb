@@ -9,8 +9,8 @@ module RubyLsp
     sig { returns(RubyIndexer::Index) }
     attr_reader :index
 
-    sig { void }
-    def initialize
+    sig { params(test_mode: T::Boolean).void }
+    def initialize(test_mode: false)
       super
       @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
     end
@@ -171,6 +171,9 @@ module RubyLsp
     def text_document_did_open(message)
       text_document = message.dig(:params, :textDocument)
       @store.set(uri: text_document[:uri], source: text_document[:text], version: text_document[:version])
+    rescue Errno::ENOENT
+      # If someone re-opens the editor with a file that was deleted or doesn't exist in the current branch, we don't
+      # want to crash
     end
 
     sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
@@ -191,7 +194,10 @@ module RubyLsp
     def text_document_did_change(message)
       params = message[:params]
       text_document = params[:textDocument]
-      @store.push_edits(uri: text_document[:uri], edits: params[:contentChanges], version: text_document[:version])
+
+      @mutex.synchronize do
+        @store.push_edits(uri: text_document[:uri], edits: params[:contentChanges], version: text_document[:version])
+      end
     end
 
     sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
@@ -215,30 +221,46 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: response))
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
-    def text_document_document_symbol(message)
-      run_combined_requests(message)
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def run_combined_requests(message)
+      uri = URI(message.dig(:params, :textDocument, :uri))
+      document = @store.get(uri)
+
+      # If the response has already been cached by another request, return it
+      cached_response = document.cache_get(message[:method])
+      if cached_response
+        send_message(Result.new(id: message[:id], response: cached_response))
+        return
+      end
+
+      # Run requests for the document
+      dispatcher = Prism::Dispatcher.new
+      folding_range = Requests::FoldingRanges.new(document.parse_result.comments, dispatcher)
+      document_symbol = Requests::DocumentSymbol.new(uri, dispatcher)
+      document_link = Requests::DocumentLink.new(uri, document.comments, dispatcher)
+      code_lens = Requests::CodeLens.new(uri, dispatcher)
+
+      semantic_highlighting = Requests::SemanticHighlighting.new(dispatcher)
+      dispatcher.dispatch(document.tree)
+
+      # Store all responses retrieve in this round of visits in the cache and then return the response for the request
+      # we actually received
+      document.cache_set("textDocument/foldingRange", folding_range.perform)
+      document.cache_set("textDocument/documentSymbol", document_symbol.perform)
+      document.cache_set("textDocument/documentLink", document_link.perform)
+      document.cache_set("textDocument/codeLens", code_lens.perform)
+      document.cache_set(
+        "textDocument/semanticTokens/full",
+        semantic_highlighting.perform,
+      )
+      send_message(Result.new(id: message[:id], response: document.cache_get(message[:method])))
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
-    def text_document_document_link(message)
-      run_combined_requests(message)
-    end
-
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
-    def text_document_code_lens(message)
-      run_combined_requests(message)
-    end
-
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
-    def text_document_semantic_tokens_full(message)
-      run_combined_requests(message)
-    end
-
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
-    def text_document_folding_range(message)
-      run_combined_requests(message)
-    end
+    alias_method :text_document_document_symbol, :run_combined_requests
+    alias_method :text_document_document_link, :run_combined_requests
+    alias_method :text_document_code_lens, :run_combined_requests
+    alias_method :text_document_semantic_tokens_full, :run_combined_requests
+    alias_method :text_document_folding_range, :run_combined_requests
 
     sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_semantic_tokens_range(message)
@@ -260,22 +282,28 @@ module RubyLsp
     sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_formatting(message)
       # If formatter is set to `auto` but no supported formatting gem is found, don't attempt to format
-      return if @store.formatter == "none"
+      if @store.formatter == "none"
+        send_empty_response(message[:id])
+        return
+      end
 
       uri = message.dig(:params, :textDocument, :uri)
       # Do not format files outside of the workspace. For example, if someone is looking at a gem's source code, we
       # don't want to format it
       path = uri.to_standardized_path
-      return unless path.nil? || path.start_with?(T.must(@store.workspace_uri.to_standardized_path))
+      unless path.nil? || path.start_with?(T.must(@store.workspace_uri.to_standardized_path))
+        send_empty_response(message[:id])
+        return
+      end
 
       response = Requests::Formatting.new(@store.get(uri), formatter: @store.formatter).perform
       send_message(Result.new(id: message[:id], response: response))
     rescue Requests::Formatting::InvalidFormatter => error
       send_message(Notification.window_show_error("Configuration error: #{error.message}"))
-      send_message(Result.new(id: message[:id], response: nil))
+      send_empty_response(message[:id])
     rescue StandardError, LoadError => error
       send_message(Notification.window_show_error("Formatting error: #{error.message}"))
-      send_message(Result.new(id: message[:id], response: nil))
+      send_empty_response(message[:id])
     end
 
     sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
@@ -382,7 +410,10 @@ module RubyLsp
       # source code, we don't want to show diagnostics for it
       uri = message.dig(:params, :textDocument, :uri)
       path = uri.to_standardized_path
-      return unless path.nil? || path.start_with?(T.must(@store.workspace_uri.to_standardized_path))
+      unless path.nil? || path.start_with?(T.must(@store.workspace_uri.to_standardized_path))
+        send_empty_response(message[:id])
+        return
+      end
 
       response = @store.cache_fetch(uri, "textDocument/diagnostic") do |document|
         Requests::Diagnostics.new(document).perform
@@ -396,7 +427,7 @@ module RubyLsp
       )
     rescue StandardError, LoadError => error
       send_message(Notification.window_show_error("Error running diagnostics: #{error.message}"))
-      send_message(Result.new(id: message[:id], response: nil))
+      send_empty_response(message[:id])
     end
 
     sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
@@ -638,41 +669,6 @@ module RubyLsp
           ),
         )
       end
-    end
-
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
-    def run_combined_requests(message)
-      uri = URI(message.dig(:params, :textDocument, :uri))
-      document = @store.get(uri)
-
-      # If the response has already been cached by another request, return it
-      cached_response = document.cache_get(message[:method])
-      if cached_response
-        send_message(Result.new(id: message[:id], response: cached_response))
-        return
-      end
-
-      # Run requests for the document
-      dispatcher = Prism::Dispatcher.new
-      folding_range = Requests::FoldingRanges.new(document.parse_result.comments, dispatcher)
-      document_symbol = Requests::DocumentSymbol.new(uri, dispatcher)
-      document_link = Requests::DocumentLink.new(uri, document.comments, dispatcher)
-      code_lens = Requests::CodeLens.new(uri, dispatcher)
-
-      semantic_highlighting = Requests::SemanticHighlighting.new(dispatcher)
-      dispatcher.dispatch(document.tree)
-
-      # Store all responses retrieve in this round of visits in the cache and then return the response for the request
-      # we actually received
-      document.cache_set("textDocument/foldingRange", folding_range.perform)
-      document.cache_set("textDocument/documentSymbol", document_symbol.perform)
-      document.cache_set("textDocument/documentLink", document_link.perform)
-      document.cache_set("textDocument/codeLens", code_lens.perform)
-      document.cache_set(
-        "textDocument/semanticTokens/full",
-        semantic_highlighting.perform,
-      )
-      send_message(Result.new(id: message[:id], response: document.cache_get(message[:method])))
     end
   end
 end

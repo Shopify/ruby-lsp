@@ -15,15 +15,16 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    test_addon(:create_document_symbol_addon, source: source) do |executor|
-      response = executor.execute({
+    test_addon(:create_document_symbol_addon, source: source) do |server|
+      server.text_document_document_symbol({
+        id: 1,
         method: "textDocument/documentSymbol",
         params: { textDocument: { uri: "file:///fake.rb" } },
       })
+      result = server.pop_response
+      assert_instance_of(RubyLsp::Result, result)
 
-      assert_nil(response.error, response.error&.full_message)
-
-      response = response.response
+      response = result.response
 
       assert_equal(1, response.count)
       assert_equal("Foo", response.first.name)
