@@ -47,11 +47,48 @@ module RubyLsp
           end
         end
 
-        @incoming_queue << message
+        # We need to process shutdown and exit from the main thread in order to close queues and wait for other threads
+        # to finish. Everything else is pushed into the incoming queue
+        case message[:method]
+        when "shutdown"
+          $stderr.puts("Shutting down Ruby LSP...")
+
+          shutdown
+
+          @mutex.synchronize do
+            run_shutdown
+            @writer.write(Result.new(id: message[:id], response: nil).to_hash)
+          end
+        when "exit"
+          @mutex.synchronize do
+            status = @incoming_queue.closed? ? 0 : 1
+            $stderr.puts("Shutdown complete with status #{status}")
+            exit(status)
+          end
+        else
+          @incoming_queue << message
+        end
       end
     end
 
-    private
+    sig { void }
+    def run_shutdown
+      @incoming_queue.clear
+      @outgoing_queue.clear
+      @incoming_queue.close
+      @outgoing_queue.close
+      @cancelled_requests.clear
+
+      @worker.join
+      @outgoing_dispatcher.join
+      @store.clear
+    end
+
+    # This method is only intended to be used in tests! Pops the latest response that would be sent to the client
+    sig { returns(T.any(Result, Error, Message)) }
+    def pop_response
+      @outgoing_queue.pop
+    end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def process_message(message)
@@ -114,28 +151,6 @@ module RubyLsp
         workspace_dependencies(message)
       when "$/cancelRequest"
         @mutex.synchronize { @cancelled_requests << message[:params][:id] }
-      when "shutdown"
-        $stderr.puts("Shutting down Ruby LSP...")
-
-        shutdown
-
-        # Move to implementation
-        # Addon.addons.each(&:deactivate)
-        # send_message(Result.new(id: message[:id], response: nil))
-
-        @incoming_queue.clear
-        @outgoing_queue.clear
-        @incoming_queue.close
-        @outgoing_queue.close
-        @cancelled_requests.clear
-
-        @worker.join
-        @outgoing_dispatcher.join
-        @store.clear
-      when "exit"
-        status = @incoming_queue.closed? ? 0 : 1
-        $stderr.puts("Shutdown complete with status #{status}")
-        exit(status)
       end
     rescue StandardError, LoadError => e
       # If an error occurred in a request, we have to return an error response or else the editor will hang
@@ -168,6 +183,11 @@ module RubyLsp
 
     sig { params(message: T.any(Result, Error, Notification, Request)).void }
     def send_message(message)
+      # When we're shutting down the server, there's a small race condition between closing the thread queues and
+      # finishing remaining requests. We may close the queue in the middle of processing a request, which will then fail
+      # when trying to send a response back
+      return if @outgoing_queue.closed?
+
       @outgoing_queue << message
       @current_request_id += 1 if message.is_a?(Request)
     end

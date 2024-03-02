@@ -31,6 +31,12 @@ module RubyLsp
     extend T::Sig
     extend T::Helpers
 
+    sig { returns(String) }
+    attr_reader :message
+
+    sig { returns(Object) }
+    attr_reader :params
+
     abstract!
 
     sig { params(message: String, params: Object).void }
@@ -106,6 +112,9 @@ module RubyLsp
   # The final result of running a request before its IO is finalized
   class Result
     extend T::Sig
+
+    sig { returns(T.untyped) }
+    attr_reader :response
 
     sig { params(id: Integer, response: T.untyped).void }
     def initialize(id:, response:)
