@@ -2,8 +2,13 @@
 # frozen_string_literal: true
 
 module RubyLsp
+  # rubocop:disable RubyLsp/UseLanguageServerAliases
+  Interface = LanguageServer::Protocol::Interface
+  Constant = LanguageServer::Protocol::Constant
+  Transport = LanguageServer::Protocol::Transport
+  # rubocop:enable RubyLsp/UseLanguageServerAliases
+
   # Used to indicate that a request shouldn't return a response
-  VOID = T.let(Object.new.freeze, Object)
   BUNDLE_PATH = T.let(
     begin
       Bundler.bundle_path.to_s
@@ -28,17 +33,14 @@ module RubyLsp
 
     abstract!
 
-    sig { returns(String) }
-    attr_reader :message
-
-    sig { returns(Object) }
-    attr_reader :params
-
     sig { params(message: String, params: Object).void }
     def initialize(message:, params:)
       @message = message
       @params = params
     end
+
+    sig { abstract.returns(T::Hash[Symbol, T.untyped]) }
+    def to_hash; end
   end
 
   class Notification < Message
@@ -55,46 +57,65 @@ module RubyLsp
         )
       end
     end
+
+    extend T::Sig
+
+    sig { override.returns(T::Hash[Symbol, T.untyped]) }
+    def to_hash
+      { message: @message, params: T.unsafe(@params).to_hash }
+    end
   end
 
-  class Request < Message; end
+  class Request < Message
+    extend T::Sig
+
+    sig { params(id: Integer, message: String, params: Object).void }
+    def initialize(id:, message:, params:)
+      @id = id
+      super(message: message, params: params)
+    end
+
+    sig { override.returns(T::Hash[Symbol, T.untyped]) }
+    def to_hash
+      { id: @id, message: @message, params: T.unsafe(@params).to_hash }
+    end
+  end
+
+  class Error
+    extend T::Sig
+
+    sig { params(id: Integer, code: Integer, message: String, data: T.nilable(T::Hash[Symbol, T.untyped])).void }
+    def initialize(id:, code:, message:, data: nil)
+      @id = id
+      @code = code
+      @message = message
+      @data = data
+    end
+
+    sig { returns(T::Hash[Symbol, T.untyped]) }
+    def to_hash
+      {
+        id: @id,
+        code: @code,
+        message: @message,
+        data: @data,
+      }
+    end
+  end
 
   # The final result of running a request before its IO is finalized
   class Result
     extend T::Sig
 
-    sig { returns(T.untyped) }
-    attr_reader :response
-
-    sig { returns(T.nilable(Exception)) }
-    attr_reader :error
-
-    sig { params(response: T.untyped, error: T.nilable(Exception)).void }
-    def initialize(response:, error: nil)
+    sig { params(id: Integer, response: T.untyped).void }
+    def initialize(id:, response:)
+      @id = id
       @response = response
-      @error = error
     end
-  end
-
-  # A request that will sit in the queue until it's executed
-  class Job
-    extend T::Sig
 
     sig { returns(T::Hash[Symbol, T.untyped]) }
-    attr_reader :request
-
-    sig { returns(T::Boolean) }
-    attr_reader :cancelled
-
-    sig { params(request: T::Hash[Symbol, T.untyped], cancelled: T::Boolean).void }
-    def initialize(request:, cancelled:)
-      @request = request
-      @cancelled = cancelled
-    end
-
-    sig { void }
-    def cancel
-      @cancelled = true
+    def to_hash
+      { id: @id, result: @response }
     end
   end
 
