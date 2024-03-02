@@ -23,6 +23,7 @@ module RubyLsp
           :on_class_node_enter,
           :on_class_node_leave,
           :on_call_node_enter,
+          :on_call_node_leave,
           :on_constant_path_write_node_enter,
           :on_constant_write_node_enter,
           :on_constant_path_or_write_node_enter,
@@ -83,6 +84,17 @@ module RubyLsp
           handle_attr_accessor(node)
         elsif node.name == :alias_method
           handle_alias_method(node)
+        elsif node.name == :namespace
+          handle_rake_namespace(node)
+        elsif node.name == :task
+          handle_rake_task(node)
+        end
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def on_call_node_leave(node)
+        if node.name == :namespace && !node.receiver
+          @response_builder.pop
         end
       end
 
@@ -356,6 +368,66 @@ module RubyLsp
             selection_range_location: new_name_argument.content_loc,
           )
         end
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def handle_rake_namespace(node)
+        return if node.receiver
+
+        arguments = node.arguments
+        return unless arguments
+
+        name_argument = arguments.arguments.first
+        return unless name_argument
+
+        name = case name_argument
+        when Prism::StringNode then name_argument.content
+        when Prism::SymbolNode then name_argument.value
+        end
+
+        return unless name
+
+        @response_builder << create_document_symbol(
+          name: name,
+          kind: Constant::SymbolKind::MODULE,
+          range_location: name_argument.location,
+          selection_range_location: name_argument.location,
+        )
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def handle_rake_task(node)
+        return if node.receiver
+
+        arguments = node.arguments
+        return unless arguments
+
+        name_argument = arguments.arguments.first
+        return unless name_argument
+
+        name = case name_argument
+        when Prism::StringNode then name_argument.content
+        when Prism::SymbolNode then name_argument.value
+        when Prism::KeywordHashNode
+          first_element = name_argument.elements.first
+          case first_element
+          when Prism::AssocNode
+            key = first_element.key
+            case key
+            when Prism::StringNode then key.content
+            when Prism::SymbolNode then key.value
+            end
+          end
+        end
+
+        return unless name
+
+        create_document_symbol(
+          name: name,
+          kind: Constant::SymbolKind::METHOD,
+          range_location: name_argument.location,
+          selection_range_location: name_argument.location,
+        )
       end
     end
   end
