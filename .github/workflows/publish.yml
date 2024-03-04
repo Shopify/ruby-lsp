@@ -29,7 +29,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
             });
-            const previousRelease = data.find((release) => release.tag_name.startsWith("vscode-ruby-lsp"));
+            const previousRelease = data.find((release) => release.tag_name.startsWith("vscode-ruby-lsp") && release.tag_name !== "${{ github.ref_name }}");
 
             const commitResponse = await github.rest.repos.compareCommits({
               owner: context.repo.owner,
