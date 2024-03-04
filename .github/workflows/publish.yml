@@ -119,8 +119,6 @@ jobs:
 
       - name: Copy files needed for release
         run: |
-          cp LICENSE.txt vscode/LICENSE.txt
-          cp README.md vscode/README.md
           cp CODE_OF_CONDUCT.md vscode/CODE_OF_CONDUCT.md
           cp TROUBLESHOOTING.md vscode/TROUBLESHOOTING.md
 
