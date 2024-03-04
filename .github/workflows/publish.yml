@@ -37,6 +37,7 @@ jobs:
               base: previousRelease.tag_name,
               head: "${{ github.ref }}"
             });
+            console.log(`Found ${commitResponse.data.commits.length} commits`);
 
             const pullRequests = [];
 
@@ -53,6 +54,7 @@ jobs:
                 }
               });
             }
+            console.log(`Found ${pullRequests.length} pull requests`);
 
             const relevantPulls = pullRequests.filter((pull) => {
               return pull.labels.some((label) => label === "vscode") &&
@@ -111,7 +113,7 @@ jobs:
             const includePrereleases = context.payload.release.prerelease;
 
             const changelog = releases
-              .filter((release) => release.tag_name.startsWith?("vscode-ruby-lsp") && (includePrereleases || !release.prerelease))
+              .filter((release) => release.tag_name.startsWith("vscode-ruby-lsp") && (includePrereleases || !release.prerelease))
               .map((release) => `# ${release.tag_name}\n${release.body}\n`)
               .join("\n");
 
