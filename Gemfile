@@ -17,7 +17,7 @@ group :development do
   gem "rubocop-rake", "~> 0.6.0", require: false
   gem "rubocop-shopify", "~> 2.15", require: false
   gem "rubocop-sorbet", "~> 0.7", require: false
-  gem "rubocop", "~> 1.60"
+  gem "rubocop", "~> 1.61"
   gem "simplecov", require: false
   gem "syntax_tree", ">= 6.1.1", "< 7"
 
