@@ -25,7 +25,7 @@ jobs:
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |
-            const { data }  = await github.rest.repos.listReleases({
+            const { data } = await github.rest.repos.listReleases({
               owner: context.repo.owner,
               repo: context.repo.repo,
             });
@@ -83,16 +83,16 @@ jobs:
               content += `## 📦 Other Changes\n\n${otherChanges.map((pull) => `- ${pull.title} (${pull.url})`).join("\n")}\n\n`;
             }
 
-            const { data: id } = await github.rest.repos.getReleaseByTag({
+            const releaseResponse = await github.rest.repos.getReleaseByTag({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag: "${{ github.ref }}",
+              tag: "${{ github.ref_name }}",
             });
 
             await github.rest.repos.updateRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              release_id: id,
+              release_id: releaseResponse.data.id,
               body: content
             });
 
