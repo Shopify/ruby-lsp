@@ -28,7 +28,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               base: previousRelease.tag_name,
-              head: "${{ github.ref }}"
+              head: "${{ github.ref_name }}"
             });
 
             const pullRequests = [];
