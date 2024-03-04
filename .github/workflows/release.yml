@@ -59,7 +59,7 @@ jobs:
             const enhancements = relevantPulls.filter((pull) => pull.labels.some((label) => label === "enhancement"));
             const otherChanges = relevantPulls.filter((pull) => !pull.labels.some((label) => ["bugfix", "enhancement", "breaking-change"].includes(label)));
 
-            const content = `# ${{ github.ref_name }}\n`;
+            let content = `# ${{ github.ref_name }}\n`;
 
             if (breakingChanges.length > 0) {
               content += `## 🚧 Breaking Changes\n\n${breakingChanges.map((pull) => `- ${pull.title} (${pull.url})`).join("\n")}\n\n`;
