@@ -12,7 +12,7 @@ body:
     attributes:
       label: Description
       description: Reproduction steps
-      placeholder: >
+      value: |
         ### Before submitting
 
         Please follow the instructions on
