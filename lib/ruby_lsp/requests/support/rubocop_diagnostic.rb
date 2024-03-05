@@ -40,6 +40,9 @@ module RubyLsp
 
         sig { returns(Interface::Diagnostic) }
         def to_lsp_diagnostic
+          # highlighted_area contains the begin and end position of the first line
+          # This ensures that multiline offenses don't clutter the editor
+          highlighted = @offense.highlighted_area
           Interface::Diagnostic.new(
             message: message,
             source: "RuboCop",
@@ -49,11 +52,11 @@ module RubyLsp
             range: Interface::Range.new(
               start: Interface::Position.new(
                 line: @offense.line - 1,
-                character: @offense.column,
+                character: highlighted.begin_pos,
               ),
               end: Interface::Position.new(
-                line: @offense.last_line - 1,
-                character: @offense.last_column,
+                line: @offense.line - 1,
+                character: highlighted.end_pos,
               ),
             ),
             data: {
