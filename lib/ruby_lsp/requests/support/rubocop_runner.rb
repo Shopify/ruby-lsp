@@ -13,6 +13,10 @@ rescue LoadError
   raise StandardError, "Incompatible RuboCop version. Ruby LSP requires >= 1.4.0"
 end
 
+if RuboCop.const_defined?(:LSP) # This condition will be removed when requiring RuboCop >= 1.61.
+  RuboCop::LSP.enable
+end
+
 module RubyLsp
   module Requests
     module Support
