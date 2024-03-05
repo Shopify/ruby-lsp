@@ -26,6 +26,12 @@ jobs:
       - name: Generate documentation
         run: bundle exec rake rdoc
 
+      - name: Copy README images to the docs folder
+        run: |
+          mkdir docs/vscode
+          cp vscode/icon.png docs/vscode/icon.png
+          cp -R vscode/extras docs/vscode/
+
       - name: Commit to gh-pages
         run: |
           git add docs -f

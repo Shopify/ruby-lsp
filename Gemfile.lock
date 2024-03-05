@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/Shopify/rdoc.git
-  revision: 360dd09cdd025278e3f8156ca895395325f54d7b
+  revision: dbabc13c8ceea0375bf01c6652ca3c5175230c5b
   branch: create_snapper_generator
   specs:
     rdoc (6.6.2)
