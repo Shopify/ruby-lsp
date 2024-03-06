@@ -152,6 +152,8 @@ module RubyIndexer
         handle_attribute(node, reader: false, writer: true)
       when :attr_accessor
         handle_attribute(node, reader: true, writer: true)
+      when :include
+        handle_include(node)
       end
     end
 
@@ -349,6 +351,25 @@ module RubyIndexer
         @index << Entry::Accessor.new(name, @file_path, loc, comments, @current_owner) if reader
         @index << Entry::Accessor.new("#{name}=", @file_path, loc, comments, @current_owner) if writer
       end
+    end
+
+    sig { params(node: Prism::CallNode).void }
+    def handle_include(node)
+      return unless @current_owner
+
+      arguments = node.arguments&.arguments
+      return unless arguments
+
+      names = arguments.filter_map do |node|
+        if node.is_a?(Prism::ConstantReadNode) || node.is_a?(Prism::ConstantPathNode)
+          node.full_name
+        end
+      rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError
+        # TO DO: add MissingNodesInConstantPathError when released in Prism
+        # If a constant path reference is dynamic or missing parts, we can't
+        # index it
+      end
+      @current_owner.included_modules.concat(names)
     end
   end
 end
