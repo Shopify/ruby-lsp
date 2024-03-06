@@ -78,15 +78,11 @@ module RubyLsp
     end
 
     def test_automatically_identifies_file_watcher_addons
-      klass = Class.new(Addon) do
+      klass = Class.new(::RubyLsp::Addon) do
         def activate(message_queue); end
         def deactivate; end
 
         def workspace_did_change_watched_files(changes); end
-
-        def name
-          "My addon"
-        end
       end
 
       begin

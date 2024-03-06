@@ -229,7 +229,6 @@ module RubyLsp
         end
       end
 
-      # TODO: document once we are happy with
       Addon.file_watcher_addons.each { |addon| T.unsafe(addon).workspace_did_change_watched_files(changes) }
       VOID
     end
