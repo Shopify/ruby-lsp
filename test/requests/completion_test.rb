@@ -690,6 +690,35 @@ class CompletionTest < Minitest::Test
     assert_equal(expected.to_json, result.to_json)
   end
 
+  def test_relative_completion_command_call_without_leading_dot
+    source = <<~RUBY
+      Kernel.require_relative "b"
+    RUBY
+
+    end_char = T.must(source.rindex('"'))
+    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
+    end_position = { line: 0, character: end_char }
+
+    result = with_file_structure do |tmpdir|
+      uri = URI("file://#{tmpdir}/foo/quxx.rb")
+      document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+      @store.set(uri: uri, source: document.source, version: 1)
+      run_request(
+        method: "textDocument/completion",
+        params: { textDocument: { uri: uri.to_s }, position: { line: 0, character: end_char } },
+      )
+    end
+
+    expected = [
+      path_completion("bar", start_position, end_position),
+      path_completion("baz", start_position, end_position),
+      path_completion("support/bar", start_position, end_position),
+      path_completion("support/baz", start_position, end_position),
+    ]
+
+    assert_equal(expected.to_json, result.to_json)
+  end
+
   def test_relative_completion_with_partial_path
     prefix = "../suppo"
     source = <<~RUBY
