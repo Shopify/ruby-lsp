@@ -64,7 +64,11 @@ module RubyLsp
       return false if ENV["RUBY_LSP_BYPASS_TYPECHECKER"]
 
       Bundler.with_original_env do
-        Bundler.locked_gems.specs.any? { |spec| spec.name == "sorbet-static" }
+        sorbet_static_detected = Bundler.locked_gems.specs.any? { |spec| spec.name == "sorbet-static" }
+        if sorbet_static_detected
+          warn("Ruby LSP detected this is a Sorbet project so will defer to it for some functionality")
+        end
+        sorbet_static_detected
       end
     rescue Bundler::GemfileNotFound
       false
