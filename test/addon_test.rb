@@ -76,5 +76,24 @@ module RubyLsp
           Failed to activate
       MESSAGE
     end
+
+    def test_automatically_identifies_file_watcher_addons
+      klass = Class.new(::RubyLsp::Addon) do
+        def activate(message_queue); end
+        def deactivate; end
+
+        def workspace_did_change_watched_files(changes); end
+      end
+
+      begin
+        queue = Thread::Queue.new
+        Addon.load_addons(queue)
+        assert_equal(1, Addon.file_watcher_addons.length)
+        assert_instance_of(klass, Addon.file_watcher_addons.first)
+      ensure
+        T.must(queue).close
+        Addon.file_watcher_addons.clear
+      end
+    end
   end
 end
