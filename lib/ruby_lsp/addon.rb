@@ -27,12 +27,17 @@ module RubyLsp
 
     @addons = T.let([], T::Array[Addon])
     @addon_classes = T.let([], T::Array[T.class_of(Addon)])
+    # Addon instances that have declared a handler to accept file watcher events
+    @file_watcher_addons = T.let([], T::Array[Addon])
 
     class << self
       extend T::Sig
 
       sig { returns(T::Array[Addon]) }
       attr_accessor :addons
+
+      sig { returns(T::Array[Addon]) }
+      attr_accessor :file_watcher_addons
 
       sig { returns(T::Array[T.class_of(Addon)]) }
       attr_reader :addon_classes
@@ -57,6 +62,7 @@ module RubyLsp
 
         # Instantiate all discovered addon classes
         self.addons = addon_classes.map(&:new)
+        self.file_watcher_addons = addons.select { |addon| addon.respond_to?(:workspace_did_change_watched_files) }
 
         # Activate each one of the discovered addons. If any problems occur in the addons, we don't want to
         # fail to boot the server
