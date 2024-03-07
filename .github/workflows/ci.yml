@@ -87,7 +87,22 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.3"
+          ruby-version: "3.3.0"
+
+      - name: Download shadowenv
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            pattern="shadowenv-x86_64-unknown-linux-gnu"
+          else
+            pattern="shadowenv-x86_64-apple-darwin"
+          fi
+
+          gh release download --pattern $pattern --repo=Shopify/shadowenv --output shadowenv
+          chmod +x shadowenv
+          sudo mv shadowenv /usr/local/bin/shadowenv
 
       - name: Run tests
         working-directory: ./vscode

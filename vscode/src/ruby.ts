@@ -5,6 +5,7 @@ import * as vscode from "vscode";
 
 import { asyncExec, pathExists, RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
+import { Shadowenv } from "./ruby/shadowenv";
 
 export enum VersionManager {
   Asdf = "asdf",
@@ -22,7 +23,7 @@ export class Ruby implements RubyInterface {
   // This property indicates that Ruby has been compiled with YJIT support and that we're running on a Ruby version
   // where it will be activated, either by the extension or by the server
   public yjitEnabled?: boolean;
-  private readonly workingFolderPath: string;
+  private readonly workspaceFolder: vscode.WorkspaceFolder;
   #versionManager?: VersionManager;
   // eslint-disable-next-line no-process-env
   private readonly shell = process.env.SHELL?.replace(/(\s+)/g, "\\$1");
@@ -35,11 +36,11 @@ export class Ruby implements RubyInterface {
 
   constructor(
     context: vscode.ExtensionContext,
-    workingFolder: vscode.WorkspaceFolder,
+    workspaceFolder: vscode.WorkspaceFolder,
     outputChannel: WorkspaceChannel,
   ) {
     this.context = context;
-    this.workingFolderPath = workingFolder.uri.fsPath;
+    this.workspaceFolder = workspaceFolder;
     this.outputChannel = outputChannel;
 
     const customBundleGemfile: string = vscode.workspace
@@ -49,12 +50,14 @@ export class Ruby implements RubyInterface {
     if (customBundleGemfile.length > 0) {
       this.customBundleGemfile = path.isAbsolute(customBundleGemfile)
         ? customBundleGemfile
-        : path.resolve(path.join(this.workingFolderPath, customBundleGemfile));
+        : path.resolve(
+            path.join(this.workspaceFolder.uri.fsPath, customBundleGemfile),
+          );
     }
 
     this.cwd = this.customBundleGemfile
       ? path.dirname(this.customBundleGemfile)
-      : this.workingFolderPath;
+      : this.workspaceFolder.uri.fsPath;
   }
 
   get versionManager() {
@@ -133,44 +136,16 @@ export class Ruby implements RubyInterface {
   }
 
   private async activateShadowenv() {
-    if (
-      !(await pathExists(path.join(this.workingFolderPath, ".shadowenv.d")))
-    ) {
-      throw new Error(
-        "The Ruby LSP version manager is configured to be shadowenv, \
-        but no .shadowenv.d directory was found in the workspace",
-      );
-    }
+    const shadowenv = new Shadowenv(this.workspaceFolder, this.outputChannel);
+    const { env, version, yjit } = await shadowenv.activate();
+    const [major, minor, _patch] = version.split(".").map(Number);
 
-    const result = await asyncExec("shadowenv hook --json 1>&2", {
-      cwd: this.cwd,
-    });
-
-    if (result.stderr.trim() === "") {
-      result.stderr = "{ }";
-    }
-    // eslint-disable-next-line no-process-env
-    const env = { ...process.env, ...JSON.parse(result.stderr).exported };
-
-    // The only reason we set the process environment here is to allow other extensions that don't perform activation
-    // work properly
+    // We need to set the process environment too to make other extensions such as Sorbet find the right Ruby paths
     // eslint-disable-next-line no-process-env
     process.env = env;
     this._env = env;
-
-    // Get the Ruby version and YJIT support. Shadowenv is the only manager where this is separate from activation
-    const rubyInfo = await asyncExec(
-      "ruby -e 'STDERR.print(\"#{RUBY_VERSION},#{defined?(RubyVM::YJIT)}\")'",
-      { env: this._env, cwd: this.cwd },
-    );
-
-    const [rubyVersion, yjitIsDefined] = rubyInfo.stderr.trim().split(",");
-    const [major, minor, _patch] = rubyVersion.split(".").map(Number);
-
-    this.rubyVersion = rubyVersion;
-    this.yjitEnabled =
-      (yjitIsDefined === "constant" && major >= 3) ||
-      (major === 3 && minor >= 2);
+    this.rubyVersion = version;
+    this.yjitEnabled = (yjit && major >= 3) || (major === 3 && minor >= 2);
   }
 
   private async activateChruby() {
@@ -296,9 +271,14 @@ export class Ruby implements RubyInterface {
   private async discoverVersionManager() {
     // For shadowenv, it wouldn't be enough to check for the executable's existence. We need to check if the project has
     // created a .shadowenv.d folder
-    if (await pathExists(path.join(this.workingFolderPath, ".shadowenv.d"))) {
+    try {
+      await vscode.workspace.fs.stat(
+        vscode.Uri.joinPath(this.workspaceFolder.uri, ".shadowenv.d"),
+      );
       this.versionManager = VersionManager.Shadowenv;
       return;
+    } catch (error: any) {
+      // If .shadowenv.d doesn't exist, then we check the other version managers
     }
 
     const managers = [
@@ -334,7 +314,10 @@ export class Ruby implements RubyInterface {
         `Checking if ${tool} is available on the path with command: ${command}`,
       );
 
-      await asyncExec(command, { cwd: this.workingFolderPath, timeout: 1000 });
+      await asyncExec(command, {
+        cwd: this.workspaceFolder.uri.fsPath,
+        timeout: 1000,
+      });
       return true;
     } catch {
       return false;
