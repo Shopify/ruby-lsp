@@ -65,7 +65,8 @@ module RubyLsp
 
       Bundler.with_original_env do
         sorbet_static_detected = Bundler.locked_gems.specs.any? { |spec| spec.name == "sorbet-static" }
-        if sorbet_static_detected
+        # Don't show message while running tests, since it's noisy
+        if sorbet_static_detected && !defined?(Minitest)
           $stderr.puts("Ruby LSP detected this is a Sorbet project so will defer to it for some functionality")
         end
         sorbet_static_detected
