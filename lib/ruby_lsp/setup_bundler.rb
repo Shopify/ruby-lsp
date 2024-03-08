@@ -60,7 +60,7 @@ module RubyLsp
       # Do not set up a custom bundle if LSP dependencies are already in the Gemfile
       if @dependencies["ruby-lsp"] &&
           @dependencies["debug"] &&
-          (@dependencies["rails"] ? @dependencies["ruby-lsp-rails"] : true)
+          (rails_app? ? @dependencies["ruby-lsp-rails"] : true)
         $stderr.puts(
           "Ruby LSP> Skipping custom bundle setup since LSP dependencies are already in #{@gemfile}",
         )
@@ -102,6 +102,13 @@ module RubyLsp
     end
 
     private
+
+    sig { returns(T::Boolean) }
+    def rails_app?
+      rails_binstub_exists = File.exist?("bin/rails")
+      $stderr.puts("Rails app detected, enabling ruby-lsp-rails") if rails_binstub_exists
+      rails_binstub_exists
+    end
 
     sig { returns(T::Hash[String, T.untyped]) }
     def custom_bundle_dependencies
@@ -146,7 +153,7 @@ module RubyLsp
         parts << 'gem "debug", require: false, group: :development, platforms: :mri'
       end
 
-      if @dependencies["rails"] && !@dependencies["ruby-lsp-rails"]
+      if rails_app? && !@dependencies["ruby-lsp-rails"]
         parts << 'gem "ruby-lsp-rails", require: false, group: :development'
       end
 
@@ -207,7 +214,7 @@ module RubyLsp
         command << " && bundle update "
         command << "ruby-lsp " unless @dependencies["ruby-lsp"]
         command << "debug " unless @dependencies["debug"]
-        command << "ruby-lsp-rails " if @dependencies["rails"] && !@dependencies["ruby-lsp-rails"]
+        command << "ruby-lsp-rails " if rails_app? && !@dependencies["ruby-lsp-rails"]
         command << "--pre" if @experimental
         command.delete_suffix!(" ")
         command << ")"
@@ -232,7 +239,7 @@ module RubyLsp
     def should_bundle_update?
       # If `ruby-lsp`, `ruby-lsp-rails` and `debug` are in the Gemfile, then we shouldn't try to upgrade them or else it
       # will produce version control changes
-      if @dependencies["rails"]
+      if rails_app?
         return false if @dependencies.values_at("ruby-lsp", "ruby-lsp-rails", "debug").all?
 
         # If the custom lockfile doesn't include `ruby-lsp`, `ruby-lsp-rails` or `debug`, we need to run bundle install

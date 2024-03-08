@@ -12,11 +12,10 @@ class SetupBundlerTest < Minitest::Test
     refute_path_exists(".ruby-lsp")
   end
 
-  def test_does_nothing_if_both_ruby_lsp_and_debug_are_in_the_bundle2
+  def test_does_nothing_if_both_ruby_lsp_and_ruby_lsp_rails_are_in_the_bundle
     Object.any_instance.expects(:system).with(bundle_env, "(bundle check || bundle install) 1>&2")
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({
       "ruby-lsp" => true,
-      "rails" => true,
       "ruby-lsp-rails" => true,
       "debug" => true,
     })
@@ -73,7 +72,9 @@ class SetupBundlerTest < Minitest::Test
 
   def test_creates_custom_bundle_for_a_rails_app
     Object.any_instance.expects(:system).with(bundle_env(".ruby-lsp/Gemfile"), "(bundle check || bundle install) 1>&2")
-    Bundler::LockfileParser.any_instance.expects(:dependencies).returns({ "rails" => true }).at_least_once
+    Bundler::LockfileParser.any_instance.expects(:dependencies).returns({}).at_least_once
+    FileUtils.touch("bin/rails")
+
     run_script
 
     assert_path_exists(".ruby-lsp")
@@ -85,6 +86,7 @@ class SetupBundlerTest < Minitest::Test
     assert_match("ruby-lsp-rails", File.read(".ruby-lsp/Gemfile"))
   ensure
     FileUtils.rm_r(".ruby-lsp") if Dir.exist?(".ruby-lsp")
+    FileUtils.rm_r("bin/rails") if File.exist?("bin/rails")
   end
 
   def test_changing_lockfile_causes_custom_bundle_to_be_rebuilt
@@ -479,6 +481,8 @@ class SetupBundlerTest < Minitest::Test
           source "https://rubygems.org"
           gem "rails"
         GEMFILE
+        FileUtils.mkdir(File.join(dir, "bin"))
+        FileUtils.touch(File.join(dir, "bin", "rails"))
 
         capture_subprocess_io do
           Bundler.with_unbundled_env do
