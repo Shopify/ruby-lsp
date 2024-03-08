@@ -14,12 +14,12 @@ pr_labels = JSON.parse(label_info, symbolize_names: true)[:labels].map { |label|
 
 # If the PR includes at least one of the labels ignored for release notes, then exit successfully
 ignored_labels = ["documentation", "chore", "dependencies"]
-exit(0) if (pr_labels & ignored_labels).any?
+exit(0) if pr_labels.intersect?(ignored_labels)
 
 # Otherwise, the PR must indicate what type of change it is
 type_labels = ["bugfix", "enhancement", "breaking-change", "other"]
 
-if (pr_labels & type_labels).empty?
+unless pr_labels.intersect?(type_labels)
   warn("PR must be labeled with one of the following change types: #{type_labels.join(", ")}")
   exit(1)
 end
@@ -27,7 +27,7 @@ end
 # And it should label the category to which we need to include the notes
 category_labels = ["server", "vscode"]
 
-if (pr_labels & category_labels).empty?
+unless pr_labels.intersect?(category_labels)
   warn("PR must be labeled with the category to be included in the right release notes: #{category_labels.join(", ")}")
   exit(1)
 end

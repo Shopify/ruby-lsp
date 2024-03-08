@@ -56,3 +56,8 @@ RubyLsp/UseLanguageServerAliases:
 #     - "lib/ruby_indexer/test/**/*.rb"
 #     - "lib/ruby-lsp.rb"
 #     - "lib/ruby_indexer/lib/ruby_indexer/prefix_tree.rb"
+
+Layout/HeredocIndentation:
+  Exclude:
+  - "lib/ruby_lsp/addon.rb" # suspect bug with parser_prism
+  - "lib/ruby_lsp/requests/support/common.rb" # suspect bug with parser_prism
