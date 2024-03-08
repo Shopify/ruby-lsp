@@ -24,6 +24,21 @@ jobs:
 
       - name: Lint Ruby files and RBI shims
         run: bundle exec rubocop
+  rubocop_prism_experimental:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Lint Ruby files and RBI shims
+        run: bundle exec rubocop -c  .rubocop-prism-experimental.yml
   build_ruby:
     strategy:
       fail-fast: false

@@ -1,0 +1,58 @@
+inherit_gem:
+  rubocop-shopify: rubocop.yml
+
+require:
+  # doesn't yet work with prism
+  # - rubocop-sorbet
+  - rubocop-minitest
+  - rubocop-rake
+  - ./lib/rubocop/cop/ruby_lsp/use_language_server_aliases
+  - ./lib/rubocop/cop/ruby_lsp/use_register_with_handler_method
+
+AllCops:
+  ParserEngine: parser_prism
+  NewCops: disable
+  SuggestExtensions: false
+  TargetRubyVersion: 3.3
+  # Include:
+  #   - "sorbet/rbi/shims/**/*.rbi"
+  Exclude:
+    - "vendor/**/*"
+    - "features/**/*"
+    - "test/fixtures/**/*"
+    - "test/expectations/**/*"
+
+Minitest/AssertPredicate:
+  Enabled: true
+
+Naming/FileName:
+  Exclude:
+    - "lib/ruby-lsp.rb"
+
+RubyLsp/UseLanguageServerAliases:
+  Exclude:
+    - "test/**/*.rb"
+
+# Sorbet/FalseSigil:
+#   Enabled: false
+
+# Sorbet/TrueSigil:
+#   Enabled: true
+#   Include:
+#     - "test/**/*.rb"
+#     - "lib/ruby_indexer/test/**/*.rb"
+#     - "lib/ruby_indexer/lib/ruby_indexer/prefix_tree.rb"
+#   Exclude:
+#     - "**/*.rake"
+#     - "lib/**/*.rb"
+
+# Sorbet/StrictSigil:
+#   Enabled: true
+#   Include:
+#     - "lib/**/*.rb"
+#   Exclude:
+#     - "**/*.rake"
+#     - "test/**/*.rb"
+#     - "lib/ruby_indexer/test/**/*.rb"
+#     - "lib/ruby-lsp.rb"
+#     - "lib/ruby_indexer/lib/ruby_indexer/prefix_tree.rb"
