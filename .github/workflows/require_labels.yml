@@ -11,6 +11,9 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
       - name: Check for Pull Request Labels
         shell: bash
         run: |
