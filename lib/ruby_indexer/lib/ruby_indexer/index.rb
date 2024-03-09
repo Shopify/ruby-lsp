@@ -93,12 +93,18 @@ module RubyIndexer
     #   [#<Entry::Class name="Foo::Baz">],
     # ]
     # ```
-    sig { params(query: String, nesting: T.nilable(T::Array[String])).returns(T::Array[T::Array[Entry]]) }
-    def prefix_search(query, nesting = nil)
+    sig do
+      params(
+        query: String,
+        nesting: T.nilable(T::Array[String]),
+        limit: T.nilable(Integer),
+      ).returns(T::Array[T::Array[Entry]])
+    end
+    def prefix_search(query, nesting = nil, limit = nil)
       unless nesting
         results = @entries_tree.search(query)
         results.uniq!
-        return results
+        return limit ? results.take(limit) : results
       end
 
       results = nesting.length.downto(0).flat_map do |i|
@@ -108,7 +114,7 @@ module RubyIndexer
       end
 
       results.uniq!
-      results
+      limit ? results.take(limit) : results
     end
 
     # Fuzzy searches index entries based on Jaro-Winkler similarity. If no query is provided, all entries are returned

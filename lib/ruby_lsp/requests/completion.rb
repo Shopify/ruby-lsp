@@ -27,6 +27,8 @@ module RubyLsp
     class Completion < Request
       extend T::Sig
 
+      DEFAULT_COMPLETIONS_LIMIT = 100
+
       class << self
         extend T::Sig
 
@@ -68,7 +70,15 @@ module RubyLsp
           ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
         )
 
-        Listeners::Completion.new(@response_builder, index, nesting, typechecker_enabled, dispatcher, document.uri)
+        Listeners::Completion.new(
+          @response_builder,
+          index,
+          nesting,
+          typechecker_enabled,
+          dispatcher,
+          document.uri,
+          DEFAULT_COMPLETIONS_LIMIT,
+        )
 
         return unless matched && parent
 
@@ -84,12 +94,16 @@ module RubyLsp
         end
       end
 
-      sig { override.returns(T::Array[Interface::CompletionItem]) }
+      sig { override.returns(Interface::CompletionList) }
       def perform
         return [] unless @target
 
         @dispatcher.dispatch_once(@target)
-        @response_builder.response
+
+        items = @response_builder.response
+        is_incomplete = items.count >= DEFAULT_COMPLETIONS_LIMIT
+
+        Interface::CompletionList.new(is_incomplete: is_incomplete, items: items)
       end
     end
   end

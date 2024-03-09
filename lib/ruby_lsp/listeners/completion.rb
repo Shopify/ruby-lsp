@@ -7,6 +7,8 @@ module RubyLsp
       extend T::Sig
       include Requests::Support::Common
 
+      MAX_DETAILS_ENTRIES = 10
+
       sig do
         params(
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
@@ -15,14 +17,16 @@ module RubyLsp
           typechecker_enabled: T::Boolean,
           dispatcher: Prism::Dispatcher,
           uri: URI::Generic,
+          limit: T.nilable(Integer),
         ).void
       end
-      def initialize(response_builder, index, nesting, typechecker_enabled, dispatcher, uri) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, index, nesting, typechecker_enabled, dispatcher, uri, limit = nil) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @index = index
         @nesting = nesting
         @typechecker_enabled = typechecker_enabled
         @uri = uri
+        @limit = limit
 
         dispatcher.register(
           self,
@@ -40,7 +44,7 @@ module RubyLsp
         name = constant_name(node)
         return if name.nil?
 
-        candidates = @index.prefix_search(name, @nesting)
+        candidates = @index.prefix_search(name, @nesting, @limit)
         candidates.each do |entries|
           complete_name = T.must(entries.first).name
           @response_builder << build_entry_completion(
@@ -77,7 +81,11 @@ module RubyLsp
 
         real_namespace = @index.follow_aliased_namespace(T.must(namespace_entries.first).name)
 
-        candidates = @index.prefix_search("#{real_namespace}::#{incomplete_name}", top_level_reference ? [] : @nesting)
+        candidates = @index.prefix_search(
+          "#{real_namespace}::#{incomplete_name}",
+          top_level_reference ? [] : @nesting,
+          @limit,
+        )
         candidates.each do |entries|
           # The only time we may have a private constant reference from outside of the namespace is if we're dealing
           # with ConstantPath and the entry name doesn't start with the current nesting
@@ -165,7 +173,7 @@ module RubyLsp
 
         receiver = T.must(receiver_entries.first)
 
-        @index.prefix_search(name).each do |entries|
+        @index.prefix_search(name, nil, @limit).each do |entries|
           entry = entries.find { |e| e.is_a?(RubyIndexer::Entry::Member) && e.owner&.name == receiver.name }
           next unless entry
 
@@ -285,11 +293,11 @@ module RubyLsp
           ),
           kind: kind,
           label_details: Interface::CompletionItemLabelDetails.new(
-            description: entries.map(&:file_name).join(","),
+            description: entries.take(MAX_DETAILS_ENTRIES).map(&:file_name).join(","),
           ),
           documentation: Interface::MarkupContent.new(
             kind: "markdown",
-            value: markdown_from_index_entries(real_name, entries),
+            value: markdown_from_index_entries(real_name, entries.take(MAX_DETAILS_ENTRIES)),
           ),
         )
       end
