@@ -6,7 +6,7 @@ import * as os from "os";
 import * as vscode from "vscode";
 
 import { Debugger } from "../../debugger";
-import { Ruby, VersionManager } from "../../ruby";
+import { Ruby, ManagerIdentifier } from "../../ruby";
 import { Workspace } from "../../workspace";
 import { WorkspaceChannel } from "../../workspaceChannel";
 import { LOG_CHANNEL, asyncExec } from "../../common";
@@ -142,7 +142,7 @@ suite("Debugger", () => {
     if (process.env.CI) {
       await vscode.workspace
         .getConfiguration("rubyLsp")
-        .update("rubyVersionManager", VersionManager.None, true, true);
+        .update("rubyVersionManager", ManagerIdentifier.None, true, true);
     }
 
     // By default, VS Code always saves all open files when launching a debugging session. This is a problem for tests
