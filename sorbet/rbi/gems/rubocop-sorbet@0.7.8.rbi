@@ -694,26 +694,26 @@ class RuboCop::Cop::Sorbet::ForbidTStruct < ::RuboCop::Cop::Base
   include ::RuboCop::Cop::CommentsHelp
   extend ::RuboCop::Cop::AutoCorrector
 
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_t_struct.rb#164
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_t_struct.rb#169
   def on_class(node); end
 
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_t_struct.rb#205
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_t_struct.rb#210
   def on_send(node); end
 
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_t_struct.rb#162
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_t_struct.rb#167
   def t_props?(param0 = T.unsafe(nil)); end
 
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_t_struct.rb#157
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_t_struct.rb#162
   def t_struct?(param0 = T.unsafe(nil)); end
 
   private
 
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_t_struct.rb#213
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_t_struct.rb#218
   def initialize_method(indent, props); end
 
   # @return [Boolean]
   #
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_t_struct.rb#226
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_t_struct.rb#258
   def previous_line_blank?(node); end
 end
 
@@ -775,9 +775,7 @@ class RuboCop::Cop::Sorbet::ForbidTStruct::Property
   # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_t_struct.rb#105
   def node; end
 
-  # Returns the value of attribute type.
-  #
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_t_struct.rb#105
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/forbid_t_struct.rb#155
   def type; end
 end
 
