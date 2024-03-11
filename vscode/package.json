@@ -490,7 +490,7 @@
     "mocha": "^10.3.0",
     "ovsx": "^0.8.3",
     "prettier": "^3.2.5",
-    "typescript": "^5.3.3",
+    "typescript": "^5.4.2",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.0.0"
   },
