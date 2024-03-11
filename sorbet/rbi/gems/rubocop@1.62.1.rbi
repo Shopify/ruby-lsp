@@ -169,77 +169,83 @@ end
 class RuboCop::CLI::Command::AutoGenerateConfig < ::RuboCop::CLI::Command::Base
   # @api private
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#22
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#25
   def run; end
 
   private
 
   # @api private
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#98
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#107
   def add_formatter; end
 
   # @api private
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#106
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#115
   def add_inheritance_from_auto_generated_file(config_file); end
 
   # @api private
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#102
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#111
   def execute_runner; end
 
   # @api private
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#127
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#136
   def existing_configuration(config_file); end
 
   # @api private
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#60
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#65
   def line_length_cop(config); end
 
   # @api private
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#48
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#53
   def line_length_enabled?(config); end
 
   # @api private
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#56
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#61
   def max_line_length(config); end
 
   # @api private
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#31
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#34
   def maybe_run_line_length_cop; end
 
   # @api private
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#153
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#73
+  def only_exclude?; end
+
+  # @api private
+  # @return [Boolean]
+  #
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#162
   def options_config_in_root?; end
 
   # @api private
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#64
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#69
   def options_has_only_flag?; end
 
   # @api private
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#144
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#153
   def relative_path_to_todo_from_options_config; end
 
   # @api private
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#91
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#100
   def reset_config_and_auto_gen_file; end
 
   # @api private
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#82
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#91
   def run_all_cops(line_length_contents); end
 
   # Do an initial run with only Layout/LineLength so that cops that
@@ -248,23 +254,23 @@ class RuboCop::CLI::Command::AutoGenerateConfig < ::RuboCop::CLI::Command::Base
   #
   # @api private
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#71
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#80
   def run_line_length_cop; end
 
   # @api private
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#52
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#57
   def same_max_line_length?(config1, config2); end
 
   # @api private
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#43
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#48
   def skip_line_length_cop(reason); end
 
   # @api private
   #
-  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#133
+  # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#142
   def write_config_file(file_name, file_string, rubocop_yml_contents); end
 end
 
@@ -291,7 +297,12 @@ RuboCop::CLI::Command::AutoGenerateConfig::PHASE_1_OVERRIDDEN = T.let(T.unsafe(n
 # @api private
 #
 # source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#20
-RuboCop::CLI::Command::AutoGenerateConfig::PHASE_1_SKIPPED = T.let(T.unsafe(nil), String)
+RuboCop::CLI::Command::AutoGenerateConfig::PHASE_1_SKIPPED_ONLY_COPS = T.let(T.unsafe(nil), String)
+
+# @api private
+#
+# source://rubocop//lib/rubocop/cli/command/auto_generate_config.rb#22
+RuboCop::CLI::Command::AutoGenerateConfig::PHASE_1_SKIPPED_ONLY_EXCLUDE = T.let(T.unsafe(nil), String)
 
 # @api private
 #
@@ -6120,7 +6131,7 @@ class RuboCop::Cop::Gemspec::RequiredRubyVersion < ::RuboCop::Cop::Base
   # source://rubocop//lib/rubocop/cop/gemspec/required_ruby_version.rb#78
   def on_new_investigation; end
 
-  # source://rubocop//lib/rubocop/cop/gemspec/required_ruby_version.rb#82
+  # source://rubocop//lib/rubocop/cop/gemspec/required_ruby_version.rb#84
   def on_send(node); end
 
   # source://rubocop//lib/rubocop/cop/gemspec/required_ruby_version.rb#65
@@ -6130,13 +6141,13 @@ class RuboCop::Cop::Gemspec::RequiredRubyVersion < ::RuboCop::Cop::Base
 
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/cop/gemspec/required_ruby_version.rb#94
+  # source://rubocop//lib/rubocop/cop/gemspec/required_ruby_version.rb#96
   def dynamic_version?(node); end
 
-  # source://rubocop//lib/rubocop/cop/gemspec/required_ruby_version.rb#100
+  # source://rubocop//lib/rubocop/cop/gemspec/required_ruby_version.rb#102
   def extract_ruby_version(required_ruby_version); end
 
-  # source://rubocop//lib/rubocop/cop/gemspec/required_ruby_version.rb#118
+  # source://rubocop//lib/rubocop/cop/gemspec/required_ruby_version.rb#120
   def not_equal_message(required_ruby_version, target_ruby_version); end
 end
 
@@ -8919,15 +8930,19 @@ class RuboCop::Cop::Layout::EmptyLineAfterMagicComment < ::RuboCop::Cop::Base
 
   private
 
+  # source://rubocop//lib/rubocop/cop/layout/empty_line_after_magic_comment.rb#61
+  def comments_before_code(source); end
+
   # Find the last magic comment in the source file.
   #
-  # Take all comments that precede the first line of code, select the
+  # Take all comments that precede the first line of code (or just take
+  # them all in the case when there is no code), select the
   # magic comments, and return the last magic comment in the file.
   #
   # @return [Parser::Source::Comment] if magic comments exist before code
   # @return [nil] otherwise
   #
-  # source://rubocop//lib/rubocop/cop/layout/empty_line_after_magic_comment.rb#54
+  # source://rubocop//lib/rubocop/cop/layout/empty_line_after_magic_comment.rb#55
   def last_magic_comment(source); end
 
   # source://rubocop//lib/rubocop/cop/layout/empty_line_after_magic_comment.rb#43
@@ -14124,17 +14139,17 @@ class RuboCop::Cop::Layout::RedundantLineBreak < ::RuboCop::Cop::Base
 
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#127
+  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#133
   def comment_within?(node); end
 
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#97
+  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#103
   def configured_to_not_be_inspected?(node); end
 
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#121
+  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#127
   def convertible_block?(node); end
 
   # @return [Boolean]
@@ -14144,10 +14159,10 @@ class RuboCop::Cop::Layout::RedundantLineBreak < ::RuboCop::Cop::Base
 
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#91
+  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#97
   def index_access_call_chained?(node); end
 
-  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#149
+  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#155
   def max_line_length; end
 
   # @return [Boolean]
@@ -14157,7 +14172,7 @@ class RuboCop::Cop::Layout::RedundantLineBreak < ::RuboCop::Cop::Base
 
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#104
+  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#110
   def other_cop_takes_precedence?(node); end
 
   # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#79
@@ -14165,20 +14180,25 @@ class RuboCop::Cop::Layout::RedundantLineBreak < ::RuboCop::Cop::Base
 
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#110
+  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#93
+  def require_backslash?(node); end
+
+  # @return [Boolean]
+  #
+  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#116
   def single_line_block_chain_enabled?; end
 
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#114
+  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#120
   def suitable_as_single_line?(node); end
 
-  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#140
+  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#146
   def to_single_line(source); end
 
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#135
+  # source://rubocop//lib/rubocop/cop/layout/redundant_line_break.rb#141
   def too_long?(node); end
 end
 
@@ -22467,15 +22487,15 @@ class RuboCop::Cop::Lint::RedundantWithIndex < ::RuboCop::Cop::Base
   # source://rubocop//lib/rubocop/cop/lint/redundant_with_index.rb#36
   def on_numblock(node); end
 
-  # source://rubocop//lib/rubocop/cop/lint/redundant_with_index.rb#56
+  # source://rubocop//lib/rubocop/cop/lint/redundant_with_index.rb#57
   def redundant_with_index?(param0 = T.unsafe(nil)); end
 
   private
 
-  # source://rubocop//lib/rubocop/cop/lint/redundant_with_index.rb#66
+  # source://rubocop//lib/rubocop/cop/lint/redundant_with_index.rb#67
   def message(node); end
 
-  # source://rubocop//lib/rubocop/cop/lint/redundant_with_index.rb#74
+  # source://rubocop//lib/rubocop/cop/lint/redundant_with_index.rb#75
   def with_index_range(send); end
 end
 
@@ -36681,7 +36701,7 @@ class RuboCop::Cop::Style::For < ::RuboCop::Cop::Base
 
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/cop/style/for.rb#82
+  # source://rubocop//lib/rubocop/cop/style/for.rb#84
   def suspect_enumerable?(node); end
 end
 
@@ -41266,33 +41286,33 @@ class RuboCop::Cop::Style::MultilineMethodSignature < ::RuboCop::Cop::Base
 
   private
 
-  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#60
+  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#69
   def arguments_range(node); end
 
-  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#41
+  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#42
   def autocorrect(corrector, node, begin_of_arguments); end
 
-  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#72
+  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#81
   def closing_line(node); end
 
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#76
+  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#85
   def correction_exceeds_max_line_length?(node); end
 
-  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#84
+  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#93
   def definition_width(node); end
 
-  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#80
+  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#89
   def indentation_width(node); end
 
-  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#56
+  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#65
   def last_line_source_of_arguments(arguments); end
 
-  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#88
+  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#97
   def max_line_length; end
 
-  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#68
+  # source://rubocop//lib/rubocop/cop/style/multiline_method_signature.rb#77
   def opening_line(node); end
 end
 
@@ -42375,17 +42395,17 @@ class RuboCop::Cop::Style::NilComparison < ::RuboCop::Cop::Base
 
   private
 
-  # source://rubocop//lib/rubocop/cop/style/nil_comparison.rb#65
+  # source://rubocop//lib/rubocop/cop/style/nil_comparison.rb#67
   def message(_node); end
 
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/cop/style/nil_comparison.rb#77
+  # source://rubocop//lib/rubocop/cop/style/nil_comparison.rb#79
   def prefer_comparison?; end
 
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/cop/style/nil_comparison.rb#69
+  # source://rubocop//lib/rubocop/cop/style/nil_comparison.rb#71
   def style_check?(node, &block); end
 end
 
@@ -53667,176 +53687,181 @@ RuboCop::Cop::VisibilityHelp::VISIBILITY_SCOPES = T.let(T.unsafe(nil), Set)
 class RuboCop::DirectiveComment
   # @return [DirectiveComment] a new instance of DirectiveComment
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#30
+  # source://rubocop//lib/rubocop/directive_comment.rb#32
   def initialize(comment, cop_registry = T.unsafe(nil)); end
 
   # Checks if all cops specified in this directive
   #
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#80
+  # source://rubocop//lib/rubocop/directive_comment.rb#82
   def all_cops?; end
 
   # Returns the value of attribute comment.
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#28
+  # source://rubocop//lib/rubocop/directive_comment.rb#30
   def comment; end
 
   # Returns array of specified in this directive cop names
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#85
+  # source://rubocop//lib/rubocop/directive_comment.rb#87
   def cop_names; end
 
   # Returns the value of attribute cop_registry.
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#28
+  # source://rubocop//lib/rubocop/directive_comment.rb#30
   def cop_registry; end
 
   # Returns the value of attribute cops.
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#28
+  # source://rubocop//lib/rubocop/directive_comment.rb#30
   def cops; end
 
   # Returns array of specified in this directive department names
   # when all department disabled
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#91
+  # source://rubocop//lib/rubocop/directive_comment.rb#93
   def department_names; end
 
-  # source://rubocop//lib/rubocop/directive_comment.rb#105
+  # source://rubocop//lib/rubocop/directive_comment.rb#107
   def directive_count; end
 
   # Checks if this directive disables cops
   #
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#60
+  # source://rubocop//lib/rubocop/directive_comment.rb#62
   def disabled?; end
 
   # Checks if this directive disables all cops
   #
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#75
+  # source://rubocop//lib/rubocop/directive_comment.rb#77
   def disabled_all?; end
 
   # Checks if this directive enables cops
   #
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#65
+  # source://rubocop//lib/rubocop/directive_comment.rb#67
   def enabled?; end
 
   # Checks if this directive enables all cops
   #
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#70
+  # source://rubocop//lib/rubocop/directive_comment.rb#72
   def enabled_all?; end
 
   # Checks if directive departments include cop
   #
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#96
+  # source://rubocop//lib/rubocop/directive_comment.rb#98
   def in_directive_department?(cop); end
 
   # Returns line number for directive
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#110
+  # source://rubocop//lib/rubocop/directive_comment.rb#112
   def line_number; end
 
   # Checks if this directive contains all the given cop names
   #
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#42
+  # source://rubocop//lib/rubocop/directive_comment.rb#44
   def match?(cop_names); end
 
   # Returns match captures to directive comment pattern
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#55
+  # source://rubocop//lib/rubocop/directive_comment.rb#57
   def match_captures; end
 
   # Returns the value of attribute mode.
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#28
+  # source://rubocop//lib/rubocop/directive_comment.rb#30
   def mode; end
 
   # Checks if cop department has already used in directive comment
   #
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#101
+  # source://rubocop//lib/rubocop/directive_comment.rb#103
   def overridden_by_department?(cop); end
 
-  # source://rubocop//lib/rubocop/directive_comment.rb#46
+  # source://rubocop//lib/rubocop/directive_comment.rb#48
   def range; end
 
   # Checks if this directive relates to single line
   #
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#37
+  # source://rubocop//lib/rubocop/directive_comment.rb#39
   def single_line?; end
 
   private
 
-  # source://rubocop//lib/rubocop/directive_comment.rb#130
+  # source://rubocop//lib/rubocop/directive_comment.rb#133
   def all_cop_names; end
 
-  # source://rubocop//lib/rubocop/directive_comment.rb#134
+  # source://rubocop//lib/rubocop/directive_comment.rb#137
   def cop_names_for_department(department); end
 
   # @return [Boolean]
   #
-  # source://rubocop//lib/rubocop/directive_comment.rb#126
+  # source://rubocop//lib/rubocop/directive_comment.rb#129
   def department?(name); end
 
-  # source://rubocop//lib/rubocop/directive_comment.rb#140
-  def exclude_redundant_directive_cop(cops); end
+  # source://rubocop//lib/rubocop/directive_comment.rb#142
+  def exclude_lint_department_cops(cops); end
 
-  # source://rubocop//lib/rubocop/directive_comment.rb#120
+  # source://rubocop//lib/rubocop/directive_comment.rb#122
   def parsed_cop_names; end
 
-  # source://rubocop//lib/rubocop/directive_comment.rb#116
+  # source://rubocop//lib/rubocop/directive_comment.rb#118
   def splitted_cops_string; end
 
   class << self
-    # source://rubocop//lib/rubocop/directive_comment.rb#24
+    # source://rubocop//lib/rubocop/directive_comment.rb#26
     def before_comment(line); end
   end
 end
 
 # @api private
 #
-# source://rubocop//lib/rubocop/directive_comment.rb#17
+# source://rubocop//lib/rubocop/directive_comment.rb#19
 RuboCop::DirectiveComment::COPS_PATTERN = T.let(T.unsafe(nil), String)
 
 # @api private
 #
-# source://rubocop//lib/rubocop/directive_comment.rb#15
+# source://rubocop//lib/rubocop/directive_comment.rb#17
 RuboCop::DirectiveComment::COP_NAMES_PATTERN = T.let(T.unsafe(nil), String)
 
 # @api private
 #
-# source://rubocop//lib/rubocop/directive_comment.rb#13
+# source://rubocop//lib/rubocop/directive_comment.rb#15
 RuboCop::DirectiveComment::COP_NAME_PATTERN = T.let(T.unsafe(nil), String)
 
 # @api private
 #
-# source://rubocop//lib/rubocop/directive_comment.rb#19
+# source://rubocop//lib/rubocop/directive_comment.rb#21
 RuboCop::DirectiveComment::DIRECTIVE_COMMENT_REGEXP = T.let(T.unsafe(nil), Regexp)
 
 # @api private
 #
-# source://rubocop//lib/rubocop/directive_comment.rb#11
-RuboCop::DirectiveComment::REDUNDANT_DIRECTIVE_COP = T.let(T.unsafe(nil), String)
+# source://rubocop//lib/rubocop/directive_comment.rb#9
+RuboCop::DirectiveComment::LINT_DEPARTMENT = T.let(T.unsafe(nil), String)
 
 # @api private
 #
-# source://rubocop//lib/rubocop/directive_comment.rb#9
-RuboCop::DirectiveComment::REDUNDANT_DIRECTIVE_COP_DEPARTMENT = T.let(T.unsafe(nil), String)
+# source://rubocop//lib/rubocop/directive_comment.rb#11
+RuboCop::DirectiveComment::LINT_REDUNDANT_DIRECTIVE_COP = T.let(T.unsafe(nil), String)
+
+# @api private
+#
+# source://rubocop//lib/rubocop/directive_comment.rb#13
+RuboCop::DirectiveComment::LINT_SYNTAX_COP = T.let(T.unsafe(nil), String)
 
 # An Error exception is different from an Offense with severity 'error'
 # When this exception is raised, it means that RuboCop is unable to perform
@@ -56536,7 +56561,9 @@ module RuboCop::RSpec::ExpectOffense
   # source://rubocop//lib/rubocop/rspec/expect_offense.rb#130
   def expect_correction(correction, loop: T.unsafe(nil), source: T.unsafe(nil)); end
 
-  # source://rubocop//lib/rubocop/rspec/expect_offense.rb#168
+  # @raise [RuboCop::Runner::InfiniteCorrectionLoop]
+  #
+  # source://rubocop//lib/rubocop/rspec/expect_offense.rb#167
   def expect_no_corrections; end
 
   # source://rubocop//lib/rubocop/rspec/expect_offense.rb#181
