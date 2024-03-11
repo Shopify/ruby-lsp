@@ -5,6 +5,11 @@ type: ruby
 up:
   - ruby
   - bundler
+  - node:
+      yarn: true
+      version: 18.15.0
+      packages:
+        - vscode
 
 commands:
   docs:
