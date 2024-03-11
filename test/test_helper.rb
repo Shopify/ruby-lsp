@@ -54,3 +54,14 @@ begin
 rescue LoadError
   # Tapioca (and thus Spoom) is not available on Windows
 end
+
+# The RuboCop runner catches interrupts to show a nicer exit message to users.
+# This prevents the Interrupt from reaching minitest to stop execution.
+module ReraiseInterrupt
+  def run(...)
+    super
+    raise Interrupt if aborting?
+  end
+end
+
+RubyLsp::Requests::Support::RuboCopRunner.include(ReraiseInterrupt)
