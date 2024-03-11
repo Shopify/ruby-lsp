@@ -57,7 +57,7 @@ jobs:
           git push origin automated-bump-version-$version
 
       - name: Open pull request and turn on auto-merge
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         id: open-pr
         with:
           github-token: "${{ secrets.RUBY_LSP_BOT_TOKEN }}"
@@ -78,7 +78,7 @@ jobs:
             return pullRequestNumber;
 
       - name: Approve pull request
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |
