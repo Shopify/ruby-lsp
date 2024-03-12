@@ -1,5 +1,6 @@
 /* eslint-disable no-process-env */
 import path from "path";
+import os from "os";
 
 import * as vscode from "vscode";
 
@@ -8,6 +9,7 @@ import { WorkspaceChannel } from "./workspaceChannel";
 import { Shadowenv } from "./ruby/shadowenv";
 import { Chruby } from "./ruby/chruby";
 import { VersionManager } from "./ruby/versionManager";
+import { Mise } from "./ruby/mise";
 
 export enum ManagerIdentifier {
   Asdf = "asdf",
@@ -16,6 +18,7 @@ export enum ManagerIdentifier {
   Rbenv = "rbenv",
   Rvm = "rvm",
   Shadowenv = "shadowenv",
+  Mise = "mise",
   None = "none",
   Custom = "custom",
 }
@@ -108,6 +111,11 @@ export class Ruby implements RubyInterface {
           break;
         case ManagerIdentifier.Rvm:
           await this.activate("rvm-auto-ruby");
+          break;
+        case ManagerIdentifier.Mise:
+          await this.runActivation(
+            new Mise(this.workspaceFolder, this.outputChannel),
+          );
           break;
         case ManagerIdentifier.Custom:
           await this.activateCustomRuby();
@@ -264,6 +272,21 @@ export class Ruby implements RubyInterface {
         this.versionManager = tool;
         return;
       }
+    }
+
+    try {
+      await vscode.workspace.fs.stat(
+        vscode.Uri.joinPath(
+          vscode.Uri.file(os.homedir()),
+          ".local",
+          "bin",
+          "mise",
+        ),
+      );
+      this.versionManager = ManagerIdentifier.Mise;
+      return;
+    } catch (error: any) {
+      // If the Mise binary doesn't exist, then continue checking
     }
 
     // If we can't find a version manager, just return None
