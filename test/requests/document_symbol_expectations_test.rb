@@ -33,6 +33,16 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def run_expectations(source)
+    uri = URI("file://#{@_path}")
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+
+    dispatcher = Prism::Dispatcher.new
+    listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
+    dispatcher.dispatch(document.tree)
+    listener.perform
+  end
+
   private
 
   def create_document_symbol_addon

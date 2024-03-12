@@ -12,11 +12,13 @@ module RubyLsp
       sig do
         params(
           response_builder: ResponseBuilders::DocumentSymbol,
+          uri: URI::Generic,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(response_builder, dispatcher)
+      def initialize(response_builder, uri, dispatcher)
         @response_builder = response_builder
+        @uri = uri
 
         dispatcher.register(
           self,
