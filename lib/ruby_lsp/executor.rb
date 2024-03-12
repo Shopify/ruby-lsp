@@ -235,15 +235,17 @@ module RubyLsp
 
     sig { returns(T::Array[T::Hash[Symbol, T.untyped]]) }
     def workspace_dependencies
-      definition = Bundler.definition
-      dep_keys = definition.locked_deps.keys.to_set
-      definition.specs.map do |spec|
-        {
-          name: spec.name,
-          version: spec.version,
-          path: spec.full_gem_path,
-          dependency: dep_keys.include?(spec.name),
-        }
+      Bundler.with_original_env do
+        definition = Bundler.definition
+        dep_keys = definition.locked_deps.keys.to_set
+        definition.specs.map do |spec|
+          {
+            name: spec.name,
+            version: spec.version,
+            path: spec.full_gem_path,
+            dependency: dep_keys.include?(spec.name),
+          }
+        end
       end
     rescue Bundler::GemfileNotFound
       []
