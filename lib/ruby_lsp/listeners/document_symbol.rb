@@ -412,8 +412,7 @@ module RubyLsp
         when Prism::SymbolNode then name_argument.value
         when Prism::KeywordHashNode
           first_element = name_argument.elements.first
-          case first_element
-          when Prism::AssocNode
+          if first_element.is_a?(Prism::AssocNode)
             key = first_element.key
             case key
             when Prism::StringNode then key.content
