@@ -43,15 +43,15 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
           cache-version: 1
-          if: matrix.ruby != 'jruby-head'
+          if: ${{ matrix.ruby != 'jruby-head' }}
 
       - name: Run tests
         run: bundle exec rake
-        if: matrix.ruby != 'jruby-head'
+        if: ${{ matrix.ruby != 'jruby-head' }}
 
       - name: Run index troubleshooting tool
         run: bundle exec ruby-lsp-doctor
-        if: matrix.ruby != 'jruby-head'
+        if: ${{ matrix.ruby != 'jruby-head' }}
   lint_node:
     runs-on: ubuntu-latest
     steps:
