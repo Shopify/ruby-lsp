@@ -4,7 +4,7 @@
 class ExpectationsTestRunner < Minitest::Test
   TEST_EXP_DIR = "test/expectations"
   TEST_FIXTURES_DIR = "test/fixtures"
-  TEST_RUBY_LSP_FIXTURES = File.join(TEST_FIXTURES_DIR, "*.rb")
+  TEST_RUBY_LSP_FIXTURES = File.join(TEST_FIXTURES_DIR, "*.{rb,rake}")
   TEST_PRISM_FIXTURES = File.join(TEST_FIXTURES_DIR, "prism/test/prism/fixtures/**", "*.txt")
 
   class << self
@@ -35,7 +35,7 @@ class ExpectationsTestRunner < Minitest::Test
       RB
 
       Dir.glob(TEST_RUBY_LSP_FIXTURES).each do |path|
-        test_name = File.basename(path, ".rb")
+        test_name = File.basename(path, File.extname(path))
 
         expectations_dir = File.join(TEST_EXP_DIR, expectation_suffix)
         unless File.directory?(expectations_dir)

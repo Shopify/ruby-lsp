@@ -95,6 +95,8 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_leave(node)
+        return unless rake?
+
         if node.name == :namespace && !node.receiver
           @response_builder.pop
         end
@@ -374,6 +376,7 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def handle_rake_namespace(node)
+        return unless rake?
         return if node.receiver
 
         arguments = node.arguments
@@ -399,6 +402,7 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def handle_rake_task(node)
+        return unless rake?
         return if node.receiver
 
         arguments = node.arguments
@@ -429,6 +433,15 @@ module RubyLsp
           range_location: name_argument.location,
           selection_range_location: name_argument.location,
         )
+      end
+
+      sig { returns(T::Boolean) }
+      def rake?
+        if (path = @uri.to_standardized_path)
+          path.match?(/(Rakefile|\.rake)$/)
+        else
+          false
+        end
       end
     end
   end
