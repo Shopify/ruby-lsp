@@ -477,6 +477,7 @@
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.6",
     "@types/node": "20.x",
+    "@types/sinon": "^17.0.3",
     "@types/vscode": "^1.68.0",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
@@ -491,6 +492,7 @@
     "ovsx": "^0.8.3",
     "prettier": "^3.2.5",
     "typescript": "^5.4.2",
+    "sinon": "^17.0.1",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.0.0"
   },
