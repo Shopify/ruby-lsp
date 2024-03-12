@@ -124,6 +124,8 @@ export class Workspace implements WorkspaceInterface {
         return;
       }
 
+      this.error = false;
+
       // If there's no client, then we can just start a new one
       if (!this.lspClient) {
         return this.start();
