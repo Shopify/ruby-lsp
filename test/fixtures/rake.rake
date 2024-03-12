@@ -5,4 +5,6 @@ namespace :foo do
     task three: []
     task "four" => []
   end
+  namespace ""
+  rake ""
 end

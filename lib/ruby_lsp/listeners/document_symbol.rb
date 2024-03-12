@@ -390,7 +390,7 @@ module RubyLsp
         when Prism::SymbolNode then name_argument.value
         end
 
-        return unless name
+        return if name.nil? || name.empty?
 
         @response_builder << create_document_symbol(
           name: name,
@@ -425,7 +425,7 @@ module RubyLsp
           end
         end
 
-        return unless name
+        return if name.nil? || name.empty?
 
         create_document_symbol(
           name: name,
