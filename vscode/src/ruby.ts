@@ -1,13 +1,15 @@
+/* eslint-disable no-process-env */
 import path from "path";
-import fs from "fs/promises";
 
 import * as vscode from "vscode";
 
 import { asyncExec, pathExists, RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 import { Shadowenv } from "./ruby/shadowenv";
+import { Chruby } from "./ruby/chruby";
+import { VersionManager } from "./ruby/versionManager";
 
-export enum VersionManager {
+export enum ManagerIdentifier {
   Asdf = "asdf",
   Auto = "auto",
   Chruby = "chruby",
@@ -24,8 +26,8 @@ export class Ruby implements RubyInterface {
   // where it will be activated, either by the extension or by the server
   public yjitEnabled?: boolean;
   private readonly workspaceFolder: vscode.WorkspaceFolder;
-  #versionManager?: VersionManager;
-  // eslint-disable-next-line no-process-env
+  #versionManager?: ManagerIdentifier;
+
   private readonly shell = process.env.SHELL?.replace(/(\s+)/g, "\\$1");
   private _env: NodeJS.ProcessEnv = {};
   private _error = false;
@@ -64,7 +66,7 @@ export class Ruby implements RubyInterface {
     return this.#versionManager;
   }
 
-  private set versionManager(versionManager: VersionManager | undefined) {
+  private set versionManager(versionManager: ManagerIdentifier | undefined) {
     this.#versionManager = versionManager;
   }
 
@@ -77,14 +79,14 @@ export class Ruby implements RubyInterface {
   }
 
   async activateRuby(
-    versionManager: VersionManager = vscode.workspace
+    versionManager: ManagerIdentifier = vscode.workspace
       .getConfiguration("rubyLsp")
       .get("rubyVersionManager")!,
   ) {
     this.versionManager = versionManager;
 
     // If the version manager is auto, discover the actual manager before trying to activate anything
-    if (this.versionManager === VersionManager.Auto) {
+    if (this.versionManager === ManagerIdentifier.Auto) {
       await this.discoverVersionManager();
       this.outputChannel.info(
         `Discovered version manager ${this.versionManager}`,
@@ -93,26 +95,30 @@ export class Ruby implements RubyInterface {
 
     try {
       switch (this.versionManager) {
-        case VersionManager.Asdf:
+        case ManagerIdentifier.Asdf:
           await this.activate("asdf exec ruby");
           break;
-        case VersionManager.Chruby:
-          await this.activateChruby();
+        case ManagerIdentifier.Chruby:
+          await this.runActivation(
+            new Chruby(this.workspaceFolder, this.outputChannel),
+          );
           break;
-        case VersionManager.Rbenv:
+        case ManagerIdentifier.Rbenv:
           await this.activate("rbenv exec ruby");
           break;
-        case VersionManager.Rvm:
+        case ManagerIdentifier.Rvm:
           await this.activate("rvm-auto-ruby");
           break;
-        case VersionManager.Custom:
+        case ManagerIdentifier.Custom:
           await this.activateCustomRuby();
           break;
-        case VersionManager.None:
+        case ManagerIdentifier.None:
           await this.activate("ruby");
           break;
         default:
-          await this.activateShadowenv();
+          await this.runActivation(
+            new Shadowenv(this.workspaceFolder, this.outputChannel),
+          );
           break;
       }
 
@@ -135,22 +141,15 @@ export class Ruby implements RubyInterface {
     }
   }
 
-  private async activateShadowenv() {
-    const shadowenv = new Shadowenv(this.workspaceFolder, this.outputChannel);
-    const { env, version, yjit } = await shadowenv.activate();
+  private async runActivation(manager: VersionManager) {
+    const { env, version, yjit } = await manager.activate();
     const [major, minor, _patch] = version.split(".").map(Number);
 
     // We need to set the process environment too to make other extensions such as Sorbet find the right Ruby paths
-    // eslint-disable-next-line no-process-env
     process.env = env;
     this._env = env;
     this.rubyVersion = version;
-    this.yjitEnabled = (yjit && major >= 3) || (major === 3 && minor >= 2);
-  }
-
-  private async activateChruby() {
-    const rubyVersion = await this.readRubyVersion();
-    await this.activate(`chruby "${rubyVersion}" && ruby`);
+    this.yjitEnabled = (yjit && major > 3) || (major === 3 && minor >= 2);
   }
 
   private async activate(ruby: string) {
@@ -186,7 +185,7 @@ export class Ruby implements RubyInterface {
 
     const [major, minor, _patch] = rubyInfo.ruby_version.split(".").map(Number);
     this.yjitEnabled =
-      (rubyInfo.yjit === "constant" && major >= 3) ||
+      (rubyInfo.yjit === "constant" && major > 3) ||
       (major === 3 && minor >= 2);
   }
 
@@ -239,35 +238,6 @@ export class Ruby implements RubyInterface {
     this._env.BUNDLE_GEMFILE = this.customBundleGemfile;
   }
 
-  private async readRubyVersion() {
-    let dir = this.cwd;
-
-    while (await pathExists(dir)) {
-      const versionFile = path.join(dir, ".ruby-version");
-
-      if (await pathExists(versionFile)) {
-        const version = await fs.readFile(versionFile, "utf8");
-        const trimmedVersion = version.trim();
-
-        if (trimmedVersion !== "") {
-          return trimmedVersion;
-        }
-      }
-
-      const parent = path.dirname(dir);
-
-      // When we hit the root path (e.g. /), parent will be the same as dir.
-      // We don't want to loop forever in this case, so we break out of the loop.
-      if (parent === dir) {
-        break;
-      }
-
-      dir = parent;
-    }
-
-    throw new Error("No .ruby-version file was found");
-  }
-
   private async discoverVersionManager() {
     // For shadowenv, it wouldn't be enough to check for the executable's existence. We need to check if the project has
     // created a .shadowenv.d folder
@@ -275,17 +245,17 @@ export class Ruby implements RubyInterface {
       await vscode.workspace.fs.stat(
         vscode.Uri.joinPath(this.workspaceFolder.uri, ".shadowenv.d"),
       );
-      this.versionManager = VersionManager.Shadowenv;
+      this.versionManager = ManagerIdentifier.Shadowenv;
       return;
     } catch (error: any) {
       // If .shadowenv.d doesn't exist, then we check the other version managers
     }
 
     const managers = [
-      VersionManager.Asdf,
-      VersionManager.Chruby,
-      VersionManager.Rbenv,
-      VersionManager.Rvm,
+      ManagerIdentifier.Asdf,
+      ManagerIdentifier.Chruby,
+      ManagerIdentifier.Rbenv,
+      ManagerIdentifier.Rvm,
     ];
 
     for (const tool of managers) {
@@ -298,7 +268,7 @@ export class Ruby implements RubyInterface {
     }
 
     // If we can't find a version manager, just return None
-    this.versionManager = VersionManager.None;
+    this.versionManager = ManagerIdentifier.None;
   }
 
   private async toolExists(tool: string) {

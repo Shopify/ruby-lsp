@@ -5,7 +5,7 @@ import * as os from "os";
 
 import * as vscode from "vscode";
 
-import { Ruby, VersionManager } from "../../ruby";
+import { Ruby, ManagerIdentifier } from "../../ruby";
 import { WorkspaceChannel } from "../../workspaceChannel";
 import { LOG_CHANNEL } from "../../common";
 
@@ -29,13 +29,13 @@ suite("Ruby environment activation", () => {
     ruby = new Ruby(
       context,
       {
-        uri: { fsPath: tmpPath },
+        uri: vscode.Uri.file(tmpPath),
       } as vscode.WorkspaceFolder,
       outputChannel,
     );
     await ruby.activateRuby(
       // eslint-disable-next-line no-process-env
-      process.env.CI ? VersionManager.None : VersionManager.Chruby,
+      process.env.CI ? ManagerIdentifier.None : ManagerIdentifier.Chruby,
     );
 
     assert.ok(ruby.rubyVersion, "Expected Ruby version to be set");

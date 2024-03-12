@@ -7,7 +7,7 @@ import { afterEach } from "mocha";
 import * as vscode from "vscode";
 import { State } from "vscode-languageclient/node";
 
-import { Ruby, VersionManager } from "../../ruby";
+import { Ruby, ManagerIdentifier } from "../../ruby";
 import { Telemetry, TelemetryApi, TelemetryEvent } from "../../telemetry";
 import Client from "../../client";
 import { LOG_CHANNEL, asyncExec } from "../../common";
@@ -45,7 +45,7 @@ suite("Client", () => {
     if (process.env.CI) {
       await managerConfig.update(
         "rubyVersionManager",
-        VersionManager.None,
+        ManagerIdentifier.None,
         true,
         true,
       );
