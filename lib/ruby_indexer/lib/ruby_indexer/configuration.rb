@@ -20,7 +20,7 @@ module RubyIndexer
     def initialize
       @excluded_gems = T.let(initial_excluded_gems, T::Array[String])
       @included_gems = T.let([], T::Array[String])
-      @excluded_patterns = T.let([File.join("**", "*_test.rb")], T::Array[String])
+      @excluded_patterns = T.let([File.join("**", "*_test.rb"), File.join("**", "tmp", "**", "*")], T::Array[String])
       path = Bundler.settings["path"]
       @excluded_patterns << File.join(File.expand_path(path, Dir.pwd), "**", "*.rb") if path
 
