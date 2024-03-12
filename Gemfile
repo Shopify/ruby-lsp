@@ -6,7 +6,7 @@ gemspec
 
 group :development do
   gem "bundler", "~> 2.5"
-  gem "debug", "~> 1.9", require: false
+  gem "debug", "~> 1.9", require: false, platforms: [:mri, :mingw, :x64_mingw]
   gem "minitest-reporters", "~> 1.6"
   gem "minitest", "~> 5.22"
   gem "mocha", "~> 2.1"
