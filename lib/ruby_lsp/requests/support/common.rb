@@ -147,6 +147,15 @@ module RubyLsp
         rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError
           nil
         end
+
+        sig { params(node: T.any(Prism::ModuleNode, Prism::ClassNode)).returns(T.nilable(String)) }
+        def namespace_constant_name(node)
+          path = node.constant_path
+          case path
+          when Prism::ConstantPathNode, Prism::ConstantReadNode, Prism::ConstantPathTargetNode
+            constant_name(path)
+          end
+        end
       end
     end
   end

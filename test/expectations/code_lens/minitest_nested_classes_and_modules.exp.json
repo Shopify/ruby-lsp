@@ -1,0 +1,1270 @@
+{
+  "result": [
+    {
+      "range": {
+        "start": {
+          "line": 1,
+          "character": 2
+        },
+        "end": {
+          "line": 5,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "FooTest",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name \"/^Foo::FooTest(#|::)/\"",
+          {
+            "start_line": 1,
+            "start_column": 2,
+            "end_line": 5,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": null,
+        "kind": "group",
+        "id": 1
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 1,
+          "character": 2
+        },
+        "end": {
+          "line": 5,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "FooTest",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name \"/^Foo::FooTest(#|::)/\"",
+          {
+            "start_line": 1,
+            "start_column": 2,
+            "end_line": 5,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": null,
+        "kind": "group",
+        "id": 1
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 1,
+          "character": 2
+        },
+        "end": {
+          "line": 5,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "FooTest",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name \"/^Foo::FooTest(#|::)/\"",
+          {
+            "start_line": 1,
+            "start_column": 2,
+            "end_line": 5,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": null,
+        "kind": "group",
+        "id": 1
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 4
+        },
+        "end": {
+          "line": 2,
+          "character": 21
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_foo",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::FooTest\\#test_foo",
+          {
+            "start_line": 2,
+            "start_column": 4,
+            "end_line": 2,
+            "end_column": 21
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 1,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 4
+        },
+        "end": {
+          "line": 2,
+          "character": 21
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_foo",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::FooTest\\#test_foo",
+          {
+            "start_line": 2,
+            "start_column": 4,
+            "end_line": 2,
+            "end_column": 21
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 1,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 4
+        },
+        "end": {
+          "line": 2,
+          "character": 21
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_foo",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::FooTest\\#test_foo",
+          {
+            "start_line": 2,
+            "start_column": 4,
+            "end_line": 2,
+            "end_column": 21
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 1,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 4
+        },
+        "end": {
+          "line": 4,
+          "character": 23
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_foo_2",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::FooTest\\#test_foo_2",
+          {
+            "start_line": 4,
+            "start_column": 4,
+            "end_line": 4,
+            "end_column": 23
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 1,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 4
+        },
+        "end": {
+          "line": 4,
+          "character": 23
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_foo_2",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::FooTest\\#test_foo_2",
+          {
+            "start_line": 4,
+            "start_column": 4,
+            "end_line": 4,
+            "end_column": 23
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 1,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 4
+        },
+        "end": {
+          "line": 4,
+          "character": 23
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_foo_2",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::FooTest\\#test_foo_2",
+          {
+            "start_line": 4,
+            "start_column": 4,
+            "end_line": 4,
+            "end_column": 23
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 1,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 4
+        },
+        "end": {
+          "line": 18,
+          "character": 7
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "BarTest",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name \"/^Foo::Bar::BarTest(#|::)/\"",
+          {
+            "start_line": 8,
+            "start_column": 4,
+            "end_line": 18,
+            "end_column": 7
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": null,
+        "kind": "group",
+        "id": 2
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 4
+        },
+        "end": {
+          "line": 18,
+          "character": 7
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "BarTest",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name \"/^Foo::Bar::BarTest(#|::)/\"",
+          {
+            "start_line": 8,
+            "start_column": 4,
+            "end_line": 18,
+            "end_column": 7
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": null,
+        "kind": "group",
+        "id": 2
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 4
+        },
+        "end": {
+          "line": 18,
+          "character": 7
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "BarTest",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name \"/^Foo::Bar::BarTest(#|::)/\"",
+          {
+            "start_line": 8,
+            "start_column": 4,
+            "end_line": 18,
+            "end_column": 7
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": null,
+        "kind": "group",
+        "id": 2
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 6
+        },
+        "end": {
+          "line": 9,
+          "character": 23
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_bar",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::BarTest\\#test_bar",
+          {
+            "start_line": 9,
+            "start_column": 6,
+            "end_line": 9,
+            "end_column": 23
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 2,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 6
+        },
+        "end": {
+          "line": 9,
+          "character": 23
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_bar",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::BarTest\\#test_bar",
+          {
+            "start_line": 9,
+            "start_column": 6,
+            "end_line": 9,
+            "end_column": 23
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 2,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 6
+        },
+        "end": {
+          "line": 9,
+          "character": 23
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_bar",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::BarTest\\#test_bar",
+          {
+            "start_line": 9,
+            "start_column": 6,
+            "end_line": 9,
+            "end_column": 23
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 2,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 12,
+          "character": 8
+        },
+        "end": {
+          "line": 16,
+          "character": 11
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "BazTest",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name \"/^Foo::Bar::BarTest::Baz::BazTest(#|::)/\"",
+          {
+            "start_line": 12,
+            "start_column": 8,
+            "end_line": 16,
+            "end_column": 11
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 2,
+        "kind": "group",
+        "id": 3
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 12,
+          "character": 8
+        },
+        "end": {
+          "line": 16,
+          "character": 11
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "BazTest",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name \"/^Foo::Bar::BarTest::Baz::BazTest(#|::)/\"",
+          {
+            "start_line": 12,
+            "start_column": 8,
+            "end_line": 16,
+            "end_column": 11
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 2,
+        "kind": "group",
+        "id": 3
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 12,
+          "character": 8
+        },
+        "end": {
+          "line": 16,
+          "character": 11
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "BazTest",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name \"/^Foo::Bar::BarTest::Baz::BazTest(#|::)/\"",
+          {
+            "start_line": 12,
+            "start_column": 8,
+            "end_line": 16,
+            "end_column": 11
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 2,
+        "kind": "group",
+        "id": 3
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 10
+        },
+        "end": {
+          "line": 13,
+          "character": 27
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_baz",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::BarTest::Baz::BazTest\\#test_baz",
+          {
+            "start_line": 13,
+            "start_column": 10,
+            "end_line": 13,
+            "end_column": 27
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 3,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 10
+        },
+        "end": {
+          "line": 13,
+          "character": 27
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_baz",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::BarTest::Baz::BazTest\\#test_baz",
+          {
+            "start_line": 13,
+            "start_column": 10,
+            "end_line": 13,
+            "end_column": 27
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 3,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 10
+        },
+        "end": {
+          "line": 13,
+          "character": 27
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_baz",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::BarTest::Baz::BazTest\\#test_baz",
+          {
+            "start_line": 13,
+            "start_column": 10,
+            "end_line": 13,
+            "end_column": 27
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 3,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 15,
+          "character": 10
+        },
+        "end": {
+          "line": 15,
+          "character": 29
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_baz_2",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::BarTest::Baz::BazTest\\#test_baz_2",
+          {
+            "start_line": 15,
+            "start_column": 10,
+            "end_line": 15,
+            "end_column": 29
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 3,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 15,
+          "character": 10
+        },
+        "end": {
+          "line": 15,
+          "character": 29
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_baz_2",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::BarTest::Baz::BazTest\\#test_baz_2",
+          {
+            "start_line": 15,
+            "start_column": 10,
+            "end_line": 15,
+            "end_column": 29
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 3,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 15,
+          "character": 10
+        },
+        "end": {
+          "line": 15,
+          "character": 29
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_baz_2",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::BarTest::Baz::BazTest\\#test_baz_2",
+          {
+            "start_line": 15,
+            "start_column": 10,
+            "end_line": 15,
+            "end_column": 29
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 3,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 23,
+          "character": 2
+        },
+        "end": {
+          "line": 27,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "FooBarTest",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name \"/^Foo::Bar::FooBarTest(#|::)/\"",
+          {
+            "start_line": 23,
+            "start_column": 2,
+            "end_line": 27,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": null,
+        "kind": "group",
+        "id": 4
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 23,
+          "character": 2
+        },
+        "end": {
+          "line": 27,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "FooBarTest",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name \"/^Foo::Bar::FooBarTest(#|::)/\"",
+          {
+            "start_line": 23,
+            "start_column": 2,
+            "end_line": 27,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": null,
+        "kind": "group",
+        "id": 4
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 23,
+          "character": 2
+        },
+        "end": {
+          "line": 27,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "FooBarTest",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name \"/^Foo::Bar::FooBarTest(#|::)/\"",
+          {
+            "start_line": 23,
+            "start_column": 2,
+            "end_line": 27,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": null,
+        "kind": "group",
+        "id": 4
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 24,
+          "character": 4
+        },
+        "end": {
+          "line": 24,
+          "character": 25
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_foo_bar",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::FooBarTest\\#test_foo_bar",
+          {
+            "start_line": 24,
+            "start_column": 4,
+            "end_line": 24,
+            "end_column": 25
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 4,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 24,
+          "character": 4
+        },
+        "end": {
+          "line": 24,
+          "character": 25
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_foo_bar",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::FooBarTest\\#test_foo_bar",
+          {
+            "start_line": 24,
+            "start_column": 4,
+            "end_line": 24,
+            "end_column": 25
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 4,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 24,
+          "character": 4
+        },
+        "end": {
+          "line": 24,
+          "character": 25
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_foo_bar",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::FooBarTest\\#test_foo_bar",
+          {
+            "start_line": 24,
+            "start_column": 4,
+            "end_line": 24,
+            "end_column": 25
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 4,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 26,
+          "character": 4
+        },
+        "end": {
+          "line": 26,
+          "character": 27
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_foo_bar_2",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::FooBarTest\\#test_foo_bar_2",
+          {
+            "start_line": 26,
+            "start_column": 4,
+            "end_line": 26,
+            "end_column": 27
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 4,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 26,
+          "character": 4
+        },
+        "end": {
+          "line": 26,
+          "character": 27
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_foo_bar_2",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::FooBarTest\\#test_foo_bar_2",
+          {
+            "start_line": 26,
+            "start_column": 4,
+            "end_line": 26,
+            "end_column": 27
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 4,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 26,
+          "character": 4
+        },
+        "end": {
+          "line": 26,
+          "character": 27
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_foo_bar_2",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::FooBarTest\\#test_foo_bar_2",
+          {
+            "start_line": 26,
+            "start_column": 4,
+            "end_line": 26,
+            "end_column": 27
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 4,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 32,
+          "character": 2
+        },
+        "end": {
+          "line": 34,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "FooBar::Test",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name \"/^Foo::Bar::FooBar::Test(#|::)/\"",
+          {
+            "start_line": 32,
+            "start_column": 2,
+            "end_line": 34,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": null,
+        "kind": "group",
+        "id": 5
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 32,
+          "character": 2
+        },
+        "end": {
+          "line": 34,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "FooBar::Test",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name \"/^Foo::Bar::FooBar::Test(#|::)/\"",
+          {
+            "start_line": 32,
+            "start_column": 2,
+            "end_line": 34,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": null,
+        "kind": "group",
+        "id": 5
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 32,
+          "character": 2
+        },
+        "end": {
+          "line": 34,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "FooBar::Test",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name \"/^Foo::Bar::FooBar::Test(#|::)/\"",
+          {
+            "start_line": 32,
+            "start_column": 2,
+            "end_line": 34,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": null,
+        "kind": "group",
+        "id": 5
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 33,
+          "character": 4
+        },
+        "end": {
+          "line": 33,
+          "character": 29
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_foo_bar_baz",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::FooBar::Test\\#test_foo_bar_baz",
+          {
+            "start_line": 33,
+            "start_column": 4,
+            "end_line": 33,
+            "end_column": 29
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 5,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 33,
+          "character": 4
+        },
+        "end": {
+          "line": 33,
+          "character": 29
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_foo_bar_baz",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::FooBar::Test\\#test_foo_bar_baz",
+          {
+            "start_line": 33,
+            "start_column": 4,
+            "end_line": 33,
+            "end_column": 29
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 5,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 33,
+          "character": 4
+        },
+        "end": {
+          "line": 33,
+          "character": 29
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_nested_classes_and_modules.rb",
+          "test_foo_bar_baz",
+          "bundle exec ruby -Itest /fixtures/minitest_nested_classes_and_modules.rb --name Foo::Bar::FooBar::Test\\#test_foo_bar_baz",
+          {
+            "start_line": 33,
+            "start_column": 4,
+            "end_line": 33,
+            "end_column": 29
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 5,
+        "kind": "example"
+      }
+    }
+  ],
+  "params": [
+
+  ]
+}
