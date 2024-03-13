@@ -155,7 +155,7 @@ module RubyIndexer
 
     sig { returns(Regexp) }
     def magic_comment_regex
-      @magic_comment_regex ||= T.let(/^#\s*#{@excluded_magic_comments.join("|")}/, T.nilable(Regexp))
+      @magic_comment_regex ||= T.let(/#{@excluded_magic_comments.join("|")}/, T.nilable(Regexp))
     end
 
     private
