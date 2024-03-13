@@ -258,8 +258,8 @@ module RubyLsp
         name = case first_argument
         when Prism::StringNode
           first_argument.content
-        when Prism::ConstantReadNode
-          first_argument.full_name
+        when Prism::ConstantReadNode, Prism::ConstantPathNode
+          constant_name(first_argument)
         end
 
         return unless name

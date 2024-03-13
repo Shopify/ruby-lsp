@@ -13,3 +13,7 @@ describe Foo do
 
   it "it_level_one_again"
 end
+
+describe Foo::Bar do
+  it 'it_class_constant_path'
+end
