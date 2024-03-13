@@ -26,10 +26,13 @@ GEM
     docile (1.4.0)
     erubi (1.12.0)
     io-console (0.7.1)
+    io-console (0.7.1-java)
     irb (1.11.0)
       rdoc
       reline (>= 0.3.8)
+    jar-dependencies (0.4.1)
     json (2.7.1)
+    json (2.7.1-java)
     language_server-protocol (3.17.0.3)
     minitest (5.22.2)
     minitest-reporters (1.6.1)
@@ -48,7 +51,10 @@ GEM
     prism (0.24.0)
     psych (5.1.2)
       stringio
+    psych (5.1.2-java)
+      jar-dependencies (>= 0.1.7)
     racc (1.7.3)
+    racc (1.7.3-java)
     rainbow (3.1.1)
     rake (13.1.0)
     rbi (0.1.9)
@@ -91,6 +97,7 @@ GEM
     sorbet (0.5.11287)
       sorbet-static (= 0.5.11287)
     sorbet-runtime (0.5.11287)
+    sorbet-static (0.5.11287-java)
     sorbet-static (0.5.11287-universal-darwin)
     sorbet-static (0.5.11287-x86_64-linux)
     sorbet-static-and-runtime (0.5.11287)
@@ -122,8 +129,7 @@ GEM
 
 PLATFORMS
   arm64-darwin
-  x64-mingw-ucrt
-  x64-mingw32
+  java
   x86_64-darwin
   x86_64-linux
 
