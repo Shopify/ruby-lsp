@@ -133,4 +133,26 @@ suite("Chruby", () => {
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
   });
+
+  test("Considers Ruby as the default engine if missing", async () => {
+    const rubyHome = path.join(rootPath, "fakehome", ".rubies");
+    fs.mkdirSync(path.join(rubyHome, `ruby-${RUBY_VERSION}`, "bin"), {
+      recursive: true,
+    });
+
+    createRubySymlinks(
+      path.join(rubyHome, `ruby-${RUBY_VERSION}`, "bin", "ruby"),
+    );
+
+    fs.writeFileSync(path.join(rootPath, ".ruby-version"), RUBY_VERSION);
+
+    const chruby = new Chruby(workspaceFolder, outputChannel);
+    chruby.rubyInstallationUris = [vscode.Uri.file(rubyHome)];
+
+    const { env, version, yjit } = await chruby.activate();
+
+    assert.match(env.PATH!, /ruby-3\.3\.0\/bin/);
+    assert.strictEqual(version, RUBY_VERSION);
+    assert.notStrictEqual(yjit, undefined);
+  });
 });
