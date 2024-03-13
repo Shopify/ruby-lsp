@@ -47,17 +47,22 @@ suite("Debugger", () => {
     context.subscriptions.forEach((subscription) => subscription.dispose());
   });
 
-  test("Resolve configuration injects Ruby environment", () => {
+  test("Resolve configuration injects Ruby environment", async () => {
     const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const ruby = { env: { bogus: "hello!" } } as unknown as Ruby;
+    const workspaceFolder = {
+      name: "fake",
+      uri: vscode.Uri.file("fake"),
+      index: 0,
+    };
     const debug = new Debugger(context, () => {
       return {
         ruby,
-        workspaceFolder: { uri: { fsPath: "fake" } },
+        workspaceFolder,
       } as Workspace;
     });
-    const configs: any = debug.resolveDebugConfiguration!(
-      { uri: { fsPath: "fake" } } as vscode.WorkspaceFolder,
+    const configs: any = await debug.resolveDebugConfiguration!(
+      workspaceFolder,
       {
         type: "ruby_lsp",
         name: "Debug",
@@ -72,17 +77,22 @@ suite("Debugger", () => {
     context.subscriptions.forEach((subscription) => subscription.dispose());
   });
 
-  test("Resolve configuration injects Ruby environment and allows users custom environment", () => {
+  test("Resolve configuration injects Ruby environment and allows users custom environment", async () => {
     const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const ruby = { env: { bogus: "hello!" } } as unknown as Ruby;
+    const workspaceFolder = {
+      name: "fake",
+      uri: vscode.Uri.file("fake"),
+      index: 0,
+    };
     const debug = new Debugger(context, () => {
       return {
         ruby,
-        workspaceFolder: { uri: { fsPath: "fake" } },
+        workspaceFolder,
       } as Workspace;
     });
-    const configs: any = debug.resolveDebugConfiguration!(
-      { uri: { fsPath: "fake" } } as vscode.WorkspaceFolder,
+    const configs: any = await debug.resolveDebugConfiguration!(
+      workspaceFolder,
       {
         type: "ruby_lsp",
         name: "Debug",
@@ -98,21 +108,26 @@ suite("Debugger", () => {
     context.subscriptions.forEach((subscription) => subscription.dispose());
   });
 
-  test("Resolve configuration injects BUNDLE_GEMFILE if there's a custom bundle", () => {
+  test("Resolve configuration injects BUNDLE_GEMFILE if there's a custom bundle", async () => {
     const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
     fs.mkdirSync(path.join(tmpPath, ".ruby-lsp"));
     fs.writeFileSync(path.join(tmpPath, ".ruby-lsp", "Gemfile"), "hello!");
 
     const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const ruby = { env: { bogus: "hello!" } } as unknown as Ruby;
+    const workspaceFolder = {
+      name: "fake",
+      uri: vscode.Uri.file(tmpPath),
+      index: 0,
+    };
     const debug = new Debugger(context, () => {
       return {
         ruby,
-        workspaceFolder: { uri: { fsPath: tmpPath } },
+        workspaceFolder,
       } as Workspace;
     });
-    const configs: any = debug.resolveDebugConfiguration!(
-      { uri: { fsPath: tmpPath } } as vscode.WorkspaceFolder,
+    const configs: any = await debug.resolveDebugConfiguration!(
+      workspaceFolder,
       {
         type: "ruby_lsp",
         name: "Debug",
@@ -127,7 +142,11 @@ suite("Debugger", () => {
       {
         parallel: "1",
         ...ruby.env,
-        BUNDLE_GEMFILE: path.join(tmpPath, ".ruby-lsp", "Gemfile"),
+        BUNDLE_GEMFILE: vscode.Uri.joinPath(
+          vscode.Uri.file(tmpPath),
+          ".ruby-lsp",
+          "Gemfile",
+        ).fsPath,
       },
       configs.env,
     );
@@ -168,7 +187,7 @@ suite("Debugger", () => {
     const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
     const workspaceFolder: vscode.WorkspaceFolder = {
-      uri: vscode.Uri.from({ scheme: "file", path: tmpPath }),
+      uri: vscode.Uri.file(tmpPath),
       name: path.basename(tmpPath),
       index: 0,
     };
