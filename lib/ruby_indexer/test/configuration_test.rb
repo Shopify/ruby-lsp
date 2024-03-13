@@ -21,7 +21,6 @@ module RubyIndexer
     end
 
     def test_indexables_only_includes_gem_require_paths
-      @config.apply_config({})
       indexables = @config.indexables
 
       Bundler.locked_gems.specs.each do |lazy_spec|
@@ -35,7 +34,6 @@ module RubyIndexer
     end
 
     def test_indexables_does_not_include_default_gem_path_when_in_bundle
-      @config.apply_config({})
       indexables = @config.indexables
 
       assert(
@@ -44,7 +42,6 @@ module RubyIndexer
     end
 
     def test_indexables_includes_default_gems
-      @config.apply_config({})
       indexables = @config.indexables.map(&:full_path)
 
       assert_includes(indexables, "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb")
@@ -53,7 +50,6 @@ module RubyIndexer
     end
 
     def test_indexables_includes_project_files
-      @config.apply_config({})
       indexables = @config.indexables.map(&:full_path)
 
       Dir.glob("#{Dir.pwd}/lib/**/*.rb").each do |path|
@@ -66,7 +62,6 @@ module RubyIndexer
     def test_indexables_avoids_duplicates_if_bundle_path_is_inside_project
       Bundler.settings.set_global("path", "vendor/bundle")
       config = Configuration.new
-      config.apply_config({})
 
       assert_includes(config.instance_variable_get(:@excluded_patterns), "#{Dir.pwd}/vendor/bundle/**/*.rb")
     ensure
@@ -74,7 +69,6 @@ module RubyIndexer
     end
 
     def test_indexables_does_not_include_gems_own_installed_files
-      @config.apply_config({})
       indexables = @config.indexables
 
       assert(
@@ -95,7 +89,6 @@ module RubyIndexer
     end
 
     def test_paths_are_unique
-      @config.apply_config({})
       indexables = @config.indexables
 
       assert_equal(indexables.uniq.length, indexables.length)
