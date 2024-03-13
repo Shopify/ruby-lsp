@@ -63,7 +63,7 @@ module RubyLsp
         indexing_config = {}
 
         # Need to use the workspace URI, otherwise, this will fail for people working on a project that is a symlink.
-        index_path = File.join(T.must(@store.workspace_uri.to_standardized_path), ".index.yml")
+        index_path = File.join(@store.workspace_uri.to_standardized_path, ".index.yml")
 
         if File.exist?(index_path)
           begin
