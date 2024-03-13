@@ -197,7 +197,7 @@ export class Ruby implements RubyInterface {
     if (major < 3) {
       throw new Error(
         `The Ruby LSP requires Ruby 3.0 or newer to run. This project is using ${this.rubyVersion}. \
-        [See alternatives](https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md?#ruby-version-requirement)`,
+        [See alternatives](https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md#ruby-version-requirement)`,
       );
     }
 
