@@ -1,8 +1,7 @@
 {
     "version": "0.2",
     "ignorePaths": [
-        "sorbet/rbi",
-        "test/fixtures/rails_search_index.js"
+        "sorbet/rbi"
     ],
     "words": [
         "aref",
