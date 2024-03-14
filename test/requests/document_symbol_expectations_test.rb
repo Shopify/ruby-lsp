@@ -7,6 +7,23 @@ require "expectations/expectations_test_runner"
 class DocumentSymbolExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::DocumentSymbol, "document_symbol"
 
+  def test_labels_blank_names
+    source = <<~RUBY
+      def
+    RUBY
+    uri = URI("file:///fake.rb")
+
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+
+    dispatcher = Prism::Dispatcher.new
+    listener = RubyLsp::Requests::DocumentSymbol.new(dispatcher)
+    dispatcher.dispatch(document.tree)
+    response = listener.perform
+
+    assert_equal(1, response.size)
+    assert_equal("<blank>", T.must(response.first).name)
+  end
+
   def test_document_symbol_addons
     source = <<~RUBY
       class Foo
