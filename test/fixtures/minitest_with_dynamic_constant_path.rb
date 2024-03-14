@@ -21,5 +21,11 @@ module foo::Baz
     def test_stuff; end
 
     def test_other_stuff; end
+
+    module nested::Dynamic
+      class OtherDynamicTest < Minitest::Test
+        def test_more; end
+      end
+    end
   end
 end

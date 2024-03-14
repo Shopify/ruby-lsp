@@ -1,0 +1,883 @@
+{
+  "result": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 0
+        },
+        "end": {
+          "line": 21,
+          "character": 3
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "Foo",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name \"/^Foo(#|::)/\"",
+          {
+            "start_line": 5,
+            "start_column": 0,
+            "end_line": 21,
+            "end_column": 3
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": null,
+        "kind": "group",
+        "id": 1
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 0
+        },
+        "end": {
+          "line": 21,
+          "character": 3
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "Foo",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name \"/^Foo(#|::)/\"",
+          {
+            "start_line": 5,
+            "start_column": 0,
+            "end_line": 21,
+            "end_column": 3
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": null,
+        "kind": "group",
+        "id": 1
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 0
+        },
+        "end": {
+          "line": 21,
+          "character": 3
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "Foo",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name \"/^Foo(#|::)/\"",
+          {
+            "start_line": 5,
+            "start_column": 0,
+            "end_line": 21,
+            "end_column": 3
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": null,
+        "kind": "group",
+        "id": 1
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 2
+        },
+        "end": {
+          "line": 12,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "string_+dynamic_reference+",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name \"/^Foo::string_.*(#|::)/\"",
+          {
+            "start_line": 6,
+            "start_column": 2,
+            "end_line": 12,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 1,
+        "kind": "group",
+        "id": 2
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 2
+        },
+        "end": {
+          "line": 12,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "string_+dynamic_reference+",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name \"/^Foo::string_.*(#|::)/\"",
+          {
+            "start_line": 6,
+            "start_column": 2,
+            "end_line": 12,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 1,
+        "kind": "group",
+        "id": 2
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 2
+        },
+        "end": {
+          "line": 12,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "string_+dynamic_reference+",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name \"/^Foo::string_.*(#|::)/\"",
+          {
+            "start_line": 6,
+            "start_column": 2,
+            "end_line": 12,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 1,
+        "kind": "group",
+        "id": 2
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 4
+        },
+        "end": {
+          "line": 7,
+          "character": 23
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "does_something",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name /^Foo::string_.*\\#test_.*_does_something$/",
+          {
+            "start_line": 7,
+            "start_column": 4,
+            "end_line": 7,
+            "end_column": 23
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 2,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 4
+        },
+        "end": {
+          "line": 7,
+          "character": 23
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "does_something",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name /^Foo::string_.*\\#test_.*_does_something$/",
+          {
+            "start_line": 7,
+            "start_column": 4,
+            "end_line": 7,
+            "end_column": 23
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 2,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 4
+        },
+        "end": {
+          "line": 7,
+          "character": 23
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "does_something",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name /^Foo::string_.*\\#test_.*_does_something$/",
+          {
+            "start_line": 7,
+            "start_column": 4,
+            "end_line": 7,
+            "end_column": 23
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 2,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 4
+        },
+        "end": {
+          "line": 11,
+          "character": 7
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "normal_string",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name \"/^Foo::string_.*::normal_string(#|::)/\"",
+          {
+            "start_line": 9,
+            "start_column": 4,
+            "end_line": 11,
+            "end_column": 7
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 2,
+        "kind": "group",
+        "id": 3
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 4
+        },
+        "end": {
+          "line": 11,
+          "character": 7
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "normal_string",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name \"/^Foo::string_.*::normal_string(#|::)/\"",
+          {
+            "start_line": 9,
+            "start_column": 4,
+            "end_line": 11,
+            "end_column": 7
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 2,
+        "kind": "group",
+        "id": 3
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 4
+        },
+        "end": {
+          "line": 11,
+          "character": 7
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "normal_string",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name \"/^Foo::string_.*::normal_string(#|::)/\"",
+          {
+            "start_line": 9,
+            "start_column": 4,
+            "end_line": 11,
+            "end_column": 7
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 2,
+        "kind": "group",
+        "id": 3
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 6
+        },
+        "end": {
+          "line": 10,
+          "character": 30
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "does_something_else",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name /^Foo::string_.*::normal_string\\#test_.*_does_something_else$/",
+          {
+            "start_line": 10,
+            "start_column": 6,
+            "end_line": 10,
+            "end_column": 30
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 3,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 6
+        },
+        "end": {
+          "line": 10,
+          "character": 30
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "does_something_else",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name /^Foo::string_.*::normal_string\\#test_.*_does_something_else$/",
+          {
+            "start_line": 10,
+            "start_column": 6,
+            "end_line": 10,
+            "end_column": 30
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 3,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 6
+        },
+        "end": {
+          "line": 10,
+          "character": 30
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "does_something_else",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name /^Foo::string_.*::normal_string\\#test_.*_does_something_else$/",
+          {
+            "start_line": 10,
+            "start_column": 6,
+            "end_line": 10,
+            "end_column": 30
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 3,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 14,
+          "character": 2
+        },
+        "end": {
+          "line": 18,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "+dynamic_reference+_double_string_+dynamic_reference+",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name \"/^Foo::.*_double_string_.*(#|::)/\"",
+          {
+            "start_line": 14,
+            "start_column": 2,
+            "end_line": 18,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 1,
+        "kind": "group",
+        "id": 4
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 14,
+          "character": 2
+        },
+        "end": {
+          "line": 18,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "+dynamic_reference+_double_string_+dynamic_reference+",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name \"/^Foo::.*_double_string_.*(#|::)/\"",
+          {
+            "start_line": 14,
+            "start_column": 2,
+            "end_line": 18,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 1,
+        "kind": "group",
+        "id": 4
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 14,
+          "character": 2
+        },
+        "end": {
+          "line": 18,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "+dynamic_reference+_double_string_+dynamic_reference+",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name \"/^Foo::.*_double_string_.*(#|::)/\"",
+          {
+            "start_line": 14,
+            "start_column": 2,
+            "end_line": 18,
+            "end_column": 5
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 1,
+        "kind": "group",
+        "id": 4
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 15,
+          "character": 4
+        },
+        "end": {
+          "line": 15,
+          "character": 13
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "runs",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name /^Foo::.*_double_string_.*\\#test_.*_runs$/",
+          {
+            "start_line": 15,
+            "start_column": 4,
+            "end_line": 15,
+            "end_column": 13
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 4,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 15,
+          "character": 4
+        },
+        "end": {
+          "line": 15,
+          "character": 13
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "runs",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name /^Foo::.*_double_string_.*\\#test_.*_runs$/",
+          {
+            "start_line": 15,
+            "start_column": 4,
+            "end_line": 15,
+            "end_column": 13
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 4,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 15,
+          "character": 4
+        },
+        "end": {
+          "line": 15,
+          "character": 13
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "runs",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name /^Foo::.*_double_string_.*\\#test_.*_runs$/",
+          {
+            "start_line": 15,
+            "start_column": 4,
+            "end_line": 15,
+            "end_column": 13
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 4,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 17,
+          "character": 4
+        },
+        "end": {
+          "line": 17,
+          "character": 21
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "runs_as_well",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name /^Foo::.*_double_string_.*\\#test_.*_runs_as_well$/",
+          {
+            "start_line": 17,
+            "start_column": 4,
+            "end_line": 17,
+            "end_column": 21
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 4,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 17,
+          "character": 4
+        },
+        "end": {
+          "line": 17,
+          "character": 21
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "runs_as_well",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name /^Foo::.*_double_string_.*\\#test_.*_runs_as_well$/",
+          {
+            "start_line": 17,
+            "start_column": 4,
+            "end_line": 17,
+            "end_column": 21
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 4,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 17,
+          "character": 4
+        },
+        "end": {
+          "line": 17,
+          "character": 21
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "runs_as_well",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name /^Foo::.*_double_string_.*\\#test_.*_runs_as_well$/",
+          {
+            "start_line": 17,
+            "start_column": 4,
+            "end_line": 17,
+            "end_column": 21
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 4,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 20,
+          "character": 2
+        },
+        "end": {
+          "line": 20,
+          "character": 19
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "it_level_one",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name /^Foo\\#test_.*_it_level_one$/",
+          {
+            "start_line": 20,
+            "start_column": 2,
+            "end_line": 20,
+            "end_column": 19
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 1,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 20,
+          "character": 2
+        },
+        "end": {
+          "line": 20,
+          "character": 19
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "it_level_one",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name /^Foo\\#test_.*_it_level_one$/",
+          {
+            "start_line": 20,
+            "start_column": 2,
+            "end_line": 20,
+            "end_column": 19
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 1,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 20,
+          "character": 2
+        },
+        "end": {
+          "line": 20,
+          "character": 19
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_spec_interpolation.rb",
+          "it_level_one",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_interpolation.rb --name /^Foo\\#test_.*_it_level_one$/",
+          {
+            "start_line": 20,
+            "start_column": 2,
+            "end_line": 20,
+            "end_column": 19
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 1,
+        "kind": "example"
+      }
+    }
+  ],
+  "params": [
+
+  ]
+}

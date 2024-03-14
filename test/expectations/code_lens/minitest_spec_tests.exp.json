@@ -17,7 +17,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "Foo",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /Foo/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name \"/^Foo(#|::)/\"",
           {
             "start_line": 0,
             "start_column": 0,
@@ -50,7 +50,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "Foo",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /Foo/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name \"/^Foo(#|::)/\"",
           {
             "start_line": 0,
             "start_column": 0,
@@ -83,7 +83,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "Foo",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /Foo/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name \"/^Foo(#|::)/\"",
           {
             "start_line": 0,
             "start_column": 0,
@@ -116,7 +116,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_level_one",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_level_one/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo\\#test_.*_it_level_one$/",
           {
             "start_line": 1,
             "start_column": 2,
@@ -148,7 +148,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_level_one",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_level_one/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo\\#test_.*_it_level_one$/",
           {
             "start_line": 1,
             "start_column": 2,
@@ -180,7 +180,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_level_one",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_level_one/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo\\#test_.*_it_level_one$/",
           {
             "start_line": 1,
             "start_column": 2,
@@ -212,7 +212,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "nested",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /nested/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested(#|::)/\"",
           {
             "start_line": 3,
             "start_column": 2,
@@ -245,7 +245,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "nested",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /nested/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested(#|::)/\"",
           {
             "start_line": 3,
             "start_column": 2,
@@ -278,7 +278,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "nested",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /nested/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested(#|::)/\"",
           {
             "start_line": 3,
             "start_column": 2,
@@ -311,7 +311,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_nested",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_nested/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo::nested\\#test_.*_it_nested$/",
           {
             "start_line": 4,
             "start_column": 4,
@@ -343,7 +343,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_nested",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_nested/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo::nested\\#test_.*_it_nested$/",
           {
             "start_line": 4,
             "start_column": 4,
@@ -375,7 +375,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_nested",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_nested/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo::nested\\#test_.*_it_nested$/",
           {
             "start_line": 4,
             "start_column": 4,
@@ -407,7 +407,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "deep_nested",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /deep_nested/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested::deep_nested(#|::)/\"",
           {
             "start_line": 6,
             "start_column": 4,
@@ -440,7 +440,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "deep_nested",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /deep_nested/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested::deep_nested(#|::)/\"",
           {
             "start_line": 6,
             "start_column": 4,
@@ -473,7 +473,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "deep_nested",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /deep_nested/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested::deep_nested(#|::)/\"",
           {
             "start_line": 6,
             "start_column": 4,
@@ -506,7 +506,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_deep_nested",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_deep_nested/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo::nested::deep_nested\\#test_.*_it_deep_nested$/",
           {
             "start_line": 7,
             "start_column": 6,
@@ -538,7 +538,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_deep_nested",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_deep_nested/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo::nested::deep_nested\\#test_.*_it_deep_nested$/",
           {
             "start_line": 7,
             "start_column": 6,
@@ -570,7 +570,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_deep_nested",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_deep_nested/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo::nested::deep_nested\\#test_.*_it_deep_nested$/",
           {
             "start_line": 7,
             "start_column": 6,
@@ -602,7 +602,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_nested_again",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_nested_again/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo::nested\\#test_.*_it_nested_again$/",
           {
             "start_line": 10,
             "start_column": 4,
@@ -634,7 +634,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_nested_again",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_nested_again/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo::nested\\#test_.*_it_nested_again$/",
           {
             "start_line": 10,
             "start_column": 4,
@@ -666,7 +666,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_nested_again",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_nested_again/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo::nested\\#test_.*_it_nested_again$/",
           {
             "start_line": 10,
             "start_column": 4,
@@ -698,7 +698,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_level_one_again",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_level_one_again/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo\\#test_.*_it_level_one_again$/",
           {
             "start_line": 13,
             "start_column": 2,
@@ -730,7 +730,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_level_one_again",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_level_one_again/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo\\#test_.*_it_level_one_again$/",
           {
             "start_line": 13,
             "start_column": 2,
@@ -762,7 +762,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_level_one_again",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_level_one_again/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo\\#test_.*_it_level_one_again$/",
           {
             "start_line": 13,
             "start_column": 2,
@@ -794,7 +794,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "Foo::Bar",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /Foo::Bar/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name \"/^Foo::Bar(#|::)/\"",
           {
             "start_line": 16,
             "start_column": 0,
@@ -827,7 +827,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "Foo::Bar",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /Foo::Bar/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name \"/^Foo::Bar(#|::)/\"",
           {
             "start_line": 16,
             "start_column": 0,
@@ -860,7 +860,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "Foo::Bar",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /Foo::Bar/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name \"/^Foo::Bar(#|::)/\"",
           {
             "start_line": 16,
             "start_column": 0,
@@ -893,7 +893,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_class_constant_path",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_class_constant_path/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo::Bar\\#test_.*_it_class_constant_path$/",
           {
             "start_line": 17,
             "start_column": 2,
@@ -925,7 +925,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_class_constant_path",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_class_constant_path/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo::Bar\\#test_.*_it_class_constant_path$/",
           {
             "start_line": 17,
             "start_column": 2,
@@ -957,7 +957,7 @@
         "arguments": [
           "/fixtures/minitest_spec_tests.rb",
           "it_class_constant_path",
-          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /it_class_constant_path/",
+          "bundle exec ruby -Itest /fixtures/minitest_spec_tests.rb --name /^Foo::Bar\\#test_.*_it_class_constant_path$/",
           {
             "start_line": 17,
             "start_column": 2,

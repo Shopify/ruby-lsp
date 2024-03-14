@@ -22,7 +22,7 @@ module RubyLsp
       SUPPORTED_TEST_LIBRARIES = T.let(["minitest", "test-unit"], T::Array[String])
       DESCRIBE_KEYWORD = T.let(:describe, Symbol)
       IT_KEYWORD = T.let(:it, Symbol)
-      DYNAMIC_REFERENCE_MARKER = T.let("<dynamic_reference>", String)
+      DYNAMIC_REFERENCE_MARKER = T.let("+dynamic_reference+", String)
 
       sig do
         params(
@@ -133,11 +133,9 @@ module RubyLsp
         if [DESCRIBE_KEYWORD, IT_KEYWORD].include?(name)
           case name
           when DESCRIBE_KEYWORD
-            add_spec_code_lens(node, kind: :group)
-            @group_id_stack.push(@group_id)
-            @group_id += 1
+            add_spec_group_code_lens(node)
           when IT_KEYWORD
-            add_spec_code_lens(node, kind: :example)
+            add_spec_example_code_lens(node)
           end
         end
       end
@@ -147,6 +145,7 @@ module RubyLsp
         _, prev_visibility = @visibility_stack.pop
         @visibility_stack.push([prev_visibility, prev_visibility])
         if node.name == DESCRIBE_KEYWORD
+          @group_stack.pop
           @group_id_stack.pop
         end
       end
@@ -210,31 +209,30 @@ module RubyLsp
 
         case DependencyDetector.instance.detected_test_library
         when "minitest"
-          last_dynamic_reference_index = group_stack.rindex(DYNAMIC_REFERENCE_MARKER)
-          command += if last_dynamic_reference_index
-            # In cases where the test path looks like `foo::Bar`
-            # the best we can do is match everything to the right of it.
-            # Tests are classes, dynamic references are only a thing for modules,
-            # so there must be something to the left of the available path.
-            group_stack = T.must(group_stack[last_dynamic_reference_index + 1..])
-            if method_name
-              " --name " + "/::#{Shellwords.escape(group_stack.join("::") + "#" + method_name)}$/"
-            else
-              # When clicking on a CodeLens for `Test`, `(#|::)` will match all tests
-              # that are registered on the class itself (matches after `#`) and all tests
-              # that are nested inside of that class in other modules/classes (matches after `::`)
-              " --name " + "\"/::#{Shellwords.escape(group_stack.join("::"))}(#|::)/\""
-            end
+          path = group_stack.join("::")
+          path += "#" + method_name if method_name
+          is_dynamic = path.include?(DYNAMIC_REFERENCE_MARKER)
+
+          name = if is_dynamic && method_name
+            # If we've got the method name, we know the beginning and end of the name.
+            # Things in-between might be dynamic (interpolation, variable constant path, etc.),
+            # the best we can do then is match these parts by `.*`. When specs are used,
+            # the method name itself will be dynamic (`0001`, `0002`, etc.).
+            "/^#{Shellwords.escape(path)}$/"
           elsif method_name
-            # We know the entire path, do an exact match
-            " --name " + Shellwords.escape(group_stack.join("::") + "#" + method_name)
-          elsif spec_name
-            " --name " + "/#{Shellwords.escape(spec_name)}/"
+            # We know the entire path, everything is static. Do an exact match.
+            Shellwords.escape(path)
           else
-            # Execute all tests of the selected class and tests in
-            # modules/classes nested inside of that class
-            " --name " + "\"/^#{Shellwords.escape(group_stack.join("::"))}(#|::)/\""
+            # The user wants to execute all tests of a group.  When clicking on a CodeLens
+            # for `Test`, `(#|::)` will match all tests that are registered on the class
+            # itself (matches after `#`) and all tests that are nested inside of that class
+            # in other modules/classes (matches after `::`). The `describe` method for specs
+            # creates a class and can make use of the same logic.
+            "\"/^#{Shellwords.escape(path)}(#|::)/\""
           end
+          # Replace here so that this doesn't get shell escaped.
+          name = name.gsub(DYNAMIC_REFERENCE_MARKER, ".*") if is_dynamic
+          command += " --name " + name
         when "test-unit"
           group_name = T.must(group_stack.last)
           command += " --testcase " + "/#{Shellwords.escape(group_name)}/"
@@ -247,29 +245,67 @@ module RubyLsp
         command
       end
 
-      sig { params(node: Prism::CallNode, kind: Symbol).void }
-      def add_spec_code_lens(node, kind:)
-        arguments = node.arguments
-        return unless arguments
-
-        first_argument = arguments.arguments.first
-        return unless first_argument
-
-        name = case first_argument
-        when Prism::StringNode
-          first_argument.content
-        when Prism::ConstantReadNode, Prism::ConstantPathNode
-          constant_name(first_argument)
-        end
-
-        return unless name
+      sig { params(node: Prism::CallNode).void }
+      def add_spec_group_code_lens(node)
+        name = group_or_example_name(node)
+        @group_stack.push(name)
 
         add_test_code_lens(
           node,
           name: name,
-          command: generate_test_command(spec_name: name),
-          kind: kind,
+          command: generate_test_command(group_stack: @group_stack),
+          kind: :group,
         )
+
+        @group_id_stack.push(@group_id)
+        @group_id += 1
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def add_spec_example_code_lens(node)
+        name = group_or_example_name(node)
+
+        # Generated spec test names have the following format:
+        # test_0001_example. 0001 is the counter of the current group.
+        method_name = "test_#{DYNAMIC_REFERENCE_MARKER}_#{name}"
+        add_test_code_lens(
+          node,
+          name: name,
+          command: generate_test_command(group_stack: @group_stack, method_name: method_name),
+          kind: :example,
+        )
+      end
+
+      sig { params(node: Prism::CallNode).returns(String) }
+      def group_or_example_name(node)
+        arguments = node.arguments
+        return DYNAMIC_REFERENCE_MARKER unless arguments
+
+        first_argument = arguments.arguments.first
+        return DYNAMIC_REFERENCE_MARKER unless first_argument
+
+        case first_argument
+        when Prism::StringNode
+          first_argument.content
+        when Prism::InterpolatedStringNode
+          replace_variables_with_dynamic_references(first_argument)
+        when Prism::ConstantPathNode, Prism::ConstantReadNode
+          constant_name(first_argument) || DYNAMIC_REFERENCE_MARKER
+        else
+          DYNAMIC_REFERENCE_MARKER
+        end
+      end
+
+      sig { params(node: Prism::InterpolatedStringNode).returns(String) }
+      def replace_variables_with_dynamic_references(node)
+        node.parts.map do |part|
+          case part
+          when Prism::StringNode
+            part.content
+          else
+            DYNAMIC_REFERENCE_MARKER
+          end
+        end.join
       end
     end
   end
