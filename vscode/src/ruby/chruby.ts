@@ -141,7 +141,7 @@ export class Chruby extends VersionManager {
     ].join(";");
 
     const result = await asyncExec(
-      `${rubyExecutableUri.fsPath} -rjson -e '${script}'`,
+      `${rubyExecutableUri.fsPath} -W0 -rjson -e '${script}'`,
       { cwd: this.bundleUri.fsPath },
     );
 
