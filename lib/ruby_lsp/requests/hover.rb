@@ -50,7 +50,11 @@ module RubyLsp
         if (Listeners::Hover::ALLOWED_TARGETS.include?(parent.class) &&
             !Listeners::Hover::ALLOWED_TARGETS.include?(@target.class)) ||
             (parent.is_a?(Prism::ConstantPathNode) && @target.is_a?(Prism::ConstantReadNode))
-          @target = parent
+          @target = determine_target(
+            T.must(@target),
+            T.must(parent),
+            position,
+          )
         end
 
         # Don't need to instantiate any listeners if there's no target
