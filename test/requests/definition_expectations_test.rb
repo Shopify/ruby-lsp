@@ -99,6 +99,60 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     T.must(message_queue).close
   end
 
+  def test_constant_precision
+    message_queue = Thread::Queue.new
+    uri = URI::Generic.from_path(path: "/folder/fake.rb")
+    source = <<~RUBY
+      module Foo
+        module Bar
+          class Baz
+          end
+        end
+      end
+
+      Foo::Bar::Baz
+    RUBY
+    store = RubyLsp::Store.new
+    store.set(uri: uri, source: source, version: 1)
+    executor = RubyLsp::Executor.new(store, message_queue)
+    executor.instance_variable_get(:@index).index_single(
+      RubyIndexer::IndexablePath.new(
+        nil,
+        T.must(uri.to_standardized_path),
+      ),
+      source,
+    )
+
+    # Foo
+    response = executor.execute({
+      method: "textDocument/definition",
+      params: { textDocument: { uri: uri.to_s }, position: { line: 7, character: 0 } },
+    }).response
+    range = response[0].attributes[:range].attributes
+    range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
+    assert_equal({ start: { line: 0, character: 0 }, end: { line: 5, character: 3 } }, range_hash)
+
+    # Foo::Bar
+    response = executor.execute({
+      method: "textDocument/definition",
+      params: { textDocument: { uri: uri.to_s }, position: { line: 7, character: 5 } },
+    }).response
+    range = response[0].attributes[:range].attributes
+    range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
+    assert_equal({ start: { line: 1, character: 2 }, end: { line: 4, character: 5 } }, range_hash)
+
+    # Foo::Bar::Baz
+    response = executor.execute({
+      method: "textDocument/definition",
+      params: { textDocument: { uri: uri.to_s }, position: { line: 7, character: 10 } },
+    }).response
+    range = response[0].attributes[:range].attributes
+    range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
+    assert_equal({ start: { line: 2, character: 4 }, end: { line: 3, character: 7 } }, range_hash)
+  ensure
+    T.must(message_queue).close
+  end
+
   def test_jumping_to_default_require_of_a_gem
     message_queue = Thread::Queue.new
 
@@ -189,7 +243,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     stub_no_typechecker
     response = executor.execute({
       method: "textDocument/definition",
-      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 0, line: 5 } },
+      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 3, line: 5 } },
     }).response
 
     assert_empty(response)

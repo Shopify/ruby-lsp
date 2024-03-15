@@ -49,7 +49,13 @@ module RubyLsp
           node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode],
         )
 
-        target = parent if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)
+        if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)
+          target = determine_target(
+            target,
+            parent,
+            position,
+          )
+        end
 
         Listeners::Definition.new(@response_builder, document.uri, nesting, index, dispatcher, typechecker_enabled)
 
