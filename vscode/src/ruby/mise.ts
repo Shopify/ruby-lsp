@@ -32,7 +32,7 @@ export class Mise extends VersionManager {
 
     // The exec command in Mise is called `x`
     const result = await asyncExec(
-      `${miseUri.fsPath} x -- ruby -rjson -e '${activationScript}'`,
+      `${miseUri.fsPath} x -- ruby -W0 -rjson -e '${activationScript}'`,
       {
         cwd: this.bundleUri.fsPath,
       },

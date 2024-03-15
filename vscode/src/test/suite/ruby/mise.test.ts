@@ -43,7 +43,7 @@ suite("Mise", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${os.homedir()}/.local/bin/mise x -- ruby -rjson -e '${activationScript}'`,
+        `${os.homedir()}/.local/bin/mise x -- ruby -W0 -rjson -e '${activationScript}'`,
         { cwd: workspacePath },
       ),
     );

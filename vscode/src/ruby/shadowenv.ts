@@ -27,7 +27,7 @@ export class Shadowenv extends VersionManager {
 
     try {
       const result = await asyncExec(
-        `shadowenv exec -- ruby -rjson -e '${activationScript}'`,
+        `shadowenv exec -- ruby -W0 -rjson -e '${activationScript}'`,
         {
           cwd: this.bundleUri.fsPath,
         },
