@@ -308,5 +308,10 @@ module RubyIndexer
 
       refute_empty(@index.instance_variable_get(:@entries))
     end
+
+    def test_index_single_does_not_fail_for_non_existing_file
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"))
+      assert_empty(@index.instance_variable_get(:@entries))
+    end
   end
 end
