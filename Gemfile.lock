@@ -31,7 +31,7 @@ GEM
       reline (>= 0.3.8)
     json (2.7.1)
     language_server-protocol (3.17.0.3)
-    minitest (5.22.2)
+    minitest (5.22.3)
     minitest-reporters (1.6.1)
       ansi
       builder
@@ -88,14 +88,14 @@ GEM
       simplecov_json_formatter (~> 0.1)
     simplecov-html (0.12.3)
     simplecov_json_formatter (0.1.4)
-    sorbet (0.5.11287)
-      sorbet-static (= 0.5.11287)
-    sorbet-runtime (0.5.11287)
-    sorbet-static (0.5.11287-universal-darwin)
-    sorbet-static (0.5.11287-x86_64-linux)
-    sorbet-static-and-runtime (0.5.11287)
-      sorbet (= 0.5.11287)
-      sorbet-runtime (= 0.5.11287)
+    sorbet (0.5.11294)
+      sorbet-static (= 0.5.11294)
+    sorbet-runtime (0.5.11294)
+    sorbet-static (0.5.11294-universal-darwin)
+    sorbet-static (0.5.11294-x86_64-linux)
+    sorbet-static-and-runtime (0.5.11294)
+      sorbet (= 0.5.11294)
+      sorbet-runtime (= 0.5.11294)
     spoom (1.2.4)
       erubi (>= 1.10.0)
       sorbet-static-and-runtime (>= 0.5.10187)
@@ -122,8 +122,6 @@ GEM
 
 PLATFORMS
   arm64-darwin
-  x64-mingw-ucrt
-  x64-mingw32
   x86_64-darwin
   x86_64-linux
 
