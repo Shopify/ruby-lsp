@@ -108,7 +108,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     RUBY
 
     test_addon(:create_code_lens_addon, source: source) do |server|
-      server.text_document_code_lens({
+      server.process_message({
         id: 1,
         method: "textDocument/codeLens",
         params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 1, character: 2 } },

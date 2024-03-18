@@ -21,7 +21,7 @@ class SignatureHelpTest < Minitest::Test
     RUBY
 
     with_server(source) do |server, uri|
-      server.text_document_signature_help(id: 1, params: {
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
         textDocument: { uri: uri },
         position: { line: 5, character: 7 },
         context: {
@@ -57,7 +57,7 @@ class SignatureHelpTest < Minitest::Test
     RUBY
 
     with_server(source) do |server, uri|
-      server.text_document_signature_help(id: 1, params: {
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
         textDocument: { uri: uri },
         position: { line: 6, character: 7 },
         context: {
@@ -88,7 +88,7 @@ class SignatureHelpTest < Minitest::Test
     RUBY
 
     with_server(source) do |server, uri|
-      server.text_document_signature_help(id: 1, params:  {
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params:  {
         textDocument: { uri: uri },
         position: { line: 5, character: 9 },
         context: {
@@ -116,7 +116,7 @@ class SignatureHelpTest < Minitest::Test
     RUBY
 
     with_server(source) do |server, uri|
-      server.text_document_signature_help(id: 1, params:  {
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params:  {
         textDocument: { uri: uri },
         position: { line: 5, character: 12 },
         context: {
@@ -145,7 +145,7 @@ class SignatureHelpTest < Minitest::Test
     RUBY
 
     with_server(source) do |server, uri|
-      server.text_document_signature_help(id: 1, params: {
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
         textDocument: { uri: uri },
         position: { line: 5, character: 15 },
         context: {
@@ -173,7 +173,7 @@ class SignatureHelpTest < Minitest::Test
     RUBY
 
     with_server(source) do |server, uri|
-      server.text_document_signature_help(id: 1, params: {
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
         textDocument: { uri: uri },
         position: { line: 5, character: 20 },
         context: {},
@@ -198,7 +198,7 @@ class SignatureHelpTest < Minitest::Test
     RUBY
 
     with_server(source) do |server, uri|
-      server.text_document_signature_help(id: 1, params: {
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
         textDocument: { uri: uri },
         position: { line: 5, character: 9 },
         context: {},
@@ -224,7 +224,7 @@ class SignatureHelpTest < Minitest::Test
     RUBY
 
     with_server(source) do |server, uri|
-      server.text_document_signature_help(id: 1, params: {
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
         textDocument: { uri: uri },
         position: { line: 5, character: 7 },
       })
@@ -252,7 +252,7 @@ class SignatureHelpTest < Minitest::Test
     RUBY
 
     with_server(source) do |server, uri|
-      server.text_document_signature_help(id: 1, params: {
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
         textDocument: { uri: uri },
         position: { line: 8, character: 11 },
         context: {},
@@ -281,7 +281,7 @@ class SignatureHelpTest < Minitest::Test
     RUBY
 
     with_server(source) do |server, uri|
-      server.text_document_signature_help(id: 1, params: {
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
         textDocument: { uri: uri },
         position: { line: 8, character: 11 },
         context: {},

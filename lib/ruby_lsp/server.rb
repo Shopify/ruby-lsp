@@ -86,6 +86,8 @@ module RubyLsp
       $stderr.puts("Error processing #{message[:method]}: #{e.full_message}")
     end
 
+    private
+
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def run_initialize(message)
       options = message[:params]

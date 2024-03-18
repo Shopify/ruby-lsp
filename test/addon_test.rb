@@ -35,7 +35,10 @@ module RubyLsp
 
     def test_registering_an_addon_invokes_activate_on_initialized
       server = RubyLsp::Server.new
-      server.run_initialized
+
+      capture_subprocess_io do
+        server.process_message({ method: "initialized" })
+      end
 
       addon_instance = T.must(Addon.addons.find { |addon| addon.is_a?(@addon) })
       assert_predicate(addon_instance, :activated)

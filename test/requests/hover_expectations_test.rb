@@ -13,7 +13,11 @@ class HoverExpectationsTest < ExpectationsTestRunner
     with_server(source) do |server, uri|
       # We need to pretend that Sorbet is not a dependency or else we can't properly test
       stub_no_typechecker
-      server.text_document_hover(id: 1, params: { textDocument: { uri: uri }, position: position })
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: position },
+      )
       server.pop_response.response
     end
   end
@@ -31,7 +35,11 @@ class HoverExpectationsTest < ExpectationsTestRunner
     with_server(source) do |server, uri|
       # We need to pretend that Sorbet is not a dependency or else we can't properly test
       stub_no_typechecker
-      server.text_document_hover(id: 1, params: { textDocument: { uri: uri }, position: { character: 2, line: 4 } })
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 2, line: 4 } },
+      )
 
       assert_match("CONST", server.pop_response.response.contents.value)
     end
@@ -53,15 +61,27 @@ class HoverExpectationsTest < ExpectationsTestRunner
       stub_no_typechecker
 
       # Foo
-      server.text_document_hover(id: 1, params: { textDocument: { uri: uri }, position: { line: 7, character: 0 } })
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { line: 7, character: 0 } },
+      )
       assert_match(/Foo\b/, server.pop_response.response.contents.value)
 
       # Foo::Bar
-      server.text_document_hover(id: 1, params: { textDocument: { uri: uri }, position: { line: 7, character: 5 } })
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { line: 7, character: 5 } },
+      )
       assert_match(/Foo::Bar\b/, server.pop_response.response.contents.value)
 
       # Foo::Bar::Baz
-      server.text_document_hover(id: 1, params: { textDocument: { uri: uri }, position: { line: 7, character: 10 } })
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { line: 7, character: 10 } },
+      )
       assert_match(/Foo::Bar::Baz\b/, server.pop_response.response.contents.value)
     end
   end
@@ -83,7 +103,11 @@ class HoverExpectationsTest < ExpectationsTestRunner
     with_server(source) do |server, uri|
       # We need to pretend that Sorbet is not a dependency or else we can't properly test
       stub_no_typechecker
-      server.text_document_hover(id: 1, params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } })
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+      )
 
       assert_match("Hello from `foo`", server.pop_response.response.contents.value)
     end
@@ -111,7 +135,11 @@ class HoverExpectationsTest < ExpectationsTestRunner
     with_server(source) do |server, uri|
       # We need to pretend that Sorbet is not a dependency or else we can't properly test
       stub_no_typechecker
-      server.text_document_hover(id: 1, params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } })
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+      )
 
       response = server.pop_response.response
       assert_match("Hello from first `foo`", response.contents.value)
@@ -136,7 +164,11 @@ class HoverExpectationsTest < ExpectationsTestRunner
     with_server(source) do |server, uri|
       # We need to pretend that Sorbet is not a dependency or else we can't properly test
       stub_no_typechecker
-      server.text_document_hover(id: 1, params: { textDocument: { uri: uri }, position: { character: 9, line: 7 } })
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 9, line: 7 } },
+      )
 
       assert_match("Hello from `foo`", server.pop_response.response.contents.value)
     end
@@ -155,7 +187,11 @@ class HoverExpectationsTest < ExpectationsTestRunner
     with_server(source) do |server, uri|
       # We need to pretend that Sorbet is not a dependency or else we can't properly test
       stub_no_typechecker
-      server.text_document_hover(id: 1, params: { textDocument: { uri: uri }, position: { character: 3, line: 5 } })
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 3, line: 5 } },
+      )
 
       assert_nil(server.pop_response.response)
     end
@@ -169,7 +205,11 @@ class HoverExpectationsTest < ExpectationsTestRunner
     with_server(source, URI("file:///Gemfile")) do |server, uri|
       # We need to pretend that Sorbet is not a dependency or else we can't properly test
       stub_no_typechecker
-      server.text_document_hover(id: 1, params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } })
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
+      )
 
       response = server.pop_response.response
       spec = Gem.loaded_specs["rake"]
@@ -188,7 +228,11 @@ class HoverExpectationsTest < ExpectationsTestRunner
     with_server(source, URI("file:///Gemfile")) do |server, uri|
       # We need to pretend that Sorbet is not a dependency or else we can't properly test
       stub_no_typechecker
-      server.text_document_hover(id: 1, params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } })
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
+      )
 
       assert_nil(server.pop_response.response)
     end
@@ -202,7 +246,11 @@ class HoverExpectationsTest < ExpectationsTestRunner
     with_server(source, URI("file:///Gemfile")) do |server, uri|
       # We need to pretend that Sorbet is not a dependency or else we can't properly test
       stub_no_typechecker
-      server.text_document_hover(id: 1, params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } })
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
+      )
 
       assert_nil(server.pop_response.response)
     end
@@ -218,8 +266,9 @@ class HoverExpectationsTest < ExpectationsTestRunner
     RUBY
 
     test_addon(:create_hover_addon, source: source) do |server|
-      server.text_document_hover(
+      server.process_message(
         id: 1,
+        method: "textDocument/hover",
         params: { textDocument: { uri: URI("file:///fake.rb") }, position: { character: 0, line: 4 } },
       )
 

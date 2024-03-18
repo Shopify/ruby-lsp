@@ -43,7 +43,11 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
       # We need to pretend that Sorbet is not a dependency or else we can't properly test
       stub_no_typechecker
-      server.text_document_definition(id: 1, params: { textDocument: { uri: uri }, position: position })
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: position },
+      )
       response = server.pop_response.response
 
       case response
@@ -72,8 +76,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb",
         ),
       )
-      server.text_document_definition(
+      server.process_message(
         id: 1,
+        method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
       )
       refute_empty(server.pop_response.response)
@@ -94,8 +99,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
     with_server(source) do |server, uri|
       # Foo
-      server.text_document_definition(
+      server.process_message(
         id: 1,
+        method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { line: 7, character: 0 } },
       )
       range = server.pop_response.response[0].attributes[:range].attributes
@@ -103,8 +109,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       assert_equal({ start: { line: 0, character: 0 }, end: { line: 5, character: 3 } }, range_hash)
 
       # Foo::Bar
-      server.text_document_definition(
+      server.process_message(
         id: 1,
+        method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { line: 7, character: 5 } },
       )
       range = server.pop_response.response[0].attributes[:range].attributes
@@ -112,8 +119,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       assert_equal({ start: { line: 1, character: 2 }, end: { line: 4, character: 5 } }, range_hash)
 
       # Foo::Bar::Baz
-      server.text_document_definition(
+      server.process_message(
         id: 1,
+        method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { line: 7, character: 10 } },
       )
       range = server.pop_response.response[0].attributes[:range].attributes
@@ -137,8 +145,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         )
       end
 
-      server.text_document_definition(
+      server.process_message(
         id: 1,
+        method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 10, line: 0 } },
       )
       assert_equal(bundler_uri.to_s, server.pop_response.response.first.attributes[:uri])
@@ -157,8 +166,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
     with_server(source) do |server, uri|
       stub_no_typechecker
-      server.text_document_definition(
+      server.process_message(
         id: 1,
+        method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 2, line: 4 } },
       )
       response = server.pop_response
@@ -180,8 +190,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
     with_server(source) do |server, uri|
       stub_no_typechecker
-      server.text_document_definition(
+      server.process_message(
         id: 1,
+        method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 3, line: 5 } },
       )
       assert_empty(server.pop_response.response)
@@ -203,8 +214,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           ),
         ),
       )
-      server.text_document_definition(
+      server.process_message(
         id: 1,
+        method: "textDocument/definition",
         params: { textDocument: { uri: URI("file:///fake.rb") }, position: { character: 0, line: 0 } },
       )
       response = server.pop_response.response
@@ -229,8 +241,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     RUBY
 
     with_server(source) do |server, uri|
-      server.text_document_definition(
+      server.process_message(
         id: 1,
+        method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 4, line: 4 } },
       )
       assert_equal(uri.to_s, server.pop_response.response.first.attributes[:uri])
@@ -259,7 +272,8 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           def foo; end
         end
       RUBY
-      server.text_document_did_open({
+      server.process_message({
+        method: "textDocument/didOpen",
         params: {
           textDocument: {
             uri: second_uri,
@@ -271,8 +285,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       index = server.index
       index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(second_uri.to_standardized_path)), second_source)
 
-      server.text_document_definition(
+      server.process_message(
         id: 1,
+        method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 4, line: 4 } },
       )
 
@@ -296,8 +311,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     RUBY
 
     with_server(source) do |server, uri|
-      server.text_document_definition(
+      server.process_message(
         id: 1,
+        method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 9, line: 4 } },
       )
       assert_equal(uri.to_s, server.pop_response.response.first.attributes[:uri])
@@ -316,8 +332,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     RUBY
 
     with_server(source) do |server, uri|
-      server.text_document_definition(
+      server.process_message(
         id: 1,
+        method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 4, line: 4 } },
       )
       assert_empty(server.pop_response.response)

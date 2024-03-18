@@ -115,7 +115,8 @@ class ExpectationsTestRunner < Minitest::Test
 
     uri = URI::Generic.from_path(path: "/fake.rb")
     server = RubyLsp::Server.new(test_mode: true)
-    server.text_document_did_open({
+    server.process_message({
+      method: "textDocument/didOpen",
       params: {
         textDocument: {
           uri: uri,

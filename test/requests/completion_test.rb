@@ -15,7 +15,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 0, character: end_char },
         })
@@ -46,7 +46,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 0, character: end_char },
         })
@@ -77,7 +77,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 0, character: end_char },
         })
@@ -108,7 +108,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 0, character: end_char },
         })
@@ -135,7 +135,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: end_position,
         })
@@ -153,7 +153,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: end_position,
         })
@@ -176,7 +176,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: end_position,
         })
@@ -204,7 +204,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 7, character: 3 },
         })
@@ -214,7 +214,7 @@ class CompletionTest < Minitest::Test
         assert_equal(["Bar", "::Bar"], result.map(&:filter_text))
         assert_equal(["Bar", "::Bar"], result.map { |completion| completion.text_edit.new_text })
 
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 10, character: 6 },
         })
@@ -245,7 +245,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 6, character: 5 },
         })
@@ -274,7 +274,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 7, character: 5 },
         })
@@ -300,7 +300,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 3, character: 4 },
         })
@@ -323,7 +323,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 4, character: 5 },
         })
@@ -352,7 +352,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 9, character: 18 },
         })
@@ -384,7 +384,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 11, character: 29 },
         })
@@ -413,7 +413,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 5, character: 5 },
         })
@@ -423,7 +423,7 @@ class CompletionTest < Minitest::Test
         assert_equal(["Foo"], result.map(&:filter_text))
         assert_equal(["Foo"], result.map { |completion| completion.text_edit.new_text })
 
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 6, character: 11 },
         })
@@ -450,7 +450,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 5, character: 5 },
         })
@@ -477,7 +477,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 5, character: 10 },
         })
@@ -505,7 +505,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 4, character: 10 },
         })
@@ -531,7 +531,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 4, character: 5 },
         })
@@ -559,7 +559,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 6, character: 8 },
         })
@@ -585,7 +585,7 @@ class CompletionTest < Minitest::Test
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 6, character: 8 },
         })
@@ -608,7 +608,8 @@ class CompletionTest < Minitest::Test
     with_server(source) do |server|
       with_file_structure(server) do |tmpdir|
         uri = URI("file://#{tmpdir}/foo/fake.rb")
-        server.text_document_did_open({
+        server.process_message({
+          method: "textDocument/didOpen",
           params: {
             textDocument: {
               uri: uri,
@@ -618,7 +619,7 @@ class CompletionTest < Minitest::Test
           },
         })
 
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 0, character: end_char },
         })
@@ -647,7 +648,8 @@ class CompletionTest < Minitest::Test
     with_server(source) do |server|
       with_file_structure(server) do |tmpdir|
         uri = URI("file://#{tmpdir}/foo/fake.rb")
-        server.text_document_did_open({
+        server.process_message({
+          method: "textDocument/didOpen",
           params: {
             textDocument: {
               uri: uri,
@@ -657,7 +659,7 @@ class CompletionTest < Minitest::Test
           },
         })
 
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 0, character: end_char },
         })
@@ -689,7 +691,8 @@ class CompletionTest < Minitest::Test
     with_server(source) do |server|
       with_file_structure(server) do |tmpdir|
         uri = URI("file://#{tmpdir}/foo/support/fake.rb")
-        server.text_document_did_open({
+        server.process_message({
+          method: "textDocument/didOpen",
           params: {
             textDocument: {
               uri: uri,
@@ -699,7 +702,7 @@ class CompletionTest < Minitest::Test
           },
         })
 
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 0, character: end_char },
         })
@@ -727,7 +730,8 @@ class CompletionTest < Minitest::Test
     with_server(source) do |server|
       with_file_structure(server) do |tmpdir|
         uri = URI("file://#{tmpdir}/foo/quxx.rb")
-        server.text_document_did_open({
+        server.process_message({
+          method: "textDocument/didOpen",
           params: {
             textDocument: {
               uri: uri,
@@ -737,7 +741,7 @@ class CompletionTest < Minitest::Test
           },
         })
 
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 0, character: end_char },
         })
@@ -768,7 +772,8 @@ class CompletionTest < Minitest::Test
     with_server(source) do |server|
       with_file_structure(server) do |tmpdir|
         uri = URI("file://#{tmpdir}/foo/support/fake.rb")
-        server.text_document_did_open({
+        server.process_message({
+          method: "textDocument/didOpen",
           params: {
             textDocument: {
               uri: uri,
@@ -778,7 +783,7 @@ class CompletionTest < Minitest::Test
           },
         })
 
-        server.text_document_completion(id: 1, params: {
+        server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 0, character: end_char },
         })

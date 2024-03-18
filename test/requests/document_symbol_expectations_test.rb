@@ -16,7 +16,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
     RUBY
 
     test_addon(:create_document_symbol_addon, source: source) do |server|
-      server.text_document_document_symbol({
+      server.process_message({
         id: 1,
         method: "textDocument/documentSymbol",
         params: { textDocument: { uri: "file:///fake.rb" } },

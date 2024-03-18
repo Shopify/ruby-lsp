@@ -28,10 +28,13 @@ server = RubyLsp::Server.new(test_mode: true)
 
 files.each_with_index do |file, index|
   uri = URI("file://#{file}")
-  server.text_document_did_open({ params: { textDocument: { uri: uri, text: File.read(file), version: 1 } } })
+  server.process_message({
+    method: "textDocument/didOpen",
+    params: { textDocument: { uri: uri, text: File.read(file), version: 1 } },
+  })
 
   # Executing any of the automatic requests will execute all of them, so here we just pick one
-  server.text_document_document_symbol({
+  server.process_message({
     id: 1,
     method: "textDocument/documentSymbol",
     params: { textDocument: { uri: uri } },
@@ -40,7 +43,7 @@ files.each_with_index do |file, index|
   result = server.pop_response
   errors[file] = result.message if result.is_a?(RubyLsp::Error)
 ensure
-  server.text_document_did_close({ params: { textDocument: { uri: uri } } })
+  server.process_message({ method: "textDocument/didClose", params: { textDocument: { uri: uri } } })
   server.pop_response
   print("\033[M\033[0KCompleted #{index + 1}/#{files.length}") unless ENV["CI"]
 end

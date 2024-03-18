@@ -6,7 +6,11 @@ require "test_helper"
 class ShowSyntaxTreeTest < Minitest::Test
   def test_returns_partial_tree_if_document_has_syntax_error
     with_server("foo do") do |server, uri|
-      server.text_document_show_syntax_tree(id: 1, params: { textDocument: { uri: uri } })
+      server.process_message(
+        id: 1,
+        method: "rubyLsp/textDocument/showSyntaxTree",
+        params: { textDocument: { uri: uri } },
+      )
 
       assert_equal(<<~AST, server.pop_response.response[:ast])
         @ ProgramNode (location: (1,0)-(1,6))
@@ -39,7 +43,11 @@ class ShowSyntaxTreeTest < Minitest::Test
 
   def test_returns_ast_if_document_is_parsed
     with_server("foo = 123") do |server, uri|
-      server.text_document_show_syntax_tree(id: 1, params: { textDocument: { uri: uri } })
+      server.process_message(
+        id: 1,
+        method: "rubyLsp/textDocument/showSyntaxTree",
+        params: { textDocument: { uri: uri } },
+      )
 
       assert_equal(<<~AST, server.pop_response.response[:ast])
         @ ProgramNode (location: (1,0)-(1,9))
@@ -67,8 +75,9 @@ class ShowSyntaxTreeTest < Minitest::Test
     RUBY
 
     with_server(source) do |server, uri|
-      server.text_document_show_syntax_tree(
+      server.process_message(
         id: 1,
+        method: "rubyLsp/textDocument/showSyntaxTree",
         params: {
           textDocument: { uri: uri },
           range: { start: { line: 0, character: 0 }, end: { line: 1, character: 9 } },
@@ -96,8 +105,9 @@ class ShowSyntaxTreeTest < Minitest::Test
       AST
 
       # We execute twice just to make sure we do not mutate by mistake.
-      server.text_document_show_syntax_tree(
+      server.process_message(
         id: 1,
+        method: "rubyLsp/textDocument/showSyntaxTree",
         params: {
           textDocument: { uri: uri },
           range: { start: { line: 1, character: 0 }, end: { line: 1, character: 9 } },

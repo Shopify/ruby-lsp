@@ -60,7 +60,8 @@ module Minitest
       server = RubyLsp::Server.new(test_mode: true)
 
       if source
-        server.text_document_did_open({
+        server.process_message({
+          method: "textDocument/didOpen",
           params: {
             textDocument: {
               uri: uri,
