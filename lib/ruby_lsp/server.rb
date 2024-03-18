@@ -16,6 +16,77 @@ module RubyLsp
     end
 
     sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    def process_message(message)
+      case message[:method]
+      when "initialize"
+        $stderr.puts("Initializing Ruby LSP v#{VERSION}...")
+        run_initialize(message)
+      when "initialized"
+        $stderr.puts("Finished initializing Ruby LSP!")
+        run_initialized
+      when "textDocument/didOpen"
+        text_document_did_open(message)
+      when "textDocument/didClose"
+        text_document_did_close(message)
+      when "textDocument/didChange"
+        text_document_did_change(message)
+      when "textDocument/selectionRange"
+        text_document_selection_range(message)
+      when "textDocument/documentSymbol"
+        text_document_document_symbol(message)
+      when "textDocument/documentLink"
+        text_document_document_link(message)
+      when "textDocument/codeLens"
+        text_document_code_lens(message)
+      when "textDocument/semanticTokens/full"
+        text_document_semantic_tokens_full(message)
+      when "textDocument/foldingRange"
+        text_document_folding_range(message)
+      when "textDocument/semanticTokens/range"
+        text_document_semantic_tokens_range(message)
+      when "textDocument/formatting"
+        text_document_formatting(message)
+      when "textDocument/documentHighlight"
+        text_document_document_highlight(message)
+      when "textDocument/onTypeFormatting"
+        text_document_on_type_formatting(message)
+      when "textDocument/hover"
+        text_document_hover(message)
+      when "textDocument/inlayHint"
+        text_document_inlay_hint(message)
+      when "textDocument/codeAction"
+        text_document_code_action(message)
+      when "codeAction/resolve"
+        code_action_resolve(message)
+      when "textDocument/diagnostic"
+        text_document_diagnostic(message)
+      when "textDocument/completion"
+        text_document_completion(message)
+      when "textDocument/signatureHelp"
+        text_document_signature_help(message)
+      when "textDocument/definition"
+        text_document_definition(message)
+      when "workspace/didChangeWatchedFiles"
+        workspace_did_change_watched_files(message)
+      when "workspace/symbol"
+        workspace_symbol(message)
+      when "rubyLsp/textDocument/showSyntaxTree"
+        text_document_show_syntax_tree(message)
+      when "rubyLsp/workspace/dependencies"
+        workspace_dependencies(message)
+      when "$/cancelRequest"
+        @mutex.synchronize { @cancelled_requests << message[:params][:id] }
+      end
+    rescue StandardError, LoadError => e
+      # If an error occurred in a request, we have to return an error response or else the editor will hang
+      if message[:id]
+        send_message(Error.new(id: message[:id], code: Constant::ErrorCodes::INTERNAL_ERROR, message: e.full_message))
+      end
+
+      $stderr.puts("Error processing #{message[:method]}: #{e.full_message}")
+    end
+
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def run_initialize(message)
       options = message[:params]
       workspace_uri = options.dig(:workspaceFolders, 0, :uri)
@@ -75,38 +146,6 @@ module RubyLsp
       completion_provider = Requests::Completion.provider if enabled_features["completion"]
       signature_help_provider = Requests::SignatureHelp.provider if enabled_features["signatureHelp"]
 
-      # Dynamically registered capabilities
-      file_watching_caps = options.dig(:capabilities, :workspace, :didChangeWatchedFiles)
-
-      # Not every client supports dynamic registration or file watching
-      if file_watching_caps&.dig(:dynamicRegistration) && file_watching_caps&.dig(:relativePatternSupport)
-        send_message(
-          Request.new(
-            id: @current_request_id,
-            message: "client/registerCapability",
-            params: Interface::RegistrationParams.new(
-              registrations: [
-                # Register watching Ruby files
-                Interface::Registration.new(
-                  id: "workspace/didChangeWatchedFiles",
-                  method: "workspace/didChangeWatchedFiles",
-                  register_options: Interface::DidChangeWatchedFilesRegistrationOptions.new(
-                    watchers: [
-                      Interface::FileSystemWatcher.new(
-                        glob_pattern: "**/*.rb",
-                        kind: Constant::WatchKind::CREATE | Constant::WatchKind::CHANGE | Constant::WatchKind::DELETE,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        )
-      end
-
-      begin_progress("indexing-progress", "Ruby LSP: indexing files")
-
       response = {
         capabilities: Interface::ServerCapabilities.new(
           text_document_sync: Interface::TextDocumentSyncOptions.new(
@@ -140,10 +179,42 @@ module RubyLsp
       }
 
       send_message(Result.new(id: message[:id], response: response))
+
+      # Dynamically registered capabilities
+      file_watching_caps = options.dig(:capabilities, :workspace, :didChangeWatchedFiles)
+
+      # Not every client supports dynamic registration or file watching
+      if file_watching_caps&.dig(:dynamicRegistration) && file_watching_caps&.dig(:relativePatternSupport)
+        send_message(
+          Request.new(
+            id: @current_request_id,
+            message: "client/registerCapability",
+            params: Interface::RegistrationParams.new(
+              registrations: [
+                # Register watching Ruby files
+                Interface::Registration.new(
+                  id: "workspace/didChangeWatchedFiles",
+                  method: "workspace/didChangeWatchedFiles",
+                  register_options: Interface::DidChangeWatchedFilesRegistrationOptions.new(
+                    watchers: [
+                      Interface::FileSystemWatcher.new(
+                        glob_pattern: "**/*.rb",
+                        kind: Constant::WatchKind::CREATE | Constant::WatchKind::CHANGE | Constant::WatchKind::DELETE,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        )
+      end
+
+      begin_progress("indexing-progress", "Ruby LSP: indexing files")
     end
 
-    sig { override.void }
-    def initialized
+    sig { void }
+    def run_initialized
       Addon.load_addons(@outgoing_queue)
       errored_addons = Addon.addons.select(&:error?)
 
@@ -167,7 +238,7 @@ module RubyLsp
       check_formatter_is_available
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_did_open(message)
       text_document = message.dig(:params, :textDocument)
       @store.set(uri: text_document[:uri], source: text_document[:text], version: text_document[:version])
@@ -176,7 +247,7 @@ module RubyLsp
       # want to crash
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_did_close(message)
       uri = message.dig(:params, :textDocument, :uri)
       @store.delete(uri)
@@ -190,7 +261,7 @@ module RubyLsp
       )
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_did_change(message)
       params = message[:params]
       text_document = params[:textDocument]
@@ -200,7 +271,7 @@ module RubyLsp
       end
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_selection_range(message)
       uri = message.dig(:params, :textDocument, :uri)
       ranges = @store.cache_fetch(uri, "textDocument/selectionRange") do |document|
@@ -262,7 +333,7 @@ module RubyLsp
     alias_method :text_document_semantic_tokens_full, :run_combined_requests
     alias_method :text_document_folding_range, :run_combined_requests
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_semantic_tokens_range(message)
       params = message[:params]
       range = params[:range]
@@ -279,7 +350,7 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: response))
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_formatting(message)
       # If formatter is set to `auto` but no supported formatting gem is found, don't attempt to format
       if @store.formatter == "none"
@@ -306,7 +377,7 @@ module RubyLsp
       send_empty_response(message[:id])
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_document_highlight(message)
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
@@ -316,7 +387,7 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: request.perform))
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_on_type_formatting(message)
       params = message[:params]
 
@@ -333,7 +404,7 @@ module RubyLsp
       )
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_hover(message)
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
@@ -353,7 +424,7 @@ module RubyLsp
       )
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_inlay_hint(message)
       params = message[:params]
       hints_configurations = T.must(@store.features_configuration.dig(:inlayHint))
@@ -364,7 +435,7 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: request.perform))
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_code_action(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
@@ -381,7 +452,7 @@ module RubyLsp
       )
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def code_action_resolve(message)
       params = message[:params]
       uri = URI(params.dig(:data, :uri))
@@ -404,7 +475,7 @@ module RubyLsp
       end
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_diagnostic(message)
       # Do not compute diagnostics for files outside of the workspace. For example, if someone is looking at a gem's
       # source code, we don't want to show diagnostics for it
@@ -430,7 +501,7 @@ module RubyLsp
       send_empty_response(message[:id])
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_completion(message)
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
@@ -450,7 +521,7 @@ module RubyLsp
       )
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_signature_help(message)
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
@@ -470,7 +541,7 @@ module RubyLsp
       )
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_definition(message)
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
@@ -490,7 +561,7 @@ module RubyLsp
       )
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def workspace_did_change_watched_files(message)
       changes = message.dig(:params, :changes)
       changes.each do |change|
@@ -516,7 +587,7 @@ module RubyLsp
       Addon.file_watcher_addons.each { |addon| T.unsafe(addon).workspace_did_change_watched_files(changes) }
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def workspace_symbol(message)
       send_message(
         Result.new(
@@ -526,7 +597,7 @@ module RubyLsp
       )
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_show_syntax_tree(message)
       params = message[:params]
       response = {
@@ -538,7 +609,7 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: response))
     end
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def workspace_dependencies(message)
       response = begin
         Bundler.with_original_env do

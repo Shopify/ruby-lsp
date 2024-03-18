@@ -22,11 +22,6 @@ class ServerTest < Minitest::Test
       },
     })
 
-    # Pop the file watching request
-    @server.pop_response
-
-    # Pop the progress notification
-    @server.pop_response
     hash = JSON.parse(@server.pop_response.response.to_json)
     capabilities = hash["capabilities"]
 
@@ -45,11 +40,6 @@ class ServerTest < Minitest::Test
       },
     })
 
-    # Pop the file watching request
-    @server.pop_response
-
-    # Pop the progress notification
-    @server.pop_response
     hash = JSON.parse(@server.pop_response.response.to_json)
     capabilities = hash["capabilities"]
 
@@ -66,12 +56,6 @@ class ServerTest < Minitest::Test
         capabilities: { general: { positionEncodings: ["utf-8"] } },
       },
     })
-
-    # Pop the file watching request
-    @server.pop_response
-
-    # Pop the progress notification
-    @server.pop_response
 
     hash = JSON.parse(@server.pop_response.response.to_json)
     capabilities = hash["capabilities"]
@@ -90,12 +74,6 @@ class ServerTest < Minitest::Test
       },
     })
 
-    # Pop the file watching request
-    @server.pop_response
-
-    # Pop the progress notification
-    @server.pop_response
-
     hash = JSON.parse(@server.pop_response.response.to_json)
 
     # All features are enabled by default
@@ -111,12 +89,6 @@ class ServerTest < Minitest::Test
         capabilities: { general: { positionEncodings: ["utf-16"] } },
       },
     })
-
-    # Pop the file watching request
-    @server.pop_response
-
-    # Pop the progress notification
-    @server.pop_response
 
     hash = JSON.parse(@server.pop_response.response.to_json)
 
@@ -134,12 +106,6 @@ class ServerTest < Minitest::Test
       },
     })
 
-    # Pop the file watching request
-    @server.pop_response
-
-    # Pop the progress notification
-    @server.pop_response
-
     hash = JSON.parse(@server.pop_response.response.to_json)
 
     # All features are enabled by default
@@ -156,12 +122,6 @@ class ServerTest < Minitest::Test
       },
     })
 
-    # Pop the file watching request
-    @server.pop_response
-
-    # Pop the progress notification
-    @server.pop_response
-
     hash = JSON.parse(@server.pop_response.response.to_json)
     assert_equal(RubyLsp::VERSION, hash.dig("serverInfo", "version"))
   end
@@ -177,19 +137,13 @@ class ServerTest < Minitest::Test
       },
     })
 
-    # Pop the file watching request
-    @server.pop_response
-
-    # Pop the progress notification
-    @server.pop_response
-
     hash = JSON.parse(@server.pop_response.response.to_json)
     assert_equal("rubocop", hash.dig("formatter"))
   end
 
   def test_initialized_populates_index
     capture_subprocess_io do
-      @server.initialized
+      @server.run_initialized
 
       assert_equal("$/progress", @server.pop_response.message)
       assert_equal("$/progress", @server.pop_response.message)
@@ -203,7 +157,7 @@ class ServerTest < Minitest::Test
 
   def test_initialized_recovers_from_indexing_failures
     @server.index.expects(:index_all).once.raises(StandardError, "boom!")
-    @server.initialized
+    @server.run_initialized
 
     notification = @server.pop_response
     assert_equal("window/showMessage", notification.message)
@@ -285,7 +239,7 @@ class ServerTest < Minitest::Test
   end
 
   def test_initialize_features_with_default_configuration
-    @server.initialized
+    @server.run_initialized
     store = @server.instance_variable_get(:@store)
 
     refute(store.features_configuration.dig(:inlayHint).enabled?(:implicitRescue))
@@ -390,7 +344,7 @@ class ServerTest < Minitest::Test
         @server.run_initialize(id: 1, method: "initialize", params: {
           initializationOptions: { formatter: "rubocop" },
         })
-        @server.initialized
+        @server.run_initialized
 
         store = @server.instance_variable_get(:@store)
         assert_equal("none", store.formatter)
@@ -443,7 +397,7 @@ class ServerTest < Minitest::Test
     end
 
     assert_match(/boom/, stderr)
-    assert_match(%r{ruby-lsp/lib/ruby_lsp/base_server\.rb:\d+:in `process_message'}, stderr)
+    assert_match(%r{ruby-lsp/lib/ruby_lsp/server\.rb:\d+:in `process_message'}, stderr)
   end
 
   private
