@@ -48,6 +48,34 @@ export class Chruby extends VersionManager {
     };
   }
 
+  // Returns the full URI to the Ruby executable
+  protected async findRubyUri(rubyVersion: RubyVersion): Promise<vscode.Uri> {
+    // If an engine was specified in the .ruby-version file, we favor looking for that first and also try just the
+    // version number. If no engine was specified, we first try just the version number and then we try using `ruby` as
+    // the default engine
+    const possibleVersionNames = rubyVersion.engine
+      ? [`${rubyVersion.engine}-${rubyVersion.version}`, rubyVersion.version]
+      : [rubyVersion.version, `ruby-${rubyVersion.version}`];
+
+    for (const uri of this.rubyInstallationUris) {
+      let installationUri: vscode.Uri;
+
+      for (const versionName of possibleVersionNames) {
+        try {
+          installationUri = vscode.Uri.joinPath(uri, versionName);
+          await vscode.workspace.fs.stat(installationUri);
+          return vscode.Uri.joinPath(installationUri, "bin", "ruby");
+        } catch (_error: any) {
+          // Continue to the next version name
+        }
+      }
+    }
+
+    throw new Error(
+      `Cannot find installation directory for Ruby version ${possibleVersionNames.join(" or ")}`,
+    );
+  }
+
   // Returns the Ruby version information including version and engine. E.g.: ruby-3.3.0, truffleruby-21.3.0
   private async discoverRubyVersion(): Promise<RubyVersion> {
     let uri = this.bundleUri;
@@ -86,34 +114,6 @@ export class Chruby extends VersionManager {
     }
 
     throw new Error("No .ruby-version file was found");
-  }
-
-  // Returns the full URI to the Ruby executable
-  private async findRubyUri(rubyVersion: RubyVersion): Promise<vscode.Uri> {
-    // If an engine was specified in the .ruby-version file, we favor looking for that first and also try just the
-    // version number. If no engine was specified, we first try just the version number and then we try using `ruby` as
-    // the default engine
-    const possibleVersionNames = rubyVersion.engine
-      ? [`${rubyVersion.engine}-${rubyVersion.version}`, rubyVersion.version]
-      : [rubyVersion.version, `ruby-${rubyVersion.version}`];
-
-    for (const uri of this.rubyInstallationUris) {
-      let installationUri: vscode.Uri;
-
-      for (const versionName of possibleVersionNames) {
-        try {
-          installationUri = vscode.Uri.joinPath(uri, versionName);
-          await vscode.workspace.fs.stat(installationUri);
-          return vscode.Uri.joinPath(installationUri, "bin", "ruby");
-        } catch (_error: any) {
-          // Continue to the next version name
-        }
-      }
-    }
-
-    throw new Error(
-      `Cannot find installation directory for Ruby version ${possibleVersionNames.join(" or ")}`,
-    );
   }
 
   // Run the activation script using the Ruby installation we found so that we can discover gem paths
