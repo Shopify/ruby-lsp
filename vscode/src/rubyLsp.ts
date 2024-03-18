@@ -1,12 +1,10 @@
-import path from "path";
-
 import * as vscode from "vscode";
 import { Range } from "vscode-languageclient/node";
 
 import { Telemetry } from "./telemetry";
 import DocumentProvider from "./documentProvider";
 import { Workspace } from "./workspace";
-import { Command, STATUS_EMITTER, pathExists } from "./common";
+import { Command, STATUS_EMITTER } from "./common";
 import { ManagerIdentifier } from "./ruby";
 import { StatusItems } from "./status";
 import { TestController } from "./testController";
@@ -119,9 +117,7 @@ export class RubyLsp {
       .getConfiguration("rubyLsp")
       .get("bundleGemfile")!;
 
-    const lockfileExists =
-      (await pathExists(path.join(workspaceDir, "Gemfile.lock"))) ||
-      (await pathExists(path.join(workspaceDir, "gems.locked")));
+    const lockfileExists = await this.lockfileExists(workspaceFolder.uri);
 
     // When eagerly activating workspaces, we skip the ones that do not have a lockfile since they may not be a Ruby
     // workspace. Those cases are activated lazily below
@@ -469,5 +465,27 @@ export class RubyLsp {
         vscode.ConfigurationTarget.Global,
       );
     }
+  }
+
+  private async lockfileExists(workspaceUri: vscode.Uri) {
+    try {
+      await vscode.workspace.fs.stat(
+        vscode.Uri.joinPath(workspaceUri, "Gemfile.lock"),
+      );
+      return true;
+    } catch (error: any) {
+      // Gemfile.lock doesn't exist, try the next
+    }
+
+    try {
+      await vscode.workspace.fs.stat(
+        vscode.Uri.joinPath(workspaceUri, "gems.locked"),
+      );
+      return true;
+    } catch (error: any) {
+      // gems.locked doesn't exist
+    }
+
+    return false;
   }
 }

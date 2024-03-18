@@ -4,7 +4,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 
-import { asyncExec, pathExists, RubyInterface } from "./common";
+import { asyncExec, RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 import { Shadowenv } from "./ruby/shadowenv";
 import { Chruby } from "./ruby/chruby";
@@ -236,13 +236,14 @@ export class Ruby implements RubyInterface {
       return;
     }
 
-    if (!(await pathExists(this.customBundleGemfile))) {
+    try {
+      await vscode.workspace.fs.stat(vscode.Uri.file(this.customBundleGemfile));
+      this._env.BUNDLE_GEMFILE = this.customBundleGemfile;
+    } catch (error: any) {
       throw new Error(
         `The configured bundle gemfile ${this.customBundleGemfile} does not exist`,
       );
     }
-
-    this._env.BUNDLE_GEMFILE = this.customBundleGemfile;
   }
 
   private async discoverVersionManager() {
