@@ -97,7 +97,7 @@ module RubyLsp
         # Run requests for the document
         dispatcher = Prism::Dispatcher.new
         folding_range = Requests::FoldingRanges.new(document.parse_result.comments, dispatcher)
-        document_symbol = Requests::DocumentSymbol.new(dispatcher)
+        document_symbol = Requests::DocumentSymbol.new(uri, dispatcher)
         document_link = Requests::DocumentLink.new(uri, document.comments, dispatcher)
         code_lens = Requests::CodeLens.new(uri, dispatcher)
 
