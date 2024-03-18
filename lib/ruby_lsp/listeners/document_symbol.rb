@@ -82,13 +82,14 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
-        if ATTR_ACCESSORS.include?(node.name)
+        node_name = node.name
+        if ATTR_ACCESSORS.include?(node_name)
           handle_attr_accessor(node)
-        elsif node.name == :alias_method
+        elsif node_name == :alias_method
           handle_alias_method(node)
-        elsif node.name == :namespace
+        elsif node_name == :namespace
           handle_rake_namespace(node)
-        elsif node.name == :task
+        elsif node_name == :task
           handle_rake_task(node)
         end
       end
