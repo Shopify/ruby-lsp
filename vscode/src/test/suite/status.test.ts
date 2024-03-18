@@ -3,6 +3,7 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 import { beforeEach, afterEach } from "mocha";
 import { State } from "vscode-languageclient/node";
+import sinon from "sinon";
 
 import { Ruby } from "../../ruby";
 import {
@@ -148,14 +149,6 @@ suite("StatusItems", () => {
   });
 
   suite("FeaturesStatus", () => {
-    const configuration = vscode.workspace.getConfiguration("rubyLsp");
-    const originalFeatures: Record<string, boolean> =
-      configuration.get("enabledFeatures")!;
-    const numberOfExperimentalFeatures = Object.values(originalFeatures).filter(
-      (feature) => feature === false,
-    ).length;
-    const numberOfFeatures = Object.keys(originalFeatures).length;
-
     beforeEach(() => {
       ruby = {} as Ruby;
       workspace = {
@@ -172,53 +165,73 @@ suite("StatusItems", () => {
       status.refresh(workspace);
     });
 
-    afterEach(() => {
-      configuration.update("enabledFeatures", originalFeatures, true, true);
-    });
-
     test("Status is initialized with the right values", () => {
+      const features = {
+        codeActions: true,
+        diagnostics: true,
+        documentHighlights: true,
+        documentLink: true,
+        documentSymbols: true,
+        foldingRanges: true,
+        formatting: true,
+        hover: true,
+        inlayHint: true,
+        onTypeFormatting: true,
+        selectionRanges: true,
+        semanticHighlighting: true,
+        completion: true,
+        codeLens: true,
+        definition: true,
+        workspaceSymbol: true,
+        signatureHelp: true,
+      };
+      const numberOfFeatures = Object.keys(features).length;
+      const stub = sinon.stub(vscode.workspace, "getConfiguration").returns({
+        get: () => features,
+      } as unknown as vscode.WorkspaceConfiguration);
+
       assert.strictEqual(
         status.item.text,
-        `${
-          numberOfFeatures - numberOfExperimentalFeatures
-        }/${numberOfFeatures} features enabled`,
+        `${numberOfFeatures}/${numberOfFeatures} features enabled`,
       );
       assert.strictEqual(status.item.name, "Ruby LSP Features");
       assert.strictEqual(status.item.command?.title, "Manage");
       assert.strictEqual(status.item.command.command, Command.ToggleFeatures);
+      stub.restore();
     });
 
-    test("Refresh updates number of features", async () => {
-      const originalFeatures = vscode.workspace
-        .getConfiguration("rubyLsp")
-        .get("enabledFeatures")!;
-
-      await vscode.workspace
-        .getConfiguration("rubyLsp")
-        .update("enabledFeatures", { completion: false }, true, true);
-
-      const currentFeatures: Record<string, boolean> = vscode.workspace
-        .getConfiguration("rubyLsp")
-        .get("enabledFeatures")!;
-
-      assert.notDeepEqual(currentFeatures, originalFeatures);
-
-      Object.keys(currentFeatures).forEach((key) => {
-        const expected = key === "completion" ? false : currentFeatures[key];
-        assert.strictEqual(currentFeatures[key], expected);
-      });
+    test("Refresh updates number of features", () => {
+      const features = {
+        codeActions: false,
+        diagnostics: true,
+        documentHighlights: true,
+        documentLink: true,
+        documentSymbols: true,
+        foldingRanges: true,
+        formatting: true,
+        hover: true,
+        inlayHint: true,
+        onTypeFormatting: true,
+        selectionRanges: true,
+        semanticHighlighting: true,
+        completion: true,
+        codeLens: true,
+        definition: true,
+        workspaceSymbol: true,
+        signatureHelp: true,
+      };
+      const numberOfFeatures = Object.keys(features).length;
+      const stub = sinon.stub(vscode.workspace, "getConfiguration").returns({
+        get: () => features,
+      } as unknown as vscode.WorkspaceConfiguration);
 
       status.refresh(workspace);
       assert.strictEqual(
         status.item.text,
-        `${
-          numberOfFeatures - numberOfExperimentalFeatures - 1
-        }/${numberOfFeatures} features enabled`,
+        `${numberOfFeatures - 1}/${numberOfFeatures} features enabled`,
       );
 
-      await vscode.workspace
-        .getConfiguration("rubyLsp")
-        .update("enabledFeatures", originalFeatures, true, true);
+      stub.restore();
     });
   });
 
