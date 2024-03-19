@@ -40,7 +40,7 @@ Sorbet/TrueSigil:
     - "test/**/*.rb"
     - "lib/ruby_indexer/test/**/*.rb"
     - "lib/ruby_indexer/lib/ruby_indexer/prefix_tree.rb"
-    - "lib/ruby_lsp/disable_sorbet.rb"
+    - "lib/ruby_lsp/load_sorbet.rb"
   Exclude:
     - "**/*.rake"
     - "lib/**/*.rb"
@@ -55,4 +55,4 @@ Sorbet/StrictSigil:
     - "lib/ruby_indexer/test/**/*.rb"
     - "lib/ruby-lsp.rb"
     - "lib/ruby_indexer/lib/ruby_indexer/prefix_tree.rb"
-    - "lib/ruby_lsp/disable_sorbet.rb"
+    - "lib/ruby_lsp/load_sorbet.rb"
