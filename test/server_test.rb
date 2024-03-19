@@ -161,10 +161,10 @@ class ServerTest < Minitest::Test
     capture_subprocess_io do
       @server.process_message({ method: "initialized" })
 
-      assert_equal("$/progress", @server.pop_response.message)
-      assert_equal("$/progress", @server.pop_response.message)
-      assert_equal("$/progress", @server.pop_response.message)
-      assert_equal("$/progress", @server.pop_response.message)
+      assert_equal("$/progress", @server.pop_response.method)
+      assert_equal("$/progress", @server.pop_response.method)
+      assert_equal("$/progress", @server.pop_response.method)
+      assert_equal("$/progress", @server.pop_response.method)
 
       index = @server.index
       refute_empty(index.instance_variable_get(:@entries))
@@ -178,7 +178,7 @@ class ServerTest < Minitest::Test
     end
 
     notification = @server.pop_response
-    assert_equal("window/showMessage", notification.message)
+    assert_equal("window/showMessage", notification.method)
     assert_equal(
       "Error while indexing: boom!",
       T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
@@ -199,7 +199,7 @@ class ServerTest < Minitest::Test
     notification = @server.pop_response
 
     assert_instance_of(RubyLsp::Notification, notification)
-    assert_equal("window/showMessage", notification.message)
+    assert_equal("window/showMessage", notification.method)
     assert_equal(
       "Formatting error: boom",
       T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
@@ -254,7 +254,7 @@ class ServerTest < Minitest::Test
     })
 
     notification = T.must(@server.pop_response)
-    assert_equal("textDocument/publishDiagnostics", notification.message)
+    assert_equal("textDocument/publishDiagnostics", notification.method)
     assert_empty(T.cast(notification.params, RubyLsp::Interface::PublishDiagnosticsParams).diagnostics)
   end
 
@@ -392,7 +392,7 @@ class ServerTest < Minitest::Test
 
         notification = @server.pop_response
 
-        assert_equal("window/showMessage", notification.message)
+        assert_equal("window/showMessage", notification.method)
         assert_equal(
           "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the Gemfile or gemspec.",
           T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,

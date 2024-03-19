@@ -32,16 +32,16 @@ module RubyLsp
     extend T::Helpers
 
     sig { returns(String) }
-    attr_reader :message
+    attr_reader :method
 
     sig { returns(Object) }
     attr_reader :params
 
     abstract!
 
-    sig { params(message: String, params: Object).void }
-    def initialize(message:, params:)
-      @message = message
+    sig { params(method: String, params: Object).void }
+    def initialize(method:, params:)
+      @method = method
       @params = params
     end
 
@@ -55,7 +55,7 @@ module RubyLsp
       sig { params(message: String).returns(Notification) }
       def window_show_error(message)
         new(
-          message: "window/showMessage",
+          method: "window/showMessage",
           params: Interface::ShowMessageParams.new(
             type: Constant::MessageType::ERROR,
             message: message,
@@ -68,22 +68,22 @@ module RubyLsp
 
     sig { override.returns(T::Hash[Symbol, T.untyped]) }
     def to_hash
-      { message: @message, params: T.unsafe(@params).to_hash }
+      { method: @method, params: T.unsafe(@params).to_hash }
     end
   end
 
   class Request < Message
     extend T::Sig
 
-    sig { params(id: Integer, message: String, params: Object).void }
-    def initialize(id:, message:, params:)
+    sig { params(id: Integer, method: String, params: Object).void }
+    def initialize(id:, method:, params:)
       @id = id
-      super(message: message, params: params)
+      super(method: method, params: params)
     end
 
     sig { override.returns(T::Hash[Symbol, T.untyped]) }
     def to_hash
-      { id: @id, message: @message, params: T.unsafe(@params).to_hash }
+      { id: @id, method: @method, params: T.unsafe(@params).to_hash }
     end
   end
 

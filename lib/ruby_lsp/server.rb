@@ -190,7 +190,7 @@ module RubyLsp
         send_message(
           Request.new(
             id: @current_request_id,
-            message: "client/registerCapability",
+            method: "client/registerCapability",
             params: Interface::RegistrationParams.new(
               registrations: [
                 # Register watching Ruby files
@@ -223,7 +223,7 @@ module RubyLsp
       if errored_addons.any?
         send_message(
           Notification.new(
-            message: "window/showMessage",
+            method: "window/showMessage",
             params: Interface::ShowMessageParams.new(
               type: Constant::MessageType::WARNING,
               message: "Error loading addons:\n\n#{errored_addons.map(&:formatted_errors).join("\n\n")}",
@@ -257,7 +257,7 @@ module RubyLsp
       # Clear diagnostics for the closed file, so that they no longer appear in the problems tab
       send_message(
         Notification.new(
-          message: "textDocument/publishDiagnostics",
+          method: "textDocument/publishDiagnostics",
           params: Interface::PublishDiagnosticsParams.new(uri: uri.to_s, diagnostics: []),
         ),
       )
@@ -672,12 +672,12 @@ module RubyLsp
 
       send_message(Request.new(
         id: @current_request_id,
-        message: "window/workDoneProgress/create",
+        method: "window/workDoneProgress/create",
         params: Interface::WorkDoneProgressCreateParams.new(token: id),
       ))
 
       send_message(Notification.new(
-        message: "$/progress",
+        method: "$/progress",
         params: Interface::ProgressParams.new(
           token: id,
           value: Interface::WorkDoneProgressBegin.new(
@@ -696,7 +696,7 @@ module RubyLsp
 
       send_message(
         Notification.new(
-          message: "$/progress",
+          method: "$/progress",
           params: Interface::ProgressParams.new(
             token: id,
             value: Interface::WorkDoneProgressReport.new(
@@ -715,7 +715,7 @@ module RubyLsp
 
       send_message(
         Notification.new(
-          message: "$/progress",
+          method: "$/progress",
           params: Interface::ProgressParams.new(
             token: id,
             value: Interface::WorkDoneProgressEnd.new(kind: "end"),
