@@ -126,6 +126,11 @@ if any entries hint at what the issue might be. Did the extension select your pr
 Did it select your preferred version manager? You can define which version manager to use with the
 `"rubyLsp.rubyVersionManager"` setting.
 
+### Enable logging
+
+You can enable logging to the VS Code output tab,
+[as described in the CONTRIBUTING](CONTRIBUTING.md#tracing-lsp-requests-and-responses) docs.
+
 ### My preferred version manager is not supported
 
 We default to supporting the most common version managers, but that may not cover every single tool available. For these
