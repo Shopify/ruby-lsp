@@ -40,6 +40,7 @@ module RubyLsp
     autoload :DocumentHighlight, "ruby_lsp/requests/document_highlight"
     autoload :InlayHints, "ruby_lsp/requests/inlay_hints"
     autoload :Completion, "ruby_lsp/requests/completion"
+    autoload :CompletionResolve, "ruby_lsp/requests/completion_resolve"
     autoload :CodeLens, "ruby_lsp/requests/code_lens"
     autoload :Definition, "ruby_lsp/requests/definition"
     autoload :ShowSyntaxTree, "ruby_lsp/requests/show_syntax_tree"

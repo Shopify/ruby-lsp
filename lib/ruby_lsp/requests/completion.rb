@@ -33,7 +33,7 @@ module RubyLsp
         sig { returns(Interface::CompletionOptions) }
         def provider
           Interface::CompletionOptions.new(
-            resolve_provider: false,
+            resolve_provider: true,
             trigger_characters: ["/", "\"", "'"],
             completion_item: {
               labelDetailsSupport: true,

@@ -284,13 +284,6 @@ module RubyLsp
             new_text: insertion_text,
           ),
           kind: kind,
-          label_details: Interface::CompletionItemLabelDetails.new(
-            description: entries.map(&:file_name).join(","),
-          ),
-          documentation: Interface::MarkupContent.new(
-            kind: "markdown",
-            value: markdown_from_index_entries(real_name, entries),
-          ),
         )
       end
 
