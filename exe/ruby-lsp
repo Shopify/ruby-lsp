@@ -69,6 +69,7 @@ if ENV["BUNDLE_GEMFILE"].nil?
 end
 
 require "sorbet-runtime"
+require "ruby_lsp/disable_sorbet"
 
 begin
   T::Configuration.default_checked_level = :never

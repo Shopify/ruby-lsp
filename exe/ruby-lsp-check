@@ -4,6 +4,7 @@
 # This executable checks if all automatic LSP requests run successfully on every Ruby file under the current directory
 
 require "sorbet-runtime"
+require "ruby_lsp/disable_sorbet"
 
 begin
   T::Configuration.default_checked_level = :never
