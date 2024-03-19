@@ -10,6 +10,7 @@ import { Shadowenv } from "./ruby/shadowenv";
 import { Chruby } from "./ruby/chruby";
 import { VersionManager } from "./ruby/versionManager";
 import { Mise } from "./ruby/mise";
+import { RubyInstaller } from "./ruby/rubyInstaller";
 
 export enum ManagerIdentifier {
   Asdf = "asdf",
@@ -19,6 +20,7 @@ export enum ManagerIdentifier {
   Rvm = "rvm",
   Shadowenv = "shadowenv",
   Mise = "mise",
+  RubyInstaller = "rubyInstaller",
   None = "none",
   Custom = "custom",
 }
@@ -115,6 +117,11 @@ export class Ruby implements RubyInterface {
         case ManagerIdentifier.Mise:
           await this.runActivation(
             new Mise(this.workspaceFolder, this.outputChannel),
+          );
+          break;
+        case ManagerIdentifier.RubyInstaller:
+          await this.runActivation(
+            new RubyInstaller(this.workspaceFolder, this.outputChannel),
           );
           break;
         case ManagerIdentifier.Custom:
@@ -288,6 +295,11 @@ export class Ruby implements RubyInterface {
       return;
     } catch (error: any) {
       // If the Mise binary doesn't exist, then continue checking
+    }
+
+    if (os.platform() === "win32") {
+      this.versionManager = ManagerIdentifier.RubyInstaller;
+      return;
     }
 
     // If we can't find a version manager, just return None
