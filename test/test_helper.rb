@@ -41,9 +41,42 @@ module Minitest
 
     Minitest::Test.make_my_diffs_pretty!
 
+    private
+
     sig { void }
     def stub_no_typechecker
       RubyLsp::DependencyDetector.instance.stubs(:typechecker).returns(false)
+    end
+
+    sig do
+      type_parameters(:T)
+        .params(
+          source: T.nilable(String),
+          uri: URI::Generic,
+          block: T.proc.params(server: RubyLsp::Server, uri: URI::Generic).returns(T.type_parameter(:T)),
+        ).returns(T.type_parameter(:T))
+    end
+    def with_server(source = nil, uri = URI("file:///fake.rb"), &block)
+      server = RubyLsp::Server.new(test_mode: true)
+
+      if source
+        server.process_message({
+          method: "textDocument/didOpen",
+          params: {
+            textDocument: {
+              uri: uri,
+              text: source,
+              version: 1,
+            },
+          },
+        })
+      end
+
+      index = server.index
+      index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
+      block.call(server, uri)
+    ensure
+      T.must(server).run_shutdown
     end
   end
 end

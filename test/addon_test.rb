@@ -34,13 +34,16 @@ module RubyLsp
     end
 
     def test_registering_an_addon_invokes_activate_on_initialized
-      message_queue = Thread::Queue.new
-      Executor.new(RubyLsp::Store.new, message_queue).execute({ method: "initialized" })
+      server = RubyLsp::Server.new
+
+      capture_subprocess_io do
+        server.process_message({ method: "initialized" })
+      end
 
       addon_instance = T.must(Addon.addons.find { |addon| addon.is_a?(@addon) })
       assert_predicate(addon_instance, :activated)
     ensure
-      T.must(message_queue).close
+      T.must(server).run_shutdown
     end
 
     def test_addons_are_automatically_tracked

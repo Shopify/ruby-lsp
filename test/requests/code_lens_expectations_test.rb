@@ -107,14 +107,17 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
       class Test < Minitest::Test; end
     RUBY
 
-    test_addon(:create_code_lens_addon, source: source) do |executor|
-      response = executor.execute({
+    test_addon(:create_code_lens_addon, source: source) do |server|
+      server.process_message({
+        id: 1,
         method: "textDocument/codeLens",
         params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 1, character: 2 } },
       })
 
-      assert_nil(response.error, response.error&.full_message)
-      response = response.response
+      result = server.pop_response
+      assert_instance_of(RubyLsp::Result, result)
+
+      response = result.response
 
       assert_equal(response.size, 4)
       assert_match("Run", response[0].command.title)

@@ -1,1 +1,1 @@
-require "ruby_lsp/executor"
+require "ruby_lsp/server"
