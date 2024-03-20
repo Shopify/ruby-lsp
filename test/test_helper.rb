@@ -3,6 +3,8 @@
 
 require "sorbet-runtime"
 
+ENV["RUBY_LSP_ENV"] = "test"
+
 if ENV["COVERAGE"]
   require "simplecov"
 

@@ -63,8 +63,15 @@ module RubyLsp
     def detect_typechecker
       return false if ENV["RUBY_LSP_BYPASS_TYPECHECKER"]
 
+      # We can't read the env from within `Bundle.with_original_env` so we need to set it here.
+      ruby_lsp_env_is_test = (ENV["RUBY_LSP_ENV"] == "test")
       Bundler.with_original_env do
-        Bundler.locked_gems.specs.any? { |spec| spec.name == "sorbet-static" }
+        sorbet_static_detected = Bundler.locked_gems.specs.any? { |spec| spec.name == "sorbet-static" }
+        # Don't show message while running tests, since it's noisy
+        if sorbet_static_detected && !ruby_lsp_env_is_test
+          $stderr.puts("Ruby LSP detected this is a Sorbet project so will defer to Sorbet LSP for some functionality")
+        end
+        sorbet_static_detected
       end
     rescue Bundler::GemfileNotFound
       false
