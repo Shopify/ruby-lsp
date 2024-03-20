@@ -16,7 +16,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::DocumentSymbol.new(dispatcher)
+    listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.perform
 
