@@ -38,29 +38,4 @@ module RubyLsp
 
     T.singleton_class.prepend(self)
   end
-
-  # No-op generic type variable syntax
-  module TypeVariableSyntax
-    def type_member(variance = :invariant, fixed: nil, lower: T.untyped, upper: BasicObject, &block)
-      block = TypeVariableSyntax.build_bounds_block(fixed, lower, upper) if block.nil?
-      super(variance, &block)
-    end
-
-    def type_template(variance = :invariant, fixed: nil, lower: T.untyped, upper: BasicObject, &block)
-      block = TypeVariableSyntax.build_bounds_block(fixed, lower, upper) if block.nil?
-      super(variance, &block)
-    end
-
-    class << self
-      def build_bounds_block(fixed, lower, upper)
-        bounds = {}
-        bounds[:fixed] = fixed unless fixed.nil?
-        bounds[:lower] = lower unless lower == T.untyped
-        bounds[:upper] = upper unless upper == BasicObject
-        -> { bounds }
-      end
-    end
-
-    T::Generic.prepend(self)
-  end
 end
