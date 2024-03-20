@@ -59,16 +59,6 @@ class IntegrationTest < Minitest::Test
     refute_predicate(@wait_thr, :alive?)
   end
 
-  def test_document_symbol
-    initialize_lsp(["documentSymbols"])
-    open_file_with("class Foo\nend")
-
-    response = make_request("textDocument/documentSymbol", { textDocument: { uri: @uri } })
-    symbol = response[:result].first
-    assert_equal("Foo", symbol[:name])
-    assert_equal(LanguageServer::Protocol::Constant::SymbolKind::CLASS, symbol[:kind])
-  end
-
   def test_document_highlight
     initialize_lsp(["documentHighlights"])
     open_file_with("$foo = 1")

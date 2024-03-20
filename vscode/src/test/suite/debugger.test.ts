@@ -195,7 +195,6 @@ suite("Debugger", () => {
     await ruby.activateRuby();
 
     try {
-      await asyncExec("gem install debug", { env: ruby.env, cwd: tmpPath });
       await asyncExec("bundle install", { env: ruby.env, cwd: tmpPath });
     } catch (error: any) {
       assert.fail(`Failed to bundle install: ${error.message}`);
