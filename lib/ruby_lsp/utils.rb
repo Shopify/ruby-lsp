@@ -105,9 +105,11 @@ module RubyLsp
     def to_hash
       {
         id: @id,
-        code: @code,
-        message: @message,
-        data: @data,
+        error: {
+          code: @code,
+          message: @message,
+          data: @data,
+        },
       }
     end
   end
