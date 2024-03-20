@@ -17,7 +17,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "Test",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/::Test(#|::)/\"",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/^.*::Test(#|::)/\"",
           {
             "start_line": 9,
             "start_column": 2,
@@ -50,7 +50,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "Test",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/::Test(#|::)/\"",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/^.*::Test(#|::)/\"",
           {
             "start_line": 9,
             "start_column": 2,
@@ -83,7 +83,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "Test",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/::Test(#|::)/\"",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/^.*::Test(#|::)/\"",
           {
             "start_line": 9,
             "start_column": 2,
@@ -116,7 +116,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "test_something",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /::Test\\#test_something$/",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::Test\\#test_something$/",
           {
             "start_line": 10,
             "start_column": 4,
@@ -148,7 +148,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "test_something",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /::Test\\#test_something$/",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::Test\\#test_something$/",
           {
             "start_line": 10,
             "start_column": 4,
@@ -180,7 +180,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "test_something",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /::Test\\#test_something$/",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::Test\\#test_something$/",
           {
             "start_line": 10,
             "start_column": 4,
@@ -212,7 +212,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "test_something_else",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /::Test\\#test_something_else$/",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::Test\\#test_something_else$/",
           {
             "start_line": 12,
             "start_column": 4,
@@ -244,7 +244,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "test_something_else",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /::Test\\#test_something_else$/",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::Test\\#test_something_else$/",
           {
             "start_line": 12,
             "start_column": 4,
@@ -276,7 +276,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "test_something_else",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /::Test\\#test_something_else$/",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::Test\\#test_something_else$/",
           {
             "start_line": 12,
             "start_column": 4,
@@ -308,7 +308,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "NestedTest",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/::Test::NestedTest(#|::)/\"",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/^.*::Test::NestedTest(#|::)/\"",
           {
             "start_line": 14,
             "start_column": 4,
@@ -341,7 +341,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "NestedTest",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/::Test::NestedTest(#|::)/\"",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/^.*::Test::NestedTest(#|::)/\"",
           {
             "start_line": 14,
             "start_column": 4,
@@ -374,7 +374,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "NestedTest",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/::Test::NestedTest(#|::)/\"",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/^.*::Test::NestedTest(#|::)/\"",
           {
             "start_line": 14,
             "start_column": 4,
@@ -407,7 +407,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "test_nested",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /::Test::NestedTest\\#test_nested$/",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::Test::NestedTest\\#test_nested$/",
           {
             "start_line": 15,
             "start_column": 6,
@@ -439,7 +439,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "test_nested",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /::Test::NestedTest\\#test_nested$/",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::Test::NestedTest\\#test_nested$/",
           {
             "start_line": 15,
             "start_column": 6,
@@ -471,7 +471,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "test_nested",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /::Test::NestedTest\\#test_nested$/",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::Test::NestedTest\\#test_nested$/",
           {
             "start_line": 15,
             "start_column": 6,
@@ -493,7 +493,7 @@
           "character": 2
         },
         "end": {
-          "line": 23,
+          "line": 29,
           "character": 5
         }
       },
@@ -503,11 +503,11 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "SomeOtherTest",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/::SomeOtherTest(#|::)/\"",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/^.*::SomeOtherTest(#|::)/\"",
           {
             "start_line": 19,
             "start_column": 2,
-            "end_line": 23,
+            "end_line": 29,
             "end_column": 5
           }
         ]
@@ -526,7 +526,7 @@
           "character": 2
         },
         "end": {
-          "line": 23,
+          "line": 29,
           "character": 5
         }
       },
@@ -536,11 +536,11 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "SomeOtherTest",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/::SomeOtherTest(#|::)/\"",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/^.*::SomeOtherTest(#|::)/\"",
           {
             "start_line": 19,
             "start_column": 2,
-            "end_line": 23,
+            "end_line": 29,
             "end_column": 5
           }
         ]
@@ -559,7 +559,7 @@
           "character": 2
         },
         "end": {
-          "line": 23,
+          "line": 29,
           "character": 5
         }
       },
@@ -569,11 +569,11 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "SomeOtherTest",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/::SomeOtherTest(#|::)/\"",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/^.*::SomeOtherTest(#|::)/\"",
           {
             "start_line": 19,
             "start_column": 2,
-            "end_line": 23,
+            "end_line": 29,
             "end_column": 5
           }
         ]
@@ -602,7 +602,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "test_stuff",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /::SomeOtherTest\\#test_stuff$/",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::SomeOtherTest\\#test_stuff$/",
           {
             "start_line": 20,
             "start_column": 4,
@@ -634,7 +634,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "test_stuff",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /::SomeOtherTest\\#test_stuff$/",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::SomeOtherTest\\#test_stuff$/",
           {
             "start_line": 20,
             "start_column": 4,
@@ -666,7 +666,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "test_stuff",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /::SomeOtherTest\\#test_stuff$/",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::SomeOtherTest\\#test_stuff$/",
           {
             "start_line": 20,
             "start_column": 4,
@@ -698,7 +698,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "test_other_stuff",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /::SomeOtherTest\\#test_other_stuff$/",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::SomeOtherTest\\#test_other_stuff$/",
           {
             "start_line": 22,
             "start_column": 4,
@@ -730,7 +730,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "test_other_stuff",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /::SomeOtherTest\\#test_other_stuff$/",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::SomeOtherTest\\#test_other_stuff$/",
           {
             "start_line": 22,
             "start_column": 4,
@@ -762,7 +762,7 @@
         "arguments": [
           "/fixtures/minitest_with_dynamic_constant_path.rb",
           "test_other_stuff",
-          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /::SomeOtherTest\\#test_other_stuff$/",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::SomeOtherTest\\#test_other_stuff$/",
           {
             "start_line": 22,
             "start_column": 4,
@@ -774,6 +774,201 @@
       "data": {
         "type": "debug",
         "group_id": 3,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 25,
+          "character": 6
+        },
+        "end": {
+          "line": 27,
+          "character": 9
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_with_dynamic_constant_path.rb",
+          "OtherDynamicTest",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/^.*::SomeOtherTest::.*::OtherDynamicTest(#|::)/\"",
+          {
+            "start_line": 25,
+            "start_column": 6,
+            "end_line": 27,
+            "end_column": 9
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 3,
+        "kind": "group",
+        "id": 4
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 25,
+          "character": 6
+        },
+        "end": {
+          "line": 27,
+          "character": 9
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_with_dynamic_constant_path.rb",
+          "OtherDynamicTest",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/^.*::SomeOtherTest::.*::OtherDynamicTest(#|::)/\"",
+          {
+            "start_line": 25,
+            "start_column": 6,
+            "end_line": 27,
+            "end_column": 9
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 3,
+        "kind": "group",
+        "id": 4
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 25,
+          "character": 6
+        },
+        "end": {
+          "line": 27,
+          "character": 9
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_with_dynamic_constant_path.rb",
+          "OtherDynamicTest",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name \"/^.*::SomeOtherTest::.*::OtherDynamicTest(#|::)/\"",
+          {
+            "start_line": 25,
+            "start_column": 6,
+            "end_line": 27,
+            "end_column": 9
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 3,
+        "kind": "group",
+        "id": 4
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 26,
+          "character": 8
+        },
+        "end": {
+          "line": 26,
+          "character": 26
+        }
+      },
+      "command": {
+        "title": "Run",
+        "command": "rubyLsp.runTest",
+        "arguments": [
+          "/fixtures/minitest_with_dynamic_constant_path.rb",
+          "test_more",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::SomeOtherTest::.*::OtherDynamicTest\\#test_more$/",
+          {
+            "start_line": 26,
+            "start_column": 8,
+            "end_line": 26,
+            "end_column": 26
+          }
+        ]
+      },
+      "data": {
+        "type": "test",
+        "group_id": 4,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 26,
+          "character": 8
+        },
+        "end": {
+          "line": 26,
+          "character": 26
+        }
+      },
+      "command": {
+        "title": "Run In Terminal",
+        "command": "rubyLsp.runTestInTerminal",
+        "arguments": [
+          "/fixtures/minitest_with_dynamic_constant_path.rb",
+          "test_more",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::SomeOtherTest::.*::OtherDynamicTest\\#test_more$/",
+          {
+            "start_line": 26,
+            "start_column": 8,
+            "end_line": 26,
+            "end_column": 26
+          }
+        ]
+      },
+      "data": {
+        "type": "test_in_terminal",
+        "group_id": 4,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 26,
+          "character": 8
+        },
+        "end": {
+          "line": 26,
+          "character": 26
+        }
+      },
+      "command": {
+        "title": "Debug",
+        "command": "rubyLsp.debugTest",
+        "arguments": [
+          "/fixtures/minitest_with_dynamic_constant_path.rb",
+          "test_more",
+          "bundle exec ruby -Itest /fixtures/minitest_with_dynamic_constant_path.rb --name /^.*::SomeOtherTest::.*::OtherDynamicTest\\#test_more$/",
+          {
+            "start_line": 26,
+            "start_column": 8,
+            "end_line": 26,
+            "end_column": 26
+          }
+        ]
+      },
+      "data": {
+        "type": "debug",
+        "group_id": 4,
         "kind": "example"
       }
     }
