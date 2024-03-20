@@ -92,6 +92,10 @@ module RubyLsp
           @options[:stdin] = contents
 
           super([path])
+
+          # RuboCop rescues interrupts and then sets the `@aborting` variable to true. We don't want them to be rescued,
+          # so here we re-raise in case RuboCop received an interrupt.
+          raise Interrupt if aborting?
         rescue RuboCop::Runner::InfiniteCorrectionLoop => error
           raise Formatting::Error, error.message
         rescue RuboCop::ValidationError => error
