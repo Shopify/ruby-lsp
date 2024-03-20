@@ -36,17 +36,22 @@ module RubyLsp
     sig { void }
     def start
       @reader.read do |message|
+        method = message[:method]
+
+        # We must parse the document under a mutex lock or else we might switch threads and accept text edits in the
+        # source. Altering the source reference during parsing will put the parser in an invalid internal state, since
+        # it started parsing with one source but then it changed in the middle. We don't want to do this for text
+        # synchronization notifications
         @mutex.synchronize do
-          # We must parse the document under a mutex lock or else we might switch threads and accept text edits in the
-          # source. Altering the source reference during parsing will put the parser in an invalid internal state,
-          # since it started parsing with one source but then it changed in the middle
           uri = message.dig(:params, :textDocument, :uri)
 
           if uri
             begin
               parsed_uri = URI(uri)
-              @store.get(parsed_uri).parse
               message[:params][:textDocument][:uri] = parsed_uri
+
+              # We don't want to try to parse documents on text synchronization notifications
+              @store.get(parsed_uri).parse unless method.start_with?("textDocument/did")
             rescue Errno::ENOENT
               # If we receive a request for a file that no longer exists, we don't want to fail
             end
@@ -55,7 +60,7 @@ module RubyLsp
 
         # We need to process shutdown and exit from the main thread in order to close queues and wait for other threads
         # to finish. Everything else is pushed into the incoming queue
-        case message[:method]
+        case method
         when "shutdown"
           $stderr.puts("Shutting down Ruby LSP...")
 
