@@ -249,19 +249,6 @@ class IntegrationTest < Minitest::Test
     refute_empty(response.dig(:result, :items))
   end
 
-  def test_workspace_symbol
-    initialize_lsp(["workspaceSymbol"])
-    open_file_with("class Foo\nend")
-
-    # Populate the index
-    send_request("initialized")
-
-    # There's no easy way to know when indexing finished. Here we just sleep until it's done
-    sleep(5)
-    response = make_request("workspace/symbol", {})
-    refute_empty(response[:result])
-  end
-
   private
 
   def make_request(request, params = nil)

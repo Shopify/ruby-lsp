@@ -10,6 +10,8 @@ import {
   Location,
   SemanticTokens,
   DocumentLink,
+  WorkspaceSymbol,
+  SymbolKind,
 } from "vscode-languageclient/node";
 import { after, afterEach, before } from "mocha";
 
@@ -276,5 +278,18 @@ suite("Client", () => {
 
     assert.strictEqual(response.length, 1);
     assert.match(response[0].target!, /mutex_m\.rb/);
+  }).timeout(20000);
+
+  test("workspace symbol", async () => {
+    const response: WorkspaceSymbol[] = await client.sendRequest(
+      "workspace/symbol",
+      {},
+    );
+
+    const server = response.find(
+      (symbol) => symbol.name === "RubyLsp::Server",
+    )!;
+    assert.strictEqual(server.name, "RubyLsp::Server");
+    assert.strictEqual(server.kind, SymbolKind.Class);
   }).timeout(20000);
 });
