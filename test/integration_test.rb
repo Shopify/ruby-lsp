@@ -142,24 +142,6 @@ class IntegrationTest < Minitest::Test
     assert_equal("Refactor: Extract Variable", response[:result][:title])
   end
 
-  def test_selection_ranges
-    initialize_lsp(["selectionRanges"])
-    open_file_with("class Foo\nend")
-
-    response = make_request(
-      "textDocument/selectionRange",
-      {
-        textDocument: { uri: @uri },
-        positions: [{ line: 0, character: 0 }],
-      },
-    )
-
-    assert_equal(
-      { start: { line: 0, character: 0 }, end: { line: 1, character: 3 } },
-      response[:result].first[:range],
-    )
-  end
-
   private
 
   def make_request(request, params = nil)

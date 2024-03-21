@@ -17,6 +17,7 @@ import {
   FullDocumentDiagnosticReport,
   FoldingRange,
   TextEdit,
+  SelectionRange,
 } from "vscode-languageclient/node";
 import { after, afterEach, before } from "mocha";
 
@@ -408,5 +409,32 @@ suite("Client", () => {
     ].join("\n");
 
     assert.strictEqual(response[0].newText, expected);
+  }).timeout(20000);
+
+  test("selection range", async () => {
+    const text = "class Foo\nend";
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text,
+      },
+    });
+    const response: SelectionRange[] = await client.sendRequest(
+      "textDocument/selectionRange",
+      {
+        textDocument: {
+          uri: documentUri.toString(),
+        },
+        positions: [{ line: 0, character: 0 }],
+      },
+    );
+
+    const range = response[0].range;
+    assert.strictEqual(range.start.line, 0);
+    assert.strictEqual(range.end.line, 1);
+    assert.strictEqual(range.start.character, 0);
+    assert.strictEqual(range.end.character, 3);
   }).timeout(20000);
 });
