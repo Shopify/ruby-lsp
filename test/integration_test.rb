@@ -59,19 +59,6 @@ class IntegrationTest < Minitest::Test
     refute_predicate(@wait_thr, :alive?)
   end
 
-  def test_hover
-    initialize_lsp(["hover"])
-    open_file_with("$foo = 1")
-
-    response = make_request(
-      "textDocument/hover",
-      { textDocument: { uri: @uri }, position: { line: 0, character: 1 } },
-    )
-
-    assert_nil(response[:result])
-    assert_nil(response[:error])
-  end
-
   def test_definition
     initialize_lsp(["definition"])
     open_file_with("require 'ruby_lsp/utils'")

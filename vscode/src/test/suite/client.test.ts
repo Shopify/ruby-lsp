@@ -2,7 +2,12 @@ import * as assert from "assert";
 import * as path from "path";
 
 import * as vscode from "vscode";
-import { State, DocumentHighlightKind } from "vscode-languageclient/node";
+import {
+  State,
+  DocumentHighlightKind,
+  Hover,
+  WorkDoneProgress,
+} from "vscode-languageclient/node";
 import { after, afterEach, before } from "mocha";
 
 import { Ruby, ManagerIdentifier } from "../../ruby";
@@ -43,6 +48,7 @@ async function launchClient(workspaceUri: vscode.Uri) {
 
   const ruby = new Ruby(context, workspaceFolder, outputChannel);
   await ruby.activateRuby();
+  ruby.env.RUBY_LSP_BYPASS_TYPECHECKER = "true";
 
   const telemetry = new Telemetry(context, new FakeApi());
   const client = new Client(
@@ -62,7 +68,19 @@ async function launchClient(workspaceUri: vscode.Uri) {
 
   assert.strictEqual(client.state, State.Running);
 
-  return client;
+  // Wait for indexing to complete and only resolve the promise once we received the workdone progress end notification
+  // (signifying indexing is complete)
+  return new Promise<Client>((resolve) => {
+    client.onProgress(
+      WorkDoneProgress.type,
+      "indexing-progress",
+      (value: any) => {
+        if (value.kind === "end") {
+          resolve(client);
+        }
+      },
+    );
+  });
 }
 
 suite("Client", () => {
@@ -163,5 +181,28 @@ suite("Client", () => {
 
     assert.strictEqual(response.length, 1);
     assert.strictEqual(response[0].kind, DocumentHighlightKind.Write);
+  }).timeout(20000);
+
+  test("hover", async () => {
+    const text = "RubyLsp::Server";
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text,
+      },
+    });
+    const response: Hover = await client.sendRequest("textDocument/hover", {
+      textDocument: {
+        uri: documentUri.toString(),
+      },
+      position: { line: 0, character: 11 },
+    });
+
+    const value = (response.contents as unknown as vscode.MarkdownString).value;
+    assert.match(value, /RubyLsp::Server/);
+    assert.match(value, /\*\*Definitions\*\*/);
+    assert.match(value, /\[server.rb\]\(file/);
   }).timeout(20000);
 });
