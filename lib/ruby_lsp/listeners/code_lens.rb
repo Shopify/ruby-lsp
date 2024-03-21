@@ -264,12 +264,14 @@ module RubyLsp
 
         return unless name
 
-        add_test_code_lens(
-          node,
-          name: name,
-          command: generate_test_command(spec_name: name),
-          kind: kind,
-        )
+        if @path
+          add_test_code_lens(
+            node,
+            name: name,
+            command: generate_test_command(spec_name: name),
+            kind: kind,
+          )
+        end
       end
     end
   end

@@ -102,6 +102,25 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     assert_empty(response)
   end
 
+  def test_no_code_lens_for_unsaved_specs
+    source = <<~RUBY
+      describe FooTest < Minitest::Spec
+        it "does something"; end
+      end
+    RUBY
+    uri = URI::Generic.build(scheme: "untitled", opaque: "Untitled-1")
+
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+
+    dispatcher = Prism::Dispatcher.new
+    stub_test_library("minitest")
+    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher)
+    dispatcher.dispatch(document.tree)
+    response = listener.perform
+
+    assert_empty(response)
+  end
+
   def test_code_lens_addons
     source = <<~RUBY
       class Test < Minitest::Test; end
