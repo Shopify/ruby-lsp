@@ -15,6 +15,7 @@ import {
   SymbolKind,
   CodeLens,
   FullDocumentDiagnosticReport,
+  FoldingRange,
 } from "vscode-languageclient/node";
 import { after, afterEach, before } from "mocha";
 
@@ -352,5 +353,28 @@ suite("Client", () => {
         : /Style\/FrozenStringLiteralComment: Missing magic comment/;
 
     assert.match(response.items[0].message, expectedMessage);
+  }).timeout(20000);
+
+  test("folding range", async () => {
+    const text = "def foo\n  1\nend";
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text,
+      },
+    });
+    const response: FoldingRange[] = await client.sendRequest(
+      "textDocument/foldingRange",
+      {
+        textDocument: {
+          uri: documentUri.toString(),
+        },
+      },
+    );
+
+    assert.strictEqual(response.length, 1);
+    assert.strictEqual(response[0].kind, "region");
   }).timeout(20000);
 });

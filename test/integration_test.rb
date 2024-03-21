@@ -156,14 +156,6 @@ class IntegrationTest < Minitest::Test
     assert_equal("Refactor: Extract Variable", response[:result][:title])
   end
 
-  def test_folding_ranges
-    initialize_lsp(["foldingRanges"])
-    open_file_with("class Foo\n\nend")
-
-    response = make_request("textDocument/foldingRange", { textDocument: { uri: @uri } })
-    assert_equal({ startLine: 0, endLine: 1, kind: "region" }, response[:result].first)
-  end
-
   def test_selection_ranges
     initialize_lsp(["selectionRanges"])
     open_file_with("class Foo\nend")
