@@ -187,14 +187,6 @@ class IntegrationTest < Minitest::Test
     assert_equal({ startLine: 0, endLine: 1, kind: "region" }, response[:result].first)
   end
 
-  def test_code_lens
-    initialize_lsp(["codeLens"])
-    open_file_with("class Foo\n\nend")
-
-    response = make_request("textDocument/codeLens", { textDocument: { uri: @uri } })
-    assert_empty(response[:result])
-  end
-
   def test_request_with_telemetry
     initialize_lsp(["foldingRanges"])
     open_file_with("class Foo\n\nend")

@@ -12,6 +12,7 @@ import {
   DocumentLink,
   WorkspaceSymbol,
   SymbolKind,
+  CodeLens,
 } from "vscode-languageclient/node";
 import { after, afterEach, before } from "mocha";
 
@@ -291,5 +292,36 @@ suite("Client", () => {
     )!;
     assert.strictEqual(server.name, "RubyLsp::Server");
     assert.strictEqual(server.kind, SymbolKind.Class);
+  }).timeout(20000);
+
+  test("code lens", async () => {
+    const text = [
+      "require 'test_helper'",
+      "",
+      "class MyTest < Minitest::Test",
+      "  def test_foo",
+      "    assert true",
+      "  end",
+      "end",
+    ].join("\n");
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text,
+      },
+    });
+    const response: CodeLens[] = await client.sendRequest(
+      "textDocument/codeLens",
+      {
+        textDocument: {
+          uri: documentUri.toString(),
+        },
+      },
+    );
+
+    // 3 for the class, 3 for the example
+    assert.strictEqual(response.length, 6);
   }).timeout(20000);
 });
