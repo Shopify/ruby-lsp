@@ -59,20 +59,6 @@ class IntegrationTest < Minitest::Test
     refute_predicate(@wait_thr, :alive?)
   end
 
-  def test_formatting
-    initialize_lsp(["formatting"])
-    open_file_with("class Foo\nend")
-
-    response = make_request("textDocument/formatting", { textDocument: { uri: @uri } })
-    assert_equal(<<~FORMATTED, response[:result].first[:newText])
-      # typed: true
-      # frozen_string_literal: true
-
-      class Foo
-      end
-    FORMATTED
-  end
-
   def test_on_type_formatting
     initialize_lsp(["onTypeFormatting"])
     open_file_with("class Foo\nend")

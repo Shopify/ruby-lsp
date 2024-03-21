@@ -16,6 +16,7 @@ import {
   CodeLens,
   FullDocumentDiagnosticReport,
   FoldingRange,
+  TextEdit,
 } from "vscode-languageclient/node";
 import { after, afterEach, before } from "mocha";
 
@@ -376,5 +377,36 @@ suite("Client", () => {
 
     assert.strictEqual(response.length, 1);
     assert.strictEqual(response[0].kind, "region");
+  }).timeout(20000);
+
+  test("formatting", async () => {
+    const text = "  def foo\n end";
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text,
+      },
+    });
+    const response: TextEdit[] = await client.sendRequest(
+      "textDocument/formatting",
+      {
+        textDocument: {
+          uri: documentUri.toString(),
+        },
+      },
+    );
+
+    const expected = [
+      "# typed: strict",
+      "# frozen_string_literal: true",
+      "",
+      "def foo",
+      "end",
+      "",
+    ].join("\n");
+
+    assert.strictEqual(response[0].newText, expected);
   }).timeout(20000);
 });
