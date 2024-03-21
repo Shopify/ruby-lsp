@@ -59,18 +59,6 @@ class IntegrationTest < Minitest::Test
     refute_predicate(@wait_thr, :alive?)
   end
 
-  def test_document_link
-    initialize_lsp(["documentLink"])
-    open_file_with(<<~DOC)
-      # source://syntax_tree/#{Gem::Specification.find_by_name("syntax_tree").version}/lib/syntax_tree.rb#39
-      def foo
-      end
-    DOC
-
-    response = make_request("textDocument/documentLink", { textDocument: { uri: @uri } })
-    assert_match(/syntax_tree/, response.dig(:result, 0, :target))
-  end
-
   def test_formatting
     initialize_lsp(["formatting"])
     open_file_with("class Foo\nend")

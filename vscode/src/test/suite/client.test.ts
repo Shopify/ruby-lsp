@@ -9,6 +9,7 @@ import {
   WorkDoneProgress,
   Location,
   SemanticTokens,
+  DocumentLink,
 } from "vscode-languageclient/node";
 import { after, afterEach, before } from "mocha";
 
@@ -252,5 +253,28 @@ suite("Client", () => {
     );
 
     assert.deepStrictEqual(response.data, [0, 0, 3, 13, 0]);
+  }).timeout(20000);
+
+  test("document link", async () => {
+    const text = "# source://mutex_m//mutex_m.rb#1\ndef foo\nend";
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text,
+      },
+    });
+    const response: DocumentLink[] = await client.sendRequest(
+      "textDocument/documentLink",
+      {
+        textDocument: {
+          uri: documentUri.toString(),
+        },
+      },
+    );
+
+    assert.strictEqual(response.length, 1);
+    assert.match(response[0].target!, /mutex_m\.rb/);
   }).timeout(20000);
 });
