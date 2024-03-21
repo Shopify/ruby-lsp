@@ -2,7 +2,7 @@ import * as assert from "assert";
 import * as path from "path";
 
 import * as vscode from "vscode";
-import { State } from "vscode-languageclient/node";
+import { State, DocumentHighlightKind } from "vscode-languageclient/node";
 import { after, afterEach, before } from "mocha";
 
 import { Ruby, ManagerIdentifier } from "../../ruby";
@@ -139,5 +139,29 @@ suite("Client", () => {
     assert.strictEqual(response[0].name, "Foo");
     assert.strictEqual(response[0].children[0].name, "initialize");
     assert.strictEqual(response[0].children[0].children[0].name, "@bar");
+  }).timeout(20000);
+
+  test("document highlight", async () => {
+    const text = "$foo = 1";
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text,
+      },
+    });
+    const response: vscode.DocumentHighlight[] = await client.sendRequest(
+      "textDocument/documentHighlight",
+      {
+        textDocument: {
+          uri: documentUri.toString(),
+        },
+        position: { line: 0, character: 1 },
+      },
+    );
+
+    assert.strictEqual(response.length, 1);
+    assert.strictEqual(response[0].kind, DocumentHighlightKind.Write);
   }).timeout(20000);
 });

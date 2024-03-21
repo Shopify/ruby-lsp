@@ -59,19 +59,6 @@ class IntegrationTest < Minitest::Test
     refute_predicate(@wait_thr, :alive?)
   end
 
-  def test_document_highlight
-    initialize_lsp(["documentHighlights"])
-    open_file_with("$foo = 1")
-
-    response = make_request(
-      "textDocument/documentHighlight",
-      { textDocument: { uri: @uri }, position: { line: 0, character: 1 } },
-    )
-
-    range = response[:result].first
-    assert_equal(LanguageServer::Protocol::Constant::DocumentHighlightKind::WRITE, range[:kind])
-  end
-
   def test_hover
     initialize_lsp(["hover"])
     open_file_with("$foo = 1")
