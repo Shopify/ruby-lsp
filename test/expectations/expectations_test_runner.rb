@@ -12,12 +12,7 @@ class ExpectationsTestRunner < Minitest::Test
       class_eval(<<~RB, __FILE__, __LINE__ + 1)
         module ExpectationsRunnerMethods
           def run_expectations(source)
-            params = @__params&.any? ? @__params : default_args
-            document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI("file:///fake.rb"))
-            dispatcher = Prism::Dispatcher.new
-            request = #{handler_class}.new(dispatcher)
-            dispatcher.dispatch(document.tree)
-            request.perform
+            raise "This method should be implemented in the inherited class"
           end
 
           def assert_expectations(source, expected)
