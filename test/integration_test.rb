@@ -59,61 +59,6 @@ class IntegrationTest < Minitest::Test
     refute_predicate(@wait_thr, :alive?)
   end
 
-  def test_code_actions
-    initialize_lsp(["codeActions"])
-    open_file_with("class Foo\nend")
-
-    response = make_request(
-      "textDocument/codeAction",
-      {
-        textDocument: { uri: @uri },
-        range: { start: { line: 2 }, end: { line: 4 } },
-        context: {
-          diagnostics: [
-            {
-              range: {
-                start: { line: 2, character: 0 },
-                end: { line: 2, character: 0 },
-              },
-              message: "Layout/EmptyLines: Extra blank line detected.",
-              data: {
-                correctable: true,
-                code_actions: [{
-                  title: "Autocorrect Layout/EmptyLines",
-                  kind: "quickfix",
-                  isPreferred: true,
-                  edit: {
-                    documentChanges: [
-                      {
-                        textDocument: { uri: @uri, version: nil },
-                        edits: [
-                          {
-                            range: {
-                              start: { line: 2, character: 0 },
-                              end: { line: 3, character: 0 },
-                            },
-                            newText: "",
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                }],
-              },
-              code: "Layout/EmptyLines",
-              severity: 3,
-              source: "RuboCop",
-            },
-          ],
-        },
-      },
-    )
-
-    quickfix = response[:result].detect { |action| action[:kind] == "quickfix" }
-    assert(quickfix)
-    assert_match(%r{Autocorrect .*/.*}, quickfix[:title])
-  end
-
   def test_code_action_resolve
     initialize_lsp(["codeActions"])
     open_file_with("class Foo\nend")

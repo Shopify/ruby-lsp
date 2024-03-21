@@ -18,6 +18,7 @@ import {
   FoldingRange,
   TextEdit,
   SelectionRange,
+  CodeAction,
 } from "vscode-languageclient/node";
 import { after, afterEach, before } from "mocha";
 
@@ -461,5 +462,73 @@ suite("Client", () => {
 
     assert.strictEqual(response.length, 3);
     assert.strictEqual(response[1].newText, "end");
+  }).timeout(20000);
+
+  test("code actions", async () => {
+    const text = "class Foo\nend";
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text,
+      },
+    });
+
+    const response: CodeAction[] = await client.sendRequest(
+      "textDocument/codeAction",
+      {
+        textDocument: {
+          uri: documentUri.toString(),
+        },
+        range: { start: { line: 2 }, end: { line: 4 } },
+        context: {
+          diagnostics: [
+            {
+              range: {
+                start: { line: 2, character: 0 },
+                end: { line: 2, character: 0 },
+              },
+              message: "Layout/EmptyLines: Extra blank line detected.",
+              data: {
+                correctable: true,
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                code_actions: [
+                  {
+                    title: "Autocorrect Layout/EmptyLines",
+                    kind: "quickfix",
+                    isPreferred: true,
+                    edit: {
+                      documentChanges: [
+                        {
+                          textDocument: {
+                            uri: documentUri.toString(),
+                          },
+                          edits: [
+                            {
+                              range: {
+                                start: { line: 2, character: 0 },
+                                end: { line: 3, character: 0 },
+                              },
+                              newText: "",
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              code: "Layout/EmptyLines",
+              severity: 3,
+              source: "RuboCop",
+            },
+          ],
+        },
+      },
+    );
+
+    const quickfix = response.find((action) => action.kind === "quickfix")!;
+    assert.match(quickfix.title, /Autocorrect Layout\/EmptyLines/);
   }).timeout(20000);
 });
