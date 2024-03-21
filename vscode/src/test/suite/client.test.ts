@@ -531,4 +531,32 @@ suite("Client", () => {
     const quickfix = response.find((action) => action.kind === "quickfix")!;
     assert.match(quickfix.title, /Autocorrect Layout\/EmptyLines/);
   }).timeout(20000);
+
+  test("code action resolve", async () => {
+    const text = "class Foo\nend";
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text,
+      },
+    });
+
+    const response: CodeAction = await client.sendRequest(
+      "codeAction/resolve",
+      {
+        kind: "refactor.extract",
+        data: {
+          range: {
+            start: { line: 1, character: 1 },
+            end: { line: 1, character: 3 },
+          },
+          uri: documentUri.toString(),
+        },
+      },
+    );
+
+    assert.strictEqual(response.title, "Refactor: Extract Variable");
+  }).timeout(20000);
 });
