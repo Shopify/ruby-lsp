@@ -166,5 +166,17 @@ module RubyLsp
       ).void
     end
     def create_definition_listener(response_builder, uri, nesting, index, dispatcher); end
+
+    # Creates a new Completion listener. This method is invoked on every Completion request
+    sig do
+      overridable.params(
+        response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
+        index: RubyIndexer::Index,
+        nesting: T::Array[String],
+        dispatcher: Prism::Dispatcher,
+        uri: URI::Generic,
+      ).void
+    end
+    def create_completion_listener(response_builder, index, nesting, dispatcher, uri); end
   end
 end

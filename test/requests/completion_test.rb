@@ -800,6 +800,24 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_addons
+    source = <<~RUBY
+      R
+    RUBY
+
+    test_addon(:create_completion_addon, source: source) do |server|
+      server.process_message(
+        id: 1,
+        method: "textDocument/completion",
+        params: { textDocument: { uri: URI("file:///fake.rb") }, position: { character: 1, line: 0 } },
+      )
+      response = server.pop_response.response
+
+      assert_equal(1, response.size)
+      assert_match("MyCompletion", response[0].label)
+    end
+  end
+
   private
 
   def with_file_structure(server, &block)
@@ -851,5 +869,43 @@ class CompletionTest < Minitest::Test
       ),
       kind: LanguageServer::Protocol::Constant::CompletionItemKind::FILE,
     )
+  end
+
+  def create_completion_addon
+    Class.new(RubyLsp::Addon) do
+      def create_completion_listener(response_builder, index, nesting, dispatcher, uri)
+        klass = Class.new do
+          include RubyLsp::Requests::Support::Common
+
+          def initialize(response_builder, index, _, dispatcher, uri)
+            @index = index
+            @uri = uri
+            @response_builder = response_builder
+            dispatcher.register(self, :on_constant_read_node_enter)
+          end
+
+          def on_constant_read_node_enter(node)
+            @response_builder << RubyLsp::Interface::CompletionItem.new(
+              label: "MyCompletion",
+              text_edit: RubyLsp::Interface::TextEdit.new(
+                range: T.bind(self, RubyLsp::Requests::Support::Common).range_from_node(node),
+                new_text: "MyCompletion",
+              ),
+              kind: RubyLsp::Constant::CompletionItemKind::CONSTANT,
+            )
+          end
+        end
+
+        T.unsafe(klass).new(response_builder, index, nesting, dispatcher, uri)
+      end
+
+      def activate(message_queue); end
+
+      def deactivate; end
+
+      def name
+        "Foo"
+      end
+    end
   end
 end
