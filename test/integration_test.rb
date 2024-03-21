@@ -59,28 +59,6 @@ class IntegrationTest < Minitest::Test
     refute_predicate(@wait_thr, :alive?)
   end
 
-  def test_document_highlight_with_syntax_error
-    initialize_lsp(["documentHighlights"])
-    open_file_with("class Foo")
-
-    response = make_request(
-      "textDocument/documentHighlight",
-      { textDocument: { uri: @uri }, position: { line: 0, character: 1 } },
-    )
-
-    assert_empty(response[:result])
-    assert_nil(response[:error])
-  end
-
-  def test_semantic_highlighting
-    initialize_lsp(["semanticHighlighting"])
-    open_file_with("class Foo\nend")
-
-    response = make_request("textDocument/semanticTokens/full", { textDocument: { uri: @uri } })
-    assert_nil(response[:error])
-    assert_equal([0, 6, 3, 2, 1, 0, 0, 3, 0, 0], response[:result][:data])
-  end
-
   def test_document_link
     initialize_lsp(["documentLink"])
     open_file_with(<<~DOC)

@@ -8,6 +8,7 @@ import {
   Hover,
   WorkDoneProgress,
   Location,
+  SemanticTokens,
 } from "vscode-languageclient/node";
 import { after, afterEach, before } from "mocha";
 
@@ -229,5 +230,27 @@ suite("Client", () => {
 
     assert.strictEqual(response.length, 1);
     assert.match(response[0].uri, /server\.rb/);
+  }).timeout(20000);
+
+  test("semantic highlighting", async () => {
+    const text = "foo";
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text,
+      },
+    });
+    const response: SemanticTokens = await client.sendRequest(
+      "textDocument/semanticTokens/full",
+      {
+        textDocument: {
+          uri: documentUri.toString(),
+        },
+      },
+    );
+
+    assert.deepStrictEqual(response.data, [0, 0, 3, 13, 0]);
   }).timeout(20000);
 });
