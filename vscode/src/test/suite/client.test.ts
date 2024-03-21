@@ -437,4 +437,29 @@ suite("Client", () => {
     assert.strictEqual(range.start.character, 0);
     assert.strictEqual(range.end.character, 3);
   }).timeout(20000);
+
+  test("on type formatting", async () => {
+    const text = "class Foo\n\n\n";
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text,
+      },
+    });
+    const response: TextEdit[] = await client.sendRequest(
+      "textDocument/onTypeFormatting",
+      {
+        textDocument: {
+          uri: documentUri.toString(),
+        },
+        position: { line: 1, character: 2 },
+        ch: "\n",
+      },
+    );
+
+    assert.strictEqual(response.length, 3);
+    assert.strictEqual(response[1].newText, "end");
+  }).timeout(20000);
 });
