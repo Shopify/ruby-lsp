@@ -156,44 +156,11 @@ class IntegrationTest < Minitest::Test
     assert_equal("Refactor: Extract Variable", response[:result][:title])
   end
 
-  def test_document_did_close
-    initialize_lsp([])
-    open_file_with("class Foo\nend")
-
-    assert(send_request("textDocument/didClose", { textDocument: { uri: @uri } }))
-  end
-
-  def test_document_did_change
-    initialize_lsp([])
-    open_file_with("class Foo\nend")
-
-    assert(send_request(
-      "textDocument/didChange",
-      {
-        textDocument: { uri: @uri },
-        contentChanges: [{
-          text: "class Foo\ndef bar\nend\nend",
-          range: { start: { line: 0, character: 0 }, end: { line: 1, character: 3 } },
-        }],
-      },
-    ))
-  end
-
   def test_folding_ranges
     initialize_lsp(["foldingRanges"])
     open_file_with("class Foo\n\nend")
 
     response = make_request("textDocument/foldingRange", { textDocument: { uri: @uri } })
-    assert_equal({ startLine: 0, endLine: 1, kind: "region" }, response[:result].first)
-  end
-
-  def test_request_with_telemetry
-    initialize_lsp(["foldingRanges"])
-    open_file_with("class Foo\n\nend")
-
-    send_request("textDocument/foldingRange", { textDocument: { uri: @uri } })
-
-    response = read_response("textDocument/foldingRange")
     assert_equal({ startLine: 0, endLine: 1, kind: "region" }, response[:result].first)
   end
 
@@ -213,32 +180,6 @@ class IntegrationTest < Minitest::Test
       { start: { line: 0, character: 0 }, end: { line: 1, character: 3 } },
       response[:result].first[:range],
     )
-  end
-
-  def test_selection_ranges_with_syntax_error
-    initialize_lsp(["selectionRanges"])
-    open_file_with("class Foo")
-
-    response = make_request(
-      "textDocument/selectionRange",
-      {
-        textDocument: { uri: @uri },
-        positions: [{ line: 0, character: 0 }],
-      },
-    )
-
-    refute_nil(response[:result].first)
-    assert_nil(response[:error])
-  end
-
-  def test_diagnostics
-    initialize_lsp([])
-    open_file_with("class Foo\nend")
-
-    response = make_request("textDocument/diagnostic", { textDocument: { uri: @uri } })
-
-    assert_equal("full", response.dig(:result, :kind))
-    refute_empty(response.dig(:result, :items))
   end
 
   private

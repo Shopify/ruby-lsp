@@ -1,5 +1,6 @@
 import * as assert from "assert";
 import * as path from "path";
+import os from "os";
 
 import * as vscode from "vscode";
 import {
@@ -13,6 +14,7 @@ import {
   WorkspaceSymbol,
   SymbolKind,
   CodeLens,
+  FullDocumentDiagnosticReport,
 } from "vscode-languageclient/node";
 import { after, afterEach, before } from "mocha";
 
@@ -323,5 +325,32 @@ suite("Client", () => {
 
     // 3 for the class, 3 for the example
     assert.strictEqual(response.length, 6);
+  }).timeout(20000);
+
+  test("diagnostic", async () => {
+    const text = "  def foo\n end";
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text,
+      },
+    });
+    const response: FullDocumentDiagnosticReport = await client.sendRequest(
+      "textDocument/diagnostic",
+      {
+        textDocument: {
+          uri: documentUri.toString(),
+        },
+      },
+    );
+
+    const expectedMessage =
+      os.platform() === "win32"
+        ? /Layout\/EndOfLine: Carriage return character missing/
+        : /Style\/FrozenStringLiteralComment: Missing magic comment/;
+
+    assert.match(response.items[0].message, expectedMessage);
   }).timeout(20000);
 });
