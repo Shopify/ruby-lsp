@@ -59,25 +59,6 @@ class IntegrationTest < Minitest::Test
     refute_predicate(@wait_thr, :alive?)
   end
 
-  def test_definition
-    initialize_lsp(["definition"])
-    open_file_with("require 'ruby_lsp/utils'")
-
-    # Populate the index
-    send_request("initialized")
-
-    # There's no easy way to know when indexing finished. Here we just sleep until it's done
-    sleep(5)
-
-    response = make_request(
-      "textDocument/definition",
-      { textDocument: { uri: @uri }, position: { line: 0, character: 20 } },
-    )
-
-    assert_nil(response[:error])
-    assert(response[:result].first[:uri].end_with?("ruby_lsp/utils.rb"))
-  end
-
   def test_document_highlight_with_syntax_error
     initialize_lsp(["documentHighlights"])
     open_file_with("class Foo")

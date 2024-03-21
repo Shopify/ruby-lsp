@@ -7,6 +7,7 @@ import {
   DocumentHighlightKind,
   Hover,
   WorkDoneProgress,
+  Location,
 } from "vscode-languageclient/node";
 import { after, afterEach, before } from "mocha";
 
@@ -204,5 +205,29 @@ suite("Client", () => {
     assert.match(value, /RubyLsp::Server/);
     assert.match(value, /\*\*Definitions\*\*/);
     assert.match(value, /\[server.rb\]\(file/);
+  }).timeout(20000);
+
+  test("definition", async () => {
+    const text = "RubyLsp::Server";
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text,
+      },
+    });
+    const response: Location[] = await client.sendRequest(
+      "textDocument/definition",
+      {
+        textDocument: {
+          uri: documentUri.toString(),
+        },
+        position: { line: 0, character: 11 },
+      },
+    );
+
+    assert.strictEqual(response.length, 1);
+    assert.match(response[0].uri, /server\.rb/);
   }).timeout(20000);
 });
