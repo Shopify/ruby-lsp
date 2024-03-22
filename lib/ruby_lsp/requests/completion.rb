@@ -70,6 +70,10 @@ module RubyLsp
 
         Listeners::Completion.new(@response_builder, index, nesting, typechecker_enabled, dispatcher, document.uri)
 
+        Addon.addons.each do |addon|
+          addon.create_completion_listener(@response_builder, index, nesting, dispatcher, document.uri)
+        end
+
         return unless matched && parent
 
         @target = case matched
