@@ -326,18 +326,19 @@ class ServerTest < Minitest::Test
   end
 
   def test_handles_invalid_configuration
-    FileUtils.mv(".index.yml", ".index.yml.tmp")
-    File.write(".index.yml", "} invalid yaml")
+    FileUtils.mv(".ruby-lsp.yml", ".ruby-lsp.yml.tmp")
+    File.write(".ruby-lsp.yml", "}")
 
     @server.process_message({ method: "initialized" })
     notification = @server.pop_response
     assert_equal("window/showMessage", notification.method)
     assert_match(
-      /Syntax error while loading configuration/,
+      /Psych::SyntaxError while loading indexing configuration/,
       T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
+      "Psych::SyntaxError while loading indexing configuration:",
     )
   ensure
-    FileUtils.mv(".index.yml.tmp", ".index.yml")
+    FileUtils.mv(".ruby-lsp.yml.tmp", ".ruby-lsp.yml")
   end
 
   def test_detects_rubocop_if_direct_dependency

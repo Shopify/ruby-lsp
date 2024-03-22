@@ -1,2 +1,0 @@
-excluded_patterns:
-  - "**/test/fixtures/**/*.rb"
