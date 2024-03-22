@@ -325,6 +325,22 @@ class ServerTest < Minitest::Test
     assert(store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
   end
 
+  def test_handles_invalid_configuration
+    FileUtils.mv(".index.yml", ".index.yml.tmp")
+    File.write(".index.yml", "} invalid yaml")
+
+    @server.process_message({ method: "initialized" })
+    notification = @server.pop_response
+    assert_equal("window/showMessage", notification.method)
+    assert_equal(
+      "Syntax error while loading .index.yml configuration: (.index.yml): did not find expected node content " \
+        "while parsing a block node at line 1 column 1",
+      T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
+    )
+  ensure
+    FileUtils.mv(".index.yml.tmp", ".index.yml")
+  end
+
   def test_detects_rubocop_if_direct_dependency
     stub_dependencies(rubocop: true, syntax_tree: false)
 
