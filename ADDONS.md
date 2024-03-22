@@ -1,6 +1,6 @@
 # Ruby LSP addons
 
-> **WARNING**
+> [!WARNING]
 > The Ruby LSP addon system is currently experimental and subject to changes in the API
 
 Need help writing addons? Consider joining the #ruby-lsp-addons channel in the [Ruby DX Slack
