@@ -29,10 +29,10 @@ module RubyLsp
       # https://github.com/Shopify/ruby-lsp/pull/1798
       MAX_DOCUMENTATION_ENTRIES = 10
 
-      sig { params(index: RubyIndexer::Index, item: T::Hash[Symbol, T.untyped]).void }
-      def initialize(index, item)
+      sig { params(global_state: GlobalState, item: T::Hash[Symbol, T.untyped]).void }
+      def initialize(global_state, item)
         super()
-        @index = index
+        @index = T.let(global_state.index, RubyIndexer::Index)
         @item = item
       end
 

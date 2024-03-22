@@ -10,14 +10,13 @@ class CompletionResolveTest < Minitest::Test
   Constant = LanguageServer::Protocol::Constant
 
   def test_completion_resolve_for_constant
-    stub_no_typechecker
     source = +<<~RUBY
       # This is a class that does things
       class Foo
       end
     RUBY
 
-    with_server(source) do |server, _uri|
+    with_server(source, stub_no_typechecker: true) do |server, _uri|
       server.process_message(id: 1, method: "completionItem/resolve", params: {
         label: "Foo",
       })
@@ -31,7 +30,7 @@ class CompletionResolveTest < Minitest::Test
         ),
         documentation: Interface::MarkupContent.new(
           kind: "markdown",
-          value: markdown_from_index_entries("Foo", T.must(server.index["Foo"])),
+          value: markdown_from_index_entries("Foo", T.must(server.global_state.index["Foo"])),
         ),
       )
       assert_match(/This is a class that does things/, result.documentation.value)

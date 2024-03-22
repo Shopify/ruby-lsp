@@ -164,7 +164,6 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_constants
-    stub_no_typechecker
     source = +<<~RUBY
       class Foo
       end
@@ -174,7 +173,7 @@ class CompletionTest < Minitest::Test
 
     end_position = { line: 3, character: 1 }
 
-    with_server(source) do |server, uri|
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       with_file_structure(server) do
         server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
@@ -187,7 +186,6 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_constant_paths
-    stub_no_typechecker
     source = +<<~RUBY
       class Bar
       end
@@ -202,7 +200,7 @@ class CompletionTest < Minitest::Test
       Foo::B
     RUBY
 
-    with_server(source) do |server, uri|
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       with_file_structure(server) do
         server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
@@ -228,7 +226,6 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_conflicting_constants
-    stub_no_typechecker
     source = +<<~RUBY
       module Foo
         class Qux; end
@@ -243,7 +240,7 @@ class CompletionTest < Minitest::Test
       end
     RUBY
 
-    with_server(source) do |server, uri|
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       with_file_structure(server) do
         server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
@@ -259,7 +256,6 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_top_level_constants_inside_nesting
-    stub_no_typechecker
     source = +<<~RUBY
       class Bar
       end
@@ -272,7 +268,7 @@ class CompletionTest < Minitest::Test
       end
     RUBY
 
-    with_server(source) do |server, uri|
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       with_file_structure(server) do
         server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
@@ -288,7 +284,6 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_private_constants_inside_the_same_namespace
-    stub_no_typechecker
     source = +<<~RUBY
       class A
         CONST = 1
@@ -298,7 +293,7 @@ class CompletionTest < Minitest::Test
       end
     RUBY
 
-    with_server(source) do |server, uri|
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       with_file_structure(server) do
         server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
@@ -335,7 +330,6 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_aliased_constants
-    stub_no_typechecker
     source = +<<~RUBY
       module A
         module B
@@ -350,7 +344,7 @@ class CompletionTest < Minitest::Test
       end
     RUBY
 
-    with_server(source) do |server, uri|
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       with_file_structure(server) do
         server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
@@ -366,7 +360,6 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_aliased_complex_constants
-    stub_no_typechecker
     source = +<<~RUBY
       module A
         module B
@@ -382,7 +375,7 @@ class CompletionTest < Minitest::Test
       FINAL_ALIAS::ALIAS_NAME::B::C
     RUBY
 
-    with_server(source) do |server, uri|
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       with_file_structure(server) do
         server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
@@ -398,7 +391,6 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_uses_shortest_possible_name_for_filter_text
-    stub_no_typechecker
     source = +<<~RUBY
       module A
         module B
@@ -411,7 +403,7 @@ class CompletionTest < Minitest::Test
       end
     RUBY
 
-    with_server(source) do |server, uri|
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       with_file_structure(server) do
         server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
@@ -844,7 +836,7 @@ class CompletionTest < Minitest::Test
         tmpdir + "/foo/support/quux.rb",
       ])
 
-      index = server.index
+      index = server.global_state.index
       indexables = Dir.glob(File.join(tmpdir, "**", "*.rb")).map! do |path|
         RubyIndexer::IndexablePath.new(tmpdir, path)
       end
@@ -873,12 +865,11 @@ class CompletionTest < Minitest::Test
 
   def create_completion_addon
     Class.new(RubyLsp::Addon) do
-      def create_completion_listener(response_builder, index, nesting, dispatcher, uri)
+      def create_completion_listener(response_builder, global_state, nesting, dispatcher, uri)
         klass = Class.new do
           include RubyLsp::Requests::Support::Common
 
-          def initialize(response_builder, index, _, dispatcher, uri)
-            @index = index
+          def initialize(response_builder, global_state, _, dispatcher, uri)
             @uri = uri
             @response_builder = response_builder
             dispatcher.register(self, :on_constant_read_node_enter)
@@ -896,7 +887,7 @@ class CompletionTest < Minitest::Test
           end
         end
 
-        T.unsafe(klass).new(response_builder, index, nesting, dispatcher, uri)
+        T.unsafe(klass).new(response_builder, global_state, nesting, dispatcher, uri)
       end
 
       def activate(message_queue); end

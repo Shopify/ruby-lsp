@@ -10,16 +10,17 @@ module RubyLsp
       sig do
         params(
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
-          index: RubyIndexer::Index,
+          global_state: GlobalState,
           nesting: T::Array[String],
           typechecker_enabled: T::Boolean,
           dispatcher: Prism::Dispatcher,
           uri: URI::Generic,
         ).void
       end
-      def initialize(response_builder, index, nesting, typechecker_enabled, dispatcher, uri) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, global_state, nesting, typechecker_enabled, dispatcher, uri) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
-        @index = index
+        @global_state = global_state
+        @index = T.let(global_state.index, RubyIndexer::Index)
         @nesting = nesting
         @typechecker_enabled = typechecker_enabled
         @uri = uri
@@ -35,7 +36,7 @@ module RubyLsp
       # Handle completion on regular constant references (e.g. `Bar`)
       sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read_node_enter(node)
-        return if DependencyDetector.instance.typechecker
+        return if @global_state.typechecker
 
         name = constant_name(node)
         return if name.nil?
@@ -56,7 +57,7 @@ module RubyLsp
       # Handle completion on namespaced constant references (e.g. `Foo::Bar`)
       sig { params(node: Prism::ConstantPathNode).void }
       def on_constant_path_node_enter(node)
-        return if DependencyDetector.instance.typechecker
+        return if @global_state.typechecker
 
         name = constant_name(node)
         return if name.nil?
@@ -77,7 +78,10 @@ module RubyLsp
 
         real_namespace = @index.follow_aliased_namespace(T.must(namespace_entries.first).name)
 
-        candidates = @index.prefix_search("#{real_namespace}::#{incomplete_name}", top_level_reference ? [] : @nesting)
+        candidates = @index.prefix_search(
+          "#{real_namespace}::#{incomplete_name}",
+          top_level_reference ? [] : @nesting,
+        )
         candidates.each do |entries|
           # The only time we may have a private constant reference from outside of the namespace is if we're dealing
           # with ConstantPath and the entry name doesn't start with the current nesting
@@ -124,7 +128,9 @@ module RubyLsp
 
         return unless path_node_to_complete.is_a?(Prism::StringNode)
 
-        @index.search_require_paths(path_node_to_complete.content).map!(&:require_path).sort!.each do |path|
+        matched_indexable_paths = @index.search_require_paths(path_node_to_complete.content)
+
+        matched_indexable_paths.map!(&:require_path).sort!.each do |path|
           @response_builder << build_completion(T.must(path), path_node_to_complete)
         end
       end

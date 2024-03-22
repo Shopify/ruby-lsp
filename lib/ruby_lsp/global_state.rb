@@ -1,27 +1,41 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "singleton"
-
 module RubyLsp
-  class DependencyDetector
-    include Singleton
+  class GlobalState
     extend T::Sig
 
     sig { returns(String) }
-    attr_reader :detected_formatter
+    attr_reader :test_library
 
     sig { returns(String) }
-    attr_reader :detected_test_library
+    attr_accessor :formatter
 
     sig { returns(T::Boolean) }
     attr_reader :typechecker
 
+    sig { returns(RubyIndexer::Index) }
+    attr_reader :index
+
     sig { void }
     def initialize
-      @detected_formatter = T.let(detect_formatter, String)
-      @detected_test_library = T.let(detect_test_library, String)
+      @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
+
+      @formatter = T.let(detect_formatter, String)
+      @test_library = T.let(detect_test_library, String)
       @typechecker = T.let(detect_typechecker, T::Boolean)
+      @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
+    end
+
+    sig { params(options: T::Hash[Symbol, T.untyped]).void }
+    def apply_options(options)
+      workspace_uri = options.dig(:workspaceFolders, 0, :uri)
+      @workspace_uri = URI(workspace_uri) if workspace_uri
+    end
+
+    sig { returns(String) }
+    def workspace_path
+      T.must(@workspace_uri.to_standardized_path)
     end
 
     sig { returns(String) }

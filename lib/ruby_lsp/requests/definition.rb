@@ -31,13 +31,13 @@ module RubyLsp
       sig do
         params(
           document: Document,
-          index: RubyIndexer::Index,
+          global_state: GlobalState,
           position: T::Hash[Symbol, T.untyped],
           dispatcher: Prism::Dispatcher,
           typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(document, index, position, dispatcher, typechecker_enabled)
+      def initialize(document, global_state, position, dispatcher, typechecker_enabled)
         super()
         @response_builder = T.let(
           ResponseBuilders::CollectionResponseBuilder[Interface::Location].new,
@@ -57,10 +57,17 @@ module RubyLsp
           )
         end
 
-        Listeners::Definition.new(@response_builder, document.uri, nesting, index, dispatcher, typechecker_enabled)
+        Listeners::Definition.new(
+          @response_builder,
+          global_state,
+          document.uri,
+          nesting,
+          dispatcher,
+          typechecker_enabled,
+        )
 
         Addon.addons.each do |addon|
-          addon.create_definition_listener(@response_builder, document.uri, nesting, index, dispatcher)
+          addon.create_definition_listener(@response_builder, global_state, document.uri, nesting, dispatcher)
         end
 
         @target = T.let(target, T.nilable(Prism::Node))

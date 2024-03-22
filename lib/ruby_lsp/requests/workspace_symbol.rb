@@ -22,11 +22,12 @@ module RubyLsp
       extend T::Sig
       include Support::Common
 
-      sig { params(query: T.nilable(String), index: RubyIndexer::Index).void }
-      def initialize(query, index)
+      sig { params(global_state: GlobalState, query: T.nilable(String)).void }
+      def initialize(global_state, query)
         super()
+        @global_state = global_state
         @query = query
-        @index = index
+        @index = T.let(global_state.index, RubyIndexer::Index)
       end
 
       sig { override.returns(T::Array[Interface::WorkspaceSymbol]) }
@@ -35,7 +36,7 @@ module RubyLsp
           # If the project is using Sorbet, we let Sorbet handle symbols defined inside the project itself and RBIs, but
           # we still return entries defined in gems to allow developers to jump directly to the source
           file_path = entry.file_path
-          next if DependencyDetector.instance.typechecker && not_in_dependencies?(file_path)
+          next if @global_state.typechecker && not_in_dependencies?(file_path)
 
           # We should never show private symbols when searching the entire workspace
           next if entry.visibility == :private

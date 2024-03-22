@@ -42,13 +42,14 @@ module RubyLsp
       sig do
         params(
           document: Document,
-          index: RubyIndexer::Index,
+          global_state: GlobalState,
           position: T::Hash[Symbol, T.untyped],
           context: T.nilable(T::Hash[Symbol, T.untyped]),
           dispatcher: Prism::Dispatcher,
+          typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(document, index, position, context, dispatcher)
+      def initialize(document, global_state, position, context, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
         super()
         target, parent, nesting = document.locate_node(
           { line: position[:line], character: position[:character] },
@@ -60,7 +61,7 @@ module RubyLsp
         @target = T.let(target, T.nilable(Prism::Node))
         @dispatcher = dispatcher
         @response_builder = T.let(ResponseBuilders::SignatureHelp.new, ResponseBuilders::SignatureHelp)
-        Listeners::SignatureHelp.new(@response_builder, nesting, index, dispatcher)
+        Listeners::SignatureHelp.new(@response_builder, global_state, nesting, dispatcher, typechecker_enabled)
       end
 
       sig { override.returns(T.nilable(Interface::SignatureHelp)) }

@@ -10,9 +10,8 @@ class HoverExpectationsTest < ExpectationsTestRunner
   def run_expectations(source)
     position = @__params&.first || { character: 0, line: 0 }
 
-    with_server(source) do |server, uri|
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       # We need to pretend that Sorbet is not a dependency or else we can't properly test
-      stub_no_typechecker
       server.process_message(
         id: 1,
         method: "textDocument/hover",
@@ -32,9 +31,8 @@ class HoverExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    with_server(source) do |server, uri|
-      # We need to pretend that Sorbet is not a dependency or else we can't properly test
-      stub_no_typechecker
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/hover",
@@ -57,9 +55,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
       Foo::Bar::Baz
     RUBY
 
-    with_server(source) do |server, uri|
-      stub_no_typechecker
-
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       # Foo
       server.process_message(
         id: 1,
@@ -100,9 +96,8 @@ class HoverExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    with_server(source) do |server, uri|
-      # We need to pretend that Sorbet is not a dependency or else we can't properly test
-      stub_no_typechecker
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/hover",
@@ -132,9 +127,8 @@ class HoverExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    with_server(source) do |server, uri|
-      # We need to pretend that Sorbet is not a dependency or else we can't properly test
-      stub_no_typechecker
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/hover",
@@ -161,9 +155,8 @@ class HoverExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    with_server(source) do |server, uri|
-      # We need to pretend that Sorbet is not a dependency or else we can't properly test
-      stub_no_typechecker
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/hover",
@@ -184,9 +177,8 @@ class HoverExpectationsTest < ExpectationsTestRunner
       A::CONST # invalid private reference
     RUBY
 
-    with_server(source) do |server, uri|
-      # We need to pretend that Sorbet is not a dependency or else we can't properly test
-      stub_no_typechecker
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/hover",
@@ -202,9 +194,8 @@ class HoverExpectationsTest < ExpectationsTestRunner
       gem 'rake'
     RUBY
 
-    with_server(source, URI("file:///Gemfile")) do |server, uri|
-      # We need to pretend that Sorbet is not a dependency or else we can't properly test
-      stub_no_typechecker
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    with_server(source, URI("file:///Gemfile"), stub_no_typechecker: true) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/hover",
@@ -225,9 +216,8 @@ class HoverExpectationsTest < ExpectationsTestRunner
       gem()
     RUBY
 
-    with_server(source, URI("file:///Gemfile")) do |server, uri|
-      # We need to pretend that Sorbet is not a dependency or else we can't properly test
-      stub_no_typechecker
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    with_server(source, URI("file:///Gemfile"), stub_no_typechecker: true) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/hover",
@@ -243,9 +233,8 @@ class HoverExpectationsTest < ExpectationsTestRunner
       gem(method_call)
     RUBY
 
-    with_server(source, URI("file:///Gemfile")) do |server, uri|
-      # We need to pretend that Sorbet is not a dependency or else we can't properly test
-      stub_no_typechecker
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    with_server(source, URI("file:///Gemfile"), stub_no_typechecker: true) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/hover",

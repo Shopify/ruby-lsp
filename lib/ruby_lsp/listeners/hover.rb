@@ -28,18 +28,19 @@ module RubyLsp
       sig do
         params(
           response_builder: ResponseBuilders::Hover,
+          global_state: GlobalState,
           uri: URI::Generic,
           nesting: T::Array[String],
-          index: RubyIndexer::Index,
           dispatcher: Prism::Dispatcher,
           typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(response_builder, uri, nesting, index, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, global_state, uri, nesting, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
+        @global_state = global_state
+        @index = T.let(global_state.index, RubyIndexer::Index)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
         @nesting = nesting
-        @index = index
         @typechecker_enabled = typechecker_enabled
 
         dispatcher.register(
@@ -63,14 +64,14 @@ module RubyLsp
 
       sig { params(node: Prism::ConstantWriteNode).void }
       def on_constant_write_node_enter(node)
-        return if DependencyDetector.instance.typechecker
+        return if @global_state.typechecker
 
         generate_hover(node.name.to_s, node.name_loc)
       end
 
       sig { params(node: Prism::ConstantPathNode).void }
       def on_constant_path_node_enter(node)
-        return if DependencyDetector.instance.typechecker
+        return if @global_state.typechecker
 
         name = constant_name(node)
         return if name.nil?

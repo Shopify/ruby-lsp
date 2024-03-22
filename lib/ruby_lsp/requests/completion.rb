@@ -45,13 +45,13 @@ module RubyLsp
       sig do
         params(
           document: Document,
-          index: RubyIndexer::Index,
+          global_state: GlobalState,
           position: T::Hash[Symbol, T.untyped],
           typechecker_enabled: T::Boolean,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(document, index, position, typechecker_enabled, dispatcher)
+      def initialize(document, global_state, position, typechecker_enabled, dispatcher)
         super()
         @target = T.let(nil, T.nilable(Prism::Node))
         @dispatcher = dispatcher
@@ -68,10 +68,17 @@ module RubyLsp
           ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
         )
 
-        Listeners::Completion.new(@response_builder, index, nesting, typechecker_enabled, dispatcher, document.uri)
+        Listeners::Completion.new(
+          @response_builder,
+          global_state,
+          nesting,
+          typechecker_enabled,
+          dispatcher,
+          document.uri,
+        )
 
         Addon.addons.each do |addon|
-          addon.create_completion_listener(@response_builder, index, nesting, dispatcher, document.uri)
+          addon.create_completion_listener(@response_builder, global_state, nesting, dispatcher, document.uri)
         end
 
         return unless matched && parent

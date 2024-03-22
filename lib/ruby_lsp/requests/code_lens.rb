@@ -34,20 +34,21 @@ module RubyLsp
 
       sig do
         params(
+          global_state: GlobalState,
           uri: URI::Generic,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(uri, dispatcher)
+      def initialize(global_state, uri, dispatcher)
         @response_builder = T.let(
           ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens].new,
           ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
         )
         super()
-        Listeners::CodeLens.new(@response_builder, uri, dispatcher)
+        Listeners::CodeLens.new(@response_builder, global_state, uri, dispatcher)
 
         Addon.addons.each do |addon|
-          addon.create_code_lens_listener(@response_builder, uri, dispatcher)
+          addon.create_code_lens_listener(@response_builder, global_state, uri, dispatcher)
         end
       end
 

@@ -33,13 +33,13 @@ module RubyLsp
       sig do
         params(
           document: Document,
-          index: RubyIndexer::Index,
+          global_state: GlobalState,
           position: T::Hash[Symbol, T.untyped],
           dispatcher: Prism::Dispatcher,
           typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(document, index, position, dispatcher, typechecker_enabled)
+      def initialize(document, global_state, position, dispatcher, typechecker_enabled)
         super()
         @target = T.let(nil, T.nilable(Prism::Node))
         @target, parent, nesting = document.locate_node(
@@ -62,9 +62,9 @@ module RubyLsp
 
         uri = document.uri
         @response_builder = T.let(ResponseBuilders::Hover.new, ResponseBuilders::Hover)
-        Listeners::Hover.new(@response_builder, uri, nesting, index, dispatcher, typechecker_enabled)
+        Listeners::Hover.new(@response_builder, global_state, uri, nesting, dispatcher, typechecker_enabled)
         Addon.addons.each do |addon|
-          addon.create_hover_listener(@response_builder, nesting, index, dispatcher)
+          addon.create_hover_listener(@response_builder, global_state, nesting, dispatcher)
         end
 
         @dispatcher = dispatcher
