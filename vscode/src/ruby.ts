@@ -12,6 +12,7 @@ import { VersionManager } from "./ruby/versionManager";
 import { Mise } from "./ruby/mise";
 import { RubyInstaller } from "./ruby/rubyInstaller";
 import { Rbenv } from "./ruby/rbenv";
+import { Rvm } from "./ruby/rvm";
 
 export enum ManagerIdentifier {
   Asdf = "asdf",
@@ -115,7 +116,9 @@ export class Ruby implements RubyInterface {
           );
           break;
         case ManagerIdentifier.Rvm:
-          await this.activate("rvm-auto-ruby");
+          await this.runActivation(
+            new Rvm(this.workspaceFolder, this.outputChannel),
+          );
           break;
         case ManagerIdentifier.Mise:
           await this.runActivation(
