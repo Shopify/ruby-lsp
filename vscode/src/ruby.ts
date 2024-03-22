@@ -11,6 +11,7 @@ import { Chruby } from "./ruby/chruby";
 import { VersionManager } from "./ruby/versionManager";
 import { Mise } from "./ruby/mise";
 import { RubyInstaller } from "./ruby/rubyInstaller";
+import { Rbenv } from "./ruby/rbenv";
 
 export enum ManagerIdentifier {
   Asdf = "asdf",
@@ -109,7 +110,9 @@ export class Ruby implements RubyInterface {
           );
           break;
         case ManagerIdentifier.Rbenv:
-          await this.activate("rbenv exec ruby");
+          await this.runActivation(
+            new Rbenv(this.workspaceFolder, this.outputChannel),
+          );
           break;
         case ManagerIdentifier.Rvm:
           await this.activate("rvm-auto-ruby");
