@@ -327,5 +327,51 @@ module RubyIndexer
       constant_path_references = T.must(@index["ConstantPathReferences"][0])
       assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.included_modules)
     end
+
+    def test_keeping_track_of_prepended_modules
+      index(<<~RUBY)
+        class Foo
+          # valid syntaxes that we can index
+          prepend A1
+          self.prepend A2
+          prepend A3, A4
+          self.prepend A5, A6
+
+          # valid syntaxes that we cannot index because of their dynamic nature
+          prepend some_variable_or_method_call
+          self.prepend some_variable_or_method_call
+
+          def something
+            prepend A7 # We should not index this because of this dynamic nature
+          end
+
+          # Valid inner class syntax definition with its own modules prepended
+          class Qux
+            prepend Corge
+            self.prepend Corge
+            prepend Baz
+
+            prepend some_variable_or_method_call
+          end
+        end
+
+        class ConstantPathReferences
+          prepend Foo::Bar
+          self.prepend Foo::Bar2
+
+          prepend dynamic::Bar
+          prepend Foo::
+        end
+      RUBY
+
+      foo = T.must(@index["Foo"][0])
+      assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.prepended_modules)
+
+      qux = T.must(@index["Foo::Qux"][0])
+      assert_equal(["Corge", "Corge", "Baz"], qux.prepended_modules)
+
+      constant_path_references = T.must(@index["ConstantPathReferences"][0])
+      assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.prepended_modules)
+    end
   end
 end

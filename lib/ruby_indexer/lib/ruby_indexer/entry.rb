@@ -43,6 +43,9 @@ module RubyIndexer
       sig { returns(T::Array[String]) }
       attr_accessor :included_modules
 
+      sig { returns(T::Array[String]) }
+      attr_accessor :prepended_modules
+
       sig do
         params(
           name: String,
@@ -54,6 +57,7 @@ module RubyIndexer
       def initialize(name, file_path, location, comments)
         super(name, file_path, location, comments)
         @included_modules = T.let([], T::Array[String])
+        @prepended_modules = T.let([], T::Array[String])
       end
 
       sig { returns(String) }
