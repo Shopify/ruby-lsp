@@ -364,8 +364,7 @@ module RubyIndexer
         if node.is_a?(Prism::ConstantReadNode) || node.is_a?(Prism::ConstantPathNode)
           node.full_name
         end
-      rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError
-        # TO DO: add MissingNodesInConstantPathError when released in Prism
+      rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError, MissingNodesInConstantPathError
         # If a constant path reference is dynamic or missing parts, we can't
         # index it
       end
