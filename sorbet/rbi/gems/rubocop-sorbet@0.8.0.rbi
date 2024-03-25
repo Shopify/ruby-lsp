@@ -1190,12 +1190,11 @@ RuboCop::Cop::Sorbet::RedundantExtendTSig::MSG = T.let(T.unsafe(nil), String)
 # source://rubocop-sorbet//lib/rubocop/cop/sorbet/redundant_extend_t_sig.rb#33
 RuboCop::Cop::Sorbet::RedundantExtendTSig::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
 
-# Checks for the correct order of sig builder methods:
-# - abstract, override, or overridable
-# - type_parameters
-# - params
-# - returns, or void
-# - soft, checked, or on_failure
+# Checks for the correct order of `sig` builder methods.
+#
+# Options:
+#
+# * `Order`: The order in which to enforce the builder methods are called.
 #
 # @example
 #   # bad
@@ -1210,45 +1209,30 @@ RuboCop::Cop::Sorbet::RedundantExtendTSig::RESTRICT_ON_SEND = T.let(T.unsafe(nil
 #   # good
 #   sig { params(x: Integer).returns(Integer) }
 #
-# source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#31
-class RuboCop::Cop::Sorbet::SignatureBuildOrder < ::RuboCop::Cop::Cop
+# source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#24
+class RuboCop::Cop::Sorbet::SignatureBuildOrder < ::RuboCop::Cop::Base
   include ::RuboCop::Cop::Sorbet::SignatureHelp
+  extend ::RuboCop::Cop::AutoCorrector
 
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#77
-  def autocorrect(node); end
-
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#53
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#33
   def on_signature(node); end
 
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#49
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#29
   def root_call(param0); end
 
   private
 
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#119
-  def call_chain(sig_child_node); end
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#96
+  def builder_method_indexes; end
 
-  # @return [Boolean]
+  # Split foo.bar.baz into [foo, foo.bar, foo.bar.baz]
   #
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#115
-  def can_autocorrect?; end
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#83
+  def call_chain(node); end
 
-  # This method exists to reparse the current node with modern features enabled.
-  # Modern features include "index send" emitting, which is necessary to unparse
-  # "index sends" (i.e. `[]` calls) back to index accessors (i.e. as `foo[bar]``).
-  # Otherwise, we would get the unparsed node as `foo.[](bar)`.
-  #
-  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#106
-  def node_reparsed_with_modern_features(node); end
+  # source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#70
+  def expected_source(expected_calls_and_indexes); end
 end
-
-# Create a subclass of AST Builder that has modern features turned on
-#
-# source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#95
-class RuboCop::Cop::Sorbet::SignatureBuildOrder::ModernBuilder < ::RuboCop::AST::Builder; end
-
-# source://rubocop-sorbet//lib/rubocop/cop/sorbet/signatures/signature_build_order.rb#34
-RuboCop::Cop::Sorbet::SignatureBuildOrder::ORDER = T.let(T.unsafe(nil), Hash)
 
 # Mixin for writing cops for signatures, providing a `signature?` node matcher and an `on_signature` trigger.
 #
