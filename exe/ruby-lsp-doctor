@@ -4,6 +4,9 @@
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 require "ruby_lsp/internal"
 
+if File.exist?(".index.yml")
+  RubyIndexer.configuration.apply_config(YAML.parse_file(".index.yml").to_ruby)
+end
 index = RubyIndexer::Index.new
 
 puts "Globbing for indexable files"
