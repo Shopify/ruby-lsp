@@ -28,7 +28,10 @@ suite("StatusItems", () => {
 
   suite("RubyVersionStatus", () => {
     beforeEach(() => {
-      ruby = { rubyVersion: "3.2.0", versionManager: "shadowenv" } as Ruby;
+      ruby = {
+        rubyVersion: "3.2.0",
+        versionManager: { identifier: "shadowenv" },
+      } as Ruby;
       workspace = {
         ruby,
         lspClient: {

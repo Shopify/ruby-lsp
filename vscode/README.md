@@ -85,7 +85,12 @@ by clicking `Change version manager` in the language status center or by changin
 // "rbenv"
 // "rvm"
 // "shadowenv"
-"rubyLsp.rubyVersionManager": "chruby"
+// "mise"
+{
+  "rubyLsp.rubyVersionManager": {
+    "identifier": "chruby",
+  },
+}
 ```
 
 To make sure that the Ruby LSP can find the version manager scripts, make sure that they are loaded in the shell's

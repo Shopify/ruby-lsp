@@ -161,7 +161,12 @@ suite("Debugger", () => {
     if (process.env.CI) {
       await vscode.workspace
         .getConfiguration("rubyLsp")
-        .update("rubyVersionManager", ManagerIdentifier.None, true, true);
+        .update(
+          "rubyVersionManager",
+          { identifier: ManagerIdentifier.None },
+          true,
+          true,
+        );
     }
 
     // By default, VS Code always saves all open files when launching a debugging session. This is a problem for tests
