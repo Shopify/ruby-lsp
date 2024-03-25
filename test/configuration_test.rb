@@ -8,7 +8,6 @@ module RubyLsp
     def test_returns_empty_hash_when_no_configuration_files_exist
       FileUtils.mv(".ruby-lsp.yml", ".ruby-lsp.yml.tmp")
       workspace_uri = URI::Generic.build(scheme: "file", host: nil, path: "/path/to/workspace")
-
       result = RubyLsp::Configuration.new(workspace_uri).indexing
 
       assert_empty(result)
@@ -22,7 +21,7 @@ module RubyLsp
         excluded_patterns:
           - "**/test/fixtures/**/*.rb"
       YAML
-      workspace_uri = URI::Generic.build(scheme: "file", host: nil, path: Dir.pwd)
+      workspace_uri = URI::Generic.from_path(path: Dir.pwd)
 
       result = RubyLsp::Configuration.new(workspace_uri).indexing
 
@@ -33,7 +32,7 @@ module RubyLsp
     end
 
     def test_supports_newer_configuration
-      workspace_uri = URI::Generic.build(scheme: "file", host: nil, path: Dir.pwd)
+      workspace_uri = URI::Generic.from_path(path: Dir.pwd)
 
       result = RubyLsp::Configuration.new(workspace_uri).indexing
 
@@ -46,7 +45,7 @@ module RubyLsp
         excluded_patterns:
           - "**/test/fixtures/**/*.rb"
       YAML
-      workspace_uri = URI::Generic.build(scheme: "file", host: nil, path: Dir.pwd)
+      workspace_uri = URI::Generic.from_path(path: Dir.pwd)
 
       error = assert_raises do
         RubyLsp::Configuration.new(workspace_uri).indexing
