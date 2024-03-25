@@ -232,20 +232,28 @@
           }
         },
         "rubyLsp.rubyVersionManager": {
-          "description": "The Ruby version manager to use",
-          "type": "string",
-          "enum": [
-            "asdf",
-            "auto",
-            "chruby",
-            "none",
-            "rbenv",
-            "rvm",
-            "shadowenv",
-            "mise",
-            "custom"
-          ],
-          "default": "auto"
+          "type": "object",
+          "properties": {
+            "identifier": {
+              "description": "The Ruby version manager to use",
+              "type": "string",
+              "enum": [
+                "asdf",
+                "auto",
+                "chruby",
+                "none",
+                "rbenv",
+                "rvm",
+                "shadowenv",
+                "mise",
+                "custom"
+              ],
+              "default": "auto"
+            }
+          },
+          "default": {
+            "identifier": "auto"
+          }
         },
         "rubyLsp.customRubyCommand": {
           "description": "A shell command to activate the right Ruby version or add a custom Ruby bin folder to the PATH. Only used if rubyVersionManager is set to 'custom'",

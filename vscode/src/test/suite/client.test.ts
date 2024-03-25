@@ -116,7 +116,12 @@ suite("Client", () => {
     if (process.env.CI) {
       await vscode.workspace
         .getConfiguration("rubyLsp")
-        .update("rubyVersionManager", ManagerIdentifier.None, true, true);
+        .update(
+          "rubyVersionManager",
+          { identifier: ManagerIdentifier.None },
+          true,
+          true,
+        );
     }
     client = await launchClient(workspaceUri);
   });

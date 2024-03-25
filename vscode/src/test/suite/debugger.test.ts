@@ -168,7 +168,7 @@ suite("Debugger", () => {
       .returns({
         get: (name: string) => {
           if (name === "rubyVersionManager") {
-            return manager;
+            return { identifier: manager };
           } else if (name === "bundleGemfile") {
             return "";
           } else if (name === "saveBeforeStart") {

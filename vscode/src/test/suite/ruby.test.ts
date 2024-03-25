@@ -29,7 +29,7 @@ suite("Ruby environment activation", () => {
       .returns({
         get: (name: string) => {
           if (name === "rubyVersionManager") {
-            return manager;
+            return { identifier: manager };
           } else if (name === "bundleGemfile") {
             return "";
           }
@@ -66,7 +66,7 @@ suite("Ruby environment activation", () => {
       .returns({
         get: (name: string) => {
           if (name === "rubyVersionManager") {
-            return manager;
+            return { identifier: manager };
           } else if (name === "bundleGemfile") {
             return "";
           }

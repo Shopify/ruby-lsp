@@ -29,13 +29,19 @@ export enum ManagerIdentifier {
   Custom = "custom",
 }
 
+export interface ManagerConfiguration {
+  identifier: ManagerIdentifier;
+}
+
 export class Ruby implements RubyInterface {
   public rubyVersion?: string;
   // This property indicates that Ruby has been compiled with YJIT support and that we're running on a Ruby version
   // where it will be activated, either by the extension or by the server
   public yjitEnabled?: boolean;
   private readonly workspaceFolder: vscode.WorkspaceFolder;
-  #versionManager?: ManagerIdentifier;
+  #versionManager: ManagerConfiguration = vscode.workspace
+    .getConfiguration("rubyLsp")
+    .get<ManagerConfiguration>("rubyVersionManager")!;
 
   private readonly shell = process.env.SHELL?.replace(/(\s+)/g, "\\$1");
   private _env: NodeJS.ProcessEnv = {};
@@ -71,12 +77,18 @@ export class Ruby implements RubyInterface {
       : this.workspaceFolder.uri.fsPath;
   }
 
-  get versionManager() {
+  get versionManager(): ManagerConfiguration {
     return this.#versionManager;
   }
 
-  private set versionManager(versionManager: ManagerIdentifier | undefined) {
-    this.#versionManager = versionManager;
+  private set versionManager(
+    versionManager: ManagerConfiguration | ManagerIdentifier,
+  ) {
+    if (typeof versionManager === "string") {
+      this.#versionManager.identifier = versionManager;
+    } else {
+      this.#versionManager = versionManager;
+    }
   }
 
   get env() {
@@ -88,14 +100,14 @@ export class Ruby implements RubyInterface {
   }
 
   async activateRuby(
-    versionManager: ManagerIdentifier = vscode.workspace
+    versionManager: ManagerConfiguration = vscode.workspace
       .getConfiguration("rubyLsp")
-      .get("rubyVersionManager")!,
+      .get<ManagerConfiguration>("rubyVersionManager")!,
   ) {
     this.versionManager = versionManager;
 
     // If the version manager is auto, discover the actual manager before trying to activate anything
-    if (this.versionManager === ManagerIdentifier.Auto) {
+    if (this.versionManager.identifier === ManagerIdentifier.Auto) {
       await this.discoverVersionManager();
       this.outputChannel.info(
         `Discovered version manager ${this.versionManager}`,
@@ -103,7 +115,7 @@ export class Ruby implements RubyInterface {
     }
 
     try {
-      switch (this.versionManager) {
+      switch (this.versionManager.identifier) {
         case ManagerIdentifier.Asdf:
           await this.activate("asdf exec ruby");
           break;
@@ -281,7 +293,7 @@ export class Ruby implements RubyInterface {
       await vscode.workspace.fs.stat(
         vscode.Uri.joinPath(this.workspaceFolder.uri, ".shadowenv.d"),
       );
-      this.versionManager = ManagerIdentifier.Shadowenv;
+      this.versionManager.identifier = ManagerIdentifier.Shadowenv;
       return;
     } catch (error: any) {
       // If .shadowenv.d doesn't exist, then we check the other version managers
