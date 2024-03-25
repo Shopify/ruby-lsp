@@ -243,7 +243,7 @@ module RubyLsp
 
       if File.exist?(index_path)
         begin
-          indexing_config = YAML.parse_file(".index.yml").to_ruby
+          indexing_config = YAML.parse_file(index_path).to_ruby
         rescue Psych::SyntaxError => e
           message = "Syntax error while loading .index.yml configuration: #{e.message}"
           send_message(
