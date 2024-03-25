@@ -236,7 +236,29 @@ module RubyLsp
 
       RubyVM::YJIT.enable if defined?(RubyVM::YJIT.enable)
 
-      perform_initial_indexing
+      indexing_config = {}
+
+      # Need to use the workspace URI, otherwise, this will fail for people working on a project that is a symlink.
+      index_path = File.join(@store.workspace_uri.to_standardized_path, ".index.yml")
+
+      if File.exist?(index_path)
+        begin
+          indexing_config = YAML.parse_file(index_path).to_ruby
+        rescue Psych::SyntaxError => e
+          message = "Syntax error while loading configuration: #{e.message}"
+          send_message(
+            Notification.new(
+              method: "window/showMessage",
+              params: Interface::ShowMessageParams.new(
+                type: Constant::MessageType::WARNING,
+                message: message,
+              ),
+            ),
+          )
+        end
+      end
+
+      perform_initial_indexing(indexing_config)
       check_formatter_is_available
     end
 
@@ -639,11 +661,11 @@ module RubyLsp
       Addon.addons.each(&:deactivate)
     end
 
-    sig { void }
-    def perform_initial_indexing
+    sig { params(config_hash: T::Hash[String, T.untyped]).void }
+    def perform_initial_indexing(config_hash)
       # The begin progress invocation happens during `initialize`, so that the notification is sent before we are
       # stuck indexing files
-      RubyIndexer.configuration.load_config
+      RubyIndexer.configuration.apply_config(config_hash)
 
       Thread.new do
         begin
