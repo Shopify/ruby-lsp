@@ -245,7 +245,7 @@ module RubyLsp
         begin
           indexing_config = YAML.parse_file(index_path).to_ruby
         rescue Psych::SyntaxError => e
-          message = "Syntax error while loading #{index_path} configuration: #{e.message}"
+          message = "Syntax error while loading configuration: #{e.message}"
           send_message(
             Notification.new(
               method: "window/showMessage",

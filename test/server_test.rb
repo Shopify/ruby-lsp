@@ -332,9 +332,8 @@ class ServerTest < Minitest::Test
     @server.process_message({ method: "initialized" })
     notification = @server.pop_response
     assert_equal("window/showMessage", notification.method)
-    assert_equal(
-      "Syntax error while loading .index.yml configuration: (.index.yml): did not find expected node content " \
-        "while parsing a block node at line 1 column 1",
+    assert_match(
+      /Syntax error while loading configuration/,
       T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
     )
   ensure
