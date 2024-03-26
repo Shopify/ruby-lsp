@@ -123,8 +123,8 @@ This approach enables all addon responses to be captured in a single round of AS
 
 ### Enhancing features
 
-To enhance a request, the addon must create a listener that will collect extra results that will be automatically appended to the 
-base language server response. Additionally, `Addon` has to implement a factory method that instantiates the listener. When instantiating the 
+To enhance a request, the addon must create a listener that will collect extra results that will be automatically appended to the
+base language server response. Additionally, `Addon` has to implement a factory method that instantiates the listener. When instantiating the
 listener, also note that a `ResponseBuilders` object is passed in. This object should be used to return responses back to the Ruby LSP.
 
 For example: to add a message on hover saying "Hello!" on top of the base hover behavior of the Ruby LSP, we can use the
@@ -176,7 +176,7 @@ module RubyLsp
       # Listeners are initialized with the Prism::Dispatcher. This object is used by the Ruby LSP to emit the events
       # when it finds nodes during AST analysis. Listeners must register which nodes they want to handle with the
       # dispatcher (see below).
-      # Listeners are initialized with a `ResponseBuilders` object. The listener will push the associated content 
+      # Listeners are initialized with a `ResponseBuilders` object. The listener will push the associated content
       # to this object, which will then build the Ruby LSP's response.
       # Additionally, listeners are instantiated with a message_queue to push notifications (not used in this example).
       # See "Sending notifications to the client" for more information.
@@ -342,3 +342,16 @@ require ""
 # Using uncommon, but valid syntax, such as invoking require directly on Kernel using parenthesis
 Kernel.require("library")
 ```
+
+We provide a `RubyLsp::TestHelper` module than can be included in your test class. For example:
+
+```ruby
+# myaddon/test_helper.rb
+
+module Minitest
+  class Test
+    include RubyLsp::TestHelper
+  end
+end
+```
+It has a method `with_server` for testing requests. Refer to Ruby LSP's own tests for examples of its use.
