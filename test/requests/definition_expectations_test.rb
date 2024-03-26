@@ -8,10 +8,11 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Definition, "definition"
 
   def run_expectations(source)
-    with_server(source) do |server, uri|
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       position = @__params&.first || { character: 0, line: 0 }
 
-      index = server.index
+      index = server.global_state.index
 
       index.index_single(
         RubyIndexer::IndexablePath.new(
@@ -41,8 +42,6 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         ),
       )
 
-      # We need to pretend that Sorbet is not a dependency or else we can't properly test
-      stub_no_typechecker
       server.process_message(
         id: 1,
         method: "textDocument/definition",
@@ -69,7 +68,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
   def test_jumping_to_default_gems
     with_server("Pathname") do |server, uri|
-      index = server.index
+      index = server.global_state.index
       index.index_single(
         RubyIndexer::IndexablePath.new(
           nil,
@@ -132,7 +131,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
   def test_jumping_to_default_require_of_a_gem
     with_server("require \"bundler\"") do |server, uri|
-      index = server.index
+      index = server.global_state.index
 
       bundler_uri = URI::Generic.from_path(path: "#{RbConfig::CONFIG["rubylibdir"]}/bundler.rb")
       index.index_single(
@@ -165,7 +164,6 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     RUBY
 
     with_server(source) do |server, uri|
-      stub_no_typechecker
       server.process_message(
         id: 1,
         method: "textDocument/definition",
@@ -188,8 +186,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       A::CONST # invalid private reference
     RUBY
 
-    with_server(source) do |server, uri|
-      stub_no_typechecker
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/definition",
@@ -205,7 +202,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     RUBY
 
     test_addon(:create_definition_addon, source: source) do |server|
-      server.index.index_single(
+      server.global_state.index.index_single(
         RubyIndexer::IndexablePath.new(
           "#{Dir.pwd}/lib",
           File.expand_path(
@@ -282,7 +279,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           },
         },
       })
-      index = server.index
+      index = server.global_state.index
       index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(second_uri.to_standardized_path)), second_source)
 
       server.process_message(

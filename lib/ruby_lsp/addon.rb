@@ -121,22 +121,23 @@ module RubyLsp
     sig do
       overridable.params(
         response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
+        global_state: GlobalState,
         uri: URI::Generic,
         dispatcher: Prism::Dispatcher,
       ).void
     end
-    def create_code_lens_listener(response_builder, uri, dispatcher); end
+    def create_code_lens_listener(response_builder, global_state, uri, dispatcher); end
 
     # Creates a new Hover listener. This method is invoked on every Hover request
     sig do
       overridable.params(
         response_builder: ResponseBuilders::Hover,
+        global_state: GlobalState,
         nesting: T::Array[String],
-        index: RubyIndexer::Index,
         dispatcher: Prism::Dispatcher,
       ).void
     end
-    def create_hover_listener(response_builder, nesting, index, dispatcher); end
+    def create_hover_listener(response_builder, global_state, nesting, dispatcher); end
 
     # Creates a new DocumentSymbol listener. This method is invoked on every DocumentSymbol request
     sig do
@@ -159,24 +160,24 @@ module RubyLsp
     sig do
       overridable.params(
         response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::Location],
+        global_state: GlobalState,
         uri: URI::Generic,
         nesting: T::Array[String],
-        index: RubyIndexer::Index,
         dispatcher: Prism::Dispatcher,
       ).void
     end
-    def create_definition_listener(response_builder, uri, nesting, index, dispatcher); end
+    def create_definition_listener(response_builder, global_state, uri, nesting, dispatcher); end
 
     # Creates a new Completion listener. This method is invoked on every Completion request
     sig do
       overridable.params(
         response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
-        index: RubyIndexer::Index,
+        global_state: GlobalState,
         nesting: T::Array[String],
         dispatcher: Prism::Dispatcher,
         uri: URI::Generic,
       ).void
     end
-    def create_completion_listener(response_builder, index, nesting, dispatcher, uri); end
+    def create_completion_listener(response_builder, global_state, nesting, dispatcher, uri); end
   end
 end

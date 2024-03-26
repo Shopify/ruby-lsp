@@ -5,14 +5,14 @@ module RubyLsp
   class Server < BaseServer
     extend T::Sig
 
-    # The instance of the index for this server. Only exposed for tests
-    sig { returns(RubyIndexer::Index) }
-    attr_reader :index
+    # Only for testing
+    sig { returns(GlobalState) }
+    attr_reader :global_state
 
     sig { params(test_mode: T::Boolean).void }
     def initialize(test_mode: false)
       super
-      @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
+      @global_state = T.let(GlobalState.new, GlobalState)
     end
 
     sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
@@ -22,7 +22,7 @@ module RubyLsp
         $stderr.puts("Initializing Ruby LSP v#{VERSION}...")
         run_initialize(message)
       when "initialized"
-        $stderr.puts("Finished initializing Ruby LSP!")
+        $stderr.puts("Finished initializing Ruby LSP!") unless @test_mode
         run_initialized
       when "textDocument/didOpen"
         text_document_did_open(message)
@@ -93,8 +93,7 @@ module RubyLsp
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def run_initialize(message)
       options = message[:params]
-      workspace_uri = options.dig(:workspaceFolders, 0, :uri)
-      @store.workspace_uri = URI(workspace_uri) if workspace_uri
+      @global_state.apply_options(options)
 
       client_name = options.dig(:clientInfo, :name)
       @store.client_name = client_name if client_name
@@ -111,11 +110,6 @@ module RubyLsp
       progress = options.dig(:capabilities, :window, :workDoneProgress)
       @store.supports_progress = progress.nil? ? true : progress
       formatter = options.dig(:initializationOptions, :formatter) || "auto"
-      @store.formatter = if formatter == "auto"
-        DependencyDetector.instance.detected_formatter
-      else
-        formatter
-      end
 
       configured_features = options.dig(:initializationOptions, :enabledFeatures)
       @store.experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled) || false
@@ -179,7 +173,7 @@ module RubyLsp
           name: "Ruby LSP",
           version: VERSION,
         },
-        formatter: @store.formatter,
+        formatter: @global_state.formatter,
       }
 
       send_message(Result.new(id: message[:id], response: response))
@@ -241,7 +235,7 @@ module RubyLsp
       indexing_config = {}
 
       # Need to use the workspace URI, otherwise, this will fail for people working on a project that is a symlink.
-      index_path = File.join(@store.workspace_uri.to_standardized_path, ".index.yml")
+      index_path = File.join(@global_state.workspace_path, ".index.yml")
 
       if File.exist?(index_path)
         begin
@@ -335,7 +329,7 @@ module RubyLsp
       folding_range = Requests::FoldingRanges.new(document.parse_result.comments, dispatcher)
       document_symbol = Requests::DocumentSymbol.new(uri, dispatcher)
       document_link = Requests::DocumentLink.new(uri, document.comments, dispatcher)
-      code_lens = Requests::CodeLens.new(uri, dispatcher)
+      code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
 
       semantic_highlighting = Requests::SemanticHighlighting.new(dispatcher)
       dispatcher.dispatch(document.tree)
@@ -379,7 +373,7 @@ module RubyLsp
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_formatting(message)
       # If formatter is set to `auto` but no supported formatting gem is found, don't attempt to format
-      if @store.formatter == "none"
+      if @global_state.formatter == "none"
         send_empty_response(message[:id])
         return
       end
@@ -388,12 +382,12 @@ module RubyLsp
       # Do not format files outside of the workspace. For example, if someone is looking at a gem's source code, we
       # don't want to format it
       path = uri.to_standardized_path
-      unless path.nil? || path.start_with?(T.must(@store.workspace_uri.to_standardized_path))
+      unless path.nil? || path.start_with?(@global_state.workspace_path)
         send_empty_response(message[:id])
         return
       end
 
-      response = Requests::Formatting.new(@store.get(uri), formatter: @store.formatter).perform
+      response = Requests::Formatting.new(@store.get(uri), formatter: @global_state.formatter).perform
       send_message(Result.new(id: message[:id], response: response))
     rescue Requests::Formatting::InvalidFormatter => error
       send_message(Notification.window_show_error("Configuration error: #{error.message}"))
@@ -441,13 +435,18 @@ module RubyLsp
           id: message[:id],
           response: Requests::Hover.new(
             document,
-            @index,
+            @global_state,
             params[:position],
             dispatcher,
-            document.typechecker_enabled?,
+            typechecker_enabled?(document),
           ).perform,
         ),
       )
+    end
+
+    sig { params(document: Document).returns(T::Boolean) }
+    def typechecker_enabled?(document)
+      @global_state.typechecker && document.sorbet_sigil_is_true_or_higher
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
@@ -507,7 +506,7 @@ module RubyLsp
       # source code, we don't want to show diagnostics for it
       uri = message.dig(:params, :textDocument, :uri)
       path = uri.to_standardized_path
-      unless path.nil? || path.start_with?(T.must(@store.workspace_uri.to_standardized_path))
+      unless path.nil? || path.start_with?(@global_state.workspace_path)
         send_empty_response(message[:id])
         return
       end
@@ -538,9 +537,9 @@ module RubyLsp
           id: message[:id],
           response: Requests::Completion.new(
             document,
-            @index,
+            @global_state,
             params[:position],
-            document.typechecker_enabled?,
+            typechecker_enabled?(document),
             dispatcher,
           ).perform,
         ),
@@ -551,7 +550,7 @@ module RubyLsp
     def text_document_completion_item_resolve(message)
       send_message(Result.new(
         id: message[:id],
-        response: Requests::CompletionResolve.new(@index, message[:params]).perform,
+        response: Requests::CompletionResolve.new(@global_state, message[:params]).perform,
       ))
     end
 
@@ -566,10 +565,11 @@ module RubyLsp
           id: message[:id],
           response: Requests::SignatureHelp.new(
             document,
-            @index,
+            @global_state,
             params[:position],
             params[:context],
             dispatcher,
+            typechecker_enabled?(document),
           ).perform,
         ),
       )
@@ -586,10 +586,10 @@ module RubyLsp
           id: message[:id],
           response: Requests::Definition.new(
             document,
-            @index,
+            @global_state,
             params[:position],
             dispatcher,
-            document.typechecker_enabled?,
+            typechecker_enabled?(document),
           ).perform,
         ),
       )
@@ -598,6 +598,7 @@ module RubyLsp
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def workspace_did_change_watched_files(message)
       changes = message.dig(:params, :changes)
+      index = @global_state.index
       changes.each do |change|
         # File change events include folders, but we're only interested in files
         uri = URI(change[:uri])
@@ -609,12 +610,12 @@ module RubyLsp
 
         case change[:type]
         when Constant::FileChangeType::CREATED
-          @index.index_single(indexable)
+          index.index_single(indexable)
         when Constant::FileChangeType::CHANGED
-          @index.delete(indexable)
-          @index.index_single(indexable)
+          index.delete(indexable)
+          index.index_single(indexable)
         when Constant::FileChangeType::DELETED
-          @index.delete(indexable)
+          index.delete(indexable)
         end
       end
 
@@ -626,7 +627,10 @@ module RubyLsp
       send_message(
         Result.new(
           id: message[:id],
-          response: Requests::WorkspaceSymbol.new(message.dig(:params, :query), @index).perform,
+          response: Requests::WorkspaceSymbol.new(
+            @global_state,
+            message.dig(:params, :query),
+          ).perform,
         ),
       )
     end
@@ -679,7 +683,7 @@ module RubyLsp
 
       Thread.new do
         begin
-          @index.index_all do |percentage|
+          @global_state.index.index_all do |percentage|
             progress("indexing-progress", percentage)
             true
           rescue ClosedQueueError
@@ -763,10 +767,10 @@ module RubyLsp
     def check_formatter_is_available
       # Warn of an unavailable `formatter` setting, e.g. `rubocop` on a project which doesn't have RuboCop.
       # Syntax Tree will always be available via Ruby LSP so we don't need to check for it.
-      return unless @store.formatter == "rubocop"
+      return unless @global_state.formatter == "rubocop"
 
       unless defined?(RubyLsp::Requests::Support::RuboCopRunner)
-        @store.formatter = "none"
+        @global_state.formatter = "none"
 
         send_message(
           Notification.window_show_error(

@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 # frozen_string_literal: true
 
 require "sorbet-runtime"
@@ -47,11 +47,6 @@ module Minitest
 
     private
 
-    sig { void }
-    def stub_no_typechecker
-      RubyLsp::DependencyDetector.instance.stubs(:typechecker).returns(false)
-    end
-
     sig do
       params(
         addon_creation_method: Symbol,
@@ -61,10 +56,10 @@ module Minitest
     end
     def test_addon(addon_creation_method, source:, &block)
       message_queue = Thread::Queue.new
-      stub_no_typechecker
 
       uri = URI::Generic.from_path(path: "/fake.rb")
       server = RubyLsp::Server.new(test_mode: true)
+      server.global_state.stubs(:typechecker).returns(false)
       server.process_message({
         method: "textDocument/didOpen",
         params: {
@@ -75,7 +70,7 @@ module Minitest
           },
         },
       })
-      index = server.index
+      index = server.global_state.index
       index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
 
       send(addon_creation_method)

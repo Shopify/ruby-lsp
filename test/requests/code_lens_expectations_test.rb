@@ -7,13 +7,17 @@ require "expectations/expectations_test_runner"
 class CodeLensExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::CodeLens, "code_lens"
 
+  def setup
+    @global_state = RubyLsp::GlobalState.new
+  end
+
   def run_expectations(source)
     uri = URI("file://#{@_path}")
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
     dispatcher.dispatch(document.tree)
     listener.perform
   end
@@ -30,7 +34,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.perform
 
@@ -57,7 +61,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("unknown")
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.perform
 
@@ -76,7 +80,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("rspec")
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.perform
 
@@ -95,7 +99,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.perform
 
@@ -114,7 +118,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.perform
 
@@ -150,7 +154,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
   def create_code_lens_addon
     Class.new(RubyLsp::Addon) do
-      def create_code_lens_listener(response_builder, uri, dispatcher)
+      def create_code_lens_listener(response_builder, global_state, uri, dispatcher)
         raise "uri can't be nil" unless uri
 
         klass = Class.new do
@@ -186,7 +190,6 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   end
 
   def stub_test_library(name)
-    Singleton.__init__(RubyLsp::DependencyDetector)
-    RubyLsp::DependencyDetector.instance.stubs(:detected_test_library).returns(name)
+    @global_state.stubs(:test_library).returns(name)
   end
 end

@@ -4,10 +4,6 @@
 require "test_helper"
 
 class SignatureHelpTest < Minitest::Test
-  def setup
-    stub_no_typechecker
-  end
-
   def test_initial_request
     source = +<<~RUBY
       class Foo

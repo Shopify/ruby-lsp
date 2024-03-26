@@ -10,6 +10,7 @@ module RubyLsp
 
     sig { params(test_mode: T::Boolean).void }
     def initialize(test_mode: false)
+      @test_mode = T.let(test_mode, T::Boolean)
       @writer = T.let(Transport::Stdio::Writer.new, Transport::Stdio::Writer)
       @reader = T.let(Transport::Stdio::Reader.new, Transport::Stdio::Reader)
       @incoming_queue = T.let(Thread::Queue.new, Thread::Queue)

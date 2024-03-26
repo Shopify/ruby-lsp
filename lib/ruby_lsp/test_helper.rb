@@ -12,12 +12,13 @@ module RubyLsp
         .params(
           source: T.nilable(String),
           uri: URI::Generic,
+          stub_no_typechecker: T::Boolean,
           block: T.proc.params(server: RubyLsp::Server, uri: URI::Generic).returns(T.type_parameter(:T)),
         ).returns(T.type_parameter(:T))
     end
-    def with_server(source = nil, uri = Kernel.URI("file:///fake.rb"), &block)
+    def with_server(source = nil, uri = Kernel.URI("file:///fake.rb"), stub_no_typechecker: false, &block)
       server = RubyLsp::Server.new(test_mode: true)
-      server.process_message(method: "initialized")
+      server.global_state.stubs(:typechecker).returns(false) if stub_no_typechecker
 
       if source
         server.process_message({
@@ -32,8 +33,10 @@ module RubyLsp
         })
       end
 
-      index = server.index
-      index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
+      server.global_state.index.index_single(
+        RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)),
+        source,
+      )
       block.call(server, uri)
     ensure
       T.must(server).run_shutdown

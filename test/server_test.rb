@@ -141,7 +141,7 @@ class ServerTest < Minitest::Test
   end
 
   def test_server_info_includes_formatter
-    RubyLsp::DependencyDetector.instance.expects(:detected_formatter).returns("rubocop")
+    @server.global_state.expects(:formatter).returns("rubocop")
     capture_subprocess_io do
       @server.process_message({
         id: 1,
@@ -166,13 +166,13 @@ class ServerTest < Minitest::Test
       assert_equal("$/progress", @server.pop_response.method)
       assert_equal("$/progress", @server.pop_response.method)
 
-      index = @server.index
+      index = @server.global_state.index
       refute_empty(index.instance_variable_get(:@entries))
     end
   end
 
   def test_initialized_recovers_from_indexing_failures
-    @server.index.expects(:index_all).once.raises(StandardError, "boom!")
+    @server.global_state.index.expects(:index_all).once.raises(StandardError, "boom!")
     capture_subprocess_io do
       @server.process_message({ method: "initialized" })
     end
@@ -186,7 +186,7 @@ class ServerTest < Minitest::Test
   end
 
   def test_formatting_errors_push_window_notification
-    @server.instance_variable_get(:@store).expects(:formatter).raises(StandardError, "boom").once
+    @server.global_state.expects(:formatter).raises(StandardError, "boom").once
 
     @server.process_message({
       id: 1,
@@ -343,50 +343,70 @@ class ServerTest < Minitest::Test
   def test_detects_rubocop_if_direct_dependency
     stub_dependencies(rubocop: true, syntax_tree: false)
 
-    capture_subprocess_io do
-      @server.process_message(id: 1, method: "initialize", params: {
-        initializationOptions: { formatter: "auto" },
-      })
-    end
+    server = RubyLsp::Server.new(test_mode: true)
 
-    store = @server.instance_variable_get(:@store)
-    assert_equal("rubocop", store.formatter)
+    begin
+      capture_subprocess_io do
+        server.process_message(id: 1, method: "initialize", params: {
+          initializationOptions: { formatter: "auto" },
+        })
+      end
+
+      assert_equal("rubocop", server.global_state.formatter)
+    ensure
+      server.run_shutdown
+    end
   end
 
   def test_detects_syntax_tree_if_direct_dependency
     stub_dependencies(rubocop: false, syntax_tree: true)
-    capture_subprocess_io do
-      @server.process_message(id: 1, method: "initialize", params: {
-        initializationOptions: { formatter: "auto" },
-      })
-    end
+    server = RubyLsp::Server.new(test_mode: true)
 
-    store = @server.instance_variable_get(:@store)
-    assert_equal("syntax_tree", store.formatter)
+    begin
+      capture_subprocess_io do
+        server.process_message(id: 1, method: "initialize", params: {
+          initializationOptions: { formatter: "auto" },
+        })
+      end
+
+      assert_equal("syntax_tree", server.global_state.formatter)
+    ensure
+      server.run_shutdown
+    end
   end
 
   def test_gives_rubocop_precedence_if_syntax_tree_also_present
     stub_dependencies(rubocop: true, syntax_tree: true)
-    capture_subprocess_io do
-      @server.process_message(id: 1, method: "initialize", params: {
-        initializationOptions: { formatter: "auto" },
-      })
-    end
+    server = RubyLsp::Server.new(test_mode: true)
 
-    store = @server.instance_variable_get(:@store)
-    assert_equal("rubocop", store.formatter)
+    begin
+      capture_subprocess_io do
+        server.process_message(id: 1, method: "initialize", params: {
+          initializationOptions: { formatter: "auto" },
+        })
+      end
+
+      assert_equal("rubocop", server.global_state.formatter)
+    ensure
+      server.run_shutdown
+    end
   end
 
   def test_sets_formatter_to_none_if_neither_rubocop_or_syntax_tree_are_present
     stub_dependencies(rubocop: false, syntax_tree: false)
-    capture_subprocess_io do
-      @server.process_message(id: 1, method: "initialize", params: {
-        initializationOptions: { formatter: "auto" },
-      })
-    end
+    server = RubyLsp::Server.new(test_mode: true)
 
-    store = @server.instance_variable_get(:@store)
-    assert_equal("none", store.formatter)
+    begin
+      capture_subprocess_io do
+        server.process_message(id: 1, method: "initialize", params: {
+          initializationOptions: { formatter: "auto" },
+        })
+      end
+
+      assert_equal("none", server.global_state.formatter)
+    ensure
+      server.run_shutdown
+    end
   end
 
   def test_shows_error_if_formatter_set_to_rubocop_but_rubocop_not_available
@@ -397,8 +417,7 @@ class ServerTest < Minitest::Test
         })
         @server.process_message({ method: "initialized" })
 
-        store = @server.instance_variable_get(:@store)
-        assert_equal("none", store.formatter)
+        assert_equal("none", @server.global_state.formatter)
 
         # Remove the initialization notifications
         @server.pop_response
@@ -476,7 +495,6 @@ class ServerTest < Minitest::Test
   end
 
   def stub_dependencies(rubocop:, syntax_tree:)
-    Singleton.__init__(RubyLsp::DependencyDetector)
     dependencies = {}
     dependencies["syntax_tree"] = "..." if syntax_tree
     dependencies["rubocop"] = "..." if rubocop
