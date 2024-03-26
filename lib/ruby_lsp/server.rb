@@ -22,7 +22,7 @@ module RubyLsp
         $stderr.puts("Initializing Ruby LSP v#{VERSION}...")
         run_initialize(message)
       when "initialized"
-        $stderr.puts("Finished initializing Ruby LSP!")
+        $stderr.puts("Finished initializing Ruby LSP!") unless @test_mode
         run_initialized
       when "textDocument/didOpen"
         text_document_did_open(message)
