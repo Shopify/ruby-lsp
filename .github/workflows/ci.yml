@@ -13,7 +13,6 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.3"
           bundler-cache: true
 
       - name: Check if documentation is up to date
@@ -86,8 +85,6 @@ jobs:
       # We need some Ruby installed for the environment activation tests
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.3.0"
 
       - name: Download shadowenv
         if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
