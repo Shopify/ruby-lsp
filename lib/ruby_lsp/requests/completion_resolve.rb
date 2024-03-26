@@ -3,6 +3,8 @@
 
 module RubyLsp
   module Requests
+    # ![Completion resolve demo](../../completion_resolve.gif)
+    #
     # The [completionItem/resolve](https://microsoft.github.io/language-server-protocol/specification#completionItem_resolve)
     # request provides additional information about the currently selected completion. Specifically, the `labelDetails`
     # and `documentation` fields are provided, which are omitted from the completion items returned by
@@ -13,6 +15,12 @@ module RubyLsp
     #
     # At most 10 definitions are included, to ensure low latency during request processing and rendering the completion
     # item.
+    #
+    # # Example
+    #
+    # ```ruby
+    # A # -> as the user cycles through completion items, the documentation will be resolved and displayed
+    # ```
     class CompletionResolve < Request
       extend T::Sig
       include Requests::Support::Common

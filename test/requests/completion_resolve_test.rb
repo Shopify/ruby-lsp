@@ -17,7 +17,7 @@ class CompletionResolveTest < Minitest::Test
       end
     RUBY
 
-    with_server(source) do |server, uri|
+    with_server(source) do |server, _uri|
       server.process_message(id: 1, method: "completionItem/resolve", params: {
         label: "Foo",
       })
