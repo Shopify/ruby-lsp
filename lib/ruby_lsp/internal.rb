@@ -20,6 +20,7 @@ require "prism/visitor"
 require "language_server-protocol"
 
 require "ruby-lsp"
+require "ruby_lsp/configuration"
 require "ruby_lsp/base_server"
 require "ruby_indexer/ruby_indexer"
 require "core_ext/uri"
