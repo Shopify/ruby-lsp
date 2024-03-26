@@ -12,15 +12,17 @@ module RubyLsp
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
           index: RubyIndexer::Index,
           nesting: T::Array[String],
+          local_variables: T::Array[Prism::LocalVariableNode],
           typechecker_enabled: T::Boolean,
           dispatcher: Prism::Dispatcher,
           uri: URI::Generic,
         ).void
       end
-      def initialize(response_builder, index, nesting, typechecker_enabled, dispatcher, uri) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, index, nesting, local_variables, typechecker_enabled, dispatcher, uri) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @index = index
         @nesting = nesting
+        @local_variables = local_variables
         @typechecker_enabled = typechecker_enabled
         @uri = uri
 
@@ -160,6 +162,12 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode, name: String).void }
       def complete_self_receiver_method(node, name)
+        @local_variables.uniq(&:name).each do |variable_node|
+          next unless variable_node.name.to_s.start_with?(node.name.to_s)
+
+          @response_builder << build_local_variable_completion(variable_node, node)
+        end
+
         receiver_entries = @index[@nesting.join("::")]
         return unless receiver_entries
 
@@ -195,6 +203,26 @@ module RubyLsp
             kind: "markdown",
             value: markdown_from_index_entries(name, entry),
           ),
+        )
+      end
+
+      sig do
+        params(
+          variable_node: Prism::LocalVariableNode,
+          node: Prism::CallNode,
+        ).returns(Interface::CompletionItem)
+      end
+      def build_local_variable_completion(variable_node, node)
+        name = variable_node.name.to_s
+
+        Interface::CompletionItem.new(
+          label: name,
+          filter_text: name,
+          text_edit: Interface::TextEdit.new(
+            range: range_from_location(T.must(node.message_loc)),
+            new_text: name,
+          ),
+          kind: Constant::CompletionItemKind::VARIABLE,
         )
       end
 

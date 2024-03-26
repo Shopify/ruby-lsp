@@ -173,6 +173,61 @@ module RubyLsp
       [closest, parent, nesting.map { |n| n.constant_path.location.slice }]
     end
 
+    sig do
+      params(position: T::Hash[Symbol, T.untyped]).returns(T::Array[Prism::LocalVariableNode])
+    end
+    def locate_local_variable_nodes(position)
+      locate_local_variables(@parse_result.value, create_scanner.find_char_position(position))
+    end
+
+    sig do
+      params(
+        node: Prism::Node,
+        char_position: Integer,
+      ).returns(T::Array[Prism::LocalVariableNode])
+    end
+    def locate_local_variables(node, char_position)
+      queue = T.let(node.compact_child_nodes, T::Array[Prism::Node])
+      variable_nodes = T.let([], T::Array[Prism::LocalVariableNode])
+
+      until queue.empty?
+        current = T.must(queue.shift)
+        loc = current.location
+
+        # Don't take into account variables after given position
+        break if char_position < loc.start_offset
+
+        # Local variables defined in def, begin, classes, modules and block nodes are visible only in their own scope,
+        # so we can skip it if our position is outside.
+        # Other nodes (like if ... end) don't create its own scope.
+        next if [Prism::DefNode, Prism::BeginNode, Prism::BlockNode, Prism::ClassNode, Prism::ModuleNode]
+          .any? { |t| current.is_a?(t) } && char_position > loc.end_offset
+
+        T.unsafe(queue).unshift(*current.compact_child_nodes)
+
+        case current
+        when Prism::DefNode, Prism::ClassNode # in this nodes we don't have access to variables outside
+          variable_nodes.clear
+        when Prism::LocalVariableWriteNode,
+          Prism::LocalVariableTargetNode,
+          Prism::LocalVariableAndWriteNode,
+          Prism::LocalVariableOrWriteNode,
+          Prism::RequiredParameterNode,
+          Prism::OptionalParameterNode,
+          Prism::RequiredKeywordParameterNode,
+          Prism::OptionalKeywordParameterNode,
+          Prism::BlockLocalVariableNode,
+          Prism::RestParameterNode,
+          Prism::KeywordRestParameterNode
+
+          variable_nodes << current
+        end
+
+      end
+
+      variable_nodes
+    end
+
     sig { returns(T::Boolean) }
     def sorbet_sigil_is_true_or_higher
       parse_result.magic_comments.any? do |comment|
