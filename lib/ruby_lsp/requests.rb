@@ -18,6 +18,7 @@ module RubyLsp
   # - [DocumentHighlight](rdoc-ref:RubyLsp::Requests::DocumentHighlight)
   # - [InlayHint](rdoc-ref:RubyLsp::Requests::InlayHints)
   # - [Completion](rdoc-ref:RubyLsp::Requests::Completion)
+  # - [CompletionResolve](rdoc-ref:RubyLsp::Requests::CompletionResolve)
   # - [CodeLens](rdoc-ref:RubyLsp::Requests::CodeLens)
   # - [Definition](rdoc-ref:RubyLsp::Requests::Definition)
   # - [ShowSyntaxTree](rdoc-ref:RubyLsp::Requests::ShowSyntaxTree)

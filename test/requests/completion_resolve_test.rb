@@ -12,6 +12,7 @@ class CompletionResolveTest < Minitest::Test
   def test_completion_resolve_for_constant
     stub_no_typechecker
     source = +<<~RUBY
+      # This is a class that does things
       class Foo
       end
     RUBY
@@ -33,6 +34,7 @@ class CompletionResolveTest < Minitest::Test
           value: markdown_from_index_entries("Foo", T.must(server.index["Foo"])),
         ),
       )
+      assert_match(/This is a class that does things/, result.documentation.value)
       assert_equal(expected.to_json, result.to_json)
     end
   end
