@@ -15,7 +15,6 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2 # `bundle exec rake rdoc` fails on 3.3.0
           bundler-cache: true
 
       - name: Configure git
