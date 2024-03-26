@@ -62,6 +62,8 @@ module RubyLsp
         text_document_diagnostic(message)
       when "textDocument/completion"
         text_document_completion(message)
+      when "completionItem/resolve"
+        text_document_completion_item_resolve(message)
       when "textDocument/signatureHelp"
         text_document_signature_help(message)
       when "textDocument/definition"
@@ -543,6 +545,14 @@ module RubyLsp
           ).perform,
         ),
       )
+    end
+
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def text_document_completion_item_resolve(message)
+      send_message(Result.new(
+        id: message[:id],
+        response: Requests::CompletionResolve.new(@index, message[:params]).perform,
+      ))
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
