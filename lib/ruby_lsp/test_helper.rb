@@ -18,7 +18,6 @@ module RubyLsp
     end
     def with_server(source = nil, uri = Kernel.URI("file:///fake.rb"), stub_no_typechecker: false, &block)
       server = RubyLsp::Server.new(test_mode: true)
-      server.process_message(method: "initialized")
       server.global_state.stubs(:typechecker).returns(false) if stub_no_typechecker
 
       if source
