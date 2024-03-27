@@ -58,7 +58,8 @@ module Minitest
       message_queue = Thread::Queue.new
 
       uri = URI::Generic.from_path(path: "/fake.rb")
-      server = RubyLsp::Server.new(test_mode: true)
+      server = RubyLsp::Server.new
+      server.global_state.test_mode = true
       server.global_state.stubs(:typechecker).returns(false)
       server.process_message({
         method: "textDocument/didOpen",

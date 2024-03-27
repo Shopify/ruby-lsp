@@ -17,7 +17,8 @@ module RubyLsp
         ).returns(T.type_parameter(:T))
     end
     def with_server(source = nil, uri = Kernel.URI("file:///fake.rb"), stub_no_typechecker: false, &block)
-      server = RubyLsp::Server.new(test_mode: true)
+      server = RubyLsp::Server.new
+      server.global_state.test_mode = true
       server.global_state.stubs(:typechecker).returns(false) if stub_no_typechecker
 
       if source

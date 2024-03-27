@@ -9,8 +9,8 @@ module RubyLsp
     sig { returns(GlobalState) }
     attr_reader :global_state
 
-    sig { params(test_mode: T::Boolean).void }
-    def initialize(test_mode: false)
+    sig { void }
+    def initialize
       super
       @global_state = T.let(GlobalState.new, GlobalState)
     end
@@ -22,7 +22,7 @@ module RubyLsp
         $stderr.puts("Initializing Ruby LSP v#{VERSION}...")
         run_initialize(message)
       when "initialized"
-        $stderr.puts("Finished initializing Ruby LSP!") unless @test_mode
+        $stderr.puts("Finished initializing Ruby LSP!") unless @global_state.test_mode
         run_initialized
       when "textDocument/didOpen"
         text_document_did_open(message)

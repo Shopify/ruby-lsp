@@ -5,7 +5,8 @@ require "test_helper"
 
 class ServerTest < Minitest::Test
   def setup
-    @server = RubyLsp::Server.new(test_mode: true)
+    @server = RubyLsp::Server.new
+    @server.global_state.test_mode = true
   end
 
   def teardown
@@ -343,7 +344,8 @@ class ServerTest < Minitest::Test
   def test_detects_rubocop_if_direct_dependency
     stub_dependencies(rubocop: true, syntax_tree: false)
 
-    server = RubyLsp::Server.new(test_mode: true)
+    server = RubyLsp::Server.new
+    server.global_state.test_mode = true
 
     begin
       capture_subprocess_io do
@@ -360,7 +362,8 @@ class ServerTest < Minitest::Test
 
   def test_detects_syntax_tree_if_direct_dependency
     stub_dependencies(rubocop: false, syntax_tree: true)
-    server = RubyLsp::Server.new(test_mode: true)
+    server = RubyLsp::Server.new
+    server.global_state.test_mode = true
 
     begin
       capture_subprocess_io do
@@ -377,7 +380,8 @@ class ServerTest < Minitest::Test
 
   def test_gives_rubocop_precedence_if_syntax_tree_also_present
     stub_dependencies(rubocop: true, syntax_tree: true)
-    server = RubyLsp::Server.new(test_mode: true)
+    server = RubyLsp::Server.new
+    server.global_state.test_mode = true
 
     begin
       capture_subprocess_io do
@@ -394,7 +398,8 @@ class ServerTest < Minitest::Test
 
   def test_sets_formatter_to_none_if_neither_rubocop_or_syntax_tree_are_present
     stub_dependencies(rubocop: false, syntax_tree: false)
-    server = RubyLsp::Server.new(test_mode: true)
+    server = RubyLsp::Server.new
+    server.global_state.test_mode = true
 
     begin
       capture_subprocess_io do
