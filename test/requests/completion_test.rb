@@ -797,11 +797,13 @@ class CompletionTest < Minitest::Test
       R
     RUBY
 
-    test_addon(:create_completion_addon, source: source) do |server|
+    create_completion_addon
+
+    with_server(source) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/completion",
-        params: { textDocument: { uri: URI("file:///fake.rb") }, position: { character: 1, line: 0 } },
+        params: { textDocument: { uri: uri }, position: { character: 1, line: 0 } },
       )
       response = server.pop_response.response
 

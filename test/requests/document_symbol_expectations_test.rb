@@ -32,11 +32,12 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    test_addon(:create_document_symbol_addon, source: source) do |server|
+    create_document_symbol_addon
+    with_server(source) do |server, uri|
       server.process_message({
         id: 1,
         method: "textDocument/documentSymbol",
-        params: { textDocument: { uri: "file:///fake.rb" } },
+        params: { textDocument: { uri: uri } },
       })
       result = server.pop_response
       assert_instance_of(RubyLsp::Result, result)

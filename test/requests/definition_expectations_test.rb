@@ -201,7 +201,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       RubyLsp
     RUBY
 
-    test_addon(:create_definition_addon, source: source) do |server|
+    create_definition_addon
+
+    with_server(source) do |server, uri|
       server.global_state.index.index_single(
         RubyIndexer::IndexablePath.new(
           "#{Dir.pwd}/lib",
@@ -214,7 +216,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       server.process_message(
         id: 1,
         method: "textDocument/definition",
-        params: { textDocument: { uri: URI("file:///fake.rb") }, position: { character: 0, line: 0 } },
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
       )
       response = server.pop_response.response
 
