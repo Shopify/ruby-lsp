@@ -144,11 +144,11 @@ export class DependenciesTree
   private async fetchDependencies(): Promise<BundlerTreeNode[]> {
     this.gemRootFolders = {};
 
-    if (!this.currentWorkspace) {
+    if (!this.currentWorkspace || !this.currentWorkspace.lspClient) {
       return [];
     }
 
-    const resp = (await this.currentWorkspace.lspClient?.sendRequest(
+    const resp = (await this.currentWorkspace.lspClient.sendRequest(
       "rubyLsp/workspace/dependencies",
       {},
     )) as [
