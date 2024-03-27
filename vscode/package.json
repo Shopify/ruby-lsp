@@ -456,12 +456,7 @@
           "Snapfile",
           "Steepfile",
           "Thorfile",
-          "Vagrantfile",
-          "brewfile",
-          "buildfile",
-          "capfile",
-          "gemfile",
-          "rakefile"
+          "Vagrantfile"
         ],
         "configuration": "./languages/ruby.json"
       },
