@@ -70,7 +70,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
 
   def create_document_symbol_addon
     Class.new(RubyLsp::Addon) do
-      def activate(global_state, message_queue); end
+      def activate(global_state, outgoing_queue); end
 
       def name
         "Document SymbolsAddon"

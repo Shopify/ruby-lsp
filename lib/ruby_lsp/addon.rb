@@ -50,8 +50,8 @@ module RubyLsp
       end
 
       # Discovers and loads all addons. Returns the list of activated addons
-      sig { params(global_state: GlobalState, message_queue: Thread::Queue).returns(T::Array[Addon]) }
-      def load_addons(global_state, message_queue)
+      sig { params(global_state: GlobalState, outgoing_queue: Thread::Queue).returns(T::Array[Addon]) }
+      def load_addons(global_state, outgoing_queue)
         # Require all addons entry points, which should be placed under
         # `some_gem/lib/ruby_lsp/your_gem_name/addon.rb`
         Gem.find_files("ruby_lsp/**/addon.rb").each do |addon|
@@ -67,7 +67,7 @@ module RubyLsp
         # Activate each one of the discovered addons. If any problems occur in the addons, we don't want to
         # fail to boot the server
         addons.each do |addon|
-          addon.activate(global_state, message_queue)
+          addon.activate(global_state, outgoing_queue)
         rescue => e
           addon.add_error(e)
         end
@@ -105,8 +105,8 @@ module RubyLsp
 
     # Each addon should implement `MyAddon#activate` and use to perform any sort of initialization, such as
     # reading information into memory or even spawning a separate process
-    sig { abstract.params(global_state: GlobalState, message_queue: Thread::Queue).void }
-    def activate(global_state, message_queue); end
+    sig { abstract.params(global_state: GlobalState, outgoing_queue: Thread::Queue).void }
+    def activate(global_state, outgoing_queue); end
 
     # Each addon should implement `MyAddon#deactivate` and use to perform any clean up, like shutting down a
     # child process

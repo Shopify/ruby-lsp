@@ -374,7 +374,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         T.unsafe(klass).new(response_builder, uri, nesting, dispatcher)
       end
 
-      def activate(global_state, message_queue); end
+      def activate(global_state, outgoing_queue); end
 
       def deactivate; end
 

@@ -896,7 +896,7 @@ class CompletionTest < Minitest::Test
         T.unsafe(klass).new(response_builder, nesting, dispatcher, uri)
       end
 
-      def activate(global_state, message_queue); end
+      def activate(global_state, outgoing_queue); end
 
       def deactivate; end
 
