@@ -1,5 +1,3 @@
-import fs from "fs/promises";
-
 import * as vscode from "vscode";
 import { CodeLens, State } from "vscode-languageclient/node";
 
@@ -56,7 +54,16 @@ export class Workspace implements WorkspaceInterface {
     }
 
     try {
-      await fs.access(this.workspaceFolder.uri.fsPath, fs.constants.W_OK);
+      const stat = await vscode.workspace.fs.stat(this.workspaceFolder.uri);
+
+      // If permissions is undefined, then we have all permissions. If it's set, the only possible value currently is
+      // readonly, so it means VS Code does not have write permissions to the workspace URI and creating the custom
+      // bundle would fail. We throw here just to catch it immediately below and show the error to the user
+      if (stat.permissions) {
+        throw new Error(
+          `Directory ${this.workspaceFolder.uri.fsPath} is readonly.`,
+        );
+      }
     } catch (error: any) {
       this.error = true;
 
