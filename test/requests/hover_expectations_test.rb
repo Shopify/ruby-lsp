@@ -254,11 +254,13 @@ class HoverExpectationsTest < ExpectationsTestRunner
       Post
     RUBY
 
-    test_addon(:create_hover_addon, source: source) do |server|
+    create_hover_addon
+
+    with_server(source) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/hover",
-        params: { textDocument: { uri: URI("file:///fake.rb") }, position: { character: 0, line: 4 } },
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 4 } },
       )
 
       assert_match(<<~RESPONSE.strip, server.pop_response.response.contents.value)

@@ -88,6 +88,26 @@ module RubyLsp
       $stderr.puts("Error processing #{message[:method]}: #{e.full_message}")
     end
 
+    sig { void }
+    def load_addons
+      Addon.load_addons(@outgoing_queue)
+      errored_addons = Addon.addons.select(&:error?)
+
+      if errored_addons.any?
+        send_message(
+          Notification.new(
+            method: "window/showMessage",
+            params: Interface::ShowMessageParams.new(
+              type: Constant::MessageType::WARNING,
+              message: "Error loading addons:\n\n#{errored_addons.map(&:formatted_errors).join("\n\n")}",
+            ),
+          ),
+        )
+
+        $stderr.puts(errored_addons.map(&:backtraces).join("\n\n"))
+      end
+    end
+
     private
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
@@ -213,23 +233,7 @@ module RubyLsp
 
     sig { void }
     def run_initialized
-      Addon.load_addons(@outgoing_queue)
-      errored_addons = Addon.addons.select(&:error?)
-
-      if errored_addons.any?
-        send_message(
-          Notification.new(
-            method: "window/showMessage",
-            params: Interface::ShowMessageParams.new(
-              type: Constant::MessageType::WARNING,
-              message: "Error loading addons:\n\n#{errored_addons.map(&:formatted_errors).join("\n\n")}",
-            ),
-          ),
-        )
-
-        $stderr.puts(errored_addons.map(&:backtraces).join("\n\n"))
-      end
-
+      load_addons
       RubyVM::YJIT.enable if defined?(RubyVM::YJIT.enable)
 
       indexing_config = {}

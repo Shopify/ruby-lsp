@@ -44,46 +44,6 @@ module Minitest
     include RubyLsp::TestHelper
 
     Minitest::Test.make_my_diffs_pretty!
-
-    private
-
-    sig do
-      params(
-        addon_creation_method: Symbol,
-        source: String,
-        block: T.proc.params(server: RubyLsp::Server).void,
-      ).void
-    end
-    def test_addon(addon_creation_method, source:, &block)
-      message_queue = Thread::Queue.new
-
-      uri = URI::Generic.from_path(path: "/fake.rb")
-      server = RubyLsp::Server.new(test_mode: true)
-      server.global_state.stubs(:typechecker).returns(false)
-      server.process_message({
-        method: "textDocument/didOpen",
-        params: {
-          textDocument: {
-            uri: uri,
-            text: source,
-            version: 1,
-          },
-        },
-      })
-      index = server.global_state.index
-      index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
-
-      send(addon_creation_method)
-      RubyLsp::Addon.load_addons(message_queue)
-
-      block.call(server)
-    ensure
-      RubyLsp::Addon.addons.each(&:deactivate)
-      RubyLsp::Addon.addon_classes.clear
-      RubyLsp::Addon.addons.clear
-      T.must(server).run_shutdown
-      T.must(message_queue).close
-    end
   end
 end
 

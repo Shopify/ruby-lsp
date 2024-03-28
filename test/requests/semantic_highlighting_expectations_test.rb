@@ -37,11 +37,13 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    test_addon(:create_semantic_highlighting_addon, source: source) do |server|
+    create_semantic_highlighting_addon
+
+    with_server(source) do |server, uri|
       server.process_message({
         id: 1,
         method: "textDocument/semanticTokens/full",
-        params: { textDocument: { uri: "file:///fake.rb" } },
+        params: { textDocument: { uri: uri } },
       })
 
       result = server.pop_response

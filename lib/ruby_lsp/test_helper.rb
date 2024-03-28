@@ -13,10 +13,12 @@ module RubyLsp
           source: T.nilable(String),
           uri: URI::Generic,
           stub_no_typechecker: T::Boolean,
+          load_addons: T::Boolean,
           block: T.proc.params(server: RubyLsp::Server, uri: URI::Generic).returns(T.type_parameter(:T)),
         ).returns(T.type_parameter(:T))
     end
-    def with_server(source = nil, uri = Kernel.URI("file:///fake.rb"), stub_no_typechecker: false, &block)
+    def with_server(source = nil, uri = Kernel.URI("file:///fake.rb"), stub_no_typechecker: false, load_addons: true,
+      &block)
       server = RubyLsp::Server.new(test_mode: true)
       server.global_state.stubs(:typechecker).returns(false) if stub_no_typechecker
 
@@ -37,8 +39,14 @@ module RubyLsp
         RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)),
         source,
       )
+      server.load_addons if load_addons
       block.call(server, uri)
     ensure
+      if load_addons
+        RubyLsp::Addon.addons.each(&:deactivate)
+        RubyLsp::Addon.addon_classes.clear
+        RubyLsp::Addon.addons.clear
+      end
       T.must(server).run_shutdown
     end
   end

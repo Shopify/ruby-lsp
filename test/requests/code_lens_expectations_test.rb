@@ -130,11 +130,13 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
       class Test < Minitest::Test; end
     RUBY
 
-    test_addon(:create_code_lens_addon, source: source) do |server|
+    create_code_lens_addon
+
+    with_server(source) do |server, uri|
       server.process_message({
         id: 1,
         method: "textDocument/codeLens",
-        params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 1, character: 2 } },
+        params: { textDocument: { uri: uri }, position: { line: 1, character: 2 } },
       })
 
       result = server.pop_response
