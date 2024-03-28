@@ -4,14 +4,22 @@
 module RubyLsp
   module Requests
     module Support
-      module FormatterRunner
+      module Formatter
         extend T::Sig
         extend T::Helpers
 
         interface!
 
         sig { abstract.params(uri: URI::Generic, document: Document).returns(T.nilable(String)) }
-        def run(uri, document); end
+        def formatting(uri, document); end
+
+        sig do
+          abstract.params(
+            uri: URI::Generic,
+            document: Document,
+          ).returns(T.nilable(T::Array[Interface::Diagnostic]))
+        end
+        def diagnostic(uri, document); end
       end
     end
   end

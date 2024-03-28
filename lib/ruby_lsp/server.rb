@@ -254,6 +254,13 @@ module RubyLsp
         end
       end
 
+      if defined?(Requests::Support::RuboCopFormatter)
+        @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.instance)
+      end
+      if defined?(Requests::Support::SyntaxTreeFormatter)
+        @global_state.register_formatter("syntax_tree", Requests::Support::SyntaxTreeFormatter.instance)
+      end
+
       perform_initial_indexing(indexing_config)
       check_formatter_is_available
     end
@@ -387,9 +394,9 @@ module RubyLsp
         return
       end
 
-      response = Requests::Formatting.new(@store.get(uri), formatter: @global_state.formatter).perform
+      response = Requests::Formatting.new(@global_state, @store.get(uri)).perform
       send_message(Result.new(id: message[:id], response: response))
-    rescue Requests::Formatting::InvalidFormatter => error
+    rescue Requests::Request::InvalidFormatter => error
       send_message(Notification.window_show_error("Configuration error: #{error.message}"))
       send_empty_response(message[:id])
     rescue StandardError, LoadError => error
@@ -512,7 +519,7 @@ module RubyLsp
       end
 
       response = @store.cache_fetch(uri, "textDocument/diagnostic") do |document|
-        Requests::Diagnostics.new(document).perform
+        Requests::Diagnostics.new(@global_state, document).perform
       end
 
       send_message(
@@ -521,6 +528,9 @@ module RubyLsp
           response: response && Interface::FullDocumentDiagnosticReport.new(kind: "full", items: response),
         ),
       )
+    rescue Requests::Request::InvalidFormatter => error
+      send_message(Notification.window_show_error("Configuration error: #{error.message}"))
+      send_empty_response(message[:id])
     rescue StandardError, LoadError => error
       send_message(Notification.window_show_error("Error running diagnostics: #{error.message}"))
       send_empty_response(message[:id])
