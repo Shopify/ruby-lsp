@@ -22,7 +22,7 @@ module RubyLsp
         def run(uri, document)
           filename = T.must(uri.to_standardized_path || uri.opaque)
           # Invoke RuboCop with just this file in `paths`
-          @runner.run(filename, document.source)
+          @runner.run(filename, document.source, document.parse_result)
 
           @runner.offenses.map do |offense|
             Support::RuboCopDiagnostic.new(document, offense, uri)

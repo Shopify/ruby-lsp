@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 # frozen_string_literal: true
 
 begin
@@ -16,6 +16,8 @@ end
 if RuboCop.const_defined?(:LSP) # This condition will be removed when requiring RuboCop >= 1.61.
   RuboCop::LSP.enable
 end
+
+require "prism/translation/parser/rubocop"
 
 module RubyLsp
   module Requests
@@ -74,6 +76,7 @@ module RubyLsp
           @offenses = T.let([], T::Array[RuboCop::Cop::Offense])
           @errors = T.let([], T::Array[String])
           @warnings = T.let([], T::Array[String])
+          @parse_result = T.let(nil, T.nilable(Prism::ParseResult))
 
           args += DEFAULT_ARGS
           rubocop_options = ::RuboCop::Options.new.parse(args).first
@@ -82,14 +85,15 @@ module RubyLsp
           super(rubocop_options, config_store)
         end
 
-        sig { params(path: String, contents: String).void }
-        def run(path, contents)
+        sig { params(path: String, contents: String, parse_result: Prism::ParseResult).void }
+        def run(path, contents, parse_result)
           # Clear Runner state between runs since we get a single instance of this class
           # on every use site.
           @errors = []
           @warnings = []
           @offenses = []
           @options[:stdin] = contents
+          @parse_result = parse_result
 
           super([path])
 
@@ -107,6 +111,28 @@ module RubyLsp
         sig { returns(String) }
         def formatted_source
           @options[:stdin]
+        end
+
+        sig { params(file: String).returns(RuboCop::ProcessedSource) }
+        def get_processed_source(file)
+          config = @config_store.for_file(file)
+          parser_engine = config.parser_engine
+          return super unless parser_engine == :parser_prism
+
+          processed_source = T.unsafe(::RuboCop::AST::ProcessedSource).new(
+            @options[:stdin],
+            Prism::Translation::Parser::VERSION_3_3,
+            file,
+            parser_engine: parser_engine,
+            prism_result: @parse_result,
+          )
+          processed_source.config = config
+          processed_source.registry = mobilized_cop_classes(config)
+          # We have to reset the result to nil after returning the processed source the first time. This is needed for
+          # formatting because RuboCop will keep re-parsing the same file until no more auto-corrects can be applied. If
+          # we didn't reset it, we would end up operating in a stale AST
+          @parse_result = nil
+          processed_source
         end
 
         class << self
@@ -133,6 +159,110 @@ module RubyLsp
         sig { params(_file: String, offenses: T::Array[RuboCop::Cop::Offense]).void }
         def file_finished(_file, offenses)
           @offenses = offenses
+        end
+      end
+    end
+  end
+end
+
+# Processed Source patch so that we can pass the existing AST to RuboCop without having to re-parse files a second time
+module ProcessedSourcePatch
+  extend T::Sig
+
+  sig do
+    params(
+      source: String,
+      ruby_version: Float,
+      path: T.nilable(String),
+      parser_engine: Symbol,
+      prism_result: T.nilable(Prism::ParseResult),
+    ).void
+  end
+  def initialize(source, ruby_version, path = nil, parser_engine: :parser_whitequark, prism_result: nil)
+    @prism_result = prism_result
+
+    # Invoking super will end up invoking our patched version of tokenize, which avoids re-parsing the file
+    super(source, Prism::Translation::Parser::VERSION_3_3, path, parser_engine: parser_engine)
+  end
+
+  sig { params(parser: T.untyped).returns(T::Array[T.untyped]) }
+  def tokenize(parser)
+    begin
+      ast, comments, tokens = parser.tokenize(@buffer, parse_result: @prism_result)
+      ast ||= nil
+    rescue Parser::SyntaxError
+      comments = []
+      tokens = []
+    end
+
+    ast&.complete!
+    tokens.map! { |t| RuboCop::AST::Token.from_parser_token(t) }
+
+    [ast, comments, tokens]
+  end
+
+  RuboCop::AST::ProcessedSource.prepend(self)
+end
+
+module Prism
+  module Translation
+    class Parser < ::Parser::Base
+      extend T::Sig
+
+      sig do
+        params(
+          source_buffer: ::Parser::Source::Buffer,
+          recover: T::Boolean,
+          parse_result: T.nilable(Prism::ParseResult),
+        ).returns(T::Array[T.untyped])
+      end
+      def tokenize(source_buffer, recover = false, parse_result: nil)
+        @source_buffer = T.let(source_buffer, T.nilable(::Parser::Source::Buffer))
+        source = source_buffer.source
+
+        offset_cache = build_offset_cache(source)
+        result = if @prism_result
+          @prism_result
+        else
+          begin
+            unwrap(
+              Prism.parse_lex(source, filepath: source_buffer.name, version: convert_for_prism(version)),
+              offset_cache,
+            )
+          rescue ::Parser::SyntaxError
+            raise unless recover
+          end
+        end
+
+        program, tokens = result.value
+        ast = build_ast(program, offset_cache) if result.success?
+
+        [
+          ast,
+          build_comments(result.comments, offset_cache),
+          build_tokens(tokens, offset_cache),
+        ]
+      ensure
+        @source_buffer = nil
+      end
+
+      module ProcessedSource
+        extend T::Sig
+        extend T::Helpers
+
+        requires_ancestor { Kernel }
+
+        sig { params(ruby_version: Float, parser_engine: Symbol).returns(T.untyped) }
+        def parser_class(ruby_version, parser_engine)
+          if ruby_version == Prism::Translation::Parser::VERSION_3_3
+            require "prism/translation/parser33"
+            Prism::Translation::Parser33
+          elsif ruby_version == Prism::Translation::Parser::VERSION_3_4
+            require "prism/translation/parser34"
+            Prism::Translation::Parser34
+          else
+            super
+          end
         end
       end
     end

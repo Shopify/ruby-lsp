@@ -9,6 +9,7 @@ require:
   - ./lib/rubocop/cop/ruby_lsp/use_register_with_handler_method
 
 AllCops:
+  ParserEngine: parser_prism
   NewCops: disable
   SuggestExtensions: false
   Include:

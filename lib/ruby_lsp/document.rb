@@ -36,7 +36,7 @@ module RubyLsp
 
     sig { returns(Prism::ProgramNode) }
     def tree
-      @parse_result.value
+      T.unsafe(@parse_result.value).first
     end
 
     sig { returns(T::Array[Prism::Comment]) }
@@ -113,7 +113,7 @@ module RubyLsp
       ).returns([T.nilable(Prism::Node), T.nilable(Prism::Node), T::Array[String]])
     end
     def locate_node(position, node_types: [])
-      locate(@parse_result.value, create_scanner.find_char_position(position), node_types: node_types)
+      locate(T.unsafe(@parse_result.value).first, create_scanner.find_char_position(position), node_types: node_types)
     end
 
     sig do

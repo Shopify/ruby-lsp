@@ -25,7 +25,7 @@ module RubyLsp
           filename = T.must(uri.to_standardized_path || uri.opaque)
 
           # Invoke RuboCop with just this file in `paths`
-          @runner.run(filename, document.source)
+          @runner.run(filename, document.source, document.parse_result)
 
           @runner.formatted_source
         end
