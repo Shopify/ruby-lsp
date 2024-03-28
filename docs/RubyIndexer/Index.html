@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Ruby LSP documentation</title>
+
+  <script type="text/javascript">
+    var rdoc_rel_prefix = "../";
+    var index_rel_prefix = "../";
+  </script>
+
+  <script src="../js/search_index.js" defer></script>
+  <script src="../js/snapper.js" defer></script>
+  <link href="../css/snapper.css" rel="stylesheet">
+</head>
+
+  <body>
+    <div id="main-container">
+  <nav id="nav">
+  <h3 class="title">Ruby LSP documentation</h3>
+
+  <input id="side-search" type="text" placeholder="Search docs (CMD/CTRL + K)"></input>
+
+  <ul id="navigation-list">
+    <li id="getting-started"><a href="../index.html">Getting started</a></li>
+    <p class="separator">PAGES</p>
+    <li class="index-entry">
+  <a href="../ADDONS_md.html">
+    ADDONS
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../CODE_OF_CONDUCT_md.html">
+    CODE_OF_CONDUCT
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../CONTRIBUTING_md.html">
+    CONTRIBUTING
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../DESIGN_AND_ROADMAP_md.html">
+    DESIGN_AND_ROADMAP
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../EDITORS_md.html">
+    EDITORS
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../README_md.html">
+    README
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../SEMANTIC_HIGHLIGHTING_md.html">
+    SEMANTIC_HIGHLIGHTING
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../TROUBLESHOOTING_md.html">
+    TROUBLESHOOTING
+  </a>
+</li>
+
+    <p class="separator">CODE</p>
+    <li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RuboCop.html">RuboCop</a></summary>
+    <ul>
+      <li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RuboCop/Cop.html">Cop</a></summary>
+    <ul>
+      <li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RuboCop/Cop/RubyLsp.html">RubyLsp</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RuboCop/Cop/RubyLsp/UseLanguageServerAliases.html">UseLanguageServerAliases</a></li><li class="index-entry"><a href="../RuboCop/Cop/RubyLsp/UseRegisterWithHandlerMethod.html">UseRegisterWithHandlerMethod</a></li>
+    </ul>
+  </details>
+</li>
+
+    </ul>
+  </details>
+</li>
+
+    </ul>
+  </details>
+</li>
+<li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyIndexer.html">RubyIndexer</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyIndexer/ClassesAndModulesTest.html">ClassesAndModulesTest</a></li><li class="index-entry"><a href="../RubyIndexer/Collector.html">Collector</a></li><li class="index-entry"><a href="../RubyIndexer/Configuration.html">Configuration</a></li><li class="index-entry"><a href="../RubyIndexer/ConfigurationTest.html">ConfigurationTest</a></li><li class="index-entry"><a href="../RubyIndexer/ConstantTest.html">ConstantTest</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyIndexer/Entry.html">Entry</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyIndexer/Entry/Accessor.html">Accessor</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Alias.html">Alias</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/BlockParameter.html">BlockParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Class.html">Class</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Constant.html">Constant</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/InstanceMethod.html">InstanceMethod</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/KeywordParameter.html">KeywordParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/KeywordRestParameter.html">KeywordRestParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Member.html">Member</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Method.html">Method</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Module.html">Module</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Namespace.html">Namespace</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/OptionalKeywordParameter.html">OptionalKeywordParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/OptionalParameter.html">OptionalParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Parameter.html">Parameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/RequiredParameter.html">RequiredParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/RestParameter.html">RestParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/SingletonMethod.html">SingletonMethod</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/UnresolvedAlias.html">UnresolvedAlias</a></li>
+    </ul>
+  </details>
+</li>
+<li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyIndexer/Index.html">Index</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyIndexer/Index/UnresolvableAliasError.html">UnresolvableAliasError</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyIndexer/IndexTest.html">IndexTest</a></li><li class="index-entry"><a href="../RubyIndexer/IndexablePath.html">IndexablePath</a></li><li class="index-entry"><a href="../RubyIndexer/MethodTest.html">MethodTest</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyIndexer/PrefixTree.html">PrefixTree</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyIndexer/PrefixTree/Node.html">Node</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyIndexer/PrefixTreeTest.html">PrefixTreeTest</a></li><li class="index-entry"><a href="../RubyIndexer/TestCase.html">TestCase</a></li>
+    </ul>
+  </details>
+</li>
+<li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp.html">RubyLsp</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Addon.html">Addon</a></li><li class="index-entry"><a href="../RubyLsp/BaseServer.html">BaseServer</a></li><li class="index-entry"><a href="../RubyLsp/CheckDocs.html">CheckDocs</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Document.html">Document</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Document/Scanner.html">Scanner</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Error.html">Error</a></li><li class="index-entry"><a href="../RubyLsp/GlobalState.html">GlobalState</a></li><li class="index-entry"><a href="../RubyLsp/InlineTypeAssertions.html">InlineTypeAssertions</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Listeners.html">Listeners</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Listeners/CodeLens.html">CodeLens</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/Completion.html">Completion</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/Definition.html">Definition</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/DocumentHighlight.html">DocumentHighlight</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/DocumentLink.html">DocumentLink</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/DocumentSymbol.html">DocumentSymbol</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/FoldingRanges.html">FoldingRanges</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/Hover.html">Hover</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/InlayHints.html">InlayHints</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/SemanticHighlighting.html">SemanticHighlighting</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/SignatureHelp.html">SignatureHelp</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Message.html">Message</a></li><li class="index-entry"><a href="../RubyLsp/Notification.html">Notification</a></li><li class="index-entry"><a href="../RubyLsp/ParameterScope.html">ParameterScope</a></li><li class="index-entry"><a href="../RubyLsp/Request.html">Request</a></li><li class="index-entry"><a href="../RubyLsp/RequestConfig.html">RequestConfig</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Requests.html">Requests</a></summary>
+    <ul>
+      <li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Requests/CodeActionResolve.html">CodeActionResolve</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Requests/CodeActionResolve/CodeActionError.html">CodeActionError</a></li><li class="index-entry"><a href="../RubyLsp/Requests/CodeActionResolve/Error.html">Error</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Requests/CodeActions.html">CodeActions</a></li><li class="index-entry"><a href="../RubyLsp/Requests/CodeLens.html">CodeLens</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Completion.html">Completion</a></li><li class="index-entry"><a href="../RubyLsp/Requests/CompletionResolve.html">CompletionResolve</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Definition.html">Definition</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Diagnostics.html">Diagnostics</a></li><li class="index-entry"><a href="../RubyLsp/Requests/DocumentHighlight.html">DocumentHighlight</a></li><li class="index-entry"><a href="../RubyLsp/Requests/DocumentLink.html">DocumentLink</a></li><li class="index-entry"><a href="../RubyLsp/Requests/DocumentSymbol.html">DocumentSymbol</a></li><li class="index-entry"><a href="../RubyLsp/Requests/FoldingRanges.html">FoldingRanges</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Requests/Formatting.html">Formatting</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Requests/Formatting/Error.html">Error</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Formatting/InvalidFormatter.html">InvalidFormatter</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Requests/Hover.html">Hover</a></li><li class="index-entry"><a href="../RubyLsp/Requests/InlayHints.html">InlayHints</a></li><li class="index-entry"><a href="../RubyLsp/Requests/OnTypeFormatting.html">OnTypeFormatting</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Request.html">Request</a></li><li class="index-entry"><a href="../RubyLsp/Requests/SelectionRanges.html">SelectionRanges</a></li><li class="index-entry"><a href="../RubyLsp/Requests/SemanticHighlighting.html">SemanticHighlighting</a></li><li class="index-entry"><a href="../RubyLsp/Requests/ShowSyntaxTree.html">ShowSyntaxTree</a></li><li class="index-entry"><a href="../RubyLsp/Requests/SignatureHelp.html">SignatureHelp</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Requests/Support.html">Support</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Requests/Support/Annotation.html">Annotation</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/Common.html">Common</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/FormatterRunner.html">FormatterRunner</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/InternalRuboCopError.html">InternalRuboCopError</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/RuboCopDiagnostic.html">RuboCopDiagnostic</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/RuboCopDiagnosticsRunner.html">RuboCopDiagnosticsRunner</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/RuboCopFormattingRunner.html">RuboCopFormattingRunner</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Requests/Support/RuboCopRunner.html">RuboCopRunner</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Requests/Support/RuboCopRunner/ConfigurationError.html">ConfigurationError</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Requests/Support/SelectionRange.html">SelectionRange</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/Sorbet.html">Sorbet</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/SyntaxTreeFormattingRunner.html">SyntaxTreeFormattingRunner</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Requests/WorkspaceSymbol.html">WorkspaceSymbol</a></li>
+    </ul>
+  </details>
+</li>
+<li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/ResponseBuilders.html">ResponseBuilders</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/ResponseBuilders/CollectionResponseBuilder.html">CollectionResponseBuilder</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/ResponseBuilders/DocumentSymbol.html">DocumentSymbol</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/ResponseBuilders/DocumentSymbol/SymbolHierarchyRoot.html">SymbolHierarchyRoot</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/ResponseBuilders/Hover.html">Hover</a></li><li class="index-entry"><a href="../RubyLsp/ResponseBuilders/ResponseBuilder.html">ResponseBuilder</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/ResponseBuilders/SemanticHighlighting.html">SemanticHighlighting</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/ResponseBuilders/SemanticHighlighting/SemanticToken.html">SemanticToken</a></li><li class="index-entry"><a href="../RubyLsp/ResponseBuilders/SemanticHighlighting/SemanticTokenEncoder.html">SemanticTokenEncoder</a></li><li class="index-entry"><a href="../RubyLsp/ResponseBuilders/SemanticHighlighting/UndefinedTokenType.html">UndefinedTokenType</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/ResponseBuilders/SignatureHelp.html">SignatureHelp</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Result.html">Result</a></li><li class="index-entry"><a href="../RubyLsp/RubyDocument.html">RubyDocument</a></li><li class="index-entry"><a href="../RubyLsp/Server.html">Server</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/SetupBundler.html">SetupBundler</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/SetupBundler/BundleNotLocked.html">BundleNotLocked</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Store.html">Store</a></li><li class="index-entry"><a href="../RubyLsp/TestHelper.html">TestHelper</a></li>
+    </ul>
+  </details>
+</li>
+<li class="expandable-index-entry">
+  <details>
+    <summary><a href="../URI.html">URI</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../URI/Generic.html">Generic</a></li><li class="index-entry"><a href="../URI/Source.html">Source</a></li>
+    </ul>
+  </details>
+</li>
+
+  </ul>
+</nav>
+
+
+  <article>
+    <h1>class RubyIndexer::Index</h1>
+    <section class="description"></section>
+
+      <section id="5Buntitled-5D" class="documentation-section">
+
+
+          <section>
+            <h3 class="section-title">Constants<hr/></h3>
+
+            <dl>
+                <dt id="ENTRY_SIMILARITY_THRESHOLD">>ENTRY_SIMILARITY_THRESHOLD</dt>
+                <dd><p>The minimum Jaro-Winkler similarity score for an entry to be considered a match for a given fuzzy search query</p></dd>
+            </dl>
+          </section>
+
+        
+
+        
+            
+
+            <section>
+              <h3 class="section-title">Public Class Methods<hr/></h3>
+
+                <div id="method-c-new" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      new()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/lib/ruby_indexer/index.rb, line 14</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">initialize</span>
+  <span class="ruby-comment"># Holds all entries in the index using the following format:</span>
+  <span class="ruby-comment"># {</span>
+  <span class="ruby-comment">#  &quot;Foo&quot; =&gt; [#&lt;Entry::Class&gt;, #&lt;Entry::Class&gt;],</span>
+  <span class="ruby-comment">#  &quot;Foo::Bar&quot; =&gt; [#&lt;Entry::Class&gt;],</span>
+  <span class="ruby-comment"># }</span>
+  <span class="ruby-ivar">@entries</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">let</span>({}, <span class="ruby-constant">T</span><span class="ruby-operator">::</span><span class="ruby-constant">Hash</span>[<span class="ruby-constant">String</span>, <span class="ruby-constant">T</span><span class="ruby-operator">::</span><span class="ruby-constant">Array</span>[<span class="ruby-constant">Entry</span>]])
+
+  <span class="ruby-comment"># Holds all entries in the index using a prefix tree for searching based on prefixes to provide autocompletion</span>
+  <span class="ruby-ivar">@entries_tree</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">let</span>(<span class="ruby-constant">PrefixTree</span>[<span class="ruby-constant">T</span><span class="ruby-operator">::</span><span class="ruby-constant">Array</span>[<span class="ruby-constant">Entry</span>]].<span class="ruby-identifier">new</span>, <span class="ruby-constant">PrefixTree</span>[<span class="ruby-constant">T</span><span class="ruby-operator">::</span><span class="ruby-constant">Array</span>[<span class="ruby-constant">Entry</span>]])
+
+  <span class="ruby-comment"># Holds references to where entries where discovered so that we can easily delete them</span>
+  <span class="ruby-comment"># {</span>
+  <span class="ruby-comment">#  &quot;/my/project/foo.rb&quot; =&gt; [#&lt;Entry::Class&gt;, #&lt;Entry::Class&gt;],</span>
+  <span class="ruby-comment">#  &quot;/my/project/bar.rb&quot; =&gt; [#&lt;Entry::Class&gt;],</span>
+  <span class="ruby-comment"># }</span>
+  <span class="ruby-ivar">@files_to_entries</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">let</span>({}, <span class="ruby-constant">T</span><span class="ruby-operator">::</span><span class="ruby-constant">Hash</span>[<span class="ruby-constant">String</span>, <span class="ruby-constant">T</span><span class="ruby-operator">::</span><span class="ruby-constant">Array</span>[<span class="ruby-constant">Entry</span>]])
+
+  <span class="ruby-comment"># Holds all require paths for every indexed item so that we can provide autocomplete for requires</span>
+  <span class="ruby-ivar">@require_paths_tree</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">let</span>(<span class="ruby-constant">PrefixTree</span>[<span class="ruby-constant">IndexablePath</span>].<span class="ruby-identifier">new</span>, <span class="ruby-constant">PrefixTree</span>[<span class="ruby-constant">IndexablePath</span>])
+<span class="ruby-keyword">end</span></pre>
+                </div>
+            </section>
+          
+            
+            
+        
+            
+
+            <section>
+              <h3 class="section-title">Public Instance Methods<hr/></h3>
+
+                <div id="method-i-3C-3C" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      &lt;&lt;(entry)
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/lib/ruby_indexer/index.rb, line 65</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">&lt;&lt;</span>(<span class="ruby-identifier">entry</span>)
+  <span class="ruby-identifier">name</span> = <span class="ruby-identifier">entry</span>.<span class="ruby-identifier">name</span>
+
+  (<span class="ruby-ivar">@entries</span>[<span class="ruby-identifier">name</span>] <span class="ruby-operator">||=</span> []) <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">entry</span>
+  (<span class="ruby-ivar">@files_to_entries</span>[<span class="ruby-identifier">entry</span>.<span class="ruby-identifier">file_path</span>] <span class="ruby-operator">||=</span> []) <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">entry</span>
+  <span class="ruby-ivar">@entries_tree</span>.<span class="ruby-identifier">insert</span>(<span class="ruby-identifier">name</span>, <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@entries</span>[<span class="ruby-identifier">name</span>]))
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-5B-5D" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      [](fully_qualified_name)
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/lib/ruby_indexer/index.rb, line 74</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">[]</span>(<span class="ruby-identifier">fully_qualified_name</span>)
+  <span class="ruby-ivar">@entries</span>[<span class="ruby-identifier">fully_qualified_name</span>.<span class="ruby-identifier">delete_prefix</span>(<span class="ruby-string">&quot;::&quot;</span>)]
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-delete" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      delete(indexable)
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/lib/ruby_indexer/index.rb, line 37</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">delete</span>(<span class="ruby-identifier">indexable</span>)
+  <span class="ruby-comment"># For each constant discovered in `path`, delete the associated entry from the index. If there are no entries</span>
+  <span class="ruby-comment"># left, delete the constant from the index.</span>
+  <span class="ruby-ivar">@files_to_entries</span>[<span class="ruby-identifier">indexable</span>.<span class="ruby-identifier">full_path</span>]&amp;.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">entry</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">name</span> = <span class="ruby-identifier">entry</span>.<span class="ruby-identifier">name</span>
+    <span class="ruby-identifier">entries</span> = <span class="ruby-ivar">@entries</span>[<span class="ruby-identifier">name</span>]
+    <span class="ruby-keyword">next</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">entries</span>
+
+    <span class="ruby-comment"># Delete the specific entry from the list for this name</span>
+    <span class="ruby-identifier">entries</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">entry</span>)
+
+    <span class="ruby-comment"># If all entries were deleted, then remove the name from the hash and from the prefix tree. Otherwise, update</span>
+    <span class="ruby-comment"># the prefix tree with the current entries</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">entries</span>.<span class="ruby-identifier">empty?</span>
+      <span class="ruby-ivar">@entries</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">name</span>)
+      <span class="ruby-ivar">@entries_tree</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">name</span>)
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-ivar">@entries_tree</span>.<span class="ruby-identifier">insert</span>(<span class="ruby-identifier">name</span>, <span class="ruby-identifier">entries</span>)
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-ivar">@files_to_entries</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">indexable</span>.<span class="ruby-identifier">full_path</span>)
+
+  <span class="ruby-identifier">require_path</span> = <span class="ruby-identifier">indexable</span>.<span class="ruby-identifier">require_path</span>
+  <span class="ruby-ivar">@require_paths_tree</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">require_path</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">require_path</span>
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-follow_aliased_namespace" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      follow_aliased_namespace(name)
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/lib/ruby_indexer/index.rb, line 210</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">follow_aliased_namespace</span>(<span class="ruby-identifier">name</span>)
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">name</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@entries</span>[<span class="ruby-identifier">name</span>]
+
+  <span class="ruby-identifier">parts</span> = <span class="ruby-identifier">name</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&quot;::&quot;</span>)
+  <span class="ruby-identifier">real_parts</span> = []
+
+  (<span class="ruby-identifier">parts</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">-</span> <span class="ruby-value">1</span>).<span class="ruby-identifier">downto</span>(<span class="ruby-value">0</span>).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">i</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">current_name</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-identifier">parts</span>[<span class="ruby-value">0</span><span class="ruby-operator">..</span><span class="ruby-identifier">i</span>]).<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;::&quot;</span>)
+    <span class="ruby-identifier">entry</span> = <span class="ruby-ivar">@entries</span>[<span class="ruby-identifier">current_name</span>]&amp;.<span class="ruby-identifier">first</span>
+
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">entry</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Alias</span>
+      <span class="ruby-identifier">target</span> = <span class="ruby-identifier">entry</span>.<span class="ruby-identifier">target</span>
+      <span class="ruby-keyword">return</span> <span class="ruby-identifier">follow_aliased_namespace</span>(<span class="ruby-node">&quot;#{target}::#{real_parts.join(&quot;::&quot;)}&quot;</span>)
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">UnresolvedAlias</span>
+      <span class="ruby-identifier">resolved</span> = <span class="ruby-identifier">resolve_alias</span>(<span class="ruby-identifier">entry</span>)
+
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">resolved</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">UnresolvedAlias</span>)
+        <span class="ruby-identifier">raise</span> <span class="ruby-constant">UnresolvableAliasError</span>, <span class="ruby-node">&quot;The constant #{resolved.name} is an alias to a non existing constant&quot;</span>
+      <span class="ruby-keyword">end</span>
+
+      <span class="ruby-identifier">target</span> = <span class="ruby-identifier">resolved</span>.<span class="ruby-identifier">target</span>
+      <span class="ruby-keyword">return</span> <span class="ruby-identifier">follow_aliased_namespace</span>(<span class="ruby-node">&quot;#{target}::#{real_parts.join(&quot;::&quot;)}&quot;</span>)
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">real_parts</span>.<span class="ruby-identifier">unshift</span>(<span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-identifier">parts</span>[<span class="ruby-identifier">i</span>]))
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">real_parts</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;::&quot;</span>)
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-fuzzy_search" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      fuzzy_search(query)
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/lib/ruby_indexer/index.rb, line 116</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">fuzzy_search</span>(<span class="ruby-identifier">query</span>)
+  <span class="ruby-keyword">return</span> <span class="ruby-ivar">@entries</span>.<span class="ruby-identifier">flat_map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">_name</span>, <span class="ruby-identifier">entries</span><span class="ruby-operator">|</span> <span class="ruby-identifier">entries</span> } <span class="ruby-keyword">unless</span> <span class="ruby-identifier">query</span>
+
+  <span class="ruby-identifier">normalized_query</span> = <span class="ruby-identifier">query</span>.<span class="ruby-identifier">gsub</span>(<span class="ruby-string">&quot;::&quot;</span>, <span class="ruby-string">&quot;&quot;</span>).<span class="ruby-identifier">downcase</span>
+
+  <span class="ruby-identifier">results</span> = <span class="ruby-ivar">@entries</span>.<span class="ruby-identifier">filter_map</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">name</span>, <span class="ruby-identifier">entries</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">similarity</span> = <span class="ruby-constant">DidYouMean</span><span class="ruby-operator">::</span><span class="ruby-constant">JaroWinkler</span>.<span class="ruby-identifier">distance</span>(<span class="ruby-identifier">name</span>.<span class="ruby-identifier">gsub</span>(<span class="ruby-string">&quot;::&quot;</span>, <span class="ruby-string">&quot;&quot;</span>).<span class="ruby-identifier">downcase</span>, <span class="ruby-identifier">normalized_query</span>)
+    [<span class="ruby-identifier">entries</span>, <span class="ruby-operator">-</span><span class="ruby-identifier">similarity</span>] <span class="ruby-keyword">if</span> <span class="ruby-identifier">similarity</span> <span class="ruby-operator">&gt;</span> <span class="ruby-constant">ENTRY_SIMILARITY_THRESHOLD</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">results</span>.<span class="ruby-identifier">sort_by!</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:last</span>)
+  <span class="ruby-identifier">results</span>.<span class="ruby-identifier">flat_map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:first</span>)
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-index_all" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      index_all(indexable_paths: RubyIndexer.configuration.indexables, &amp;block)
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/lib/ruby_indexer/index.rb, line 171</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">index_all</span>(<span class="ruby-value">indexable_paths:</span> <span class="ruby-constant">RubyIndexer</span>.<span class="ruby-identifier">configuration</span>.<span class="ruby-identifier">indexables</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
+  <span class="ruby-comment"># Calculate how many paths are worth 1% of progress</span>
+  <span class="ruby-identifier">progress_step</span> = (<span class="ruby-identifier">indexable_paths</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">/</span> <span class="ruby-value">100.0</span>).<span class="ruby-identifier">ceil</span>
+
+  <span class="ruby-identifier">indexable_paths</span>.<span class="ruby-identifier">each_with_index</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">path</span>, <span class="ruby-identifier">index</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">block</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">index</span> <span class="ruby-operator">%</span> <span class="ruby-identifier">progress_step</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>
+      <span class="ruby-identifier">progress</span> = (<span class="ruby-identifier">index</span> <span class="ruby-operator">/</span> <span class="ruby-identifier">progress_step</span>) <span class="ruby-operator">+</span> <span class="ruby-value">1</span>
+      <span class="ruby-keyword">break</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">block</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">progress</span>)
+    <span class="ruby-keyword">end</span>
+
+    <span class="ruby-identifier">index_single</span>(<span class="ruby-identifier">path</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-index_single" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      index_single(indexable_path, source = nil)
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/lib/ruby_indexer/index.rb, line 186</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">index_single</span>(<span class="ruby-identifier">indexable_path</span>, <span class="ruby-identifier">source</span> = <span class="ruby-keyword">nil</span>)
+  <span class="ruby-identifier">content</span> = <span class="ruby-identifier">source</span> <span class="ruby-operator">||</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-identifier">indexable_path</span>.<span class="ruby-identifier">full_path</span>)
+  <span class="ruby-identifier">result</span> = <span class="ruby-constant">Prism</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">content</span>)
+  <span class="ruby-identifier">collector</span> = <span class="ruby-constant">Collector</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword">self</span>, <span class="ruby-identifier">result</span>, <span class="ruby-identifier">indexable_path</span>.<span class="ruby-identifier">full_path</span>)
+  <span class="ruby-identifier">collector</span>.<span class="ruby-identifier">collect</span>(<span class="ruby-identifier">result</span>.<span class="ruby-identifier">value</span>)
+
+  <span class="ruby-identifier">require_path</span> = <span class="ruby-identifier">indexable_path</span>.<span class="ruby-identifier">require_path</span>
+  <span class="ruby-ivar">@require_paths_tree</span>.<span class="ruby-identifier">insert</span>(<span class="ruby-identifier">require_path</span>, <span class="ruby-identifier">indexable_path</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">require_path</span>
+<span class="ruby-keyword">rescue</span> <span class="ruby-constant">Errno</span><span class="ruby-operator">::</span><span class="ruby-constant">EISDIR</span>, <span class="ruby-constant">Errno</span><span class="ruby-operator">::</span><span class="ruby-constant">ENOENT</span>
+  <span class="ruby-comment"># If `path` is a directory, just ignore it and continue indexing. If the file doesn&#39;t exist, then we also ignore</span>
+  <span class="ruby-comment"># it</span>
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-prefix_search" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      prefix_search(query, nesting = nil)
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/lib/ruby_indexer/index.rb, line 97</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">prefix_search</span>(<span class="ruby-identifier">query</span>, <span class="ruby-identifier">nesting</span> = <span class="ruby-keyword">nil</span>)
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">nesting</span>
+    <span class="ruby-identifier">results</span> = <span class="ruby-ivar">@entries_tree</span>.<span class="ruby-identifier">search</span>(<span class="ruby-identifier">query</span>)
+    <span class="ruby-identifier">results</span>.<span class="ruby-identifier">uniq!</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">results</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">results</span> = <span class="ruby-identifier">nesting</span>.<span class="ruby-identifier">length</span>.<span class="ruby-identifier">downto</span>(<span class="ruby-value">0</span>).<span class="ruby-identifier">flat_map</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">i</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">prefix</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-identifier">nesting</span>[<span class="ruby-value">0</span><span class="ruby-operator">...</span><span class="ruby-identifier">i</span>]).<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;::&quot;</span>)
+    <span class="ruby-identifier">namespaced_query</span> = <span class="ruby-identifier">prefix</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">query</span> <span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{prefix}::#{query}&quot;</span>
+    <span class="ruby-ivar">@entries_tree</span>.<span class="ruby-identifier">search</span>(<span class="ruby-identifier">namespaced_query</span>)
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">results</span>.<span class="ruby-identifier">uniq!</span>
+  <span class="ruby-identifier">results</span>
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-resolve" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      resolve(name, nesting)
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/lib/ruby_indexer/index.rb, line 135</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">resolve</span>(<span class="ruby-identifier">name</span>, <span class="ruby-identifier">nesting</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">name</span>.<span class="ruby-identifier">start_with?</span>(<span class="ruby-string">&quot;::&quot;</span>)
+    <span class="ruby-identifier">name</span> = <span class="ruby-identifier">name</span>.<span class="ruby-identifier">delete_prefix</span>(<span class="ruby-string">&quot;::&quot;</span>)
+    <span class="ruby-identifier">results</span> = <span class="ruby-ivar">@entries</span>[<span class="ruby-identifier">name</span>] <span class="ruby-operator">||</span> <span class="ruby-ivar">@entries</span>[<span class="ruby-identifier">follow_aliased_namespace</span>(<span class="ruby-identifier">name</span>)]
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">results</span>&amp;.<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">e</span><span class="ruby-operator">|</span> <span class="ruby-identifier">e</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">UnresolvedAlias</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">resolve_alias</span>(<span class="ruby-identifier">e</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">e</span> }
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">nesting</span>.<span class="ruby-identifier">length</span>.<span class="ruby-identifier">downto</span>(<span class="ruby-value">0</span>).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">i</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">namespace</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-identifier">nesting</span>[<span class="ruby-value">0</span><span class="ruby-operator">...</span><span class="ruby-identifier">i</span>]).<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;::&quot;</span>)
+    <span class="ruby-identifier">full_name</span> = <span class="ruby-identifier">namespace</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">name</span> <span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{namespace}::#{name}&quot;</span>
+
+    <span class="ruby-comment"># If we find an entry with `full_name` directly, then we can already return it, even if it contains aliases -</span>
+    <span class="ruby-comment"># because the user might be trying to jump to the alias definition.</span>
+    <span class="ruby-comment">#</span>
+    <span class="ruby-comment"># However, if we don&#39;t find it, then we need to search for possible aliases in the namespace. For example, in</span>
+    <span class="ruby-comment"># the LSP itself we alias `RubyLsp::Interface` to `LanguageServer::Protocol::Interface`, which means doing</span>
+    <span class="ruby-comment"># `RubyLsp::Interface::Location` is allowed. For these cases, we need some way to realize that the</span>
+    <span class="ruby-comment"># `RubyLsp::Interface` part is an alias, that has to be resolved</span>
+    <span class="ruby-identifier">entries</span> = <span class="ruby-ivar">@entries</span>[<span class="ruby-identifier">full_name</span>] <span class="ruby-operator">||</span> <span class="ruby-ivar">@entries</span>[<span class="ruby-identifier">follow_aliased_namespace</span>(<span class="ruby-identifier">full_name</span>)]
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">entries</span>.<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">e</span><span class="ruby-operator">|</span> <span class="ruby-identifier">e</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">UnresolvedAlias</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">resolve_alias</span>(<span class="ruby-identifier">e</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">e</span> } <span class="ruby-keyword">if</span> <span class="ruby-identifier">entries</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-keyword">nil</span>
+<span class="ruby-keyword">rescue</span> <span class="ruby-constant">UnresolvableAliasError</span>
+  <span class="ruby-keyword">nil</span>
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-resolve_method" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      resolve_method(method_name, receiver_name)
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/lib/ruby_indexer/index.rb, line 244</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">resolve_method</span>(<span class="ruby-identifier">method_name</span>, <span class="ruby-identifier">receiver_name</span>)
+  <span class="ruby-identifier">method_entries</span> = <span class="ruby-keyword">self</span>[<span class="ruby-identifier">method_name</span>]
+  <span class="ruby-identifier">owner_entries</span> = <span class="ruby-keyword">self</span>[<span class="ruby-identifier">receiver_name</span>]
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">owner_entries</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">method_entries</span>
+
+  <span class="ruby-identifier">owner_name</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-identifier">owner_entries</span>.<span class="ruby-identifier">first</span>).<span class="ruby-identifier">name</span>
+  <span class="ruby-constant">T</span>.<span class="ruby-identifier">cast</span>(
+    <span class="ruby-identifier">method_entries</span>.<span class="ruby-identifier">grep</span>(<span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Member</span>).<span class="ruby-identifier">select</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">entry</span><span class="ruby-operator">|</span>
+      <span class="ruby-constant">T</span>.<span class="ruby-identifier">cast</span>(<span class="ruby-identifier">entry</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Member</span>).<span class="ruby-identifier">owner</span>&amp;.<span class="ruby-identifier">name</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">owner_name</span>
+    <span class="ruby-keyword">end</span>,
+    <span class="ruby-constant">T</span><span class="ruby-operator">::</span><span class="ruby-constant">Array</span>[<span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Member</span>],
+  )
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-search_require_paths" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      search_require_paths(query)
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/lib/ruby_indexer/index.rb, line 79</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">search_require_paths</span>(<span class="ruby-identifier">query</span>)
+  <span class="ruby-ivar">@require_paths_tree</span>.<span class="ruby-identifier">search</span>(<span class="ruby-identifier">query</span>)
+<span class="ruby-keyword">end</span></pre>
+                </div>
+            </section>
+          
+            
+            
+        
+      </section>
+  </article>
+
+   <div class="right-section">
+  <nav class="right-nav">
+    <span id="right-side-bar-title" class="right-side-bar-title">On this page</span>
+      <ul>
+          <li id="right-side-bar-class-rubyindexer-index" class="right-side-bar-class">
+            <a href="#" >class RubyIndexer::Index</a>
+
+              <ul>
+                    <li>
+                      <details open>
+                        <summary id="right-side-bar-section-constants" class="right-side-bar-section">Constants</summary>
+                        <ul>
+                            <li id="right-nav-ENTRY_SIMILARITY_THRESHOLD" class="right-side-bar-element">
+                              <a href="#ENTRY_SIMILARITY_THRESHOLD">
+                              ENTRY_SIMILARITY_THRESHOLD
+                              </a>
+                            </li>
+                        </ul>
+                      </details>
+                    </li>
+
+
+
+
+                    <li>
+                      <details open>
+                        <summary id="right-side-bar-section-public-class-methods" class="right-side-bar-section">Public Class Methods</summary>
+                        <ul>
+                            <li id="right-nav-new" class="right-side-bar-element">
+                              <a href="#method-c-new">new</a>
+                            </li>
+                        </ul>
+                      </details>
+                    </li>
+
+
+                    <li>
+                      <details open>
+                        <summary id="right-side-bar-section-public-instance-methods" class="right-side-bar-section">Public Instance Methods</summary>
+                        <ul>
+                            <li id="right-nav-<<" class="right-side-bar-element">
+                              <a href="#method-i-3C-3C"><<</a>
+                            </li>
+                            <li id="right-nav-[]" class="right-side-bar-element">
+                              <a href="#method-i-5B-5D">[]</a>
+                            </li>
+                            <li id="right-nav-delete" class="right-side-bar-element">
+                              <a href="#method-i-delete">delete</a>
+                            </li>
+                            <li id="right-nav-follow_aliased_namespace" class="right-side-bar-element">
+                              <a href="#method-i-follow_aliased_namespace">follow_aliased_namespace</a>
+                            </li>
+                            <li id="right-nav-fuzzy_search" class="right-side-bar-element">
+                              <a href="#method-i-fuzzy_search">fuzzy_search</a>
+                            </li>
+                            <li id="right-nav-index_all" class="right-side-bar-element">
+                              <a href="#method-i-index_all">index_all</a>
+                            </li>
+                            <li id="right-nav-index_single" class="right-side-bar-element">
+                              <a href="#method-i-index_single">index_single</a>
+                            </li>
+                            <li id="right-nav-prefix_search" class="right-side-bar-element">
+                              <a href="#method-i-prefix_search">prefix_search</a>
+                            </li>
+                            <li id="right-nav-resolve" class="right-side-bar-element">
+                              <a href="#method-i-resolve">resolve</a>
+                            </li>
+                            <li id="right-nav-resolve_method" class="right-side-bar-element">
+                              <a href="#method-i-resolve_method">resolve_method</a>
+                            </li>
+                            <li id="right-nav-search_require_paths" class="right-side-bar-element">
+                              <a href="#method-i-search_require_paths">search_require_paths</a>
+                            </li>
+                        </ul>
+                      </details>
+                    </li>
+            </li>
+          </ul>
+        </li>
+  </nav>
+</div>
+
+</div>
+
+<div id="search-modal">
+  <div id="search-modal-content">
+    <input id="search-modal-input" type="text" placeholder="Search"></input>
+    <ul id="search-results"></ul>
+  </div>
+</div>
+
+
+    <footer>
+      <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.6.3.1
+    </footer>
+  </body>
+</html>
