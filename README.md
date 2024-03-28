@@ -60,6 +60,8 @@ gem install ruby-lsp
 and the language server can be launched running `ruby-lsp` (without bundle exec in order to properly hook into your
 project's dependencies).
 
+Note: If using an addon such as `ruby-lsp-rails`, `ruby-lsp` will be declared in the main `Gemfile.lock`, so the `.ruby-lsp/Gemfile` and its lockfile are not used, and can be deleted.
+
 ### Documentation
 
 See the [documentation](https://shopify.github.io/ruby-lsp) for more in-depth details about the
