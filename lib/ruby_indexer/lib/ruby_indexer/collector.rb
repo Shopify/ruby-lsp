@@ -154,6 +154,8 @@ module RubyIndexer
         handle_attribute(node, reader: true, writer: true)
       when :include
         handle_include(node)
+      when :prepend
+        handle_prepend(node)
       end
     end
 
@@ -355,6 +357,16 @@ module RubyIndexer
 
     sig { params(node: Prism::CallNode).void }
     def handle_include(node)
+      handle_module_operation(node, :included_modules)
+    end
+
+    sig { params(node: Prism::CallNode).void }
+    def handle_prepend(node)
+      handle_module_operation(node, :prepended_modules)
+    end
+
+    sig { params(node: Prism::CallNode, operation: Symbol).void }
+    def handle_module_operation(node, operation)
       return unless @current_owner
 
       arguments = node.arguments&.arguments
@@ -369,7 +381,8 @@ module RubyIndexer
         # If a constant path reference is dynamic or missing parts, we can't
         # index it
       end
-      @current_owner.included_modules.concat(names)
+      collection = operation == :included_modules ? @current_owner.included_modules : @current_owner.prepended_modules
+      collection.concat(names)
     end
   end
 end
