@@ -201,28 +201,32 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       RubyLsp
     RUBY
 
-    create_definition_addon
+    begin
+      create_definition_addon
 
-    with_server(source) do |server, uri|
-      server.global_state.index.index_single(
-        RubyIndexer::IndexablePath.new(
-          "#{Dir.pwd}/lib",
-          File.expand_path(
-            "../../test/fixtures/class_reference_target.rb",
-            __dir__,
+      with_server(source) do |server, uri|
+        server.global_state.index.index_single(
+          RubyIndexer::IndexablePath.new(
+            "#{Dir.pwd}/lib",
+            File.expand_path(
+              "../../test/fixtures/class_reference_target.rb",
+              __dir__,
+            ),
           ),
-        ),
-      )
-      server.process_message(
-        id: 1,
-        method: "textDocument/definition",
-        params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
-      )
-      response = server.pop_response.response
+        )
+        server.process_message(
+          id: 1,
+          method: "textDocument/definition",
+          params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
+        )
+        response = server.pop_response.response
 
-      assert_equal(2, response.size)
-      assert_match("class_reference_target.rb", response[0].uri)
-      assert_match("generated_by_addon.rb", response[1].uri)
+        assert_equal(2, response.size)
+        assert_match("class_reference_target.rb", response[0].uri)
+        assert_match("generated_by_addon.rb", response[1].uri)
+      end
+    ensure
+      RubyLsp::Addon.addon_classes.clear
     end
   end
 
@@ -344,9 +348,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
   def create_definition_addon
     Class.new(RubyLsp::Addon) do
-      def create_definition_listener(response_builder, uri, nesting, index, dispatcher)
+      def create_definition_listener(response_builder, uri, nesting, dispatcher)
         klass = Class.new do
-          def initialize(response_builder, uri, _, _, dispatcher)
+          def initialize(response_builder, uri, _, dispatcher)
             @uri = uri
             @response_builder = response_builder
             dispatcher.register(self, :on_constant_read_node_enter)
@@ -367,10 +371,10 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        T.unsafe(klass).new(response_builder, uri, nesting, index, dispatcher)
+        T.unsafe(klass).new(response_builder, uri, nesting, dispatcher)
       end
 
-      def activate(message_queue); end
+      def activate(global_state, outgoing_queue); end
 
       def deactivate; end
 

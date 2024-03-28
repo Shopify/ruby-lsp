@@ -797,18 +797,22 @@ class CompletionTest < Minitest::Test
       R
     RUBY
 
-    create_completion_addon
+    begin
+      create_completion_addon
 
-    with_server(source) do |server, uri|
-      server.process_message(
-        id: 1,
-        method: "textDocument/completion",
-        params: { textDocument: { uri: uri }, position: { character: 1, line: 0 } },
-      )
-      response = server.pop_response.response
+      with_server(source) do |server, uri|
+        server.process_message(
+          id: 1,
+          method: "textDocument/completion",
+          params: { textDocument: { uri: uri }, position: { character: 1, line: 0 } },
+        )
+        response = server.pop_response.response
 
-      assert_equal(1, response.size)
-      assert_match("MyCompletion", response[0].label)
+        assert_equal(1, response.size)
+        assert_match("MyCompletion", response[0].label)
+      end
+    ensure
+      RubyLsp::Addon.addon_classes.clear
     end
   end
 
@@ -867,11 +871,11 @@ class CompletionTest < Minitest::Test
 
   def create_completion_addon
     Class.new(RubyLsp::Addon) do
-      def create_completion_listener(response_builder, global_state, nesting, dispatcher, uri)
+      def create_completion_listener(response_builder, nesting, dispatcher, uri)
         klass = Class.new do
           include RubyLsp::Requests::Support::Common
 
-          def initialize(response_builder, global_state, _, dispatcher, uri)
+          def initialize(response_builder, _, dispatcher, uri)
             @uri = uri
             @response_builder = response_builder
             dispatcher.register(self, :on_constant_read_node_enter)
@@ -889,10 +893,10 @@ class CompletionTest < Minitest::Test
           end
         end
 
-        T.unsafe(klass).new(response_builder, global_state, nesting, dispatcher, uri)
+        T.unsafe(klass).new(response_builder, nesting, dispatcher, uri)
       end
 
-      def activate(message_queue); end
+      def activate(global_state, outgoing_queue); end
 
       def deactivate; end
 

@@ -67,7 +67,7 @@ module RubyLsp
         )
 
         Addon.addons.each do |addon|
-          addon.create_definition_listener(@response_builder, global_state, document.uri, nesting, dispatcher)
+          addon.create_definition_listener(@response_builder, document.uri, nesting, dispatcher)
         end
 
         @target = T.let(target, T.nilable(Prism::Node))

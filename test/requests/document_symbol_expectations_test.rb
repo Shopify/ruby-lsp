@@ -32,23 +32,27 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    create_document_symbol_addon
-    with_server(source) do |server, uri|
-      server.process_message({
-        id: 1,
-        method: "textDocument/documentSymbol",
-        params: { textDocument: { uri: uri } },
-      })
-      result = server.pop_response
-      assert_instance_of(RubyLsp::Result, result)
+    begin
+      create_document_symbol_addon
+      with_server(source) do |server, uri|
+        server.process_message({
+          id: 1,
+          method: "textDocument/documentSymbol",
+          params: { textDocument: { uri: uri } },
+        })
+        result = server.pop_response
+        assert_instance_of(RubyLsp::Result, result)
 
-      response = result.response
+        response = result.response
 
-      assert_equal(1, response.count)
-      assert_equal("Foo", response.first.name)
+        assert_equal(1, response.count)
+        assert_equal("Foo", response.first.name)
 
-      test_symbol = response.first.children.first
-      assert_equal(LanguageServer::Protocol::Constant::SymbolKind::METHOD, test_symbol.kind)
+        test_symbol = response.first.children.first
+        assert_equal(LanguageServer::Protocol::Constant::SymbolKind::METHOD, test_symbol.kind)
+      end
+    ensure
+      RubyLsp::Addon.addon_classes.clear
     end
   end
 
@@ -66,7 +70,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
 
   def create_document_symbol_addon
     Class.new(RubyLsp::Addon) do
-      def activate(message_queue); end
+      def activate(global_state, outgoing_queue); end
 
       def name
         "Document SymbolsAddon"
