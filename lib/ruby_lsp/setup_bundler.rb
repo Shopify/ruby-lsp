@@ -19,6 +19,7 @@ module RubyLsp
     extend T::Sig
 
     class BundleNotLocked < StandardError; end
+    class BundleInstallFailure < StandardError; end
 
     FOUR_HOURS = T.let(4 * 60 * 60, Integer)
 
@@ -49,6 +50,7 @@ module RubyLsp
       @last_updated_path = T.let(@custom_dir + "last_updated", Pathname)
 
       @dependencies = T.let(load_dependencies, T::Hash[String, T.untyped])
+      @retry = T.let(false, T::Boolean)
     end
 
     # Sets up the custom bundle and returns the `BUNDLE_GEMFILE`, `BUNDLE_PATH` and `BUNDLE_APP_CONFIG` that should be
@@ -224,7 +226,17 @@ module RubyLsp
       # Add bundle update
       $stderr.puts("Ruby LSP> Running bundle install for the custom bundle. This may take a while...")
       $stderr.puts("Ruby LSP> Command: #{command}")
-      system(env, command)
+
+      # Try to run the bundle install or update command. If that fails, it normally means that the custom lockfile is in
+      # a bad state that no longer reflects the top level one. In that case, we can remove the whole directory, try
+      # another time and give up if it fails again
+      if !system(env, command) && !@retry && @custom_dir.exist?
+        @retry = true
+        @custom_dir.rmtree
+        $stderr.puts("Ruby LSP> Running bundle install failed. Trying to re-generate the custom bundle from scratch")
+        return setup!
+      end
+
       [bundle_gemfile.to_s, expanded_path, env["BUNDLE_APP_CONFIG"]]
     end
 
