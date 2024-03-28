@@ -9,12 +9,17 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
 
   def run_expectations(source)
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI::Generic.from_path(path: __FILE__))
-    RubyLsp::Requests::Diagnostics.new(document).perform
     result = T.let(nil, T.nilable(T::Array[RubyLsp::Interface::Diagnostic]))
+    global_state = RubyLsp::GlobalState.new
+    global_state.formatter = "rubocop"
+    global_state.register_formatter(
+      "rubocop",
+      RubyLsp::Requests::Support::RuboCopFormatter.instance,
+    )
 
     stdout, _ = capture_io do
       result = T.cast(
-        RubyLsp::Requests::Diagnostics.new(document).perform,
+        RubyLsp::Requests::Diagnostics.new(global_state, document).perform,
         T::Array[RubyLsp::Interface::Diagnostic],
       )
     end
