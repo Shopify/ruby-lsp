@@ -63,8 +63,8 @@ module RubyLsp
       extend T::Sig
 
       # Performs any activation that needs to happen once when the language server is booted
-      sig { override.params(message_queue: Thread::Queue).void }
-      def activate(message_queue)
+      sig { override.params(global_state: GlobalState, outgoing_queue: Thread::Queue).void }
+      def activate(global_state, outgoing_queue)
       end
 
       # Performs any cleanup when shutting down the server, like terminating a subprocess
@@ -123,8 +123,8 @@ This approach enables all addon responses to be captured in a single round of AS
 
 ### Enhancing features
 
-To enhance a request, the addon must create a listener that will collect extra results that will be automatically appended to the 
-base language server response. Additionally, `Addon` has to implement a factory method that instantiates the listener. When instantiating the 
+To enhance a request, the addon must create a listener that will collect extra results that will be automatically appended to the
+base language server response. Additionally, `Addon` has to implement a factory method that instantiates the listener. When instantiating the
 listener, also note that a `ResponseBuilders` object is passed in. This object should be used to return responses back to the Ruby LSP.
 
 For example: to add a message on hover saying "Hello!" on top of the base hover behavior of the Ruby LSP, we can use the
@@ -138,9 +138,10 @@ module RubyLsp
     class Addon < ::RubyLsp::Addon
       extend T::Sig
 
-      sig { override.params(message_queue: Thread::Queue).void }
-      def activate(message_queue)
-        @message_queue = message_queue
+      sig { override.params(global_state: GlobalState, outgoing_queue: Thread::Queue).void }
+      def activate(global_state, outgoing_queue)
+        @global_state = global_state
+        @outgoing_queue = outgoing_queue
         @config = SomeConfiguration.new
       end
 
@@ -164,7 +165,7 @@ module RubyLsp
       def create_hover_listener(response_builder, nesting, index, dispatcher)
         # Use the listener factory methods to instantiate listeners with parameters sent by the LSP combined with any
         # pre-computed information in the addon. These factory methods are invoked on every request
-        Hover.new(client, response_builder, @config, dispatcher)
+        Hover.new(client, response_builder, @global_state, @config, dispatcher)
       end
 
     class Hover
@@ -176,16 +177,17 @@ module RubyLsp
       # Listeners are initialized with the Prism::Dispatcher. This object is used by the Ruby LSP to emit the events
       # when it finds nodes during AST analysis. Listeners must register which nodes they want to handle with the
       # dispatcher (see below).
-      # Listeners are initialized with a `ResponseBuilders` object. The listener will push the associated content 
+      # Listeners are initialized with a `ResponseBuilders` object. The listener will push the associated content
       # to this object, which will then build the Ruby LSP's response.
-      # Additionally, listeners are instantiated with a message_queue to push notifications (not used in this example).
+      # Additionally, listeners are instantiated with a outgoing_queue to push notifications (not used in this example).
       # See "Sending notifications to the client" for more information.
-      sig { params(client: RailsClient, response_builder: ResponseBuilders::Hover, config: SomeConfiguration, dispatcher: Prism::Dispatcher).void }
-      def initialize(client, response_builder, config, dispatcher)
+      sig { params(client: RailsClient, response_builder: ResponseBuilders::Hover, global_state: GlobalState, config: SomeConfiguration, dispatcher: Prism::Dispatcher).void }
+      def initialize(client, response_builder, global_state, config, dispatcher)
         super(dispatcher)
 
         @client = client
         @response_builder = response_builder
+        @global_state = global_state
         @config = config
 
         # Register that this listener will handle `on_constant_read_node_enter` events (i.e.: whenever a constant read
@@ -219,7 +221,7 @@ class MyFormatterRubyLspAddon < RubyLsp::Addon
     "My Formatter"
   end
 
-  def activate(message_queue)
+  def activate(outgoing_queue)
     # The first argument is an identifier users can pick to select this formatter. To use this formatter, users must
     # have rubyLsp.formatter configured to "my_formatter"
     # The second argument is a singleton instance that implements the `FormatterRunner` interface (see below)
@@ -264,8 +266,9 @@ interested in using it.
 module RubyLsp
   module MyGem
     class Addon < ::RubyLsp::Addon
-      def activate(message_queue)
-        @message_queue = message_queue
+      def activate(global_state, outgoing_queue)
+        @global_state = global_state
+        @outgoing_queue = outgoing_queue
       end
 
       def deactivate; end
@@ -275,15 +278,16 @@ module RubyLsp
       end
 
       def create_hover_listener(response_builder, nesting, index, dispatcher)
-        MyHoverListener.new(@message_queue, response_builder, nesting, index, dispatcher)
+        MyHoverListener.new(@outgoing_queue, @global_state, response_builder, nesting, index, dispatcher)
       end
     end
 
     class MyHoverListener
-      def initialize(message_queue, response_builder, nesting, index, dispatcher)
-        @message_queue = message_queue
+      def initialize(outgoing_queue, global_state, response_builder, nesting, index, dispatcher)
+        @outgoing_queue = outgoing_queue
+        @global_state = global_state
 
-        @message_queue << Notification.new(
+        @outgoing_queue << Notification.new(
           message: "$/progress",
           params: Interface::ProgressParams.new(
             token: "progress-token-id",
