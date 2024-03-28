@@ -25,6 +25,17 @@ module RubyLsp
       @test_library = T.let(detect_test_library, String)
       @typechecker = T.let(detect_typechecker, T::Boolean)
       @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
+      @supported_formatters = T.let({}, T::Hash[String, Requests::Support::Formatter])
+    end
+
+    sig { params(identifier: String, instance: Requests::Support::Formatter).void }
+    def register_formatter(identifier, instance)
+      @supported_formatters[identifier] = instance
+    end
+
+    sig { returns(T.nilable(Requests::Support::Formatter)) }
+    def active_formatter
+      @supported_formatters[@formatter]
     end
 
     sig { params(options: T::Hash[Symbol, T.untyped]).void }

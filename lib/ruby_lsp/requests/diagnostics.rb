@@ -1,8 +1,6 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "ruby_lsp/requests/support/rubocop_diagnostics_runner"
-
 module RubyLsp
   module Requests
     # ![Diagnostics demo](../../diagnostics.gif)
@@ -33,9 +31,10 @@ module RubyLsp
         end
       end
 
-      sig { params(document: Document).void }
-      def initialize(document)
+      sig { params(global_state: GlobalState, document: Document).void }
+      def initialize(global_state, document)
         super()
+        @active_formatter = T.let(global_state.active_formatter, T.nilable(Support::Formatter))
         @document = document
         @uri = T.let(document.uri, URI::Generic)
       end
@@ -46,15 +45,10 @@ module RubyLsp
         diagnostics.concat(syntax_error_diagnostics, syntax_warning_diagnostics)
 
         # Running RuboCop is slow, so to avoid excessive runs we only do so if the file is syntactically valid
-        return diagnostics if @document.syntax_error?
+        return diagnostics if @document.syntax_error? || !@active_formatter
 
-        diagnostics.concat(
-          Support::RuboCopDiagnosticsRunner.instance.run(
-            @uri,
-            @document,
-          ).map!(&:to_lsp_diagnostic),
-        ) if defined?(Support::RuboCopDiagnosticsRunner)
-
+        formatter_diagnostics = @active_formatter.run_diagnostic(@uri, @document)
+        diagnostics.concat(formatter_diagnostics) if formatter_diagnostics
         diagnostics
       end
 

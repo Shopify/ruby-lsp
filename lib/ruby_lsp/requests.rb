@@ -56,7 +56,7 @@ module RubyLsp
       autoload :Sorbet, "ruby_lsp/requests/support/sorbet"
       autoload :RailsDocumentClient, "ruby_lsp/requests/support/rails_document_client"
       autoload :Common, "ruby_lsp/requests/support/common"
-      autoload :FormatterRunner, "ruby_lsp/requests/support/formatter_runner"
+      autoload :Formatter, "ruby_lsp/requests/support/formatter"
     end
   end
 end

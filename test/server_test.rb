@@ -410,28 +410,30 @@ class ServerTest < Minitest::Test
   end
 
   def test_shows_error_if_formatter_set_to_rubocop_but_rubocop_not_available
-    with_uninstalled_rubocop do
-      capture_subprocess_io do
-        @server.process_message(id: 1, method: "initialize", params: {
-          initializationOptions: { formatter: "rubocop" },
-        })
+    capture_subprocess_io do
+      @server.process_message(id: 1, method: "initialize", params: {
+        initializationOptions: { formatter: "rubocop" },
+      })
+
+      @server.global_state.register_formatter("rubocop", RubyLsp::Requests::Support::RuboCopFormatter.instance)
+      with_uninstalled_rubocop do
         @server.process_message({ method: "initialized" })
-
-        assert_equal("none", @server.global_state.formatter)
-
-        # Remove the initialization notifications
-        @server.pop_response
-        @server.pop_response
-        @server.pop_response
-
-        notification = @server.pop_response
-
-        assert_equal("window/showMessage", notification.method)
-        assert_equal(
-          "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the Gemfile or gemspec.",
-          T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
-        )
       end
+
+      assert_equal("none", @server.global_state.formatter)
+
+      # Remove the initialization notifications
+      @server.pop_response
+      @server.pop_response
+      @server.pop_response
+
+      notification = @server.pop_response
+
+      assert_equal("window/showMessage", notification.method)
+      assert_equal(
+        "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the Gemfile or gemspec.",
+        T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
+      )
     end
   end
 
