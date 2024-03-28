@@ -130,25 +130,29 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
       class Test < Minitest::Test; end
     RUBY
 
-    create_code_lens_addon
+    begin
+      create_code_lens_addon
 
-    with_server(source) do |server, uri|
-      server.process_message({
-        id: 1,
-        method: "textDocument/codeLens",
-        params: { textDocument: { uri: uri }, position: { line: 1, character: 2 } },
-      })
+      with_server(source) do |server, uri|
+        server.process_message({
+          id: 1,
+          method: "textDocument/codeLens",
+          params: { textDocument: { uri: uri }, position: { line: 1, character: 2 } },
+        })
 
-      result = server.pop_response
-      assert_instance_of(RubyLsp::Result, result)
+        result = server.pop_response
+        assert_instance_of(RubyLsp::Result, result)
 
-      response = result.response
+        response = result.response
 
-      assert_equal(response.size, 4)
-      assert_match("Run", response[0].command.title)
-      assert_match("Run In Terminal", response[1].command.title)
-      assert_match("Debug", response[2].command.title)
-      assert_match("Run Test", response[3].command.title)
+        assert_equal(response.size, 4)
+        assert_match("Run", response[0].command.title)
+        assert_match("Run In Terminal", response[1].command.title)
+        assert_match("Debug", response[2].command.title)
+        assert_match("Run Test", response[3].command.title)
+      ensure
+        RubyLsp::Addon.addon_classes.clear
+      end
     end
   end
 

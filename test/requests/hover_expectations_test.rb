@@ -254,26 +254,30 @@ class HoverExpectationsTest < ExpectationsTestRunner
       Post
     RUBY
 
-    create_hover_addon
+    begin
+      create_hover_addon
 
-    with_server(source) do |server, uri|
-      server.process_message(
-        id: 1,
-        method: "textDocument/hover",
-        params: { textDocument: { uri: uri }, position: { character: 0, line: 4 } },
-      )
+      with_server(source) do |server, uri|
+        server.process_message(
+          id: 1,
+          method: "textDocument/hover",
+          params: { textDocument: { uri: uri }, position: { character: 0, line: 4 } },
+        )
 
-      assert_match(<<~RESPONSE.strip, server.pop_response.response.contents.value)
-        Title
+        assert_match(<<~RESPONSE.strip, server.pop_response.response.contents.value)
+          Title
 
-        **Definitions**: [fake.rb](file:///fake.rb#L2,1-3,4)
-        Links
+          **Definitions**: [fake.rb](file:///fake.rb#L2,1-3,4)
+          Links
 
 
 
-        Hello
-        Documentation from middleware: Post
-      RESPONSE
+          Hello
+          Documentation from middleware: Post
+        RESPONSE
+      end
+    ensure
+      RubyLsp::Addon.addon_classes.clear
     end
   end
 
