@@ -33,10 +33,12 @@ suite("Ruby environment activation", () => {
       } as vscode.WorkspaceFolder,
       outputChannel,
     );
-    await ruby.activateRuby(
+    await ruby.activateRuby({
       // eslint-disable-next-line no-process-env
-      process.env.CI ? ManagerIdentifier.None : ManagerIdentifier.Chruby,
-    );
+      identifier: process.env.CI
+        ? ManagerIdentifier.None
+        : ManagerIdentifier.Chruby,
+    });
 
     assert.ok(ruby.rubyVersion, "Expected Ruby version to be set");
     assert.notStrictEqual(
