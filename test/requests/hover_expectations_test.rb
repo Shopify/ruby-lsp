@@ -281,7 +281,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
   def create_hover_addon
     Class.new(RubyLsp::Addon) do
-      def activate(message_queue); end
+      def activate(global_state, message_queue); end
 
       def name
         "HoverAddon"
@@ -289,7 +289,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
       def deactivate; end
 
-      def create_hover_listener(response_builder, nesting, index, dispatcher)
+      def create_hover_listener(response_builder, nesting, dispatcher)
         klass = Class.new do
           def initialize(response_builder, dispatcher)
             @response_builder = response_builder

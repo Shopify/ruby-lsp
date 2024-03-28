@@ -78,7 +78,7 @@ module RubyLsp
         )
 
         Addon.addons.each do |addon|
-          addon.create_completion_listener(@response_builder, global_state, nesting, dispatcher, document.uri)
+          addon.create_completion_listener(@response_builder, nesting, dispatcher, document.uri)
         end
 
         return unless matched && parent

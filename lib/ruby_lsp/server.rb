@@ -90,7 +90,7 @@ module RubyLsp
 
     sig { void }
     def load_addons
-      Addon.load_addons(@outgoing_queue)
+      Addon.load_addons(@global_state, @outgoing_queue)
       errored_addons = Addon.addons.select(&:error?)
 
       if errored_addons.any?

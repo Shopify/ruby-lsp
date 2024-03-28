@@ -95,7 +95,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
         T.unsafe(klass).new(response_builder, dispatcher)
       end
 
-      def activate(message_queue); end
+      def activate(global_state, message_queue); end
 
       def deactivate; end
 
