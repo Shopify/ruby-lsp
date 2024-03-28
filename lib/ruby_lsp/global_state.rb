@@ -12,6 +12,9 @@ module RubyLsp
     attr_accessor :formatter
 
     sig { returns(T::Boolean) }
+    attr_accessor :test_mode
+
+    sig { returns(T::Boolean) }
     attr_reader :typechecker
 
     sig { returns(RubyIndexer::Index) }
@@ -22,6 +25,7 @@ module RubyLsp
       @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
 
       @formatter = T.let(detect_formatter, String)
+      @test_mode = T.let(false, T::Boolean)
       @test_library = T.let(detect_test_library, String)
       @typechecker = T.let(detect_typechecker, T::Boolean)
       @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
