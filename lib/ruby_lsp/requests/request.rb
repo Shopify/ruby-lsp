@@ -8,6 +8,8 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
+      class InvalidFormatter < StandardError; end
+
       abstract!
 
       sig { abstract.returns(T.anything) }
