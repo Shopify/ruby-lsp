@@ -55,6 +55,14 @@ export class Rvm extends VersionManager {
         "bin",
         "rvm-auto-ruby",
       ),
+      vscode.Uri.joinPath(
+        vscode.Uri.file("/"),
+        "usr",
+        "share",
+        "rvm",
+        "bin",
+        "rvm-auto-ruby",
+      ),
     ];
 
     for (const uri of possiblePaths) {
