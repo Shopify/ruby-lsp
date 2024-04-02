@@ -29,7 +29,7 @@ The Ruby LSP features include
 - Debugging support
 - Running and debugging tests through VS Code's UI
 - Go to definition for classes, modules, constants and required files
-- Showing documentaton on hover for classes, modules and constants
+- Showing documentation on hover for classes, modules and constants
 - Completion for classes, modules, constants and require paths
 - Fuzzy search classes, modules and constants anywhere in the project and its dependencies (workspace symbol)
 
