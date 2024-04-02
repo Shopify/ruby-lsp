@@ -1,6 +1,5 @@
 /* eslint-disable no-process-env */
 import os from "os";
-import path from "path";
 
 import * as vscode from "vscode";
 
@@ -14,12 +13,8 @@ import { ActivationResult, VersionManager } from "./versionManager";
 // - https://rvm.io
 export class Rvm extends VersionManager {
   async activate(): Promise<ActivationResult> {
-    const activationScript = [
-      "STDERR.print(",
-      "{yjit:!!defined?(RubyVM::YJIT),version:RUBY_VERSION,",
-      "home:Gem.user_dir,default:Gem.default_dir,ruby:RbConfig.ruby}",
-      ".to_json)",
-    ].join("");
+    const activationScript =
+      "STDERR.print({ env: ENV.to_h, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }.to_json)";
 
     const installationPath = await this.findRvmInstallation();
 
@@ -31,28 +26,14 @@ export class Rvm extends VersionManager {
     );
 
     const parsedResult = JSON.parse(result.stderr);
-
-    // Invoking `rvm-auto-ruby` doesn't actually inject anything into the environment, it just finds the right Ruby to
-    // execute. We need to build the environment from the variables we return in the activation script
-    const env = {
-      GEM_HOME: parsedResult.home,
-      GEM_PATH: `${parsedResult.home}${path.delimiter}${parsedResult.default}`,
-      PATH: [
-        path.join(parsedResult.home, "bin"),
-        path.join(parsedResult.default, "bin"),
-        path.dirname(parsedResult.ruby),
-        process.env.PATH,
-      ].join(path.delimiter),
-    };
-
-    const activatedKeys = Object.entries(env)
+    const activatedKeys = Object.entries(parsedResult.env)
       .map(([key, value]) => `${key}=${value}`)
       .join(" ");
 
     this.outputChannel.info(`Activated Ruby environment: ${activatedKeys}`);
 
     return {
-      env: { ...process.env, ...env },
+      env: { ...process.env, ...parsedResult.env },
       yjit: parsedResult.yjit,
       version: parsedResult.version,
     };
