@@ -34,6 +34,17 @@ suite("RVM", () => {
       ".to_json)",
     ].join("");
 
+    const installationPathStub = sinon
+      .stub(rvm, "findRvmInstallation")
+      .resolves(
+        vscode.Uri.joinPath(
+          vscode.Uri.file(os.homedir()),
+          ".rvm",
+          "bin",
+          "rvm-auto-ruby",
+        ),
+      );
+
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: JSON.stringify({
@@ -66,5 +77,6 @@ suite("RVM", () => {
     assert.ok(env.PATH!.includes("/home/user/.rvm/rubies/ruby-3.0.0/bin"));
 
     execStub.restore();
+    installationPathStub.restore();
   });
 });

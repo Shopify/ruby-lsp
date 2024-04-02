@@ -2,6 +2,8 @@
 import os from "os";
 import path from "path";
 
+import * as vscode from "vscode";
+
 import { asyncExec } from "../common";
 
 import { ActivationResult, VersionManager } from "./versionManager";
@@ -19,8 +21,10 @@ export class Rvm extends VersionManager {
       ".to_json)",
     ].join("");
 
+    const installationPath = await this.findRvmInstallation();
+
     const result = await asyncExec(
-      `${path.join(os.homedir(), ".rvm", "bin", "rvm-auto-ruby")} -W0 -rjson -e '${activationScript}'`,
+      `${installationPath.fsPath} -W0 -rjson -e '${activationScript}'`,
       {
         cwd: this.bundleUri.fsPath,
       },
@@ -52,5 +56,37 @@ export class Rvm extends VersionManager {
       yjit: parsedResult.yjit,
       version: parsedResult.version,
     };
+  }
+
+  async findRvmInstallation(): Promise<vscode.Uri> {
+    const possiblePaths = [
+      vscode.Uri.joinPath(
+        vscode.Uri.file(os.homedir()),
+        ".rvm",
+        "bin",
+        "rvm-auto-ruby",
+      ),
+      vscode.Uri.joinPath(
+        vscode.Uri.file("/"),
+        "usr",
+        "local",
+        "rvm",
+        "bin",
+        "rvm-auto-ruby",
+      ),
+    ];
+
+    for (const uri of possiblePaths) {
+      try {
+        await vscode.workspace.fs.stat(uri);
+        return uri;
+      } catch (_error: any) {
+        // Continue to the next installation path
+      }
+    }
+
+    throw new Error(
+      `Cannot find RVM installation directory. Searched in ${possiblePaths.map((uri) => uri.fsPath).join(",")}`,
+    );
   }
 }
