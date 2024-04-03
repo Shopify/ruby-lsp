@@ -46,7 +46,7 @@ module RubyLsp
         RubyLsp::Addon.addons.each(&:deactivate)
         RubyLsp::Addon.addons.clear
       end
-      T.must(server).run_shutdown
+      T.must(server).shutdown
     end
   end
 end

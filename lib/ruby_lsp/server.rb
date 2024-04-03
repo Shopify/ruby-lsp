@@ -108,6 +108,11 @@ module RubyLsp
       end
     end
 
+    sig { override.void }
+    def shutdown
+      Addon.addons.each(&:deactivate)
+    end
+
     private
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
@@ -672,11 +677,6 @@ module RubyLsp
       end
 
       send_message(Result.new(id: message[:id], response: response))
-    end
-
-    sig { override.void }
-    def shutdown
-      Addon.addons.each(&:deactivate)
     end
 
     sig { params(config_hash: T::Hash[String, T.untyped]).void }
