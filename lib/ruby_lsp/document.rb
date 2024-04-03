@@ -20,13 +20,13 @@ module RubyLsp
     sig { returns(URI::Generic) }
     attr_reader :uri
 
-    sig { returns(String) }
+    sig { returns(Encoding) }
     attr_reader :encoding
 
-    sig { params(source: String, version: Integer, uri: URI::Generic, encoding: String).void }
-    def initialize(source:, version:, uri:, encoding: Constant::PositionEncodingKind::UTF8)
+    sig { params(source: String, version: Integer, uri: URI::Generic, encoding: Encoding).void }
+    def initialize(source:, version:, uri:, encoding: Encoding::UTF_8)
       @cache = T.let({}, T::Hash[String, T.untyped])
-      @encoding = T.let(encoding, String)
+      @encoding = T.let(encoding, Encoding)
       @source = T.let(source, String)
       @version = T.let(version, Integer)
       @uri = T.let(uri, URI::Generic)
@@ -187,7 +187,7 @@ module RubyLsp
       # After character 0xFFFF, UTF-16 considers characters to have length 2 and we have to account for that
       SURROGATE_PAIR_START = T.let(0xFFFF, Integer)
 
-      sig { params(source: String, encoding: String).void }
+      sig { params(source: String, encoding: Encoding).void }
       def initialize(source, encoding)
         @current_line = T.let(0, Integer)
         @pos = T.let(0, Integer)
@@ -209,7 +209,7 @@ module RubyLsp
         # need to adjust for surrogate pairs
         requested_position = @pos + position[:character]
 
-        if @encoding == Constant::PositionEncodingKind::UTF16
+        if @encoding == Encoding::UTF_16LE
           requested_position -= utf_16_character_position_correction(@pos, requested_position)
         end
 

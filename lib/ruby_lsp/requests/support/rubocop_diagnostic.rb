@@ -163,7 +163,7 @@ module RubyLsp
 
         sig { params(line: String).returns(Integer) }
         def length_of_line(line)
-          if @document.encoding == Constant::PositionEncodingKind::UTF16
+          if @document.encoding == Encoding::UTF_16LE
             line_length = 0
             line.codepoints.each do |codepoint|
               line_length += 1

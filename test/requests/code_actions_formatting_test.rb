@@ -72,7 +72,7 @@ class CodeActionsFormattingTest < Minitest::Test
       source: source.dup,
       version: 1,
       uri: URI::Generic.from_path(path: __FILE__),
-      encoding: LanguageServer::Protocol::Constant::PositionEncodingKind::UTF16,
+      encoding: Encoding::UTF_16LE,
     )
 
     global_state = RubyLsp::GlobalState.new

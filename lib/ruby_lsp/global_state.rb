@@ -17,9 +17,13 @@ module RubyLsp
     sig { returns(RubyIndexer::Index) }
     attr_reader :index
 
+    sig { returns(Encoding) }
+    attr_reader :encoding
+
     sig { void }
     def initialize
       @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
+      @encoding = T.let(Encoding::UTF_8, Encoding)
 
       @formatter = T.let("auto", String)
       @test_library = T.let(detect_test_library, String)
@@ -46,12 +50,42 @@ module RubyLsp
       specified_formatter = options.dig(:initializationOptions, :formatter)
       @formatter = specified_formatter if specified_formatter
       @formatter = detect_formatter if @formatter == "auto"
+
+      encodings = options.dig(:capabilities, :general, :positionEncodings)
+      @encoding = if !encodings || encodings.empty?
+        Encoding::UTF_16LE
+      elsif encodings.include?(Constant::PositionEncodingKind::UTF8)
+        Encoding::UTF_8
+      elsif encodings.include?(Constant::PositionEncodingKind::UTF16)
+        Encoding::UTF_16LE
+      else
+        Encoding::UTF_32
+      end
     end
 
     sig { returns(String) }
     def workspace_path
       T.must(@workspace_uri.to_standardized_path)
     end
+
+    sig { returns(String) }
+    def encoding_name
+      case @encoding
+      when Encoding::UTF_8
+        Constant::PositionEncodingKind::UTF8
+      when Encoding::UTF_16LE
+        Constant::PositionEncodingKind::UTF16
+      else
+        Constant::PositionEncodingKind::UTF32
+      end
+    end
+
+    sig { params(gem_pattern: Regexp).returns(T::Boolean) }
+    def direct_dependency?(gem_pattern)
+      dependencies.any?(gem_pattern)
+    end
+
+    private
 
     sig { returns(String) }
     def detect_formatter
@@ -81,11 +115,6 @@ module RubyLsp
       else
         "unknown"
       end
-    end
-
-    sig { params(gem_pattern: Regexp).returns(T::Boolean) }
-    def direct_dependency?(gem_pattern)
-      dependencies.any?(gem_pattern)
     end
 
     sig { returns(T::Boolean) }
