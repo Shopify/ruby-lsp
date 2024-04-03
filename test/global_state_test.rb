@@ -39,6 +39,12 @@ module RubyLsp
       assert_equal("rails", GlobalState.new.test_library)
     end
 
+    def test_detects_rspec_if_both_rails_and_rspec_are_present
+      stub_dependencies("rspec" => "1.2.3", "rails" => "1.2.3")
+
+      assert_equal("rspec", GlobalState.new.test_library)
+    end
+
     def test_direct_dependency_returns_false_outside_of_bundle
       File.expects(:file?).at_least_once.returns(false)
       stub_dependencies({})
