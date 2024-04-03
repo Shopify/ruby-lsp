@@ -13,6 +13,7 @@ import { Mise } from "./ruby/mise";
 import { RubyInstaller } from "./ruby/rubyInstaller";
 import { Rbenv } from "./ruby/rbenv";
 import { Rvm } from "./ruby/rvm";
+import { None } from "./ruby/none";
 
 export enum ManagerIdentifier {
   Asdf = "asdf",
@@ -134,7 +135,9 @@ export class Ruby implements RubyInterface {
           await this.activateCustomRuby();
           break;
         case ManagerIdentifier.None:
-          await this.activate("ruby");
+          await this.runActivation(
+            new None(this.workspaceFolder, this.outputChannel),
+          );
           break;
         default:
           await this.runActivation(
