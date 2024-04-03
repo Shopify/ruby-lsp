@@ -87,21 +87,25 @@ export class DependenciesTree
     }
   }
 
-  private refresh(): void {
-    this.fetchDependencies();
+  private async refresh(): Promise<void> {
+    await this.fetchDependencies();
     this._onDidChangeTreeData.fire(undefined);
   }
 
-  private workspaceDidChange(workspace: WorkspaceInterface | undefined): void {
+  private async workspaceDidChange(
+    workspace: WorkspaceInterface | undefined,
+  ): Promise<void> {
     if (!workspace || workspace === this.currentWorkspace) {
       return;
     }
 
     this.currentWorkspace = workspace;
-    this.refresh();
+    return this.refresh();
   }
 
-  private activeEditorDidChange(editor: vscode.TextEditor | undefined): void {
+  private async activeEditorDidChange(
+    editor: vscode.TextEditor | undefined,
+  ): Promise<void> {
     const uri = editor?.document.uri;
 
     if (!uri) {
@@ -113,25 +117,25 @@ export class DependenciesTree
     this.currentVisibleItem = new GemFilePath(uri);
 
     if (this.treeView.visible) {
-      this.revealElement(this.currentVisibleItem);
+      await this.revealElement(this.currentVisibleItem);
     }
   }
 
-  private treeVisibilityDidChange(
+  private async treeVisibilityDidChange(
     event: vscode.TreeViewVisibilityChangeEvent,
-  ): void {
+  ): Promise<void> {
     if (this.currentVisibleItem && event.visible) {
-      this.revealElement(this.currentVisibleItem);
+      await this.revealElement(this.currentVisibleItem);
     }
   }
 
-  private revealElement(element: BundlerTreeNode): void {
+  private async revealElement(element: BundlerTreeNode): Promise<void> {
     const autoReveal: boolean | undefined = vscode.workspace
       .getConfiguration("explorer")
       .get("autoReveal");
 
     if (autoReveal) {
-      this.treeView.reveal(element, {
+      await this.treeView.reveal(element, {
         select: true,
         focus: false,
         expand: true,

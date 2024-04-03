@@ -56,7 +56,7 @@ export class Telemetry {
 
   async sendEvent(event: TelemetryEvent) {
     if (await this.initialize()) {
-      this.api!.sendEvent(event);
+      return this.api!.sendEvent(event);
     }
   }
 
@@ -102,7 +102,7 @@ export class Telemetry {
 
     await Promise.all(promises);
 
-    this.context.globalState.update(
+    await this.context.globalState.update(
       "rubyLsp.lastConfigurationTelemetry",
       Date.now(),
     );

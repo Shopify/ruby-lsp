@@ -41,8 +41,8 @@ export class TestController {
     this.testRunProfile = this.testController.createRunProfile(
       "Run",
       vscode.TestRunProfileKind.Run,
-      (request, token) => {
-        this.runHandler(request, token);
+      async (request, token) => {
+        await this.runHandler(request, token);
       },
       true,
     );
@@ -50,14 +50,13 @@ export class TestController {
     this.testDebugProfile = this.testController.createRunProfile(
       "Debug",
       vscode.TestRunProfileKind.Debug,
-      (request, token) => {
-        this.debugHandler(request, token);
+      async (request, token) => {
+        await this.debugHandler(request, token);
       },
       false,
       this.debugTag,
     );
 
-    vscode.commands.executeCommand("testing.clearTestResults");
     vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
       if (terminal === this.terminal) this.terminal = undefined;
     });
@@ -164,25 +163,24 @@ export class TestController {
     }
   }
 
-  runOnClick(testId: string) {
+  async runOnClick(testId: string) {
     const test = this.findTestById(testId);
 
     if (!test) return;
 
-    vscode.commands.executeCommand("vscode.revealTestInExplorer", test);
+    await vscode.commands.executeCommand("vscode.revealTestInExplorer", test);
     let tokenSource: vscode.CancellationTokenSource | null =
       new vscode.CancellationTokenSource();
 
-    tokenSource.token.onCancellationRequested(() => {
+    tokenSource.token.onCancellationRequested(async () => {
       tokenSource?.dispose();
       tokenSource = null;
 
-      vscode.window.showInformationMessage("Cancelled the progress");
+      await vscode.window.showInformationMessage("Cancelled the progress");
     });
 
     const testRun = new vscode.TestRunRequest([test], [], this.testRunProfile);
-
-    this.testRunProfile.runHandler(testRun, tokenSource.token);
+    return this.testRunProfile.runHandler(testRun, tokenSource.token);
   }
 
   debugTest(_path: string, _name: string, command?: string) {

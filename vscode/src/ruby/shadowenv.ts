@@ -12,7 +12,7 @@ import { VersionManager, ActivationResult } from "./versionManager";
 export class Shadowenv extends VersionManager {
   async activate(): Promise<ActivationResult> {
     try {
-      vscode.workspace.fs.stat(
+      await vscode.workspace.fs.stat(
         vscode.Uri.joinPath(this.bundleUri, ".shadowenv.d"),
       );
     } catch (error: any) {

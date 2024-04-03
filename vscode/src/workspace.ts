@@ -67,7 +67,7 @@ export class Workspace implements WorkspaceInterface {
     } catch (error: any) {
       this.error = true;
 
-      vscode.window.showErrorMessage(
+      await vscode.window.showErrorMessage(
         `Directory ${this.workspaceFolder.uri.fsPath} is not writable. The Ruby LSP server needs to be able to create a
         .ruby-lsp directory to function appropriately. Consider switching to a directory for which VS Code has write
         permissions`,
@@ -80,7 +80,7 @@ export class Workspace implements WorkspaceInterface {
       await this.installOrUpdateServer();
     } catch (error: any) {
       this.error = true;
-      vscode.window.showErrorMessage(
+      await vscode.window.showErrorMessage(
         `Failed to setup the bundle: ${error.message}. \
         See [Troubleshooting](https://github.com/Shopify/ruby-lsp/blob/main/TROUBLESHOOTING.md) for help`,
       );
@@ -199,7 +199,10 @@ export class Workspace implements WorkspaceInterface {
         env: this.ruby.env,
       });
 
-      this.context.workspaceState.update("rubyLsp.lastGemUpdate", Date.now());
+      await this.context.workspaceState.update(
+        "rubyLsp.lastGemUpdate",
+        Date.now(),
+      );
       return;
     }
 
@@ -213,7 +216,10 @@ export class Workspace implements WorkspaceInterface {
           cwd: this.workspaceFolder.uri.fsPath,
           env: this.ruby.env,
         });
-        this.context.workspaceState.update("rubyLsp.lastGemUpdate", Date.now());
+        await this.context.workspaceState.update(
+          "rubyLsp.lastGemUpdate",
+          Date.now(),
+        );
       } catch (error) {
         // If we fail to update the global installation of `ruby-lsp`, we don't want to prevent the server from starting
         this.outputChannel.error(
