@@ -17,10 +17,10 @@ end
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 $VERBOSE = nil unless ENV["VERBOSE"] || ENV["CI"]
 
-require_relative "../lib/ruby_lsp/internal"
-require_relative "../lib/ruby_lsp/test_helper"
-require_relative "../lib/rubocop/cop/ruby_lsp/use_language_server_aliases"
-require_relative "../lib/rubocop/cop/ruby_lsp/use_register_with_handler_method"
+require "ruby_lsp/internal"
+require "ruby_lsp/test_helper"
+require "rubocop/cop/ruby_lsp/use_language_server_aliases"
+require "rubocop/cop/ruby_lsp/use_register_with_handler_method"
 
 require "minitest/autorun"
 require "minitest/reporters"
