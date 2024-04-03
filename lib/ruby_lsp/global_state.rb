@@ -63,17 +63,17 @@ module RubyLsp
 
     sig { returns(String) }
     def detect_test_library
+      if direct_dependency?(/^rspec/)
+        "rspec"
       # A Rails app may have a dependency on minitest, but we would instead want to use the Rails test runner provided
       # by ruby-lsp-rails.
-      if direct_dependency?(/^rails$/)
+      elsif direct_dependency?(/^rails$/)
         "rails"
       # NOTE: Intentionally ends with $ to avoid mis-matching minitest-reporters, etc. in a Rails app.
       elsif direct_dependency?(/^minitest$/)
         "minitest"
       elsif direct_dependency?(/^test-unit/)
         "test-unit"
-      elsif direct_dependency?(/^rspec/)
-        "rspec"
       else
         "unknown"
       end
