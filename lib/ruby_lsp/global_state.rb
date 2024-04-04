@@ -21,7 +21,7 @@ module RubyLsp
     def initialize
       @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
 
-      @formatter = T.let(detect_formatter, String)
+      @formatter = T.let("auto", String)
       @test_library = T.let(detect_test_library, String)
       @typechecker = T.let(detect_typechecker, T::Boolean)
       @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
@@ -42,6 +42,10 @@ module RubyLsp
     def apply_options(options)
       workspace_uri = options.dig(:workspaceFolders, 0, :uri)
       @workspace_uri = URI(workspace_uri) if workspace_uri
+
+      specified_formatter = options.dig(:initializationOptions, :formatter)
+      @formatter = specified_formatter if specified_formatter
+      @formatter = detect_formatter if @formatter == "auto"
     end
 
     sig { returns(String) }

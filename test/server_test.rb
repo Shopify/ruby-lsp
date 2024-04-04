@@ -141,7 +141,7 @@ class ServerTest < Minitest::Test
   end
 
   def test_server_info_includes_formatter
-    @server.global_state.expects(:formatter).returns("rubocop")
+    @server.global_state.expects(:formatter).twice.returns("rubocop")
     capture_subprocess_io do
       @server.process_message({
         id: 1,
