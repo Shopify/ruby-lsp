@@ -100,7 +100,7 @@ steps that led to the server getting stuck.
 
 ### Developing on containers
 
-See the [documentation](README.md#developing-on-containers).
+See the [documentation](vscode/README.md#developing-on-containers).
 
 ## Diagnosing the problem
 
