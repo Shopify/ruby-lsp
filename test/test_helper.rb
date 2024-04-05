@@ -25,10 +25,14 @@ require "rubocop/cop/ruby_lsp/use_register_with_handler_method"
 require "minitest/autorun"
 require "minitest/reporters"
 require "tempfile"
-require "debug"
 require "mocha/minitest"
 
 SORBET_PATHS = T.let(Gem.loaded_specs["sorbet-runtime"].full_require_paths.freeze, T::Array[String])
+
+# Define breakpoint methods without actually activating the debugger
+require "debug/prelude"
+# Load the debugger configuration to skip Sorbet paths. But this still doesn't activate the debugger
+require "debug/config"
 DEBUGGER__::CONFIG[:skip_path] = Array(DEBUGGER__::CONFIG[:skip_path]) + SORBET_PATHS
 
 minitest_reporter = if ENV["SPEC_REPORTER"]
