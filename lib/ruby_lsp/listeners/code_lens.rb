@@ -68,17 +68,22 @@ module RubyLsp
             command: generate_test_command(group_stack: @group_stack),
             kind: :group,
           )
-        end
 
-        @group_id_stack.push(@group_id)
-        @group_id += 1
+          @group_id_stack.push(@group_id)
+          @group_id += 1
+        end
       end
 
       sig { params(node: Prism::ClassNode).void }
       def on_class_node_leave(node)
         @visibility_stack.pop
         @group_stack.pop
-        @group_id_stack.pop
+
+        class_name = node.constant_path.slice
+
+        if @path && class_name.end_with?("Test")
+          @group_id_stack.pop
+        end
       end
 
       sig { params(node: Prism::DefNode).void }

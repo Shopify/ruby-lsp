@@ -18,6 +18,12 @@ module Foo
       end
     end
   end
+
+  class Baz
+    class BazTest < Minitest::Test
+      def test_baz; end
+    end
+  end
 end
 
 module Foo::Bar
