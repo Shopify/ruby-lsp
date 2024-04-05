@@ -4,6 +4,7 @@ import * as path from "path";
 import * as os from "os";
 
 import * as vscode from "vscode";
+import sinon from "sinon";
 
 import { Debugger } from "../../debugger";
 import { Ruby, ManagerIdentifier } from "../../ruby";
@@ -158,21 +159,25 @@ suite("Debugger", () => {
 
   test("Launching the debugger", async () => {
     // eslint-disable-next-line no-process-env
-    if (process.env.CI) {
-      await vscode.workspace
-        .getConfiguration("rubyLsp")
-        .update("rubyVersionManager", ManagerIdentifier.None, true, true);
-    }
+    const manager = process.env.CI
+      ? ManagerIdentifier.None
+      : ManagerIdentifier.Chruby;
 
-    // By default, VS Code always saves all open files when launching a debugging session. This is a problem for tests
-    // because it attempts to save an untitled test file and then we get stuck in the save file dialog with no way of
-    // closing it. We have to disable that before running this test
-    const currentSaveBeforeStart = await vscode.workspace
-      .getConfiguration("debug")
-      .get("saveBeforeStart");
-    await vscode.workspace
-      .getConfiguration("debug")
-      .update("saveBeforeStart", "none", true, true);
+    const configStub = sinon
+      .stub(vscode.workspace, "getConfiguration")
+      .returns({
+        get: (name: string) => {
+          if (name === "rubyVersionManager") {
+            return manager;
+          } else if (name === "bundleGemfile") {
+            return "";
+          } else if (name === "saveBeforeStart") {
+            return "none";
+          }
+
+          return undefined;
+        },
+      } as unknown as vscode.WorkspaceConfiguration);
 
     const tmpPath = fs.mkdtempSync(
       path.join(os.tmpdir(), "ruby-lsp-test-debugger"),
@@ -225,14 +230,16 @@ suite("Debugger", () => {
     }
 
     // The debugger might take a bit of time to disconnect from the editor. We need to perform cleanup when we receive
-    // the termination callback or else we try to dispose of the debugger client too early
-    vscode.debug.onDidTerminateDebugSession(async (_session) => {
-      debug.dispose();
-      context.subscriptions.forEach((subscription) => subscription.dispose());
-      fs.rmSync(tmpPath, { recursive: true, force: true });
-      await vscode.workspace
-        .getConfiguration("debug")
-        .update("saveBeforeStart", currentSaveBeforeStart, true, true);
+    // the termination callback or else we try to dispose of the debugger client too early, but we need to wait for that
+    // so that we can clean up stubs otherwise they leak into other tests.
+    await new Promise<void>((resolve) => {
+      vscode.debug.onDidTerminateDebugSession((_session) => {
+        configStub.restore();
+        debug.dispose();
+        context.subscriptions.forEach((subscription) => subscription.dispose());
+        fs.rmSync(tmpPath, { recursive: true, force: true });
+        resolve();
+      });
     });
   }).timeout(45000);
 });

@@ -1,9 +1,8 @@
 import * as assert from "assert";
-import * as fs from "fs";
 import * as path from "path";
-import * as os from "os";
 
 import * as vscode from "vscode";
+import sinon from "sinon";
 
 import { Ruby, ManagerIdentifier } from "../../ruby";
 import { WorkspaceChannel } from "../../workspaceChannel";
@@ -13,13 +12,28 @@ suite("Ruby environment activation", () => {
   let ruby: Ruby;
 
   test("Activate fetches Ruby information when outside of Ruby LSP", async () => {
-    if (os.platform() !== "win32") {
-      // eslint-disable-next-line no-process-env
-      process.env.SHELL = "/bin/bash";
-    }
+    // eslint-disable-next-line no-process-env
+    const manager = process.env.CI
+      ? ManagerIdentifier.None
+      : ManagerIdentifier.Chruby;
 
-    const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
-    fs.writeFileSync(path.join(tmpPath, ".ruby-version"), "3.3.0");
+    const configStub = sinon
+      .stub(vscode.workspace, "getConfiguration")
+      .returns({
+        get: (name: string) => {
+          if (name === "rubyVersionManager") {
+            return manager;
+          } else if (name === "bundleGemfile") {
+            return "";
+          }
+
+          return undefined;
+        },
+      } as unknown as vscode.WorkspaceConfiguration);
+
+    const workspacePath = path.dirname(
+      path.dirname(path.dirname(path.dirname(__dirname))),
+    );
 
     const context = {
       extensionMode: vscode.ExtensionMode.Test,
@@ -29,14 +43,13 @@ suite("Ruby environment activation", () => {
     ruby = new Ruby(
       context,
       {
-        uri: vscode.Uri.file(tmpPath),
+        uri: vscode.Uri.file(workspacePath),
+        name: path.basename(workspacePath),
+        index: 0,
       } as vscode.WorkspaceFolder,
       outputChannel,
     );
-    await ruby.activateRuby(
-      // eslint-disable-next-line no-process-env
-      process.env.CI ? ManagerIdentifier.None : ManagerIdentifier.Chruby,
-    );
+    await ruby.activateRuby();
 
     assert.ok(ruby.rubyVersion, "Expected Ruby version to be set");
     assert.notStrictEqual(
@@ -45,6 +58,6 @@ suite("Ruby environment activation", () => {
       "Expected YJIT support to be set to true or false",
     );
 
-    fs.rmSync(tmpPath, { recursive: true, force: true });
-  });
+    configStub.restore();
+  }).timeout(10000);
 });
