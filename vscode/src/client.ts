@@ -263,7 +263,7 @@ export default class Client extends LanguageClient implements ClientInterface {
       `${benchmarkId}.end`,
     );
     telemetryData.requestTime = bench.duration;
-    this.telemetry.sendEvent(telemetryData);
+    await this.telemetry.sendEvent(telemetryData);
 
     // If there has been an error, we must throw it again. Otherwise we can return the result
     if (errorResult) {
@@ -271,7 +271,7 @@ export default class Client extends LanguageClient implements ClientInterface {
         this.baseFolder === "ruby-lsp" ||
         this.baseFolder === "ruby-lsp-rails"
       ) {
-        vscode.window.showErrorMessage(
+        await vscode.window.showErrorMessage(
           `Ruby LSP error ${errorResult.data.errorClass}: ${errorResult.data.errorMessage}\n\n
                 ${errorResult.data.backtrace}`,
         );

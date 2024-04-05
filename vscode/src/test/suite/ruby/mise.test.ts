@@ -38,6 +38,16 @@ suite("Mise", () => {
         version: "3.0.0",
       }),
     });
+    const findStub = sinon
+      .stub(mise, "findMiseUri")
+      .resolves(
+        vscode.Uri.joinPath(
+          vscode.Uri.file(os.homedir()),
+          ".local",
+          "bin",
+          "mise",
+        ),
+      );
 
     const { env, version, yjit } = await mise.activate();
 
@@ -53,5 +63,6 @@ suite("Mise", () => {
     assert.deepStrictEqual(env.ANY, "true");
 
     execStub.restore();
+    findStub.restore();
   });
 });

@@ -79,6 +79,7 @@ export class RubyLsp {
   // Activate the extension. This method should perform all actions necessary to start the extension, such as booting
   // all language servers for each existing workspace
   async activate() {
+    await vscode.commands.executeCommand("testing.clearTestResults");
     await this.telemetry.sendConfigurationEvents();
 
     const firstWorkspace = vscode.workspace.workspaceFolders?.[0];
@@ -140,7 +141,7 @@ export class RubyLsp {
       );
 
       if (answer === "See the multi-root workspace docs") {
-        vscode.env.openExternal(
+        await vscode.env.openExternal(
           vscode.Uri.parse(
             "https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md?tab=readme-ov-file#multi-root-workspaces",
           ),
@@ -148,7 +149,7 @@ export class RubyLsp {
       }
 
       if (answer === "Don't show again") {
-        this.context.globalState.update(
+        await this.context.globalState.update(
           "rubyLsp.disableMultirootLockfileWarning",
           true,
         );
@@ -168,8 +169,12 @@ export class RubyLsp {
 
     // If we successfully activated a workspace, then we can start showing the dependencies tree view. This is necessary
     // so that we can avoid showing it on non Ruby projects
-    vscode.commands.executeCommand("setContext", "rubyLsp.activated", true);
-    this.showFormatOnSaveModeWarning(workspace);
+    await vscode.commands.executeCommand(
+      "setContext",
+      "rubyLsp.activated",
+      true,
+    );
+    await this.showFormatOnSaveModeWarning(workspace);
   }
 
   // Registers all extension commands. Commands can only be registered once, so this happens in the constructor. For
@@ -198,7 +203,7 @@ export class RubyLsp {
         this.showSyntaxTree.bind(this),
       ),
       vscode.commands.registerCommand(Command.FormatterHelp, () => {
-        vscode.env.openExternal(
+        return vscode.env.openExternal(
           vscode.Uri.parse(
             "https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md#formatting",
           ),
@@ -287,14 +292,19 @@ export class RubyLsp {
           });
 
           if (manager !== undefined) {
-            configuration.update("rubyVersionManager", manager, true, true);
+            await configuration.update(
+              "rubyVersionManager",
+              manager,
+              true,
+              true,
+            );
           }
         },
       ),
       vscode.commands.registerCommand(
         Command.RunTest,
         (_path, name, _command) => {
-          this.testController.runOnClick(name);
+          return this.testController.runOnClick(name);
         },
       ),
       vscode.commands.registerCommand(
@@ -382,7 +392,9 @@ export class RubyLsp {
       const document = activeEditor.document;
 
       if (document.languageId !== "ruby") {
-        vscode.window.showErrorMessage("Show syntax tree: not a Ruby file");
+        await vscode.window.showErrorMessage(
+          "Show syntax tree: not a Ruby file",
+        );
         return;
       }
 
