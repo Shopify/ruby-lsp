@@ -51,6 +51,18 @@ module RubyLsp
       refute(GlobalState.new.direct_dependency?(/^ruby-lsp/))
     end
 
+    def test_apply_option_selects_formatter
+      state = GlobalState.new
+      state.apply_options({ initializationOptions: { formatter: "syntax_tree" } })
+      assert_equal("syntax_tree", state.formatter)
+    end
+
+    def test_applying_auto_formatter_invokes_detection
+      state = GlobalState.new
+      state.apply_options({ initializationOptions: { formatter: "auto" } })
+      assert_equal("rubocop", state.formatter)
+    end
+
     private
 
     def stub_dependencies(dependencies)

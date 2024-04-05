@@ -129,8 +129,6 @@ module RubyLsp
 
       progress = options.dig(:capabilities, :window, :workDoneProgress)
       @store.supports_progress = progress.nil? ? true : progress
-      formatter = options.dig(:initializationOptions, :formatter) || "auto"
-
       configured_features = options.dig(:initializationOptions, :enabledFeatures)
       @store.experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled) || false
 
@@ -177,7 +175,7 @@ module RubyLsp
           document_link_provider: document_link_provider,
           folding_range_provider: folding_ranges_provider,
           semantic_tokens_provider: semantic_tokens_provider,
-          document_formatting_provider: enabled_features["formatting"] && formatter != "none",
+          document_formatting_provider: enabled_features["formatting"] && @global_state.formatter != "none",
           document_highlight_provider: enabled_features["documentHighlights"],
           code_action_provider: code_action_provider,
           document_on_type_formatting_provider: on_type_formatting_provider,
