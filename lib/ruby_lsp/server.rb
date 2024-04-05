@@ -336,7 +336,7 @@ module RubyLsp
       document_link = Requests::DocumentLink.new(uri, document.comments, dispatcher)
       code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
 
-      semantic_highlighting = Requests::SemanticHighlighting.new(dispatcher)
+      semantic_highlighting = Requests::SemanticHighlighting.new(@global_state, dispatcher)
       dispatcher.dispatch(document.tree)
 
       # Store all responses retrieve in this round of visits in the cache and then return the response for the request
@@ -368,7 +368,7 @@ module RubyLsp
       end_line = range.dig(:end, :line)
 
       dispatcher = Prism::Dispatcher.new
-      request = Requests::SemanticHighlighting.new(dispatcher, range: start_line..end_line)
+      request = Requests::SemanticHighlighting.new(@global_state, dispatcher, range: start_line..end_line)
       dispatcher.visit(document.tree)
 
       response = request.perform

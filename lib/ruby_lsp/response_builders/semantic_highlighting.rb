@@ -55,24 +55,35 @@ module RubyLsp
 
       ResponseType = type_member { { fixed: Interface::SemanticTokens } }
 
-      sig { void }
-      def initialize
-        super
+      sig { params(encoding: Encoding).void }
+      def initialize(encoding)
+        super()
+        @encoding = encoding
         @stack = T.let([], T::Array[SemanticToken])
       end
 
       sig { params(location: Prism::Location, type: Symbol, modifiers: T::Array[Symbol]).void }
       def add_token(location, type, modifiers = [])
-        length = location.end_offset - location.start_offset
+        length = location.end_code_units_offset(@encoding) - location.start_code_units_offset(@encoding)
         modifiers_indices = modifiers.filter_map { |modifier| TOKEN_MODIFIERS[modifier] }
         @stack.push(
           SemanticToken.new(
-            location: location,
+            start_line: location.start_line,
+            start_code_unit_column: location.start_code_units_column(@encoding),
             length: length,
             type: T.must(TOKEN_TYPES[type]),
             modifier: modifiers_indices,
           ),
         )
+      end
+
+      sig { params(location: Prism::Location).returns(T::Boolean) }
+      def last_token_matches?(location)
+        token = @stack.last
+        return false unless token
+
+        token.start_line == location.start_line &&
+          token.start_code_unit_column == location.start_code_units_column(@encoding)
       end
 
       sig { returns(T.nilable(SemanticToken)) }
@@ -88,8 +99,11 @@ module RubyLsp
       class SemanticToken
         extend T::Sig
 
-        sig { returns(Prism::Location) }
-        attr_reader :location
+        sig { returns(Integer) }
+        attr_reader :start_line
+
+        sig { returns(Integer) }
+        attr_reader :start_code_unit_column
 
         sig { returns(Integer) }
         attr_reader :length
@@ -100,9 +114,18 @@ module RubyLsp
         sig { returns(T::Array[Integer]) }
         attr_reader :modifier
 
-        sig { params(location: Prism::Location, length: Integer, type: Integer, modifier: T::Array[Integer]).void }
-        def initialize(location:, length:, type:, modifier:)
-          @location = location
+        sig do
+          params(
+            start_line: Integer,
+            start_code_unit_column: Integer,
+            length: Integer,
+            type: Integer,
+            modifier: T::Array[Integer],
+          ).void
+        end
+        def initialize(start_line:, start_code_unit_column:, length:, type:, modifier:)
+          @start_line = start_line
+          @start_code_unit_column = start_code_unit_column
           @length = length
           @type = type
           @modifier = modifier
@@ -146,7 +169,7 @@ module RubyLsp
             # Enumerable#sort_by is not deterministic when the compared values are equal.
             # When that happens, we need to use the index as a tie breaker to ensure
             # that the order of the tokens is always the same.
-            [token.location.start_line, token.location.start_column, index]
+            [token.start_line, token.start_code_unit_column, index]
           end
 
           delta = sorted_tokens.flat_map do |token|
@@ -167,8 +190,8 @@ module RubyLsp
         # https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_semanticTokens
         sig { params(token: SemanticToken).returns(T::Array[Integer]) }
         def compute_delta(token)
-          row = token.location.start_line - 1
-          column = token.location.start_column
+          row = token.start_line - 1
+          column = token.start_code_unit_column
 
           begin
             delta_line = row - @current_row
