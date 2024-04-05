@@ -320,11 +320,17 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_document_handle_4_byte_unicode_characters
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"), encoding: "utf-16")
+    source = +<<~RUBY
       class Foo
         a = "👋"
       end
     RUBY
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI("file:///foo.rb"),
+      encoding: Encoding::UTF_16LE,
+    )
 
     document.push_edits(
       [

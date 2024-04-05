@@ -118,15 +118,6 @@ module RubyLsp
       client_name = options.dig(:clientInfo, :name)
       @store.client_name = client_name if client_name
 
-      encodings = options.dig(:capabilities, :general, :positionEncodings)
-      @store.encoding = if encodings.nil? || encodings.empty?
-        Constant::PositionEncodingKind::UTF16
-      elsif encodings.include?(Constant::PositionEncodingKind::UTF8)
-        Constant::PositionEncodingKind::UTF8
-      else
-        encodings.first
-      end
-
       progress = options.dig(:capabilities, :window, :workDoneProgress)
       @store.supports_progress = progress.nil? ? true : progress
       configured_features = options.dig(:initializationOptions, :enabledFeatures)
@@ -168,7 +159,7 @@ module RubyLsp
             change: Constant::TextDocumentSyncKind::INCREMENTAL,
             open_close: true,
           ),
-          position_encoding: @store.encoding,
+          position_encoding: @global_state.encoding_name,
           selection_range_provider: enabled_features["selectionRanges"],
           hover_provider: hover_provider,
           document_symbol_provider: document_symbol_provider,
@@ -270,7 +261,12 @@ module RubyLsp
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_did_open(message)
       text_document = message.dig(:params, :textDocument)
-      @store.set(uri: text_document[:uri], source: text_document[:text], version: text_document[:version])
+      @store.set(
+        uri: text_document[:uri],
+        source: text_document[:text],
+        version: text_document[:version],
+        encoding: @global_state.encoding,
+      )
     rescue Errno::ENOENT
       # If someone re-opens the editor with a file that was deleted or doesn't exist in the current branch, we don't
       # want to crash
