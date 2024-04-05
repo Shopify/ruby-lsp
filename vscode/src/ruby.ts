@@ -150,7 +150,6 @@ export class Ruby implements RubyInterface {
       }
 
       this.fetchRubyVersionInfo();
-      this.deleteGcEnvironmentVariables();
       await this.setupBundlePath();
       this._error = false;
     } catch (error: any) {
@@ -171,6 +170,8 @@ export class Ruby implements RubyInterface {
   private async runActivation(manager: VersionManager) {
     const { env, version, yjit } = await manager.activate();
     const [major, minor, _patch] = version.split(".").map(Number);
+
+    this.sanitizeEnvironment(env);
 
     // We need to set the process environment too to make other extensions such as Sorbet find the right Ruby paths
     process.env = env;
@@ -240,12 +241,20 @@ export class Ruby implements RubyInterface {
     }
   }
 
-  private deleteGcEnvironmentVariables() {
-    Object.keys(this._env).forEach((key) => {
+  // Deletes environment variables that are known to cause issues for launching the Ruby LSP. For example, GC tuning
+  // variables or verbose settings
+  private sanitizeEnvironment(env: NodeJS.ProcessEnv) {
+    // Delete all GC tuning variables
+    Object.keys(env).forEach((key) => {
       if (key.startsWith("RUBY_GC")) {
-        delete this._env[key];
+        delete env[key];
       }
     });
+
+    // Delete verbose or debug related settings. These often make Bundler or other dependencies print things to STDOUT,
+    // which breaks the client/server communication
+    delete env.VERBOSE;
+    delete env.DEBUG;
   }
 
   private async setupBundlePath() {
