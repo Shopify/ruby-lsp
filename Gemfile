@@ -11,7 +11,7 @@ group :development do
   gem "minitest", "~> 5.22"
   gem "mocha", "~> 2.1"
   gem "psych", "~> 5.1", require: false
-  gem "rake", "~> 13.1"
+  gem "rake", "~> 13.2"
   gem "rdoc", require: false, github: "Shopify/rdoc", branch: "create_snapper_generator"
   gem "rubocop-minitest", "~> 0.35.0", require: false
   gem "rubocop-rake", "~> 0.6.0", require: false
