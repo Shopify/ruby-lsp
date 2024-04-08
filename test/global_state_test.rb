@@ -33,14 +33,16 @@ module RubyLsp
       assert(GlobalState.new.direct_dependency?(/^prism$/))
     end
 
-    def test_detects_rails_if_both_rails_and_minitest_are_present
-      stub_dependencies("minitest" => "1.2.3", "rails" => "1.2.3")
+    def test_detects_rails_if_minitest_is_present_and_bin_rails_exists
+      stub_dependencies("minitest" => "1.2.3")
+      File.expects(:exist?).with("#{Dir.pwd}/bin/rails").once.returns(true)
 
       assert_equal("rails", GlobalState.new.test_library)
     end
 
     def test_detects_rspec_if_both_rails_and_rspec_are_present
-      stub_dependencies("rspec" => "1.2.3", "rails" => "1.2.3")
+      stub_dependencies("rspec" => "1.2.3")
+      File.expects(:exist?).never
 
       assert_equal("rspec", GlobalState.new.test_library)
     end
