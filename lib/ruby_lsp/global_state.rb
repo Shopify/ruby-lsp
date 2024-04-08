@@ -104,8 +104,10 @@ module RubyLsp
       if direct_dependency?(/^rspec/)
         "rspec"
       # A Rails app may have a dependency on minitest, but we would instead want to use the Rails test runner provided
-      # by ruby-lsp-rails.
-      elsif direct_dependency?(/^rails$/)
+      # by ruby-lsp-rails. A Rails app doesn't need to depend on the rails gem itself, individual components like
+      # activestorage may be added to the gemfile so that other components aren't downloaded. Check for the presence
+      #  of bin/rails to support these cases.
+      elsif File.exist?(File.join(workspace_path, "bin/rails"))
         "rails"
       # NOTE: Intentionally ends with $ to avoid mis-matching minitest-reporters, etc. in a Rails app.
       elsif direct_dependency?(/^minitest$/)
