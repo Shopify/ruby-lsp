@@ -6,14 +6,14 @@ require "ruby_lsp/setup_bundler"
 
 class SetupBundlerTest < Minitest::Test
   def test_does_nothing_if_both_ruby_lsp_and_debug_are_in_the_bundle
-    Object.any_instance.expects(:system).with(bundle_env, "(bundle check || bundle install) 1>&2")
+    Object.any_instance.expects(:system).with(bundle_env, "(bundle check || bundle install) 1>&2").returns(true)
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({ "ruby-lsp" => true, "debug" => true })
     run_script
     refute_path_exists(".ruby-lsp")
   end
 
   def test_does_nothing_if_both_ruby_lsp_and_debug_are_in_the_bundle2
-    Object.any_instance.expects(:system).with(bundle_env, "(bundle check || bundle install) 1>&2")
+    Object.any_instance.expects(:system).with(bundle_env, "(bundle check || bundle install) 1>&2").returns(true)
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({
       "ruby-lsp" => true,
       "rails" => true,
@@ -35,7 +35,7 @@ class SetupBundlerTest < Minitest::Test
   end
 
   def test_in_a_rails_app_does_nothing_if_ruby_lsp_and_ruby_lsp_rails_and_debug_are_in_the_bundle
-    Object.any_instance.expects(:system).with(bundle_env, "(bundle check || bundle install) 1>&2")
+    Object.any_instance.expects(:system).with(bundle_env, "(bundle check || bundle install) 1>&2").returns(true)
     Bundler::LockfileParser.any_instance.expects(:dependencies)
       .returns({ "ruby-lsp" => true, "ruby-lsp-rails" => true, "debug" => true })
     run_script
@@ -45,7 +45,7 @@ class SetupBundlerTest < Minitest::Test
   end
 
   def test_in_a_rails_app_removes_ruby_lsp_folder_if_all_gems_were_added_to_the_bundle
-    Object.any_instance.expects(:system).with(bundle_env, "(bundle check || bundle install) 1>&2")
+    Object.any_instance.expects(:system).with(bundle_env, "(bundle check || bundle install) 1>&2").returns(true)
     Bundler::LockfileParser.any_instance.expects(:dependencies)
       .returns({ "ruby-lsp" => true, "ruby-lsp-rails" => true, "debug" => true })
     FileUtils.mkdir(".ruby-lsp")
@@ -56,7 +56,10 @@ class SetupBundlerTest < Minitest::Test
   end
 
   def test_creates_custom_bundle
-    Object.any_instance.expects(:system).with(bundle_env(".ruby-lsp/Gemfile"), "(bundle check || bundle install) 1>&2")
+    Object.any_instance.expects(:system).with(
+      bundle_env(".ruby-lsp/Gemfile"),
+      "(bundle check || bundle install) 1>&2",
+    ).returns(true)
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({}).at_least_once
     run_script
 
@@ -72,7 +75,10 @@ class SetupBundlerTest < Minitest::Test
   end
 
   def test_creates_custom_bundle_for_a_rails_app
-    Object.any_instance.expects(:system).with(bundle_env(".ruby-lsp/Gemfile"), "(bundle check || bundle install) 1>&2")
+    Object.any_instance.expects(:system).with(
+      bundle_env(".ruby-lsp/Gemfile"),
+      "(bundle check || bundle install) 1>&2",
+    ).returns(true)
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({ "rails" => true }).at_least_once
     run_script
 
@@ -128,7 +134,7 @@ class SetupBundlerTest < Minitest::Test
         Object.any_instance.expects(:system).with(
           bundle_env(".ruby-lsp/Gemfile"),
           "(bundle check || bundle install) 1>&2",
-        )
+        ).returns(true)
         Bundler.with_unbundled_env do
           run_script
         end
@@ -160,7 +166,7 @@ class SetupBundlerTest < Minitest::Test
           Object.any_instance.expects(:system).with(
             bundle_env(".ruby-lsp/Gemfile"),
             "((bundle check && bundle update ruby-lsp debug) || bundle install) 1>&2",
-          )
+          ).returns(true)
 
           FileUtils.expects(:cp).never
 
@@ -197,7 +203,7 @@ class SetupBundlerTest < Minitest::Test
           Object.any_instance.expects(:system).with(
             bundle_env(".ruby-lsp/Gemfile"),
             "(bundle check || bundle install) 1>&2",
-          )
+          ).returns(true)
 
           Bundler.with_unbundled_env do
             # Run the script again without having the lockfile modified
@@ -210,7 +216,10 @@ class SetupBundlerTest < Minitest::Test
 
   def test_uses_absolute_bundle_path_for_bundle_install
     Bundler.settings.set_global("path", "vendor/bundle")
-    Object.any_instance.expects(:system).with(bundle_env(".ruby-lsp/Gemfile"), "(bundle check || bundle install) 1>&2")
+    Object.any_instance.expects(:system).with(
+      bundle_env(".ruby-lsp/Gemfile"),
+      "(bundle check || bundle install) 1>&2",
+    ).returns(true)
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({}).at_least_once
     run_script(expected_path: File.expand_path("vendor/bundle", Dir.pwd))
   ensure
@@ -227,7 +236,7 @@ class SetupBundlerTest < Minitest::Test
         Object.any_instance.expects(:system).with(
           bundle_env(bundle_gemfile.to_s),
           "(bundle check || bundle install) 1>&2",
-        )
+        ).returns(true)
 
         Bundler.with_unbundled_env do
           run_script
@@ -289,7 +298,7 @@ class SetupBundlerTest < Minitest::Test
         FileUtils.touch(File.join(dir, "Gemfile.lock"))
 
         Bundler.with_unbundled_env do
-          Object.any_instance.expects(:system).with(bundle_env, "(bundle check || bundle install) 1>&2")
+          Object.any_instance.expects(:system).with(bundle_env, "(bundle check || bundle install) 1>&2").returns(true)
           Bundler::LockfileParser.any_instance.expects(:dependencies).returns({})
           run_script
         end
@@ -306,7 +315,7 @@ class SetupBundlerTest < Minitest::Test
         Object.any_instance.expects(:system).with(
           bundle_env(bundle_gemfile.to_s),
           "(bundle check || bundle install) 1>&2",
-        )
+        ).returns(true)
 
         Bundler.with_unbundled_env do
           run_script(branch: "test-branch")
@@ -342,7 +351,7 @@ class SetupBundlerTest < Minitest::Test
           Object.any_instance.expects(:system).with(
             bundle_env(".ruby-lsp/Gemfile"),
             "((bundle check && bundle update ruby-lsp debug --pre) || bundle install) 1>&2",
-          )
+          ).returns(true)
 
           Bundler.with_unbundled_env do
             run_script(experimental: true)
@@ -361,7 +370,7 @@ class SetupBundlerTest < Minitest::Test
           Object.any_instance.expects(:system).with(
             bundle_env(bundle_gemfile.to_s),
             "(bundle check || bundle install) 1>&2",
-          )
+          ).returns(true)
 
           run_script
         end
@@ -490,13 +499,80 @@ class SetupBundlerTest < Minitest::Test
         Object.any_instance.expects(:system).with(
           bundle_env(".ruby-lsp/Gemfile"),
           "(bundle check || bundle install) 1>&2",
-        )
+        ).returns(true)
         Bundler.with_unbundled_env do
           run_script
         end
 
         assert_path_exists(".ruby-lsp/Gemfile")
         assert_match('gem "ruby-lsp-rails"', File.read(".ruby-lsp/Gemfile"))
+      end
+    end
+  end
+
+  def test_recovers_from_stale_lockfiles
+    Dir.mktmpdir do |dir|
+      custom_dir = File.join(dir, ".ruby-lsp")
+      FileUtils.mkdir_p(custom_dir)
+
+      Dir.chdir(dir) do
+        # Write the main Gemfile and lockfile with valid versions
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "stringio"
+        GEMFILE
+
+        lockfile_contents = <<~LOCKFILE
+          GEM
+            remote: https://rubygems.org/
+            specs:
+              stringio (3.1.0)
+
+          PLATFORMS
+            arm64-darwin-23
+            ruby
+
+          DEPENDENCIES
+            stringio
+
+          BUNDLED WITH
+            2.5.7
+        LOCKFILE
+        File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
+
+        # Write the lockfile hash based on the valid file
+        File.write(File.join(custom_dir, "main_lockfile_hash"), Digest::SHA256.hexdigest(lockfile_contents))
+
+        # Write the custom bundle's lockfile using a fake version that doesn't exist to force bundle install to fail
+        File.write(File.join(custom_dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "stringio"
+        GEMFILE
+        File.write(File.join(custom_dir, "Gemfile.lock"), <<~LOCKFILE)
+          GEM
+            remote: https://rubygems.org/
+            specs:
+              stringio (999.1.555)
+
+          PLATFORMS
+            arm64-darwin-23
+            ruby
+
+          DEPENDENCIES
+            stringio
+
+          BUNDLED WITH
+            2.5.7
+        LOCKFILE
+
+        Bundler.with_unbundled_env do
+          run_script
+        end
+
+        # Verify that the script recovered and re-generated the custom bundle from scratch
+        assert_path_exists(".ruby-lsp/Gemfile")
+        assert_path_exists(".ruby-lsp/Gemfile.lock")
+        refute_match("999.1.555", File.read(".ruby-lsp/Gemfile.lock"))
       end
     end
   end
