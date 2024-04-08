@@ -260,30 +260,31 @@ module RubyLsp
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_did_open(message)
-      text_document = message.dig(:params, :textDocument)
-      @store.set(
-        uri: text_document[:uri],
-        source: text_document[:text],
-        version: text_document[:version],
-        encoding: @global_state.encoding,
-      )
-    rescue Errno::ENOENT
-      # If someone re-opens the editor with a file that was deleted or doesn't exist in the current branch, we don't
-      # want to crash
+      @mutex.synchronize do
+        text_document = message.dig(:params, :textDocument)
+        @store.set(
+          uri: text_document[:uri],
+          source: text_document[:text],
+          version: text_document[:version],
+          encoding: @global_state.encoding,
+        )
+      end
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_did_close(message)
-      uri = message.dig(:params, :textDocument, :uri)
-      @store.delete(uri)
+      @mutex.synchronize do
+        uri = message.dig(:params, :textDocument, :uri)
+        @store.delete(uri)
 
-      # Clear diagnostics for the closed file, so that they no longer appear in the problems tab
-      send_message(
-        Notification.new(
-          method: "textDocument/publishDiagnostics",
-          params: Interface::PublishDiagnosticsParams.new(uri: uri.to_s, diagnostics: []),
-        ),
-      )
+        # Clear diagnostics for the closed file, so that they no longer appear in the problems tab
+        send_message(
+          Notification.new(
+            method: "textDocument/publishDiagnostics",
+            params: Interface::PublishDiagnosticsParams.new(uri: uri.to_s, diagnostics: []),
+          ),
+        )
+      end
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
