@@ -9,11 +9,11 @@ class FormattingTest < Minitest::Test
     @global_state.formatter = "rubocop"
     @global_state.register_formatter(
       "rubocop",
-      RubyLsp::Requests::Support::RuboCopFormatter.instance,
+      RubyLsp::Requests::Support::RuboCopFormatter.new,
     )
     @global_state.register_formatter(
       "syntax_tree",
-      RubyLsp::Requests::Support::SyntaxTreeFormatter.instance,
+      RubyLsp::Requests::Support::SyntaxTreeFormatter.new,
     )
     @document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI::Generic.from_path(path: __FILE__))
       class Foo
@@ -141,9 +141,7 @@ class FormattingTest < Minitest::Test
   end
 
   def test_using_a_custom_formatter
-    require "singleton"
     formatter_class = Class.new do
-      include Singleton
       include RubyLsp::Requests::Support::Formatter
 
       def run_formatting(uri, document)
@@ -151,7 +149,7 @@ class FormattingTest < Minitest::Test
       end
     end
 
-    @global_state.register_formatter("my-custom-formatter", T.unsafe(formatter_class).instance)
+    @global_state.register_formatter("my-custom-formatter", T.unsafe(formatter_class).new)
     assert_includes(formatted_document("my-custom-formatter"), "# formatter by my-custom-formatter")
   end
 
@@ -181,10 +179,9 @@ class FormattingTest < Minitest::Test
   def clear_syntax_tree_runner_singleton_instance
     return unless defined?(RubyLsp::Requests::Support::SyntaxTreeFormatter)
 
-    Singleton.__init__(RubyLsp::Requests::Support::SyntaxTreeFormatter)
     @global_state.register_formatter(
       "syntax_tree",
-      RubyLsp::Requests::Support::SyntaxTreeFormatter.instance,
+      RubyLsp::Requests::Support::SyntaxTreeFormatter.new,
     )
   end
 end

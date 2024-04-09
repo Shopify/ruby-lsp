@@ -8,15 +8,12 @@ rescue LoadError
   return
 end
 
-require "singleton"
-
 module RubyLsp
   module Requests
     module Support
       # :nodoc:
       class SyntaxTreeFormatter
         extend T::Sig
-        include Singleton
         include Support::Formatter
 
         sig { void }

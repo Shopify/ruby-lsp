@@ -415,7 +415,7 @@ class ServerTest < Minitest::Test
         initializationOptions: { formatter: "rubocop" },
       })
 
-      @server.global_state.register_formatter("rubocop", RubyLsp::Requests::Support::RuboCopFormatter.instance)
+      @server.global_state.register_formatter("rubocop", RubyLsp::Requests::Support::RuboCopFormatter.new)
       with_uninstalled_rubocop do
         @server.process_message({ method: "initialized" })
       end
@@ -480,7 +480,10 @@ class ServerTest < Minitest::Test
     rubocop_paths = $LOAD_PATH.select { |path| path.include?("gems/rubocop") }
     rubocop_paths.each { |path| $LOAD_PATH.delete(path) }
 
-    $LOADED_FEATURES.delete_if { |path| path.include?("ruby_lsp/requests/support/rubocop_runner") }
+    $LOADED_FEATURES.delete_if do |path|
+      path.include?("ruby_lsp/requests/support/rubocop_runner") ||
+        path.include?("ruby_lsp/requests/support/rubocop_formatter")
+    end
 
     unload_rubocop_runner
     block.call
@@ -488,12 +491,14 @@ class ServerTest < Minitest::Test
     $LOAD_PATH.unshift(*rubocop_paths)
     unload_rubocop_runner
     require "ruby_lsp/requests/support/rubocop_runner"
+    require "ruby_lsp/requests/support/rubocop_formatter"
   end
 
   def unload_rubocop_runner
     RubyLsp::Requests::Support.send(:remove_const, :RuboCopRunner)
+    RubyLsp::Requests::Support.send(:remove_const, :RuboCopFormatter)
   rescue NameError
-    # Depending on which tests have run prior to this one, `RuboCopRunner` may or may not be defined
+    # Depending on which tests have run prior to this one, the classes may or may not be defined
   end
 
   def stub_dependencies(rubocop:, syntax_tree:)

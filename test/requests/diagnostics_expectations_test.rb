@@ -14,7 +14,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     global_state.formatter = "rubocop"
     global_state.register_formatter(
       "rubocop",
-      RubyLsp::Requests::Support::RuboCopFormatter.instance,
+      RubyLsp::Requests::Support::RuboCopFormatter.new,
     )
 
     stdout, _ = capture_io do

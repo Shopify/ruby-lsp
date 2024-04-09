@@ -12,7 +12,7 @@ class FormattingExpectationsTest < ExpectationsTestRunner
     global_state.formatter = "rubocop"
     global_state.register_formatter(
       "rubocop",
-      RubyLsp::Requests::Support::RuboCopFormatter.instance,
+      RubyLsp::Requests::Support::RuboCopFormatter.new,
     )
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI::Generic.from_path(path: __FILE__))
     RubyLsp::Requests::Formatting.new(global_state, document).perform&.first&.new_text
