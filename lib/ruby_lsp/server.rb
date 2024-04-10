@@ -610,6 +610,7 @@ module RubyLsp
         uri = URI(change[:uri])
         file_path = uri.to_standardized_path
         next if file_path.nil? || File.directory?(file_path)
+        next unless file_path.end_with?(".rb")
 
         load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
         indexable = RubyIndexer::IndexablePath.new(load_path_entry, file_path)
