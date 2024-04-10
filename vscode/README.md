@@ -429,4 +429,5 @@ vscode.commands.registerCommand(
 When `rubyLsp.formatter` is set to `auto`, Ruby LSP tries to determine which formatter to use.
 
 If the bundle has a **direct** dependency on a supported formatter, such as `rubocop` or `syntax_tree`, that will be used.
-Otherwise, formatting will be disabled and you will need add one to the bundle.
+Otherwise, formatting will be disabled and you will need add one to the bundle. Using globally installed formatters or
+linters is not supported, they must in your Gemfile or gemspec.
