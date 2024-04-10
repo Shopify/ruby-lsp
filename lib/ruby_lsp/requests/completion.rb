@@ -34,7 +34,7 @@ module RubyLsp
         sig { returns(Interface::CompletionOptions) }
         def provider
           Interface::CompletionOptions.new(
-            resolve_provider: false,
+            resolve_provider: true,
             trigger_characters: ["/", "\"", "'"],
             completion_item: {
               labelDetailsSupport: true,
@@ -46,13 +46,13 @@ module RubyLsp
       sig do
         params(
           document: Document,
-          index: RubyIndexer::Index,
+          global_state: GlobalState,
           position: T::Hash[Symbol, T.untyped],
           typechecker_enabled: T::Boolean,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(document, index, position, typechecker_enabled, dispatcher)
+      def initialize(document, global_state, position, typechecker_enabled, dispatcher)
         super()
         @target = T.let(nil, T.nilable(Prism::Node))
         @dispatcher = dispatcher
@@ -73,13 +73,17 @@ module RubyLsp
 
         Listeners::Completion.new(
           @response_builder,
-          index,
+          global_state,
           nesting,
           local_variables,
           typechecker_enabled,
           dispatcher,
           document.uri,
         )
+
+        Addon.addons.each do |addon|
+          addon.create_completion_listener(@response_builder, nesting, dispatcher, document.uri)
+        end
 
         return unless matched && parent
 

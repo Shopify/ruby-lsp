@@ -4,178 +4,167 @@
 require "test_helper"
 
 class CompletionTest < Minitest::Test
-  def setup
-    @message_queue = Thread::Queue.new
-    @uri = URI("file:///fake.rb")
-    @store = RubyLsp::Store.new
-    @executor = RubyLsp::Executor.new(@store, @message_queue)
-  end
-
-  def teardown
-    T.must(@message_queue).close
-  end
-
   def test_completion_command
     prefix = "foo/"
-
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri)
+    source = <<~RUBY
       require "#{prefix}"
     RUBY
-
-    end_char = T.must(document.source.rindex('"'))
-    start_position = { line: 0, character: T.must(document.source.index('"')) + 1 }
+    end_char = T.must(source.rindex('"'))
+    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 
-    result = with_file_structure do
-      @store.set(uri: @uri, source: document.source, version: 1)
-      run_request(
-        method: "textDocument/completion",
-        params: { textDocument: { uri: @uri.to_s }, position: { line: 0, character: end_char } },
-      )
+    with_server(source) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 0, character: end_char },
+        })
+        result = server.pop_response.response
+
+        expected = [
+          path_completion("foo/bar", start_position, end_position),
+          path_completion("foo/baz", start_position, end_position),
+          path_completion("foo/quux", start_position, end_position),
+          path_completion("foo/support/bar", start_position, end_position),
+          path_completion("foo/support/baz", start_position, end_position),
+          path_completion("foo/support/quux", start_position, end_position),
+        ]
+
+        assert_equal(expected.to_json, result.to_json)
+      end
     end
-
-    expected = [
-      path_completion("foo/bar", start_position, end_position),
-      path_completion("foo/baz", start_position, end_position),
-      path_completion("foo/quux", start_position, end_position),
-      path_completion("foo/support/bar", start_position, end_position),
-      path_completion("foo/support/baz", start_position, end_position),
-      path_completion("foo/support/quux", start_position, end_position),
-    ]
-
-    assert_equal(expected.to_json, result.to_json)
   end
 
   def test_completion_call
     prefix = "foo/"
-
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri)
+    source = <<~RUBY
       require("#{prefix}")
     RUBY
-
-    end_char = T.must(document.source.rindex('"'))
-    start_position = { line: 0, character: T.must(document.source.index('"')) + 1 }
+    end_char = T.must(source.rindex('"'))
+    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 
-    result = with_file_structure do
-      @store.set(uri: @uri, source: document.source, version: 1)
-      run_request(
-        method: "textDocument/completion",
-        params: { textDocument: { uri: @uri.to_s }, position: { line: 0, character: end_char } },
-      )
+    with_server(source) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 0, character: end_char },
+        })
+        result = server.pop_response.response
+
+        expected = [
+          path_completion("foo/bar", start_position, end_position),
+          path_completion("foo/baz", start_position, end_position),
+          path_completion("foo/quux", start_position, end_position),
+          path_completion("foo/support/bar", start_position, end_position),
+          path_completion("foo/support/baz", start_position, end_position),
+          path_completion("foo/support/quux", start_position, end_position),
+        ]
+
+        assert_equal(expected.to_json, result.to_json)
+      end
     end
-
-    expected = [
-      path_completion("foo/bar", start_position, end_position),
-      path_completion("foo/baz", start_position, end_position),
-      path_completion("foo/quux", start_position, end_position),
-      path_completion("foo/support/bar", start_position, end_position),
-      path_completion("foo/support/baz", start_position, end_position),
-      path_completion("foo/support/quux", start_position, end_position),
-    ]
-
-    assert_equal(expected.to_json, result.to_json)
   end
 
   def test_completion_command_call
     prefix = "foo/"
-
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri)
+    source = <<~RUBY
       Kernel.require "#{prefix}"
     RUBY
-
-    end_char = T.must(document.source.rindex('"'))
-    start_position = { line: 0, character: T.must(document.source.index('"')) + 1 }
+    end_char = T.must(source.rindex('"'))
+    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 
-    result = with_file_structure do
-      @store.set(uri: @uri, source: document.source, version: 1)
-      run_request(
-        method: "textDocument/completion",
-        params: { textDocument: { uri: @uri.to_s }, position: { line: 0, character: end_char } },
-      )
+    with_server(source) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 0, character: end_char },
+        })
+        result = server.pop_response.response
+
+        expected = [
+          path_completion("foo/bar", start_position, end_position),
+          path_completion("foo/baz", start_position, end_position),
+          path_completion("foo/quux", start_position, end_position),
+          path_completion("foo/support/bar", start_position, end_position),
+          path_completion("foo/support/baz", start_position, end_position),
+          path_completion("foo/support/quux", start_position, end_position),
+        ]
+
+        assert_equal(expected.to_json, result.to_json)
+      end
     end
-
-    expected = [
-      path_completion("foo/bar", start_position, end_position),
-      path_completion("foo/baz", start_position, end_position),
-      path_completion("foo/quux", start_position, end_position),
-      path_completion("foo/support/bar", start_position, end_position),
-      path_completion("foo/support/baz", start_position, end_position),
-      path_completion("foo/support/quux", start_position, end_position),
-    ]
-
-    assert_equal(expected.to_json, result.to_json)
   end
 
   def test_completion_with_partial_path
     prefix = "foo/suppo"
-
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri)
+    source = <<~RUBY
       require "#{prefix}"
     RUBY
-
-    end_char = T.must(document.source.rindex('"'))
-    start_position = { line: 0, character: T.must(document.source.index('"')) + 1 }
+    end_char = T.must(source.rindex('"'))
+    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 
-    result = with_file_structure do
-      @store.set(uri: @uri, source: document.source, version: 1)
-      run_request(
-        method: "textDocument/completion",
-        params: { textDocument: { uri: @uri.to_s }, position: { line: 0, character: end_char } },
-      )
+    with_server(source) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 0, character: end_char },
+        })
+        result = server.pop_response.response
+
+        expected = [
+          path_completion("foo/support/bar", start_position, end_position),
+          path_completion("foo/support/baz", start_position, end_position),
+          path_completion("foo/support/quux", start_position, end_position),
+        ]
+
+        assert_equal(expected.to_json, result.to_json)
+      end
     end
-
-    expected = [
-      path_completion("foo/support/bar", start_position, end_position),
-      path_completion("foo/support/baz", start_position, end_position),
-      path_completion("foo/support/quux", start_position, end_position),
-    ]
-
-    assert_equal(expected.to_json, result.to_json)
   end
 
   def test_completion_does_not_fail_when_there_are_syntax_errors
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = <<~RUBY
       require "ruby_lsp/requests/"
 
       def foo
     RUBY
+    end_position = { line: 0, character: source.rindex('"') }
 
-    end_position = {
-      line: 0,
-      character: document.source.rindex('"'),
-    }
-
-    @store.set(uri: @uri, source: document.source, version: 1)
-    run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: end_position },
-    )
+    with_server(source) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: end_position,
+        })
+        result = server.pop_response
+        assert_instance_of(RubyLsp::Result, result)
+      end
+    end
   end
 
   def test_completion_is_not_triggered_if_argument_is_not_a_string
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       require foo
     RUBY
+    end_position = { line: 0, character: source.rindex("o") }
 
-    end_position = {
-      line: 0,
-      character: document.source.rindex("o"),
-    }
-
-    @store.set(uri: @uri, source: document.source, version: 1)
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: end_position },
-    )
-    assert_empty(result)
+    with_server(source) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: end_position,
+        })
+        result = server.pop_response.response
+        assert_empty(result)
+      end
+    end
   end
 
   def test_completion_for_constants
-    stub_no_typechecker
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class Foo
       end
 
@@ -183,21 +172,21 @@ class CompletionTest < Minitest::Test
     RUBY
 
     end_position = { line: 3, character: 1 }
-    @store.set(uri: @uri, source: document.source, version: 1)
 
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: end_position },
-    )
-    assert_equal(["Foo"], result.map(&:label))
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: end_position,
+        })
+        result = server.pop_response.response
+        assert_equal(["Foo"], result.map(&:label))
+      end
+    end
   end
 
   def test_completion_for_constant_paths
-    stub_no_typechecker
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class Bar
       end
 
@@ -211,33 +200,33 @@ class CompletionTest < Minitest::Test
       Foo::B
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 7, character: 3 },
+        })
 
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+        result = server.pop_response.response
+        assert_equal(["Foo::Bar", "Bar"], result.map(&:label))
+        assert_equal(["Bar", "::Bar"], result.map(&:filter_text))
+        assert_equal(["Bar", "::Bar"], result.map { |completion| completion.text_edit.new_text })
 
-    end_position = { line: 7, character: 3 }
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: end_position },
-    )
-    assert_equal(["Foo::Bar", "Bar"], result.map(&:label))
-    assert_equal(["Bar", "::Bar"], result.map(&:filter_text))
-    assert_equal(["Bar", "::Bar"], result.map { |completion| completion.text_edit.new_text })
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 10, character: 6 },
+        })
 
-    end_position = { line: 10, character: 6 }
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: end_position },
-    )
-    assert_equal(["Foo::Bar"], result.map(&:label))
-    assert_equal(["Foo::Bar"], result.map(&:filter_text))
-    assert_equal(["Foo::Bar"], result.map { |completion| completion.text_edit.new_text })
+        result = server.pop_response.response
+        assert_equal(["Foo::Bar"], result.map(&:label))
+        assert_equal(["Foo::Bar"], result.map(&:filter_text))
+        assert_equal(["Foo::Bar"], result.map { |completion| completion.text_edit.new_text })
+      end
+    end
   end
 
   def test_completion_conflicting_constants
-    stub_no_typechecker
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       module Foo
         class Qux; end
 
@@ -251,23 +240,23 @@ class CompletionTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 6, character: 5 },
+        })
 
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: { line: 6, character: 5 } },
-    )
-    assert_equal(["Foo::Bar::Qux", "Foo::Qux"], result.map(&:label))
-    assert_equal(["Qux", "Foo::Qux"], result.map(&:filter_text))
-    assert_equal(["Qux", "Foo::Qux"], result.map { |completion| completion.text_edit.new_text })
+        result = server.pop_response.response
+        assert_equal(["Foo::Bar::Qux", "Foo::Qux"], result.map(&:label))
+        assert_equal(["Qux", "Foo::Qux"], result.map(&:filter_text))
+        assert_equal(["Qux", "Foo::Qux"], result.map { |completion| completion.text_edit.new_text })
+      end
+    end
   end
 
   def test_completion_for_top_level_constants_inside_nesting
-    stub_no_typechecker
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class Bar
       end
 
@@ -279,24 +268,23 @@ class CompletionTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 7, character: 5 },
+        })
 
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    end_position = { line: 7, character: 5 }
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: end_position },
-    )
-    assert_equal(["Bar"], result.map(&:label))
-    assert_equal(["::Bar"], result.map(&:filter_text))
-    assert_equal(["::Bar"], result.map { |completion| completion.text_edit.new_text })
+        result = server.pop_response.response
+        assert_equal(["Bar"], result.map(&:label))
+        assert_equal(["::Bar"], result.map(&:filter_text))
+        assert_equal(["::Bar"], result.map { |completion| completion.text_edit.new_text })
+      end
+    end
   end
 
   def test_completion_private_constants_inside_the_same_namespace
-    stub_no_typechecker
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class A
         CONST = 1
         private_constant(:CONST)
@@ -305,21 +293,21 @@ class CompletionTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 3, character: 4 },
+        })
 
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    end_position = { line: 3, character: 4 }
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: end_position },
-    )
-    assert_equal(["CONST"], result.map { |completion| completion.text_edit.new_text })
+        result = server.pop_response.response
+        assert_equal(["CONST"], result.map { |completion| completion.text_edit.new_text })
+      end
+    end
   end
 
   def test_completion_private_constants_from_different_namespace
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class A
         CONST = 1
         private_constant(:CONST)
@@ -328,22 +316,21 @@ class CompletionTest < Minitest::Test
       A::C
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
+    with_server(source) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 4, character: 5 },
+        })
 
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    end_position = { line: 4, character: 5 }
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: end_position },
-    )
-    assert_empty(result)
+        result = server.pop_response.response
+        assert_empty(result)
+      end
+    end
   end
 
   def test_completion_for_aliased_constants
-    stub_no_typechecker
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       module A
         module B
           CONST = 1
@@ -357,25 +344,23 @@ class CompletionTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 9, character: 18 },
+        })
 
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    end_position = { line: 9, character: 18 }
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: end_position },
-    )
-
-    assert_equal(["ALIAS_NAME::B::CONST"], result.map(&:label))
-    assert_equal(["ALIAS_NAME::B::CONST"], result.map(&:filter_text))
-    assert_equal(["ALIAS_NAME::B::CONST"], result.map { |completion| completion.text_edit.new_text })
+        result = server.pop_response.response
+        assert_equal(["ALIAS_NAME::B::CONST"], result.map(&:label))
+        assert_equal(["ALIAS_NAME::B::CONST"], result.map(&:filter_text))
+        assert_equal(["ALIAS_NAME::B::CONST"], result.map { |completion| completion.text_edit.new_text })
+      end
+    end
   end
 
   def test_completion_for_aliased_complex_constants
-    stub_no_typechecker
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       module A
         module B
           CONST = 1
@@ -390,25 +375,23 @@ class CompletionTest < Minitest::Test
       FINAL_ALIAS::ALIAS_NAME::B::C
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 11, character: 29 },
+        })
 
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    end_position = { line: 11, character: 29 }
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: end_position },
-    )
-
-    assert_equal(["FINAL_ALIAS::ALIAS_NAME::B::CONST"], result.map(&:label))
-    assert_equal(["FINAL_ALIAS::ALIAS_NAME::B::CONST"], result.map(&:filter_text))
-    assert_equal(["FINAL_ALIAS::ALIAS_NAME::B::CONST"], result.map { |completion| completion.text_edit.new_text })
+        result = server.pop_response.response
+        assert_equal(["FINAL_ALIAS::ALIAS_NAME::B::CONST"], result.map(&:label))
+        assert_equal(["FINAL_ALIAS::ALIAS_NAME::B::CONST"], result.map(&:filter_text))
+        assert_equal(["FINAL_ALIAS::ALIAS_NAME::B::CONST"], result.map { |completion| completion.text_edit.new_text })
+      end
+    end
   end
 
   def test_completion_uses_shortest_possible_name_for_filter_text
-    stub_no_typechecker
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       module A
         module B
           class Foo
@@ -420,32 +403,33 @@ class CompletionTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 5, character: 5 },
+        })
 
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
+        result = server.pop_response.response
+        assert_equal(["A::B::Foo"], result.map(&:label))
+        assert_equal(["Foo"], result.map(&:filter_text))
+        assert_equal(["Foo"], result.map { |completion| completion.text_edit.new_text })
 
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: { line: 5, character: 5 } },
-    )
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 6, character: 11 },
+        })
 
-    assert_equal(["A::B::Foo"], result.map(&:label))
-    assert_equal(["Foo"], result.map(&:filter_text))
-    assert_equal(["Foo"], result.map { |completion| completion.text_edit.new_text })
-
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: { line: 6, character: 11 } },
-    )
-
-    assert_equal(["A::B::Foo"], result.map(&:label))
-    assert_equal(["A::B::Foo"], result.map(&:filter_text))
-    assert_equal(["Foo"], result.map { |completion| completion.text_edit.new_text })
+        result = server.pop_response.response
+        assert_equal(["A::B::Foo"], result.map(&:label))
+        assert_equal(["A::B::Foo"], result.map(&:filter_text))
+        assert_equal(["Foo"], result.map { |completion| completion.text_edit.new_text })
+      end
+    end
   end
 
   def test_completion_for_methods_invoked_on_self
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class Foo
         def bar(a, b); end
         def baz(c, d); end
@@ -456,22 +440,23 @@ class CompletionTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
+    with_server(source) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 5, character: 5 },
+        })
 
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: { line: 5, character: 5 } },
-    )
-    assert_equal(["bar", "baz"], result.map(&:label))
-    assert_equal(["bar", "baz"], result.map(&:filter_text))
-    assert_equal(["bar", "baz"], result.map { |completion| completion.text_edit.new_text })
+        result = server.pop_response.response
+        assert_equal(["bar", "baz"], result.map(&:label))
+        assert_equal(["bar", "baz"], result.map(&:filter_text))
+        assert_equal(["bar", "baz"], result.map { |completion| completion.text_edit.new_text })
+      end
+    end
   end
 
   def test_completion_for_methods_invoked_on_explicit_self
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class Foo
         def bar(a, b); end
         def baz(c, d); end
@@ -482,24 +467,25 @@ class CompletionTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
+    with_server(source) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 5, character: 10 },
+        })
 
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: { line: 5, character: 10 } },
-    )
-    assert_equal(["bar", "baz"], result.map(&:label))
-    assert_equal(["bar", "baz"], result.map(&:filter_text))
-    assert_equal(["bar", "baz"], result.map { |completion| completion.text_edit.new_text })
-    assert_equal(["(a, b)", "(c, d)"], result.map { |completion| completion.label_details.detail })
-    assert_equal([9, 9], result.map { |completion| completion.text_edit.range.start.character })
+        result = server.pop_response.response
+        assert_equal(["bar", "baz"], result.map(&:label))
+        assert_equal(["bar", "baz"], result.map(&:filter_text))
+        assert_equal(["bar", "baz"], result.map { |completion| completion.text_edit.new_text })
+        assert_equal(["(a, b)", "(c, d)"], result.map { |completion| completion.label_details.detail })
+        assert_equal([9, 9], result.map { |completion| completion.text_edit.range.start.character })
+      end
+    end
   end
 
   def test_completion_for_methods_named_with_uppercase_characters
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class Kernel
         def Array(a); end
 
@@ -509,22 +495,23 @@ class CompletionTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
+    with_server(source) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 4, character: 10 },
+        })
 
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: { line: 4, character: 10 } },
-    )
-    assert_equal(["Array"], result.map(&:label))
-    assert_equal(["Array"], result.map(&:filter_text))
-    assert_equal(["Array"], result.map { |completion| completion.text_edit.new_text })
+        result = server.pop_response.response
+        assert_equal(["Array"], result.map(&:label))
+        assert_equal(["Array"], result.map(&:filter_text))
+        assert_equal(["Array"], result.map { |completion| completion.text_edit.new_text })
+      end
+    end
   end
 
   def test_completion_for_local_variables
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class Foo
         class_var = 1
         def foo(a_required_param, an_optional_param = 1, *a_rest, a_required_named_param:, an_optional_named_param:, **an_options)
@@ -545,16 +532,6 @@ class CompletionTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
-
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: { line: 14, character: 7 } },
-    )
-
     expected_variables = [
       "a_required_param",
       "an_optional_param",
@@ -572,13 +549,23 @@ class CompletionTest < Minitest::Test
       "a_proc_var",
     ]
 
-    assert_equal(expected_variables, result.map(&:label))
-    assert_equal(expected_variables, result.map(&:filter_text))
-    assert_equal(expected_variables, result.map { |completion| completion.text_edit.new_text })
+    with_server(source) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 14, character: 7 },
+        })
+
+        result = server.pop_response.response
+        assert_equal(expected_variables, result.map(&:label))
+        assert_equal(expected_variables, result.map(&:filter_text))
+        assert_equal(expected_variables, result.map { |completion| completion.text_edit.new_text })
+      end
+    end
   end
 
   def test_completion_for_attributes
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class Foo
         attr_accessor :bar
 
@@ -588,22 +575,23 @@ class CompletionTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
+    with_server(source) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 4, character: 5 },
+        })
 
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: { line: 4, character: 5 } },
-    )
-    assert_equal(["bar", "bar="], result.map(&:label))
-    assert_equal(["bar", "bar="], result.map(&:filter_text))
-    assert_equal(["bar", "bar="], result.map { |completion| completion.text_edit.new_text })
+        result = server.pop_response.response
+        assert_equal(["bar", "bar="], result.map(&:label))
+        assert_equal(["bar", "bar="], result.map(&:filter_text))
+        assert_equal(["bar", "bar="], result.map { |completion| completion.text_edit.new_text })
+      end
+    end
   end
 
   def test_with_typed_false
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       # typed: false
       class Foo
         def complete_me
@@ -615,21 +603,21 @@ class CompletionTest < Minitest::Test
       end
     RUBY
 
-    end_position = { line: 6, character: 8 }
-    @store.set(uri: @uri, source: document.source, version: 1)
+    with_server(source) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 6, character: 8 },
+        })
 
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: end_position },
-    )
-    assert_equal(["complete_me"], result.map(&:label))
+        result = server.pop_response.response
+        assert_equal(["complete_me"], result.map(&:label))
+      end
+    end
   end
 
   def test_with_typed_true
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       # typed: true
       class Foo
         def complete_me
@@ -641,17 +629,17 @@ class CompletionTest < Minitest::Test
       end
     RUBY
 
-    end_position = { line: 6, character: 8 }
-    @store.set(uri: @uri, source: document.source, version: 1)
+    with_server(source) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 6, character: 8 },
+        })
 
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/completion",
-      params: { textDocument: { uri: @uri.to_s }, position: end_position },
-    )
-    assert_empty(result)
+        result = server.pop_response.response
+        assert_empty(result)
+      end
+    end
   end
 
   def test_relative_completion_command
@@ -659,28 +647,39 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       require_relative "#{prefix}"
     RUBY
-
     end_char = T.must(source.rindex('"'))
     start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 
-    result = with_file_structure do |tmpdir|
-      uri = URI("file://#{tmpdir}/foo/fake.rb")
-      document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
-      @store.set(uri: uri, source: document.source, version: 1)
-      run_request(
-        method: "textDocument/completion",
-        params: { textDocument: { uri: uri.to_s }, position: { line: 0, character: end_char } },
-      )
+    with_server(source) do |server|
+      with_file_structure(server) do |tmpdir|
+        uri = URI("file://#{tmpdir}/foo/fake.rb")
+        server.process_message({
+          method: "textDocument/didOpen",
+          params: {
+            textDocument: {
+              uri: uri,
+              text: source,
+              version: 1,
+            },
+          },
+        })
+
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 0, character: end_char },
+        })
+
+        result = server.pop_response.response
+        expected = [
+          path_completion("support/bar", start_position, end_position),
+          path_completion("support/baz", start_position, end_position),
+          path_completion("support/quux", start_position, end_position),
+        ]
+
+        assert_equal(expected.to_json, result.to_json)
+      end
     end
-
-    expected = [
-      path_completion("support/bar", start_position, end_position),
-      path_completion("support/baz", start_position, end_position),
-      path_completion("support/quux", start_position, end_position),
-    ]
-
-    assert_equal(expected.to_json, result.to_json)
   end
 
   def test_relative_completion_call
@@ -688,31 +687,42 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       require_relative("#{prefix}")
     RUBY
-
     end_char = T.must(source.rindex('"'))
     start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 
-    result = with_file_structure do |tmpdir|
-      uri = URI("file://#{tmpdir}/foo/fake.rb")
-      document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
-      @store.set(uri: uri, source: document.source, version: 1)
-      run_request(
-        method: "textDocument/completion",
-        params: { textDocument: { uri: uri.to_s }, position: { line: 0, character: end_char } },
-      )
+    with_server(source) do |server|
+      with_file_structure(server) do |tmpdir|
+        uri = URI("file://#{tmpdir}/foo/fake.rb")
+        server.process_message({
+          method: "textDocument/didOpen",
+          params: {
+            textDocument: {
+              uri: uri,
+              text: source,
+              version: 1,
+            },
+          },
+        })
+
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 0, character: end_char },
+        })
+
+        result = server.pop_response.response
+        expected = [
+          path_completion("../foo/bar", start_position, end_position),
+          path_completion("../foo/baz", start_position, end_position),
+          path_completion("../foo/quux", start_position, end_position),
+          path_completion("../foo/support/bar", start_position, end_position),
+          path_completion("../foo/support/baz", start_position, end_position),
+          path_completion("../foo/support/quux", start_position, end_position),
+        ]
+
+        assert_equal(expected.to_json, result.to_json)
+      end
     end
-
-    expected = [
-      path_completion("../foo/bar", start_position, end_position),
-      path_completion("../foo/baz", start_position, end_position),
-      path_completion("../foo/quux", start_position, end_position),
-      path_completion("../foo/support/bar", start_position, end_position),
-      path_completion("../foo/support/baz", start_position, end_position),
-      path_completion("../foo/support/quux", start_position, end_position),
-    ]
-
-    assert_equal(expected.to_json, result.to_json)
   end
 
   def test_relative_completion_command_call
@@ -720,57 +730,79 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       Kernel.require_relative "#{prefix}"
     RUBY
-
     end_char = T.must(source.rindex('"'))
     start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 
-    result = with_file_structure do |tmpdir|
-      uri = URI("file://#{tmpdir}/foo/support/fake.rb")
-      document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
-      @store.set(uri: uri, source: document.source, version: 1)
-      run_request(
-        method: "textDocument/completion",
-        params: { textDocument: { uri: uri.to_s }, position: { line: 0, character: end_char } },
-      )
+    with_server(source) do |server|
+      with_file_structure(server) do |tmpdir|
+        uri = URI("file://#{tmpdir}/foo/support/fake.rb")
+        server.process_message({
+          method: "textDocument/didOpen",
+          params: {
+            textDocument: {
+              uri: uri,
+              text: source,
+              version: 1,
+            },
+          },
+        })
+
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 0, character: end_char },
+        })
+
+        result = server.pop_response.response
+        expected = [
+          path_completion("./bar", start_position, end_position),
+          path_completion("./baz", start_position, end_position),
+          path_completion("./quux", start_position, end_position),
+        ]
+
+        assert_equal(expected.to_json, result.to_json)
+      end
     end
-
-    expected = [
-      path_completion("./bar", start_position, end_position),
-      path_completion("./baz", start_position, end_position),
-      path_completion("./quux", start_position, end_position),
-    ]
-
-    assert_equal(expected.to_json, result.to_json)
   end
 
   def test_relative_completion_command_call_without_leading_dot
     source = <<~RUBY
       Kernel.require_relative "b"
     RUBY
-
     end_char = T.must(source.rindex('"'))
     start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 
-    result = with_file_structure do |tmpdir|
-      uri = URI("file://#{tmpdir}/foo/quxx.rb")
-      document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
-      @store.set(uri: uri, source: document.source, version: 1)
-      run_request(
-        method: "textDocument/completion",
-        params: { textDocument: { uri: uri.to_s }, position: { line: 0, character: end_char } },
-      )
+    with_server(source) do |server|
+      with_file_structure(server) do |tmpdir|
+        uri = URI("file://#{tmpdir}/foo/quxx.rb")
+        server.process_message({
+          method: "textDocument/didOpen",
+          params: {
+            textDocument: {
+              uri: uri,
+              text: source,
+              version: 1,
+            },
+          },
+        })
+
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 0, character: end_char },
+        })
+
+        result = server.pop_response.response
+        expected = [
+          path_completion("bar", start_position, end_position),
+          path_completion("baz", start_position, end_position),
+          path_completion("support/bar", start_position, end_position),
+          path_completion("support/baz", start_position, end_position),
+        ]
+
+        assert_equal(expected.to_json, result.to_json)
+      end
     end
-
-    expected = [
-      path_completion("bar", start_position, end_position),
-      path_completion("baz", start_position, end_position),
-      path_completion("support/bar", start_position, end_position),
-      path_completion("support/baz", start_position, end_position),
-    ]
-
-    assert_equal(expected.to_json, result.to_json)
   end
 
   def test_relative_completion_with_partial_path
@@ -783,36 +815,64 @@ class CompletionTest < Minitest::Test
     start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 
-    result = with_file_structure do |tmpdir|
-      uri = URI("file://#{tmpdir}/foo/support/fake.rb")
-      document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
-      @store.set(uri: uri, source: document.source, version: 1)
-      run_request(
-        method: "textDocument/completion",
-        params: { textDocument: { uri: uri.to_s }, position: { line: 0, character: end_char } },
-      )
+    with_server(source) do |server|
+      with_file_structure(server) do |tmpdir|
+        uri = URI("file://#{tmpdir}/foo/support/fake.rb")
+        server.process_message({
+          method: "textDocument/didOpen",
+          params: {
+            textDocument: {
+              uri: uri,
+              text: source,
+              version: 1,
+            },
+          },
+        })
+
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 0, character: end_char },
+        })
+
+        result = server.pop_response.response
+        expected = [
+          path_completion("../support/bar", start_position, end_position),
+          path_completion("../support/baz", start_position, end_position),
+          path_completion("../support/quux", start_position, end_position),
+        ]
+
+        assert_equal(expected.to_json, result.to_json)
+      end
     end
+  end
 
-    expected = [
-      path_completion("../support/bar", start_position, end_position),
-      path_completion("../support/baz", start_position, end_position),
-      path_completion("../support/quux", start_position, end_position),
-    ]
+  def test_completion_addons
+    source = <<~RUBY
+      R
+    RUBY
 
-    assert_equal(expected.to_json, result.to_json)
+    begin
+      create_completion_addon
+
+      with_server(source) do |server, uri|
+        server.process_message(
+          id: 1,
+          method: "textDocument/completion",
+          params: { textDocument: { uri: uri }, position: { character: 1, line: 0 } },
+        )
+        response = server.pop_response.response
+
+        assert_equal(1, response.size)
+        assert_match("MyCompletion", response[0].label)
+      end
+    ensure
+      RubyLsp::Addon.addon_classes.clear
+    end
   end
 
   private
 
-  def run_request(method:, params: {})
-    result = @executor.execute({ method: method, params: params })
-    error = result.error
-    raise error if error
-
-    result.response
-  end
-
-  def with_file_structure(&block)
+  def with_file_structure(server, &block)
     Dir.mktmpdir("path_completion_test") do |tmpdir|
       $LOAD_PATH << tmpdir
 
@@ -836,7 +896,7 @@ class CompletionTest < Minitest::Test
         tmpdir + "/foo/support/quux.rb",
       ])
 
-      index = @executor.instance_variable_get(:@index)
+      index = server.global_state.index
       indexables = Dir.glob(File.join(tmpdir, "**", "*.rb")).map! do |path|
         RubyIndexer::IndexablePath.new(tmpdir, path)
       end
@@ -861,5 +921,42 @@ class CompletionTest < Minitest::Test
       ),
       kind: LanguageServer::Protocol::Constant::CompletionItemKind::FILE,
     )
+  end
+
+  def create_completion_addon
+    Class.new(RubyLsp::Addon) do
+      def create_completion_listener(response_builder, nesting, dispatcher, uri)
+        klass = Class.new do
+          include RubyLsp::Requests::Support::Common
+
+          def initialize(response_builder, _, dispatcher, uri)
+            @uri = uri
+            @response_builder = response_builder
+            dispatcher.register(self, :on_constant_read_node_enter)
+          end
+
+          def on_constant_read_node_enter(node)
+            @response_builder << RubyLsp::Interface::CompletionItem.new(
+              label: "MyCompletion",
+              text_edit: RubyLsp::Interface::TextEdit.new(
+                range: T.bind(self, RubyLsp::Requests::Support::Common).range_from_node(node),
+                new_text: "MyCompletion",
+              ),
+              kind: RubyLsp::Constant::CompletionItemKind::CONSTANT,
+            )
+          end
+        end
+
+        T.unsafe(klass).new(response_builder, nesting, dispatcher, uri)
+      end
+
+      def activate(global_state, outgoing_queue); end
+
+      def deactivate; end
+
+      def name
+        "Foo"
+      end
+    end
   end
 end

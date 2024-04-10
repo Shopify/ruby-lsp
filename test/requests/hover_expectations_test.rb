@@ -8,34 +8,20 @@ class HoverExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Hover, "hover"
 
   def run_expectations(source)
-    message_queue = Thread::Queue.new
     position = @__params&.first || { character: 0, line: 0 }
 
-    uri = URI("file:///fake.rb")
-    store = RubyLsp::Store.new
-    store.set(uri: uri, source: source, version: 1)
-
-    executor = RubyLsp::Executor.new(store, message_queue)
-    index = executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
-
-    begin
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       # We need to pretend that Sorbet is not a dependency or else we can't properly test
-      stub_no_typechecker
-      executor.execute({
+      server.process_message(
+        id: 1,
         method: "textDocument/hover",
         params: { textDocument: { uri: uri }, position: position },
-      }).response
-    ensure
-      T.must(message_queue).close
+      )
+      server.pop_response.response
     end
   end
 
   def test_hovering_over_private_constant_from_the_same_namespace
-    message_queue = Thread::Queue.new
-    store = RubyLsp::Store.new
-
-    uri = URI("file:///fake.rb")
     source = <<~RUBY
       class A
         CONST = 123
@@ -44,28 +30,59 @@ class HoverExpectationsTest < ExpectationsTestRunner
         CONST
       end
     RUBY
-    store.set(uri: uri, source: source, version: 1)
 
-    executor = RubyLsp::Executor.new(store, message_queue)
-    index = executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 2, line: 4 } },
+      )
 
-    stub_no_typechecker
-    response = executor.execute({
-      method: "textDocument/hover",
-      params: { textDocument: { uri: uri }, position: { character: 2, line: 4 } },
-    }).response
+      assert_match("CONST", server.pop_response.response.contents.value)
+    end
+  end
 
-    assert_match("CONST", response.contents.value)
-  ensure
-    T.must(message_queue).close
+  def test_hovering_precision
+    source = <<~RUBY
+      module Foo
+        module Bar
+          class Baz
+          end
+        end
+      end
+
+      Foo::Bar::Baz
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # Foo
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { line: 7, character: 0 } },
+      )
+      assert_match(/Foo\b/, server.pop_response.response.contents.value)
+
+      # Foo::Bar
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { line: 7, character: 5 } },
+      )
+      assert_match(/Foo::Bar\b/, server.pop_response.response.contents.value)
+
+      # Foo::Bar::Baz
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { line: 7, character: 10 } },
+      )
+      assert_match(/Foo::Bar::Baz\b/, server.pop_response.response.contents.value)
+    end
   end
 
   def test_hovering_methods_invoked_on_implicit_self
-    message_queue = Thread::Queue.new
-    store = RubyLsp::Store.new
-
-    uri = URI("file:///fake.rb")
     source = <<~RUBY
       # typed: false
 
@@ -78,27 +95,20 @@ class HoverExpectationsTest < ExpectationsTestRunner
         end
       end
     RUBY
-    store.set(uri: uri, source: source, version: 1)
 
-    executor = RubyLsp::Executor.new(store, message_queue)
-    index = executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+      )
 
-    response = executor.execute({
-      method: "textDocument/hover",
-      params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
-    }).response
-
-    assert_match("Hello from `foo`", response.contents.value)
-  ensure
-    T.must(message_queue).close
+      assert_match("Hello from `foo`", server.pop_response.response.contents.value)
+    end
   end
 
   def test_hovering_methods_with_two_definitions
-    message_queue = Thread::Queue.new
-    store = RubyLsp::Store.new
-
-    uri = URI("file:///fake.rb")
     source = <<~RUBY
       # typed: false
 
@@ -116,28 +126,22 @@ class HoverExpectationsTest < ExpectationsTestRunner
         def foo; end
       end
     RUBY
-    store.set(uri: uri, source: source, version: 1)
 
-    executor = RubyLsp::Executor.new(store, message_queue)
-    index = executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+      )
 
-    response = executor.execute({
-      method: "textDocument/hover",
-      params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
-    }).response
-
-    assert_match("Hello from first `foo`", response.contents.value)
-    assert_match("Hello from second `foo`", response.contents.value)
-  ensure
-    T.must(message_queue).close
+      response = server.pop_response.response
+      assert_match("Hello from first `foo`", response.contents.value)
+      assert_match("Hello from second `foo`", response.contents.value)
+    end
   end
 
   def test_hovering_methods_invoked_on_explicit_self
-    message_queue = Thread::Queue.new
-    store = RubyLsp::Store.new
-
-    uri = URI("file:///fake.rb")
     source = <<~RUBY
       # typed: false
 
@@ -150,27 +154,20 @@ class HoverExpectationsTest < ExpectationsTestRunner
         end
       end
     RUBY
-    store.set(uri: uri, source: source, version: 1)
 
-    executor = RubyLsp::Executor.new(store, message_queue)
-    index = executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 9, line: 7 } },
+      )
 
-    response = executor.execute({
-      method: "textDocument/hover",
-      params: { textDocument: { uri: uri }, position: { character: 9, line: 7 } },
-    }).response
-
-    assert_match("Hello from `foo`", response.contents.value)
-  ensure
-    T.must(message_queue).close
+      assert_match("Hello from `foo`", server.pop_response.response.contents.value)
+    end
   end
 
   def test_hovering_over_private_constant_from_different_namespace
-    message_queue = Thread::Queue.new
-    store = RubyLsp::Store.new
-
-    uri = URI("file:///fake.rb")
     source = <<~RUBY
       class A
         CONST = 123
@@ -179,96 +176,73 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
       A::CONST # invalid private reference
     RUBY
-    store.set(uri: uri, source: source, version: 1)
 
-    executor = RubyLsp::Executor.new(store, message_queue)
-    index = executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 3, line: 5 } },
+      )
 
-    stub_no_typechecker
-    response = executor.execute({
-      method: "textDocument/hover",
-      params: { textDocument: { uri: uri }, position: { character: 0, line: 5 } },
-    }).response
-
-    assert_nil(response)
-  ensure
-    T.must(message_queue).close
+      assert_nil(server.pop_response.response)
+    end
   end
 
   def test_hovering_over_gemfile_dependency
-    message_queue = Thread::Queue.new
-    store = RubyLsp::Store.new
-
-    uri = URI("file:///Gemfile")
     source = <<~RUBY
       gem 'rake'
     RUBY
-    store.set(uri: uri, source: source, version: 1)
 
-    executor = RubyLsp::Executor.new(store, message_queue)
-    index = executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    with_server(source, URI("file:///Gemfile"), stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
+      )
 
-    stub_no_typechecker
-    response = executor.execute({
-      method: "textDocument/hover",
-      params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
-    }).response
+      response = server.pop_response.response
+      spec = Gem.loaded_specs["rake"]
 
-    spec = Gem.loaded_specs["rake"]
-
-    assert_includes(response.contents.value, spec.name)
-    assert_includes(response.contents.value, spec.version.to_s)
-    assert_includes(response.contents.value, spec.homepage)
-  ensure
-    T.must(message_queue).close
+      assert_includes(response.contents.value, spec.name)
+      assert_includes(response.contents.value, spec.version.to_s)
+      assert_includes(response.contents.value, spec.homepage)
+    end
   end
 
   def test_hovering_over_gemfile_dependency_with_missing_argument
-    message_queue = Thread::Queue.new
-    store = RubyLsp::Store.new
-
-    uri = URI("file:///Gemfile")
     source = <<~RUBY
       gem()
     RUBY
-    store.set(uri: uri, source: source, version: 1)
 
-    executor = RubyLsp::Executor.new(store, message_queue)
-    index = executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    with_server(source, URI("file:///Gemfile"), stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
+      )
 
-    stub_no_typechecker
-    response = executor.execute({
-      method: "textDocument/hover",
-      params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
-    }).response
-
-    assert_nil(response)
+      assert_nil(server.pop_response.response)
+    end
   end
 
   def test_hovering_over_gemfile_dependency_with_non_gem_argument
-    message_queue = Thread::Queue.new
-    store = RubyLsp::Store.new
-
-    uri = URI("file:///Gemfile")
     source = <<~RUBY
       gem(method_call)
     RUBY
-    store.set(uri: uri, source: source, version: 1)
 
-    executor = RubyLsp::Executor.new(store, message_queue)
-    index = executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source)
+    # We need to pretend that Sorbet is not a dependency or else we can't properly test
+    with_server(source, URI("file:///Gemfile"), stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
+      )
 
-    stub_no_typechecker
-    response = executor.execute({
-      method: "textDocument/hover",
-      params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
-    }).response
-
-    assert_nil(response)
+      assert_nil(server.pop_response.response)
+    end
   end
 
   def test_hover_addons
@@ -280,24 +254,30 @@ class HoverExpectationsTest < ExpectationsTestRunner
       Post
     RUBY
 
-    test_addon(:create_hover_addon, source: source) do |executor|
-      response = executor.execute({
-        method: "textDocument/hover",
-        params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 4, character: 0 } },
-      })
+    begin
+      create_hover_addon
 
-      assert_nil(response.error, response.error&.full_message)
-      assert_match(<<~RESPONSE.strip, response.response.contents.value)
-        Title
+      with_server(source) do |server, uri|
+        server.process_message(
+          id: 1,
+          method: "textDocument/hover",
+          params: { textDocument: { uri: uri }, position: { character: 0, line: 4 } },
+        )
 
-        **Definitions**: [fake.rb](file:///fake.rb#L2,1-3,4)
-        Links
+        assert_match(<<~RESPONSE.strip, server.pop_response.response.contents.value)
+          Title
+
+          **Definitions**: [fake.rb](file:///fake.rb#L2,1-3,4)
+          Links
 
 
 
-        Hello
-        Documentation from middleware: Post
-      RESPONSE
+          Hello
+          Documentation from middleware: Post
+        RESPONSE
+      end
+    ensure
+      RubyLsp::Addon.addon_classes.clear
     end
   end
 
@@ -305,7 +285,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
   def create_hover_addon
     Class.new(RubyLsp::Addon) do
-      def activate(message_queue); end
+      def activate(global_state, outgoing_queue); end
 
       def name
         "HoverAddon"
@@ -313,7 +293,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
       def deactivate; end
 
-      def create_hover_listener(response_builder, nesting, index, dispatcher)
+      def create_hover_listener(response_builder, nesting, dispatcher)
         klass = Class.new do
           def initialize(response_builder, dispatcher)
             @response_builder = response_builder

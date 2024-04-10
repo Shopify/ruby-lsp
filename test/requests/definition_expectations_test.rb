@@ -8,202 +8,12 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Definition, "definition"
 
   def run_expectations(source)
-    message_queue = Thread::Queue.new
-    position = @__params&.first || { character: 0, line: 0 }
-
-    store = RubyLsp::Store.new
-    store.set(uri: URI("file:///folder/fake.rb"), source: source, version: 1)
-    executor = RubyLsp::Executor.new(store, message_queue)
-
-    index = executor.instance_variable_get(:@index)
-    index.index_single(
-      RubyIndexer::IndexablePath.new(
-        "#{Dir.pwd}/lib",
-        File.expand_path(
-          "../../test/fixtures/class_reference_target.rb",
-          __dir__,
-        ),
-      ),
-    )
-    index.index_single(
-      RubyIndexer::IndexablePath.new(
-        nil,
-        File.expand_path(
-          "../../test/fixtures/constant_reference_target.rb",
-          __dir__,
-        ),
-      ),
-    )
-    index.index_single(
-      RubyIndexer::IndexablePath.new(
-        "#{Dir.pwd}/lib",
-        File.expand_path(
-          "../../lib/ruby_lsp/executor.rb",
-          __dir__,
-        ),
-      ),
-    )
-
     # We need to pretend that Sorbet is not a dependency or else we can't properly test
-    stub_no_typechecker
-    response = executor.execute({
-      method: "textDocument/definition",
-      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: position },
-    }).response
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      position = @__params&.first || { character: 0, line: 0 }
 
-    case response
-    when RubyLsp::Interface::Location
-      attributes = response.attributes
-      fake_path = attributes[:uri].split("/").last(2).join("/")
-      response.instance_variable_set(:@attributes, attributes.merge("uri" => "file:///#{fake_path}"))
-    when Array
-      response.each do |location|
-        attributes = T.let(location.attributes, T.untyped)
-        fake_path = T.let(attributes[:uri].split("/").last(2).join("/"), String)
-        location.instance_variable_set(:@attributes, attributes.merge("uri" => "file:///#{fake_path}"))
-      end
-    end
+      index = server.global_state.index
 
-    response
-  ensure
-    T.must(message_queue).close
-  end
-
-  def test_jumping_to_default_gems
-    message_queue = Thread::Queue.new
-    position = { character: 0, line: 0 }
-
-    path = "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb"
-    uri = URI::Generic.from_path(path: path)
-
-    store = RubyLsp::Store.new
-    store.set(uri: URI("file:///folder/fake.rb"), source: <<~RUBY, version: 1)
-      Pathname
-    RUBY
-
-    executor = RubyLsp::Executor.new(store, message_queue)
-    executor.instance_variable_get(:@index).index_single(
-      RubyIndexer::IndexablePath.new(
-        nil,
-        T.must(uri.to_standardized_path),
-      ),
-    )
-
-    response = executor.execute({
-      method: "textDocument/definition",
-      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: position },
-    }).response
-
-    refute_empty(response)
-  ensure
-    T.must(message_queue).close
-  end
-
-  def test_jumping_to_default_require_of_a_gem
-    message_queue = Thread::Queue.new
-
-    store = RubyLsp::Store.new
-    store.set(uri: URI("file:///folder/fake.rb"), source: <<~RUBY, version: 1)
-      require "bundler"
-    RUBY
-
-    executor = RubyLsp::Executor.new(store, message_queue)
-
-    uri = URI::Generic.from_path(path: "#{RbConfig::CONFIG["rubylibdir"]}/bundler.rb")
-    executor.instance_variable_get(:@index).index_single(
-      RubyIndexer::IndexablePath.new(RbConfig::CONFIG["rubylibdir"], T.must(uri.to_standardized_path)),
-    )
-
-    Dir.glob("#{RbConfig::CONFIG["rubylibdir"]}/bundler/*.rb").each do |path|
-      executor.instance_variable_get(:@index).index_single(
-        RubyIndexer::IndexablePath.new(RbConfig::CONFIG["rubylibdir"], path),
-      )
-    end
-
-    response = executor.execute({
-      method: "textDocument/definition",
-      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 10, line: 0 } },
-    }).response
-
-    assert_equal(uri.to_s, response.first.attributes[:uri])
-  ensure
-    T.must(message_queue).close
-  end
-
-  def test_jumping_to_private_constant_inside_the_same_namespace
-    message_queue = Thread::Queue.new
-    store = RubyLsp::Store.new
-
-    uri = URI("file:///folder/fake.rb")
-    source = <<~RUBY
-      class A
-        CONST = 123
-        private_constant(:CONST)
-
-        CONST
-      end
-    RUBY
-
-    store.set(uri: uri, source: source, version: 1)
-
-    executor = RubyLsp::Executor.new(store, message_queue)
-
-    executor.instance_variable_get(:@index).index_single(
-      RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
-    )
-
-    stub_no_typechecker
-    response = executor.execute({
-      method: "textDocument/definition",
-      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 2, line: 4 } },
-    })
-
-    assert_nil(response.error, response.error&.full_message)
-    assert_equal(uri.to_s, response.response.first.attributes[:uri])
-  ensure
-    T.must(message_queue).close
-  end
-
-  def test_jumping_to_private_constant_from_different_namespace
-    message_queue = Thread::Queue.new
-    store = RubyLsp::Store.new
-
-    uri = URI("file:///folder/fake.rb")
-    source = <<~RUBY
-      class A
-        CONST = 123
-        private_constant(:CONST)
-      end
-
-      A::CONST # invalid private reference
-    RUBY
-
-    store.set(uri: uri, source: source, version: 1)
-
-    executor = RubyLsp::Executor.new(store, message_queue)
-
-    executor.instance_variable_get(:@index).index_single(
-      RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
-    )
-
-    stub_no_typechecker
-    response = executor.execute({
-      method: "textDocument/definition",
-      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 0, line: 5 } },
-    }).response
-
-    assert_empty(response)
-  ensure
-    T.must(message_queue).close
-  end
-
-  def test_definition_addons
-    source = <<~RUBY
-      RubyLsp
-    RUBY
-
-    test_addon(:create_definition_addon, source: source) do |executor|
-      index = executor.instance_variable_get(:@index)
       index.index_single(
         RubyIndexer::IndexablePath.new(
           "#{Dir.pwd}/lib",
@@ -213,22 +23,214 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           ),
         ),
       )
-      response = executor.execute({
-        method: "textDocument/definition",
-        params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 0, character: 0 } },
-      }).response
+      index.index_single(
+        RubyIndexer::IndexablePath.new(
+          nil,
+          File.expand_path(
+            "../../test/fixtures/constant_reference_target.rb",
+            __dir__,
+          ),
+        ),
+      )
+      index.index_single(
+        RubyIndexer::IndexablePath.new(
+          "#{Dir.pwd}/lib",
+          File.expand_path(
+            "../../lib/ruby_lsp/server.rb",
+            __dir__,
+          ),
+        ),
+      )
 
-      assert_equal(2, response.size)
-      assert_match("class_reference_target.rb", response[0].uri)
-      assert_match("generated_by_addon.rb", response[1].uri)
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: position },
+      )
+      response = server.pop_response.response
+
+      case response
+      when RubyLsp::Interface::Location
+        attributes = response.attributes
+        fake_path = attributes[:uri].split("/").last(2).join("/")
+        response.instance_variable_set(:@attributes, attributes.merge("uri" => "file:///#{fake_path}"))
+      when Array
+        response.each do |location|
+          attributes = T.let(location.attributes, T.untyped)
+          fake_path = T.let(attributes[:uri].split("/").last(2).join("/"), String)
+          location.instance_variable_set(:@attributes, attributes.merge("uri" => "file:///#{fake_path}"))
+        end
+      end
+
+      response
+    end
+  end
+
+  def test_jumping_to_default_gems
+    with_server("Pathname") do |server, uri|
+      index = server.global_state.index
+      index.index_single(
+        RubyIndexer::IndexablePath.new(
+          nil,
+          "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb",
+        ),
+      )
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
+      )
+      refute_empty(server.pop_response.response)
+    end
+  end
+
+  def test_constant_precision
+    source = <<~RUBY
+      module Foo
+        module Bar
+          class Baz
+          end
+        end
+      end
+
+      Foo::Bar::Baz
+    RUBY
+
+    with_server(source) do |server, uri|
+      # Foo
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { line: 7, character: 0 } },
+      )
+      range = server.pop_response.response[0].attributes[:range].attributes
+      range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
+      assert_equal({ start: { line: 0, character: 0 }, end: { line: 5, character: 3 } }, range_hash)
+
+      # Foo::Bar
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { line: 7, character: 5 } },
+      )
+      range = server.pop_response.response[0].attributes[:range].attributes
+      range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
+      assert_equal({ start: { line: 1, character: 2 }, end: { line: 4, character: 5 } }, range_hash)
+
+      # Foo::Bar::Baz
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { line: 7, character: 10 } },
+      )
+      range = server.pop_response.response[0].attributes[:range].attributes
+      range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
+      assert_equal({ start: { line: 2, character: 4 }, end: { line: 3, character: 7 } }, range_hash)
+    end
+  end
+
+  def test_jumping_to_default_require_of_a_gem
+    with_server("require \"bundler\"") do |server, uri|
+      index = server.global_state.index
+
+      bundler_uri = URI::Generic.from_path(path: "#{RbConfig::CONFIG["rubylibdir"]}/bundler.rb")
+      index.index_single(
+        RubyIndexer::IndexablePath.new(RbConfig::CONFIG["rubylibdir"], T.must(bundler_uri.to_standardized_path)),
+      )
+
+      Dir.glob("#{RbConfig::CONFIG["rubylibdir"]}/bundler/*.rb").each do |path|
+        index.index_single(
+          RubyIndexer::IndexablePath.new(RbConfig::CONFIG["rubylibdir"], path),
+        )
+      end
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 10, line: 0 } },
+      )
+      assert_equal(bundler_uri.to_s, server.pop_response.response.first.attributes[:uri])
+    end
+  end
+
+  def test_jumping_to_private_constant_inside_the_same_namespace
+    source = <<~RUBY
+      class A
+        CONST = 123
+        private_constant(:CONST)
+
+        CONST
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 2, line: 4 } },
+      )
+      response = server.pop_response
+
+      assert_instance_of(RubyLsp::Result, response)
+      assert_equal(uri.to_s, response.response.first.attributes[:uri])
+    end
+  end
+
+  def test_jumping_to_private_constant_from_different_namespace
+    source = <<~RUBY
+      class A
+        CONST = 123
+        private_constant(:CONST)
+      end
+
+      A::CONST # invalid private reference
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 3, line: 5 } },
+      )
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_definition_addons
+    source = <<~RUBY
+      RubyLsp
+    RUBY
+
+    begin
+      create_definition_addon
+
+      with_server(source) do |server, uri|
+        server.global_state.index.index_single(
+          RubyIndexer::IndexablePath.new(
+            "#{Dir.pwd}/lib",
+            File.expand_path(
+              "../../test/fixtures/class_reference_target.rb",
+              __dir__,
+            ),
+          ),
+        )
+        server.process_message(
+          id: 1,
+          method: "textDocument/definition",
+          params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
+        )
+        response = server.pop_response.response
+
+        assert_equal(2, response.size)
+        assert_match("class_reference_target.rb", response[0].uri)
+        assert_match("generated_by_addon.rb", response[1].uri)
+      end
+    ensure
+      RubyLsp::Addon.addon_classes.clear
     end
   end
 
   def test_jumping_to_method_definitions_when_declaration_exists
-    message_queue = Thread::Queue.new
-    store = RubyLsp::Store.new
-
-    uri = URI("file:///folder/fake.rb")
     source = <<~RUBY
       # typed: false
 
@@ -241,29 +243,17 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    store.set(uri: uri, source: source, version: 1)
-
-    executor = RubyLsp::Executor.new(store, message_queue)
-
-    executor.instance_variable_get(:@index).index_single(
-      RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
-    )
-
-    response = executor.execute({
-      method: "textDocument/definition",
-      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 4, line: 4 } },
-    }).response
-
-    assert_equal(uri.to_s, response.first.attributes[:uri])
-  ensure
-    T.must(message_queue).close
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 4 } },
+      )
+      assert_equal(uri.to_s, server.pop_response.response.first.attributes[:uri])
+    end
   end
 
   def test_can_jump_to_method_with_two_definitions
-    message_queue = Thread::Queue.new
-    store = RubyLsp::Store.new
-
-    first_uri = URI("file:///folder/fake.rb")
     first_source = <<~RUBY
       # typed: false
 
@@ -276,44 +266,41 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    second_uri = URI("file:///folder/fake2.rb")
-    second_source = <<~RUBY
-      # typed: false
+    with_server(first_source) do |server, uri|
+      second_uri = URI("file:///folder/fake2.rb")
+      second_source = <<~RUBY
+        # typed: false
 
-      class A
-        def foo; end
-      end
-    RUBY
+        class A
+          def foo; end
+        end
+      RUBY
+      server.process_message({
+        method: "textDocument/didOpen",
+        params: {
+          textDocument: {
+            uri: second_uri,
+            text: second_source,
+            version: 1,
+          },
+        },
+      })
+      index = server.global_state.index
+      index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(second_uri.to_standardized_path)), second_source)
 
-    store.set(uri: first_uri, source: first_source, version: 1)
-    store.set(uri: second_uri, source: second_source, version: 1)
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 4 } },
+      )
 
-    executor = RubyLsp::Executor.new(store, message_queue)
-
-    executor.instance_variable_get(:@index).index_single(
-      RubyIndexer::IndexablePath.new(nil, T.must(first_uri.to_standardized_path)), first_source
-    )
-    executor.instance_variable_get(:@index).index_single(
-      RubyIndexer::IndexablePath.new(nil, T.must(second_uri.to_standardized_path)), second_source
-    )
-
-    response = executor.execute({
-      method: "textDocument/definition",
-      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 4, line: 4 } },
-    }).response
-
-    first_definition, second_definition = response
-    assert_equal(first_uri.to_s, first_definition.attributes[:uri])
-    assert_equal(second_uri.to_s, second_definition.attributes[:uri])
-  ensure
-    T.must(message_queue).close
+      first_definition, second_definition = server.pop_response.response
+      assert_equal(uri.to_s, first_definition.attributes[:uri])
+      assert_equal(second_uri.to_s, second_definition.attributes[:uri])
+    end
   end
 
   def test_jumping_to_method_method_calls_on_explicit_self
-    message_queue = Thread::Queue.new
-    store = RubyLsp::Store.new
-
-    uri = URI("file:///folder/fake.rb")
     source = <<~RUBY
       # typed: false
 
@@ -326,29 +313,17 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    store.set(uri: uri, source: source, version: 1)
-
-    executor = RubyLsp::Executor.new(store, message_queue)
-
-    executor.instance_variable_get(:@index).index_single(
-      RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
-    )
-
-    response = executor.execute({
-      method: "textDocument/definition",
-      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 9, line: 4 } },
-    }).response
-
-    assert_equal(uri.to_s, response.first.attributes[:uri])
-  ensure
-    T.must(message_queue).close
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 9, line: 4 } },
+      )
+      assert_equal(uri.to_s, server.pop_response.response.first.attributes[:uri])
+    end
   end
 
   def test_does_nothing_when_declaration_does_not_exist
-    message_queue = Thread::Queue.new
-    store = RubyLsp::Store.new
-
-    uri = URI("file:///folder/fake.rb")
     source = <<~RUBY
       # typed: false
 
@@ -359,29 +334,17 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    store.set(uri: uri, source: source, version: 1)
-
-    executor = RubyLsp::Executor.new(store, message_queue)
-
-    executor.instance_variable_get(:@index).index_single(
-      RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
-    )
-
-    response = executor.execute({
-      method: "textDocument/definition",
-      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 4, line: 4 } },
-    }).response
-
-    assert_empty(response)
-  ensure
-    T.must(message_queue).close
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 4 } },
+      )
+      assert_empty(server.pop_response.response)
+    end
   end
 
   def test_finds_matching_local_variable
-    message_queue = Thread::Queue.new
-    store = RubyLsp::Store.new
-
-    uri = URI("file:///folder/fake.rb")
     source = <<~RUBY
       class Foo
         local_var = 1
@@ -394,32 +357,26 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    store.set(uri: uri, source: source, version: 1)
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 10, line: 6 } },
+      )
 
-    executor = RubyLsp::Executor.new(store, message_queue)
-
-    executor.instance_variable_get(:@index).index_single(
-      RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)), source
-    )
-
-    response = executor.execute({
-      method: "textDocument/definition",
-      params: { textDocument: { uri: "file:///folder/fake.rb" }, position: { character: 10, line: 6 } },
-    }).response
-
-    assert_equal(1, response.size)
-    assert_equal(4, response.first.range.start.line)
-  ensure
-    T.must(message_queue).close
+      response = server.pop_response.response
+      assert_equal(1, response.size)
+      assert_equal(4, response.first.range.start.line)
+    end
   end
 
   private
 
   def create_definition_addon
     Class.new(RubyLsp::Addon) do
-      def create_definition_listener(response_builder, uri, nesting, index, dispatcher)
+      def create_definition_listener(response_builder, uri, nesting, dispatcher)
         klass = Class.new do
-          def initialize(response_builder, uri, _, _, dispatcher)
+          def initialize(response_builder, uri, _, dispatcher)
             @uri = uri
             @response_builder = response_builder
             dispatcher.register(self, :on_constant_read_node_enter)
@@ -440,10 +397,10 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        T.unsafe(klass).new(response_builder, uri, nesting, index, dispatcher)
+        T.unsafe(klass).new(response_builder, uri, nesting, dispatcher)
       end
 
-      def activate(message_queue); end
+      def activate(global_state, outgoing_queue); end
 
       def deactivate; end
 

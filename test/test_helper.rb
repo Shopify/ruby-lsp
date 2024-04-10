@@ -3,6 +3,8 @@
 
 require "sorbet-runtime"
 
+ENV["RUBY_LSP_ENV"] = "test"
+
 if ENV["COVERAGE"]
   require "simplecov"
 
@@ -15,17 +17,22 @@ end
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 $VERBOSE = nil unless ENV["VERBOSE"] || ENV["CI"]
 
-require_relative "../lib/ruby_lsp/internal"
-require_relative "../lib/rubocop/cop/ruby_lsp/use_language_server_aliases"
-require_relative "../lib/rubocop/cop/ruby_lsp/use_register_with_handler_method"
+require "ruby_lsp/internal"
+require "ruby_lsp/test_helper"
+require "rubocop/cop/ruby_lsp/use_language_server_aliases"
+require "rubocop/cop/ruby_lsp/use_register_with_handler_method"
 
 require "minitest/autorun"
 require "minitest/reporters"
 require "tempfile"
-require "debug"
 require "mocha/minitest"
 
 SORBET_PATHS = T.let(Gem.loaded_specs["sorbet-runtime"].full_require_paths.freeze, T::Array[String])
+
+# Define breakpoint methods without actually activating the debugger
+require "debug/prelude"
+# Load the debugger configuration to skip Sorbet paths. But this still doesn't activate the debugger
+require "debug/config"
 DEBUGGER__::CONFIG[:skip_path] = Array(DEBUGGER__::CONFIG[:skip_path]) + SORBET_PATHS
 
 minitest_reporter = if ENV["SPEC_REPORTER"]
@@ -38,13 +45,9 @@ Minitest::Reporters.use!(minitest_reporter)
 module Minitest
   class Test
     extend T::Sig
+    include RubyLsp::TestHelper
 
     Minitest::Test.make_my_diffs_pretty!
-
-    sig { void }
-    def stub_no_typechecker
-      RubyLsp::DependencyDetector.instance.stubs(:typechecker).returns(false)
-    end
   end
 end
 

@@ -1,5 +1,3 @@
-import fs from "fs/promises";
-
 import * as vscode from "vscode";
 import { CodeLens, State } from "vscode-languageclient/node";
 
@@ -56,11 +54,20 @@ export class Workspace implements WorkspaceInterface {
     }
 
     try {
-      await fs.access(this.workspaceFolder.uri.fsPath, fs.constants.W_OK);
+      const stat = await vscode.workspace.fs.stat(this.workspaceFolder.uri);
+
+      // If permissions is undefined, then we have all permissions. If it's set, the only possible value currently is
+      // readonly, so it means VS Code does not have write permissions to the workspace URI and creating the custom
+      // bundle would fail. We throw here just to catch it immediately below and show the error to the user
+      if (stat.permissions) {
+        throw new Error(
+          `Directory ${this.workspaceFolder.uri.fsPath} is readonly.`,
+        );
+      }
     } catch (error: any) {
       this.error = true;
 
-      vscode.window.showErrorMessage(
+      await vscode.window.showErrorMessage(
         `Directory ${this.workspaceFolder.uri.fsPath} is not writable. The Ruby LSP server needs to be able to create a
         .ruby-lsp directory to function appropriately. Consider switching to a directory for which VS Code has write
         permissions`,
@@ -73,7 +80,7 @@ export class Workspace implements WorkspaceInterface {
       await this.installOrUpdateServer();
     } catch (error: any) {
       this.error = true;
-      vscode.window.showErrorMessage(
+      await vscode.window.showErrorMessage(
         `Failed to setup the bundle: ${error.message}. \
         See [Troubleshooting](https://github.com/Shopify/ruby-lsp/blob/main/TROUBLESHOOTING.md) for help`,
       );
@@ -123,6 +130,8 @@ export class Workspace implements WorkspaceInterface {
       if (this.#rebaseInProgress) {
         return;
       }
+
+      this.error = false;
 
       // If there's no client, then we can just start a new one
       if (!this.lspClient) {
@@ -190,7 +199,10 @@ export class Workspace implements WorkspaceInterface {
         env: this.ruby.env,
       });
 
-      this.context.workspaceState.update("rubyLsp.lastGemUpdate", Date.now());
+      await this.context.workspaceState.update(
+        "rubyLsp.lastGemUpdate",
+        Date.now(),
+      );
       return;
     }
 
@@ -204,7 +216,10 @@ export class Workspace implements WorkspaceInterface {
           cwd: this.workspaceFolder.uri.fsPath,
           env: this.ruby.env,
         });
-        this.context.workspaceState.update("rubyLsp.lastGemUpdate", Date.now());
+        await this.context.workspaceState.update(
+          "rubyLsp.lastGemUpdate",
+          Date.now(),
+        );
       } catch (error) {
         // If we fail to update the global installation of `ruby-lsp`, we don't want to prevent the server from starting
         this.outputChannel.error(

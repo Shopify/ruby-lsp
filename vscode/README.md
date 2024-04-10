@@ -1,7 +1,3 @@
-<p align="center">
-  <img alt="Ruby LSP logo" width="200" src="icon.png" />
-</p>
-
 # Ruby LSP
 
 The Ruby LSP is an implementation of the [language server protocol](https://microsoft.github.io/language-server-protocol/)

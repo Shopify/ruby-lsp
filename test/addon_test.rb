@@ -14,7 +14,7 @@ module RubyLsp
           super
         end
 
-        def activate(message_queue)
+        def activate(global_state, outgoing_queue)
           @activated = true
         end
 
@@ -22,25 +22,29 @@ module RubyLsp
           "My Addon"
         end
       end
+      @global_state = GlobalState.new
 
-      @message_queue = Thread::Queue.new
-      Addon.load_addons(@message_queue)
+      @outgoing_queue = Thread::Queue.new
+      Addon.load_addons(@global_state, @outgoing_queue)
     end
 
     def teardown
       RubyLsp::Addon.addon_classes.clear
       RubyLsp::Addon.addons.clear
-      @message_queue.close
+      @outgoing_queue.close
     end
 
     def test_registering_an_addon_invokes_activate_on_initialized
-      message_queue = Thread::Queue.new
-      Executor.new(RubyLsp::Store.new, message_queue).execute({ method: "initialized" })
+      server = RubyLsp::Server.new
+
+      capture_subprocess_io do
+        server.process_message({ method: "initialized" })
+      end
 
       addon_instance = T.must(Addon.addons.find { |addon| addon.is_a?(@addon) })
       assert_predicate(addon_instance, :activated)
     ensure
-      T.must(message_queue).close
+      T.must(server).run_shutdown
     end
 
     def test_addons_are_automatically_tracked
@@ -56,7 +60,7 @@ module RubyLsp
 
     def test_load_addons_returns_errors
       Class.new(Addon) do
-        def activate(message_queue)
+        def activate(global_state, outgoing_queue)
           raise StandardError, "Failed to activate"
         end
 
@@ -66,7 +70,7 @@ module RubyLsp
       end
 
       queue = Thread::Queue.new
-      Addon.load_addons(queue)
+      Addon.load_addons(GlobalState.new, queue)
       error_addon = T.must(Addon.addons.find(&:error?))
       queue.close
 
@@ -79,7 +83,7 @@ module RubyLsp
 
     def test_automatically_identifies_file_watcher_addons
       klass = Class.new(::RubyLsp::Addon) do
-        def activate(message_queue); end
+        def activate(global_state, outgoing_queue); end
         def deactivate; end
 
         def workspace_did_change_watched_files(changes); end
@@ -87,7 +91,7 @@ module RubyLsp
 
       begin
         queue = Thread::Queue.new
-        Addon.load_addons(queue)
+        Addon.load_addons(GlobalState.new, queue)
         assert_equal(1, Addon.file_watcher_addons.length)
         assert_instance_of(klass, Addon.file_watcher_addons.first)
       ensure

@@ -1,13 +1,11 @@
-import path from "path";
-
 import * as vscode from "vscode";
 import { Range } from "vscode-languageclient/node";
 
 import { Telemetry } from "./telemetry";
 import DocumentProvider from "./documentProvider";
 import { Workspace } from "./workspace";
-import { Command, STATUS_EMITTER, pathExists } from "./common";
-import { VersionManager } from "./ruby";
+import { Command, STATUS_EMITTER } from "./common";
+import { ManagerIdentifier } from "./ruby";
 import { StatusItems } from "./status";
 import { TestController } from "./testController";
 import { Debugger } from "./debugger";
@@ -81,6 +79,7 @@ export class RubyLsp {
   // Activate the extension. This method should perform all actions necessary to start the extension, such as booting
   // all language servers for each existing workspace
   async activate() {
+    await vscode.commands.executeCommand("testing.clearTestResults");
     await this.telemetry.sendConfigurationEvents();
 
     const firstWorkspace = vscode.workspace.workspaceFolders?.[0];
@@ -119,9 +118,7 @@ export class RubyLsp {
       .getConfiguration("rubyLsp")
       .get("bundleGemfile")!;
 
-    const lockfileExists =
-      (await pathExists(path.join(workspaceDir, "Gemfile.lock"))) ||
-      (await pathExists(path.join(workspaceDir, "gems.locked")));
+    const lockfileExists = await this.lockfileExists(workspaceFolder.uri);
 
     // When eagerly activating workspaces, we skip the ones that do not have a lockfile since they may not be a Ruby
     // workspace. Those cases are activated lazily below
@@ -144,7 +141,7 @@ export class RubyLsp {
       );
 
       if (answer === "See the multi-root workspace docs") {
-        vscode.env.openExternal(
+        await vscode.env.openExternal(
           vscode.Uri.parse(
             "https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md?tab=readme-ov-file#multi-root-workspaces",
           ),
@@ -152,7 +149,7 @@ export class RubyLsp {
       }
 
       if (answer === "Don't show again") {
-        this.context.globalState.update(
+        await this.context.globalState.update(
           "rubyLsp.disableMultirootLockfileWarning",
           true,
         );
@@ -172,8 +169,12 @@ export class RubyLsp {
 
     // If we successfully activated a workspace, then we can start showing the dependencies tree view. This is necessary
     // so that we can avoid showing it on non Ruby projects
-    vscode.commands.executeCommand("setContext", "rubyLsp.activated", true);
-    this.showFormatOnSaveModeWarning(workspace);
+    await vscode.commands.executeCommand(
+      "setContext",
+      "rubyLsp.activated",
+      true,
+    );
+    await this.showFormatOnSaveModeWarning(workspace);
   }
 
   // Registers all extension commands. Commands can only be registered once, so this happens in the constructor. For
@@ -202,7 +203,7 @@ export class RubyLsp {
         this.showSyntaxTree.bind(this),
       ),
       vscode.commands.registerCommand(Command.FormatterHelp, () => {
-        vscode.env.openExternal(
+        return vscode.env.openExternal(
           vscode.Uri.parse(
             "https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md#formatting",
           ),
@@ -285,20 +286,25 @@ export class RubyLsp {
         Command.SelectVersionManager,
         async () => {
           const configuration = vscode.workspace.getConfiguration("rubyLsp");
-          const options = Object.values(VersionManager);
+          const options = Object.values(ManagerIdentifier);
           const manager = await vscode.window.showQuickPick(options, {
             placeHolder: `Current: ${configuration.get("rubyVersionManager")}`,
           });
 
           if (manager !== undefined) {
-            configuration.update("rubyVersionManager", manager, true, true);
+            await configuration.update(
+              "rubyVersionManager",
+              manager,
+              true,
+              true,
+            );
           }
         },
       ),
       vscode.commands.registerCommand(
         Command.RunTest,
         (_path, name, _command) => {
-          this.testController.runOnClick(name);
+          return this.testController.runOnClick(name);
         },
       ),
       vscode.commands.registerCommand(
@@ -386,7 +392,9 @@ export class RubyLsp {
       const document = activeEditor.document;
 
       if (document.languageId !== "ruby") {
-        vscode.window.showErrorMessage("Show syntax tree: not a Ruby file");
+        await vscode.window.showErrorMessage(
+          "Show syntax tree: not a Ruby file",
+        );
         return;
       }
 
@@ -469,5 +477,27 @@ export class RubyLsp {
         vscode.ConfigurationTarget.Global,
       );
     }
+  }
+
+  private async lockfileExists(workspaceUri: vscode.Uri) {
+    try {
+      await vscode.workspace.fs.stat(
+        vscode.Uri.joinPath(workspaceUri, "Gemfile.lock"),
+      );
+      return true;
+    } catch (error: any) {
+      // Gemfile.lock doesn't exist, try the next
+    }
+
+    try {
+      await vscode.workspace.fs.stat(
+        vscode.Uri.joinPath(workspaceUri, "gems.locked"),
+      );
+      return true;
+    } catch (error: any) {
+      // gems.locked doesn't exist
+    }
+
+    return false;
   }
 }

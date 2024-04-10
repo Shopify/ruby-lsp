@@ -68,22 +68,7 @@ if ENV["BUNDLE_GEMFILE"].nil?
   exit exec(env, "bundle exec ruby-lsp #{original_args.join(" ")}")
 end
 
-require "sorbet-runtime"
-
-begin
-  T::Configuration.default_checked_level = :never
-  # Suppresses call validation errors
-  T::Configuration.call_validation_error_handler = ->(*) {}
-  # Suppresses errors caused by T.cast, T.let, T.must, etc.
-  T::Configuration.inline_type_error_handler = ->(*) {}
-  # Suppresses errors caused by incorrect parameter ordering
-  T::Configuration.sig_validation_error_handler = ->(*) {}
-rescue
-  # Need this rescue so that if another gem has
-  # already set the checked level by the time we
-  # get to it, we don't fail outright.
-  nil
-end
+require "ruby_lsp/load_sorbet"
 
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 require "ruby_lsp/internal"

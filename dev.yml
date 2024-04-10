@@ -5,6 +5,11 @@ type: ruby
 up:
   - ruby
   - bundler
+  - node:
+      yarn: true
+      version: 18.15.0
+      packages:
+        - vscode
 
 commands:
   docs:
@@ -28,3 +33,6 @@ commands:
       argument: file
       optional: args...
     run: bin/test
+
+env:
+  'RUBY_DEBUG_IRB_CONSOLE': '1'

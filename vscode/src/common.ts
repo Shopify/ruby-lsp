@@ -1,4 +1,3 @@
-import fs from "fs/promises";
 import { exec } from "child_process";
 import { promisify } from "util";
 
@@ -54,18 +53,6 @@ export const LSP_NAME = "Ruby LSP";
 export const LOG_CHANNEL = vscode.window.createOutputChannel(LSP_NAME, {
   log: true,
 });
-
-export async function pathExists(
-  path: string,
-  mode = fs.constants.R_OK,
-): Promise<boolean> {
-  try {
-    await fs.access(path, mode);
-    return true;
-  } catch (error: any) {
-    return false;
-  }
-}
 
 // Creates a debounced version of a function with the specified delay. If the function is invoked before the delay runs
 // out, then the previous invocation of the function gets cancelled and a new one is scheduled.

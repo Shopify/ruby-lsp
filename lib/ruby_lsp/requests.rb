@@ -18,6 +18,7 @@ module RubyLsp
   # - [DocumentHighlight](rdoc-ref:RubyLsp::Requests::DocumentHighlight)
   # - [InlayHint](rdoc-ref:RubyLsp::Requests::InlayHints)
   # - [Completion](rdoc-ref:RubyLsp::Requests::Completion)
+  # - [CompletionResolve](rdoc-ref:RubyLsp::Requests::CompletionResolve)
   # - [CodeLens](rdoc-ref:RubyLsp::Requests::CodeLens)
   # - [Definition](rdoc-ref:RubyLsp::Requests::Definition)
   # - [ShowSyntaxTree](rdoc-ref:RubyLsp::Requests::ShowSyntaxTree)
@@ -40,6 +41,7 @@ module RubyLsp
     autoload :DocumentHighlight, "ruby_lsp/requests/document_highlight"
     autoload :InlayHints, "ruby_lsp/requests/inlay_hints"
     autoload :Completion, "ruby_lsp/requests/completion"
+    autoload :CompletionResolve, "ruby_lsp/requests/completion_resolve"
     autoload :CodeLens, "ruby_lsp/requests/code_lens"
     autoload :Definition, "ruby_lsp/requests/definition"
     autoload :ShowSyntaxTree, "ruby_lsp/requests/show_syntax_tree"
@@ -54,7 +56,7 @@ module RubyLsp
       autoload :Sorbet, "ruby_lsp/requests/support/sorbet"
       autoload :RailsDocumentClient, "ruby_lsp/requests/support/rails_document_client"
       autoload :Common, "ruby_lsp/requests/support/common"
-      autoload :FormatterRunner, "ruby_lsp/requests/support/formatter_runner"
+      autoload :Formatter, "ruby_lsp/requests/support/formatter"
     end
   end
 end

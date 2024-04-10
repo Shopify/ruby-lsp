@@ -1,18 +1,30 @@
+/* eslint-disable no-process-env */
 import path from "path";
-import fs from "fs/promises";
+import os from "os";
 
 import * as vscode from "vscode";
 
-import { asyncExec, pathExists, RubyInterface } from "./common";
+import { asyncExec, RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
+import { Shadowenv } from "./ruby/shadowenv";
+import { Chruby } from "./ruby/chruby";
+import { VersionManager } from "./ruby/versionManager";
+import { Mise } from "./ruby/mise";
+import { RubyInstaller } from "./ruby/rubyInstaller";
+import { Rbenv } from "./ruby/rbenv";
+import { Rvm } from "./ruby/rvm";
+import { None } from "./ruby/none";
+import { Custom } from "./ruby/custom";
 
-export enum VersionManager {
+export enum ManagerIdentifier {
   Asdf = "asdf",
   Auto = "auto",
   Chruby = "chruby",
   Rbenv = "rbenv",
   Rvm = "rvm",
   Shadowenv = "shadowenv",
+  Mise = "mise",
+  RubyInstaller = "rubyInstaller",
   None = "none",
   Custom = "custom",
 }
@@ -22,9 +34,9 @@ export class Ruby implements RubyInterface {
   // This property indicates that Ruby has been compiled with YJIT support and that we're running on a Ruby version
   // where it will be activated, either by the extension or by the server
   public yjitEnabled?: boolean;
-  private readonly workingFolderPath: string;
-  #versionManager?: VersionManager;
-  // eslint-disable-next-line no-process-env
+  private readonly workspaceFolder: vscode.WorkspaceFolder;
+  #versionManager?: ManagerIdentifier;
+
   private readonly shell = process.env.SHELL?.replace(/(\s+)/g, "\\$1");
   private _env: NodeJS.ProcessEnv = {};
   private _error = false;
@@ -35,11 +47,11 @@ export class Ruby implements RubyInterface {
 
   constructor(
     context: vscode.ExtensionContext,
-    workingFolder: vscode.WorkspaceFolder,
+    workspaceFolder: vscode.WorkspaceFolder,
     outputChannel: WorkspaceChannel,
   ) {
     this.context = context;
-    this.workingFolderPath = workingFolder.uri.fsPath;
+    this.workspaceFolder = workspaceFolder;
     this.outputChannel = outputChannel;
 
     const customBundleGemfile: string = vscode.workspace
@@ -49,19 +61,21 @@ export class Ruby implements RubyInterface {
     if (customBundleGemfile.length > 0) {
       this.customBundleGemfile = path.isAbsolute(customBundleGemfile)
         ? customBundleGemfile
-        : path.resolve(path.join(this.workingFolderPath, customBundleGemfile));
+        : path.resolve(
+            path.join(this.workspaceFolder.uri.fsPath, customBundleGemfile),
+          );
     }
 
     this.cwd = this.customBundleGemfile
       ? path.dirname(this.customBundleGemfile)
-      : this.workingFolderPath;
+      : this.workspaceFolder.uri.fsPath;
   }
 
   get versionManager() {
     return this.#versionManager;
   }
 
-  private set versionManager(versionManager: VersionManager | undefined) {
+  private set versionManager(versionManager: ManagerIdentifier | undefined) {
     this.#versionManager = versionManager;
   }
 
@@ -74,14 +88,14 @@ export class Ruby implements RubyInterface {
   }
 
   async activateRuby(
-    versionManager: VersionManager = vscode.workspace
+    versionManager: ManagerIdentifier = vscode.workspace
       .getConfiguration("rubyLsp")
       .get("rubyVersionManager")!,
   ) {
     this.versionManager = versionManager;
 
     // If the version manager is auto, discover the actual manager before trying to activate anything
-    if (this.versionManager === VersionManager.Auto) {
+    if (this.versionManager === ManagerIdentifier.Auto) {
       await this.discoverVersionManager();
       this.outputChannel.info(
         `Discovered version manager ${this.versionManager}`,
@@ -90,31 +104,52 @@ export class Ruby implements RubyInterface {
 
     try {
       switch (this.versionManager) {
-        case VersionManager.Asdf:
+        case ManagerIdentifier.Asdf:
           await this.activate("asdf exec ruby");
           break;
-        case VersionManager.Chruby:
-          await this.activateChruby();
+        case ManagerIdentifier.Chruby:
+          await this.runActivation(
+            new Chruby(this.workspaceFolder, this.outputChannel),
+          );
           break;
-        case VersionManager.Rbenv:
-          await this.activate("rbenv exec ruby");
+        case ManagerIdentifier.Rbenv:
+          await this.runActivation(
+            new Rbenv(this.workspaceFolder, this.outputChannel),
+          );
           break;
-        case VersionManager.Rvm:
-          await this.activate("rvm-auto-ruby");
+        case ManagerIdentifier.Rvm:
+          await this.runActivation(
+            new Rvm(this.workspaceFolder, this.outputChannel),
+          );
           break;
-        case VersionManager.Custom:
-          await this.activateCustomRuby();
+        case ManagerIdentifier.Mise:
+          await this.runActivation(
+            new Mise(this.workspaceFolder, this.outputChannel),
+          );
           break;
-        case VersionManager.None:
-          await this.activate("ruby");
+        case ManagerIdentifier.RubyInstaller:
+          await this.runActivation(
+            new RubyInstaller(this.workspaceFolder, this.outputChannel),
+          );
+          break;
+        case ManagerIdentifier.Custom:
+          await this.runActivation(
+            new Custom(this.workspaceFolder, this.outputChannel),
+          );
+          break;
+        case ManagerIdentifier.None:
+          await this.runActivation(
+            new None(this.workspaceFolder, this.outputChannel),
+          );
           break;
         default:
-          await this.activateShadowenv();
+          await this.runActivation(
+            new Shadowenv(this.workspaceFolder, this.outputChannel),
+          );
           break;
       }
 
       this.fetchRubyVersionInfo();
-      this.deleteGcEnvironmentVariables();
       await this.setupBundlePath();
       this._error = false;
     } catch (error: any) {
@@ -132,50 +167,17 @@ export class Ruby implements RubyInterface {
     }
   }
 
-  private async activateShadowenv() {
-    if (
-      !(await pathExists(path.join(this.workingFolderPath, ".shadowenv.d")))
-    ) {
-      throw new Error(
-        "The Ruby LSP version manager is configured to be shadowenv, \
-        but no .shadowenv.d directory was found in the workspace",
-      );
-    }
+  private async runActivation(manager: VersionManager) {
+    const { env, version, yjit } = await manager.activate();
+    const [major, minor, _patch] = version.split(".").map(Number);
 
-    const result = await asyncExec("shadowenv hook --json 1>&2", {
-      cwd: this.cwd,
-    });
+    this.sanitizeEnvironment(env);
 
-    if (result.stderr.trim() === "") {
-      result.stderr = "{ }";
-    }
-    // eslint-disable-next-line no-process-env
-    const env = { ...process.env, ...JSON.parse(result.stderr).exported };
-
-    // The only reason we set the process environment here is to allow other extensions that don't perform activation
-    // work properly
-    // eslint-disable-next-line no-process-env
+    // We need to set the process environment too to make other extensions such as Sorbet find the right Ruby paths
     process.env = env;
     this._env = env;
-
-    // Get the Ruby version and YJIT support. Shadowenv is the only manager where this is separate from activation
-    const rubyInfo = await asyncExec(
-      "ruby -e 'STDERR.print(\"#{RUBY_VERSION},#{defined?(RubyVM::YJIT)}\")'",
-      { env: this._env, cwd: this.cwd },
-    );
-
-    const [rubyVersion, yjitIsDefined] = rubyInfo.stderr.trim().split(",");
-    const [major, minor, _patch] = rubyVersion.split(".").map(Number);
-
-    this.rubyVersion = rubyVersion;
-    this.yjitEnabled =
-      (yjitIsDefined === "constant" && major >= 3) ||
-      (major === 3 && minor >= 2);
-  }
-
-  private async activateChruby() {
-    const rubyVersion = await this.readRubyVersion();
-    await this.activate(`chruby "${rubyVersion}" && ruby`);
+    this.rubyVersion = version;
+    this.yjitEnabled = (yjit && major > 3) || (major === 3 && minor >= 2);
   }
 
   private async activate(ruby: string) {
@@ -211,7 +213,7 @@ export class Ruby implements RubyInterface {
 
     const [major, minor, _patch] = rubyInfo.ruby_version.split(".").map(Number);
     this.yjitEnabled =
-      (rubyInfo.yjit === "constant" && major >= 3) ||
+      (rubyInfo.yjit === "constant" && major > 3) ||
       (major === 3 && minor >= 2);
   }
 
@@ -223,8 +225,7 @@ export class Ruby implements RubyInterface {
     if (major < 3) {
       throw new Error(
         `The Ruby LSP requires Ruby 3.0 or newer to run. This project is using ${this.rubyVersion}. \
-        [See alternatives](https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md \
-        ?tab=readme-ov-file#ruby-version-requirement)`,
+        [See alternatives](https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md#ruby-version-requirement)`,
       );
     }
 
@@ -240,12 +241,20 @@ export class Ruby implements RubyInterface {
     }
   }
 
-  private deleteGcEnvironmentVariables() {
-    Object.keys(this._env).forEach((key) => {
+  // Deletes environment variables that are known to cause issues for launching the Ruby LSP. For example, GC tuning
+  // variables or verbose settings
+  private sanitizeEnvironment(env: NodeJS.ProcessEnv) {
+    // Delete all GC tuning variables
+    Object.keys(env).forEach((key) => {
       if (key.startsWith("RUBY_GC")) {
-        delete this._env[key];
+        delete env[key];
       }
     });
+
+    // Delete verbose or debug related settings. These often make Bundler or other dependencies print things to STDOUT,
+    // which breaks the client/server communication
+    delete env.VERBOSE;
+    delete env.DEBUG;
   }
 
   private async setupBundlePath() {
@@ -255,57 +264,34 @@ export class Ruby implements RubyInterface {
       return;
     }
 
-    if (!(await pathExists(this.customBundleGemfile))) {
+    try {
+      await vscode.workspace.fs.stat(vscode.Uri.file(this.customBundleGemfile));
+      this._env.BUNDLE_GEMFILE = this.customBundleGemfile;
+    } catch (error: any) {
       throw new Error(
         `The configured bundle gemfile ${this.customBundleGemfile} does not exist`,
       );
     }
-
-    this._env.BUNDLE_GEMFILE = this.customBundleGemfile;
-  }
-
-  private async readRubyVersion() {
-    let dir = this.cwd;
-
-    while (await pathExists(dir)) {
-      const versionFile = path.join(dir, ".ruby-version");
-
-      if (await pathExists(versionFile)) {
-        const version = await fs.readFile(versionFile, "utf8");
-        const trimmedVersion = version.trim();
-
-        if (trimmedVersion !== "") {
-          return trimmedVersion;
-        }
-      }
-
-      const parent = path.dirname(dir);
-
-      // When we hit the root path (e.g. /), parent will be the same as dir.
-      // We don't want to loop forever in this case, so we break out of the loop.
-      if (parent === dir) {
-        break;
-      }
-
-      dir = parent;
-    }
-
-    throw new Error("No .ruby-version file was found");
   }
 
   private async discoverVersionManager() {
     // For shadowenv, it wouldn't be enough to check for the executable's existence. We need to check if the project has
     // created a .shadowenv.d folder
-    if (await pathExists(path.join(this.workingFolderPath, ".shadowenv.d"))) {
-      this.versionManager = VersionManager.Shadowenv;
+    try {
+      await vscode.workspace.fs.stat(
+        vscode.Uri.joinPath(this.workspaceFolder.uri, ".shadowenv.d"),
+      );
+      this.versionManager = ManagerIdentifier.Shadowenv;
       return;
+    } catch (error: any) {
+      // If .shadowenv.d doesn't exist, then we check the other version managers
     }
 
     const managers = [
-      VersionManager.Asdf,
-      VersionManager.Chruby,
-      VersionManager.Rbenv,
-      VersionManager.Rvm,
+      ManagerIdentifier.Asdf,
+      ManagerIdentifier.Chruby,
+      ManagerIdentifier.Rbenv,
+      ManagerIdentifier.Rvm,
     ];
 
     for (const tool of managers) {
@@ -317,8 +303,28 @@ export class Ruby implements RubyInterface {
       }
     }
 
+    try {
+      await vscode.workspace.fs.stat(
+        vscode.Uri.joinPath(
+          vscode.Uri.file(os.homedir()),
+          ".local",
+          "bin",
+          "mise",
+        ),
+      );
+      this.versionManager = ManagerIdentifier.Mise;
+      return;
+    } catch (error: any) {
+      // If the Mise binary doesn't exist, then continue checking
+    }
+
+    if (os.platform() === "win32") {
+      this.versionManager = ManagerIdentifier.RubyInstaller;
+      return;
+    }
+
     // If we can't find a version manager, just return None
-    this.versionManager = VersionManager.None;
+    this.versionManager = ManagerIdentifier.None;
   }
 
   private async toolExists(tool: string) {
@@ -334,25 +340,13 @@ export class Ruby implements RubyInterface {
         `Checking if ${tool} is available on the path with command: ${command}`,
       );
 
-      await asyncExec(command, { cwd: this.workingFolderPath, timeout: 1000 });
+      await asyncExec(command, {
+        cwd: this.workspaceFolder.uri.fsPath,
+        timeout: 1000,
+      });
       return true;
     } catch {
       return false;
     }
-  }
-
-  private async activateCustomRuby() {
-    const configuration = vscode.workspace.getConfiguration("rubyLsp");
-    const customCommand: string | undefined =
-      configuration.get("customRubyCommand");
-
-    if (customCommand === undefined) {
-      throw new Error(
-        "The customRubyCommand configuration must be set when 'custom' is selected as the version manager. \
-        See the [README](https://github.com/Shopify/ruby-lsp/blob/main/vscode/VERSION_MANAGERS.md) for instructions.",
-      );
-    }
-
-    await this.activate(`${customCommand} && ruby`);
   }
 }

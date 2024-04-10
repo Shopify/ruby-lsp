@@ -191,8 +191,9 @@ module RubyIndexer
 
       require_path = indexable_path.require_path
       @require_paths_tree.insert(require_path, indexable_path) if require_path
-    rescue Errno::EISDIR
-      # If `path` is a directory, just ignore it and continue indexing
+    rescue Errno::EISDIR, Errno::ENOENT
+      # If `path` is a directory, just ignore it and continue indexing. If the file doesn't exist, then we also ignore
+      # it
     end
 
     # Follows aliases in a namespace. The algorithm keeps checking if the name is an alias and then recursively follows

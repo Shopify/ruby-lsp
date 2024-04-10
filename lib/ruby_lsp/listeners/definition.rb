@@ -10,19 +10,20 @@ module RubyLsp
       sig do
         params(
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::Location],
+          global_state: GlobalState,
           uri: URI::Generic,
           nesting: T::Array[String],
           local_variables: T::Array[Prism::LocalVariableNode],
-          index: RubyIndexer::Index,
           dispatcher: Prism::Dispatcher,
           typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(response_builder, uri, nesting, local_variables, index, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, global_state, uri, nesting, local_variables, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
+        @global_state = global_state
+        @index = T.let(global_state.index, RubyIndexer::Index)
         @uri = uri
         @nesting = nesting
-        @index = index
         @typechecker_enabled = typechecker_enabled
         @local_variables = local_variables
 

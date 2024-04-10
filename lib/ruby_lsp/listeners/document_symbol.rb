@@ -12,17 +12,20 @@ module RubyLsp
       sig do
         params(
           response_builder: ResponseBuilders::DocumentSymbol,
+          uri: URI::Generic,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(response_builder, dispatcher)
+      def initialize(response_builder, uri, dispatcher)
         @response_builder = response_builder
+        @uri = uri
 
         dispatcher.register(
           self,
           :on_class_node_enter,
           :on_class_node_leave,
           :on_call_node_enter,
+          :on_call_node_leave,
           :on_constant_path_write_node_enter,
           :on_constant_write_node_enter,
           :on_constant_path_or_write_node_enter,
@@ -79,10 +82,24 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
-        if ATTR_ACCESSORS.include?(node.name)
+        node_name = node.name
+        if ATTR_ACCESSORS.include?(node_name)
           handle_attr_accessor(node)
-        elsif node.name == :alias_method
+        elsif node_name == :alias_method
           handle_alias_method(node)
+        elsif node_name == :namespace
+          handle_rake_namespace(node)
+        elsif node_name == :task
+          handle_rake_task(node)
+        end
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def on_call_node_leave(node)
+        return unless rake?
+
+        if node.name == :namespace && !node.receiver
+          @response_builder.pop
         end
       end
 
@@ -279,6 +296,7 @@ module RubyLsp
         ).returns(Interface::DocumentSymbol)
       end
       def create_document_symbol(name:, kind:, range_location:, selection_range_location:)
+        name = "<blank>" if name.empty?
         symbol = Interface::DocumentSymbol.new(
           name: name,
           kind: kind,
@@ -355,6 +373,76 @@ module RubyLsp
             range_location: new_name_argument.location,
             selection_range_location: new_name_argument.content_loc,
           )
+        end
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def handle_rake_namespace(node)
+        return unless rake?
+        return if node.receiver
+
+        arguments = node.arguments
+        return unless arguments
+
+        name_argument = arguments.arguments.first
+        return unless name_argument
+
+        name = case name_argument
+        when Prism::StringNode then name_argument.content
+        when Prism::SymbolNode then name_argument.value
+        end
+
+        return if name.nil? || name.empty?
+
+        @response_builder << create_document_symbol(
+          name: name,
+          kind: Constant::SymbolKind::MODULE,
+          range_location: name_argument.location,
+          selection_range_location: name_argument.location,
+        )
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def handle_rake_task(node)
+        return unless rake?
+        return if node.receiver
+
+        arguments = node.arguments
+        return unless arguments
+
+        name_argument = arguments.arguments.first
+        return unless name_argument
+
+        name = case name_argument
+        when Prism::StringNode then name_argument.content
+        when Prism::SymbolNode then name_argument.value
+        when Prism::KeywordHashNode
+          first_element = name_argument.elements.first
+          if first_element.is_a?(Prism::AssocNode)
+            key = first_element.key
+            case key
+            when Prism::StringNode then key.content
+            when Prism::SymbolNode then key.value
+            end
+          end
+        end
+
+        return if name.nil? || name.empty?
+
+        create_document_symbol(
+          name: name,
+          kind: Constant::SymbolKind::METHOD,
+          range_location: name_argument.location,
+          selection_range_location: name_argument.location,
+        )
+      end
+
+      sig { returns(T::Boolean) }
+      def rake?
+        if (path = @uri.to_standardized_path)
+          path.match?(/(Rakefile|\.rake)$/)
+        else
+          false
         end
       end
     end

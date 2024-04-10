@@ -6,14 +6,13 @@ jobs:
   lint_ruby:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: "recursive"
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.3"
           bundler-cache: true
 
       - name: Check if documentation is up to date
@@ -31,9 +30,10 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         ruby: ["3.0", "3.1", "3.2", "3.3"]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     name: Ruby ${{ matrix.ruby }} on ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: "recursive"
 
@@ -52,10 +52,10 @@ jobs:
   lint_node:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "18"
           cache: "yarn"
@@ -74,10 +74,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "18"
           cache: "yarn"
@@ -86,14 +86,28 @@ jobs:
       # We need some Ruby installed for the environment activation tests
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.3"
+
+      - name: Download shadowenv
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            pattern="shadowenv-x86_64-unknown-linux-gnu"
+          else
+            pattern="shadowenv-x86_64-apple-darwin"
+          fi
+
+          gh release download --pattern $pattern --repo=Shopify/shadowenv --output shadowenv
+          chmod +x shadowenv
+          sudo mv shadowenv /usr/local/bin/shadowenv
 
       - name: Run tests
         working-directory: ./vscode
         env:
           DISPLAY: ":99.0"
         run: |
+          gem install ruby-lsp debug
           yarn --frozen-lockfile
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           yarn run test

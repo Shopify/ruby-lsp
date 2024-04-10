@@ -40,6 +40,26 @@ module RubyIndexer
 
       abstract!
 
+      sig { returns(T::Array[String]) }
+      attr_accessor :included_modules
+
+      sig { returns(T::Array[String]) }
+      attr_accessor :prepended_modules
+
+      sig do
+        params(
+          name: String,
+          file_path: String,
+          location: Prism::Location,
+          comments: T::Array[String],
+        ).void
+      end
+      def initialize(name, file_path, location, comments)
+        super(name, file_path, location, comments)
+        @included_modules = T.let([], T::Array[String])
+        @prepended_modules = T.let([], T::Array[String])
+      end
+
       sig { returns(String) }
       def short_name
         T.must(@name.split("::").last)

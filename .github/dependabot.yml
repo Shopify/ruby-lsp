@@ -38,3 +38,13 @@ updates:
     labels:
       - "dependencies"
       - "fixtures"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "Shopify/ruby-dev-exp"
+    labels:
+      - "chore"
+      - "dependencies"
+      - "gh-actions"

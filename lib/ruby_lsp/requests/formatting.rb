@@ -1,9 +1,6 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "ruby_lsp/requests/support/rubocop_formatting_runner"
-require "ruby_lsp/requests/support/syntax_tree_formatting_runner"
-
 module RubyLsp
   module Requests
     # ![Formatting symbol demo](../../formatting.gif)
@@ -26,47 +23,24 @@ module RubyLsp
     # end
     # ```
     class Formatting < Request
-      class Error < StandardError; end
-      class InvalidFormatter < StandardError; end
-
-      @formatters = T.let({}, T::Hash[String, Support::FormatterRunner])
-
-      class << self
-        extend T::Sig
-
-        sig { returns(T::Hash[String, Support::FormatterRunner]) }
-        attr_reader :formatters
-
-        sig { params(identifier: String, instance: Support::FormatterRunner).void }
-        def register_formatter(identifier, instance)
-          @formatters[identifier] = instance
-        end
-      end
-
-      if defined?(Support::RuboCopFormattingRunner)
-        register_formatter("rubocop", Support::RuboCopFormattingRunner.instance)
-      end
-
-      if defined?(Support::SyntaxTreeFormattingRunner)
-        register_formatter("syntax_tree", Support::SyntaxTreeFormattingRunner.instance)
-      end
-
       extend T::Sig
 
-      sig { params(document: Document, formatter: String).void }
-      def initialize(document, formatter: "auto")
+      class Error < StandardError; end
+
+      sig { params(global_state: GlobalState, document: Document).void }
+      def initialize(global_state, document)
         super()
         @document = document
+        @active_formatter = T.let(global_state.active_formatter, T.nilable(Support::Formatter))
         @uri = T.let(document.uri, URI::Generic)
-        @formatter = formatter
       end
 
       sig { override.returns(T.nilable(T.all(T::Array[Interface::TextEdit], Object))) }
       def perform
-        return if @formatter == "none"
+        return unless @active_formatter
         return if @document.syntax_error?
 
-        formatted_text = formatted_file
+        formatted_text = @active_formatter.run_formatting(@uri, @document)
         return unless formatted_text
 
         size = @document.source.size
@@ -81,16 +55,6 @@ module RubyLsp
             new_text: formatted_text,
           ),
         ]
-      end
-
-      private
-
-      sig { returns(T.nilable(String)) }
-      def formatted_file
-        formatter_runner = Formatting.formatters[@formatter]
-        raise InvalidFormatter, "Formatter is not available: #{@formatter}" unless formatter_runner
-
-        formatter_runner.run(@uri, @document)
       end
     end
   end

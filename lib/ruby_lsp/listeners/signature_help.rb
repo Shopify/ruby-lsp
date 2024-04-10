@@ -10,21 +10,24 @@ module RubyLsp
       sig do
         params(
           response_builder: ResponseBuilders::SignatureHelp,
+          global_state: GlobalState,
           nesting: T::Array[String],
-          index: RubyIndexer::Index,
           dispatcher: Prism::Dispatcher,
+          typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(response_builder, nesting, index, dispatcher)
+      def initialize(response_builder, global_state, nesting, dispatcher, typechecker_enabled)
+        @typechecker_enabled = typechecker_enabled
         @response_builder = response_builder
+        @global_state = global_state
+        @index = T.let(global_state.index, RubyIndexer::Index)
         @nesting = nesting
-        @index = index
         dispatcher.register(self, :on_call_node_enter)
       end
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
-        return if DependencyDetector.instance.typechecker
+        return if @typechecker_enabled
         return unless self_receiver?(node)
 
         message = node.message

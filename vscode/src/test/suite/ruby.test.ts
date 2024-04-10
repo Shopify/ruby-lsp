@@ -1,42 +1,50 @@
+/* eslint-disable no-process-env */
 import * as assert from "assert";
-import * as fs from "fs";
 import * as path from "path";
-import * as os from "os";
 
 import * as vscode from "vscode";
+import sinon from "sinon";
 
-import { Ruby, VersionManager } from "../../ruby";
+import { Ruby, ManagerIdentifier } from "../../ruby";
 import { WorkspaceChannel } from "../../workspaceChannel";
 import { LOG_CHANNEL } from "../../common";
 
 suite("Ruby environment activation", () => {
-  let ruby: Ruby;
+  const workspacePath = path.dirname(
+    path.dirname(path.dirname(path.dirname(__dirname))),
+  );
+  const workspaceFolder: vscode.WorkspaceFolder = {
+    uri: vscode.Uri.file(workspacePath),
+    name: path.basename(workspacePath),
+    index: 0,
+  };
 
   test("Activate fetches Ruby information when outside of Ruby LSP", async () => {
-    if (os.platform() !== "win32") {
-      // eslint-disable-next-line no-process-env
-      process.env.SHELL = "/bin/bash";
-    }
+    const manager = process.env.CI
+      ? ManagerIdentifier.None
+      : ManagerIdentifier.Chruby;
 
-    const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
-    fs.writeFileSync(path.join(tmpPath, ".ruby-version"), "3.3.0");
+    const configStub = sinon
+      .stub(vscode.workspace, "getConfiguration")
+      .returns({
+        get: (name: string) => {
+          if (name === "rubyVersionManager") {
+            return manager;
+          } else if (name === "bundleGemfile") {
+            return "";
+          }
+
+          return undefined;
+        },
+      } as unknown as vscode.WorkspaceConfiguration);
 
     const context = {
       extensionMode: vscode.ExtensionMode.Test,
     } as vscode.ExtensionContext;
     const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
 
-    ruby = new Ruby(
-      context,
-      {
-        uri: { fsPath: tmpPath },
-      } as vscode.WorkspaceFolder,
-      outputChannel,
-    );
-    await ruby.activateRuby(
-      // eslint-disable-next-line no-process-env
-      process.env.CI ? VersionManager.None : VersionManager.Chruby,
-    );
+    const ruby = new Ruby(context, workspaceFolder, outputChannel);
+    await ruby.activateRuby();
 
     assert.ok(ruby.rubyVersion, "Expected Ruby version to be set");
     assert.notStrictEqual(
@@ -45,6 +53,46 @@ suite("Ruby environment activation", () => {
       "Expected YJIT support to be set to true or false",
     );
 
-    fs.rmSync(tmpPath, { recursive: true, force: true });
+    configStub.restore();
+  }).timeout(10000);
+
+  test("Deletes verbose and GC settings from activated environment", async () => {
+    const manager = process.env.CI
+      ? ManagerIdentifier.None
+      : ManagerIdentifier.Chruby;
+
+    const configStub = sinon
+      .stub(vscode.workspace, "getConfiguration")
+      .returns({
+        get: (name: string) => {
+          if (name === "rubyVersionManager") {
+            return manager;
+          } else if (name === "bundleGemfile") {
+            return "";
+          }
+
+          return undefined;
+        },
+      } as unknown as vscode.WorkspaceConfiguration);
+
+    const context = {
+      extensionMode: vscode.ExtensionMode.Test,
+    } as vscode.ExtensionContext;
+    const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
+
+    const ruby = new Ruby(context, workspaceFolder, outputChannel);
+
+    process.env.VERBOSE = "1";
+    process.env.DEBUG = "WARN";
+    process.env.RUBY_GC_HEAP_GROWTH_FACTOR = "1.7";
+    await ruby.activateRuby();
+
+    assert.strictEqual(ruby.env.VERBOSE, undefined);
+    assert.strictEqual(ruby.env.DEBUG, undefined);
+    assert.strictEqual(ruby.env.RUBY_GC_HEAP_GROWTH_FACTOR, undefined);
+    delete process.env.VERBOSE;
+    delete process.env.DEBUG;
+    delete process.env.RUBY_GC_HEAP_GROWTH_FACTOR;
+    configStub.restore();
   });
 });

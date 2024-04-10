@@ -3,16 +3,7 @@
 
 # This executable checks if all automatic LSP requests run successfully on every Ruby file under the current directory
 
-require "sorbet-runtime"
-
-begin
-  T::Configuration.default_checked_level = :never
-  T::Configuration.call_validation_error_handler = ->(*) {}
-  T::Configuration.inline_type_error_handler = ->(*) {}
-  T::Configuration.sig_validation_error_handler = ->(*) {}
-rescue
-  nil
-end
+require "ruby_lsp/load_sorbet"
 
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 require "ruby_lsp/internal"
@@ -24,30 +15,30 @@ files = Dir.glob("#{Dir.pwd}/**/*.rb")
 puts "Verifying that all automatic LSP requests execute successfully. This may take a while..."
 
 errors = {}
-store = RubyLsp::Store.new
-message_queue = Thread::Queue.new
-RubyLsp::Addon.load_addons(message_queue)
-executor = RubyLsp::Executor.new(store, message_queue)
+server = RubyLsp::Server.new(test_mode: true)
 
 files.each_with_index do |file, index|
   uri = URI("file://#{file}")
-  store.set(uri: uri, source: File.read(file), version: 1)
-
-  # Executing any of the automatic requests will execute all of them, so here we just pick one
-  result = executor.execute({
-    method: "textDocument/documentSymbol",
-    params: { textDocument: { uri: uri.to_s } },
+  server.process_message({
+    method: "textDocument/didOpen",
+    params: { textDocument: { uri: uri, text: File.read(file), version: 1 } },
   })
 
-  error = result.error
-  errors[file] = error if error
+  # Executing any of the automatic requests will execute all of them, so here we just pick one
+  server.process_message({
+    id: 1,
+    method: "textDocument/documentSymbol",
+    params: { textDocument: { uri: uri } },
+  })
+
+  result = server.pop_response
+  errors[file] = result.message if result.is_a?(RubyLsp::Error)
 ensure
-  store.delete(uri)
+  server.process_message({ method: "textDocument/didClose", params: { textDocument: { uri: uri } } })
+  server.pop_response
   print("\033[M\033[0KCompleted #{index + 1}/#{files.length}") unless ENV["CI"]
 end
-
 puts "\n"
-message_queue.close
 
 # Indexing
 puts "Verifying that indexing executes successfully. This may take a while..."

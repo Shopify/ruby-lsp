@@ -14,10 +14,10 @@ module RubyLsp
   module Requests
     module Support
       # :nodoc:
-      class SyntaxTreeFormattingRunner
+      class SyntaxTreeFormatter
         extend T::Sig
         include Singleton
-        include Support::FormatterRunner
+        include Support::Formatter
 
         sig { void }
         def initialize
@@ -33,11 +33,21 @@ module RubyLsp
         end
 
         sig { override.params(uri: URI::Generic, document: Document).returns(T.nilable(String)) }
-        def run(uri, document)
+        def run_formatting(uri, document)
           path = uri.to_standardized_path
           return if path && @options.ignore_files.any? { |pattern| File.fnmatch?("*/#{pattern}", path) }
 
           SyntaxTree.format(document.source, @options.print_width, options: @options.formatter_options)
+        end
+
+        sig do
+          override.params(
+            uri: URI::Generic,
+            document: Document,
+          ).returns(T.nilable(T::Array[Interface::Diagnostic]))
+        end
+        def run_diagnostic(uri, document)
+          nil
         end
       end
     end

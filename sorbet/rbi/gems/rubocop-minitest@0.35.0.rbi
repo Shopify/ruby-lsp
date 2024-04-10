@@ -941,6 +941,40 @@ end
 # source://rubocop-minitest//lib/rubocop/cop/minitest/empty_line_before_assertion_methods.rb#24
 RuboCop::Cop::Minitest::EmptyLineBeforeAssertionMethods::MSG = T.let(T.unsafe(nil), String)
 
+# Enforces tests are not focused.
+#
+# @example
+#   # bad
+#   focus test 'foo' do
+#   end
+#
+#   # bad
+#   focus
+#   test 'foo' do
+#   end
+#
+#   # good
+#   test 'foo' do
+#   end
+#
+# source://rubocop-minitest//lib/rubocop/cop/minitest/focus.rb#22
+class RuboCop::Cop::Minitest::Focus < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::RangeHelp
+  extend ::RuboCop::Cop::AutoCorrector
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/focus.rb#29
+  def focused?(param0 = T.unsafe(nil)); end
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/focus.rb#33
+  def on_send(node); end
+end
+
+# source://rubocop-minitest//lib/rubocop/cop/minitest/focus.rb#26
+RuboCop::Cop::Minitest::Focus::MSG = T.let(T.unsafe(nil), String)
+
+# source://rubocop-minitest//lib/rubocop/cop/minitest/focus.rb#27
+RuboCop::Cop::Minitest::Focus::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
+
 # Checks for deprecated global expectations
 # and autocorrects them to use expect format.
 #
@@ -2622,7 +2656,7 @@ module RuboCop::Minitest::AssertOffense
   # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#106
   def assert_offense(source, file = T.unsafe(nil), **replacements); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#201
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#195
   def configuration; end
 
   # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#85
@@ -2637,10 +2671,13 @@ module RuboCop::Minitest::AssertOffense
   # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#182
   def parse_source!(source, file = T.unsafe(nil)); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#209
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#217
+  def parser_engine; end
+
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#203
   def registry; end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#218
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#212
   def ruby_version; end
 
   # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#78

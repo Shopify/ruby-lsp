@@ -86,13 +86,16 @@ module RubyLsp
           params(
             title: String,
             entries: T.any(T::Array[RubyIndexer::Entry], RubyIndexer::Entry),
+            max_entries: T.nilable(Integer),
           ).returns(T::Hash[Symbol, String])
         end
-        def categorized_markdown_from_index_entries(title, entries)
+        def categorized_markdown_from_index_entries(title, entries, max_entries = nil)
           markdown_title = "```ruby\n#{title}\n```"
           definitions = []
           content = +""
-          Array(entries).each do |entry|
+          entries = Array(entries)
+          entries_to_format = max_entries ? entries.take(max_entries) : entries
+          entries_to_format.each do |entry|
             loc = entry.location
 
             # We always handle locations as zero based. However, for file links in Markdown we need them to be one
@@ -108,9 +111,16 @@ module RubyLsp
             content << "\n\n#{entry.comments.join("\n")}" unless entry.comments.empty?
           end
 
+          additional_entries_text = if max_entries && entries.length > max_entries
+            additional = entries.length - max_entries
+            " | #{additional} other#{additional > 1 ? "s" : ""}"
+          else
+            ""
+          end
+
           {
             title: markdown_title,
-            links: "**Definitions**: #{definitions.join(" | ")}",
+            links: "**Definitions**: #{definitions.join(" | ")}#{additional_entries_text}",
             documentation: content,
           }
         end
@@ -119,10 +129,11 @@ module RubyLsp
           params(
             title: String,
             entries: T.any(T::Array[RubyIndexer::Entry], RubyIndexer::Entry),
+            max_entries: T.nilable(Integer),
           ).returns(String)
         end
-        def markdown_from_index_entries(title, entries)
-          categorized_markdown = categorized_markdown_from_index_entries(title, entries)
+        def markdown_from_index_entries(title, entries, max_entries = nil)
+          categorized_markdown = categorized_markdown_from_index_entries(title, entries, max_entries)
 
           <<~MARKDOWN.chomp
             #{categorized_markdown[:title]}
@@ -146,6 +157,15 @@ module RubyLsp
           node.full_name
         rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError
           nil
+        end
+
+        sig { params(node: T.any(Prism::ModuleNode, Prism::ClassNode)).returns(T.nilable(String)) }
+        def namespace_constant_name(node)
+          path = node.constant_path
+          case path
+          when Prism::ConstantPathNode, Prism::ConstantReadNode, Prism::ConstantPathTargetNode
+            constant_name(path)
+          end
         end
       end
     end

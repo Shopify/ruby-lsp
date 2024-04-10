@@ -1,6 +1,6 @@
 # Ruby LSP addons
 
-> **WARNING**
+> [!WARNING]
 > The Ruby LSP addon system is currently experimental and subject to changes in the API
 
 Need help writing addons? Consider joining the #ruby-lsp-addons channel in the [Ruby DX Slack
@@ -123,8 +123,8 @@ This approach enables all addon responses to be captured in a single round of AS
 
 ### Enhancing features
 
-To enhance a request, the addon must create a listener that will collect extra results that will be automatically appended to the 
-base language server response. Additionally, `Addon` has to implement a factory method that instantiates the listener. When instantiating the 
+To enhance a request, the addon must create a listener that will collect extra results that will be automatically appended to the
+base language server response. Additionally, `Addon` has to implement a factory method that instantiates the listener. When instantiating the
 listener, also note that a `ResponseBuilders` object is passed in. This object should be used to return responses back to the Ruby LSP.
 
 For example: to add a message on hover saying "Hello!" on top of the base hover behavior of the Ruby LSP, we can use the
@@ -176,7 +176,7 @@ module RubyLsp
       # Listeners are initialized with the Prism::Dispatcher. This object is used by the Ruby LSP to emit the events
       # when it finds nodes during AST analysis. Listeners must register which nodes they want to handle with the
       # dispatcher (see below).
-      # Listeners are initialized with a `ResponseBuilders` object. The listener will push the associated content 
+      # Listeners are initialized with a `ResponseBuilders` object. The listener will push the associated content
       # to this object, which will then build the Ruby LSP's response.
       # Additionally, listeners are instantiated with a message_queue to push notifications (not used in this example).
       # See "Sending notifications to the client" for more information.
@@ -219,32 +219,39 @@ class MyFormatterRubyLspAddon < RubyLsp::Addon
     "My Formatter"
   end
 
-  def activate(message_queue)
+  def activate(global_state, message_queue)
     # The first argument is an identifier users can pick to select this formatter. To use this formatter, users must
     # have rubyLsp.formatter configured to "my_formatter"
     # The second argument is a singleton instance that implements the `FormatterRunner` interface (see below)
-    RubyLsp::Requests::Formatting.register_formatter("my_formatter", MyFormatterRunner.instance)
+    global_state.register_formatter("my_formatter", MyFormatterRunner.instance)
   end
 end
 
-# Custom formatting runner
-class MyFormatterRunner
+# Custom formatter
+class MyFormatter
   # Make it a singleton class
   include Singleton
   # If using Sorbet to develop the addon, then include this interface to make sure the class is properly implemented
-  include RubyLsp::Requests::Support::FormatterRunner
+  include RubyLsp::Requests::Support::Formatter
 
   # Use the initialize method to perform any sort of ahead of time work. For example, reading configurations for your
   # formatter since they are unlikely to change between requests
   def initialize
+    @config = read_config_file!
   end
 
-  # The main part of the interface is implementing the run method. It receives the URI and the document being formatted.
-  # IMPORTANT: This method must return the formatted document source without mutating the original one in document
-  def run(uri, document)
+  # IMPORTANT: None of the following methods should mutate the document in any way or that will lead to a corrupt state!
+
+  # Provide formatting for a given document. This method should return the formatted string for the entire document
+  def run_formatting(uri, document)
     source = document.source
     formatted_source = format_the_source_using_my_formatter(source)
     formatted_source
+  end
+
+  # Provide diagnostics for the given document. This method must return an array of `RubyLsp::Interface::Diagnostic`
+  # objects
+  def run_diagnostic(uri, document)
   end
 end
 ```

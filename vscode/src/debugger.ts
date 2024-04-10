@@ -1,5 +1,3 @@
-import path from "path";
-import fs from "fs";
 import net from "net";
 import os from "os";
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
@@ -122,24 +120,35 @@ export class Debugger
       debugConfiguration.env = workspace.ruby.env;
     }
 
-    const workspacePath = workspace.workspaceFolder.uri.fsPath;
+    const workspaceUri = workspace.workspaceFolder.uri;
 
     debugConfiguration.targetFolder = {
-      path: workspacePath,
+      path: workspaceUri.fsPath,
       name: workspace.workspaceFolder.name,
     };
 
-    let customGemfilePath = path.join(workspacePath, ".ruby-lsp", "Gemfile");
-    if (fs.existsSync(customGemfilePath)) {
-      debugConfiguration.env.BUNDLE_GEMFILE = customGemfilePath;
-    }
+    const customBundleUri = vscode.Uri.joinPath(workspaceUri, ".ruby-lsp");
 
-    customGemfilePath = path.join(workspacePath, ".ruby-lsp", "gems.rb");
-    if (fs.existsSync(customGemfilePath)) {
-      debugConfiguration.env.BUNDLE_GEMFILE = customGemfilePath;
-    }
+    return vscode.workspace.fs.readDirectory(customBundleUri).then(
+      (value) => {
+        if (value.some((entry) => entry[0] === "Gemfile")) {
+          debugConfiguration.env.BUNDLE_GEMFILE = vscode.Uri.joinPath(
+            customBundleUri,
+            "Gemfile",
+          ).fsPath;
+        } else if (value.some((entry) => entry[0] === "gems.rb")) {
+          debugConfiguration.env.BUNDLE_GEMFILE = vscode.Uri.joinPath(
+            customBundleUri,
+            "gems.rb",
+          ).fsPath;
+        }
 
-    return debugConfiguration;
+        return debugConfiguration;
+      },
+      () => {
+        return debugConfiguration;
+      },
+    );
   }
 
   // If the extension is deactivating, we need to ensure the debug process is terminated or else it may continue running

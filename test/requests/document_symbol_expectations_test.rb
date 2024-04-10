@@ -7,6 +7,23 @@ require "expectations/expectations_test_runner"
 class DocumentSymbolExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::DocumentSymbol, "document_symbol"
 
+  def test_labels_blank_names
+    source = <<~RUBY
+      def
+    RUBY
+    uri = URI("file:///fake.rb")
+
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+
+    dispatcher = Prism::Dispatcher.new
+    listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
+    dispatcher.dispatch(document.tree)
+    response = listener.perform
+
+    assert_equal(1, response.size)
+    assert_equal("<blank>", T.must(response.first).name)
+  end
+
   def test_document_symbol_addons
     source = <<~RUBY
       class Foo
@@ -15,29 +32,45 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    test_addon(:create_document_symbol_addon, source: source) do |executor|
-      response = executor.execute({
-        method: "textDocument/documentSymbol",
-        params: { textDocument: { uri: "file:///fake.rb" } },
-      })
+    begin
+      create_document_symbol_addon
+      with_server(source) do |server, uri|
+        server.process_message({
+          id: 1,
+          method: "textDocument/documentSymbol",
+          params: { textDocument: { uri: uri } },
+        })
+        result = server.pop_response
+        assert_instance_of(RubyLsp::Result, result)
 
-      assert_nil(response.error, response.error&.full_message)
+        response = result.response
 
-      response = response.response
+        assert_equal(1, response.count)
+        assert_equal("Foo", response.first.name)
 
-      assert_equal(1, response.count)
-      assert_equal("Foo", response.first.name)
-
-      test_symbol = response.first.children.first
-      assert_equal(LanguageServer::Protocol::Constant::SymbolKind::METHOD, test_symbol.kind)
+        test_symbol = response.first.children.first
+        assert_equal(LanguageServer::Protocol::Constant::SymbolKind::METHOD, test_symbol.kind)
+      end
+    ensure
+      RubyLsp::Addon.addon_classes.clear
     end
+  end
+
+  def run_expectations(source)
+    uri = URI("file://#{@_path}")
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+
+    dispatcher = Prism::Dispatcher.new
+    listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
+    dispatcher.dispatch(document.tree)
+    listener.perform
   end
 
   private
 
   def create_document_symbol_addon
     Class.new(RubyLsp::Addon) do
-      def activate(message_queue); end
+      def activate(global_state, outgoing_queue); end
 
       def name
         "Document SymbolsAddon"

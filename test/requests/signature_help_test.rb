@@ -4,20 +4,8 @@
 require "test_helper"
 
 class SignatureHelpTest < Minitest::Test
-  def setup
-    @message_queue = Thread::Queue.new
-    @uri = URI("file:///fake.rb")
-    @store = RubyLsp::Store.new
-    @executor = RubyLsp::Executor.new(@store, @message_queue)
-    stub_no_typechecker
-  end
-
-  def teardown
-    T.must(@message_queue).close
-  end
-
   def test_initial_request
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class Foo
         def bar(a, b)
         end
@@ -28,27 +16,21 @@ class SignatureHelpTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
-
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/signatureHelp",
-      params: {
-        textDocument: { uri: @uri.to_s },
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
         position: { line: 5, character: 7 },
         context: {
           triggerCharacter: "(",
           activeSignatureHelp: nil,
         },
-      },
-    )
+      })
+      result = server.pop_response.response
+      signature = result.signatures.first
 
-    signature = result.signatures.first
-
-    assert_equal("bar(a, b)", signature.label)
-    assert_equal(0, result.active_parameter)
+      assert_equal("bar(a, b)", signature.label)
+      assert_equal(0, result.active_parameter)
+    end
   end
 
   def test_concats_documentations_from_both_definitions
@@ -70,32 +52,27 @@ class SignatureHelpTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: source, version: 1)
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(@uri.to_standardized_path)), source)
-
-    result = run_request(
-      method: "textDocument/signatureHelp",
-      params: {
-        textDocument: { uri: @uri.to_s },
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
         position: { line: 6, character: 7 },
         context: {
           triggerCharacter: "(",
           activeSignatureHelp: nil,
         },
-      },
-    )
+      })
+      result = server.pop_response.response
+      signature = result.signatures.first
 
-    signature = result.signatures.first
-
-    assert_equal("bar(a, b)", signature.label)
-    assert_equal(0, result.active_parameter)
-    assert_match("first definition", signature.documentation.value)
-    assert_match("second definition", signature.documentation.value)
+      assert_equal("bar(a, b)", signature.label)
+      assert_equal(0, result.active_parameter)
+      assert_match("first definition", signature.documentation.value)
+      assert_match("second definition", signature.documentation.value)
+    end
   end
 
   def test_help_after_comma
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class Foo
         def bar(a, b)
         end
@@ -106,30 +83,24 @@ class SignatureHelpTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
-
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/signatureHelp",
-      params: {
-        textDocument: { uri: @uri.to_s },
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params:  {
+        textDocument: { uri: uri },
         position: { line: 5, character: 9 },
         context: {
           triggerCharacter: ",",
         },
-      },
-    )
+      })
+      result = server.pop_response.response
+      signature = result.signatures.first
 
-    signature = result.signatures.first
-
-    assert_equal("bar(a, b)", signature.label)
-    assert_equal(1, result.active_parameter)
+      assert_equal("bar(a, b)", signature.label)
+      assert_equal(1, result.active_parameter)
+    end
   end
 
   def test_keyword_arguments
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class Foo
         def bar(a:, b:)
         end
@@ -140,31 +111,25 @@ class SignatureHelpTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
-
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/signatureHelp",
-      params: {
-        textDocument: { uri: @uri.to_s },
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params:  {
+        textDocument: { uri: uri },
         position: { line: 5, character: 12 },
         context: {
           triggerCharacter: ",",
           activeSignatureHelp: nil,
         },
-      },
-    )
+      })
+      result = server.pop_response.response
+      signature = result.signatures.first
 
-    signature = result.signatures.first
-
-    assert_equal("bar(a:, b:)", signature.label)
-    assert_equal(1, result.active_parameter)
+      assert_equal("bar(a:, b:)", signature.label)
+      assert_equal(1, result.active_parameter)
+    end
   end
 
   def test_skipped_arguments
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class Foo
         def bar(a, b = 123, c:, d:)
         end
@@ -175,31 +140,24 @@ class SignatureHelpTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
-
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/signatureHelp",
-      params: {
-        textDocument: { uri: @uri.to_s },
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
         position: { line: 5, character: 15 },
         context: {
           triggerCharacter: ",",
           activeSignatureHelp: nil,
         },
-      },
-    )
-
-    signature = result.signatures.first
-
-    assert_equal("bar(a, b, c:, d:)", signature.label)
-    assert_equal(2, result.active_parameter)
+      })
+      result = server.pop_response.response
+      signature = result.signatures.first
+      assert_equal("bar(a, b, c:, d:)", signature.label)
+      assert_equal(2, result.active_parameter)
+    end
   end
 
   def test_help_for_splats
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class Foo
         def bar(*a)
         end
@@ -210,28 +168,21 @@ class SignatureHelpTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
-
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/signatureHelp",
-      params: {
-        textDocument: { uri: @uri.to_s },
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
         position: { line: 5, character: 20 },
         context: {},
-      },
-    )
-
-    signature = result.signatures.first
-
-    assert_equal("bar(*a)", signature.label)
-    assert_equal(0, result.active_parameter)
+      })
+      result = server.pop_response.response
+      signature = result.signatures.first
+      assert_equal("bar(*a)", signature.label)
+      assert_equal(0, result.active_parameter)
+    end
   end
 
   def test_help_for_blocks
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class Foo
         def bar(a, &block)
         end
@@ -242,28 +193,22 @@ class SignatureHelpTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
-
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/signatureHelp",
-      params: {
-        textDocument: { uri: @uri.to_s },
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
         position: { line: 5, character: 9 },
         context: {},
-      },
-    )
+      })
+      result = server.pop_response.response
+      signature = result.signatures.first
 
-    signature = result.signatures.first
-
-    assert_equal("bar(a, &block)", signature.label)
-    assert_equal(1, result.active_parameter)
+      assert_equal("bar(a, &block)", signature.label)
+      assert_equal(1, result.active_parameter)
+    end
   end
 
   def test_requests_missing_context
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class Foo
         def bar(a, b)
         end
@@ -274,27 +219,21 @@ class SignatureHelpTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
-
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/signatureHelp",
-      params: {
-        textDocument: { uri: @uri.to_s },
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
         position: { line: 5, character: 7 },
-      },
-    )
+      })
+      result = server.pop_response.response
+      signature = result.signatures.first
 
-    signature = result.signatures.first
-
-    assert_equal("bar(a, b)", signature.label)
-    assert_equal(0, result.active_parameter)
+      assert_equal("bar(a, b)", signature.label)
+      assert_equal(0, result.active_parameter)
+    end
   end
 
   def test_help_in_nested_method_calls_no_arguments
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class Foo
         def bar(a)
         end
@@ -308,28 +247,22 @@ class SignatureHelpTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
-
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/signatureHelp",
-      params: {
-        textDocument: { uri: @uri.to_s },
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
         position: { line: 8, character: 11 },
         context: {},
-      },
-    )
+      })
+      result = server.pop_response.response
+      signature = result.signatures.first
 
-    signature = result.signatures.first
-
-    assert_equal("bar(a)", signature.label)
-    assert_equal(0, result.active_parameter)
+      assert_equal("bar(a)", signature.label)
+      assert_equal(0, result.active_parameter)
+    end
   end
 
   def test_help_in_nested_method_calls_with_arguments
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri)
+    source = +<<~RUBY
       class Foo
         def bar(a)
         end
@@ -343,33 +276,17 @@ class SignatureHelpTest < Minitest::Test
       end
     RUBY
 
-    @store.set(uri: @uri, source: document.source, version: 1)
-
-    index = @executor.instance_variable_get(:@index)
-    index.index_single(RubyIndexer::IndexablePath.new(nil, @uri.to_standardized_path), document.source)
-
-    result = run_request(
-      method: "textDocument/signatureHelp",
-      params: {
-        textDocument: { uri: @uri.to_s },
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
         position: { line: 8, character: 11 },
         context: {},
-      },
-    )
+      })
+      result = server.pop_response.response
+      signature = result.signatures.first
 
-    signature = result.signatures.first
-
-    assert_equal("bar(a)", signature.label)
-    assert_equal(0, result.active_parameter)
-  end
-
-  private
-
-  def run_request(method:, params: {})
-    result = @executor.execute({ method: method, params: params })
-    error = result.error
-    raise error if error
-
-    result.response
+      assert_equal("bar(a)", signature.label)
+      assert_equal(0, result.active_parameter)
+    end
   end
 end

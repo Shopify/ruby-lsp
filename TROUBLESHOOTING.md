@@ -100,7 +100,7 @@ steps that led to the server getting stuck.
 
 ### Developing on containers
 
-See the [documentation](README.md#developing-on-containers).
+See the [documentation](vscode/README.md#developing-on-containers).
 
 ## Diagnosing the problem
 
@@ -125,6 +125,11 @@ if any entries hint at what the issue might be. Did the extension select your pr
 
 Did it select your preferred version manager? You can define which version manager to use with the
 `"rubyLsp.rubyVersionManager"` setting.
+
+### Enable logging
+
+You can enable logging to the VS Code output tab,
+[as described in the CONTRIBUTING](CONTRIBUTING.md#tracing-lsp-requests-and-responses) docs.
 
 ### My preferred version manager is not supported
 

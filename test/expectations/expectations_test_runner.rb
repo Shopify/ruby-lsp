@@ -4,7 +4,7 @@
 class ExpectationsTestRunner < Minitest::Test
   TEST_EXP_DIR = "test/expectations"
   TEST_FIXTURES_DIR = "test/fixtures"
-  TEST_RUBY_LSP_FIXTURES = File.join(TEST_FIXTURES_DIR, "*.rb")
+  TEST_RUBY_LSP_FIXTURES = File.join(TEST_FIXTURES_DIR, "*.{rb,rake}")
   TEST_PRISM_FIXTURES = File.join(TEST_FIXTURES_DIR, "prism/test/prism/fixtures/**", "*.txt")
 
   class << self
@@ -12,12 +12,7 @@ class ExpectationsTestRunner < Minitest::Test
       class_eval(<<~RB, __FILE__, __LINE__ + 1)
         module ExpectationsRunnerMethods
           def run_expectations(source)
-            params = @__params&.any? ? @__params : default_args
-            document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI("file:///fake.rb"))
-            dispatcher = Prism::Dispatcher.new
-            request = #{handler_class}.new(dispatcher)
-            dispatcher.dispatch(document.tree)
-            request.perform
+            raise "This method should be implemented in the inherited class"
           end
 
           def assert_expectations(source, expected)
@@ -35,7 +30,7 @@ class ExpectationsTestRunner < Minitest::Test
       RB
 
       Dir.glob(TEST_RUBY_LSP_FIXTURES).each do |path|
-        test_name = File.basename(path, ".rb")
+        test_name = File.basename(path, File.extname(path))
 
         expectations_dir = File.join(TEST_EXP_DIR, expectation_suffix)
         unless File.directory?(expectations_dir)
@@ -108,31 +103,6 @@ class ExpectationsTestRunner < Minitest::Test
   end
 
   private
-
-  def test_addon(addon_creation_method, source:)
-    stub_no_typechecker
-    message_queue = Thread::Queue.new
-
-    send(addon_creation_method)
-    RubyLsp::Addon.load_addons(message_queue)
-
-    store = RubyLsp::Store.new
-    uri = URI::Generic.from_path(path: "/fake.rb")
-    store.set(uri: uri, source: source, version: 1)
-
-    executor = RubyLsp::Executor.new(store, message_queue)
-    executor.instance_variable_get(:@index).index_single(
-      RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)),
-      source,
-    )
-
-    yield(executor)
-  ensure
-    RubyLsp::Addon.addons.each(&:deactivate)
-    RubyLsp::Addon.addon_classes.clear
-    RubyLsp::Addon.addons.clear
-    T.must(message_queue).close
-  end
 
   def diff(expected, actual)
     res = super

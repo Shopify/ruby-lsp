@@ -1,0 +1,40 @@
+# typed: true
+# frozen_string_literal: true
+
+require "test_helper"
+
+class CompletionResolveTest < Minitest::Test
+  include RubyLsp::Requests::Support::Common
+
+  Interface = LanguageServer::Protocol::Interface
+  Constant = LanguageServer::Protocol::Constant
+
+  def test_completion_resolve_for_constant
+    source = +<<~RUBY
+      # This is a class that does things
+      class Foo
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, _uri|
+      server.process_message(id: 1, method: "completionItem/resolve", params: {
+        label: "Foo",
+      })
+
+      result = server.pop_response.response
+
+      expected = Interface::CompletionItem.new(
+        label: "Foo",
+        label_details: Interface::CompletionItemLabelDetails.new(
+          description: "fake.rb",
+        ),
+        documentation: Interface::MarkupContent.new(
+          kind: "markdown",
+          value: markdown_from_index_entries("Foo", T.must(server.global_state.index["Foo"])),
+        ),
+      )
+      assert_match(/This is a class that does things/, result.documentation.value)
+      assert_equal(expected.to_json, result.to_json)
+    end
+  end
+end

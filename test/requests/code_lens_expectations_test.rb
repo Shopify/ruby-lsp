@@ -7,13 +7,17 @@ require "expectations/expectations_test_runner"
 class CodeLensExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::CodeLens, "code_lens"
 
+  def setup
+    @global_state = RubyLsp::GlobalState.new
+  end
+
   def run_expectations(source)
     uri = URI("file://#{@_path}")
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
     dispatcher.dispatch(document.tree)
     listener.perform
   end
@@ -30,7 +34,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.perform
 
@@ -57,7 +61,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("unknown")
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.perform
 
@@ -76,7 +80,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("rspec")
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.perform
 
@@ -95,7 +99,26 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
-    listener = RubyLsp::Requests::CodeLens.new(uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
+    dispatcher.dispatch(document.tree)
+    response = listener.perform
+
+    assert_empty(response)
+  end
+
+  def test_no_code_lens_for_unsaved_specs
+    source = <<~RUBY
+      describe FooTest < Minitest::Spec
+        it "does something"; end
+      end
+    RUBY
+    uri = URI::Generic.build(scheme: "untitled", opaque: "Untitled-1")
+
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+
+    dispatcher = Prism::Dispatcher.new
+    stub_test_library("minitest")
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
     dispatcher.dispatch(document.tree)
     response = listener.perform
 
@@ -107,20 +130,29 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
       class Test < Minitest::Test; end
     RUBY
 
-    test_addon(:create_code_lens_addon, source: source) do |executor|
-      response = executor.execute({
-        method: "textDocument/codeLens",
-        params: { textDocument: { uri: "file:///fake.rb" }, position: { line: 1, character: 2 } },
-      })
+    begin
+      create_code_lens_addon
 
-      assert_nil(response.error, response.error&.full_message)
-      response = response.response
+      with_server(source) do |server, uri|
+        server.process_message({
+          id: 1,
+          method: "textDocument/codeLens",
+          params: { textDocument: { uri: uri }, position: { line: 1, character: 2 } },
+        })
 
-      assert_equal(response.size, 4)
-      assert_match("Run", response[0].command.title)
-      assert_match("Run In Terminal", response[1].command.title)
-      assert_match("Debug", response[2].command.title)
-      assert_match("Run Test", response[3].command.title)
+        result = server.pop_response
+        assert_instance_of(RubyLsp::Result, result)
+
+        response = result.response
+
+        assert_equal(response.size, 4)
+        assert_match("Run", response[0].command.title)
+        assert_match("Run In Terminal", response[1].command.title)
+        assert_match("Debug", response[2].command.title)
+        assert_match("Run Test", response[3].command.title)
+      ensure
+        RubyLsp::Addon.addon_classes.clear
+      end
     end
   end
 
@@ -155,7 +187,8 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
         T.unsafe(klass).new(response_builder, uri, dispatcher)
       end
 
-      def activate(message_queue); end
+      def activate(global_state, outgoing_queue)
+      end
 
       def deactivate; end
 
@@ -164,7 +197,6 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   end
 
   def stub_test_library(name)
-    Singleton.__init__(RubyLsp::DependencyDetector)
-    RubyLsp::DependencyDetector.instance.stubs(:detected_test_library).returns(name)
+    @global_state.stubs(:test_library).returns(name)
   end
 end

@@ -5,20 +5,11 @@ module RubyLsp
   class Store
     extend T::Sig
 
-    sig { returns(String) }
-    attr_accessor :encoding
-
-    sig { returns(String) }
-    attr_accessor :formatter
-
     sig { returns(T::Boolean) }
     attr_accessor :supports_progress
 
     sig { returns(T::Boolean) }
     attr_accessor :experimental_features
-
-    sig { returns(URI::Generic) }
-    attr_accessor :workspace_uri
 
     sig { returns(T::Hash[Symbol, RequestConfig]) }
     attr_accessor :features_configuration
@@ -29,11 +20,8 @@ module RubyLsp
     sig { void }
     def initialize
       @state = T.let({}, T::Hash[String, Document])
-      @encoding = T.let(Constant::PositionEncodingKind::UTF8, String)
-      @formatter = T.let("auto", String)
       @supports_progress = T.let(true, T::Boolean)
       @experimental_features = T.let(false, T::Boolean)
-      @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
       @features_configuration = T.let(
         {
           inlayHint: RequestConfig.new({
@@ -57,9 +45,9 @@ module RubyLsp
       T.must(@state[uri.to_s])
     end
 
-    sig { params(uri: URI::Generic, source: String, version: Integer).void }
-    def set(uri:, source:, version:)
-      document = RubyDocument.new(source: source, version: version, uri: uri, encoding: @encoding)
+    sig { params(uri: URI::Generic, source: String, version: Integer, encoding: Encoding).void }
+    def set(uri:, source:, version:, encoding: Encoding::UTF_8)
+      document = RubyDocument.new(source: source, version: version, uri: uri, encoding: encoding)
       @state[uri.to_s] = document
     end
 

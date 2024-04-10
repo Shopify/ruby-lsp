@@ -72,10 +72,17 @@ class CodeActionsFormattingTest < Minitest::Test
       source: source.dup,
       version: 1,
       uri: URI::Generic.from_path(path: __FILE__),
-      encoding: LanguageServer::Protocol::Constant::PositionEncodingKind::UTF16,
+      encoding: Encoding::UTF_16LE,
     )
 
-    diagnostics = RubyLsp::Requests::Diagnostics.new(document).perform
+    global_state = RubyLsp::GlobalState.new
+    global_state.formatter = "rubocop"
+    global_state.register_formatter(
+      "rubocop",
+      RubyLsp::Requests::Support::RuboCopFormatter.instance,
+    )
+
+    diagnostics = RubyLsp::Requests::Diagnostics.new(global_state, document).perform
     diagnostic = T.must(T.must(diagnostics).find { |d| d.code == diagnostic_code })
     range = diagnostic.range.to_hash.transform_values(&:to_hash)
     result = RubyLsp::Requests::CodeActions.new(document, range, {
