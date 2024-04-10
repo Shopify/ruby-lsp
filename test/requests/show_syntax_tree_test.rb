@@ -61,7 +61,8 @@ class ShowSyntaxTreeTest < Minitest::Test
                     ├── name_loc: (1,0)-(1,3) = "foo"
                     ├── value:
                     │   @ IntegerNode (location: (1,6)-(1,9))
-                    │   └── flags: decimal
+                    │   ├── flags: decimal
+                    │   └── value: 123
                     └── operator_loc: (1,4)-(1,5) = "="
       AST
     end
@@ -91,7 +92,8 @@ class ShowSyntaxTreeTest < Minitest::Test
         ├── name_loc: (1,0)-(1,3) = "foo"
         ├── value:
         │   @ IntegerNode (location: (1,6)-(1,9))
-        │   └── flags: decimal
+        │   ├── flags: decimal
+        │   └── value: 123
         └── operator_loc: (1,4)-(1,5) = "="
 
         @ LocalVariableWriteNode (location: (2,0)-(2,9))
@@ -100,7 +102,8 @@ class ShowSyntaxTreeTest < Minitest::Test
         ├── name_loc: (2,0)-(2,3) = "bar"
         ├── value:
         │   @ IntegerNode (location: (2,6)-(2,9))
-        │   └── flags: decimal
+        │   ├── flags: decimal
+        │   └── value: 456
         └── operator_loc: (2,4)-(2,5) = "="
       AST
 
