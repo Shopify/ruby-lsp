@@ -26,4 +26,6 @@ group :development do
     gem "sorbet-static-and-runtime"
     gem "tapioca", "~> 0.13", require: false
   end
+
+  gem "rbi", github: "Shopify/rbi", branch: "main" # temporary until we fix shipit
 end
