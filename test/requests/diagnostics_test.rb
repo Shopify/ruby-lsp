@@ -9,7 +9,7 @@ class DiagnosticsTest < Minitest::Test
     @global_state.formatter = "rubocop"
     @global_state.register_formatter(
       "rubocop",
-      RubyLsp::Requests::Support::RuboCopFormatter.instance,
+      RubyLsp::Requests::Support::RuboCopFormatter.new,
     )
   end
 
@@ -78,7 +78,6 @@ class DiagnosticsTest < Minitest::Test
     RUBY
 
     formatter_class = Class.new do
-      include Singleton
       include RubyLsp::Requests::Support::Formatter
 
       def run_diagnostic(uri, document)
@@ -96,7 +95,7 @@ class DiagnosticsTest < Minitest::Test
       end
     end
 
-    @global_state.register_formatter("my-custom-formatter", T.unsafe(formatter_class).instance)
+    @global_state.register_formatter("my-custom-formatter", T.unsafe(formatter_class).new)
     @global_state.formatter = "my-custom-formatter"
 
     diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(@global_state, document).perform)

@@ -222,15 +222,13 @@ class MyFormatterRubyLspAddon < RubyLsp::Addon
   def activate(global_state, message_queue)
     # The first argument is an identifier users can pick to select this formatter. To use this formatter, users must
     # have rubyLsp.formatter configured to "my_formatter"
-    # The second argument is a singleton instance that implements the `FormatterRunner` interface (see below)
-    global_state.register_formatter("my_formatter", MyFormatterRunner.instance)
+    # The second argument is a class instance that implements the `FormatterRunner` interface (see below)
+    global_state.register_formatter("my_formatter", MyFormatterRunner.new)
   end
 end
 
 # Custom formatter
 class MyFormatter
-  # Make it a singleton class
-  include Singleton
   # If using Sorbet to develop the addon, then include this interface to make sure the class is properly implemented
   include RubyLsp::Requests::Support::Formatter
 

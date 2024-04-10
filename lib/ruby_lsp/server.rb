@@ -245,10 +245,10 @@ module RubyLsp
       end
 
       if defined?(Requests::Support::RuboCopFormatter)
-        @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.instance)
+        @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.new)
       end
       if defined?(Requests::Support::SyntaxTreeFormatter)
-        @global_state.register_formatter("syntax_tree", Requests::Support::SyntaxTreeFormatter.instance)
+        @global_state.register_formatter("syntax_tree", Requests::Support::SyntaxTreeFormatter.new)
       end
 
       perform_initial_indexing(indexing_config)

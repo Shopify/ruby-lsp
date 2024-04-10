@@ -79,7 +79,7 @@ class CodeActionsFormattingTest < Minitest::Test
     global_state.formatter = "rubocop"
     global_state.register_formatter(
       "rubocop",
-      RubyLsp::Requests::Support::RuboCopFormatter.instance,
+      RubyLsp::Requests::Support::RuboCopFormatter.new,
     )
 
     diagnostics = RubyLsp::Requests::Diagnostics.new(global_state, document).perform

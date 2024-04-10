@@ -3,15 +3,12 @@
 
 return unless defined?(RubyLsp::Requests::Support::RuboCopRunner)
 
-require "singleton"
-
 module RubyLsp
   module Requests
     module Support
       class RuboCopFormatter
         extend T::Sig
         include Formatter
-        include Singleton
 
         sig { void }
         def initialize
