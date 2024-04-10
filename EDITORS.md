@@ -22,10 +22,42 @@ put that in your init file:
 
 When you run `eglot` command it will run `ruby-lsp` process for you.
 
-## Neovim LSP
+## Neovim
+
+### nvim-lspconfig
 
 The [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/ruby_ls.lua)
 plugin has support for Ruby LSP.
+
+### Mason
+
+You can use [mason.nvim](https://github.com/williamboman/mason.nvim),
+along with [mason-lspconfig.nvim](https://github.com/williamboman/mason-lspconfig.nvim):
+
+```lua
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+local mason_lspconfig = require("mason-lspconfig")
+local servers = {
+  ruby_ls = {},
+}
+
+mason_lspconfig.setup {
+  ensure_installed = vim.tbl_keys(servers),
+}
+
+mason_lspconfig.setup_handlers {
+  function(server_name)
+    require("lspconfig")[server_name].setup {
+      capabilities = capabilities,
+      on_attach = on_attach,
+      settings = servers[server_name],
+      filetypes = (servers[server_name] or {}).filetypes,
+    }
+  end
+}
+```
+
+### Neovim Limitations
 
 Ruby LSP only supports pull diagnostics, and neovim versions prior to v0.10.0-dev-695+g58f948614 only support [publishDiagnostics](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_publishDiagnostics).
 Additional setup is required to enable diagnostics from Ruby LSP to appear in neovim.
