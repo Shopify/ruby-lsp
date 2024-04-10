@@ -474,6 +474,27 @@ class ServerTest < Minitest::Test
     assert_match(%r{ruby-lsp/lib/ruby_lsp/server\.rb:\d+:in `process_message'}, stderr)
   end
 
+  def test_changed_file_only_indexes_ruby
+    @server.global_state.index.expects(:index_single).once.with do |indexable|
+      indexable.full_path == "/foo.rb"
+    end
+    @server.process_message({
+      method: "workspace/didChangeWatchedFiles",
+      params: {
+        changes: [
+          {
+            uri: URI("file:///foo.rb"),
+            type: RubyLsp::Constant::FileChangeType::CREATED,
+          },
+          {
+            uri: URI("file:///.rubocop.yml"),
+            type: RubyLsp::Constant::FileChangeType::CREATED,
+          },
+        ],
+      },
+    })
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)
