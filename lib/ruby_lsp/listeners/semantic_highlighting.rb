@@ -85,7 +85,7 @@ module RubyLsp
         return if special_method?(message)
 
         type = Requests::Support::Sorbet.annotation?(node) ? :type : :method
-        @response_builder.add_token(T.must(node.message_loc), type)
+        @response_builder.add_token(node.message_loc, type)
       end
 
       sig { params(node: Prism::MatchWriteNode).void }
@@ -205,7 +205,7 @@ module RubyLsp
         if name
           @current_scope << name.to_sym
 
-          @response_builder.add_token(T.must(node.name_loc), :parameter) if visible?(node, @range)
+          @response_builder.add_token(node.name_loc, :parameter) if visible?(node, @range)
         end
       end
 
@@ -232,7 +232,7 @@ module RubyLsp
         if name
           @current_scope << name.to_sym
 
-          @response_builder.add_token(T.must(node.name_loc), :parameter) if visible?(node, @range)
+          @response_builder.add_token(node.name_loc, :parameter) if visible?(node, @range)
         end
       end
 
@@ -349,7 +349,7 @@ module RubyLsp
         # For each capture name we find in the regexp, look for a local in the current_scope
         Regexp.new(content, Regexp::FIXEDENCODING).names.each do |name|
           # The +3 is to compensate for the "(?<" part of the capture name
-          capture_name_offset = T.must(content.index("(?<#{name}>")) + 3
+          capture_name_offset = content.index("(?<#{name}>") + 3
           local_var_loc = loc.copy(start_offset: loc.start_offset + capture_name_offset, length: name.length)
 
           @response_builder.add_token(local_var_loc, @current_scope.type_for(name))

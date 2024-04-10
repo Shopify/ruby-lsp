@@ -61,10 +61,10 @@ module RubyLsp
 
         # Find the node with the end line closest to the requested position, so that we can place the refactor
         # immediately after that closest node
-        closest_node = T.must(closest_statements.child_nodes.compact.min_by do |node|
+        closest_node = closest_statements.child_nodes.compact.min_by do |node|
           distance = source_range.dig(:start, :line) - (node.location.end_line - 1)
           distance <= 0 ? Float::INFINITY : distance
-        end)
+        end
 
         return Error::InvalidTargetRange if closest_node.is_a?(Prism::MissingNode)
 

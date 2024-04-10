@@ -281,7 +281,7 @@ module RubyLsp
           name: name,
           kind: Constant::SymbolKind::METHOD,
           range_location: new_name_node.location,
-          selection_range_location: T.must(new_name_node.value_loc),
+          selection_range_location: new_name_node.value_loc,
         )
       end
 
@@ -327,7 +327,7 @@ module RubyLsp
               name: name,
               kind: Constant::SymbolKind::FIELD,
               range_location: argument.location,
-              selection_range_location: T.must(argument.value_loc),
+              selection_range_location: argument.value_loc,
             )
           elsif argument.is_a?(Prism::StringNode)
             name = argument.content
@@ -361,7 +361,7 @@ module RubyLsp
             name: name,
             kind: Constant::SymbolKind::METHOD,
             range_location: new_name_argument.location,
-            selection_range_location: T.must(new_name_argument.value_loc),
+            selection_range_location: new_name_argument.value_loc,
           )
         elsif new_name_argument.is_a?(Prism::StringNode)
           name = new_name_argument.content

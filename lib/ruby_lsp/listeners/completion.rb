@@ -191,7 +191,7 @@ module RubyLsp
         Interface::CompletionItem.new(
           label: name,
           filter_text: name,
-          text_edit: Interface::TextEdit.new(range: range_from_location(T.must(node.message_loc)), new_text: name),
+          text_edit: Interface::TextEdit.new(range: range_from_location(node.message_loc), new_text: name),
           kind: Constant::CompletionItemKind::METHOD,
           label_details: Interface::CompletionItemLabelDetails.new(
             detail: "(#{entry.parameters.map(&:decorated_name).join(", ")})",
