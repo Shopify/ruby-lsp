@@ -187,11 +187,8 @@ module RubyLsp
 
       send_message(Result.new(id: message[:id], response: response))
 
-      # Dynamically registered capabilities
-      file_watching_caps = options.dig(:capabilities, :workspace, :didChangeWatchedFiles)
-
       # Not every client supports dynamic registration or file watching
-      if file_watching_caps&.dig(:dynamicRegistration) && file_watching_caps&.dig(:relativePatternSupport)
+      if global_state.supports_watching_files
         send_message(
           Request.new(
             id: @current_request_id,

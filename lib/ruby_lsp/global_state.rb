@@ -20,6 +20,9 @@ module RubyLsp
     sig { returns(Encoding) }
     attr_reader :encoding
 
+    sig { returns(T::Boolean) }
+    attr_reader :supports_watching_files
+
     sig { void }
     def initialize
       @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
@@ -30,6 +33,7 @@ module RubyLsp
       @typechecker = T.let(detect_typechecker, T::Boolean)
       @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
       @supported_formatters = T.let({}, T::Hash[String, Requests::Support::Formatter])
+      @supports_watching_files = T.let(false, T::Boolean)
     end
 
     sig { params(identifier: String, instance: Requests::Support::Formatter).void }
@@ -60,6 +64,11 @@ module RubyLsp
         Encoding::UTF_16LE
       else
         Encoding::UTF_32
+      end
+
+      file_watching_caps = options.dig(:capabilities, :workspace, :didChangeWatchedFiles)
+      if file_watching_caps&.dig(:dynamicRegistration) && file_watching_caps&.dig(:relativePatternSupport)
+        @supports_watching_files = true
       end
     end
 

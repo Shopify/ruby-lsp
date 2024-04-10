@@ -65,6 +65,46 @@ module RubyLsp
       assert_equal("rubocop", state.formatter)
     end
 
+    def test_watching_files_if_supported
+      state = GlobalState.new
+      state.apply_options({
+        capabilities: {
+          workspace: {
+            didChangeWatchedFiles: {
+              dynamicRegistration: true,
+              relativePatternSupport: true,
+            },
+          },
+        },
+      })
+      assert(state.supports_watching_files)
+    end
+
+    def test_watching_files_if_not_supported
+      state = GlobalState.new
+      state.apply_options({
+        capabilities: {
+          workspace: {
+            didChangeWatchedFiles: {
+              dynamicRegistration: true,
+              relativePatternSupport: false,
+            },
+          },
+        },
+      })
+      refute(state.supports_watching_files)
+    end
+
+    def test_watching_files_if_not_reported
+      state = GlobalState.new
+      state.apply_options({
+        capabilities: {
+          workspace: {},
+        },
+      })
+      refute(state.supports_watching_files)
+    end
+
     private
 
     def stub_dependencies(dependencies)
