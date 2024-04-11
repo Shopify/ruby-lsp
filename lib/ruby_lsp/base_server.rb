@@ -59,9 +59,11 @@ module RubyLsp
           end
         end
 
-        # We need to process shutdown and exit from the main thread in order to close queues and wait for other threads
-        # to finish. Everything else is pushed into the incoming queue
+        # The following requests need to be executed in the main thread directly to avoid concurrency issues. Everything
+        # else is pushed into the incoming queue
         case method
+        when "initialize", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange"
+          process_message(message)
         when "shutdown"
           $stderr.puts("Shutting down Ruby LSP...")
 
