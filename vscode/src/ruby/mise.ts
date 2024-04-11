@@ -34,15 +34,22 @@ export class Mise extends VersionManager {
   }
 
   async findMiseUri(): Promise<vscode.Uri> {
-    const miseUri = vscode.Uri.joinPath(
-      vscode.Uri.file(os.homedir()),
-      ".local",
-      "bin",
-      "mise",
+    const config = vscode.workspace.getConfiguration("rubyLsp");
+    const misePath = config.get<string | undefined>(
+      "rubyVersionManager.miseExecutablePath",
     );
+    const miseUri = misePath
+      ? vscode.Uri.file(misePath)
+      : vscode.Uri.joinPath(
+          vscode.Uri.file(os.homedir()),
+          ".local",
+          "bin",
+          "mise",
+        );
 
     try {
       await vscode.workspace.fs.stat(miseUri);
+      return miseUri;
     } catch (error: any) {
       // Couldn't find it
     }
