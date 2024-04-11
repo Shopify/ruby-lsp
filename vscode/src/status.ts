@@ -49,7 +49,7 @@ export class RubyVersionStatus extends StatusItem {
       this.item.text = "Failed to activate Ruby";
       this.item.severity = vscode.LanguageStatusSeverity.Error;
     } else {
-      this.item.text = `Using Ruby ${workspace.ruby.rubyVersion} with ${workspace.ruby.versionManager}`;
+      this.item.text = `Using Ruby ${workspace.ruby.rubyVersion} with ${workspace.ruby.versionManager.identifier}`;
       this.item.severity = vscode.LanguageStatusSeverity.Information;
     }
   }

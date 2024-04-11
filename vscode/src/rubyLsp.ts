@@ -5,7 +5,7 @@ import { Telemetry } from "./telemetry";
 import DocumentProvider from "./documentProvider";
 import { Workspace } from "./workspace";
 import { Command, STATUS_EMITTER } from "./common";
-import { ManagerIdentifier } from "./ruby";
+import { ManagerIdentifier, ManagerConfiguration } from "./ruby";
 import { StatusItems } from "./status";
 import { TestController } from "./testController";
 import { Debugger } from "./debugger";
@@ -286,16 +286,18 @@ export class RubyLsp {
         Command.SelectVersionManager,
         async () => {
           const configuration = vscode.workspace.getConfiguration("rubyLsp");
+          const managerConfig =
+            configuration.get<ManagerConfiguration>("rubyVersionManager")!;
           const options = Object.values(ManagerIdentifier);
-          const manager = await vscode.window.showQuickPick(options, {
-            placeHolder: `Current: ${configuration.get("rubyVersionManager")}`,
-          });
+          const manager = (await vscode.window.showQuickPick(options, {
+            placeHolder: `Current: ${managerConfig.identifier}`,
+          })) as ManagerIdentifier | undefined;
 
           if (manager !== undefined) {
+            managerConfig.identifier = manager;
             await configuration.update(
               "rubyVersionManager",
-              manager,
-              true,
+              managerConfig,
               true,
             );
           }

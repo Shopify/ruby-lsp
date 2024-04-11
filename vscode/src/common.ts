@@ -22,7 +22,7 @@ export enum Command {
 
 export interface RubyInterface {
   error: boolean;
-  versionManager?: string;
+  versionManager: { identifier: string };
   rubyVersion?: string;
 }
 
