@@ -300,10 +300,10 @@ export class Ruby implements RubyInterface {
     }
 
     const managers = [
-      ManagerIdentifier.Asdf,
       ManagerIdentifier.Chruby,
       ManagerIdentifier.Rbenv,
       ManagerIdentifier.Rvm,
+      ManagerIdentifier.Asdf,
     ];
 
     for (const tool of managers) {
