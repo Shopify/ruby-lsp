@@ -22,10 +22,9 @@ module RubyIndexer
       entry = entries.first
       assert_instance_of(type, entry, "Expected #{expected_name} to be a #{type}")
 
-      location = entry.location
       location_string =
-        "#{entry.file_path}:#{location.start_line - 1}-#{location.start_column}" \
-          ":#{location.end_line - 1}-#{location.end_column}"
+        "#{entry.file_path}:#{entry.start_line - 1}-#{entry.start_column}" \
+          ":#{entry.end_line - 1}-#{entry.end_column}"
 
       assert_equal(expected_location, location_string)
     end

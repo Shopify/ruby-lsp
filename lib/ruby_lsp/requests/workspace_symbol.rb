@@ -42,7 +42,6 @@ module RubyLsp
           next if entry.visibility == :private
 
           kind = kind_for_entry(entry)
-          loc = entry.location
 
           # We use the namespace as the container name, but we also use the full name as the regular name. The reason we
           # do this is to allow people to search for fully qualified names (e.g.: `Foo::Bar`). If we only included the
@@ -56,8 +55,8 @@ module RubyLsp
             location: Interface::Location.new(
               uri: URI::Generic.from_path(path: file_path).to_s,
               range:  Interface::Range.new(
-                start: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column),
-                end: Interface::Position.new(line: loc.end_line - 1, character: loc.end_column),
+                start: Interface::Position.new(line: entry.start_line - 1, character: entry.start_column),
+                end: Interface::Position.new(line: entry.end_line - 1, character: entry.end_column),
               ),
             ),
           )

@@ -73,15 +73,14 @@ module RubyLsp
         return unless methods
 
         methods.each do |target_method|
-          location = target_method.location
           file_path = target_method.file_path
           next if @typechecker_enabled && not_in_dependencies?(file_path)
 
           @response_builder << Interface::Location.new(
             uri: URI::Generic.from_path(path: file_path).to_s,
             range: Interface::Range.new(
-              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
-              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
+              start: Interface::Position.new(line: target_method.start_line - 1, character: target_method.start_column),
+              end: Interface::Position.new(line: target_method.end_line - 1, character: target_method.end_column),
             ),
           )
         end
@@ -140,7 +139,6 @@ module RubyLsp
         return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{value}"
 
         entries.each do |entry|
-          location = entry.location
           # If the project has Sorbet, then we only want to handle go to definition for constants defined in gems, as an
           # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
           # in the project, even if the files are typed false
@@ -150,8 +148,8 @@ module RubyLsp
           @response_builder << Interface::Location.new(
             uri: URI::Generic.from_path(path: file_path).to_s,
             range: Interface::Range.new(
-              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
-              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
+              start: Interface::Position.new(line: entry.start_line - 1, character: entry.start_column),
+              end: Interface::Position.new(line: entry.end_line - 1, character: entry.end_column),
             ),
           )
         end
