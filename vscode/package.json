@@ -249,6 +249,10 @@
                 "custom"
               ],
               "default": "auto"
+            },
+            "miseExecutablePath": {
+              "description": "The path to the Mise executable, if not installed in ~/.local/bin/mise",
+              "type": "string"
             }
           },
           "default": {
