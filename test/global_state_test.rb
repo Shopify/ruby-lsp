@@ -47,6 +47,20 @@ module RubyLsp
       assert_equal("rspec", GlobalState.new.test_library)
     end
 
+    def test_detects_library_from_env_if_present
+      original_env = ENV.fetch("RUBY_LSP_TEST_LIBRARY", :not_present)
+      ENV["RUBY_LSP_TEST_LIBRARY"] = "minitest"
+      stub_dependencies("test-unit" => "1.2.3")
+      stub_dependencies("rspec" => "1.2.3")
+      assert_equal("minitest", GlobalState.new.test_library)
+    ensure
+      if original_env == :not_present
+        ENV.delete("RUBY_LSP_TEST_LIBRARY")
+      else
+        ENV["RUBY_LSP_TEST_LIBRARY"] = original_env
+      end
+    end
+
     def test_direct_dependency_returns_false_outside_of_bundle
       File.expects(:file?).at_least_once.returns(false)
       stub_dependencies({})

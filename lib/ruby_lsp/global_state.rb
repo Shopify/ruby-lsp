@@ -110,7 +110,9 @@ module RubyLsp
 
     sig { returns(String) }
     def detect_test_library
-      if direct_dependency?(/^rspec/)
+      if ENV.key?("RUBY_LSP_TEST_LIBRARY")
+        ENV["RUBY_LSP_TEST_LIBRARY"]
+      elsif direct_dependency?(/^rspec/)
         "rspec"
       # A Rails app may have a dependency on minitest, but we would instead want to use the Rails test runner provided
       # by ruby-lsp-rails. A Rails app doesn't need to depend on the rails gem itself, individual components like
