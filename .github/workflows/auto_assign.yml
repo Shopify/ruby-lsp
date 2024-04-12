@@ -1,0 +1,41 @@
+name: Auto assign
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  auto_assign:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+
+      - name: Randomly assign reviewers to community issues
+        uses: actions/github-script@v7
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          script: |
+            const devExpResponse = await github.rest.teams.listMembersInOrg({
+              org: "shopify",
+              team_slug: "ruby-dev-exp",
+            });
+            const members = devExpResponse.data.map((member) => member.login);
+            const issue = github.event.issue;
+
+            if (!members.includes(issue.user.login)) {
+              const dxResponse = await github.rest.teams.listMembersInOrg({
+                org: "shopify",
+                team_slug: "ruby-dx",
+              });
+              const reviewers = dxResponse.data.map((member) => member.login);
+              const assignee = reviewers[Math.floor(Math.random() * reviewers.length)];
+
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                assignees: [assignee]
+              });
+            }
