@@ -76,7 +76,9 @@ class CodeActionsFormattingTest < Minitest::Test
     )
 
     global_state = RubyLsp::GlobalState.new
-    global_state.formatter = "rubocop"
+    global_state.apply_options({
+      initializationOptions: { linters: ["rubocop"] },
+    })
     global_state.register_formatter(
       "rubocop",
       RubyLsp::Requests::Support::RuboCopFormatter.new,
