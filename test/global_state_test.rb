@@ -105,6 +105,23 @@ module RubyLsp
       refute(state.supports_watching_files)
     end
 
+    def test_linter_specification
+      state = GlobalState.new
+      state.apply_options({
+        initializationOptions: { linters: ["rubocop", "brakeman"] },
+      })
+
+      assert_equal(["rubocop", "brakeman"], state.instance_variable_get(:@linters))
+    end
+
+    def test_linter_auto_detection
+      stub_dependencies("rubocop" => "1.2.3")
+      state = GlobalState.new
+      state.apply_options({})
+
+      assert_equal(["rubocop"], state.instance_variable_get(:@linters))
+    end
+
     private
 
     def stub_dependencies(dependencies)

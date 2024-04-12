@@ -29,6 +29,7 @@ module RubyLsp
       @encoding = T.let(Encoding::UTF_8, Encoding)
 
       @formatter = T.let("auto", String)
+      @linters = T.let([], T::Array[String])
       @test_library = T.let(detect_test_library, String)
       @typechecker = T.let(detect_typechecker, T::Boolean)
       @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
@@ -46,6 +47,11 @@ module RubyLsp
       @supported_formatters[@formatter]
     end
 
+    sig { returns(T::Array[Requests::Support::Formatter]) }
+    def active_linters
+      @linters.filter_map { |name| @supported_formatters[name] }
+    end
+
     sig { params(options: T::Hash[Symbol, T.untyped]).void }
     def apply_options(options)
       workspace_uri = options.dig(:workspaceFolders, 0, :uri)
@@ -54,6 +60,9 @@ module RubyLsp
       specified_formatter = options.dig(:initializationOptions, :formatter)
       @formatter = specified_formatter if specified_formatter
       @formatter = detect_formatter if @formatter == "auto"
+
+      specified_linters = options.dig(:initializationOptions, :linters)
+      @linters = specified_linters ? specified_linters : detect_linters
 
       encodings = options.dig(:capabilities, :general, :positionEncodings)
       @encoding = if !encodings || encodings.empty?
@@ -106,6 +115,15 @@ module RubyLsp
       else
         "none"
       end
+    end
+
+    # Try to detect if there are linters in the project's dependencies. For auto-detection, we always only consider a
+    # single linter. To have multiple linters running, the user must configure them manually
+    sig { returns(T::Array[String]) }
+    def detect_linters
+      linters = []
+      linters << "rubocop" if direct_dependency?(/^rubocop/)
+      linters
     end
 
     sig { returns(String) }
