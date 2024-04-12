@@ -5,14 +5,14 @@ import { RubyLsp } from "./rubyLsp";
 let extension: RubyLsp;
 
 export async function activate(context: vscode.ExtensionContext) {
+  await migrateManagerConfigurations();
+
   if (!vscode.workspace.workspaceFolders) {
     return;
   }
 
   extension = new RubyLsp(context);
   await extension.activate();
-
-  await migrateManagerConfigurations();
 }
 
 export async function deactivate(): Promise<void> {
