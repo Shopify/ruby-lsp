@@ -110,7 +110,7 @@ export class Ruby implements RubyInterface {
     if (this.versionManager.identifier === ManagerIdentifier.Auto) {
       await this.discoverVersionManager();
       this.outputChannel.info(
-        `Discovered version manager ${this.versionManager}`,
+        `Discovered version manager ${this.versionManager.identifier}`,
       );
     }
 
