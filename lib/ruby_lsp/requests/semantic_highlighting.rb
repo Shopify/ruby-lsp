@@ -40,10 +40,13 @@ module RubyLsp
         end
       end
 
-      sig { params(dispatcher: Prism::Dispatcher, range: T.nilable(T::Range[Integer])).void }
-      def initialize(dispatcher, range: nil)
+      sig { params(global_state: GlobalState, dispatcher: Prism::Dispatcher, range: T.nilable(T::Range[Integer])).void }
+      def initialize(global_state, dispatcher, range: nil)
         super()
-        @response_builder = T.let(ResponseBuilders::SemanticHighlighting.new, ResponseBuilders::SemanticHighlighting)
+        @response_builder = T.let(
+          ResponseBuilders::SemanticHighlighting.new(global_state.encoding),
+          ResponseBuilders::SemanticHighlighting,
+        )
         Listeners::SemanticHighlighting.new(dispatcher, @response_builder, range: range)
 
         Addon.addons.each do |addon|

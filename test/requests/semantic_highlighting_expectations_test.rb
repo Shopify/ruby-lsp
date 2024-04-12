@@ -18,7 +18,9 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
     end
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::SemanticHighlighting.new(dispatcher, range: processed_range)
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({})
+    listener = RubyLsp::Requests::SemanticHighlighting.new(global_state, dispatcher, range: processed_range)
 
     dispatcher.dispatch(document.tree)
     listener.perform
@@ -89,7 +91,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
 
           def on_call_node_enter(node)
             current_token = @response_builder.last
-            if node.message == "before_create" && node.message_loc == current_token.location
+            if node.message == "before_create" && @response_builder.last_token_matches?(node.message_loc)
               current_token.replace_type(:keyword)
               current_token.replace_modifier([:declaration])
             end
