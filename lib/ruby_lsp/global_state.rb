@@ -30,8 +30,8 @@ module RubyLsp
 
       @formatter = T.let("auto", String)
       @linters = T.let([], T::Array[String])
-      @test_library = T.let(detect_test_library, String)
-      @typechecker = T.let(detect_typechecker, T::Boolean)
+      @test_library = T.let("minitest", String)
+      @typechecker = T.let(true, T::Boolean)
       @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
       @supported_formatters = T.let({}, T::Hash[String, Requests::Support::Formatter])
       @supports_watching_files = T.let(false, T::Boolean)
@@ -54,15 +54,18 @@ module RubyLsp
 
     sig { params(options: T::Hash[Symbol, T.untyped]).void }
     def apply_options(options)
+      dependencies = gather_dependencies
       workspace_uri = options.dig(:workspaceFolders, 0, :uri)
       @workspace_uri = URI(workspace_uri) if workspace_uri
 
       specified_formatter = options.dig(:initializationOptions, :formatter)
       @formatter = specified_formatter if specified_formatter
-      @formatter = detect_formatter if @formatter == "auto"
+      @formatter = detect_formatter(dependencies) if @formatter == "auto"
 
       specified_linters = options.dig(:initializationOptions, :linters)
-      @linters = specified_linters || detect_linters
+      @linters = specified_linters || detect_linters(dependencies)
+      @test_library = detect_test_library(dependencies)
+      @typechecker = detect_typechecker(dependencies)
 
       encodings = options.dig(:capabilities, :general, :positionEncodings)
       @encoding = if !encodings || encodings.empty?
@@ -98,19 +101,14 @@ module RubyLsp
       end
     end
 
-    sig { params(gem_pattern: Regexp).returns(T::Boolean) }
-    def direct_dependency?(gem_pattern)
-      dependencies.any?(gem_pattern)
-    end
-
     private
 
-    sig { returns(String) }
-    def detect_formatter
+    sig { params(dependencies: T::Array[String]).returns(String) }
+    def detect_formatter(dependencies)
       # NOTE: Intentionally no $ at end, since we want to match rubocop-shopify, etc.
-      if direct_dependency?(/^rubocop/)
+      if dependencies.any?(/^rubocop/)
         "rubocop"
-      elsif direct_dependency?(/^syntax_tree$/)
+      elsif dependencies.any?(/^syntax_tree$/)
         "syntax_tree"
       else
         "none"
@@ -119,16 +117,16 @@ module RubyLsp
 
     # Try to detect if there are linters in the project's dependencies. For auto-detection, we always only consider a
     # single linter. To have multiple linters running, the user must configure them manually
-    sig { returns(T::Array[String]) }
-    def detect_linters
+    sig { params(dependencies: T::Array[String]).returns(T::Array[String]) }
+    def detect_linters(dependencies)
       linters = []
-      linters << "rubocop" if direct_dependency?(/^rubocop/)
+      linters << "rubocop" if dependencies.any?(/^rubocop/)
       linters
     end
 
-    sig { returns(String) }
-    def detect_test_library
-      if direct_dependency?(/^rspec/)
+    sig { params(dependencies: T::Array[String]).returns(String) }
+    def detect_test_library(dependencies)
+      if dependencies.any?(/^rspec/)
         "rspec"
       # A Rails app may have a dependency on minitest, but we would instead want to use the Rails test runner provided
       # by ruby-lsp-rails. A Rails app doesn't need to depend on the rails gem itself, individual components like
@@ -137,23 +135,23 @@ module RubyLsp
       elsif File.exist?(File.join(workspace_path, "bin/rails"))
         "rails"
       # NOTE: Intentionally ends with $ to avoid mis-matching minitest-reporters, etc. in a Rails app.
-      elsif direct_dependency?(/^minitest$/)
+      elsif dependencies.any?(/^minitest$/)
         "minitest"
-      elsif direct_dependency?(/^test-unit/)
+      elsif dependencies.any?(/^test-unit/)
         "test-unit"
       else
         "unknown"
       end
     end
 
-    sig { returns(T::Boolean) }
-    def detect_typechecker
+    sig { params(dependencies: T::Array[String]).returns(T::Boolean) }
+    def detect_typechecker(dependencies)
       return false if ENV["RUBY_LSP_BYPASS_TYPECHECKER"]
 
       # We can't read the env from within `Bundle.with_original_env` so we need to set it here.
       ruby_lsp_env_is_test = (ENV["RUBY_LSP_ENV"] == "test")
       Bundler.with_original_env do
-        sorbet_static_detected = Bundler.locked_gems.specs.any? { |spec| spec.name == "sorbet-static" }
+        sorbet_static_detected = dependencies.any?(/^sorbet-static/)
         # Don't show message while running tests, since it's noisy
         if sorbet_static_detected && !ruby_lsp_env_is_test
           $stderr.puts("Ruby LSP detected this is a Sorbet project so will defer to Sorbet LSP for some functionality")
@@ -165,16 +163,11 @@ module RubyLsp
     end
 
     sig { returns(T::Array[String]) }
-    def dependencies
-      @dependencies ||= T.let(
-        begin
-          Bundler.with_original_env { Bundler.default_gemfile }
-          Bundler.locked_gems.dependencies.keys + gemspec_dependencies
-        rescue Bundler::GemfileNotFound
-          []
-        end,
-        T.nilable(T::Array[String]),
-      )
+    def gather_dependencies
+      Bundler.with_original_env { Bundler.default_gemfile }
+      Bundler.locked_gems.dependencies.keys + gemspec_dependencies
+    rescue Bundler::GemfileNotFound
+      []
     end
 
     sig { returns(T::Array[String]) }
