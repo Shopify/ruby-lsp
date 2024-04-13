@@ -205,6 +205,10 @@ module RubyLsp
                         glob_pattern: "**/*.rb",
                         kind: Constant::WatchKind::CREATE | Constant::WatchKind::CHANGE | Constant::WatchKind::DELETE,
                       ),
+                      Interface::FileSystemWatcher.new(
+                        glob_pattern: "**/.rubocop.yml",
+                        kind: Constant::WatchKind::CREATE | Constant::WatchKind::CHANGE | Constant::WatchKind::DELETE,
+                      ),
                     ],
                   ),
                 ),
@@ -244,15 +248,24 @@ module RubyLsp
         end
       end
 
+      register_rubocop_formatter
+      register_syntax_tree_formatter
+      perform_initial_indexing(indexing_config)
+      check_formatter_is_available
+    end
+
+    sig { void }
+    def register_rubocop_formatter
       if defined?(Requests::Support::RuboCopFormatter)
         @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.new)
       end
+    end
+
+    sig { void }
+    def register_syntax_tree_formatter
       if defined?(Requests::Support::SyntaxTreeFormatter)
         @global_state.register_formatter("syntax_tree", Requests::Support::SyntaxTreeFormatter.new)
       end
-
-      perform_initial_indexing(indexing_config)
-      check_formatter_is_available
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
@@ -270,18 +283,22 @@ module RubyLsp
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_did_close(message)
+      uri = message.dig(:params, :textDocument, :uri)
       @mutex.synchronize do
-        uri = message.dig(:params, :textDocument, :uri)
         @store.delete(uri)
-
         # Clear diagnostics for the closed file, so that they no longer appear in the problems tab
-        send_message(
-          Notification.new(
-            method: "textDocument/publishDiagnostics",
-            params: Interface::PublishDiagnosticsParams.new(uri: uri.to_s, diagnostics: []),
-          ),
-        )
+        clear_diagnostics(uri)
       end
+    end
+
+    sig { params(uri: T.any(URI::Generic, String)).void }
+    def clear_diagnostics(uri)
+      send_message(
+        Notification.new(
+          method: "textDocument/publishDiagnostics",
+          params: Interface::PublishDiagnosticsParams.new(uri: uri.to_s, diagnostics: []),
+        ),
+      )
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
@@ -610,19 +627,24 @@ module RubyLsp
         uri = URI(change[:uri])
         file_path = uri.to_standardized_path
         next if file_path.nil? || File.directory?(file_path)
-        next unless file_path.end_with?(".rb")
 
-        load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
-        indexable = RubyIndexer::IndexablePath.new(load_path_entry, file_path)
+        if file_path.end_with?(".rb")
+          load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
+          indexable = RubyIndexer::IndexablePath.new(load_path_entry, file_path)
 
-        case change[:type]
-        when Constant::FileChangeType::CREATED
-          index.index_single(indexable)
-        when Constant::FileChangeType::CHANGED
-          index.delete(indexable)
-          index.index_single(indexable)
-        when Constant::FileChangeType::DELETED
-          index.delete(indexable)
+          case change[:type]
+          when Constant::FileChangeType::CREATED
+            index.index_single(indexable)
+          when Constant::FileChangeType::CHANGED
+            index.delete(indexable)
+            index.index_single(indexable)
+          when Constant::FileChangeType::DELETED
+            index.delete(indexable)
+          end
+        elsif file_path.end_with?(".rubocop.yml")
+          $stderr.puts("Reloading RuboCop config")
+          register_rubocop_formatter
+          @store.each_uri { |uri| clear_diagnostics(uri) }
         end
       end
 
