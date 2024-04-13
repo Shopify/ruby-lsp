@@ -75,7 +75,7 @@ module RubyLsp
   class Request < Message
     extend T::Sig
 
-    sig { params(id: Integer, method: String, params: Object).void }
+    sig { params(id: T.any(Integer, String), method: String, params: Object).void }
     def initialize(id:, method:, params:)
       @id = id
       super(method: method, params: params)
