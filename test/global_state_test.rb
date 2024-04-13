@@ -105,6 +105,24 @@ module RubyLsp
       refute(state.supports_watching_files)
     end
 
+    def test_progress_if_supported
+      state = GlobalState.new
+      state.apply_options({ capabilities: { window: { workDoneProgress: true } } })
+      assert(state.supports_progress)
+    end
+
+    def test_progress_if_not_supported
+      state = GlobalState.new
+      state.apply_options({ capabilities: { window: { workDoneProgress: false } } })
+      refute(state.supports_progress)
+    end
+
+    def test_progress_if_not_reported
+      state = GlobalState.new
+      state.apply_options({ capabilities: {} })
+      refute(state.supports_progress)
+    end
+
     private
 
     def stub_dependencies(dependencies)

@@ -23,6 +23,9 @@ module RubyLsp
     sig { returns(T::Boolean) }
     attr_reader :supports_watching_files
 
+    sig { returns(T::Boolean) }
+    attr_reader :supports_progress
+
     sig { void }
     def initialize
       @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
@@ -34,6 +37,7 @@ module RubyLsp
       @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
       @supported_formatters = T.let({}, T::Hash[String, Requests::Support::Formatter])
       @supports_watching_files = T.let(false, T::Boolean)
+      @supports_progress = T.let(false, T::Boolean)
     end
 
     sig { params(identifier: String, instance: Requests::Support::Formatter).void }
@@ -70,6 +74,8 @@ module RubyLsp
       if file_watching_caps&.dig(:dynamicRegistration) && file_watching_caps&.dig(:relativePatternSupport)
         @supports_watching_files = true
       end
+
+      @supports_progress = true if options.dig(:capabilities, :window, :workDoneProgress)
     end
 
     sig { returns(String) }
