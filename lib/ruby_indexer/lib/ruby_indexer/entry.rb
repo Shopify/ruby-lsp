@@ -11,8 +11,8 @@ module RubyIndexer
     sig { returns(String) }
     attr_reader :file_path
 
-    sig { returns(Integer) }
-    attr_reader :start_line, :end_line, :start_column, :end_column
+    sig { returns(RubyIndexer::Location) }
+    attr_reader :location
 
     sig { returns(T::Array[String]) }
     attr_reader :comments
@@ -24,7 +24,7 @@ module RubyIndexer
       params(
         name: String,
         file_path: String,
-        location: T.any(Prism::Location, [Integer, Integer, Integer, Integer]),
+        location: T.any(Prism::Location, RubyIndexer::Location),
         comments: T::Array[String],
       ).void
     end
@@ -34,19 +34,19 @@ module RubyIndexer
       @comments = comments
       @visibility = T.let(:public, Symbol)
 
-      if location.is_a?(Prism::Location)
-        start_line = location.start_line
-        end_line = location.end_line
-        start_column = location.start_column
-        end_column = location.end_column
-      else
-        start_line, start_column, end_line, end_column = location
-      end
-
-      @start_line = T.let(start_line, Integer)
-      @end_line = T.let(end_line, Integer)
-      @start_column = T.let(start_column, Integer)
-      @end_column = T.let(end_column, Integer)
+      @location = T.let(
+        if location.is_a?(Prism::Location)
+          Location.new(
+            location.start_line,
+            location.end_line,
+            location.start_column,
+            location.end_column,
+          )
+        else
+          location
+        end,
+        RubyIndexer::Location,
+      )
     end
 
     sig { returns(String) }
@@ -70,7 +70,7 @@ module RubyIndexer
         params(
           name: String,
           file_path: String,
-          location: Prism::Location,
+          location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
         ).void
       end
@@ -101,7 +101,7 @@ module RubyIndexer
         params(
           name: String,
           file_path: String,
-          location: Prism::Location,
+          location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
           parent_class: T.nilable(String),
         ).void
@@ -201,7 +201,7 @@ module RubyIndexer
         params(
           name: String,
           file_path: String,
-          location: Prism::Location,
+          location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
           owner: T.nilable(Entry::Namespace),
         ).void
@@ -239,7 +239,7 @@ module RubyIndexer
         params(
           name: String,
           file_path: String,
-          location: Prism::Location,
+          location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
           parameters_node: T.nilable(Prism::ParametersNode),
           owner: T.nilable(Entry::Namespace),
@@ -369,7 +369,7 @@ module RubyIndexer
           nesting: T::Array[String],
           name: String,
           file_path: String,
-          location: Prism::Location,
+          location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
         ).void
       end
@@ -390,14 +390,7 @@ module RubyIndexer
 
       sig { params(target: String, unresolved_alias: UnresolvedAlias).void }
       def initialize(target, unresolved_alias)
-        location = [
-          unresolved_alias.start_line,
-          unresolved_alias.start_column,
-          unresolved_alias.end_line,
-          unresolved_alias.end_column,
-        ]
-
-        super(unresolved_alias.name, unresolved_alias.file_path, location, unresolved_alias.comments)
+        super(unresolved_alias.name, unresolved_alias.file_path, unresolved_alias.location, unresolved_alias.comments)
 
         @target = target
       end
