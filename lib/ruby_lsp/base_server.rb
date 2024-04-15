@@ -62,7 +62,7 @@ module RubyLsp
         # The following requests need to be executed in the main thread directly to avoid concurrency issues. Everything
         # else is pushed into the incoming queue
         case method
-        when "initialize", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange"
+        when "initialize", "initialized", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange"
           process_message(message)
         when "shutdown"
           $stderr.puts("Shutting down Ruby LSP...")
