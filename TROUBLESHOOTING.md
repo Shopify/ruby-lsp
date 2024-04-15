@@ -110,7 +110,7 @@ manner. Please include the steps taken to diagnose in your bug report.
 
 ### Check if the server is running
 
-Check the [status center](https://github.com/Shopify/ruby-lsp/blob/main/extras/ruby_lsp_status_center.png).
+Check the [status center](https://github.com/Shopify/ruby-lsp/blob/main/vscode/extras/ruby_lsp_status_center.png).
 Does the server status say it's running? If it is running, but you are missing certain features, please check our
 [documentation](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html) to ensure we already added support for it.
 
