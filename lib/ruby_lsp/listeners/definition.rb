@@ -39,6 +39,8 @@ module RubyLsp
 
         if message == :require || message == :require_relative
           handle_require_definition(node)
+        elsif message == :autoload
+          handle_autoload_constant_definition(node)
         else
           handle_method_definition(node)
         end
@@ -118,6 +120,43 @@ module RubyLsp
           path = @uri.to_standardized_path
           current_folder = path ? Pathname.new(CGI.unescape(path)).dirname : Dir.pwd
           candidate = File.expand_path(File.join(current_folder, required_file))
+
+          @response_builder << Interface::Location.new(
+            uri: URI::Generic.from_path(path: candidate).to_s,
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: 0, character: 0),
+              end: Interface::Position.new(line: 0, character: 0),
+            ),
+          )
+        end
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def handle_autoload_constant_definition(node)
+        name = node.name # should be ":autoload"
+        if name != :autoload
+          return
+        end
+
+        arguments = node.arguments # should be 'ArgumentsNode'
+        return unless arguments.is_a?(Prism::ArgumentsNode)
+
+        symbol = arguments.arguments[0] # should be 'SymbolNode'
+        return unless symbol.is_a?(Prism::SymbolNode)
+
+        # class_name = symbol.value
+
+        file_string = arguments.arguments[1] # should be 'StringNode'
+        return unless file_string.is_a?(Prism::StringNode)
+
+        file_path = file_string.content
+
+        entry = @index.search_require_paths(file_path).find do |indexable_path|
+          indexable_path.require_path == file_path
+        end
+
+        if entry
+          candidate = entry.full_path
 
           @response_builder << Interface::Location.new(
             uri: URI::Generic.from_path(path: candidate).to_s,
