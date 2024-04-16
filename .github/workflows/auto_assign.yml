@@ -17,20 +17,28 @@ jobs:
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |
-            const devExpResponse = await github.rest.teams.listMembersInOrg({
-              org: "shopify",
-              team_slug: "ruby-dev-exp",
-            });
-            const members = devExpResponse.data.map((member) => member.login);
+            const fullTeam = [
+              "andyw8",
+              "dirceu",
+              "paracycle",
+              "vinistock",
+              "aryan-soni",
+              "rafaelfranca",
+              "Morriar",
+              "st0012",
+              "egiurleo",
+              "KaanOzkan"
+            ];
             const issue = github.event.issue;
 
-            if (!members.includes(issue.user.login)) {
-              const dxResponse = await github.rest.teams.listMembersInOrg({
-                org: "shopify",
-                team_slug: "ruby-dx",
-              });
-              const reviewers = dxResponse.data.map((member) => member.login);
-              const assignee = reviewers[Math.floor(Math.random() * reviewers.length)];
+            if (!fullTeam.includes(issue.user.login)) {
+              const dxReviewers = [
+                "andyw8",
+                "vinistock",
+                "aryan-soni",
+                "st0012",
+              ];
+              const assignee = dxReviewers[Math.floor(Math.random() * dxReviewers.length)];
 
               await github.rest.issues.addAssignees({
                 owner: context.repo.owner,
