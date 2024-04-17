@@ -29,9 +29,9 @@ jobs:
               "egiurleo",
               "KaanOzkan"
             ];
-            const issue = github.event.issue;
+            const author = "${{ github.event.issue.user.login }}";
 
-            if (!fullTeam.includes(issue.user.login)) {
+            if (!fullTeam.includes(author)) {
               const dxReviewers = [
                 "andyw8",
                 "vinistock",
@@ -43,7 +43,7 @@ jobs:
               await github.rest.issues.addAssignees({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: issue.number,
+                issue_number: ${{ github.event.issue.number }},
                 assignees: [assignee]
               });
             }
