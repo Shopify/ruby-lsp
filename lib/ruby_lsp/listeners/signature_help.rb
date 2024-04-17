@@ -33,13 +33,12 @@ module RubyLsp
         message = node.message
         return unless message
 
-        methods = @index.resolve_method(message, @nesting.join("::"))
-        return unless methods
-
-        target_method = methods.first
+        target_method = @index.resolve_method(message, @nesting.join("::"))
         return unless target_method
 
-        parameters = target_method.parameters
+        declarations = T.cast(target_method.declarations, T::Array[RubyIndexer::Entry::MemberDeclaration])
+        # TODO: this is currently only showing the first declaration parameters, but a method can be overridden
+        parameters = T.must(declarations.first).parameters
         name = target_method.name
 
         # If the method doesn't have any parameters, there's no need to show signature help
@@ -65,7 +64,7 @@ module RubyLsp
               parameters: parameters.map { |param| Interface::ParameterInformation.new(label: param.name) },
               documentation: Interface::MarkupContent.new(
                 kind: "markdown",
-                value: markdown_from_index_entries("", methods),
+                value: markdown_from_index_entries("", target_method),
               ),
             ),
           ],

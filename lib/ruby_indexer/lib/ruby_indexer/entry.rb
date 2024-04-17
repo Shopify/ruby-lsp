@@ -8,50 +8,95 @@ module RubyIndexer
     sig { returns(String) }
     attr_reader :name
 
-    sig { returns(String) }
-    attr_reader :file_path
-
-    sig { returns(RubyIndexer::Location) }
-    attr_reader :location
-
-    sig { returns(T::Array[String]) }
-    attr_reader :comments
-
     sig { returns(Symbol) }
     attr_accessor :visibility
 
-    sig do
-      params(
-        name: String,
-        file_path: String,
-        location: T.any(Prism::Location, RubyIndexer::Location),
-        comments: T::Array[String],
-      ).void
-    end
-    def initialize(name, file_path, location, comments)
+    sig { returns(T::Array[Declaration]) }
+    attr_reader :declarations
+
+    sig { params(name: String).void }
+    def initialize(name)
       @name = name
-      @file_path = file_path
-      @comments = comments
       @visibility = T.let(:public, Symbol)
-
-      @location = T.let(
-        if location.is_a?(Prism::Location)
-          Location.new(
-            location.start_line,
-            location.end_line,
-            location.start_column,
-            location.end_column,
-          )
-        else
-          location
-        end,
-        RubyIndexer::Location,
-      )
+      @declarations = T.let([], T::Array[Declaration])
     end
 
-    sig { returns(String) }
-    def file_name
-      File.basename(@file_path)
+    sig { params(declaration: Declaration).void }
+    def add_declaration(declaration)
+      @declarations << declaration
+    end
+
+    sig { returns(T::Array[String]) }
+    def comments
+      @declarations.flat_map(&:comments)
+    end
+
+    # A declaration represents a single place in the code where a declaration for the given entry exists. For example,
+    # if a class is re-opened multiple times, there will be a single entry for the class with multiple declarations.
+    # This base declaration class can be used to track any general identifiers if the only information they contain is a
+    # file path, a location and some comments
+    class Declaration
+      extend T::Sig
+
+      sig { returns(String) }
+      attr_reader :file_path
+
+      sig { returns(RubyIndexer::Location) }
+      attr_reader :location
+
+      sig { returns(T::Array[String]) }
+      attr_reader :comments
+
+      sig do
+        params(
+          file_path: String,
+          location: T.any(Prism::Location, RubyIndexer::Location),
+          comments: T::Array[String],
+        ).void
+      end
+      def initialize(file_path, location, comments)
+        @file_path = file_path
+        @comments = comments
+        @location = T.let(
+          if location.is_a?(Prism::Location)
+            Location.new(
+              location.start_line,
+              location.end_line,
+              location.start_column,
+              location.end_column,
+            )
+          else
+            location
+          end,
+          RubyIndexer::Location,
+        )
+      end
+
+      sig { returns(String) }
+      def file_name
+        File.basename(@file_path)
+      end
+    end
+
+    class MemberDeclaration < Declaration
+      extend T::Sig
+
+      sig { returns(T::Array[Entry::Parameter]) }
+      attr_reader :parameters
+
+      sig do
+        params(
+          parameters: T::Array[Entry::Parameter],
+          file_path: String,
+          location: T.any(Prism::Location, RubyIndexer::Location),
+          comments: T::Array[String],
+        ).void
+      end
+      def initialize(parameters, file_path, location, comments)
+        super(file_path, location, comments)
+
+        @parameters = parameters
+      end
     end
 
     class Namespace < Entry
@@ -66,16 +111,9 @@ module RubyIndexer
       sig { returns(T::Array[String]) }
       attr_accessor :prepended_modules
 
-      sig do
-        params(
-          name: String,
-          file_path: String,
-          location: T.any(Prism::Location, RubyIndexer::Location),
-          comments: T::Array[String],
-        ).void
-      end
-      def initialize(name, file_path, location, comments)
-        super(name, file_path, location, comments)
+      sig { params(name: String).void }
+      def initialize(name)
+        super(name)
         @included_modules = T.let([], T::Array[String])
         @prepended_modules = T.let([], T::Array[String])
       end
@@ -97,17 +135,9 @@ module RubyIndexer
       sig { returns(T.nilable(String)) }
       attr_reader :parent_class
 
-      sig do
-        params(
-          name: String,
-          file_path: String,
-          location: T.any(Prism::Location, RubyIndexer::Location),
-          comments: T::Array[String],
-          parent_class: T.nilable(String),
-        ).void
-      end
-      def initialize(name, file_path, location, comments, parent_class)
-        super(name, file_path, location, comments)
+      sig { params(name: String, parent_class: T.nilable(String)).void }
+      def initialize(name, parent_class)
+        super(name)
         @parent_class = T.let(parent_class, T.nilable(String))
       end
     end
@@ -189,153 +219,25 @@ module RubyIndexer
     end
 
     class Member < Entry
-      extend T::Sig
       extend T::Helpers
-
       abstract!
 
       sig { returns(T.nilable(Entry::Namespace)) }
       attr_reader :owner
 
-      sig do
-        params(
-          name: String,
-          file_path: String,
-          location: T.any(Prism::Location, RubyIndexer::Location),
-          comments: T::Array[String],
-          owner: T.nilable(Entry::Namespace),
-        ).void
-      end
-      def initialize(name, file_path, location, comments, owner)
-        super(name, file_path, location, comments)
+      sig { params(name: String, owner: T.nilable(Entry::Namespace)).void }
+      def initialize(name, owner)
+        super(name)
         @owner = owner
       end
-
-      sig { abstract.returns(T::Array[Parameter]) }
-      def parameters; end
     end
 
     class Accessor < Member
-      extend T::Sig
-
-      sig { override.returns(T::Array[Parameter]) }
-      def parameters
-        params = []
-        params << RequiredParameter.new(name: name.delete_suffix("=").to_sym) if name.end_with?("=")
-        params
-      end
     end
 
     class Method < Member
-      extend T::Sig
       extend T::Helpers
-
       abstract!
-
-      sig { override.returns(T::Array[Parameter]) }
-      attr_reader :parameters
-
-      sig do
-        params(
-          name: String,
-          file_path: String,
-          location: T.any(Prism::Location, RubyIndexer::Location),
-          comments: T::Array[String],
-          parameters_node: T.nilable(Prism::ParametersNode),
-          owner: T.nilable(Entry::Namespace),
-        ).void
-      end
-      def initialize(name, file_path, location, comments, parameters_node, owner) # rubocop:disable Metrics/ParameterLists
-        super(name, file_path, location, comments, owner)
-
-        @parameters = T.let(list_params(parameters_node), T::Array[Parameter])
-      end
-
-      private
-
-      sig { params(parameters_node: T.nilable(Prism::ParametersNode)).returns(T::Array[Parameter]) }
-      def list_params(parameters_node)
-        return [] unless parameters_node
-
-        parameters = []
-
-        parameters_node.requireds.each do |required|
-          name = parameter_name(required)
-          next unless name
-
-          parameters << RequiredParameter.new(name: name)
-        end
-
-        parameters_node.optionals.each do |optional|
-          name = parameter_name(optional)
-          next unless name
-
-          parameters << OptionalParameter.new(name: name)
-        end
-
-        parameters_node.keywords.each do |keyword|
-          name = parameter_name(keyword)
-          next unless name
-
-          case keyword
-          when Prism::RequiredKeywordParameterNode
-            parameters << KeywordParameter.new(name: name)
-          when Prism::OptionalKeywordParameterNode
-            parameters << OptionalKeywordParameter.new(name: name)
-          end
-        end
-
-        rest = parameters_node.rest
-
-        if rest.is_a?(Prism::RestParameterNode)
-          rest_name = rest.name || RestParameter::DEFAULT_NAME
-          parameters << RestParameter.new(name: rest_name)
-        end
-
-        keyword_rest = parameters_node.keyword_rest
-
-        if keyword_rest.is_a?(Prism::KeywordRestParameterNode)
-          keyword_rest_name = parameter_name(keyword_rest) || KeywordRestParameter::DEFAULT_NAME
-          parameters << KeywordRestParameter.new(name: keyword_rest_name)
-        end
-
-        parameters_node.posts.each do |post|
-          name = parameter_name(post)
-          next unless name
-
-          parameters << RequiredParameter.new(name: name)
-        end
-
-        block = parameters_node.block
-        parameters << BlockParameter.new(name: block.name || BlockParameter::DEFAULT_NAME) if block
-
-        parameters
-      end
-
-      sig { params(node: T.nilable(Prism::Node)).returns(T.nilable(Symbol)) }
-      def parameter_name(node)
-        case node
-        when Prism::RequiredParameterNode, Prism::OptionalParameterNode,
-          Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode,
-          Prism::RestParameterNode, Prism::KeywordRestParameterNode
-          node.name
-        when Prism::MultiTargetNode
-          names = node.lefts.map { |parameter_node| parameter_name(parameter_node) }
-
-          rest = node.rest
-          if rest.is_a?(Prism::SplatNode)
-            name = rest.expression&.slice
-            names << (rest.operator == "*" ? "*#{name}".to_sym : name&.to_sym)
-          end
-
-          names << nil if rest.is_a?(Prism::ImplicitRestNode)
-
-          names.concat(node.rights.map { |parameter_node| parameter_name(parameter_node) })
-
-          names_with_commas = names.join(", ")
-          :"(#{names_with_commas})"
-        end
-      end
     end
 
     class SingletonMethod < Method
@@ -368,13 +270,10 @@ module RubyIndexer
           target: String,
           nesting: T::Array[String],
           name: String,
-          file_path: String,
-          location: T.any(Prism::Location, RubyIndexer::Location),
-          comments: T::Array[String],
         ).void
       end
-      def initialize(target, nesting, name, file_path, location, comments) # rubocop:disable Metrics/ParameterLists
-        super(name, file_path, location, comments)
+      def initialize(target, nesting, name)
+        super(name)
 
         @target = target
         @nesting = nesting
@@ -390,9 +289,10 @@ module RubyIndexer
 
       sig { params(target: String, unresolved_alias: UnresolvedAlias).void }
       def initialize(target, unresolved_alias)
-        super(unresolved_alias.name, unresolved_alias.file_path, unresolved_alias.location, unresolved_alias.comments)
+        super(unresolved_alias.name)
 
         @target = target
+        @declarations = unresolved_alias.declarations
       end
     end
   end

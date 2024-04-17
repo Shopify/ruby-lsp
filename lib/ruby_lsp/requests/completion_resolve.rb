@@ -25,6 +25,15 @@ module RubyLsp
       extend T::Sig
       include Requests::Support::Common
 
+      CONSTANT_KINDS = T.let(
+        [
+          Constant::CompletionItemKind::CLASS,
+          Constant::CompletionItemKind::MODULE,
+          Constant::CompletionItemKind::CONSTANT,
+        ].freeze,
+        T::Array[Integer],
+      )
+
       # set a limit on the number of documentation entries returned, to avoid rendering performance issues
       # https://github.com/Shopify/ruby-lsp/pull/1798
       MAX_DOCUMENTATION_ENTRIES = 10
@@ -36,25 +45,50 @@ module RubyLsp
         @item = item
       end
 
-      sig { override.returns(Interface::CompletionItem) }
+      sig { override.returns(T.nilable(Interface::CompletionItem)) }
       def perform
         label = @item[:label]
-        entries = case @item[:kind]
-        when Constant::CompletionItemKind::CLASS, Constant::CompletionItemKind::MODULE,
-          Constant::CompletionItemKind::CONSTANT
-          @index.get_constant(label) || []
-        else
-          @index.get_method(label) || []
+        owner = @item.dig(:data, :owner)
+
+        if CONSTANT_KINDS.include?(@item[:kind])
+          constant_item_documentation(label, T.must(@index.get_constant(label)))
+        elsif owner
+          known_method_item_documentation(label, T.must(@index.resolve_method(label, owner)))
         end
+      end
+
+      private
+
+      sig { params(label: String, entry: RubyIndexer::Entry::Member).returns(Interface::CompletionItem) }
+      def known_method_item_documentation(label, entry)
+        declarations = T.cast(
+          entry.declarations.take(MAX_DOCUMENTATION_ENTRIES),
+          T::Array[RubyIndexer::Entry::MemberDeclaration],
+        )
 
         Interface::CompletionItem.new(
           label: label,
           label_details: Interface::CompletionItemLabelDetails.new(
-            description: entries.take(MAX_DOCUMENTATION_ENTRIES).map(&:file_name).join(","),
+            detail: "(#{T.must(declarations.first).parameters.map(&:decorated_name).join(", ")})",
+            description: declarations.map(&:file_name).join(","),
           ),
           documentation: Interface::MarkupContent.new(
             kind: "markdown",
-            value: markdown_from_index_entries(label, entries, MAX_DOCUMENTATION_ENTRIES),
+            value: markdown_from_index_entries(label, entry, MAX_DOCUMENTATION_ENTRIES),
+          ),
+        )
+      end
+
+      sig { params(label: String, entry: RubyIndexer::Entry).returns(Interface::CompletionItem) }
+      def constant_item_documentation(label, entry)
+        file_names = entry.declarations.take(MAX_DOCUMENTATION_ENTRIES).map(&:file_name)
+
+        Interface::CompletionItem.new(
+          label: label,
+          label_details: Interface::CompletionItemLabelDetails.new(description: file_names.join(",")),
+          documentation: Interface::MarkupContent.new(
+            kind: "markdown",
+            value: markdown_from_index_entries(label, entry, MAX_DOCUMENTATION_ENTRIES),
           ),
         )
       end

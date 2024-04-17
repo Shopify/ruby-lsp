@@ -15,12 +15,12 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index.get_constant("Foo")
-      assert_equal(2, entries.length)
+      entry = @index.get_constant("Foo")
+      declarations = entry.declarations
+      assert_equal(2, declarations.length)
 
       @index.delete(IndexablePath.new(nil, "/fake/path/other_foo.rb"))
-      entries = @index.get_constant("Foo")
-      assert_equal(1, entries.length)
+      assert_equal(1, declarations.length)
     end
 
     def test_deleting_all_entries_for_a_class
@@ -29,12 +29,12 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index.get_constant("Foo")
-      assert_equal(1, entries.length)
+      entry = @index.get_constant("Foo")
+      declarations = entry.declarations
+      assert_equal(1, declarations.length)
 
       @index.delete(IndexablePath.new(nil, "/fake/path/foo.rb"))
-      entries = @index.get_constant("Foo")
-      assert_nil(entries)
+      assert_nil(@index.get_constant("Foo"))
     end
 
     def test_index_resolve
@@ -52,21 +52,17 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index.resolve_constant("Something", ["Foo", "Baz"])
-      refute_empty(entries)
-      assert_equal("Foo::Baz::Something", entries.first.name)
+      entry = T.must(@index.resolve_constant("Something", ["Foo", "Baz"]))
+      assert_equal("Foo::Baz::Something", entry.name)
 
-      entries = @index.resolve_constant("Bar", ["Foo"])
-      refute_empty(entries)
-      assert_equal("Foo::Bar", entries.first.name)
+      entry = T.must(@index.resolve_constant("Bar", ["Foo"]))
+      assert_equal("Foo::Bar", entry.name)
 
-      entries = @index.resolve_constant("Bar", ["Foo", "Baz"])
-      refute_empty(entries)
-      assert_equal("Foo::Bar", entries.first.name)
+      entry = T.must(@index.resolve_constant("Bar", ["Foo", "Baz"]))
+      assert_equal("Foo::Bar", entry.name)
 
-      entries = @index.resolve_constant("Foo::Bar", ["Foo", "Baz"])
-      refute_empty(entries)
-      assert_equal("Foo::Bar", entries.first.name)
+      entry = T.must(@index.resolve_constant("Foo::Bar", ["Foo", "Baz"]))
+      assert_equal("Foo::Bar", entry.name)
 
       assert_nil(@index.resolve_constant("DoesNotExist", ["Foo"]))
     end
@@ -86,9 +82,9 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index.get_constant("::Foo::Baz::Something")
-      refute_empty(entries)
-      assert_equal("Foo::Baz::Something", entries.first.name)
+      entry = @index.get_constant("::Foo::Baz::Something")
+      refute_nil(entry)
+      assert_equal("Foo::Baz::Something", T.must(entry).name)
     end
 
     def test_fuzzy_search
@@ -108,7 +104,7 @@ module RubyIndexer
 
       result = @index.fuzzy_search("Bar")
       assert_equal(1, result.length)
-      assert_equal(@index.get_constant("Bar").first, result.first)
+      assert_equal(@index.get_constant("Bar"), result.first)
 
       result = @index.fuzzy_search("foobarsomeking")
       assert_equal(5, result.length)
@@ -152,11 +148,11 @@ module RubyIndexer
         end
       RUBY
 
-      results = @index.prefix_search_constants("Foo", []).map { |entries| entries.map(&:name) }
-      assert_equal([["Foo::Bar", "Foo::Bar"], ["Foo::Baz"]], results)
+      results = @index.prefix_search_constants("Foo", []).map(&:name)
+      assert_equal(["Foo::Bar", "Foo::Baz"], results)
 
-      results = @index.prefix_search_constants("Ba", ["Foo"]).map { |entries| entries.map(&:name) }
-      assert_equal([["Foo::Bar", "Foo::Bar"], ["Foo::Baz"]], results)
+      results = @index.prefix_search_constants("Ba", ["Foo"]).map(&:name)
+      assert_equal(["Foo::Bar", "Foo::Baz"], results)
     end
 
     def test_resolve_normalizes_top_level_names
@@ -168,15 +164,11 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index.resolve_constant("::Foo::Bar", [])
-      refute_nil(entries)
+      entry = T.must(@index.resolve_constant("::Foo::Bar", []))
+      assert_equal("Foo::Bar", entry.name)
 
-      assert_equal("Foo::Bar", entries.first.name)
-
-      entries = @index.resolve_constant("::Bar", ["Foo"])
-      refute_nil(entries)
-
-      assert_equal("Bar", entries.first.name)
+      entry = T.must(@index.resolve_constant("::Bar", ["Foo"]))
+      assert_equal("Bar", entry.name)
     end
 
     def test_resolving_aliases_to_non_existing_constants_with_conflicting_names
@@ -188,7 +180,7 @@ module RubyIndexer
         end
       RUBY
 
-      entry = @index.resolve_constant("INFINITY", ["Foo", "Float"]).first
+      entry = @index.resolve_constant("INFINITY", ["Foo", "Float"])
       refute_nil(entry)
 
       assert_instance_of(Entry::UnresolvedAlias, entry)
@@ -226,9 +218,9 @@ module RubyIndexer
         end
       RUBY
 
-      entries = T.must(@index.resolve_method("baz", "Foo::Bar"))
-      assert_equal("baz", entries.first.name)
-      assert_equal("Foo::Bar", T.must(entries.first.owner).name)
+      entry = T.must(@index.resolve_method("baz", "Foo::Bar"))
+      assert_equal("baz", entry.name)
+      assert_equal("Foo::Bar", T.must(entry.owner).name)
     end
 
     def test_resolve_method_with_class_name_conflict
@@ -241,9 +233,9 @@ module RubyIndexer
         end
       RUBY
 
-      entries = T.must(@index.resolve_method("Array", "Foo"))
-      assert_equal("Array", entries.first.name)
-      assert_equal("Foo", T.must(entries.first.owner).name)
+      entry = T.must(@index.resolve_method("Array", "Foo"))
+      assert_equal("Array", entry.name)
+      assert_equal("Foo", T.must(entry.owner).name)
     end
 
     def test_resolve_method_attribute
@@ -253,9 +245,9 @@ module RubyIndexer
         end
       RUBY
 
-      entries = T.must(@index.resolve_method("bar", "Foo"))
-      assert_equal("bar", entries.first.name)
-      assert_equal("Foo", T.must(entries.first.owner).name)
+      entry = T.must(@index.resolve_method("bar", "Foo"))
+      assert_equal("bar", entry.name)
+      assert_equal("Foo", T.must(entry.owner).name)
     end
 
     def test_resolve_method_with_two_definitions
@@ -271,15 +263,12 @@ module RubyIndexer
         end
       RUBY
 
-      first_entry, second_entry = T.must(@index.resolve_method("bar", "Foo"))
+      entry = T.must(@index.resolve_method("bar", "Foo"))
+      first_declaration, second_declaration = entry.declarations
 
-      assert_equal("bar", first_entry.name)
-      assert_equal("Foo", T.must(first_entry.owner).name)
-      assert_includes(first_entry.comments, "Hello from first `bar`")
-
-      assert_equal("bar", second_entry.name)
-      assert_equal("Foo", T.must(second_entry.owner).name)
-      assert_includes(second_entry.comments, "Hello from second `bar`")
+      assert_equal("Foo", T.must(entry.owner).name)
+      assert_includes(first_declaration.comments, "Hello from first `bar`")
+      assert_includes(second_declaration.comments, "Hello from second `bar`")
     end
 
     def test_prefix_search_for_methods
@@ -294,7 +283,7 @@ module RubyIndexer
       entries = @index.prefix_search_methods("ba")
       refute_empty(entries)
 
-      entry = T.must(entries.first).first
+      entry = T.must(T.must(entries.first).first)
       assert_equal("baz", entry.name)
     end
 

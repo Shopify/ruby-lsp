@@ -70,27 +70,30 @@ module RubyLsp
         return unless message
 
         methods = if self_receiver?(node)
-          @index.resolve_method(message, @nesting.join("::"))
+          resolved_method = @index.resolve_method(message, @nesting.join("::"))
+          [resolved_method] if resolved_method
         else
           # If the method doesn't have a receiver, then we provide a few candidates to jump to
           # But we don't want to provide too many candidates, as it can be overwhelming
-          @index.get_method(message)&.take(MAX_NUMBER_OF_DEFINITION_CANDIDATES_WITHOUT_RECEIVER)
+          @index.get_methods(message)&.take(MAX_NUMBER_OF_DEFINITION_CANDIDATES_WITHOUT_RECEIVER)
         end
 
         return unless methods
 
         methods.each do |target_method|
-          location = target_method.location
-          file_path = target_method.file_path
-          next if @typechecker_enabled && not_in_dependencies?(file_path)
+          target_method.declarations.each do |declaration|
+            location = declaration.location
+            file_path = declaration.file_path
+            next if @typechecker_enabled && not_in_dependencies?(file_path)
 
-          @response_builder << Interface::Location.new(
-            uri: URI::Generic.from_path(path: file_path).to_s,
-            range: Interface::Range.new(
-              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
-              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
-            ),
-          )
+            @response_builder << Interface::Location.new(
+              uri: URI::Generic.from_path(path: file_path).to_s,
+              range: Interface::Range.new(
+                start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
+                end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
+              ),
+            )
+          end
         end
       end
 
@@ -138,20 +141,19 @@ module RubyLsp
 
       sig { params(value: String).void }
       def find_in_index(value)
-        entries = @index.resolve_constant(value, @nesting)
-        return unless entries
+        entry = @index.resolve_constant(value, @nesting)
+        return unless entry
 
         # We should only allow jumping to the definition of private constants if the constant is defined in the same
         # namespace as the reference
-        first_entry = T.must(entries.first)
-        return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{value}"
+        return if entry.visibility == :private && entry.name != "#{@nesting.join("::")}::#{value}"
 
-        entries.each do |entry|
-          location = entry.location
+        entry.declarations.each do |declaration|
+          location = declaration.location
           # If the project has Sorbet, then we only want to handle go to definition for constants defined in gems, as an
           # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
           # in the project, even if the files are typed false
-          file_path = entry.file_path
+          file_path = declaration.file_path
           next if @typechecker_enabled && not_in_dependencies?(file_path)
 
           @response_builder << Interface::Location.new(

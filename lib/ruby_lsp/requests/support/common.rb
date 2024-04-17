@@ -85,17 +85,16 @@ module RubyLsp
         sig do
           params(
             title: String,
-            entries: T.any(T::Array[RubyIndexer::Entry], RubyIndexer::Entry),
+            entry: RubyIndexer::Entry,
             max_entries: T.nilable(Integer),
           ).returns(T::Hash[Symbol, String])
         end
-        def categorized_markdown_from_index_entries(title, entries, max_entries = nil)
+        def categorized_markdown_from_index_entries(title, entry, max_entries = nil)
           markdown_title = "```ruby\n#{title}\n```"
           definitions = []
           content = +""
-          entries = Array(entries)
-          entries_to_format = max_entries ? entries.take(max_entries) : entries
-          entries_to_format.each do |entry|
+          declarations = max_entries ? entry.declarations.take(max_entries) : entry.declarations
+          declarations.each do |entry|
             loc = entry.location
 
             # We always handle locations as zero based. However, for file links in Markdown we need them to be one
@@ -111,8 +110,8 @@ module RubyLsp
             content << "\n\n#{entry.comments.join("\n")}" unless entry.comments.empty?
           end
 
-          additional_entries_text = if max_entries && entries.length > max_entries
-            additional = entries.length - max_entries
+          additional_entries_text = if max_entries && declarations.length > max_entries
+            additional = declarations.length - max_entries
             " | #{additional} other#{additional > 1 ? "s" : ""}"
           else
             ""
@@ -125,15 +124,9 @@ module RubyLsp
           }
         end
 
-        sig do
-          params(
-            title: String,
-            entries: T.any(T::Array[RubyIndexer::Entry], RubyIndexer::Entry),
-            max_entries: T.nilable(Integer),
-          ).returns(String)
-        end
-        def markdown_from_index_entries(title, entries, max_entries = nil)
-          categorized_markdown = categorized_markdown_from_index_entries(title, entries, max_entries)
+        sig { params(title: String, entry: RubyIndexer::Entry, max_entries: T.nilable(Integer)).returns(String) }
+        def markdown_from_index_entries(title, entry, max_entries = nil)
+          categorized_markdown = categorized_markdown_from_index_entries(title, entry, max_entries)
 
           <<~MARKDOWN.chomp
             #{categorized_markdown[:title]}

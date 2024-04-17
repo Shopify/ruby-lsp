@@ -52,6 +52,7 @@ module RubyLsp
   class Notification < Message
     class << self
       extend T::Sig
+
       sig { params(message: String).returns(Notification) }
       def window_show_error(message)
         new(
@@ -59,6 +60,17 @@ module RubyLsp
           params: Interface::ShowMessageParams.new(
             type: Constant::MessageType::ERROR,
             message: message,
+          ),
+        )
+      end
+
+      sig { params(message: String, verbose: T.nilable(String)).returns(Notification) }
+      def log_trace(message, verbose = nil)
+        new(
+          method: "$/logTrace",
+          params: Interface::LogTraceParams.new(
+            message: message,
+            verbose: verbose,
           ),
         )
       end

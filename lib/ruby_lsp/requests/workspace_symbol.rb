@@ -32,35 +32,37 @@ module RubyLsp
 
       sig { override.returns(T::Array[Interface::WorkspaceSymbol]) }
       def perform
-        @index.fuzzy_search(@query).filter_map do |entry|
-          # If the project is using Sorbet, we let Sorbet handle symbols defined inside the project itself and RBIs, but
-          # we still return entries defined in gems to allow developers to jump directly to the source
-          file_path = entry.file_path
-          next if @global_state.typechecker && not_in_dependencies?(file_path)
+        @index.fuzzy_search(@query).flat_map do |entry|
+          entry.declarations.filter_map do |declaration|
+            # If the project is using Sorbet, we let Sorbet handle symbols defined inside the project itself and RBIs,
+            # but we still return entries defined in gems to allow developers to jump directly to the source
+            file_path = declaration.file_path
+            next if @global_state.typechecker && not_in_dependencies?(file_path)
 
-          # We should never show private symbols when searching the entire workspace
-          next if entry.visibility == :private
+            # We should never show private symbols when searching the entire workspace
+            next if entry.visibility == :private
 
-          kind = kind_for_entry(entry)
-          loc = entry.location
+            kind = kind_for_entry(entry)
+            loc = declaration.location
 
-          # We use the namespace as the container name, but we also use the full name as the regular name. The reason we
-          # do this is to allow people to search for fully qualified names (e.g.: `Foo::Bar`). If we only included the
-          # short name `Bar`, then searching for `Foo::Bar` would not return any results
-          *container, _short_name = entry.name.split("::")
+            # We use the namespace as the container name, but we also use the full name as the regular name. The reason
+            # we do this is to allow people to search for fully qualified names (e.g.: `Foo::Bar`). If we only included
+            # the short name `Bar`, then searching for `Foo::Bar` would not return any results
+            *container, _short_name = entry.name.split("::")
 
-          Interface::WorkspaceSymbol.new(
-            name: entry.name,
-            container_name: T.must(container).join("::"),
-            kind: kind,
-            location: Interface::Location.new(
-              uri: URI::Generic.from_path(path: file_path).to_s,
-              range:  Interface::Range.new(
-                start: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column),
-                end: Interface::Position.new(line: loc.end_line - 1, character: loc.end_column),
+            Interface::WorkspaceSymbol.new(
+              name: entry.name,
+              container_name: T.must(container).join("::"),
+              kind: kind,
+              location: Interface::Location.new(
+                uri: URI::Generic.from_path(path: file_path).to_s,
+                range:  Interface::Range.new(
+                  start: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column),
+                  end: Interface::Position.new(line: loc.end_line - 1, character: loc.end_column),
+                ),
               ),
-            ),
-          )
+            )
+          end
         end
       end
 

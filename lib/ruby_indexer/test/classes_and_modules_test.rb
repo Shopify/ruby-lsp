@@ -161,10 +161,10 @@ module RubyIndexer
         class Bar; end
       RUBY
 
-      foo_entry = @index.get_constant("Foo").first
+      foo_entry = @index.get_constant("Foo")
       assert_equal("This is a Foo comment\nThis is another Foo comment", foo_entry.comments.join("\n"))
 
-      bar_entry = @index.get_constant("Bar").first
+      bar_entry = @index.get_constant("Bar")
       assert_equal("This Bar comment has 1 line padding", bar_entry.comments.join("\n"))
     end
 
@@ -174,7 +174,7 @@ module RubyIndexer
         class Foo
         end
       RUBY
-      assert(@index.get_constant("Foo").first)
+      assert(@index.get_constant("Foo"))
     end
 
     def test_comments_can_be_attached_to_a_namespaced_class
@@ -187,10 +187,10 @@ module RubyIndexer
         end
       RUBY
 
-      foo_entry = @index.get_constant("Foo").first
+      foo_entry = @index.get_constant("Foo")
       assert_equal("This is a Foo comment\nThis is another Foo comment", foo_entry.comments.join("\n"))
 
-      bar_entry = @index.get_constant("Foo::Bar").first
+      bar_entry = @index.get_constant("Foo::Bar")
       assert_equal("This is a Bar comment", bar_entry.comments.join("\n"))
     end
 
@@ -203,11 +203,12 @@ module RubyIndexer
         class Foo; end
       RUBY
 
-      first_foo_entry = @index.get_constant("Foo")[0]
-      assert_equal("This is a Foo comment", first_foo_entry.comments.join("\n"))
+      foo_entry = @index.get_constant("Foo")
+      declaration = T.must(foo_entry.declarations[0])
+      assert_equal("This is a Foo comment", declaration.comments.join("\n"))
 
-      second_foo_entry = @index.get_constant("Foo")[1]
-      assert_equal("This is another Foo comment", second_foo_entry.comments.join("\n"))
+      declaration = T.must(foo_entry.declarations[1])
+      assert_equal("This is another Foo comment", declaration.comments.join("\n"))
     end
 
     def test_comments_removes_the_leading_pound_and_space
@@ -219,11 +220,13 @@ module RubyIndexer
         class Bar; end
       RUBY
 
-      first_foo_entry = @index.get_constant("Foo")[0]
-      assert_equal("This is a Foo comment", first_foo_entry.comments.join("\n"))
+      foo_entry = @index.get_constant("Foo")
+      declaration = T.must(foo_entry.declarations[0])
+      assert_equal("This is a Foo comment", declaration.comments.join("\n"))
 
-      second_foo_entry = @index.get_constant("Bar")[0]
-      assert_equal("This is a Bar comment", second_foo_entry.comments.join("\n"))
+      bar_entry = @index.get_constant("Bar")
+      declaration = T.must(bar_entry.declarations[0])
+      assert_equal("This is a Bar comment", declaration.comments.join("\n"))
     end
 
     def test_private_class_and_module_indexing
@@ -239,13 +242,13 @@ module RubyIndexer
         end
       RUBY
 
-      b_const = @index.get_constant("A::B").first
+      b_const = @index.get_constant("A::B")
       assert_equal(:private, b_const.visibility)
 
-      c_const = @index.get_constant("A::C").first
+      c_const = @index.get_constant("A::C")
       assert_equal(:private, c_const.visibility)
 
-      d_const = @index.get_constant("A::D").first
+      d_const = @index.get_constant("A::D")
       assert_equal(:public, d_const.visibility)
     end
 
@@ -269,16 +272,16 @@ module RubyIndexer
         end
       RUBY
 
-      foo = T.must(@index.get_constant("Foo").first)
+      foo = T.must(@index.get_constant("Foo"))
       assert_equal("Bar", foo.parent_class)
 
-      baz = T.must(@index.get_constant("Baz").first)
+      baz = T.must(@index.get_constant("Baz"))
       assert_nil(baz.parent_class)
 
-      qux = T.must(@index.get_constant("Something::Qux").first)
+      qux = T.must(@index.get_constant("Something::Qux"))
       assert_equal("::Baz", qux.parent_class)
 
-      final_thing = T.must(@index.get_constant("FinalThing").first)
+      final_thing = T.must(@index.get_constant("FinalThing"))
       assert_equal("Something::Baz", final_thing.parent_class)
     end
 
@@ -318,13 +321,13 @@ module RubyIndexer
         end
       RUBY
 
-      foo = T.must(@index.get_constant("Foo")[0])
+      foo = T.must(@index.get_constant("Foo"))
       assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.included_modules)
 
-      qux = T.must(@index.get_constant("Foo::Qux")[0])
+      qux = T.must(@index.get_constant("Foo::Qux"))
       assert_equal(["Corge", "Corge", "Baz"], qux.included_modules)
 
-      constant_path_references = T.must(@index.get_constant("ConstantPathReferences")[0])
+      constant_path_references = T.must(@index.get_constant("ConstantPathReferences"))
       assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.included_modules)
     end
 
@@ -364,13 +367,13 @@ module RubyIndexer
         end
       RUBY
 
-      foo = T.must(@index.get_constant("Foo")[0])
+      foo = T.must(@index.get_constant("Foo"))
       assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.prepended_modules)
 
-      qux = T.must(@index.get_constant("Foo::Qux")[0])
+      qux = T.must(@index.get_constant("Foo::Qux"))
       assert_equal(["Corge", "Corge", "Baz"], qux.prepended_modules)
 
-      constant_path_references = T.must(@index.get_constant("ConstantPathReferences")[0])
+      constant_path_references = T.must(@index.get_constant("ConstantPathReferences"))
       assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.prepended_modules)
     end
   end

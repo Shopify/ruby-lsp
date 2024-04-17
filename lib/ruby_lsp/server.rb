@@ -554,10 +554,16 @@ module RubyLsp
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_completion_item_resolve(message)
-      send_message(Result.new(
-        id: message[:id],
-        response: Requests::CompletionResolve.new(@global_state, message[:params]).perform,
-      ))
+      response = Requests::CompletionResolve.new(@global_state, message[:params]).perform
+      send_message(Result.new(id: message[:id], response: response))
+
+      unless response
+        send_message(
+          Notification.log_trace(
+            "Tried to resolve a completion item for an unknown receiver. This shouldn't happen",
+          ),
+        )
+      end
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }

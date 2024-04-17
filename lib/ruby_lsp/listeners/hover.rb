@@ -93,10 +93,10 @@ module RubyLsp
         message = node.message
         return unless message
 
-        methods = @index.resolve_method(message, @nesting.join("::"))
-        return unless methods
+        target_method = @index.resolve_method(message, @nesting.join("::"))
+        return unless target_method
 
-        categorized_markdown_from_index_entries(message, methods).each do |category, content|
+        categorized_markdown_from_index_entries(message, target_method).each do |category, content|
           @response_builder.push(content, category: category)
         end
       end
@@ -105,15 +105,14 @@ module RubyLsp
 
       sig { params(name: String, location: Prism::Location).void }
       def generate_hover(name, location)
-        entries = @index.resolve_constant(name, @nesting)
-        return unless entries
+        entry = @index.resolve_constant(name, @nesting)
+        return unless entry
 
         # We should only show hover for private constants if the constant is defined in the same namespace as the
         # reference
-        first_entry = T.must(entries.first)
-        return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{name}"
+        return if entry.visibility == :private && entry.name != "#{@nesting.join("::")}::#{name}"
 
-        categorized_markdown_from_index_entries(name, entries).each do |category, content|
+        categorized_markdown_from_index_entries(name, entry).each do |category, content|
           @response_builder.push(content, category: category)
         end
       end

@@ -42,13 +42,13 @@ module RubyLsp
         return if name.nil?
 
         candidates = @index.prefix_search_constants(name, @nesting)
-        candidates.each do |entries|
-          complete_name = T.must(entries.first).name
+        candidates.each do |entry|
+          complete_name = entry.name
           @response_builder << build_entry_completion(
             complete_name,
             name,
             node,
-            entries,
+            entry,
             top_level?(complete_name),
           )
         end
@@ -73,22 +73,21 @@ module RubyLsp
         # order to find which possible constants match the desired search
         *namespace, incomplete_name = name.split("::")
         aliased_namespace = T.must(namespace).join("::")
-        namespace_entries = @index.resolve_constant(aliased_namespace, @nesting)
-        return unless namespace_entries
+        namespace_entry = @index.resolve_constant(aliased_namespace, @nesting)
+        return unless namespace_entry
 
-        real_namespace = @index.follow_aliased_namespace(T.must(namespace_entries.first).name)
+        real_namespace = @index.follow_aliased_namespace(namespace_entry.name)
 
         candidates = @index.prefix_search_constants(
           "#{real_namespace}::#{incomplete_name}",
           top_level_reference ? [] : @nesting,
         )
-        candidates.each do |entries|
+        candidates.each do |entry|
           # The only time we may have a private constant reference from outside of the namespace is if we're dealing
           # with ConstantPath and the entry name doesn't start with the current nesting
-          first_entry = T.must(entries.first)
-          next if first_entry.visibility == :private && !first_entry.name.start_with?("#{@nesting}::")
+          next if entry.visibility == :private && !entry.name.start_with?("#{@nesting}::")
 
-          constant_name = T.must(first_entry.name.split("::").last)
+          constant_name = T.must(entry.name.split("::").last)
 
           full_name = aliased_namespace.empty? ? constant_name : "#{aliased_namespace}::#{constant_name}"
 
@@ -96,8 +95,8 @@ module RubyLsp
             full_name,
             name,
             node,
-            entries,
-            top_level_reference || top_level?(T.must(entries.first).name),
+            entry,
+            top_level_reference || top_level?(entry.name),
           )
         end
       end
@@ -166,16 +165,14 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode, name: String).void }
       def complete_self_receiver_method(node, name)
-        receiver_entries = @index.get_constant(@nesting.join("::"))
-        return unless receiver_entries
-
-        receiver = T.must(receiver_entries.first)
+        receiver = @index.get_constant(@nesting.join("::"))
+        return unless receiver
 
         @index.prefix_search_methods(name).each do |entries|
-          entry = entries.find { |e| e.is_a?(RubyIndexer::Entry::Member) && e.owner&.name == receiver.name }
+          entry = entries.find { |e| e.owner&.name == receiver.name }
           next unless entry
 
-          @response_builder << build_method_completion(T.cast(entry, RubyIndexer::Entry::Member), node)
+          @response_builder << build_method_completion(entry, node)
         end
       end
 
@@ -187,6 +184,7 @@ module RubyLsp
       end
       def build_method_completion(entry, node)
         name = entry.name
+        declarations = T.cast(entry.declarations, T::Array[RubyIndexer::Entry::MemberDeclaration])
 
         Interface::CompletionItem.new(
           label: name,
@@ -194,13 +192,16 @@ module RubyLsp
           text_edit: Interface::TextEdit.new(range: range_from_location(T.must(node.message_loc)), new_text: name),
           kind: Constant::CompletionItemKind::METHOD,
           label_details: Interface::CompletionItemLabelDetails.new(
-            detail: "(#{entry.parameters.map(&:decorated_name).join(", ")})",
-            description: entry.file_name,
+            detail: "(#{T.must(declarations.first).parameters.map(&:decorated_name).join(", ")})",
+            description: declarations.map(&:file_name).join(","),
           ),
           documentation: Interface::MarkupContent.new(
             kind: "markdown",
             value: markdown_from_index_entries(name, entry),
           ),
+          data: {
+            owner: entry.owner&.name,
+          },
         )
       end
 
@@ -224,13 +225,12 @@ module RubyLsp
           real_name: String,
           incomplete_name: String,
           node: Prism::Node,
-          entries: T::Array[RubyIndexer::Entry],
+          entry: RubyIndexer::Entry,
           top_level: T::Boolean,
         ).returns(Interface::CompletionItem)
       end
-      def build_entry_completion(real_name, incomplete_name, node, entries, top_level)
-        first_entry = T.must(entries.first)
-        kind = case first_entry
+      def build_entry_completion(real_name, incomplete_name, node, entry, top_level)
+        kind = case entry
         when RubyIndexer::Entry::Class
           Constant::CompletionItemKind::CLASS
         when RubyIndexer::Entry::Module

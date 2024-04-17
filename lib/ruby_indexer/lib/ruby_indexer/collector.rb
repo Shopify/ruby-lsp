@@ -163,25 +163,23 @@ module RubyIndexer
     def handle_def_node(node)
       method_name = node.name.to_s
       comments = collect_comments(node)
-      case node.receiver
-      when nil
-        @index << Entry::InstanceMethod.new(
-          method_name,
-          @file_path,
-          node.location,
-          comments,
-          node.parameters,
-          @current_owner,
-        )
-      when Prism::SelfNode
-        @index << Entry::SingletonMethod.new(
-          method_name,
-          @file_path,
-          node.location,
-          comments,
-          node.parameters,
-          @current_owner,
-        )
+      declaration = Entry::MemberDeclaration.new(list_params(node.parameters), @file_path, node.location, comments)
+      existing_entry = @current_owner && @index.resolve_method(method_name, @current_owner.name)
+
+      entry = if existing_entry
+        existing_entry
+      else
+        case node.receiver
+        when nil
+          Entry::InstanceMethod.new(method_name, @current_owner)
+        when Prism::SelfNode
+          Entry::SingletonMethod.new(method_name, @current_owner)
+        end
+      end
+
+      if entry
+        @index.add_new_entry(entry, @file_path)
+        entry.add_declaration(declaration)
       end
     end
 
@@ -206,8 +204,8 @@ module RubyIndexer
 
       # The private_constant method does not resolve the constant name. It always points to a constant that needs to
       # exist in the current namespace
-      entries = @index.get_constant(fully_qualify_name(name))
-      entries&.each { |entry| entry.visibility = :private }
+      entry = @index.get_constant(fully_qualify_name(name))
+      entry&.visibility = :private
     end
 
     sig do
@@ -231,25 +229,34 @@ module RubyIndexer
     def add_constant(node, name, value = nil)
       value = node.value unless node.is_a?(Prism::ConstantTargetNode) || node.is_a?(Prism::ConstantPathTargetNode)
       comments = collect_comments(node)
+      entry = @index.get_constant(name)
 
-      @index << case value
-      when Prism::ConstantReadNode, Prism::ConstantPathNode
-        Entry::UnresolvedAlias.new(value.slice, @stack.dup, name, @file_path, node.location, comments)
-      when Prism::ConstantWriteNode, Prism::ConstantAndWriteNode, Prism::ConstantOrWriteNode,
+      if entry
+        @index.add_file_path(entry, @file_path)
+      else
+        entry = case value
+        when Prism::ConstantReadNode, Prism::ConstantPathNode
+          Entry::UnresolvedAlias.new(value.slice, @stack.dup, name)
+        when Prism::ConstantWriteNode, Prism::ConstantAndWriteNode, Prism::ConstantOrWriteNode,
         Prism::ConstantOperatorWriteNode
 
-        # If the right hand side is another constant assignment, we need to visit it because that constant has to be
-        # indexed too
-        @queue.prepend(value)
-        Entry::UnresolvedAlias.new(value.name.to_s, @stack.dup, name, @file_path, node.location, comments)
-      when Prism::ConstantPathWriteNode, Prism::ConstantPathOrWriteNode, Prism::ConstantPathOperatorWriteNode,
+          # If the right hand side is another constant assignment, we need to visit it because that constant has to be
+          # indexed too
+          @queue.prepend(value)
+          Entry::UnresolvedAlias.new(value.name.to_s, @stack.dup, name)
+        when Prism::ConstantPathWriteNode, Prism::ConstantPathOrWriteNode, Prism::ConstantPathOperatorWriteNode,
         Prism::ConstantPathAndWriteNode
 
-        @queue.prepend(value)
-        Entry::UnresolvedAlias.new(value.target.slice, @stack.dup, name, @file_path, node.location, comments)
-      else
-        Entry::Constant.new(name, @file_path, node.location, comments)
+          @queue.prepend(value)
+          Entry::UnresolvedAlias.new(value.target.slice, @stack.dup, name)
+        else
+          Entry::Constant.new(name)
+        end
+
+        @index.add_new_entry(entry, @file_path)
       end
+
+      entry.add_declaration(Entry::Declaration.new(@file_path, node.location, comments))
     end
 
     sig { params(node: Prism::ModuleNode).void }
@@ -261,8 +268,21 @@ module RubyIndexer
       end
 
       comments = collect_comments(node)
-      @current_owner = Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments)
-      @index << @current_owner
+
+      fully_qualified_name = fully_qualify_name(name)
+      existing_entry = @index.get_constant(fully_qualified_name)
+
+      # If the user has defined the same constant as a namespace and a constant, then we end up losing the original
+      # definition. This is an error in Ruby, but we should still try to handle it gracefully
+      @current_owner = existing_entry.is_a?(Entry::Namespace) ? existing_entry : Entry::Module.new(fully_qualified_name)
+
+      if existing_entry
+        @index.add_file_path(@current_owner, @file_path)
+      else
+        @index.add_new_entry(@current_owner, @file_path)
+      end
+
+      @current_owner.add_declaration(Entry::Declaration.new(@file_path, node.location, comments))
       @stack << name
       @queue.prepend(node.body, LEAVE_EVENT)
     end
@@ -284,14 +304,24 @@ module RubyIndexer
         superclass.slice
       end
 
-      @current_owner = Entry::Class.new(
-        fully_qualify_name(name),
-        @file_path,
-        node.location,
-        comments,
-        parent_class,
-      )
-      @index << @current_owner
+      fully_qualified_name = fully_qualify_name(name)
+      existing_entry = @index.get_constant(fully_qualified_name)
+
+      # If the user has defined the same constant as a namespace and a constant, then we end up losing the original
+      # definition. This is an error in Ruby, but we should still try to handle it gracefully
+      @current_owner = if existing_entry.is_a?(Entry::Namespace)
+        existing_entry
+      else
+        Entry::Class.new(fully_qualified_name, parent_class)
+      end
+
+      if existing_entry
+        @index.add_file_path(@current_owner, @file_path)
+      else
+        @index.add_new_entry(@current_owner, @file_path)
+      end
+
+      @current_owner.add_declaration(Entry::Declaration.new(@file_path, node.location, comments))
       @stack << name
       @queue.prepend(node.body, LEAVE_EVENT)
     end
@@ -350,8 +380,37 @@ module RubyIndexer
 
         next unless name && loc
 
-        @index << Entry::Accessor.new(name, @file_path, loc, comments, @current_owner) if reader
-        @index << Entry::Accessor.new("#{name}=", @file_path, loc, comments, @current_owner) if writer
+        if reader
+          entry = @current_owner && @index.resolve_method(name, @current_owner.name)
+
+          if entry
+            @index.add_file_path(entry, @file_path)
+          else
+            entry = Entry::Accessor.new(name, @current_owner)
+            @index.add_new_entry(entry, @file_path)
+          end
+
+          entry.add_declaration(Entry::MemberDeclaration.new([], @file_path, loc, comments))
+        end
+
+        next unless writer
+
+        writer_name = "#{name}="
+        entry = @current_owner && @index.resolve_method(writer_name, @current_owner.name)
+
+        if entry
+          @index.add_file_path(entry, @file_path)
+        else
+          entry = Entry::Accessor.new(writer_name, @current_owner)
+          @index.add_new_entry(entry, @file_path)
+        end
+
+        entry.add_declaration(Entry::MemberDeclaration.new(
+          [Entry::RequiredParameter.new(name: name.to_sym)],
+          @file_path,
+          loc,
+          comments,
+        ))
       end
     end
 
@@ -383,6 +442,90 @@ module RubyIndexer
       end
       collection = operation == :included_modules ? @current_owner.included_modules : @current_owner.prepended_modules
       collection.concat(names)
+    end
+
+    sig { params(parameters_node: T.nilable(Prism::ParametersNode)).returns(T::Array[Entry::Parameter]) }
+    def list_params(parameters_node)
+      return [] unless parameters_node
+
+      parameters = []
+
+      parameters_node.requireds.each do |required|
+        name = parameter_name(required)
+        next unless name
+
+        parameters << Entry::RequiredParameter.new(name: name)
+      end
+
+      parameters_node.optionals.each do |optional|
+        name = parameter_name(optional)
+        next unless name
+
+        parameters << Entry::OptionalParameter.new(name: name)
+      end
+
+      parameters_node.keywords.each do |keyword|
+        name = parameter_name(keyword)
+        next unless name
+
+        case keyword
+        when Prism::RequiredKeywordParameterNode
+          parameters << Entry::KeywordParameter.new(name: name)
+        when Prism::OptionalKeywordParameterNode
+          parameters << Entry::OptionalKeywordParameter.new(name: name)
+        end
+      end
+
+      rest = parameters_node.rest
+
+      if rest.is_a?(Prism::RestParameterNode)
+        rest_name = rest.name || Entry::RestParameter::DEFAULT_NAME
+        parameters << Entry::RestParameter.new(name: rest_name)
+      end
+
+      keyword_rest = parameters_node.keyword_rest
+
+      if keyword_rest.is_a?(Prism::KeywordRestParameterNode)
+        keyword_rest_name = parameter_name(keyword_rest) || Entry::KeywordRestParameter::DEFAULT_NAME
+        parameters << Entry::KeywordRestParameter.new(name: keyword_rest_name)
+      end
+
+      parameters_node.posts.each do |post|
+        name = parameter_name(post)
+        next unless name
+
+        parameters << Entry::RequiredParameter.new(name: name)
+      end
+
+      block = parameters_node.block
+      parameters << Entry::BlockParameter.new(name: block.name || Entry::BlockParameter::DEFAULT_NAME) if block
+
+      parameters
+    end
+
+    sig { params(node: T.nilable(Prism::Node)).returns(T.nilable(Symbol)) }
+    def parameter_name(node)
+      case node
+      when Prism::RequiredParameterNode, Prism::OptionalParameterNode,
+        Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode,
+        Prism::RestParameterNode, Prism::KeywordRestParameterNode
+        node.name
+      when Prism::MultiTargetNode
+        names = node.lefts.map { |parameter_node| parameter_name(parameter_node) }
+
+        rest = node.rest
+        if rest.is_a?(Prism::SplatNode)
+          name = rest.expression&.slice
+          names << (rest.operator == "*" ? "*#{name}".to_sym : name&.to_sym)
+        end
+
+        names << nil if rest.is_a?(Prism::ImplicitRestNode)
+
+        names.concat(node.rights.map { |parameter_node| parameter_name(parameter_node) })
+
+        names_with_commas = names.join(", ")
+        :"(#{names_with_commas})"
+      end
     end
   end
 end
