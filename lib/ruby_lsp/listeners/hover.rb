@@ -105,7 +105,7 @@ module RubyLsp
 
       sig { params(name: String, location: Prism::Location).void }
       def generate_hover(name, location)
-        entries = @index.resolve(name, @nesting)
+        entries = @index.resolve_constant(name, @nesting)
         return unless entries
 
         # We should only show hover for private constants if the constant is defined in the same namespace as the

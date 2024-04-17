@@ -16,7 +16,7 @@ module RubyIndexer
     end
 
     def assert_entry(expected_name, type, expected_location)
-      entries = @index[expected_name]
+      entries = @index.get_constant(expected_name) || @index.get_method(expected_name)
       refute_empty(entries, "Expected #{expected_name} to be indexed")
 
       entry = entries.first
@@ -31,16 +31,18 @@ module RubyIndexer
     end
 
     def refute_entry(expected_name)
-      entries = @index[expected_name]
+      entries = @index.get_constant(expected_name) || @index.get_method(expected_name)
       assert_nil(entries, "Expected #{expected_name} to not be indexed")
     end
 
     def assert_no_entries
-      assert_empty(@index.instance_variable_get(:@entries), "Expected nothing to be indexed")
+      assert_empty(@index.instance_variable_get(:@constant_entries), "Expected nothing to be indexed")
+      assert_empty(@index.instance_variable_get(:@method_entries), "Expected nothing to be indexed")
     end
 
     def assert_no_entry(entry)
-      refute(@index.instance_variable_get(:@entries).key?(entry), "Expected '#{entry}' to not be indexed")
+      refute(@index.instance_variable_get(:@constant_entries).key?(entry), "Expected '#{entry}' to not be indexed")
+      refute(@index.instance_variable_get(:@method_entries).key?(entry), "Expected '#{entry}' to not be indexed")
     end
   end
 end

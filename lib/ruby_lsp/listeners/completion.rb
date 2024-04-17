@@ -41,7 +41,7 @@ module RubyLsp
         name = constant_name(node)
         return if name.nil?
 
-        candidates = @index.prefix_search(name, @nesting)
+        candidates = @index.prefix_search_constants(name, @nesting)
         candidates.each do |entries|
           complete_name = T.must(entries.first).name
           @response_builder << build_entry_completion(
@@ -73,12 +73,12 @@ module RubyLsp
         # order to find which possible constants match the desired search
         *namespace, incomplete_name = name.split("::")
         aliased_namespace = T.must(namespace).join("::")
-        namespace_entries = @index.resolve(aliased_namespace, @nesting)
+        namespace_entries = @index.resolve_constant(aliased_namespace, @nesting)
         return unless namespace_entries
 
         real_namespace = @index.follow_aliased_namespace(T.must(namespace_entries.first).name)
 
-        candidates = @index.prefix_search(
+        candidates = @index.prefix_search_constants(
           "#{real_namespace}::#{incomplete_name}",
           top_level_reference ? [] : @nesting,
         )
@@ -166,12 +166,12 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode, name: String).void }
       def complete_self_receiver_method(node, name)
-        receiver_entries = @index[@nesting.join("::")]
+        receiver_entries = @index.get_constant(@nesting.join("::"))
         return unless receiver_entries
 
         receiver = T.must(receiver_entries.first)
 
-        @index.prefix_search(name).each do |entries|
+        @index.prefix_search_methods(name).each do |entries|
           entry = entries.find { |e| e.is_a?(RubyIndexer::Entry::Member) && e.owner&.name == receiver.name }
           next unless entry
 
@@ -269,7 +269,7 @@ module RubyLsp
 
           # If a different entry exists for the shortened name, then there's a conflict and we should not shorten it
           conflict_name = "#{@nesting.join("::")}::#{shortened_name}"
-          break if real_name != conflict_name && @index[conflict_name]
+          break if real_name != conflict_name && @index.get_constant(conflict_name)
 
           insertion_text = shortened_name
 
@@ -314,7 +314,7 @@ module RubyLsp
           full_name = prefix.empty? ? entry_name : "#{prefix}::#{entry_name}"
           next if full_name == entry_name
 
-          return true if @index[full_name]
+          return true if @index.get_constant(full_name)
         end
 
         false

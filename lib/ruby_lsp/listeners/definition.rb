@@ -74,7 +74,7 @@ module RubyLsp
         else
           # If the method doesn't have a receiver, then we provide a few candidates to jump to
           # But we don't want to provide too many candidates, as it can be overwhelming
-          @index[message]&.take(MAX_NUMBER_OF_DEFINITION_CANDIDATES_WITHOUT_RECEIVER)
+          @index.get_method(message)&.take(MAX_NUMBER_OF_DEFINITION_CANDIDATES_WITHOUT_RECEIVER)
         end
 
         return unless methods
@@ -138,7 +138,7 @@ module RubyLsp
 
       sig { params(value: String).void }
       def find_in_index(value)
-        entries = @index.resolve(value, @nesting)
+        entries = @index.resolve_constant(value, @nesting)
         return unless entries
 
         # We should only allow jumping to the definition of private constants if the constant is defined in the same

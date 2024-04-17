@@ -39,7 +39,14 @@ module RubyLsp
       sig { override.returns(Interface::CompletionItem) }
       def perform
         label = @item[:label]
-        entries = @index[label] || []
+        entries = case @item[:kind]
+        when Constant::CompletionItemKind::CLASS, Constant::CompletionItemKind::MODULE,
+          Constant::CompletionItemKind::CONSTANT
+          @index.get_constant(label) || []
+        else
+          @index.get_method(label) || []
+        end
+
         Interface::CompletionItem.new(
           label: label,
           label_details: Interface::CompletionItemLabelDetails.new(

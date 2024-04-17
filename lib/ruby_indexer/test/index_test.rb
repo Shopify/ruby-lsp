@@ -15,11 +15,11 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index["Foo"]
+      entries = @index.get_constant("Foo")
       assert_equal(2, entries.length)
 
       @index.delete(IndexablePath.new(nil, "/fake/path/other_foo.rb"))
-      entries = @index["Foo"]
+      entries = @index.get_constant("Foo")
       assert_equal(1, entries.length)
     end
 
@@ -29,11 +29,11 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index["Foo"]
+      entries = @index.get_constant("Foo")
       assert_equal(1, entries.length)
 
       @index.delete(IndexablePath.new(nil, "/fake/path/foo.rb"))
-      entries = @index["Foo"]
+      entries = @index.get_constant("Foo")
       assert_nil(entries)
     end
 
@@ -52,23 +52,23 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index.resolve("Something", ["Foo", "Baz"])
+      entries = @index.resolve_constant("Something", ["Foo", "Baz"])
       refute_empty(entries)
       assert_equal("Foo::Baz::Something", entries.first.name)
 
-      entries = @index.resolve("Bar", ["Foo"])
+      entries = @index.resolve_constant("Bar", ["Foo"])
       refute_empty(entries)
       assert_equal("Foo::Bar", entries.first.name)
 
-      entries = @index.resolve("Bar", ["Foo", "Baz"])
+      entries = @index.resolve_constant("Bar", ["Foo", "Baz"])
       refute_empty(entries)
       assert_equal("Foo::Bar", entries.first.name)
 
-      entries = @index.resolve("Foo::Bar", ["Foo", "Baz"])
+      entries = @index.resolve_constant("Foo::Bar", ["Foo", "Baz"])
       refute_empty(entries)
       assert_equal("Foo::Bar", entries.first.name)
 
-      assert_nil(@index.resolve("DoesNotExist", ["Foo"]))
+      assert_nil(@index.resolve_constant("DoesNotExist", ["Foo"]))
     end
 
     def test_accessing_with_colon_colon_prefix
@@ -86,7 +86,7 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index["::Foo::Baz::Something"]
+      entries = @index.get_constant("::Foo::Baz::Something")
       refute_empty(entries)
       assert_equal("Foo::Baz::Something", entries.first.name)
     end
@@ -108,7 +108,7 @@ module RubyIndexer
 
       result = @index.fuzzy_search("Bar")
       assert_equal(1, result.length)
-      assert_equal(@index["Bar"].first, result.first)
+      assert_equal(@index.get_constant("Bar").first, result.first)
 
       result = @index.fuzzy_search("foobarsomeking")
       assert_equal(5, result.length)
@@ -152,10 +152,10 @@ module RubyIndexer
         end
       RUBY
 
-      results = @index.prefix_search("Foo", []).map { |entries| entries.map(&:name) }
+      results = @index.prefix_search_constants("Foo", []).map { |entries| entries.map(&:name) }
       assert_equal([["Foo::Bar", "Foo::Bar"], ["Foo::Baz"]], results)
 
-      results = @index.prefix_search("Ba", ["Foo"]).map { |entries| entries.map(&:name) }
+      results = @index.prefix_search_constants("Ba", ["Foo"]).map { |entries| entries.map(&:name) }
       assert_equal([["Foo::Bar", "Foo::Bar"], ["Foo::Baz"]], results)
     end
 
@@ -168,12 +168,12 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index.resolve("::Foo::Bar", [])
+      entries = @index.resolve_constant("::Foo::Bar", [])
       refute_nil(entries)
 
       assert_equal("Foo::Bar", entries.first.name)
 
-      entries = @index.resolve("::Bar", ["Foo"])
+      entries = @index.resolve_constant("::Bar", ["Foo"])
       refute_nil(entries)
 
       assert_equal("Bar", entries.first.name)
@@ -188,7 +188,7 @@ module RubyIndexer
         end
       RUBY
 
-      entry = @index.resolve("INFINITY", ["Foo", "Float"]).first
+      entry = @index.resolve_constant("INFINITY", ["Foo", "Float"]).first
       refute_nil(entry)
 
       assert_instance_of(Entry::UnresolvedAlias, entry)
@@ -291,7 +291,7 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index.prefix_search("ba")
+      entries = @index.prefix_search_methods("ba")
       refute_empty(entries)
 
       entry = T.must(entries.first).first
@@ -306,12 +306,14 @@ module RubyIndexer
         @index.index_single(indexable_path)
       end
 
-      refute_empty(@index.instance_variable_get(:@entries))
+      refute_empty(@index.instance_variable_get(:@constant_entries))
+      refute_empty(@index.instance_variable_get(:@method_entries))
     end
 
     def test_index_single_does_not_fail_for_non_existing_file
       @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"))
-      assert_empty(@index.instance_variable_get(:@entries))
+      assert_empty(@index.instance_variable_get(:@constant_entries))
+      assert_empty(@index.instance_variable_get(:@method_entries))
     end
   end
 end

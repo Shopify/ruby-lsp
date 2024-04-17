@@ -19,6 +19,7 @@ class CompletionResolveTest < Minitest::Test
     with_server(source, stub_no_typechecker: true) do |server, _uri|
       server.process_message(id: 1, method: "completionItem/resolve", params: {
         label: "Foo",
+        kind: Constant::CompletionItemKind::CLASS,
       })
 
       result = server.pop_response.response
@@ -30,7 +31,7 @@ class CompletionResolveTest < Minitest::Test
         ),
         documentation: Interface::MarkupContent.new(
           kind: "markdown",
-          value: markdown_from_index_entries("Foo", T.must(server.global_state.index["Foo"])),
+          value: markdown_from_index_entries("Foo", T.must(server.global_state.index.get_constant("Foo"))),
         ),
       )
       assert_match(/This is a class that does things/, result.documentation.value)

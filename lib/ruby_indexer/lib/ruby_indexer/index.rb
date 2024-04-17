@@ -12,15 +12,25 @@ module RubyIndexer
 
     sig { void }
     def initialize
-      # Holds all entries in the index using the following format:
+      # Holds all constant entries in the index using the following format:
       # {
       #  "Foo" => [#<Entry::Class>, #<Entry::Class>],
       #  "Foo::Bar" => [#<Entry::Class>],
       # }
-      @entries = T.let({}, T::Hash[String, T::Array[Entry]])
+      @constant_entries = T.let({}, T::Hash[String, T::Array[Entry]])
 
       # Holds all entries in the index using a prefix tree for searching based on prefixes to provide autocompletion
-      @entries_tree = T.let(PrefixTree[T::Array[Entry]].new, PrefixTree[T::Array[Entry]])
+      @constant_entries_tree = T.let(PrefixTree[T::Array[Entry]].new, PrefixTree[T::Array[Entry]])
+
+      # Holds all method entries in the index using the following format:
+      # {
+      #  "method_name" => [#<Entry::Method>, #<Entry::Method>],
+      #  "foo" => [#<Entry::Accessor>],
+      # }
+      @method_entries = T.let({}, T::Hash[String, T::Array[Entry]])
+
+      # Holds all entries in the index using a prefix tree for searching based on prefixes to provide autocompletion
+      @method_entries_tree = T.let(PrefixTree[T::Array[Entry]].new, PrefixTree[T::Array[Entry]])
 
       # Holds references to where entries where discovered so that we can easily delete them
       # {
@@ -38,8 +48,16 @@ module RubyIndexer
       # For each constant discovered in `path`, delete the associated entry from the index. If there are no entries
       # left, delete the constant from the index.
       @files_to_entries[indexable.full_path]&.each do |entry|
+        if entry.is_a?(Entry::Member)
+          entry_set = @method_entries
+          entry_tree = @method_entries_tree
+        else
+          entry_set = @constant_entries
+          entry_tree = @constant_entries_tree
+        end
+
         name = entry.name
-        entries = @entries[name]
+        entries = entry_set[name]
         next unless entries
 
         # Delete the specific entry from the list for this name
@@ -48,10 +66,10 @@ module RubyIndexer
         # If all entries were deleted, then remove the name from the hash and from the prefix tree. Otherwise, update
         # the prefix tree with the current entries
         if entries.empty?
-          @entries.delete(name)
-          @entries_tree.delete(name)
+          entry_set.delete(name)
+          entry_tree.delete(name)
         else
-          @entries_tree.insert(name, entries)
+          entry_tree.insert(name, entries)
         end
       end
 
@@ -64,15 +82,28 @@ module RubyIndexer
     sig { params(entry: Entry).void }
     def <<(entry)
       name = entry.name
-
-      (@entries[name] ||= []) << entry
       (@files_to_entries[entry.file_path] ||= []) << entry
-      @entries_tree.insert(name, T.must(@entries[name]))
+
+      if entry.is_a?(Entry::Member)
+        entry_set = @method_entries
+        entry_tree = @method_entries_tree
+      else
+        entry_set = @constant_entries
+        entry_tree = @constant_entries_tree
+      end
+
+      (entry_set[name] ||= []) << entry
+      entry_tree.insert(name, T.must(entry_set[name]))
     end
 
     sig { params(fully_qualified_name: String).returns(T.nilable(T::Array[Entry])) }
-    def [](fully_qualified_name)
-      @entries[fully_qualified_name.delete_prefix("::")]
+    def get_constant(fully_qualified_name)
+      @constant_entries[fully_qualified_name.delete_prefix("::")]
+    end
+
+    sig { params(name: String).returns(T.nilable(T::Array[Entry])) }
+    def get_method(name)
+      @method_entries[name]
     end
 
     sig { params(query: String).returns(T::Array[IndexablePath]) }
@@ -94,9 +125,9 @@ module RubyIndexer
     # ]
     # ```
     sig { params(query: String, nesting: T.nilable(T::Array[String])).returns(T::Array[T::Array[Entry]]) }
-    def prefix_search(query, nesting = nil)
+    def prefix_search_constants(query, nesting = nil)
       unless nesting
-        results = @entries_tree.search(query)
+        results = @constant_entries_tree.search(query)
         results.uniq!
         return results
       end
@@ -104,7 +135,25 @@ module RubyIndexer
       results = nesting.length.downto(0).flat_map do |i|
         prefix = T.must(nesting[0...i]).join("::")
         namespaced_query = prefix.empty? ? query : "#{prefix}::#{query}"
-        @entries_tree.search(namespaced_query)
+        @constant_entries_tree.search(namespaced_query)
+      end
+
+      results.uniq!
+      results
+    end
+
+    sig { params(query: String, nesting: T.nilable(T::Array[String])).returns(T::Array[T::Array[Entry]]) }
+    def prefix_search_methods(query, nesting = nil)
+      unless nesting
+        results = @method_entries_tree.search(query)
+        results.uniq!
+        return results
+      end
+
+      results = nesting.length.downto(0).flat_map do |i|
+        prefix = T.must(nesting[0...i]).join("::")
+        namespaced_query = prefix.empty? ? query : "#{prefix}::#{query}"
+        @method_entries_tree.search(namespaced_query)
       end
 
       results.uniq!
@@ -114,11 +163,14 @@ module RubyIndexer
     # Fuzzy searches index entries based on Jaro-Winkler similarity. If no query is provided, all entries are returned
     sig { params(query: T.nilable(String)).returns(T::Array[Entry]) }
     def fuzzy_search(query)
-      return @entries.flat_map { |_name, entries| entries } unless query
+      unless query
+        constants = @constant_entries.flat_map { |_name, entries| entries }
+        return constants + @method_entries.flat_map { |_name, entries| entries }
+      end
 
       normalized_query = query.gsub("::", "").downcase
 
-      results = @entries.filter_map do |name, entries|
+      results = @constant_entries.merge(@method_entries).filter_map do |name, entries|
         similarity = DidYouMean::JaroWinkler.distance(name.gsub("::", "").downcase, normalized_query)
         [entries, -similarity] if similarity > ENTRY_SIMILARITY_THRESHOLD
       end
@@ -132,10 +184,10 @@ module RubyIndexer
     # 2. Foo::Baz
     # 3. Baz
     sig { params(name: String, nesting: T::Array[String]).returns(T.nilable(T::Array[Entry])) }
-    def resolve(name, nesting)
+    def resolve_constant(name, nesting)
       if name.start_with?("::")
         name = name.delete_prefix("::")
-        results = @entries[name] || @entries[follow_aliased_namespace(name)]
+        results = @constant_entries[name] || @constant_entries[follow_aliased_namespace(name)]
         return results&.map { |e| e.is_a?(Entry::UnresolvedAlias) ? resolve_alias(e) : e }
       end
 
@@ -150,7 +202,7 @@ module RubyIndexer
         # the LSP itself we alias `RubyLsp::Interface` to `LanguageServer::Protocol::Interface`, which means doing
         # `RubyLsp::Interface::Location` is allowed. For these cases, we need some way to realize that the
         # `RubyLsp::Interface` part is an alias, that has to be resolved
-        entries = @entries[full_name] || @entries[follow_aliased_namespace(full_name)]
+        entries = @constant_entries[full_name] || @constant_entries[follow_aliased_namespace(full_name)]
         return entries.map { |e| e.is_a?(Entry::UnresolvedAlias) ? resolve_alias(e) : e } if entries
       end
 
@@ -208,14 +260,14 @@ module RubyIndexer
     # aliases, so we have to invoke `follow_aliased_namespace` again to check until we only return a real name
     sig { params(name: String).returns(String) }
     def follow_aliased_namespace(name)
-      return name if @entries[name]
+      return name if @constant_entries[name]
 
       parts = name.split("::")
       real_parts = []
 
       (parts.length - 1).downto(0).each do |i|
         current_name = T.must(parts[0..i]).join("::")
-        entry = @entries[current_name]&.first
+        entry = @constant_entries[current_name]&.first
 
         case entry
         when Entry::Alias
@@ -242,8 +294,8 @@ module RubyIndexer
     # Returns `nil` if the method does not exist on that receiver
     sig { params(method_name: String, receiver_name: String).returns(T.nilable(T::Array[Entry::Member])) }
     def resolve_method(method_name, receiver_name)
-      method_entries = self[method_name]
-      owner_entries = self[receiver_name]
+      method_entries = get_method(method_name)
+      owner_entries = get_constant(receiver_name)
       return unless owner_entries && method_entries
 
       owner_name = T.must(owner_entries.first).name
@@ -261,18 +313,18 @@ module RubyIndexer
     # that doesn't exist, then we return the same UnresolvedAlias
     sig { params(entry: Entry::UnresolvedAlias).returns(T.any(Entry::Alias, Entry::UnresolvedAlias)) }
     def resolve_alias(entry)
-      target = resolve(entry.target, entry.nesting)
+      target = resolve_constant(entry.target, entry.nesting)
       return entry unless target
 
       target_name = T.must(target.first).name
       resolved_alias = Entry::Alias.new(target_name, entry)
 
       # Replace the UnresolvedAlias by a resolved one so that we don't have to do this again later
-      original_entries = T.must(@entries[entry.name])
+      original_entries = T.must(@constant_entries[entry.name])
       original_entries.delete(entry)
       original_entries << resolved_alias
 
-      @entries_tree.insert(entry.name, original_entries)
+      @constant_entries_tree.insert(entry.name, original_entries)
 
       resolved_alias
     end

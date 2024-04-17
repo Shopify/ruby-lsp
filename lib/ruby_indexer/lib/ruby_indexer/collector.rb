@@ -206,7 +206,7 @@ module RubyIndexer
 
       # The private_constant method does not resolve the constant name. It always points to a constant that needs to
       # exist in the current namespace
-      entries = @index[fully_qualify_name(name)]
+      entries = @index.get_constant(fully_qualify_name(name))
       entries&.each { |entry| entry.visibility = :private }
     end
 
