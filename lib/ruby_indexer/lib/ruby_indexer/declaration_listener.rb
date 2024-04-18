@@ -52,6 +52,7 @@ module RubyIndexer
         :on_instance_variable_operator_write_node_enter,
         :on_instance_variable_or_write_node_enter,
         :on_instance_variable_target_node_enter,
+        :on_alias_method_node_enter,
       )
     end
 
@@ -209,6 +210,8 @@ module RubyIndexer
         handle_attribute(node, reader: false, writer: true)
       when :attr_accessor
         handle_attribute(node, reader: true, writer: true)
+      when :alias_method
+        handle_alias_method(node)
       when :include, :prepend, :extend
         handle_module_operation(node, message)
       when :public
@@ -338,6 +341,20 @@ module RubyIndexer
       )
     end
 
+    sig { params(node: Prism::AliasMethodNode).void }
+    def on_alias_method_node_enter(node)
+      method_name = node.new_name.slice
+      comments = collect_comments(node)
+      @index << Entry::UnresolvedMethodAlias.new(
+        method_name,
+        node.old_name.slice,
+        @owner_stack.last,
+        @file_path,
+        node.new_name.location,
+        comments,
+      )
+    end
+
     private
 
     sig { params(node: Prism::CallNode).void }
@@ -363,6 +380,43 @@ module RubyIndexer
       # exist in the current namespace
       entries = @index[fully_qualify_name(name)]
       entries&.each { |entry| entry.visibility = Entry::Visibility::PRIVATE }
+    end
+
+    sig { params(node: Prism::CallNode).void }
+    def handle_alias_method(node)
+      arguments = node.arguments&.arguments
+      return unless arguments
+
+      new_name, old_name = arguments
+      return unless new_name && old_name
+
+      new_name_value = case new_name
+      when Prism::StringNode
+        new_name.content
+      when Prism::SymbolNode
+        new_name.value
+      end
+
+      return unless new_name_value
+
+      old_name_value = case old_name
+      when Prism::StringNode
+        old_name.content
+      when Prism::SymbolNode
+        old_name.value
+      end
+
+      return unless old_name_value
+
+      comments = collect_comments(node)
+      @index << Entry::UnresolvedMethodAlias.new(
+        new_name_value,
+        old_name_value,
+        @owner_stack.last,
+        @file_path,
+        new_name.location,
+        comments,
+      )
     end
 
     sig do
