@@ -19,6 +19,14 @@ require "prism"
 require "prism/visitor"
 require "language_server-protocol"
 
+# Prism v0.26.0 introduced generics for ParseResult, but it causes some problems so the intention is to remove it.
+# Once that is done, we can remove this patch.
+module Prism
+  class ParseResult
+    extend T::Generic
+  end
+end
+
 require "ruby-lsp"
 require "ruby_lsp/base_server"
 require "ruby_indexer/ruby_indexer"

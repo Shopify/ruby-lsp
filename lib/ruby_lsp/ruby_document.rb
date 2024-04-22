@@ -3,7 +3,7 @@
 
 module RubyLsp
   class RubyDocument < Document
-    sig { override.returns(Prism::ParseResult) }
+    sig { override.returns(Prism::ParseResult[Prism::ProgramNode]) }
     def parse
       return @parse_result unless @needs_parsing
 
