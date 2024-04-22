@@ -62,7 +62,7 @@ module RubyLsp
       @formatter = detect_formatter if @formatter == "auto"
 
       specified_linters = options.dig(:initializationOptions, :linters)
-      @linters = specified_linters ? specified_linters : detect_linters
+      @linters = specified_linters || detect_linters
 
       encodings = options.dig(:capabilities, :general, :positionEncodings)
       @encoding = if !encodings || encodings.empty?

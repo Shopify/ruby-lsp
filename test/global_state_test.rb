@@ -122,6 +122,16 @@ module RubyLsp
       assert_equal(["rubocop"], state.instance_variable_get(:@linters))
     end
 
+    def test_specifying_empty_linters
+      stub_dependencies("rubocop" => "1.2.3")
+      state = GlobalState.new
+      state.apply_options({
+        initializationOptions: { linters: [] },
+      })
+
+      assert_empty(state.instance_variable_get(:@linters))
+    end
+
     private
 
     def stub_dependencies(dependencies)
