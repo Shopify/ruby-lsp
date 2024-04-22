@@ -109,8 +109,10 @@ suite("Client", () => {
   let client: Client;
 
   before(async function () {
+    // 60000 should be plenty but we're seeing timeouts on Windows in CI
+
     // eslint-disable-next-line no-invalid-this
-    this.timeout(60000);
+    this.timeout(90000);
 
     // eslint-disable-next-line no-process-env
     if (process.env.CI) {
