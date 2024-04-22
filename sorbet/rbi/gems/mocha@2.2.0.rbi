@@ -37,7 +37,7 @@ class Minitest::Test < ::Minitest::Runnable
   include ::Mocha::ParameterMatchers
   include ::Mocha::Hooks
   include ::Mocha::API
-  include ::Mocha::Integration::MiniTest::Adapter
+  include ::Mocha::Integration::Minitest::Adapter
 end
 
 # source://mocha//lib/mocha/version.rb#1
@@ -66,7 +66,7 @@ module Mocha
   end
 end
 
-# Methods added to +Test::Unit::TestCase+, +MiniTest::Unit::TestCase+ or equivalent.
+# Methods added to +Test::Unit::TestCase+, +Minitest::Unit::TestCase+ or equivalent.
 # The mock creation methods are {#mock}, {#stub} and {#stub_everything}, all of which return a #{Mock}
 # which can be further modified by {Mock#responds_like} and {Mock#responds_like_instance_of} methods,
 # both of which return a {Mock}, too, and can therefore, be chained to the original creation methods.
@@ -100,7 +100,7 @@ module Mocha::API
   #
   # @example Using expected_methods_vs_return_values Hash to setup expectations.
   #   def test_motor_starts_and_stops
-  #   motor = mock('motor', :start => true, :stop => true)
+  #   motor = mock('motor', start: true, stop: true)
   #   assert motor.start
   #   assert motor.stop
   #   # an error will be raised unless both Motor#start and Motor#stop have been called
@@ -115,7 +115,8 @@ module Mocha::API
 
   # Builds a new sequence which can be used to constrain the order in which expectations can occur.
   #
-  # Specify that an expected invocation must occur within a named {Sequence} by using {Expectation#in_sequence}.
+  # Specify that an expected invocation must occur within a named {Sequence} by calling {Expectation#in_sequence}
+  # on each expectation or by passing a block within which all expectations should be constrained by the {Sequence}.
   #
   # @example Ensure methods on egg are invoked in correct order.
   #   breakfast = sequence('breakfast')
@@ -135,10 +136,19 @@ module Mocha::API
   #
   #   task_one.execute
   #   task_two.execute
+  # @example Ensure methods on egg are invoked in the correct order using a block.
+  #   egg = mock('egg')
+  #   sequence('breakfast') do
+  #   egg.expects(:crack)
+  #   egg.expects(:fry)
+  #   egg.expects(:eat)
+  #   end
+  # @param name [String] name of sequence
   # @return [Sequence] a new sequence
   # @see Expectation#in_sequence
+  # @yield optional block within which expectations should be constrained by the sequence
   #
-  # source://mocha//lib/mocha/api.rb#159
+  # source://mocha//lib/mocha/api.rb#170
   def sequence(name); end
 
   # Builds a new state machine which can be used to constrain the order in which expectations can occur.
@@ -161,19 +171,20 @@ module Mocha::API
   #   radio.expects(:select_channel).with('BBC World Service').when(power.is('on'))
   #   radio.expects(:adjust_volume).with(-5).when(power.is('on'))
   #   radio.expects(:switch_off).then(power.is('off'))
+  # @param name [String] name of state machine
   # @return [StateMachine] a new state machine
   # @see Expectation#then
   # @see Expectation#when
   # @see StateMachine
   #
-  # source://mocha//lib/mocha/api.rb#188
+  # source://mocha//lib/mocha/api.rb#207
   def states(name); end
 
   # Builds a new mock object
   #
   # @example Using stubbed_methods_vs_return_values Hash to setup stubbed methods.
   #   def test_motor_starts_and_stops
-  #   motor = stub('motor', :start => true, :stop => true)
+  #   motor = stub('motor', start: true, stop: true)
   #   assert motor.start
   #   assert motor.stop
   #   # an error will not be raised even if either Motor#start or Motor#stop has not been called
@@ -190,7 +201,7 @@ module Mocha::API
   #
   # @example Ignore invocations of irrelevant methods.
   #   def test_motor_stops
-  #   motor = stub_everything('motor', :stop => true)
+  #   motor = stub_everything('motor', stop: true)
   #   assert_nil motor.irrelevant_method_1 # => no error raised
   #   assert_nil motor.irrelevant_method_2 # => no error raised
   #   assert motor.stop
@@ -873,16 +884,16 @@ class Mocha::Deprecation
   end
 end
 
-# source://mocha//lib/mocha/detection/mini_test.rb#2
+# source://mocha//lib/mocha/detection/minitest.rb#2
 module Mocha::Detection; end
 
-# source://mocha//lib/mocha/detection/mini_test.rb#3
-module Mocha::Detection::MiniTest
+# source://mocha//lib/mocha/detection/minitest.rb#3
+module Mocha::Detection::Minitest
   class << self
-    # source://mocha//lib/mocha/detection/mini_test.rb#4
+    # source://mocha//lib/mocha/detection/minitest.rb#4
     def testcase; end
 
-    # source://mocha//lib/mocha/detection/mini_test.rb#12
+    # source://mocha//lib/mocha/detection/minitest.rb#12
     def version; end
   end
 end
@@ -1010,7 +1021,7 @@ class Mocha::Expectation
 
   # @private
   #
-  # source://mocha//lib/mocha/expectation.rb#698
+  # source://mocha//lib/mocha/expectation.rb#704
   def definition_location; end
 
   # @private
@@ -1046,40 +1057,40 @@ class Mocha::Expectation
 
   # @private
   #
-  # source://mocha//lib/mocha/expectation.rb#674
+  # source://mocha//lib/mocha/expectation.rb#680
   def inspect; end
 
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/expectation.rb#646
+  # source://mocha//lib/mocha/expectation.rb#652
   def invocations_allowed?; end
 
   # @private
   #
-  # source://mocha//lib/mocha/expectation.rb#656
+  # source://mocha//lib/mocha/expectation.rb#662
   def invoke(invocation); end
 
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/expectation.rb#641
-  def match?(invocation); end
+  # source://mocha//lib/mocha/expectation.rb#646
+  def match?(invocation, ignoring_order: T.unsafe(nil)); end
 
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/expectation.rb#636
+  # source://mocha//lib/mocha/expectation.rb#641
   def matches_method?(method_name); end
 
   # @private
   #
-  # source://mocha//lib/mocha/expectation.rb#691
+  # source://mocha//lib/mocha/expectation.rb#697
   def method_signature; end
 
   # @private
   #
-  # source://mocha//lib/mocha/expectation.rb#681
+  # source://mocha//lib/mocha/expectation.rb#687
   def mocha_inspect; end
 
   # Modifies expectation so that when the expected method is called, it yields multiple times per invocation with the specified +parameter_groups+.
@@ -1148,11 +1159,20 @@ class Mocha::Expectation
 
   # @private
   #
+  # source://mocha//lib/mocha/expectation.rb#636
+  def ordering_constraints_not_allowing_invocation_now; end
+
+  # @private
+  #
   # source://mocha//lib/mocha/expectation.rb#626
   def perform_side_effects; end
 
   # Modifies expectation so that when the expected method is called, it raises the specified +exception+ with the specified +message+ i.e. calls +Kernel#raise(exception, message)+.
   #
+  # @example Raise specified exception if expected method is invoked.
+  #   object = stub()
+  #   object.stubs(:expected_method).raises(Exception, 'message')
+  #   object.expected_method # => raises exception of class Exception and with message 'message'
   # @example Raise custom exception with extra constructor parameters by passing in an instance of the exception.
   #   object = stub()
   #   object.stubs(:expected_method).raises(MyException.new('message', 1, 2, 3))
@@ -1162,10 +1182,6 @@ class Mocha::Expectation
   #   object.stubs(:expected_method).raises(Exception1).then.raises(Exception2)
   #   object.expected_method # => raises exception of class Exception1
   #   object.expected_method # => raises exception of class Exception2
-  # @example Raise specified exception if expected method is invoked.
-  #   object = stub()
-  #   object.stubs(:expected_method).raises(Exception, 'message')
-  #   object.expected_method # => raises exception of class Exception and with message 'message'
   # @example Raise an exception on first invocation of expected method and then return values on subsequent invocations.
   #   object = stub()
   #   object.stubs(:expected_method).raises(Exception).then.returns(2, 3)
@@ -1225,7 +1241,7 @@ class Mocha::Expectation
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/expectation.rb#651
+  # source://mocha//lib/mocha/expectation.rb#657
   def satisfied?; end
 
   # @example Using {#then} as syntactic sugar when specifying values to be returned and exceptions to be raised on consecutive invocations of the expected method.
@@ -1254,14 +1270,14 @@ class Mocha::Expectation
 
   # Modifies expectation so that when the expected method is called, it throws the specified +tag+ with the specific return value +object+ i.e. calls +Kernel#throw(tag, object)+.
   #
-  # @example Throw tag with return value +object+ c.f. +Kernel#throw+.
-  #   object = stub()
-  #   object.stubs(:expected_method).throws(:done, 'result')
-  #   object.expected_method # => throws tag :done and causes catch block to return 'result'
   # @example Throw tag when expected method is invoked.
   #   object = stub()
   #   object.stubs(:expected_method).throws(:done)
   #   object.expected_method # => throws tag :done
+  # @example Throw tag with return value +object+ c.f. +Kernel#throw+.
+  #   object = stub()
+  #   object.stubs(:expected_method).throws(:done, 'result')
+  #   object.expected_method # => throws tag :done and causes catch block to return 'result'
   # @example Throw different tags on consecutive invocations of the expected method.
   #   object = stub()
   #   object.stubs(:expected_method).throws(:done).then.throws(:continue)
@@ -1339,13 +1355,13 @@ class Mocha::Expectation
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/expectation.rb#669
+  # source://mocha//lib/mocha/expectation.rb#675
   def used?; end
 
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/expectation.rb#663
+  # source://mocha//lib/mocha/expectation.rb#669
   def verified?(assertion_counter = T.unsafe(nil)); end
 
   # Constrains the expectation to occur only when the +state_machine+ is in the state specified by +state_predicate+.
@@ -1527,9 +1543,9 @@ class Mocha::ExpectationError < ::Exception; end
 #
 # This class should only be used by authors of test libraries and not by typical "users" of Mocha.
 #
-# For example, it is used by +Mocha::Integration::MiniTest::Adapter+ in order to have Mocha raise a +MiniTest::Assertion+ which can then be sensibly handled by +MiniTest::Unit::TestCase+.
+# For example, it is used by +Mocha::Integration::Minitest::Adapter+ in order to have Mocha raise a +Minitest::Assertion+ which can then be sensibly handled by +Minitest::Unit::TestCase+.
 #
-# @see Mocha::Integration::MiniTest::Adapter
+# @see Mocha::Integration::Minitest::Adapter
 #
 # source://mocha//lib/mocha/expectation_error_factory.rb#12
 class Mocha::ExpectationErrorFactory
@@ -1567,7 +1583,7 @@ class Mocha::ExpectationList
   # source://mocha//lib/mocha/expectation_list.rb#3
   def initialize(expectations = T.unsafe(nil)); end
 
-  # source://mocha//lib/mocha/expectation_list.rb#48
+  # source://mocha//lib/mocha/expectation_list.rb#52
   def +(other); end
 
   # source://mocha//lib/mocha/expectation_list.rb#7
@@ -1575,17 +1591,20 @@ class Mocha::ExpectationList
 
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/expectation_list.rb#44
+  # source://mocha//lib/mocha/expectation_list.rb#48
   def any?; end
 
-  # source://mocha//lib/mocha/expectation_list.rb#40
+  # source://mocha//lib/mocha/expectation_list.rb#44
   def length; end
 
   # source://mocha//lib/mocha/expectation_list.rb#20
-  def match(invocation); end
+  def match(invocation, ignoring_order: T.unsafe(nil)); end
+
+  # source://mocha//lib/mocha/expectation_list.rb#28
+  def match_allowing_invocation(invocation); end
 
   # source://mocha//lib/mocha/expectation_list.rb#24
-  def match_allowing_invocation(invocation); end
+  def match_but_out_of_order(invocation); end
 
   # @return [Boolean]
   #
@@ -1595,21 +1614,21 @@ class Mocha::ExpectationList
   # source://mocha//lib/mocha/expectation_list.rb#12
   def remove_all_matching_method(method_name); end
 
-  # source://mocha//lib/mocha/expectation_list.rb#32
+  # source://mocha//lib/mocha/expectation_list.rb#36
   def to_a; end
 
-  # source://mocha//lib/mocha/expectation_list.rb#36
+  # source://mocha//lib/mocha/expectation_list.rb#40
   def to_set; end
 
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/expectation_list.rb#28
+  # source://mocha//lib/mocha/expectation_list.rb#32
   def verified?(assertion_counter = T.unsafe(nil)); end
 
   private
 
-  # source://mocha//lib/mocha/expectation_list.rb#54
-  def matching_expectations(invocation); end
+  # source://mocha//lib/mocha/expectation_list.rb#58
+  def matching_expectations(invocation, ignoring_order: T.unsafe(nil)); end
 end
 
 # Integration hooks for test library authors.
@@ -1618,12 +1637,12 @@ end
 #
 # This module is provided as part of the +Mocha::API+ module and is therefore part of the public API, but should only be used by authors of test libraries and not by typical "users" of Mocha.
 #
-# Integration with Test::Unit and MiniTest are provided as part of Mocha, because they are (or were once) part of the Ruby standard library. Integration with other test libraries is not provided as *part* of Mocha, but is supported by means of the methods in this module.
+# Integration with Test::Unit and Minitest are provided as part of Mocha, because they are (or were once) part of the Ruby standard library. Integration with other test libraries is not provided as *part* of Mocha, but is supported by means of the methods in this module.
 #
 # See the code in the +Adapter+ modules for examples of how to use the methods in this module. +Mocha::ExpectationErrorFactory+ may be used if you want +Mocha+ to raise a different type of exception.
 #
 # @see Mocha::Integration::TestUnit::Adapter
-# @see Mocha::Integration::MiniTest::Adapter
+# @see Mocha::Integration::Minitest::Adapter
 # @see Mocha::ExpectationErrorFactory
 # @see Mocha::API
 #
@@ -1641,7 +1660,13 @@ module Mocha::Hooks
   # This method should be called after each individual test has finished (including after any "teardown" code).
   #
   # source://mocha//lib/mocha/hooks.rb#38
-  def mocha_teardown; end
+  def mocha_teardown(origin = T.unsafe(nil)); end
+
+  # Returns a string representing the unit test name, to be included in some Mocha
+  # to help track down potential bugs.
+  #
+  # source://mocha//lib/mocha/hooks.rb#44
+  def mocha_test_name; end
 
   # Verifies that all mock expectations have been met (only for use by authors of test libraries).
   #
@@ -1752,55 +1777,60 @@ class Mocha::Integration::AssertionCounter
   def increment; end
 end
 
-# source://mocha//lib/mocha/integration/mini_test/adapter.rb#7
-module Mocha::Integration::MiniTest
+# source://mocha//lib/mocha/integration/minitest/adapter.rb#7
+module Mocha::Integration::Minitest
   class << self
-    # source://mocha//lib/mocha/integration/mini_test.rb#8
+    # source://mocha//lib/mocha/integration/minitest.rb#8
     def activate; end
   end
 end
 
-# Integrates Mocha into recent versions of MiniTest.
+# Integrates Mocha into recent versions of Minitest.
 #
 # See the source code for an example of how to integrate Mocha into a test library.
 #
-# source://mocha//lib/mocha/integration/mini_test/adapter.rb#11
-module Mocha::Integration::MiniTest::Adapter
+# source://mocha//lib/mocha/integration/minitest/adapter.rb#11
+module Mocha::Integration::Minitest::Adapter
   include ::Mocha::ParameterMatchers
   include ::Mocha::Hooks
   include ::Mocha::API
 
   # @private
   #
-  # source://mocha//lib/mocha/integration/mini_test/adapter.rb#45
+  # source://mocha//lib/mocha/integration/minitest/adapter.rb#45
   def after_teardown; end
 
   # @private
   #
-  # source://mocha//lib/mocha/integration/mini_test/adapter.rb#30
+  # source://mocha//lib/mocha/integration/minitest/adapter.rb#30
   def before_setup; end
 
   # @private
   #
-  # source://mocha//lib/mocha/integration/mini_test/adapter.rb#36
+  # source://mocha//lib/mocha/integration/minitest/adapter.rb#36
   def before_teardown; end
+
+  # @private
+  #
+  # source://mocha//lib/mocha/integration/minitest/adapter.rb#51
+  def mocha_test_name; end
 
   class << self
     # @private
     # @return [Boolean]
     #
-    # source://mocha//lib/mocha/integration/mini_test/adapter.rb#15
-    def applicable_to?(mini_test_version); end
+    # source://mocha//lib/mocha/integration/minitest/adapter.rb#15
+    def applicable_to?(minitest_version); end
 
     # @private
     #
-    # source://mocha//lib/mocha/integration/mini_test/adapter.rb#20
+    # source://mocha//lib/mocha/integration/minitest/adapter.rb#20
     def description; end
 
     # @private
     # @private
     #
-    # source://mocha//lib/mocha/integration/mini_test/adapter.rb#25
+    # source://mocha//lib/mocha/integration/minitest/adapter.rb#25
     def included(_mod); end
   end
 end
@@ -1955,12 +1985,12 @@ class Mocha::Mock
   # @private
   # @return [Mock] a new instance of Mock
   #
-  # source://mocha//lib/mocha/mock.rb#273
+  # source://mocha//lib/mocha/mock.rb#275
   def initialize(mockery, name = T.unsafe(nil), receiver = T.unsafe(nil)); end
 
   # @private
   #
-  # source://mocha//lib/mocha/mock.rb#297
+  # source://mocha//lib/mocha/mock.rb#299
   def __expectations__; end
 
   # Adds an expectation that the specified method must be called exactly once with any parameters.
@@ -1980,7 +2010,7 @@ class Mocha::Mock
   #   object.expected_method # => error raised when expected method invoked second time
   # @example Setup multiple expectations using +expected_methods_vs_return_values+.
   #   object = mock()
-  #   object.expects(:expected_method_one => :result_one, :expected_method_two => :result_two)
+  #   object.expects(expected_method_one: :result_one, expected_method_two: :result_two)
   #
   #   # is exactly equivalent to
   #
@@ -1997,7 +2027,7 @@ class Mocha::Mock
   # @private
   #
   # source://mocha//lib/mocha/mock.rb#346
-  def __expire__; end
+  def __expire__(origin); end
 
   def __singleton_class__; end
 
@@ -2011,7 +2041,7 @@ class Mocha::Mock
   #   # no error raised
   # @example Setup multiple expectations using +stubbed_methods_vs_return_values+.
   #   object = mock()
-  #   object.stubs(:stubbed_method_one => :result_one, :stubbed_method_two => :result_two)
+  #   object.stubs(stubbed_method_one: :result_one, stubbed_method_two: :result_two)
   #
   #   # is exactly equivalent to
   #
@@ -2022,7 +2052,7 @@ class Mocha::Mock
   # @overload stubs
   # @return [Expectation] last-built expectation which can be further modified by methods on {Expectation}.
   #
-  # source://mocha//lib/mocha/mock.rb#148
+  # source://mocha//lib/mocha/mock.rb#149
   def __stubs__(method_name_or_hash, backtrace = T.unsafe(nil)); end
 
   # @private
@@ -2033,7 +2063,7 @@ class Mocha::Mock
 
   # @private
   #
-  # source://mocha//lib/mocha/mock.rb#307
+  # source://mocha//lib/mocha/mock.rb#309
   def all_expectations; end
 
   # @private
@@ -2049,7 +2079,7 @@ class Mocha::Mock
 
   # @private
   #
-  # source://mocha//lib/mocha/mock.rb#285
+  # source://mocha//lib/mocha/mock.rb#287
   def everything_stubbed; end
 
   # Adds an expectation that the specified method must be called exactly once with any parameters.
@@ -2069,7 +2099,7 @@ class Mocha::Mock
   #   object.expected_method # => error raised when expected method invoked second time
   # @example Setup multiple expectations using +expected_methods_vs_return_values+.
   #   object = mock()
-  #   object.expects(:expected_method_one => :result_one, :expected_method_two => :result_two)
+  #   object.expects(expected_method_one: :result_one, expected_method_two: :result_two)
   #
   #   # is exactly equivalent to
   #
@@ -2095,7 +2125,7 @@ class Mocha::Mock
 
   # @private
   #
-  # source://mocha//lib/mocha/mock.rb#313
+  # source://mocha//lib/mocha/mock.rb#314
   def method_missing(symbol, *arguments, **_arg2, &block); end
 
   # @private
@@ -2150,7 +2180,7 @@ class Mocha::Mock
   # @return [Mock] the same {Mock} instance, thereby allowing invocations of other {Mock} methods to be chained.
   # @see #responds_like_instance_of
   #
-  # source://mocha//lib/mocha/mock.rb#235
+  # source://mocha//lib/mocha/mock.rb#237
   def quacks_like(responder); end
 
   # Constrains the {Mock} instance so that it can only expect or stub methods to which an instance of the +responder_class+ responds publicly. The constraint is only applied at method invocation time. Note that the responder instance is instantiated using +Class#allocate+.
@@ -2181,7 +2211,7 @@ class Mocha::Mock
   # @return [Mock] the same {Mock} instance, thereby allowing invocations of other {Mock} methods to be chained.
   # @see #responds_like
   #
-  # source://mocha//lib/mocha/mock.rb#268
+  # source://mocha//lib/mocha/mock.rb#270
   def quacks_like_instance_of(responder_class); end
 
   # Constrains the {Mock} instance so that it can only expect or stub methods to which +responder+ responds publicly. The constraint is only applied at method invocation time.
@@ -2231,7 +2261,7 @@ class Mocha::Mock
   # @return [Mock] the same {Mock} instance, thereby allowing invocations of other {Mock} methods to be chained.
   # @see #responds_like_instance_of
   #
-  # source://mocha//lib/mocha/mock.rb#235
+  # source://mocha//lib/mocha/mock.rb#237
   def responds_like(responder); end
 
   # Constrains the {Mock} instance so that it can only expect or stub methods to which an instance of the +responder_class+ responds publicly. The constraint is only applied at method invocation time. Note that the responder instance is instantiated using +Class#allocate+.
@@ -2262,12 +2292,12 @@ class Mocha::Mock
   # @return [Mock] the same {Mock} instance, thereby allowing invocations of other {Mock} methods to be chained.
   # @see #responds_like
   #
-  # source://mocha//lib/mocha/mock.rb#268
+  # source://mocha//lib/mocha/mock.rb#270
   def responds_like_instance_of(responder_class); end
 
   # @private
   #
-  # source://mocha//lib/mocha/mock.rb#302
+  # source://mocha//lib/mocha/mock.rb#304
   def stub_everything; end
 
   # Adds an expectation that the specified method may be called any number of times with any parameters.
@@ -2280,7 +2310,7 @@ class Mocha::Mock
   #   # no error raised
   # @example Setup multiple expectations using +stubbed_methods_vs_return_values+.
   #   object = mock()
-  #   object.stubs(:stubbed_method_one => :result_one, :stubbed_method_two => :result_two)
+  #   object.stubs(stubbed_method_one: :result_one, stubbed_method_two: :result_two)
   #
   #   # is exactly equivalent to
   #
@@ -2291,7 +2321,7 @@ class Mocha::Mock
   # @overload stubs
   # @return [Expectation] last-built expectation which can be further modified by methods on {Expectation}.
   #
-  # source://mocha//lib/mocha/mock.rb#148
+  # source://mocha//lib/mocha/mock.rb#149
   def stubs(method_name_or_hash, backtrace = T.unsafe(nil)); end
 
   # Removes the specified stubbed methods (added by calls to {#expects} or {#stubs}) and all expectations associated with them.
@@ -2311,17 +2341,17 @@ class Mocha::Mock
   #   multiplier.unstub(:triple)
   # @param method_names [Array<Symbol>] names of methods to unstub.
   #
-  # source://mocha//lib/mocha/mock.rb#180
+  # source://mocha//lib/mocha/mock.rb#182
   def unstub(*method_names); end
 
   private
 
   # @raise [StubbingError]
   #
-  # source://mocha//lib/mocha/mock.rb#389
+  # source://mocha//lib/mocha/mock.rb#393
   def check_expiry; end
 
-  # source://mocha//lib/mocha/mock.rb#383
+  # source://mocha//lib/mocha/mock.rb#387
   def check_responder_responds_to(symbol); end
 
   # source://mocha//lib/mocha/mock.rb#372
@@ -2336,17 +2366,17 @@ end
 
 # source://mocha//lib/mocha/mockery.rb#13
 class Mocha::Mockery
-  # source://mocha//lib/mocha/mockery.rb#134
+  # source://mocha//lib/mocha/mockery.rb#138
   def logger; end
 
   # Sets the attribute logger
   #
   # @param value the value to set the attribute logger to.
   #
-  # source://mocha//lib/mocha/mockery.rb#132
+  # source://mocha//lib/mocha/mockery.rb#136
   def logger=(_arg0); end
 
-  # source://mocha//lib/mocha/mockery.rb#112
+  # source://mocha//lib/mocha/mockery.rb#116
   def mocha_inspect; end
 
   # source://mocha//lib/mocha/mockery.rb#66
@@ -2364,8 +2394,11 @@ class Mocha::Mockery
   # source://mocha//lib/mocha/mockery.rb#74
   def new_state_machine(name); end
 
-  # source://mocha//lib/mocha/mockery.rb#120
+  # source://mocha//lib/mocha/mockery.rb#124
   def on_stubbing(object, method); end
+
+  # source://mocha//lib/mocha/mockery.rb#112
+  def sequences; end
 
   # source://mocha//lib/mocha/mockery.rb#108
   def state_machines; end
@@ -2374,7 +2407,7 @@ class Mocha::Mockery
   def stubba; end
 
   # source://mocha//lib/mocha/mockery.rb#94
-  def teardown; end
+  def teardown(origin = T.unsafe(nil)); end
 
   # source://mocha//lib/mocha/mockery.rb#62
   def unnamed_mock; end
@@ -2384,27 +2417,27 @@ class Mocha::Mockery
 
   private
 
-  # source://mocha//lib/mocha/mockery.rb#161
+  # source://mocha//lib/mocha/mockery.rb#165
   def add_mock(mock); end
 
-  # source://mocha//lib/mocha/mockery.rb#166
+  # source://mocha//lib/mocha/mockery.rb#170
   def add_state_machine(state_machine); end
 
   # @raise [StubbingError]
   #
-  # source://mocha//lib/mocha/mockery.rb#140
+  # source://mocha//lib/mocha/mockery.rb#144
   def check(action, description, signature_proc, backtrace = T.unsafe(nil)); end
 
-  # source://mocha//lib/mocha/mockery.rb#149
+  # source://mocha//lib/mocha/mockery.rb#153
   def expectations; end
 
-  # source://mocha//lib/mocha/mockery.rb#171
+  # source://mocha//lib/mocha/mockery.rb#175
   def reset; end
 
-  # source://mocha//lib/mocha/mockery.rb#157
+  # source://mocha//lib/mocha/mockery.rb#161
   def satisfied_expectations; end
 
-  # source://mocha//lib/mocha/mockery.rb#153
+  # source://mocha//lib/mocha/mockery.rb#157
   def unsatisfied_expectations; end
 
   class << self
@@ -2415,7 +2448,7 @@ class Mocha::Mockery
     def setup; end
 
     # source://mocha//lib/mocha/mockery.rb#51
-    def teardown; end
+    def teardown(origin = T.unsafe(nil)); end
 
     # source://mocha//lib/mocha/mockery.rb#47
     def verify(*args); end
@@ -2477,7 +2510,7 @@ module Mocha::ObjectMethods
   #   assert_equal true, product.save
   # @example Setting up multiple expectations on a non-mock object.
   #   product = Product.new
-  #   product.expects(:valid? => true, :save => true)
+  #   product.expects(valid?: true, save: true)
   #
   #   # exactly equivalent to
   #
@@ -2528,7 +2561,7 @@ module Mocha::ObjectMethods
   #   assert_equal true, product.save
   # @example Setting up multiple stubbed methods on a non-mock object.
   #   product = Product.new
-  #   product.stubs(:valid? => true, :save => true)
+  #   product.stubs(valid?: true, save: true)
   #
   #   # exactly equivalent to
   #
@@ -2840,7 +2873,7 @@ module Mocha::ParameterMatchers
   # @example Actual parameter includes item which matches nested matcher.
   #   object = mock()
   #   object.expects(:method_1).with(includes(has_key(:key)))
-  #   object.method_1(['foo', 'bar', {:key => 'baz'}])
+  #   object.method_1(['foo', 'bar', {key: 'baz'}])
   #   # no error raised
   # @example Actual parameter does not include item matching nested matcher.
   #   object.method_1(['foo', 'bar', {:other_key => 'baz'}])
@@ -2856,10 +2889,10 @@ module Mocha::ParameterMatchers
   # @example Actual parameter is a Hash including the given key.
   #   object = mock()
   #   object.expects(:method_1).with(includes(:bar))
-  #   object.method_1({:foo => 1, :bar => 2})
+  #   object.method_1({foo: 1, bar: 2})
   #   # no error raised
   # @example Actual parameter is a Hash without the given key.
-  #   object.method_1({:foo => 1, :baz => 2})
+  #   object.method_1({foo: 1, baz: 2})
   #   # error raised, because hash does not include key 'bar'
   # @example Actual parameter is a Hash with a key matching the given matcher.
   #   object = mock()
@@ -2985,8 +3018,6 @@ module Mocha::ParameterMatchers
   # source://mocha//lib/mocha/parameter_matchers/regexp_matches.rb#24
   def regexp_matches(regexp); end
 
-  # Matches any object that responds to +message+ with +result+. To put it another way, it tests the quack, not the duck.
-  #
   # @example Actual parameter responds with "FOO" when :upcase is invoked.
   #   object = mock()
   #   object.expects(:method_1).with(responds_with(:upcase, "FOO"))
@@ -2997,13 +3028,18 @@ module Mocha::ParameterMatchers
   #   object.expects(:method_1).with(responds_with(:upcase, "BAR"))
   #   object.method_1("foo")
   #   # error raised, because "foo".upcase != "BAR"
-  # @param message [Symbol] method to invoke.
-  # @param result [Object] expected result of sending +message+.
+  # @example Actual parameter responds with "FOO" when :upcase is invoked and "oof" when :reverse is invoked.
+  #   object = mock()
+  #   object.expects(:method_1).with(responds_with(upcase: "FOO", reverse: "oof"))
+  #   object.method_1("foo")
+  #   # no error raised, because "foo".upcase == "FOO" and "foo".reverse == "oof"
+  # @overload responds_with
+  # @overload responds_with
   # @return [RespondsWith] parameter matcher.
   # @see Expectation#with
   #
-  # source://mocha//lib/mocha/parameter_matchers/responds_with.rb#25
-  def responds_with(message, result); end
+  # source://mocha//lib/mocha/parameter_matchers/responds_with.rb#37
+  def responds_with(*options); end
 
   # Matches any YAML that represents the specified +object+
   #
@@ -3121,12 +3157,12 @@ class Mocha::ParameterMatchers::Base
   # @example Alternative ways to combine matchers with a logical AND.
   #   object = mock()
   #   object.expects(:run).with(all_of(has_key(:foo), has_key(:bar)))
-  #   object.run(:foo => 'foovalue', :bar => 'barvalue')
+  #   object.run(foo: 'foovalue', bar: 'barvalue')
   #
   #   # is exactly equivalent to
   #
   #   object.expects(:run).with(has_key(:foo) & has_key(:bar))
-  #   object.run(:foo => 'foovalue', :bar => 'barvalue)
+  #   object.run(foo: 'foovalue', bar: 'barvalue)
   # @param other [Base] parameter matcher.
   # @return [AllOf] parameter matcher.
   # @see Expectation#with
@@ -3148,12 +3184,12 @@ class Mocha::ParameterMatchers::Base
   # @example Alternative ways to combine matchers with a logical OR.
   #   object = mock()
   #   object.expects(:run).with(any_of(has_key(:foo), has_key(:bar)))
-  #   object.run(:foo => 'foovalue')
+  #   object.run(foo: 'foovalue')
   #
   #   # is exactly equivalent to
   #
   #   object.expects(:run).with(has_key(:foo) | has_key(:bar))
-  #   object.run(:foo => 'foovalue')
+  #   object.run(foo: 'foovalue')
   # @example Using an explicit {Equals} matcher in combination with {#|}.
   #   object.expects(:run).with(equals(1) | equals(2))
   #   object.run(1) # passes
@@ -3537,23 +3573,23 @@ end
 
 # Parameter matcher which matches if actual parameter returns expected result when specified method is invoked.
 #
-# source://mocha//lib/mocha/parameter_matchers/responds_with.rb#30
+# source://mocha//lib/mocha/parameter_matchers/responds_with.rb#57
 class Mocha::ParameterMatchers::RespondsWith < ::Mocha::ParameterMatchers::Base
   # @private
   # @return [RespondsWith] a new instance of RespondsWith
   #
-  # source://mocha//lib/mocha/parameter_matchers/responds_with.rb#32
+  # source://mocha//lib/mocha/parameter_matchers/responds_with.rb#59
   def initialize(message, result); end
 
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/parameter_matchers/responds_with.rb#38
+  # source://mocha//lib/mocha/parameter_matchers/responds_with.rb#65
   def matches?(available_parameters); end
 
   # @private
   #
-  # source://mocha//lib/mocha/parameter_matchers/responds_with.rb#44
+  # source://mocha//lib/mocha/parameter_matchers/responds_with.rb#71
   def mocha_inspect; end
 end
 
