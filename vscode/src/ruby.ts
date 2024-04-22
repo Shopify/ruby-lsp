@@ -174,7 +174,7 @@ export class Ruby implements RubyInterface {
       }
 
       await vscode.window.showErrorMessage(
-        `Failed to activate ${this.versionManager} environment: ${error.message}`,
+        `Failed to activate ${this.versionManager.identifier} environment: ${error.message}`,
       );
     }
   }
