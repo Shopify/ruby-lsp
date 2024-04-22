@@ -30,7 +30,7 @@ When you run `eglot` command it will run `ruby-lsp` process for you.
 
 ### nvim-lspconfig
 
-The [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/ruby_ls.lua)
+The [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/ruby_lsp.lua)
 plugin has support for Ruby LSP.
 
 ### Mason
@@ -42,7 +42,7 @@ along with [mason-lspconfig.nvim](https://github.com/williamboman/mason-lspconfi
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 local mason_lspconfig = require("mason-lspconfig")
 local servers = {
-  ruby_ls = {},
+  ruby_lsp = {},
 }
 
 mason_lspconfig.setup {
@@ -150,7 +150,7 @@ local function add_ruby_deps_command(client, bufnr)
 end
 
 
-require("lspconfig").ruby_ls.setup({
+require("lspconfig").ruby_lsp.setup({
   on_attach = function(client, buffer)
     setup_diagnostics(client, buffer)
     add_ruby_deps_command(client, buffer)
