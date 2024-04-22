@@ -11,7 +11,9 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI::Generic.from_path(path: __FILE__))
     result = T.let(nil, T.nilable(T::Array[RubyLsp::Interface::Diagnostic]))
     global_state = RubyLsp::GlobalState.new
-    global_state.formatter = "rubocop"
+    global_state.apply_options({
+      initializationOptions: { linters: ["rubocop"] },
+    })
     global_state.register_formatter(
       "rubocop",
       RubyLsp::Requests::Support::RuboCopFormatter.new,

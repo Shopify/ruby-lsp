@@ -34,7 +34,7 @@ module RubyLsp
       sig { params(global_state: GlobalState, document: Document).void }
       def initialize(global_state, document)
         super()
-        @active_formatter = T.let(global_state.active_formatter, T.nilable(Support::Formatter))
+        @active_linters = T.let(global_state.active_linters, T::Array[Support::Formatter])
         @document = document
         @uri = T.let(document.uri, URI::Generic)
       end
@@ -45,10 +45,13 @@ module RubyLsp
         diagnostics.concat(syntax_error_diagnostics, syntax_warning_diagnostics)
 
         # Running RuboCop is slow, so to avoid excessive runs we only do so if the file is syntactically valid
-        return diagnostics if @document.syntax_error? || !@active_formatter
+        return diagnostics if @document.syntax_error? || @active_linters.empty?
 
-        formatter_diagnostics = @active_formatter.run_diagnostic(@uri, @document)
-        diagnostics.concat(formatter_diagnostics) if formatter_diagnostics
+        @active_linters.each do |linter|
+          linter_diagnostics = linter.run_diagnostic(@uri, @document)
+          diagnostics.concat(linter_diagnostics) if linter_diagnostics
+        end
+
         diagnostics
       end
 
