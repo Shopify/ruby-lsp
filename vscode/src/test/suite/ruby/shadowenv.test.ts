@@ -11,8 +11,7 @@ import sinon from "sinon";
 import { Shadowenv } from "../../../ruby/shadowenv";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL, asyncExec } from "../../../common";
-
-const RUBY_VERSION = "3.3.0";
+import { RUBY_VERSION } from "../../rubyVersion";
 
 suite("Shadowenv", () => {
   if (os.platform() === "win32") {
@@ -46,7 +45,7 @@ suite("Shadowenv", () => {
       "hostedtoolcache",
       "Ruby",
       RUBY_VERSION,
-      "x64",
+      "arm64",
       "bin",
     );
   } else {
