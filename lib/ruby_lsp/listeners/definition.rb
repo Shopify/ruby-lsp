@@ -40,7 +40,7 @@ module RubyLsp
         if message == :require || message == :require_relative
           handle_require_definition(node)
         elsif message == :autoload
-          handle_autoload_constant_definition(node)
+          handle_autoload_definition(node)
         else
           handle_method_definition(node)
         end
@@ -132,7 +132,7 @@ module RubyLsp
       end
 
       sig { params(node: Prism::CallNode).void }
-      def handle_autoload_constant_definition(node)
+      def handle_autoload_definition(node)
         name = node.name # should be ":autoload"
         if name != :autoload
           return
@@ -144,28 +144,7 @@ module RubyLsp
         symbol = arguments.arguments[0] # should be 'SymbolNode'
         return unless symbol.is_a?(Prism::SymbolNode)
 
-        # class_name = symbol.value
-
-        file_string = arguments.arguments[1] # should be 'StringNode'
-        return unless file_string.is_a?(Prism::StringNode)
-
-        file_path = file_string.content
-
-        entry = @index.search_require_paths(file_path).find do |indexable_path|
-          indexable_path.require_path == file_path
-        end
-
-        if entry
-          candidate = entry.full_path
-
-          @response_builder << Interface::Location.new(
-            uri: URI::Generic.from_path(path: candidate).to_s,
-            range: Interface::Range.new(
-              start: Interface::Position.new(line: 0, character: 0),
-              end: Interface::Position.new(line: 0, character: 0),
-            ),
-          )
-        end
+        find_in_index(symbol.value)
       end
 
       sig { params(value: String).void }
