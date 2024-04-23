@@ -9,8 +9,7 @@ import * as vscode from "vscode";
 import { RubyInstaller } from "../../../ruby/rubyInstaller";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL } from "../../../common";
-
-const RUBY_VERSION = "3.3.0";
+import { RUBY_VERSION } from "../../rubyVersion";
 
 suite("RubyInstaller", () => {
   if (os.platform() !== "win32") {

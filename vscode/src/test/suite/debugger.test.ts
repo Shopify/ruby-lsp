@@ -11,6 +11,7 @@ import { Ruby, ManagerIdentifier } from "../../ruby";
 import { Workspace } from "../../workspace";
 import { WorkspaceChannel } from "../../workspaceChannel";
 import { LOG_CHANNEL, asyncExec } from "../../common";
+import { RUBY_VERSION } from "../rubyVersion";
 
 suite("Debugger", () => {
   test("Provide debug configurations returns the default configs", () => {
@@ -183,7 +184,7 @@ suite("Debugger", () => {
       path.join(os.tmpdir(), "ruby-lsp-test-debugger"),
     );
     fs.writeFileSync(path.join(tmpPath, "test.rb"), "1 + 1");
-    fs.writeFileSync(path.join(tmpPath, ".ruby-version"), "3.3.0");
+    fs.writeFileSync(path.join(tmpPath, ".ruby-version"), RUBY_VERSION);
     fs.writeFileSync(
       path.join(tmpPath, "Gemfile"),
       'source "https://rubygems.org"\ngem "debug"',
