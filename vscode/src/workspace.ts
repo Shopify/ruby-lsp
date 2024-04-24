@@ -187,13 +187,13 @@ export class Workspace implements WorkspaceInterface {
       "rubyLsp.lastGemUpdate",
     );
 
-    const { stderr } = await asyncExec("gem list ruby-lsp 1>&2", {
+    const { stdout } = await asyncExec("gem list ruby-lsp", {
       cwd: this.workspaceFolder.uri.fsPath,
       env: this.ruby.env,
     });
 
     // If the gem is not yet installed, install it
-    if (!stderr.includes("ruby-lsp")) {
+    if (!stdout.includes("ruby-lsp")) {
       await asyncExec("gem install ruby-lsp", {
         cwd: this.workspaceFolder.uri.fsPath,
         env: this.ruby.env,
