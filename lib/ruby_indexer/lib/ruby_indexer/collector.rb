@@ -7,7 +7,7 @@ module RubyIndexer
 
     LEAVE_EVENT = T.let(Object.new.freeze, Object)
 
-    sig { params(index: Index, parse_result: Prism::ParseResult[Prism::ProgramNode], file_path: String).void }
+    sig { params(index: Index, parse_result: Prism::ParseResult, file_path: String).void }
     def initialize(index, parse_result, file_path)
       @index = index
       @file_path = file_path
