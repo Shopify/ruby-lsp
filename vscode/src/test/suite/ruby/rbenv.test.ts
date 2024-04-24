@@ -27,11 +27,8 @@ suite("Rbenv", () => {
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
     const rbenv = new Rbenv(workspaceFolder, outputChannel);
 
-    const activationScript = [
-      "STDERR.print(",
-      "{env: ENV.to_h,yjit:!!defined?(RubyVM::YJIT),version:RUBY_VERSION,home:Gem.user_dir,default:Gem.default_dir}",
-      ".to_json)",
-    ].join("");
+    const activationScript =
+      "STDERR.print({env: ENV.to_h,yjit:!!defined?(RubyVM::YJIT),version:RUBY_VERSION}.to_json)";
 
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
@@ -39,8 +36,6 @@ suite("Rbenv", () => {
         env: { ANY: "true" },
         yjit: true,
         version: "3.0.0",
-        home: "/home/user/.gem/ruby/3.0.0",
-        default: "/usr/lib/ruby/gems/3.0.0",
       }),
     });
 
@@ -55,15 +50,7 @@ suite("Rbenv", () => {
 
     assert.strictEqual(version, "3.0.0");
     assert.strictEqual(yjit, true);
-    assert.strictEqual(env.GEM_HOME, "/home/user/.gem/ruby/3.0.0");
-    assert.strictEqual(
-      env.GEM_PATH,
-      "/home/user/.gem/ruby/3.0.0:/usr/lib/ruby/gems/3.0.0",
-    );
-    assert.ok(env.PATH!.includes("/home/user/.gem/ruby/3.0.0/bin"));
-    assert.ok(env.PATH!.includes("/usr/lib/ruby/gems/3.0.0/bin"));
     assert.strictEqual(env.ANY, "true");
-
     execStub.restore();
   });
 });
