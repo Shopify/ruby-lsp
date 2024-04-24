@@ -7,6 +7,8 @@ module RubyLsp
       extend T::Sig
       include Requests::Support::Common
 
+      MAX_NUMBER_OF_DEFINITION_CANDIDATES_WITHOUT_RECEIVER = 10
+
       sig do
         params(
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::Location],
@@ -64,12 +66,17 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def handle_method_definition(node)
-        return unless self_receiver?(node)
-
         message = node.message
         return unless message
 
-        methods = @index.resolve_method(message, @nesting.join("::"))
+        methods = if self_receiver?(node)
+          @index.resolve_method(message, @nesting.join("::"))
+        else
+          # If the method doesn't have a receiver, then we provide a few candidates to jump to
+          # But we don't want to provide too many candidates, as it can be overwhelming
+          @index[message]&.take(MAX_NUMBER_OF_DEFINITION_CANDIDATES_WITHOUT_RECEIVER)
+        end
+
         return unless methods
 
         methods.each do |target_method|
