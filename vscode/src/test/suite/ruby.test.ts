@@ -40,7 +40,11 @@ suite("Ruby environment activation", () => {
 
     const context = {
       extensionMode: vscode.ExtensionMode.Test,
-    } as vscode.ExtensionContext;
+      workspaceState: {
+        get: () => undefined,
+        update: () => undefined,
+      },
+    } as unknown as vscode.ExtensionContext;
     const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
 
     const ruby = new Ruby(context, workspaceFolder, outputChannel);
@@ -77,7 +81,11 @@ suite("Ruby environment activation", () => {
 
     const context = {
       extensionMode: vscode.ExtensionMode.Test,
-    } as vscode.ExtensionContext;
+      workspaceState: {
+        get: () => undefined,
+        update: () => undefined,
+      },
+    } as unknown as vscode.ExtensionContext;
     const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
 
     const ruby = new Ruby(context, workspaceFolder, outputChannel);

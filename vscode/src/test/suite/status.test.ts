@@ -49,7 +49,7 @@ suite("StatusItems", () => {
     test("Status is initialized with the right values", () => {
       assert.strictEqual(status.item.text, "Using Ruby 3.2.0 with shadowenv");
       assert.strictEqual(status.item.name, "Ruby LSP Status");
-      assert.strictEqual(status.item.command?.title, "Change version manager");
+      assert.strictEqual(status.item.command?.title, "Configure");
       assert.strictEqual(
         status.item.command.command,
         Command.SelectVersionManager,

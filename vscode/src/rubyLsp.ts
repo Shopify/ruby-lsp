@@ -285,22 +285,43 @@ export class RubyLsp {
       vscode.commands.registerCommand(
         Command.SelectVersionManager,
         async () => {
-          const configuration = vscode.workspace.getConfiguration("rubyLsp");
-          const managerConfig =
-            configuration.get<ManagerConfiguration>("rubyVersionManager")!;
-          const options = Object.values(ManagerIdentifier);
-          const manager = (await vscode.window.showQuickPick(options, {
-            placeHolder: `Current: ${managerConfig.identifier}`,
-          })) as ManagerIdentifier | undefined;
+          const answer = await vscode.window.showQuickPick(
+            ["Change version manager", "Change manual Ruby configuration"],
+            { placeHolder: "What would you like to do?" },
+          );
 
-          if (manager !== undefined) {
-            managerConfig.identifier = manager;
-            await configuration.update(
-              "rubyVersionManager",
-              managerConfig,
-              true,
-            );
+          if (!answer) {
+            return;
           }
+
+          if (answer === "Change version manager") {
+            const configuration = vscode.workspace.getConfiguration("rubyLsp");
+            const managerConfig =
+              configuration.get<ManagerConfiguration>("rubyVersionManager")!;
+            const options = Object.values(ManagerIdentifier);
+            const manager = (await vscode.window.showQuickPick(options, {
+              placeHolder: `Current: ${managerConfig.identifier}`,
+            })) as ManagerIdentifier | undefined;
+
+            if (manager !== undefined) {
+              managerConfig.identifier = manager;
+              await configuration.update(
+                "rubyVersionManager",
+                managerConfig,
+                true,
+              );
+            }
+
+            return;
+          }
+
+          const workspace = await this.showWorkspacePick();
+
+          if (!workspace) {
+            return;
+          }
+
+          await workspace.ruby.manuallySelectRuby();
         },
       ),
       vscode.commands.registerCommand(
