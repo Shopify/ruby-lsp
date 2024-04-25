@@ -26,12 +26,13 @@ module RubyIndexer
       # Holds all entries in the index using a prefix tree for searching based on prefixes to provide autocompletion
       @constant_entries_tree = T.let(PrefixTree[ConstantType].new, PrefixTree[ConstantType])
 
-      # Holds all method entries in the index using the following format:
+      # Holds all method entries in the index using the following format. We keep the owner names so that we can check
+      # if a method entry already exists for that owner in a performant way without slowing down indexing
       # {
-      #  "method_name" => [#<Entry::Method>, #<Entry::Method>],
-      #  "foo" => [#<Entry::Accessor>],
+      #  "method_name" => { "OwnerModuleName" => #<Entry::Method>, "OwnerClassName" => #<Entry::Method> },
+      #  "foo" => { "OwnerClassName" => #<Entry::Accessor> },
       # }
-      @method_entries = T.let({}, T::Hash[String, T::Array[Entry::Member]])
+      @method_entries = T.let({}, T::Hash[String, T::Hash[String, Entry::Member]])
 
       # Holds all entries in the index using a prefix tree for searching based on prefixes to provide autocompletion
       @method_entries_tree = T.let(PrefixTree[T::Array[Entry::Member]].new, PrefixTree[T::Array[Entry::Member]])
@@ -85,8 +86,12 @@ module RubyIndexer
 
       case entry
       when Entry::Member
-        (@method_entries[name] ||= []) << entry
-        @method_entries_tree.insert(name, T.must(@method_entries[name]))
+        owner_name = entry.owner&.name
+
+        if owner_name
+          (@method_entries[name] ||= {})[owner_name] = entry
+          @method_entries_tree.insert(name, T.must(@method_entries[name]).values)
+        end
       when Entry::Class, Entry::Module, Entry::Constant, Entry::Alias, Entry::UnresolvedAlias
         @constant_entries[name] = entry
         @constant_entries_tree.insert(name, entry)
@@ -106,7 +111,7 @@ module RubyIndexer
 
     sig { params(name: String).returns(T.nilable(T::Array[Entry::Member])) }
     def get_methods(name)
-      @method_entries[name]
+      @method_entries[name]&.values
     end
 
     sig { params(query: String).returns(T::Array[IndexablePath]) }
@@ -166,14 +171,20 @@ module RubyIndexer
     # Fuzzy searches index entries based on Jaro-Winkler similarity. If no query is provided, all entries are returned
     sig { params(query: T.nilable(String)).returns(T::Array[Entry]) }
     def fuzzy_search(query)
-      return @constant_entries.values + @method_entries.values.flatten unless query
+      return @constant_entries.values + @method_entries.values.flat_map(&:values) unless query
 
       normalized_query = query.gsub("::", "").downcase
 
-      results = @constant_entries.merge(@method_entries).filter_map do |name, entries|
+      results = @constant_entries.filter_map do |name, entries|
         similarity = DidYouMean::JaroWinkler.distance(name.gsub("::", "").downcase, normalized_query)
         [entries, -similarity] if similarity > ENTRY_SIMILARITY_THRESHOLD
       end
+
+      results.concat(@method_entries.filter_map do |name, hash|
+        similarity = DidYouMean::JaroWinkler.distance(name.gsub("::", "").downcase, normalized_query)
+        [hash.values, -similarity] if similarity > ENTRY_SIMILARITY_THRESHOLD
+      end)
+
       results.sort_by!(&:last)
       results.flat_map(&:first)
     end
@@ -294,12 +305,7 @@ module RubyIndexer
     # Returns `nil` if the method does not exist on that receiver
     sig { params(method_name: String, receiver_name: String).returns(T.nilable(Entry::Member)) }
     def resolve_method(method_name, receiver_name)
-      method_entries = get_methods(method_name)
-      owner_entry = get_constant(receiver_name)
-      return unless method_entries && owner_entry
-
-      owner_name = owner_entry.name
-      method_entries.find { |entry| entry.owner&.name == owner_name }
+      @method_entries.dig(method_name, receiver_name)
     end
 
     private
