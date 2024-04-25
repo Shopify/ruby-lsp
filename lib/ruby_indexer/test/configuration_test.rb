@@ -20,6 +20,14 @@ module RubyIndexer
       assert(indexables.none? { |indexable| indexable.full_path == __FILE__ })
     end
 
+    def test_indexables_have_expanded_full_paths
+      @config.apply_config({ "included_patterns" => ["**/*.rb"] })
+      indexables = @config.indexables
+
+      # All paths should be expanded
+      assert(indexables.none? { |indexable| indexable.full_path.start_with?("lib/") })
+    end
+
     def test_indexables_only_includes_gem_require_paths
       indexables = @config.indexables
 

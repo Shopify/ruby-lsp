@@ -56,6 +56,7 @@ module RubyIndexer
         load_path_entry = T.let(nil, T.nilable(String))
 
         Dir.glob(pattern, File::FNM_PATHNAME | File::FNM_EXTGLOB).map! do |path|
+          path = File.expand_path(path)
           # All entries for the same pattern match the same $LOAD_PATH entry. Since searching the $LOAD_PATH for every
           # entry is expensive, we memoize it until we find a path that doesn't belong to that $LOAD_PATH. This happens
           # on repositories that define multiple gems, like Rails. All frameworks are defined inside the Dir.pwd, but
