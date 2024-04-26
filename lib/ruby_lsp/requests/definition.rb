@@ -43,6 +43,7 @@ module RubyLsp
           ResponseBuilders::CollectionResponseBuilder[Interface::Location].new,
           ResponseBuilders::CollectionResponseBuilder[Interface::Location],
         )
+        @dispatcher = dispatcher
 
         target, parent, nesting = document.locate_node(
           position,
@@ -50,33 +51,41 @@ module RubyLsp
         )
 
         if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)
+          # If the target is part of a constant path node, we need to find the exact portion of the constant that the
+          # user is requesting to go to definition for
           target = determine_target(
             target,
             parent,
             position,
           )
+        elsif target.is_a?(Prism::CallNode) && target.name != :require && target.name != :require_relative &&
+            !covers_position?(target.message_loc, position)
+          # If the target is a method call, we need to ensure that the requested position is exactly on top of the
+          # method identifier. Otherwise, we risk showing definitions for unrelated things
+          target = nil
         end
 
-        Listeners::Definition.new(
-          @response_builder,
-          global_state,
-          document.uri,
-          nesting,
-          dispatcher,
-          typechecker_enabled,
-        )
+        if target
+          Listeners::Definition.new(
+            @response_builder,
+            global_state,
+            document.uri,
+            nesting,
+            dispatcher,
+            typechecker_enabled,
+          )
 
-        Addon.addons.each do |addon|
-          addon.create_definition_listener(@response_builder, document.uri, nesting, dispatcher)
+          Addon.addons.each do |addon|
+            addon.create_definition_listener(@response_builder, document.uri, nesting, dispatcher)
+          end
         end
 
         @target = T.let(target, T.nilable(Prism::Node))
-        @dispatcher = dispatcher
       end
 
       sig { override.returns(T::Array[Interface::Location]) }
       def perform
-        @dispatcher.dispatch_once(@target)
+        @dispatcher.dispatch_once(@target) if @target
         @response_builder.response
       end
     end

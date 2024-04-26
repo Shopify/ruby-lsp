@@ -281,6 +281,36 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hover_precision_for_methods_with_block_arguments
+    source = <<~RUBY
+      class Foo
+        # Hello
+        def foo(&block); end
+
+        def bar
+          foo(&:argument)
+        end
+      end
+    RUBY
+
+    # Going to definition on `argument` should not take you to the `foo` method definition
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 12, line: 5 } },
+      )
+      assert_nil(server.pop_response.response)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 5 } },
+      )
+      assert_match("Hello", server.pop_response.response.contents.value)
+    end
+  end
+
   private
 
   def create_hover_addon
