@@ -24,7 +24,7 @@ export class Asdf extends VersionManager {
       {
         cwd: this.bundleUri.fsPath,
         env: {
-          ASDF_DIR: path.dirname(asdfUri.fsPath),
+          ASDF_DIR: asdfDaraDirUri.fsPath,
           ASDF_DATA_DIR: asdfDaraDirUri.fsPath,
         },
       },
