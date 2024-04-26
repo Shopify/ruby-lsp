@@ -407,6 +407,8 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     source = <<~RUBY
       class Foo
         def foo(&block); end
+
+        def argument; end
       end
 
       bar.foo(&:argument)
@@ -417,16 +419,16 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       server.process_message(
         id: 1,
         method: "textDocument/definition",
-        params: { textDocument: { uri: uri }, position: { character: 12, line: 4 } },
+        params: { textDocument: { uri: uri }, position: { character: 12, line: 6 } },
       )
-      assert_empty(server.pop_response.response)
+      assert_equal(3, server.pop_response.response.first.range.start.line)
 
       server.process_message(
         id: 1,
         method: "textDocument/definition",
-        params: { textDocument: { uri: uri }, position: { character: 4, line: 4 } },
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 6 } },
       )
-      refute_empty(server.pop_response.response)
+      assert_equal(1, server.pop_response.response.first.range.start.line)
     end
   end
 

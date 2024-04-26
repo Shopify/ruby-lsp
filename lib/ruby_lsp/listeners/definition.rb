@@ -30,6 +30,7 @@ module RubyLsp
         dispatcher.register(
           self,
           :on_call_node_enter,
+          :on_block_argument_node_enter,
           :on_constant_read_node_enter,
           :on_constant_path_node_enter,
         )
@@ -42,8 +43,19 @@ module RubyLsp
         if message == :require || message == :require_relative
           handle_require_definition(node)
         else
-          handle_method_definition(node)
+          handle_method_definition(message.to_s, self_receiver?(node))
         end
+      end
+
+      sig { params(node: Prism::BlockArgumentNode).void }
+      def on_block_argument_node_enter(node)
+        expression = node.expression
+        return unless expression.is_a?(Prism::SymbolNode)
+
+        value = expression.value
+        return unless value
+
+        handle_method_definition(value, false)
       end
 
       sig { params(node: Prism::ConstantPathNode).void }
@@ -64,12 +76,9 @@ module RubyLsp
 
       private
 
-      sig { params(node: Prism::CallNode).void }
-      def handle_method_definition(node)
-        message = node.message
-        return unless message
-
-        methods = if self_receiver?(node)
+      sig { params(message: String, self_receiver: T::Boolean).void }
+      def handle_method_definition(message, self_receiver)
+        methods = if self_receiver
           @index.resolve_method(message, @nesting.join("::"))
         else
           # If the method doesn't have a receiver, then we provide a few candidates to jump to
