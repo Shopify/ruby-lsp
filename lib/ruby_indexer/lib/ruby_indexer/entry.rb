@@ -60,11 +60,6 @@ module RubyIndexer
 
       abstract!
 
-      sig { returns(String) }
-      def short_name
-        T.must(@name.split("::").last)
-      end
-
       sig { returns(T::Array[String]) }
       def included_modules
         @included_modules ||= T.let([], T.nilable(T::Array[String]))
