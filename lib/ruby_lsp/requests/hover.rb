@@ -41,25 +41,29 @@ module RubyLsp
       end
       def initialize(document, global_state, position, dispatcher, typechecker_enabled)
         super()
-        @target = T.let(nil, T.nilable(Prism::Node))
-        @target, parent, nesting = document.locate_node(
+        target, parent, nesting = document.locate_node(
           position,
           node_types: Listeners::Hover::ALLOWED_TARGETS,
         )
 
         if (Listeners::Hover::ALLOWED_TARGETS.include?(parent.class) &&
-            !Listeners::Hover::ALLOWED_TARGETS.include?(@target.class)) ||
-            (parent.is_a?(Prism::ConstantPathNode) && @target.is_a?(Prism::ConstantReadNode))
-          @target = determine_target(
-            T.must(@target),
+            !Listeners::Hover::ALLOWED_TARGETS.include?(target.class)) ||
+            (parent.is_a?(Prism::ConstantPathNode) && target.is_a?(Prism::ConstantReadNode))
+          target = determine_target(
+            T.must(target),
             T.must(parent),
             position,
           )
+        elsif target.is_a?(Prism::CallNode) && target.name != :require && target.name != :require_relative &&
+            !covers_position?(target.message_loc, position)
+
+          target = nil
         end
 
         # Don't need to instantiate any listeners if there's no target
-        return unless @target
+        return unless target
 
+        @target = T.let(target, T.nilable(Prism::Node))
         uri = document.uri
         @response_builder = T.let(ResponseBuilders::Hover.new, ResponseBuilders::Hover)
         Listeners::Hover.new(@response_builder, global_state, uri, nesting, dispatcher, typechecker_enabled)

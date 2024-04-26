@@ -65,6 +65,20 @@ module RubyLsp
 
         target
       end
+
+      # Checks if a given location covers the position requested
+      sig { params(location: T.nilable(Prism::Location), position: T::Hash[Symbol, T.untyped]).returns(T::Boolean) }
+      def covers_position?(location, position)
+        return false unless location
+
+        start_line = location.start_line - 1
+        end_line = location.end_line - 1
+        line = position[:line]
+        character = position[:character]
+
+        (start_line < line || (start_line == line && location.start_column <= character)) &&
+          (end_line > line || (end_line == line && location.end_column >= character))
+      end
     end
   end
 end

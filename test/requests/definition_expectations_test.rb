@@ -403,6 +403,58 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definition_precision_for_methods_with_block_arguments
+    source = <<~RUBY
+      class Foo
+        def foo(&block); end
+      end
+
+      bar.foo(&:argument)
+    RUBY
+
+    # Going to definition on `argument` should not take you to the `foo` method definition
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 12, line: 4 } },
+      )
+      assert_empty(server.pop_response.response)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 4 } },
+      )
+      refute_empty(server.pop_response.response)
+    end
+  end
+
+  def test_definition_for_method_call_inside_arguments
+    source = <<~RUBY
+      class Foo
+        def foo; end
+
+        def bar(a:, b:); end
+
+        def baz
+          bar(a: foo, b: 42)
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 11, line: 6 } },
+      )
+      response = server.pop_response.response.first
+      assert_equal(1, response.range.start.line)
+      assert_equal(1, response.range.end.line)
+    end
+  end
+
   private
 
   def create_definition_addon
