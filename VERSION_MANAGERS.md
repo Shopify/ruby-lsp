@@ -1,3 +1,7 @@
+# Version Managers
+
+This document contains information and tips to help Ruby LSP's VS Code extension work with your Ruby version manager.
+
 ## asdf
 
 If you use `asdf` and the VS Code extension fails to activate the environment, try updating it to the latest version with `asdf update` and restart VS Code.
