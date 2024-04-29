@@ -135,7 +135,7 @@ You can enable logging to the VS Code output tab,
 
 We default to supporting the most common version managers, but that may not cover every single tool available. For these
 cases, we offer custom activation support. More context in the version manager
-[documentation](https://github.com/Shopify/ruby-lsp/blob/main/vscode/VERSION_MANAGERS.md).
+[documentation](VERSION_MANAGERS.md#custom-activation).
 
 ### Try to run the Ruby activation manually
 
