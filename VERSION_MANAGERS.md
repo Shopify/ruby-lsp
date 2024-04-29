@@ -1,3 +1,7 @@
+## asdf
+
+If you use `asdf` and the VS Code extension fails to activate the environment, try updating it to the latest version with `asdf update` and restart VS Code.
+
 ## Chruby
 
 If you use `chruby` but don't have a `.ruby-version` file in the project root, you can add `.ruby-version` to its parent folder as a fallback.

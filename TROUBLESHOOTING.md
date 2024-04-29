@@ -131,6 +131,10 @@ Did it select your preferred version manager? You can define which version manag
 You can enable logging to the VS Code output tab,
 [as described in the CONTRIBUTING](CONTRIBUTING.md#tracing-lsp-requests-and-responses) docs.
 
+### Environment activation failed
+
+We listed version manager related information and tips in this [documentation](VERSION_MANAGERS.md).
+
 ### My preferred version manager is not supported
 
 We default to supporting the most common version managers, but that may not cover every single tool available. For these
