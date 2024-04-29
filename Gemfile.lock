@@ -78,7 +78,7 @@ GEM
       rubocop (~> 1.0)
     rubocop-shopify (2.15.1)
       rubocop (~> 1.51)
-    rubocop-sorbet (0.8.2)
+    rubocop-sorbet (0.8.3)
       rubocop (>= 0.90.0)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
