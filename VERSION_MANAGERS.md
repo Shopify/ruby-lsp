@@ -4,7 +4,7 @@ This document contains information and tips to help Ruby LSP's VS Code extension
 
 ## asdf
 
-If you use `asdf` and the VS Code extension fails to activate the environment, try updating it to the latest version with `asdf update` and restart VS Code.
+If you use `asdf` and the VS Code extension fails to activate the environment (as described in [this issue](https://github.com/Shopify/ruby-lsp/issues/1985)), you may resolve it by updating `asdf` to the latest version with `asdf update`, and then restart VS Code.
 
 ## Chruby
 
