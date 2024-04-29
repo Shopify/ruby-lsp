@@ -22,7 +22,6 @@ jobs:
               "dirceu",
               "paracycle",
               "vinistock",
-              "aryan-soni",
               "rafaelfranca",
               "Morriar",
               "st0012",
@@ -35,7 +34,6 @@ jobs:
               const dxReviewers = [
                 "andyw8",
                 "vinistock",
-                "aryan-soni",
                 "st0012",
               ];
               const assignee = dxReviewers[Math.floor(Math.random() * dxReviewers.length)];
