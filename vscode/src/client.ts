@@ -117,6 +117,7 @@ function collectClientOptions(
       ),
       featuresConfiguration: configuration.get("featuresConfiguration"),
       formatter: configuration.get("formatter"),
+      linters: configuration.get("linters"),
     },
   };
 }

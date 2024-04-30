@@ -5,18 +5,18 @@ import os from "os";
 import * as vscode from "vscode";
 import sinon from "sinon";
 
-import { Rbenv } from "../../../ruby/rbenv";
+import { Asdf } from "../../../ruby/asdf";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import * as common from "../../../common";
 
-suite("Rbenv", () => {
+suite("Asdf", () => {
   if (os.platform() === "win32") {
     // eslint-disable-next-line no-console
-    console.log("Skipping Rbenv tests on Windows");
+    console.log("Skipping Asdf tests on Windows");
     return;
   }
 
-  test("Finds Ruby based on .ruby-version", async () => {
+  test("Finds Ruby based on .tool-versions", async () => {
     // eslint-disable-next-line no-process-env
     const workspacePath = process.env.PWD!;
     const workspaceFolder = {
@@ -25,8 +25,7 @@ suite("Rbenv", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const rbenv = new Rbenv(workspaceFolder, outputChannel);
-
+    const asdf = new Asdf(workspaceFolder, outputChannel);
     const activationScript =
       "STDERR.print({env: ENV.to_h,yjit:!!defined?(RubyVM::YJIT),version:RUBY_VERSION}.to_json)";
 
@@ -39,18 +38,35 @@ suite("Rbenv", () => {
       }),
     });
 
-    const { env, version, yjit } = await rbenv.activate();
+    const findInstallationStub = sinon
+      .stub(asdf, "findAsdfInstallation")
+      .resolves(vscode.Uri.file(`${os.homedir()}/.asdf/asdf.sh`));
+    const findDataDirStub = sinon
+      .stub(asdf, "findAsdfDataDir")
+      .resolves(vscode.Uri.file(`${os.homedir()}/.asdf`));
+
+    const { env, version, yjit } = await asdf.activate();
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `rbenv exec ruby -W0 -rjson -e '${activationScript}'`,
-        { cwd: workspacePath },
+        `. ${os.homedir()}/.asdf/asdf.sh && asdf exec ruby -W0 -rjson -e '${activationScript}'`,
+        {
+          cwd: workspacePath,
+          env: {
+            ASDF_DIR: `${os.homedir()}/.asdf`,
+            ASDF_DATA_DIR: `${os.homedir()}/.asdf`,
+          },
+        },
       ),
     );
 
     assert.strictEqual(version, "3.0.0");
     assert.strictEqual(yjit, true);
+    assert.ok(env.PATH!.includes(`${os.homedir()}/.asdf/shims`));
     assert.strictEqual(env.ANY, "true");
+
     execStub.restore();
+    findInstallationStub.restore();
+    findDataDirStub.restore();
   });
 });

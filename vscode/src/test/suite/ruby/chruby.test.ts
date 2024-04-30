@@ -10,8 +10,10 @@ import * as vscode from "vscode";
 import { Chruby } from "../../../ruby/chruby";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL } from "../../../common";
+import { RUBY_VERSION } from "../../rubyVersion";
 
-const RUBY_VERSION = "3.3.0";
+const [major, minor, _patch] = RUBY_VERSION.split(".");
+const VERSION_REGEX = `${major}\\.${minor}\\.\\d+`;
 
 // Create links to the real Ruby installations on CI and on our local machines
 function createRubySymlinks(destination: string) {
@@ -22,11 +24,11 @@ function createRubySymlinks(destination: string) {
     );
   } else if (process.env.CI) {
     fs.symlinkSync(
-      `/Users/runner/hostedtoolcache/Ruby/${RUBY_VERSION}/x64/bin/ruby`,
+      `/Users/runner/hostedtoolcache/Ruby/${RUBY_VERSION}/arm64/bin/ruby`,
       destination,
     );
   } else {
-    fs.symlinkSync("/opt/rubies/3.3.0/bin/ruby", destination);
+    fs.symlinkSync(`/opt/rubies/${RUBY_VERSION}/bin/ruby`, destination);
   }
 }
 
@@ -78,8 +80,8 @@ suite("Chruby", () => {
 
     const { env, version, yjit } = await chruby.activate();
 
-    assert.match(env.GEM_PATH!, /ruby\/3\.3\.0/);
-    assert.match(env.GEM_PATH!, /lib\/ruby\/gems\/3\.3\.0/);
+    assert.match(env.GEM_PATH!, new RegExp(`ruby/${VERSION_REGEX}`));
+    assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
   });
@@ -94,8 +96,8 @@ suite("Chruby", () => {
 
     const { env, version, yjit } = await chruby.activate();
 
-    assert.match(env.GEM_PATH!, /ruby\/3\.3\.0/);
-    assert.match(env.GEM_PATH!, /lib\/ruby\/gems\/3\.3\.0/);
+    assert.match(env.GEM_PATH!, new RegExp(`ruby/${VERSION_REGEX}`));
+    assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
   });
@@ -128,8 +130,8 @@ suite("Chruby", () => {
 
     const { env, version, yjit } = await chruby.activate();
 
-    assert.match(env.GEM_PATH!, /ruby\/3\.3\.0/);
-    assert.match(env.GEM_PATH!, /lib\/ruby\/gems\/3\.3\.0/);
+    assert.match(env.GEM_PATH!, new RegExp(`ruby/${VERSION_REGEX}`));
+    assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
   });
@@ -151,7 +153,7 @@ suite("Chruby", () => {
 
     const { env, version, yjit } = await chruby.activate();
 
-    assert.match(env.PATH!, /ruby-3\.3\.0\/bin/);
+    assert.match(env.PATH!, new RegExp(`/ruby-${RUBY_VERSION}/bin`));
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
   });

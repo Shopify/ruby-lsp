@@ -6,7 +6,9 @@ require "test_helper"
 class DiagnosticsTest < Minitest::Test
   def setup
     @global_state = RubyLsp::GlobalState.new
-    @global_state.formatter = "rubocop"
+    @global_state.apply_options({
+      initializationOptions: { linters: ["rubocop"] },
+    })
     @global_state.register_formatter(
       "rubocop",
       RubyLsp::Requests::Support::RuboCopFormatter.new,
@@ -96,7 +98,9 @@ class DiagnosticsTest < Minitest::Test
     end
 
     @global_state.register_formatter("my-custom-formatter", T.unsafe(formatter_class).new)
-    @global_state.formatter = "my-custom-formatter"
+    @global_state.apply_options({
+      initializationOptions: { linters: ["my-custom-formatter"] },
+    })
 
     diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(@global_state, document).perform)
     assert(diagnostics.find { |d| d.message == "Hello from custom formatter" })

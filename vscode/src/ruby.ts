@@ -15,6 +15,7 @@ import { Rbenv } from "./ruby/rbenv";
 import { Rvm } from "./ruby/rvm";
 import { None } from "./ruby/none";
 import { Custom } from "./ruby/custom";
+import { Asdf } from "./ruby/asdf";
 
 export enum ManagerIdentifier {
   Asdf = "asdf",
@@ -48,7 +49,6 @@ export class Ruby implements RubyInterface {
   private _error = false;
   private readonly context: vscode.ExtensionContext;
   private readonly customBundleGemfile?: string;
-  private readonly cwd: string;
   private readonly outputChannel: WorkspaceChannel;
 
   constructor(
@@ -71,10 +71,6 @@ export class Ruby implements RubyInterface {
             path.join(this.workspaceFolder.uri.fsPath, customBundleGemfile),
           );
     }
-
-    this.cwd = this.customBundleGemfile
-      ? path.dirname(this.customBundleGemfile)
-      : this.workspaceFolder.uri.fsPath;
   }
 
   get versionManager(): ManagerConfiguration {
@@ -117,7 +113,9 @@ export class Ruby implements RubyInterface {
     try {
       switch (this.versionManager.identifier) {
         case ManagerIdentifier.Asdf:
-          await this.activate("asdf exec ruby");
+          await this.runActivation(
+            new Asdf(this.workspaceFolder, this.outputChannel),
+          );
           break;
         case ManagerIdentifier.Chruby:
           await this.runActivation(
@@ -174,7 +172,7 @@ export class Ruby implements RubyInterface {
       }
 
       await vscode.window.showErrorMessage(
-        `Failed to activate ${this.versionManager} environment: ${error.message}`,
+        `Failed to activate ${this.versionManager.identifier} environment: ${error.message}`,
       );
     }
   }
@@ -190,43 +188,6 @@ export class Ruby implements RubyInterface {
     this._env = env;
     this.rubyVersion = version;
     this.yjitEnabled = (yjit && major > 3) || (major === 3 && minor >= 2);
-  }
-
-  private async activate(ruby: string) {
-    let command = this.shell ? `${this.shell} -i -c '` : "";
-
-    // The Ruby activation script is intentionally written as an array that gets joined into a one liner because some
-    // terminals cannot handle line breaks. Do not switch this to a multiline string or that will break activation for
-    // those terminals
-    const script = [
-      "STDERR.printf(%{RUBY_ENV_ACTIVATE%sRUBY_ENV_ACTIVATE}, ",
-      "JSON.dump({ env: ENV.to_h, ruby_version: RUBY_VERSION, yjit: defined?(RubyVM::YJIT) }))",
-    ].join("");
-
-    command += `${ruby} -rjson -e "${script}"`;
-
-    if (this.shell) {
-      command += "'";
-    }
-
-    this.outputChannel.info(
-      `Trying to activate Ruby environment with command: ${command} inside directory: ${this.cwd}`,
-    );
-
-    const result = await asyncExec(command, { cwd: this.cwd });
-    const rubyInfoJson = /RUBY_ENV_ACTIVATE(.*)RUBY_ENV_ACTIVATE/.exec(
-      result.stderr,
-    )![1];
-
-    const rubyInfo = JSON.parse(rubyInfoJson);
-
-    this._env = rubyInfo.env;
-    this.rubyVersion = rubyInfo.ruby_version;
-
-    const [major, minor, _patch] = rubyInfo.ruby_version.split(".").map(Number);
-    this.yjitEnabled =
-      (rubyInfo.yjit === "constant" && major > 3) ||
-      (major === 3 && minor >= 2);
   }
 
   // Fetch information related to the Ruby version. This can only be invoked after activation, so that `rubyVersion` is

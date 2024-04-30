@@ -429,6 +429,119 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definitions_are_listed_for_method_with_unknown_receiver
+    source = <<~RUBY
+      # typed: false
+
+      class A
+        def foo; end
+      end
+
+      class B
+        def foo; end
+      end
+
+      obj.foo
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 10 } },
+      )
+      response = server.pop_response.response
+
+      assert_equal(2, response.size)
+
+      range = response[0].attributes[:range].attributes
+      range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
+      assert_equal({ start: { line: 3, character: 2 }, end: { line: 3, character: 14 } }, range_hash)
+
+      range = response[1].attributes[:range].attributes
+      range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
+      assert_equal({ start: { line: 7, character: 2 }, end: { line: 7, character: 14 } }, range_hash)
+    end
+  end
+
+  def test_definitions_for_unknown_receiver_is_capped
+    source = +"# typed: false\n"
+
+    13.times do |i|
+      source << <<~RUBY
+        class Class#{i + 1}
+          def foo; end
+        end
+      RUBY
+    end
+    source << "\nobj.foo"
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 41 } },
+      )
+      response = server.pop_response.response
+
+      assert_equal(10, response.size)
+    end
+  end
+
+  def test_definition_precision_for_methods_with_block_arguments
+    source = <<~RUBY
+      class Foo
+        def foo(&block); end
+
+        def argument; end
+      end
+
+      bar.foo(&:argument)
+    RUBY
+
+    # Going to definition on `argument` should not take you to the `foo` method definition
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 12, line: 6 } },
+      )
+      assert_equal(3, server.pop_response.response.first.range.start.line)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 6 } },
+      )
+      assert_equal(1, server.pop_response.response.first.range.start.line)
+    end
+  end
+
+  def test_definition_for_method_call_inside_arguments
+    source = <<~RUBY
+      class Foo
+        def foo; end
+
+        def bar(a:, b:); end
+
+        def baz
+          bar(a: foo, b: 42)
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 11, line: 6 } },
+      )
+      response = server.pop_response.response.first
+      assert_equal(1, response.range.start.line)
+      assert_equal(1, response.range.end.line)
+    end
+  end
+
   private
 
   def create_definition_addon
