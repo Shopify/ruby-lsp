@@ -344,6 +344,91 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_jumping_to_autoload_definition_when_declaration_exists
+    source = <<~RUBY
+      # typed: false
+
+      class Foo
+        autoload :Bar, "bar"
+
+        class Bar; end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 3, line: 3 } },
+      )
+      assert_equal(uri.to_s, server.pop_response.response.first.attributes[:uri])
+    end
+  end
+
+  def test_jumping_to_autoload_definition_with_two_definition
+    first_source = <<~RUBY
+      # typed: false
+
+      class Foo
+        autoload :Bar, "bar"
+
+        class Bar; end
+      end
+    RUBY
+
+    with_server(first_source) do |server, uri|
+      second_uri = URI("file:///folder/fake2.rb")
+      second_source = <<~RUBY
+        # typed: false
+
+        class Foo
+          class Bar; end
+        end
+      RUBY
+      server.process_message({
+        method: "textDocument/didOpen",
+        params: {
+          textDocument: {
+            uri: second_uri,
+            text: second_source,
+            version: 1,
+          },
+        },
+      })
+      index = server.global_state.index
+      index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(second_uri.to_standardized_path)), second_source)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 3, line: 3 } },
+      )
+
+      first_definition, second_definition = server.pop_response.response
+      assert_equal(uri.to_s, first_definition.attributes[:uri])
+      assert_equal(second_uri.to_s, second_definition.attributes[:uri])
+    end
+  end
+
+  def test_does_nothing_when_autoload_declaration_does_not_exist
+    source = <<~RUBY
+      # typed: false
+
+      class Foo
+        autoload :Bar, "bar"
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 3, line: 3 } },
+      )
+      assert_empty(server.pop_response.response)
+    end
+  end
+
   private
 
   def create_definition_addon
