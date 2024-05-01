@@ -145,6 +145,6 @@ export class Chruby extends VersionManager {
       { cwd: this.bundleUri.fsPath },
     );
 
-    return JSON.parse(result.stderr);
+    return this.parseWithErrorHandling(result.stderr);
   }
 }

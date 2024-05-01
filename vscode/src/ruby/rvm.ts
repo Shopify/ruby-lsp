@@ -25,7 +25,7 @@ export class Rvm extends VersionManager {
       },
     );
 
-    const parsedResult = JSON.parse(result.stderr);
+    const parsedResult = this.parseWithErrorHandling(result.stderr);
     const activatedKeys = Object.entries(parsedResult.env)
       .map(([key, value]) => `${key}=${value}`)
       .join(" ");
