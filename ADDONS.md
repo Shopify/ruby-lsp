@@ -301,6 +301,62 @@ module RubyLsp
 end
 ```
 
+### Registering for file update events
+
+By default, the Ruby LSP listens for changes to files ending in `.rb` to continuously update its index when Ruby source
+code is modified. If your addon uses a tool that is configured through a file (like RuboCop and its `.rubocop.yml`)
+you can register for changes to these files and react when the configuration changes.
+
+**Note**: you will receive events from `ruby-lsp` and other addons as well, in addition to your own registered ones.
+
+
+```ruby
+module RubyLsp
+  module MyGem
+    class Addon < ::RubyLsp::Addon
+      def activate(global_state, message_queue)
+        register_additional_file_watchers(global_state, message_queue)
+      end
+
+      def deactivate; end
+
+      def register_additional_file_watchers(global_state, message_queue)
+        # Clients are not required to implement this capability
+        return unless global_state.supports_watching_files
+
+        message_queue << Request.new(
+          id: "ruby-lsp-my-gem-file-watcher",
+          method: "client/registerCapability",
+          params: Interface::RegistrationParams.new(
+            registrations: [
+              Interface::Registration.new(
+                id: "workspace/didChangeWatchedFilesMyGem",
+                method: "workspace/didChangeWatchedFiles",
+                register_options: Interface::DidChangeWatchedFilesRegistrationOptions.new(
+                  watchers: [
+                    Interface::FileSystemWatcher.new(
+                      glob_pattern: "**/.my-config.yml",
+                      kind: Constant::WatchKind::CREATE | Constant::WatchKind::CHANGE | Constant::WatchKind::DELETE,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        )
+      end
+
+
+      def workspace_did_change_watched_files(changes)
+        if changes.any? { |change| change[:uri].end_with?(".my-config.yml") }
+          # Do something to reload the config here
+        end
+      end
+    end
+  end
+end
+```
+
 ### Ensuring consistent documentation
 
 The Ruby LSP exports a Rake task to help authors make sure all of their listeners are documented and include demos and
