@@ -318,6 +318,10 @@
           "description": "Ignores if the project uses a typechecker. Only intended to be used while working on the Ruby LSP itself",
           "type": "boolean",
           "default": false
+        },
+        "rubyLsp.rubyExecutablePath": {
+          "description": "Path to the Ruby installation. This is used as a fallback if version manager activation fails",
+          "type": "string"
         }
       }
     },

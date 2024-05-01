@@ -36,7 +36,7 @@ export class RubyVersionStatus extends StatusItem {
 
     this.item.name = "Ruby LSP Status";
     this.item.command = {
-      title: "Change version manager",
+      title: "Configure",
       command: Command.SelectVersionManager,
     };
 

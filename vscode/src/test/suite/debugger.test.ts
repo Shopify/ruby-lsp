@@ -190,7 +190,13 @@ suite("Debugger", () => {
       'source "https://rubygems.org"\ngem "debug"',
     );
 
-    const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
+    const context = {
+      subscriptions: [],
+      workspaceState: {
+        get: () => undefined,
+        update: () => undefined,
+      },
+    } as unknown as vscode.ExtensionContext;
     const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
     const workspaceFolder: vscode.WorkspaceFolder = {
       uri: vscode.Uri.file(tmpPath),
