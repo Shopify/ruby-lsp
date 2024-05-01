@@ -253,6 +253,10 @@
             "miseExecutablePath": {
               "description": "The path to the Mise executable, if not installed in ~/.local/bin/mise",
               "type": "string"
+            },
+            "chrubyRubies": {
+              "description": "An array of extra directories to search for Ruby installations when using chruby. Equivalent to the RUBIES environment variable",
+              "type": "array"
             }
           },
           "default": {

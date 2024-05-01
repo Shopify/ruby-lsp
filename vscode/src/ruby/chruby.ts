@@ -5,6 +5,7 @@ import path from "path";
 import * as vscode from "vscode";
 
 import { asyncExec } from "../common";
+import { WorkspaceChannel } from "../workspaceChannel";
 
 import { ActivationResult, VersionManager } from "./versionManager";
 
@@ -21,6 +22,23 @@ export class Chruby extends VersionManager {
     vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "rubies"),
     vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".rubies"),
   ];
+
+  constructor(
+    workspaceFolder: vscode.WorkspaceFolder,
+    outputChannel: WorkspaceChannel,
+  ) {
+    super(workspaceFolder, outputChannel);
+
+    const configuredRubies = vscode.workspace
+      .getConfiguration("rubyLsp")
+      .get<string[] | undefined>("rubyVersionManager.chrubyRubies");
+
+    if (configuredRubies) {
+      this.rubyInstallationUris.push(
+        ...configuredRubies.map((path) => vscode.Uri.file(path)),
+      );
+    }
+  }
 
   async activate(): Promise<ActivationResult> {
     const versionInfo = await this.discoverRubyVersion();
@@ -72,7 +90,8 @@ export class Chruby extends VersionManager {
     }
 
     throw new Error(
-      `Cannot find installation directory for Ruby version ${possibleVersionNames.join(" or ")}`,
+      `Cannot find installation directory for Ruby version ${possibleVersionNames.join(" or ")}.
+       Searched in ${this.rubyInstallationUris.map((uri) => uri.fsPath).join(", ")}`,
     );
   }
 
