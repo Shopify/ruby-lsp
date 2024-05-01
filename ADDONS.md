@@ -60,20 +60,15 @@ require "ruby_lsp/addon"
 module RubyLsp
   module MyGem
     class Addon < ::RubyLsp::Addon
-      extend T::Sig
-
       # Performs any activation that needs to happen once when the language server is booted
-      sig { override.params(message_queue: Thread::Queue).void }
       def activate(message_queue)
       end
 
       # Performs any cleanup when shutting down the server, like terminating a subprocess
-      sig { override.void }
       def deactivate
       end
 
       # Returns the name of the addon
-      sig { override.returns(String) }
       def name
         "Ruby LSP My Gem"
       end
@@ -136,31 +131,18 @@ following listener implementation.
 module RubyLsp
   module MyGem
     class Addon < ::RubyLsp::Addon
-      extend T::Sig
-
-      sig { override.params(message_queue: Thread::Queue).void }
       def activate(message_queue)
         @message_queue = message_queue
         @config = SomeConfiguration.new
       end
 
-      sig { override.void }
       def deactivate
       end
 
-      sig { override.returns(String) }
       def name
         "Ruby LSP My Gem"
       end
 
-      sig do
-        override.params(
-          response_builder: ResponseBuilders::Hover,
-          nesting: T::Array[String],
-          index: RubyIndexer::Index,
-          dispatcher: Prism::Dispatcher,
-        ).void
-      end
       def create_hover_listener(response_builder, nesting, index, dispatcher)
         # Use the listener factory methods to instantiate listeners with parameters sent by the LSP combined with any
         # pre-computed information in the addon. These factory methods are invoked on every request
@@ -168,8 +150,6 @@ module RubyLsp
       end
 
     class Hover
-      extend T::Sig
-
       # The Requests::Support::Common module provides some helper methods you may find helpful.
       include Requests::Support::Common
 
@@ -180,7 +160,6 @@ module RubyLsp
       # to this object, which will then build the Ruby LSP's response.
       # Additionally, listeners are instantiated with a message_queue to push notifications (not used in this example).
       # See "Sending notifications to the client" for more information.
-      sig { params(client: RailsClient, response_builder: ResponseBuilders::Hover, config: SomeConfiguration, dispatcher: Prism::Dispatcher).void }
       def initialize(client, response_builder, config, dispatcher)
         super(dispatcher)
 
@@ -195,7 +174,6 @@ module RubyLsp
 
       # Listeners must define methods for each event they registered with the dispatcher. In this case, we have to
       # define `on_constant_read_node_enter` to specify what this listener should do every time we find a constant
-      sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read_node_enter(node)
         # Certain builders are made available to listeners to build LSP responses. The classes under `RubyLsp::ResponseBuilders`
         # are used to build responses conforming to the LSP Specification.

@@ -151,7 +151,6 @@ Create a `Gemfile` for development tools inside that directory.
 
 ```ruby
 # the/directory/Gemfile
-# frozen_string_literal: true
 
 source "https://rubygems.org"
 

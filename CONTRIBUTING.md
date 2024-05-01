@@ -67,8 +67,6 @@ To add a new expectations test runner for a new request handler:
 - Add a new file under `test/requests/MY_REQUEST_expectations_test.rb`
 
 ```ruby
-# frozen_string_literal: true
-
 require "test_helper"
 require "expectations/expectations_test_runner"
 
@@ -84,8 +82,6 @@ the base run and assert method to achieve the right behaviour. See `diagnostics_
 example
 
 ```ruby
-# frozen_string_literal: true
-
 require "test_helper"
 require "expectations/expectations_test_runner"
 
