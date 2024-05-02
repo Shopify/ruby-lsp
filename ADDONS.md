@@ -148,6 +148,7 @@ module RubyLsp
         # pre-computed information in the addon. These factory methods are invoked on every request
         Hover.new(client, response_builder, @config, dispatcher)
       end
+    end
 
     class Hover
       # The Requests::Support::Common module provides some helper methods you may find helpful.
@@ -175,9 +176,10 @@ module RubyLsp
       # Listeners must define methods for each event they registered with the dispatcher. In this case, we have to
       # define `on_constant_read_node_enter` to specify what this listener should do every time we find a constant
       def on_constant_read_node_enter(node)
-        # Certain builders are made available to listeners to build LSP responses. The classes under `RubyLsp::ResponseBuilders`
-        # are used to build responses conforming to the LSP Specification.
-        # ResponseBuilders::Hover itself also requires a content category to be specified (title, links, or documentation).
+        # Certain builders are made available to listeners to build LSP responses. The classes under
+        # `RubyLsp::ResponseBuilders` are used to build responses conforming to the LSP Specification.
+        # ResponseBuilders::Hover itself also requires a content category to be specified (title, links,
+        # or documentation).
         @response_builder.push("Hello!", category: :documentation)
       end
     end
@@ -271,7 +273,7 @@ module RubyLsp
           params: Interface::ProgressParams.new(
             token: "progress-token-id",
             value: Interface::WorkDoneProgressBegin.new(kind: "begin", title: "Starting slow work!"),
-          )
+          ),
         )
       end
     end
@@ -324,7 +326,6 @@ module RubyLsp
         )
       end
 
-
       def workspace_did_change_watched_files(changes)
         if changes.any? { |change| change[:uri].end_with?(".my-config.yml") }
           # Do something to reload the config here
@@ -348,7 +349,7 @@ require "ruby_lsp/check_docs"
 # The second argument is the file list of GIF files with the demos of all listeners
 RubyLsp::CheckDocs.new(
   FileList["#{__dir__}/lib/ruby_lsp/ruby_lsp_rails/**/*.rb"],
-  FileList.new("#{__dir__}/misc/**/*.gif")
+  FileList.new("#{__dir__}/misc/**/*.gif"),
 )
 ```
 
