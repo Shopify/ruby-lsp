@@ -33,7 +33,7 @@ export class Shadowenv extends VersionManager {
         },
       );
 
-      const parsedResult = JSON.parse(result.stderr);
+      const parsedResult = this.parseWithErrorHandling(result.stderr);
       return {
         env: { ...process.env, ...parsedResult.env },
         yjit: parsedResult.yjit,
