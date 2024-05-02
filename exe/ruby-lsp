@@ -18,6 +18,10 @@ parser = OptionParser.new do |opts|
     options[:debug] = true
   end
 
+  opts.on("--time-index", "Measure the time it takes to index the project") do
+    options[:time_index] = true
+  end
+
   opts.on(
     "--branch [BRANCH]",
     "Launch the Ruby LSP using the specified branch rather than the release version",
@@ -88,6 +92,16 @@ if options[:debug]
   ensure
     $stdout = original_stdout
   end
+end
+
+if options[:time_index]
+  require "benchmark"
+
+  index = RubyIndexer::Index.new
+
+  result = Benchmark.realtime { index.index_all }
+  puts "Ruby LSP v#{RubyLsp::VERSION}: Indexing took #{result.round(5)} seconds"
+  return
 end
 
 RubyLsp::Server.new.start
