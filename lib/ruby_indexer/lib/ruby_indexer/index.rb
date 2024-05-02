@@ -185,9 +185,11 @@ module RubyIndexer
     sig { params(indexable_path: IndexablePath, source: T.nilable(String)).void }
     def index_single(indexable_path, source = nil)
       content = source || File.read(indexable_path.full_path)
+      dispatcher = Prism::Dispatcher.new
+
       result = Prism.parse(content)
-      collector = Collector.new(self, result, indexable_path.full_path)
-      collector.collect(result.value)
+      DeclarationListener.new(self, dispatcher, result, indexable_path.full_path)
+      dispatcher.dispatch(result.value)
 
       require_path = indexable_path.require_path
       @require_paths_tree.insert(require_path, indexable_path) if require_path
