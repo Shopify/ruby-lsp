@@ -17,6 +17,8 @@ if RuboCop.const_defined?(:LSP) # This condition will be removed when requiring 
   RuboCop::LSP.enable
 end
 
+require "ruby_lsp/requests/support/ast_translation"
+
 module RubyLsp
   module Requests
     module Support
@@ -74,6 +76,7 @@ module RubyLsp
           @offenses = T.let([], T::Array[RuboCop::Cop::Offense])
           @errors = T.let([], T::Array[String])
           @warnings = T.let([], T::Array[String])
+          @parse_result = T.let(nil, T.nilable(Prism::ParseLexResult))
 
           args += DEFAULT_ARGS
           rubocop_options = ::RuboCop::Options.new.parse(args).first
@@ -82,14 +85,15 @@ module RubyLsp
           super(rubocop_options, config_store)
         end
 
-        sig { params(path: String, contents: String).void }
-        def run(path, contents)
+        sig { params(path: String, contents: String, parse_result: Prism::ParseLexResult).void }
+        def run(path, contents, parse_result)
           # Clear Runner state between runs since we get a single instance of this class
           # on every use site.
           @errors = []
           @warnings = []
           @offenses = []
           @options[:stdin] = contents
+          @parse_result = parse_result
 
           super([path])
 
@@ -107,6 +111,29 @@ module RubyLsp
         sig { returns(String) }
         def formatted_source
           @options[:stdin]
+        end
+
+        sig { params(file: String).returns(RuboCop::ProcessedSource) }
+        def get_processed_source(file)
+          config = @config_store.for_file(file)
+          parser_engine = config.parser_engine
+          return super unless parser_engine == :parser_prism
+
+          processed_source = T.unsafe(::RuboCop::AST::ProcessedSource).new(
+            @options[:stdin],
+            3.3,
+            file,
+            parser_engine: parser_engine,
+            prism_result: @parse_result,
+          )
+          processed_source.config = config
+          processed_source.registry = mobilized_cop_classes(config)
+
+          # We have to reset the result to nil after returning the processed source the first time. This is needed for
+          # formatting because RuboCop will keep re-parsing the same file until no more auto-corrects can be applied. If
+          # we didn't reset it, we would end up operating in a stale AST
+          @parse_result = nil
+          processed_source
         end
 
         class << self

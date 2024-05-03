@@ -514,14 +514,14 @@ class RubyDocumentTest < Minitest::Test
       version: 2,
     )
 
-    parse_result = Prism.parse(text)
+    parse_result = Prism.parse_lex(text)
 
     # When there's a new edit, we parse it the first `parse` invocation
-    Prism.expects(:parse).with(document.source).once.returns(parse_result)
+    Prism.expects(:parse_lex).with(document.source).once.returns(parse_result)
     document.parse
 
     # If there are no new edits, we don't do anything
-    Prism.expects(:parse).never
+    Prism.expects(:parse_lex).never
     document.parse
 
     document.push_edits(
@@ -530,7 +530,7 @@ class RubyDocumentTest < Minitest::Test
     )
 
     # If there's another edit, we parse it once again
-    Prism.expects(:parse).with(document.source).once.returns(parse_result)
+    Prism.expects(:parse_lex).with(document.source).once.returns(parse_result)
     document.parse
   end
 

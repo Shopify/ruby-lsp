@@ -22,7 +22,7 @@ module RubyLsp
           filename = T.must(uri.to_standardized_path || uri.opaque)
 
           # Invoke RuboCop with just this file in `paths`
-          @format_runner.run(filename, document.source)
+          @format_runner.run(filename, document.source, document.parse_result)
           @format_runner.formatted_source
         end
 
@@ -35,7 +35,7 @@ module RubyLsp
         def run_diagnostic(uri, document)
           filename = T.must(uri.to_standardized_path || uri.opaque)
           # Invoke RuboCop with just this file in `paths`
-          @diagnostic_runner.run(filename, document.source)
+          @diagnostic_runner.run(filename, document.source, document.parse_result)
 
           @diagnostic_runner.offenses.map do |offense|
             Support::RuboCopDiagnostic.new(document, offense, uri).to_lsp_diagnostic
