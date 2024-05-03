@@ -3,12 +3,12 @@
 
 module RubyLsp
   class RubyDocument < Document
-    sig { override.returns(Prism::ParseResult) }
+    sig { override.returns(Prism::ParseLexResult) }
     def parse
       return @parse_result unless @needs_parsing
 
       @needs_parsing = false
-      @parse_result = Prism.parse(@source)
+      @parse_result = Prism.parse_lex(@source)
     end
   end
 end
