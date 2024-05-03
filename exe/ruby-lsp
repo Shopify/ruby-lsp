@@ -84,13 +84,10 @@ if options[:debug]
   end
 
   begin
-    original_stdout = $stdout
-    $stdout = $stderr
+    ENV.delete("RUBY_DEBUG_IRB_CONSOLE")
     require "debug/open_nonstop"
   rescue LoadError
     $stderr.puts("You need to install the debug gem to use the --debug flag")
-  ensure
-    $stdout = original_stdout
   end
 end
 
