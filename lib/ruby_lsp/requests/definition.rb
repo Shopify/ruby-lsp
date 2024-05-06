@@ -60,7 +60,7 @@ module RubyLsp
             position,
           )
         elsif target.is_a?(Prism::CallNode) && target.name != :require && target.name != :require_relative &&
-            !covers_position?(target.message_loc, position)
+            !covers_position?(target.message_loc, position) && target.name != :autoload
           # If the target is a method call, we need to ensure that the requested position is exactly on top of the
           # method identifier. Otherwise, we risk showing definitions for unrelated things
           target = nil
