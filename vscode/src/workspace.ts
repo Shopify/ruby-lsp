@@ -193,7 +193,7 @@ export class Workspace implements WorkspaceInterface {
     });
 
     // If the gem is not yet installed, install it
-    if (!stdout.includes("ruby-lsp")) {
+    if (!/^ruby-lsp[\s]/.exec(stdout)) {
       await asyncExec("gem install ruby-lsp", {
         cwd: this.workspaceFolder.uri.fsPath,
         env: this.ruby.env,
