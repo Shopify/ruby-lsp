@@ -289,7 +289,7 @@
           "default": null
         },
         "rubyLsp.bundleGemfile": {
-          "description": "Relative or absolute path to the Gemfile to use for bundling the Ruby LSP server. Only necessary when using a separate Gemfile for the Ruby LSP",
+          "description": "Relative or absolute path to the Gemfile to use for bundling the Ruby LSP server. Do not use this if you're working on a monorepo or your project's Gemfile is in a subdirectory (look into multiroot workspaces instead). Only necessary when using a separate Gemfile for the Ruby LSP",
           "type": "string",
           "default": ""
         },
