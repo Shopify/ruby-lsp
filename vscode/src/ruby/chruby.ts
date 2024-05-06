@@ -43,6 +43,10 @@ export class Chruby extends VersionManager {
   async activate(): Promise<ActivationResult> {
     const versionInfo = await this.discoverRubyVersion();
     const rubyUri = await this.findRubyUri(versionInfo);
+    this.outputChannel.info(
+      `Discovered Ruby installation at ${rubyUri.fsPath}`,
+    );
+
     const { defaultGems, gemHome, yjit, version } =
       await this.runActivationScript(rubyUri);
 
@@ -168,7 +172,7 @@ export class Chruby extends VersionManager {
       }
 
       this.outputChannel.info(
-        `Discovered Ruby version ${version} from ${rubyVersionUri.toString()}`,
+        `Discovered Ruby version ${version} from ${rubyVersionUri.fsPath}`,
       );
       return { engine: match.groups.engine, version: match.groups.version };
     }
