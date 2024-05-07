@@ -71,6 +71,43 @@ module RubyIndexer
       assert_equal("Bar", second_entry.owner.name)
     end
 
+    def test_visibility_tracking
+      index(<<~RUBY)
+        private def foo
+        end
+
+        def bar; end
+
+        protected
+
+        def baz; end
+      RUBY
+
+      assert_entry("foo", Entry::InstanceMethod, "/fake/path/foo.rb:0-8:1-3", visibility: :private)
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:3-0:3-12", visibility: :public)
+      assert_entry("baz", Entry::InstanceMethod, "/fake/path/foo.rb:7-0:7-12", visibility: :protected)
+    end
+
+    def test_visibility_tracking_with_nested_class_or_modules
+      index(<<~RUBY)
+        class Foo
+          private
+
+          def foo; end
+
+          class Bar
+            def bar; end
+          end
+
+          def baz; end
+        end
+      RUBY
+
+      assert_entry("foo", Entry::InstanceMethod, "/fake/path/foo.rb:3-2:3-14", visibility: :private)
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:6-4:6-16", visibility: :public)
+      assert_entry("baz", Entry::InstanceMethod, "/fake/path/foo.rb:9-2:9-14", visibility: :private)
+    end
+
     def test_method_with_parameters
       index(<<~RUBY)
         class Foo

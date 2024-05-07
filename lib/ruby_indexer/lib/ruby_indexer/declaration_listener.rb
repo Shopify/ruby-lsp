@@ -11,6 +11,7 @@ module RubyIndexer
     def initialize(index, dispatcher, parse_result, file_path)
       @index = index
       @file_path = file_path
+      @visibility_stack = T.let([[:public]], T::Array[T::Array[Symbol]])
       @comments_by_line = T.let(
         parse_result.comments.to_h do |c|
           [c.location.start_line, c]
@@ -35,6 +36,7 @@ module RubyIndexer
         :on_def_node_enter,
         :on_def_node_leave,
         :on_call_node_enter,
+        :on_call_node_leave,
         :on_multi_write_node_enter,
         :on_constant_path_write_node_enter,
         :on_constant_path_or_write_node_enter,
@@ -50,6 +52,7 @@ module RubyIndexer
 
     sig { params(node: Prism::ClassNode).void }
     def on_class_node_enter(node)
+      @visibility_stack.push([:public])
       name = node.constant_path.location.slice
 
       comments = collect_comments(node)
@@ -77,10 +80,12 @@ module RubyIndexer
     def on_class_node_leave(node)
       @stack.pop
       @owner_stack.pop
+      @visibility_stack.pop
     end
 
     sig { params(node: Prism::ModuleNode).void }
     def on_module_node_enter(node)
+      @visibility_stack.push([:public])
       name = node.constant_path.location.slice
 
       comments = collect_comments(node)
@@ -95,6 +100,7 @@ module RubyIndexer
     def on_module_node_leave(node)
       @stack.pop
       @owner_stack.pop
+      @visibility_stack.pop
     end
 
     sig { params(node: Prism::MultiWriteNode).void }
@@ -198,6 +204,21 @@ module RubyIndexer
         handle_module_operation(node, :included_modules)
       when :prepend
         handle_module_operation(node, :prepended_modules)
+      when :public, :protected, :private
+        change_scope_visibility(message)
+      end
+    end
+
+    sig { params(node: Prism::CallNode).void }
+    def on_call_node_leave(node)
+      message = node.name
+      case message
+      when :public, :protected, :private
+        # We want to restore the visibility stack when we leave a method definition with a visibility modifier
+        # e.g. `private def foo; end`
+        if node.arguments&.arguments&.first&.is_a?(Prism::DefNode)
+          restore_scope_visibility
+        end
       end
     end
 
@@ -206,6 +227,7 @@ module RubyIndexer
       @inside_def = true
       method_name = node.name.to_s
       comments = collect_comments(node)
+
       case node.receiver
       when nil
         @index << Entry::InstanceMethod.new(
@@ -214,6 +236,7 @@ module RubyIndexer
           node.location,
           comments,
           node.parameters,
+          current_visibility,
           @owner_stack.last,
         )
       when Prism::SelfNode
@@ -223,6 +246,7 @@ module RubyIndexer
           node.location,
           comments,
           node.parameters,
+          current_visibility,
           @owner_stack.last,
         )
       end
@@ -354,8 +378,15 @@ module RubyIndexer
 
         next unless name && loc
 
-        @index << Entry::Accessor.new(name, @file_path, loc, comments, @owner_stack.last) if reader
-        @index << Entry::Accessor.new("#{name}=", @file_path, loc, comments, @owner_stack.last) if writer
+        @index << Entry::Accessor.new(name, @file_path, loc, comments, current_visibility, @owner_stack.last) if reader
+        @index << Entry::Accessor.new(
+          "#{name}=",
+          @file_path,
+          loc,
+          comments,
+          current_visibility,
+          @owner_stack.last,
+        ) if writer
       end
     end
 
@@ -379,6 +410,23 @@ module RubyIndexer
       end
       collection = operation == :included_modules ? owner.included_modules : owner.prepended_modules
       collection.concat(names)
+    end
+
+    sig { returns(Symbol) }
+    def current_visibility
+      T.must(@visibility_stack.last&.last)
+    end
+
+    sig { params(visibility: Symbol).void }
+    def change_scope_visibility(visibility)
+      scope_visibility_stack = T.must(@visibility_stack.last)
+      scope_visibility_stack.push(visibility)
+    end
+
+    sig { void }
+    def restore_scope_visibility
+      scope_visibility_stack = T.must(@visibility_stack.last)
+      scope_visibility_stack.pop
     end
   end
 end
