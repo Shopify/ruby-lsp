@@ -49,6 +49,28 @@ module RubyIndexer
       assert_no_entry("bar")
     end
 
+    def test_method_under_dynamic_class_or_module
+      index(<<~RUBY)
+        module Foo
+          class self::Bar
+            def bar
+            end
+          end
+        end
+
+        module Bar
+          def bar
+          end
+        end
+      RUBY
+
+      assert_equal(2, @index["bar"].length)
+      first_entry = T.must(@index["bar"].first)
+      assert_equal("Foo::self::Bar", first_entry.owner.name)
+      second_entry = T.must(@index["bar"].last)
+      assert_equal("Bar", second_entry.owner.name)
+    end
+
     def test_method_with_parameters
       index(<<~RUBY)
         class Foo

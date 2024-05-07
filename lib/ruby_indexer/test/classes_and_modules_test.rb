@@ -69,7 +69,23 @@ module RubyIndexer
         end
       RUBY
 
+      assert_entry("self::Bar", Entry::Class, "/fake/path/foo.rb:0-0:1-3")
+    end
+
+    def test_dynamically_namespaced_class_doesnt_affect_other_classes
+      index(<<~RUBY)
+        class Foo
+          class self::Bar
+          end
+
+          class Bar
+          end
+        end
+      RUBY
+
       refute_entry("self::Bar")
+      assert_entry("Foo", Entry::Class, "/fake/path/foo.rb:0-0:6-3")
+      assert_entry("Foo::Bar", Entry::Class, "/fake/path/foo.rb:4-2:5-5")
     end
 
     def test_empty_statements_module
@@ -124,7 +140,23 @@ module RubyIndexer
         end
       RUBY
 
-      refute_entry("self::Bar")
+      assert_entry("self::Bar", Entry::Module, "/fake/path/foo.rb:0-0:1-3")
+    end
+
+    def test_dynamically_namespaced_module_doesnt_affect_other_modules
+      index(<<~RUBY)
+        module Foo
+          class self::Bar
+          end
+
+          module Bar
+          end
+        end
+      RUBY
+
+      assert_entry("Foo::self::Bar", Entry::Class, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("Foo", Entry::Module, "/fake/path/foo.rb:0-0:6-3")
+      assert_entry("Foo::Bar", Entry::Module, "/fake/path/foo.rb:4-2:5-5")
     end
 
     def test_nested_modules_and_classes
