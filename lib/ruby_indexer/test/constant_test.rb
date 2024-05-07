@@ -12,10 +12,13 @@ module RubyIndexer
         class ::Bar
           FOO = 2
         end
+
+        BAR = 3 if condition
       RUBY
 
       assert_entry("FOO", Entry::Constant, "/fake/path/foo.rb:0-0:0-7")
       assert_entry("Bar::FOO", Entry::Constant, "/fake/path/foo.rb:3-2:3-9")
+      assert_entry("BAR", Entry::Constant, "/fake/path/foo.rb:6-0:6-7")
     end
 
     def test_constant_or_writes

@@ -14,6 +14,15 @@ module RubyIndexer
       assert_entry("Foo", Entry::Class, "/fake/path/foo.rb:0-0:1-3")
     end
 
+    def test_conditional_class
+      index(<<~RUBY)
+        class Foo
+        end if condition
+      RUBY
+
+      assert_entry("Foo", Entry::Class, "/fake/path/foo.rb:0-0:1-3")
+    end
+
     def test_class_with_statements
       index(<<~RUBY)
         class Foo
@@ -67,6 +76,15 @@ module RubyIndexer
       index(<<~RUBY)
         module Foo
         end
+      RUBY
+
+      assert_entry("Foo", Entry::Module, "/fake/path/foo.rb:0-0:1-3")
+    end
+
+    def test_conditional_module
+      index(<<~RUBY)
+        module Foo
+        end if condition
       RUBY
 
       assert_entry("Foo", Entry::Module, "/fake/path/foo.rb:0-0:1-3")

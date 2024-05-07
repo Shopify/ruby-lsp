@@ -16,6 +16,17 @@ module RubyIndexer
       assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
     end
 
+    def test_conditional_method
+      index(<<~RUBY)
+        class Foo
+          def bar
+          end if condition
+        end
+      RUBY
+
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+    end
+
     def test_singleton_method_using_self_receiver
       index(<<~RUBY)
         class Foo
