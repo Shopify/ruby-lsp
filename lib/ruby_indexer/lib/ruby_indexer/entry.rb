@@ -99,7 +99,7 @@ module RubyIndexer
           parent_class: T.nilable(String),
         ).void
       end
-      def initialize(name, file_path, location, comments, encoding, parent_class)
+      def initialize(name, file_path, location, comments, encoding, parent_class) # rubocop:disable Metrics/ParameterLists
         super(name, file_path, location, comments, encoding)
         @parent_class = T.let(parent_class, T.nilable(String))
       end
@@ -200,7 +200,7 @@ module RubyIndexer
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, encoding, owner)
+      def initialize(name, file_path, location, comments, encoding, owner) # rubocop:disable Metrics/ParameterLists
         super(name, file_path, location, comments, encoding)
         @owner = owner
       end
@@ -386,7 +386,13 @@ module RubyIndexer
 
       sig { params(target: String, unresolved_alias: UnresolvedAlias).void }
       def initialize(target, unresolved_alias)
-        super(unresolved_alias.name, unresolved_alias.file_path, unresolved_alias.location, unresolved_alias.comments, unresolved_alias.encoding)
+        super(
+          unresolved_alias.name,
+          unresolved_alias.file_path,
+          unresolved_alias.location,
+          unresolved_alias.comments,
+          unresolved_alias.encoding
+        )
 
         @target = target
       end

@@ -9,7 +9,13 @@ module RubyIndexer
     attr_reader :encoding
 
     sig do
-      params(index: Index, dispatcher: Prism::Dispatcher, parse_result: Prism::ParseResult, file_path: String, encoding: Encoding).void
+      params(
+        index: Index,
+        dispatcher: Prism::Dispatcher,
+        parse_result: Prism::ParseResult,
+        file_path: String,
+        encoding: Encoding,
+      ).void
     end
     def initialize(index, dispatcher, parse_result, file_path, encoding)
       @index = index
