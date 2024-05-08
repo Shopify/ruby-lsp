@@ -45,4 +45,27 @@ export class RubyInstaller extends Chruby {
          Searched in ${possibleInstallationUris.map((uri) => uri.fsPath).join(", ")}`,
     );
   }
+
+  protected async runActivationScript(rubyExecutableUri: vscode.Uri): Promise<{
+    defaultGems: string;
+    gemHome: string;
+    yjit: boolean;
+    version: string;
+  }> {
+    const { defaultGems, gemHome, yjit, version } =
+      await super.runActivationScript(rubyExecutableUri);
+
+    return {
+      defaultGems: this.standardizePath(defaultGems),
+      gemHome: this.standardizePath(gemHome),
+      yjit,
+      version,
+    };
+  }
+
+  // Sometimes Windows paths are prefixed by `//?/` and use forward slashes as separators. We need to both remove the
+  // prefix and convert the path to use backslashes before we insert anything into the environment PATH.
+  private standardizePath(path: string): string {
+    return path.replace("//?/", "").replace(/\//g, "\\");
+  }
 }

@@ -29,7 +29,6 @@ import { Telemetry, TelemetryApi, TelemetryEvent } from "../../telemetry";
 import Client from "../../client";
 import { WorkspaceChannel } from "../../workspaceChannel";
 import { RUBY_VERSION } from "../rubyVersion";
-import { asyncExec } from "../../common";
 
 const [major, minor, _patch] = RUBY_VERSION.split(".");
 
@@ -152,17 +151,6 @@ async function launchClient(workspaceUri: vscode.Uri) {
   const ruby = new Ruby(context, workspaceFolder, outputChannel);
   await ruby.activateRuby();
   ruby.env.RUBY_LSP_BYPASS_TYPECHECKER = "true";
-
-  try {
-    await asyncExec("gem install ruby-lsp", {
-      env: ruby.env,
-      cwd: workspaceUri.fsPath,
-    });
-  } catch (error: any) {
-    assert.fail(
-      `Failed to install Ruby LSP: ${error.message}\n${fakeLogger.receivedMessages}`,
-    );
-  }
 
   const telemetry = new Telemetry(context, new FakeApi());
   const client = new Client(
