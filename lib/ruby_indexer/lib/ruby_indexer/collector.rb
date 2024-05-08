@@ -7,8 +7,11 @@ module RubyIndexer
 
     LEAVE_EVENT = T.let(Object.new.freeze, Object)
 
-    sig { params(index: Index, parse_result: Prism::ParseResult, file_path: String).void }
-    def initialize(index, parse_result, file_path)
+    sig { returns(Encoding) }
+    attr_reader :encoding
+
+    sig { params(index: Index, parse_result: Prism::ParseResult, file_path: String, encoding: Encoding).void }
+    def initialize(index, parse_result, file_path, encoding)
       @index = index
       @file_path = file_path
       @stack = T.let([], T::Array[String])
@@ -20,6 +23,7 @@ module RubyIndexer
       )
       @queue = T.let([], T::Array[Object])
       @current_owner = T.let(nil, T.nilable(Entry::Namespace))
+      @encoding = encoding
 
       super()
     end
@@ -170,6 +174,7 @@ module RubyIndexer
           @file_path,
           node.location,
           comments,
+          encoding,
           node.parameters,
           @current_owner,
         )
@@ -179,6 +184,7 @@ module RubyIndexer
           @file_path,
           node.location,
           comments,
+          encoding,
           node.parameters,
           @current_owner,
         )
@@ -234,21 +240,21 @@ module RubyIndexer
 
       @index << case value
       when Prism::ConstantReadNode, Prism::ConstantPathNode
-        Entry::UnresolvedAlias.new(value.slice, @stack.dup, name, @file_path, node.location, comments)
+        Entry::UnresolvedAlias.new(value.slice, @stack.dup, name, @file_path, node.location, comments, encoding)
       when Prism::ConstantWriteNode, Prism::ConstantAndWriteNode, Prism::ConstantOrWriteNode,
         Prism::ConstantOperatorWriteNode
 
         # If the right hand side is another constant assignment, we need to visit it because that constant has to be
         # indexed too
         @queue.prepend(value)
-        Entry::UnresolvedAlias.new(value.name.to_s, @stack.dup, name, @file_path, node.location, comments)
+        Entry::UnresolvedAlias.new(value.name.to_s, @stack.dup, name, @file_path, node.location, comments, encoding)
       when Prism::ConstantPathWriteNode, Prism::ConstantPathOrWriteNode, Prism::ConstantPathOperatorWriteNode,
         Prism::ConstantPathAndWriteNode
 
         @queue.prepend(value)
-        Entry::UnresolvedAlias.new(value.target.slice, @stack.dup, name, @file_path, node.location, comments)
+        Entry::UnresolvedAlias.new(value.target.slice, @stack.dup, name, @file_path, node.location, comments, encoding)
       else
-        Entry::Constant.new(name, @file_path, node.location, comments)
+        Entry::Constant.new(name, @file_path, node.location, comments, encoding)
       end
     end
 
@@ -261,7 +267,7 @@ module RubyIndexer
       end
 
       comments = collect_comments(node)
-      @current_owner = Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments)
+      @current_owner = Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments, encoding)
       @index << @current_owner
       @stack << name
       @queue.prepend(node.body, LEAVE_EVENT)
@@ -289,6 +295,7 @@ module RubyIndexer
         @file_path,
         node.location,
         comments,
+        encoding,
         parent_class,
       )
       @index << @current_owner
@@ -350,8 +357,8 @@ module RubyIndexer
 
         next unless name && loc
 
-        @index << Entry::Accessor.new(name, @file_path, loc, comments, @current_owner) if reader
-        @index << Entry::Accessor.new("#{name}=", @file_path, loc, comments, @current_owner) if writer
+        @index << Entry::Accessor.new(name, @file_path, loc, comments, encoding, @current_owner) if reader
+        @index << Entry::Accessor.new("#{name}=", @file_path, loc, comments, encoding, @current_owner) if writer
       end
     end
 

@@ -32,7 +32,7 @@ module RubyLsp
       @linters = T.let([], T::Array[String])
       @test_library = T.let("minitest", String)
       @typechecker = T.let(true, T::Boolean)
-      @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
+      @index = T.let(RubyIndexer::Index.new(@encoding), RubyIndexer::Index)
       @supported_formatters = T.let({}, T::Hash[String, Requests::Support::Formatter])
       @supports_watching_files = T.let(false, T::Boolean)
     end
@@ -77,6 +77,7 @@ module RubyLsp
       else
         Encoding::UTF_32
       end
+      @index = T.let(RubyIndexer::Index.new(@encoding), RubyIndexer::Index)
 
       file_watching_caps = options.dig(:capabilities, :workspace, :didChangeWatchedFiles)
       if file_watching_caps&.dig(:dynamicRegistration) && file_watching_caps&.dig(:relativePatternSupport)

@@ -10,8 +10,11 @@ module RubyIndexer
     # The minimum Jaro-Winkler similarity score for an entry to be considered a match for a given fuzzy search query
     ENTRY_SIMILARITY_THRESHOLD = 0.7
 
-    sig { void }
-    def initialize
+    sig { returns(Encoding) }
+    attr_reader :encoding
+
+    sig { params(encoding: Encoding).void }
+    def initialize(encoding)
       # Holds all entries in the index using the following format:
       # {
       #  "Foo" => [#<Entry::Class>, #<Entry::Class>],
@@ -31,6 +34,8 @@ module RubyIndexer
 
       # Holds all require paths for every indexed item so that we can provide autocomplete for requires
       @require_paths_tree = T.let(PrefixTree[IndexablePath].new, PrefixTree[IndexablePath])
+
+      @encoding = encoding
     end
 
     sig { params(indexable: IndexablePath).void }
@@ -186,7 +191,7 @@ module RubyIndexer
     def index_single(indexable_path, source = nil)
       content = source || File.read(indexable_path.full_path)
       result = Prism.parse(content)
-      collector = Collector.new(self, result, indexable_path.full_path)
+      collector = Collector.new(self, result, indexable_path.full_path, encoding)
       collector.collect(result.value)
 
       require_path = indexable_path.require_path

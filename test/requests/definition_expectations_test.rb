@@ -41,6 +41,15 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           ),
         ),
       )
+      index.index_single(
+        RubyIndexer::IndexablePath.new(
+          "#{Dir.pwd}/lib",
+          File.expand_path(
+            "../../test/fixtures/multibyte_characters.rb",
+            __dir__,
+          ),
+        ),
+      )
 
       server.process_message(
         id: 1,

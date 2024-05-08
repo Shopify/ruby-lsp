@@ -6,7 +6,7 @@ require "test_helper"
 module RubyIndexer
   class TestCase < Minitest::Test
     def setup
-      @index = Index.new
+      @index = Index.new(Encoding::UTF_8)
     end
 
     private

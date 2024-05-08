@@ -20,19 +20,24 @@ module RubyIndexer
     sig { returns(Symbol) }
     attr_accessor :visibility
 
+    sig { returns(Encoding) }
+    attr_reader :encoding
+
     sig do
       params(
         name: String,
         file_path: String,
         location: T.any(Prism::Location, RubyIndexer::Location),
         comments: T::Array[String],
+        encoding: Encoding,
       ).void
     end
-    def initialize(name, file_path, location, comments)
+    def initialize(name, file_path, location, comments, encoding)
       @name = name
       @file_path = file_path
       @comments = comments
       @visibility = T.let(:public, Symbol)
+      @encoding = encoding
 
       @location = T.let(
         if location.is_a?(Prism::Location)
@@ -41,6 +46,8 @@ module RubyIndexer
             location.end_line,
             location.start_column,
             location.end_column,
+            location.start_code_units_column(encoding),
+            location.end_code_units_column(encoding),
           )
         else
           location
@@ -88,15 +95,17 @@ module RubyIndexer
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
+          encoding: Encoding,
           parent_class: T.nilable(String),
         ).void
       end
-      def initialize(name, file_path, location, comments, parent_class)
-        super(name, file_path, location, comments)
+      def initialize(name, file_path, location, comments, encoding, parent_class)
+        super(name, file_path, location, comments, encoding)
         @parent_class = T.let(parent_class, T.nilable(String))
       end
     end
 
+    # えんてぃてぃ
     class Constant < Entry
     end
 
@@ -188,11 +197,12 @@ module RubyIndexer
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
+          encoding: Encoding,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, owner)
-        super(name, file_path, location, comments)
+      def initialize(name, file_path, location, comments, encoding, owner)
+        super(name, file_path, location, comments, encoding)
         @owner = owner
       end
 
@@ -226,12 +236,13 @@ module RubyIndexer
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
+          encoding: Encoding,
           parameters_node: T.nilable(Prism::ParametersNode),
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, parameters_node, owner) # rubocop:disable Metrics/ParameterLists
-        super(name, file_path, location, comments, owner)
+      def initialize(name, file_path, location, comments, encoding, parameters_node, owner) # rubocop:disable Metrics/ParameterLists
+        super(name, file_path, location, comments, encoding, owner)
 
         @parameters = T.let(list_params(parameters_node), T::Array[Parameter])
       end
@@ -356,10 +367,11 @@ module RubyIndexer
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
+          encoding: Encoding,
         ).void
       end
-      def initialize(target, nesting, name, file_path, location, comments) # rubocop:disable Metrics/ParameterLists
-        super(name, file_path, location, comments)
+      def initialize(target, nesting, name, file_path, location, comments, encoding) # rubocop:disable Metrics/ParameterLists
+        super(name, file_path, location, comments, encoding)
 
         @target = target
         @nesting = nesting
@@ -375,7 +387,7 @@ module RubyIndexer
 
       sig { params(target: String, unresolved_alias: UnresolvedAlias).void }
       def initialize(target, unresolved_alias)
-        super(unresolved_alias.name, unresolved_alias.file_path, unresolved_alias.location, unresolved_alias.comments)
+        super(unresolved_alias.name, unresolved_alias.file_path, unresolved_alias.location, unresolved_alias.comments, unresolved_alias.encoding)
 
         @target = target
       end

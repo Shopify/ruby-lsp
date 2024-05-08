@@ -142,16 +142,16 @@ module RubyLsp
 
         # Skip if the current node doesn't cover the desired position
         loc = candidate.location
-        next unless (loc.start_offset...loc.end_offset).cover?(char_position)
+        next unless (loc.start_code_units_offset(encoding)...loc.end_code_units_offset(encoding)).cover?(char_position)
 
         # If the node's start character is already past the position, then we should've found the closest node
         # already
-        break if char_position < loc.start_offset
+        break if char_position < loc.start_code_units_offset(encoding)
 
         # If the candidate starts after the end of the previous nesting level, then we've exited that nesting level and
         # need to pop the stack
         previous_level = nesting.last
-        nesting.pop if previous_level && loc.start_offset > previous_level.location.end_offset
+        nesting.pop if previous_level && loc.start_code_units_offset(encoding) > previous_level.location.end_code_units_offset(encoding)
 
         # Keep track of the nesting where we found the target. This is used to determine the fully qualified name of the
         # target when it is a constant
@@ -164,7 +164,7 @@ module RubyLsp
 
         # If the current node is narrower than or equal to the previous closest node, then it is more precise
         closest_loc = closest.location
-        if loc.end_offset - loc.start_offset <= closest_loc.end_offset - closest_loc.start_offset
+        if loc.end_code_units_offset(encoding) - loc.start_code_units_offset(encoding) <= closest_loc.end_code_units_offset(encoding) - closest_loc.start_code_units_offset(encoding)
           parent = closest
           closest = candidate
         end

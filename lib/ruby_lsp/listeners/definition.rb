@@ -96,8 +96,11 @@ module RubyLsp
           @response_builder << Interface::Location.new(
             uri: URI::Generic.from_path(path: file_path).to_s,
             range: Interface::Range.new(
-              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
-              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
+              start: Interface::Position.new(
+                line: location.start_line - 1,
+                character: location.start_code_units_column,
+              ),
+              end: Interface::Position.new(line: location.end_line - 1, character: location.end_code_units_column),
             ),
           )
         end
@@ -166,8 +169,11 @@ module RubyLsp
           @response_builder << Interface::Location.new(
             uri: URI::Generic.from_path(path: file_path).to_s,
             range: Interface::Range.new(
-              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
-              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
+              start: Interface::Position.new(
+                line: location.start_line - 1,
+                character: location.start_code_units_column,
+              ),
+              end: Interface::Position.new(line: location.end_line - 1, character: location.end_code_units_column),
             ),
           )
         end
