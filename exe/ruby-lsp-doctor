@@ -13,14 +13,11 @@ if File.exist?(".index.yml")
   RubyIndexer.configuration.apply_config(config)
 end
 
-index = RubyIndexer::Index.new
+index = RubyIndexer::Index.new(Encoding::UTF_8)
 
 puts "Globbing for indexable files"
 
 RubyIndexer.configuration.indexables.each do |indexable|
   puts "indexing: #{indexable.full_path}"
-  content = File.read(indexable.full_path)
-  result = Prism.parse(content)
-  collector = RubyIndexer::Collector.new(index, result, indexable.full_path)
-  collector.collect(result.value)
+  index.index_single(indexable)
 end

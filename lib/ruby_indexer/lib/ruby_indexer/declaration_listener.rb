@@ -2,16 +2,16 @@
 # frozen_string_literal: true
 
 module RubyIndexer
-  class Collector
+  class DeclarationListener
     extend T::Sig
-
-    LEAVE_EVENT = T.let(Object.new.freeze, Object)
 
     sig { returns(Encoding) }
     attr_reader :encoding
 
-    sig { params(index: Index, parse_result: Prism::ParseResult, file_path: String, encoding: Encoding).void }
-    def initialize(index, parse_result, file_path, encoding)
+    sig do
+      params(index: Index, dispatcher: Prism::Dispatcher, parse_result: Prism::ParseResult, file_path: String, encoding: Encoding).void
+    end
+    def initialize(index, dispatcher, parse_result, file_path, encoding)
       @index = index
       @file_path = file_path
       @stack = T.let([], T::Array[String])
@@ -21,64 +21,81 @@ module RubyIndexer
         end,
         T::Hash[Integer, Prism::Comment],
       )
-      @queue = T.let([], T::Array[Object])
+      @inside_def = T.let(false, T::Boolean)
       @current_owner = T.let(nil, T.nilable(Entry::Namespace))
       @encoding = encoding
 
-      super()
+      dispatcher.register(
+        self,
+        :on_class_node_enter,
+        :on_class_node_leave,
+        :on_module_node_enter,
+        :on_module_node_leave,
+        :on_def_node_enter,
+        :on_def_node_leave,
+        :on_call_node_enter,
+        :on_multi_write_node_enter,
+        :on_constant_path_write_node_enter,
+        :on_constant_path_or_write_node_enter,
+        :on_constant_path_operator_write_node_enter,
+        :on_constant_path_and_write_node_enter,
+        :on_constant_or_write_node_enter,
+        :on_constant_write_node_enter,
+        :on_constant_or_write_node_enter,
+        :on_constant_and_write_node_enter,
+        :on_constant_operator_write_node_enter,
+      )
     end
 
-    sig { params(node: Prism::Node).void }
-    def collect(node)
-      @queue = [node]
+    sig { params(node: Prism::ClassNode).void }
+    def on_class_node_enter(node)
+      name = node.constant_path.location.slice
 
-      until @queue.empty?
-        node_or_event = @queue.shift
+      return unless /^[A-Z:]/.match?(name)
 
-        case node_or_event
-        when Prism::ProgramNode
-          @queue << node_or_event.statements
-        when Prism::StatementsNode
-          T.unsafe(@queue).prepend(*node_or_event.body)
-        when Prism::ClassNode
-          add_class_entry(node_or_event)
-        when Prism::ModuleNode
-          add_module_entry(node_or_event)
-        when Prism::MultiWriteNode
-          handle_multi_write_node(node_or_event)
-        when Prism::ConstantPathWriteNode
-          handle_constant_path_write_node(node_or_event)
-        when Prism::ConstantPathOrWriteNode
-          handle_constant_path_or_write_node(node_or_event)
-        when Prism::ConstantPathOperatorWriteNode
-          handle_constant_path_operator_write_node(node_or_event)
-        when Prism::ConstantPathAndWriteNode
-          handle_constant_path_and_write_node(node_or_event)
-        when Prism::ConstantWriteNode
-          handle_constant_write_node(node_or_event)
-        when Prism::ConstantOrWriteNode
-          name = fully_qualify_name(node_or_event.name.to_s)
-          add_constant(node_or_event, name)
-        when Prism::ConstantAndWriteNode
-          name = fully_qualify_name(node_or_event.name.to_s)
-          add_constant(node_or_event, name)
-        when Prism::ConstantOperatorWriteNode
-          name = fully_qualify_name(node_or_event.name.to_s)
-          add_constant(node_or_event, name)
-        when Prism::CallNode
-          handle_call_node(node_or_event)
-        when Prism::DefNode
-          handle_def_node(node_or_event)
-        when LEAVE_EVENT
-          @stack.pop
-        end
+      comments = collect_comments(node)
+
+      superclass = node.superclass
+      parent_class = case superclass
+      when Prism::ConstantReadNode, Prism::ConstantPathNode
+        superclass.slice
       end
+
+      @current_owner = Entry::Class.new(
+        fully_qualify_name(name),
+        @file_path,
+        node.location,
+        comments,
+        encoding,
+        parent_class,
+      )
+      @index << @current_owner
+      @stack << name
     end
 
-    private
+    sig { params(node: Prism::ClassNode).void }
+    def on_class_node_leave(node)
+      @stack.pop
+    end
+
+    sig { params(node: Prism::ModuleNode).void }
+    def on_module_node_enter(node)
+      name = node.constant_path.location.slice
+      return unless /^[A-Z:]/.match?(name)
+
+      comments = collect_comments(node)
+      @current_owner = Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments, encoding)
+      @index << @current_owner
+      @stack << name
+    end
+
+    sig { params(node: Prism::ModuleNode).void }
+    def on_module_node_leave(node)
+      @stack.pop
+    end
 
     sig { params(node: Prism::MultiWriteNode).void }
-    def handle_multi_write_node(node)
+    def on_multi_write_node_enter(node)
       value = node.value
       values = value.is_a?(Prism::ArrayNode) && value.opening_loc ? value.elements : []
 
@@ -98,7 +115,7 @@ module RubyIndexer
     end
 
     sig { params(node: Prism::ConstantPathWriteNode).void }
-    def handle_constant_path_write_node(node)
+    def on_constant_path_write_node_enter(node)
       # ignore variable constants like `var::FOO` or `self.class::FOO`
       target = node.target
       return unless target.parent.nil? || target.parent.is_a?(Prism::ConstantReadNode)
@@ -108,7 +125,7 @@ module RubyIndexer
     end
 
     sig { params(node: Prism::ConstantPathOrWriteNode).void }
-    def handle_constant_path_or_write_node(node)
+    def on_constant_path_or_write_node_enter(node)
       # ignore variable constants like `var::FOO` or `self.class::FOO`
       target = node.target
       return unless target.parent.nil? || target.parent.is_a?(Prism::ConstantReadNode)
@@ -118,7 +135,7 @@ module RubyIndexer
     end
 
     sig { params(node: Prism::ConstantPathOperatorWriteNode).void }
-    def handle_constant_path_operator_write_node(node)
+    def on_constant_path_operator_write_node_enter(node)
       # ignore variable constants like `var::FOO` or `self.class::FOO`
       target = node.target
       return unless target.parent.nil? || target.parent.is_a?(Prism::ConstantReadNode)
@@ -128,7 +145,7 @@ module RubyIndexer
     end
 
     sig { params(node: Prism::ConstantPathAndWriteNode).void }
-    def handle_constant_path_and_write_node(node)
+    def on_constant_path_and_write_node_enter(node)
       # ignore variable constants like `var::FOO` or `self.class::FOO`
       target = node.target
       return unless target.parent.nil? || target.parent.is_a?(Prism::ConstantReadNode)
@@ -138,13 +155,31 @@ module RubyIndexer
     end
 
     sig { params(node: Prism::ConstantWriteNode).void }
-    def handle_constant_write_node(node)
+    def on_constant_write_node_enter(node)
+      name = fully_qualify_name(node.name.to_s)
+      add_constant(node, name)
+    end
+
+    sig { params(node: Prism::ConstantOrWriteNode).void }
+    def on_constant_or_write_node_enter(node)
+      name = fully_qualify_name(node.name.to_s)
+      add_constant(node, name)
+    end
+
+    sig { params(node: Prism::ConstantAndWriteNode).void }
+    def on_constant_and_write_node_enter(node)
+      name = fully_qualify_name(node.name.to_s)
+      add_constant(node, name)
+    end
+
+    sig { params(node: Prism::ConstantOperatorWriteNode).void }
+    def on_constant_operator_write_node_enter(node)
       name = fully_qualify_name(node.name.to_s)
       add_constant(node, name)
     end
 
     sig { params(node: Prism::CallNode).void }
-    def handle_call_node(node)
+    def on_call_node_enter(node)
       message = node.name
 
       case message
@@ -157,14 +192,15 @@ module RubyIndexer
       when :attr_accessor
         handle_attribute(node, reader: true, writer: true)
       when :include
-        handle_include(node)
+        handle_module_operation(node, :included_modules)
       when :prepend
-        handle_prepend(node)
+        handle_module_operation(node, :prepended_modules)
       end
     end
 
     sig { params(node: Prism::DefNode).void }
-    def handle_def_node(node)
+    def on_def_node_enter(node)
+      @inside_def = true
       method_name = node.name.to_s
       comments = collect_comments(node)
       case node.receiver
@@ -190,6 +226,13 @@ module RubyIndexer
         )
       end
     end
+
+    sig { params(node: Prism::DefNode).void }
+    def on_def_node_leave(node)
+      @inside_def = false
+    end
+
+    private
 
     sig { params(node: Prism::CallNode).void }
     def handle_private_constant(node)
@@ -246,61 +289,14 @@ module RubyIndexer
 
         # If the right hand side is another constant assignment, we need to visit it because that constant has to be
         # indexed too
-        @queue.prepend(value)
         Entry::UnresolvedAlias.new(value.name.to_s, @stack.dup, name, @file_path, node.location, comments, encoding)
       when Prism::ConstantPathWriteNode, Prism::ConstantPathOrWriteNode, Prism::ConstantPathOperatorWriteNode,
         Prism::ConstantPathAndWriteNode
 
-        @queue.prepend(value)
         Entry::UnresolvedAlias.new(value.target.slice, @stack.dup, name, @file_path, node.location, comments, encoding)
       else
         Entry::Constant.new(name, @file_path, node.location, comments, encoding)
       end
-    end
-
-    sig { params(node: Prism::ModuleNode).void }
-    def add_module_entry(node)
-      name = node.constant_path.location.slice
-      unless /^[A-Z:]/.match?(name)
-        @queue << node.body
-        return
-      end
-
-      comments = collect_comments(node)
-      @current_owner = Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments, encoding)
-      @index << @current_owner
-      @stack << name
-      @queue.prepend(node.body, LEAVE_EVENT)
-    end
-
-    sig { params(node: Prism::ClassNode).void }
-    def add_class_entry(node)
-      name = node.constant_path.location.slice
-
-      unless /^[A-Z:]/.match?(name)
-        @queue << node.body
-        return
-      end
-
-      comments = collect_comments(node)
-
-      superclass = node.superclass
-      parent_class = case superclass
-      when Prism::ConstantReadNode, Prism::ConstantPathNode
-        superclass.slice
-      end
-
-      @current_owner = Entry::Class.new(
-        fully_qualify_name(name),
-        @file_path,
-        node.location,
-        comments,
-        encoding,
-        parent_class,
-      )
-      @index << @current_owner
-      @stack << name
-      @queue.prepend(node.body, LEAVE_EVENT)
     end
 
     sig { params(node: Prism::Node).returns(T::Array[String]) }
@@ -362,18 +358,9 @@ module RubyIndexer
       end
     end
 
-    sig { params(node: Prism::CallNode).void }
-    def handle_include(node)
-      handle_module_operation(node, :included_modules)
-    end
-
-    sig { params(node: Prism::CallNode).void }
-    def handle_prepend(node)
-      handle_module_operation(node, :prepended_modules)
-    end
-
     sig { params(node: Prism::CallNode, operation: Symbol).void }
     def handle_module_operation(node, operation)
+      return if @inside_def
       return unless @current_owner
 
       arguments = node.arguments&.arguments
