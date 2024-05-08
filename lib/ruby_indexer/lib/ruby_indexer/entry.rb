@@ -105,7 +105,6 @@ module RubyIndexer
       end
     end
 
-    # えんてぃてぃ
     class Constant < Entry
     end
 
