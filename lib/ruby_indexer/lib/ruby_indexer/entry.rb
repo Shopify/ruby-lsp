@@ -69,13 +69,30 @@ module RubyIndexer
       abstract!
 
       sig { returns(T::Array[String]) }
-      def included_modules
-        @included_modules ||= T.let([], T.nilable(T::Array[String]))
+      attr_reader :nesting
+
+      sig do
+        params(
+          nesting: T::Array[String],
+          file_path: String,
+          location: T.any(Prism::Location, RubyIndexer::Location),
+          comments: T::Array[String],
+        ).void
+      end
+      def initialize(nesting, file_path, location, comments)
+        @name = T.let(nesting.join("::"), String)
+        # The original nesting where this namespace was discovered
+        @nesting = nesting
+
+        super(@name, file_path, location, comments)
       end
 
-      sig { returns(T::Array[String]) }
-      def prepended_modules
-        @prepended_modules ||= T.let([], T.nilable(T::Array[String]))
+      # Stores all prepend, include and extend operations in the exact order they were discovered in the source code.
+      # Maintaining the order is essential to linearize ancestors the right way when a module is both included and
+      # prepended
+      sig { returns(T::Array[[Symbol, String]]) }
+      def modules
+        @modules ||= T.let([], T.nilable(T::Array[[Symbol, String]]))
       end
     end
 
@@ -92,15 +109,16 @@ module RubyIndexer
 
       sig do
         params(
-          name: String,
+          nesting: T::Array[String],
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
           parent_class: T.nilable(String),
         ).void
       end
-      def initialize(name, file_path, location, comments, parent_class)
-        super(name, file_path, location, comments)
+      def initialize(nesting, file_path, location, comments, parent_class)
+        super(nesting, file_path, location, comments)
+
         @parent_class = T.let(parent_class, T.nilable(String))
       end
     end

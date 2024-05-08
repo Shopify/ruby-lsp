@@ -6,6 +6,7 @@ module RubyIndexer
     extend T::Sig
 
     class UnresolvableAliasError < StandardError; end
+    class NonExistingNamespaceError < StandardError; end
 
     # The minimum Jaro-Winkler similarity score for an entry to be considered a match for a given fuzzy search query
     ENTRY_SIMILARITY_THRESHOLD = 0.7
@@ -31,6 +32,9 @@ module RubyIndexer
 
       # Holds all require paths for every indexed item so that we can provide autocomplete for requires
       @require_paths_tree = T.let(PrefixTree[IndexablePath].new, PrefixTree[IndexablePath])
+
+      # Holds the linearized ancestors list for every namespace
+      @ancestors = T.let({}, T::Hash[String, T::Array[String]])
     end
 
     sig { params(indexable: IndexablePath).void }
@@ -253,6 +257,100 @@ module RubyIndexer
       method_entries.grep(Entry::Member).select do |entry|
         entry.owner&.name == owner_name
       end
+    end
+
+    # Linearizes the ancestors for a given name, returning the order of namespaces in which Ruby will search for method
+    # or constant declarations.
+    #
+    # When we add an ancestor in Ruby, that namespace might have ancestors of its own. Therefore, we need to linearize
+    # everything recursively to ensure that we are placing ancestors in the right order. For example, if you include a
+    # module that prepends another module, then the prepend module appears before the included module.
+    #
+    # The order of ancestors is [linearized_prepends, self, linearized_includes, linearized_superclass]
+    sig { params(name: String).returns(T::Array[String]) }
+    def linearized_ancestors_of(name)
+      # If we already computed the ancestors for this namespace, return it straight away
+      cached_ancestors = @ancestors[name]
+      return cached_ancestors if cached_ancestors
+
+      ancestors = [name]
+
+      # Cache the linearized ancestors array eagerly. This is important because we might have circular dependencies and
+      # this will prevent us from falling into an infinite recursion loop. Because we mutate the ancestors array later,
+      # the cache will reflect the final result
+      @ancestors[name] = ancestors
+
+      # If we don't have an entry for `name`, raise
+      entries = self[name]
+      raise NonExistingNamespaceError, "No entry found for #{name}" unless entries
+
+      # If none of the entries for `name` are namespaces, return an empty array
+      namespaces = T.cast(entries.select { |e| e.is_a?(Entry::Namespace) }, T::Array[Entry::Namespace])
+      raise NonExistingNamespaceError, "None of the entries for #{name} are modules or classes" if namespaces.empty?
+
+      modules = namespaces.flat_map(&:modules)
+      prepended_modules_count = 0
+      included_modules_count = 0
+
+      # The original nesting where we discovered this namespace, so that we resolve the correct names of the
+      # included/prepended/extended modules and parent classes
+      nesting = T.must(namespaces.first).nesting
+
+      modules.each do |operation, module_name|
+        resolved_module = resolve(module_name, nesting)
+        next unless resolved_module
+
+        fully_qualified_name = T.must(resolved_module.first).name
+
+        case operation
+        when :prepend
+          # When a module is prepended, Ruby checks if it hasn't been prepended already to prevent adding it in front of
+          # the actual namespace twice. However, it does not check if it has been included because you are allowed to
+          # prepend the same module after it has already been included
+          linearized_prepends = linearized_ancestors_of(fully_qualified_name)
+
+          # When there are duplicate prepended modules, we have to insert the new prepends after the existing ones. For
+          # example, if the current ancestors are `["A", "Foo"]` and we try to prepend `["A", "B"]`, then `"B"` has to
+          # be inserted after `"A`
+          uniq_prepends = linearized_prepends - T.must(ancestors[0...prepended_modules_count])
+          insert_position = linearized_prepends.length - uniq_prepends.length
+
+          T.unsafe(ancestors).insert(
+            insert_position,
+            *(linearized_prepends - T.must(ancestors[0...prepended_modules_count])),
+          )
+
+          prepended_modules_count += linearized_prepends.length
+        when :include
+          # When including a module, Ruby will always prevent duplicate entries in case the module has already been
+          # prepended or included
+          linearized_includes = linearized_ancestors_of(fully_qualified_name)
+
+          T.unsafe(ancestors).insert(
+            ancestors.length - included_modules_count,
+            *(linearized_includes - ancestors),
+          )
+
+          included_modules_count += linearized_includes.length
+        end
+      end
+
+      # Find the first class entry that has a parent class. Notice that if the developer makes a mistake and inherits
+      # from two diffent classes in different files, we simply ignore it
+      superclass = T.cast(namespaces.find { |n| n.is_a?(Entry::Class) && n.parent_class }, T.nilable(Entry::Class))
+
+      if superclass
+        # If the user makes a mistake and creates a class that inherits from itself, this method would throw a stack
+        # error. We need to ensure that this isn't the case
+        parent_class = T.must(superclass.parent_class)
+
+        resolved_parent_class = resolve(parent_class, nesting)
+        parent_class_name = resolved_parent_class&.first&.name
+
+        ancestors.concat(linearized_ancestors_of(parent_class_name)) if parent_class_name && name != parent_class_name
+      end
+
+      ancestors
     end
 
     private

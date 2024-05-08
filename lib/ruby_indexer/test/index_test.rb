@@ -313,5 +313,361 @@ module RubyIndexer
       @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"))
       assert_empty(@index.instance_variable_get(:@entries))
     end
+
+    def test_linearized_ancestors_basic_ordering
+      index(<<~RUBY)
+        module A; end
+        module B; end
+
+        class Foo
+          prepend A
+          prepend B
+        end
+
+        class Bar
+          include A
+          include B
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "B",
+          "A",
+          "Foo",
+          # "Object",
+          # "Kernel",
+          # "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Foo"),
+      )
+
+      assert_equal(
+        [
+          "Bar",
+          "B",
+          "A",
+          # "Object",
+          # "Kernel",
+          # "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Bar"),
+      )
+    end
+
+    def test_linearized_ancestors
+      index(<<~RUBY)
+        module A; end
+        module B; end
+        module C; end
+
+        module D
+          include A
+        end
+
+        module E
+          prepend B
+        end
+
+        module F
+          include C
+          include A
+        end
+
+        class Bar
+          prepend F
+        end
+
+        class Foo < Bar
+          include E
+          prepend D
+        end
+      RUBY
+
+      # Object, Kernel and BasicObject are intentionally commented out for now until we develop a strategy for indexing
+      # declarations made in C code
+      assert_equal(
+        [
+          "D",
+          "A",
+          "Foo",
+          "B",
+          "E",
+          "F",
+          "A",
+          "C",
+          "Bar",
+          # "Object",
+          # "Kernel",
+          # "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Foo"),
+      )
+    end
+
+    def test_linearized_ancestors_duplicates
+      index(<<~RUBY)
+        module A; end
+        module B
+          include A
+        end
+
+        class Foo
+          include B
+          include A
+        end
+
+        class Bar
+          prepend B
+          prepend A
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "Foo",
+          "B",
+          "A",
+          # "Object",
+          # "Kernel",
+          # "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Foo"),
+      )
+
+      assert_equal(
+        [
+          "B",
+          "A",
+          "Bar",
+          # "Object",
+          # "Kernel",
+          # "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Bar"),
+      )
+    end
+
+    def test_linearizing_ancestors_is_cached
+      index(<<~RUBY)
+        module C; end
+        module A; end
+        module B
+          include A
+        end
+
+        class Foo
+          include B
+          include A
+        end
+      RUBY
+
+      @index.linearized_ancestors_of("Foo")
+      ancestors = @index.instance_variable_get(:@ancestors)
+      assert(ancestors.key?("Foo"))
+      assert(ancestors.key?("A"))
+      assert(ancestors.key?("B"))
+      refute(ancestors.key?("C"))
+    end
+
+    def test_duplicate_prepend_include
+      index(<<~RUBY)
+        module A; end
+
+        class Foo
+          prepend A
+          include A
+        end
+
+        class Bar
+          include A
+          prepend A
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "A",
+          "Foo",
+          # "Object",
+          # "Kernel",
+          # "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Foo"),
+      )
+
+      assert_equal(
+        [
+          "A",
+          "Bar",
+          "A",
+          # "Object",
+          # "Kernel",
+          # "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Bar"),
+      )
+    end
+
+    def test_linearizing_ancestors_handles_circular_parent_class
+      index(<<~RUBY)
+        class Foo < Foo
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "Foo",
+          # "Object",
+          # "Kernel",
+          # "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Foo"),
+      )
+    end
+
+    def test_ancestors_linearization_complex_prepend_duplication
+      index(<<~RUBY)
+        module A; end
+        module B
+          prepend A
+        end
+        module C
+          prepend B
+        end
+
+        class Foo
+          prepend A
+          prepend C
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "A",
+          "B",
+          "C",
+          "Foo",
+          # "Object",
+          # "Kernel",
+          # "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Foo"),
+      )
+    end
+
+    def test_ancestors_linearization_complex_include_duplication
+      index(<<~RUBY)
+        module A; end
+        module B
+          include A
+        end
+        module C
+          include B
+        end
+
+        class Foo
+          include A
+          include C
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "Foo",
+          "C",
+          "B",
+          "A",
+          # "Object",
+          # "Kernel",
+          # "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Foo"),
+      )
+    end
+
+    def test_linearizing_ancestors_that_need_to_be_resolved
+      index(<<~RUBY)
+        module Foo
+          module Baz
+          end
+          module Qux
+          end
+
+          class Something; end
+
+          class Bar < Something
+            include Baz
+            prepend Qux
+          end
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "Foo::Qux",
+          "Foo::Bar",
+          "Foo::Baz",
+          "Foo::Something",
+          # "Object",
+          # "Kernel",
+          # "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Foo::Bar"),
+      )
+    end
+
+    def test_linearizing_ancestors_for_non_existing_namespaces
+      index(<<~RUBY)
+        module Kernel
+          def Array(a); end
+        end
+      RUBY
+
+      assert_raises(Index::NonExistingNamespaceError) do
+        @index.linearized_ancestors_of("Foo")
+      end
+
+      assert_raises(Index::NonExistingNamespaceError) do
+        @index.linearized_ancestors_of("Array")
+      end
+    end
+
+    def test_linearizing_circular_ancestors
+      index(<<~RUBY)
+        module M1
+          include M2
+        end
+
+        module M2
+          include M1
+        end
+
+        module A1
+          include A2
+        end
+
+        module A2
+          include A3
+        end
+
+        module A3
+          include A1
+        end
+
+        class Foo < Foo
+          include Foo
+        end
+
+        module Bar
+          include Bar
+        end
+      RUBY
+
+      assert_equal(["M2", "M1"], @index.linearized_ancestors_of("M2"))
+      assert_equal(["A3", "A1", "A2"], @index.linearized_ancestors_of("A3"))
+      assert_equal(["Foo"], @index.linearized_ancestors_of("Foo"))
+      assert_equal(["Bar"], @index.linearized_ancestors_of("Bar"))
+    end
   end
 end
