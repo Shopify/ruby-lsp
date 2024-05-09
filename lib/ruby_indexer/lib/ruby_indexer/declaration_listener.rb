@@ -47,8 +47,6 @@ module RubyIndexer
     def on_class_node_enter(node)
       name = node.constant_path.location.slice
 
-      return unless /^[A-Z:]/.match?(name)
-
       comments = collect_comments(node)
 
       superclass = node.superclass
@@ -76,7 +74,6 @@ module RubyIndexer
     sig { params(node: Prism::ModuleNode).void }
     def on_module_node_enter(node)
       name = node.constant_path.location.slice
-      return unless /^[A-Z:]/.match?(name)
 
       comments = collect_comments(node)
       @current_owner = Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments)

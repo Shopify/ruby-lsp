@@ -344,6 +344,35 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_methods_with_dynamic_namespace_is_also_suggested
+    source = <<~RUBY
+      # typed: false
+
+      class self::A
+        def foo; end
+
+        def bar
+          foo
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 6 } },
+      )
+      response = server.pop_response.response
+
+      assert_equal(1, response.size)
+
+      range = response[0].attributes[:range].attributes
+      range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
+      assert_equal({ start: { line: 3, character: 2 }, end: { line: 3, character: 14 } }, range_hash)
+    end
+  end
+
   def test_definitions_are_listed_for_method_with_unknown_receiver
     source = <<~RUBY
       # typed: false
