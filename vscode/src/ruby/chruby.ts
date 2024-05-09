@@ -60,7 +60,7 @@ export class Chruby extends VersionManager {
       PATH: `${path.join(gemHome, "bin")}${path.delimiter}${path.join(
         defaultGems,
         "bin",
-      )}${path.delimiter}${path.dirname(rubyUri.fsPath)}${path.delimiter}${process.env.PATH}`,
+      )}${path.delimiter}${path.dirname(rubyUri.fsPath)}${path.delimiter}${this.getProcessPath()}`,
     };
 
     return {
@@ -68,6 +68,19 @@ export class Chruby extends VersionManager {
       yjit,
       version,
     };
+  }
+
+  protected getProcessPath() {
+    return process.env.PATH;
+  }
+
+  // Returns the full URI to the Ruby executable
+  protected async findRubyUri(rubyVersion: RubyVersion): Promise<vscode.Uri> {
+    if (/\d+\.\d+\.\d+/.exec(rubyVersion.version)) {
+      return this.findRubyUriForCompleteVersion(rubyVersion);
+    }
+
+    return this.findRubyUriWithOmittedPatch(rubyVersion);
   }
 
   // Run the activation script using the Ruby installation we found so that we can discover gem paths
@@ -103,15 +116,6 @@ export class Chruby extends VersionManager {
     );
 
     return this.parseWithErrorHandling(result.stderr);
-  }
-
-  // Returns the full URI to the Ruby executable
-  protected async findRubyUri(rubyVersion: RubyVersion): Promise<vscode.Uri> {
-    if (/\d+\.\d+\.\d+/.exec(rubyVersion.version)) {
-      return this.findRubyUriForCompleteVersion(rubyVersion);
-    }
-
-    return this.findRubyUriWithOmittedPatch(rubyVersion);
   }
 
   private async findRubyUriWithOmittedPatch(

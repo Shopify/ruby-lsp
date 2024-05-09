@@ -1,3 +1,4 @@
+/* eslint-disable no-process-env */
 import os from "os";
 
 import * as vscode from "vscode";
@@ -16,6 +17,12 @@ interface RubyVersion {
 //
 // If we can't find it there, then we throw an error and rely on the user to manually select where Ruby is installed.
 export class RubyInstaller extends Chruby {
+  // Environment variables are case sensitive on Windows when we access them through NodeJS. We need to ensure that
+  // we're searching through common variations, so that we don't accidentally miss the path we should inherit
+  protected getProcessPath() {
+    return process.env.Path ?? process.env.PATH ?? process.env.path;
+  }
+
   // Returns the full URI to the Ruby executable
   protected async findRubyUri(rubyVersion: RubyVersion): Promise<vscode.Uri> {
     const [major, minor, _patch] = rubyVersion.version.split(".").map(Number);
