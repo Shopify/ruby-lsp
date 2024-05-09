@@ -250,16 +250,21 @@ module RubyIndexer
     def resolve_method(method_name, receiver_name)
       method_entries = self[method_name]
       ancestors = linearized_ancestors_of(receiver_name.delete_prefix("::"))
-      return unless ancestors && method_entries
+      return unless method_entries
 
-      T.cast(
-        method_entries.select do |entry|
+      ancestors.each do |ancestor|
+        found = method_entries.select do |entry|
           next unless entry.is_a?(Entry::Member)
 
-          ancestors.any?(entry.owner&.name)
-        end,
-        T::Array[Entry::Member],
-      )
+          entry.owner&.name == ancestor
+        end
+
+        return T.cast(found, T::Array[Entry::Member]) if found.any?
+      end
+
+      nil
+    rescue NonExistingNamespaceError
+      nil
     end
 
     # Linearizes the ancestors for a given name, returning the order of namespaces in which Ruby will search for method

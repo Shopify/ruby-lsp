@@ -708,5 +708,30 @@ module RubyIndexer
       assert_equal("qux", entry.name)
       assert_equal("Bar", T.must(entry.owner).name)
     end
+
+    def test_resolving_an_inherited_method_lands_on_first_match
+      index(<<~RUBY)
+        module Foo
+          def qux; end
+        end
+
+        class Bar
+          def qux; end
+        end
+
+        class Wow < Bar
+          prepend Foo
+
+          def qux; end
+        end
+      RUBY
+
+      entries = T.must(@index.resolve_method("qux", "Wow"))
+      assert_equal(1, entries.length)
+
+      entry = T.must(entries.first)
+      assert_equal("qux", entry.name)
+      assert_equal("Foo", T.must(entry.owner).name)
+    end
   end
 end

@@ -612,6 +612,40 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_inherited_methods
+    source = <<~RUBY
+      module Foo
+        module First
+          def method1; end
+        end
+
+        class Bar
+          def method2; end
+        end
+
+        class Baz < Bar
+          include First
+
+          def do_it
+            m
+          end
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 13, character: 7 },
+        })
+
+        result = server.pop_response.response
+        assert_equal(["method1", "method2"], result.map(&:label))
+      end
+    end
+  end
+
   def test_relative_completion_command
     prefix = "support/"
     source = <<~RUBY

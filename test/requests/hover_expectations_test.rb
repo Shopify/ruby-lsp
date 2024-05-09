@@ -346,6 +346,48 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hovering_over_inherited_methods
+    source = <<~RUBY
+      module Foo
+        module First
+          # Method 1
+          def method1; end
+        end
+
+        class Bar
+          # Method 2
+          def method2; end
+        end
+
+        class Baz < Bar
+          include First
+
+          def method3
+            method1
+            method2
+          end
+        end
+      end
+    RUBY
+
+    # Going to definition on `argument` should not take you to the `foo` method definition
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 15 } },
+      )
+      assert_match("Method 1", server.pop_response.response.contents.value)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 16 } },
+      )
+      assert_match("Method 2", server.pop_response.response.contents.value)
+    end
+  end
+
   private
 
   def create_hover_addon
