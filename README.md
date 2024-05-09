@@ -50,7 +50,7 @@ editor. Do not install the `ruby-lsp` gem manually.
 
 ### With other editors
 
-See [editors](EDITORS.md) for community instructions on setting up the Ruby LSP.
+See [editors](EDITORS.md) for community instructions on setting up the Ruby LSP, which current includes Emacs, Neovim, Sublime Text, and Zed.
 
 The gem can be installed by doing
 ```shell
