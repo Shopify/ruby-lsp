@@ -296,5 +296,28 @@ module RubyIndexer
 
       assert_no_entry("bar")
     end
+
+    def test_properly_tracks_multiple_levels_of_nesting
+      index(<<~RUBY)
+        module Foo
+          def first; end
+
+          module Bar
+            def second; end
+          end
+
+          def third; end
+        end
+      RUBY
+
+      entry = T.must(@index["first"]&.first)
+      assert_equal("Foo", T.must(entry.owner).name)
+
+      entry = T.must(@index["second"]&.first)
+      assert_equal("Foo::Bar", T.must(entry.owner).name)
+
+      entry = T.must(@index["third"]&.first)
+      assert_equal("Foo", T.must(entry.owner).name)
+    end
   end
 end
