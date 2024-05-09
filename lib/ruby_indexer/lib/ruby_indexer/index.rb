@@ -249,14 +249,17 @@ module RubyIndexer
     sig { params(method_name: String, receiver_name: String).returns(T.nilable(T::Array[Entry::Member])) }
     def resolve_method(method_name, receiver_name)
       method_entries = self[method_name]
-      owner_entries = self[receiver_name]
-      return unless owner_entries && method_entries
+      ancestors = linearized_ancestors_of(receiver_name.delete_prefix("::"))
+      return unless ancestors && method_entries
 
-      owner_name = T.must(owner_entries.first).name
+      T.cast(
+        method_entries.select do |entry|
+          next unless entry.is_a?(Entry::Member)
 
-      method_entries.grep(Entry::Member).select do |entry|
-        entry.owner&.name == owner_name
-      end
+          ancestors.any?(entry.owner&.name)
+        end,
+        T::Array[Entry::Member],
+      )
     end
 
     # Linearizes the ancestors for a given name, returning the order of namespaces in which Ruby will search for method
