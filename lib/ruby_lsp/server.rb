@@ -626,8 +626,7 @@ module RubyLsp
         when Constant::FileChangeType::CREATED
           index.index_single(indexable)
         when Constant::FileChangeType::CHANGED
-          index.delete(indexable)
-          index.index_single(indexable)
+          index.handle_change(indexable)
         when Constant::FileChangeType::DELETED
           index.delete(indexable)
         end
