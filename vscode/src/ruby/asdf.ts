@@ -72,6 +72,10 @@ export class Asdf extends VersionManager {
       ),
     ];
 
+    if (process.env.ASDF_DATA_DIR) {
+      possiblePaths.unshift(vscode.Uri.file(process.env.ASDF_DATA_DIR));
+    }
+
     for (const possiblePath of possiblePaths) {
       try {
         await vscode.workspace.fs.stat(
@@ -118,6 +122,12 @@ export class Asdf extends VersionManager {
         "asdf.sh",
       ),
     ];
+
+    if (process.env.ASDF_DIR) {
+      possiblePaths.unshift(
+        vscode.Uri.joinPath(vscode.Uri.file(process.env.ASDF_DIR), "asdf.sh")
+      );
+    }
 
     for (const possiblePath of possiblePaths) {
       try {
