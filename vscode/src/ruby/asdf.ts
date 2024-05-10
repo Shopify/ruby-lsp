@@ -14,37 +14,71 @@ import { VersionManager, ActivationResult } from "./versionManager";
 // Learn more: https://github.com/asdf-vm/asdf
 export class Asdf extends VersionManager {
   async activate(): Promise<ActivationResult> {
-    const asdfUri = await this.findAsdfInstallation();
-    const asdfDaraDirUri = await this.findAsdfDataDir();
     const activationScript =
       "STDERR.print({env: ENV.to_h,yjit:!!defined?(RubyVM::YJIT),version:RUBY_VERSION}.to_json)";
 
     const result = await asyncExec(
-      `. ${asdfUri.fsPath} && asdf exec ruby -W0 -rjson -e '${activationScript}'`,
+      `asdf exec ruby -W0 -rjson -e '${activationScript}'`,
       {
         cwd: this.bundleUri.fsPath,
-        env: {
-          ASDF_DIR: path.dirname(asdfUri.fsPath),
-          ASDF_DATA_DIR: asdfDaraDirUri.fsPath,
-        },
       },
     );
 
     const parsedResult = this.parseWithErrorHandling(result.stderr);
 
+    const asdfInstallDir = await this.getAsdfInstallDir(parsedResult.env);
+    const asdfDataDir = await this.getAsdfDataDir(parsedResult.env);
+
     // ASDF does not set GEM_HOME or GEM_PATH. It also does not add the gem bin directories to the PATH. Instead, it
     // adds its shims directory to the PATH, where all gems have a shim that invokes the gem's executable with the right
     // version
     parsedResult.env.PATH = [
-      vscode.Uri.joinPath(asdfDaraDirUri, "shims").fsPath,
+      vscode.Uri.joinPath(asdfDataDir, "shims").fsPath,
       parsedResult.env.PATH,
     ].join(path.delimiter);
 
     return {
-      env: { ...process.env, ...parsedResult.env },
+      env: {
+        ...process.env,
+        ...parsedResult.env,
+        ASDF_DIR: asdfInstallDir.fsPath,
+        ASDF_DATA_DIR: asdfDataDir.fsPath,
+      },
       yjit: parsedResult.yjit,
       version: parsedResult.version,
     };
+  }
+
+  /**
+   * Returns the ASDF data directory. If the ASDF_DATA_DIR environment variable
+   * is set, it will be used. Otherwise, the function will attempt to find the
+   * ASDF data directory.
+   *
+   * @param env - environment variables
+   * @returns the ASDF data directory
+   */
+  async getAsdfDataDir(env: Record<string, string>): Promise<vscode.Uri> {
+    if (env.ASDF_DATA_DIR) {
+      return vscode.Uri.file(env.ASDF_DATA_DIR);
+    }
+    return await this.findAsdfDataDir();
+  }
+
+  /**
+   * Returns the ASDF install directory. If the ASDF_DIR environment variable
+   * is set, it will be used. Otherwise, the function will attempt to find the
+   * ASDF install directory.
+   *
+   * @param env - environment variables
+   * @returns the ASDF install directory
+   */
+  async getAsdfInstallDir(env: Record<string, string>): Promise<vscode.Uri> {
+    if (env.ASDF_DIR) {
+      return vscode.Uri.file(env.ASDF_DIR);
+    }
+    const initUri = await this.findAsdfInstallation();
+    const dirname = path.dirname(initUri.fsPath);
+    return vscode.Uri.file(dirname);
   }
 
   // Find the ASDF data directory. The default is for this to be in the same directories where we'd find the asdf.sh
@@ -71,10 +105,6 @@ export class Asdf extends VersionManager {
         "libexec",
       ),
     ];
-
-    if (process.env.ASDF_DATA_DIR) {
-      possiblePaths.unshift(vscode.Uri.file(process.env.ASDF_DATA_DIR));
-    }
 
     for (const possiblePath of possiblePaths) {
       try {
@@ -122,12 +152,6 @@ export class Asdf extends VersionManager {
         "asdf.sh",
       ),
     ];
-
-    if (process.env.ASDF_DIR) {
-      possiblePaths.unshift(
-        vscode.Uri.joinPath(vscode.Uri.file(process.env.ASDF_DIR), "asdf.sh")
-      );
-    }
 
     for (const possiblePath of possiblePaths) {
       try {
