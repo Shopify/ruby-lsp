@@ -44,14 +44,7 @@ class ExpectationsTestRunner < Minitest::Test
           raise "multiple expectations for #{test_name}"
         end
 
-        required_ruby_version = ruby_requirement_magic_comment_version(path)
-        if required_ruby_version && RUBY_VERSION < required_ruby_version
-          class_eval(<<~RB, __FILE__, __LINE__ + 1)
-            def test_#{expectation_suffix}__#{test_name}
-              skip "Fixture requires Ruby v#{required_ruby_version} while currently running v#{RUBY_VERSION}"
-            end
-          RB
-        elsif expectation_path && File.file?(expectation_path)
+        if expectation_path && File.file?(expectation_path)
           class_eval(<<~RB, __FILE__, __LINE__ + 1)
             def test_#{expectation_suffix}__#{test_name}
               @_path = "#{path}"
@@ -90,15 +83,6 @@ class ExpectationsTestRunner < Minitest::Test
     # to test_fixtures_prism_test_prism_fixtures_unparser_corpus_semantic_and
     def uniq_name_from_path(path)
       path.gsub("/", "_").gsub('.txt', '')
-    end
-
-    def ruby_requirement_magic_comment_version(fixture_path)
-      File.read(fixture_path)
-        .lines
-        .first
-        &.match(/^#\s*required_ruby_version:\s*(?<version>\d+\.\d+(\.\d+)?)$/)
-        &.named_captures
-        &.fetch("version")
     end
   end
 

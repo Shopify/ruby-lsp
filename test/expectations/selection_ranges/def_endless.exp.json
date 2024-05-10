@@ -1,7 +1,7 @@
 {
     "params": [
         {
-            "line": 2,
+            "line": 0,
             "character": 2
         }
     ],
@@ -9,33 +9,33 @@
         {
             "range": {
                 "start": {
-                    "line": 2,
+                    "line": 0,
                     "character": 0
                 },
                 "end": {
-                    "line": 2,
+                    "line": 0,
                     "character": 12
                 }
             },
             "parent": {
                 "range": {
                     "start": {
-                        "line": 2,
+                        "line": 0,
                         "character": 0
                     },
                     "end": {
-                        "line": 2,
+                        "line": 0,
                         "character": 12
                     }
                 },
                 "parent": {
                     "range": {
                         "start": {
-                            "line": 2,
+                            "line": 0,
                             "character": 0
                         },
                         "end": {
-                            "line": 2,
+                            "line": 0,
                             "character": 12
                         }
                     }
