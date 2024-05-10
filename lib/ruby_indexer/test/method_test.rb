@@ -49,6 +49,28 @@ module RubyIndexer
       assert_no_entry("bar")
     end
 
+    def test_method_under_dynamic_class_or_module
+      index(<<~RUBY)
+        module Foo
+          class self::Bar
+            def bar
+            end
+          end
+        end
+
+        module Bar
+          def bar
+          end
+        end
+      RUBY
+
+      assert_equal(2, @index["bar"].length)
+      first_entry = T.must(@index["bar"].first)
+      assert_equal("Foo::self::Bar", first_entry.owner.name)
+      second_entry = T.must(@index["bar"].last)
+      assert_equal("Bar", second_entry.owner.name)
+    end
+
     def test_method_with_parameters
       index(<<~RUBY)
         class Foo
@@ -295,6 +317,29 @@ module RubyIndexer
       RUBY
 
       assert_no_entry("bar")
+    end
+
+    def test_properly_tracks_multiple_levels_of_nesting
+      index(<<~RUBY)
+        module Foo
+          def first; end
+
+          module Bar
+            def second; end
+          end
+
+          def third; end
+        end
+      RUBY
+
+      entry = T.must(@index["first"]&.first)
+      assert_equal("Foo", T.must(entry.owner).name)
+
+      entry = T.must(@index["second"]&.first)
+      assert_equal("Foo::Bar", T.must(entry.owner).name)
+
+      entry = T.must(@index["third"]&.first)
+      assert_equal("Foo", T.must(entry.owner).name)
     end
   end
 end

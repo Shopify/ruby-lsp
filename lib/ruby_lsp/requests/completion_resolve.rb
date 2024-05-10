@@ -36,20 +36,27 @@ module RubyLsp
         @item = item
       end
 
-      sig { override.returns(Interface::CompletionItem) }
+      sig { override.returns(T::Hash[Symbol, T.untyped]) }
       def perform
+        # Based on the spec https://microsoft.github.io/language-server-protocol/specification#textDocument_completion,
+        # a completion resolve request must always return the original completion item without modifying ANY fields
+        # other than label details and documentation. If we modify anything, the completion behaviour might be broken.
+        #
+        # For example, forgetting to return the `insertText` included in the original item will make the editor use the
+        # `label` for the text edit instead
         label = @item[:label]
         entries = @index[label] || []
-        Interface::CompletionItem.new(
-          label: label,
-          label_details: Interface::CompletionItemLabelDetails.new(
-            description: entries.take(MAX_DOCUMENTATION_ENTRIES).map(&:file_name).join(","),
-          ),
-          documentation: Interface::MarkupContent.new(
-            kind: "markdown",
-            value: markdown_from_index_entries(label, entries, MAX_DOCUMENTATION_ENTRIES),
-          ),
+
+        @item[:labelDetails] = Interface::CompletionItemLabelDetails.new(
+          description: entries.take(MAX_DOCUMENTATION_ENTRIES).map(&:file_name).join(","),
         )
+
+        @item[:documentation] = Interface::MarkupContent.new(
+          kind: "markdown",
+          value: markdown_from_index_entries(label, entries, MAX_DOCUMENTATION_ENTRIES),
+        )
+
+        @item
       end
     end
   end

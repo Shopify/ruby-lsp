@@ -20,7 +20,6 @@ module RubyIndexer
     def initialize(index, dispatcher, parse_result, file_path, encoding)
       @index = index
       @file_path = file_path
-      @stack = T.let([], T::Array[String])
       @comments_by_line = T.let(
         parse_result.comments.to_h do |c|
           [c.location.start_line, c]
@@ -28,8 +27,14 @@ module RubyIndexer
         T::Hash[Integer, Prism::Comment],
       )
       @inside_def = T.let(false, T::Boolean)
-      @current_owner = T.let(nil, T.nilable(Entry::Namespace))
       @encoding = encoding
+
+      # The nesting stack we're currently inside. Used to determine the fully qualified name of constants, but only
+      # stored by unresolved aliases which need the original nesting to be lazily resolved
+      @stack = T.let([], T::Array[String])
+
+      # A stack of namespace entries that represent where we currently are. Used to properly assign methods to an owner
+      @owner_stack = T.let([], T::Array[Entry::Namespace])
 
       dispatcher.register(
         self,
@@ -57,8 +62,6 @@ module RubyIndexer
     def on_class_node_enter(node)
       name = node.constant_path.location.slice
 
-      return unless /^[A-Z:]/.match?(name)
-
       comments = collect_comments(node)
 
       superclass = node.superclass
@@ -67,7 +70,7 @@ module RubyIndexer
         superclass.slice
       end
 
-      @current_owner = Entry::Class.new(
+      entry = Entry::Class.new(
         fully_qualify_name(name),
         @file_path,
         node.location,
@@ -75,29 +78,34 @@ module RubyIndexer
         encoding,
         parent_class,
       )
-      @index << @current_owner
+
+      @owner_stack << entry
+      @index << entry
       @stack << name
     end
 
     sig { params(node: Prism::ClassNode).void }
     def on_class_node_leave(node)
       @stack.pop
+      @owner_stack.pop
     end
 
     sig { params(node: Prism::ModuleNode).void }
     def on_module_node_enter(node)
       name = node.constant_path.location.slice
-      return unless /^[A-Z:]/.match?(name)
 
       comments = collect_comments(node)
-      @current_owner = Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments, encoding)
-      @index << @current_owner
+      entry = Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments, encoding)
+
+      @owner_stack << entry
+      @index << entry
       @stack << name
     end
 
     sig { params(node: Prism::ModuleNode).void }
     def on_module_node_leave(node)
       @stack.pop
+      @owner_stack.pop
     end
 
     sig { params(node: Prism::MultiWriteNode).void }
@@ -218,7 +226,7 @@ module RubyIndexer
           comments,
           encoding,
           node.parameters,
-          @current_owner,
+          @owner_stack.last,
         )
       when Prism::SelfNode
         @index << Entry::SingletonMethod.new(
@@ -228,7 +236,7 @@ module RubyIndexer
           comments,
           encoding,
           node.parameters,
-          @current_owner,
+          @owner_stack.last,
         )
       end
     end
@@ -359,15 +367,17 @@ module RubyIndexer
 
         next unless name && loc
 
-        @index << Entry::Accessor.new(name, @file_path, loc, comments, encoding, @current_owner) if reader
-        @index << Entry::Accessor.new("#{name}=", @file_path, loc, comments, encoding, @current_owner) if writer
+        @index << Entry::Accessor.new(name, @file_path, loc, comments, encoding, @owner_stack.last) if reader
+        @index << Entry::Accessor.new("#{name}=", @file_path, loc, comments, encoding, @owner_stack.last) if writer
       end
     end
 
     sig { params(node: Prism::CallNode, operation: Symbol).void }
     def handle_module_operation(node, operation)
       return if @inside_def
-      return unless @current_owner
+
+      owner = @owner_stack.last
+      return unless owner
 
       arguments = node.arguments&.arguments
       return unless arguments
@@ -381,7 +391,7 @@ module RubyIndexer
         # If a constant path reference is dynamic or missing parts, we can't
         # index it
       end
-      collection = operation == :included_modules ? @current_owner.included_modules : @current_owner.prepended_modules
+      collection = operation == :included_modules ? owner.included_modules : owner.prepended_modules
       collection.concat(names)
     end
   end
