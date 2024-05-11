@@ -130,6 +130,16 @@ module RubyIndexer
       results.flat_map(&:first)
     end
 
+    sig { params(name: String, receiver_name: String).returns(T::Array[Entry]) }
+    def method_completion_candidates(name, receiver_name)
+      ancestors = linearized_ancestors_of(receiver_name)
+      candidates = prefix_search(name).flatten
+      candidates.select! do |entry|
+        entry.is_a?(RubyIndexer::Entry::Member) && ancestors.any?(entry.owner&.name)
+      end
+      candidates
+    end
+
     # Try to find the entry based on the nesting from the most specific to the least specific. For example, if we have
     # the nesting as ["Foo", "Bar"] and the name as "Baz", we will try to find it in this order:
     # 1. Foo::Bar::Baz

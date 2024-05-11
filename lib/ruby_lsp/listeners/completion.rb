@@ -261,12 +261,8 @@ module RubyLsp
         return unless receiver_entries
 
         receiver = T.must(receiver_entries.first)
-        ancestors = @index.linearized_ancestors_of(receiver.name)
 
-        @index.prefix_search(name).each do |entries|
-          entry = entries.find { |e| e.is_a?(RubyIndexer::Entry::Member) && ancestors.any?(e.owner&.name) }
-          next unless entry
-
+        @index.method_completion_candidates(name, receiver.name).each do |entry|
           @response_builder << build_method_completion(T.cast(entry, RubyIndexer::Entry::Member), node)
         end
       end
