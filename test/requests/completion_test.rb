@@ -163,6 +163,30 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_fully_qualified_paths_inside_namespace
+    source = +<<~RUBY
+      module Foo
+        module Bar
+          class Baz
+          end
+
+          Foo::
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 5, character: 9 },
+        })
+        result = server.pop_response.response
+        assert_equal(["Foo::Bar", "Foo::Bar::Baz"], result.map(&:label))
+      end
+    end
+  end
+
   def test_completion_for_constants
     source = +<<~RUBY
       class Foo
