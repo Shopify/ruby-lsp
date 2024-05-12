@@ -380,5 +380,25 @@ module RubyIndexer
         @target = target
       end
     end
+
+    # Represents an instance variable e.g.: @a = 1
+    class InstanceVariable < Entry
+      sig { returns(T.nilable(Entry::Namespace)) }
+      attr_reader :owner
+
+      sig do
+        params(
+          name: String,
+          file_path: String,
+          location: T.any(Prism::Location, RubyIndexer::Location),
+          comments: T::Array[String],
+          owner: T.nilable(Entry::Namespace),
+        ).void
+      end
+      def initialize(name, file_path, location, comments, owner)
+        super(name, file_path, location, comments)
+        @owner = owner
+      end
+    end
   end
 end

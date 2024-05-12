@@ -45,6 +45,11 @@ module RubyIndexer
         :on_constant_or_write_node_enter,
         :on_constant_and_write_node_enter,
         :on_constant_operator_write_node_enter,
+        :on_instance_variable_write_node_enter,
+        :on_instance_variable_and_write_node_enter,
+        :on_instance_variable_operator_write_node_enter,
+        :on_instance_variable_or_write_node_enter,
+        :on_instance_variable_target_node_enter,
       )
     end
 
@@ -206,6 +211,7 @@ module RubyIndexer
       @inside_def = true
       method_name = node.name.to_s
       comments = collect_comments(node)
+
       case node.receiver
       when nil
         @index << Entry::InstanceMethod.new(
@@ -231,6 +237,76 @@ module RubyIndexer
     sig { params(node: Prism::DefNode).void }
     def on_def_node_leave(node)
       @inside_def = false
+    end
+
+    sig { params(node: Prism::InstanceVariableWriteNode).void }
+    def on_instance_variable_write_node_enter(node)
+      name = node.name.to_s
+      return if name.length == 1
+
+      @index << Entry::InstanceVariable.new(
+        name,
+        @file_path,
+        node.name_loc,
+        collect_comments(node),
+        @owner_stack.last,
+      )
+    end
+
+    sig { params(node: Prism::InstanceVariableAndWriteNode).void }
+    def on_instance_variable_and_write_node_enter(node)
+      name = node.name.to_s
+      return if name.length == 1
+
+      @index << Entry::InstanceVariable.new(
+        name,
+        @file_path,
+        node.name_loc,
+        collect_comments(node),
+        @owner_stack.last,
+      )
+    end
+
+    sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
+    def on_instance_variable_operator_write_node_enter(node)
+      name = node.name.to_s
+      return if name.length == 1
+
+      @index << Entry::InstanceVariable.new(
+        name,
+        @file_path,
+        node.name_loc,
+        collect_comments(node),
+        @owner_stack.last,
+      )
+    end
+
+    sig { params(node: Prism::InstanceVariableOrWriteNode).void }
+    def on_instance_variable_or_write_node_enter(node)
+      name = node.name.to_s
+      return if name.length == 1
+
+      @index << Entry::InstanceVariable.new(
+        name,
+        @file_path,
+        node.name_loc,
+        collect_comments(node),
+        @owner_stack.last,
+      )
+    end
+
+    sig { params(node: Prism::InstanceVariableTargetNode).void }
+    def on_instance_variable_target_node_enter(node)
+      name = node.name.to_s
+      return if name.length == 1
+
+      @index << Entry::InstanceVariable.new(
+        name,
+        @file_path,
+        node.location,
+        collect_comments(node),
+        @owner_stack.last,
+      )
     end
 
     private
