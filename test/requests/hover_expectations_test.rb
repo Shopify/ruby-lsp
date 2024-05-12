@@ -311,6 +311,41 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hover_instance_variables
+    source = <<~RUBY
+      class Foo
+        def initialize
+          # Hello
+          @a = 1
+        end
+
+        def bar
+          @a
+        end
+
+        def baz
+          @a = 5
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+      )
+      assert_match("Hello", server.pop_response.response.contents.value)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 11 } },
+      )
+      assert_match("Hello", server.pop_response.response.contents.value)
+    end
+  end
+
   private
 
   def create_hover_addon

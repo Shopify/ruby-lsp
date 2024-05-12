@@ -13,6 +13,12 @@ module RubyLsp
           Prism::ConstantReadNode,
           Prism::ConstantWriteNode,
           Prism::ConstantPathNode,
+          Prism::InstanceVariableReadNode,
+          Prism::InstanceVariableAndWriteNode,
+          Prism::InstanceVariableOperatorWriteNode,
+          Prism::InstanceVariableOrWriteNode,
+          Prism::InstanceVariableTargetNode,
+          Prism::InstanceVariableWriteNode,
         ],
         T::Array[T.class_of(Prism::Node)],
       )
@@ -49,6 +55,12 @@ module RubyLsp
           :on_constant_write_node_enter,
           :on_constant_path_node_enter,
           :on_call_node_enter,
+          :on_instance_variable_read_node_enter,
+          :on_instance_variable_write_node_enter,
+          :on_instance_variable_and_write_node_enter,
+          :on_instance_variable_operator_write_node_enter,
+          :on_instance_variable_or_write_node_enter,
+          :on_instance_variable_target_node_enter,
         )
       end
 
@@ -101,7 +113,50 @@ module RubyLsp
         end
       end
 
+      sig { params(node: Prism::InstanceVariableReadNode).void }
+      def on_instance_variable_read_node_enter(node)
+        handle_instance_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableWriteNode).void }
+      def on_instance_variable_write_node_enter(node)
+        handle_instance_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableAndWriteNode).void }
+      def on_instance_variable_and_write_node_enter(node)
+        handle_instance_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
+      def on_instance_variable_operator_write_node_enter(node)
+        handle_instance_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableOrWriteNode).void }
+      def on_instance_variable_or_write_node_enter(node)
+        handle_instance_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableTargetNode).void }
+      def on_instance_variable_target_node_enter(node)
+        handle_instance_variable_hover(node.name.to_s)
+      end
+
       private
+
+      sig { params(name: String).void }
+      def handle_instance_variable_hover(name)
+        entries = T.cast(@index[name], T.nilable(T::Array[RubyIndexer::Entry::InstanceVariable]))
+        return unless entries
+
+        current_self = @nesting.join("::")
+        owned_variables = entries.select { |e| current_self == e.owner&.name }
+
+        categorized_markdown_from_index_entries(name, owned_variables).each do |category, content|
+          @response_builder.push(content, category: category)
+        end
+      end
 
       sig { params(name: String, location: Prism::Location).void }
       def generate_hover(name, location)
