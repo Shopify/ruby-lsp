@@ -33,6 +33,12 @@ module RubyLsp
           :on_block_argument_node_enter,
           :on_constant_read_node_enter,
           :on_constant_path_node_enter,
+          :on_instance_variable_read_node_enter,
+          :on_instance_variable_write_node_enter,
+          :on_instance_variable_and_write_node_enter,
+          :on_instance_variable_operator_write_node_enter,
+          :on_instance_variable_or_write_node_enter,
+          :on_instance_variable_target_node_enter,
         )
       end
 
@@ -74,7 +80,59 @@ module RubyLsp
         find_in_index(name)
       end
 
+      sig { params(node: Prism::InstanceVariableReadNode).void }
+      def on_instance_variable_read_node_enter(node)
+        handle_instance_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableWriteNode).void }
+      def on_instance_variable_write_node_enter(node)
+        handle_instance_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableAndWriteNode).void }
+      def on_instance_variable_and_write_node_enter(node)
+        handle_instance_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
+      def on_instance_variable_operator_write_node_enter(node)
+        handle_instance_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableOrWriteNode).void }
+      def on_instance_variable_or_write_node_enter(node)
+        handle_instance_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableTargetNode).void }
+      def on_instance_variable_target_node_enter(node)
+        handle_instance_variable_definition(node.name.to_s)
+      end
+
       private
+
+      sig { params(name: String).void }
+      def handle_instance_variable_definition(name)
+        entries = T.cast(@index[name], T.nilable(T::Array[RubyIndexer::Entry::InstanceVariable]))
+        return unless entries
+
+        current_self = @nesting.join("::")
+
+        entries.each do |entry|
+          next if current_self != entry.owner&.name
+
+          location = entry.location
+
+          @response_builder << Interface::Location.new(
+            uri: URI::Generic.from_path(path: entry.file_path).to_s,
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
+              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
+            ),
+          )
+        end
+      end
 
       sig { params(message: String, self_receiver: T::Boolean).void }
       def handle_method_definition(message, self_receiver)
