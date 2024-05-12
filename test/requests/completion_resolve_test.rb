@@ -41,4 +41,46 @@ class CompletionResolveTest < Minitest::Test
       assert_equal(expected.to_json, result.to_json)
     end
   end
+
+  def test_completion_resolve_with_owner_present
+    source = +<<~RUBY
+      class Bar
+        def initialize
+          # Bar!
+          @a = 1
+        end
+      end
+
+      class Foo
+        # Foo!
+        def initialize
+          @a = 1
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, _uri|
+      existing_item = {
+        label: "@a",
+        kind: 5,
+        data: { owner_name: "Foo" },
+      }
+
+      server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
+
+      result = server.pop_response.response
+      assert_match(/Foo/, result[:documentation].value)
+
+      existing_item = {
+        label: "@a",
+        kind: 5,
+        data: { owner_name: "Bar" },
+      }
+
+      server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
+
+      result = server.pop_response.response
+      assert_match(/Bar/, result[:documentation].value)
+    end
+  end
 end

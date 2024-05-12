@@ -840,6 +840,68 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_instance_variables
+    source = +<<~RUBY
+      class Foo
+        def initialize
+          @foo = 1
+          @foobar = 2
+        end
+
+        def bar
+          @
+        end
+
+        def baz
+          @ = 123
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 7, character: 5 },
+      })
+      result = server.pop_response.response
+      assert_equal(["@foo", "@foobar"], result.map(&:label))
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 11, character: 5 },
+      })
+      result = server.pop_response.response
+      assert_equal(["@foo", "@foobar"], result.map(&:label))
+    end
+  end
+
+  def test_instance_variable_completion_shows_only_uniq_entries
+    source = +<<~RUBY
+      class Foo
+        def initialize
+          @foo = 1
+        end
+
+        def other_set_foo
+          @foo = 2
+        end
+
+        def baz
+          @
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 10, character: 5 },
+      })
+      result = server.pop_response.response
+      assert_equal(["@foo"], result.map(&:label))
+    end
+  end
+
   private
 
   def with_file_structure(server, &block)
