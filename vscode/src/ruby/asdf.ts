@@ -51,8 +51,19 @@ export class Asdf extends VersionManager {
   // file, but that may not be the case for a Homebrew installation, in which case the we'd have
   // `/opt/homebrew/opt/asdf/libexec/asdf.sh`, but the data directory might be `~/.asdf`
   async findAsdfDataDir(): Promise<vscode.Uri> {
+    // In order, the data locations are:
+    // 1. Default
+    // 2. XDG Base Directory
+    // 3. Homebrew M series
+    // 4. Homebrew Intel series
     const possiblePaths = [
       vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".asdf"),
+      vscode.Uri.joinPath(
+        vscode.Uri.file(os.homedir()),
+        ".local",
+        "share",
+        "asdf",
+      ),
       vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "asdf-vm"),
       vscode.Uri.joinPath(
         vscode.Uri.file("/"),

@@ -16,16 +16,17 @@ suite("Asdf", () => {
     return;
   }
 
+  // eslint-disable-next-line no-process-env
+  const workspacePath = process.env.PWD!;
+  const workspaceFolder = {
+    uri: vscode.Uri.from({ scheme: "file", path: workspacePath }),
+    name: path.basename(workspacePath),
+    index: 0,
+  };
+  const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
+  const asdf = new Asdf(workspaceFolder, outputChannel);
+
   test("Finds Ruby based on .tool-versions", async () => {
-    // eslint-disable-next-line no-process-env
-    const workspacePath = process.env.PWD!;
-    const workspaceFolder = {
-      uri: vscode.Uri.from({ scheme: "file", path: workspacePath }),
-      name: path.basename(workspacePath),
-      index: 0,
-    };
-    const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const asdf = new Asdf(workspaceFolder, outputChannel);
     const activationScript =
       "STDERR.print({env: ENV.to_h,yjit:!!defined?(RubyVM::YJIT),version:RUBY_VERSION}.to_json)";
 
@@ -68,5 +69,33 @@ suite("Asdf", () => {
     execStub.restore();
     findInstallationStub.restore();
     findDataDirStub.restore();
+  });
+
+  suite("findAsdfDataDir", () => {
+    const subject = asdf.findAsdfDataDir.bind(asdf);
+    let statStub: sinon.SinonStub;
+
+    setup(() => {
+      statStub = sinon.stub(vscode.workspace.fs, "stat");
+    });
+
+    teardown(() => {
+      statStub.restore();
+    });
+
+    test("searches common asdf data directory", async () => {
+      statStub.rejects();
+      await subject().catch(() => {});
+
+      [
+        `${os.homedir()}/.asdf`,
+        `${os.homedir()}/.local/share/asdf`,
+        "/opt/asdf-vm",
+        "/opt/homebrew/opt/asdf/libexec",
+      ].forEach((base) => {
+        const shims = vscode.Uri.joinPath(vscode.Uri.file(base), "shims");
+        assert.ok(statStub.calledWith(shims));
+      });
+    });
   });
 });
