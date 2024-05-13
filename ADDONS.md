@@ -60,20 +60,15 @@ require "ruby_lsp/addon"
 module RubyLsp
   module MyGem
     class Addon < ::RubyLsp::Addon
-      extend T::Sig
-
       # Performs any activation that needs to happen once when the language server is booted
-      sig { override.params(message_queue: Thread::Queue).void }
       def activate(message_queue)
       end
 
       # Performs any cleanup when shutting down the server, like terminating a subprocess
-      sig { override.void }
       def deactivate
       end
 
       # Returns the name of the addon
-      sig { override.returns(String) }
       def name
         "Ruby LSP My Gem"
       end
@@ -136,40 +131,26 @@ following listener implementation.
 module RubyLsp
   module MyGem
     class Addon < ::RubyLsp::Addon
-      extend T::Sig
-
-      sig { override.params(message_queue: Thread::Queue).void }
       def activate(message_queue)
         @message_queue = message_queue
         @config = SomeConfiguration.new
       end
 
-      sig { override.void }
       def deactivate
       end
 
-      sig { override.returns(String) }
       def name
         "Ruby LSP My Gem"
       end
 
-      sig do
-        override.params(
-          response_builder: ResponseBuilders::Hover,
-          nesting: T::Array[String],
-          index: RubyIndexer::Index,
-          dispatcher: Prism::Dispatcher,
-        ).void
-      end
       def create_hover_listener(response_builder, nesting, index, dispatcher)
         # Use the listener factory methods to instantiate listeners with parameters sent by the LSP combined with any
         # pre-computed information in the addon. These factory methods are invoked on every request
         Hover.new(client, response_builder, @config, dispatcher)
       end
+    end
 
     class Hover
-      extend T::Sig
-
       # The Requests::Support::Common module provides some helper methods you may find helpful.
       include Requests::Support::Common
 
@@ -180,7 +161,6 @@ module RubyLsp
       # to this object, which will then build the Ruby LSP's response.
       # Additionally, listeners are instantiated with a message_queue to push notifications (not used in this example).
       # See "Sending notifications to the client" for more information.
-      sig { params(client: RailsClient, response_builder: ResponseBuilders::Hover, config: SomeConfiguration, dispatcher: Prism::Dispatcher).void }
       def initialize(client, response_builder, config, dispatcher)
         super(dispatcher)
 
@@ -195,11 +175,11 @@ module RubyLsp
 
       # Listeners must define methods for each event they registered with the dispatcher. In this case, we have to
       # define `on_constant_read_node_enter` to specify what this listener should do every time we find a constant
-      sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read_node_enter(node)
-        # Certain builders are made available to listeners to build LSP responses. The classes under `RubyLsp::ResponseBuilders`
-        # are used to build responses conforming to the LSP Specification.
-        # ResponseBuilders::Hover itself also requires a content category to be specified (title, links, or documentation).
+        # Certain builders are made available to listeners to build LSP responses. The classes under
+        # `RubyLsp::ResponseBuilders` are used to build responses conforming to the LSP Specification.
+        # ResponseBuilders::Hover itself also requires a content category to be specified (title, links,
+        # or documentation).
         @response_builder.push("Hello!", category: :documentation)
       end
     end
@@ -293,8 +273,63 @@ module RubyLsp
           params: Interface::ProgressParams.new(
             token: "progress-token-id",
             value: Interface::WorkDoneProgressBegin.new(kind: "begin", title: "Starting slow work!"),
-          )
+          ),
         )
+      end
+    end
+  end
+end
+```
+
+### Registering for file update events
+
+By default, the Ruby LSP listens for changes to files ending in `.rb` to continuously update its index when Ruby source
+code is modified. If your addon uses a tool that is configured through a file (like RuboCop and its `.rubocop.yml`)
+you can register for changes to these files and react when the configuration changes.
+
+**Note**: you will receive events from `ruby-lsp` and other addons as well, in addition to your own registered ones.
+
+
+```ruby
+module RubyLsp
+  module MyGem
+    class Addon < ::RubyLsp::Addon
+      def activate(global_state, message_queue)
+        register_additional_file_watchers(global_state, message_queue)
+      end
+
+      def deactivate; end
+
+      def register_additional_file_watchers(global_state, message_queue)
+        # Clients are not required to implement this capability
+        return unless global_state.supports_watching_files
+
+        message_queue << Request.new(
+          id: "ruby-lsp-my-gem-file-watcher",
+          method: "client/registerCapability",
+          params: Interface::RegistrationParams.new(
+            registrations: [
+              Interface::Registration.new(
+                id: "workspace/didChangeWatchedFilesMyGem",
+                method: "workspace/didChangeWatchedFiles",
+                register_options: Interface::DidChangeWatchedFilesRegistrationOptions.new(
+                  watchers: [
+                    Interface::FileSystemWatcher.new(
+                      glob_pattern: "**/.my-config.yml",
+                      kind: Constant::WatchKind::CREATE | Constant::WatchKind::CHANGE | Constant::WatchKind::DELETE,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        )
+      end
+
+      def workspace_did_change_watched_files(changes)
+        if changes.any? { |change| change[:uri].end_with?(".my-config.yml") }
+          # Do something to reload the config here
+        end
       end
     end
   end
@@ -314,7 +349,7 @@ require "ruby_lsp/check_docs"
 # The second argument is the file list of GIF files with the demos of all listeners
 RubyLsp::CheckDocs.new(
   FileList["#{__dir__}/lib/ruby_lsp/ruby_lsp_rails/**/*.rb"],
-  FileList.new("#{__dir__}/misc/**/*.gif")
+  FileList.new("#{__dir__}/misc/**/*.gif"),
 )
 ```
 

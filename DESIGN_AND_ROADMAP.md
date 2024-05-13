@@ -77,7 +77,7 @@ long term roadmap to see what’s planned
 "".upcase
 1.to_s
 {}.merge!({ a: 1 })
-[].concat([])
+[].push(1)
 
 ## Scenarios where can assume the receiver type
 class Foo

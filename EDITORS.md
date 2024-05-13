@@ -181,3 +181,11 @@ To configure the Ruby LSP using [LSP for Sublime Text](https://github.com/sublim
 ```
 
 Restart LSP or Sublime Text and `ruby-lsp` will automatically activate when opening ruby files.
+
+## Zed (partly working)
+
+See https://github.com/zed-industries/zed/issues/4834 for discussion.
+
+## RubyMine (not yet supported)
+
+Although there is overlap between the features provided by RubyMine and Ruby LSP, there may be benefits in using both together. RubyMine has a [LSP API](https://blog.jetbrains.com/ruby/2023/07/the-rubymine-2023-2-beta-updated-ai-assistant-lsp-api-for-plugin-developers-and-more/), so adding support would involve writing a plugin using Kotlin. The [rubymine-sorbet-lsp](https://github.com/simoleone/rubymine-sorbet-lsp) project may be a useful reference for this.

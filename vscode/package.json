@@ -2,7 +2,7 @@
   "name": "ruby-lsp",
   "displayName": "Ruby LSP",
   "description": "VS Code plugin for connecting with the Ruby LSP",
-  "version": "0.5.20",
+  "version": "0.5.21",
   "publisher": "Shopify",
   "repository": {
     "type": "git",
@@ -253,6 +253,10 @@
             "miseExecutablePath": {
               "description": "The path to the Mise executable, if not installed in ~/.local/bin/mise",
               "type": "string"
+            },
+            "chrubyRubies": {
+              "description": "An array of extra directories to search for Ruby installations when using chruby. Equivalent to the RUBIES environment variable",
+              "type": "array"
             }
           },
           "default": {
@@ -285,7 +289,7 @@
           "default": null
         },
         "rubyLsp.bundleGemfile": {
-          "description": "Relative or absolute path to the Gemfile to use for bundling the Ruby LSP server. Only necessary when using a separate Gemfile for the Ruby LSP",
+          "description": "Relative or absolute path to the Gemfile to use for bundling the Ruby LSP server. Do not use this if you're working on a monorepo or your project's Gemfile is in a subdirectory (look into multiroot workspaces instead). Only necessary when using a separate Gemfile for the Ruby LSP",
           "type": "string",
           "default": ""
         },
@@ -318,6 +322,10 @@
           "description": "Ignores if the project uses a typechecker. Only intended to be used while working on the Ruby LSP itself",
           "type": "boolean",
           "default": false
+        },
+        "rubyLsp.rubyExecutablePath": {
+          "description": "Path to the Ruby installation. This is used as a fallback if version manager activation fails",
+          "type": "string"
         }
       }
     },
@@ -528,7 +536,7 @@
     "ws": ">= 7.4.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.4",
+    "@babel/core": "^7.24.5",
     "@shopify/eslint-plugin": "^44.0.0",
     "@shopify/prettier-config": "^1.1.2",
     "@types/glob": "^8.1.0",
@@ -536,10 +544,10 @@
     "@types/node": "20.x",
     "@types/sinon": "^17.0.3",
     "@types/vscode": "^1.68.0",
-    "@typescript-eslint/eslint-plugin": "^7.7.1",
-    "@typescript-eslint/parser": "^7.7.1",
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "@typescript-eslint/parser": "^7.8.0",
     "@vscode/test-electron": "^2.3.9",
-    "@vscode/vsce": "^2.26.0",
+    "@vscode/vsce": "^2.26.1",
     "esbuild": "^0.20.2",
     "eslint": "^8.57.0",
     "eslint-import-resolver-typescript": "^3.6.1",

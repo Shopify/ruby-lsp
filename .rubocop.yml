@@ -3,6 +3,7 @@ inherit_gem:
 
 require:
   - rubocop-sorbet
+  - rubocop-md
   - rubocop-minitest
   - rubocop-rake
   - ./lib/rubocop/cop/ruby_lsp/use_language_server_aliases
@@ -15,6 +16,7 @@ AllCops:
     - "sorbet/rbi/shims/**/*.rbi"
   Exclude:
     - "vendor/**/*"
+    - "vscode/**/*"
     - "features/**/*"
     - "test/fixtures/**/*"
     - "test/expectations/**/*"

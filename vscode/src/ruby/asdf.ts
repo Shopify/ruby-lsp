@@ -30,7 +30,7 @@ export class Asdf extends VersionManager {
       },
     );
 
-    const parsedResult = JSON.parse(result.stderr);
+    const parsedResult = this.parseWithErrorHandling(result.stderr);
 
     // ASDF does not set GEM_HOME or GEM_PATH. It also does not add the gem bin directories to the PATH. Instead, it
     // adds its shims directory to the PATH, where all gems have a shim that invokes the gem's executable with the right

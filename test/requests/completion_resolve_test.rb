@@ -11,29 +11,33 @@ class CompletionResolveTest < Minitest::Test
 
   def test_completion_resolve_for_constant
     source = +<<~RUBY
-      # This is a class that does things
-      class Foo
+      module Foo
+        # This is a class that does things
+        class Bar
+        end
       end
     RUBY
 
     with_server(source, stub_no_typechecker: true) do |server, _uri|
-      server.process_message(id: 1, method: "completionItem/resolve", params: {
-        label: "Foo",
-      })
+      existing_item = {
+        label: "Foo::Bar",
+        insertText: "Bar",
+      }
+
+      server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
 
       result = server.pop_response.response
 
-      expected = Interface::CompletionItem.new(
-        label: "Foo",
-        label_details: Interface::CompletionItemLabelDetails.new(
+      expected = existing_item.merge(
+        labelDetails: Interface::CompletionItemLabelDetails.new(
           description: "fake.rb",
         ),
         documentation: Interface::MarkupContent.new(
           kind: "markdown",
-          value: markdown_from_index_entries("Foo", T.must(server.global_state.index["Foo"])),
+          value: markdown_from_index_entries("Foo::Bar", T.must(server.global_state.index["Foo::Bar"])),
         ),
       )
-      assert_match(/This is a class that does things/, result.documentation.value)
+      assert_match(/This is a class that does things/, result[:documentation].value)
       assert_equal(expected.to_json, result.to_json)
     end
   end

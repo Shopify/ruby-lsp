@@ -42,4 +42,16 @@ export abstract class VersionManager {
   // Activate the Ruby environment for the version manager, returning all of the necessary information to boot the
   // language server
   abstract activate(): Promise<ActivationResult>;
+
+  protected parseWithErrorHandling(json: string) {
+    try {
+      return JSON.parse(json);
+    } catch (error: any) {
+      this.outputChannel.error(
+        `Tried parsing invalid JSON environment: ${json}`,
+      );
+
+      throw error;
+    }
+  }
 }

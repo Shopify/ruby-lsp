@@ -101,80 +101,103 @@ export class Ruby implements RubyInterface {
       .get<ManagerConfiguration>("rubyVersionManager")!,
   ) {
     this.versionManager = versionManager;
+    this._error = false;
 
-    // If the version manager is auto, discover the actual manager before trying to activate anything
-    if (this.versionManager.identifier === ManagerIdentifier.Auto) {
-      await this.discoverVersionManager();
-      this.outputChannel.info(
-        `Discovered version manager ${this.versionManager.identifier}`,
+    const workspaceRubyPath = this.context.workspaceState.get<
+      string | undefined
+    >(`rubyLsp.workspaceRubyPath.${this.workspaceFolder.name}`);
+
+    if (workspaceRubyPath) {
+      // If a workspace specific Ruby path is configured, then we use that to activate the environment
+      await this.runActivation(
+        new None(this.workspaceFolder, this.outputChannel, workspaceRubyPath),
       );
-    }
-
-    try {
-      switch (this.versionManager.identifier) {
-        case ManagerIdentifier.Asdf:
-          await this.runActivation(
-            new Asdf(this.workspaceFolder, this.outputChannel),
-          );
-          break;
-        case ManagerIdentifier.Chruby:
-          await this.runActivation(
-            new Chruby(this.workspaceFolder, this.outputChannel),
-          );
-          break;
-        case ManagerIdentifier.Rbenv:
-          await this.runActivation(
-            new Rbenv(this.workspaceFolder, this.outputChannel),
-          );
-          break;
-        case ManagerIdentifier.Rvm:
-          await this.runActivation(
-            new Rvm(this.workspaceFolder, this.outputChannel),
-          );
-          break;
-        case ManagerIdentifier.Mise:
-          await this.runActivation(
-            new Mise(this.workspaceFolder, this.outputChannel),
-          );
-          break;
-        case ManagerIdentifier.RubyInstaller:
-          await this.runActivation(
-            new RubyInstaller(this.workspaceFolder, this.outputChannel),
-          );
-          break;
-        case ManagerIdentifier.Custom:
-          await this.runActivation(
-            new Custom(this.workspaceFolder, this.outputChannel),
-          );
-          break;
-        case ManagerIdentifier.None:
-          await this.runActivation(
-            new None(this.workspaceFolder, this.outputChannel),
-          );
-          break;
-        default:
-          await this.runActivation(
-            new Shadowenv(this.workspaceFolder, this.outputChannel),
-          );
-          break;
+    } else {
+      // If the version manager is auto, discover the actual manager before trying to activate anything
+      if (this.versionManager.identifier === ManagerIdentifier.Auto) {
+        await this.discoverVersionManager();
+        this.outputChannel.info(
+          `Discovered version manager ${this.versionManager.identifier}`,
+        );
       }
 
+      try {
+        await this.runManagerActivation();
+      } catch (error: any) {
+        // If an error occurred and a global Ruby path is configured, then we can try to fallback to that
+        const globalRubyPath = vscode.workspace
+          .getConfiguration("rubyLsp")
+          .get<string | undefined>("rubyExecutablePath");
+
+        if (globalRubyPath) {
+          await this.runActivation(
+            new None(this.workspaceFolder, this.outputChannel, globalRubyPath),
+          );
+        } else {
+          this._error = true;
+
+          // When running tests, we need to throw the error or else activation may silently fail and it's very difficult
+          // to debug
+          if (this.context.extensionMode === vscode.ExtensionMode.Test) {
+            throw error;
+          }
+
+          await this.handleRubyError(error.message);
+        }
+      }
+    }
+
+    if (!this.error) {
       this.fetchRubyVersionInfo();
       await this.setupBundlePath();
-      this._error = false;
-    } catch (error: any) {
-      this._error = true;
+    }
+  }
 
-      // When running tests, we need to throw the error or else activation may silently fail and it's very difficult to
-      // debug
-      if (this.context.extensionMode === vscode.ExtensionMode.Test) {
-        throw error;
-      }
+  async manuallySelectRuby() {
+    const manualSelection = await vscode.window.showInformationMessage(
+      "Configure global fallback or workspace specific Ruby?",
+      "global",
+      "workspace",
+      "clear previous workspace selection",
+    );
 
-      await vscode.window.showErrorMessage(
-        `Failed to activate ${this.versionManager.identifier} environment: ${error.message}`,
+    if (!manualSelection) {
+      return;
+    }
+
+    if (manualSelection === "clear previous workspace selection") {
+      await this.context.workspaceState.update(
+        `rubyLsp.workspaceRubyPath.${this.workspaceFolder.name}`,
+        undefined,
+      );
+      return this.activateRuby();
+    }
+
+    const selection = await vscode.window.showOpenDialog({
+      title: `Select Ruby binary path for ${manualSelection} configuration`,
+      openLabel: "Select Ruby binary",
+      canSelectMany: false,
+    });
+
+    if (!selection) {
+      return;
+    }
+
+    const selectedPath = selection[0].fsPath;
+
+    if (manualSelection === "global") {
+      await vscode.workspace
+        .getConfiguration("rubyLsp")
+        .update("rubyExecutablePath", selectedPath, true);
+    } else {
+      // We must update the cached Ruby path for this workspace if the user decided to change it
+      await this.context.workspaceState.update(
+        `rubyLsp.workspaceRubyPath.${this.workspaceFolder.name}`,
+        selectedPath,
       );
     }
+
+    return this.activateRuby();
   }
 
   private async runActivation(manager: VersionManager) {
@@ -228,6 +251,56 @@ export class Ruby implements RubyInterface {
     // which breaks the client/server communication
     delete env.VERBOSE;
     delete env.DEBUG;
+  }
+
+  private async runManagerActivation() {
+    switch (this.versionManager.identifier) {
+      case ManagerIdentifier.Asdf:
+        await this.runActivation(
+          new Asdf(this.workspaceFolder, this.outputChannel),
+        );
+        break;
+      case ManagerIdentifier.Chruby:
+        await this.runActivation(
+          new Chruby(this.workspaceFolder, this.outputChannel),
+        );
+        break;
+      case ManagerIdentifier.Rbenv:
+        await this.runActivation(
+          new Rbenv(this.workspaceFolder, this.outputChannel),
+        );
+        break;
+      case ManagerIdentifier.Rvm:
+        await this.runActivation(
+          new Rvm(this.workspaceFolder, this.outputChannel),
+        );
+        break;
+      case ManagerIdentifier.Mise:
+        await this.runActivation(
+          new Mise(this.workspaceFolder, this.outputChannel),
+        );
+        break;
+      case ManagerIdentifier.RubyInstaller:
+        await this.runActivation(
+          new RubyInstaller(this.workspaceFolder, this.outputChannel),
+        );
+        break;
+      case ManagerIdentifier.Custom:
+        await this.runActivation(
+          new Custom(this.workspaceFolder, this.outputChannel),
+        );
+        break;
+      case ManagerIdentifier.None:
+        await this.runActivation(
+          new None(this.workspaceFolder, this.outputChannel),
+        );
+        break;
+      default:
+        await this.runActivation(
+          new Shadowenv(this.workspaceFolder, this.outputChannel),
+        );
+        break;
+    }
   }
 
   private async setupBundlePath() {
@@ -321,5 +394,26 @@ export class Ruby implements RubyInterface {
     } catch {
       return false;
     }
+  }
+
+  private async handleRubyError(message: string) {
+    const answer = await vscode.window.showErrorMessage(
+      `Automatic Ruby environment activation with ${this.versionManager.identifier} failed: ${message}`,
+      "Retry",
+      "Select Ruby manually",
+    );
+
+    // If the user doesn't answer anything, we can just return. The error property was already set to true and we won't
+    // try to launch the LSP
+    if (!answer) {
+      return;
+    }
+
+    // For retrying, reload the entire window to get rid of any state
+    if (answer === "Retry") {
+      await vscode.commands.executeCommand("workbench.action.reloadWindow");
+    }
+
+    return this.manuallySelectRuby();
   }
 }

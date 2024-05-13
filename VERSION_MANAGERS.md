@@ -1,3 +1,11 @@
+# Version Managers
+
+This document contains information and tips to help Ruby LSP's VS Code extension work with your Ruby version manager.
+
+## asdf
+
+If you use `asdf` and the VS Code extension fails to activate the environment (as described in [this issue](https://github.com/Shopify/ruby-lsp/issues/1985)), you may resolve it by updating `asdf` to the latest version with `asdf update`, and then restart VS Code.
+
 ## Chruby
 
 If you use `chruby` but don't have a `.ruby-version` file in the project root, you can add `.ruby-version` to its parent folder as a fallback.

@@ -22,7 +22,7 @@ export class Custom extends VersionManager {
       },
     );
 
-    const parsedResult = JSON.parse(result.stderr);
+    const parsedResult = this.parseWithErrorHandling(result.stderr);
     return {
       env: { ...process.env, ...parsedResult.env },
       yjit: parsedResult.yjit,
@@ -38,7 +38,7 @@ export class Custom extends VersionManager {
     if (customCommand === undefined) {
       throw new Error(
         "The customRubyCommand configuration must be set when 'custom' is selected as the version manager. \
-        See the [README](https://github.com/Shopify/ruby-lsp/blob/main/vscode/VERSION_MANAGERS.md) for instructions.",
+        See the [README](https://github.com/Shopify/ruby-lsp/blob/main/VERSION_MANAGERS.md) for instructions.",
       );
     }
 

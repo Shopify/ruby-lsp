@@ -47,9 +47,7 @@ index = RubyIndexer::Index.new
 indexables = RubyIndexer.configuration.indexables
 
 indexables.each_with_index do |indexable, i|
-  result = Prism.parse(File.read(indexable.full_path))
-  collector = RubyIndexer::Collector.new(index, result, indexable.full_path)
-  collector.collect(result.value)
+  index.index_single(indexable)
 rescue => e
   errors[indexable.full_path] = e
 ensure

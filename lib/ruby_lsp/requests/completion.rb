@@ -11,6 +11,7 @@ module RubyLsp
     # suggests possible completions according to what the developer is typing.
     #
     # Currently supported targets:
+    #
     # - Classes
     # - Modules
     # - Constants

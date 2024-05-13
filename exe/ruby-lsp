@@ -18,6 +18,10 @@ parser = OptionParser.new do |opts|
     options[:debug] = true
   end
 
+  opts.on("--time-index", "Measure the time it takes to index the project") do
+    options[:time_index] = true
+  end
+
   opts.on(
     "--branch [BRANCH]",
     "Launch the Ruby LSP using the specified branch rather than the release version",
@@ -80,14 +84,27 @@ if options[:debug]
   end
 
   begin
-    original_stdout = $stdout
-    $stdout = $stderr
+    ENV.delete("RUBY_DEBUG_IRB_CONSOLE")
     require "debug/open_nonstop"
   rescue LoadError
     $stderr.puts("You need to install the debug gem to use the --debug flag")
-  ensure
-    $stdout = original_stdout
   end
+end
+
+if options[:time_index]
+  require "benchmark"
+
+  index = RubyIndexer::Index.new
+
+  result = Benchmark.realtime { index.index_all }
+  entries = index.instance_variable_get(:@entries)
+  entries_by_entry_type = entries.values.flatten.group_by(&:class)
+
+  puts <<~MSG
+    Ruby LSP v#{RubyLsp::VERSION}: Indexing took #{result.round(5)} seconds and generated:
+    - #{entries_by_entry_type.map { |k, v| "#{k.name.split("::").last}: #{v.size}" }.join("\n- ")}
+  MSG
+  return
 end
 
 RubyLsp::Server.new.start

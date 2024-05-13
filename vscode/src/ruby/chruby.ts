@@ -5,6 +5,7 @@ import path from "path";
 import * as vscode from "vscode";
 
 import { asyncExec } from "../common";
+import { WorkspaceChannel } from "../workspaceChannel";
 
 import { ActivationResult, VersionManager } from "./versionManager";
 
@@ -22,10 +23,27 @@ export class Chruby extends VersionManager {
     vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".rubies"),
   ];
 
+  constructor(
+    workspaceFolder: vscode.WorkspaceFolder,
+    outputChannel: WorkspaceChannel,
+  ) {
+    super(workspaceFolder, outputChannel);
+
+    const configuredRubies = vscode.workspace
+      .getConfiguration("rubyLsp")
+      .get<string[] | undefined>("rubyVersionManager.chrubyRubies");
+
+    if (configuredRubies) {
+      this.rubyInstallationUris.push(
+        ...configuredRubies.map((path) => vscode.Uri.file(path)),
+      );
+    }
+  }
+
   async activate(): Promise<ActivationResult> {
     const versionInfo = await this.discoverRubyVersion();
     const rubyUri = await this.findRubyUri(versionInfo);
-    const { defaultGems, gemHome, yjit } =
+    const { defaultGems, gemHome, yjit, version } =
       await this.runActivationScript(rubyUri);
 
     this.outputChannel.info(
@@ -44,12 +62,51 @@ export class Chruby extends VersionManager {
     return {
       env: { ...process.env, ...rubyEnv },
       yjit,
-      version: versionInfo.version,
+      version,
     };
   }
 
   // Returns the full URI to the Ruby executable
   protected async findRubyUri(rubyVersion: RubyVersion): Promise<vscode.Uri> {
+    if (/\d+\.\d+\.\d+/.exec(rubyVersion.version)) {
+      return this.findRubyUriForCompleteVersion(rubyVersion);
+    }
+
+    return this.findRubyUriWithOmittedPatch(rubyVersion);
+  }
+
+  private async findRubyUriWithOmittedPatch(
+    rubyVersion: RubyVersion,
+  ): Promise<vscode.Uri> {
+    const possibleVersionNames = rubyVersion.engine
+      ? [`${rubyVersion.engine}-${rubyVersion.version}`, rubyVersion.version]
+      : [rubyVersion.version, `ruby-${rubyVersion.version}`];
+
+    for (const uri of this.rubyInstallationUris) {
+      const directories = (await vscode.workspace.fs.readDirectory(uri)).sort(
+        (left, right) => right[0].localeCompare(left[0]),
+      );
+
+      for (const versionName of possibleVersionNames) {
+        const targetDirectory = directories.find(([name]) =>
+          name.startsWith(versionName),
+        );
+
+        if (targetDirectory) {
+          return vscode.Uri.joinPath(uri, targetDirectory[0], "bin", "ruby");
+        }
+      }
+    }
+
+    throw new Error(
+      `Cannot find installation directory for Ruby version ${possibleVersionNames.join(" or ")}.
+       Searched in ${this.rubyInstallationUris.map((uri) => uri.fsPath).join(", ")}`,
+    );
+  }
+
+  private async findRubyUriForCompleteVersion(
+    rubyVersion: RubyVersion,
+  ): Promise<vscode.Uri> {
     // If an engine was specified in the .ruby-version file, we favor looking for that first and also try just the
     // version number. If no engine was specified, we first try just the version number and then we try using `ruby` as
     // the default engine
@@ -72,7 +129,8 @@ export class Chruby extends VersionManager {
     }
 
     throw new Error(
-      `Cannot find installation directory for Ruby version ${possibleVersionNames.join(" or ")}`,
+      `Cannot find installation directory for Ruby version ${possibleVersionNames.join(" or ")}.
+       Searched in ${this.rubyInstallationUris.map((uri) => uri.fsPath).join(", ")}`,
     );
   }
 
@@ -80,46 +138,51 @@ export class Chruby extends VersionManager {
   private async discoverRubyVersion(): Promise<RubyVersion> {
     let uri = this.bundleUri;
     const root = path.parse(uri.fsPath).root;
+    let version: string;
+    let rubyVersionUri: vscode.Uri;
 
     while (uri.fsPath !== root) {
       try {
-        const rubyVersionUri = vscode.Uri.joinPath(uri, ".ruby-version");
+        rubyVersionUri = vscode.Uri.joinPath(uri, ".ruby-version");
         const content = await vscode.workspace.fs.readFile(rubyVersionUri);
-        const version = content.toString().trim();
-
-        if (version === "") {
-          throw new Error(`Ruby version file ${rubyVersionUri} is empty`);
-        }
-
-        const match =
-          /((?<engine>[A-Za-z]+)-)?(?<version>\d\.\d\.\d(-[A-Za-z0-9]+)?)/.exec(
-            version,
-          );
-
-        if (!match?.groups) {
-          throw new Error(
-            `Ruby version file ${rubyVersionUri} contains invalid format. Expected (engine-)?version, got ${version}`,
-          );
-        }
-
-        this.outputChannel.info(
-          `Discovered Ruby version ${version} from ${rubyVersionUri.toString()}`,
-        );
-        return { engine: match.groups.engine, version: match.groups.version };
+        version = content.toString().trim();
       } catch (error: any) {
         // If the file doesn't exist, continue going up the directory tree
         uri = vscode.Uri.file(path.dirname(uri.fsPath));
         continue;
       }
+
+      if (version === "") {
+        throw new Error(`Ruby version file ${rubyVersionUri} is empty`);
+      }
+
+      const match =
+        /((?<engine>[A-Za-z]+)-)?(?<version>\d+\.\d+(\.\d+)?(-[A-Za-z0-9]+)?)/.exec(
+          version,
+        );
+
+      if (!match?.groups) {
+        throw new Error(
+          `Ruby version file ${rubyVersionUri} contains invalid format. Expected (engine-)?version, got ${version}`,
+        );
+      }
+
+      this.outputChannel.info(
+        `Discovered Ruby version ${version} from ${rubyVersionUri.toString()}`,
+      );
+      return { engine: match.groups.engine, version: match.groups.version };
     }
 
     throw new Error("No .ruby-version file was found");
   }
 
   // Run the activation script using the Ruby installation we found so that we can discover gem paths
-  private async runActivationScript(
-    rubyExecutableUri: vscode.Uri,
-  ): Promise<{ defaultGems: string; gemHome: string; yjit: boolean }> {
+  private async runActivationScript(rubyExecutableUri: vscode.Uri): Promise<{
+    defaultGems: string;
+    gemHome: string;
+    yjit: boolean;
+    version: string;
+  }> {
     // Typically, GEM_HOME points to $HOME/.gem/ruby/version_without_patch. For example, for Ruby 3.2.2, it would be
     // $HOME/.gem/ruby/3.2.0. However, chruby overrides GEM_HOME to use the patch part of the version, resulting in
     // $HOME/.gem/ruby/3.2.2. In our activation script, we check if a directory using the patch exists and then prefer
@@ -136,7 +199,7 @@ export class Chruby extends VersionManager {
       "end",
       "newer_gem_home = File.join(File.dirname(user_dir), RUBY_VERSION)",
       "gems = (Dir.exist?(newer_gem_home) ? newer_gem_home : user_dir)",
-      "data = { defaultGems: Gem.default_dir, gemHome: gems, yjit: !!defined?(RubyVM::YJIT) }",
+      "data = { defaultGems: Gem.default_dir, gemHome: gems, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }",
       "STDERR.print(JSON.dump(data))",
     ].join(";");
 
@@ -145,6 +208,6 @@ export class Chruby extends VersionManager {
       { cwd: this.bundleUri.fsPath },
     );
 
-    return JSON.parse(result.stderr);
+    return this.parseWithErrorHandling(result.stderr);
   }
 }

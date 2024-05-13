@@ -6,6 +6,7 @@ import os from "os";
 
 import { before, after } from "mocha";
 import * as vscode from "vscode";
+import sinon from "sinon";
 
 import { Chruby } from "../../../ruby/chruby";
 import { WorkspaceChannel } from "../../../workspaceChannel";
@@ -134,6 +135,10 @@ suite("Chruby", () => {
     assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
+    fs.rmSync(path.join(rootPath, "opt", "rubies", `${RUBY_VERSION}-custom`), {
+      recursive: true,
+      force: true,
+    });
   });
 
   test("Considers Ruby as the default engine if missing", async () => {
@@ -156,5 +161,59 @@ suite("Chruby", () => {
     assert.match(env.PATH!, new RegExp(`/ruby-${RUBY_VERSION}/bin`));
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
+  });
+
+  test("Finds Ruby when extra RUBIES are configured", async () => {
+    fs.writeFileSync(path.join(workspacePath, ".ruby-version"), RUBY_VERSION);
+
+    const configStub = sinon
+      .stub(vscode.workspace, "getConfiguration")
+      .returns({
+        get: (name: string) =>
+          name === "rubyVersionManager.chrubyRubies"
+            ? [path.join(rootPath, "opt", "rubies")]
+            : "",
+      } as any);
+
+    const chruby = new Chruby(workspaceFolder, outputChannel);
+    configStub.restore();
+
+    const { env, version, yjit } = await chruby.activate();
+
+    assert.match(env.GEM_PATH!, new RegExp(`ruby/${VERSION_REGEX}`));
+    assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
+    assert.strictEqual(version, RUBY_VERSION);
+    assert.notStrictEqual(yjit, undefined);
+  });
+
+  test("Finds Ruby when .ruby-version omits patch", async () => {
+    fs.mkdirSync(
+      path.join(rootPath, "opt", "rubies", `${major}.${minor}.0`, "bin"),
+      {
+        recursive: true,
+      },
+    );
+
+    fs.writeFileSync(
+      path.join(workspacePath, ".ruby-version"),
+      `${major}.${minor}`,
+    );
+
+    const chruby = new Chruby(workspaceFolder, outputChannel);
+    chruby.rubyInstallationUris = [
+      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
+    ];
+
+    const { env, version, yjit } = await chruby.activate();
+
+    assert.match(env.GEM_PATH!, new RegExp(`ruby/${VERSION_REGEX}`));
+    assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
+    assert.strictEqual(version, RUBY_VERSION);
+    assert.notStrictEqual(yjit, undefined);
+
+    fs.rmSync(path.join(rootPath, "opt", "rubies", `${major}.${minor}.0`), {
+      recursive: true,
+      force: true,
+    });
   });
 });

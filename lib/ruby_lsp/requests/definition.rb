@@ -12,6 +12,7 @@ module RubyLsp
     # definition of the symbol under the cursor.
     #
     # Currently supported targets:
+    #
     # - Classes
     # - Modules
     # - Constants
