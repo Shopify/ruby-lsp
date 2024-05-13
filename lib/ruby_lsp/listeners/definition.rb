@@ -149,7 +149,6 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def handle_autoload_definition(node)
-
         arguments = node.arguments&.arguments
         return unless arguments
 
