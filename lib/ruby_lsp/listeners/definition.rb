@@ -152,6 +152,8 @@ module RubyLsp
         arguments = node.arguments&.arguments
         return unless arguments
 
+        return unless arguments.first
+
         value = arguments.first&.value
         return unless value
 
