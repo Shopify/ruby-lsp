@@ -182,9 +182,11 @@ To configure the Ruby LSP using [LSP for Sublime Text](https://github.com/sublim
 
 Restart LSP or Sublime Text and `ruby-lsp` will automatically activate when opening ruby files.
 
-## Zed (partly working)
+## Zed (some limitations)
 
-See https://github.com/zed-industries/zed/issues/4834 for discussion.
+[Zed has added support for Ruby LSP as a alternative language server](https://github.com/zed-industries/zed/pull/11768) in version v0.0.2 of the Ruby extension.
+
+See https://github.com/zed-industries/zed/issues/4834 for discussion of the limitations.
 
 ## RubyMine (not yet supported)
 
