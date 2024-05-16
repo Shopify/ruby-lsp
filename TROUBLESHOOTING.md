@@ -202,6 +202,36 @@ ruby-lsp
 Is there any extra information given from booting the server manually? Or does it only fail when booting through the
 extension?
 
+### Outdated Version
+
+In some circumstances, the version of Ruby LSP activated may be very outdated.
+
+**Why This Happens**
+
+Since v0.12.0, Ruby LSP has had a dependency on the [Prism](https://rubygems.org/gems/prism) parser.
+Prior to that, it had a dependency on a different parser, [YARP](https://rubygems.org/gems/yarp).
+Since Prism is a pre-1.0 release, there may be breaking changes introduced in minor versions.
+For that reason, we constrain the version of Prism up to that which is known to be compatible.
+
+With the custom bundle approach describe earlier, Bundler resolves a version of Ruby LSP which is compatible the dependencies already in your `Gemfile.lock.`
+
+When a new version of Prism is released, it will take a little time for us as Ruby LSP maintainers to verify the compatibility, and make any necessary updates.
+
+During that time, it's possible for the Prism version in your `Gemfile.lock` to be increased due to being a dependency of another gem in your bundle.
+
+If the Prism constraint cannot be satisfied, Bundler may resolve `ruby-lsp` to a much older version, which uses YARP.
+
+**How To Solve It**
+
+You can add a dependency constraint to your Gemfile limiting the Prism version to that maximum supported by Ruby LSP.
+For example:
+
+```
+gem "prism", "< 0.28" # example for Ruby LSP v0.16.6
+```
+
+Once Prism becomes sufficiently stable, we will relax the version constraint to alleviate this problem.
+
 ## After troubleshooting
 
 If after troubleshooting the Ruby LSP is still not initializing properly, please report an issue
