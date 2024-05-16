@@ -221,7 +221,7 @@ During that time, it's possible for the Prism version in your `Gemfile.lock` to 
 
 If the Prism constraint cannot be satisfied, Bundler may resolve `ruby-lsp` to a much older version, which uses YARP.
 
-**How To Solve It**
+**How to solve it**
 
 You can add a dependency constraint to your Gemfile limiting the Prism version to that maximum supported by Ruby LSP.
 For example:
