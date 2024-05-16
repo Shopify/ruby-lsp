@@ -156,6 +156,27 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_no_code_lens_for_nested_defs
+    stub_test_library("test-unit")
+    source = <<~RUBY
+      class FooTest < Test::Unit::TestCase
+        def test_bar
+          def test_baz; end
+        end
+      end
+    RUBY
+    uri = URI("file:///fake.rb")
+
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+
+    dispatcher = Prism::Dispatcher.new
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
+    dispatcher.dispatch(document.tree)
+    response = listener.perform
+
+    assert_equal(6, response.size)
+  end
+
   private
 
   def create_code_lens_addon
