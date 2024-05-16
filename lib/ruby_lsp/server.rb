@@ -498,6 +498,13 @@ module RubyLsp
           ),
         )
         raise Requests::CodeActionResolve::CodeActionError
+      when Requests::CodeActionResolve::Error::UnknownCodeAction
+        send_message(
+          Notification.window_show_error(
+            "Unknown code action",
+          ),
+        )
+        raise Requests::CodeActionResolve::CodeActionError
       else
         send_message(Result.new(id: message[:id], response: result))
       end

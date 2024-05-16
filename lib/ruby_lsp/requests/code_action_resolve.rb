@@ -24,6 +24,7 @@ module RubyLsp
     class CodeActionResolve < Request
       extend T::Sig
       NEW_VARIABLE_NAME = "new_variable"
+      NEW_METHOD_NAME = "new_method"
 
       class CodeActionError < StandardError; end
 
@@ -31,6 +32,7 @@ module RubyLsp
         enums do
           EmptySelection = new
           InvalidTargetRange = new
+          UnknownCodeAction = new
         end
       end
 
@@ -43,6 +45,18 @@ module RubyLsp
 
       sig { override.returns(T.any(Interface::CodeAction, Error)) }
       def perform
+        case @code_action[:title]
+        when CodeActions::VARIABLE_REFACTOR_CODE_ACTION_TITLE
+          refactor_variable
+        when CodeActions::METHOD_REFACTOR_CODE_ACTION_TITLE
+          refactor_method
+        else
+          Error::UnknownCodeAction
+        end
+      end
+
+      sig { returns(T.any(Interface::CodeAction, Error)) }
+      def refactor_variable
         return Error::EmptySelection if @document.source.empty?
 
         source_range = @code_action.dig(:data, :range)
@@ -128,6 +142,63 @@ module RubyLsp
                 edits: [
                   create_text_edit(source_range, NEW_VARIABLE_NAME),
                   create_text_edit(target_range, variable_source),
+                ],
+              ),
+            ],
+          ),
+        )
+      end
+
+      sig { returns(T.any(Interface::CodeAction, Error)) }
+      def refactor_method
+        return Error::EmptySelection if @document.source.empty?
+
+        source_range = @code_action.dig(:data, :range)
+        return Error::EmptySelection if source_range[:start] == source_range[:end]
+
+        scanner = @document.create_scanner
+        start_index = scanner.find_char_position(source_range[:start])
+        end_index = scanner.find_char_position(source_range[:end])
+        extracted_source = T.must(@document.source[start_index...end_index])
+
+        # Find the closest method declaration node, so that we place the refactor in a valid position
+        closest_def, _ = T.cast(
+          @document.locate(@document.tree, start_index, node_types: [Prism::DefNode]),
+          [T.nilable(Prism::DefNode), T.nilable(Prism::Node), T::Array[String]],
+        )
+        return Error::InvalidTargetRange if closest_def.nil?
+
+        closest_node_loc = closest_def.location.end_line
+        end_keyword_loc = closest_def.end_keyword_loc
+        return Error::InvalidTargetRange if end_keyword_loc.nil?
+
+        character = end_keyword_loc.start_column
+        indentation = " " * character
+        target_range = {
+          start: { line: closest_node_loc, character: character },
+          end: { line: closest_node_loc, character: character },
+        }
+
+        new_method_source = <<~RUBY
+
+          #{indentation}def #{NEW_METHOD_NAME}
+          #{indentation}  #{extracted_source}
+          #{indentation}end
+
+        RUBY
+
+        Interface::CodeAction.new(
+          title: CodeActions::METHOD_REFACTOR_CODE_ACTION_TITLE,
+          edit: Interface::WorkspaceEdit.new(
+            document_changes: [
+              Interface::TextDocumentEdit.new(
+                text_document: Interface::OptionalVersionedTextDocumentIdentifier.new(
+                  uri: @code_action.dig(:data, :uri),
+                  version: nil,
+                ),
+                edits: [
+                  create_text_edit(target_range, new_method_source),
+                  create_text_edit(source_range, NEW_METHOD_NAME),
                 ],
               ),
             ],
