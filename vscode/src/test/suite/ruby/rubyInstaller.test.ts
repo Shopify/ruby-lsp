@@ -60,7 +60,8 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(workspaceFolder, outputChannel);
     const { env, version, yjit } = await windows.activate();
 
-    assert.match(env.GEM_PATH!, /lib\\ruby\\gems\\3\.3\.0/);
+    assert.match(env.GEM_PATH!, /ruby\/3\.3\.0/);
+    assert.match(env.GEM_PATH!, /lib\/ruby\/gems\/3\.3\.0/);
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
 
@@ -89,7 +90,8 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(workspaceFolder, outputChannel);
     const { env, version, yjit } = await windows.activate();
 
-    assert.match(env.GEM_PATH!, /lib\\ruby\\gems\\3\.3\.0/);
+    assert.match(env.GEM_PATH!, /ruby\/3\.3\.0/);
+    assert.match(env.GEM_PATH!, /lib\/ruby\/gems\/3\.3\.0/);
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
 

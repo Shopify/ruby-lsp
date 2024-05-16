@@ -43,10 +43,6 @@ export class Chruby extends VersionManager {
   async activate(): Promise<ActivationResult> {
     const versionInfo = await this.discoverRubyVersion();
     const rubyUri = await this.findRubyUri(versionInfo);
-    this.outputChannel.info(
-      `Discovered Ruby installation at ${rubyUri.fsPath}`,
-    );
-
     const { defaultGems, gemHome, yjit, version } =
       await this.runActivationScript(rubyUri);
 
@@ -60,7 +56,7 @@ export class Chruby extends VersionManager {
       PATH: `${path.join(gemHome, "bin")}${path.delimiter}${path.join(
         defaultGems,
         "bin",
-      )}${path.delimiter}${path.dirname(rubyUri.fsPath)}${path.delimiter}${this.getProcessPath()}`,
+      )}${path.delimiter}${path.dirname(rubyUri.fsPath)}${path.delimiter}${process.env.PATH}`,
     };
 
     return {
@@ -70,10 +66,6 @@ export class Chruby extends VersionManager {
     };
   }
 
-  protected getProcessPath() {
-    return process.env.PATH;
-  }
-
   // Returns the full URI to the Ruby executable
   protected async findRubyUri(rubyVersion: RubyVersion): Promise<vscode.Uri> {
     if (/\d+\.\d+\.\d+/.exec(rubyVersion.version)) {
@@ -81,41 +73,6 @@ export class Chruby extends VersionManager {
     }
 
     return this.findRubyUriWithOmittedPatch(rubyVersion);
-  }
-
-  // Run the activation script using the Ruby installation we found so that we can discover gem paths
-  protected async runActivationScript(rubyExecutableUri: vscode.Uri): Promise<{
-    defaultGems: string;
-    gemHome: string;
-    yjit: boolean;
-    version: string;
-  }> {
-    // Typically, GEM_HOME points to $HOME/.gem/ruby/version_without_patch. For example, for Ruby 3.2.2, it would be
-    // $HOME/.gem/ruby/3.2.0. However, chruby overrides GEM_HOME to use the patch part of the version, resulting in
-    // $HOME/.gem/ruby/3.2.2. In our activation script, we check if a directory using the patch exists and then prefer
-    // that over the default one.
-    const script = [
-      "user_dir = Gem.user_dir",
-      "paths = Gem.path",
-      "if paths.length > 2",
-      "  paths.delete(Gem.default_dir)",
-      "  paths.delete(Gem.user_dir)",
-      "  if paths[0]",
-      "    user_dir = paths[0] if Dir.exist?(paths[0])",
-      "  end",
-      "end",
-      "newer_gem_home = File.join(File.dirname(user_dir), RUBY_VERSION)",
-      "gems = (Dir.exist?(newer_gem_home) ? newer_gem_home : user_dir)",
-      "data = { defaultGems: Gem.default_dir, gemHome: gems, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }",
-      "STDERR.print(JSON.dump(data))",
-    ].join(";");
-
-    const result = await asyncExec(
-      `${rubyExecutableUri.fsPath} -W0 -rjson -e '${script}'`,
-      { cwd: this.bundleUri.fsPath },
-    );
-
-    return this.parseWithErrorHandling(result.stderr);
   }
 
   private async findRubyUriWithOmittedPatch(
@@ -211,11 +168,46 @@ export class Chruby extends VersionManager {
       }
 
       this.outputChannel.info(
-        `Discovered Ruby version ${version} from ${rubyVersionUri.fsPath}`,
+        `Discovered Ruby version ${version} from ${rubyVersionUri.toString()}`,
       );
       return { engine: match.groups.engine, version: match.groups.version };
     }
 
     throw new Error("No .ruby-version file was found");
+  }
+
+  // Run the activation script using the Ruby installation we found so that we can discover gem paths
+  private async runActivationScript(rubyExecutableUri: vscode.Uri): Promise<{
+    defaultGems: string;
+    gemHome: string;
+    yjit: boolean;
+    version: string;
+  }> {
+    // Typically, GEM_HOME points to $HOME/.gem/ruby/version_without_patch. For example, for Ruby 3.2.2, it would be
+    // $HOME/.gem/ruby/3.2.0. However, chruby overrides GEM_HOME to use the patch part of the version, resulting in
+    // $HOME/.gem/ruby/3.2.2. In our activation script, we check if a directory using the patch exists and then prefer
+    // that over the default one.
+    const script = [
+      "user_dir = Gem.user_dir",
+      "paths = Gem.path",
+      "if paths.length > 2",
+      "  paths.delete(Gem.default_dir)",
+      "  paths.delete(Gem.user_dir)",
+      "  if paths[0]",
+      "    user_dir = paths[0] if Dir.exist?(paths[0])",
+      "  end",
+      "end",
+      "newer_gem_home = File.join(File.dirname(user_dir), RUBY_VERSION)",
+      "gems = (Dir.exist?(newer_gem_home) ? newer_gem_home : user_dir)",
+      "data = { defaultGems: Gem.default_dir, gemHome: gems, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }",
+      "STDERR.print(JSON.dump(data))",
+    ].join(";");
+
+    const result = await asyncExec(
+      `${rubyExecutableUri.fsPath} -W0 -rjson -e '${script}'`,
+      { cwd: this.bundleUri.fsPath },
+    );
+
+    return this.parseWithErrorHandling(result.stderr);
   }
 }

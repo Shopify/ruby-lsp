@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import os from "os";
 
 import * as vscode from "vscode";
@@ -17,12 +16,6 @@ interface RubyVersion {
 //
 // If we can't find it there, then we throw an error and rely on the user to manually select where Ruby is installed.
 export class RubyInstaller extends Chruby {
-  // Environment variables are case sensitive on Windows when we access them through NodeJS. We need to ensure that
-  // we're searching through common variations, so that we don't accidentally miss the path we should inherit
-  protected getProcessPath() {
-    return process.env.Path ?? process.env.PATH ?? process.env.path;
-  }
-
   // Returns the full URI to the Ruby executable
   protected async findRubyUri(rubyVersion: RubyVersion): Promise<vscode.Uri> {
     const [major, minor, _patch] = rubyVersion.version.split(".").map(Number);
@@ -51,28 +44,5 @@ export class RubyInstaller extends Chruby {
       `Cannot find installation directory for Ruby version ${rubyVersion.version}.\
          Searched in ${possibleInstallationUris.map((uri) => uri.fsPath).join(", ")}`,
     );
-  }
-
-  protected async runActivationScript(rubyExecutableUri: vscode.Uri): Promise<{
-    defaultGems: string;
-    gemHome: string;
-    yjit: boolean;
-    version: string;
-  }> {
-    const { defaultGems, gemHome, yjit, version } =
-      await super.runActivationScript(rubyExecutableUri);
-
-    return {
-      defaultGems: this.standardizePath(defaultGems),
-      gemHome: this.standardizePath(gemHome),
-      yjit,
-      version,
-    };
-  }
-
-  // Sometimes Windows paths are prefixed by `//?/` and use forward slashes as separators. We need to both remove the
-  // prefix and convert the path to use backslashes before we insert anything into the environment PATH.
-  private standardizePath(path: string): string {
-    return path.replace("//?/", "").replace(/\//g, "\\");
   }
 }
