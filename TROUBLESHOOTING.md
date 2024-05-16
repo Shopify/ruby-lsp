@@ -206,7 +206,7 @@ extension?
 
 In some circumstances, the version of Ruby LSP activated may be very outdated.
 
-**Why This Happens**
+**Why this happens**
 
 Since v0.12.0, Ruby LSP has had a dependency on the [Prism](https://rubygems.org/gems/prism) parser.
 Prior to that, it had a dependency on a different parser, [YARP](https://rubygems.org/gems/yarp).
