@@ -155,7 +155,8 @@ module RubyLsp
         end
         def constant_name(node)
           node.full_name
-        rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError
+        rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
+               Prism::ConstantPathNode::MissingNodesInConstantPathError
           nil
         end
 
