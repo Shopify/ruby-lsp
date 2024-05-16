@@ -441,26 +441,19 @@ class RubyDocumentTest < Minitest::Test
     assert_equal("ActiveRecord", T.must(T.cast(parent, Prism::ConstantPathNode).child_nodes.first).location.slice)
 
     # Locate the `Base` class
-    found, parent = T.cast(
+    found, _parent = T.cast(
       document.locate_node({ line: 0, character: 27 }),
-      [Prism::ConstantReadNode, Prism::ConstantPathNode, T::Array[String]],
+      [Prism::ConstantPathNode, Prism::ClassNode, T::Array[String]],
     )
-    assert_instance_of(Prism::ConstantReadNode, found)
-    assert_equal("Base", found.location.slice)
-
-    assert_instance_of(Prism::ConstantPathNode, parent)
-    assert_equal("Base", T.must(parent.child_nodes[1]).location.slice)
-    assert_equal("ActiveRecord", T.must(parent.child_nodes[0]).location.slice)
+    assert_equal(:ActiveRecord, T.cast(found.parent, Prism::ConstantReadNode).name)
+    assert_equal(:Base, found.name)
 
     # Locate the `where` invocation
-    found, parent = T.cast(
+    found, _parent = T.cast(
       document.locate_node({ line: 3, character: 4 }),
       [Prism::CallNode, Prism::StatementsNode, T::Array[String]],
     )
-    assert_instance_of(Prism::CallNode, found)
     assert_equal("where", T.must(found.message_loc).slice)
-
-    assert_instance_of(Prism::StatementsNode, parent)
   end
 
   def test_locate_returns_nesting

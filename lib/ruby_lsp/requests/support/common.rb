@@ -167,6 +167,24 @@ module RubyLsp
             constant_name(path)
           end
         end
+
+        # Iterates over each part of a constant path, so that we can easily push response items for each section of the
+        # name. For example, for `Foo::Bar::Baz`, this method will invoke the block with `Foo`, then `Bar` and finally
+        # `Baz`.
+        sig do
+          params(
+            node: Prism::Node,
+            block: T.proc.params(part: Prism::Node).void,
+          ).void
+        end
+        def each_constant_path_part(node, &block)
+          current = T.let(node, T.nilable(Prism::Node))
+
+          while current.is_a?(Prism::ConstantPathNode)
+            block.call(current)
+            current = current.parent
+          end
+        end
       end
     end
   end

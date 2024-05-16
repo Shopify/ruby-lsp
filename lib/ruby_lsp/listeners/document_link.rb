@@ -30,7 +30,7 @@ module RubyLsp
                 lookup[spec.name] = {}
                 lookup[spec.name][spec.version.to_s] = {}
 
-                Dir.glob("**/*.rb", base: "#{spec.full_gem_path}/").each do |path|
+                Dir.glob("**/*.rb", base: "#{spec.full_gem_path.delete_prefix("//?/")}/").each do |path|
                   lookup[spec.name][spec.version.to_s][path] = "#{spec.full_gem_path}/#{path}"
                 end
               end

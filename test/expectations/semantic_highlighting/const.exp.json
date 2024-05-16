@@ -219,21 +219,7 @@
     },
     {
       "delta_line": 0,
-      "delta_start_char": 5,
-      "length": 1,
-      "token_type": 0,
-      "token_modifiers": 0
-    },
-    {
-      "delta_line": 0,
-      "delta_start_char": 5,
-      "length": 1,
-      "token_type": 0,
-      "token_modifiers": 0
-    },
-    {
-      "delta_line": 0,
-      "delta_start_char": 3,
+      "delta_start_char": 10,
       "length": 1,
       "token_type": 0,
       "token_modifiers": 0
@@ -261,14 +247,7 @@
     },
     {
       "delta_line": 0,
-      "delta_start_char": 6,
-      "length": 1,
-      "token_type": 0,
-      "token_modifiers": 0
-    },
-    {
-      "delta_line": 0,
-      "delta_start_char": 3,
+      "delta_start_char": 9,
       "length": 3,
       "token_type": 8,
       "token_modifiers": 0
@@ -285,15 +264,7 @@
       "delta_start_char": 3,
       "length": 3,
       "token_type": 8,
-      "token_modifiers": 0
-    },
-    {
-      "delta_line": 0,
-      "delta_start_char": 5,
-      "length": 1,
-      "token_type": 0,
       "token_modifiers": 0
     }
-  ],
-  "params": []
+  ]
 }
