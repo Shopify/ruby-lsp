@@ -12,7 +12,7 @@ The Ruby LSP is an implementation of the [language server protocol](https://micr
 for Ruby, used to improve rich features in editors. It is a part of a wider goal to provide a state-of-the-art
 experience to Ruby developers using modern standards for cross-editor features, documentation and debugging.
 
-Want to discuss Ruby developer experience? Consider joining the public
+Want to discuss the Ruby developer experience? Consider joining the public
 [Ruby DX Slack workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q).
 
 ## Features
@@ -23,19 +23,20 @@ The Ruby LSP features include
 
 - Semantic highlighting
 - Symbol search and code outline
-- RuboCop errors and warnings (diagnostics)
+- Errors and warnings (diagnostics) from RuboCop and the Prism parser
 - Format on save (with RuboCop or Syntax Tree)
 - Format on type
 - Debugging support
 - Running and debugging tests through VS Code's UI
 - Go to definition for classes, modules, constants and required files
-- Showing documentation on hover for classes, modules and constants
+- Show documentation on hover for classes, modules and constants
 - Completion for classes, modules, constants and require paths
 - Fuzzy search classes, modules and constants anywhere in the project and its dependencies (workspace symbol)
 
-Adding method support for definition, completion, hover and workspace symbol is partially supported, but not yet complete. Follow progress in https://github.com/Shopify/ruby-lsp/issues/899
+Adding method support for definition, completion, hover and workspace symbol is partially complete.
+Follow progress in https://github.com/Shopify/ruby-lsp/issues/899.
 
-See complete information about features [here](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html).
+See [complete information about features](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html).
 
 If you experience issues, please see the [troubleshooting
 guide](https://github.com/Shopify/ruby-lsp/blob/main/TROUBLESHOOTING.md).
@@ -52,12 +53,13 @@ editor. Do not install the `ruby-lsp` gem manually.
 
 See [editors](EDITORS.md) for community instructions on setting up the Ruby LSP.
 
-The gem can be installed by doing
+The gem can be installed with:
+
 ```shell
 gem install ruby-lsp
 ```
 
-and the language server can be launched running `ruby-lsp` (without bundle exec in order to properly hook into your
+and the language server can be launched by running `ruby-lsp` (without bundle exec in order to properly hook into your
 project's dependencies).
 
 ### Documentation
@@ -74,7 +76,7 @@ By default, the Ruby LSP indexes all Ruby files defined in the current project a
 default gems, except for
 
 - Gems that only appear under the `:development` group
-- All Ruby files under `test/**/*.rb`
+- Ruby files under `test/**/*.rb`
 
 By creating a `.index.yml` file, these configurations can be overridden and tuned. Note that indexing dependent behavior, such as definition, hover, completion or workspace symbol will be impacted by the configurations placed here.
 
@@ -101,7 +103,7 @@ included_gems:
 ### Addons
 
 The Ruby LSP provides an addon system that allows other gems to enhance the base functionality with more editor
-features. This is the mechanism that powers addons like
+features. This is the mechanism that powers addons like:
 
 - [Ruby LSP Rails](https://github.com/Shopify/ruby-lsp-rails)
 - [Ruby LSP RSpec](https://github.com/st0012/ruby-lsp-rspec)
