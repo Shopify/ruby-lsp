@@ -28,6 +28,8 @@ When you run `eglot` command it will run `ruby-lsp` process for you.
 
 ## Neovim
 
+**Note**: Ensure that you are using Neovim 0.10 or newer.
+
 ### nvim-lspconfig
 
 The [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/ruby_lsp.lua)
@@ -61,7 +63,7 @@ mason_lspconfig.setup_handlers {
 }
 ```
 
-### Neovim Limitations
+### Additional setup (optional)
 
 `rubyLsp/workspace/dependencies` is a custom method currently supported only in the VS Code plugin.
 The following snippet adds `ShowRubyDeps` command to show dependencies in the quickfix list.
