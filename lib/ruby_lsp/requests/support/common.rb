@@ -50,12 +50,12 @@ module RubyLsp
           params(
             node: Prism::Node,
             title: String,
-            command_name: String,
+            command_name: T.nilable(String),
             arguments: T.nilable(T::Array[T.untyped]),
             data: T.nilable(T::Hash[T.untyped, T.untyped]),
           ).returns(Interface::CodeLens)
         end
-        def create_code_lens(node, title:, command_name:, arguments:, data:)
+        def create_code_lens(node, title:, command_name: nil, arguments: nil, data: nil)
           range = range_from_node(node)
 
           Interface::CodeLens.new(
