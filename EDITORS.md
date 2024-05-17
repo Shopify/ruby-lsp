@@ -63,8 +63,10 @@ mason_lspconfig.setup_handlers {
 
 ### Neovim Limitations
 
+`rubyLsp/workspace/dependencies` is a custom method currently supported only in the VS Code plugin.
+The following snippet adds `ShowRubyDeps` command to show dependencies in the quickfix list.
+
 ```lua
--- adds ShowRubyDeps command to show dependencies in the quickfix list.
 -- add the `all` argument to show indirect dependencies as well
 local function add_ruby_deps_command(client, bufnr)
     vim.api.nvim_buf_create_user_command(bufnr, "ShowRubyDeps",
