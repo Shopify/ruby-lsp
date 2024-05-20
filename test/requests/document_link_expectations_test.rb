@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "expectations/expectations_test_runner"
+require_relative "support/expectations_test_runner"
 
 class DocumentLinkExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::DocumentLink, "document_link"
