@@ -36,9 +36,9 @@ to index for features such as go to definition.
 
 ## Common issues
 
-There are three main sources of issues users typically face during activation: outdated version activation, shell problems, or Bundler related problems.
+There are three main sources of issues users typically face during activation: outdated version, shell problems, or Bundler related problems.
 
-### Outdated Version Activation
+### Outdated Version
 
 In some circumstances, the version of Ruby LSP activated may be very outdated.
 
