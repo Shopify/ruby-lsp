@@ -79,3 +79,13 @@ export function debounce(fn: (...args: any[]) => Promise<void>, delay: number) {
     });
   };
 }
+
+/**
+ * Validates the existence of a path.
+ *
+ * @param uri the path of which to validate the existence
+ * @returns `true` if the path exists, throws an error otherwise
+ */
+export async function validatePath(uri: vscode.Uri): Promise<boolean> {
+  return vscode.workspace.fs.stat(uri).then(() => true);
+}

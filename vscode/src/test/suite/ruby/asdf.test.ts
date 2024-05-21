@@ -73,18 +73,18 @@ suite("Asdf", () => {
 
   suite("findAsdfDataDir", () => {
     const subject = asdf.findAsdfDataDir.bind(asdf);
-    let statStub: sinon.SinonStub;
+    let validatePath: sinon.SinonStub;
 
     setup(() => {
-      statStub = sinon.stub(vscode.workspace.fs, "stat");
+      validatePath = sinon.stub(common, "validatePath");
     });
 
     teardown(() => {
-      statStub.restore();
+      validatePath.restore();
     });
 
     test("searches common asdf data directory", async () => {
-      statStub.rejects();
+      validatePath.rejects();
       await subject().catch(() => {});
 
       [
@@ -94,7 +94,7 @@ suite("Asdf", () => {
         "/opt/homebrew/opt/asdf/libexec",
       ].forEach((base) => {
         const shims = vscode.Uri.joinPath(vscode.Uri.file(base), "shims");
-        assert.ok(statStub.calledWith(shims));
+        assert.ok(validatePath.calledWith(shims));
       });
     });
   });

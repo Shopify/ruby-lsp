@@ -5,7 +5,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 
-import { asyncExec } from "../common";
+import { asyncExec, validatePath } from "../common";
 
 import { VersionManager, ActivationResult } from "./versionManager";
 
@@ -85,9 +85,7 @@ export class Asdf extends VersionManager {
 
     for (const possiblePath of possiblePaths) {
       try {
-        await vscode.workspace.fs.stat(
-          vscode.Uri.joinPath(possiblePath, "shims"),
-        );
+        await validatePath(vscode.Uri.joinPath(possiblePath, "shims"));
         return possiblePath;
       } catch (error: any) {
         // Continue looking
@@ -132,7 +130,7 @@ export class Asdf extends VersionManager {
 
     for (const possiblePath of possiblePaths) {
       try {
-        await vscode.workspace.fs.stat(possiblePath);
+        await validatePath(possiblePath);
         return possiblePath;
       } catch (error: any) {
         // Continue looking
