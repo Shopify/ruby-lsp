@@ -3521,31 +3521,31 @@ class Mocha::ParameterMatchers::PositionalOrKeywordHash < ::Mocha::ParameterMatc
   # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#14
   def matches?(available_parameters); end
 
-  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#27
+  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#28
   def mocha_inspect; end
 
   private
 
-  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#41
+  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#42
   def deprecation_warning(actual, expected); end
 
-  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#57
+  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#58
   def expectation_definition; end
 
-  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#33
+  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#34
   def extract_parameter(available_parameters); end
 
-  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#49
+  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#50
   def hash_type(hash); end
 
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#53
+  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#54
   def ruby2_keywords_hash?(hash); end
 
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#37
+  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#38
   def same_type_of_hash?(actual, expected); end
 end
 

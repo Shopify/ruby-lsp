@@ -9,7 +9,7 @@ group :development do
   gem "debug", "~> 1.9", require: false
   gem "minitest-reporters", "~> 1.6"
   gem "minitest", "~> 5.23"
-  gem "mocha", "~> 2.2"
+  gem "mocha", "~> 2.3"
   gem "psych", "~> 5.1", require: false
   gem "rake", "~> 13.2"
   gem "rdoc", require: false, github: "Shopify/rdoc", branch: "create_snapper_generator"
