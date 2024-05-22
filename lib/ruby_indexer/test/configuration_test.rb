@@ -49,6 +49,13 @@ module RubyIndexer
       )
     end
 
+    def test_exclude_pattern
+      assert_equal(
+        @config.exclude_pattern,
+        "#{Dir.pwd}/{**/tmp/**/*,**/node_modules/**/*,vendor/bundle/**/*}",
+      )
+    end
+
     def test_indexables_includes_default_gems
       indexables = @config.indexables.map(&:full_path)
 
@@ -71,7 +78,7 @@ module RubyIndexer
       Bundler.settings.temporary(path: "vendor/bundle") do
         config = Configuration.new
 
-        assert_includes(config.instance_variable_get(:@excluded_patterns), "#{Dir.pwd}/vendor/bundle/**/*.rb")
+        assert_includes(config.instance_variable_get(:@excluded_patterns), "#{Dir.pwd}/vendor/bundle/**/*")
       end
     end
 

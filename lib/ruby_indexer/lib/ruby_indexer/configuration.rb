@@ -20,9 +20,16 @@ module RubyIndexer
     def initialize
       @excluded_gems = T.let(initial_excluded_gems, T::Array[String])
       @included_gems = T.let([], T::Array[String])
-      @excluded_patterns = T.let([File.join("**", "*_test.rb"), File.join("**", "tmp", "**", "*")], T::Array[String])
+      @excluded_patterns = T.let(
+        [
+          File.join("**", "*_test.rb"),
+          File.join("**", "tmp", "**", "*"),
+          File.join("**", "node_modules", "**", "*"),
+        ],
+        T::Array[String],
+      )
       path = Bundler.settings["path"]
-      @excluded_patterns << File.join(File.expand_path(path, Dir.pwd), "**", "*.rb") if path
+      @excluded_patterns << File.join(File.expand_path(path, Dir.pwd), "**", "*") if path
 
       @included_patterns = T.let([File.join(Dir.pwd, "**", "*.rb")], T::Array[String])
       @excluded_magic_comments = T.let(
@@ -43,6 +50,15 @@ module RubyIndexer
       )
     end
 
+    sig { returns(String) }
+    def exclude_pattern
+      relative_patterns = @excluded_patterns
+        .select { |p| p.end_with?("/**/*") }
+        .map { |p| p.delete_prefix("#{Dir.pwd}/") }
+
+      "#{Dir.pwd}/{#{relative_patterns.join(",")}}"
+    end
+
     sig { returns(T::Array[IndexablePath]) }
     def indexables
       excluded_gems = @excluded_gems - @included_gems
@@ -52,21 +68,25 @@ module RubyIndexer
       # having duplicates if BUNDLE_PATH is set to a folder inside the project structure
 
       # Add user specified patterns
-      indexables = @included_patterns.flat_map do |pattern|
+      patterns = indexable_included_file_patterns.sort.map! { |dir| File.join(dir, "*.rb") }
+      patterns = [File.join(Dir.pwd, "**/*.rb")] if patterns.empty?
+
+      indexables = patterns.flat_map do |pattern|
         load_path_entry = T.let(nil, T.nilable(String))
 
-        Dir.glob(pattern, File::FNM_PATHNAME | File::FNM_EXTGLOB).map! do |path|
-          path = File.expand_path(path)
-          # All entries for the same pattern match the same $LOAD_PATH entry. Since searching the $LOAD_PATH for every
-          # entry is expensive, we memoize it until we find a path that doesn't belong to that $LOAD_PATH. This happens
-          # on repositories that define multiple gems, like Rails. All frameworks are defined inside the Dir.pwd, but
-          # each one of them belongs to a different $LOAD_PATH entry
-          if load_path_entry.nil? || !path.start_with?(load_path_entry)
-            load_path_entry = $LOAD_PATH.find { |load_path| path.start_with?(load_path) }
-          end
+        Dir.glob(pattern, File::FNM_PATHNAME | File::FNM_EXTGLOB)
+          .map! do |path|
+            path = File.expand_path(path)
+            # All entries for the same pattern match the same $LOAD_PATH entry. Since searching the $LOAD_PATH for every
+            # entry is expensive, we memoize it until we find a path that doesn't belong to that $LOAD_PATH. This
+            # happens on repositories that define multiple gems, like Rails. All frameworks are defined inside the
+            # Dir.pwd, but each one of them belongs to a different $LOAD_PATH entry
+            if load_path_entry.nil? || !path.start_with?(load_path_entry)
+              load_path_entry = $LOAD_PATH.find { |load_path| path.start_with?(load_path) }
+            end
 
-          IndexablePath.new(load_path_entry, path)
-        end
+            IndexablePath.new(load_path_entry, path)
+          end
       end
 
       # Remove user specified patterns
@@ -157,6 +177,37 @@ module RubyIndexer
     end
 
     private
+
+    sig { params(base_directory: String, excluded_pattern: String).returns(T::Array[String]) }
+    def indexable_included_file_patterns(base_directory = Dir.pwd, excluded_pattern = exclude_pattern)
+      flags = File::FNM_PATHNAME | File::FNM_EXTGLOB
+
+      # Escape File.fnmatch? wildcards in the directory
+      base_directory = base_directory.gsub(/[\\\{\}\[\]\*\?]/) do |reserved_glob_character|
+        "\\#{reserved_glob_character}"
+      end
+
+      dirs = Dir.glob(File.join(base_directory, "*/"), flags)
+        .reject do |dir|
+        next true if dir.end_with?("/./", "/../")
+        next true if File.fnmatch?(excluded_pattern, dir, flags)
+
+        symlink_excluded_or_infinite_loop?(base_directory, dir, excluded_pattern, flags)
+      end
+
+      dirs
+        .flat_map { |dir| indexable_included_file_patterns(dir, excluded_pattern) }
+        .unshift(base_directory)
+    end
+
+    sig { params(base_dir: String, current_dir: String, exclude_pattern: String, flags: Integer).returns(T::Boolean) }
+    def symlink_excluded_or_infinite_loop?(base_dir, current_dir, exclude_pattern, flags)
+      dir_realpath = File.realpath(current_dir)
+      File.symlink?(current_dir.chomp("/")) && (
+        File.fnmatch?(exclude_pattern, "#{dir_realpath}/", flags) ||
+        File.realpath(base_dir).start_with?(dir_realpath)
+      )
+    end
 
     sig { params(config: T::Hash[String, T.untyped]).void }
     def validate_config!(config)
