@@ -99,8 +99,10 @@ module RubyLsp
     end
 
     sig { returns(String) }
-    def backtraces
-      @errors.filter_map(&:backtrace).join("\n\n")
+    def errors_details
+      @errors.map do |error|
+        T.must(error.class.name) + ": " + error.message + "\n" + Array(error.backtrace).join("\n")
+      end.join("\n\n")
     end
 
     # Each addon should implement `MyAddon#activate` and use to perform any sort of initialization, such as

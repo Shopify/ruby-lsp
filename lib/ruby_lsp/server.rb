@@ -104,7 +104,7 @@ module RubyLsp
           ),
         )
 
-        $stderr.puts(errored_addons.map(&:backtraces).join("\n\n"))
+        $stderr.puts(errored_addons.map(&:errors_details).join("\n\n"))
       end
     end
 
