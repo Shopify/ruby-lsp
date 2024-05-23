@@ -71,7 +71,7 @@ module RubyIndexer
       Bundler.settings.temporary(path: "vendor/bundle") do
         config = Configuration.new
 
-        assert_includes(config.instance_variable_get(:@excluded_patterns), "#{Dir.pwd}/vendor/bundle/**/*")
+        assert_includes(config.instance_variable_get(:@excluded_patterns), "#{Dir.pwd}/vendor/bundle/**/*.rb")
       end
     end
 
