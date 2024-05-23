@@ -213,7 +213,7 @@ module RubyLsp
       sig { void }
       def auto_indent_after_end_keyword
         current_line = @lines[@position[:line]]
-        return unless current_line&.strip == "end"
+        return unless current_line && current_line.strip == "end"
 
         target, _parent, _nesting = @document.locate_node({
           line: @position[:line],
@@ -226,9 +226,10 @@ module RubyLsp
         end
         return unless statements
 
+        current_indentation = find_indentation(current_line)
         statements.body.each do |node|
           loc = node.location
-          next unless loc.start_column == @indentation
+          next unless loc.start_column == current_indentation
 
           (loc.start_line..loc.end_line).each do |line|
             add_edit_with_text("  ", { line: line - 1, character: 0 })
