@@ -230,7 +230,9 @@ module RubyLsp
           loc = node.location
           next unless loc.start_column == @indentation
 
-          add_edit_with_text("  ", { line: loc.start_line - 1, character: 0 })
+          (loc.start_line..loc.end_line).each do |line|
+            add_edit_with_text("  ", { line: line - 1, character: 0 })
+          end
         end
 
         move_cursor_to(@position[:line], @position[:character])
