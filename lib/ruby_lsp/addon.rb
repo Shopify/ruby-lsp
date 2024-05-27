@@ -101,7 +101,7 @@ module RubyLsp
     sig { returns(String) }
     def errors_details
       @errors.map do |error|
-        T.must(error.class.name) + ": " + error.message + "\n" + Array(error.backtrace).join("\n")
+        error.full_message
       end.join("\n\n")
     end
 
