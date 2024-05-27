@@ -62,7 +62,7 @@ class CompletionResolveTest < Minitest::Test
     with_server(source, stub_no_typechecker: true) do |server, _uri|
       existing_item = {
         label: "@a",
-        kind: 5,
+        kind: RubyLsp::Constant::CompletionItemKind::FIELD,
         data: { owner_name: "Foo" },
       }
 

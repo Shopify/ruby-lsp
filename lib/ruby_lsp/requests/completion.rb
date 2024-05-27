@@ -17,6 +17,7 @@ module RubyLsp
     # - Constants
     # - Require paths
     # - Methods invoked on self only
+    # - Instance variables
     #
     # # Example
     #

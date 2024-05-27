@@ -112,5 +112,20 @@ module RubyIndexer
 
       refute_entry("@")
     end
+
+    def test_class_instance_variables
+      index(<<~RUBY)
+        module Foo
+          class Bar
+            @a = 123
+          end
+        end
+      RUBY
+
+      assert_entry("@a", Entry::InstanceVariable, "/fake/path/foo.rb:2-4:2-6")
+
+      entry = T.must(@index["@a"]&.first)
+      assert_equal("Foo::Bar", T.must(entry.owner).name)
+    end
   end
 end

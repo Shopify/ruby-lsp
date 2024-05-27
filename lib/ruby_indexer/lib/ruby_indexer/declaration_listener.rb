@@ -242,7 +242,7 @@ module RubyIndexer
     sig { params(node: Prism::InstanceVariableWriteNode).void }
     def on_instance_variable_write_node_enter(node)
       name = node.name.to_s
-      return if name.length == 1
+      return if name == "@"
 
       @index << Entry::InstanceVariable.new(
         name,
@@ -256,7 +256,7 @@ module RubyIndexer
     sig { params(node: Prism::InstanceVariableAndWriteNode).void }
     def on_instance_variable_and_write_node_enter(node)
       name = node.name.to_s
-      return if name.length == 1
+      return if name == "@"
 
       @index << Entry::InstanceVariable.new(
         name,
@@ -270,7 +270,7 @@ module RubyIndexer
     sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
     def on_instance_variable_operator_write_node_enter(node)
       name = node.name.to_s
-      return if name.length == 1
+      return if name == "@"
 
       @index << Entry::InstanceVariable.new(
         name,
@@ -284,7 +284,7 @@ module RubyIndexer
     sig { params(node: Prism::InstanceVariableOrWriteNode).void }
     def on_instance_variable_or_write_node_enter(node)
       name = node.name.to_s
-      return if name.length == 1
+      return if name == "@"
 
       @index << Entry::InstanceVariable.new(
         name,
@@ -298,7 +298,7 @@ module RubyIndexer
     sig { params(node: Prism::InstanceVariableTargetNode).void }
     def on_instance_variable_target_node_enter(node)
       name = node.name.to_s
-      return if name.length == 1
+      return if name == "@"
 
       @index << Entry::InstanceVariable.new(
         name,
