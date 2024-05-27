@@ -23,6 +23,7 @@ export class Asdf extends VersionManager {
       `. ${asdfUri.fsPath} && asdf exec ruby -W0 -rjson -e '${activationScript}'`,
       {
         cwd: this.bundleUri.fsPath,
+        shell: vscode.env.shell,
         env: {
           ASDF_DIR: path.dirname(asdfUri.fsPath),
           ASDF_DATA_DIR: asdfDaraDirUri.fsPath,
