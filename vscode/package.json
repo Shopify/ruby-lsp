@@ -290,7 +290,7 @@
             "none"
           ],
           "enumDescriptions": [
-            "Auto",
+            "Automatically detect formatter",
             "RuboCop",
             "Syntax Tree",
             "Standard (need v0.37 or newer of the standard gem)",
