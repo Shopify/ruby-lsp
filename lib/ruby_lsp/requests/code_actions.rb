@@ -19,6 +19,9 @@ module RubyLsp
     class CodeActions < Request
       extend T::Sig
 
+      VARIABLE_REFACTOR_CODE_ACTION_TITLE = "Refactor: Extract Variable"
+      METHOD_REFACTOR_CODE_ACTION_TITLE = "Refactor: Extract Method"
+
       class << self
         extend T::Sig
 
@@ -52,7 +55,10 @@ module RubyLsp
         end
 
         # Only add refactor actions if there's a non empty selection in the editor
-        code_actions << refactor_code_action(@range, @uri) unless @range.dig(:start) == @range.dig(:end)
+        unless @range.dig(:start) == @range.dig(:end)
+          code_actions << refactor_code_action(@range, @uri)
+          code_actions << extract_code_action(@range, @uri)
+        end
         code_actions
       end
 
@@ -61,7 +67,19 @@ module RubyLsp
       sig { params(range: T::Hash[Symbol, T.untyped], uri: URI::Generic).returns(Interface::CodeAction) }
       def refactor_code_action(range, uri)
         Interface::CodeAction.new(
-          title: "Refactor: Extract Variable",
+          title: VARIABLE_REFACTOR_CODE_ACTION_TITLE,
+          kind: Constant::CodeActionKind::REFACTOR_EXTRACT,
+          data: {
+            range: range,
+            uri: uri.to_s,
+          },
+        )
+      end
+
+      sig { params(range: T::Hash[Symbol, T.untyped], uri: URI::Generic).returns(Interface::CodeAction) }
+      def extract_code_action(range, uri)
+        Interface::CodeAction.new(
+          title: METHOD_REFACTOR_CODE_ACTION_TITLE,
           kind: Constant::CodeActionKind::REFACTOR_EXTRACT,
           data: {
             range: range,

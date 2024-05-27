@@ -554,6 +554,7 @@ suite("Client", () => {
       "codeAction/resolve",
       {
         kind: "refactor.extract",
+        title: "Refactor: Extract Variable",
         data: {
           range: {
             start: { line: 1, character: 1 },
