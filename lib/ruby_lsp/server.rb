@@ -134,7 +134,7 @@ module RubyLsp
       when Hash
         # If the configuration is already a hash, merge it with a default value of `true`. That way clients don't have
         # to opt-in to every single feature
-        Hash.new(true).merge!(configured_features)
+        Hash.new(true).merge!(configured_features.transform_keys(&:to_s))
       else
         # If no configuration was passed by the client, just enable every feature
         Hash.new(true)
