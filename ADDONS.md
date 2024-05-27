@@ -61,7 +61,7 @@ module RubyLsp
   module MyGem
     class Addon < ::RubyLsp::Addon
       # Performs any activation that needs to happen once when the language server is booted
-      def activate(message_queue)
+      def activate(global_state, message_queue)
       end
 
       # Performs any cleanup when shutting down the server, like terminating a subprocess
@@ -131,7 +131,7 @@ following listener implementation.
 module RubyLsp
   module MyGem
     class Addon < ::RubyLsp::Addon
-      def activate(message_queue)
+      def activate(global_state, message_queue)
         @message_queue = message_queue
         @config = SomeConfiguration.new
       end
@@ -249,7 +249,7 @@ interested in using it.
 module RubyLsp
   module MyGem
     class Addon < ::RubyLsp::Addon
-      def activate(message_queue)
+      def activate(global_state, message_queue)
         @message_queue = message_queue
       end
 
