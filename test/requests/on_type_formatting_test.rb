@@ -445,6 +445,60 @@ class OnTypeFormattingTest < Minitest::Test
     assert_equal(expected_edits.to_json, T.must(edits).to_json)
   end
 
+  def test_auto_indent_after_end_keyword_with_complex_body
+    document = RubyLsp::RubyDocument.new(
+      source: +"if foo\nif bar\n  baz\nend\nend",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+    )
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 4, character: 2 },
+      "d",
+      "Visual Studio Code",
+    ).perform
+
+    expected_edits = [
+      {
+        range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } },
+        newText: "  ",
+      },
+      {
+        range: { start: { line: 2, character: 0 }, end: { line: 2, character: 0 } },
+        newText: "  ",
+      },
+      {
+        range: { start: { line: 3, character: 0 }, end: { line: 3, character: 0 } },
+        newText: "  ",
+      },
+      {
+        range: { start: { line: 4, character: 2 }, end: { line: 4, character: 2 } },
+        newText: "$0",
+      },
+    ]
+
+    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+  end
+
+  def test_auto_indent_after_end_keyword_does_not_add_extra_indentation
+    document = RubyLsp::RubyDocument.new(source: +"if foo\n  bar\nend", version: 1, uri: URI("file:///fake.rb"))
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 2, character: 2 },
+      "d",
+      "Visual Studio Code",
+    ).perform
+
+    expected_edits = [
+      {
+        range: { start: { line: 2, character: 2 }, end: { line: 2, character: 2 } },
+        newText: "$0",
+      },
+    ]
+
+    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+  end
+
   def test_breaking_line_if_a_keyword_is_part_of_method_call
     document = RubyLsp::RubyDocument.new(source: +"  force({", version: 1, uri: URI("file:///fake.rb"))
     edits = RubyLsp::Requests::OnTypeFormatting.new(
