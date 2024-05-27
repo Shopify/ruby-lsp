@@ -7,6 +7,9 @@ Code, use the official [Ruby LSP extension](https://marketplace.visualstudio.com
 > Some Ruby LSP features may be unavailable or limited due to incomplete implementations of the Language Server
 > Protocol, such as dynamic feature registration, or [file watching](https://github.com/Shopify/ruby-lsp/issues/1456).
 
+If you need to select particular features to enable or disable, see
+[`vscode/package.json`](vscode/package.json) for the full list.
+
 <!-- When adding a new editor to the list, either link directly to a website containing the instructions or link to a
 new H2 header in this file containing the instructions. -->
 
