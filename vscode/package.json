@@ -295,7 +295,7 @@
             "Syntax Tree",
             "Standard (need v0.37 or newer of the standard gem)",
             "Rubyfmt (needs the ruby-lsp-rubyfmt gem)",
-            "None"
+            "Do not use a formatter"
           ],
           "default": "auto"
         },
