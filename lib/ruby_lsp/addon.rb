@@ -100,9 +100,7 @@ module RubyLsp
 
     sig { returns(String) }
     def errors_details
-      @errors.map do |error|
-        error.full_message
-      end.join("\n\n")
+      @errors.map(&:full_message).join("\n\n")
     end
 
     # Each addon should implement `MyAddon#activate` and use to perform any sort of initialization, such as
