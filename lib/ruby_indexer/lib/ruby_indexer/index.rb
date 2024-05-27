@@ -249,12 +249,10 @@ module RubyIndexer
       return unless owner_entries && method_entries
 
       owner_name = T.must(owner_entries.first).name
-      T.cast(
-        method_entries.grep(Entry::Member).select do |entry|
-          T.cast(entry, Entry::Member).owner&.name == owner_name
-        end,
-        T::Array[Entry::Member],
-      )
+
+      method_entries.grep(Entry::Member).select do |entry|
+        entry.owner&.name == owner_name
+      end
     end
 
     private
