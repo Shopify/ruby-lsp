@@ -557,7 +557,7 @@
     "ovsx": "^0.9.1",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5",
-    "sinon": "^17.0.2",
+    "sinon": "^18.0.0",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.0.0"
   },
