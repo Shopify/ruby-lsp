@@ -29,15 +29,15 @@
             {
               "range": {
                 "start": {
-                  "line": 4,
-                  "character": 2
+                  "line": 3,
+                  "character": 5
                 },
                 "end": {
-                  "line": 4,
-                  "character": 2
+                  "line": 3,
+                  "character": 5
                 }
               },
-              "newText": "\n  def new_method\n        answer = 42\n  end\n\n"
+              "newText": "\n\n  def new_method\n        answer = 42\n  end"
             },
             {
               "range": {

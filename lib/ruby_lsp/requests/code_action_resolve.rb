@@ -46,9 +46,9 @@ module RubyLsp
       sig { override.returns(T.any(Interface::CodeAction, Error)) }
       def perform
         case @code_action[:title]
-        when CodeActions::VARIABLE_REFACTOR_CODE_ACTION_TITLE
+        when CodeActions::EXTRACT_TO_VARIABLE_TITLE
           refactor_variable
-        when CodeActions::METHOD_REFACTOR_CODE_ACTION_TITLE
+        when CodeActions::EXTRACT_TO_METHOD_TITLE
           refactor_method
         else
           Error::UnknownCodeAction
@@ -131,7 +131,7 @@ module RubyLsp
         end
 
         Interface::CodeAction.new(
-          title: "Refactor: Extract Variable",
+          title: CodeActions::EXTRACT_TO_VARIABLE_TITLE,
           edit: Interface::WorkspaceEdit.new(
             document_changes: [
               Interface::TextDocumentEdit.new(
@@ -168,27 +168,27 @@ module RubyLsp
         )
         return Error::InvalidTargetRange if closest_def.nil?
 
-        closest_node_loc = closest_def.location.end_line
         end_keyword_loc = closest_def.end_keyword_loc
         return Error::InvalidTargetRange if end_keyword_loc.nil?
 
-        character = end_keyword_loc.start_column
-        indentation = " " * character
+        end_line = end_keyword_loc.end_line - 1
+        character = end_keyword_loc.end_column
+        indentation = " " * end_keyword_loc.start_column
         target_range = {
-          start: { line: closest_node_loc, character: character },
-          end: { line: closest_node_loc, character: character },
+          start: { line: end_line, character: character },
+          end: { line: end_line, character: character },
         }
 
-        new_method_source = <<~RUBY
+        new_method_source = <<~RUBY.chomp
+
 
           #{indentation}def #{NEW_METHOD_NAME}
           #{indentation}  #{extracted_source}
           #{indentation}end
-
         RUBY
 
         Interface::CodeAction.new(
-          title: CodeActions::METHOD_REFACTOR_CODE_ACTION_TITLE,
+          title: CodeActions::EXTRACT_TO_METHOD_TITLE,
           edit: Interface::WorkspaceEdit.new(
             document_changes: [
               Interface::TextDocumentEdit.new(
