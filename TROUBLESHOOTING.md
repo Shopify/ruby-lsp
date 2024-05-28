@@ -45,7 +45,7 @@ In some circumstances, the version of Ruby LSP activated may be very outdated.
 **Why this happens**
 
 Since v0.12.0, Ruby LSP has had a dependency on the [Prism](https://rubygems.org/gems/prism) parser.
-Prior to that, it had a dependency on a different parser, [YARP](https://rubygems.org/gems/yarp).
+Prior to that, the Prism parser was named [YARP](https://rubygems.org/gems/yarp). The fact that the gem was renamed leads to some awkward dependency resolutions.
 Since Prism is a pre-1.0 release, there may be breaking changes introduced in minor versions.
 For that reason, we constrain the version of Prism up to that which is known to be compatible.
 
