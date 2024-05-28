@@ -17,7 +17,8 @@ module RubyLsp
     # - Modules
     # - Constants
     # - Require paths
-    # - Methods invoked on self only
+    # - Methods invoked on self only and on receivers where the type is unknown
+    # - Instance variables
     #
     # # Example
     #
@@ -48,7 +49,18 @@ module RubyLsp
 
         target, parent, nesting = document.locate_node(
           position,
-          node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::BlockArgumentNode],
+          node_types: [
+            Prism::CallNode,
+            Prism::ConstantReadNode,
+            Prism::ConstantPathNode,
+            Prism::BlockArgumentNode,
+            Prism::InstanceVariableReadNode,
+            Prism::InstanceVariableAndWriteNode,
+            Prism::InstanceVariableOperatorWriteNode,
+            Prism::InstanceVariableOrWriteNode,
+            Prism::InstanceVariableTargetNode,
+            Prism::InstanceVariableWriteNode,
+          ],
         )
 
         if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)

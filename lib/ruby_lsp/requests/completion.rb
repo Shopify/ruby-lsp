@@ -17,6 +17,7 @@ module RubyLsp
     # - Constants
     # - Require paths
     # - Methods invoked on self only
+    # - Instance variables
     #
     # # Example
     #
@@ -35,7 +36,7 @@ module RubyLsp
         def provider
           Interface::CompletionOptions.new(
             resolve_provider: true,
-            trigger_characters: ["/", "\"", "'", ":"],
+            trigger_characters: ["/", "\"", "'", ":", "@"],
             completion_item: {
               labelDetailsSupport: true,
             },
@@ -62,7 +63,17 @@ module RubyLsp
         matched, parent, nesting = document.locate(
           document.tree,
           char_position,
-          node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode],
+          node_types: [
+            Prism::CallNode,
+            Prism::ConstantReadNode,
+            Prism::ConstantPathNode,
+            Prism::InstanceVariableReadNode,
+            Prism::InstanceVariableAndWriteNode,
+            Prism::InstanceVariableOperatorWriteNode,
+            Prism::InstanceVariableOrWriteNode,
+            Prism::InstanceVariableTargetNode,
+            Prism::InstanceVariableWriteNode,
+          ],
         )
         @response_builder = T.let(
           ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem].new,
@@ -84,15 +95,10 @@ module RubyLsp
 
         return unless matched && parent
 
-        @target = case matched
-        when Prism::CallNode
+        @target = if parent.is_a?(Prism::ConstantPathNode) && matched.is_a?(Prism::ConstantReadNode)
+          parent
+        else
           matched
-        when Prism::ConstantReadNode, Prism::ConstantPathNode
-          if parent.is_a?(Prism::ConstantPathNode) && matched.is_a?(Prism::ConstantReadNode)
-            parent
-          else
-            matched
-          end
         end
       end
 

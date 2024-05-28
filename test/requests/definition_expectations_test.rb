@@ -486,6 +486,42 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definition_for_instance_variables
+    source = <<~RUBY
+      class Foo
+        def initialize
+          @a = 1
+        end
+
+        def bar
+          @a
+        end
+
+        def baz
+          @a = 5
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 6 } },
+      )
+      response = server.pop_response.response.first
+      assert_equal(2, response.range.start.line)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 10 } },
+      )
+      response = server.pop_response.response.first
+      assert_equal(2, response.range.start.line)
+    end
+  end
+
   private
 
   def create_definition_addon

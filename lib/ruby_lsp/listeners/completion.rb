@@ -30,6 +30,12 @@ module RubyLsp
           :on_constant_path_node_enter,
           :on_constant_read_node_enter,
           :on_call_node_enter,
+          :on_instance_variable_read_node_enter,
+          :on_instance_variable_write_node_enter,
+          :on_instance_variable_and_write_node_enter,
+          :on_instance_variable_operator_write_node_enter,
+          :on_instance_variable_or_write_node_enter,
+          :on_instance_variable_target_node_enter,
         )
       end
 
@@ -105,6 +111,36 @@ module RubyLsp
         end
       end
 
+      sig { params(node: Prism::InstanceVariableReadNode).void }
+      def on_instance_variable_read_node_enter(node)
+        handle_instance_variable_completion(node.name.to_s, node.location)
+      end
+
+      sig { params(node: Prism::InstanceVariableWriteNode).void }
+      def on_instance_variable_write_node_enter(node)
+        handle_instance_variable_completion(node.name.to_s, node.name_loc)
+      end
+
+      sig { params(node: Prism::InstanceVariableAndWriteNode).void }
+      def on_instance_variable_and_write_node_enter(node)
+        handle_instance_variable_completion(node.name.to_s, node.name_loc)
+      end
+
+      sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
+      def on_instance_variable_operator_write_node_enter(node)
+        handle_instance_variable_completion(node.name.to_s, node.name_loc)
+      end
+
+      sig { params(node: Prism::InstanceVariableOrWriteNode).void }
+      def on_instance_variable_or_write_node_enter(node)
+        handle_instance_variable_completion(node.name.to_s, node.name_loc)
+      end
+
+      sig { params(node: Prism::InstanceVariableTargetNode).void }
+      def on_instance_variable_target_node_enter(node)
+        handle_instance_variable_completion(node.name.to_s, node.location)
+      end
+
       private
 
       sig { params(name: String, range: Interface::Range).void }
@@ -149,6 +185,31 @@ module RubyLsp
             range,
             entries,
             top_level_reference || top_level?(T.must(entries.first).name),
+          )
+        end
+      end
+
+      sig { params(name: String, location: Prism::Location).void }
+      def handle_instance_variable_completion(name, location)
+        entries = T.cast(@index.prefix_search(name).flatten, T::Array[RubyIndexer::Entry::InstanceVariable])
+        current_self = @nesting.join("::")
+
+        variables = entries.select { |e| current_self == e.owner&.name }
+        variables.uniq!(&:name)
+
+        variables.each do |entry|
+          variable_name = entry.name
+
+          @response_builder << Interface::CompletionItem.new(
+            label: variable_name,
+            text_edit: Interface::TextEdit.new(
+              range: range_from_location(location),
+              new_text: variable_name,
+            ),
+            kind: Constant::CompletionItemKind::FIELD,
+            data: {
+              owner_name: entry.owner&.name,
+            },
           )
         end
       end
