@@ -17,6 +17,7 @@ new H2 header in this file containing the instructions. -->
 - [Emacs Eglot](#Emacs-Eglot)
 - [Neovim LSP](#Neovim-LSP)
 - [Sublime Text LSP](#sublime-text-lsp)
+- [Zed](#zed-some-limitations)
 
 ## Emacs Eglot
 
