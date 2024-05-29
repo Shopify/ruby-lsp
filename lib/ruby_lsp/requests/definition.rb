@@ -65,7 +65,6 @@ module RubyLsp
 
         target = target_context.closest
         parent = target_context.parent
-        # nesting = target_context.nesting
 
         if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)
           # If the target is part of a constant path node, we need to find the exact portion of the constant that the

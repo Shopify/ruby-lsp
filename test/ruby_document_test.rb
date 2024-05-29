@@ -433,7 +433,6 @@ class RubyDocumentTest < Minitest::Test
     RUBY
 
     # Locate the `ActiveRecord` module
-    # found, parent = document.locate_node({ line: 0, character: 19 })
     target_context = document.locate_node({ line: 0, character: 19 })
     assert_instance_of(Prism::ConstantReadNode, target_context.closest)
     assert_equal("ActiveRecord", T.cast(target_context.closest, Prism::ConstantReadNode).location.slice)
