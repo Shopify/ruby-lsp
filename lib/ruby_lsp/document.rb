@@ -110,7 +110,7 @@ module RubyLsp
       params(
         position: T::Hash[Symbol, T.untyped],
         node_types: T::Array[T.class_of(Prism::Node)],
-      ).returns([T.nilable(Prism::Node), T.nilable(Prism::Node), T::Array[String]])
+      ).returns(TargetContext)
     end
     def locate_node(position, node_types: [])
       locate(@parse_result.value, create_scanner.find_char_position(position), node_types: node_types)
@@ -121,7 +121,7 @@ module RubyLsp
         node: Prism::Node,
         char_position: Integer,
         node_types: T::Array[T.class_of(Prism::Node)],
-      ).returns([T.nilable(Prism::Node), T.nilable(Prism::Node), T::Array[String]])
+      ).returns(TargetContext)
     end
     def locate(node, char_position, node_types: [])
       queue = T.let(node.child_nodes.compact, T::Array[T.nilable(Prism::Node)])
@@ -170,7 +170,8 @@ module RubyLsp
         end
       end
 
-      [closest, parent, nesting.map { |n| n.constant_path.location.slice }]
+      TargetContext.new(closest, parent, nesting.map { |n| n.constant_path.location.slice })
+      # [closest, parent, nesting.map { |n| n.constant_path.location.slice }]
     end
 
     sig { returns(T::Boolean) }

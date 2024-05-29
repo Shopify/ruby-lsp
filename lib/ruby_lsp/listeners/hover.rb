@@ -36,17 +36,17 @@ module RubyLsp
           response_builder: ResponseBuilders::Hover,
           global_state: GlobalState,
           uri: URI::Generic,
-          nesting: T::Array[String],
+          target_context: TargetContext,
           dispatcher: Prism::Dispatcher,
           typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(response_builder, global_state, uri, nesting, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, global_state, uri, target_context, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
-        @nesting = nesting
+        @target_context = target_context
         @typechecker_enabled = typechecker_enabled
 
         dispatcher.register(
@@ -105,7 +105,7 @@ module RubyLsp
         message = node.message
         return unless message
 
-        methods = @index.resolve_method(message, @nesting.join("::"))
+        methods = @index.resolve_method(message, @target_context.nesting.join("::"))
         return unless methods
 
         categorized_markdown_from_index_entries(message, methods).each do |category, content|
@@ -150,7 +150,7 @@ module RubyLsp
         entries = T.cast(@index[name], T.nilable(T::Array[RubyIndexer::Entry::InstanceVariable]))
         return unless entries
 
-        current_self = @nesting.join("::")
+        current_self = @target_context.nesting.join("::")
         owned_variables = entries.select { |e| current_self == e.owner&.name }
 
         categorized_markdown_from_index_entries(name, owned_variables).each do |category, content|
@@ -160,14 +160,22 @@ module RubyLsp
 
       sig { params(name: String, location: Prism::Location).void }
       def generate_hover(name, location)
-        entries = @index.resolve(name, @nesting)
+        entries = @index.resolve(name, @target_context.nesting)
         return unless entries
 
         # We should only show hover for private constants if the constant is defined in the same namespace as the
         # reference
         first_entry = T.must(entries.first)
+<<<<<<< HEAD
         return if first_entry.visibility == RubyIndexer::Entry::Visibility::PRIVATE &&
           first_entry.name != "#{@nesting.join("::")}::#{name}"
+||||||| parent of 5eb74c22 (Introduce TargetContext)
+        return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{name}"
+=======
+        if first_entry.visibility == :private && first_entry.name != "#{@target_context.nesting.join("::")}::#{name}"
+          return
+        end
+>>>>>>> 5eb74c22 (Introduce TargetContext)
 
         categorized_markdown_from_index_entries(name, entries).each do |category, content|
           @response_builder.push(content, category: category)

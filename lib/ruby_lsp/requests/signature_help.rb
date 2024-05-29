@@ -51,17 +51,17 @@ module RubyLsp
       end
       def initialize(document, global_state, position, context, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
         super()
-        target, parent, nesting = document.locate_node(
+        target_context = document.locate_node(
           { line: position[:line], character: position[:character] },
           node_types: [Prism::CallNode],
         )
 
-        target = adjust_for_nested_target(target, parent, position)
+        target = adjust_for_nested_target(target_context.closest, target_context.parent, position)
 
         @target = T.let(target, T.nilable(Prism::Node))
         @dispatcher = dispatcher
         @response_builder = T.let(ResponseBuilders::SignatureHelp.new, ResponseBuilders::SignatureHelp)
-        Listeners::SignatureHelp.new(@response_builder, global_state, nesting, dispatcher, typechecker_enabled)
+        Listeners::SignatureHelp.new(@response_builder, global_state, target_context, dispatcher, typechecker_enabled)
       end
 
       sig { override.returns(T.nilable(Interface::SignatureHelp)) }

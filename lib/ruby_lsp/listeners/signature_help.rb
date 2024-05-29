@@ -11,17 +11,17 @@ module RubyLsp
         params(
           response_builder: ResponseBuilders::SignatureHelp,
           global_state: GlobalState,
-          nesting: T::Array[String],
+          target_context: TargetContext,
           dispatcher: Prism::Dispatcher,
           typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(response_builder, global_state, nesting, dispatcher, typechecker_enabled)
+      def initialize(response_builder, global_state, target_context, dispatcher, typechecker_enabled)
         @typechecker_enabled = typechecker_enabled
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
-        @nesting = nesting
+        @target_context = target_context
         dispatcher.register(self, :on_call_node_enter)
       end
 
@@ -33,7 +33,7 @@ module RubyLsp
         message = node.message
         return unless message
 
-        methods = @index.resolve_method(message, @nesting.join("::"))
+        methods = @index.resolve_method(message, @target_context.nesting.join("::"))
         return unless methods
 
         target_method = methods.first

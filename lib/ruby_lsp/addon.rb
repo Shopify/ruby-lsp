@@ -131,11 +131,11 @@ module RubyLsp
     sig do
       overridable.params(
         response_builder: ResponseBuilders::Hover,
-        nesting: T::Array[String],
+        target_context: TargetContext,
         dispatcher: Prism::Dispatcher,
       ).void
     end
-    def create_hover_listener(response_builder, nesting, dispatcher); end
+    def create_hover_listener(response_builder, target_context, dispatcher); end
 
     # Creates a new DocumentSymbol listener. This method is invoked on every DocumentSymbol request
     sig do
@@ -159,21 +159,21 @@ module RubyLsp
       overridable.params(
         response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::Location],
         uri: URI::Generic,
-        nesting: T::Array[String],
+        target_context: TargetContext,
         dispatcher: Prism::Dispatcher,
       ).void
     end
-    def create_definition_listener(response_builder, uri, nesting, dispatcher); end
+    def create_definition_listener(response_builder, uri, target_context, dispatcher); end
 
     # Creates a new Completion listener. This method is invoked on every Completion request
     sig do
       overridable.params(
         response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
-        nesting: T::Array[String],
+        target_context: TargetContext,
         dispatcher: Prism::Dispatcher,
         uri: URI::Generic,
       ).void
     end
-    def create_completion_listener(response_builder, nesting, dispatcher, uri); end
+    def create_completion_listener(response_builder, target_context, dispatcher, uri); end
   end
 end

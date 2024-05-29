@@ -14,17 +14,17 @@ module RubyLsp
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::Location],
           global_state: GlobalState,
           uri: URI::Generic,
-          nesting: T::Array[String],
+          target_context: TargetContext,
           dispatcher: Prism::Dispatcher,
           typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(response_builder, global_state, uri, nesting, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, global_state, uri, target_context, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
         @uri = uri
-        @nesting = nesting
+        @target_context = target_context
         @typechecker_enabled = typechecker_enabled
 
         dispatcher.register(
@@ -117,7 +117,7 @@ module RubyLsp
         entries = T.cast(@index[name], T.nilable(T::Array[RubyIndexer::Entry::InstanceVariable]))
         return unless entries
 
-        current_self = @nesting.join("::")
+        current_self = @target_context.nesting.join("::")
 
         entries.each do |entry|
           next if current_self != entry.owner&.name
@@ -137,7 +137,7 @@ module RubyLsp
       sig { params(message: String, self_receiver: T::Boolean).void }
       def handle_method_definition(message, self_receiver)
         methods = if self_receiver
-          @index.resolve_method(message, @nesting.join("::"))
+          @index.resolve_method(message, @target_context.nesting.join("::"))
         else
           # If the method doesn't have a receiver, then we provide a few candidates to jump to
           # But we don't want to provide too many candidates, as it can be overwhelming
@@ -205,14 +205,15 @@ module RubyLsp
 
       sig { params(value: String).void }
       def find_in_index(value)
-        entries = @index.resolve(value, @nesting)
+        entries = @index.resolve(value, @target_context.nesting)
         return unless entries
 
         # We should only allow jumping to the definition of private constants if the constant is defined in the same
         # namespace as the reference
         first_entry = T.must(entries.first)
-        return if first_entry.visibility == RubyIndexer::Entry::Visibility::PRIVATE &&
-          first_entry.name != "#{@nesting.join("::")}::#{value}"
+        if first_entry.visibility == RubyIndexer::Entry::Visibility::PRIVATE && first_entry.name != "#{@target_context.nesting.join("::")}::#{value}"
+          return
+        end
 
         entries.each do |entry|
           location = entry.location

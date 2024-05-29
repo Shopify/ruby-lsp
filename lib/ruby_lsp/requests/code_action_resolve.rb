@@ -68,9 +68,11 @@ module RubyLsp
         extracted_source = T.must(@document.source[start_index...end_index])
 
         # Find the closest statements node, so that we place the refactor in a valid position
-        closest_statements, parent_statements = @document
+        target_context = @document
           .locate(@document.tree, start_index, node_types: [Prism::StatementsNode, Prism::BlockNode])
 
+        closest_statements = target_context.closest
+        parent_statements = target_context.parent
         return Error::InvalidTargetRange if closest_statements.nil? || closest_statements.child_nodes.compact.empty?
 
         # Find the node with the end line closest to the requested position, so that we can place the refactor

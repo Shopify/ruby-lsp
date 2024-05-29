@@ -11,17 +11,17 @@ module RubyLsp
         params(
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
           global_state: GlobalState,
-          nesting: T::Array[String],
+          target_context: TargetContext,
           typechecker_enabled: T::Boolean,
           dispatcher: Prism::Dispatcher,
           uri: URI::Generic,
         ).void
       end
-      def initialize(response_builder, global_state, nesting, typechecker_enabled, dispatcher, uri) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, global_state, target_context, typechecker_enabled, dispatcher, uri) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
-        @nesting = nesting
+        @target_context = target_context
         @typechecker_enabled = typechecker_enabled
         @uri = uri
 
@@ -47,7 +47,7 @@ module RubyLsp
         name = constant_name(node)
         return if name.nil?
 
-        candidates = @index.prefix_search(name, @nesting)
+        candidates = @index.prefix_search(name, @target_context.nesting)
         candidates.each do |entries|
           complete_name = T.must(entries.first).name
           @response_builder << build_entry_completion(
@@ -161,21 +161,22 @@ module RubyLsp
           T.must(namespace).join("::")
         end
 
-        namespace_entries = @index.resolve(aliased_namespace, @nesting)
+        nesting = @target_context.nesting
+        namespace_entries = @index.resolve(aliased_namespace, nesting)
         return unless namespace_entries
 
         real_namespace = @index.follow_aliased_namespace(T.must(namespace_entries.first).name)
 
         candidates = @index.prefix_search(
           "#{real_namespace}::#{incomplete_name}",
-          top_level_reference ? [] : @nesting,
+          top_level_reference ? [] : nesting,
         )
         candidates.each do |entries|
           # The only time we may have a private constant reference from outside of the namespace is if we're dealing
           # with ConstantPath and the entry name doesn't start with the current nesting
           first_entry = T.must(entries.first)
           next if first_entry.visibility == RubyIndexer::Entry::Visibility::PRIVATE &&
-            !first_entry.name.start_with?("#{@nesting}::")
+            !first_entry.name.start_with?("#{nesting}::")
 
           constant_name = first_entry.name.delete_prefix("#{real_namespace}::")
           full_name = aliased_namespace.empty? ? constant_name : "#{aliased_namespace}::#{constant_name}"
@@ -193,7 +194,7 @@ module RubyLsp
       sig { params(name: String, location: Prism::Location).void }
       def handle_instance_variable_completion(name, location)
         entries = T.cast(@index.prefix_search(name).flatten, T::Array[RubyIndexer::Entry::InstanceVariable])
-        current_self = @nesting.join("::")
+        current_self = @target_context.nesting.join("::")
 
         variables = entries.select { |e| current_self == e.owner&.name }
         variables.uniq!(&:name)
@@ -262,7 +263,7 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode, name: String).void }
       def complete_self_receiver_method(node, name)
-        receiver_entries = @index[@nesting.join("::")]
+        receiver_entries = @index[@target_context.nesting.join("::")]
         return unless receiver_entries
 
         receiver = T.must(receiver_entries.first)
@@ -359,13 +360,14 @@ module RubyLsp
         #
         #  Foo::B # --> completion inserts `Bar` instead of `Foo::Bar`
         # end
-        unless @nesting.join("::").start_with?(incomplete_name)
-          @nesting.each do |namespace|
+        nesting = @target_context.nesting
+        unless nesting.join("::").start_with?(incomplete_name)
+          nesting.each do |namespace|
             prefix = "#{namespace}::"
             shortened_name = insertion_text.delete_prefix(prefix)
 
             # If a different entry exists for the shortened name, then there's a conflict and we should not shorten it
-            conflict_name = "#{@nesting.join("::")}::#{shortened_name}"
+            conflict_name = "#{nesting.join("::")}::#{shortened_name}"
             break if real_name != conflict_name && @index[conflict_name]
 
             insertion_text = shortened_name
@@ -407,8 +409,8 @@ module RubyLsp
       # ```
       sig { params(entry_name: String).returns(T::Boolean) }
       def top_level?(entry_name)
-        @nesting.length.downto(0).each do |i|
-          prefix = T.must(@nesting[0...i]).join("::")
+        @target_context.nesting.length.downto(0).each do |i|
+          prefix = T.must(@target_context.nesting[0...i]).join("::")
           full_name = prefix.empty? ? entry_name : "#{prefix}::#{entry_name}"
           next if full_name == entry_name
 
