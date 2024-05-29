@@ -55,6 +55,8 @@ suite("Asdf", () => {
           cwd: workspacePath,
           shell: "/bin/bash",
           env: {
+            // eslint-disable-next-line no-process-env
+            ...process.env,
             ASDF_DIR: `${os.homedir()}/.asdf`,
             ASDF_DATA_DIR: `${os.homedir()}/.asdf`,
           },

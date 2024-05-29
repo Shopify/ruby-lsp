@@ -25,6 +25,7 @@ export class Asdf extends VersionManager {
         cwd: this.bundleUri.fsPath,
         shell: vscode.env.shell,
         env: {
+          ...process.env,
           ASDF_DIR: path.dirname(asdfUri.fsPath),
           ASDF_DATA_DIR: asdfDaraDirUri.fsPath,
         },
