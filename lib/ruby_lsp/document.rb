@@ -171,7 +171,6 @@ module RubyLsp
       end
 
       TargetContext.new(closest, parent, nesting.map { |n| n.constant_path.location.slice })
-      # [closest, parent, nesting.map { |n| n.constant_path.location.slice }]
     end
 
     sig { returns(T::Boolean) }
