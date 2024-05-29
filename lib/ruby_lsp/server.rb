@@ -72,6 +72,8 @@ module RubyLsp
         text_document_prepare_type_hierarchy(message)
       when "typeHierarchy/supertypes"
         type_hierarchy_supertypes(message)
+      when "typeHierarchy/subtypes"
+        type_hierarchy_subtypes(message)
       when "workspace/didChangeWatchedFiles"
         workspace_did_change_watched_files(message)
       when "workspace/symbol"
@@ -697,6 +699,13 @@ module RubyLsp
         message.dig(:params, :item),
       ).perform
       send_message(Result.new(id: message[:id], response: response))
+    end
+
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def type_hierarchy_subtypes(message)
+      # TODO: implement subtypes
+      # The current index representation doesn't allow us to find the children of an entry.
+      send_message(Result.new(id: message[:id], response: nil))
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
