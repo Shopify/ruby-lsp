@@ -669,5 +669,20 @@ module RubyIndexer
       assert_equal(["Foo"], @index.linearized_ancestors_of("Foo"))
       assert_equal(["Bar"], @index.linearized_ancestors_of("Bar"))
     end
+
+    def test_linearizing_circular_aliased_dependency
+      index(<<~RUBY)
+        module A
+        end
+
+        ALIAS = A
+
+        module A
+          include ALIAS
+        end
+      RUBY
+
+      assert_equal(["A", "ALIAS"], @index.linearized_ancestors_of("A"))
+    end
   end
 end

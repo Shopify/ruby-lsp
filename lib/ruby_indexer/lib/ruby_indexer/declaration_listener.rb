@@ -481,16 +481,21 @@ module RubyIndexer
       arguments = node.arguments&.arguments
       return unless arguments
 
-      names = arguments.filter_map do |node|
-        if node.is_a?(Prism::ConstantReadNode) || node.is_a?(Prism::ConstantPathNode)
-          [operation, node.full_name]
+      arguments.each do |node|
+        next unless node.is_a?(Prism::ConstantReadNode) || node.is_a?(Prism::ConstantPathNode)
+
+        case operation
+        when :include
+          owner.mixin_operations << Entry::Include.new(node.full_name)
+        when :prepend
+          owner.mixin_operations << Entry::Prepend.new(node.full_name)
+        when :extend
+          owner.mixin_operations << Entry::Extend.new(node.full_name)
         end
       rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
              Prism::ConstantPathNode::MissingNodesInConstantPathError
         # Do nothing
       end
-
-      owner.modules.concat(names)
     end
 
     sig { returns(Entry::Visibility) }

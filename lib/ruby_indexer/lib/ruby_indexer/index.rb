@@ -267,71 +267,73 @@ module RubyIndexer
     # module that prepends another module, then the prepend module appears before the included module.
     #
     # The order of ancestors is [linearized_prepends, self, linearized_includes, linearized_superclass]
-    sig { params(name: String).returns(T::Array[String]) }
-    def linearized_ancestors_of(name)
+    sig { params(fully_qualified_name: String).returns(T::Array[String]) }
+    def linearized_ancestors_of(fully_qualified_name)
       # If we already computed the ancestors for this namespace, return it straight away
-      cached_ancestors = @ancestors[name]
+      cached_ancestors = @ancestors[fully_qualified_name]
       return cached_ancestors if cached_ancestors
 
-      ancestors = [name]
+      ancestors = [fully_qualified_name]
 
       # Cache the linearized ancestors array eagerly. This is important because we might have circular dependencies and
       # this will prevent us from falling into an infinite recursion loop. Because we mutate the ancestors array later,
       # the cache will reflect the final result
-      @ancestors[name] = ancestors
+      @ancestors[fully_qualified_name] = ancestors
 
       # If we don't have an entry for `name`, raise
-      entries = self[name]
-      raise NonExistingNamespaceError, "No entry found for #{name}" unless entries
+      entries = resolve(fully_qualified_name, [])
+      raise NonExistingNamespaceError, "No entry found for #{fully_qualified_name}" unless entries
 
-      # If none of the entries for `name` are namespaces, return an empty array
-      namespaces = T.cast(entries.select { |e| e.is_a?(Entry::Namespace) }, T::Array[Entry::Namespace])
-      raise NonExistingNamespaceError, "None of the entries for #{name} are modules or classes" if namespaces.empty?
+      # If none of the entries for `name` are namespaces, raise
+      namespaces = entries.filter_map do |entry|
+        case entry
+        when Entry::Namespace
+          entry
+        when Entry::Alias
+          self[entry.target]&.grep(Entry::Namespace)
+        end
+      end.flatten
 
-      modules = namespaces.flat_map(&:modules)
-      prepended_modules_count = 0
-      included_modules_count = 0
+      raise NonExistingNamespaceError,
+        "None of the entries for #{fully_qualified_name} are modules or classes" if namespaces.empty?
+
+      mixin_operations = namespaces.flat_map(&:mixin_operations)
+      main_namespace_index = 0
 
       # The original nesting where we discovered this namespace, so that we resolve the correct names of the
       # included/prepended/extended modules and parent classes
       nesting = T.must(namespaces.first).nesting
 
-      modules.each do |operation, module_name|
-        resolved_module = resolve(module_name, nesting)
+      mixin_operations.each do |operation|
+        resolved_module = resolve(operation.module_name, nesting)
         next unless resolved_module
 
-        fully_qualified_name = T.must(resolved_module.first).name
+        module_fully_qualified_name = T.must(resolved_module.first).name
 
         case operation
-        when :prepend
+        when Entry::Prepend
           # When a module is prepended, Ruby checks if it hasn't been prepended already to prevent adding it in front of
           # the actual namespace twice. However, it does not check if it has been included because you are allowed to
           # prepend the same module after it has already been included
-          linearized_prepends = linearized_ancestors_of(fully_qualified_name)
+          linearized_prepends = linearized_ancestors_of(module_fully_qualified_name)
 
           # When there are duplicate prepended modules, we have to insert the new prepends after the existing ones. For
           # example, if the current ancestors are `["A", "Foo"]` and we try to prepend `["A", "B"]`, then `"B"` has to
           # be inserted after `"A`
-          uniq_prepends = linearized_prepends - T.must(ancestors[0...prepended_modules_count])
+          uniq_prepends = linearized_prepends - T.must(ancestors[0...main_namespace_index])
           insert_position = linearized_prepends.length - uniq_prepends.length
 
           T.unsafe(ancestors).insert(
             insert_position,
-            *(linearized_prepends - T.must(ancestors[0...prepended_modules_count])),
+            *(linearized_prepends - T.must(ancestors[0...main_namespace_index])),
           )
 
-          prepended_modules_count += linearized_prepends.length
-        when :include
+          main_namespace_index += linearized_prepends.length
+        when Entry::Include
           # When including a module, Ruby will always prevent duplicate entries in case the module has already been
           # prepended or included
-          linearized_includes = linearized_ancestors_of(fully_qualified_name)
-
-          T.unsafe(ancestors).insert(
-            ancestors.length - included_modules_count,
-            *(linearized_includes - ancestors),
-          )
-
-          included_modules_count += linearized_includes.length
+          linearized_includes = linearized_ancestors_of(module_fully_qualified_name)
+          T.unsafe(ancestors).insert(main_namespace_index + 1, *(linearized_includes - ancestors))
         end
       end
 
@@ -347,7 +349,9 @@ module RubyIndexer
         resolved_parent_class = resolve(parent_class, nesting)
         parent_class_name = resolved_parent_class&.first&.name
 
-        ancestors.concat(linearized_ancestors_of(parent_class_name)) if parent_class_name && name != parent_class_name
+        if parent_class_name && fully_qualified_name != parent_class_name
+          ancestors.concat(linearized_ancestors_of(parent_class_name))
+        end
       end
 
       ancestors

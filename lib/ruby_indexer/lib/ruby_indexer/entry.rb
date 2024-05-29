@@ -62,6 +62,25 @@ module RubyIndexer
       File.basename(@file_path)
     end
 
+    class ModuleOperation
+      extend T::Sig
+      extend T::Helpers
+
+      abstract!
+
+      sig { returns(String) }
+      attr_reader :module_name
+
+      sig { params(module_name: String).void }
+      def initialize(module_name)
+        @module_name = module_name
+      end
+    end
+
+    class Include < ModuleOperation; end
+    class Prepend < ModuleOperation; end
+    class Extend < ModuleOperation; end
+
     class Namespace < Entry
       extend T::Sig
       extend T::Helpers
@@ -87,12 +106,17 @@ module RubyIndexer
         super(@name, file_path, location, comments)
       end
 
-      # Stores all prepend, include and extend operations in the exact order they were discovered in the source code.
-      # Maintaining the order is essential to linearize ancestors the right way when a module is both included and
-      # prepended
-      sig { returns(T::Array[[Symbol, String]]) }
-      def modules
-        @modules ||= T.let([], T.nilable(T::Array[[Symbol, String]]))
+      sig { returns(T::Array[String]) }
+      def mixin_operation_module_names
+        mixin_operations.map(&:module_name)
+      end
+
+      # Stores all explicit prepend, include and extend operations in the exact order they were discovered in the source
+      # code. Maintaining the order is essential to linearize ancestors the right way when a module is both included
+      # and prepended
+      sig { returns(T::Array[ModuleOperation]) }
+      def mixin_operations
+        @mixin_operations ||= T.let([], T.nilable(T::Array[ModuleOperation]))
       end
     end
 

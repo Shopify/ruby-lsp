@@ -369,13 +369,13 @@ module RubyIndexer
       RUBY
 
       foo = T.must(@index["Foo"][0])
-      assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.modules.flat_map(&:last))
+      assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
 
       qux = T.must(@index["Foo::Qux"][0])
-      assert_equal(["Corge", "Corge", "Baz"], qux.modules.flat_map(&:last))
+      assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
 
       constant_path_references = T.must(@index["ConstantPathReferences"][0])
-      assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.modules.flat_map(&:last))
+      assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
     end
 
     def test_keeping_track_of_prepended_modules
@@ -415,13 +415,13 @@ module RubyIndexer
       RUBY
 
       foo = T.must(@index["Foo"][0])
-      assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.modules.flat_map(&:last))
+      assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
 
       qux = T.must(@index["Foo::Qux"][0])
-      assert_equal(["Corge", "Corge", "Baz"], qux.modules.flat_map(&:last))
+      assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
 
       constant_path_references = T.must(@index["ConstantPathReferences"][0])
-      assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.modules.flat_map(&:last))
+      assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
     end
 
     def test_keeping_track_of_extended_modules
@@ -461,13 +461,13 @@ module RubyIndexer
       RUBY
 
       foo = T.must(@index["Foo"][0])
-      assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.modules.flat_map(&:last))
+      assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
 
       qux = T.must(@index["Foo::Qux"][0])
-      assert_equal(["Corge", "Corge", "Baz"], qux.modules.flat_map(&:last))
+      assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
 
       constant_path_references = T.must(@index["ConstantPathReferences"][0])
-      assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.modules.flat_map(&:last))
+      assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
     end
   end
 end
