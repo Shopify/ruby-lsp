@@ -70,6 +70,8 @@ module RubyLsp
         text_document_definition(message)
       when "textDocument/prepareTypeHierarchy"
         text_document_prepare_type_hierarchy(message)
+      when "typeHierarchy/supertypes"
+        type_hierarchy_supertypes(message)
       when "workspace/didChangeWatchedFiles"
         workspace_did_change_watched_files(message)
       when "workspace/symbol"
@@ -684,6 +686,15 @@ module RubyLsp
         @store.get(params.dig(:textDocument, :uri)),
         @global_state.index,
         params[:position],
+      ).perform
+      send_message(Result.new(id: message[:id], response: response))
+    end
+
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def type_hierarchy_supertypes(message)
+      response = Requests::TypeHierarchySupertypes.new(
+        @global_state.index,
+        message.dig(:params, :item),
       ).perform
       send_message(Result.new(id: message[:id], response: response))
     end
