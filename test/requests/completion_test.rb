@@ -909,6 +909,41 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_inherited_instance_variables
+    source = +<<~RUBY
+      module Foo
+        def set_ivar
+          @a = 9
+          @b = 1
+        end
+      end
+
+      class Parent
+        def initialize
+          @a = 5
+        end
+      end
+
+      class Child < Parent
+        include Foo
+
+        def do_something
+          @
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 17, character: 5 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["@a", "@b"], result.map(&:label))
+    end
+  end
+
   def test_instance_variable_completion_shows_only_uniq_entries
     source = +<<~RUBY
       class Foo
