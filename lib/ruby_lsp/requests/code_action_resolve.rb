@@ -166,7 +166,7 @@ module RubyLsp
         # Find the closest method declaration node, so that we place the refactor in a valid position
         # closest_def, _ = T.cast(
         target_context = @document.locate(@document.tree, start_index, node_types: [Prism::DefNode])
-        closest_def = target_context.closest
+        closest_def = T.cast(target_context.closest, Prism::DefNode)
         return Error::InvalidTargetRange if closest_def.nil?
 
         end_keyword_loc = closest_def.end_keyword_loc
