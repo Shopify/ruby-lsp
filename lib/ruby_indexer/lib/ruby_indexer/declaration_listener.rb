@@ -11,7 +11,7 @@ module RubyIndexer
     def initialize(index, dispatcher, parse_result, file_path)
       @index = index
       @file_path = file_path
-      @visibility_stack = T.let([[:public]], T::Array[T::Array[Symbol]])
+      @visibility_stack = T.let([[Entry::Visibility::PUBLIC]], T::Array[T::Array[Entry::Visibility]])
       @comments_by_line = T.let(
         parse_result.comments.to_h do |c|
           [c.location.start_line, c]
@@ -52,7 +52,7 @@ module RubyIndexer
 
     sig { params(node: Prism::ClassNode).void }
     def on_class_node_enter(node)
-      @visibility_stack.push([:public])
+      @visibility_stack.push([Entry::Visibility::PUBLIC])
       name = node.constant_path.location.slice
 
       comments = collect_comments(node)
@@ -85,7 +85,7 @@ module RubyIndexer
 
     sig { params(node: Prism::ModuleNode).void }
     def on_module_node_enter(node)
-      @visibility_stack.push([:public])
+      @visibility_stack.push([Entry::Visibility::PUBLIC])
       name = node.constant_path.location.slice
 
       comments = collect_comments(node)
@@ -204,8 +204,12 @@ module RubyIndexer
         handle_module_operation(node, :included_modules)
       when :prepend
         handle_module_operation(node, :prepended_modules)
-      when :public, :protected, :private
-        change_scope_visibility(message)
+      when :public
+        change_scope_visibility(Entry::Visibility::PUBLIC)
+      when :protected
+        change_scope_visibility(Entry::Visibility::PROTECTED)
+      when :private
+        change_scope_visibility(Entry::Visibility::PRIVATE)
       end
     end
 
@@ -281,7 +285,7 @@ module RubyIndexer
       # The private_constant method does not resolve the constant name. It always points to a constant that needs to
       # exist in the current namespace
       entries = @index[fully_qualify_name(name)]
-      entries&.each { |entry| entry.visibility = :private }
+      entries&.each { |entry| entry.visibility = Entry::Visibility::PRIVATE }
     end
 
     sig do
@@ -412,12 +416,12 @@ module RubyIndexer
       collection.concat(names)
     end
 
-    sig { returns(Symbol) }
+    sig { returns(Entry::Visibility) }
     def current_visibility
       T.must(@visibility_stack.last&.last)
     end
 
-    sig { params(visibility: Symbol).void }
+    sig { params(visibility: Entry::Visibility).void }
     def change_scope_visibility(visibility)
       scope_visibility_stack = T.must(@visibility_stack.last)
       scope_visibility_stack.push(visibility)

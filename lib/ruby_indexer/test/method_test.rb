@@ -83,9 +83,9 @@ module RubyIndexer
         def baz; end
       RUBY
 
-      assert_entry("foo", Entry::InstanceMethod, "/fake/path/foo.rb:0-8:1-3", visibility: :private)
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:3-0:3-12", visibility: :public)
-      assert_entry("baz", Entry::InstanceMethod, "/fake/path/foo.rb:7-0:7-12", visibility: :protected)
+      assert_entry("foo", Entry::InstanceMethod, "/fake/path/foo.rb:0-8:1-3", visibility: Entry::Visibility::PRIVATE)
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:3-0:3-12", visibility: Entry::Visibility::PUBLIC)
+      assert_entry("baz", Entry::InstanceMethod, "/fake/path/foo.rb:7-0:7-12", visibility: Entry::Visibility::PROTECTED)
     end
 
     def test_visibility_tracking_with_nested_class_or_modules
@@ -103,9 +103,9 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("foo", Entry::InstanceMethod, "/fake/path/foo.rb:3-2:3-14", visibility: :private)
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:6-4:6-16", visibility: :public)
-      assert_entry("baz", Entry::InstanceMethod, "/fake/path/foo.rb:9-2:9-14", visibility: :private)
+      assert_entry("foo", Entry::InstanceMethod, "/fake/path/foo.rb:3-2:3-14", visibility: Entry::Visibility::PRIVATE)
+      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:6-4:6-16", visibility: Entry::Visibility::PUBLIC)
+      assert_entry("baz", Entry::InstanceMethod, "/fake/path/foo.rb:9-2:9-14", visibility: Entry::Visibility::PRIVATE)
     end
 
     def test_method_with_parameters

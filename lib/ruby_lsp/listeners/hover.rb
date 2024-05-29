@@ -111,7 +111,8 @@ module RubyLsp
         # We should only show hover for private constants if the constant is defined in the same namespace as the
         # reference
         first_entry = T.must(entries.first)
-        return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{name}"
+        return if first_entry.visibility == RubyIndexer::Entry::Visibility::PRIVATE &&
+          first_entry.name != "#{@nesting.join("::")}::#{name}"
 
         categorized_markdown_from_index_entries(name, entries).each do |category, content|
           @response_builder.push(content, category: category)

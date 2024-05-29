@@ -3,6 +3,14 @@
 
 module RubyIndexer
   class Entry
+    class Visibility < T::Enum
+      enums do
+        PUBLIC = new(:public)
+        PROTECTED = new(:protected)
+        PRIVATE = new(:private)
+      end
+    end
+
     extend T::Sig
 
     sig { returns(String) }
@@ -17,7 +25,7 @@ module RubyIndexer
     sig { returns(T::Array[String]) }
     attr_reader :comments
 
-    sig { returns(Symbol) }
+    sig { returns(Visibility) }
     attr_accessor :visibility
 
     sig do
@@ -32,7 +40,7 @@ module RubyIndexer
       @name = name
       @file_path = file_path
       @comments = comments
-      @visibility = T.let(:public, Symbol)
+      @visibility = T.let(Visibility::PUBLIC, Visibility)
 
       @location = T.let(
         if location.is_a?(Prism::Location)
@@ -188,7 +196,7 @@ module RubyIndexer
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
-          visibility: Symbol,
+          visibility: Visibility,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
@@ -229,7 +237,7 @@ module RubyIndexer
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
           parameters_node: T.nilable(Prism::ParametersNode),
-          visibility: Symbol,
+          visibility: Visibility,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
