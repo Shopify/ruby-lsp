@@ -196,6 +196,8 @@ module RubyIndexer
     rescue Errno::EISDIR, Errno::ENOENT
       # If `path` is a directory, just ignore it and continue indexing. If the file doesn't exist, then we also ignore
       # it
+    rescue SystemStackError => e
+      $stderr.puts "Error indexing #{indexable_path.full_path}: #{e.message}"
     end
 
     # Follows aliases in a namespace. The algorithm keeps checking if the name is an alias and then recursively follows
