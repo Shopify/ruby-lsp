@@ -19,6 +19,16 @@ module RubyLsp
           T::Hash[Symbol, Integer],
         )
 
+        ENHANCED_DOC_URL = T.let(
+          begin
+            gem("rubocop", ">= 1.64.0")
+            true
+          rescue LoadError
+            false
+          end,
+          T::Boolean,
+        )
+
         # TODO: avoid passing document once we have alternative ways to get at
         # encoding and file source
         sig { params(document: Document, offense: RuboCop::Cop::Offense, uri: URI::Generic).void }
@@ -38,8 +48,8 @@ module RubyLsp
           code_actions
         end
 
-        sig { returns(Interface::Diagnostic) }
-        def to_lsp_diagnostic
+        sig { params(config: RuboCop::Config).returns(Interface::Diagnostic) }
+        def to_lsp_diagnostic(config)
           # highlighted_area contains the begin and end position of the first line
           # This ensures that multiline offenses don't clutter the editor
           highlighted = @offense.highlighted_area
@@ -47,7 +57,7 @@ module RubyLsp
             message: message,
             source: "RuboCop",
             code: @offense.cop_name,
-            code_description: code_description,
+            code_description: code_description(config),
             severity: severity,
             range: Interface::Range.new(
               start: Interface::Position.new(
@@ -80,9 +90,16 @@ module RubyLsp
           RUBOCOP_TO_LSP_SEVERITY[@offense.severity.name]
         end
 
-        sig { returns(T.nilable(Interface::CodeDescription)) }
-        def code_description
-          doc_url = RuboCopRunner.find_cop_by_name(@offense.cop_name)&.documentation_url
+        sig { params(config: RuboCop::Config).returns(T.nilable(Interface::CodeDescription)) }
+        def code_description(config)
+          cop = RuboCopRunner.find_cop_by_name(@offense.cop_name)
+          return unless cop
+
+          doc_url = if ENHANCED_DOC_URL
+            cop.documentation_url(config)
+          else
+            cop.documentation_url
+          end
           Interface::CodeDescription.new(href: doc_url) if doc_url
         end
 
