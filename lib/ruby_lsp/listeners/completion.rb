@@ -409,8 +409,9 @@ module RubyLsp
       # ```
       sig { params(entry_name: String).returns(T::Boolean) }
       def top_level?(entry_name)
-        @target_context.nesting.length.downto(0).each do |i|
-          prefix = T.must(@target_context.nesting[0...i]).join("::")
+        nesting = @target_context.nesting
+        nesting.length.downto(0).each do |i|
+          prefix = T.must(nesting[0...i]).join("::")
           full_name = prefix.empty? ? entry_name : "#{prefix}::#{entry_name}"
           next if full_name == entry_name
 
