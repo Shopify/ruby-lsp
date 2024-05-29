@@ -26,7 +26,7 @@ module RubyLsp
           )
         end
 
-        sig { params(location: Prism::Location).returns(Interface::Range) }
+        sig { params(location: T.any(Prism::Location, RubyIndexer::Location)).returns(Interface::Range) }
         def range_from_location(location)
           Interface::Range.new(
             start: Interface::Position.new(
