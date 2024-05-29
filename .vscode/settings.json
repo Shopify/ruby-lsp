@@ -45,5 +45,4 @@
       ]
     }
   ],
-  "sorbet.highlightUntyped": "everywhere-but-tests"
 }
