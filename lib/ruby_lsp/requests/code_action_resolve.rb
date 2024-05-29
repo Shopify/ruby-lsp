@@ -164,10 +164,9 @@ module RubyLsp
         extracted_source = T.must(@document.source[start_index...end_index])
 
         # Find the closest method declaration node, so that we place the refactor in a valid position
-        closest_def, _ = T.cast(
-          @document.locate(@document.tree, start_index, node_types: [Prism::DefNode]),
-          [T.nilable(Prism::DefNode), T.nilable(Prism::Node), T::Array[String]],
-        )
+        # closest_def, _ = T.cast(
+        target_context = @document.locate(@document.tree, start_index, node_types: [Prism::DefNode])
+        closest_def = target_context.closest
         return Error::InvalidTargetRange if closest_def.nil?
 
         end_keyword_loc = closest_def.end_keyword_loc
