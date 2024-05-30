@@ -41,9 +41,7 @@ suite("Asdf", () => {
     const findInstallationStub = sinon
       .stub(asdf, "findAsdfInstallation")
       .resolves(vscode.Uri.file(`${os.homedir()}/.asdf/asdf.sh`));
-    const findDataDirStub = sinon
-      .stub(asdf, "findAsdfDataDir")
-      .resolves(vscode.Uri.file(`${os.homedir()}/.asdf`));
+    const shellStub = sinon.stub(vscode.env, "shell").get(() => "/bin/bash");
 
     const { env, version, yjit } = await asdf.activate();
 
@@ -52,21 +50,19 @@ suite("Asdf", () => {
         `. ${os.homedir()}/.asdf/asdf.sh && asdf exec ruby -W0 -rjson -e '${activationScript}'`,
         {
           cwd: workspacePath,
-          env: {
-            ASDF_DIR: `${os.homedir()}/.asdf`,
-            ASDF_DATA_DIR: `${os.homedir()}/.asdf`,
-          },
+          shell: "/bin/bash",
+          // eslint-disable-next-line no-process-env
+          env: process.env,
         },
       ),
     );
 
     assert.strictEqual(version, "3.0.0");
     assert.strictEqual(yjit, true);
-    assert.ok(env.PATH!.includes(`${os.homedir()}/.asdf/shims`));
     assert.strictEqual(env.ANY, "true");
 
     execStub.restore();
     findInstallationStub.restore();
-    findDataDirStub.restore();
+    shellStub.restore();
   });
 });
