@@ -219,7 +219,7 @@ module RubyLsp
           line: @position[:line],
           character: @position[:character] - 1,
         })
-        target = target_context.closest
+        target = target_context.node
 
         statements = case target
         when Prism::IfNode, Prism::UnlessNode, Prism::ForNode, Prism::WhileNode, Prism::UntilNode

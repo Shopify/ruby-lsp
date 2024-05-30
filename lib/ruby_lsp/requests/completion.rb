@@ -93,7 +93,7 @@ module RubyLsp
           addon.create_completion_listener(@response_builder, target_context, dispatcher, document.uri)
         end
 
-        matched = target_context.closest
+        matched = target_context.node
         parent = target_context.parent
         return unless matched && parent
 

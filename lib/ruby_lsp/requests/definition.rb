@@ -63,7 +63,7 @@ module RubyLsp
           ],
         )
 
-        target = target_context.closest
+        target = target_context.node
         parent = target_context.parent
 
         if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)

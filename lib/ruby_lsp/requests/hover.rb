@@ -42,7 +42,7 @@ module RubyLsp
       def initialize(document, global_state, position, dispatcher, typechecker_enabled)
         super()
         target_context = document.locate_node(position, node_types: Listeners::Hover::ALLOWED_TARGETS)
-        target = target_context.closest
+        target = target_context.node
         parent = target_context.parent
 
         if (Listeners::Hover::ALLOWED_TARGETS.include?(parent.class) &&

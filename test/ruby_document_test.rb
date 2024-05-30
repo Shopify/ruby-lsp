@@ -434,8 +434,8 @@ class RubyDocumentTest < Minitest::Test
 
     # Locate the `ActiveRecord` module
     target_context = document.locate_node({ line: 0, character: 19 })
-    assert_instance_of(Prism::ConstantReadNode, target_context.closest)
-    assert_equal("ActiveRecord", T.cast(target_context.closest, Prism::ConstantReadNode).location.slice)
+    assert_instance_of(Prism::ConstantReadNode, target_context.node)
+    assert_equal("ActiveRecord", T.cast(target_context.node, Prism::ConstantReadNode).location.slice)
 
     assert_instance_of(Prism::ConstantPathNode, target_context.parent)
     assert_equal(
@@ -445,13 +445,13 @@ class RubyDocumentTest < Minitest::Test
 
     # Locate the `Base` class
     target_context = document.locate_node({ line: 0, character: 27 })
-    found = T.cast(target_context.closest, Prism::ConstantPathNode)
+    found = T.cast(target_context.node, Prism::ConstantPathNode)
     assert_equal(:ActiveRecord, T.cast(found.parent, Prism::ConstantReadNode).name)
     assert_equal(:Base, found.name)
 
     # Locate the `where` invocation
     target_context = document.locate_node({ line: 3, character: 4 })
-    assert_equal("where", T.cast(target_context.closest, Prism::CallNode).message)
+    assert_equal("where", T.cast(target_context.node, Prism::CallNode).message)
   end
 
   def test_locate_returns_nesting
@@ -472,11 +472,11 @@ class RubyDocumentTest < Minitest::Test
     RUBY
 
     target_context = document.locate_node({ line: 9, character: 6 })
-    assert_equal("Qux", T.cast(target_context.closest, Prism::ConstantReadNode).location.slice)
+    assert_equal("Qux", T.cast(target_context.node, Prism::ConstantReadNode).location.slice)
     assert_equal(["Foo", "Bar"], target_context.nesting)
 
     target_context = document.locate_node({ line: 3, character: 6 })
-    assert_equal("Hello", T.cast(target_context.closest, Prism::ConstantReadNode).location.slice)
+    assert_equal("Hello", T.cast(target_context.node, Prism::ConstantReadNode).location.slice)
     assert_equal(["Foo", "Other"], target_context.nesting)
   end
 
@@ -492,7 +492,7 @@ class RubyDocumentTest < Minitest::Test
     RUBY
 
     target_context = document.locate_node({ line: 3, character: 6 }, node_types: [Prism::ConstantReadNode])
-    found = target_context.closest
+    found = target_context.node
     assert_equal("Qux", T.cast(found, Prism::ConstantReadNode).location.slice)
     assert_equal(["Foo", "Bar"], target_context.nesting)
   end

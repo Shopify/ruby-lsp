@@ -56,7 +56,7 @@ module RubyLsp
           node_types: [Prism::CallNode],
         )
 
-        target = adjust_for_nested_target(target_context.closest, target_context.parent, position)
+        target = adjust_for_nested_target(target_context.node, target_context.parent, position)
 
         @target = T.let(target, T.nilable(Prism::Node))
         @dispatcher = dispatcher
