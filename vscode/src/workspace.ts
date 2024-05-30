@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 import { CodeLens, State } from "vscode-languageclient/node";
 
 import { Ruby } from "./ruby";
-import { Telemetry } from "./telemetry";
 import Client from "./client";
 import {
   asyncExec,
@@ -20,8 +19,8 @@ export class Workspace implements WorkspaceInterface {
   public readonly workspaceFolder: vscode.WorkspaceFolder;
   public readonly outputChannel: WorkspaceChannel;
   private readonly context: vscode.ExtensionContext;
-  private readonly telemetry: Telemetry;
   private readonly isMainWorkspace: boolean;
+  private readonly telemetry: vscode.TelemetryLogger;
   private needsRestart = false;
   #rebaseInProgress = false;
   #error = false;
@@ -29,7 +28,7 @@ export class Workspace implements WorkspaceInterface {
   constructor(
     context: vscode.ExtensionContext,
     workspaceFolder: vscode.WorkspaceFolder,
-    telemetry: Telemetry,
+    telemetry: vscode.TelemetryLogger,
     createTestItems: (response: CodeLens[]) => void,
     isMainWorkspace = false,
   ) {
