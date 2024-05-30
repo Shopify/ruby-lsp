@@ -56,6 +56,11 @@ module RubyLsp
       T.must(@state[uri.to_s]).push_edits(edits, version: version)
     end
 
+    sig { params(block: T.proc.params(uri: String).void).void }
+    def each_uri(&block)
+      @state.each_key(&block)
+    end
+
     sig { void }
     def clear
       @state.clear
@@ -66,7 +71,7 @@ module RubyLsp
       @state.empty?
     end
 
-    sig { params(uri: URI::Generic).void }
+    sig { params(uri: T.any(URI::Generic, String)).void }
     def delete(uri)
       @state.delete(uri.to_s)
     end
