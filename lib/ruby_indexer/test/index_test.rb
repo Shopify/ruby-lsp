@@ -688,5 +688,54 @@ module RubyIndexer
 
       assert_equal(["A", "ALIAS"], @index.linearized_ancestors_of("A"))
     end
+
+    def test_resolving_an_inherited_method
+      index(<<~RUBY)
+        module Foo
+          def baz; end
+        end
+
+        class Bar
+          def qux; end
+        end
+
+        class Wow < Bar
+          include Foo
+        end
+      RUBY
+
+      entry = T.must(@index.resolve_method("baz", "Wow")&.first)
+      assert_equal("baz", entry.name)
+      assert_equal("Foo", T.must(entry.owner).name)
+
+      entry = T.must(@index.resolve_method("qux", "Wow")&.first)
+      assert_equal("qux", entry.name)
+      assert_equal("Bar", T.must(entry.owner).name)
+    end
+
+    def test_resolving_an_inherited_method_lands_on_first_match
+      index(<<~RUBY)
+        module Foo
+          def qux; end
+        end
+
+        class Bar
+          def qux; end
+        end
+
+        class Wow < Bar
+          prepend Foo
+
+          def qux; end
+        end
+      RUBY
+
+      entries = T.must(@index.resolve_method("qux", "Wow"))
+      assert_equal(1, entries.length)
+
+      entry = T.must(entries.first)
+      assert_equal("qux", entry.name)
+      assert_equal("Foo", T.must(entry.owner).name)
+    end
   end
 end
