@@ -68,8 +68,10 @@ module RubyIndexer
         superclass.slice
       end
 
+      nesting = name.start_with?("::") ? [name.delete_prefix("::")] : @stack + [name.delete_prefix("::")]
+
       entry = Entry::Class.new(
-        fully_qualify_name(name),
+        nesting,
         @file_path,
         node.location,
         comments,
@@ -94,7 +96,9 @@ module RubyIndexer
       name = node.constant_path.location.slice
 
       comments = collect_comments(node)
-      entry = Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments)
+
+      nesting = name.start_with?("::") ? [name.delete_prefix("::")] : @stack + [name.delete_prefix("::")]
+      entry = Entry::Module.new(nesting, @file_path, node.location, comments)
 
       @owner_stack << entry
       @index << entry
@@ -205,10 +209,8 @@ module RubyIndexer
         handle_attribute(node, reader: false, writer: true)
       when :attr_accessor
         handle_attribute(node, reader: true, writer: true)
-      when :include
-        handle_module_operation(node, :included_modules)
-      when :prepend
-        handle_module_operation(node, :prepended_modules)
+      when :include, :prepend, :extend
+        handle_module_operation(node, message)
       when :public
         @visibility_stack.push(Entry::Visibility::PUBLIC)
       when :protected
@@ -479,16 +481,21 @@ module RubyIndexer
       arguments = node.arguments&.arguments
       return unless arguments
 
-      names = arguments.filter_map do |node|
-        if node.is_a?(Prism::ConstantReadNode) || node.is_a?(Prism::ConstantPathNode)
-          node.full_name
+      arguments.each do |node|
+        next unless node.is_a?(Prism::ConstantReadNode) || node.is_a?(Prism::ConstantPathNode)
+
+        case operation
+        when :include
+          owner.mixin_operations << Entry::Include.new(node.full_name)
+        when :prepend
+          owner.mixin_operations << Entry::Prepend.new(node.full_name)
+        when :extend
+          owner.mixin_operations << Entry::Extend.new(node.full_name)
         end
       rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
              Prism::ConstantPathNode::MissingNodesInConstantPathError
         # Do nothing
       end
-      collection = operation == :included_modules ? owner.included_modules : owner.prepended_modules
-      collection.concat(names)
     end
 
     sig { returns(Entry::Visibility) }

@@ -175,8 +175,7 @@ module RubyLsp
           # The only time we may have a private constant reference from outside of the namespace is if we're dealing
           # with ConstantPath and the entry name doesn't start with the current nesting
           first_entry = T.must(entries.first)
-          next if first_entry.visibility == RubyIndexer::Entry::Visibility::PRIVATE &&
-            !first_entry.name.start_with?("#{nesting}::")
+          next if first_entry.private? && !first_entry.name.start_with?("#{nesting}::")
 
           constant_name = first_entry.name.delete_prefix("#{real_namespace}::")
           full_name = aliased_namespace.empty? ? constant_name : "#{aliased_namespace}::#{constant_name}"
