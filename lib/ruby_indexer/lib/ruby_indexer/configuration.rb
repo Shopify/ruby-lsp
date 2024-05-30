@@ -60,7 +60,7 @@ module RubyIndexer
       # having duplicates if BUNDLE_PATH is set to a folder inside the project structure
 
       # Add user specified patterns
-      patterns = indexable_included_file_patterns.sort.map! { |dir| File.join(dir, "*.rb") }
+      patterns = indexable_included_file_patterns(Dir.pwd).sort.map! { |dir| File.join(dir, "*.rb") }
       patterns = [File.join(Dir.pwd, "**/*.rb")] if patterns.empty?
 
       indexables = patterns.flat_map do |pattern|
@@ -181,7 +181,7 @@ module RubyIndexer
     end
 
     sig { params(base_directory: String).returns(T::Array[String]) }
-    def indexable_included_file_patterns(base_directory = Dir.pwd)
+    def indexable_included_file_patterns(base_directory)
       flags = File::FNM_PATHNAME | File::FNM_EXTGLOB
 
       # Escape File.fnmatch? wildcards in the directory
