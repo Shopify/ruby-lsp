@@ -11,7 +11,7 @@ module RubyLsp
         params(
           response_builder: ResponseBuilders::SignatureHelp,
           global_state: GlobalState,
-          target_context: TargetContext,
+          target_context: NodeContext,
           dispatcher: Prism::Dispatcher,
           typechecker_enabled: T::Boolean,
         ).void

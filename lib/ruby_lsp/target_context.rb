@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 module RubyLsp
-  class TargetContext
+  class NodeContext
     extend T::Sig
 
     sig { returns(T.nilable(Prism::Node)) }

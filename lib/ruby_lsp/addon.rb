@@ -131,7 +131,7 @@ module RubyLsp
     sig do
       overridable.params(
         response_builder: ResponseBuilders::Hover,
-        target_context: TargetContext,
+        target_context: NodeContext,
         dispatcher: Prism::Dispatcher,
       ).void
     end
@@ -159,7 +159,7 @@ module RubyLsp
       overridable.params(
         response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::Location],
         uri: URI::Generic,
-        target_context: TargetContext,
+        target_context: NodeContext,
         dispatcher: Prism::Dispatcher,
       ).void
     end
@@ -169,7 +169,7 @@ module RubyLsp
     sig do
       overridable.params(
         response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
-        target_context: TargetContext,
+        target_context: NodeContext,
         dispatcher: Prism::Dispatcher,
         uri: URI::Generic,
       ).void

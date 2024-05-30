@@ -36,7 +36,7 @@ module RubyLsp
           response_builder: ResponseBuilders::Hover,
           global_state: GlobalState,
           uri: URI::Generic,
-          target_context: TargetContext,
+          target_context: NodeContext,
           dispatcher: Prism::Dispatcher,
           typechecker_enabled: T::Boolean,
         ).void
@@ -166,16 +166,9 @@ module RubyLsp
         # We should only show hover for private constants if the constant is defined in the same namespace as the
         # reference
         first_entry = T.must(entries.first)
-<<<<<<< HEAD
-        return if first_entry.visibility == RubyIndexer::Entry::Visibility::PRIVATE &&
-          first_entry.name != "#{@nesting.join("::")}::#{name}"
-||||||| parent of 5eb74c22 (Introduce TargetContext)
-        return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{name}"
-=======
-        if first_entry.visibility == :private && first_entry.name != "#{@target_context.nesting.join("::")}::#{name}"
+        if first_entry.visibility == RubyIndexer::Entry::Visibility::PRIVATE && first_entry.name != "#{@target_context.nesting.join("::")}::#{name}"
           return
         end
->>>>>>> 5eb74c22 (Introduce TargetContext)
 
         categorized_markdown_from_index_entries(name, entries).each do |category, content|
           @response_builder.push(content, category: category)

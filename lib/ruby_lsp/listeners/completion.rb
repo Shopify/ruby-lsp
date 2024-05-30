@@ -11,7 +11,7 @@ module RubyLsp
         params(
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
           global_state: GlobalState,
-          target_context: TargetContext,
+          target_context: NodeContext,
           typechecker_enabled: T::Boolean,
           dispatcher: Prism::Dispatcher,
           uri: URI::Generic,

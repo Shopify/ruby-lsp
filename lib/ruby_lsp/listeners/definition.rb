@@ -14,7 +14,7 @@ module RubyLsp
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::Location],
           global_state: GlobalState,
           uri: URI::Generic,
-          target_context: TargetContext,
+          target_context: NodeContext,
           dispatcher: Prism::Dispatcher,
           typechecker_enabled: T::Boolean,
         ).void
