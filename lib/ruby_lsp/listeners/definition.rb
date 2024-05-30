@@ -149,13 +149,10 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def handle_autoload_definition(node)
-        arguments = node.arguments&.arguments
-        return unless arguments
+        argument = node.arguments&.arguments&.first
+        return unless argument.is_a?(Prism::SymbolNode)
 
-        return unless arguments.first
-
-        value = arguments.first&.value
-        return unless value
+        value = argument.value
 
         find_in_index(value)
       end
