@@ -48,15 +48,7 @@ module RubyIndexer
         ],
         T::Array[String],
       )
-    end
-
-    sig { returns(String) }
-    def exclude_pattern
-      relative_patterns = @excluded_patterns
-        .select { |p| p.end_with?("/**/*") }
-        .map { |p| p.delete_prefix("#{Dir.pwd}/") }
-
-      "#{Dir.pwd}/{#{relative_patterns.join(",")}}"
+      @fnmatch_exclude_pattern = T.let(compute_fnmatch_exclude_pattern, String)
     end
 
     sig { returns(T::Array[IndexablePath]) }
@@ -174,12 +166,22 @@ module RubyIndexer
       @excluded_patterns.concat(config["excluded_patterns"]) if config["excluded_patterns"]
       @included_patterns.concat(config["included_patterns"]) if config["included_patterns"]
       @excluded_magic_comments.concat(config["excluded_magic_comments"]) if config["excluded_magic_comments"]
+      @fnmatch_exclude_pattern = compute_fnmatch_exclude_pattern
     end
 
     private
 
-    sig { params(base_directory: String, excluded_pattern: String).returns(T::Array[String]) }
-    def indexable_included_file_patterns(base_directory = Dir.pwd, excluded_pattern = exclude_pattern)
+    sig { returns(String) }
+    def compute_fnmatch_exclude_pattern
+      relative_patterns = @excluded_patterns
+        .select { |p| p.end_with?("/**/*") }
+        .map { |p| p.delete_prefix("#{Dir.pwd}/") }
+
+      "#{Dir.pwd}/{#{relative_patterns.join(",")}}"
+    end
+
+    sig { params(base_directory: String).returns(T::Array[String]) }
+    def indexable_included_file_patterns(base_directory = Dir.pwd)
       flags = File::FNM_PATHNAME | File::FNM_EXTGLOB
 
       # Escape File.fnmatch? wildcards in the directory
@@ -187,23 +189,22 @@ module RubyIndexer
         "\\#{reserved_glob_character}"
       end
 
-      dirs = Dir.glob(File.join(base_directory, "*/"), flags)
-        .reject do |dir|
-        next true if File.fnmatch?(excluded_pattern, dir, flags)
+      dirs = Dir.glob(File.join(base_directory, "*/"), flags).reject do |dir|
+        next true if File.fnmatch?(@fnmatch_exclude_pattern, dir, flags)
 
-        symlink_excluded_or_infinite_loop?(base_directory, dir, excluded_pattern, flags)
+        symlink_excluded_or_infinite_loop?(base_directory, dir, flags)
       end
 
       dirs
-        .flat_map { |dir| indexable_included_file_patterns(dir, excluded_pattern) }
+        .flat_map { |dir| indexable_included_file_patterns(dir) }
         .unshift(base_directory)
     end
 
-    sig { params(base_dir: String, current_dir: String, exclude_pattern: String, flags: Integer).returns(T::Boolean) }
-    def symlink_excluded_or_infinite_loop?(base_dir, current_dir, exclude_pattern, flags)
+    sig { params(base_dir: String, current_dir: String, flags: Integer).returns(T::Boolean) }
+    def symlink_excluded_or_infinite_loop?(base_dir, current_dir, flags)
       dir_realpath = File.realpath(current_dir)
       File.symlink?(current_dir.chomp("/")) && (
-        File.fnmatch?(exclude_pattern, "#{dir_realpath}/", flags) ||
+        File.fnmatch?(@fnmatch_exclude_pattern, "#{dir_realpath}/", flags) ||
         File.realpath(base_dir).start_with?(dir_realpath)
       )
     end

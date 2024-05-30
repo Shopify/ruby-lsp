@@ -51,7 +51,7 @@ module RubyIndexer
 
     def test_exclude_pattern
       assert_equal(
-        @config.exclude_pattern,
+        @config.instance_variable_get(:@fnmatch_exclude_pattern),
         "#{Dir.pwd}/{**/tmp/**/*,**/node_modules/**/*,vendor/bundle/**/*}",
       )
     end
