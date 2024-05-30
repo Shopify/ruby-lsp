@@ -123,6 +123,11 @@ module RubyIndexer
       def mixin_operations
         @mixin_operations ||= T.let([], T.nilable(T::Array[ModuleOperation]))
       end
+
+      sig { returns(Integer) }
+      def ancestor_hash
+        mixin_operation_module_names.hash
+      end
     end
 
     class Module < Namespace
@@ -149,6 +154,11 @@ module RubyIndexer
         super(nesting, file_path, location, comments)
 
         @parent_class = T.let(parent_class, T.nilable(String))
+      end
+
+      sig { override.returns(Integer) }
+      def ancestor_hash
+        [mixin_operation_module_names, @parent_class].hash
       end
     end
 

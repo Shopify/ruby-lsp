@@ -388,6 +388,36 @@ module RubyIndexer
       variables
     end
 
+    # Synchronizes a change made to the given indexable path. This method will ensure that new declarations are indexed,
+    # removed declarations removed and that the ancestor linearization cache is cleared if necessary
+    sig { params(indexable: IndexablePath).void }
+    def handle_change(indexable)
+      original_entries = @files_to_entries[indexable.full_path]
+
+      delete(indexable)
+      index_single(indexable)
+
+      updated_entries = @files_to_entries[indexable.full_path]
+
+      return unless original_entries && updated_entries
+
+      # A change in one ancestor may impact several different others, which could be including that ancestor through
+      # indirect means like including a module that than includes the ancestor. Trying to figure out exactly which
+      # ancestors need to be deleted is too expensive. Therefore, if any of the namespace entries has a change to their
+      # ancestor hash, we clear all ancestors and start linearizing lazily again from scratch
+      original_map = T.cast(
+        original_entries.select { |e| e.is_a?(Entry::Namespace) },
+        T::Array[Entry::Namespace],
+      ).to_h { |e| [e.name, e.ancestor_hash] }
+
+      updated_map = T.cast(
+        updated_entries.select { |e| e.is_a?(Entry::Namespace) },
+        T::Array[Entry::Namespace],
+      ).to_h { |e| [e.name, e.ancestor_hash] }
+
+      @ancestors.clear if original_map.any? { |name, hash| updated_map[name] != hash }
+    end
+
     private
 
     # Attempts to resolve an UnresolvedAlias into a resolved Alias. If the unresolved alias is pointing to a constant
