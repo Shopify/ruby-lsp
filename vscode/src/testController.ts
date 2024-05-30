@@ -4,7 +4,6 @@ import { promisify } from "util";
 import * as vscode from "vscode";
 import { CodeLens } from "vscode-languageclient/node";
 
-import { Telemetry } from "./telemetry";
 import { Workspace } from "./workspace";
 
 const asyncExec = promisify(exec);
@@ -16,7 +15,7 @@ export class TestController {
   private readonly testDebugProfile: vscode.TestRunProfile;
   private readonly debugTag: vscode.TestTag = new vscode.TestTag("debug");
   private terminal: vscode.Terminal | undefined;
-  private readonly telemetry: Telemetry;
+  private readonly telemetry: vscode.TelemetryLogger;
   // We allow the timeout to be configured in seconds, but exec expects it in milliseconds
   private readonly testTimeout = vscode.workspace
     .getConfiguration("rubyLsp")
@@ -26,7 +25,7 @@ export class TestController {
 
   constructor(
     context: vscode.ExtensionContext,
-    telemetry: Telemetry,
+    telemetry: vscode.TelemetryLogger,
     currentWorkspace: () => Workspace | undefined,
   ) {
     this.telemetry = telemetry;
@@ -141,7 +140,7 @@ export class TestController {
     });
   }
 
-  async runTestInTerminal(_path: string, _name: string, command?: string) {
+  runTestInTerminal(_path: string, _name: string, command?: string) {
     // eslint-disable-next-line no-param-reassign
     command ??= this.testCommands.get(this.findTestByActiveLine()!) || "";
 
@@ -152,14 +151,13 @@ export class TestController {
     this.terminal.show();
     this.terminal.sendText(command);
 
-    const workspace = this.currentWorkspace();
-
-    if (workspace?.lspClient?.serverVersion) {
-      await this.telemetry.sendCodeLensEvent(
-        "test_in_terminal",
-        workspace.lspClient.serverVersion,
-      );
-    }
+    this.telemetry.logUsage("ruby_lsp.code_lens", {
+      type: "counter",
+      attributes: {
+        label: "test_in_terminal",
+        vscodemachineid: vscode.env.machineId,
+      },
+    });
   }
 
   async runOnClick(testId: string) {
@@ -235,14 +233,10 @@ export class TestController {
     run.passed(test, Date.now() - start);
     run.end();
 
-    const workspace = this.currentWorkspace();
-
-    if (workspace?.lspClient?.serverVersion) {
-      await this.telemetry.sendCodeLensEvent(
-        "debug",
-        workspace.lspClient.serverVersion,
-      );
-    }
+    this.telemetry.logUsage("ruby_lsp.code_lens", {
+      type: "counter",
+      attributes: { label: "debug", vscodemachineid: vscode.env.machineId },
+    });
   }
 
   private async runHandler(
@@ -331,12 +325,10 @@ export class TestController {
     // Make sure to end the run after all tests have been executed
     run.end();
 
-    if (workspace?.lspClient?.serverVersion) {
-      await this.telemetry.sendCodeLensEvent(
-        "test",
-        workspace.lspClient.serverVersion,
-      );
-    }
+    this.telemetry.logUsage("ruby_lsp.code_lens", {
+      type: "counter",
+      attributes: { label: "test", vscodemachineid: vscode.env.machineId },
+    });
   }
 
   private async assertTestPasses(

@@ -1,4 +1,5 @@
 import path from "path";
+import os from "os";
 import { performance as Perf } from "perf_hooks";
 
 import * as vscode from "vscode";
@@ -19,10 +20,10 @@ import {
   Message,
   ErrorAction,
   CloseAction,
+  State,
 } from "vscode-languageclient/node";
 
 import { LSP_NAME, ClientInterface, Addon } from "./common";
-import { Telemetry, RequestEvent } from "./telemetry";
 import { Ruby } from "./ruby";
 import { WorkspaceChannel } from "./workspaceChannel";
 
@@ -211,10 +212,9 @@ export default class Client extends LanguageClient implements ClientInterface {
   public serverVersion?: string;
   public addons?: Addon[];
   private readonly workingDirectory: string;
-  private readonly telemetry: Telemetry;
+  private readonly telemetry: vscode.TelemetryLogger;
   private readonly createTestItems: (response: CodeLens[]) => void;
   private readonly baseFolder;
-  private requestId = 0;
   private readonly workspaceOutputChannel: WorkspaceChannel;
 
   #context: vscode.ExtensionContext;
@@ -222,7 +222,7 @@ export default class Client extends LanguageClient implements ClientInterface {
 
   constructor(
     context: vscode.ExtensionContext,
-    telemetry: Telemetry,
+    telemetry: vscode.TelemetryLogger,
     ruby: Ruby,
     createTestItems: (response: CodeLens[]) => void,
     workspaceFolder: vscode.WorkspaceFolder,
@@ -298,93 +298,42 @@ export default class Client extends LanguageClient implements ClientInterface {
 
   private async benchmarkMiddleware<T>(
     type: string | MessageSignature,
-    params: any,
+    _params: any,
     runRequest: () => Promise<T>,
   ): Promise<T> {
-    // Because of the custom bundle logic in the server, we can only fetch the server version after launching it. That
-    // means some requests may be received before the computed the version. For those, we cannot send telemetry
-    if (this.serverVersion === undefined) {
+    if (this.state !== State.Running) {
       return runRequest();
     }
 
     const request = typeof type === "string" ? type : type.method;
 
-    // The first few requests are not representative for telemetry. Their response time is much higher than the rest
-    // because they are inflate by the time we spend indexing and by regular "warming up" of the server (like
-    // autoloading constants or running signature blocks).
-    if (this.requestId < 50) {
-      this.requestId++;
-      return runRequest();
-    }
-
-    const telemetryData: RequestEvent = {
-      request,
-      rubyVersion: this.ruby.rubyVersion!,
-      yjitEnabled: this.ruby.yjitEnabled!,
-      lspVersion: this.serverVersion,
-      requestTime: 0,
-    };
-
-    // If there are parameters in the request, include those
-    if (params) {
-      const castParam = { ...params } as { textDocument?: { uri: string } };
-
-      if ("textDocument" in castParam) {
-        const uri = castParam.textDocument?.uri.replace(
-          // eslint-disable-next-line no-process-env
-          process.env.HOME!,
-          "~",
-        );
-
-        delete castParam.textDocument;
-        telemetryData.uri = uri;
-      }
-
-      telemetryData.params = JSON.stringify(castParam);
-    }
-
-    let result: T | undefined;
-    let errorResult;
-    const benchmarkId = this.requestId++;
-
-    // Execute the request measuring the time it takes to receive the response
-    Perf.mark(`${benchmarkId}.start`);
     try {
-      result = await runRequest();
+      // Execute the request measuring the time it takes to receive the response
+      Perf.mark(`${request}.start`);
+      const result = await runRequest();
+      Perf.mark(`${request}.end`);
+
+      const bench = Perf.measure(
+        "benchmarks",
+        `${request}.start`,
+        `${request}.end`,
+      );
+
+      this.logResponseTime(bench.duration, request);
+      return result;
     } catch (error: any) {
-      // If any errors occurred in the request, we'll receive these from the LSP server
-      telemetryData.errorClass = error.data.errorClass;
-      telemetryData.errorMessage = error.data.errorMessage;
-      telemetryData.backtrace = error.data.backtrace;
-      errorResult = error;
-    }
-    Perf.mark(`${benchmarkId}.end`);
-
-    // Insert benchmarked response time into telemetry data
-    const bench = Perf.measure(
-      "benchmarks",
-      `${benchmarkId}.start`,
-      `${benchmarkId}.end`,
-    );
-    telemetryData.requestTime = bench.duration;
-    await this.telemetry.sendEvent(telemetryData);
-
-    // If there has been an error, we must throw it again. Otherwise we can return the result
-    if (errorResult) {
       if (
         this.baseFolder === "ruby-lsp" ||
         this.baseFolder === "ruby-lsp-rails"
       ) {
         await vscode.window.showErrorMessage(
-          `Ruby LSP error ${errorResult.data.errorClass}: ${errorResult.data.errorMessage}\n\n
-                ${errorResult.data.backtrace}`,
+          `Ruby LSP error ${error.data.errorClass}: ${error.data.errorMessage}\n\n${error.data.backtrace}`,
         );
       }
 
-      throw errorResult;
+      this.telemetry.logError(error, { ...error.data });
+      throw error;
     }
-
-    return result!;
   }
 
   // Register the middleware in the client options
@@ -496,5 +445,18 @@ export default class Client extends LanguageClient implements ClientInterface {
         return this.benchmarkMiddleware(type, params, () => next(type, params));
       },
     };
+  }
+
+  private logResponseTime(duration: number, label: string) {
+    this.telemetry.logUsage("ruby_lsp.response_time", {
+      type: "histogram",
+      value: duration,
+      attributes: {
+        message: new vscode.TelemetryTrustedValue(label),
+        lspVersion: this.serverVersion,
+        rubyVersion: this.ruby.rubyVersion,
+        environment: os.platform(),
+      },
+    });
   }
 }
