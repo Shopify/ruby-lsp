@@ -299,6 +299,10 @@ module RubyIndexer
     end
 
     def test_indexing_prism_fixtures_succeeds
+      unless Dir.exist?("test/fixtures/prism/test/prism/fixtures")
+        raise "Prism fixtures not found. Run `git submodule update --init` to fetch them."
+      end
+
       fixtures = Dir.glob("test/fixtures/prism/test/prism/fixtures/**/*.txt")
 
       fixtures.each do |fixture|
