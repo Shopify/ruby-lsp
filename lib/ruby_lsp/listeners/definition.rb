@@ -211,8 +211,7 @@ module RubyLsp
         # We should only allow jumping to the definition of private constants if the constant is defined in the same
         # namespace as the reference
         first_entry = T.must(entries.first)
-        return if first_entry.visibility == RubyIndexer::Entry::Visibility::PRIVATE &&
-          first_entry.name != "#{@nesting.join("::")}::#{value}"
+        return if first_entry.private? && first_entry.name != "#{@nesting.join("::")}::#{value}"
 
         entries.each do |entry|
           location = entry.location

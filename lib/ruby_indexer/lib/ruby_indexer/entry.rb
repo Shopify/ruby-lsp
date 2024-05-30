@@ -57,6 +57,11 @@ module RubyIndexer
       )
     end
 
+    sig { returns(T::Boolean) }
+    def private?
+      visibility == Visibility::PRIVATE
+    end
+
     sig { returns(String) }
     def file_name
       File.basename(@file_path)
