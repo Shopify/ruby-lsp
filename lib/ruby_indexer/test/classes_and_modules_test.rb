@@ -369,13 +369,13 @@ module RubyIndexer
       RUBY
 
       foo = T.must(@index["Foo"][0])
-      assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.included_modules)
+      assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
 
       qux = T.must(@index["Foo::Qux"][0])
-      assert_equal(["Corge", "Corge", "Baz"], qux.included_modules)
+      assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
 
       constant_path_references = T.must(@index["ConstantPathReferences"][0])
-      assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.included_modules)
+      assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
     end
 
     def test_keeping_track_of_prepended_modules
@@ -415,13 +415,59 @@ module RubyIndexer
       RUBY
 
       foo = T.must(@index["Foo"][0])
-      assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.prepended_modules)
+      assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
 
       qux = T.must(@index["Foo::Qux"][0])
-      assert_equal(["Corge", "Corge", "Baz"], qux.prepended_modules)
+      assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
 
       constant_path_references = T.must(@index["ConstantPathReferences"][0])
-      assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.prepended_modules)
+      assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
+    end
+
+    def test_keeping_track_of_extended_modules
+      index(<<~RUBY)
+        class Foo
+          # valid syntaxes that we can index
+          extend A1
+          self.extend A2
+          extend A3, A4
+          self.extend A5, A6
+
+          # valid syntaxes that we cannot index because of their dynamic nature
+          extend some_variable_or_method_call
+          self.extend some_variable_or_method_call
+
+          def something
+            extend A7 # We should not index this because of this dynamic nature
+          end
+
+          # Valid inner class syntax definition with its own modules prepended
+          class Qux
+            extend Corge
+            self.extend Corge
+            extend Baz
+
+            extend some_variable_or_method_call
+          end
+        end
+
+        class ConstantPathReferences
+          extend Foo::Bar
+          self.extend Foo::Bar2
+
+          extend dynamic::Bar
+          extend Foo::
+        end
+      RUBY
+
+      foo = T.must(@index["Foo"][0])
+      assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
+
+      qux = T.must(@index["Foo::Qux"][0])
+      assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
+
+      constant_path_references = T.must(@index["ConstantPathReferences"][0])
+      assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
     end
   end
 end
