@@ -189,7 +189,6 @@ module RubyIndexer
 
       dirs = Dir.glob(File.join(base_directory, "*/"), flags)
         .reject do |dir|
-        next true if dir.end_with?("/./", "/../")
         next true if File.fnmatch?(excluded_pattern, dir, flags)
 
         symlink_excluded_or_infinite_loop?(base_directory, dir, excluded_pattern, flags)
