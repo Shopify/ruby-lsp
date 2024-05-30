@@ -11,9 +11,9 @@ module RubyLsp
     sig { returns(T::Array[String]) }
     attr_reader :nesting
 
-    sig { params(closest: T.nilable(Prism::Node), parent: T.nilable(Prism::Node), nesting: T::Array[String]).void }
-    def initialize(closest, parent, nesting)
-      @node = closest
+    sig { params(node: T.nilable(Prism::Node), parent: T.nilable(Prism::Node), nesting: T::Array[String]).void }
+    def initialize(node, parent, nesting)
+      @node = node
       @parent = parent
       @nesting = nesting
     end
