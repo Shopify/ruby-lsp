@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
 
-PRISM_FIXTURES_DIR=test/fixtures/prism/test/prism/fixtures
-
-if [ ! -d "$PRISM_FIXTURES_DIR" ]; then
-    echo "$PRISM_FIXTURES_DIR does not exist."
-    echo "Please run 'git submodule update --init' to pull submodule fixtures."
-    exit 1
-fi
-
 if [[ 2 -eq $# ]]; then
   bundle exec rake TEST="$1" TESTOPTS="-n='/$2/'"
 elif [[ 1 -eq $# ]]; then
