@@ -388,6 +388,44 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hover_for_inherited_instance_variables
+    source = <<~RUBY
+      module Foo
+        def set_ivar
+          # Foo
+          @a = 1
+        end
+      end
+
+      class Parent
+        def initialize
+          # Parent
+          @a = 5
+        end
+      end
+
+      class Child < Parent
+        include Foo
+
+        def do_something
+          @a
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 18 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("Foo", contents)
+      assert_match("Parent", contents)
+    end
+  end
+
   private
 
   def create_hover_addon

@@ -365,6 +365,29 @@ module RubyIndexer
       ancestors
     end
 
+    # Resolves an instance variable name for a given owner name. This method will linearize the ancestors of the owner
+    # and find inherited instance variables as well
+    sig { params(variable_name: String, owner_name: String).returns(T.nilable(T::Array[Entry::InstanceVariable])) }
+    def resolve_instance_variable(variable_name, owner_name)
+      entries = T.cast(self[variable_name], T.nilable(T::Array[Entry::InstanceVariable]))
+      ancestors = linearized_ancestors_of(owner_name)
+      return unless entries && ancestors.any?
+
+      entries.select { |e| ancestors.include?(e.owner&.name) }
+    end
+
+    # Returns a list of possible candidates for completion of instance variables for a given owner name. The name must
+    # include the `@` prefix
+    sig { params(name: String, owner_name: String).returns(T::Array[Entry::InstanceVariable]) }
+    def instance_variable_completion_candidates(name, owner_name)
+      entries = T.cast(prefix_search(name).flatten, T::Array[Entry::InstanceVariable])
+      ancestors = linearized_ancestors_of(owner_name)
+
+      variables = entries.uniq(&:name)
+      variables.select! { |e| ancestors.any?(e.owner&.name) }
+      variables
+    end
+
     private
 
     # Attempts to resolve an UnresolvedAlias into a resolved Alias. If the unresolved alias is pointing to a constant
