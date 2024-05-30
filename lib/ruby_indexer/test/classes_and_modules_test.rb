@@ -290,13 +290,13 @@ module RubyIndexer
       RUBY
 
       b_const = @index["A::B"].first
-      assert_equal(:private, b_const.visibility)
+      assert_equal(Entry::Visibility::PRIVATE, b_const.visibility)
 
       c_const = @index["A::C"].first
-      assert_equal(:private, c_const.visibility)
+      assert_equal(Entry::Visibility::PRIVATE, c_const.visibility)
 
       d_const = @index["A::D"].first
-      assert_equal(:public, d_const.visibility)
+      assert_equal(Entry::Visibility::PUBLIC, d_const.visibility)
     end
 
     def test_keeping_track_of_super_classes

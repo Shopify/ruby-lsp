@@ -15,7 +15,7 @@ module RubyIndexer
       @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), source)
     end
 
-    def assert_entry(expected_name, type, expected_location)
+    def assert_entry(expected_name, type, expected_location, visibility: nil)
       entries = @index[expected_name]
       refute_empty(entries, "Expected #{expected_name} to be indexed")
 
@@ -28,6 +28,8 @@ module RubyIndexer
           ":#{location.end_line - 1}-#{location.end_column}"
 
       assert_equal(expected_location, location_string)
+
+      assert_equal(visibility, entry.visibility) if visibility
     end
 
     def refute_entry(expected_name)

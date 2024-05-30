@@ -11,6 +11,7 @@ module RubyIndexer
     def initialize(index, dispatcher, parse_result, file_path)
       @index = index
       @file_path = file_path
+      @visibility_stack = T.let([Entry::Visibility::PUBLIC], T::Array[Entry::Visibility])
       @comments_by_line = T.let(
         parse_result.comments.to_h do |c|
           [c.location.start_line, c]
@@ -35,6 +36,7 @@ module RubyIndexer
         :on_def_node_enter,
         :on_def_node_leave,
         :on_call_node_enter,
+        :on_call_node_leave,
         :on_multi_write_node_enter,
         :on_constant_path_write_node_enter,
         :on_constant_path_or_write_node_enter,
@@ -55,6 +57,7 @@ module RubyIndexer
 
     sig { params(node: Prism::ClassNode).void }
     def on_class_node_enter(node)
+      @visibility_stack.push(Entry::Visibility::PUBLIC)
       name = node.constant_path.location.slice
 
       comments = collect_comments(node)
@@ -82,10 +85,12 @@ module RubyIndexer
     def on_class_node_leave(node)
       @stack.pop
       @owner_stack.pop
+      @visibility_stack.pop
     end
 
     sig { params(node: Prism::ModuleNode).void }
     def on_module_node_enter(node)
+      @visibility_stack.push(Entry::Visibility::PUBLIC)
       name = node.constant_path.location.slice
 
       comments = collect_comments(node)
@@ -100,6 +105,7 @@ module RubyIndexer
     def on_module_node_leave(node)
       @stack.pop
       @owner_stack.pop
+      @visibility_stack.pop
     end
 
     sig { params(node: Prism::MultiWriteNode).void }
@@ -203,6 +209,25 @@ module RubyIndexer
         handle_module_operation(node, :included_modules)
       when :prepend
         handle_module_operation(node, :prepended_modules)
+      when :public
+        @visibility_stack.push(Entry::Visibility::PUBLIC)
+      when :protected
+        @visibility_stack.push(Entry::Visibility::PROTECTED)
+      when :private
+        @visibility_stack.push(Entry::Visibility::PRIVATE)
+      end
+    end
+
+    sig { params(node: Prism::CallNode).void }
+    def on_call_node_leave(node)
+      message = node.name
+      case message
+      when :public, :protected, :private
+        # We want to restore the visibility stack when we leave a method definition with a visibility modifier
+        # e.g. `private def foo; end`
+        if node.arguments&.arguments&.first&.is_a?(Prism::DefNode)
+          @visibility_stack.pop
+        end
       end
     end
 
@@ -220,6 +245,7 @@ module RubyIndexer
           node.location,
           comments,
           node.parameters,
+          current_visibility,
           @owner_stack.last,
         )
       when Prism::SelfNode
@@ -229,6 +255,7 @@ module RubyIndexer
           node.location,
           comments,
           node.parameters,
+          current_visibility,
           @owner_stack.last,
         )
       end
@@ -333,7 +360,7 @@ module RubyIndexer
       # The private_constant method does not resolve the constant name. It always points to a constant that needs to
       # exist in the current namespace
       entries = @index[fully_qualify_name(name)]
-      entries&.each { |entry| entry.visibility = :private }
+      entries&.each { |entry| entry.visibility = Entry::Visibility::PRIVATE }
     end
 
     sig do
@@ -430,8 +457,15 @@ module RubyIndexer
 
         next unless name && loc
 
-        @index << Entry::Accessor.new(name, @file_path, loc, comments, @owner_stack.last) if reader
-        @index << Entry::Accessor.new("#{name}=", @file_path, loc, comments, @owner_stack.last) if writer
+        @index << Entry::Accessor.new(name, @file_path, loc, comments, current_visibility, @owner_stack.last) if reader
+        @index << Entry::Accessor.new(
+          "#{name}=",
+          @file_path,
+          loc,
+          comments,
+          current_visibility,
+          @owner_stack.last,
+        ) if writer
       end
     end
 
@@ -455,6 +489,11 @@ module RubyIndexer
       end
       collection = operation == :included_modules ? owner.included_modules : owner.prepended_modules
       collection.concat(names)
+    end
+
+    sig { returns(Entry::Visibility) }
+    def current_visibility
+      T.must(@visibility_stack.last)
     end
   end
 end

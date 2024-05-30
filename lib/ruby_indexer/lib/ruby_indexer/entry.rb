@@ -3,6 +3,14 @@
 
 module RubyIndexer
   class Entry
+    class Visibility < T::Enum
+      enums do
+        PUBLIC = new(:public)
+        PROTECTED = new(:protected)
+        PRIVATE = new(:private)
+      end
+    end
+
     extend T::Sig
 
     sig { returns(String) }
@@ -17,7 +25,7 @@ module RubyIndexer
     sig { returns(T::Array[String]) }
     attr_reader :comments
 
-    sig { returns(Symbol) }
+    sig { returns(Visibility) }
     attr_accessor :visibility
 
     sig do
@@ -32,7 +40,7 @@ module RubyIndexer
       @name = name
       @file_path = file_path
       @comments = comments
-      @visibility = T.let(:public, Symbol)
+      @visibility = T.let(Visibility::PUBLIC, Visibility)
 
       @location = T.let(
         if location.is_a?(Prism::Location)
@@ -188,11 +196,13 @@ module RubyIndexer
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
+          visibility: Visibility,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, owner)
+      def initialize(name, file_path, location, comments, visibility, owner) # rubocop:disable Metrics/ParameterLists
         super(name, file_path, location, comments)
+        @visibility = visibility
         @owner = owner
       end
 
@@ -227,11 +237,12 @@ module RubyIndexer
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
           parameters_node: T.nilable(Prism::ParametersNode),
+          visibility: Visibility,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, parameters_node, owner) # rubocop:disable Metrics/ParameterLists
-        super(name, file_path, location, comments, owner)
+      def initialize(name, file_path, location, comments, parameters_node, visibility, owner) # rubocop:disable Metrics/ParameterLists
+        super(name, file_path, location, comments, visibility, owner)
 
         @parameters = T.let(list_params(parameters_node), T::Array[Parameter])
       end
@@ -377,6 +388,7 @@ module RubyIndexer
       def initialize(target, unresolved_alias)
         super(unresolved_alias.name, unresolved_alias.file_path, unresolved_alias.location, unresolved_alias.comments)
 
+        @visibility = unresolved_alias.visibility
         @target = target
       end
     end
