@@ -11,7 +11,7 @@ module RubyIndexer
     def initialize(index, dispatcher, parse_result, file_path)
       @index = index
       @file_path = file_path
-      @visibility_stack = T.let([[Entry::Visibility::PUBLIC]], T::Array[T::Array[Entry::Visibility]])
+      @visibility_stack = T.let([Entry::Visibility::PUBLIC], T::Array[Entry::Visibility])
       @comments_by_line = T.let(
         parse_result.comments.to_h do |c|
           [c.location.start_line, c]
@@ -52,7 +52,7 @@ module RubyIndexer
 
     sig { params(node: Prism::ClassNode).void }
     def on_class_node_enter(node)
-      @visibility_stack.push([Entry::Visibility::PUBLIC])
+      @visibility_stack.push(Entry::Visibility::PUBLIC)
       name = node.constant_path.location.slice
 
       comments = collect_comments(node)
@@ -85,7 +85,7 @@ module RubyIndexer
 
     sig { params(node: Prism::ModuleNode).void }
     def on_module_node_enter(node)
-      @visibility_stack.push([Entry::Visibility::PUBLIC])
+      @visibility_stack.push(Entry::Visibility::PUBLIC)
       name = node.constant_path.location.slice
 
       comments = collect_comments(node)
@@ -205,11 +205,11 @@ module RubyIndexer
       when :prepend
         handle_module_operation(node, :prepended_modules)
       when :public
-        change_scope_visibility(Entry::Visibility::PUBLIC)
+        @visibility_stack.push(Entry::Visibility::PUBLIC)
       when :protected
-        change_scope_visibility(Entry::Visibility::PROTECTED)
+        @visibility_stack.push(Entry::Visibility::PROTECTED)
       when :private
-        change_scope_visibility(Entry::Visibility::PRIVATE)
+        @visibility_stack.push(Entry::Visibility::PRIVATE)
       end
     end
 
@@ -221,7 +221,7 @@ module RubyIndexer
         # We want to restore the visibility stack when we leave a method definition with a visibility modifier
         # e.g. `private def foo; end`
         if node.arguments&.arguments&.first&.is_a?(Prism::DefNode)
-          restore_scope_visibility
+          @visibility_stack.pop
         end
       end
     end
@@ -418,19 +418,7 @@ module RubyIndexer
 
     sig { returns(Entry::Visibility) }
     def current_visibility
-      T.must(@visibility_stack.last&.last)
-    end
-
-    sig { params(visibility: Entry::Visibility).void }
-    def change_scope_visibility(visibility)
-      scope_visibility_stack = T.must(@visibility_stack.last)
-      scope_visibility_stack.push(visibility)
-    end
-
-    sig { void }
-    def restore_scope_visibility
-      scope_visibility_stack = T.must(@visibility_stack.last)
-      scope_visibility_stack.pop
+      T.must(@visibility_stack.last)
     end
   end
 end
