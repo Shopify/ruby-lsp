@@ -41,9 +41,9 @@ module RubyLsp
       end
       def initialize(document, global_state, position, dispatcher, typechecker_enabled)
         super()
-        target_context = document.locate_node(position, node_types: Listeners::Hover::ALLOWED_TARGETS)
-        target = target_context.node
-        parent = target_context.parent
+        node_context = document.locate_node(position, node_types: Listeners::Hover::ALLOWED_TARGETS)
+        target = node_context.node
+        parent = node_context.parent
 
         if (Listeners::Hover::ALLOWED_TARGETS.include?(parent.class) &&
             !Listeners::Hover::ALLOWED_TARGETS.include?(target.class)) ||
@@ -65,9 +65,9 @@ module RubyLsp
         @target = T.let(target, T.nilable(Prism::Node))
         uri = document.uri
         @response_builder = T.let(ResponseBuilders::Hover.new, ResponseBuilders::Hover)
-        Listeners::Hover.new(@response_builder, global_state, uri, target_context, dispatcher, typechecker_enabled)
+        Listeners::Hover.new(@response_builder, global_state, uri, node_context, dispatcher, typechecker_enabled)
         Addon.addons.each do |addon|
-          addon.create_hover_listener(@response_builder, target_context, dispatcher)
+          addon.create_hover_listener(@response_builder, node_context, dispatcher)
         end
 
         @dispatcher = dispatcher

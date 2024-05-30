@@ -36,12 +36,12 @@ module RubyLsp
       end
       def initialize(document, position, dispatcher)
         super()
-        target_context = document.locate_node(position)
+        node_context = document.locate_node(position)
         @response_builder = T.let(
           ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight].new,
           ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight],
         )
-        Listeners::DocumentHighlight.new(@response_builder, target_context.node, target_context.parent, dispatcher)
+        Listeners::DocumentHighlight.new(@response_builder, node_context.node, node_context.parent, dispatcher)
       end
 
       sig { override.returns(T::Array[Interface::DocumentHighlight]) }

@@ -143,7 +143,7 @@ module RubyLsp
         "Ruby LSP My Gem"
       end
 
-      def create_hover_listener(response_builder, target_context, index, dispatcher)
+      def create_hover_listener(response_builder, node_context, index, dispatcher)
         # Use the listener factory methods to instantiate listeners with parameters sent by the LSP combined with any
         # pre-computed information in the addon. These factory methods are invoked on every request
         Hover.new(client, response_builder, @config, dispatcher)
@@ -259,13 +259,13 @@ module RubyLsp
         "Ruby LSP My Gem"
       end
 
-      def create_hover_listener(response_builder, target_context, index, dispatcher)
-        MyHoverListener.new(@message_queue, response_builder, target_context, index, dispatcher)
+      def create_hover_listener(response_builder, node_context, index, dispatcher)
+        MyHoverListener.new(@message_queue, response_builder, node_context, index, dispatcher)
       end
     end
 
     class MyHoverListener
-      def initialize(message_queue, response_builder, target_context, index, dispatcher)
+      def initialize(message_queue, response_builder, node_context, index, dispatcher)
         @message_queue = message_queue
 
         @message_queue << Notification.new(

@@ -11,17 +11,17 @@ module RubyLsp
         params(
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
           global_state: GlobalState,
-          target_context: NodeContext,
+          node_context: NodeContext,
           typechecker_enabled: T::Boolean,
           dispatcher: Prism::Dispatcher,
           uri: URI::Generic,
         ).void
       end
-      def initialize(response_builder, global_state, target_context, typechecker_enabled, dispatcher, uri) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, global_state, node_context, typechecker_enabled, dispatcher, uri) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
-        @target_context = target_context
+        @node_context = node_context
         @typechecker_enabled = typechecker_enabled
         @uri = uri
 
@@ -47,7 +47,7 @@ module RubyLsp
         name = constant_name(node)
         return if name.nil?
 
-        candidates = @index.prefix_search(name, @target_context.nesting)
+        candidates = @index.prefix_search(name, @node_context.nesting)
         candidates.each do |entries|
           complete_name = T.must(entries.first).name
           @response_builder << build_entry_completion(
@@ -161,7 +161,7 @@ module RubyLsp
           T.must(namespace).join("::")
         end
 
-        nesting = @target_context.nesting
+        nesting = @node_context.nesting
         namespace_entries = @index.resolve(aliased_namespace, nesting)
         return unless namespace_entries
 
@@ -194,7 +194,7 @@ module RubyLsp
       sig { params(name: String, location: Prism::Location).void }
       def handle_instance_variable_completion(name, location)
         entries = T.cast(@index.prefix_search(name).flatten, T::Array[RubyIndexer::Entry::InstanceVariable])
-        current_self = @target_context.nesting.join("::")
+        current_self = @node_context.nesting.join("::")
 
         variables = entries.select { |e| current_self == e.owner&.name }
         variables.uniq!(&:name)
@@ -263,7 +263,7 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode, name: String).void }
       def complete_self_receiver_method(node, name)
-        receiver_entries = @index[@target_context.nesting.join("::")]
+        receiver_entries = @index[@node_context.nesting.join("::")]
         return unless receiver_entries
 
         receiver = T.must(receiver_entries.first)
@@ -360,7 +360,7 @@ module RubyLsp
         #
         #  Foo::B # --> completion inserts `Bar` instead of `Foo::Bar`
         # end
-        nesting = @target_context.nesting
+        nesting = @node_context.nesting
         unless nesting.join("::").start_with?(incomplete_name)
           nesting.each do |namespace|
             prefix = "#{namespace}::"
@@ -409,7 +409,7 @@ module RubyLsp
       # ```
       sig { params(entry_name: String).returns(T::Boolean) }
       def top_level?(entry_name)
-        nesting = @target_context.nesting
+        nesting = @node_context.nesting
         nesting.length.downto(0).each do |i|
           prefix = T.must(nesting[0...i]).join("::")
           full_name = prefix.empty? ? entry_name : "#{prefix}::#{entry_name}"
