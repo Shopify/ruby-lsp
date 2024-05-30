@@ -380,8 +380,10 @@ module RubyIndexer
     sig { params(variable_name: String, owner_name: String).returns(T.nilable(T::Array[Entry::InstanceVariable])) }
     def resolve_instance_variable(variable_name, owner_name)
       entries = T.cast(self[variable_name], T.nilable(T::Array[Entry::InstanceVariable]))
+      return unless entries
+
       ancestors = linearized_ancestors_of(owner_name)
-      return unless entries && ancestors.any?
+      return if ancestors.empty?
 
       entries.select { |e| ancestors.include?(e.owner&.name) }
     end
