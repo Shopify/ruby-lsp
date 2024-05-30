@@ -54,6 +54,12 @@ module RubyIndexer
         @config.instance_variable_get(:@fnmatch_exclude_pattern),
         "#{Dir.pwd}/{**/tmp/**/*,**/node_modules/**/*,vendor/bundle/**/*}",
       )
+
+      @config.apply_config({ "excluded_patterns" => ["**/test/fixtures/**/*"] })
+      assert_equal(
+        @config.instance_variable_get(:@fnmatch_exclude_pattern),
+        "#{Dir.pwd}/{**/tmp/**/*,**/node_modules/**/*,vendor/bundle/**/*,**/test/fixtures/**/*}",
+      )
     end
 
     def test_indexables_includes_default_gems
