@@ -166,7 +166,8 @@ module RubyLsp
         # We should only show hover for private constants if the constant is defined in the same namespace as the
         # reference
         first_entry = T.must(entries.first)
-        if first_entry.visibility == RubyIndexer::Entry::Visibility::PRIVATE && first_entry.name != "#{@node_context.nesting.join("::")}::#{name}"
+        if first_entry.visibility == RubyIndexer::Entry::Visibility::PRIVATE &&
+            first_entry.name != "#{@node_context.nesting.join("::")}::#{name}"
           return
         end
 
