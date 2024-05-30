@@ -2,6 +2,8 @@
 # frozen_string_literal: true
 
 module RubyLsp
+  # This class allows listeners to access contextual information about a node in the AST, such as its parent
+  # and its namespace nesting.
   class NodeContext
     extend T::Sig
 
