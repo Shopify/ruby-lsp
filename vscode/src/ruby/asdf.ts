@@ -1,6 +1,7 @@
 /* eslint-disable no-process-env */
 
 import os from "os";
+import path from "path";
 
 import * as vscode from "vscode";
 
@@ -37,6 +38,9 @@ export class Asdf extends VersionManager {
 
   // Only public for testing. Finds the ASDF installation URI based on what's advertised in the ASDF documentation
   async findAsdfInstallation(): Promise<vscode.Uri> {
+    const scriptName =
+      path.basename(vscode.env.shell) === "fish" ? "asdf.fish" : "asdf.sh";
+
     // Possible ASDF installation paths as described in https://asdf-vm.com/guide/getting-started.html#_3-install-asdf.
     // In order, the methods of installation are:
     // 1. Git
@@ -44,8 +48,8 @@ export class Asdf extends VersionManager {
     // 3. Homebrew M series
     // 4. Homebrew Intel series
     const possiblePaths = [
-      vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".asdf", "asdf.sh"),
-      vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "asdf-vm", "asdf.sh"),
+      vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".asdf", scriptName),
+      vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "asdf-vm", scriptName),
       vscode.Uri.joinPath(
         vscode.Uri.file("/"),
         "opt",
@@ -53,7 +57,7 @@ export class Asdf extends VersionManager {
         "opt",
         "asdf",
         "libexec",
-        "asdf.sh",
+        scriptName,
       ),
       vscode.Uri.joinPath(
         vscode.Uri.file("/"),
@@ -62,7 +66,7 @@ export class Asdf extends VersionManager {
         "opt",
         "asdf",
         "libexec",
-        "asdf.sh",
+        scriptName,
       ),
     ];
 
