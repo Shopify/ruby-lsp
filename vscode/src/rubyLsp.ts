@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import { Range } from "vscode-languageclient/node";
 
-import { Telemetry } from "./telemetry";
 import DocumentProvider from "./documentProvider";
 import { Workspace } from "./workspace";
 import { Command, LOG_CHANNEL, STATUS_EMITTER } from "./common";
@@ -17,15 +16,18 @@ import { DependenciesTree } from "./dependenciesTree";
 // commands
 export class RubyLsp {
   private readonly workspaces: Map<string, Workspace> = new Map();
-  private readonly telemetry: Telemetry;
   private readonly context: vscode.ExtensionContext;
   private readonly statusItems: StatusItems;
   private readonly testController: TestController;
   private readonly debug: Debugger;
+  private readonly telemetry: vscode.TelemetryLogger;
 
-  constructor(context: vscode.ExtensionContext) {
+  constructor(
+    context: vscode.ExtensionContext,
+    telemetry: vscode.TelemetryLogger,
+  ) {
     this.context = context;
-    this.telemetry = new Telemetry(context);
+    this.telemetry = telemetry;
     this.testController = new TestController(
       context,
       this.telemetry,
@@ -57,7 +59,6 @@ export class RubyLsp {
           }
         }
       }),
-
       // Lazily activate workspaces that do not contain a lockfile
       vscode.workspace.onDidOpenTextDocument(async (document) => {
         if (document.languageId !== "ruby") {
@@ -87,7 +88,6 @@ export class RubyLsp {
   // all language servers for each existing workspace
   async activate() {
     await vscode.commands.executeCommand("testing.clearTestResults");
-    await this.telemetry.sendConfigurationEvents();
 
     const firstWorkspace = vscode.workspace.workspaceFolders?.[0];
 
