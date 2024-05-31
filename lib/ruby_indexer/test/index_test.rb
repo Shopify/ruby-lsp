@@ -299,6 +299,10 @@ module RubyIndexer
     end
 
     def test_indexing_prism_fixtures_succeeds
+      unless Dir.exist?("test/fixtures/prism/test/prism/fixtures")
+        raise "Prism fixtures not found. Run `git submodule update --init` to fetch them."
+      end
+
       fixtures = Dir.glob("test/fixtures/prism/test/prism/fixtures/**/*.txt")
 
       fixtures.each do |fixture|
@@ -683,6 +687,159 @@ module RubyIndexer
       RUBY
 
       assert_equal(["A", "ALIAS"], @index.linearized_ancestors_of("A"))
+    end
+
+    def test_resolving_an_inherited_method
+      index(<<~RUBY)
+        module Foo
+          def baz; end
+        end
+
+        class Bar
+          def qux; end
+        end
+
+        class Wow < Bar
+          include Foo
+        end
+      RUBY
+
+      entry = T.must(@index.resolve_method("baz", "Wow")&.first)
+      assert_equal("baz", entry.name)
+      assert_equal("Foo", T.must(entry.owner).name)
+
+      entry = T.must(@index.resolve_method("qux", "Wow")&.first)
+      assert_equal("qux", entry.name)
+      assert_equal("Bar", T.must(entry.owner).name)
+    end
+
+    def test_resolving_an_inherited_method_lands_on_first_match
+      index(<<~RUBY)
+        module Foo
+          def qux; end
+        end
+
+        class Bar
+          def qux; end
+        end
+
+        class Wow < Bar
+          prepend Foo
+
+          def qux; end
+        end
+      RUBY
+
+      entries = T.must(@index.resolve_method("qux", "Wow"))
+      assert_equal(1, entries.length)
+
+      entry = T.must(entries.first)
+      assert_equal("qux", entry.name)
+      assert_equal("Foo", T.must(entry.owner).name)
+    end
+
+    def test_handle_change_clears_ancestor_cache_if_tree_changed
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          # Write the original file
+          File.write(File.join(dir, "foo.rb"), <<~RUBY)
+            module Foo
+            end
+
+            class Bar
+              include Foo
+            end
+          RUBY
+
+          indexable_path = IndexablePath.new(nil, File.join(dir, "foo.rb"))
+          @index.index_single(indexable_path)
+
+          assert_equal(["Bar", "Foo"], @index.linearized_ancestors_of("Bar"))
+
+          # Remove include to invalidate the ancestor tree
+          File.write(File.join(dir, "foo.rb"), <<~RUBY)
+            module Foo
+            end
+
+            class Bar
+            end
+          RUBY
+
+          @index.handle_change(indexable_path)
+          assert_empty(@index.instance_variable_get(:@ancestors))
+          assert_equal(["Bar"], @index.linearized_ancestors_of("Bar"))
+        end
+      end
+    end
+
+    def test_handle_change_does_not_clear_ancestor_cache_if_tree_not_changed
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          # Write the original file
+          File.write(File.join(dir, "foo.rb"), <<~RUBY)
+            module Foo
+            end
+
+            class Bar
+              include Foo
+            end
+          RUBY
+
+          indexable_path = IndexablePath.new(nil, File.join(dir, "foo.rb"))
+          @index.index_single(indexable_path)
+
+          assert_equal(["Bar", "Foo"], @index.linearized_ancestors_of("Bar"))
+
+          # Remove include to invalidate the ancestor tree
+          File.write(File.join(dir, "foo.rb"), <<~RUBY)
+            module Foo
+            end
+
+            class Bar
+              include Foo
+
+              def baz; end
+            end
+          RUBY
+
+          @index.handle_change(indexable_path)
+          refute_empty(@index.instance_variable_get(:@ancestors))
+          assert_equal(["Bar", "Foo"], @index.linearized_ancestors_of("Bar"))
+        end
+      end
+    end
+
+    def test_handle_change_clears_ancestor_cache_if_parent_class_changed
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          # Write the original file
+          File.write(File.join(dir, "foo.rb"), <<~RUBY)
+            class Foo
+            end
+
+            class Bar < Foo
+            end
+          RUBY
+
+          indexable_path = IndexablePath.new(nil, File.join(dir, "foo.rb"))
+          @index.index_single(indexable_path)
+
+          assert_equal(["Bar", "Foo"], @index.linearized_ancestors_of("Bar"))
+
+          # Remove include to invalidate the ancestor tree
+          File.write(File.join(dir, "foo.rb"), <<~RUBY)
+            class Foo
+            end
+
+            class Bar
+            end
+          RUBY
+
+          @index.handle_change(indexable_path)
+          assert_empty(@index.instance_variable_get(:@ancestors))
+          assert_equal(["Bar"], @index.linearized_ancestors_of("Bar"))
+        end
+      end
     end
   end
 end

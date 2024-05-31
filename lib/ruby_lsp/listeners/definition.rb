@@ -114,14 +114,10 @@ module RubyLsp
 
       sig { params(name: String).void }
       def handle_instance_variable_definition(name)
-        entries = T.cast(@index[name], T.nilable(T::Array[RubyIndexer::Entry::InstanceVariable]))
+        entries = @index.resolve_instance_variable(name, @node_context.nesting.join("::"))
         return unless entries
 
-        current_self = @node_context.nesting.join("::")
-
         entries.each do |entry|
-          next if current_self != entry.owner&.name
-
           location = entry.location
 
           @response_builder << Interface::Location.new(
@@ -132,6 +128,8 @@ module RubyLsp
             ),
           )
         end
+      rescue RubyIndexer::Index::NonExistingNamespaceError
+        # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
       sig { params(message: String, self_receiver: T::Boolean).void }

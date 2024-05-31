@@ -147,15 +147,14 @@ module RubyLsp
 
       sig { params(name: String).void }
       def handle_instance_variable_hover(name)
-        entries = T.cast(@index[name], T.nilable(T::Array[RubyIndexer::Entry::InstanceVariable]))
+        entries = @index.resolve_instance_variable(name, @node_context.nesting.join("::"))
         return unless entries
 
-        current_self = @node_context.nesting.join("::")
-        owned_variables = entries.select { |e| current_self == e.owner&.name }
-
-        categorized_markdown_from_index_entries(name, owned_variables).each do |category, content|
+        categorized_markdown_from_index_entries(name, entries).each do |category, content|
           @response_builder.push(content, category: category)
         end
+      rescue RubyIndexer::Index::NonExistingNamespaceError
+        # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
       sig { params(name: String, location: Prism::Location).void }

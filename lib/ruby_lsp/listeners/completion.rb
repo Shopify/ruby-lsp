@@ -192,13 +192,7 @@ module RubyLsp
 
       sig { params(name: String, location: Prism::Location).void }
       def handle_instance_variable_completion(name, location)
-        entries = T.cast(@index.prefix_search(name).flatten, T::Array[RubyIndexer::Entry::InstanceVariable])
-        current_self = @node_context.nesting.join("::")
-
-        variables = entries.select { |e| current_self == e.owner&.name }
-        variables.uniq!(&:name)
-
-        variables.each do |entry|
+        @index.instance_variable_completion_candidates(name, @node_context.nesting.join("::")).each do |entry|
           variable_name = entry.name
 
           @response_builder << Interface::CompletionItem.new(
@@ -213,6 +207,8 @@ module RubyLsp
             },
           )
         end
+      rescue RubyIndexer::Index::NonExistingNamespaceError
+        # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
       sig { params(node: Prism::CallNode).void }
@@ -267,10 +263,7 @@ module RubyLsp
 
         receiver = T.must(receiver_entries.first)
 
-        @index.prefix_search(name).each do |entries|
-          entry = entries.find { |e| e.is_a?(RubyIndexer::Entry::Member) && e.owner&.name == receiver.name }
-          next unless entry
-
+        @index.method_completion_candidates(name, receiver.name).each do |entry|
           @response_builder << build_method_completion(T.cast(entry, RubyIndexer::Entry::Member), node)
         end
       end

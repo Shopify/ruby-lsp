@@ -15,7 +15,7 @@ new H2 header in this file containing the instructions. -->
 
 - [Emacs LSP Mode](https://emacs-lsp.github.io/lsp-mode/page/lsp-ruby-lsp/)
 - [Emacs Eglot](#Emacs-Eglot)
-- [Neovim LSP](#Neovim-LSP)
+- [Neovim LSP](#Neovim)
 - [Sublime Text LSP](#sublime-text-lsp)
 - [Zed](#zed)
 - [RubyMine](#RubyMine)

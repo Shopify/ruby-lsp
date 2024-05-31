@@ -130,6 +130,16 @@ module RubyIndexer
       results.flat_map(&:first)
     end
 
+    sig { params(name: String, receiver_name: String).returns(T::Array[Entry]) }
+    def method_completion_candidates(name, receiver_name)
+      ancestors = linearized_ancestors_of(receiver_name)
+      candidates = prefix_search(name).flatten
+      candidates.select! do |entry|
+        entry.is_a?(RubyIndexer::Entry::Member) && ancestors.any?(entry.owner&.name)
+      end
+      candidates
+    end
+
     # Try to find the entry based on the nesting from the most specific to the least specific. For example, if we have
     # the nesting as ["Foo", "Bar"] and the name as "Baz", we will try to find it in this order:
     # 1. Foo::Bar::Baz
@@ -249,14 +259,22 @@ module RubyIndexer
     sig { params(method_name: String, receiver_name: String).returns(T.nilable(T::Array[Entry::Member])) }
     def resolve_method(method_name, receiver_name)
       method_entries = self[method_name]
-      owner_entries = self[receiver_name]
-      return unless owner_entries && method_entries
+      ancestors = linearized_ancestors_of(receiver_name.delete_prefix("::"))
+      return unless method_entries
 
-      owner_name = T.must(owner_entries.first).name
+      ancestors.each do |ancestor|
+        found = method_entries.select do |entry|
+          next unless entry.is_a?(Entry::Member)
 
-      method_entries.grep(Entry::Member).select do |entry|
-        entry.owner&.name == owner_name
+          entry.owner&.name == ancestor
+        end
+
+        return T.cast(found, T::Array[Entry::Member]) if found.any?
       end
+
+      nil
+    rescue NonExistingNamespaceError
+      nil
     end
 
     # Linearizes the ancestors for a given name, returning the order of namespaces in which Ruby will search for method
@@ -355,6 +373,61 @@ module RubyIndexer
       end
 
       ancestors
+    end
+
+    # Resolves an instance variable name for a given owner name. This method will linearize the ancestors of the owner
+    # and find inherited instance variables as well
+    sig { params(variable_name: String, owner_name: String).returns(T.nilable(T::Array[Entry::InstanceVariable])) }
+    def resolve_instance_variable(variable_name, owner_name)
+      entries = T.cast(self[variable_name], T.nilable(T::Array[Entry::InstanceVariable]))
+      return unless entries
+
+      ancestors = linearized_ancestors_of(owner_name)
+      return if ancestors.empty?
+
+      entries.select { |e| ancestors.include?(e.owner&.name) }
+    end
+
+    # Returns a list of possible candidates for completion of instance variables for a given owner name. The name must
+    # include the `@` prefix
+    sig { params(name: String, owner_name: String).returns(T::Array[Entry::InstanceVariable]) }
+    def instance_variable_completion_candidates(name, owner_name)
+      entries = T.cast(prefix_search(name).flatten, T::Array[Entry::InstanceVariable])
+      ancestors = linearized_ancestors_of(owner_name)
+
+      variables = entries.uniq(&:name)
+      variables.select! { |e| ancestors.any?(e.owner&.name) }
+      variables
+    end
+
+    # Synchronizes a change made to the given indexable path. This method will ensure that new declarations are indexed,
+    # removed declarations removed and that the ancestor linearization cache is cleared if necessary
+    sig { params(indexable: IndexablePath).void }
+    def handle_change(indexable)
+      original_entries = @files_to_entries[indexable.full_path]
+
+      delete(indexable)
+      index_single(indexable)
+
+      updated_entries = @files_to_entries[indexable.full_path]
+
+      return unless original_entries && updated_entries
+
+      # A change in one ancestor may impact several different others, which could be including that ancestor through
+      # indirect means like including a module that than includes the ancestor. Trying to figure out exactly which
+      # ancestors need to be deleted is too expensive. Therefore, if any of the namespace entries has a change to their
+      # ancestor hash, we clear all ancestors and start linearizing lazily again from scratch
+      original_map = T.cast(
+        original_entries.select { |e| e.is_a?(Entry::Namespace) },
+        T::Array[Entry::Namespace],
+      ).to_h { |e| [e.name, e.ancestor_hash] }
+
+      updated_map = T.cast(
+        updated_entries.select { |e| e.is_a?(Entry::Namespace) },
+        T::Array[Entry::Namespace],
+      ).to_h { |e| [e.name, e.ancestor_hash] }
+
+      @ancestors.clear if original_map.any? { |name, hash| updated_map[name] != hash }
     end
 
     private
