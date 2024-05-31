@@ -47,7 +47,7 @@ module RubyLsp
         )
         @dispatcher = dispatcher
 
-        target, parent, nesting = document.locate_node(
+        node_context = document.locate_node(
           position,
           node_types: [
             Prism::CallNode,
@@ -62,6 +62,9 @@ module RubyLsp
             Prism::InstanceVariableWriteNode,
           ],
         )
+
+        target = node_context.node
+        parent = node_context.parent
 
         if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)
           # If the target is part of a constant path node, we need to find the exact portion of the constant that the
@@ -83,13 +86,13 @@ module RubyLsp
             @response_builder,
             global_state,
             document.uri,
-            nesting,
+            node_context,
             dispatcher,
             typechecker_enabled,
           )
 
           Addon.addons.each do |addon|
-            addon.create_definition_listener(@response_builder, document.uri, nesting, dispatcher)
+            addon.create_definition_listener(@response_builder, document.uri, node_context, dispatcher)
           end
         end
 

@@ -60,7 +60,7 @@ module RubyLsp
         # Completion always receives the position immediately after the character that was just typed. Here we adjust it
         # back by 1, so that we find the right node
         char_position = document.create_scanner.find_char_position(position) - 1
-        matched, parent, nesting = document.locate(
+        node_context = document.locate(
           document.tree,
           char_position,
           node_types: [
@@ -83,16 +83,18 @@ module RubyLsp
         Listeners::Completion.new(
           @response_builder,
           global_state,
-          nesting,
+          node_context,
           typechecker_enabled,
           dispatcher,
           document.uri,
         )
 
         Addon.addons.each do |addon|
-          addon.create_completion_listener(@response_builder, nesting, dispatcher, document.uri)
+          addon.create_completion_listener(@response_builder, node_context, dispatcher, document.uri)
         end
 
+        matched = node_context.node
+        parent = node_context.parent
         return unless matched && parent
 
         @target = if parent.is_a?(Prism::ConstantPathNode) && matched.is_a?(Prism::ConstantReadNode)

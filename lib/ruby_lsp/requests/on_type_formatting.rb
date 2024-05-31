@@ -215,10 +215,11 @@ module RubyLsp
         current_line = @lines[@position[:line]]
         return unless current_line && current_line.strip == "end"
 
-        target, _parent, _nesting = @document.locate_node({
+        node_context = @document.locate_node({
           line: @position[:line],
           character: @position[:character] - 1,
         })
+        target = node_context.node
 
         statements = case target
         when Prism::IfNode, Prism::UnlessNode, Prism::ForNode, Prism::WhileNode, Prism::UntilNode
