@@ -19,5 +19,10 @@ module RubyLsp
       @parent = parent
       @nesting = nesting
     end
+
+    sig { returns(String) }
+    def fully_qualified_name
+      @fully_qualified_name ||= T.let(@nesting.join("::"), T.nilable(String))
+    end
   end
 end

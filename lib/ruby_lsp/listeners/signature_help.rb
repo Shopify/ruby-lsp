@@ -33,7 +33,7 @@ module RubyLsp
         message = node.message
         return unless message
 
-        methods = @index.resolve_method(message, @node_context.nesting.join("::"))
+        methods = @index.resolve_method(message, @node_context.fully_qualified_name)
         return unless methods
 
         target_method = methods.first

@@ -192,7 +192,7 @@ module RubyLsp
 
       sig { params(name: String, location: Prism::Location).void }
       def handle_instance_variable_completion(name, location)
-        @index.instance_variable_completion_candidates(name, @node_context.nesting.join("::")).each do |entry|
+        @index.instance_variable_completion_candidates(name, @node_context.fully_qualified_name).each do |entry|
           variable_name = entry.name
 
           @response_builder << Interface::CompletionItem.new(
@@ -258,7 +258,7 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode, name: String).void }
       def complete_self_receiver_method(node, name)
-        receiver_entries = @index[@node_context.nesting.join("::")]
+        receiver_entries = @index[@node_context.fully_qualified_name]
         return unless receiver_entries
 
         receiver = T.must(receiver_entries.first)
@@ -353,13 +353,13 @@ module RubyLsp
         #  Foo::B # --> completion inserts `Bar` instead of `Foo::Bar`
         # end
         nesting = @node_context.nesting
-        unless nesting.join("::").start_with?(incomplete_name)
+        unless @node_context.fully_qualified_name.start_with?(incomplete_name)
           nesting.each do |namespace|
             prefix = "#{namespace}::"
             shortened_name = insertion_text.delete_prefix(prefix)
 
             # If a different entry exists for the shortened name, then there's a conflict and we should not shorten it
-            conflict_name = "#{nesting.join("::")}::#{shortened_name}"
+            conflict_name = "#{@node_context.fully_qualified_name}::#{shortened_name}"
             break if real_name != conflict_name && @index[conflict_name]
 
             insertion_text = shortened_name
