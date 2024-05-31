@@ -114,7 +114,7 @@ module RubyLsp
 
       sig { params(name: String).void }
       def handle_instance_variable_definition(name)
-        entries = @index.resolve_instance_variable(name, @node_context.nesting.join("::"))
+        entries = @index.resolve_instance_variable(name, @node_context.fully_qualified_name)
         return unless entries
 
         entries.each do |entry|
@@ -135,7 +135,7 @@ module RubyLsp
       sig { params(message: String, self_receiver: T::Boolean).void }
       def handle_method_definition(message, self_receiver)
         methods = if self_receiver
-          @index.resolve_method(message, @node_context.nesting.join("::"))
+          @index.resolve_method(message, @node_context.fully_qualified_name)
         else
           # If the method doesn't have a receiver, then we provide a few candidates to jump to
           # But we don't want to provide too many candidates, as it can be overwhelming
@@ -209,7 +209,7 @@ module RubyLsp
         # We should only allow jumping to the definition of private constants if the constant is defined in the same
         # namespace as the reference
         first_entry = T.must(entries.first)
-        return if first_entry.private? && first_entry.name != "#{@node_context.nesting.join("::")}::#{value}"
+        return if first_entry.private? && first_entry.name != "#{@node_context.fully_qualified_name}::#{value}"
 
         entries.each do |entry|
           location = entry.location

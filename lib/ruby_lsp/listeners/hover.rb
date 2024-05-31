@@ -105,7 +105,7 @@ module RubyLsp
         message = node.message
         return unless message
 
-        methods = @index.resolve_method(message, @node_context.nesting.join("::"))
+        methods = @index.resolve_method(message, @node_context.fully_qualified_name)
         return unless methods
 
         categorized_markdown_from_index_entries(message, methods).each do |category, content|
@@ -147,7 +147,7 @@ module RubyLsp
 
       sig { params(name: String).void }
       def handle_instance_variable_hover(name)
-        entries = @index.resolve_instance_variable(name, @node_context.nesting.join("::"))
+        entries = @index.resolve_instance_variable(name, @node_context.fully_qualified_name)
         return unless entries
 
         categorized_markdown_from_index_entries(name, entries).each do |category, content|
@@ -165,7 +165,7 @@ module RubyLsp
         # We should only show hover for private constants if the constant is defined in the same namespace as the
         # reference
         first_entry = T.must(entries.first)
-        return if first_entry.private? && first_entry.name != "#{@node_context.nesting.join("::")}::#{name}"
+        return if first_entry.private? && first_entry.name != "#{@node_context.fully_qualified_name}::#{name}"
 
         categorized_markdown_from_index_entries(name, entries).each do |category, content|
           @response_builder.push(content, category: category)
