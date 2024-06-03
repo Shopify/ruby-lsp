@@ -1,11 +1,12 @@
 name: Pull Request Labels
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+  pull_request_review:
+    types: [submitted]
 
 jobs:
   check-labels:
+    if: github.event.review.state == 'APPROVED'
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
