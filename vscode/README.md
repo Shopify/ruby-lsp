@@ -254,28 +254,123 @@ These are the settings that may impact the Ruby LSP's behavior and their explana
 
 ### Multi-root workspaces
 
+Multi-root workspaces are VS Code's way to allow users to organize a single repository into multiple distinct concerns.
+Notice that this does not necessarily match the concept of a project. For example, a web application with separate
+directories for its frontend and backend may be conceptually considered as a single project, but you can still configure
+the frontend and backend directories to be different workspaces.
+
+The advantage of adopting this configuration is that VS Code and all extensions are informed about which directories
+should be considered as possible workspace roots. Instead of having to configure each extension or tool individually so
+that are aware of your project structure, you only have to do that once for the entire repository.
+
+Some examples of functionality that benefits from multi-root workspaces:
+
+- Extensions that have to integrate with project dependencies (Gemfile, package.json), such as debuggers, language
+  servers, formatters and other tools, are informed about where to search for these files (allowing for automatic
+  detection)
+- If `launch.json` configurations are placed inside a workspace, VS Code will know to launch them from the appropriate
+  directory ([Ruby LSP example](https://github.com/Shopify/ruby-lsp/blob/main/vscode/.vscode/launch.json)), without
+  requiring you to specify the `cwd`
+- When opening a terminal, VS Code will offer to open the terminal on all configured workspaces
+
 The Ruby LSP supports multi-root workspaces by spawning a separate language server for each one of them. This strategy
 is preferred over a single language server that supports multiple workspaces because each workspace could be using a
 different Ruby version and completely different gems - which would be impossible to support in a single Ruby process.
 
-Please see the [VS Code workspaces documentation](https://code.visualstudio.com/docs/editor/workspaces) on how to
-configure the editor for multi-root workspaces. The Ruby LSP should work properly out of the box as long as the
-workspace configuration is following the guidelines.
+What matters to properly spawn the Ruby LSP is knowing where the main Gemfile of each workspace inside of the same
+repository is.
 
-#### Monorepos containing multiple workspaces
+#### Example configurations
 
-A common setup is using a monorepo with directories for sub-projects. For example:
+> ![NOTE]
+> To make sure Ruby LSP works well with your multi-root workspace project, please
+> read through the instructions below and configure it following the examples.
+> After configuring, do not forget to tell VS Code to open the workspace from the
+> code-workspace file
+
+Consider a project where the top level of the repository is a Rails application and a sub-directory called `frontend`
+contains a React application that implements the frontend layer.
+
+```
+my_project/
+  frontend/
+  Gemfile
+  Gemfile.lock
+  config.ru
+  super_awesome_project.code-workspace
+```
+
+A possible configuration for the `super_awesome_project` would be this:
+
+```jsonc
+{
+  "folders": [
+    // At the top level of the repository, we have the Rails application
+    {
+      "name": "rails",
+      "path": ".",
+    },
+    // Inside the frontend directory, we have the React frontend
+    {
+      "name": "react",
+      "path": "frontend",
+    },
+  ],
+  "settings": {
+    // To avoid having VS Code display the same files twice, we can simply exclude the frontend sub-directory. This
+    // means it will only show up as a separate workspace
+    "files.exclude": {
+      "frontend": true,
+    },
+  },
+}
+```
+
+Now consider a monorepo where both the client and the server are under sub-directories.
 
 ```
 my_project/
   client/
   server/
+    Gemfile
+    Gemfile.lock
+  super_awesome_project.code-workspace
 ```
 
-This situation also falls under the category of multi-root workspaces. In this context, `client` and `server` are distinct
-workspaces. The Ruby LSP supports this use case out of the box as long as `my_project` contains configuration that
-follows [VS Code's guidelines](https://code.visualstudio.com/docs/editor/workspaces#_multiroot-workspaces) for
-multi-root workspaces.
+In this case, we can configure the workspaces as:
+
+```jsonc
+{
+  "folders": [
+    // Both parts of the project (client and server) are inside sub-directories. But since the top level might contain
+    // some documentation or build files, we still want it to show up
+    {
+      "name": "awesome_project",
+      "path": ".",
+    },
+    // Inside the client directory, we have the client part of the project
+    {
+      "name": "client",
+      "path": "client",
+    },
+    // Inside the server directory, we have the server part of the project
+    {
+      "name": "server",
+      "path": "server",
+    },
+  ],
+  "settings": {
+    // We don't want to show duplicates, so we hide the directories that are already showing up as workspaces
+    "files.exclude": {
+      "server": true,
+      "client": true,
+    },
+  },
+}
+```
+
+For more information, read VS Code's [workspace documentation](https://code.visualstudio.com/docs/editor/workspaces) and
+[multi-root workspace documentation](https://code.visualstudio.com/docs/editor/workspaces#_multiroot-workspaces).
 
 ### Developing on containers
 
