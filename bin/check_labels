@@ -3,14 +3,22 @@
 
 require "json"
 
-label_info = ARGV.first
+pr_info = ARGV.first
 
-unless label_info
-  warn("Missing argument for label information")
+unless pr_info
+  warn("Missing argument for PR information")
   exit(1)
 end
 
-pr_labels = JSON.parse(label_info, symbolize_names: true)[:labels].map { |label| label[:name] }
+pr_info_parsed = JSON.parse(pr_info, symbolize_names: true)
+
+pr_labels = pr_info_parsed[:labels].map { |label| label[:name] }
+review_decision = pr_info_parsed[:reviewDecision]
+
+if review_decision == "REVIEW_REQUIRED"
+  warn("Skipping label check since not yet reviewed")
+  exit(0)
+end
 
 # If the PR includes at least one of the labels ignored for release notes, then exit successfully
 ignored_labels = ["documentation", "chore", "dependencies"]

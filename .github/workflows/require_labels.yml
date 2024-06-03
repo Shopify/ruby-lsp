@@ -14,4 +14,4 @@ jobs:
       - name: Check for Pull Request Labels
         shell: bash
         run: |
-          bin/check_labels "$(gh pr view --json labels ${{ github.event.pull_request.number }})"
+          bin/check_labels "$(gh pr view --json labels,reviewDecision ${{ github.event.pull_request.number }})"
