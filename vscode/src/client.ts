@@ -12,6 +12,7 @@ import {
   ExecutableOptions,
   ServerOptions,
   MessageSignature,
+  DocumentSelector,
 } from "vscode-languageclient/node";
 
 import { LSP_NAME, ClientInterface } from "./common";
@@ -92,6 +93,7 @@ function collectClientOptions(
   workspaceFolder: vscode.WorkspaceFolder,
   outputChannel: WorkspaceChannel,
   ruby: Ruby,
+  isMainWorkspace: boolean,
 ): LanguageClientOptions {
   const pullOn: "change" | "save" | "both" =
     configuration.get("pullDiagnosticsOn")!;
@@ -105,17 +107,27 @@ function collectClientOptions(
   const enabledFeatures = Object.keys(features).filter((key) => features[key]);
 
   const fsPath = workspaceFolder.uri.fsPath.replace(/\/$/, "");
-  const documentSelector = [
+  const documentSelector: DocumentSelector = [
     {
       language: "ruby",
       pattern: `${fsPath}/**/*`,
     },
   ];
 
+  // Only the first language server we spawn should handle unsaved files, otherwise requests will be duplicated across
+  // all workspaces
+  if (isMainWorkspace) {
+    documentSelector.push({
+      language: "ruby",
+      scheme: "untitled",
+    });
+  }
+
   // For each workspace, the language client is responsible for handling requests for:
   // 1. Files inside of the workspace itself
   // 2. Bundled gems
   // 3. Default gems
+
   if (ruby.env.GEM_PATH) {
     const parts = ruby.env.GEM_PATH.split(path.delimiter);
 
@@ -171,6 +183,7 @@ export default class Client extends LanguageClient implements ClientInterface {
     createTestItems: (response: CodeLens[]) => void,
     workspaceFolder: vscode.WorkspaceFolder,
     outputChannel: WorkspaceChannel,
+    isMainWorkspace = false,
   ) {
     super(
       LSP_NAME,
@@ -180,6 +193,7 @@ export default class Client extends LanguageClient implements ClientInterface {
         workspaceFolder,
         outputChannel,
         ruby,
+        isMainWorkspace,
       ),
     );
 

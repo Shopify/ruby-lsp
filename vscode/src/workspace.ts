@@ -21,6 +21,7 @@ export class Workspace implements WorkspaceInterface {
   private readonly context: vscode.ExtensionContext;
   private readonly telemetry: Telemetry;
   private readonly outputChannel: WorkspaceChannel;
+  private readonly isMainWorkspace: boolean;
   private needsRestart = false;
   #rebaseInProgress = false;
   #error = false;
@@ -30,6 +31,7 @@ export class Workspace implements WorkspaceInterface {
     workspaceFolder: vscode.WorkspaceFolder,
     telemetry: Telemetry,
     createTestItems: (response: CodeLens[]) => void,
+    isMainWorkspace = false,
   ) {
     this.context = context;
     this.workspaceFolder = workspaceFolder;
@@ -40,6 +42,7 @@ export class Workspace implements WorkspaceInterface {
     this.telemetry = telemetry;
     this.ruby = new Ruby(context, workspaceFolder, this.outputChannel);
     this.createTestItems = createTestItems;
+    this.isMainWorkspace = isMainWorkspace;
 
     this.registerRestarts(context);
     this.registerRebaseWatcher(context);
@@ -102,6 +105,7 @@ export class Workspace implements WorkspaceInterface {
       this.createTestItems,
       this.workspaceFolder,
       this.outputChannel,
+      this.isMainWorkspace,
     );
 
     try {
