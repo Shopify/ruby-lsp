@@ -170,6 +170,19 @@ module RubyLsp
         end
       end
 
+      # When targeting the constant part of a class/module definition, we do not want the nesting to be duplicated. That
+      # is, when targeting Bar in the following example:
+      #
+      # ```ruby
+      #   class Foo::Bar; end
+      # ```
+      # The correct target is `Foo::Bar` with an empty nesting. `Foo::Bar` should not appear in the nesting stack, even
+      # though the class/module node does indeed enclose the target, because it would lead to incorrect behavior
+      if closest.is_a?(Prism::ConstantReadNode) || closest.is_a?(Prism::ConstantPathNode)
+        last_level = nesting.last
+        nesting.pop if last_level && last_level.constant_path == closest
+      end
+
       NodeContext.new(closest, parent, nesting.map { |n| n.constant_path.location.slice })
     end
 

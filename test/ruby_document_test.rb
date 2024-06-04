@@ -593,6 +593,24 @@ class RubyDocumentTest < Minitest::Test
     refute_predicate(document, :sorbet_sigil_is_true_or_higher)
   end
 
+  def test_locating_compact_namespace_declaration
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      class Foo::Bar
+      end
+
+      class Baz
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 0, character: 11 })
+    assert_empty(node_context.nesting)
+    assert_equal("Foo::Bar", T.must(node_context.node).slice)
+
+    node_context = document.locate_node({ line: 3, character: 6 })
+    assert_empty(node_context.nesting)
+    assert_equal("Baz", T.must(node_context.node).slice)
+  end
+
   private
 
   def assert_error_edit(actual, error_range)
