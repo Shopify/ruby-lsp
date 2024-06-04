@@ -112,13 +112,23 @@ function collectClientOptions(
     },
   ];
 
+  // For each workspace, the language client is responsible for handling requests for:
+  // 1. Files inside of the workspace itself
+  // 2. Bundled gems
+  // 3. Default gems
   if (ruby.env.GEM_PATH) {
     const parts = ruby.env.GEM_PATH.split(path.delimiter);
 
+    // Because of how default gems are installed, the entry in the `GEM_PATH` is actually not exactly where the files
+    // are located. With the regex, we are correcting the default gem path from this (where the files are not located)
+    // /opt/rubies/3.3.1/lib/ruby/gems/3.3.0
+    //
+    // to this (where the files are actually stored)
+    // /opt/rubies/3.3.1/lib/ruby/3.3.0
     parts.forEach((gemPath) => {
       documentSelector.push({
         language: "ruby",
-        pattern: `${gemPath}/**/*`,
+        pattern: `${gemPath.replace(/lib\/ruby\/gems\/(?=\d)/, "lib/ruby/")}/**/*`,
       });
     });
   }

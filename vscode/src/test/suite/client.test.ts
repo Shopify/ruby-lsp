@@ -21,6 +21,7 @@ import {
   TextEdit,
   SelectionRange,
   CodeAction,
+  TextDocumentFilter,
 } from "vscode-languageclient/node";
 import { after, afterEach, before } from "mocha";
 
@@ -665,4 +666,24 @@ suite("Client", () => {
 
     assert.strictEqual(response.title, "Refactor: Extract Variable");
   }).timeout(20000);
+
+  test("document selectors", () => {
+    const [workspaceFilter, bundledGemsFilter, defaultGemsFilter] =
+      client.clientOptions.documentSelector!;
+
+    assert.strictEqual(
+      (workspaceFilter as TextDocumentFilter).pattern!,
+      `${workspaceUri.fsPath}/**/*`,
+    );
+
+    assert.match(
+      (bundledGemsFilter as TextDocumentFilter).pattern!,
+      new RegExp(`ruby\\/\\d\\.\\d\\.\\d\\/\\*\\*\\/\\*`),
+    );
+
+    assert.match(
+      (defaultGemsFilter as TextDocumentFilter).pattern!,
+      /lib\/ruby\/\d\.\d\.\d\/\*\*\/\*/,
+    );
+  });
 });
