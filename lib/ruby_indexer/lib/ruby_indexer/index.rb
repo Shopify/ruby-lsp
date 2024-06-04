@@ -140,35 +140,53 @@ module RubyIndexer
       candidates
     end
 
-    # Try to find the entry based on the nesting from the most specific to the least specific. For example, if we have
-    # the nesting as ["Foo", "Bar"] and the name as "Baz", we will try to find it in this order:
-    # 1. Foo::Bar::Baz
-    # 2. Foo::Baz
-    # 3. Baz
-    sig { params(name: String, nesting: T::Array[String]).returns(T.nilable(T::Array[Entry])) }
-    def resolve(name, nesting)
+    # Resolve a constant to its declaration based on its name and the nesting where the reference was found. Parameter
+    # documentation:
+    #
+    # name: the name of the reference how it was found in the source code (qualified or not)
+    # nesting: the nesting structure where the reference was found (e.g.: ["Foo", "Bar"])
+    # seen_names: this parameter should not be used by consumers of the api. It is used to avoid infinite recursion when
+    # resolving circular references
+    sig do
+      params(
+        name: String,
+        nesting: T::Array[String],
+        seen_names: T::Array[String],
+      ).returns(T.nilable(T::Array[Entry]))
+    end
+    def resolve(name, nesting, seen_names = [])
+      # If we have a top level reference, then we just search for it straight away ignoring the nesting
       if name.start_with?("::")
-        name = name.delete_prefix("::")
-        results = @entries[name] || @entries[follow_aliased_namespace(name)]
-        return results&.map { |e| e.is_a?(Entry::UnresolvedAlias) ? resolve_alias(e) : e }
+        entries = direct_or_aliased_constant(name.delete_prefix("::"), seen_names)
+        return entries if entries
       end
 
-      nesting.length.downto(0).each do |i|
-        namespace = T.must(nesting[0...i]).join("::")
-        full_name = namespace.empty? ? name : "#{namespace}::#{name}"
+      return lookup_qualified_reference(name, nesting, seen_names) if name.include?("::")
 
-        # If we find an entry with `full_name` directly, then we can already return it, even if it contains aliases -
-        # because the user might be trying to jump to the alias definition.
-        #
-        # However, if we don't find it, then we need to search for possible aliases in the namespace. For example, in
-        # the LSP itself we alias `RubyLsp::Interface` to `LanguageServer::Protocol::Interface`, which means doing
-        # `RubyLsp::Interface::Location` is allowed. For these cases, we need some way to realize that the
-        # `RubyLsp::Interface` part is an alias, that has to be resolved
-        entries = @entries[full_name] || @entries[follow_aliased_namespace(full_name)]
-        return entries.map { |e| e.is_a?(Entry::UnresolvedAlias) ? resolve_alias(e) : e } if entries
-      end
+      # Non qualified reference path
+      full_name = nesting.any? ? "#{nesting.join("::")}::#{name}" : name
 
-      nil
+      # When the name is not qualified with any namespaces, Ruby will take several steps to try to the resolve the
+      # constant. First, it will try to find the constant in the exact namespace where the reference was found
+      entries = direct_or_aliased_constant(full_name, seen_names)
+      return entries if entries
+
+      # If the nesting is empty and we did not find results at this point, that means we haven't indexed this constant
+      return if nesting.empty?
+
+      # If the constant is not found yet, then Ruby will try to find the constant in the enclosing lexical scopes,
+      # unwrapping each level one by one. Important note: the top level is not included because that's the fallback of
+      # the algorithm after every other possibility has been exhausted
+      entries = lookup_enclosing_scopes(name, nesting, seen_names)
+      return entries if entries
+
+      # If the constant does not exist in any enclosing scopes, then Ruby will search for it in the ancestors of the
+      # specific namespace where the reference was found
+      entries = lookup_ancestor_chain(name, nesting, seen_names)
+      return entries if entries
+
+      # Finally, as a fallback, Ruby will search for the constant in the top level namespace
+      search_top_level(name, seen_names)
     rescue UnresolvableAliasError
       nil
     end
@@ -222,8 +240,8 @@ module RubyIndexer
     # If we find an alias, then we want to follow its target. In the same example, if `Foo::Bar` is an alias to
     # `Something::Else`, then we first discover `Something::Else::Baz`. But `Something::Else::Baz` might contain other
     # aliases, so we have to invoke `follow_aliased_namespace` again to check until we only return a real name
-    sig { params(name: String).returns(String) }
-    def follow_aliased_namespace(name)
+    sig { params(name: String, seen_names: T::Array[String]).returns(String) }
+    def follow_aliased_namespace(name, seen_names = [])
       return name if @entries[name]
 
       parts = name.split("::")
@@ -236,16 +254,16 @@ module RubyIndexer
         case entry
         when Entry::Alias
           target = entry.target
-          return follow_aliased_namespace("#{target}::#{real_parts.join("::")}")
+          return follow_aliased_namespace("#{target}::#{real_parts.join("::")}", seen_names)
         when Entry::UnresolvedAlias
-          resolved = resolve_alias(entry)
+          resolved = resolve_alias(entry, seen_names)
 
           if resolved.is_a?(Entry::UnresolvedAlias)
             raise UnresolvableAliasError, "The constant #{resolved.name} is an alias to a non existing constant"
           end
 
           target = resolved.target
-          return follow_aliased_namespace("#{target}::#{real_parts.join("::")}")
+          return follow_aliased_namespace("#{target}::#{real_parts.join("::")}", seen_names)
         else
           real_parts.unshift(T.must(parts[i]))
         end
@@ -291,16 +309,16 @@ module RubyIndexer
       cached_ancestors = @ancestors[fully_qualified_name]
       return cached_ancestors if cached_ancestors
 
+      # If we don't have an entry for `name`, raise
+      entries = self[fully_qualified_name]
+      raise NonExistingNamespaceError, "No entry found for #{fully_qualified_name}" unless entries
+
       ancestors = [fully_qualified_name]
 
       # Cache the linearized ancestors array eagerly. This is important because we might have circular dependencies and
       # this will prevent us from falling into an infinite recursion loop. Because we mutate the ancestors array later,
       # the cache will reflect the final result
       @ancestors[fully_qualified_name] = ancestors
-
-      # If we don't have an entry for `name`, raise
-      entries = resolve(fully_qualified_name, [])
-      raise NonExistingNamespaceError, "No entry found for #{fully_qualified_name}" unless entries
 
       # If none of the entries for `name` are namespaces, raise
       namespaces = entries.filter_map do |entry|
@@ -434,22 +452,152 @@ module RubyIndexer
 
     # Attempts to resolve an UnresolvedAlias into a resolved Alias. If the unresolved alias is pointing to a constant
     # that doesn't exist, then we return the same UnresolvedAlias
-    sig { params(entry: Entry::UnresolvedAlias).returns(T.any(Entry::Alias, Entry::UnresolvedAlias)) }
-    def resolve_alias(entry)
-      target = resolve(entry.target, entry.nesting)
+    sig do
+      params(
+        entry: Entry::UnresolvedAlias,
+        seen_names: T::Array[String],
+      ).returns(T.any(Entry::Alias, Entry::UnresolvedAlias))
+    end
+    def resolve_alias(entry, seen_names)
+      alias_name = entry.name
+      return entry if seen_names.include?(alias_name)
+
+      seen_names << alias_name
+
+      target = resolve(entry.target, entry.nesting, seen_names)
       return entry unless target
 
       target_name = T.must(target.first).name
       resolved_alias = Entry::Alias.new(target_name, entry)
 
       # Replace the UnresolvedAlias by a resolved one so that we don't have to do this again later
-      original_entries = T.must(@entries[entry.name])
+      original_entries = T.must(@entries[alias_name])
       original_entries.delete(entry)
       original_entries << resolved_alias
 
-      @entries_tree.insert(entry.name, original_entries)
+      @entries_tree.insert(alias_name, original_entries)
 
       resolved_alias
+    end
+
+    sig do
+      params(
+        name: String,
+        nesting: T::Array[String],
+        seen_names: T::Array[String],
+      ).returns(T.nilable(T::Array[Entry]))
+    end
+    def lookup_qualified_reference(name, nesting, seen_names)
+      # If the name is qualified (has any namespace parts), then Ruby will search for the constant first in the exact
+      # namespace where the reference was found across the entire ancestor chain
+      #
+      # First, check if the constant is in the exact namespace where the reference was found
+      full_name = nesting.any? ? "#{nesting.join("::")}::#{name}" : name
+      results = direct_or_aliased_constant(full_name, seen_names)
+      return results if results
+
+      # Then search ancestors for the current namespace
+      entries = lookup_ancestor_chain(name, nesting, seen_names)
+      return entries if entries
+
+      # If the qualified constant is not found in the ancestors of the specific namespace where the reference was
+      # found, then Ruby searches for it in the enclosing lexical scopes
+      entries = lookup_enclosing_scopes(name, nesting, seen_names)
+      return entries if entries
+
+      # Finally, as a fallback, Ruby will search for the constant in the top level namespace
+      search_top_level(name, seen_names)
+    end
+
+    sig do
+      params(
+        name: String,
+        nesting: T::Array[String],
+        seen_names: T::Array[String],
+      ).returns(T.nilable(T::Array[Entry]))
+    end
+    def lookup_enclosing_scopes(name, nesting, seen_names)
+      nesting.length.downto(1).each do |i|
+        namespace = T.must(nesting[0...i]).join("::")
+
+        # If we find an entry with `full_name` directly, then we can already return it, even if it contains aliases -
+        # because the user might be trying to jump to the alias definition.
+        #
+        # However, if we don't find it, then we need to search for possible aliases in the namespace. For example, in
+        # the LSP itself we alias `RubyLsp::Interface` to `LanguageServer::Protocol::Interface`, which means doing
+        # `RubyLsp::Interface::Location` is allowed. For these cases, we need some way to realize that the
+        # `RubyLsp::Interface` part is an alias, that has to be resolved
+        entries = direct_or_aliased_constant("#{namespace}::#{name}", seen_names)
+        return entries if entries
+      end
+
+      nil
+    end
+
+    sig do
+      params(
+        name: String,
+        nesting: T::Array[String],
+        seen_names: T::Array[String],
+      ).returns(T.nilable(T::Array[Entry]))
+    end
+    def lookup_ancestor_chain(name, nesting, seen_names)
+      *nesting_parts, constant_name = build_non_redundant_full_name(name, nesting).split("::")
+      namespace_entries = resolve(T.must(nesting_parts).join("::"), [], seen_names)
+      return unless namespace_entries
+
+      ancestors = T.must(nesting_parts).empty? ? [] : linearized_ancestors_of(T.must(namespace_entries.first).name)
+
+      ancestors.each do |ancestor_name|
+        entries = direct_or_aliased_constant("#{ancestor_name}::#{constant_name}", seen_names)
+        return entries if entries
+      end
+
+      nil
+    rescue NonExistingNamespaceError
+      nil
+    end
+
+    # Removes redudancy from a constant reference's full name. For example, if we find a reference to `A::B::Foo` inside
+    # of the ["A", "B"] nesting, then we should not concatenate the nesting with the name or else we'll end up with
+    # `A::B::A::B::Foo`. This method will remove any redundant parts from the final name based on the reference and the
+    # nesting
+    sig { params(name: String, nesting: T::Array[String]).returns(String) }
+    def build_non_redundant_full_name(name, nesting)
+      return name if nesting.empty?
+
+      namespace = nesting.join("::")
+
+      # If the name is not qualified, we can just concatenate the nesting and the name
+      return "#{namespace}::#{name}" unless name.include?("::")
+
+      name_parts = name.split("::")
+
+      # Find the first part of the name that is not in the nesting
+      index = name_parts.index { |part| !nesting.include?(part) }
+
+      if index.nil?
+        # All parts of the nesting are redundant because they are already present in the name. We can return the name
+        # directly
+        name
+      elsif index == 0
+        # No parts of the nesting are in the name, we can concatenate the namespace and the name
+        "#{namespace}::#{name}"
+      else
+        # The name includes some parts of the nesting. We need to remove the redundant parts
+        "#{namespace}::#{T.must(name_parts[index..-1]).join("::")}"
+      end
+    end
+
+    sig { params(full_name: String, seen_names: T::Array[String]).returns(T.nilable(T::Array[Entry])) }
+    def direct_or_aliased_constant(full_name, seen_names)
+      entries = @entries[full_name] || @entries[follow_aliased_namespace(full_name)]
+      entries&.map { |e| e.is_a?(Entry::UnresolvedAlias) ? resolve_alias(e, seen_names) : e }
+    end
+
+    sig { params(name: String, seen_names: T::Array[String]).returns(T.nilable(T::Array[Entry])) }
+    def search_top_level(name, seen_names)
+      @entries[name]&.map { |e| e.is_a?(Entry::UnresolvedAlias) ? resolve_alias(e, seen_names) : e }
     end
   end
 end

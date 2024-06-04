@@ -181,6 +181,9 @@ module RubyIndexer
 
     def test_resolving_aliases_to_non_existing_constants_with_conflicting_names
       @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
+        class Float
+        end
+
         module Foo
           class Float < self
             INFINITY = ::Float::INFINITY
@@ -840,6 +843,267 @@ module RubyIndexer
           assert_equal(["Bar"], @index.linearized_ancestors_of("Bar"))
         end
       end
+    end
+
+    def test_resolving_inherited_constants
+      index(<<~RUBY)
+        module Foo
+          CONST = 1
+        end
+
+        module Baz
+          CONST = 2
+        end
+
+        module Qux
+          include Foo
+        end
+
+        module Namespace
+          CONST = 3
+
+          include Baz
+
+          class Bar
+            include Qux
+          end
+        end
+
+        CONST = 4
+      RUBY
+
+      entry = T.must(@index.resolve("CONST", ["Namespace", "Bar"])&.first)
+      assert_equal(14, entry.location.start_line)
+    end
+
+    def test_resolving_inherited_alised_namespace
+      index(<<~RUBY)
+        module Bar
+          TARGET = 123
+        end
+
+        module Foo
+          CONST = Bar
+        end
+
+        module Namespace
+          class Bar
+            include Foo
+          end
+        end
+      RUBY
+
+      entry = T.must(@index.resolve("Foo::CONST::TARGET", [])&.first)
+      assert_equal(2, entry.location.start_line)
+
+      entry = T.must(@index.resolve("Namespace::Bar::CONST::TARGET", [])&.first)
+      assert_equal(2, entry.location.start_line)
+    end
+
+    def test_resolving_same_constant_from_different_scopes
+      index(<<~RUBY)
+        module Namespace
+          CONST = 123
+
+          class Parent
+            CONST = 321
+          end
+
+          class Child < Parent
+          end
+        end
+      RUBY
+
+      entry = T.must(@index.resolve("CONST", ["Namespace", "Child"])&.first)
+      assert_equal(2, entry.location.start_line)
+
+      entry = T.must(@index.resolve("Namespace::Child::CONST", [])&.first)
+      assert_equal(5, entry.location.start_line)
+    end
+
+    def test_resolving_prepended_constants
+      index(<<~RUBY)
+        module Included
+          CONST = 123
+        end
+
+        module Prepended
+          CONST = 321
+        end
+
+        class Foo
+          include Included
+          prepend Prepended
+        end
+
+        class Bar
+          CONST = 456
+          include Included
+          prepend Prepended
+        end
+      RUBY
+
+      entry = T.must(@index.resolve("CONST", ["Foo"])&.first)
+      assert_equal(6, entry.location.start_line)
+
+      entry = T.must(@index.resolve("Foo::CONST", [])&.first)
+      assert_equal(6, entry.location.start_line)
+
+      entry = T.must(@index.resolve("Bar::CONST", [])&.first)
+      assert_equal(15, entry.location.start_line)
+    end
+
+    def test_resolving_constants_favors_ancestors_over_top_level
+      index(<<~RUBY)
+        module Value1
+          CONST = 1
+        end
+
+        module Value2
+          CONST = 2
+        end
+
+        CONST = 3
+        module First
+          include Value1
+
+          module Second
+            include Value2
+          end
+        end
+      RUBY
+
+      entry = T.must(@index.resolve("CONST", ["First", "Second"])&.first)
+      assert_equal(6, entry.location.start_line)
+    end
+
+    def test_resolving_circular_alias
+      index(<<~RUBY)
+        module Namespace
+          FOO = BAR
+          BAR = FOO
+        end
+      RUBY
+
+      foo_entry = T.must(@index.resolve("FOO", ["Namespace"])&.first)
+      assert_equal(2, foo_entry.location.start_line)
+      assert_instance_of(Entry::Alias, foo_entry)
+
+      bar_entry = T.must(@index.resolve("BAR", ["Namespace"])&.first)
+      assert_equal(3, bar_entry.location.start_line)
+      assert_instance_of(Entry::Alias, bar_entry)
+    end
+
+    def test_resolving_circular_alias_three_levels
+      index(<<~RUBY)
+        module Namespace
+          FOO = BAR
+          BAR = BAZ
+          BAZ = FOO
+        end
+      RUBY
+
+      foo_entry = T.must(@index.resolve("FOO", ["Namespace"])&.first)
+      assert_equal(2, foo_entry.location.start_line)
+      assert_instance_of(Entry::Alias, foo_entry)
+
+      bar_entry = T.must(@index.resolve("BAR", ["Namespace"])&.first)
+      assert_equal(3, bar_entry.location.start_line)
+      assert_instance_of(Entry::Alias, bar_entry)
+
+      baz_entry = T.must(@index.resolve("BAZ", ["Namespace"])&.first)
+      assert_equal(4, baz_entry.location.start_line)
+      assert_instance_of(Entry::Alias, baz_entry)
+    end
+
+    def test_resolving_top_level_compact_reference
+      index(<<~RUBY)
+        class Foo::Bar
+        end
+      RUBY
+
+      foo_entry = T.must(@index.resolve("Foo::Bar", [])&.first)
+      assert_equal(1, foo_entry.location.start_line)
+      assert_instance_of(Entry::Class, foo_entry)
+    end
+
+    def test_resolving_references_with_redundant_namespaces
+      index(<<~RUBY)
+        module Bar
+          CONST = 1
+        end
+
+        module A
+          CONST = 2
+
+          module B
+            CONST = 3
+
+            class Foo
+              include Bar
+            end
+
+            A::B::Foo::CONST
+          end
+        end
+      RUBY
+
+      foo_entry = T.must(@index.resolve("A::B::Foo::CONST", ["A", "B"])&.first)
+      assert_equal(2, foo_entry.location.start_line)
+    end
+
+    def test_resolving_qualified_references
+      index(<<~RUBY)
+        module Namespace
+          class Entry
+            CONST = 1
+          end
+        end
+
+        module Namespace
+          class Index
+          end
+        end
+      RUBY
+
+      foo_entry = T.must(@index.resolve("Entry::CONST", ["Namespace", "Index"])&.first)
+      assert_equal(3, foo_entry.location.start_line)
+    end
+
+    def test_resolving_unqualified_references
+      index(<<~RUBY)
+        module Foo
+          CONST = 1
+        end
+
+        module Namespace
+          CONST = 2
+
+          class Index
+            include Foo
+          end
+        end
+      RUBY
+
+      foo_entry = T.must(@index.resolve("CONST", ["Namespace", "Index"])&.first)
+      assert_equal(6, foo_entry.location.start_line)
+    end
+
+    def test_resolving_references_with_only_top_level_declaration
+      index(<<~RUBY)
+        CONST = 1
+
+        module Foo; end
+
+        module Namespace
+          class Index
+            include Foo
+          end
+        end
+      RUBY
+
+      foo_entry = T.must(@index.resolve("CONST", ["Namespace", "Index"])&.first)
+      assert_equal(1, foo_entry.location.start_line)
     end
   end
 end
