@@ -186,6 +186,11 @@
               "description": "Enable signature help, which shows the parameters and documentation for the method being invoked",
               "type": "boolean",
               "default": true
+            },
+            "typeHierarchy": {
+              "description": "Enable type hierarchy lookup, which shows the supertypes and subtypes of the selected symbol",
+              "type": "boolean",
+              "default": true
             }
           },
           "default": {
@@ -205,7 +210,8 @@
             "codeLens": true,
             "definition": true,
             "workspaceSymbol": true,
-            "signatureHelp": true
+            "signatureHelp": true,
+            "typeHierarchy": true
           }
         },
         "rubyLsp.featuresConfiguration": {
