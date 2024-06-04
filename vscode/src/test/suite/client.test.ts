@@ -667,7 +667,7 @@ suite("Client", () => {
     assert.strictEqual(response.title, "Refactor: Extract Variable");
   }).timeout(20000);
 
-  test("document selectors", () => {
+  test("document selectors match default gems and bundled gems appropriately", () => {
     const [workspaceFilter, bundledGemsFilter, defaultGemsFilter] =
       client.clientOptions.documentSelector!;
 
