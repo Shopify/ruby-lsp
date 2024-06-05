@@ -19,6 +19,8 @@ module RubyLsp
           Prism::InstanceVariableOrWriteNode,
           Prism::InstanceVariableTargetNode,
           Prism::InstanceVariableWriteNode,
+          Prism::SymbolNode,
+          Prism::StringNode,
         ],
         T::Array[T.class_of(Prism::Node)],
       )

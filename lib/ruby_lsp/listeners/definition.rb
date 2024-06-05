@@ -39,18 +39,27 @@ module RubyLsp
           :on_instance_variable_operator_write_node_enter,
           :on_instance_variable_or_write_node_enter,
           :on_instance_variable_target_node_enter,
+          :on_string_node_enter,
         )
       end
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
-        message = node.name
+        message = node.message
+        return unless message
 
-        if message == :require || message == :require_relative
-          handle_require_definition(node)
-        else
-          handle_method_definition(message.to_s, self_receiver?(node))
-        end
+        handle_method_definition(message, self_receiver?(node))
+      end
+
+      sig { params(node: Prism::StringNode).void }
+      def on_string_node_enter(node)
+        enclosing_call = @node_context.call_node
+        return unless enclosing_call
+
+        name = enclosing_call.name
+        return unless name == :require || name == :require_relative
+
+        handle_require_definition(node, name)
       end
 
       sig { params(node: Prism::BlockArgumentNode).void }
@@ -159,19 +168,12 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::CallNode).void }
-      def handle_require_definition(node)
-        message = node.name
-        arguments = node.arguments
-        return unless arguments
-
-        argument = arguments.arguments.first
-        return unless argument.is_a?(Prism::StringNode)
-
+      sig { params(node: Prism::StringNode, message: Symbol).void }
+      def handle_require_definition(node, message)
         case message
         when :require
-          entry = @index.search_require_paths(argument.content).find do |indexable_path|
-            indexable_path.require_path == argument.content
+          entry = @index.search_require_paths(node.content).find do |indexable_path|
+            indexable_path.require_path == node.content
           end
 
           if entry
@@ -186,7 +188,7 @@ module RubyLsp
             )
           end
         when :require_relative
-          required_file = "#{argument.content}.rb"
+          required_file = "#{node.content}.rb"
           path = @uri.to_standardized_path
           current_folder = path ? Pathname.new(CGI.unescape(path)).dirname : Dir.pwd
           candidate = File.expand_path(File.join(current_folder, required_file))

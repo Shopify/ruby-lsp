@@ -60,6 +60,8 @@ module RubyLsp
             Prism::InstanceVariableOrWriteNode,
             Prism::InstanceVariableTargetNode,
             Prism::InstanceVariableWriteNode,
+            Prism::SymbolNode,
+            Prism::StringNode,
           ],
         )
 
@@ -79,6 +81,9 @@ module RubyLsp
           # If the target is a method call, we need to ensure that the requested position is exactly on top of the
           # method identifier. Otherwise, we risk showing definitions for unrelated things
           target = nil
+        # For methods with block arguments using symbol-to-proc
+        elsif target.is_a?(Prism::SymbolNode) && parent.is_a?(Prism::BlockArgumentNode)
+          target = parent
         end
 
         if target
