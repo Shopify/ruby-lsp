@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "expectations/expectations_test_runner"
+require_relative "support/expectations_test_runner"
 
 # Tests RuboCop disable directives - before/after on whole file
 class CodeActionsFormattingTest < Minitest::Test

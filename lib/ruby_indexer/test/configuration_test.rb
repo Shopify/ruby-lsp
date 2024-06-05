@@ -68,12 +68,11 @@ module RubyIndexer
     end
 
     def test_indexables_avoids_duplicates_if_bundle_path_is_inside_project
-      Bundler.settings.set_global("path", "vendor/bundle")
-      config = Configuration.new
+      Bundler.settings.temporary(path: "vendor/bundle") do
+        config = Configuration.new
 
-      assert_includes(config.instance_variable_get(:@excluded_patterns), "#{Dir.pwd}/vendor/bundle/**/*.rb")
-    ensure
-      Bundler.settings.set_global("path", nil)
+        assert_includes(config.instance_variable_get(:@excluded_patterns), "#{Dir.pwd}/vendor/bundle/**/*.rb")
+      end
     end
 
     def test_indexables_does_not_include_gems_own_installed_files

@@ -271,7 +271,7 @@ module RubyLsp
       def on_constant_path_node_enter(node)
         return unless matches?(node, CONSTANT_PATH_NODES)
 
-        add_highlight(Constant::DocumentHighlightKind::READ, node.location)
+        add_highlight(Constant::DocumentHighlightKind::READ, node.name_loc)
       end
 
       sig { params(node: Prism::ConstantReadNode).void }

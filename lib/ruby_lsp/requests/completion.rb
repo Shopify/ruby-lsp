@@ -17,6 +17,7 @@ module RubyLsp
     # - Constants
     # - Require paths
     # - Methods invoked on self only
+    # - Instance variables
     #
     # # Example
     #
@@ -35,7 +36,7 @@ module RubyLsp
         def provider
           Interface::CompletionOptions.new(
             resolve_provider: true,
-            trigger_characters: ["/", "\"", "'"],
+            trigger_characters: ["/", "\"", "'", ":", "@"],
             completion_item: {
               labelDetailsSupport: true,
             },
@@ -59,10 +60,20 @@ module RubyLsp
         # Completion always receives the position immediately after the character that was just typed. Here we adjust it
         # back by 1, so that we find the right node
         char_position = document.create_scanner.find_char_position(position) - 1
-        matched, parent, nesting = document.locate(
+        node_context = document.locate(
           document.tree,
           char_position,
-          node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode],
+          node_types: [
+            Prism::CallNode,
+            Prism::ConstantReadNode,
+            Prism::ConstantPathNode,
+            Prism::InstanceVariableReadNode,
+            Prism::InstanceVariableAndWriteNode,
+            Prism::InstanceVariableOperatorWriteNode,
+            Prism::InstanceVariableOrWriteNode,
+            Prism::InstanceVariableTargetNode,
+            Prism::InstanceVariableWriteNode,
+          ],
         )
         @response_builder = T.let(
           ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem].new,
@@ -72,27 +83,24 @@ module RubyLsp
         Listeners::Completion.new(
           @response_builder,
           global_state,
-          nesting,
+          node_context,
           typechecker_enabled,
           dispatcher,
           document.uri,
         )
 
         Addon.addons.each do |addon|
-          addon.create_completion_listener(@response_builder, nesting, dispatcher, document.uri)
+          addon.create_completion_listener(@response_builder, node_context, dispatcher, document.uri)
         end
 
+        matched = node_context.node
+        parent = node_context.parent
         return unless matched && parent
 
-        @target = case matched
-        when Prism::CallNode
+        @target = if parent.is_a?(Prism::ConstantPathNode) && matched.is_a?(Prism::ConstantReadNode)
+          parent
+        else
           matched
-        when Prism::ConstantReadNode, Prism::ConstantPathNode
-          if parent.is_a?(Prism::ConstantPathNode) && matched.is_a?(Prism::ConstantReadNode)
-            parent
-          else
-            matched
-          end
         end
       end
 

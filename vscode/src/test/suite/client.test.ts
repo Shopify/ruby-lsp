@@ -1,6 +1,8 @@
-import * as assert from "assert";
-import * as path from "path";
+/* eslint-disable no-process-env */
+import assert from "assert";
+import path from "path";
 import os from "os";
+import fs from "fs";
 
 import * as vscode from "vscode";
 import {
@@ -25,8 +27,42 @@ import { after, afterEach, before } from "mocha";
 import { Ruby, ManagerIdentifier } from "../../ruby";
 import { Telemetry, TelemetryApi, TelemetryEvent } from "../../telemetry";
 import Client from "../../client";
-import { LOG_CHANNEL } from "../../common";
 import { WorkspaceChannel } from "../../workspaceChannel";
+import { RUBY_VERSION } from "../rubyVersion";
+
+const [major, minor, _patch] = RUBY_VERSION.split(".");
+
+class FakeLogger {
+  receivedMessages = "";
+
+  trace(message: string, ..._args: any[]): void {
+    this.receivedMessages += message;
+  }
+
+  debug(message: string, ..._args: any[]): void {
+    this.receivedMessages += message;
+  }
+
+  info(message: string, ..._args: any[]): void {
+    this.receivedMessages += message;
+  }
+
+  warn(message: string, ..._args: any[]): void {
+    this.receivedMessages += message;
+  }
+
+  error(error: string | Error, ..._args: any[]): void {
+    this.receivedMessages += error.toString();
+  }
+
+  append(value: string): void {
+    this.receivedMessages += value;
+  }
+
+  appendLine(value: string): void {
+    this.receivedMessages += value;
+  }
+}
 
 class FakeApi implements TelemetryApi {
   public sentEvents: TelemetryEvent[];
@@ -56,7 +92,61 @@ async function launchClient(workspaceUri: vscode.Uri) {
       update: (_name: string, _value: any) => Promise.resolve(),
     },
   } as unknown as vscode.ExtensionContext;
-  const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
+  const fakeLogger = new FakeLogger();
+  const outputChannel = new WorkspaceChannel("fake", fakeLogger as any);
+
+  // Ensure that we're activating the correct Ruby version on CI
+  if (process.env.CI) {
+    if (os.platform() === "linux") {
+      await vscode.workspace
+        .getConfiguration("rubyLsp")
+        .update(
+          "rubyVersionManager",
+          { identifier: ManagerIdentifier.Chruby },
+          true,
+        );
+
+      fs.mkdirSync(path.join(os.homedir(), ".rubies"), { recursive: true });
+      fs.symlinkSync(
+        `/opt/hostedtoolcache/Ruby/${RUBY_VERSION}/x64`,
+        path.join(os.homedir(), ".rubies", RUBY_VERSION),
+      );
+    } else if (os.platform() === "darwin") {
+      await vscode.workspace
+        .getConfiguration("rubyLsp")
+        .update(
+          "rubyVersionManager",
+          { identifier: ManagerIdentifier.Chruby },
+          true,
+        );
+
+      fs.mkdirSync(path.join(os.homedir(), ".rubies"), { recursive: true });
+      fs.symlinkSync(
+        `/Users/runner/hostedtoolcache/Ruby/${RUBY_VERSION}/arm64`,
+        path.join(os.homedir(), ".rubies", RUBY_VERSION),
+      );
+    } else {
+      await vscode.workspace
+        .getConfiguration("rubyLsp")
+        .update(
+          "rubyVersionManager",
+          { identifier: ManagerIdentifier.RubyInstaller },
+          true,
+        );
+
+      fs.symlinkSync(
+        path.join(
+          "C:",
+          "hostedtoolcache",
+          "windows",
+          "Ruby",
+          RUBY_VERSION,
+          "x64",
+        ),
+        path.join("C:", `Ruby${major}${minor}-${os.arch()}`),
+      );
+    }
+  }
 
   const ruby = new Ruby(context, workspaceFolder, outputChannel);
   await ruby.activateRuby();
@@ -71,6 +161,12 @@ async function launchClient(workspaceUri: vscode.Uri) {
     workspaceFolder,
     outputChannel,
   );
+
+  client.clientOptions.initializationFailedHandler = (error) => {
+    assert.fail(
+      `Failed to start server ${error.message}\n${fakeLogger.receivedMessages}`,
+    );
+  };
 
   try {
     await client.start();
@@ -113,18 +209,6 @@ suite("Client", () => {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(90000);
-
-    // eslint-disable-next-line no-process-env
-    if (process.env.CI) {
-      await vscode.workspace
-        .getConfiguration("rubyLsp")
-        .update(
-          "rubyVersionManager",
-          { identifier: ManagerIdentifier.None },
-          true,
-          true,
-        );
-    }
     client = await launchClient(workspaceUri);
   });
 
@@ -137,6 +221,20 @@ suite("Client", () => {
       await client.dispose();
     } catch (error: any) {
       assert.fail(`Failed to stop server: ${error.message}`);
+    }
+
+    if (process.env.CI) {
+      if (os.platform() === "linux" || os.platform() === "darwin") {
+        fs.rmSync(path.join(os.homedir(), ".rubies"), {
+          recursive: true,
+          force: true,
+        });
+      } else {
+        fs.rmSync(path.join("C:", `Ruby${major}${minor}-${os.arch()}`), {
+          recursive: true,
+          force: true,
+        });
+      }
     }
   });
 
@@ -554,6 +652,7 @@ suite("Client", () => {
       "codeAction/resolve",
       {
         kind: "refactor.extract",
+        title: "Refactor: Extract Variable",
         data: {
           range: {
             start: { line: 1, character: 1 },

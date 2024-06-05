@@ -6,6 +6,7 @@ module RubyIndexer
     extend T::Sig
 
     class UnresolvableAliasError < StandardError; end
+    class NonExistingNamespaceError < StandardError; end
 
     # The minimum Jaro-Winkler similarity score for an entry to be considered a match for a given fuzzy search query
     ENTRY_SIMILARITY_THRESHOLD = 0.7
@@ -31,6 +32,9 @@ module RubyIndexer
 
       # Holds all require paths for every indexed item so that we can provide autocomplete for requires
       @require_paths_tree = T.let(PrefixTree[IndexablePath].new, PrefixTree[IndexablePath])
+
+      # Holds the linearized ancestors list for every namespace
+      @ancestors = T.let({}, T::Hash[String, T::Array[String]])
     end
 
     sig { params(indexable: IndexablePath).void }
@@ -124,6 +128,16 @@ module RubyIndexer
       end
       results.sort_by!(&:last)
       results.flat_map(&:first)
+    end
+
+    sig { params(name: String, receiver_name: String).returns(T::Array[Entry]) }
+    def method_completion_candidates(name, receiver_name)
+      ancestors = linearized_ancestors_of(receiver_name)
+      candidates = prefix_search(name).flatten
+      candidates.select! do |entry|
+        entry.is_a?(RubyIndexer::Entry::Member) && ancestors.any?(entry.owner&.name)
+      end
+      candidates
     end
 
     # Try to find the entry based on the nesting from the most specific to the least specific. For example, if we have
@@ -245,16 +259,175 @@ module RubyIndexer
     sig { params(method_name: String, receiver_name: String).returns(T.nilable(T::Array[Entry::Member])) }
     def resolve_method(method_name, receiver_name)
       method_entries = self[method_name]
-      owner_entries = self[receiver_name]
-      return unless owner_entries && method_entries
+      ancestors = linearized_ancestors_of(receiver_name.delete_prefix("::"))
+      return unless method_entries
 
-      owner_name = T.must(owner_entries.first).name
-      T.cast(
-        method_entries.grep(Entry::Member).select do |entry|
-          T.cast(entry, Entry::Member).owner&.name == owner_name
-        end,
-        T::Array[Entry::Member],
-      )
+      ancestors.each do |ancestor|
+        found = method_entries.select do |entry|
+          next unless entry.is_a?(Entry::Member)
+
+          entry.owner&.name == ancestor
+        end
+
+        return T.cast(found, T::Array[Entry::Member]) if found.any?
+      end
+
+      nil
+    rescue NonExistingNamespaceError
+      nil
+    end
+
+    # Linearizes the ancestors for a given name, returning the order of namespaces in which Ruby will search for method
+    # or constant declarations.
+    #
+    # When we add an ancestor in Ruby, that namespace might have ancestors of its own. Therefore, we need to linearize
+    # everything recursively to ensure that we are placing ancestors in the right order. For example, if you include a
+    # module that prepends another module, then the prepend module appears before the included module.
+    #
+    # The order of ancestors is [linearized_prepends, self, linearized_includes, linearized_superclass]
+    sig { params(fully_qualified_name: String).returns(T::Array[String]) }
+    def linearized_ancestors_of(fully_qualified_name)
+      # If we already computed the ancestors for this namespace, return it straight away
+      cached_ancestors = @ancestors[fully_qualified_name]
+      return cached_ancestors if cached_ancestors
+
+      ancestors = [fully_qualified_name]
+
+      # Cache the linearized ancestors array eagerly. This is important because we might have circular dependencies and
+      # this will prevent us from falling into an infinite recursion loop. Because we mutate the ancestors array later,
+      # the cache will reflect the final result
+      @ancestors[fully_qualified_name] = ancestors
+
+      # If we don't have an entry for `name`, raise
+      entries = resolve(fully_qualified_name, [])
+      raise NonExistingNamespaceError, "No entry found for #{fully_qualified_name}" unless entries
+
+      # If none of the entries for `name` are namespaces, raise
+      namespaces = entries.filter_map do |entry|
+        case entry
+        when Entry::Namespace
+          entry
+        when Entry::Alias
+          self[entry.target]&.grep(Entry::Namespace)
+        end
+      end.flatten
+
+      raise NonExistingNamespaceError,
+        "None of the entries for #{fully_qualified_name} are modules or classes" if namespaces.empty?
+
+      mixin_operations = namespaces.flat_map(&:mixin_operations)
+      main_namespace_index = 0
+
+      # The original nesting where we discovered this namespace, so that we resolve the correct names of the
+      # included/prepended/extended modules and parent classes
+      nesting = T.must(namespaces.first).nesting
+
+      mixin_operations.each do |operation|
+        resolved_module = resolve(operation.module_name, nesting)
+        next unless resolved_module
+
+        module_fully_qualified_name = T.must(resolved_module.first).name
+
+        case operation
+        when Entry::Prepend
+          # When a module is prepended, Ruby checks if it hasn't been prepended already to prevent adding it in front of
+          # the actual namespace twice. However, it does not check if it has been included because you are allowed to
+          # prepend the same module after it has already been included
+          linearized_prepends = linearized_ancestors_of(module_fully_qualified_name)
+
+          # When there are duplicate prepended modules, we have to insert the new prepends after the existing ones. For
+          # example, if the current ancestors are `["A", "Foo"]` and we try to prepend `["A", "B"]`, then `"B"` has to
+          # be inserted after `"A`
+          uniq_prepends = linearized_prepends - T.must(ancestors[0...main_namespace_index])
+          insert_position = linearized_prepends.length - uniq_prepends.length
+
+          T.unsafe(ancestors).insert(
+            insert_position,
+            *(linearized_prepends - T.must(ancestors[0...main_namespace_index])),
+          )
+
+          main_namespace_index += linearized_prepends.length
+        when Entry::Include
+          # When including a module, Ruby will always prevent duplicate entries in case the module has already been
+          # prepended or included
+          linearized_includes = linearized_ancestors_of(module_fully_qualified_name)
+          T.unsafe(ancestors).insert(main_namespace_index + 1, *(linearized_includes - ancestors))
+        end
+      end
+
+      # Find the first class entry that has a parent class. Notice that if the developer makes a mistake and inherits
+      # from two diffent classes in different files, we simply ignore it
+      superclass = T.cast(namespaces.find { |n| n.is_a?(Entry::Class) && n.parent_class }, T.nilable(Entry::Class))
+
+      if superclass
+        # If the user makes a mistake and creates a class that inherits from itself, this method would throw a stack
+        # error. We need to ensure that this isn't the case
+        parent_class = T.must(superclass.parent_class)
+
+        resolved_parent_class = resolve(parent_class, nesting)
+        parent_class_name = resolved_parent_class&.first&.name
+
+        if parent_class_name && fully_qualified_name != parent_class_name
+          ancestors.concat(linearized_ancestors_of(parent_class_name))
+        end
+      end
+
+      ancestors
+    end
+
+    # Resolves an instance variable name for a given owner name. This method will linearize the ancestors of the owner
+    # and find inherited instance variables as well
+    sig { params(variable_name: String, owner_name: String).returns(T.nilable(T::Array[Entry::InstanceVariable])) }
+    def resolve_instance_variable(variable_name, owner_name)
+      entries = T.cast(self[variable_name], T.nilable(T::Array[Entry::InstanceVariable]))
+      return unless entries
+
+      ancestors = linearized_ancestors_of(owner_name)
+      return if ancestors.empty?
+
+      entries.select { |e| ancestors.include?(e.owner&.name) }
+    end
+
+    # Returns a list of possible candidates for completion of instance variables for a given owner name. The name must
+    # include the `@` prefix
+    sig { params(name: String, owner_name: String).returns(T::Array[Entry::InstanceVariable]) }
+    def instance_variable_completion_candidates(name, owner_name)
+      entries = T.cast(prefix_search(name).flatten, T::Array[Entry::InstanceVariable])
+      ancestors = linearized_ancestors_of(owner_name)
+
+      variables = entries.uniq(&:name)
+      variables.select! { |e| ancestors.any?(e.owner&.name) }
+      variables
+    end
+
+    # Synchronizes a change made to the given indexable path. This method will ensure that new declarations are indexed,
+    # removed declarations removed and that the ancestor linearization cache is cleared if necessary
+    sig { params(indexable: IndexablePath).void }
+    def handle_change(indexable)
+      original_entries = @files_to_entries[indexable.full_path]
+
+      delete(indexable)
+      index_single(indexable)
+
+      updated_entries = @files_to_entries[indexable.full_path]
+
+      return unless original_entries && updated_entries
+
+      # A change in one ancestor may impact several different others, which could be including that ancestor through
+      # indirect means like including a module that than includes the ancestor. Trying to figure out exactly which
+      # ancestors need to be deleted is too expensive. Therefore, if any of the namespace entries has a change to their
+      # ancestor hash, we clear all ancestors and start linearizing lazily again from scratch
+      original_map = T.cast(
+        original_entries.select { |e| e.is_a?(Entry::Namespace) },
+        T::Array[Entry::Namespace],
+      ).to_h { |e| [e.name, e.ancestor_hash] }
+
+      updated_map = T.cast(
+        updated_entries.select { |e| e.is_a?(Entry::Namespace) },
+        T::Array[Entry::Namespace],
+      ).to_h { |e| [e.name, e.ancestor_hash] }
+
+      @ancestors.clear if original_map.any? { |name, hash| updated_map[name] != hash }
     end
 
     private

@@ -14,3 +14,4 @@ vscode/dist
 vscode/node_modules
 vscode/.vscode-test/
 vscode/*.vsix
+vscode/*.log

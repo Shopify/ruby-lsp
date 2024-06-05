@@ -47,6 +47,15 @@ module RubyLsp
         label = @item[:label]
         entries = @index[label] || []
 
+        owner_name = @item.dig(:data, :owner_name)
+
+        if owner_name
+          entries = entries.select do |entry|
+            (entry.is_a?(RubyIndexer::Entry::Member) || entry.is_a?(RubyIndexer::Entry::InstanceVariable)) &&
+              entry.owner&.name == owner_name
+          end
+        end
+
         @item[:labelDetails] = Interface::CompletionItemLabelDetails.new(
           description: entries.take(MAX_DOCUMENTATION_ENTRIES).map(&:file_name).join(","),
         )

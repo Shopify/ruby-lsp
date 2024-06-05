@@ -7,13 +7,18 @@ Code, use the official [Ruby LSP extension](https://marketplace.visualstudio.com
 > Some Ruby LSP features may be unavailable or limited due to incomplete implementations of the Language Server
 > Protocol, such as dynamic feature registration, or [file watching](https://github.com/Shopify/ruby-lsp/issues/1456).
 
+If you need to select particular features to enable or disable, see
+[`vscode/package.json`](vscode/package.json) for the full list.
+
 <!-- When adding a new editor to the list, either link directly to a website containing the instructions or link to a
 new H2 header in this file containing the instructions. -->
 
 - [Emacs LSP Mode](https://emacs-lsp.github.io/lsp-mode/page/lsp-ruby-lsp/)
 - [Emacs Eglot](#Emacs-Eglot)
-- [Neovim LSP](#Neovim-LSP)
+- [Neovim LSP](#Neovim)
 - [Sublime Text LSP](#sublime-text-lsp)
+- [Zed](#zed)
+- [RubyMine](#RubyMine)
 
 ## Emacs Eglot
 
@@ -27,6 +32,8 @@ put that in your init file:
 When you run `eglot` command it will run `ruby-lsp` process for you.
 
 ## Neovim
+
+**Note**: Ensure that you are using Neovim 0.10 or newer.
 
 ### nvim-lspconfig
 
@@ -61,98 +68,42 @@ mason_lspconfig.setup_handlers {
 }
 ```
 
-### Neovim Limitations
+### Additional setup (optional)
 
-Ruby LSP only supports pull diagnostics, and neovim versions prior to v0.10.0-dev-695+g58f948614 only support [publishDiagnostics](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_publishDiagnostics).
-Additional setup is required to enable diagnostics from Ruby LSP to appear in neovim.
+`rubyLsp/workspace/dependencies` is a custom method currently supported only in the VS Code plugin.
+The following snippet adds `ShowRubyDeps` command to show dependencies in the quickfix list.
 
 ```lua
--- textDocument/diagnostic support until 0.10.0 is released
-_timers = {}
-local function setup_diagnostics(client, buffer)
-  if require("vim.lsp.diagnostic")._enable then
-    return
-  end
-
-  local diagnostic_handler = function()
-    local params = vim.lsp.util.make_text_document_params(buffer)
-    client.request("textDocument/diagnostic", { textDocument = params }, function(err, result)
-      if err then
-        local err_msg = string.format("diagnostics error - %s", vim.inspect(err))
-        vim.lsp.log.error(err_msg)
-      end
-      local diagnostic_items = {}
-      if result then
-        diagnostic_items = result.items
-      end
-      vim.lsp.diagnostic.on_publish_diagnostics(
-        nil,
-        vim.tbl_extend("keep", params, { diagnostics = diagnostic_items }),
-        { client_id = client.id }
-      )
-    end)
-  end
-
-  diagnostic_handler() -- to request diagnostics on buffer when first attaching
-
-  vim.api.nvim_buf_attach(buffer, false, {
-    on_lines = function()
-      if _timers[buffer] then
-        vim.fn.timer_stop(_timers[buffer])
-      end
-      _timers[buffer] = vim.fn.timer_start(200, diagnostic_handler)
-    end,
-    on_detach = function()
-      if _timers[buffer] then
-        vim.fn.timer_stop(_timers[buffer])
-      end
-    end,
-  })
-end
-
--- adds ShowRubyDeps command to show dependencies in the quickfix list.
--- add the `all` argument to show indirect dependencies as well
 local function add_ruby_deps_command(client, bufnr)
-    vim.api.nvim_buf_create_user_command(bufnr, "ShowRubyDeps",
-                                          function(opts)
+  vim.api.nvim_buf_create_user_command(bufnr, "ShowRubyDeps", function(opts)
+    local params = vim.lsp.util.make_text_document_params()
+    local showAll = opts.args == "all"
 
-        local params = vim.lsp.util.make_text_document_params()
+    client.request("rubyLsp/workspace/dependencies", params, function(error, result)
+      if error then
+        print("Error showing deps: " .. error)
+        return
+      end
 
-        local showAll = opts.args == "all"
+      local qf_list = {}
+      for _, item in ipairs(result) do
+        if showAll or item.dependency then
+          table.insert(qf_list, {
+            text = string.format("%s (%s) - %s", item.name, item.version, item.dependency),
+            filename = item.path
+          })
+        end
+      end
 
-        client.request("rubyLsp/workspace/dependencies", params,
-                        function(error, result)
-            if error then
-                print("Error showing deps: " .. error)
-                return
-            end
-
-            local qf_list = {}
-            for _, item in ipairs(result) do
-                if showAll or item.dependency then
-                    table.insert(qf_list, {
-                        text = string.format("%s (%s) - %s",
-                                              item.name,
-                                              item.version,
-                                              item.dependency),
-
-                        filename = item.path
-                    })
-                end
-            end
-
-            vim.fn.setqflist(qf_list)
-            vim.cmd('copen')
-        end, bufnr)
-    end, {nargs = "?", complete = function()
-        return {"all"}
-    end})
+      vim.fn.setqflist(qf_list)
+      vim.cmd('copen')
+    end, bufnr)
+  end,
+  {nargs = "?", complete = function() return {"all"} end})
 end
-
 
 require("lspconfig").ruby_lsp.setup({
   on_attach = function(client, buffer)
-    setup_diagnostics(client, buffer)
     add_ruby_deps_command(client, buffer)
   end,
 })
@@ -182,12 +133,18 @@ To configure the Ruby LSP using [LSP for Sublime Text](https://github.com/sublim
 
 Restart LSP or Sublime Text and `ruby-lsp` will automatically activate when opening ruby files.
 
-## Zed (some limitations)
+## Zed
+
+[Setting up Ruby LSP](https://github.com/zed-industries/zed/blob/main/docs/src/languages/ruby.md#setting-up-ruby-lsp)
 
 [Zed has added support for Ruby LSP as a alternative language server](https://github.com/zed-industries/zed/pull/11768) in version v0.0.2 of the Ruby extension.
 
 See https://github.com/zed-industries/zed/issues/4834 for discussion of the limitations.
 
-## RubyMine (not yet supported)
+## RubyMine
 
-Although there is overlap between the features provided by RubyMine and Ruby LSP, there may be benefits in using both together. RubyMine has a [LSP API](https://blog.jetbrains.com/ruby/2023/07/the-rubymine-2023-2-beta-updated-ai-assistant-lsp-api-for-plugin-developers-and-more/), so adding support would involve writing a plugin using Kotlin. The [rubymine-sorbet-lsp](https://github.com/simoleone/rubymine-sorbet-lsp) project may be a useful reference for this.
+You can use the Ruby LSP with RubyMine (or IntelliJ IDEA Ultimate) through the following plugin.
+
+Note that there might be overlapping functionality when using it with RubyMine, given that the IDE provides similar features as the ones coming from the Ruby LSP.
+
+[https://plugins.jetbrains.com/plugin/24413-ruby-lsp](Ruby LSP plugin)

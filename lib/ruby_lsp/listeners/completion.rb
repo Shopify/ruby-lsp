@@ -11,17 +11,17 @@ module RubyLsp
         params(
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
           global_state: GlobalState,
-          nesting: T::Array[String],
+          node_context: NodeContext,
           typechecker_enabled: T::Boolean,
           dispatcher: Prism::Dispatcher,
           uri: URI::Generic,
         ).void
       end
-      def initialize(response_builder, global_state, nesting, typechecker_enabled, dispatcher, uri) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, global_state, node_context, typechecker_enabled, dispatcher, uri) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
-        @nesting = nesting
+        @node_context = node_context
         @typechecker_enabled = typechecker_enabled
         @uri = uri
 
@@ -30,6 +30,12 @@ module RubyLsp
           :on_constant_path_node_enter,
           :on_constant_read_node_enter,
           :on_call_node_enter,
+          :on_instance_variable_read_node_enter,
+          :on_instance_variable_write_node_enter,
+          :on_instance_variable_and_write_node_enter,
+          :on_instance_variable_operator_write_node_enter,
+          :on_instance_variable_or_write_node_enter,
+          :on_instance_variable_target_node_enter,
         )
       end
 
@@ -41,13 +47,13 @@ module RubyLsp
         name = constant_name(node)
         return if name.nil?
 
-        candidates = @index.prefix_search(name, @nesting)
+        candidates = @index.prefix_search(name, @node_context.nesting)
         candidates.each do |entries|
           complete_name = T.must(entries.first).name
           @response_builder << build_entry_completion(
             complete_name,
             name,
-            node,
+            range_from_location(node.location),
             entries,
             top_level?(complete_name),
           )
@@ -62,48 +68,36 @@ module RubyLsp
         name = constant_name(node)
         return if name.nil?
 
-        top_level_reference = if name.start_with?("::")
-          name = name.delete_prefix("::")
-          true
-        else
-          false
-        end
-
-        # If we're trying to provide completion for an aliased namespace, we need to first discover it's real name in
-        # order to find which possible constants match the desired search
-        *namespace, incomplete_name = name.split("::")
-        aliased_namespace = T.must(namespace).join("::")
-        namespace_entries = @index.resolve(aliased_namespace, @nesting)
-        return unless namespace_entries
-
-        real_namespace = @index.follow_aliased_namespace(T.must(namespace_entries.first).name)
-
-        candidates = @index.prefix_search(
-          "#{real_namespace}::#{incomplete_name}",
-          top_level_reference ? [] : @nesting,
-        )
-        candidates.each do |entries|
-          # The only time we may have a private constant reference from outside of the namespace is if we're dealing
-          # with ConstantPath and the entry name doesn't start with the current nesting
-          first_entry = T.must(entries.first)
-          next if first_entry.visibility == :private && !first_entry.name.start_with?("#{@nesting}::")
-
-          constant_name = T.must(first_entry.name.split("::").last)
-
-          full_name = aliased_namespace.empty? ? constant_name : "#{aliased_namespace}::#{constant_name}"
-
-          @response_builder << build_entry_completion(
-            full_name,
-            name,
-            node,
-            entries,
-            top_level_reference || top_level?(T.must(entries.first).name),
-          )
-        end
+        constant_path_completion(name, range_from_location(node.location))
       end
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
+        receiver = node.receiver
+
+        # When writing `Foo::`, the AST assigns a method call node (because you can use that syntax to invoke singleton
+        # methods). However, in addition to providing method completion, we also need to show possible constant
+        # completions
+        if (receiver.is_a?(Prism::ConstantReadNode) || receiver.is_a?(Prism::ConstantPathNode)) &&
+            node.call_operator == "::"
+
+          name = constant_name(receiver)
+
+          if name
+            start_loc = node.location
+            end_loc = T.must(node.call_operator_loc)
+
+            constant_path_completion(
+              "#{name}::",
+              Interface::Range.new(
+                start: Interface::Position.new(line: start_loc.start_line - 1, character: start_loc.start_column),
+                end: Interface::Position.new(line: end_loc.end_line - 1, character: end_loc.end_column),
+              ),
+            )
+            return
+          end
+        end
+
         name = node.message
         return unless name
 
@@ -117,7 +111,105 @@ module RubyLsp
         end
       end
 
+      sig { params(node: Prism::InstanceVariableReadNode).void }
+      def on_instance_variable_read_node_enter(node)
+        handle_instance_variable_completion(node.name.to_s, node.location)
+      end
+
+      sig { params(node: Prism::InstanceVariableWriteNode).void }
+      def on_instance_variable_write_node_enter(node)
+        handle_instance_variable_completion(node.name.to_s, node.name_loc)
+      end
+
+      sig { params(node: Prism::InstanceVariableAndWriteNode).void }
+      def on_instance_variable_and_write_node_enter(node)
+        handle_instance_variable_completion(node.name.to_s, node.name_loc)
+      end
+
+      sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
+      def on_instance_variable_operator_write_node_enter(node)
+        handle_instance_variable_completion(node.name.to_s, node.name_loc)
+      end
+
+      sig { params(node: Prism::InstanceVariableOrWriteNode).void }
+      def on_instance_variable_or_write_node_enter(node)
+        handle_instance_variable_completion(node.name.to_s, node.name_loc)
+      end
+
+      sig { params(node: Prism::InstanceVariableTargetNode).void }
+      def on_instance_variable_target_node_enter(node)
+        handle_instance_variable_completion(node.name.to_s, node.location)
+      end
+
       private
+
+      sig { params(name: String, range: Interface::Range).void }
+      def constant_path_completion(name, range)
+        top_level_reference = if name.start_with?("::")
+          name = name.delete_prefix("::")
+          true
+        else
+          false
+        end
+
+        # If we're trying to provide completion for an aliased namespace, we need to first discover it's real name in
+        # order to find which possible constants match the desired search
+        aliased_namespace = if name.end_with?("::")
+          name.delete_suffix("::")
+        else
+          *namespace, incomplete_name = name.split("::")
+          T.must(namespace).join("::")
+        end
+
+        nesting = @node_context.nesting
+        namespace_entries = @index.resolve(aliased_namespace, nesting)
+        return unless namespace_entries
+
+        real_namespace = @index.follow_aliased_namespace(T.must(namespace_entries.first).name)
+
+        candidates = @index.prefix_search(
+          "#{real_namespace}::#{incomplete_name}",
+          top_level_reference ? [] : nesting,
+        )
+        candidates.each do |entries|
+          # The only time we may have a private constant reference from outside of the namespace is if we're dealing
+          # with ConstantPath and the entry name doesn't start with the current nesting
+          first_entry = T.must(entries.first)
+          next if first_entry.private? && !first_entry.name.start_with?("#{nesting}::")
+
+          constant_name = first_entry.name.delete_prefix("#{real_namespace}::")
+          full_name = aliased_namespace.empty? ? constant_name : "#{aliased_namespace}::#{constant_name}"
+
+          @response_builder << build_entry_completion(
+            full_name,
+            name,
+            range,
+            entries,
+            top_level_reference || top_level?(T.must(entries.first).name),
+          )
+        end
+      end
+
+      sig { params(name: String, location: Prism::Location).void }
+      def handle_instance_variable_completion(name, location)
+        @index.instance_variable_completion_candidates(name, @node_context.fully_qualified_name).each do |entry|
+          variable_name = entry.name
+
+          @response_builder << Interface::CompletionItem.new(
+            label: variable_name,
+            text_edit: Interface::TextEdit.new(
+              range: range_from_location(location),
+              new_text: variable_name,
+            ),
+            kind: Constant::CompletionItemKind::FIELD,
+            data: {
+              owner_name: entry.owner&.name,
+            },
+          )
+        end
+      rescue RubyIndexer::Index::NonExistingNamespaceError
+        # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
+      end
 
       sig { params(node: Prism::CallNode).void }
       def complete_require(node)
@@ -166,15 +258,12 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode, name: String).void }
       def complete_self_receiver_method(node, name)
-        receiver_entries = @index[@nesting.join("::")]
+        receiver_entries = @index[@node_context.fully_qualified_name]
         return unless receiver_entries
 
         receiver = T.must(receiver_entries.first)
 
-        @index.prefix_search(name).each do |entries|
-          entry = entries.find { |e| e.is_a?(RubyIndexer::Entry::Member) && e.owner&.name == receiver.name }
-          next unless entry
-
+        @index.method_completion_candidates(name, receiver.name).each do |entry|
           @response_builder << build_method_completion(T.cast(entry, RubyIndexer::Entry::Member), node)
         end
       end
@@ -223,12 +312,12 @@ module RubyLsp
         params(
           real_name: String,
           incomplete_name: String,
-          node: Prism::Node,
+          range: Interface::Range,
           entries: T::Array[RubyIndexer::Entry],
           top_level: T::Boolean,
         ).returns(Interface::CompletionItem)
       end
-      def build_entry_completion(real_name, incomplete_name, node, entries, top_level)
+      def build_entry_completion(real_name, incomplete_name, range, entries, top_level)
         first_entry = T.must(entries.first)
         kind = case first_entry
         when RubyIndexer::Entry::Class
@@ -263,20 +352,23 @@ module RubyLsp
         #
         #  Foo::B # --> completion inserts `Bar` instead of `Foo::Bar`
         # end
-        @nesting.each do |namespace|
-          prefix = "#{namespace}::"
-          shortened_name = insertion_text.delete_prefix(prefix)
+        nesting = @node_context.nesting
+        unless @node_context.fully_qualified_name.start_with?(incomplete_name)
+          nesting.each do |namespace|
+            prefix = "#{namespace}::"
+            shortened_name = insertion_text.delete_prefix(prefix)
 
-          # If a different entry exists for the shortened name, then there's a conflict and we should not shorten it
-          conflict_name = "#{@nesting.join("::")}::#{shortened_name}"
-          break if real_name != conflict_name && @index[conflict_name]
+            # If a different entry exists for the shortened name, then there's a conflict and we should not shorten it
+            conflict_name = "#{@node_context.fully_qualified_name}::#{shortened_name}"
+            break if real_name != conflict_name && @index[conflict_name]
 
-          insertion_text = shortened_name
+            insertion_text = shortened_name
 
-          # If the user is typing a fully qualified name `Foo::Bar::Baz`, then we should not use the short name (e.g.:
-          # `Baz`) as filtering. So we only shorten the filter text if the user is not including the namespaces in their
-          # typing
-          filter_text.delete_prefix!(prefix) unless incomplete_name.start_with?(prefix)
+            # If the user is typing a fully qualified name `Foo::Bar::Baz`, then we should not use the short name (e.g.:
+            # `Baz`) as filtering. So we only shorten the filter text if the user is not including the namespaces in
+            # their typing
+            filter_text.delete_prefix!(prefix) unless incomplete_name.start_with?(prefix)
+          end
         end
 
         # When using a top level constant reference (e.g.: `::Bar`), the editor includes the `::` as part of the filter.
@@ -286,7 +378,7 @@ module RubyLsp
           label: real_name,
           filter_text: filter_text,
           text_edit: Interface::TextEdit.new(
-            range: range_from_node(node),
+            range: range,
             new_text: insertion_text,
           ),
           kind: kind,
@@ -309,8 +401,9 @@ module RubyLsp
       # ```
       sig { params(entry_name: String).returns(T::Boolean) }
       def top_level?(entry_name)
-        @nesting.length.downto(0).each do |i|
-          prefix = T.must(@nesting[0...i]).join("::")
+        nesting = @node_context.nesting
+        nesting.length.downto(0).each do |i|
+          prefix = T.must(nesting[0...i]).join("::")
           full_name = prefix.empty? ? entry_name : "#{prefix}::#{entry_name}"
           next if full_name == entry_name
 

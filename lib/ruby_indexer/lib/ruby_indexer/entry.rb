@@ -3,6 +3,14 @@
 
 module RubyIndexer
   class Entry
+    class Visibility < T::Enum
+      enums do
+        PUBLIC = new(:public)
+        PROTECTED = new(:protected)
+        PRIVATE = new(:private)
+      end
+    end
+
     extend T::Sig
 
     sig { returns(String) }
@@ -17,7 +25,7 @@ module RubyIndexer
     sig { returns(T::Array[String]) }
     attr_reader :comments
 
-    sig { returns(Symbol) }
+    sig { returns(Visibility) }
     attr_accessor :visibility
 
     sig do
@@ -32,7 +40,7 @@ module RubyIndexer
       @name = name
       @file_path = file_path
       @comments = comments
-      @visibility = T.let(:public, Symbol)
+      @visibility = T.let(Visibility::PUBLIC, Visibility)
 
       @location = T.let(
         if location.is_a?(Prism::Location)
@@ -49,10 +57,34 @@ module RubyIndexer
       )
     end
 
+    sig { returns(T::Boolean) }
+    def private?
+      visibility == Visibility::PRIVATE
+    end
+
     sig { returns(String) }
     def file_name
       File.basename(@file_path)
     end
+
+    class ModuleOperation
+      extend T::Sig
+      extend T::Helpers
+
+      abstract!
+
+      sig { returns(String) }
+      attr_reader :module_name
+
+      sig { params(module_name: String).void }
+      def initialize(module_name)
+        @module_name = module_name
+      end
+    end
+
+    class Include < ModuleOperation; end
+    class Prepend < ModuleOperation; end
+    class Extend < ModuleOperation; end
 
     class Namespace < Entry
       extend T::Sig
@@ -61,13 +93,40 @@ module RubyIndexer
       abstract!
 
       sig { returns(T::Array[String]) }
-      def included_modules
-        @included_modules ||= T.let([], T.nilable(T::Array[String]))
+      attr_reader :nesting
+
+      sig do
+        params(
+          nesting: T::Array[String],
+          file_path: String,
+          location: T.any(Prism::Location, RubyIndexer::Location),
+          comments: T::Array[String],
+        ).void
+      end
+      def initialize(nesting, file_path, location, comments)
+        @name = T.let(nesting.join("::"), String)
+        # The original nesting where this namespace was discovered
+        @nesting = nesting
+
+        super(@name, file_path, location, comments)
       end
 
       sig { returns(T::Array[String]) }
-      def prepended_modules
-        @prepended_modules ||= T.let([], T.nilable(T::Array[String]))
+      def mixin_operation_module_names
+        mixin_operations.map(&:module_name)
+      end
+
+      # Stores all explicit prepend, include and extend operations in the exact order they were discovered in the source
+      # code. Maintaining the order is essential to linearize ancestors the right way when a module is both included
+      # and prepended
+      sig { returns(T::Array[ModuleOperation]) }
+      def mixin_operations
+        @mixin_operations ||= T.let([], T.nilable(T::Array[ModuleOperation]))
+      end
+
+      sig { returns(Integer) }
+      def ancestor_hash
+        mixin_operation_module_names.hash
       end
     end
 
@@ -84,16 +143,22 @@ module RubyIndexer
 
       sig do
         params(
-          name: String,
+          nesting: T::Array[String],
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
           parent_class: T.nilable(String),
         ).void
       end
-      def initialize(name, file_path, location, comments, parent_class)
-        super(name, file_path, location, comments)
+      def initialize(nesting, file_path, location, comments, parent_class)
+        super(nesting, file_path, location, comments)
+
         @parent_class = T.let(parent_class, T.nilable(String))
+      end
+
+      sig { override.returns(Integer) }
+      def ancestor_hash
+        [mixin_operation_module_names, @parent_class].hash
       end
     end
 
@@ -188,11 +253,13 @@ module RubyIndexer
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
+          visibility: Visibility,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, owner)
+      def initialize(name, file_path, location, comments, visibility, owner) # rubocop:disable Metrics/ParameterLists
         super(name, file_path, location, comments)
+        @visibility = visibility
         @owner = owner
       end
 
@@ -227,11 +294,12 @@ module RubyIndexer
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
           parameters_node: T.nilable(Prism::ParametersNode),
+          visibility: Visibility,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, parameters_node, owner) # rubocop:disable Metrics/ParameterLists
-        super(name, file_path, location, comments, owner)
+      def initialize(name, file_path, location, comments, parameters_node, visibility, owner) # rubocop:disable Metrics/ParameterLists
+        super(name, file_path, location, comments, visibility, owner)
 
         @parameters = T.let(list_params(parameters_node), T::Array[Parameter])
       end
@@ -377,7 +445,28 @@ module RubyIndexer
       def initialize(target, unresolved_alias)
         super(unresolved_alias.name, unresolved_alias.file_path, unresolved_alias.location, unresolved_alias.comments)
 
+        @visibility = unresolved_alias.visibility
         @target = target
+      end
+    end
+
+    # Represents an instance variable e.g.: @a = 1
+    class InstanceVariable < Entry
+      sig { returns(T.nilable(Entry::Namespace)) }
+      attr_reader :owner
+
+      sig do
+        params(
+          name: String,
+          file_path: String,
+          location: T.any(Prism::Location, RubyIndexer::Location),
+          comments: T::Array[String],
+          owner: T.nilable(Entry::Namespace),
+        ).void
+      end
+      def initialize(name, file_path, location, comments, owner)
+        super(name, file_path, location, comments)
+        @owner = owner
       end
     end
   end

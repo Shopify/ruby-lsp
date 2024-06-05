@@ -104,7 +104,7 @@ module RubyLsp
           ),
         )
 
-        $stderr.puts(errored_addons.map(&:backtraces).join("\n\n"))
+        $stderr.puts(errored_addons.map(&:errors_details).join("\n\n"))
       end
     end
 
@@ -134,7 +134,7 @@ module RubyLsp
       when Hash
         # If the configuration is already a hash, merge it with a default value of `true`. That way clients don't have
         # to opt-in to every single feature
-        Hash.new(true).merge!(configured_features)
+        Hash.new(true).merge!(configured_features.transform_keys(&:to_s))
       else
         # If no configuration was passed by the client, just enable every feature
         Hash.new(true)
@@ -498,6 +498,13 @@ module RubyLsp
           ),
         )
         raise Requests::CodeActionResolve::CodeActionError
+      when Requests::CodeActionResolve::Error::UnknownCodeAction
+        send_message(
+          Notification.window_show_error(
+            "Unknown code action",
+          ),
+        )
+        raise Requests::CodeActionResolve::CodeActionError
       else
         send_message(Result.new(id: message[:id], response: result))
       end
@@ -619,8 +626,7 @@ module RubyLsp
         when Constant::FileChangeType::CREATED
           index.index_single(indexable)
         when Constant::FileChangeType::CHANGED
-          index.delete(indexable)
-          index.index_single(indexable)
+          index.handle_change(indexable)
         when Constant::FileChangeType::DELETED
           index.delete(indexable)
         end

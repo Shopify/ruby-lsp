@@ -61,7 +61,7 @@ module RubyLsp
   module MyGem
     class Addon < ::RubyLsp::Addon
       # Performs any activation that needs to happen once when the language server is booted
-      def activate(message_queue)
+      def activate(global_state, message_queue)
       end
 
       # Performs any cleanup when shutting down the server, like terminating a subprocess
@@ -131,7 +131,7 @@ following listener implementation.
 module RubyLsp
   module MyGem
     class Addon < ::RubyLsp::Addon
-      def activate(message_queue)
+      def activate(global_state, message_queue)
         @message_queue = message_queue
         @config = SomeConfiguration.new
       end
@@ -143,7 +143,7 @@ module RubyLsp
         "Ruby LSP My Gem"
       end
 
-      def create_hover_listener(response_builder, nesting, index, dispatcher)
+      def create_hover_listener(response_builder, node_context, index, dispatcher)
         # Use the listener factory methods to instantiate listeners with parameters sent by the LSP combined with any
         # pre-computed information in the addon. These factory methods are invoked on every request
         Hover.new(client, response_builder, @config, dispatcher)
@@ -249,7 +249,7 @@ interested in using it.
 module RubyLsp
   module MyGem
     class Addon < ::RubyLsp::Addon
-      def activate(message_queue)
+      def activate(global_state, message_queue)
         @message_queue = message_queue
       end
 
@@ -259,13 +259,13 @@ module RubyLsp
         "Ruby LSP My Gem"
       end
 
-      def create_hover_listener(response_builder, nesting, index, dispatcher)
-        MyHoverListener.new(@message_queue, response_builder, nesting, index, dispatcher)
+      def create_hover_listener(response_builder, node_context, index, dispatcher)
+        MyHoverListener.new(@message_queue, response_builder, node_context, index, dispatcher)
       end
     end
 
     class MyHoverListener
-      def initialize(message_queue, response_builder, nesting, index, dispatcher)
+      def initialize(message_queue, response_builder, node_context, index, dispatcher)
         @message_queue = message_queue
 
         @message_queue << Notification.new(

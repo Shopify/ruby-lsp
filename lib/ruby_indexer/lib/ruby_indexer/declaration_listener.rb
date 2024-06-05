@@ -11,6 +11,7 @@ module RubyIndexer
     def initialize(index, dispatcher, parse_result, file_path)
       @index = index
       @file_path = file_path
+      @visibility_stack = T.let([Entry::Visibility::PUBLIC], T::Array[Entry::Visibility])
       @comments_by_line = T.let(
         parse_result.comments.to_h do |c|
           [c.location.start_line, c]
@@ -35,6 +36,7 @@ module RubyIndexer
         :on_def_node_enter,
         :on_def_node_leave,
         :on_call_node_enter,
+        :on_call_node_leave,
         :on_multi_write_node_enter,
         :on_constant_path_write_node_enter,
         :on_constant_path_or_write_node_enter,
@@ -45,11 +47,17 @@ module RubyIndexer
         :on_constant_or_write_node_enter,
         :on_constant_and_write_node_enter,
         :on_constant_operator_write_node_enter,
+        :on_instance_variable_write_node_enter,
+        :on_instance_variable_and_write_node_enter,
+        :on_instance_variable_operator_write_node_enter,
+        :on_instance_variable_or_write_node_enter,
+        :on_instance_variable_target_node_enter,
       )
     end
 
     sig { params(node: Prism::ClassNode).void }
     def on_class_node_enter(node)
+      @visibility_stack.push(Entry::Visibility::PUBLIC)
       name = node.constant_path.location.slice
 
       comments = collect_comments(node)
@@ -60,8 +68,10 @@ module RubyIndexer
         superclass.slice
       end
 
+      nesting = name.start_with?("::") ? [name.delete_prefix("::")] : @stack + [name.delete_prefix("::")]
+
       entry = Entry::Class.new(
-        fully_qualify_name(name),
+        nesting,
         @file_path,
         node.location,
         comments,
@@ -77,14 +87,18 @@ module RubyIndexer
     def on_class_node_leave(node)
       @stack.pop
       @owner_stack.pop
+      @visibility_stack.pop
     end
 
     sig { params(node: Prism::ModuleNode).void }
     def on_module_node_enter(node)
+      @visibility_stack.push(Entry::Visibility::PUBLIC)
       name = node.constant_path.location.slice
 
       comments = collect_comments(node)
-      entry = Entry::Module.new(fully_qualify_name(name), @file_path, node.location, comments)
+
+      nesting = name.start_with?("::") ? [name.delete_prefix("::")] : @stack + [name.delete_prefix("::")]
+      entry = Entry::Module.new(nesting, @file_path, node.location, comments)
 
       @owner_stack << entry
       @index << entry
@@ -95,6 +109,7 @@ module RubyIndexer
     def on_module_node_leave(node)
       @stack.pop
       @owner_stack.pop
+      @visibility_stack.pop
     end
 
     sig { params(node: Prism::MultiWriteNode).void }
@@ -194,10 +209,27 @@ module RubyIndexer
         handle_attribute(node, reader: false, writer: true)
       when :attr_accessor
         handle_attribute(node, reader: true, writer: true)
-      when :include
-        handle_module_operation(node, :included_modules)
-      when :prepend
-        handle_module_operation(node, :prepended_modules)
+      when :include, :prepend, :extend
+        handle_module_operation(node, message)
+      when :public
+        @visibility_stack.push(Entry::Visibility::PUBLIC)
+      when :protected
+        @visibility_stack.push(Entry::Visibility::PROTECTED)
+      when :private
+        @visibility_stack.push(Entry::Visibility::PRIVATE)
+      end
+    end
+
+    sig { params(node: Prism::CallNode).void }
+    def on_call_node_leave(node)
+      message = node.name
+      case message
+      when :public, :protected, :private
+        # We want to restore the visibility stack when we leave a method definition with a visibility modifier
+        # e.g. `private def foo; end`
+        if node.arguments&.arguments&.first&.is_a?(Prism::DefNode)
+          @visibility_stack.pop
+        end
       end
     end
 
@@ -206,6 +238,7 @@ module RubyIndexer
       @inside_def = true
       method_name = node.name.to_s
       comments = collect_comments(node)
+
       case node.receiver
       when nil
         @index << Entry::InstanceMethod.new(
@@ -214,6 +247,7 @@ module RubyIndexer
           node.location,
           comments,
           node.parameters,
+          current_visibility,
           @owner_stack.last,
         )
       when Prism::SelfNode
@@ -223,6 +257,7 @@ module RubyIndexer
           node.location,
           comments,
           node.parameters,
+          current_visibility,
           @owner_stack.last,
         )
       end
@@ -231,6 +266,76 @@ module RubyIndexer
     sig { params(node: Prism::DefNode).void }
     def on_def_node_leave(node)
       @inside_def = false
+    end
+
+    sig { params(node: Prism::InstanceVariableWriteNode).void }
+    def on_instance_variable_write_node_enter(node)
+      name = node.name.to_s
+      return if name == "@"
+
+      @index << Entry::InstanceVariable.new(
+        name,
+        @file_path,
+        node.name_loc,
+        collect_comments(node),
+        @owner_stack.last,
+      )
+    end
+
+    sig { params(node: Prism::InstanceVariableAndWriteNode).void }
+    def on_instance_variable_and_write_node_enter(node)
+      name = node.name.to_s
+      return if name == "@"
+
+      @index << Entry::InstanceVariable.new(
+        name,
+        @file_path,
+        node.name_loc,
+        collect_comments(node),
+        @owner_stack.last,
+      )
+    end
+
+    sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
+    def on_instance_variable_operator_write_node_enter(node)
+      name = node.name.to_s
+      return if name == "@"
+
+      @index << Entry::InstanceVariable.new(
+        name,
+        @file_path,
+        node.name_loc,
+        collect_comments(node),
+        @owner_stack.last,
+      )
+    end
+
+    sig { params(node: Prism::InstanceVariableOrWriteNode).void }
+    def on_instance_variable_or_write_node_enter(node)
+      name = node.name.to_s
+      return if name == "@"
+
+      @index << Entry::InstanceVariable.new(
+        name,
+        @file_path,
+        node.name_loc,
+        collect_comments(node),
+        @owner_stack.last,
+      )
+    end
+
+    sig { params(node: Prism::InstanceVariableTargetNode).void }
+    def on_instance_variable_target_node_enter(node)
+      name = node.name.to_s
+      return if name == "@"
+
+      @index << Entry::InstanceVariable.new(
+        name,
+        @file_path,
+        node.location,
+        collect_comments(node),
+        @owner_stack.last,
+      )
     end
 
     private
@@ -257,7 +362,7 @@ module RubyIndexer
       # The private_constant method does not resolve the constant name. It always points to a constant that needs to
       # exist in the current namespace
       entries = @index[fully_qualify_name(name)]
-      entries&.each { |entry| entry.visibility = :private }
+      entries&.each { |entry| entry.visibility = Entry::Visibility::PRIVATE }
     end
 
     sig do
@@ -354,8 +459,15 @@ module RubyIndexer
 
         next unless name && loc
 
-        @index << Entry::Accessor.new(name, @file_path, loc, comments, @owner_stack.last) if reader
-        @index << Entry::Accessor.new("#{name}=", @file_path, loc, comments, @owner_stack.last) if writer
+        @index << Entry::Accessor.new(name, @file_path, loc, comments, current_visibility, @owner_stack.last) if reader
+        @index << Entry::Accessor.new(
+          "#{name}=",
+          @file_path,
+          loc,
+          comments,
+          current_visibility,
+          @owner_stack.last,
+        ) if writer
       end
     end
 
@@ -369,17 +481,26 @@ module RubyIndexer
       arguments = node.arguments&.arguments
       return unless arguments
 
-      names = arguments.filter_map do |node|
-        if node.is_a?(Prism::ConstantReadNode) || node.is_a?(Prism::ConstantPathNode)
-          node.full_name
+      arguments.each do |node|
+        next unless node.is_a?(Prism::ConstantReadNode) || node.is_a?(Prism::ConstantPathNode)
+
+        case operation
+        when :include
+          owner.mixin_operations << Entry::Include.new(node.full_name)
+        when :prepend
+          owner.mixin_operations << Entry::Prepend.new(node.full_name)
+        when :extend
+          owner.mixin_operations << Entry::Extend.new(node.full_name)
         end
-      rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError
-        # TO DO: add MissingNodesInConstantPathError when released in Prism
-        # If a constant path reference is dynamic or missing parts, we can't
-        # index it
+      rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
+             Prism::ConstantPathNode::MissingNodesInConstantPathError
+        # Do nothing
       end
-      collection = operation == :included_modules ? owner.included_modules : owner.prepended_modules
-      collection.concat(names)
+    end
+
+    sig { returns(Entry::Visibility) }
+    def current_visibility
+      T.must(@visibility_stack.last)
     end
   end
 end

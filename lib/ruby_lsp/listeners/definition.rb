@@ -14,17 +14,17 @@ module RubyLsp
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::Location],
           global_state: GlobalState,
           uri: URI::Generic,
-          nesting: T::Array[String],
+          node_context: NodeContext,
           dispatcher: Prism::Dispatcher,
           typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(response_builder, global_state, uri, nesting, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, global_state, uri, node_context, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
         @uri = uri
-        @nesting = nesting
+        @node_context = node_context
         @typechecker_enabled = typechecker_enabled
 
         dispatcher.register(
@@ -33,6 +33,12 @@ module RubyLsp
           :on_block_argument_node_enter,
           :on_constant_read_node_enter,
           :on_constant_path_node_enter,
+          :on_instance_variable_read_node_enter,
+          :on_instance_variable_write_node_enter,
+          :on_instance_variable_and_write_node_enter,
+          :on_instance_variable_operator_write_node_enter,
+          :on_instance_variable_or_write_node_enter,
+          :on_instance_variable_target_node_enter,
         )
       end
 
@@ -74,12 +80,62 @@ module RubyLsp
         find_in_index(name)
       end
 
+      sig { params(node: Prism::InstanceVariableReadNode).void }
+      def on_instance_variable_read_node_enter(node)
+        handle_instance_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableWriteNode).void }
+      def on_instance_variable_write_node_enter(node)
+        handle_instance_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableAndWriteNode).void }
+      def on_instance_variable_and_write_node_enter(node)
+        handle_instance_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
+      def on_instance_variable_operator_write_node_enter(node)
+        handle_instance_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableOrWriteNode).void }
+      def on_instance_variable_or_write_node_enter(node)
+        handle_instance_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableTargetNode).void }
+      def on_instance_variable_target_node_enter(node)
+        handle_instance_variable_definition(node.name.to_s)
+      end
+
       private
+
+      sig { params(name: String).void }
+      def handle_instance_variable_definition(name)
+        entries = @index.resolve_instance_variable(name, @node_context.fully_qualified_name)
+        return unless entries
+
+        entries.each do |entry|
+          location = entry.location
+
+          @response_builder << Interface::Location.new(
+            uri: URI::Generic.from_path(path: entry.file_path).to_s,
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
+              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
+            ),
+          )
+        end
+      rescue RubyIndexer::Index::NonExistingNamespaceError
+        # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
+      end
 
       sig { params(message: String, self_receiver: T::Boolean).void }
       def handle_method_definition(message, self_receiver)
         methods = if self_receiver
-          @index.resolve_method(message, @nesting.join("::"))
+          @index.resolve_method(message, @node_context.fully_qualified_name)
         else
           # If the method doesn't have a receiver, then we provide a few candidates to jump to
           # But we don't want to provide too many candidates, as it can be overwhelming
@@ -147,13 +203,13 @@ module RubyLsp
 
       sig { params(value: String).void }
       def find_in_index(value)
-        entries = @index.resolve(value, @nesting)
+        entries = @index.resolve(value, @node_context.nesting)
         return unless entries
 
         # We should only allow jumping to the definition of private constants if the constant is defined in the same
         # namespace as the reference
         first_entry = T.must(entries.first)
-        return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{value}"
+        return if first_entry.private? && first_entry.name != "#{@node_context.fully_qualified_name}::#{value}"
 
         entries.each do |entry|
           location = entry.location

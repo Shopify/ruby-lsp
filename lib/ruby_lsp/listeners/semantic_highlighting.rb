@@ -58,6 +58,7 @@ module RubyLsp
           :on_constant_operator_write_node_enter,
           :on_constant_or_write_node_enter,
           :on_constant_target_node_enter,
+          :on_constant_path_node_enter,
           :on_local_variable_and_write_node_enter,
           :on_local_variable_operator_write_node_enter,
           :on_local_variable_or_write_node_enter,
@@ -302,17 +303,64 @@ module RubyLsp
       def on_class_node_enter(node)
         return unless visible?(node, @range)
 
-        @response_builder.add_token(node.constant_path.location, :class, [:declaration])
+        constant_path = node.constant_path
+
+        if constant_path.is_a?(Prism::ConstantReadNode)
+          @response_builder.add_token(constant_path.location, :class, [:declaration])
+        else
+          each_constant_path_part(constant_path) do |part|
+            loc = case part
+            when Prism::ConstantPathNode
+              part.name_loc
+            when Prism::ConstantReadNode
+              part.location
+            end
+            next unless loc
+
+            @response_builder.add_token(loc, :class, [:declaration])
+          end
+        end
 
         superclass = node.superclass
-        @response_builder.add_token(superclass.location, :class) if superclass
+
+        if superclass.is_a?(Prism::ConstantReadNode)
+          @response_builder.add_token(superclass.location, :class)
+        elsif superclass
+          each_constant_path_part(superclass) do |part|
+            loc = case part
+            when Prism::ConstantPathNode
+              part.name_loc
+            when Prism::ConstantReadNode
+              part.location
+            end
+            next unless loc
+
+            @response_builder.add_token(loc, :class)
+          end
+        end
       end
 
       sig { params(node: Prism::ModuleNode).void }
       def on_module_node_enter(node)
         return unless visible?(node, @range)
 
-        @response_builder.add_token(node.constant_path.location, :namespace, [:declaration])
+        constant_path = node.constant_path
+
+        if constant_path.is_a?(Prism::ConstantReadNode)
+          @response_builder.add_token(constant_path.location, :namespace, [:declaration])
+        else
+          each_constant_path_part(constant_path) do |part|
+            loc = case part
+            when Prism::ConstantPathNode
+              part.name_loc
+            when Prism::ConstantReadNode
+              part.location
+            end
+            next unless loc
+
+            @response_builder.add_token(loc, :namespace, [:declaration])
+          end
+        end
       end
 
       sig { params(node: Prism::ImplicitNode).void }
@@ -325,6 +373,14 @@ module RubyLsp
       sig { params(node: Prism::ImplicitNode).void }
       def on_implicit_node_leave(node)
         @inside_implicit_node = false
+      end
+
+      sig { params(node: Prism::ConstantPathNode).void }
+      def on_constant_path_node_enter(node)
+        return if @inside_implicit_node
+        return unless visible?(node, @range)
+
+        @response_builder.add_token(node.name_loc, :namespace)
       end
 
       private

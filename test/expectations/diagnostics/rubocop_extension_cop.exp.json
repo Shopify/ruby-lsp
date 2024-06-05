@@ -1,0 +1,100 @@
+{
+  "result": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 4
+        },
+        "end": {
+          "line": 5,
+          "character": 25
+        }
+      },
+      "severity": 3,
+      "code": "Minitest/AssertEmptyLiteral",
+      "codeDescription": {
+        "href": "https://docs.rubocop.org/rubocop-minitest/cops_minitest.html#minitestassertemptyliteral"
+      },
+      "source": "RuboCop",
+      "message": "Minitest/AssertEmptyLiteral: Prefer using `assert_empty(foo)`.",
+      "data": {
+        "correctable": true,
+        "code_actions": [
+          {
+            "title": "Autocorrect Minitest/AssertEmptyLiteral",
+            "kind": "quickfix",
+            "isPreferred": true,
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
+                  },
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 5,
+                          "character": 4
+                        },
+                        "end": {
+                          "line": 5,
+                          "character": 16
+                        }
+                      },
+                      "newText": "assert_empty"
+                    },
+                    {
+                      "range": {
+                        "start": {
+                          "line": 5,
+                          "character": 17
+                        },
+                        "end": {
+                          "line": 5,
+                          "character": 24
+                        }
+                      },
+                      "newText": "foo"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "title": "Disable Minitest/AssertEmptyLiteral for this line",
+            "kind": "quickfix",
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
+                  },
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 5,
+                          "character": 25
+                        },
+                        "end": {
+                          "line": 5,
+                          "character": 25
+                        }
+                      },
+                      "newText": " # rubocop:disable Minitest/AssertEmptyLiteral"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

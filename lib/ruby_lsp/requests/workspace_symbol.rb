@@ -39,7 +39,7 @@ module RubyLsp
           next if @global_state.typechecker && not_in_dependencies?(file_path)
 
           # We should never show private symbols when searching the entire workspace
-          next if entry.visibility == :private
+          next if entry.private?
 
           kind = kind_for_entry(entry)
           loc = entry.location
@@ -79,6 +79,8 @@ module RubyLsp
           entry.name == "initialize" ? Constant::SymbolKind::CONSTRUCTOR : Constant::SymbolKind::METHOD
         when RubyIndexer::Entry::Accessor
           Constant::SymbolKind::PROPERTY
+        when RubyIndexer::Entry::InstanceVariable
+          Constant::SymbolKind::FIELD
         end
       end
     end

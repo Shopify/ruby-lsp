@@ -215,16 +215,15 @@ class SetupBundlerTest < Minitest::Test
   end
 
   def test_uses_absolute_bundle_path_for_bundle_install
-    Bundler.settings.set_global("path", "vendor/bundle")
-    Object.any_instance.expects(:system).with(
-      bundle_env(".ruby-lsp/Gemfile"),
-      "(bundle check || bundle install) 1>&2",
-    ).returns(true)
-    Bundler::LockfileParser.any_instance.expects(:dependencies).returns({}).at_least_once
-    run_script(expected_path: File.expand_path("vendor/bundle", Dir.pwd))
+    Bundler.settings.temporary(path: "vendor/bundle") do
+      Object.any_instance.expects(:system).with(
+        bundle_env(".ruby-lsp/Gemfile"),
+        "(bundle check || bundle install) 1>&2",
+      ).returns(true)
+      Bundler::LockfileParser.any_instance.expects(:dependencies).returns({}).at_least_once
+      run_script(expected_path: File.expand_path("vendor/bundle", Dir.pwd))
+    end
   ensure
-    # We need to revert the changes to the bundler config or else this actually changes ~/.bundle/config
-    Bundler.settings.set_global("path", nil)
     FileUtils.rm_r(".ruby-lsp")
   end
 
@@ -366,19 +365,17 @@ class SetupBundlerTest < Minitest::Test
       Dir.chdir(dir) do
         bundle_gemfile = Pathname.new(".ruby-lsp").expand_path(Dir.pwd) + "Gemfile"
         Bundler.with_unbundled_env do
-          Bundler.settings.set_local("without", "production")
-          Object.any_instance.expects(:system).with(
-            bundle_env(bundle_gemfile.to_s),
-            "(bundle check || bundle install) 1>&2",
-          ).returns(true)
+          Bundler.settings.temporary(without: "production") do
+            Object.any_instance.expects(:system).with(
+              bundle_env(bundle_gemfile.to_s),
+              "(bundle check || bundle install) 1>&2",
+            ).returns(true)
 
-          run_script
+            run_script
+          end
         end
       end
     end
-  ensure
-    # CI uses a local bundle config and we don't want to delete that
-    FileUtils.rm_r(File.join(Dir.pwd, ".bundle")) unless ENV["CI"]
   end
 
   def test_custom_bundle_uses_alternative_gemfiles

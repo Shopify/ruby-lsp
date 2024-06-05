@@ -38,7 +38,11 @@ module RubyLsp
           @diagnostic_runner.run(filename, document.source)
 
           @diagnostic_runner.offenses.map do |offense|
-            Support::RuboCopDiagnostic.new(document, offense, uri).to_lsp_diagnostic
+            Support::RuboCopDiagnostic.new(
+              document,
+              offense,
+              uri,
+            ).to_lsp_diagnostic(@diagnostic_runner.config_for_working_directory)
           end
         end
       end
