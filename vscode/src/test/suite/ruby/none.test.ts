@@ -40,7 +40,12 @@ suite("None", () => {
     assert.ok(
       execStub.calledOnceWithExactly(
         `ruby -W0 -rjson -e '${activationScript}'`,
-        { cwd: uri.fsPath },
+        {
+          cwd: uri.fsPath,
+          shell: vscode.env.shell,
+          // eslint-disable-next-line no-process-env
+          env: process.env,
+        },
       ),
     );
 

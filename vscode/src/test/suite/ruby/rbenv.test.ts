@@ -44,7 +44,12 @@ suite("Rbenv", () => {
     assert.ok(
       execStub.calledOnceWithExactly(
         `rbenv exec ruby -W0 -rjson -e '${activationScript}'`,
-        { cwd: workspacePath },
+        {
+          cwd: workspacePath,
+          shell: vscode.env.shell,
+          // eslint-disable-next-line no-process-env
+          env: process.env,
+        },
       ),
     );
 
@@ -83,7 +88,12 @@ suite("Rbenv", () => {
     assert.ok(
       execStub.calledOnceWithExactly(
         `rbenv exec ruby -W0 -rjson -e '${activationScript}'`,
-        { cwd: workspacePath },
+        {
+          cwd: workspacePath,
+          shell: vscode.env.shell,
+          // eslint-disable-next-line no-process-env
+          env: process.env,
+        },
       ),
     );
 
