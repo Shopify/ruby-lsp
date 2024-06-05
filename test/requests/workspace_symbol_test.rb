@@ -52,26 +52,6 @@ class WorkspaceSymbolTest < Minitest::Test
     assert_equal(RubyLsp::Constant::SymbolKind::CONSTANT, T.must(result).kind)
   end
 
-  def test_matches_only_gem_symbols_if_typechecker_is_present
-    # create a new global state so the stub is not used
-    @global_state = RubyLsp::GlobalState.new
-    @index = @global_state.index
-    indexable = RubyIndexer::IndexablePath.new(nil, "#{Dir.pwd}/workspace_symbol_foo.rb")
-
-    @index.index_single(indexable, <<~RUBY)
-      class Foo; end
-    RUBY
-
-    path = "#{Bundler.bundle_path}/gems/fake-gem-0.1.0/lib/gem_symbol_foo.rb"
-    @index.index_single(RubyIndexer::IndexablePath.new(nil, path), <<~RUBY)
-      class Foo; end
-    RUBY
-
-    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Foo").perform
-    assert_equal(1, result.length)
-    assert_equal(URI::Generic.from_path(path: path).to_s, T.must(result.first).location.uri)
-  end
-
   def test_symbols_include_container_name
     @index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake.rb"), <<~RUBY)
       module Foo
@@ -85,11 +65,11 @@ class WorkspaceSymbolTest < Minitest::Test
     assert_equal("Foo", T.must(result).container_name)
   end
 
-  def test_finds_default_gem_symbols
+  def test_does_not_include_symbols_from_dependencies
     @index.index_single(RubyIndexer::IndexablePath.new(nil, "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb"))
 
     result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Pathname").perform
-    refute_empty(result)
+    assert_empty(result)
   end
 
   def test_does_not_include_private_constants
