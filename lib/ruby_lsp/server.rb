@@ -175,7 +175,7 @@ module RubyLsp
           completion_provider: completion_provider,
           code_lens_provider: code_lens_provider,
           definition_provider: enabled_features["definition"],
-          workspace_symbol_provider: enabled_features["workspaceSymbol"],
+          workspace_symbol_provider: enabled_features["workspaceSymbol"] && !@global_state.typechecker,
           signature_help_provider: signature_help_provider,
         ),
         serverInfo: {
