@@ -128,6 +128,7 @@ module RubyLsp
       closest = node
       parent = T.let(nil, T.nilable(Prism::Node))
       nesting = T.let([], T::Array[T.any(Prism::ClassNode, Prism::ModuleNode)])
+      call_node = T.let(nil, T.nilable(Prism::CallNode))
 
       until queue.empty?
         candidate = queue.shift
@@ -159,6 +160,15 @@ module RubyLsp
           nesting << candidate
         end
 
+        if candidate.is_a?(Prism::CallNode)
+          arg_loc = candidate.arguments&.location
+          blk_loc = candidate.block&.location
+          if (arg_loc && (arg_loc.start_offset...arg_loc.end_offset).cover?(char_position)) ||
+              (blk_loc && (blk_loc.start_offset...blk_loc.end_offset).cover?(char_position))
+            call_node = candidate
+          end
+        end
+
         # If there are node types to filter by, and the current node is not one of those types, then skip it
         next if node_types.any? && node_types.none? { |type| candidate.class == type }
 
@@ -183,7 +193,7 @@ module RubyLsp
         nesting.pop if last_level && last_level.constant_path == closest
       end
 
-      NodeContext.new(closest, parent, nesting.map { |n| n.constant_path.location.slice })
+      NodeContext.new(closest, parent, nesting.map { |n| n.constant_path.location.slice }, call_node)
     end
 
     sig { returns(T::Boolean) }
