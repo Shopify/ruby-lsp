@@ -3,8 +3,6 @@ import os from "os";
 
 import * as vscode from "vscode";
 
-import { asyncExec } from "../common";
-
 import { ActivationResult, VersionManager } from "./versionManager";
 
 // Ruby enVironment Manager. It manages Ruby application environments and enables switching between them.
@@ -17,12 +15,8 @@ export class Rvm extends VersionManager {
       "STDERR.print({ env: ENV.to_h, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }.to_json)";
 
     const installationPath = await this.findRvmInstallation();
-
-    const result = await asyncExec(
+    const result = await this.runScript(
       `${installationPath.fsPath} -W0 -rjson -e '${activationScript}'`,
-      {
-        cwd: this.bundleUri.fsPath,
-      },
     );
 
     const parsedResult = this.parseWithErrorHandling(result.stderr);

@@ -4,7 +4,6 @@ import path from "path";
 
 import * as vscode from "vscode";
 
-import { asyncExec } from "../common";
 import { WorkspaceChannel } from "../workspaceChannel";
 
 import { ActivationResult, VersionManager } from "./versionManager";
@@ -224,9 +223,8 @@ export class Chruby extends VersionManager {
       "STDERR.print(JSON.dump(data))",
     ].join(";");
 
-    const result = await asyncExec(
+    const result = await this.runScript(
       `${rubyExecutableUri.fsPath} -W0 -rjson -e '${script}'`,
-      { cwd: this.bundleUri.fsPath },
     );
 
     return this.parseWithErrorHandling(result.stderr);

@@ -5,8 +5,6 @@ import path from "path";
 
 import * as vscode from "vscode";
 
-import { asyncExec } from "../common";
-
 import { VersionManager, ActivationResult } from "./versionManager";
 
 // A tool to manage multiple runtime versions with a single CLI tool
@@ -18,13 +16,8 @@ export class Asdf extends VersionManager {
     const activationScript =
       "STDERR.print({env: ENV.to_h,yjit:!!defined?(RubyVM::YJIT),version:RUBY_VERSION}.to_json)";
 
-    const result = await asyncExec(
+    const result = await this.runScript(
       `. ${asdfUri.fsPath} && asdf exec ruby -W0 -rjson -e '${activationScript}'`,
-      {
-        cwd: this.bundleUri.fsPath,
-        shell: vscode.env.shell,
-        env: process.env,
-      },
     );
 
     const parsedResult = this.parseWithErrorHandling(result.stderr);
