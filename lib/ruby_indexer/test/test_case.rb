@@ -17,6 +17,7 @@ module RubyIndexer
 
     def assert_entry(expected_name, type, expected_location, visibility: nil)
       entries = @index[expected_name]
+      refute_nil(entries, "Expected #{expected_name} to be indexed")
       refute_empty(entries, "Expected #{expected_name} to be indexed")
 
       entry = entries.first

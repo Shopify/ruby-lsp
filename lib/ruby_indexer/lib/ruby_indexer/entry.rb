@@ -469,5 +469,33 @@ module RubyIndexer
         @owner = owner
       end
     end
+
+    class UnresolvedMethodAlias < Entry
+      extend T::Sig
+
+      sig { returns(String) }
+      attr_reader :new_name, :old_name
+
+      sig { returns(T.nilable(Entry::Namespace)) }
+      attr_reader :owner
+
+      sig do
+        params(
+          new_name: String,
+          old_name: String,
+          owner: T.nilable(Entry::Namespace),
+          file_path: String,
+          location: Prism::Location,
+          comments: T::Array[String],
+        ).void
+      end
+      def initialize(new_name, old_name, owner, file_path, location, comments) # rubocop:disable Metrics/ParameterLists
+        super(new_name, file_path, location, comments)
+
+        @new_name = new_name
+        @old_name = old_name
+        @owner = owner
+      end
+    end
   end
 end

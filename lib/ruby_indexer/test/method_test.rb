@@ -378,5 +378,25 @@ module RubyIndexer
       entry = T.must(@index["third"]&.first)
       assert_equal("Foo", T.must(entry.owner).name)
     end
+
+    def test_keeps_track_of_aliases
+      index(<<~RUBY)
+        class Foo
+          alias whatever to_s
+          alias_method :foo, :to_a
+          alias_method "bar", "to_a"
+
+          # These two are not indexed because they are dynamic or incomplete
+          alias_method baz, :to_a
+          alias_method :baz
+        end
+      RUBY
+
+      assert_entry("whatever", Entry::UnresolvedMethodAlias, "/fake/path/foo.rb:1-8:1-16")
+      assert_entry("foo", Entry::UnresolvedMethodAlias, "/fake/path/foo.rb:2-15:2-19")
+      assert_entry("bar", Entry::UnresolvedMethodAlias, "/fake/path/foo.rb:3-15:3-20")
+      # Foo plus 3 valid aliases
+      assert_equal(4, @index.instance_variable_get(:@entries).length)
+    end
   end
 end
