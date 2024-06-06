@@ -188,8 +188,8 @@
     "description": "New unless statement."
   },
   "Case": {
-		"prefix": ["case"],
-		"body": ["case $0", "when  $1", "  $2", "when  $3", "  $4", "else", "  $5", "end"],
-		"description": "New case statement."
-	}
+    "prefix": ["case"],
+    "body": ["case $0", "when  $1", "  $2", "when  $3", "  $4", "else", "  $5", "end"],
+    "description": "New case statement."
+  }
 }
