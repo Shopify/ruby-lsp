@@ -28,7 +28,8 @@ project. That directory contains another `Gemfile`, that includes the `ruby-lsp`
 dependencies. This approach allows us to automatically detect which formatter your project uses and which gems we need
 to index for features such as go to definition.
 
-> **Note**: we are working with the rubygems/bundler team to have this type of mechanism properly supported from within
+> ![NOTE]
+> We are working with the RubyGems/Bundler team to have this type of mechanism properly supported from within
 > Bundler itself, which is currently being experimented with in a plugin called `bundler-compose`. Once
 > `bundler-compose`is production ready, the entire custom bundle created under the `.ruby-lsp` directory will go away
 > and we'll rely on Bundler to compose the LOAD_PATH including the `ruby-lsp` gem.
@@ -97,6 +98,47 @@ This is always the result of a bug in the server. It should always fail graceful
 that prevents it from responding to new requests coming from the editor. If you encounter this, please submit a bug
 report [here](https://github.com/Shopify/ruby-lsp/issues/new?labels=bug&template=bug_template.yml) including the
 steps that led to the server getting stuck.
+
+### Gem installation locations and permissions
+
+To launch the Ruby LSP server, the `ruby-lsp` gem must be installed. And in order to automatically index your project's
+dependencies, they must also be installed so that we can read, parse and analyze their source files. The `ruby-lsp` gem
+is installed via `gem install` (using RubyGems). The project dependencies are installed via `bundle install` (using
+Bundler).
+
+If you use a non-default path to install your gems, please remember that RubyGems and Bundler require separate
+configurations to achieve that.
+
+For example, if you configure `BUNDLE_PATH` to point to `vendor/bundle` so that gems are installed inside the same
+directory as your project, `bundle install` will automatically pick that up and install them in the right place. But
+`gem install` will not as it requires a different setting to achieve it.
+
+You can apply your prefered installed locations for RubyGems by using the `~/.gemrc` file. In that file, you can decide
+to either install it with `--user-install` or select a specific installation directory with `--install-dir`.
+
+```yaml
+gem: --user-install
+# Or
+gem: --install-dir /my/preferred/path/for/gem/install
+```
+
+One scenario where this is useful is if the user doesn't have permissions for the default gem installation directory and
+`gem install` fails. For example, when using the system Ruby on certain Linux distributions.
+
+> ![NOTE]
+> Using non-default gem installation paths may lead to other integration issues with version managers. For example, for
+> Ruby 3.3.1 the default `GEM_HOME` is `~/.gem/ruby/3.3.0` (without the patch part of the version). However, `chruby`
+> (and potentially other version managers) override `GEM_HOME` to include the version patch resulting in
+> `~/.gem/ruby/3.3.1`. When you install a gem using `gem install --user-install`, RubyGems ignores the `GEM_HOME`
+> override and installs the gem inside `~/.gem/ruby/3.3.0`. This results in executables not being found because `chruby`
+> modified the `PATH` to only include executables installed under `~/.gem/ruby/3.3.1`.
+>
+> Similarly, the majority of version managers don't read your `~/.gemrc` configurations. If you use a custom
+> installation with `--install-dir`, it's unlikely that the version manager will know about it. This may result in the
+> gem executables not being found.
+>
+> Incompatibilities between RubyGems and version managers like this one are beyond the scope of the Ruby LSP and should
+> be reported either to RubyGems or the respective version manager.
 
 ### Developing on containers
 
