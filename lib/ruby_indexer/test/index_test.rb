@@ -107,16 +107,16 @@ module RubyIndexer
       RUBY
 
       result = @index.fuzzy_search("Bar")
-      assert_equal(1, result.length)
-      assert_equal(@index["Bar"].first, result.first)
+      assert_equal(3, result.length)
+      assert_equal(["Bar", "Backtrace", "Base"], result.map(&:name))
 
       result = @index.fuzzy_search("foobarsomeking")
-      assert_equal(5, result.length)
-      assert_equal(["Foo::Baz::Something", "Foo::Bar", "Foo::Baz", "Foo", "Bar"], result.map(&:name))
+      assert_equal(6, result.length)
+      assert_equal(["Foo::Baz::Something", "Foo::Bar", "Foo::Baz", "Foo", "Base", "Bar"], result.map(&:name))
 
       result = @index.fuzzy_search("FooBaz")
-      assert_equal(4, result.length)
-      assert_equal(["Foo::Baz", "Foo::Bar", "Foo", "Foo::Baz::Something"], result.map(&:name))
+      assert_equal(5, result.length)
+      assert_equal(["Foo::Baz", "Foo::Bar", "Foo", "Foo::Baz::Something", "Float"], result.map(&:name))
     end
 
     def test_index_single_ignores_directories
@@ -140,6 +140,8 @@ module RubyIndexer
     end
 
     def test_searching_for_entries_based_on_prefix
+      # For this test, it's easier if we don't include core classes and modules
+      @index = Index.new
       @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
         class Foo::Bar
         end
@@ -318,7 +320,8 @@ module RubyIndexer
 
     def test_index_single_does_not_fail_for_non_existing_file
       @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"))
-      assert_empty(@index.instance_variable_get(:@entries))
+      entries_after_indexing = @index.instance_variable_get(:@entries).keys
+      assert_equal(@default_indexed_entries.keys, entries_after_indexing)
     end
 
     def test_linearized_ancestors_basic_ordering
@@ -342,9 +345,9 @@ module RubyIndexer
           "B",
           "A",
           "Foo",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Foo"),
       )
@@ -354,9 +357,9 @@ module RubyIndexer
           "Bar",
           "B",
           "A",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Bar"),
       )
@@ -404,9 +407,9 @@ module RubyIndexer
           "A",
           "C",
           "Bar",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Foo"),
       )
@@ -435,9 +438,9 @@ module RubyIndexer
           "Foo",
           "B",
           "A",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Foo"),
       )
@@ -447,9 +450,9 @@ module RubyIndexer
           "B",
           "A",
           "Bar",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Bar"),
       )
@@ -496,9 +499,9 @@ module RubyIndexer
         [
           "A",
           "Foo",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Foo"),
       )
@@ -508,9 +511,9 @@ module RubyIndexer
           "A",
           "Bar",
           "A",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Bar"),
       )
@@ -522,15 +525,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_equal(
-        [
-          "Foo",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
-        ],
-        @index.linearized_ancestors_of("Foo"),
-      )
+      assert_equal(["Foo"], @index.linearized_ancestors_of("Foo"))
     end
 
     def test_ancestors_linearization_complex_prepend_duplication
@@ -555,9 +550,9 @@ module RubyIndexer
           "B",
           "C",
           "Foo",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Foo"),
       )
@@ -585,9 +580,9 @@ module RubyIndexer
           "C",
           "B",
           "A",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Foo"),
       )
@@ -616,9 +611,9 @@ module RubyIndexer
           "Foo::Bar",
           "Foo::Baz",
           "Foo::Something",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Foo::Bar"),
       )
@@ -626,9 +621,7 @@ module RubyIndexer
 
     def test_linearizing_ancestors_for_non_existing_namespaces
       index(<<~RUBY)
-        module Kernel
-          def Array(a); end
-        end
+        def Bar(a); end
       RUBY
 
       assert_raises(Index::NonExistingNamespaceError) do
@@ -636,7 +629,7 @@ module RubyIndexer
       end
 
       assert_raises(Index::NonExistingNamespaceError) do
-        @index.linearized_ancestors_of("Array")
+        @index.linearized_ancestors_of("Bar")
       end
     end
 
@@ -757,7 +750,7 @@ module RubyIndexer
           indexable_path = IndexablePath.new(nil, File.join(dir, "foo.rb"))
           @index.index_single(indexable_path)
 
-          assert_equal(["Bar", "Foo"], @index.linearized_ancestors_of("Bar"))
+          assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
 
           # Remove include to invalidate the ancestor tree
           File.write(File.join(dir, "foo.rb"), <<~RUBY)
@@ -770,7 +763,7 @@ module RubyIndexer
 
           @index.handle_change(indexable_path)
           assert_empty(@index.instance_variable_get(:@ancestors))
-          assert_equal(["Bar"], @index.linearized_ancestors_of("Bar"))
+          assert_equal(["Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end
       end
     end
@@ -791,7 +784,7 @@ module RubyIndexer
           indexable_path = IndexablePath.new(nil, File.join(dir, "foo.rb"))
           @index.index_single(indexable_path)
 
-          assert_equal(["Bar", "Foo"], @index.linearized_ancestors_of("Bar"))
+          assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
 
           # Remove include to invalidate the ancestor tree
           File.write(File.join(dir, "foo.rb"), <<~RUBY)
@@ -807,7 +800,7 @@ module RubyIndexer
 
           @index.handle_change(indexable_path)
           refute_empty(@index.instance_variable_get(:@ancestors))
-          assert_equal(["Bar", "Foo"], @index.linearized_ancestors_of("Bar"))
+          assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end
       end
     end
@@ -827,7 +820,7 @@ module RubyIndexer
           indexable_path = IndexablePath.new(nil, File.join(dir, "foo.rb"))
           @index.index_single(indexable_path)
 
-          assert_equal(["Bar", "Foo"], @index.linearized_ancestors_of("Bar"))
+          assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
 
           # Remove include to invalidate the ancestor tree
           File.write(File.join(dir, "foo.rb"), <<~RUBY)
@@ -840,7 +833,7 @@ module RubyIndexer
 
           @index.handle_change(indexable_path)
           assert_empty(@index.instance_variable_get(:@ancestors))
-          assert_equal(["Bar"], @index.linearized_ancestors_of("Bar"))
+          assert_equal(["Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end
       end
     end
@@ -1150,6 +1143,35 @@ module RubyIndexer
 
     def test_resolving_unindexed_constant_with_no_nesting
       assert_nil(@index.resolve("RSpec", []))
+    end
+
+    def test_object_superclass_resolution
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        module Foo
+          class Object; end
+
+          class Bar; end
+          class Baz < Object; end
+        end
+      RUBY
+
+      assert_equal(["Foo::Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Foo::Bar"))
+      assert_equal(
+        ["Foo::Baz", "Foo::Object", "Object", "Kernel", "BasicObject"],
+        @index.linearized_ancestors_of("Foo::Baz"),
+      )
+    end
+
+    def test_top_level_object_superclass_resolution
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        module Foo
+          class Object; end
+
+          class Bar < ::Object; end
+        end
+      RUBY
+
+      assert_equal(["Foo::Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Foo::Bar"))
     end
   end
 end

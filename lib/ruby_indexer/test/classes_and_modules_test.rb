@@ -191,7 +191,8 @@ module RubyIndexer
 
       @index.delete(IndexablePath.new(nil, "/fake/path/foo.rb"))
       refute_entry("Foo")
-      assert_empty(@index.instance_variable_get(:@files_to_entries))
+
+      assert_no_indexed_entries
     end
 
     def test_comments_can_be_attached_to_a_class
@@ -323,7 +324,7 @@ module RubyIndexer
       assert_equal("Bar", foo.parent_class)
 
       baz = T.must(@index["Baz"].first)
-      assert_nil(baz.parent_class)
+      assert_equal("::Object", baz.parent_class)
 
       qux = T.must(@index["Something::Qux"].first)
       assert_equal("::Baz", qux.parent_class)
