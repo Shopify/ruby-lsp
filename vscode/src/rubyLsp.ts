@@ -185,7 +185,11 @@ export class RubyLsp {
     context.subscriptions.push(
       vscode.commands.registerCommand(Command.Update, async () => {
         const workspace = await this.showWorkspacePick();
-        await workspace?.installOrUpdateServer();
+
+        if (workspace) {
+          await workspace.installOrUpdateServer(true);
+          await workspace.restart();
+        }
       }),
       vscode.commands.registerCommand(Command.Start, async () => {
         const workspace = await this.showWorkspacePick();
