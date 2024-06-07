@@ -57,7 +57,11 @@ suite("RVM", () => {
     assert.ok(
       execStub.calledOnceWithExactly(
         `${path.join(os.homedir(), ".rvm", "bin", "rvm-auto-ruby")} -W0 -rjson -e '${activationScript}'`,
-        { cwd: workspacePath },
+        {
+          cwd: workspacePath,
+          shell: vscode.env.shell,
+          env: process.env,
+        },
       ),
     );
 

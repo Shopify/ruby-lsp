@@ -43,7 +43,12 @@ suite("Custom", () => {
     assert.ok(
       execStub.calledOnceWithExactly(
         `my_version_manager activate_env && ruby -W0 -rjson -e '${activationScript}'`,
-        { cwd: uri.fsPath },
+        {
+          cwd: uri.fsPath,
+          shell: vscode.env.shell,
+          // eslint-disable-next-line no-process-env
+          env: process.env,
+        },
       ),
     );
 

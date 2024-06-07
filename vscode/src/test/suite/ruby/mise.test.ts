@@ -55,7 +55,12 @@ suite("Mise", () => {
     assert.ok(
       execStub.calledOnceWithExactly(
         `${os.homedir()}/.local/bin/mise x -- ruby -W0 -rjson -e '${activationScript}'`,
-        { cwd: workspacePath },
+        {
+          cwd: workspacePath,
+          shell: vscode.env.shell,
+          // eslint-disable-next-line no-process-env
+          env: process.env,
+        },
       ),
     );
 
@@ -109,7 +114,12 @@ suite("Mise", () => {
     assert.ok(
       execStub.calledOnceWithExactly(
         `${misePath} x -- ruby -W0 -rjson -e '${activationScript}'`,
-        { cwd: workspacePath },
+        {
+          cwd: workspacePath,
+          shell: vscode.env.shell,
+          // eslint-disable-next-line no-process-env
+          env: process.env,
+        },
       ),
     );
 
