@@ -8,7 +8,6 @@ on:
 
 jobs:
   check-labels:
-    if: github.event.review.state == 'APPROVED'
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
