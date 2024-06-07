@@ -210,7 +210,7 @@ export class Workspace implements WorkspaceInterface {
       return;
     }
 
-    // In addition to updating the global installation of the ruby-lsp gem, if the user manually requested an udpate, we
+    // In addition to updating the global installation of the ruby-lsp gem, if the user manually requested an update, we
     // should delete the `.ruby-lsp` to ensure that we'll lock a new version of the server that will actually be booted
     if (manualInvocation) {
       try {
