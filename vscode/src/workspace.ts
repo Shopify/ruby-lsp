@@ -80,7 +80,7 @@ export class Workspace implements WorkspaceInterface {
     }
 
     try {
-      await this.installOrUpdateServer();
+      await this.installOrUpdateServer(false);
     } catch (error: any) {
       this.error = true;
       await vscode.window.showErrorMessage(
@@ -175,7 +175,7 @@ export class Workspace implements WorkspaceInterface {
 
   // Install or update the `ruby-lsp` gem globally with `gem install ruby-lsp` or `gem update ruby-lsp`. We only try to
   // update on a daily basis, not every time the server boots
-  async installOrUpdateServer(): Promise<void> {
+  async installOrUpdateServer(manualInvocation: boolean): Promise<void> {
     // If there's a user configured custom bundle to run the LSP, then we do not perform auto-updates and let the user
     // manage that custom bundle themselves
     const customBundle: string = vscode.workspace
@@ -210,8 +210,24 @@ export class Workspace implements WorkspaceInterface {
       return;
     }
 
-    // If we haven't updated the gem in the last 24 hours, update it
+    // In addition to updating the global installation of the ruby-lsp gem, if the user manually requested an update, we
+    // should delete the `.ruby-lsp` to ensure that we'll lock a new version of the server that will actually be booted
+    if (manualInvocation) {
+      try {
+        await vscode.workspace.fs.delete(
+          vscode.Uri.joinPath(this.workspaceFolder.uri, ".ruby-lsp"),
+          { recursive: true },
+        );
+      } catch (error) {
+        this.outputChannel.info(
+          `Tried deleting ${vscode.Uri.joinPath(this.workspaceFolder.uri, ".ruby - lsp")}, but it doesn't exist`,
+        );
+      }
+    }
+
+    // If we haven't updated the gem in the last 24 hours or if the user manually asked for an update, update it
     if (
+      manualInvocation ||
       lastUpdatedAt === undefined ||
       Date.now() - lastUpdatedAt > oneDayInMs
     ) {
