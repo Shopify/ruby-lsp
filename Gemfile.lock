@@ -11,7 +11,7 @@ PATH
   specs:
     ruby-lsp (0.17.2)
       language_server-protocol (~> 3.17.0)
-      prism (>= 0.29.0, < 0.30)
+      prism (>= 0.29.0, < 0.31)
       rbs (>= 3, < 4)
       sorbet-runtime (>= 0.5.10782)
 
@@ -47,7 +47,7 @@ GEM
       ast (~> 2.4.1)
       racc
     prettier_print (1.2.1)
-    prism (0.29.0)
+    prism (0.30.0)
     psych (5.1.2)
       stringio
     racc (1.8.0)
