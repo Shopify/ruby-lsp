@@ -171,7 +171,7 @@ module RubyIndexer
     sig { returns(String) }
     def merge_exclude_patterns
       relative_patterns = @excluded_patterns
-        .select { |p| p.end_with?("/**/*") }
+        .select { |p| p.end_with?("/**/*") && (p.start_with?(Dir.pwd) || p.start_with?("**")) }
         .map { |p| p.delete_prefix("#{Dir.pwd}/") }
 
       "#{Dir.pwd}/{#{relative_patterns.join(",")}}"
