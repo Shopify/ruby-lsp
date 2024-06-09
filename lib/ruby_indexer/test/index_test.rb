@@ -1105,5 +1105,25 @@ module RubyIndexer
       foo_entry = T.must(@index.resolve("CONST", ["Namespace", "Index"])&.first)
       assert_equal(1, foo_entry.location.start_line)
     end
+
+    def test_instance_variables_completions_from_different_owners_with_conflicting_names
+      index(<<~RUBY)
+        class Foo
+          def initialize
+            @bar = 1
+          end
+        end
+
+        class Bar
+          def initialize
+            @bar = 2
+          end
+        end
+      RUBY
+
+      entry = T.must(@index.instance_variable_completion_candidates("@", "Bar")&.first)
+      assert_equal("@bar", entry.name)
+      assert_equal("Bar", T.must(entry.owner).name)
+    end
   end
 end

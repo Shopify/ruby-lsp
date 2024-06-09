@@ -413,8 +413,8 @@ module RubyIndexer
       entries = T.cast(prefix_search(name).flatten, T::Array[Entry::InstanceVariable])
       ancestors = linearized_ancestors_of(owner_name)
 
-      variables = entries.uniq(&:name)
-      variables.select! { |e| ancestors.any?(e.owner&.name) }
+      variables = entries.select { |e| ancestors.any?(e.owner&.name) }
+      variables.uniq!(&:name)
       variables
     end
 
