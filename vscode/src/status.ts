@@ -178,6 +178,32 @@ export class FormatterStatus extends StatusItem {
   }
 }
 
+export class AddonsStatus extends StatusItem {
+  constructor() {
+    super("addons");
+
+    this.item.name = "Ruby LSP Addons";
+    this.item.text = "Fetching addon information";
+  }
+
+  refresh(workspace: WorkspaceInterface): void {
+    if (!workspace.lspClient) {
+      return;
+    }
+    if (workspace.lspClient.addons === undefined) {
+      this.item.text =
+        "Addons: requires server to be v0.17.4 or higher to display this field";
+    } else if (workspace.lspClient.addons.length === 0) {
+      this.item.text = "Addons: none";
+    } else {
+      const addonNames = workspace.lspClient.addons.map((addon) =>
+        addon.errored ? `${addon.name} (errored)` : `${addon.name}`,
+      );
+      this.item.text = `Addons: ${addonNames.join(", ")}`;
+    }
+  }
+}
+
 export class StatusItems {
   private readonly items: StatusItem[] = [];
 
@@ -188,6 +214,7 @@ export class StatusItems {
       new ExperimentalFeaturesStatus(),
       new FeaturesStatus(),
       new FormatterStatus(),
+      new AddonsStatus(),
     ];
 
     STATUS_EMITTER.event((workspace) => {

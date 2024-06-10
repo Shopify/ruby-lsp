@@ -13,6 +13,7 @@ import {
   StatusItem,
   FeaturesStatus,
   FormatterStatus,
+  AddonsStatus,
 } from "../../status";
 import { Command, WorkspaceInterface } from "../../common";
 
@@ -35,6 +36,7 @@ suite("StatusItems", () => {
       workspace = {
         ruby,
         lspClient: {
+          addons: [],
           state: State.Running,
           formatter: "none",
           serverVersion: "1.0.0",
@@ -72,6 +74,7 @@ suite("StatusItems", () => {
         ruby,
         lspClient: {
           state: State.Running,
+          addons: [],
           formatter: "none",
           serverVersion: "1.0.0",
           sendRequest: <T>() => Promise.resolve([] as T),
@@ -129,6 +132,7 @@ suite("StatusItems", () => {
       workspace = {
         ruby,
         lspClient: {
+          addons: [],
           state: State.Running,
           formatter,
           serverVersion: "1.0.0",
@@ -157,6 +161,7 @@ suite("StatusItems", () => {
       workspace = {
         ruby,
         lspClient: {
+          addons: [],
           state: State.Running,
           formatter: "none",
           serverVersion: "1.0.0",
@@ -244,6 +249,7 @@ suite("StatusItems", () => {
       workspace = {
         ruby,
         lspClient: {
+          addons: [],
           state: State.Running,
           formatter: "auto",
           serverVersion: "1.0.0",
@@ -260,6 +266,53 @@ suite("StatusItems", () => {
       assert.strictEqual(status.item.name, "Formatter");
       assert.strictEqual(status.item.command?.title, "Help");
       assert.strictEqual(status.item.command.command, Command.FormatterHelp);
+    });
+  });
+
+  suite("AddonsStatus", () => {
+    beforeEach(() => {
+      ruby = {} as Ruby;
+      workspace = {
+        ruby,
+        lspClient: {
+          addons: undefined,
+          state: State.Running,
+          formatter: "auto",
+          serverVersion: "1.0.0",
+          sendRequest: <T>() => Promise.resolve([] as T),
+        },
+        error: false,
+      };
+      status = new AddonsStatus();
+      status.refresh(workspace);
+    });
+
+    test("Status displays the server requirement info when addons is undefined", () => {
+      workspace.lspClient!.addons = undefined;
+      status.refresh(workspace);
+
+      assert.strictEqual(
+        status.item.text,
+        "Addons: requires server to be v0.17.4 or higher to display this field",
+      );
+    });
+
+    test("Status displays no addons when addons is an empty array", () => {
+      workspace.lspClient!.addons = [];
+      status.refresh(workspace);
+
+      assert.strictEqual(status.item.text, "Addons: none");
+    });
+
+    test("Status displays addon names and errored status", () => {
+      workspace.lspClient!.addons = [
+        { name: "foo", errored: false },
+        { name: "bar", errored: true },
+      ];
+
+      status.refresh(workspace);
+
+      assert.strictEqual(status.item.text, "Addons: foo, bar (errored)");
     });
   });
 });

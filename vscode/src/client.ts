@@ -15,7 +15,7 @@ import {
   DocumentSelector,
 } from "vscode-languageclient/node";
 
-import { LSP_NAME, ClientInterface } from "./common";
+import { LSP_NAME, ClientInterface, Addon } from "./common";
 import { Telemetry, RequestEvent } from "./telemetry";
 import { Ruby } from "./ruby";
 import { WorkspaceChannel } from "./workspaceChannel";
@@ -167,11 +167,13 @@ function collectClientOptions(
 export default class Client extends LanguageClient implements ClientInterface {
   public readonly ruby: Ruby;
   public serverVersion?: string;
+  public addons?: Addon[];
   private readonly workingDirectory: string;
   private readonly telemetry: Telemetry;
   private readonly createTestItems: (response: CodeLens[]) => void;
   private readonly baseFolder;
   private requestId = 0;
+  private readonly workspaceOutputChannel: WorkspaceChannel;
 
   #context: vscode.ExtensionContext;
   #formatter: string;
@@ -197,6 +199,8 @@ export default class Client extends LanguageClient implements ClientInterface {
       ),
     );
 
+    this.workspaceOutputChannel = outputChannel;
+
     // Middleware are part of client options, but because they must reference `this`, we cannot make it a part of the
     // `super` call (TypeScript does not allow accessing `this` before invoking `super`)
     this.registerMiddleware();
@@ -210,9 +214,22 @@ export default class Client extends LanguageClient implements ClientInterface {
     this.#formatter = "";
   }
 
-  afterStart() {
+  async afterStart() {
     this.#formatter = this.initializeResult?.formatter;
     this.serverVersion = this.initializeResult?.serverInfo?.version;
+    await this.fetchAddons();
+  }
+
+  async fetchAddons() {
+    if (this.initializeResult?.capabilities.experimental?.addon_detection) {
+      try {
+        this.addons = await this.sendRequest("rubyLsp/workspace/addons", {});
+      } catch (error: any) {
+        this.workspaceOutputChannel.error(
+          `Error while fetching addons: ${error.data.errorMessage}`,
+        );
+      }
+    }
   }
 
   get formatter(): string {

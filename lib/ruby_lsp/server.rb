@@ -76,6 +76,16 @@ module RubyLsp
         text_document_show_syntax_tree(message)
       when "rubyLsp/workspace/dependencies"
         workspace_dependencies(message)
+      when "rubyLsp/workspace/addons"
+        send_message(
+          Result.new(
+            id: message[:id],
+            response:
+              Addon.addons.map do |addon|
+                { name: addon.name, errored: addon.error? }
+              end,
+          ),
+        )
       when "$/cancelRequest"
         @mutex.synchronize { @cancelled_requests << message[:params][:id] }
       end
@@ -104,7 +114,7 @@ module RubyLsp
           ),
         )
 
-        $stderr.puts(errored_addons.map(&:errors_details).join("\n\n"))
+        $stderr.puts(errored_addons.map(&:errors_details).join("\n\n")) unless @test_mode
       end
     end
 
@@ -177,6 +187,9 @@ module RubyLsp
           definition_provider: enabled_features["definition"],
           workspace_symbol_provider: enabled_features["workspaceSymbol"] && !@global_state.typechecker,
           signature_help_provider: signature_help_provider,
+          experimental: {
+            addon_detection: true,
+          },
         ),
         serverInfo: {
           name: "Ruby LSP",
