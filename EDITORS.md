@@ -112,10 +112,10 @@ require("lspconfig").ruby_lsp.setup({
 
 ## LazyVim LSP
 
-For LazyVim, you can add the ruby-lsp by creating a file in your plugins folder (`~/.config/nvim/plugins/ruby_lsp.lua`) and adding the following:
+For LazyVim, you can add the ruby-lsp by creating a file in your plugins folder (`~/.config/nvim/lua/plugins/ruby_lsp.lua`) and adding the following:
 
 ```lua
--- ~/.config/nvim/plugins/ruby_lsp.lua
+-- ~/.config/nvim/lua/plugins/ruby_lsp.lua
 
 return {
   {
