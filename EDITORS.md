@@ -16,6 +16,7 @@ new H2 header in this file containing the instructions. -->
 - [Emacs LSP Mode](https://emacs-lsp.github.io/lsp-mode/page/lsp-ruby-lsp/)
 - [Emacs Eglot](#Emacs-Eglot)
 - [Neovim LSP](#Neovim)
+- [LazyVim LSP](#lazyvim-lsp)
 - [Sublime Text LSP](#sublime-text-lsp)
 - [Zed](#zed)
 - [RubyMine](#RubyMine)
@@ -107,6 +108,32 @@ require("lspconfig").ruby_lsp.setup({
     add_ruby_deps_command(client, buffer)
   end,
 })
+```
+
+## LazyVim LSP
+
+For LazyVim, you can add the ruby-lsp by creating a file in your plugins folder (`~/.config/nvim/plugins/ruby_lsp.lua`) and adding the following:
+
+```lua
+-- ~/.config/nvim/plugins/ruby_lsp.lua
+
+return {
+  {
+    "neovim/nvim-lspconfig",
+    ---@class PluginLspOpts
+    opts = {
+      ---@type lspconfig.options
+      servers = {
+        -- disable solargraph from auto running when you open ruby files
+        solargraph = {
+          autostart = false
+        },
+        -- ruby_lsp will be automatically installed with mason and loaded with lspconfig
+        ruby_lsp = {},
+      },
+    },
+  },
+}
 ```
 
 ## Sublime Text LSP
