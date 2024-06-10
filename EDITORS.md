@@ -129,7 +129,7 @@ return {
           autostart = false
         },
         -- ruby_lsp will be automatically installed with mason and loaded with lspconfig
-        ruby_ls = {},
+        ruby_lsp = {},
       },
     },
   },
