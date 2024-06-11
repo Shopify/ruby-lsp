@@ -67,6 +67,8 @@ module RubyIndexer
       parent_class = case superclass
       when Prism::ConstantReadNode, Prism::ConstantPathNode
         superclass.slice
+      else
+        "::Object"
       end
 
       nesting = name.start_with?("::") ? [name.delete_prefix("::")] : @stack + [name.delete_prefix("::")]
