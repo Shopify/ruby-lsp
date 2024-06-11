@@ -6,7 +6,7 @@ require "test_helper"
 module RubyLsp
   class GlobalStateTest < Minitest::Test
     def test_detects_no_test_library_when_there_are_no_dependencies
-      stub_dependencies({})
+      stub_direct_dependencies({})
 
       state = GlobalState.new
       state.apply_options({})
@@ -14,7 +14,7 @@ module RubyLsp
     end
 
     def test_detects_minitest
-      stub_dependencies("minitest" => "1.2.3")
+      stub_direct_dependencies("minitest" => "1.2.3")
 
       state = GlobalState.new
       state.apply_options({})
@@ -22,7 +22,7 @@ module RubyLsp
     end
 
     def test_does_not_detect_minitest_related_gems_as_minitest
-      stub_dependencies("minitest-reporters" => "1.2.3")
+      stub_direct_dependencies("minitest-reporters" => "1.2.3")
 
       state = GlobalState.new
       state.apply_options({})
@@ -30,7 +30,7 @@ module RubyLsp
     end
 
     def test_detects_test_unit
-      stub_dependencies("test-unit" => "1.2.3")
+      stub_direct_dependencies("test-unit" => "1.2.3")
 
       state = GlobalState.new
       state.apply_options({})
@@ -38,17 +38,16 @@ module RubyLsp
     end
 
     def test_detects_rails_if_minitest_is_present_and_bin_rails_exists
-      stub_dependencies("minitest" => "1.2.3")
-      File.expects(:exist?).with("#{Dir.pwd}/bin/rails").once.returns(true)
+      stub_direct_dependencies("minitest" => "1.2.3")
 
       state = GlobalState.new
+      state.stubs(:bin_rails_present).returns(true)
       state.apply_options({})
       assert_equal("rails", state.test_library)
     end
 
     def test_detects_rspec_if_both_rails_and_rspec_are_present
-      stub_dependencies("rspec" => "1.2.3")
-      File.expects(:exist?).never
+      stub_direct_dependencies("rspec" => "1.2.3")
 
       state = GlobalState.new
       state.apply_options({})
@@ -65,6 +64,49 @@ module RubyLsp
       state = GlobalState.new
       state.apply_options({ initializationOptions: { formatter: "auto" } })
       assert_equal("rubocop", state.formatter)
+    end
+
+    def test_applying_auto_formatter_with_rubocop_extension
+      state = GlobalState.new
+      stub_direct_dependencies("rubocop-rails" => "1.2.3")
+      state.apply_options({ initializationOptions: { formatter: "auto" } })
+      assert_equal("rubocop", state.formatter)
+    end
+
+    def test_applying_auto_formatter_with_rubocop_as_transitive_dependency
+      state = GlobalState.new
+
+      stub_direct_dependencies("gem_with_config" => "1.2.3")
+      stub_all_dependencies("gem_with_config", "rubocop")
+      state.stubs(:dot_rubocop_yml_present).returns(true)
+
+      state.apply_options({ initializationOptions: { formatter: "auto" } })
+
+      assert_equal("rubocop", state.formatter)
+    end
+
+    def test_applying_auto_formatter_with_rubocop_as_transitive_dependency_without_config
+      state = GlobalState.new
+
+      stub_direct_dependencies("gem_with_config" => "1.2.3")
+      stub_all_dependencies("gem_with_config", "rubocop")
+      state.stubs(:dot_rubocop_yml_present).returns(false)
+
+      state.apply_options({ initializationOptions: { formatter: "auto" } })
+
+      assert_equal("none", state.formatter)
+    end
+
+    def test_applying_auto_formatter_with_rubocop_as_transitive_dependency_and_sytax_tree
+      state = GlobalState.new
+
+      stub_direct_dependencies("syntax_tree" => "1.2.3")
+      stub_all_dependencies("syntax_tree", "rubocop")
+      state.stubs(:dot_rubocop_yml_present).returns(true)
+
+      state.apply_options({ initializationOptions: { formatter: "auto" } })
+
+      assert_equal("syntax_tree", state.formatter)
     end
 
     def test_watching_files_if_supported
@@ -117,7 +159,7 @@ module RubyLsp
     end
 
     def test_linter_auto_detection
-      stub_dependencies("rubocop" => "1.2.3")
+      stub_direct_dependencies("rubocop" => "1.2.3")
       state = GlobalState.new
       state.apply_options({})
 
@@ -125,7 +167,7 @@ module RubyLsp
     end
 
     def test_specifying_empty_linters
-      stub_dependencies("rubocop" => "1.2.3")
+      stub_direct_dependencies("rubocop" => "1.2.3")
       state = GlobalState.new
       state.apply_options({
         initializationOptions: { linters: [] },
@@ -136,8 +178,17 @@ module RubyLsp
 
     private
 
-    def stub_dependencies(dependencies)
+    def stub_direct_dependencies(dependencies)
       Bundler.locked_gems.stubs(dependencies: dependencies)
+    end
+
+    BundlerSpec = Struct.new(:name)
+    def stub_all_dependencies(*dependencies)
+      Bundler.locked_gems.stubs(specs: dependencies.map { BundlerSpec.new(_1) })
+    end
+
+    def stub_workspace_file_exists(path)
+      File.expects(:exist?).with("#{Dir.pwd}/#{path}").returns(true)
     end
   end
 end
