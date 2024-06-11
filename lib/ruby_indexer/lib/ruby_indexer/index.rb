@@ -161,8 +161,6 @@ module RubyIndexer
         return entries if entries
       end
 
-      return lookup_qualified_reference(name, nesting, seen_names) if name.include?("::")
-
       # Non qualified reference path
       full_name = nesting.any? ? "#{nesting.join("::")}::#{name}" : name
 
@@ -170,9 +168,6 @@ module RubyIndexer
       # constant. First, it will try to find the constant in the exact namespace where the reference was found
       entries = direct_or_aliased_constant(full_name, seen_names)
       return entries if entries
-
-      # If the nesting is empty and we did not find results at this point, that means we haven't indexed this constant
-      return if nesting.empty?
 
       # If the constant is not found yet, then Ruby will try to find the constant in the enclosing lexical scopes,
       # unwrapping each level one by one. Important note: the top level is not included because that's the fallback of
@@ -487,35 +482,6 @@ module RubyIndexer
         seen_names: T::Array[String],
       ).returns(T.nilable(T::Array[Entry]))
     end
-    def lookup_qualified_reference(name, nesting, seen_names)
-      # If the name is qualified (has any namespace parts), then Ruby will search for the constant first in the exact
-      # namespace where the reference was found across the entire ancestor chain
-      #
-      # First, check if the constant is in the exact namespace where the reference was found
-      full_name = nesting.any? ? "#{nesting.join("::")}::#{name}" : name
-      results = direct_or_aliased_constant(full_name, seen_names)
-      return results if results
-
-      # Then search ancestors for the current namespace
-      entries = lookup_ancestor_chain(name, nesting, seen_names)
-      return entries if entries
-
-      # If the qualified constant is not found in the ancestors of the specific namespace where the reference was
-      # found, then Ruby searches for it in the enclosing lexical scopes
-      entries = lookup_enclosing_scopes(name, nesting, seen_names)
-      return entries if entries
-
-      # Finally, as a fallback, Ruby will search for the constant in the top level namespace
-      search_top_level(name, seen_names)
-    end
-
-    sig do
-      params(
-        name: String,
-        nesting: T::Array[String],
-        seen_names: T::Array[String],
-      ).returns(T.nilable(T::Array[Entry]))
-    end
     def lookup_enclosing_scopes(name, nesting, seen_names)
       nesting.length.downto(1).each do |i|
         namespace = T.must(nesting[0...i]).join("::")
@@ -543,6 +509,8 @@ module RubyIndexer
     end
     def lookup_ancestor_chain(name, nesting, seen_names)
       *nesting_parts, constant_name = build_non_redundant_full_name(name, nesting).split("::")
+      return if T.must(nesting_parts).empty?
+
       namespace_entries = resolve(T.must(nesting_parts).join("::"), [], seen_names)
       return unless namespace_entries
 
