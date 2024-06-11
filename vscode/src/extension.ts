@@ -8,6 +8,19 @@ export async function activate(context: vscode.ExtensionContext) {
   await migrateManagerConfigurations();
 
   if (!vscode.workspace.workspaceFolders) {
+    // We currently don't support usage without any workspace folders opened. Here we warn the user, point to the issue
+    // and offer to open a folder instead
+    const answer = await vscode.window.showWarningMessage(
+      `Using the Ruby LSP without any workspaces opened is currently not supported
+      ([learn more](https://github.com/Shopify/ruby-lsp/issues/1780))`,
+      "Open a workspace",
+      "Continue anyway",
+    );
+
+    if (answer === "Open a workspace") {
+      await vscode.commands.executeCommand("workbench.action.files.openFolder");
+    }
+
     return;
   }
 
