@@ -4,11 +4,12 @@ source "https://rubygems.org"
 
 gemspec
 
+gem "bundler", "~> 2.5"
+gem "minitest", "~> 5.23"
+
 group :development do
-  gem "bundler", "~> 2.5"
   gem "debug", "~> 1.9", require: false
   gem "minitest-reporters", "~> 1.6"
-  gem "minitest", "~> 5.23"
   gem "mocha", "~> 2.3"
   gem "psych", "~> 5.1", require: false
   gem "rake", "~> 13.2"
