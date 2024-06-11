@@ -1125,5 +1125,31 @@ module RubyIndexer
       assert_equal("@bar", entry.name)
       assert_equal("Bar", T.must(entry.owner).name)
     end
+
+    def test_resolving_a_qualified_reference
+      index(<<~RUBY)
+        class Base
+          module Third
+            CONST = 1
+          end
+        end
+
+        class Foo
+          module Third
+            CONST = 2
+          end
+
+          class Second < Base
+          end
+        end
+      RUBY
+
+      foo_entry = T.must(@index.resolve("Third::CONST", ["Foo"])&.first)
+      assert_equal(9, foo_entry.location.start_line)
+    end
+
+    def test_resolving_unindexed_constant_with_no_nesting
+      assert_nil(@index.resolve("RSpec", []))
+    end
   end
 end
