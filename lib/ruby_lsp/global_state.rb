@@ -54,18 +54,19 @@ module RubyLsp
 
     sig { params(options: T::Hash[Symbol, T.untyped]).void }
     def apply_options(options)
-      dependencies = gather_dependencies
+      direct_dependencies = gather_direct_dependencies
+      all_dependencies = gather_direct_and_indirect_dependencies
       workspace_uri = options.dig(:workspaceFolders, 0, :uri)
       @workspace_uri = URI(workspace_uri) if workspace_uri
 
       specified_formatter = options.dig(:initializationOptions, :formatter)
       @formatter = specified_formatter if specified_formatter
-      @formatter = detect_formatter(dependencies) if @formatter == "auto"
+      @formatter = detect_formatter(direct_dependencies, all_dependencies) if @formatter == "auto"
 
       specified_linters = options.dig(:initializationOptions, :linters)
-      @linters = specified_linters || detect_linters(dependencies)
-      @test_library = detect_test_library(dependencies)
-      @typechecker = detect_typechecker(dependencies)
+      @linters = specified_linters || detect_linters(direct_dependencies)
+      @test_library = detect_test_library(direct_dependencies)
+      @typechecker = detect_typechecker(direct_dependencies)
 
       encodings = options.dig(:capabilities, :general, :positionEncodings)
       @encoding = if !encodings || encodings.empty?
@@ -103,16 +104,18 @@ module RubyLsp
 
     private
 
-    sig { params(dependencies: T::Array[String]).returns(String) }
-    def detect_formatter(dependencies)
+    sig { params(direct_dependencies: T::Array[String], all_dependencies: T::Array[String]).returns(String) }
+    def detect_formatter(direct_dependencies, all_dependencies)
       # NOTE: Intentionally no $ at end, since we want to match rubocop-shopify, etc.
-      if dependencies.any?(/^rubocop/)
-        "rubocop"
-      elsif dependencies.any?(/^syntax_tree$/)
-        "syntax_tree"
-      else
-        "none"
-      end
+      return "rubocop" if direct_dependencies.any?(/^rubocop/)
+
+      syntax_tree_is_direct_dependency = direct_dependencies.include?("syntax_tree")
+      return "syntax_tree" if syntax_tree_is_direct_dependency
+
+      rubocop_is_transitive_dependency = all_dependencies.include?("rubocop")
+      return "rubocop" if dot_rubocop_yml_present && rubocop_is_transitive_dependency
+
+      "none"
     end
 
     # Try to detect if there are linters in the project's dependencies. For auto-detection, we always only consider a
@@ -132,7 +135,7 @@ module RubyLsp
       # by ruby-lsp-rails. A Rails app doesn't need to depend on the rails gem itself, individual components like
       # activestorage may be added to the gemfile so that other components aren't downloaded. Check for the presence
       #  of bin/rails to support these cases.
-      elsif File.exist?(File.join(workspace_path, "bin/rails"))
+      elsif bin_rails_present
         "rails"
       # NOTE: Intentionally ends with $ to avoid mis-matching minitest-reporters, etc. in a Rails app.
       elsif dependencies.any?(/^minitest$/)
@@ -162,8 +165,18 @@ module RubyLsp
       false
     end
 
+    sig { returns(T::Boolean) }
+    def bin_rails_present
+      File.exist?(File.join(workspace_path, "bin/rails"))
+    end
+
+    sig { returns(T::Boolean) }
+    def dot_rubocop_yml_present
+      File.exist?(File.join(workspace_path, ".rubocop.yml"))
+    end
+
     sig { returns(T::Array[String]) }
-    def gather_dependencies
+    def gather_direct_dependencies
       Bundler.with_original_env { Bundler.default_gemfile }
       Bundler.locked_gems.dependencies.keys + gemspec_dependencies
     rescue Bundler::GemfileNotFound
@@ -175,6 +188,14 @@ module RubyLsp
       Bundler.locked_gems.sources
         .grep(Bundler::Source::Gemspec)
         .flat_map { _1.gemspec&.dependencies&.map(&:name) }
+    end
+
+    sig { returns(T::Array[String]) }
+    def gather_direct_and_indirect_dependencies
+      Bundler.with_original_env { Bundler.default_gemfile }
+      Bundler.locked_gems.specs.map(&:name)
+    rescue Bundler::GemfileNotFound
+      []
     end
   end
 end

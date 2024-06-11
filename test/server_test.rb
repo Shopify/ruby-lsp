@@ -340,75 +340,6 @@ class ServerTest < Minitest::Test
     FileUtils.mv(".index.yml.tmp", ".index.yml")
   end
 
-  def test_detects_rubocop_if_direct_dependency
-    stub_dependencies(rubocop: true, syntax_tree: false)
-
-    server = RubyLsp::Server.new(test_mode: true)
-
-    begin
-      capture_subprocess_io do
-        server.process_message(id: 1, method: "initialize", params: {
-          initializationOptions: { formatter: "auto" },
-        })
-      end
-
-      assert_equal("rubocop", server.global_state.formatter)
-    ensure
-      server.run_shutdown
-    end
-  end
-
-  def test_detects_syntax_tree_if_direct_dependency
-    stub_dependencies(rubocop: false, syntax_tree: true)
-    server = RubyLsp::Server.new(test_mode: true)
-
-    begin
-      capture_subprocess_io do
-        server.process_message(id: 1, method: "initialize", params: {
-          initializationOptions: { formatter: "auto" },
-        })
-      end
-
-      assert_equal("syntax_tree", server.global_state.formatter)
-    ensure
-      server.run_shutdown
-    end
-  end
-
-  def test_gives_rubocop_precedence_if_syntax_tree_also_present
-    stub_dependencies(rubocop: true, syntax_tree: true)
-    server = RubyLsp::Server.new(test_mode: true)
-
-    begin
-      capture_subprocess_io do
-        server.process_message(id: 1, method: "initialize", params: {
-          initializationOptions: { formatter: "auto" },
-        })
-      end
-
-      assert_equal("rubocop", server.global_state.formatter)
-    ensure
-      server.run_shutdown
-    end
-  end
-
-  def test_sets_formatter_to_none_if_neither_rubocop_or_syntax_tree_are_present
-    stub_dependencies(rubocop: false, syntax_tree: false)
-    server = RubyLsp::Server.new(test_mode: true)
-
-    begin
-      capture_subprocess_io do
-        server.process_message(id: 1, method: "initialize", params: {
-          initializationOptions: { formatter: "auto" },
-        })
-      end
-
-      assert_equal("none", server.global_state.formatter)
-    ensure
-      server.run_shutdown
-    end
-  end
-
   def test_shows_error_if_formatter_set_to_rubocop_but_rubocop_not_available
     capture_subprocess_io do
       @server.process_message(id: 1, method: "initialize", params: {
@@ -520,12 +451,5 @@ class ServerTest < Minitest::Test
     RubyLsp::Requests::Support.send(:remove_const, :RuboCopFormatter)
   rescue NameError
     # Depending on which tests have run prior to this one, the classes may or may not be defined
-  end
-
-  def stub_dependencies(rubocop:, syntax_tree:)
-    dependencies = {}
-    dependencies["syntax_tree"] = "..." if syntax_tree
-    dependencies["rubocop"] = "..." if rubocop
-    Bundler.locked_gems.stubs(:dependencies).returns(dependencies)
   end
 end
