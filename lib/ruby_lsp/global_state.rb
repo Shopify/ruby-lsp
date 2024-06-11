@@ -1,6 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "ruby_lsp/listeners/rails_app"
+
 module RubyLsp
   class GlobalState
     extend T::Sig
@@ -133,9 +135,9 @@ module RubyLsp
         "rspec"
       # A Rails app may have a dependency on minitest, but we would instead want to use the Rails test runner provided
       # by ruby-lsp-rails. A Rails app doesn't need to depend on the rails gem itself, individual components like
-      # activestorage may be added to the gemfile so that other components aren't downloaded. Check for the presence
-      #  of bin/rails to support these cases.
-      elsif bin_rails_present
+      # activestorage may be added to the gemfile so that other components aren't downloaded. Check for inheritance of
+      # `Rails::Application` in config/application.rb to support these cases.
+      elsif rails_app?
         "rails"
       # NOTE: Intentionally ends with $ to avoid mis-matching minitest-reporters, etc. in a Rails app.
       elsif dependencies.any?(/^minitest$/)
@@ -166,8 +168,24 @@ module RubyLsp
     end
 
     sig { returns(T::Boolean) }
-    def bin_rails_present
-      File.exist?(File.join(workspace_path, "bin/rails"))
+    def rails_app?
+      config = rails_app_config
+      return false unless config
+
+      result = Prism.parse(config)
+      return false unless result
+
+      dispatcher = Prism::Dispatcher.new
+      listener = Listeners::RailsApp.new(dispatcher)
+      dispatcher.dispatch(result.value)
+
+      listener.rails_app
+    end
+
+    sig { returns(T.nilable(String)) }
+    def rails_app_config
+      path = File.join(workspace_path, "config/application.rb")
+      File.read(path) if File.exist?(path)
     end
 
     sig { returns(T::Boolean) }

@@ -37,13 +37,33 @@ module RubyLsp
       assert_equal("test-unit", state.test_library)
     end
 
-    def test_detects_rails_if_minitest_is_present_and_bin_rails_exists
+    def test_detects_rails_if_minitest_is_present_and_rails_file_exists
       stub_direct_dependencies("minitest" => "1.2.3")
 
       state = GlobalState.new
-      state.stubs(:bin_rails_present).returns(true)
+      state.stubs(:rails_app_config).returns(<<~RUBY)
+        module MyApp
+          class Application < Rails::Application
+          end
+        end
+      RUBY
+
       state.apply_options({})
       assert_equal("rails", state.test_library)
+    end
+
+    def test_doesnt_detects_rails_if_minitest_is_present_and_rails_file_contains_bogus
+      stub_direct_dependencies("minitest" => "1.2.3")
+
+      state = GlobalState.new
+      state.stubs(:rails_app_config).returns(<<~RUBY)
+        puts "Hello World!"
+        class Test
+        end
+      RUBY
+
+      state.apply_options({})
+      assert_equal("minitest", state.test_library)
     end
 
     def test_detects_rspec_if_both_rails_and_rspec_are_present
