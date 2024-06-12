@@ -690,23 +690,14 @@ module RubyLsp
 
     sig { params(config_hash: T::Hash[String, T.untyped]).void }
     def perform_initial_indexing(config_hash)
-      index_ruby_core
-      index_ruby_code(config_hash)
-    end
-
-    sig { void }
-    def index_ruby_core
-      RubyIndexer::RBSIndexer.new(@global_state.index).index_ruby_core
-    end
-
-    sig { params(config_hash: T::Hash[String, T.untyped]).void }
-    def index_ruby_code(config_hash)
       # The begin progress invocation happens during `initialize`, so that the notification is sent before we are
       # stuck indexing files
       RubyIndexer.configuration.apply_config(config_hash)
 
       Thread.new do
         begin
+          RubyIndexer::RBSIndexer.new(@global_state.index).index_ruby_core
+
           @global_state.index.index_all do |percentage|
             progress("indexing-progress", percentage)
             true
