@@ -152,8 +152,7 @@ module RubyIndexer
       end
       def initialize(nesting, file_path, location, comments, parent_class)
         super(nesting, file_path, location, comments)
-
-        @parent_class = T.let(parent_class, T.nilable(String))
+        @parent_class = parent_class
       end
 
       sig { override.returns(Integer) }

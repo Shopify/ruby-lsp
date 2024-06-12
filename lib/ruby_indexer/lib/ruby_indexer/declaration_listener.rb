@@ -5,6 +5,9 @@ module RubyIndexer
   class DeclarationListener
     extend T::Sig
 
+    OBJECT_NESTING = T.let(["Object"].freeze, T::Array[String])
+    BASIC_OBJECT_NESTING = T.let(["BasicObject"].freeze, T::Array[String])
+
     sig do
       params(index: Index, dispatcher: Prism::Dispatcher, parse_result: Prism::ParseResult, file_path: String).void
     end
@@ -66,14 +69,25 @@ module RubyIndexer
       comments = collect_comments(node)
 
       superclass = node.superclass
+
+      nesting = name.start_with?("::") ? [name.delete_prefix("::")] : @stack + [name.delete_prefix("::")]
+
       parent_class = case superclass
       when Prism::ConstantReadNode, Prism::ConstantPathNode
         superclass.slice
       else
-        "::Object"
+        case nesting
+        when OBJECT_NESTING
+          # When Object is reopened, its parent class should still be the top-level BasicObject
+          "::BasicObject"
+        when BASIC_OBJECT_NESTING
+          # When BasicObject is reopened, its parent class should still be nil
+          nil
+        else
+          # Otherwise, the parent class should be the top-level Object
+          "::Object"
+        end
       end
-
-      nesting = name.start_with?("::") ? [name.delete_prefix("::")] : @stack + [name.delete_prefix("::")]
 
       entry = Entry::Class.new(
         nesting,

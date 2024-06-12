@@ -1143,8 +1143,32 @@ module RubyIndexer
       assert_nil(@index.resolve("RSpec", []))
     end
 
+    def test_object_superclass_indexing_and_resolution_with_reopened_object_class
+      index(<<~RUBY)
+        class Object; end
+      RUBY
+
+      entries = @index["Object"]
+      assert_equal(2, entries.length)
+      reopened_entry = entries.last
+      assert_equal("::BasicObject", reopened_entry.parent_class)
+      assert_equal(["Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Object"))
+    end
+
+    def test_object_superclass_indexing_and_resolution_with_reopened_basic_object_class
+      index(<<~RUBY)
+        class BasicObject; end
+      RUBY
+
+      entries = @index["BasicObject"]
+      assert_equal(2, entries.length)
+      reopened_entry = entries.last
+      assert_nil(reopened_entry.parent_class)
+      assert_equal(["BasicObject"], @index.linearized_ancestors_of("BasicObject"))
+    end
+
     def test_object_superclass_resolution
-      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+      index(<<~RUBY)
         module Foo
           class Object; end
 
@@ -1160,8 +1184,25 @@ module RubyIndexer
       )
     end
 
+    def test_basic_object_superclass_resolution
+      index(<<~RUBY)
+        module Foo
+          class BasicObject; end
+
+          class Bar; end
+          class Baz < BasicObject; end
+        end
+      RUBY
+
+      assert_equal(["Foo::Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Foo::Bar"))
+      assert_equal(
+        ["Foo::Baz", "Foo::BasicObject", "Object", "Kernel", "BasicObject"],
+        @index.linearized_ancestors_of("Foo::Baz"),
+      )
+    end
+
     def test_top_level_object_superclass_resolution
-      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+      index(<<~RUBY)
         module Foo
           class Object; end
 
@@ -1170,6 +1211,18 @@ module RubyIndexer
       RUBY
 
       assert_equal(["Foo::Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Foo::Bar"))
+    end
+
+    def test_top_level_basic_object_superclass_resolution
+      index(<<~RUBY)
+        module Foo
+          class BasicObject; end
+
+          class Bar < ::BasicObject; end
+        end
+      RUBY
+
+      assert_equal(["Foo::Bar", "BasicObject"], @index.linearized_ancestors_of("Foo::Bar"))
     end
 
     def test_resolving_method_inside_singleton_context
