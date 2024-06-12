@@ -205,6 +205,10 @@ module RubyIndexer
 
     # An optional method parameter, e.g. `def foo(a = 123)`
     class OptionalParameter < Parameter
+      sig { override.returns(Symbol) }
+      def decorated_name
+        :"#{@name} = <default>"
+      end
     end
 
     # An required keyword method parameter, e.g. `def foo(a:)`
@@ -219,7 +223,7 @@ module RubyIndexer
     class OptionalKeywordParameter < Parameter
       sig { override.returns(Symbol) }
       def decorated_name
-        :"#{@name}:"
+        :"#{@name}: <default>"
       end
     end
 
@@ -338,6 +342,13 @@ module RubyIndexer
           parameters << OptionalParameter.new(name: name)
         end
 
+        rest = parameters_node.rest
+
+        if rest.is_a?(Prism::RestParameterNode)
+          rest_name = rest.name || RestParameter::DEFAULT_NAME
+          parameters << RestParameter.new(name: rest_name)
+        end
+
         parameters_node.keywords.each do |keyword|
           name = parameter_name(keyword)
           next unless name
@@ -348,13 +359,6 @@ module RubyIndexer
           when Prism::OptionalKeywordParameterNode
             parameters << OptionalKeywordParameter.new(name: name)
           end
-        end
-
-        rest = parameters_node.rest
-
-        if rest.is_a?(Prism::RestParameterNode)
-          rest_name = rest.name || RestParameter::DEFAULT_NAME
-          parameters << RestParameter.new(name: rest_name)
         end
 
         keyword_rest = parameters_node.keyword_rest
