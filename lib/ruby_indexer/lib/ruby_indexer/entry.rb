@@ -162,6 +162,22 @@ module RubyIndexer
       end
     end
 
+    class SingletonClass < Class
+      extend T::Sig
+
+      sig { params(location: Prism::Location, comments: T::Array[String]).void }
+      def update_singleton_information(location, comments)
+        # Create a new RubyIndexer::Location object from the Prism location
+        @location = Location.new(
+          location.start_line,
+          location.end_line,
+          location.start_column,
+          location.end_column,
+        )
+        @comments.concat(comments)
+      end
+    end
+
     class Constant < Entry
     end
 
@@ -280,9 +296,6 @@ module RubyIndexer
 
     class Method < Member
       extend T::Sig
-      extend T::Helpers
-
-      abstract!
 
       sig { override.returns(T::Array[Parameter]) }
       attr_reader :parameters
@@ -389,12 +402,6 @@ module RubyIndexer
           :"(#{names_with_commas})"
         end
       end
-    end
-
-    class SingletonMethod < Method
-    end
-
-    class InstanceMethod < Method
     end
 
     # An UnresolvedAlias points to a constant alias with a right hand side that has not yet been resolved. For

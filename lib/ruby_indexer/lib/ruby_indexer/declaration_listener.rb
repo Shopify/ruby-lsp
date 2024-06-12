@@ -33,6 +33,8 @@ module RubyIndexer
         :on_class_node_leave,
         :on_module_node_enter,
         :on_module_node_leave,
+        :on_singleton_class_node_enter,
+        :on_singleton_class_node_leave,
         :on_def_node_enter,
         :on_def_node_leave,
         :on_call_node_enter,
@@ -110,6 +112,37 @@ module RubyIndexer
 
     sig { params(node: Prism::ModuleNode).void }
     def on_module_node_leave(node)
+      @stack.pop
+      @owner_stack.pop
+      @visibility_stack.pop
+    end
+
+    sig { params(node: Prism::SingletonClassNode).void }
+    def on_singleton_class_node_enter(node)
+      @visibility_stack.push(Entry::Visibility::PUBLIC)
+
+      current_owner = @owner_stack.last
+
+      if current_owner
+        expression = node.expression
+        @stack << (expression.is_a?(Prism::SelfNode) ? "<Class:#{@stack.last}>" : "<Class:#{expression.slice}>")
+
+        existing_entries = T.cast(@index[@stack.join("::")], T.nilable(T::Array[Entry::SingletonClass]))
+
+        if existing_entries
+          entry = T.must(existing_entries.first)
+          entry.update_singleton_information(node.location, collect_comments(node))
+        else
+          entry = Entry::SingletonClass.new(@stack, @file_path, node.location, collect_comments(node), nil)
+          @index << entry
+        end
+
+        @owner_stack << entry
+      end
+    end
+
+    sig { params(node: Prism::SingletonClassNode).void }
+    def on_singleton_class_node_leave(node)
       @stack.pop
       @owner_stack.pop
       @visibility_stack.pop
@@ -246,7 +279,7 @@ module RubyIndexer
 
       case node.receiver
       when nil
-        @index << Entry::InstanceMethod.new(
+        @index << Entry::Method.new(
           method_name,
           @file_path,
           node.location,
@@ -256,14 +289,14 @@ module RubyIndexer
           @owner_stack.last,
         )
       when Prism::SelfNode
-        @index << Entry::SingletonMethod.new(
+        @index << Entry::Method.new(
           method_name,
           @file_path,
           node.location,
           comments,
           node.parameters,
           current_visibility,
-          @owner_stack.last,
+          singleton_klass,
         )
       end
     end
@@ -275,72 +308,27 @@ module RubyIndexer
 
     sig { params(node: Prism::InstanceVariableWriteNode).void }
     def on_instance_variable_write_node_enter(node)
-      name = node.name.to_s
-      return if name == "@"
-
-      @index << Entry::InstanceVariable.new(
-        name,
-        @file_path,
-        node.name_loc,
-        collect_comments(node),
-        @owner_stack.last,
-      )
+      handle_instance_variable(node, node.name_loc)
     end
 
     sig { params(node: Prism::InstanceVariableAndWriteNode).void }
     def on_instance_variable_and_write_node_enter(node)
-      name = node.name.to_s
-      return if name == "@"
-
-      @index << Entry::InstanceVariable.new(
-        name,
-        @file_path,
-        node.name_loc,
-        collect_comments(node),
-        @owner_stack.last,
-      )
+      handle_instance_variable(node, node.name_loc)
     end
 
     sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
     def on_instance_variable_operator_write_node_enter(node)
-      name = node.name.to_s
-      return if name == "@"
-
-      @index << Entry::InstanceVariable.new(
-        name,
-        @file_path,
-        node.name_loc,
-        collect_comments(node),
-        @owner_stack.last,
-      )
+      handle_instance_variable(node, node.name_loc)
     end
 
     sig { params(node: Prism::InstanceVariableOrWriteNode).void }
     def on_instance_variable_or_write_node_enter(node)
-      name = node.name.to_s
-      return if name == "@"
-
-      @index << Entry::InstanceVariable.new(
-        name,
-        @file_path,
-        node.name_loc,
-        collect_comments(node),
-        @owner_stack.last,
-      )
+      handle_instance_variable(node, node.name_loc)
     end
 
     sig { params(node: Prism::InstanceVariableTargetNode).void }
     def on_instance_variable_target_node_enter(node)
-      name = node.name.to_s
-      return if name == "@"
-
-      @index << Entry::InstanceVariable.new(
-        name,
-        @file_path,
-        node.location,
-        collect_comments(node),
-        @owner_stack.last,
-      )
+      handle_instance_variable(node, node.location)
     end
 
     sig { params(node: Prism::AliasMethodNode).void }
@@ -358,6 +346,28 @@ module RubyIndexer
     end
 
     private
+
+    sig do
+      params(
+        node: T.any(
+          Prism::InstanceVariableAndWriteNode,
+          Prism::InstanceVariableOperatorWriteNode,
+          Prism::InstanceVariableOrWriteNode,
+          Prism::InstanceVariableTargetNode,
+          Prism::InstanceVariableWriteNode,
+        ),
+        loc: Prism::Location,
+      ).void
+    end
+    def handle_instance_variable(node, loc)
+      name = node.name.to_s
+      return if name == "@"
+
+      # When instance variables are declared inside the class body, they turn into class instance variables rather than
+      # regular instance variables
+      owner = @inside_def ? @owner_stack.last : singleton_klass
+      @index << Entry::InstanceVariable.new(name, @file_path, loc, collect_comments(node), owner)
+    end
 
     sig { params(node: Prism::CallNode).void }
     def handle_private_constant(node)
@@ -557,6 +567,25 @@ module RubyIndexer
     sig { returns(Entry::Visibility) }
     def current_visibility
       T.must(@visibility_stack.last)
+    end
+
+    sig { returns(T.nilable(Entry::Class)) }
+    def singleton_klass
+      attached_class = @owner_stack.last
+      return unless attached_class
+
+      # Return the existing singleton class if available
+      owner = T.cast(
+        @index["#{attached_class.name}::<Class:#{attached_class.name}>"],
+        T.nilable(T::Array[Entry::SingletonClass]),
+      )
+      return owner.first if owner
+
+      # If not available, create the singleton class lazily
+      nesting = @stack + ["<Class:#{@stack.last}>"]
+      entry = Entry::SingletonClass.new(nesting, @file_path, attached_class.location, [], nil)
+      @index << entry
+      entry
     end
   end
 end

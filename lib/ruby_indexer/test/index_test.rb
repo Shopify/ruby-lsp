@@ -1171,5 +1171,108 @@ module RubyIndexer
 
       assert_equal(["Foo::Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Foo::Bar"))
     end
+
+    def test_resolving_method_inside_singleton_context
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        module Foo
+          class Bar
+            class << self
+              class Baz
+                class << self
+                  def found_me!; end
+                end
+              end
+            end
+          end
+        end
+      RUBY
+
+      entry = @index.resolve_method("found_me!", "Foo::Bar::<Class:Bar>::Baz::<Class:Baz>")&.first
+      refute_nil(entry)
+
+      assert_equal("found_me!", T.must(entry).name)
+    end
+
+    def test_resolving_constants_in_singleton_contexts
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        module Foo
+          class Bar
+            CONST = 3
+
+            class << self
+              CONST = 2
+
+              class Baz
+                CONST = 1
+
+                class << self
+                end
+              end
+            end
+          end
+        end
+      RUBY
+
+      entry = @index.resolve("CONST", ["Foo", "Bar", "<Class:Bar>", "Baz", "<Class:Baz>"])&.first
+      refute_nil(entry)
+      assert_equal(9, T.must(entry).location.start_line)
+    end
+
+    def test_resolving_instance_variables_in_singleton_contexts
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        module Foo
+          class Bar
+            @a = 123
+
+            class << self
+              def hello
+                @b = 123
+              end
+
+              @c = 123
+            end
+          end
+        end
+      RUBY
+
+      entry = @index.resolve_instance_variable("@a", "Foo::Bar::<Class:Bar>")&.first
+      refute_nil(entry)
+      assert_equal("@a", T.must(entry).name)
+
+      entry = @index.resolve_instance_variable("@b", "Foo::Bar::<Class:Bar>")&.first
+      refute_nil(entry)
+      assert_equal("@b", T.must(entry).name)
+
+      entry = @index.resolve_instance_variable("@c", "Foo::Bar::<Class:Bar>::<Class:<Class:Bar>>")&.first
+      refute_nil(entry)
+      assert_equal("@c", T.must(entry).name)
+    end
+
+    def test_instance_variable_completion_in_singleton_contexts
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        module Foo
+          class Bar
+            @a = 123
+
+            class << self
+              def hello
+                @b = 123
+              end
+
+              @c = 123
+            end
+          end
+        end
+      RUBY
+
+      entries = @index.instance_variable_completion_candidates("@", "Foo::Bar::<Class:Bar>").map(&:name)
+      assert_includes(entries, "@a")
+      assert_includes(entries, "@b")
+
+      assert_includes(
+        @index.instance_variable_completion_candidates("@", "Foo::Bar::<Class:Bar>::<Class:<Class:Bar>>").map(&:name),
+        "@c",
+      )
+    end
   end
 end
