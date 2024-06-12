@@ -106,8 +106,8 @@ module RubyIndexer
       end
     end
 
-    sig { params(member: RBS::AST::Members::MethodDefinition, entry: Entry::Namespace).void }
-    def handle_method(member, entry)
+    sig { params(member: RBS::AST::Members::MethodDefinition, owner: Entry::Namespace).void }
+    def handle_method(member, owner)
       name = member.name.name
       file_path = member.location.buffer.name
       location = to_ruby_indexer_location(member.location)
@@ -123,11 +123,7 @@ module RubyIndexer
         Entry::Visibility::PUBLIC
       end
 
-      owner = entry
-
-      klass = member.instance? ? Entry::InstanceMethod : Entry::SingletonMethod
-
-      entry = klass.new(
+      @index << Entry::Method.new(
         name,
         file_path,
         location,
@@ -136,7 +132,6 @@ module RubyIndexer
         visibility,
         owner,
       )
-      @index << entry if entry
     end
   end
 end
