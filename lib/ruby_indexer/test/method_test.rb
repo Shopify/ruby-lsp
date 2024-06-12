@@ -359,23 +359,23 @@ module RubyIndexer
     def test_properly_tracks_multiple_levels_of_nesting
       index(<<~RUBY)
         module Foo
-          def first; end
+          def first_method; end
 
           module Bar
-            def second; end
+            def second_method; end
           end
 
-          def third; end
+          def third_method; end
         end
       RUBY
 
-      entry = T.must(@index["first"]&.first)
+      entry = T.cast(@index["first_method"]&.first, Entry::InstanceMethod)
       assert_equal("Foo", T.must(entry.owner).name)
 
-      entry = T.must(@index["second"]&.first)
+      entry = T.cast(@index["second_method"]&.first, Entry::InstanceMethod)
       assert_equal("Foo::Bar", T.must(entry.owner).name)
 
-      entry = T.must(@index["third"]&.first)
+      entry = T.cast(@index["third_method"]&.first, Entry::InstanceMethod)
       assert_equal("Foo", T.must(entry.owner).name)
     end
 
