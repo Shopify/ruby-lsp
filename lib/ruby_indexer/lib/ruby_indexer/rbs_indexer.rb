@@ -51,6 +51,11 @@ module RubyIndexer
       class_entry = Entry::Class.new(nesting, file_path, location, comments, parent_class)
       add_declaration_mixins_to_entry(declaration, class_entry)
       @index << class_entry
+      declaration.members.each do |member|
+        next unless member.is_a?(RBS::AST::Members::MethodDefinition)
+
+        handle_method(member, class_entry)
+      end
     end
 
     sig { params(declaration: RBS::AST::Declarations::Module, pathname: Pathname).void }
@@ -62,6 +67,11 @@ module RubyIndexer
       module_entry = Entry::Module.new(nesting, file_path, location, comments)
       add_declaration_mixins_to_entry(declaration, module_entry)
       @index << module_entry
+      declaration.members.each do |member|
+        next unless member.is_a?(RBS::AST::Members::MethodDefinition)
+
+        handle_method(member, module_entry)
+      end
     end
 
     sig { params(rbs_location: RBS::Location).returns(RubyIndexer::Location) }
@@ -94,6 +104,39 @@ module RubyIndexer
           end
         entry.mixin_operations << mixin_operation if mixin_operation
       end
+    end
+
+    sig { params(member: RBS::AST::Members::MethodDefinition, entry: Entry::Namespace).void }
+    def handle_method(member, entry)
+      name = member.name.name
+      file_path = member.location.buffer.name
+      location = to_ruby_indexer_location(member.location)
+      comments = Array(member.comment&.string)
+      parameters_node = nil
+
+      visibility = case member.visibility
+      when :private
+        Entry::Visibility::PRIVATE
+      when :protected
+        Entry::Visibility::PROTECTED
+      else
+        Entry::Visibility::PUBLIC
+      end
+
+      owner = entry
+
+      klass = member.instance? ? Entry::InstanceMethod : Entry::SingletonMethod
+
+      entry = klass.new(
+        name,
+        file_path,
+        location,
+        comments,
+        parameters_node,
+        visibility,
+        owner,
+      )
+      @index << entry if entry
     end
   end
 end

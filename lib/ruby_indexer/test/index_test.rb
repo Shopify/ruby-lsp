@@ -93,30 +93,30 @@ module RubyIndexer
 
     def test_fuzzy_search
       @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
-        class Bar; end
+        class Zws; end
 
-        module Foo
-          class Bar
+        module Qtl
+          class Zws
           end
 
-          class Baz
+          class Zwo
             class Something
             end
           end
         end
       RUBY
 
-      result = @index.fuzzy_search("Bar")
-      assert_equal(3, result.length)
-      assert_equal(["Bar", "Backtrace", "Base"], result.map(&:name))
+      result = @index.fuzzy_search("Zws")
+      assert_equal(2, result.length)
+      assert_equal(["Zws", "Qtl::Zwo::Something"], result.map(&:name))
 
-      result = @index.fuzzy_search("foobarsomeking")
-      assert_equal(6, result.length)
-      assert_equal(["Foo::Baz::Something", "Foo::Bar", "Foo::Baz", "Foo", "Base", "Bar"], result.map(&:name))
-
-      result = @index.fuzzy_search("FooBaz")
+      result = @index.fuzzy_search("qtlzwssomeking")
       assert_equal(5, result.length)
-      assert_equal(["Foo::Baz", "Foo::Bar", "Foo", "Foo::Baz::Something", "Float"], result.map(&:name))
+      assert_equal(["Qtl::Zwo::Something", "Qtl::Zws", "Qtl::Zwo", "Qtl", "Zws"], result.map(&:name))
+
+      result = @index.fuzzy_search("QltZwo")
+      assert_equal(4, result.length)
+      assert_equal(["Qtl::Zwo", "Qtl::Zws", "Qtl::Zwo::Something", "Qtl"], result.map(&:name))
     end
 
     def test_index_single_ignores_directories
@@ -140,25 +140,23 @@ module RubyIndexer
     end
 
     def test_searching_for_entries_based_on_prefix
-      # For this test, it's easier if we don't include core classes and modules
-      @index = Index.new
       @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
-        class Foo::Bar
+        class Foo::Bizw
         end
       RUBY
       @index.index_single(IndexablePath.new("/fake", "/fake/path/other_foo.rb"), <<~RUBY)
-        class Foo::Bar
+        class Foo::Bizw
         end
 
-        class Foo::Baz
+        class Foo::Bizt
         end
       RUBY
 
       results = @index.prefix_search("Foo", []).map { |entries| entries.map(&:name) }
-      assert_equal([["Foo::Bar", "Foo::Bar"], ["Foo::Baz"]], results)
+      assert_equal([["Foo::Bizw", "Foo::Bizw"], ["Foo::Bizt"]], results)
 
-      results = @index.prefix_search("Ba", ["Foo"]).map { |entries| entries.map(&:name) }
-      assert_equal([["Foo::Bar", "Foo::Bar"], ["Foo::Baz"]], results)
+      results = @index.prefix_search("Biz", ["Foo"]).map { |entries| entries.map(&:name) }
+      assert_equal([["Foo::Bizw", "Foo::Bizw"], ["Foo::Bizt"]], results)
     end
 
     def test_resolve_normalizes_top_level_names
@@ -291,16 +289,16 @@ module RubyIndexer
       index(<<~RUBY)
         module Foo
           module Bar
-            def baz; end
+            def qzx; end
           end
         end
       RUBY
 
-      entries = @index.prefix_search("ba")
+      entries = @index.prefix_search("qz")
       refute_empty(entries)
 
-      entry = T.must(entries.first).first
-      assert_equal("baz", entry.name)
+      entry = T.must(T.must(entries.first).first)
+      assert_equal("qzx", entry.name)
     end
 
     def test_indexing_prism_fixtures_succeeds
