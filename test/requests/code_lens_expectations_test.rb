@@ -79,6 +79,35 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     )
   end
 
+  def test_command_generation_for_tldr
+    stub_test_library("tldr")
+    source = <<~RUBY
+      class FooTest < TLDR
+        def test_bar;end
+      end
+    RUBY
+    uri = URI("file:///fake.rb")
+
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+
+    dispatcher = Prism::Dispatcher.new
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
+    dispatcher.dispatch(document.tree)
+    response = listener.perform
+
+    assert_equal(6, response.size)
+
+    assert_equal(
+      "bundle exec tldr /fake.rb --name \"/^FooTest(#|::)/\"",
+      T.must(response[1]).command.arguments[2],
+    )
+    assert_equal("Run In Terminal", T.must(response[4]).command.title)
+    assert_equal(
+      "bundle exec tldr /fake.rb --name FooTest#test_bar",
+      T.must(response[4]).command.arguments[2],
+    )
+  end
+
   def test_no_code_lens_for_unknown_test_framework
     source = <<~RUBY
       class FooTest < Test::Unit::TestCase

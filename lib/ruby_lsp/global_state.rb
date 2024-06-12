@@ -142,6 +142,8 @@ module RubyLsp
         "minitest"
       elsif dependencies.any?(/^test-unit/)
         "test-unit"
+      elsif dependencies.any?(/^tldr/)
+        "tldr"
       else
         "unknown"
       end

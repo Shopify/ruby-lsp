@@ -19,7 +19,7 @@ module RubyLsp
         String,
       )
       ACCESS_MODIFIERS = T.let([:public, :private, :protected], T::Array[Symbol])
-      SUPPORTED_TEST_LIBRARIES = T.let(["minitest", "test-unit"], T::Array[String])
+      SUPPORTED_TEST_LIBRARIES = T.let(["minitest", "test-unit", "tldr"], T::Array[String])
       DESCRIBE_KEYWORD = T.let(:describe, Symbol)
       IT_KEYWORD = T.let(:it, Symbol)
       DYNAMIC_REFERENCE_MARKER = T.let("<dynamic_reference>", String)
@@ -216,6 +216,17 @@ module RubyLsp
         )
       end
 
+      sig { params(path: T.nilable(String)).returns(String) }
+      def generate_base_command(path)
+        return BASE_COMMAND.dup unless path
+
+        if @global_state.test_library == "tldr"
+          "bundle exec tldr #{path}"
+        else
+          BASE_COMMAND + path
+        end
+      end
+
       sig do
         params(
           group_stack: T::Array[String],
@@ -224,10 +235,10 @@ module RubyLsp
         ).returns(String)
       end
       def generate_test_command(group_stack: [], spec_name: nil, method_name: nil)
-        command = BASE_COMMAND + T.must(@path)
+        command = generate_base_command(@path)
 
         case @global_state.test_library
-        when "minitest"
+        when "minitest", "tldr"
           last_dynamic_reference_index = group_stack.rindex(DYNAMIC_REFERENCE_MARKER)
           command += if last_dynamic_reference_index
             # In cases where the test path looks like `foo::Bar`
