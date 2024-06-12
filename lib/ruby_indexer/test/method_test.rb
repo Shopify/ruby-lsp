@@ -374,13 +374,13 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.cast(@index["first_method"]&.first, Entry::InstanceMethod)
+      entry = T.cast(@index["first_method"]&.first, Entry::Method)
       assert_equal("Foo", T.must(entry.owner).name)
 
-      entry = T.cast(@index["second_method"]&.first, Entry::InstanceMethod)
+      entry = T.cast(@index["second_method"]&.first, Entry::Method)
       assert_equal("Foo::Bar", T.must(entry.owner).name)
 
-      entry = T.cast(@index["third_method"]&.first, Entry::InstanceMethod)
+      entry = T.cast(@index["third_method"]&.first, Entry::Method)
       assert_equal("Foo", T.must(entry.owner).name)
     end
 
