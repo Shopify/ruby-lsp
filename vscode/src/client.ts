@@ -210,8 +210,7 @@ export default class Client extends LanguageClient implements ClientInterface {
     this.#formatter = "";
   }
 
-  override async start() {
-    await super.start();
+  afterStart() {
     this.#formatter = this.initializeResult?.formatter;
     this.serverVersion = this.initializeResult?.serverInfo?.version;
   }
