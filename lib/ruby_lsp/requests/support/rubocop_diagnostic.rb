@@ -42,7 +42,7 @@ module RubyLsp
         def to_lsp_code_actions
           code_actions = []
 
-          code_actions << autocorrect_action if @offense.correctable?
+          code_actions << autocorrect_action if correctable?
           code_actions << disable_line_action
 
           code_actions
@@ -70,7 +70,7 @@ module RubyLsp
               ),
             ),
             data: {
-              correctable: @offense.correctable?,
+              correctable: correctable?,
               code_actions: to_lsp_code_actions,
             },
           )
@@ -81,7 +81,7 @@ module RubyLsp
         sig { returns(String) }
         def message
           message  = @offense.message
-          message += "\n\nThis offense is not auto-correctable.\n" unless @offense.correctable?
+          message += "\n\nThis offense is not auto-correctable.\n" unless correctable?
           message
         end
 
@@ -115,7 +115,7 @@ module RubyLsp
                     uri: @uri.to_s,
                     version: nil,
                   ),
-                  edits: @offense.correctable? ? offense_replacements : [],
+                  edits: correctable? ? offense_replacements : [],
                 ),
               ],
             ),
@@ -192,6 +192,14 @@ module RubyLsp
           else
             line.length
           end
+        end
+
+        # When `RuboCop::LSP.enable` is called, contextual autocorrect will not offer itself
+        # as `correctable?` to prevent annoying changes while typing. Instead check if
+        # a corrector is present. If it is, then that means some code transformation can be applied.
+        sig { returns(T::Boolean) }
+        def correctable?
+          !@offense.corrector.nil?
         end
       end
     end
