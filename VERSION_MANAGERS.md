@@ -13,6 +13,10 @@ If you use `chruby` but don't have a `.ruby-version` file in the project root, y
 
 For example, if `/projects/my_project` doesn't have `.ruby-version`, `chruby` would read `/projects/.ruby-version` instead.
 
+## Mise
+
+Ensure mise is up-to-date by running `mise self-update`.
+
 ## Custom activation
 
 If you're using a different version manager that's not supported by this extension or if you're manually inserting the Ruby
