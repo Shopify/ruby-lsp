@@ -66,7 +66,7 @@ module RubyIndexer
     end
 
     sig { params(entry: Entry).void }
-    def <<(entry)
+    def add(entry)
       name = entry.name
 
       (@entries[name] ||= []) << entry

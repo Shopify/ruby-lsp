@@ -50,7 +50,7 @@ module RubyIndexer
       parent_class = declaration.super_class&.name&.name&.to_s
       class_entry = Entry::Class.new(nesting, file_path, location, comments, parent_class)
       add_declaration_mixins_to_entry(declaration, class_entry)
-      @index << class_entry
+      @index.add(class_entry)
       declaration.members.each do |member|
         next unless member.is_a?(RBS::AST::Members::MethodDefinition)
 
@@ -66,7 +66,7 @@ module RubyIndexer
       comments = Array(declaration.comment&.string)
       module_entry = Entry::Module.new(nesting, file_path, location, comments)
       add_declaration_mixins_to_entry(declaration, module_entry)
-      @index << module_entry
+      @index.add(module_entry)
       declaration.members.each do |member|
         next unless member.is_a?(RBS::AST::Members::MethodDefinition)
 
@@ -123,15 +123,7 @@ module RubyIndexer
         Entry::Visibility::PUBLIC
       end
 
-      @index << Entry::Method.new(
-        name,
-        file_path,
-        location,
-        comments,
-        parameters_node,
-        visibility,
-        owner,
-      )
+      @index.add(Entry::Method.new(name, file_path, location, comments, parameters_node, visibility, owner))
     end
   end
 end
