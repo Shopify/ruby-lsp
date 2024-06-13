@@ -65,13 +65,13 @@ module RubyIndexer
       @require_paths_tree.delete(require_path) if require_path
     end
 
-    sig { params(entry: Entry).void }
-    def add(entry)
+    sig { params(entry: Entry, skip_prefix_tree: T::Boolean).void }
+    def add(entry, skip_prefix_tree: false)
       name = entry.name
 
       (@entries[name] ||= []) << entry
       (@files_to_entries[entry.file_path] ||= []) << entry
-      @entries_tree.insert(name, T.must(@entries[name]))
+      @entries_tree.insert(name, T.must(@entries[name])) unless skip_prefix_tree
     end
 
     sig { params(fully_qualified_name: String).returns(T.nilable(T::Array[Entry])) }

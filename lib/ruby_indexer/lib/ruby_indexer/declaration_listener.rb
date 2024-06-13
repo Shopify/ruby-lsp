@@ -148,7 +148,7 @@ module RubyIndexer
           entry.update_singleton_information(node.location, collect_comments(node))
         else
           entry = Entry::SingletonClass.new(@stack, @file_path, node.location, collect_comments(node), nil)
-          @index.add(entry)
+          @index.add(entry, skip_prefix_tree: true)
         end
 
         @owner_stack << entry
@@ -609,7 +609,7 @@ module RubyIndexer
       # If not available, create the singleton class lazily
       nesting = @stack + ["<Class:#{@stack.last}>"]
       entry = Entry::SingletonClass.new(nesting, @file_path, attached_class.location, [], nil)
-      @index.add(entry)
+      @index.add(entry, skip_prefix_tree: true)
       entry
     end
   end

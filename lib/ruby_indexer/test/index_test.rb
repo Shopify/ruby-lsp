@@ -1327,5 +1327,16 @@ module RubyIndexer
         "@c",
       )
     end
+
+    def test_singletons_are_excluded_from_prefix_search
+      index(<<~RUBY)
+        class Zwq
+          class << self
+          end
+        end
+      RUBY
+
+      assert_empty(@index.prefix_search("Zwq::<C"))
+    end
   end
 end
