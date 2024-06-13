@@ -65,13 +65,13 @@ module RubyIndexer
       @require_paths_tree.delete(require_path) if require_path
     end
 
-    sig { params(entry: Entry).void }
-    def <<(entry)
+    sig { params(entry: Entry, skip_prefix_tree: T::Boolean).void }
+    def add(entry, skip_prefix_tree: false)
       name = entry.name
 
       (@entries[name] ||= []) << entry
       (@files_to_entries[entry.file_path] ||= []) << entry
-      @entries_tree.insert(name, T.must(@entries[name]))
+      @entries_tree.insert(name, T.must(@entries[name])) unless skip_prefix_tree
     end
 
     sig { params(fully_qualified_name: String).returns(T.nilable(T::Array[Entry])) }
@@ -118,11 +118,21 @@ module RubyIndexer
     # Fuzzy searches index entries based on Jaro-Winkler similarity. If no query is provided, all entries are returned
     sig { params(query: T.nilable(String)).returns(T::Array[Entry]) }
     def fuzzy_search(query)
-      return @entries.flat_map { |_name, entries| entries } unless query
+      unless query
+        entries = @entries.filter_map do |_name, entries|
+          next if entries.first.is_a?(Entry::SingletonClass)
+
+          entries
+        end
+
+        return entries.flatten
+      end
 
       normalized_query = query.gsub("::", "").downcase
 
       results = @entries.filter_map do |name, entries|
+        next if entries.first.is_a?(Entry::SingletonClass)
+
         similarity = DidYouMean::JaroWinkler.distance(name.gsub("::", "").downcase, normalized_query)
         [entries, -similarity] if similarity > ENTRY_SIMILARITY_THRESHOLD
       end

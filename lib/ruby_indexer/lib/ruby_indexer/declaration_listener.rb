@@ -98,7 +98,7 @@ module RubyIndexer
       )
 
       @owner_stack << entry
-      @index << entry
+      @index.add(entry)
       @stack << name
     end
 
@@ -120,7 +120,7 @@ module RubyIndexer
       entry = Entry::Module.new(nesting, @file_path, node.location, comments)
 
       @owner_stack << entry
-      @index << entry
+      @index.add(entry)
       @stack << name
     end
 
@@ -148,7 +148,7 @@ module RubyIndexer
           entry.update_singleton_information(node.location, collect_comments(node))
         else
           entry = Entry::SingletonClass.new(@stack, @file_path, node.location, collect_comments(node), nil)
-          @index << entry
+          @index.add(entry, skip_prefix_tree: true)
         end
 
         @owner_stack << entry
@@ -293,7 +293,7 @@ module RubyIndexer
 
       case node.receiver
       when nil
-        @index << Entry::Method.new(
+        @index.add(Entry::Method.new(
           method_name,
           @file_path,
           node.location,
@@ -301,9 +301,9 @@ module RubyIndexer
           node.parameters,
           current_visibility,
           @owner_stack.last,
-        )
+        ))
       when Prism::SelfNode
-        @index << Entry::Method.new(
+        @index.add(Entry::Method.new(
           method_name,
           @file_path,
           node.location,
@@ -311,7 +311,7 @@ module RubyIndexer
           node.parameters,
           current_visibility,
           singleton_klass,
-        )
+        ))
       end
     end
 
@@ -349,13 +349,15 @@ module RubyIndexer
     def on_alias_method_node_enter(node)
       method_name = node.new_name.slice
       comments = collect_comments(node)
-      @index << Entry::UnresolvedMethodAlias.new(
-        method_name,
-        node.old_name.slice,
-        @owner_stack.last,
-        @file_path,
-        node.new_name.location,
-        comments,
+      @index.add(
+        Entry::UnresolvedMethodAlias.new(
+          method_name,
+          node.old_name.slice,
+          @owner_stack.last,
+          @file_path,
+          node.new_name.location,
+          comments,
+        ),
       )
     end
 
@@ -380,7 +382,7 @@ module RubyIndexer
       # When instance variables are declared inside the class body, they turn into class instance variables rather than
       # regular instance variables
       owner = @inside_def ? @owner_stack.last : singleton_klass
-      @index << Entry::InstanceVariable.new(name, @file_path, loc, collect_comments(node), owner)
+      @index.add(Entry::InstanceVariable.new(name, @file_path, loc, collect_comments(node), owner))
     end
 
     sig { params(node: Prism::CallNode).void }
@@ -435,13 +437,15 @@ module RubyIndexer
       return unless old_name_value
 
       comments = collect_comments(node)
-      @index << Entry::UnresolvedMethodAlias.new(
-        new_name_value,
-        old_name_value,
-        @owner_stack.last,
-        @file_path,
-        new_name.location,
-        comments,
+      @index.add(
+        Entry::UnresolvedMethodAlias.new(
+          new_name_value,
+          old_name_value,
+          @owner_stack.last,
+          @file_path,
+          new_name.location,
+          comments,
+        ),
       )
     end
 
@@ -467,22 +471,24 @@ module RubyIndexer
       value = node.value unless node.is_a?(Prism::ConstantTargetNode) || node.is_a?(Prism::ConstantPathTargetNode)
       comments = collect_comments(node)
 
-      @index << case value
-      when Prism::ConstantReadNode, Prism::ConstantPathNode
-        Entry::UnresolvedAlias.new(value.slice, @stack.dup, name, @file_path, node.location, comments)
-      when Prism::ConstantWriteNode, Prism::ConstantAndWriteNode, Prism::ConstantOrWriteNode,
+      @index.add(
+        case value
+        when Prism::ConstantReadNode, Prism::ConstantPathNode
+          Entry::UnresolvedAlias.new(value.slice, @stack.dup, name, @file_path, node.location, comments)
+        when Prism::ConstantWriteNode, Prism::ConstantAndWriteNode, Prism::ConstantOrWriteNode,
         Prism::ConstantOperatorWriteNode
 
-        # If the right hand side is another constant assignment, we need to visit it because that constant has to be
-        # indexed too
-        Entry::UnresolvedAlias.new(value.name.to_s, @stack.dup, name, @file_path, node.location, comments)
-      when Prism::ConstantPathWriteNode, Prism::ConstantPathOrWriteNode, Prism::ConstantPathOperatorWriteNode,
+          # If the right hand side is another constant assignment, we need to visit it because that constant has to be
+          # indexed too
+          Entry::UnresolvedAlias.new(value.name.to_s, @stack.dup, name, @file_path, node.location, comments)
+        when Prism::ConstantPathWriteNode, Prism::ConstantPathOrWriteNode, Prism::ConstantPathOperatorWriteNode,
         Prism::ConstantPathAndWriteNode
 
-        Entry::UnresolvedAlias.new(value.target.slice, @stack.dup, name, @file_path, node.location, comments)
-      else
-        Entry::Constant.new(name, @file_path, node.location, comments)
-      end
+          Entry::UnresolvedAlias.new(value.target.slice, @stack.dup, name, @file_path, node.location, comments)
+        else
+          Entry::Constant.new(name, @file_path, node.location, comments)
+        end,
+      )
     end
 
     sig { params(node: Prism::Node).returns(T::Array[String]) }
@@ -539,15 +545,20 @@ module RubyIndexer
 
         next unless name && loc
 
-        @index << Entry::Accessor.new(name, @file_path, loc, comments, current_visibility, @owner_stack.last) if reader
-        @index << Entry::Accessor.new(
+        if reader
+          @index.add(Entry::Accessor.new(name, @file_path, loc, comments, current_visibility, @owner_stack.last))
+        end
+
+        next unless writer
+
+        @index.add(Entry::Accessor.new(
           "#{name}=",
           @file_path,
           loc,
           comments,
           current_visibility,
           @owner_stack.last,
-        ) if writer
+        ))
       end
     end
 
@@ -598,7 +609,7 @@ module RubyIndexer
       # If not available, create the singleton class lazily
       nesting = @stack + ["<Class:#{@stack.last}>"]
       entry = Entry::SingletonClass.new(nesting, @file_path, attached_class.location, [], nil)
-      @index << entry
+      @index.add(entry, skip_prefix_tree: true)
       entry
     end
   end
