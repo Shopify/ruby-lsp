@@ -23,6 +23,9 @@ module RubyLsp
     sig { returns(T::Boolean) }
     attr_reader :supports_watching_files
 
+    sig { returns(TypeChecker) }
+    attr_reader :type_checker
+
     sig { void }
     def initialize
       @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
@@ -33,6 +36,7 @@ module RubyLsp
       @test_library = T.let("minitest", String)
       @has_type_checker = T.let(true, T::Boolean)
       @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
+      @type_checker = T.let(TypeChecker.new(@index), TypeChecker)
       @supported_formatters = T.let({}, T::Hash[String, Requests::Support::Formatter])
       @supports_watching_files = T.let(false, T::Boolean)
     end

@@ -1,0 +1,171 @@
+# typed: true
+# frozen_string_literal: true
+
+require "test_helper"
+
+module RubyLsp
+  class TypeCheckerTest < Minitest::Test
+    def setup
+      @index = RubyIndexer::Index.new
+      @type_checker = TypeChecker.new(@index)
+    end
+
+    def test_infer_receiver_type_self_inside_method
+      node_context = index_and_locate({ line: 2, character: 4 }, <<~RUBY)
+        class Foo
+          def bar
+            baz
+          end
+        end
+      RUBY
+
+      assert_equal("Foo", @type_checker.infer_receiver_type(node_context))
+    end
+
+    def test_infer_receiver_type_self_inside_class_body
+      node_context = index_and_locate({ line: 1, character: 2 }, <<~RUBY)
+        class Foo
+          baz
+        end
+      RUBY
+
+      assert_equal("Foo::<Class:Foo>", @type_checker.infer_receiver_type(node_context))
+    end
+
+    def test_infer_receiver_type_self_inside_singleton_method
+      node_context = index_and_locate({ line: 2, character: 4 }, <<~RUBY)
+        class Foo
+          def self.bar
+            baz
+          end
+        end
+      RUBY
+
+      assert_equal("Foo::<Class:Foo>", @type_checker.infer_receiver_type(node_context))
+    end
+
+    def test_infer_receiver_type_self_inside_singleton_block_body
+      node_context = index_and_locate({ line: 2, character: 4 }, <<~RUBY)
+        class Foo
+          class << self
+            baz
+          end
+        end
+      RUBY
+
+      assert_equal("Foo::<Class:Foo>::<Class:<Class:Foo>>", @type_checker.infer_receiver_type(node_context))
+    end
+
+    def test_infer_receiver_type_self_inside_singleton_block_method
+      node_context = index_and_locate({ line: 3, character: 6 }, <<~RUBY)
+        class Foo
+          class << self
+            def bar
+              baz
+            end
+          end
+        end
+      RUBY
+
+      assert_equal("Foo::<Class:Foo>", @type_checker.infer_receiver_type(node_context))
+    end
+
+    def test_infer_receiver_type_constant
+      node_context = index_and_locate({ line: 4, character: 4 }, <<~RUBY)
+        class Foo
+          def bar; end
+        end
+
+        Foo.bar
+      RUBY
+
+      assert_equal("Foo::<Class:Foo>", @type_checker.infer_receiver_type(node_context))
+    end
+
+    def test_infer_receiver_type_constant_path
+      node_context = index_and_locate({ line: 6, character: 9 }, <<~RUBY)
+        module Foo
+          class Bar
+            def baz; end
+          end
+        end
+
+        Foo::Bar.baz
+      RUBY
+
+      assert_equal("Foo::Bar::<Class:Bar>", @type_checker.infer_receiver_type(node_context))
+    end
+
+    def test_infer_receiver_type_instance_variables_in_class_body
+      node_context = index_and_locate({ line: 1, character: 2 }, <<~RUBY)
+        class Foo
+          @hello1
+        end
+      RUBY
+
+      assert_equal("Foo::<Class:Foo>", @type_checker.infer_receiver_type(node_context))
+    end
+
+    def test_infer_receiver_type_instance_variables_in_singleton_method
+      node_context = index_and_locate({ line: 2, character: 4 }, <<~RUBY)
+        class Foo
+          def self.bar
+            @hello1
+          end
+        end
+      RUBY
+
+      assert_equal("Foo::<Class:Foo>", @type_checker.infer_receiver_type(node_context))
+    end
+
+    def test_infer_receiver_type_instance_variables_in_singleton_block_body
+      node_context = index_and_locate({ line: 2, character: 4 }, <<~RUBY)
+        class Foo
+          class << self
+            @hello1
+          end
+        end
+      RUBY
+
+      assert_equal("Foo::<Class:Foo>::<Class:<Class:Foo>>", @type_checker.infer_receiver_type(node_context))
+    end
+
+    def test_infer_receiver_type_instance_variables_in_singleton_block_method
+      node_context = index_and_locate({ line: 3, character: 6 }, <<~RUBY)
+        class Foo
+          class << self
+            def bar
+              @hello1
+            end
+          end
+        end
+      RUBY
+
+      assert_equal("Foo::<Class:Foo>", @type_checker.infer_receiver_type(node_context))
+    end
+
+    def test_infer_receiver_type_instance_variables_in_instance_method
+      node_context = index_and_locate({ line: 2, character: 4 }, <<~RUBY)
+        class Foo
+          def bar
+            @hello1
+          end
+        end
+      RUBY
+
+      assert_equal("Foo", @type_checker.infer_receiver_type(node_context))
+    end
+
+    private
+
+    def index_and_locate(position, source)
+      @index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake/path/foo.rb"), source)
+      document = RubyLsp::RubyDocument.new(
+        source: source,
+        version: 1,
+        uri: URI::Generic.build(scheme: "file", path: "/fake/path/foo.rb"),
+      )
+      document.locate_node(position)
+    end
+  end
+end
