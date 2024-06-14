@@ -35,7 +35,7 @@ module RubyLsp
         name = @item[:name]
         entries = @index[name]
 
-        parents = T.let([], T::Array[RubyIndexer::Entry::Namespace])
+        parents = T.let(Set.new, T::Set[RubyIndexer::Entry::Namespace])
         return unless entries&.any?
 
         entries.each do |entry|
@@ -68,7 +68,7 @@ module RubyLsp
           end
         end
 
-        parents.uniq.map { |entry| hierarchy_item(entry) }
+        parents.map { |entry| hierarchy_item(entry) }
       end
 
       private
