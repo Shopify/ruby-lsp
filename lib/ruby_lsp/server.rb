@@ -564,7 +564,7 @@ module RubyLsp
           response: Requests::Completion.new(
             document,
             @global_state,
-            params[:position],
+            params,
             typechecker_enabled?(document),
             dispatcher,
           ).perform,
