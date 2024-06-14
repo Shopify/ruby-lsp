@@ -172,5 +172,37 @@ module RubyIndexer
       entry = T.must(@index["@a"]&.first)
       assert_nil(entry.owner)
     end
+
+    def test_class_instance_variables_inside_self_method
+      index(<<~RUBY)
+        class Foo
+          def self.bar
+            @a = 123
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["@a"]&.first)
+      owner = T.must(entry.owner)
+      assert_instance_of(Entry::SingletonClass, owner)
+      assert_equal("Foo::<Class:Foo>", owner.name)
+    end
+
+    def test_instance_variable_inside_dynamic_method_declaration
+      index(<<~RUBY)
+        class Foo
+          def something.bar
+            @a = 123
+          end
+        end
+      RUBY
+
+      # If the surrounding method is beind defined on any dynamic value that isn't `self`, then we attribute the
+      # instance variable to the wrong owner since there's no way to understand that statically
+      entry = T.must(@index["@a"]&.first)
+      owner = T.must(entry.owner)
+      assert_instance_of(Entry::Class, owner)
+      assert_equal("Foo", owner.name)
+    end
   end
 end
