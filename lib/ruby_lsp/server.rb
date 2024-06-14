@@ -185,7 +185,7 @@ module RubyLsp
           completion_provider: completion_provider,
           code_lens_provider: code_lens_provider,
           definition_provider: enabled_features["definition"],
-          workspace_symbol_provider: enabled_features["workspaceSymbol"] && !@global_state.typechecker,
+          workspace_symbol_provider: enabled_features["workspaceSymbol"] && !@global_state.has_type_checker,
           signature_help_provider: signature_help_provider,
           experimental: {
             addon_detection: true,
@@ -462,7 +462,7 @@ module RubyLsp
 
     sig { params(document: Document).returns(T::Boolean) }
     def typechecker_enabled?(document)
-      @global_state.typechecker && document.sorbet_sigil_is_true_or_higher
+      @global_state.has_type_checker && document.sorbet_sigil_is_true_or_higher
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }

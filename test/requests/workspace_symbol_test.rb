@@ -6,7 +6,7 @@ require "test_helper"
 class WorkspaceSymbolTest < Minitest::Test
   def setup
     @global_state = RubyLsp::GlobalState.new
-    @global_state.stubs(:typechecker).returns(false)
+    @global_state.stubs(:has_type_checker).returns(false)
     @index = @global_state.index
   end
 

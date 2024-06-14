@@ -12,7 +12,7 @@ module RubyLsp
     attr_accessor :formatter
 
     sig { returns(T::Boolean) }
-    attr_reader :typechecker
+    attr_reader :has_type_checker
 
     sig { returns(RubyIndexer::Index) }
     attr_reader :index
@@ -31,7 +31,7 @@ module RubyLsp
       @formatter = T.let("auto", String)
       @linters = T.let([], T::Array[String])
       @test_library = T.let("minitest", String)
-      @typechecker = T.let(true, T::Boolean)
+      @has_type_checker = T.let(true, T::Boolean)
       @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
       @supported_formatters = T.let({}, T::Hash[String, Requests::Support::Formatter])
       @supports_watching_files = T.let(false, T::Boolean)
@@ -66,7 +66,7 @@ module RubyLsp
       specified_linters = options.dig(:initializationOptions, :linters)
       @linters = specified_linters || detect_linters(direct_dependencies)
       @test_library = detect_test_library(direct_dependencies)
-      @typechecker = detect_typechecker(direct_dependencies)
+      @has_type_checker = detect_typechecker(direct_dependencies)
 
       encodings = options.dig(:capabilities, :general, :positionEncodings)
       @encoding = if !encodings || encodings.empty?

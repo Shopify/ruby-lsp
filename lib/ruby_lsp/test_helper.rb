@@ -20,7 +20,7 @@ module RubyLsp
     def with_server(source = nil, uri = Kernel.URI("file:///fake.rb"), stub_no_typechecker: false, load_addons: true,
       &block)
       server = RubyLsp::Server.new(test_mode: true)
-      server.global_state.stubs(:typechecker).returns(false) if stub_no_typechecker
+      server.global_state.stubs(:has_type_checker).returns(false) if stub_no_typechecker
       server.global_state.apply_options({})
 
       if source
