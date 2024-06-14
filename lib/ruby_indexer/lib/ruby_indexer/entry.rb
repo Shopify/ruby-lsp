@@ -309,101 +309,14 @@ module RubyIndexer
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
-          parameters_node: T.nilable(Prism::ParametersNode),
+          parameters: T::Array[Parameter],
           visibility: Visibility,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, parameters_node, visibility, owner) # rubocop:disable Metrics/ParameterLists
+      def initialize(name, file_path, location, comments, parameters, visibility, owner) # rubocop:disable Metrics/ParameterLists
         super(name, file_path, location, comments, visibility, owner)
-
-        @parameters = T.let(list_params(parameters_node), T::Array[Parameter])
-      end
-
-      private
-
-      sig { params(parameters_node: T.nilable(Prism::ParametersNode)).returns(T::Array[Parameter]) }
-      def list_params(parameters_node)
-        return [] unless parameters_node
-
-        parameters = []
-
-        parameters_node.requireds.each do |required|
-          name = parameter_name(required)
-          next unless name
-
-          parameters << RequiredParameter.new(name: name)
-        end
-
-        parameters_node.optionals.each do |optional|
-          name = parameter_name(optional)
-          next unless name
-
-          parameters << OptionalParameter.new(name: name)
-        end
-
-        rest = parameters_node.rest
-
-        if rest.is_a?(Prism::RestParameterNode)
-          rest_name = rest.name || RestParameter::DEFAULT_NAME
-          parameters << RestParameter.new(name: rest_name)
-        end
-
-        parameters_node.keywords.each do |keyword|
-          name = parameter_name(keyword)
-          next unless name
-
-          case keyword
-          when Prism::RequiredKeywordParameterNode
-            parameters << KeywordParameter.new(name: name)
-          when Prism::OptionalKeywordParameterNode
-            parameters << OptionalKeywordParameter.new(name: name)
-          end
-        end
-
-        keyword_rest = parameters_node.keyword_rest
-
-        if keyword_rest.is_a?(Prism::KeywordRestParameterNode)
-          keyword_rest_name = parameter_name(keyword_rest) || KeywordRestParameter::DEFAULT_NAME
-          parameters << KeywordRestParameter.new(name: keyword_rest_name)
-        end
-
-        parameters_node.posts.each do |post|
-          name = parameter_name(post)
-          next unless name
-
-          parameters << RequiredParameter.new(name: name)
-        end
-
-        block = parameters_node.block
-        parameters << BlockParameter.new(name: block.name || BlockParameter::DEFAULT_NAME) if block
-
-        parameters
-      end
-
-      sig { params(node: T.nilable(Prism::Node)).returns(T.nilable(Symbol)) }
-      def parameter_name(node)
-        case node
-        when Prism::RequiredParameterNode, Prism::OptionalParameterNode,
-          Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode,
-          Prism::RestParameterNode, Prism::KeywordRestParameterNode
-          node.name
-        when Prism::MultiTargetNode
-          names = node.lefts.map { |parameter_node| parameter_name(parameter_node) }
-
-          rest = node.rest
-          if rest.is_a?(Prism::SplatNode)
-            name = rest.expression&.slice
-            names << (rest.operator == "*" ? "*#{name}".to_sym : name&.to_sym)
-          end
-
-          names << nil if rest.is_a?(Prism::ImplicitRestNode)
-
-          names.concat(node.rights.map { |parameter_node| parameter_name(parameter_node) })
-
-          names_with_commas = names.join(", ")
-          :"(#{names_with_commas})"
-        end
+        @parameters = parameters
       end
     end
 

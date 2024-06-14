@@ -112,7 +112,6 @@ module RubyIndexer
       file_path = member.location.buffer.name
       location = to_ruby_indexer_location(member.location)
       comments = Array(member.comment&.string)
-      parameters_node = nil
 
       visibility = case member.visibility
       when :private
@@ -123,7 +122,7 @@ module RubyIndexer
         Entry::Visibility::PUBLIC
       end
 
-      @index.add(Entry::Method.new(name, file_path, location, comments, parameters_node, visibility, owner))
+      @index.add(Entry::Method.new(name, file_path, location, comments, [], visibility, owner))
     end
   end
 end
