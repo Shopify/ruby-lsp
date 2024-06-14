@@ -289,4 +289,31 @@ class SignatureHelpTest < Minitest::Test
       assert_equal(0, result.active_parameter)
     end
   end
+
+  def test_singleton_methods
+    source = +<<~RUBY
+      class Foo
+        def self.bar(a, b)
+        end
+      end
+
+      Foo.bar()
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
+        position: { line: 5, character: 7 },
+        context: {
+          triggerCharacter: "(",
+          activeSignatureHelp: nil,
+        },
+      })
+      result = server.pop_response.response
+      signature = result.signatures.first
+
+      assert_equal("bar(a, b)", signature.label)
+      assert_equal(0, result.active_parameter)
+    end
+  end
 end
