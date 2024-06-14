@@ -23,6 +23,7 @@ module RubyLsp
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
+        @type_inferrer = T.let(global_state.type_inferrer, TypeInferrer)
         @uri = uri
         @node_context = node_context
         @typechecker_enabled = typechecker_enabled
@@ -48,7 +49,7 @@ module RubyLsp
         message = node.message
         return unless message
 
-        handle_method_definition(message, self_receiver?(node))
+        handle_method_definition(message, @type_inferrer.infer_receiver_type(@node_context))
       end
 
       sig { params(node: Prism::StringNode).void }
@@ -70,7 +71,7 @@ module RubyLsp
         value = expression.value
         return unless value
 
-        handle_method_definition(value, false)
+        handle_method_definition(value, nil)
       end
 
       sig { params(node: Prism::ConstantPathNode).void }
@@ -123,7 +124,10 @@ module RubyLsp
 
       sig { params(name: String).void }
       def handle_instance_variable_definition(name)
-        entries = @index.resolve_instance_variable(name, @node_context.fully_qualified_name)
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
+
+        entries = @index.resolve_instance_variable(name, type)
         return unless entries
 
         entries.each do |entry|
@@ -141,10 +145,10 @@ module RubyLsp
         # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
-      sig { params(message: String, self_receiver: T::Boolean).void }
-      def handle_method_definition(message, self_receiver)
-        methods = if self_receiver
-          @index.resolve_method(message, @node_context.fully_qualified_name)
+      sig { params(message: String, receiver_type: T.nilable(String)).void }
+      def handle_method_definition(message, receiver_type)
+        methods = if receiver_type
+          @index.resolve_method(message, receiver_type)
         else
           # If the method doesn't have a receiver, then we provide a few candidates to jump to
           # But we don't want to provide too many candidates, as it can be overwhelming
