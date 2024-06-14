@@ -27,8 +27,8 @@ class ServerTest < Minitest::Test
     hash = JSON.parse(@server.pop_response.response.to_json)
     capabilities = hash["capabilities"]
 
-    # TextSynchronization + encodings + semanticHighlighting
-    assert_equal(3, capabilities.length)
+    # TextSynchronization + encodings + semanticHighlighting + experimental
+    assert_equal(4, capabilities.length)
     assert_includes(capabilities, "semanticTokensProvider")
   end
 
@@ -426,6 +426,27 @@ class ServerTest < Minitest::Test
     })
   end
 
+  def test_workspace_addons
+    create_test_addons
+    @server.load_addons
+
+    @server.process_message({ id: 1, method: "rubyLsp/workspace/addons" })
+
+    addon_error_notification = @server.pop_response
+    assert_equal("window/showMessage", addon_error_notification.method)
+    assert_equal("Error loading addons:\n\nBar:\n  boom\n", addon_error_notification.params.message)
+    addons_info = @server.pop_response.response
+
+    assert_equal("Foo", addons_info[0][:name])
+    refute(addons_info[0][:errored])
+
+    assert_equal("Bar", addons_info[1][:name])
+    assert(addons_info[1][:errored])
+  ensure
+    RubyLsp::Addon.addons.clear
+    RubyLsp::Addon.addon_classes.clear
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)
@@ -451,5 +472,30 @@ class ServerTest < Minitest::Test
     RubyLsp::Requests::Support.send(:remove_const, :RuboCopFormatter)
   rescue NameError
     # Depending on which tests have run prior to this one, the classes may or may not be defined
+  end
+
+  def create_test_addons
+    Class.new(RubyLsp::Addon) do
+      def activate(global_state, outgoing_queue); end
+
+      def name
+        "Foo"
+      end
+
+      def deactivate; end
+    end
+
+    Class.new(RubyLsp::Addon) do
+      def activate(global_state, outgoing_queue)
+        # simulates failed addon activation
+        raise "boom"
+      end
+
+      def name
+        "Bar"
+      end
+
+      def deactivate; end
+    end
   end
 end
