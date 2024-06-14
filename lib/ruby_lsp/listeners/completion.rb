@@ -298,14 +298,9 @@ module RubyLsp
             filter_text: entry_name,
             text_edit: Interface::TextEdit.new(range: range, new_text: entry_name),
             kind: Constant::CompletionItemKind::METHOD,
-            label_details: Interface::CompletionItemLabelDetails.new(
-              detail: "(#{T.cast(entry, RubyIndexer::Entry::Member).parameters.map(&:decorated_name).join(", ")})",
-              description: entry.file_name,
-            ),
-            documentation: Interface::MarkupContent.new(
-              kind: "markdown",
-              value: markdown_from_index_entries(entry_name, entry),
-            ),
+            data: {
+              owner_name: T.cast(entry, RubyIndexer::Entry::Member).owner&.name,
+            },
           )
         end
       rescue RubyIndexer::Index::NonExistingNamespaceError

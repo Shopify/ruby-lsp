@@ -83,4 +83,31 @@ class CompletionResolveTest < Minitest::Test
       assert_match(/Bar/, result[:documentation].value)
     end
   end
+
+  def test_inserts_method_parameters_in_label_details
+    source = +<<~RUBY
+      class Bar
+        def foo(a, b, c)
+        end
+
+        def bar
+          f
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, _uri|
+      existing_item = {
+        label: "foo",
+        kind: RubyLsp::Constant::CompletionItemKind::METHOD,
+        data: { owner_name: "Bar" },
+      }
+
+      server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
+
+      result = server.pop_response.response
+      assert_equal("(a, b, c)", result[:labelDetails].detail)
+      assert_match("(a, b, c)", result[:documentation].value)
+    end
+  end
 end
