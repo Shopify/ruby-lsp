@@ -65,7 +65,7 @@ module RubyLsp
 
         target = determine_target(node, parent, @position)
         entries = @index.resolve(target.slice, context.nesting)
-        return if entries.nil? || entries.empty?
+        return unless entries
 
         # While the spec allows for multiple entries, VSCode seems to only support one
         # We'll just return the first one for now
