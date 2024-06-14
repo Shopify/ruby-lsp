@@ -1,6 +1,12 @@
 # typed: strict
 # frozen_string_literal: true
 
+begin
+  gem("rbs", ">= 3", "< 4")
+rescue LoadError
+  return
+end
+
 module RubyIndexer
   class RBSIndexer
     extend T::Sig

@@ -696,7 +696,10 @@ module RubyLsp
 
       Thread.new do
         begin
-          RubyIndexer::RBSIndexer.new(@global_state.index).index_ruby_core
+          # RBS is not available all platforms, e.g. JRuby
+          if defined? RubyIndexer::RBSIndexer
+            RubyIndexer::RBSIndexer.new(@global_state.index).index_ruby_core
+          end
 
           @global_state.index.index_all do |percentage|
             progress("indexing-progress", percentage)

@@ -7,7 +7,10 @@ module RubyIndexer
   class TestCase < Minitest::Test
     def setup
       @index = Index.new
-      RBSIndexer.new(@index).index_ruby_core
+      # RBS is not available all platforms, e.g. JRuby
+      if defined? RubyIndexer::RBSIndexer
+        RBSIndexer.new(@index).index_ruby_core
+      end
       @default_indexed_entries = @index.instance_variable_get(:@entries).dup
     end
 
