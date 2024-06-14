@@ -47,6 +47,7 @@ module RubyLsp
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
+        @type_inferrer = T.let(global_state.type_inferrer, TypeInferrer)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
         @node_context = node_context
         @typechecker_enabled = typechecker_enabled
@@ -95,8 +96,6 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
-        return unless self_receiver?(node)
-
         if @path && File.basename(@path) == GEMFILE_NAME && node.name == :gem
           generate_gem_hover(node)
           return
@@ -107,7 +106,10 @@ module RubyLsp
         message = node.message
         return unless message
 
-        methods = @index.resolve_method(message, @node_context.fully_qualified_name)
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
+
+        methods = @index.resolve_method(message, type)
         return unless methods
 
         title = "#{message}(#{T.must(methods.first).parameters.map(&:decorated_name).join(", ")})"
@@ -151,7 +153,10 @@ module RubyLsp
 
       sig { params(name: String).void }
       def handle_instance_variable_hover(name)
-        entries = @index.resolve_instance_variable(name, @node_context.fully_qualified_name)
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
+
+        entries = @index.resolve_instance_variable(name, type)
         return unless entries
 
         categorized_markdown_from_index_entries(name, entries).each do |category, content|
