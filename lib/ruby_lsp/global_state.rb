@@ -23,8 +23,8 @@ module RubyLsp
     sig { returns(T::Boolean) }
     attr_reader :supports_watching_files
 
-    sig { returns(TypeChecker) }
-    attr_reader :type_checker
+    sig { returns(TypeInferrer) }
+    attr_reader :type_inferrer
 
     sig { void }
     def initialize
@@ -36,7 +36,7 @@ module RubyLsp
       @test_library = T.let("minitest", String)
       @has_type_checker = T.let(true, T::Boolean)
       @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
-      @type_checker = T.let(TypeChecker.new(@index), TypeChecker)
+      @type_inferrer = T.let(TypeInferrer.new(@index), TypeInferrer)
       @supported_formatters = T.let({}, T::Hash[String, Requests::Support::Formatter])
       @supports_watching_files = T.let(false, T::Boolean)
     end

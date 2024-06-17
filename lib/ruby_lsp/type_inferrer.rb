@@ -4,7 +4,7 @@
 module RubyLsp
   # A minimalistic type checker to try to resolve types that can be inferred without requiring a type system or
   # annotations
-  class TypeChecker
+  class TypeInferrer
     extend T::Sig
 
     sig { params(index: RubyIndexer::Index).void }
@@ -21,11 +21,15 @@ module RubyLsp
         infer_receiver_for_call_node(node, node_context)
       when Prism::InstanceVariableReadNode, Prism::InstanceVariableAndWriteNode, Prism::InstanceVariableWriteNode,
         Prism::InstanceVariableOperatorWriteNode, Prism::InstanceVariableOrWriteNode, Prism::InstanceVariableTargetNode
-
-        return node_context.fully_qualified_name if node_context.surrounding_method
-
         nesting = node_context.nesting
-        "#{nesting.join("::")}::<Class:#{nesting.last}>"
+        # If we're at the top level, then the invocation is happening on `<main>`, which is a special singleton that
+        # inherits from Object
+        return "Object" if nesting.empty?
+
+        fully_qualified_name = node_context.fully_qualified_name
+        return fully_qualified_name if node_context.surrounding_method
+
+        "#{fully_qualified_name}::<Class:#{nesting.last}>"
       end
     end
 
@@ -37,11 +41,14 @@ module RubyLsp
 
       case receiver
       when Prism::SelfNode, nil
+        nesting = node_context.nesting
+        # If we're at the top level, then the invocation is happening on `<main>`, which is a special singleton that
+        # inherits from Object
+        return "Object" if nesting.empty?
         return node_context.fully_qualified_name if node_context.surrounding_method
 
         # If we're not inside a method, then we're inside the body of a class or module, which is a singleton
         # context
-        nesting = node_context.nesting
         "#{nesting.join("::")}::<Class:#{nesting.last}>"
       when Prism::ConstantPathNode, Prism::ConstantReadNode
         # When the receiver is a constant reference, we have to try to resolve it to figure out the right
