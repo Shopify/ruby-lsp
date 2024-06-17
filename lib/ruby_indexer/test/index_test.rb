@@ -1351,5 +1351,89 @@ module RubyIndexer
       assert_equal(1, results.length)
       assert_equal("Zwq", results.first.name)
     end
+
+    def test_resolving_method_aliases
+      index(<<~RUBY)
+        class Foo
+          def bar(a, b, c)
+          end
+
+          alias double_alias bar
+        end
+
+        class Bar < Foo
+          def hello(b); end
+
+          alias baz bar
+          alias_method :qux, :hello
+          alias double double_alias
+        end
+      RUBY
+
+      # baz
+      methods = @index.resolve_method("baz", "Bar")
+      refute_nil(methods)
+
+      entry = T.must(methods.first)
+      assert_kind_of(Entry::MethodAlias, entry)
+      assert_equal("bar", entry.target.name)
+      assert_equal("Foo", T.must(entry.target.owner).name)
+
+      # qux
+      methods = @index.resolve_method("qux", "Bar")
+      refute_nil(methods)
+
+      entry = T.must(methods.first)
+      assert_kind_of(Entry::MethodAlias, entry)
+      assert_equal("hello", entry.target.name)
+      assert_equal("Bar", T.must(entry.target.owner).name)
+
+      # double
+      methods = @index.resolve_method("double", "Bar")
+      refute_nil(methods)
+
+      entry = T.must(methods.first)
+      assert_kind_of(Entry::MethodAlias, entry)
+
+      target = entry.target
+      assert_equal("double_alias", target.name)
+      assert_kind_of(Entry::MethodAlias, target)
+      assert_equal("Foo", T.must(target.owner).name)
+
+      final_target = target.target
+      assert_equal("bar", final_target.name)
+      assert_kind_of(Entry::Method, final_target)
+      assert_equal("Foo", T.must(final_target.owner).name)
+    end
+
+    def test_resolving_circular_method_aliases
+      index(<<~RUBY)
+        class Foo
+          alias bar bar
+        end
+      RUBY
+
+      # It's not possible to resolve an alias that points to itself
+      methods = @index.resolve_method("bar", "Foo")
+      assert_nil(methods)
+
+      entry = T.must(@index["bar"].first)
+      assert_kind_of(Entry::UnresolvedMethodAlias, entry)
+    end
+
+    def test_unresolable_method_aliases
+      index(<<~RUBY)
+        class Foo
+          alias bar baz
+        end
+      RUBY
+
+      # `baz` does not exist, so resolving `bar` is not possible
+      methods = @index.resolve_method("bar", "Foo")
+      assert_nil(methods)
+
+      entry = T.must(@index["bar"].first)
+      assert_kind_of(Entry::UnresolvedMethodAlias, entry)
+    end
   end
 end

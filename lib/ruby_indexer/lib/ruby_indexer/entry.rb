@@ -399,6 +399,9 @@ module RubyIndexer
       end
     end
 
+    # An unresolved method alias is an alias entry for which we aren't sure what the right hand side points to yet. For
+    # example, if we have `alias a b`, we create an unresolved alias for `a` because we aren't sure immediate what `b`
+    # is referring to
     class UnresolvedMethodAlias < Entry
       extend T::Sig
 
@@ -424,6 +427,41 @@ module RubyIndexer
         @new_name = new_name
         @old_name = old_name
         @owner = owner
+      end
+    end
+
+    # A method alias is a resolved alias entry that points to the exact method target it refers to
+    class MethodAlias < Entry
+      extend T::Sig
+
+      sig { returns(T.any(Member, MethodAlias)) }
+      attr_reader :target
+
+      sig { params(target: T.any(Member, MethodAlias), unresolved_alias: UnresolvedMethodAlias).void }
+      def initialize(target, unresolved_alias)
+        super(
+          unresolved_alias.new_name,
+          unresolved_alias.file_path,
+          unresolved_alias.location,
+          unresolved_alias.comments,
+        )
+
+        @target = target
+      end
+
+      sig { returns(T.nilable(Entry::Namespace)) }
+      def owner
+        @target.owner
+      end
+
+      sig { returns(T::Array[Parameter]) }
+      def parameters
+        @target.parameters
+      end
+
+      sig { override.returns(T::Array[String]) }
+      def comments
+        @comments + @target.comments
       end
     end
   end
