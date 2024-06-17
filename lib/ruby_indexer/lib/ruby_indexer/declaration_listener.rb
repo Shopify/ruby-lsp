@@ -303,6 +303,8 @@ module RubyIndexer
           @owner_stack.last,
         ))
       when Prism::SelfNode
+        singleton = singleton_klass
+
         @index.add(Entry::Method.new(
           method_name,
           @file_path,
@@ -310,14 +312,24 @@ module RubyIndexer
           comments,
           list_params(node.parameters),
           current_visibility,
-          singleton_klass,
+          singleton,
         ))
+
+        if singleton
+          @owner_stack << singleton
+          @stack << "<Class:#{@stack.last}>"
+        end
       end
     end
 
     sig { params(node: Prism::DefNode).void }
     def on_def_node_leave(node)
       @inside_def = false
+
+      if node.receiver.is_a?(Prism::SelfNode)
+        @owner_stack.pop
+        @stack.pop
+      end
     end
 
     sig { params(node: Prism::InstanceVariableWriteNode).void }
