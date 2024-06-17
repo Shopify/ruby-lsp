@@ -16,19 +16,24 @@ module RubyLsp
     sig { returns(T.nilable(Prism::CallNode)) }
     attr_reader :call_node
 
+    sig { returns(T.nilable(String)) }
+    attr_reader :surrounding_method
+
     sig do
       params(
         node: T.nilable(Prism::Node),
         parent: T.nilable(Prism::Node),
         nesting: T::Array[String],
         call_node: T.nilable(Prism::CallNode),
+        surrounding_method: T.nilable(String),
       ).void
     end
-    def initialize(node, parent, nesting, call_node)
+    def initialize(node, parent, nesting, call_node, surrounding_method)
       @node = node
       @parent = parent
       @nesting = nesting
       @call_node = call_node
+      @surrounding_method = surrounding_method
     end
 
     sig { returns(String) }

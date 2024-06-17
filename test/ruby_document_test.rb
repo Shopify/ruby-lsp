@@ -672,6 +672,50 @@ class RubyDocumentTest < Minitest::Test
     assert_equal("Baz", T.must(node_context.node).slice)
   end
 
+  def test_locating_singleton_contexts
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      class Foo
+        hello1
+
+        def self.bar
+          hello2
+        end
+
+        class << self
+          hello3
+
+          def baz
+            hello4
+          end
+        end
+
+        def qux
+          hello5
+        end
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 1, character: 2 })
+    assert_equal(["Foo"], node_context.nesting)
+    assert_nil(node_context.surrounding_method)
+
+    node_context = document.locate_node({ line: 4, character: 4 })
+    assert_equal(["Foo", "<Class:Foo>"], node_context.nesting)
+    assert_equal("bar", node_context.surrounding_method)
+
+    node_context = document.locate_node({ line: 8, character: 4 })
+    assert_equal(["Foo", "<Class:Foo>"], node_context.nesting)
+    assert_nil(node_context.surrounding_method)
+
+    node_context = document.locate_node({ line: 11, character: 6 })
+    assert_equal(["Foo", "<Class:Foo>"], node_context.nesting)
+    assert_equal("baz", node_context.surrounding_method)
+
+    node_context = document.locate_node({ line: 16, character: 6 })
+    assert_equal(["Foo"], node_context.nesting)
+    assert_equal("qux", node_context.surrounding_method)
+  end
+
   private
 
   def assert_error_edit(actual, error_range)
