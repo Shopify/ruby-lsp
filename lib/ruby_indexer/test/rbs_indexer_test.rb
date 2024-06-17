@@ -55,6 +55,92 @@ module RubyIndexer
       assert_operator(entry.location.end_column, :>, 0)
     end
 
+    def test_rbs_method_with_required_positionals
+      entries = @index["crypt"] # https://rubyapi.org/3.3/o/string#method-i-crypt
+      assert_equal(1, entries.length)
+
+      entry = entries.first
+      parameters = entry.parameters
+
+      assert_equal(1, parameters.length)
+      assert_kind_of(Entry::RequiredParameter, parameters[0])
+      assert_equal(:salt_str, parameters[0].name)
+    end
+
+    def test_rbs_method_with_optional_parameter
+      entries = @index["chomp"] # https://rubyapi.org/3.3/o/string#method-i-chomp
+      assert_equal(1, entries.length)
+
+      entry = entries.first
+      parameters = entry.parameters
+
+      assert_equal(1, parameters.length)
+      assert_kind_of(Entry::OptionalParameter, parameters[0])
+      assert_equal(:separator, parameters[0].name)
+    end
+
+    def test_rbs_method_with_required_and_optional_parameters
+      entries = @index["gsub"] # https://rubyapi.org/3.3/o/string#method-i-gsub
+      assert_equal(1, entries.length)
+
+      entry = entries.first
+
+      parameters = entry.parameters
+
+      assert_equal(2, parameters.length)
+      assert_kind_of(Entry::RequiredParameter, parameters[0])
+      assert_kind_of(Entry::OptionalParameter, parameters[1])
+      assert_equal(:pattern, parameters[0].name)
+      assert_equal(:replacement, parameters[1].name)
+    end
+
+    def test_rbs_method_with_rest_positionals
+      entries = @index["count"] # https://rubyapi.org/3.3/o/string#method-i-count
+      entry = entries.find { |entry| entry.owner.name == "String" }
+
+      parameters = entry.parameters
+
+      # TODO: In RBS, this is represented as having two arguments:
+      #
+      #   def count: (selector selector_0, *selector more_selectors) -> Integer
+      #
+      # but perhaps that is confusing?
+      assert_equal(2, parameters.length)
+      assert_kind_of(RubyIndexer::Entry::RequiredParameter, parameters[0])
+      assert_kind_of(RubyIndexer::Entry::RestParameter, parameters[1])
+    end
+
+    def test_rbs_method_with_trailing_positionals
+      entries = @index["select"] # https://rubyapi.org/3.3/o/io#method-c-select
+      entry = entries.find { |entry| entry.owner.name == "IO::<Class:IO>" }
+
+      parameters = entry.parameters
+
+      assert_equal(4, parameters.length)
+      assert_kind_of(Entry::RequiredParameter, parameters[0])
+      assert_kind_of(Entry::OptionalParameter, parameters[1])
+      assert_kind_of(Entry::OptionalParameter, parameters[2])
+      assert_kind_of(Entry::OptionalParameter, parameters[3])
+    end
+
+    def test_rbs_method_with_optional_keywords
+      entries = @index["step"] # https://rubyapi.org/3.3/o/numeric#method-i-step
+      entry = entries.find { |entry| entry.owner.name == "Numeric" }
+
+      parameters = entry.parameters
+
+      assert_equal(4, parameters.length)
+      assert_equal([:limit, :step, :by, :to], parameters.map(&:name))
+      assert_kind_of(Entry::OptionalParameter, parameters[0])
+      assert_kind_of(Entry::OptionalParameter, parameters[1])
+      assert_kind_of(Entry::OptionalKeywordParameter, parameters[2])
+      assert_kind_of(Entry::OptionalKeywordParameter, parameters[3])
+    end
+
+    def test_rbs_method_with_required_keywords
+      # Investigating if there are any methods in Core for this
+    end
+
     def test_attaches_correct_owner_to_singleton_methods
       entries = @index["basename"]
       refute_nil(entries)

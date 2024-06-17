@@ -123,7 +123,15 @@ module RubyIndexer
       end
 
       real_owner = member.singleton? ? existing_or_new_singleton_klass(owner) : owner
-      @index.add(Entry::Method.new(name, file_path, location, comments, [], visibility, real_owner))
+      @index.add(Entry::Method.new(
+        name,
+        file_path,
+        location,
+        comments,
+        build_parameters(member.overloads),
+        visibility,
+        real_owner,
+      ))
     end
 
     sig { params(owner: Entry::Namespace).returns(T.nilable(Entry::Class)) }
@@ -142,6 +150,98 @@ module RubyIndexer
       entry = Entry::SingletonClass.new(nesting, owner.file_path, owner.location, [], nil)
       @index.add(entry, skip_prefix_tree: true)
       entry
+    end
+
+    sig do
+      params(overloads: T::Array[RBS::AST::Members::MethodDefinition::Overload]).returns(T::Array[Entry::Parameter])
+    end
+    def build_parameters(overloads)
+      parameters = {}
+      overloads.each do |overload|
+        process_overload(overload, parameters)
+      end
+      parameters.values
+    end
+
+    sig do
+      params(
+        overload: RBS::AST::Members::MethodDefinition::Overload,
+        parameters: T::Hash[Symbol, Entry::Parameter],
+      ).void
+    end
+    def process_overload(overload, parameters)
+      function = overload.method_type.type
+      process_required_positionals(function, parameters) if function.required_positionals
+      process_optional_positionals(function, parameters) if function.optional_positionals
+      process_trailing_positionals(function, parameters) if function.trailing_positionals
+      process_required_keywords(function, parameters) if function.trailing_positionals
+      process_optional_keywords(function, parameters) if function.optional_keywords
+      process_rest_keywords(function, parameters) if function.rest_keywords
+    end
+
+    sig { params(function: RBS::Types::Function, parameters: T::Hash[Symbol, Entry::Parameter]).void }
+    def process_required_positionals(function, parameters)
+      function.required_positionals.each do |param|
+        name = param.name
+
+        next unless name
+
+        parameters[name] = Entry::RequiredParameter.new(name: name)
+      end
+      optional_argument_names = parameters.keys - function.required_positionals.map(&:name)
+      optional_argument_names.each do |optional_argument_name|
+        parameters[optional_argument_name] = Entry::OptionalParameter.new(name: optional_argument_name)
+      end
+    end
+
+    sig { params(function: RBS::Types::Function, parameters: T::Hash[Symbol, Entry::Parameter]).void }
+    def process_optional_positionals(function, parameters)
+      function.optional_positionals.each do |param|
+        name = param.name
+        next unless name
+
+        parameters[name] = Entry::OptionalParameter.new(name: name)
+      end
+      rest = function.rest_positionals
+
+      if rest
+        rest_name = rest.name || Entry::RestParameter::DEFAULT_NAME
+        return if rest_name == :selector_0
+
+        parameters[rest_name] = Entry::RestParameter.new(name: rest_name)
+      end
+    end
+
+    sig { params(function: RBS::Types::Function, parameters: T::Hash[Symbol, Entry::Parameter]).void }
+    def process_trailing_positionals(function, parameters)
+      function.trailing_positionals.each do |param|
+        name = param.name
+        parameters[name] = Entry::OptionalParameter.new(name: param.name)
+      end
+    end
+
+    sig { params(function: RBS::Types::Function, parameters: T::Hash[Symbol, Entry::Parameter]).void }
+    def process_required_keywords(function, parameters)
+      function.required_keywords.each do |param|
+        name = param.first
+        parameters[name] = Entry::KeywordParameter.new(name: name)
+      end
+    end
+
+    sig { params(function: RBS::Types::Function, parameters: T::Hash[Symbol, Entry::Parameter]).void }
+    def process_optional_keywords(function, parameters)
+      function.optional_keywords.each do |param|
+        name = param.first.to_s.to_sym # hack
+        parameters[name] = Entry::OptionalKeywordParameter.new(name: name)
+      end
+    end
+
+    sig { params(function: RBS::Types::Function, parameters: T::Hash[Symbol, Entry::Parameter]).void }
+    def process_rest_keywords(function, parameters)
+      keyword_rest = function.rest_keywords
+
+      keyword_rest_name = keyword_rest.name || Entry::KeywordRestParameter::DEFAULT_NAME
+      parameters[keyword_rest_name] = Entry::KeywordRestParameter.new(name: keyword_rest_name)
     end
   end
 end
