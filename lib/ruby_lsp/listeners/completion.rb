@@ -42,7 +42,7 @@ module RubyLsp
       # Handle completion on regular constant references (e.g. `Bar`)
       sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read_node_enter(node)
-        return if @global_state.typechecker
+        return if @global_state.has_type_checker
 
         name = constant_name(node)
         return if name.nil?
@@ -63,7 +63,7 @@ module RubyLsp
       # Handle completion on namespaced constant references (e.g. `Foo::Bar`)
       sig { params(node: Prism::ConstantPathNode).void }
       def on_constant_path_node_enter(node)
-        return if @global_state.typechecker
+        return if @global_state.has_type_checker
 
         name = constant_name(node)
         return if name.nil?
