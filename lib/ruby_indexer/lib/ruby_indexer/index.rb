@@ -140,13 +140,27 @@ module RubyIndexer
       results.flat_map(&:first)
     end
 
-    sig { params(name: T.nilable(String), receiver_name: String).returns(T::Array[Entry]) }
+    sig do
+      params(
+        name: T.nilable(String),
+        receiver_name: String,
+      ).returns(T::Array[T.any(Entry::Member, Entry::MethodAlias)])
+    end
     def method_completion_candidates(name, receiver_name)
       ancestors = linearized_ancestors_of(receiver_name)
 
       candidates = name ? prefix_search(name).flatten : @entries.values.flatten
-      candidates.select! { |entry| entry.is_a?(Entry::Member) && ancestors.any?(entry.owner&.name) }
-      candidates
+      candidates.filter_map do |entry|
+        case entry
+        when Entry::Member, Entry::MethodAlias
+          entry if ancestors.any?(entry.owner&.name)
+        when Entry::UnresolvedMethodAlias
+          if ancestors.any?(entry.owner&.name)
+            resolved_alias = resolve_method_alias(entry, receiver_name)
+            resolved_alias if resolved_alias.is_a?(Entry::MethodAlias)
+          end
+        end
+      end
     end
 
     # Resolve a constant to its declaration based on its name and the nesting where the reference was found. Parameter
@@ -296,19 +310,20 @@ module RubyIndexer
 
       ancestors = linearized_ancestors_of(receiver_name.delete_prefix("::"))
       ancestors.each do |ancestor|
-        found = method_entries.select do |entry|
+        found = method_entries.filter_map do |entry|
           case entry
           when Entry::Member, Entry::MethodAlias
-            entry.owner&.name == ancestor
+            entry if entry.owner&.name == ancestor
           when Entry::UnresolvedMethodAlias
-            resolved_alias = resolve_method_alias(entry, receiver_name)
-            resolved_alias.is_a?(Entry::MethodAlias) && resolved_alias.owner&.name == ancestor
-          else
-            next
+            # Resolve aliases lazily as we find them
+            if entry.owner&.name == ancestor
+              resolved_alias = resolve_method_alias(entry, receiver_name)
+              resolved_alias if resolved_alias.is_a?(Entry::MethodAlias)
+            end
           end
         end
 
-        return T.cast(found, T::Array[T.any(Entry::Member, Entry::MethodAlias)]) if found.any?
+        return found if found.any?
       end
 
       nil

@@ -1435,5 +1435,42 @@ module RubyIndexer
       entry = T.must(@index["bar"].first)
       assert_kind_of(Entry::UnresolvedMethodAlias, entry)
     end
+
+    def test_only_aliases_for_the_right_owner_are_resolved
+      index(<<~RUBY)
+        class Foo
+          attr_reader :name
+          alias_method :decorated_name, :name
+        end
+
+        class Bar
+          alias_method :decorated_name, :to_s
+        end
+      RUBY
+
+      methods = @index.resolve_method("decorated_name", "Foo")
+      refute_nil(methods)
+
+      entry = T.must(methods.first)
+      assert_kind_of(Entry::MethodAlias, entry)
+
+      target = entry.target
+      assert_equal("name", target.name)
+      assert_kind_of(Entry::Accessor, target)
+      assert_equal("Foo", T.must(target.owner).name)
+
+      other_decorated_name = T.must(@index["decorated_name"].find { |e| e.is_a?(Entry::UnresolvedMethodAlias) })
+      assert_kind_of(Entry::UnresolvedMethodAlias, other_decorated_name)
+    end
+
+    def test_completion_does_not_include_unresolved_aliases
+      index(<<~RUBY)
+        class Foo
+          alias_method :bar, :missing
+        end
+      RUBY
+
+      assert_empty(@index.method_completion_candidates("bar", "Foo"))
+    end
   end
 end

@@ -675,6 +675,33 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definition_for_aliased_methods
+    source = <<~RUBY
+      class Parent
+        def bar; end
+      end
+
+      class Child < Parent
+        alias baz bar
+
+        def do_something
+          baz
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 8 } },
+      )
+      response = server.pop_response.response
+
+      assert_equal(5, response[0].range.start.line)
+    end
+  end
+
   private
 
   def create_definition_addon

@@ -527,6 +527,36 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hover_for_aliased_methods
+    source = <<~RUBY
+      class Parent
+        # Original
+        def bar; end
+      end
+
+      class Child < Parent
+        # Alias
+        alias baz bar
+
+        def do_something
+          baz
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 10 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("Alias", contents)
+      assert_match("Original", contents)
+    end
+  end
+
   private
 
   def create_hover_addon

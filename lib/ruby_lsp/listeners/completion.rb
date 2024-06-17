@@ -299,7 +299,7 @@ module RubyLsp
             text_edit: Interface::TextEdit.new(range: range, new_text: entry_name),
             kind: Constant::CompletionItemKind::METHOD,
             data: {
-              owner_name: T.cast(entry, RubyIndexer::Entry::Member).owner&.name,
+              owner_name: entry.owner&.name,
             },
           )
         end
@@ -309,7 +309,7 @@ module RubyLsp
 
       sig do
         params(
-          entry: RubyIndexer::Entry::Member,
+          entry: T.any(RubyIndexer::Entry::Member, RubyIndexer::Entry::MethodAlias),
           node: Prism::CallNode,
         ).returns(Interface::CompletionItem)
       end

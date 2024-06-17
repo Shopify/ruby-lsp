@@ -439,11 +439,16 @@ module RubyIndexer
 
       sig { params(target: T.any(Member, MethodAlias), unresolved_alias: UnresolvedMethodAlias).void }
       def initialize(target, unresolved_alias)
+        full_comments = ["Alias for #{target.name}\n"]
+        full_comments.concat(unresolved_alias.comments)
+        full_comments << "\n"
+        full_comments.concat(target.comments)
+
         super(
           unresolved_alias.new_name,
           unresolved_alias.file_path,
           unresolved_alias.location,
-          unresolved_alias.comments,
+          full_comments,
         )
 
         @target = target
@@ -459,9 +464,9 @@ module RubyIndexer
         @target.parameters
       end
 
-      sig { override.returns(T::Array[String]) }
-      def comments
-        @comments + @target.comments
+      sig { returns(String) }
+      def decorated_parameters
+        @target.decorated_parameters
       end
     end
   end
