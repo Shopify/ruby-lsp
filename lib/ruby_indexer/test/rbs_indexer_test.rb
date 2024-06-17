@@ -54,5 +54,14 @@ module RubyIndexer
       assert_equal(2, entry.location.start_column)
       assert_operator(entry.location.end_column, :>, 0)
     end
+
+    def test_attaches_correct_owner_to_singleton_methods
+      entries = @index["basename"]
+      refute_nil(entries)
+
+      owner = entries.first.owner
+      assert_instance_of(Entry::SingletonClass, owner)
+      assert_equal("File::<Class:File>", owner.name)
+    end
   end
 end

@@ -122,7 +122,26 @@ module RubyIndexer
         Entry::Visibility::PUBLIC
       end
 
-      @index.add(Entry::Method.new(name, file_path, location, comments, [], visibility, owner))
+      real_owner = member.singleton? ? existing_or_new_singleton_klass(owner) : owner
+      @index.add(Entry::Method.new(name, file_path, location, comments, [], visibility, real_owner))
+    end
+
+    sig { params(owner: Entry::Namespace).returns(T.nilable(Entry::Class)) }
+    def existing_or_new_singleton_klass(owner)
+      *_parts, name = owner.name.split("::")
+
+      # Return the existing singleton class if available
+      singleton_entries = T.cast(
+        @index["#{owner.name}::<Class:#{name}>"],
+        T.nilable(T::Array[Entry::SingletonClass]),
+      )
+      return singleton_entries.first if singleton_entries
+
+      # If not available, create the singleton class lazily
+      nesting = owner.nesting + ["<Class:#{name}>"]
+      entry = Entry::SingletonClass.new(nesting, owner.file_path, owner.location, [], nil)
+      @index.add(entry, skip_prefix_tree: true)
+      entry
     end
   end
 end
