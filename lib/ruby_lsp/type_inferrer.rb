@@ -62,9 +62,9 @@ module RubyLsp
         return unless name
 
         *parts, last = name.split("::")
-        return "#{last}::<Class:#{last}>" if T.must(parts).empty?
+        return "#{last}::<Class:#{last}>" if parts.empty?
 
-        "#{T.must(parts).join("::")}::#{last}::<Class:#{last}>"
+        "#{parts.join("::")}::#{last}::<Class:#{last}>"
       end
     end
 

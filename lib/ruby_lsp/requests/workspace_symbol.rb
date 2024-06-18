@@ -52,7 +52,7 @@ module RubyLsp
 
           Interface::WorkspaceSymbol.new(
             name: entry.name,
-            container_name: T.must(container).join("::"),
+            container_name: container.join("::"),
             kind: kind,
             location: Interface::Location.new(
               uri: URI::Generic.from_path(path: file_path).to_s,
