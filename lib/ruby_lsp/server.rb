@@ -68,6 +68,12 @@ module RubyLsp
         text_document_signature_help(message)
       when "textDocument/definition"
         text_document_definition(message)
+      when "textDocument/prepareTypeHierarchy"
+        text_document_prepare_type_hierarchy(message)
+      when "typeHierarchy/supertypes"
+        type_hierarchy_supertypes(message)
+      when "typeHierarchy/subtypes"
+        type_hierarchy_subtypes(message)
       when "workspace/didChangeWatchedFiles"
         workspace_did_change_watched_files(message)
       when "workspace/symbol"
@@ -162,6 +168,7 @@ module RubyLsp
       inlay_hint_provider = Requests::InlayHints.provider if enabled_features["inlayHint"]
       completion_provider = Requests::Completion.provider if enabled_features["completion"]
       signature_help_provider = Requests::SignatureHelp.provider if enabled_features["signatureHelp"]
+      type_hierarchy_provider = Requests::PrepareTypeHierarchy.provider if enabled_features["typeHierarchy"]
 
       response = {
         capabilities: Interface::ServerCapabilities.new(
@@ -187,6 +194,7 @@ module RubyLsp
           definition_provider: enabled_features["definition"],
           workspace_symbol_provider: enabled_features["workspaceSymbol"] && !@global_state.has_type_checker,
           signature_help_provider: signature_help_provider,
+          type_hierarchy_provider: type_hierarchy_provider,
           experimental: {
             addon_detection: true,
           },
@@ -671,6 +679,33 @@ module RubyLsp
         ).perform,
       }
       send_message(Result.new(id: message[:id], response: response))
+    end
+
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def text_document_prepare_type_hierarchy(message)
+      params = message[:params]
+      response = Requests::PrepareTypeHierarchy.new(
+        @store.get(params.dig(:textDocument, :uri)),
+        @global_state.index,
+        params[:position],
+      ).perform
+      send_message(Result.new(id: message[:id], response: response))
+    end
+
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def type_hierarchy_supertypes(message)
+      response = Requests::TypeHierarchySupertypes.new(
+        @global_state.index,
+        message.dig(:params, :item),
+      ).perform
+      send_message(Result.new(id: message[:id], response: response))
+    end
+
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def type_hierarchy_subtypes(message)
+      # TODO: implement subtypes
+      # The current index representation doesn't allow us to find the children of an entry.
+      send_message(Result.new(id: message[:id], response: nil))
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }

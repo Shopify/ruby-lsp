@@ -64,26 +64,6 @@ module RubyLsp
           )
         end
       end
-
-      private
-
-      sig { params(entry: RubyIndexer::Entry).returns(T.nilable(Integer)) }
-      def kind_for_entry(entry)
-        case entry
-        when RubyIndexer::Entry::Class
-          Constant::SymbolKind::CLASS
-        when RubyIndexer::Entry::Module
-          Constant::SymbolKind::NAMESPACE
-        when RubyIndexer::Entry::Constant
-          Constant::SymbolKind::CONSTANT
-        when RubyIndexer::Entry::Method
-          entry.name == "initialize" ? Constant::SymbolKind::CONSTRUCTOR : Constant::SymbolKind::METHOD
-        when RubyIndexer::Entry::Accessor
-          Constant::SymbolKind::PROPERTY
-        when RubyIndexer::Entry::InstanceVariable
-          Constant::SymbolKind::FIELD
-        end
-      end
     end
   end
 end
