@@ -158,7 +158,7 @@ module RubyLsp
           name.delete_suffix("::")
         else
           *namespace, incomplete_name = name.split("::")
-          T.must(namespace).join("::")
+          namespace.join("::")
         end
 
         nesting = @node_context.nesting

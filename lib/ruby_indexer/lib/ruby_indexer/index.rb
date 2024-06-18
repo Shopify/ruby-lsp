@@ -525,12 +525,12 @@ module RubyIndexer
     end
     def lookup_ancestor_chain(name, nesting, seen_names)
       *nesting_parts, constant_name = build_non_redundant_full_name(name, nesting).split("::")
-      return if T.must(nesting_parts).empty?
+      return if nesting_parts.empty?
 
-      namespace_entries = resolve(T.must(nesting_parts).join("::"), [], seen_names)
+      namespace_entries = resolve(nesting_parts.join("::"), [], seen_names)
       return unless namespace_entries
 
-      ancestors = T.must(nesting_parts).empty? ? [] : linearized_ancestors_of(T.must(namespace_entries.first).name)
+      ancestors = nesting_parts.empty? ? [] : linearized_ancestors_of(T.must(namespace_entries.first).name)
 
       ancestors.each do |ancestor_name|
         entries = direct_or_aliased_constant("#{ancestor_name}::#{constant_name}", seen_names)
