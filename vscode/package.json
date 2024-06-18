@@ -67,6 +67,11 @@
         "category": "Ruby LSP"
       },
       {
+        "command": "rubyLsp.displayAddons",
+        "title": "Display addons",
+        "category": "Ruby LSP"
+      },
+      {
         "command": "rubyLsp.runTest",
         "title": "Run current test",
         "category": "Ruby LSP",

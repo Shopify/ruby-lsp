@@ -214,6 +214,33 @@ export class RubyLsp {
           ),
         );
       }),
+      vscode.commands.registerCommand(Command.DisplayAddons, async () => {
+        const client = this.currentActiveWorkspace()?.lspClient;
+
+        if (!client || !client.addons) {
+          return;
+        }
+
+        const options: vscode.QuickPickItem[] = client.addons
+          .sort((addon) => {
+            // Display errored addons last
+            if (addon.errored) {
+              return 1;
+            }
+
+            return -1;
+          })
+          .map((addon) => {
+            const icon = addon.errored ? "$(error)" : "$(pass)";
+            return {
+              label: `${icon} ${addon.name}`,
+            };
+          });
+
+        await vscode.window.showQuickPick(options, {
+          placeHolder: "Addons (readonly)",
+        });
+      }),
       vscode.commands.registerCommand(Command.ToggleFeatures, async () => {
         // Extract feature descriptions from our package.json
         const enabledFeaturesProperties =

@@ -18,6 +18,7 @@ export enum Command {
   RunTestInTerminal = "rubyLsp.runTestInTerminal",
   DebugTest = "rubyLsp.debugTest",
   ShowSyntaxTree = "rubyLsp.showSyntaxTree",
+  DisplayAddons = "rubyLsp.displayAddons",
 }
 
 export interface RubyInterface {

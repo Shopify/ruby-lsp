@@ -305,7 +305,7 @@ suite("StatusItems", () => {
       assert.strictEqual(status.item.text, "Addons: none");
     });
 
-    test("Status displays addon names and errored status", () => {
+    test("Status displays addon count and command to list commands", () => {
       workspace.lspClient!.addons = [
         { name: "foo", errored: false },
         { name: "bar", errored: true },
@@ -313,7 +313,9 @@ suite("StatusItems", () => {
 
       status.refresh(workspace);
 
-      assert.strictEqual(status.item.text, "Addons: foo, bar (errored)");
+      assert.strictEqual(status.item.text, "Addons: 2");
+      assert.strictEqual(status.item.command?.title, "Details");
+      assert.strictEqual(status.item.command.command, Command.DisplayAddons);
     });
   });
 });
