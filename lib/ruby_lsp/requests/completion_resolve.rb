@@ -59,8 +59,8 @@ module RubyLsp
         first_entry = T.must(entries.first)
 
         if first_entry.is_a?(RubyIndexer::Entry::Member)
-          detail = "(#{first_entry.parameters.map(&:decorated_name).join(", ")})"
-          label = "#{label}(#{first_entry.parameters.map(&:decorated_name).join(", ")})"
+          detail = first_entry.decorated_parameters
+          label = "#{label}#{first_entry.decorated_parameters}"
         end
 
         @item[:labelDetails] = Interface::CompletionItemLabelDetails.new(

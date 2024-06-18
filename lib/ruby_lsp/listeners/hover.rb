@@ -112,7 +112,7 @@ module RubyLsp
         methods = @index.resolve_method(message, type)
         return unless methods
 
-        title = "#{message}(#{T.must(methods.first).parameters.map(&:decorated_name).join(", ")})"
+        title = "#{message}#{T.must(methods.first).decorated_parameters}"
 
         categorized_markdown_from_index_entries(title, methods).each do |category, content|
           @response_builder.push(content, category: category)

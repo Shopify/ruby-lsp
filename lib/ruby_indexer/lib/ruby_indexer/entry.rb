@@ -284,6 +284,12 @@ module RubyIndexer
 
       sig { abstract.returns(T::Array[Parameter]) }
       def parameters; end
+
+      # Returns a string with the decorated names of the parameters of this member. E.g.: `(a, b = 1, c: 2)`
+      sig { returns(String) }
+      def decorated_parameters
+        "(#{parameters.map(&:decorated_name).join(", ")})"
+      end
     end
 
     class Accessor < Member
