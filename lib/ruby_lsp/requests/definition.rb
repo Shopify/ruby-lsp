@@ -42,8 +42,8 @@ module RubyLsp
       def initialize(document, global_state, position, dispatcher, typechecker_enabled)
         super()
         @response_builder = T.let(
-          ResponseBuilders::CollectionResponseBuilder[Interface::Location].new,
-          ResponseBuilders::CollectionResponseBuilder[Interface::Location],
+          ResponseBuilders::CollectionResponseBuilder[T.any(Interface::Location, Interface::LocationLink)].new,
+          ResponseBuilders::CollectionResponseBuilder[T.any(Interface::Location, Interface::LocationLink)],
         )
         @dispatcher = dispatcher
 
@@ -104,7 +104,7 @@ module RubyLsp
         @target = T.let(target, T.nilable(Prism::Node))
       end
 
-      sig { override.returns(T::Array[Interface::Location]) }
+      sig { override.returns(T::Array[T.any(Interface::Location, Interface::LocationLink)]) }
       def perform
         @dispatcher.dispatch_once(@target) if @target
         @response_builder.response

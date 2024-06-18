@@ -22,6 +22,8 @@ module RubyIndexer
     sig { returns(RubyIndexer::Location) }
     attr_reader :location
 
+    alias_method :name_location, :location
+
     sig { returns(T::Array[String]) }
     attr_reader :comments
 
