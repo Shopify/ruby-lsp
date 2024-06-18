@@ -1,8 +1,10 @@
+/* eslint-disable no-process-env */
 import path from "path";
 
 import * as vscode from "vscode";
 
 import { WorkspaceChannel } from "../workspaceChannel";
+import { asyncExec } from "../common";
 
 export interface ActivationResult {
   env: NodeJS.ProcessEnv;
@@ -53,5 +55,24 @@ export abstract class VersionManager {
 
       throw error;
     }
+  }
+
+  // Runs the given command in the directory for the Bundle, using the user's preferred shell and inheriting the current
+  // process environment
+  protected runScript(command: string) {
+    const shell = vscode.env.shell.length > 0 ? vscode.env.shell : undefined;
+
+    this.outputChannel.info(
+      `Running command: \`${command}\` in ${this.bundleUri.fsPath} using shell: ${shell}`,
+    );
+    this.outputChannel.debug(
+      `Environment used for command: ${JSON.stringify(process.env)}`,
+    );
+
+    return asyncExec(command, {
+      cwd: this.bundleUri.fsPath,
+      shell,
+      env: process.env,
+    });
   }
 }

@@ -480,6 +480,67 @@ class RubyDocumentTest < Minitest::Test
     assert_equal(["Foo", "Other"], node_context.nesting)
   end
 
+  def test_locate_returns_call_node
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      module Foo
+        class Other
+          def do_it
+            hello :foo
+            :bar
+          end
+        end
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 3, character: 14 })
+    assert_equal(":foo", T.must(node_context.node).slice)
+    assert_equal(:hello, T.must(node_context.call_node).name)
+
+    node_context = document.locate_node({ line: 4, character: 8 })
+    assert_equal(":bar", T.must(node_context.node).slice)
+    assert_nil(node_context.call_node)
+  end
+
+  def test_locate_returns_call_node_nested
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      module Foo
+        class Other
+          def do_it
+            goodbye(hello(:foo))
+          end
+        end
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 3, character: 22 })
+    assert_equal(":foo", T.must(node_context.node).slice)
+    assert_equal(:hello, T.must(node_context.call_node).name)
+  end
+
+  def test_locate_returns_call_node_for_blocks
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      foo do
+        "hello"
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 1, character: 4 })
+    assert_equal(:foo, T.must(node_context.call_node).name)
+  end
+
+  def test_locate_returns_call_node_ZZZ
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      foo(
+        if bar(1, 2, 3)
+          "hello" # this is the target
+        end
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 2, character: 6 })
+    assert_equal(:foo, T.must(node_context.call_node).name)
+  end
+
   def test_locate_returns_correct_nesting_when_specifying_target_classes
     document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
       module Foo
@@ -608,6 +669,68 @@ class RubyDocumentTest < Minitest::Test
       end
     RUBY
     refute_predicate(document, :sorbet_sigil_is_true_or_higher)
+  end
+
+  def test_locating_compact_namespace_declaration
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      class Foo::Bar
+      end
+
+      class Baz
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 0, character: 11 })
+    assert_empty(node_context.nesting)
+    assert_equal("Foo::Bar", T.must(node_context.node).slice)
+
+    node_context = document.locate_node({ line: 3, character: 6 })
+    assert_empty(node_context.nesting)
+    assert_equal("Baz", T.must(node_context.node).slice)
+  end
+
+  def test_locating_singleton_contexts
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      class Foo
+        hello1
+
+        def self.bar
+          hello2
+        end
+
+        class << self
+          hello3
+
+          def baz
+            hello4
+          end
+        end
+
+        def qux
+          hello5
+        end
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 1, character: 2 })
+    assert_equal(["Foo"], node_context.nesting)
+    assert_nil(node_context.surrounding_method)
+
+    node_context = document.locate_node({ line: 4, character: 4 })
+    assert_equal(["Foo", "<Class:Foo>"], node_context.nesting)
+    assert_equal("bar", node_context.surrounding_method)
+
+    node_context = document.locate_node({ line: 8, character: 4 })
+    assert_equal(["Foo", "<Class:Foo>"], node_context.nesting)
+    assert_nil(node_context.surrounding_method)
+
+    node_context = document.locate_node({ line: 11, character: 6 })
+    assert_equal(["Foo", "<Class:Foo>"], node_context.nesting)
+    assert_equal("baz", node_context.surrounding_method)
+
+    node_context = document.locate_node({ line: 16, character: 6 })
+    assert_equal(["Foo"], node_context.nesting)
+    assert_equal("qux", node_context.surrounding_method)
   end
 
   private

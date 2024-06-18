@@ -152,13 +152,28 @@ module RubyIndexer
       end
       def initialize(nesting, file_path, location, comments, parent_class)
         super(nesting, file_path, location, comments)
-
-        @parent_class = T.let(parent_class, T.nilable(String))
+        @parent_class = parent_class
       end
 
       sig { override.returns(Integer) }
       def ancestor_hash
         [mixin_operation_module_names, @parent_class].hash
+      end
+    end
+
+    class SingletonClass < Class
+      extend T::Sig
+
+      sig { params(location: Prism::Location, comments: T::Array[String]).void }
+      def update_singleton_information(location, comments)
+        # Create a new RubyIndexer::Location object from the Prism location
+        @location = Location.new(
+          location.start_line,
+          location.end_line,
+          location.start_column,
+          location.end_column,
+        )
+        @comments.concat(comments)
       end
     end
 
@@ -190,6 +205,10 @@ module RubyIndexer
 
     # An optional method parameter, e.g. `def foo(a = 123)`
     class OptionalParameter < Parameter
+      sig { override.returns(Symbol) }
+      def decorated_name
+        :"#{@name} = <default>"
+      end
     end
 
     # An required keyword method parameter, e.g. `def foo(a:)`
@@ -204,7 +223,7 @@ module RubyIndexer
     class OptionalKeywordParameter < Parameter
       sig { override.returns(Symbol) }
       def decorated_name
-        :"#{@name}:"
+        :"#{@name}: <default>"
       end
     end
 
@@ -280,9 +299,6 @@ module RubyIndexer
 
     class Method < Member
       extend T::Sig
-      extend T::Helpers
-
-      abstract!
 
       sig { override.returns(T::Array[Parameter]) }
       attr_reader :parameters
@@ -293,108 +309,15 @@ module RubyIndexer
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
-          parameters_node: T.nilable(Prism::ParametersNode),
+          parameters: T::Array[Parameter],
           visibility: Visibility,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, parameters_node, visibility, owner) # rubocop:disable Metrics/ParameterLists
+      def initialize(name, file_path, location, comments, parameters, visibility, owner) # rubocop:disable Metrics/ParameterLists
         super(name, file_path, location, comments, visibility, owner)
-
-        @parameters = T.let(list_params(parameters_node), T::Array[Parameter])
+        @parameters = parameters
       end
-
-      private
-
-      sig { params(parameters_node: T.nilable(Prism::ParametersNode)).returns(T::Array[Parameter]) }
-      def list_params(parameters_node)
-        return [] unless parameters_node
-
-        parameters = []
-
-        parameters_node.requireds.each do |required|
-          name = parameter_name(required)
-          next unless name
-
-          parameters << RequiredParameter.new(name: name)
-        end
-
-        parameters_node.optionals.each do |optional|
-          name = parameter_name(optional)
-          next unless name
-
-          parameters << OptionalParameter.new(name: name)
-        end
-
-        parameters_node.keywords.each do |keyword|
-          name = parameter_name(keyword)
-          next unless name
-
-          case keyword
-          when Prism::RequiredKeywordParameterNode
-            parameters << KeywordParameter.new(name: name)
-          when Prism::OptionalKeywordParameterNode
-            parameters << OptionalKeywordParameter.new(name: name)
-          end
-        end
-
-        rest = parameters_node.rest
-
-        if rest.is_a?(Prism::RestParameterNode)
-          rest_name = rest.name || RestParameter::DEFAULT_NAME
-          parameters << RestParameter.new(name: rest_name)
-        end
-
-        keyword_rest = parameters_node.keyword_rest
-
-        if keyword_rest.is_a?(Prism::KeywordRestParameterNode)
-          keyword_rest_name = parameter_name(keyword_rest) || KeywordRestParameter::DEFAULT_NAME
-          parameters << KeywordRestParameter.new(name: keyword_rest_name)
-        end
-
-        parameters_node.posts.each do |post|
-          name = parameter_name(post)
-          next unless name
-
-          parameters << RequiredParameter.new(name: name)
-        end
-
-        block = parameters_node.block
-        parameters << BlockParameter.new(name: block.name || BlockParameter::DEFAULT_NAME) if block
-
-        parameters
-      end
-
-      sig { params(node: T.nilable(Prism::Node)).returns(T.nilable(Symbol)) }
-      def parameter_name(node)
-        case node
-        when Prism::RequiredParameterNode, Prism::OptionalParameterNode,
-          Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode,
-          Prism::RestParameterNode, Prism::KeywordRestParameterNode
-          node.name
-        when Prism::MultiTargetNode
-          names = node.lefts.map { |parameter_node| parameter_name(parameter_node) }
-
-          rest = node.rest
-          if rest.is_a?(Prism::SplatNode)
-            name = rest.expression&.slice
-            names << (rest.operator == "*" ? "*#{name}".to_sym : name&.to_sym)
-          end
-
-          names << nil if rest.is_a?(Prism::ImplicitRestNode)
-
-          names.concat(node.rights.map { |parameter_node| parameter_name(parameter_node) })
-
-          names_with_commas = names.join(", ")
-          :"(#{names_with_commas})"
-        end
-      end
-    end
-
-    class SingletonMethod < Method
-    end
-
-    class InstanceMethod < Method
     end
 
     # An UnresolvedAlias points to a constant alias with a right hand side that has not yet been resolved. For
@@ -466,6 +389,34 @@ module RubyIndexer
       end
       def initialize(name, file_path, location, comments, owner)
         super(name, file_path, location, comments)
+        @owner = owner
+      end
+    end
+
+    class UnresolvedMethodAlias < Entry
+      extend T::Sig
+
+      sig { returns(String) }
+      attr_reader :new_name, :old_name
+
+      sig { returns(T.nilable(Entry::Namespace)) }
+      attr_reader :owner
+
+      sig do
+        params(
+          new_name: String,
+          old_name: String,
+          owner: T.nilable(Entry::Namespace),
+          file_path: String,
+          location: Prism::Location,
+          comments: T::Array[String],
+        ).void
+      end
+      def initialize(new_name, old_name, owner, file_path, location, comments) # rubocop:disable Metrics/ParameterLists
+        super(new_name, file_path, location, comments)
+
+        @new_name = new_name
+        @old_name = old_name
         @owner = owner
       end
     end

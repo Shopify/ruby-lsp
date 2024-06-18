@@ -47,7 +47,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     )
     assert_equal("Run In Terminal", T.must(response[4]).command.title)
     assert_equal(
-      "bundle exec ruby -Itest /fake.rb --name FooTest\\#test_bar",
+      "bundle exec ruby -Itest /fake.rb --name FooTest#test_bar",
       T.must(response[4]).command.arguments[2],
     )
   end

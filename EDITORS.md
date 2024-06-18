@@ -16,6 +16,7 @@ new H2 header in this file containing the instructions. -->
 - [Emacs LSP Mode](https://emacs-lsp.github.io/lsp-mode/page/lsp-ruby-lsp/)
 - [Emacs Eglot](#Emacs-Eglot)
 - [Neovim LSP](#Neovim)
+- [LazyVim LSP](#lazyvim-lsp)
 - [Sublime Text LSP](#sublime-text-lsp)
 - [Zed](#zed)
 - [RubyMine](#RubyMine)
@@ -109,6 +110,32 @@ require("lspconfig").ruby_lsp.setup({
 })
 ```
 
+## LazyVim LSP
+
+For LazyVim, you can add the ruby-lsp by creating a file in your plugins folder (`~/.config/nvim/lua/plugins/ruby_lsp.lua`) and adding the following:
+
+```lua
+-- ~/.config/nvim/lua/plugins/ruby_lsp.lua
+
+return {
+  {
+    "neovim/nvim-lspconfig",
+    ---@class PluginLspOpts
+    opts = {
+      ---@type lspconfig.options
+      servers = {
+        -- disable solargraph from auto running when you open ruby files
+        solargraph = {
+          autostart = false
+        },
+        -- ruby_lsp will be automatically installed with mason and loaded with lspconfig
+        ruby_lsp = {},
+      },
+    },
+  },
+}
+```
+
 ## Sublime Text LSP
 
 To configure the Ruby LSP using [LSP for Sublime Text](https://github.com/sublimelsp/LSP), add the following configuration to your LSP client configuration:
@@ -147,4 +174,4 @@ You can use the Ruby LSP with RubyMine (or IntelliJ IDEA Ultimate) through the f
 
 Note that there might be overlapping functionality when using it with RubyMine, given that the IDE provides similar features as the ones coming from the Ruby LSP.
 
-[https://plugins.jetbrains.com/plugin/24413-ruby-lsp](Ruby LSP plugin)
+[Ruby LSP plugin](https://plugins.jetbrains.com/plugin/24413-ruby-lsp)

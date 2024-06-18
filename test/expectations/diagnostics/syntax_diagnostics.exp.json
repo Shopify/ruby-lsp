@@ -13,7 +13,7 @@
       },
       "severity": 1,
       "source": "Prism",
-      "message": "unexpected end of file, assuming it is closing the parent top level context"
+      "message": "unexpected end-of-input, assuming it is closing the parent top level context"
     },
     {
       "range": {

@@ -426,6 +426,30 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hover_for_methods_shows_parameters
+    source = <<~RUBY
+      class Foo
+        def bar(a, b = 1, *c, d:, e: 1, **f, &g)
+        end
+
+        def baz
+          bar
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 5 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("bar(a, b = <default>, *c, d:, e: <default>, **f, &g)", contents)
+    end
+  end
+
   private
 
   def create_hover_addon

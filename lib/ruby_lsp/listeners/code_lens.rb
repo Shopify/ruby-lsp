@@ -236,7 +236,7 @@ module RubyLsp
             # so there must be something to the left of the available path.
             group_stack = T.must(group_stack[last_dynamic_reference_index + 1..])
             if method_name
-              " --name " + "/::#{Shellwords.escape(group_stack.join("::") + "#" + method_name)}$/"
+              " --name " + "/::#{Shellwords.escape(group_stack.join("::")) + "#" + Shellwords.escape(method_name)}$/"
             else
               # When clicking on a CodeLens for `Test`, `(#|::)` will match all tests
               # that are registered on the class itself (matches after `#`) and all tests
@@ -245,7 +245,7 @@ module RubyLsp
             end
           elsif method_name
             # We know the entire path, do an exact match
-            " --name " + Shellwords.escape(group_stack.join("::") + "#" + method_name)
+            " --name " + Shellwords.escape(group_stack.join("::")) + "#" + Shellwords.escape(method_name)
           elsif spec_name
             " --name " + "/#{Shellwords.escape(spec_name)}/"
           else

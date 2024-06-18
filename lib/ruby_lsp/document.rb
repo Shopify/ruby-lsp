@@ -127,7 +127,11 @@ module RubyLsp
       queue = T.let(node.child_nodes.compact, T::Array[T.nilable(Prism::Node)])
       closest = node
       parent = T.let(nil, T.nilable(Prism::Node))
-      nesting = T.let([], T::Array[T.any(Prism::ClassNode, Prism::ModuleNode)])
+      nesting_nodes = T.let(
+        [],
+        T::Array[T.any(Prism::ClassNode, Prism::ModuleNode, Prism::SingletonClassNode, Prism::DefNode)],
+      )
+      call_node = T.let(nil, T.nilable(Prism::CallNode))
 
       until queue.empty?
         candidate = queue.shift
@@ -150,17 +154,31 @@ module RubyLsp
 
         # If the candidate starts after the end of the previous nesting level, then we've exited that nesting level and
         # need to pop the stack
-        previous_level = nesting.last
+        previous_level = nesting_nodes.last
         if previous_level
           start_offset = loc.start_code_units_offset(encoding)
           end_offset = previous_level.location.end_code_units_offset(encoding)
-          nesting.pop if start_offset > end_offset
+          nesting_nodes.pop if start_offset > end_offset
         end
 
         # Keep track of the nesting where we found the target. This is used to determine the fully qualified name of the
         # target when it is a constant
-        if candidate.is_a?(Prism::ClassNode) || candidate.is_a?(Prism::ModuleNode)
-          nesting << candidate
+        case candidate
+        when Prism::ClassNode, Prism::ModuleNode
+          nesting_nodes << candidate
+        when Prism::SingletonClassNode
+          nesting_nodes << candidate
+        when Prism::DefNode
+          nesting_nodes << candidate
+        end
+
+        if candidate.is_a?(Prism::CallNode)
+          arg_loc = candidate.arguments&.location
+          blk_loc = candidate.block&.location
+          if (arg_loc && (arg_loc.start_offset...arg_loc.end_offset).cover?(char_position)) ||
+              (blk_loc && (blk_loc.start_offset...blk_loc.end_offset).cover?(char_position))
+            call_node = candidate
+          end
         end
 
         # If there are node types to filter by, and the current node is not one of those types, then skip it
@@ -176,7 +194,41 @@ module RubyLsp
         end
       end
 
-      NodeContext.new(closest, parent, nesting.map { |n| n.constant_path.location.slice })
+      # When targeting the constant part of a class/module definition, we do not want the nesting to be duplicated. That
+      # is, when targeting Bar in the following example:
+      #
+      # ```ruby
+      #   class Foo::Bar; end
+      # ```
+      # The correct target is `Foo::Bar` with an empty nesting. `Foo::Bar` should not appear in the nesting stack, even
+      # though the class/module node does indeed enclose the target, because it would lead to incorrect behavior
+      if closest.is_a?(Prism::ConstantReadNode) || closest.is_a?(Prism::ConstantPathNode)
+        last_level = nesting_nodes.last
+
+        if (last_level.is_a?(Prism::ModuleNode) || last_level.is_a?(Prism::ClassNode)) &&
+            last_level.constant_path == closest
+          nesting_nodes.pop
+        end
+      end
+
+      nesting = []
+      surrounding_method = T.let(nil, T.nilable(String))
+
+      nesting_nodes.each do |node|
+        case node
+        when Prism::ClassNode, Prism::ModuleNode
+          nesting << node.constant_path.slice
+        when Prism::SingletonClassNode
+          nesting << "<Class:#{nesting.last}>"
+        when Prism::DefNode
+          surrounding_method = node.name.to_s
+          next unless node.receiver.is_a?(Prism::SelfNode)
+
+          nesting << "<Class:#{nesting.last}>"
+        end
+      end
+
+      NodeContext.new(closest, parent, nesting, call_node, surrounding_method)
     end
 
     sig { returns(T::Boolean) }

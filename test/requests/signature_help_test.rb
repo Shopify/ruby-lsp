@@ -151,7 +151,7 @@ class SignatureHelpTest < Minitest::Test
       })
       result = server.pop_response.response
       signature = result.signatures.first
-      assert_equal("bar(a, b, c:, d:)", signature.label)
+      assert_equal("bar(a, b = <default>, c:, d:)", signature.label)
       assert_equal(2, result.active_parameter)
     end
   end

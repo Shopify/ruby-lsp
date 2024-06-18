@@ -26,9 +26,15 @@ export interface RubyInterface {
   rubyVersion?: string;
 }
 
+export interface Addon {
+  name: string;
+  errored: boolean;
+}
+
 export interface ClientInterface {
   state: State;
   formatter: string;
+  addons?: Addon[];
   serverVersion?: string;
   sendRequest<T>(
     method: string,

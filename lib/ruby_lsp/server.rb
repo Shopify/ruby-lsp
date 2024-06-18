@@ -76,6 +76,16 @@ module RubyLsp
         text_document_show_syntax_tree(message)
       when "rubyLsp/workspace/dependencies"
         workspace_dependencies(message)
+      when "rubyLsp/workspace/addons"
+        send_message(
+          Result.new(
+            id: message[:id],
+            response:
+              Addon.addons.map do |addon|
+                { name: addon.name, errored: addon.error? }
+              end,
+          ),
+        )
       when "$/cancelRequest"
         @mutex.synchronize { @cancelled_requests << message[:params][:id] }
       end
@@ -104,7 +114,7 @@ module RubyLsp
           ),
         )
 
-        $stderr.puts(errored_addons.map(&:errors_details).join("\n\n"))
+        $stderr.puts(errored_addons.map(&:errors_details).join("\n\n")) unless @test_mode
       end
     end
 
@@ -175,8 +185,11 @@ module RubyLsp
           completion_provider: completion_provider,
           code_lens_provider: code_lens_provider,
           definition_provider: enabled_features["definition"],
-          workspace_symbol_provider: enabled_features["workspaceSymbol"],
+          workspace_symbol_provider: enabled_features["workspaceSymbol"] && !@global_state.has_type_checker,
           signature_help_provider: signature_help_provider,
+          experimental: {
+            addon_detection: true,
+          },
         ),
         serverInfo: {
           name: "Ruby LSP",
@@ -449,7 +462,7 @@ module RubyLsp
 
     sig { params(document: Document).returns(T::Boolean) }
     def typechecker_enabled?(document)
-      @global_state.typechecker && document.sorbet_sigil_is_true_or_higher
+      @global_state.has_type_checker && document.sorbet_sigil_is_true_or_higher
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
@@ -696,6 +709,8 @@ module RubyLsp
 
       Thread.new do
         begin
+          RubyIndexer::RBSIndexer.new(@global_state.index).index_ruby_core
+
           @global_state.index.index_all do |percentage|
             progress("indexing-progress", percentage)
             true

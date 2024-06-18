@@ -1,8 +1,6 @@
 /* eslint-disable no-process-env */
 import * as vscode from "vscode";
 
-import { asyncExec } from "../common";
-
 import { VersionManager, ActivationResult } from "./versionManager";
 
 // Custom
@@ -15,11 +13,8 @@ export class Custom extends VersionManager {
     const activationScript =
       "STDERR.print({ env: ENV.to_h, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }.to_json)";
 
-    const result = await asyncExec(
+    const result = await this.runScript(
       `${this.customCommand()} && ruby -W0 -rjson -e '${activationScript}'`,
-      {
-        cwd: this.bundleUri.fsPath,
-      },
     );
 
     const parsedResult = this.parseWithErrorHandling(result.stderr);

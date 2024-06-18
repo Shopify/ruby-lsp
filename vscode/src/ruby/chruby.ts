@@ -4,7 +4,6 @@ import path from "path";
 
 import * as vscode from "vscode";
 
-import { asyncExec } from "../common";
 import { WorkspaceChannel } from "../workspaceChannel";
 
 import { ActivationResult, VersionManager } from "./versionManager";
@@ -19,8 +18,8 @@ interface RubyVersion {
 export class Chruby extends VersionManager {
   // Only public so that we can point to a different directory in tests
   public rubyInstallationUris = [
-    vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "rubies"),
     vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".rubies"),
+    vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "rubies"),
   ];
 
   constructor(
@@ -91,9 +90,19 @@ export class Chruby extends VersionManager {
       : [rubyVersion.version, `ruby-${rubyVersion.version}`];
 
     for (const uri of this.rubyInstallationUris) {
-      const directories = (await vscode.workspace.fs.readDirectory(uri)).sort(
-        (left, right) => right[0].localeCompare(left[0]),
-      );
+      let directories;
+
+      try {
+        directories = (await vscode.workspace.fs.readDirectory(uri)).sort(
+          (left, right) => right[0].localeCompare(left[0]),
+        );
+      } catch (error: any) {
+        // If the directory doesn't exist, keep searching
+        this.outputChannel.debug(
+          `Tried searching for Ruby installation in ${uri.fsPath} but it doesn't exist`,
+        );
+        continue;
+      }
 
       for (const versionName of possibleVersionNames) {
         const targetDirectory = directories.find(([name]) =>
@@ -132,6 +141,9 @@ export class Chruby extends VersionManager {
           return vscode.Uri.joinPath(installationUri, "bin", "ruby");
         } catch (_error: any) {
           // Continue to the next version name
+          this.outputChannel.debug(
+            `Tried searching for Ruby installation in ${uri.fsPath} but it doesn't exist`,
+          );
         }
       }
     }
@@ -211,9 +223,8 @@ export class Chruby extends VersionManager {
       "STDERR.print(JSON.dump(data))",
     ].join(";");
 
-    const result = await asyncExec(
+    const result = await this.runScript(
       `${rubyExecutableUri.fsPath} -W0 -rjson -e '${script}'`,
-      { cwd: this.bundleUri.fsPath },
     );
 
     return this.parseWithErrorHandling(result.stderr);

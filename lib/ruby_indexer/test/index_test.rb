@@ -93,30 +93,30 @@ module RubyIndexer
 
     def test_fuzzy_search
       @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
-        class Bar; end
+        class Zws; end
 
-        module Foo
-          class Bar
+        module Qtl
+          class Zws
           end
 
-          class Baz
+          class Zwo
             class Something
             end
           end
         end
       RUBY
 
-      result = @index.fuzzy_search("Bar")
-      assert_equal(1, result.length)
-      assert_equal(@index["Bar"].first, result.first)
+      result = @index.fuzzy_search("Zws")
+      assert_equal(2, result.length)
+      assert_equal(["Zws", "Qtl::Zwo::Something"], result.map(&:name))
 
-      result = @index.fuzzy_search("foobarsomeking")
+      result = @index.fuzzy_search("qtlzwssomeking")
       assert_equal(5, result.length)
-      assert_equal(["Foo::Baz::Something", "Foo::Bar", "Foo::Baz", "Foo", "Bar"], result.map(&:name))
+      assert_equal(["Qtl::Zwo::Something", "Qtl::Zws", "Qtl::Zwo", "Qtl", "Zws"], result.map(&:name))
 
-      result = @index.fuzzy_search("FooBaz")
+      result = @index.fuzzy_search("QltZwo")
       assert_equal(4, result.length)
-      assert_equal(["Foo::Baz", "Foo::Bar", "Foo", "Foo::Baz::Something"], result.map(&:name))
+      assert_equal(["Qtl::Zwo", "Qtl::Zws", "Qtl::Zwo::Something", "Qtl"], result.map(&:name))
     end
 
     def test_index_single_ignores_directories
@@ -141,22 +141,22 @@ module RubyIndexer
 
     def test_searching_for_entries_based_on_prefix
       @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
-        class Foo::Bar
+        class Foo::Bizw
         end
       RUBY
       @index.index_single(IndexablePath.new("/fake", "/fake/path/other_foo.rb"), <<~RUBY)
-        class Foo::Bar
+        class Foo::Bizw
         end
 
-        class Foo::Baz
+        class Foo::Bizt
         end
       RUBY
 
       results = @index.prefix_search("Foo", []).map { |entries| entries.map(&:name) }
-      assert_equal([["Foo::Bar", "Foo::Bar"], ["Foo::Baz"]], results)
+      assert_equal([["Foo::Bizw", "Foo::Bizw"], ["Foo::Bizt"]], results)
 
-      results = @index.prefix_search("Ba", ["Foo"]).map { |entries| entries.map(&:name) }
-      assert_equal([["Foo::Bar", "Foo::Bar"], ["Foo::Baz"]], results)
+      results = @index.prefix_search("Biz", ["Foo"]).map { |entries| entries.map(&:name) }
+      assert_equal([["Foo::Bizw", "Foo::Bizw"], ["Foo::Bizt"]], results)
     end
 
     def test_resolve_normalizes_top_level_names
@@ -181,6 +181,9 @@ module RubyIndexer
 
     def test_resolving_aliases_to_non_existing_constants_with_conflicting_names
       @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
+        class Float
+        end
+
         module Foo
           class Float < self
             INFINITY = ::Float::INFINITY
@@ -286,16 +289,16 @@ module RubyIndexer
       index(<<~RUBY)
         module Foo
           module Bar
-            def baz; end
+            def qzx; end
           end
         end
       RUBY
 
-      entries = @index.prefix_search("ba")
+      entries = @index.prefix_search("qz")
       refute_empty(entries)
 
-      entry = T.must(entries.first).first
-      assert_equal("baz", entry.name)
+      entry = T.must(T.must(entries.first).first)
+      assert_equal("qzx", entry.name)
     end
 
     def test_indexing_prism_fixtures_succeeds
@@ -315,7 +318,8 @@ module RubyIndexer
 
     def test_index_single_does_not_fail_for_non_existing_file
       @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"))
-      assert_empty(@index.instance_variable_get(:@entries))
+      entries_after_indexing = @index.instance_variable_get(:@entries).keys
+      assert_equal(@default_indexed_entries.keys, entries_after_indexing)
     end
 
     def test_linearized_ancestors_basic_ordering
@@ -339,9 +343,9 @@ module RubyIndexer
           "B",
           "A",
           "Foo",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Foo"),
       )
@@ -351,9 +355,9 @@ module RubyIndexer
           "Bar",
           "B",
           "A",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Bar"),
       )
@@ -401,9 +405,9 @@ module RubyIndexer
           "A",
           "C",
           "Bar",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Foo"),
       )
@@ -432,9 +436,9 @@ module RubyIndexer
           "Foo",
           "B",
           "A",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Foo"),
       )
@@ -444,9 +448,9 @@ module RubyIndexer
           "B",
           "A",
           "Bar",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Bar"),
       )
@@ -493,9 +497,9 @@ module RubyIndexer
         [
           "A",
           "Foo",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Foo"),
       )
@@ -505,9 +509,9 @@ module RubyIndexer
           "A",
           "Bar",
           "A",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Bar"),
       )
@@ -519,15 +523,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_equal(
-        [
-          "Foo",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
-        ],
-        @index.linearized_ancestors_of("Foo"),
-      )
+      assert_equal(["Foo"], @index.linearized_ancestors_of("Foo"))
     end
 
     def test_ancestors_linearization_complex_prepend_duplication
@@ -552,9 +548,9 @@ module RubyIndexer
           "B",
           "C",
           "Foo",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Foo"),
       )
@@ -582,9 +578,9 @@ module RubyIndexer
           "C",
           "B",
           "A",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Foo"),
       )
@@ -613,9 +609,9 @@ module RubyIndexer
           "Foo::Bar",
           "Foo::Baz",
           "Foo::Something",
-          # "Object",
-          # "Kernel",
-          # "BasicObject",
+          "Object",
+          "Kernel",
+          "BasicObject",
         ],
         @index.linearized_ancestors_of("Foo::Bar"),
       )
@@ -623,9 +619,7 @@ module RubyIndexer
 
     def test_linearizing_ancestors_for_non_existing_namespaces
       index(<<~RUBY)
-        module Kernel
-          def Array(a); end
-        end
+        def Bar(a); end
       RUBY
 
       assert_raises(Index::NonExistingNamespaceError) do
@@ -633,7 +627,7 @@ module RubyIndexer
       end
 
       assert_raises(Index::NonExistingNamespaceError) do
-        @index.linearized_ancestors_of("Array")
+        @index.linearized_ancestors_of("Bar")
       end
     end
 
@@ -754,7 +748,7 @@ module RubyIndexer
           indexable_path = IndexablePath.new(nil, File.join(dir, "foo.rb"))
           @index.index_single(indexable_path)
 
-          assert_equal(["Bar", "Foo"], @index.linearized_ancestors_of("Bar"))
+          assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
 
           # Remove include to invalidate the ancestor tree
           File.write(File.join(dir, "foo.rb"), <<~RUBY)
@@ -767,7 +761,7 @@ module RubyIndexer
 
           @index.handle_change(indexable_path)
           assert_empty(@index.instance_variable_get(:@ancestors))
-          assert_equal(["Bar"], @index.linearized_ancestors_of("Bar"))
+          assert_equal(["Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end
       end
     end
@@ -788,7 +782,7 @@ module RubyIndexer
           indexable_path = IndexablePath.new(nil, File.join(dir, "foo.rb"))
           @index.index_single(indexable_path)
 
-          assert_equal(["Bar", "Foo"], @index.linearized_ancestors_of("Bar"))
+          assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
 
           # Remove include to invalidate the ancestor tree
           File.write(File.join(dir, "foo.rb"), <<~RUBY)
@@ -804,7 +798,7 @@ module RubyIndexer
 
           @index.handle_change(indexable_path)
           refute_empty(@index.instance_variable_get(:@ancestors))
-          assert_equal(["Bar", "Foo"], @index.linearized_ancestors_of("Bar"))
+          assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end
       end
     end
@@ -824,7 +818,7 @@ module RubyIndexer
           indexable_path = IndexablePath.new(nil, File.join(dir, "foo.rb"))
           @index.index_single(indexable_path)
 
-          assert_equal(["Bar", "Foo"], @index.linearized_ancestors_of("Bar"))
+          assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
 
           # Remove include to invalidate the ancestor tree
           File.write(File.join(dir, "foo.rb"), <<~RUBY)
@@ -837,9 +831,525 @@ module RubyIndexer
 
           @index.handle_change(indexable_path)
           assert_empty(@index.instance_variable_get(:@ancestors))
-          assert_equal(["Bar"], @index.linearized_ancestors_of("Bar"))
+          assert_equal(["Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end
       end
+    end
+
+    def test_resolving_inherited_constants
+      index(<<~RUBY)
+        module Foo
+          CONST = 1
+        end
+
+        module Baz
+          CONST = 2
+        end
+
+        module Qux
+          include Foo
+        end
+
+        module Namespace
+          CONST = 3
+
+          include Baz
+
+          class Bar
+            include Qux
+          end
+        end
+
+        CONST = 4
+      RUBY
+
+      entry = T.must(@index.resolve("CONST", ["Namespace", "Bar"])&.first)
+      assert_equal(14, entry.location.start_line)
+    end
+
+    def test_resolving_inherited_alised_namespace
+      index(<<~RUBY)
+        module Bar
+          TARGET = 123
+        end
+
+        module Foo
+          CONST = Bar
+        end
+
+        module Namespace
+          class Bar
+            include Foo
+          end
+        end
+      RUBY
+
+      entry = T.must(@index.resolve("Foo::CONST::TARGET", [])&.first)
+      assert_equal(2, entry.location.start_line)
+
+      entry = T.must(@index.resolve("Namespace::Bar::CONST::TARGET", [])&.first)
+      assert_equal(2, entry.location.start_line)
+    end
+
+    def test_resolving_same_constant_from_different_scopes
+      index(<<~RUBY)
+        module Namespace
+          CONST = 123
+
+          class Parent
+            CONST = 321
+          end
+
+          class Child < Parent
+          end
+        end
+      RUBY
+
+      entry = T.must(@index.resolve("CONST", ["Namespace", "Child"])&.first)
+      assert_equal(2, entry.location.start_line)
+
+      entry = T.must(@index.resolve("Namespace::Child::CONST", [])&.first)
+      assert_equal(5, entry.location.start_line)
+    end
+
+    def test_resolving_prepended_constants
+      index(<<~RUBY)
+        module Included
+          CONST = 123
+        end
+
+        module Prepended
+          CONST = 321
+        end
+
+        class Foo
+          include Included
+          prepend Prepended
+        end
+
+        class Bar
+          CONST = 456
+          include Included
+          prepend Prepended
+        end
+      RUBY
+
+      entry = T.must(@index.resolve("CONST", ["Foo"])&.first)
+      assert_equal(6, entry.location.start_line)
+
+      entry = T.must(@index.resolve("Foo::CONST", [])&.first)
+      assert_equal(6, entry.location.start_line)
+
+      entry = T.must(@index.resolve("Bar::CONST", [])&.first)
+      assert_equal(15, entry.location.start_line)
+    end
+
+    def test_resolving_constants_favors_ancestors_over_top_level
+      index(<<~RUBY)
+        module Value1
+          CONST = 1
+        end
+
+        module Value2
+          CONST = 2
+        end
+
+        CONST = 3
+        module First
+          include Value1
+
+          module Second
+            include Value2
+          end
+        end
+      RUBY
+
+      entry = T.must(@index.resolve("CONST", ["First", "Second"])&.first)
+      assert_equal(6, entry.location.start_line)
+    end
+
+    def test_resolving_circular_alias
+      index(<<~RUBY)
+        module Namespace
+          FOO = BAR
+          BAR = FOO
+        end
+      RUBY
+
+      foo_entry = T.must(@index.resolve("FOO", ["Namespace"])&.first)
+      assert_equal(2, foo_entry.location.start_line)
+      assert_instance_of(Entry::Alias, foo_entry)
+
+      bar_entry = T.must(@index.resolve("BAR", ["Namespace"])&.first)
+      assert_equal(3, bar_entry.location.start_line)
+      assert_instance_of(Entry::Alias, bar_entry)
+    end
+
+    def test_resolving_circular_alias_three_levels
+      index(<<~RUBY)
+        module Namespace
+          FOO = BAR
+          BAR = BAZ
+          BAZ = FOO
+        end
+      RUBY
+
+      foo_entry = T.must(@index.resolve("FOO", ["Namespace"])&.first)
+      assert_equal(2, foo_entry.location.start_line)
+      assert_instance_of(Entry::Alias, foo_entry)
+
+      bar_entry = T.must(@index.resolve("BAR", ["Namespace"])&.first)
+      assert_equal(3, bar_entry.location.start_line)
+      assert_instance_of(Entry::Alias, bar_entry)
+
+      baz_entry = T.must(@index.resolve("BAZ", ["Namespace"])&.first)
+      assert_equal(4, baz_entry.location.start_line)
+      assert_instance_of(Entry::Alias, baz_entry)
+    end
+
+    def test_resolving_top_level_compact_reference
+      index(<<~RUBY)
+        class Foo::Bar
+        end
+      RUBY
+
+      foo_entry = T.must(@index.resolve("Foo::Bar", [])&.first)
+      assert_equal(1, foo_entry.location.start_line)
+      assert_instance_of(Entry::Class, foo_entry)
+    end
+
+    def test_resolving_references_with_redundant_namespaces
+      index(<<~RUBY)
+        module Bar
+          CONST = 1
+        end
+
+        module A
+          CONST = 2
+
+          module B
+            CONST = 3
+
+            class Foo
+              include Bar
+            end
+
+            A::B::Foo::CONST
+          end
+        end
+      RUBY
+
+      foo_entry = T.must(@index.resolve("A::B::Foo::CONST", ["A", "B"])&.first)
+      assert_equal(2, foo_entry.location.start_line)
+    end
+
+    def test_resolving_qualified_references
+      index(<<~RUBY)
+        module Namespace
+          class Entry
+            CONST = 1
+          end
+        end
+
+        module Namespace
+          class Index
+          end
+        end
+      RUBY
+
+      foo_entry = T.must(@index.resolve("Entry::CONST", ["Namespace", "Index"])&.first)
+      assert_equal(3, foo_entry.location.start_line)
+    end
+
+    def test_resolving_unqualified_references
+      index(<<~RUBY)
+        module Foo
+          CONST = 1
+        end
+
+        module Namespace
+          CONST = 2
+
+          class Index
+            include Foo
+          end
+        end
+      RUBY
+
+      foo_entry = T.must(@index.resolve("CONST", ["Namespace", "Index"])&.first)
+      assert_equal(6, foo_entry.location.start_line)
+    end
+
+    def test_resolving_references_with_only_top_level_declaration
+      index(<<~RUBY)
+        CONST = 1
+
+        module Foo; end
+
+        module Namespace
+          class Index
+            include Foo
+          end
+        end
+      RUBY
+
+      foo_entry = T.must(@index.resolve("CONST", ["Namespace", "Index"])&.first)
+      assert_equal(1, foo_entry.location.start_line)
+    end
+
+    def test_instance_variables_completions_from_different_owners_with_conflicting_names
+      index(<<~RUBY)
+        class Foo
+          def initialize
+            @bar = 1
+          end
+        end
+
+        class Bar
+          def initialize
+            @bar = 2
+          end
+        end
+      RUBY
+
+      entry = T.must(@index.instance_variable_completion_candidates("@", "Bar")&.first)
+      assert_equal("@bar", entry.name)
+      assert_equal("Bar", T.must(entry.owner).name)
+    end
+
+    def test_resolving_a_qualified_reference
+      index(<<~RUBY)
+        class Base
+          module Third
+            CONST = 1
+          end
+        end
+
+        class Foo
+          module Third
+            CONST = 2
+          end
+
+          class Second < Base
+          end
+        end
+      RUBY
+
+      foo_entry = T.must(@index.resolve("Third::CONST", ["Foo"])&.first)
+      assert_equal(9, foo_entry.location.start_line)
+    end
+
+    def test_resolving_unindexed_constant_with_no_nesting
+      assert_nil(@index.resolve("RSpec", []))
+    end
+
+    def test_object_superclass_indexing_and_resolution_with_reopened_object_class
+      index(<<~RUBY)
+        class Object; end
+      RUBY
+
+      entries = @index["Object"]
+      assert_equal(2, entries.length)
+      reopened_entry = entries.last
+      assert_equal("::BasicObject", reopened_entry.parent_class)
+      assert_equal(["Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Object"))
+    end
+
+    def test_object_superclass_indexing_and_resolution_with_reopened_basic_object_class
+      index(<<~RUBY)
+        class BasicObject; end
+      RUBY
+
+      entries = @index["BasicObject"]
+      assert_equal(2, entries.length)
+      reopened_entry = entries.last
+      assert_nil(reopened_entry.parent_class)
+      assert_equal(["BasicObject"], @index.linearized_ancestors_of("BasicObject"))
+    end
+
+    def test_object_superclass_resolution
+      index(<<~RUBY)
+        module Foo
+          class Object; end
+
+          class Bar; end
+          class Baz < Object; end
+        end
+      RUBY
+
+      assert_equal(["Foo::Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Foo::Bar"))
+      assert_equal(
+        ["Foo::Baz", "Foo::Object", "Object", "Kernel", "BasicObject"],
+        @index.linearized_ancestors_of("Foo::Baz"),
+      )
+    end
+
+    def test_basic_object_superclass_resolution
+      index(<<~RUBY)
+        module Foo
+          class BasicObject; end
+
+          class Bar; end
+          class Baz < BasicObject; end
+        end
+      RUBY
+
+      assert_equal(["Foo::Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Foo::Bar"))
+      assert_equal(
+        ["Foo::Baz", "Foo::BasicObject", "Object", "Kernel", "BasicObject"],
+        @index.linearized_ancestors_of("Foo::Baz"),
+      )
+    end
+
+    def test_top_level_object_superclass_resolution
+      index(<<~RUBY)
+        module Foo
+          class Object; end
+
+          class Bar < ::Object; end
+        end
+      RUBY
+
+      assert_equal(["Foo::Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Foo::Bar"))
+    end
+
+    def test_top_level_basic_object_superclass_resolution
+      index(<<~RUBY)
+        module Foo
+          class BasicObject; end
+
+          class Bar < ::BasicObject; end
+        end
+      RUBY
+
+      assert_equal(["Foo::Bar", "BasicObject"], @index.linearized_ancestors_of("Foo::Bar"))
+    end
+
+    def test_resolving_method_inside_singleton_context
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        module Foo
+          class Bar
+            class << self
+              class Baz
+                class << self
+                  def found_me!; end
+                end
+              end
+            end
+          end
+        end
+      RUBY
+
+      entry = @index.resolve_method("found_me!", "Foo::Bar::<Class:Bar>::Baz::<Class:Baz>")&.first
+      refute_nil(entry)
+
+      assert_equal("found_me!", T.must(entry).name)
+    end
+
+    def test_resolving_constants_in_singleton_contexts
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        module Foo
+          class Bar
+            CONST = 3
+
+            class << self
+              CONST = 2
+
+              class Baz
+                CONST = 1
+
+                class << self
+                end
+              end
+            end
+          end
+        end
+      RUBY
+
+      entry = @index.resolve("CONST", ["Foo", "Bar", "<Class:Bar>", "Baz", "<Class:Baz>"])&.first
+      refute_nil(entry)
+      assert_equal(9, T.must(entry).location.start_line)
+    end
+
+    def test_resolving_instance_variables_in_singleton_contexts
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        module Foo
+          class Bar
+            @a = 123
+
+            class << self
+              def hello
+                @b = 123
+              end
+
+              @c = 123
+            end
+          end
+        end
+      RUBY
+
+      entry = @index.resolve_instance_variable("@a", "Foo::Bar::<Class:Bar>")&.first
+      refute_nil(entry)
+      assert_equal("@a", T.must(entry).name)
+
+      entry = @index.resolve_instance_variable("@b", "Foo::Bar::<Class:Bar>")&.first
+      refute_nil(entry)
+      assert_equal("@b", T.must(entry).name)
+
+      entry = @index.resolve_instance_variable("@c", "Foo::Bar::<Class:Bar>::<Class:<Class:Bar>>")&.first
+      refute_nil(entry)
+      assert_equal("@c", T.must(entry).name)
+    end
+
+    def test_instance_variable_completion_in_singleton_contexts
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        module Foo
+          class Bar
+            @a = 123
+
+            class << self
+              def hello
+                @b = 123
+              end
+
+              @c = 123
+            end
+          end
+        end
+      RUBY
+
+      entries = @index.instance_variable_completion_candidates("@", "Foo::Bar::<Class:Bar>").map(&:name)
+      assert_includes(entries, "@a")
+      assert_includes(entries, "@b")
+
+      assert_includes(
+        @index.instance_variable_completion_candidates("@", "Foo::Bar::<Class:Bar>::<Class:<Class:Bar>>").map(&:name),
+        "@c",
+      )
+    end
+
+    def test_singletons_are_excluded_from_prefix_search
+      index(<<~RUBY)
+        class Zwq
+          class << self
+          end
+        end
+      RUBY
+
+      assert_empty(@index.prefix_search("Zwq::<C"))
+    end
+
+    def test_singletons_are_excluded_from_fuzzy_search
+      index(<<~RUBY)
+        class Zwq
+          class << self
+          end
+        end
+      RUBY
+
+      results = @index.fuzzy_search("Zwq")
+      assert_equal(1, results.length)
+      assert_equal("Zwq", results.first.name)
     end
   end
 end

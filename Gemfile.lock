@@ -9,9 +9,10 @@ GIT
 PATH
   remote: .
   specs:
-    ruby-lsp (0.17.2)
+    ruby-lsp (0.17.4)
       language_server-protocol (~> 3.17.0)
-      prism (>= 0.29.0, < 0.30)
+      prism (>= 0.29.0, < 0.31)
+      rbs (>= 3, < 4)
       sorbet-runtime (>= 0.5.10782)
 
 GEM
@@ -31,6 +32,7 @@ GEM
       reline (>= 0.4.2)
     json (2.7.2)
     language_server-protocol (3.17.0.3)
+    logger (1.6.0)
     minitest (5.23.1)
     minitest-reporters (1.6.1)
       ansi
@@ -45,7 +47,7 @@ GEM
       ast (~> 2.4.1)
       racc
     prettier_print (1.2.1)
-    prism (0.29.0)
+    prism (0.30.0)
     psych (5.1.2)
       stringio
     racc (1.8.0)
@@ -54,6 +56,8 @@ GEM
     rbi (0.1.13)
       prism (>= 0.18.0, < 1.0.0)
       sorbet-runtime (>= 0.5.9204)
+    rbs (3.5.1)
+      logger
     regexp_parser (2.9.2)
     reline (0.5.0)
       io-console (~> 0.5)

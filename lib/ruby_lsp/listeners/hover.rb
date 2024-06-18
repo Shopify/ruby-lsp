@@ -19,6 +19,8 @@ module RubyLsp
           Prism::InstanceVariableOrWriteNode,
           Prism::InstanceVariableTargetNode,
           Prism::InstanceVariableWriteNode,
+          Prism::SymbolNode,
+          Prism::StringNode,
         ],
         T::Array[T.class_of(Prism::Node)],
       )
@@ -76,14 +78,14 @@ module RubyLsp
 
       sig { params(node: Prism::ConstantWriteNode).void }
       def on_constant_write_node_enter(node)
-        return if @global_state.typechecker
+        return if @global_state.has_type_checker
 
         generate_hover(node.name.to_s, node.name_loc)
       end
 
       sig { params(node: Prism::ConstantPathNode).void }
       def on_constant_path_node_enter(node)
-        return if @global_state.typechecker
+        return if @global_state.has_type_checker
 
         name = constant_name(node)
         return if name.nil?
@@ -108,7 +110,9 @@ module RubyLsp
         methods = @index.resolve_method(message, @node_context.fully_qualified_name)
         return unless methods
 
-        categorized_markdown_from_index_entries(message, methods).each do |category, content|
+        title = "#{message}(#{T.must(methods.first).parameters.map(&:decorated_name).join(", ")})"
+
+        categorized_markdown_from_index_entries(title, methods).each do |category, content|
           @response_builder.push(content, category: category)
         end
       end

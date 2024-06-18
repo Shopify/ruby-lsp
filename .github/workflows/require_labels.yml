@@ -1,8 +1,10 @@
 name: Pull Request Labels
 
 on:
+  pull_request_review:
+    types: [submitted]
   pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+    types: [labeled, unlabeled]
 
 jobs:
   check-labels:

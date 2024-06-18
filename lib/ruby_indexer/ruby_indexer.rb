@@ -11,6 +11,7 @@ require "ruby_indexer/lib/ruby_indexer/entry"
 require "ruby_indexer/lib/ruby_indexer/configuration"
 require "ruby_indexer/lib/ruby_indexer/prefix_tree"
 require "ruby_indexer/lib/ruby_indexer/location"
+require "ruby_indexer/lib/ruby_indexer/rbs_indexer"
 
 module RubyIndexer
   @configuration = T.let(Configuration.new, Configuration)

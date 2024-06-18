@@ -48,6 +48,8 @@ If using VS Code, all you have to do is install the [Ruby LSP
 extension](https://marketplace.visualstudio.com/items?itemName=Shopify.ruby-lsp) to get the extra features in the
 editor. Do not install the `ruby-lsp` gem manually.
 
+For more information on using and configuring the extension, see [vscode/README.md](vscode/README.md).
+
 ### With other editors
 
 See [editors](EDITORS.md) for community instructions on setting up the Ruby LSP, which current includes Emacs, Neovim, Sublime Text, and Zed.

@@ -5,6 +5,9 @@ module RubyIndexer
   class DeclarationListener
     extend T::Sig
 
+    OBJECT_NESTING = T.let(["Object"].freeze, T::Array[String])
+    BASIC_OBJECT_NESTING = T.let(["BasicObject"].freeze, T::Array[String])
+
     sig do
       params(index: Index, dispatcher: Prism::Dispatcher, parse_result: Prism::ParseResult, file_path: String).void
     end
@@ -33,6 +36,8 @@ module RubyIndexer
         :on_class_node_leave,
         :on_module_node_enter,
         :on_module_node_leave,
+        :on_singleton_class_node_enter,
+        :on_singleton_class_node_leave,
         :on_def_node_enter,
         :on_def_node_leave,
         :on_call_node_enter,
@@ -52,6 +57,7 @@ module RubyIndexer
         :on_instance_variable_operator_write_node_enter,
         :on_instance_variable_or_write_node_enter,
         :on_instance_variable_target_node_enter,
+        :on_alias_method_node_enter,
       )
     end
 
@@ -63,12 +69,25 @@ module RubyIndexer
       comments = collect_comments(node)
 
       superclass = node.superclass
+
+      nesting = name.start_with?("::") ? [name.delete_prefix("::")] : @stack + [name.delete_prefix("::")]
+
       parent_class = case superclass
       when Prism::ConstantReadNode, Prism::ConstantPathNode
         superclass.slice
+      else
+        case nesting
+        when OBJECT_NESTING
+          # When Object is reopened, its parent class should still be the top-level BasicObject
+          "::BasicObject"
+        when BASIC_OBJECT_NESTING
+          # When BasicObject is reopened, its parent class should still be nil
+          nil
+        else
+          # Otherwise, the parent class should be the top-level Object
+          "::Object"
+        end
       end
-
-      nesting = name.start_with?("::") ? [name.delete_prefix("::")] : @stack + [name.delete_prefix("::")]
 
       entry = Entry::Class.new(
         nesting,
@@ -79,7 +98,7 @@ module RubyIndexer
       )
 
       @owner_stack << entry
-      @index << entry
+      @index.add(entry)
       @stack << name
     end
 
@@ -101,12 +120,43 @@ module RubyIndexer
       entry = Entry::Module.new(nesting, @file_path, node.location, comments)
 
       @owner_stack << entry
-      @index << entry
+      @index.add(entry)
       @stack << name
     end
 
     sig { params(node: Prism::ModuleNode).void }
     def on_module_node_leave(node)
+      @stack.pop
+      @owner_stack.pop
+      @visibility_stack.pop
+    end
+
+    sig { params(node: Prism::SingletonClassNode).void }
+    def on_singleton_class_node_enter(node)
+      @visibility_stack.push(Entry::Visibility::PUBLIC)
+
+      current_owner = @owner_stack.last
+
+      if current_owner
+        expression = node.expression
+        @stack << (expression.is_a?(Prism::SelfNode) ? "<Class:#{@stack.last}>" : "<Class:#{expression.slice}>")
+
+        existing_entries = T.cast(@index[@stack.join("::")], T.nilable(T::Array[Entry::SingletonClass]))
+
+        if existing_entries
+          entry = T.must(existing_entries.first)
+          entry.update_singleton_information(node.location, collect_comments(node))
+        else
+          entry = Entry::SingletonClass.new(@stack, @file_path, node.location, collect_comments(node), nil)
+          @index.add(entry, skip_prefix_tree: true)
+        end
+
+        @owner_stack << entry
+      end
+    end
+
+    sig { params(node: Prism::SingletonClassNode).void }
+    def on_singleton_class_node_leave(node)
       @stack.pop
       @owner_stack.pop
       @visibility_stack.pop
@@ -209,6 +259,8 @@ module RubyIndexer
         handle_attribute(node, reader: false, writer: true)
       when :attr_accessor
         handle_attribute(node, reader: true, writer: true)
+      when :alias_method
+        handle_alias_method(node)
       when :include, :prepend, :extend
         handle_module_operation(node, message)
       when :public
@@ -241,104 +293,109 @@ module RubyIndexer
 
       case node.receiver
       when nil
-        @index << Entry::InstanceMethod.new(
+        @index.add(Entry::Method.new(
           method_name,
           @file_path,
           node.location,
           comments,
-          node.parameters,
+          list_params(node.parameters),
           current_visibility,
           @owner_stack.last,
-        )
+        ))
       when Prism::SelfNode
-        @index << Entry::SingletonMethod.new(
+        singleton = singleton_klass
+
+        @index.add(Entry::Method.new(
           method_name,
           @file_path,
           node.location,
           comments,
-          node.parameters,
+          list_params(node.parameters),
           current_visibility,
-          @owner_stack.last,
-        )
+          singleton,
+        ))
+
+        if singleton
+          @owner_stack << singleton
+          @stack << "<Class:#{@stack.last}>"
+        end
       end
     end
 
     sig { params(node: Prism::DefNode).void }
     def on_def_node_leave(node)
       @inside_def = false
+
+      if node.receiver.is_a?(Prism::SelfNode)
+        @owner_stack.pop
+        @stack.pop
+      end
     end
 
     sig { params(node: Prism::InstanceVariableWriteNode).void }
     def on_instance_variable_write_node_enter(node)
-      name = node.name.to_s
-      return if name == "@"
-
-      @index << Entry::InstanceVariable.new(
-        name,
-        @file_path,
-        node.name_loc,
-        collect_comments(node),
-        @owner_stack.last,
-      )
+      handle_instance_variable(node, node.name_loc)
     end
 
     sig { params(node: Prism::InstanceVariableAndWriteNode).void }
     def on_instance_variable_and_write_node_enter(node)
-      name = node.name.to_s
-      return if name == "@"
-
-      @index << Entry::InstanceVariable.new(
-        name,
-        @file_path,
-        node.name_loc,
-        collect_comments(node),
-        @owner_stack.last,
-      )
+      handle_instance_variable(node, node.name_loc)
     end
 
     sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
     def on_instance_variable_operator_write_node_enter(node)
-      name = node.name.to_s
-      return if name == "@"
-
-      @index << Entry::InstanceVariable.new(
-        name,
-        @file_path,
-        node.name_loc,
-        collect_comments(node),
-        @owner_stack.last,
-      )
+      handle_instance_variable(node, node.name_loc)
     end
 
     sig { params(node: Prism::InstanceVariableOrWriteNode).void }
     def on_instance_variable_or_write_node_enter(node)
-      name = node.name.to_s
-      return if name == "@"
-
-      @index << Entry::InstanceVariable.new(
-        name,
-        @file_path,
-        node.name_loc,
-        collect_comments(node),
-        @owner_stack.last,
-      )
+      handle_instance_variable(node, node.name_loc)
     end
 
     sig { params(node: Prism::InstanceVariableTargetNode).void }
     def on_instance_variable_target_node_enter(node)
-      name = node.name.to_s
-      return if name == "@"
+      handle_instance_variable(node, node.location)
+    end
 
-      @index << Entry::InstanceVariable.new(
-        name,
-        @file_path,
-        node.location,
-        collect_comments(node),
-        @owner_stack.last,
+    sig { params(node: Prism::AliasMethodNode).void }
+    def on_alias_method_node_enter(node)
+      method_name = node.new_name.slice
+      comments = collect_comments(node)
+      @index.add(
+        Entry::UnresolvedMethodAlias.new(
+          method_name,
+          node.old_name.slice,
+          @owner_stack.last,
+          @file_path,
+          node.new_name.location,
+          comments,
+        ),
       )
     end
 
     private
+
+    sig do
+      params(
+        node: T.any(
+          Prism::InstanceVariableAndWriteNode,
+          Prism::InstanceVariableOperatorWriteNode,
+          Prism::InstanceVariableOrWriteNode,
+          Prism::InstanceVariableTargetNode,
+          Prism::InstanceVariableWriteNode,
+        ),
+        loc: Prism::Location,
+      ).void
+    end
+    def handle_instance_variable(node, loc)
+      name = node.name.to_s
+      return if name == "@"
+
+      # When instance variables are declared inside the class body, they turn into class instance variables rather than
+      # regular instance variables
+      owner = @inside_def ? @owner_stack.last : singleton_klass
+      @index.add(Entry::InstanceVariable.new(name, @file_path, loc, collect_comments(node), owner))
+    end
 
     sig { params(node: Prism::CallNode).void }
     def handle_private_constant(node)
@@ -365,6 +422,45 @@ module RubyIndexer
       entries&.each { |entry| entry.visibility = Entry::Visibility::PRIVATE }
     end
 
+    sig { params(node: Prism::CallNode).void }
+    def handle_alias_method(node)
+      arguments = node.arguments&.arguments
+      return unless arguments
+
+      new_name, old_name = arguments
+      return unless new_name && old_name
+
+      new_name_value = case new_name
+      when Prism::StringNode
+        new_name.content
+      when Prism::SymbolNode
+        new_name.value
+      end
+
+      return unless new_name_value
+
+      old_name_value = case old_name
+      when Prism::StringNode
+        old_name.content
+      when Prism::SymbolNode
+        old_name.value
+      end
+
+      return unless old_name_value
+
+      comments = collect_comments(node)
+      @index.add(
+        Entry::UnresolvedMethodAlias.new(
+          new_name_value,
+          old_name_value,
+          @owner_stack.last,
+          @file_path,
+          new_name.location,
+          comments,
+        ),
+      )
+    end
+
     sig do
       params(
         node: T.any(
@@ -387,22 +483,24 @@ module RubyIndexer
       value = node.value unless node.is_a?(Prism::ConstantTargetNode) || node.is_a?(Prism::ConstantPathTargetNode)
       comments = collect_comments(node)
 
-      @index << case value
-      when Prism::ConstantReadNode, Prism::ConstantPathNode
-        Entry::UnresolvedAlias.new(value.slice, @stack.dup, name, @file_path, node.location, comments)
-      when Prism::ConstantWriteNode, Prism::ConstantAndWriteNode, Prism::ConstantOrWriteNode,
+      @index.add(
+        case value
+        when Prism::ConstantReadNode, Prism::ConstantPathNode
+          Entry::UnresolvedAlias.new(value.slice, @stack.dup, name, @file_path, node.location, comments)
+        when Prism::ConstantWriteNode, Prism::ConstantAndWriteNode, Prism::ConstantOrWriteNode,
         Prism::ConstantOperatorWriteNode
 
-        # If the right hand side is another constant assignment, we need to visit it because that constant has to be
-        # indexed too
-        Entry::UnresolvedAlias.new(value.name.to_s, @stack.dup, name, @file_path, node.location, comments)
-      when Prism::ConstantPathWriteNode, Prism::ConstantPathOrWriteNode, Prism::ConstantPathOperatorWriteNode,
+          # If the right hand side is another constant assignment, we need to visit it because that constant has to be
+          # indexed too
+          Entry::UnresolvedAlias.new(value.name.to_s, @stack.dup, name, @file_path, node.location, comments)
+        when Prism::ConstantPathWriteNode, Prism::ConstantPathOrWriteNode, Prism::ConstantPathOperatorWriteNode,
         Prism::ConstantPathAndWriteNode
 
-        Entry::UnresolvedAlias.new(value.target.slice, @stack.dup, name, @file_path, node.location, comments)
-      else
-        Entry::Constant.new(name, @file_path, node.location, comments)
-      end
+          Entry::UnresolvedAlias.new(value.target.slice, @stack.dup, name, @file_path, node.location, comments)
+        else
+          Entry::Constant.new(name, @file_path, node.location, comments)
+        end,
+      )
     end
 
     sig { params(node: Prism::Node).returns(T::Array[String]) }
@@ -459,15 +557,20 @@ module RubyIndexer
 
         next unless name && loc
 
-        @index << Entry::Accessor.new(name, @file_path, loc, comments, current_visibility, @owner_stack.last) if reader
-        @index << Entry::Accessor.new(
+        if reader
+          @index.add(Entry::Accessor.new(name, @file_path, loc, comments, current_visibility, @owner_stack.last))
+        end
+
+        next unless writer
+
+        @index.add(Entry::Accessor.new(
           "#{name}=",
           @file_path,
           loc,
           comments,
           current_visibility,
           @owner_stack.last,
-        ) if writer
+        ))
       end
     end
 
@@ -501,6 +604,109 @@ module RubyIndexer
     sig { returns(Entry::Visibility) }
     def current_visibility
       T.must(@visibility_stack.last)
+    end
+
+    sig { params(parameters_node: T.nilable(Prism::ParametersNode)).returns(T::Array[Entry::Parameter]) }
+    def list_params(parameters_node)
+      return [] unless parameters_node
+
+      parameters = []
+
+      parameters_node.requireds.each do |required|
+        name = parameter_name(required)
+        next unless name
+
+        parameters << Entry::RequiredParameter.new(name: name)
+      end
+
+      parameters_node.optionals.each do |optional|
+        name = parameter_name(optional)
+        next unless name
+
+        parameters << Entry::OptionalParameter.new(name: name)
+      end
+
+      rest = parameters_node.rest
+
+      if rest.is_a?(Prism::RestParameterNode)
+        rest_name = rest.name || Entry::RestParameter::DEFAULT_NAME
+        parameters << Entry::RestParameter.new(name: rest_name)
+      end
+
+      parameters_node.keywords.each do |keyword|
+        name = parameter_name(keyword)
+        next unless name
+
+        case keyword
+        when Prism::RequiredKeywordParameterNode
+          parameters << Entry::KeywordParameter.new(name: name)
+        when Prism::OptionalKeywordParameterNode
+          parameters << Entry::OptionalKeywordParameter.new(name: name)
+        end
+      end
+
+      keyword_rest = parameters_node.keyword_rest
+
+      if keyword_rest.is_a?(Prism::KeywordRestParameterNode)
+        keyword_rest_name = parameter_name(keyword_rest) || Entry::KeywordRestParameter::DEFAULT_NAME
+        parameters << Entry::KeywordRestParameter.new(name: keyword_rest_name)
+      end
+
+      parameters_node.posts.each do |post|
+        name = parameter_name(post)
+        next unless name
+
+        parameters << Entry::RequiredParameter.new(name: name)
+      end
+
+      block = parameters_node.block
+      parameters << Entry::BlockParameter.new(name: block.name || Entry::BlockParameter::DEFAULT_NAME) if block
+
+      parameters
+    end
+
+    sig { params(node: T.nilable(Prism::Node)).returns(T.nilable(Symbol)) }
+    def parameter_name(node)
+      case node
+      when Prism::RequiredParameterNode, Prism::OptionalParameterNode,
+        Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode,
+        Prism::RestParameterNode, Prism::KeywordRestParameterNode
+        node.name
+      when Prism::MultiTargetNode
+        names = node.lefts.map { |parameter_node| parameter_name(parameter_node) }
+
+        rest = node.rest
+        if rest.is_a?(Prism::SplatNode)
+          name = rest.expression&.slice
+          names << (rest.operator == "*" ? "*#{name}".to_sym : name&.to_sym)
+        end
+
+        names << nil if rest.is_a?(Prism::ImplicitRestNode)
+
+        names.concat(node.rights.map { |parameter_node| parameter_name(parameter_node) })
+
+        names_with_commas = names.join(", ")
+        :"(#{names_with_commas})"
+      end
+    end
+
+    sig { returns(T.nilable(Entry::Class)) }
+    def singleton_klass
+      attached_class = @owner_stack.last
+      return unless attached_class
+
+      # Return the existing singleton class if available
+      owner = T.cast(
+        @index["#{attached_class.name}::<Class:#{attached_class.name}>"],
+        T.nilable(T::Array[Entry::SingletonClass]),
+      )
+      return owner.first if owner
+
+      # If not available, create the singleton class lazily
+      nesting = @stack + ["<Class:#{@stack.last}>"]
+      entry = Entry::SingletonClass.new(nesting, @file_path, attached_class.location, [], nil)
+      @index.add(entry, skip_prefix_tree: true)
+      entry
     end
   end
 end
