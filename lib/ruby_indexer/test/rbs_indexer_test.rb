@@ -87,11 +87,13 @@ module RubyIndexer
 
       parameters = entry.parameters
 
-      assert_equal(2, parameters.length)
+      assert_equal(3, parameters.length)
       assert_kind_of(Entry::RequiredParameter, parameters[0])
       assert_kind_of(Entry::OptionalParameter, parameters[1])
+      assert_kind_of(Entry::BlockParameter, parameters[2])
       assert_equal(:pattern, parameters[0].name)
       assert_equal(:replacement, parameters[1].name)
+      assert_equal(:match, parameters[2].name)
     end
 
     def test_rbs_method_with_rest_positionals

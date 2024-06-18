@@ -177,6 +177,19 @@ module RubyIndexer
       process_required_keywords(function, parameters) if function.trailing_positionals
       process_optional_keywords(function, parameters) if function.optional_keywords
       process_rest_keywords(function, parameters) if function.rest_keywords
+      process_block(overload.method_type.block, parameters) if overload.method_type.block&.required
+    end
+
+    sig { params(block: RBS::Types::Block, parameters: T::Hash[Symbol, Entry::Parameter]).void }
+    def process_block(block, parameters)
+      function = block.type
+      # TODO: other kinds of arguments
+      function.required_positionals.each do |required_positional|
+        name = required_positional.name
+        next unless name
+
+        parameters[name] = Entry::BlockParameter.new(name: name)
+      end
     end
 
     sig { params(function: RBS::Types::Function, parameters: T::Hash[Symbol, Entry::Parameter]).void }
