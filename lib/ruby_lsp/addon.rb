@@ -99,8 +99,8 @@ module RubyLsp
     end
 
     sig { returns(String) }
-    def backtraces
-      @errors.filter_map(&:backtrace).join("\n\n")
+    def errors_details
+      @errors.map(&:full_message).join("\n\n")
     end
 
     # Each addon should implement `MyAddon#activate` and use to perform any sort of initialization, such as
@@ -131,11 +131,11 @@ module RubyLsp
     sig do
       overridable.params(
         response_builder: ResponseBuilders::Hover,
-        nesting: T::Array[String],
+        node_context: NodeContext,
         dispatcher: Prism::Dispatcher,
       ).void
     end
-    def create_hover_listener(response_builder, nesting, dispatcher); end
+    def create_hover_listener(response_builder, node_context, dispatcher); end
 
     # Creates a new DocumentSymbol listener. This method is invoked on every DocumentSymbol request
     sig do
@@ -159,21 +159,21 @@ module RubyLsp
       overridable.params(
         response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::Location],
         uri: URI::Generic,
-        nesting: T::Array[String],
+        node_context: NodeContext,
         dispatcher: Prism::Dispatcher,
       ).void
     end
-    def create_definition_listener(response_builder, uri, nesting, dispatcher); end
+    def create_definition_listener(response_builder, uri, node_context, dispatcher); end
 
     # Creates a new Completion listener. This method is invoked on every Completion request
     sig do
       overridable.params(
         response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
-        nesting: T::Array[String],
+        node_context: NodeContext,
         dispatcher: Prism::Dispatcher,
         uri: URI::Generic,
       ).void
     end
-    def create_completion_listener(response_builder, nesting, dispatcher, uri); end
+    def create_completion_listener(response_builder, node_context, dispatcher, uri); end
   end
 end

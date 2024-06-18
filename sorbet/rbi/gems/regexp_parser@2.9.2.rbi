@@ -1132,7 +1132,7 @@ end
 # source://regexp_parser//lib/regexp_parser/expression/classes/keep.rb#2
 module Regexp::Expression::Keep; end
 
-# TOOD: in regexp_parser v3.0.0 this should possibly be a Subexpression
+# TODO: in regexp_parser v3.0.0 this should possibly be a Subexpression
 #       that contains all expressions to its left.
 #
 # source://regexp_parser//lib/regexp_parser/expression/classes/keep.rb#5
@@ -2368,7 +2368,7 @@ class Regexp::Parser
   # source://regexp_parser//lib/regexp_parser/parser.rb#262
   def assign_effective_number(exp); end
 
-  # Assigns referenced expressions to refering expressions, e.g. if there is
+  # Assigns referenced expressions to referring expressions, e.g. if there is
   # an instance of Backreference::Number, its #referenced_expression is set to
   # the instance of Group::Capture that it refers to via its number.
   #

@@ -191,7 +191,8 @@ module RubyIndexer
 
       @index.delete(IndexablePath.new(nil, "/fake/path/foo.rb"))
       refute_entry("Foo")
-      assert_empty(@index.instance_variable_get(:@files_to_entries))
+
+      assert_no_indexed_entries
     end
 
     def test_comments_can_be_attached_to_a_class
@@ -290,13 +291,13 @@ module RubyIndexer
       RUBY
 
       b_const = @index["A::B"].first
-      assert_equal(:private, b_const.visibility)
+      assert_equal(Entry::Visibility::PRIVATE, b_const.visibility)
 
       c_const = @index["A::C"].first
-      assert_equal(:private, c_const.visibility)
+      assert_equal(Entry::Visibility::PRIVATE, c_const.visibility)
 
       d_const = @index["A::D"].first
-      assert_equal(:public, d_const.visibility)
+      assert_equal(Entry::Visibility::PUBLIC, d_const.visibility)
     end
 
     def test_keeping_track_of_super_classes
@@ -323,7 +324,7 @@ module RubyIndexer
       assert_equal("Bar", foo.parent_class)
 
       baz = T.must(@index["Baz"].first)
-      assert_nil(baz.parent_class)
+      assert_equal("::Object", baz.parent_class)
 
       qux = T.must(@index["Something::Qux"].first)
       assert_equal("::Baz", qux.parent_class)
@@ -369,13 +370,13 @@ module RubyIndexer
       RUBY
 
       foo = T.must(@index["Foo"][0])
-      assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.included_modules)
+      assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
 
       qux = T.must(@index["Foo::Qux"][0])
-      assert_equal(["Corge", "Corge", "Baz"], qux.included_modules)
+      assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
 
       constant_path_references = T.must(@index["ConstantPathReferences"][0])
-      assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.included_modules)
+      assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
     end
 
     def test_keeping_track_of_prepended_modules
@@ -415,13 +416,105 @@ module RubyIndexer
       RUBY
 
       foo = T.must(@index["Foo"][0])
-      assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.prepended_modules)
+      assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
 
       qux = T.must(@index["Foo::Qux"][0])
-      assert_equal(["Corge", "Corge", "Baz"], qux.prepended_modules)
+      assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
 
       constant_path_references = T.must(@index["ConstantPathReferences"][0])
-      assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.prepended_modules)
+      assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
+    end
+
+    def test_keeping_track_of_extended_modules
+      index(<<~RUBY)
+        class Foo
+          # valid syntaxes that we can index
+          extend A1
+          self.extend A2
+          extend A3, A4
+          self.extend A5, A6
+
+          # valid syntaxes that we cannot index because of their dynamic nature
+          extend some_variable_or_method_call
+          self.extend some_variable_or_method_call
+
+          def something
+            extend A7 # We should not index this because of this dynamic nature
+          end
+
+          # Valid inner class syntax definition with its own modules prepended
+          class Qux
+            extend Corge
+            self.extend Corge
+            extend Baz
+
+            extend some_variable_or_method_call
+          end
+        end
+
+        class ConstantPathReferences
+          extend Foo::Bar
+          self.extend Foo::Bar2
+
+          extend dynamic::Bar
+          extend Foo::
+        end
+      RUBY
+
+      foo = T.must(@index["Foo"][0])
+      assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
+
+      qux = T.must(@index["Foo::Qux"][0])
+      assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
+
+      constant_path_references = T.must(@index["ConstantPathReferences"][0])
+      assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
+    end
+
+    def test_tracking_singleton_classes
+      index(<<~RUBY)
+        class Foo; end
+        class Foo
+          # Some extra comments
+          class << self
+          end
+        end
+      RUBY
+
+      foo = T.must(@index["Foo::<Class:Foo>"].first)
+      assert_equal(4, foo.location.start_line)
+      assert_equal("Some extra comments", foo.comments.join("\n"))
+    end
+
+    def test_dynamic_singleton_class_blocks
+      index(<<~RUBY)
+        class Foo
+          # Some extra comments
+          class << bar
+          end
+        end
+      RUBY
+
+      singleton = T.must(@index["Foo::<Class:bar>"].first)
+
+      # Even though this is not correct, we consider any dynamic singleton class block as a regular singleton class.
+      # That pattern cannot be properly analyzed statically and assuming that it's always a regular singleton simplifies
+      # the implementation considerably.
+      assert_equal(3, singleton.location.start_line)
+      assert_equal("Some extra comments", singleton.comments.join("\n"))
+    end
+
+    def test_namespaces_inside_singleton_blocks
+      index(<<~RUBY)
+        class Foo
+          class << self
+            class Bar
+            end
+          end
+        end
+      RUBY
+
+      assert_entry("Foo::<Class:Foo>::Bar", Entry::Class, "/fake/path/foo.rb:2-4:3-7")
     end
   end
 end

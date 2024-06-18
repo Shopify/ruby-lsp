@@ -68,7 +68,7 @@ To add a new expectations test runner for a new request handler:
 
 ```ruby
 require "test_helper"
-require "expectations/expectations_test_runner"
+require_relative "support/expectations_test_runner"
 
 class MyRequestExpectationsTest < ExpectationsTestRunner
   # The first argument is the fully qualified name of the request class
@@ -83,7 +83,7 @@ example
 
 ```ruby
 require "test_helper"
-require "expectations/expectations_test_runner"
+require_relative "support/expectations_test_runner"
 
 class MyRequestExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::MyRequest, "my_request"

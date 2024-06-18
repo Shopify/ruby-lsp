@@ -13,6 +13,14 @@ module RubyLsp
           Prism::ConstantReadNode,
           Prism::ConstantWriteNode,
           Prism::ConstantPathNode,
+          Prism::InstanceVariableReadNode,
+          Prism::InstanceVariableAndWriteNode,
+          Prism::InstanceVariableOperatorWriteNode,
+          Prism::InstanceVariableOrWriteNode,
+          Prism::InstanceVariableTargetNode,
+          Prism::InstanceVariableWriteNode,
+          Prism::SymbolNode,
+          Prism::StringNode,
         ],
         T::Array[T.class_of(Prism::Node)],
       )
@@ -30,17 +38,17 @@ module RubyLsp
           response_builder: ResponseBuilders::Hover,
           global_state: GlobalState,
           uri: URI::Generic,
-          nesting: T::Array[String],
+          node_context: NodeContext,
           dispatcher: Prism::Dispatcher,
           typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(response_builder, global_state, uri, nesting, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, global_state, uri, node_context, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
-        @nesting = nesting
+        @node_context = node_context
         @typechecker_enabled = typechecker_enabled
 
         dispatcher.register(
@@ -49,6 +57,12 @@ module RubyLsp
           :on_constant_write_node_enter,
           :on_constant_path_node_enter,
           :on_call_node_enter,
+          :on_instance_variable_read_node_enter,
+          :on_instance_variable_write_node_enter,
+          :on_instance_variable_and_write_node_enter,
+          :on_instance_variable_operator_write_node_enter,
+          :on_instance_variable_or_write_node_enter,
+          :on_instance_variable_target_node_enter,
         )
       end
 
@@ -64,14 +78,14 @@ module RubyLsp
 
       sig { params(node: Prism::ConstantWriteNode).void }
       def on_constant_write_node_enter(node)
-        return if @global_state.typechecker
+        return if @global_state.has_type_checker
 
         generate_hover(node.name.to_s, node.name_loc)
       end
 
       sig { params(node: Prism::ConstantPathNode).void }
       def on_constant_path_node_enter(node)
-        return if @global_state.typechecker
+        return if @global_state.has_type_checker
 
         name = constant_name(node)
         return if name.nil?
@@ -93,25 +107,69 @@ module RubyLsp
         message = node.message
         return unless message
 
-        methods = @index.resolve_method(message, @nesting.join("::"))
+        methods = @index.resolve_method(message, @node_context.fully_qualified_name)
         return unless methods
 
-        categorized_markdown_from_index_entries(message, methods).each do |category, content|
+        title = "#{message}(#{T.must(methods.first).parameters.map(&:decorated_name).join(", ")})"
+
+        categorized_markdown_from_index_entries(title, methods).each do |category, content|
           @response_builder.push(content, category: category)
         end
       end
 
+      sig { params(node: Prism::InstanceVariableReadNode).void }
+      def on_instance_variable_read_node_enter(node)
+        handle_instance_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableWriteNode).void }
+      def on_instance_variable_write_node_enter(node)
+        handle_instance_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableAndWriteNode).void }
+      def on_instance_variable_and_write_node_enter(node)
+        handle_instance_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
+      def on_instance_variable_operator_write_node_enter(node)
+        handle_instance_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableOrWriteNode).void }
+      def on_instance_variable_or_write_node_enter(node)
+        handle_instance_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::InstanceVariableTargetNode).void }
+      def on_instance_variable_target_node_enter(node)
+        handle_instance_variable_hover(node.name.to_s)
+      end
+
       private
+
+      sig { params(name: String).void }
+      def handle_instance_variable_hover(name)
+        entries = @index.resolve_instance_variable(name, @node_context.fully_qualified_name)
+        return unless entries
+
+        categorized_markdown_from_index_entries(name, entries).each do |category, content|
+          @response_builder.push(content, category: category)
+        end
+      rescue RubyIndexer::Index::NonExistingNamespaceError
+        # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
+      end
 
       sig { params(name: String, location: Prism::Location).void }
       def generate_hover(name, location)
-        entries = @index.resolve(name, @nesting)
+        entries = @index.resolve(name, @node_context.nesting)
         return unless entries
 
         # We should only show hover for private constants if the constant is defined in the same namespace as the
         # reference
         first_entry = T.must(entries.first)
-        return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{name}"
+        return if first_entry.private? && first_entry.name != "#{@node_context.fully_qualified_name}::#{name}"
 
         categorized_markdown_from_index_entries(name, entries).each do |category, content|
           @response_builder.push(content, category: category)

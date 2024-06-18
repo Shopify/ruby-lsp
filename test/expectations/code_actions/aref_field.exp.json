@@ -35,6 +35,23 @@
         },
         "uri": "file:///fake"
       }
+    },
+    {
+      "title": "Refactor: Extract Method",
+      "kind": "refactor.extract",
+      "data": {
+        "range": {
+          "start": {
+            "line": 2,
+            "character": 9
+          },
+          "end": {
+            "line": 2,
+            "character": 13
+          }
+        },
+        "uri": "file:///fake"
+      }
     }
   ]
 }

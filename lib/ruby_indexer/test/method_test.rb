@@ -13,7 +13,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
     end
 
     def test_conditional_method
@@ -24,7 +24,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
     end
 
     def test_singleton_method_using_self_receiver
@@ -35,7 +35,12 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::SingletonMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
+
+      entry = T.must(@index["bar"].first)
+      owner = T.must(entry.owner)
+      assert_equal("Foo::<Class:Foo>", owner.name)
+      assert_instance_of(Entry::SingletonClass, owner)
     end
 
     def test_singleton_method_using_other_receiver_is_not_indexed
@@ -71,6 +76,43 @@ module RubyIndexer
       assert_equal("Bar", second_entry.owner.name)
     end
 
+    def test_visibility_tracking
+      index(<<~RUBY)
+        private def foo
+        end
+
+        def bar; end
+
+        protected
+
+        def baz; end
+      RUBY
+
+      assert_entry("foo", Entry::Method, "/fake/path/foo.rb:0-8:1-3", visibility: Entry::Visibility::PRIVATE)
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:3-0:3-12", visibility: Entry::Visibility::PUBLIC)
+      assert_entry("baz", Entry::Method, "/fake/path/foo.rb:7-0:7-12", visibility: Entry::Visibility::PROTECTED)
+    end
+
+    def test_visibility_tracking_with_nested_class_or_modules
+      index(<<~RUBY)
+        class Foo
+          private
+
+          def foo; end
+
+          class Bar
+            def bar; end
+          end
+
+          def baz; end
+        end
+      RUBY
+
+      assert_entry("foo", Entry::Method, "/fake/path/foo.rb:3-2:3-14", visibility: Entry::Visibility::PRIVATE)
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:6-4:6-16", visibility: Entry::Visibility::PUBLIC)
+      assert_entry("baz", Entry::Method, "/fake/path/foo.rb:9-2:9-14", visibility: Entry::Visibility::PRIVATE)
+    end
+
     def test_method_with_parameters
       index(<<~RUBY)
         class Foo
@@ -79,7 +121,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_equal(1, entry.parameters.length)
       parameter = entry.parameters.first
@@ -95,7 +137,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_equal(1, entry.parameters.length)
       parameter = entry.parameters.first
@@ -111,7 +153,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_equal(1, entry.parameters.length)
       parameter = entry.parameters.first
@@ -127,7 +169,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_equal(2, entry.parameters.length)
       a, b = entry.parameters
@@ -147,7 +189,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_equal(2, entry.parameters.length)
       a, b = entry.parameters
@@ -172,7 +214,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_equal(2, entry.parameters.length)
       a, b = entry.parameters
@@ -209,7 +251,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_equal(1, entry.parameters.length)
       param = entry.parameters.first
@@ -250,7 +292,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_equal(2, entry.parameters.length)
       first, second = entry.parameters
@@ -270,7 +312,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("bar", Entry::InstanceMethod, "/fake/path/foo.rb:1-2:2-5")
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
       entry = T.must(@index["bar"].first)
       assert_empty(entry.parameters)
     end
@@ -322,24 +364,69 @@ module RubyIndexer
     def test_properly_tracks_multiple_levels_of_nesting
       index(<<~RUBY)
         module Foo
-          def first; end
+          def first_method; end
 
           module Bar
-            def second; end
+            def second_method; end
           end
 
-          def third; end
+          def third_method; end
         end
       RUBY
 
-      entry = T.must(@index["first"]&.first)
+      entry = T.cast(@index["first_method"]&.first, Entry::Method)
       assert_equal("Foo", T.must(entry.owner).name)
 
-      entry = T.must(@index["second"]&.first)
+      entry = T.cast(@index["second_method"]&.first, Entry::Method)
       assert_equal("Foo::Bar", T.must(entry.owner).name)
 
-      entry = T.must(@index["third"]&.first)
+      entry = T.cast(@index["third_method"]&.first, Entry::Method)
       assert_equal("Foo", T.must(entry.owner).name)
+    end
+
+    def test_keeps_track_of_aliases
+      index(<<~RUBY)
+        class Foo
+          alias whatever to_s
+          alias_method :foo, :to_a
+          alias_method "bar", "to_a"
+
+          # These two are not indexed because they are dynamic or incomplete
+          alias_method baz, :to_a
+          alias_method :baz
+        end
+      RUBY
+
+      assert_entry("whatever", Entry::UnresolvedMethodAlias, "/fake/path/foo.rb:1-8:1-16")
+      assert_entry("foo", Entry::UnresolvedMethodAlias, "/fake/path/foo.rb:2-15:2-19")
+      assert_entry("bar", Entry::UnresolvedMethodAlias, "/fake/path/foo.rb:3-15:3-20")
+      # Foo plus 3 valid aliases
+      assert_equal(4, @index.instance_variable_get(:@entries).length - @default_indexed_entries.length)
+    end
+
+    def test_singleton_methods
+      index(<<~RUBY)
+        class Foo
+          def self.bar; end
+
+          class << self
+            def baz; end
+          end
+        end
+      RUBY
+
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:1-19")
+      assert_entry("baz", Entry::Method, "/fake/path/foo.rb:4-4:4-16")
+
+      bar_owner = T.must(T.must(@index["bar"].first).owner)
+      baz_owner = T.must(T.must(@index["baz"].first).owner)
+
+      assert_instance_of(Entry::SingletonClass, bar_owner)
+      assert_instance_of(Entry::SingletonClass, baz_owner)
+
+      # Regardless of whether the method was added through `self.something` or `class << self`, the owner object must be
+      # the exact same
+      assert_same(bar_owner, baz_owner)
     end
   end
 end

@@ -1,7 +1,5 @@
 /* eslint-disable no-process-env */
 
-import { asyncExec } from "../common";
-
 import { VersionManager, ActivationResult } from "./versionManager";
 
 // Seamlessly manage your app’s Ruby environment with rbenv.
@@ -12,11 +10,8 @@ export class Rbenv extends VersionManager {
     const activationScript =
       "STDERR.print({env: ENV.to_h,yjit:!!defined?(RubyVM::YJIT),version:RUBY_VERSION}.to_json)";
 
-    const result = await asyncExec(
+    const result = await this.runScript(
       `rbenv exec ruby -W0 -rjson -e '${activationScript}'`,
-      {
-        cwd: this.bundleUri.fsPath,
-      },
     );
 
     const parsedResult = this.parseWithErrorHandling(result.stderr);

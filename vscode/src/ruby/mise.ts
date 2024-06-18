@@ -3,8 +3,6 @@ import os from "os";
 
 import * as vscode from "vscode";
 
-import { asyncExec } from "../common";
-
 import { VersionManager, ActivationResult } from "./versionManager";
 
 // Mise (mise en place) is a manager for dev tools, environment variables and tasks
@@ -18,11 +16,8 @@ export class Mise extends VersionManager {
       "STDERR.print({ env: ENV.to_h, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }.to_json)";
 
     // The exec command in Mise is called `x`
-    const result = await asyncExec(
+    const result = await this.runScript(
       `${miseUri.fsPath} x -- ruby -W0 -rjson -e '${activationScript}'`,
-      {
-        cwd: this.bundleUri.fsPath,
-      },
     );
 
     const parsedResult = this.parseWithErrorHandling(result.stderr);

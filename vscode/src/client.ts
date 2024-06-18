@@ -12,9 +12,10 @@ import {
   ExecutableOptions,
   ServerOptions,
   MessageSignature,
+  DocumentSelector,
 } from "vscode-languageclient/node";
 
-import { LSP_NAME, ClientInterface } from "./common";
+import { LSP_NAME, ClientInterface, Addon } from "./common";
 import { Telemetry, RequestEvent } from "./telemetry";
 import { Ruby } from "./ruby";
 import { WorkspaceChannel } from "./workspaceChannel";
@@ -91,6 +92,8 @@ function collectClientOptions(
   configuration: vscode.WorkspaceConfiguration,
   workspaceFolder: vscode.WorkspaceFolder,
   outputChannel: WorkspaceChannel,
+  ruby: Ruby,
+  isMainWorkspace: boolean,
 ): LanguageClientOptions {
   const pullOn: "change" | "save" | "both" =
     configuration.get("pullDiagnosticsOn")!;
@@ -103,8 +106,47 @@ function collectClientOptions(
   const features: EnabledFeatures = configuration.get("enabledFeatures")!;
   const enabledFeatures = Object.keys(features).filter((key) => features[key]);
 
+  const fsPath = workspaceFolder.uri.fsPath.replace(/\/$/, "");
+  const documentSelector: DocumentSelector = [
+    {
+      language: "ruby",
+      pattern: `${fsPath}/**/*`,
+    },
+  ];
+
+  // Only the first language server we spawn should handle unsaved files, otherwise requests will be duplicated across
+  // all workspaces
+  if (isMainWorkspace) {
+    documentSelector.push({
+      language: "ruby",
+      scheme: "untitled",
+    });
+  }
+
+  // For each workspace, the language client is responsible for handling requests for:
+  // 1. Files inside of the workspace itself
+  // 2. Bundled gems
+  // 3. Default gems
+
+  if (ruby.env.GEM_PATH) {
+    const parts = ruby.env.GEM_PATH.split(path.delimiter);
+
+    // Because of how default gems are installed, the entry in the `GEM_PATH` is actually not exactly where the files
+    // are located. With the regex, we are correcting the default gem path from this (where the files are not located)
+    // /opt/rubies/3.3.1/lib/ruby/gems/3.3.0
+    //
+    // to this (where the files are actually stored)
+    // /opt/rubies/3.3.1/lib/ruby/3.3.0
+    parts.forEach((gemPath) => {
+      documentSelector.push({
+        language: "ruby",
+        pattern: `${gemPath.replace(/lib\/ruby\/gems\/(?=\d)/, "lib/ruby/")}/**/*`,
+      });
+    });
+  }
+
   return {
-    documentSelector: [{ language: "ruby" }],
+    documentSelector,
     workspaceFolder,
     diagnosticCollectionName: LSP_NAME,
     outputChannel,
@@ -125,11 +167,13 @@ function collectClientOptions(
 export default class Client extends LanguageClient implements ClientInterface {
   public readonly ruby: Ruby;
   public serverVersion?: string;
+  public addons?: Addon[];
   private readonly workingDirectory: string;
   private readonly telemetry: Telemetry;
   private readonly createTestItems: (response: CodeLens[]) => void;
   private readonly baseFolder;
   private requestId = 0;
+  private readonly workspaceOutputChannel: WorkspaceChannel;
 
   #context: vscode.ExtensionContext;
   #formatter: string;
@@ -141,6 +185,7 @@ export default class Client extends LanguageClient implements ClientInterface {
     createTestItems: (response: CodeLens[]) => void,
     workspaceFolder: vscode.WorkspaceFolder,
     outputChannel: WorkspaceChannel,
+    isMainWorkspace = false,
   ) {
     super(
       LSP_NAME,
@@ -149,8 +194,12 @@ export default class Client extends LanguageClient implements ClientInterface {
         vscode.workspace.getConfiguration("rubyLsp"),
         workspaceFolder,
         outputChannel,
+        ruby,
+        isMainWorkspace,
       ),
     );
+
+    this.workspaceOutputChannel = outputChannel;
 
     // Middleware are part of client options, but because they must reference `this`, we cannot make it a part of the
     // `super` call (TypeScript does not allow accessing `this` before invoking `super`)
@@ -165,10 +214,22 @@ export default class Client extends LanguageClient implements ClientInterface {
     this.#formatter = "";
   }
 
-  override async start() {
-    await super.start();
+  async afterStart() {
     this.#formatter = this.initializeResult?.formatter;
     this.serverVersion = this.initializeResult?.serverInfo?.version;
+    await this.fetchAddons();
+  }
+
+  async fetchAddons() {
+    if (this.initializeResult?.capabilities.experimental?.addon_detection) {
+      try {
+        this.addons = await this.sendRequest("rubyLsp/workspace/addons", {});
+      } catch (error: any) {
+        this.workspaceOutputChannel.error(
+          `Error while fetching addons: ${error.data.errorMessage}`,
+        );
+      }
+    }
   }
 
   get formatter(): string {

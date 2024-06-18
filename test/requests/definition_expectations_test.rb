@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "expectations/expectations_test_runner"
+require_relative "support/expectations_test_runner"
 
 class DefinitionExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Definition, "definition"
@@ -523,6 +523,121 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       response = server.pop_response.response.first
       assert_equal(1, response.range.start.line)
       assert_equal(1, response.range.end.line)
+    end
+  end
+
+  def test_definition_for_instance_variables
+    source = <<~RUBY
+      class Foo
+        def initialize
+          @a = 1
+        end
+
+        def bar
+          @a
+        end
+
+        def baz
+          @a = 5
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 6 } },
+      )
+      response = server.pop_response.response.first
+      assert_equal(2, response.range.start.line)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 10 } },
+      )
+      response = server.pop_response.response.first
+      assert_equal(2, response.range.start.line)
+    end
+  end
+
+  def test_definition_for_inherited_methods
+    source = <<~RUBY
+      module Foo
+        module First
+          def method1; end
+        end
+
+        class Bar
+          def method2; end
+        end
+
+        class Baz < Bar
+          include First
+
+          def method3
+            method1
+            method2
+          end
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 13 } },
+      )
+      response = server.pop_response.response.first
+      assert_equal(2, response.range.start.line)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 14 } },
+      )
+      response = server.pop_response.response.first
+      assert_equal(6, response.range.start.line)
+    end
+  end
+
+  def test_definition_for_inherited_instance_variables
+    source = <<~RUBY
+      module Foo
+        def set_ivar
+          @a = 1
+        end
+      end
+
+      class Parent
+        def initialize
+          @a = 5
+        end
+      end
+
+      class Child < Parent
+        include Foo
+
+        def do_something
+          @a
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 16 } },
+      )
+      response = server.pop_response.response
+
+      # First location is Foo#@a
+      assert_equal(2, response[0].range.start.line)
+      # Second location is Parent#@a
+      assert_equal(8, response[1].range.start.line)
     end
   end
 

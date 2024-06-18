@@ -42,6 +42,8 @@ module RubyLsp
         @group_stack = T.let([], T::Array[String])
         @group_id = T.let(1, Integer)
         @group_id_stack = T.let([], T::Array[Integer])
+        # We want to avoid adding code lenses for nested definitions
+        @def_depth = T.let(0, Integer)
 
         dispatcher.register(
           self,
@@ -50,6 +52,7 @@ module RubyLsp
           :on_module_node_enter,
           :on_module_node_leave,
           :on_def_node_enter,
+          :on_def_node_leave,
           :on_call_node_enter,
           :on_call_node_leave,
         )
@@ -88,6 +91,9 @@ module RubyLsp
 
       sig { params(node: Prism::DefNode).void }
       def on_def_node_enter(node)
+        @def_depth += 1
+        return if @def_depth > 1
+
         class_name = @group_stack.last
         return unless class_name&.end_with?("Test")
 
@@ -103,6 +109,11 @@ module RubyLsp
             )
           end
         end
+      end
+
+      sig { params(node: Prism::DefNode).void }
+      def on_def_node_leave(node)
+        @def_depth -= 1
       end
 
       sig { params(node: Prism::ModuleNode).void }
@@ -225,7 +236,7 @@ module RubyLsp
             # so there must be something to the left of the available path.
             group_stack = T.must(group_stack[last_dynamic_reference_index + 1..])
             if method_name
-              " --name " + "/::#{Shellwords.escape(group_stack.join("::") + "#" + method_name)}$/"
+              " --name " + "/::#{Shellwords.escape(group_stack.join("::")) + "#" + Shellwords.escape(method_name)}$/"
             else
               # When clicking on a CodeLens for `Test`, `(#|::)` will match all tests
               # that are registered on the class itself (matches after `#`) and all tests
@@ -234,7 +245,7 @@ module RubyLsp
             end
           elsif method_name
             # We know the entire path, do an exact match
-            " --name " + Shellwords.escape(group_stack.join("::") + "#" + method_name)
+            " --name " + Shellwords.escape(group_stack.join("::")) + "#" + Shellwords.escape(method_name)
           elsif spec_name
             " --name " + "/#{Shellwords.escape(spec_name)}/"
           else

@@ -26,11 +26,8 @@ export class Shadowenv extends VersionManager {
       "STDERR.print({ env: ENV.to_h, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }.to_json)";
 
     try {
-      const result = await asyncExec(
+      const result = await this.runScript(
         `shadowenv exec -- ruby -W0 -rjson -e '${activationScript}'`,
-        {
-          cwd: this.bundleUri.fsPath,
-        },
       );
 
       const parsedResult = this.parseWithErrorHandling(result.stderr);

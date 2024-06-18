@@ -19,6 +19,16 @@ module RubyLsp
           T::Hash[Symbol, Integer],
         )
 
+        ENHANCED_DOC_URL = T.let(
+          begin
+            gem("rubocop", ">= 1.64.0")
+            true
+          rescue LoadError
+            false
+          end,
+          T::Boolean,
+        )
+
         # TODO: avoid passing document once we have alternative ways to get at
         # encoding and file source
         sig { params(document: Document, offense: RuboCop::Cop::Offense, uri: URI::Generic).void }
@@ -32,14 +42,14 @@ module RubyLsp
         def to_lsp_code_actions
           code_actions = []
 
-          code_actions << autocorrect_action if @offense.correctable?
+          code_actions << autocorrect_action if correctable?
           code_actions << disable_line_action
 
           code_actions
         end
 
-        sig { returns(Interface::Diagnostic) }
-        def to_lsp_diagnostic
+        sig { params(config: RuboCop::Config).returns(Interface::Diagnostic) }
+        def to_lsp_diagnostic(config)
           # highlighted_area contains the begin and end position of the first line
           # This ensures that multiline offenses don't clutter the editor
           highlighted = @offense.highlighted_area
@@ -47,7 +57,7 @@ module RubyLsp
             message: message,
             source: "RuboCop",
             code: @offense.cop_name,
-            code_description: code_description,
+            code_description: code_description(config),
             severity: severity,
             range: Interface::Range.new(
               start: Interface::Position.new(
@@ -60,7 +70,7 @@ module RubyLsp
               ),
             ),
             data: {
-              correctable: @offense.correctable?,
+              correctable: correctable?,
               code_actions: to_lsp_code_actions,
             },
           )
@@ -71,7 +81,7 @@ module RubyLsp
         sig { returns(String) }
         def message
           message  = @offense.message
-          message += "\n\nThis offense is not auto-correctable.\n" unless @offense.correctable?
+          message += "\n\nThis offense is not auto-correctable.\n" unless correctable?
           message
         end
 
@@ -80,9 +90,16 @@ module RubyLsp
           RUBOCOP_TO_LSP_SEVERITY[@offense.severity.name]
         end
 
-        sig { returns(T.nilable(Interface::CodeDescription)) }
-        def code_description
-          doc_url = RuboCopRunner.find_cop_by_name(@offense.cop_name)&.documentation_url
+        sig { params(config: RuboCop::Config).returns(T.nilable(Interface::CodeDescription)) }
+        def code_description(config)
+          cop = RuboCopRunner.find_cop_by_name(@offense.cop_name)
+          return unless cop
+
+          doc_url = if ENHANCED_DOC_URL
+            cop.documentation_url(config)
+          else
+            cop.documentation_url
+          end
           Interface::CodeDescription.new(href: doc_url) if doc_url
         end
 
@@ -98,7 +115,7 @@ module RubyLsp
                     uri: @uri.to_s,
                     version: nil,
                   ),
-                  edits: @offense.correctable? ? offense_replacements : [],
+                  edits: correctable? ? offense_replacements : [],
                 ),
               ],
             ),
@@ -175,6 +192,14 @@ module RubyLsp
           else
             line.length
           end
+        end
+
+        # When `RuboCop::LSP.enable` is called, contextual autocorrect will not offer itself
+        # as `correctable?` to prevent annoying changes while typing. Instead check if
+        # a corrector is present. If it is, then that means some code transformation can be applied.
+        sig { returns(T::Boolean) }
+        def correctable?
+          !@offense.corrector.nil?
         end
       end
     end

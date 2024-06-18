@@ -216,4 +216,31 @@ suite("Chruby", () => {
       force: true,
     });
   });
+
+  test("Continues searching if first directory doesn't exist for omitted patch", async () => {
+    fs.mkdirSync(
+      path.join(rootPath, "opt", "rubies", `${major}.${minor}.0`, "bin"),
+      {
+        recursive: true,
+      },
+    );
+
+    fs.writeFileSync(
+      path.join(workspacePath, ".ruby-version"),
+      `${major}.${minor}`,
+    );
+
+    const chruby = new Chruby(workspaceFolder, outputChannel);
+    chruby.rubyInstallationUris = [
+      vscode.Uri.file(path.join(rootPath, ".rubies")),
+      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
+    ];
+
+    const { env, version, yjit } = await chruby.activate();
+
+    assert.match(env.GEM_PATH!, new RegExp(`ruby/${VERSION_REGEX}`));
+    assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
+    assert.strictEqual(version, RUBY_VERSION);
+    assert.notStrictEqual(yjit, undefined);
+  });
 });

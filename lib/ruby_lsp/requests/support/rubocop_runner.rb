@@ -50,6 +50,9 @@ module RubyLsp
         sig { returns(T::Array[RuboCop::Cop::Offense]) }
         attr_reader :offenses
 
+        sig { returns(::RuboCop::Config) }
+        attr_reader :config_for_working_directory
+
         DEFAULT_ARGS = T.let(
           [
             "--stderr", # Print any output to stderr so that our stdout does not get polluted
@@ -78,6 +81,7 @@ module RubyLsp
           args += DEFAULT_ARGS
           rubocop_options = ::RuboCop::Options.new.parse(args).first
           config_store = ::RuboCop::ConfigStore.new
+          @config_for_working_directory = T.let(config_store.for_pwd, ::RuboCop::Config)
 
           super(rubocop_options, config_store)
         end

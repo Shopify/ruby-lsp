@@ -27,8 +27,8 @@ class ServerTest < Minitest::Test
     hash = JSON.parse(@server.pop_response.response.to_json)
     capabilities = hash["capabilities"]
 
-    # TextSynchronization + encodings + semanticHighlighting
-    assert_equal(3, capabilities.length)
+    # TextSynchronization + encodings + semanticHighlighting + experimental
+    assert_equal(4, capabilities.length)
     assert_includes(capabilities, "semanticTokensProvider")
   end
 
@@ -340,75 +340,6 @@ class ServerTest < Minitest::Test
     FileUtils.mv(".index.yml.tmp", ".index.yml")
   end
 
-  def test_detects_rubocop_if_direct_dependency
-    stub_dependencies(rubocop: true, syntax_tree: false)
-
-    server = RubyLsp::Server.new(test_mode: true)
-
-    begin
-      capture_subprocess_io do
-        server.process_message(id: 1, method: "initialize", params: {
-          initializationOptions: { formatter: "auto" },
-        })
-      end
-
-      assert_equal("rubocop", server.global_state.formatter)
-    ensure
-      server.run_shutdown
-    end
-  end
-
-  def test_detects_syntax_tree_if_direct_dependency
-    stub_dependencies(rubocop: false, syntax_tree: true)
-    server = RubyLsp::Server.new(test_mode: true)
-
-    begin
-      capture_subprocess_io do
-        server.process_message(id: 1, method: "initialize", params: {
-          initializationOptions: { formatter: "auto" },
-        })
-      end
-
-      assert_equal("syntax_tree", server.global_state.formatter)
-    ensure
-      server.run_shutdown
-    end
-  end
-
-  def test_gives_rubocop_precedence_if_syntax_tree_also_present
-    stub_dependencies(rubocop: true, syntax_tree: true)
-    server = RubyLsp::Server.new(test_mode: true)
-
-    begin
-      capture_subprocess_io do
-        server.process_message(id: 1, method: "initialize", params: {
-          initializationOptions: { formatter: "auto" },
-        })
-      end
-
-      assert_equal("rubocop", server.global_state.formatter)
-    ensure
-      server.run_shutdown
-    end
-  end
-
-  def test_sets_formatter_to_none_if_neither_rubocop_or_syntax_tree_are_present
-    stub_dependencies(rubocop: false, syntax_tree: false)
-    server = RubyLsp::Server.new(test_mode: true)
-
-    begin
-      capture_subprocess_io do
-        server.process_message(id: 1, method: "initialize", params: {
-          initializationOptions: { formatter: "auto" },
-        })
-      end
-
-      assert_equal("none", server.global_state.formatter)
-    ensure
-      server.run_shutdown
-    end
-  end
-
   def test_shows_error_if_formatter_set_to_rubocop_but_rubocop_not_available
     capture_subprocess_io do
       @server.process_message(id: 1, method: "initialize", params: {
@@ -495,6 +426,27 @@ class ServerTest < Minitest::Test
     })
   end
 
+  def test_workspace_addons
+    create_test_addons
+    @server.load_addons
+
+    @server.process_message({ id: 1, method: "rubyLsp/workspace/addons" })
+
+    addon_error_notification = @server.pop_response
+    assert_equal("window/showMessage", addon_error_notification.method)
+    assert_equal("Error loading addons:\n\nBar:\n  boom\n", addon_error_notification.params.message)
+    addons_info = @server.pop_response.response
+
+    assert_equal("Foo", addons_info[0][:name])
+    refute(addons_info[0][:errored])
+
+    assert_equal("Bar", addons_info[1][:name])
+    assert(addons_info[1][:errored])
+  ensure
+    RubyLsp::Addon.addons.clear
+    RubyLsp::Addon.addon_classes.clear
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)
@@ -522,10 +474,28 @@ class ServerTest < Minitest::Test
     # Depending on which tests have run prior to this one, the classes may or may not be defined
   end
 
-  def stub_dependencies(rubocop:, syntax_tree:)
-    dependencies = {}
-    dependencies["syntax_tree"] = "..." if syntax_tree
-    dependencies["rubocop"] = "..." if rubocop
-    Bundler.locked_gems.stubs(:dependencies).returns(dependencies)
+  def create_test_addons
+    Class.new(RubyLsp::Addon) do
+      def activate(global_state, outgoing_queue); end
+
+      def name
+        "Foo"
+      end
+
+      def deactivate; end
+    end
+
+    Class.new(RubyLsp::Addon) do
+      def activate(global_state, outgoing_queue)
+        # simulates failed addon activation
+        raise "boom"
+      end
+
+      def name
+        "Bar"
+      end
+
+      def deactivate; end
+    end
   end
 end

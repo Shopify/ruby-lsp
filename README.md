@@ -33,7 +33,7 @@ The Ruby LSP features include
 - Completion for classes, modules, constants and require paths
 - Fuzzy search classes, modules and constants anywhere in the project and its dependencies (workspace symbol)
 
-Adding method support for definition, completion, hover and workspace symbol is planned, but not yet completed.
+Adding method support for definition, completion, hover and workspace symbol is partially supported, but not yet complete. Follow progress in https://github.com/Shopify/ruby-lsp/issues/899
 
 See complete information about features [here](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html).
 
@@ -48,9 +48,11 @@ If using VS Code, all you have to do is install the [Ruby LSP
 extension](https://marketplace.visualstudio.com/items?itemName=Shopify.ruby-lsp) to get the extra features in the
 editor. Do not install the `ruby-lsp` gem manually.
 
+For more information on using and configuring the extension, see [vscode/README.md](vscode/README.md).
+
 ### With other editors
 
-See [editors](EDITORS.md) for community instructions on setting up the Ruby LSP.
+See [editors](EDITORS.md) for community instructions on setting up the Ruby LSP, which current includes Emacs, Neovim, Sublime Text, and Zed.
 
 The gem can be installed by doing
 ```shell

@@ -33,13 +33,14 @@ module RubyLsp
       sig { override.returns(T::Array[Interface::WorkspaceSymbol]) }
       def perform
         @index.fuzzy_search(@query).filter_map do |entry|
-          # If the project is using Sorbet, we let Sorbet handle symbols defined inside the project itself and RBIs, but
-          # we still return entries defined in gems to allow developers to jump directly to the source
           file_path = entry.file_path
-          next if @global_state.typechecker && not_in_dependencies?(file_path)
+
+          # We only show symbols declared in the workspace
+          in_dependencies = !not_in_dependencies?(file_path)
+          next if in_dependencies
 
           # We should never show private symbols when searching the entire workspace
-          next if entry.visibility == :private
+          next if entry.private?
 
           kind = kind_for_entry(entry)
           loc = entry.location
@@ -79,6 +80,8 @@ module RubyLsp
           entry.name == "initialize" ? Constant::SymbolKind::CONSTRUCTOR : Constant::SymbolKind::METHOD
         when RubyIndexer::Entry::Accessor
           Constant::SymbolKind::PROPERTY
+        when RubyIndexer::Entry::InstanceVariable
+          Constant::SymbolKind::FIELD
         end
       end
     end

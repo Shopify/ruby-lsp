@@ -76,6 +76,16 @@ module RubyLsp
         text_document_show_syntax_tree(message)
       when "rubyLsp/workspace/dependencies"
         workspace_dependencies(message)
+      when "rubyLsp/workspace/addons"
+        send_message(
+          Result.new(
+            id: message[:id],
+            response:
+              Addon.addons.map do |addon|
+                { name: addon.name, errored: addon.error? }
+              end,
+          ),
+        )
       when "$/cancelRequest"
         @mutex.synchronize { @cancelled_requests << message[:params][:id] }
       end
@@ -104,7 +114,7 @@ module RubyLsp
           ),
         )
 
-        $stderr.puts(errored_addons.map(&:backtraces).join("\n\n"))
+        $stderr.puts(errored_addons.map(&:errors_details).join("\n\n")) unless @test_mode
       end
     end
 
@@ -134,7 +144,7 @@ module RubyLsp
       when Hash
         # If the configuration is already a hash, merge it with a default value of `true`. That way clients don't have
         # to opt-in to every single feature
-        Hash.new(true).merge!(configured_features)
+        Hash.new(true).merge!(configured_features.transform_keys(&:to_s))
       else
         # If no configuration was passed by the client, just enable every feature
         Hash.new(true)
@@ -175,8 +185,11 @@ module RubyLsp
           completion_provider: completion_provider,
           code_lens_provider: code_lens_provider,
           definition_provider: enabled_features["definition"],
-          workspace_symbol_provider: enabled_features["workspaceSymbol"],
+          workspace_symbol_provider: enabled_features["workspaceSymbol"] && !@global_state.has_type_checker,
           signature_help_provider: signature_help_provider,
+          experimental: {
+            addon_detection: true,
+          },
         ),
         serverInfo: {
           name: "Ruby LSP",
@@ -449,7 +462,7 @@ module RubyLsp
 
     sig { params(document: Document).returns(T::Boolean) }
     def typechecker_enabled?(document)
-      @global_state.typechecker && document.sorbet_sigil_is_true_or_higher
+      @global_state.has_type_checker && document.sorbet_sigil_is_true_or_higher
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
@@ -495,6 +508,13 @@ module RubyLsp
         send_message(
           Notification.window_show_error(
             "Couldn't find an appropriate location to place extracted refactor",
+          ),
+        )
+        raise Requests::CodeActionResolve::CodeActionError
+      when Requests::CodeActionResolve::Error::UnknownCodeAction
+        send_message(
+          Notification.window_show_error(
+            "Unknown code action",
           ),
         )
         raise Requests::CodeActionResolve::CodeActionError
@@ -619,8 +639,7 @@ module RubyLsp
         when Constant::FileChangeType::CREATED
           index.index_single(indexable)
         when Constant::FileChangeType::CHANGED
-          index.delete(indexable)
-          index.index_single(indexable)
+          index.handle_change(indexable)
         when Constant::FileChangeType::DELETED
           index.delete(indexable)
         end
@@ -690,6 +709,8 @@ module RubyLsp
 
       Thread.new do
         begin
+          RubyIndexer::RBSIndexer.new(@global_state.index).index_ruby_core
+
           @global_state.index.index_all do |percentage|
             progress("indexing-progress", percentage)
             true

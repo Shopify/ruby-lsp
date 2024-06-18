@@ -17,8 +17,8 @@ module RubyLsp
     # - Modules
     # - Constants
     # - Require paths
-    # - Methods invoked on self only
-    # - Autoloaded constants
+    # - Methods invoked on self only and on receivers where the type is unknown
+    # - Instance variables
     #
     # # Example
     #
@@ -47,10 +47,26 @@ module RubyLsp
         )
         @dispatcher = dispatcher
 
-        target, parent, nesting = document.locate_node(
+        node_context = document.locate_node(
           position,
-          node_types: [Prism::CallNode, Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::BlockArgumentNode],
+          node_types: [
+            Prism::CallNode,
+            Prism::ConstantReadNode,
+            Prism::ConstantPathNode,
+            Prism::BlockArgumentNode,
+            Prism::InstanceVariableReadNode,
+            Prism::InstanceVariableAndWriteNode,
+            Prism::InstanceVariableOperatorWriteNode,
+            Prism::InstanceVariableOrWriteNode,
+            Prism::InstanceVariableTargetNode,
+            Prism::InstanceVariableWriteNode,
+            Prism::SymbolNode,
+            Prism::StringNode,
+          ],
         )
+
+        target = node_context.node
+        parent = node_context.parent
 
         if target.is_a?(Prism::ConstantReadNode) && parent.is_a?(Prism::ConstantPathNode)
           # If the target is part of a constant path node, we need to find the exact portion of the constant that the
@@ -65,6 +81,9 @@ module RubyLsp
           # If the target is a method call, we need to ensure that the requested position is exactly on top of the
           # method identifier. Otherwise, we risk showing definitions for unrelated things
           target = nil
+        # For methods with block arguments using symbol-to-proc
+        elsif target.is_a?(Prism::SymbolNode) && parent.is_a?(Prism::BlockArgumentNode)
+          target = parent
         end
 
         if target
@@ -72,13 +91,13 @@ module RubyLsp
             @response_builder,
             global_state,
             document.uri,
-            nesting,
+            node_context,
             dispatcher,
             typechecker_enabled,
           )
 
           Addon.addons.each do |addon|
-            addon.create_definition_listener(@response_builder, document.uri, nesting, dispatcher)
+            addon.create_definition_listener(@response_builder, document.uri, node_context, dispatcher)
           end
         end
 

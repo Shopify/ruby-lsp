@@ -16,6 +16,7 @@ updates:
           - "patch"
         exclude-patterns:
           - "prism"
+    open-pull-requests-limit: 100
   - package-ecosystem: "npm"
     directory: "vscode/"
     schedule:
@@ -29,6 +30,7 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    open-pull-requests-limit: 100
   - package-ecosystem: "gitsubmodule"
     directory: "/"
     schedule:

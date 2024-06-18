@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "expectations/expectations_test_runner"
+require_relative "support/expectations_test_runner"
 
 class HoverExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Hover, "hover"
@@ -308,6 +308,145 @@ class HoverExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: uri }, position: { character: 4, line: 5 } },
       )
       assert_match("Hello", server.pop_response.response.contents.value)
+    end
+  end
+
+  def test_hover_instance_variables
+    source = <<~RUBY
+      class Foo
+        def initialize
+          # Hello
+          @a = 1
+        end
+
+        def bar
+          @a
+        end
+
+        def baz
+          @a = 5
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+      )
+      assert_match("Hello", server.pop_response.response.contents.value)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 11 } },
+      )
+      assert_match("Hello", server.pop_response.response.contents.value)
+    end
+  end
+
+  def test_hovering_over_inherited_methods
+    source = <<~RUBY
+      module Foo
+        module First
+          # Method 1
+          def method1; end
+        end
+
+        class Bar
+          # Method 2
+          def method2; end
+        end
+
+        class Baz < Bar
+          include First
+
+          def method3
+            method1
+            method2
+          end
+        end
+      end
+    RUBY
+
+    # Going to definition on `argument` should not take you to the `foo` method definition
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 15 } },
+      )
+      assert_match("Method 1", server.pop_response.response.contents.value)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 16 } },
+      )
+      assert_match("Method 2", server.pop_response.response.contents.value)
+    end
+  end
+
+  def test_hover_for_inherited_instance_variables
+    source = <<~RUBY
+      module Foo
+        def set_ivar
+          # Foo
+          @a = 1
+        end
+      end
+
+      class Parent
+        def initialize
+          # Parent
+          @a = 5
+        end
+      end
+
+      class Child < Parent
+        include Foo
+
+        def do_something
+          @a
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 18 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("Foo", contents)
+      assert_match("Parent", contents)
+    end
+  end
+
+  def test_hover_for_methods_shows_parameters
+    source = <<~RUBY
+      class Foo
+        def bar(a, b = 1, *c, d:, e: 1, **f, &g)
+        end
+
+        def baz
+          bar
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 5 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("bar(a, b = <default>, *c, d:, e: <default>, **f, &g)", contents)
     end
   end
 

@@ -2,4 +2,5 @@
 .
 --ignore=vendor/
 --ignore=test/fixtures/
+--ignore=test/expectations/
 --enable-experimental-requires-ancestor

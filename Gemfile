@@ -4,12 +4,13 @@ source "https://rubygems.org"
 
 gemspec
 
+gem "bundler", "~> 2.5"
+gem "minitest", "~> 5.23"
+
 group :development do
-  gem "bundler", "~> 2.5"
   gem "debug", "~> 1.9", require: false
   gem "minitest-reporters", "~> 1.6"
-  gem "minitest", "~> 5.22"
-  gem "mocha", "~> 2.2"
+  gem "mocha", "~> 2.3"
   gem "psych", "~> 5.1", require: false
   gem "rake", "~> 13.2"
   gem "rdoc", require: false, github: "Shopify/rdoc", branch: "create_snapper_generator"
@@ -18,7 +19,7 @@ group :development do
   gem "rubocop-rake", "~> 0.6.0", require: false
   gem "rubocop-shopify", "~> 2.15", require: false
   gem "rubocop-sorbet", "~> 0.8", require: false
-  gem "rubocop", "~> 1.63"
+  gem "rubocop", "~> 1.64"
   gem "simplecov", require: false
   gem "syntax_tree", ">= 6.1.1", "< 7"
 

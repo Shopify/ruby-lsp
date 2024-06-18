@@ -11,6 +11,9 @@ module URI
         # On Windows, if the path begins with the disk name, we need to add a leading slash to make it a valid URI
         escaped_path = if /^[A-Z]:/i.match?(path)
           DEFAULT_PARSER.escape("/#{path}")
+        elsif path.start_with?("//?/")
+          # Some paths on Windows start with "//?/". This is a special prefix that allows for long file paths
+          DEFAULT_PARSER.escape(path.delete_prefix("//?"))
         else
           DEFAULT_PARSER.escape(path)
         end
