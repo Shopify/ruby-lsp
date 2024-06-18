@@ -516,5 +516,35 @@ module RubyIndexer
 
       assert_entry("Foo::<Class:Foo>::Bar", Entry::Class, "/fake/path/foo.rb:2-4:3-7")
     end
+
+    def test_name_location_points_to_constant_path_location
+      index(<<~RUBY)
+        class Foo
+          def foo; end
+        end
+
+        module Bar
+          def bar; end
+        end
+      RUBY
+
+      foo = T.must(@index["Foo"].first)
+      refute_equal(foo.location, foo.name_location)
+
+      name_location = foo.name_location
+      assert_equal(1, name_location.start_line)
+      assert_equal(1, name_location.end_line)
+      assert_equal(6, name_location.start_column)
+      assert_equal(9, name_location.end_column)
+
+      bar = T.must(@index["Bar"].first)
+      refute_equal(bar.location, bar.name_location)
+
+      name_location = bar.name_location
+      assert_equal(5, name_location.start_line)
+      assert_equal(5, name_location.end_line)
+      assert_equal(7, name_location.start_column)
+      assert_equal(10, name_location.end_column)
+    end
   end
 end

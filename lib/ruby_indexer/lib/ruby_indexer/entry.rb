@@ -95,20 +95,39 @@ module RubyIndexer
       sig { returns(T::Array[String]) }
       attr_reader :nesting
 
+      # Returns the location of the constant name, excluding the parent class or the body
+      sig { returns(Location) }
+      attr_reader :name_location
+
       sig do
         params(
           nesting: T::Array[String],
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
+          name_location: T.any(Prism::Location, Location),
           comments: T::Array[String],
         ).void
       end
-      def initialize(nesting, file_path, location, comments)
+      def initialize(nesting, file_path, location, name_location, comments)
         @name = T.let(nesting.join("::"), String)
         # The original nesting where this namespace was discovered
         @nesting = nesting
 
         super(@name, file_path, location, comments)
+
+        @name_location = T.let(
+          if name_location.is_a?(Prism::Location)
+            Location.new(
+              name_location.start_line,
+              name_location.end_line,
+              name_location.start_column,
+              name_location.end_column,
+            )
+          else
+            name_location
+          end,
+          RubyIndexer::Location,
+        )
       end
 
       sig { returns(T::Array[String]) }
@@ -146,12 +165,13 @@ module RubyIndexer
           nesting: T::Array[String],
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
+          name_location: T.any(Prism::Location, Location),
           comments: T::Array[String],
           parent_class: T.nilable(String),
         ).void
       end
-      def initialize(nesting, file_path, location, comments, parent_class)
-        super(nesting, file_path, location, comments)
+      def initialize(nesting, file_path, location, name_location, comments, parent_class) # rubocop:disable Metrics/ParameterLists
+        super(nesting, file_path, location, name_location, comments)
         @parent_class = parent_class
       end
 
@@ -164,14 +184,20 @@ module RubyIndexer
     class SingletonClass < Class
       extend T::Sig
 
-      sig { params(location: Prism::Location, comments: T::Array[String]).void }
-      def update_singleton_information(location, comments)
+      sig { params(location: Prism::Location, name_location: Prism::Location, comments: T::Array[String]).void }
+      def update_singleton_information(location, name_location, comments)
         # Create a new RubyIndexer::Location object from the Prism location
         @location = Location.new(
           location.start_line,
           location.end_line,
           location.start_column,
           location.end_column,
+        )
+        @name_location = Location.new(
+          name_location.start_line,
+          name_location.end_line,
+          name_location.start_column,
+          name_location.end_column,
         )
         @comments.concat(comments)
       end
@@ -309,20 +335,38 @@ module RubyIndexer
       sig { override.returns(T::Array[Parameter]) }
       attr_reader :parameters
 
+      # Returns the location of the method name, excluding parameters or the body
+      sig { returns(Location) }
+      attr_reader :name_location
+
       sig do
         params(
           name: String,
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
+          name_location: T.any(Prism::Location, Location),
           comments: T::Array[String],
           parameters: T::Array[Parameter],
           visibility: Visibility,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, parameters, visibility, owner) # rubocop:disable Metrics/ParameterLists
+      def initialize(name, file_path, location, name_location, comments, parameters, visibility, owner) # rubocop:disable Metrics/ParameterLists
         super(name, file_path, location, comments, visibility, owner)
         @parameters = parameters
+        @name_location = T.let(
+          if name_location.is_a?(Prism::Location)
+            Location.new(
+              name_location.start_line,
+              name_location.end_line,
+              name_location.start_column,
+              name_location.end_column,
+            )
+          else
+            name_location
+          end,
+          RubyIndexer::Location,
+        )
       end
     end
 
