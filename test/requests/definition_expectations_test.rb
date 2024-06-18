@@ -601,6 +601,80 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definition_for_singleton_methods
+    source = <<~RUBY
+      class Foo
+        def self.bar
+        end
+
+        class << self
+          def baz; end
+        end
+      end
+
+      Foo.bar
+      Foo.baz
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 9 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response[0].range.start.line)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 10 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(5, response[0].range.start.line)
+    end
+  end
+
+  def test_definition_for_class_instance_variables
+    source = <<~RUBY
+      class Foo
+        @a = 123
+
+        def self.bar
+          @a
+        end
+
+        class << self
+          def baz
+            @a
+          end
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 4 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response[0].range.start.line)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 9 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response[0].range.start.line)
+    end
+  end
+
   private
 
   def create_definition_addon

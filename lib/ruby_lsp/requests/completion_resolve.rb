@@ -56,8 +56,16 @@ module RubyLsp
           end
         end
 
+        first_entry = T.must(entries.first)
+
+        if first_entry.is_a?(RubyIndexer::Entry::Member)
+          detail = first_entry.decorated_parameters
+          label = "#{label}#{first_entry.decorated_parameters}"
+        end
+
         @item[:labelDetails] = Interface::CompletionItemLabelDetails.new(
           description: entries.take(MAX_DOCUMENTATION_ENTRIES).map(&:file_name).join(","),
+          detail: detail,
         )
 
         @item[:documentation] = Interface::MarkupContent.new(

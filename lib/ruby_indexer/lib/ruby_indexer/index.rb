@@ -140,13 +140,12 @@ module RubyIndexer
       results.flat_map(&:first)
     end
 
-    sig { params(name: String, receiver_name: String).returns(T::Array[Entry]) }
+    sig { params(name: T.nilable(String), receiver_name: String).returns(T::Array[Entry]) }
     def method_completion_candidates(name, receiver_name)
       ancestors = linearized_ancestors_of(receiver_name)
-      candidates = prefix_search(name).flatten
-      candidates.select! do |entry|
-        entry.is_a?(RubyIndexer::Entry::Member) && ancestors.any?(entry.owner&.name)
-      end
+
+      candidates = name ? prefix_search(name).flatten : @entries.values.flatten
+      candidates.select! { |entry| entry.is_a?(Entry::Member) && ancestors.any?(entry.owner&.name) }
       candidates
     end
 

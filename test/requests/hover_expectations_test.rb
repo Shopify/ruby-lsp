@@ -450,6 +450,83 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hover_for_singleton_methods
+    source = <<~RUBY
+      class Foo
+        # bar
+        def self.bar
+        end
+
+        class << self
+          # baz
+          def baz; end
+        end
+      end
+
+      Foo.bar
+      Foo.baz
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 11 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("bar", contents)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 12 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("baz", contents)
+    end
+  end
+
+  def test_definition_for_class_instance_variables
+    source = <<~RUBY
+      class Foo
+        # Hey!
+        @a = 123
+
+        def self.bar
+          @a
+        end
+
+        class << self
+          def baz
+            @a
+          end
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 5 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("Hey!", contents)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 10 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("Hey!", contents)
+    end
+  end
+
   private
 
   def create_hover_addon

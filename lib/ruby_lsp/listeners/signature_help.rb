@@ -21,6 +21,7 @@ module RubyLsp
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
+        @type_inferrer = T.let(global_state.type_inferrer, TypeInferrer)
         @node_context = node_context
         dispatcher.register(self, :on_call_node_enter)
       end
@@ -28,12 +29,14 @@ module RubyLsp
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
         return if @typechecker_enabled
-        return unless self_receiver?(node)
 
         message = node.message
         return unless message
 
-        methods = @index.resolve_method(message, @node_context.fully_qualified_name)
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
+
+        methods = @index.resolve_method(message, type)
         return unless methods
 
         target_method = methods.first

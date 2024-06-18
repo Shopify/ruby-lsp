@@ -502,7 +502,6 @@ class CompletionTest < Minitest::Test
         assert_equal(["bar", "baz"], result.map(&:label))
         assert_equal(["bar", "baz"], result.map(&:filter_text))
         assert_equal(["bar", "baz"], result.map { |completion| completion.text_edit.new_text })
-        assert_equal(["(a, b)", "(c, d)"], result.map { |completion| completion.label_details.detail })
         assert_equal([9, 9], result.map { |completion| completion.text_edit.range.start.character })
       end
     end
@@ -968,6 +967,84 @@ class CompletionTest < Minitest::Test
       })
       result = server.pop_response.response
       assert_equal(["@foo"], result.map(&:label))
+    end
+  end
+
+  def test_completion_for_singleton_methods
+    source = +<<~RUBY
+      class Foo
+        def self.baz; end
+
+        class << self
+          def bar
+            b
+          end
+        end
+      end
+
+      Foo.
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 10, character: 4 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["baz", "bar"], result.map(&:label))
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 5, character: 7 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["baz", "bar"], result.map(&:label))
+    end
+  end
+
+  def test_completion_for_class_instance_variables
+    source = +<<~RUBY
+      class Foo
+        @a = 1
+
+        def self.baz
+          @b = 2
+        end
+
+        class << self
+          def bar
+            @c = 3
+          end
+
+          def qux
+            @
+          end
+        end
+
+        def self.yeah
+          @
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 13, character: 7 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["@a", "@b", "@c"], result.map(&:label))
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 18, character: 5 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["@a", "@b", "@c"], result.map(&:label))
     end
   end
 

@@ -15,15 +15,26 @@ module RubyLsp
           typechecker_enabled: T::Boolean,
           dispatcher: Prism::Dispatcher,
           uri: URI::Generic,
+          trigger_character: T.nilable(String),
         ).void
       end
-      def initialize(response_builder, global_state, node_context, typechecker_enabled, dispatcher, uri) # rubocop:disable Metrics/ParameterLists
+      def initialize( # rubocop:disable Metrics/ParameterLists
+        response_builder,
+        global_state,
+        node_context,
+        typechecker_enabled,
+        dispatcher,
+        uri,
+        trigger_character
+      )
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
+        @type_inferrer = T.let(global_state.type_inferrer, TypeInferrer)
         @node_context = node_context
         @typechecker_enabled = typechecker_enabled
         @uri = uri
+        @trigger_character = trigger_character
 
         dispatcher.register(
           self,
@@ -107,7 +118,7 @@ module RubyLsp
         when "require_relative"
           complete_require_relative(node)
         else
-          complete_self_receiver_method(node, name) if !@typechecker_enabled && self_receiver?(node)
+          complete_methods(node, name) unless @typechecker_enabled
         end
       end
 
@@ -192,7 +203,10 @@ module RubyLsp
 
       sig { params(name: String, location: Prism::Location).void }
       def handle_instance_variable_completion(name, location)
-        @index.instance_variable_completion_candidates(name, @node_context.fully_qualified_name).each do |entry|
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
+
+        @index.instance_variable_completion_candidates(name, type).each do |entry|
           variable_name = entry.name
 
           @response_builder << Interface::CompletionItem.new(
@@ -257,15 +271,40 @@ module RubyLsp
       end
 
       sig { params(node: Prism::CallNode, name: String).void }
-      def complete_self_receiver_method(node, name)
-        receiver_entries = @index[@node_context.fully_qualified_name]
-        return unless receiver_entries
+      def complete_methods(node, name)
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
 
-        receiver = T.must(receiver_entries.first)
+        # When the trigger character is a dot, Prism matches the name of the call node to whatever is next in the source
+        # code, leading to us searching for the wrong name. What we want to do instead is show every available method
+        # when dot is pressed
+        method_name = @trigger_character == "." ? nil : name
 
-        @index.method_completion_candidates(name, receiver.name).each do |entry|
-          @response_builder << build_method_completion(T.cast(entry, RubyIndexer::Entry::Member), node)
+        range = if method_name
+          range_from_location(T.must(node.message_loc))
+        else
+          loc = T.must(node.call_operator_loc)
+          Interface::Range.new(
+            start: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column + 1),
+            end: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column + 1),
+          )
         end
+
+        @index.method_completion_candidates(method_name, type).each do |entry|
+          entry_name = entry.name
+
+          @response_builder << Interface::CompletionItem.new(
+            label: entry_name,
+            filter_text: entry_name,
+            text_edit: Interface::TextEdit.new(range: range, new_text: entry_name),
+            kind: Constant::CompletionItemKind::METHOD,
+            data: {
+              owner_name: T.cast(entry, RubyIndexer::Entry::Member).owner&.name,
+            },
+          )
+        end
+      rescue RubyIndexer::Index::NonExistingNamespaceError
+        # We have not indexed this namespace, so we can't provide any completions
       end
 
       sig do
@@ -283,7 +322,7 @@ module RubyLsp
           text_edit: Interface::TextEdit.new(range: range_from_location(T.must(node.message_loc)), new_text: name),
           kind: Constant::CompletionItemKind::METHOD,
           label_details: Interface::CompletionItemLabelDetails.new(
-            detail: "(#{entry.parameters.map(&:decorated_name).join(", ")})",
+            detail: entry.decorated_parameters,
             description: entry.file_name,
           ),
           documentation: Interface::MarkupContent.new(
