@@ -316,4 +316,33 @@ class SignatureHelpTest < Minitest::Test
       assert_equal(0, result.active_parameter)
     end
   end
+
+  def test_aliased_methods
+    source = <<~RUBY
+      class Parent
+        def bar(a); end
+      end
+
+      class Child < Parent
+        alias baz bar
+
+        def do_something
+          baz()
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
+        position: { line: 8, character: 8 },
+        context: {},
+      })
+      result = server.pop_response.response
+      signature = result.signatures.first
+
+      assert_equal("baz(a)", signature.label)
+      assert_equal(0, result.active_parameter)
+    end
+  end
 end

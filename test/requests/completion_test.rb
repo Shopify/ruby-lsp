@@ -1048,6 +1048,31 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_aliased_methods
+    source = +<<~RUBY
+      class Parent
+        def bar(a); end
+      end
+
+      class Child < Parent
+        alias baz bar
+
+        def do_something
+          b
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 8, character: 5 },
+      })
+      result = server.pop_response.response
+      assert_equal(["bar", "baz"], result.map(&:label))
+    end
+  end
+
   private
 
   def with_file_structure(server, &block)

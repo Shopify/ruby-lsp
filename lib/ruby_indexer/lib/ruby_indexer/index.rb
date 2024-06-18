@@ -140,13 +140,27 @@ module RubyIndexer
       results.flat_map(&:first)
     end
 
-    sig { params(name: T.nilable(String), receiver_name: String).returns(T::Array[Entry]) }
+    sig do
+      params(
+        name: T.nilable(String),
+        receiver_name: String,
+      ).returns(T::Array[T.any(Entry::Member, Entry::MethodAlias)])
+    end
     def method_completion_candidates(name, receiver_name)
       ancestors = linearized_ancestors_of(receiver_name)
 
       candidates = name ? prefix_search(name).flatten : @entries.values.flatten
-      candidates.select! { |entry| entry.is_a?(Entry::Member) && ancestors.any?(entry.owner&.name) }
-      candidates
+      candidates.filter_map do |entry|
+        case entry
+        when Entry::Member, Entry::MethodAlias
+          entry if ancestors.any?(entry.owner&.name)
+        when Entry::UnresolvedMethodAlias
+          if ancestors.any?(entry.owner&.name)
+            resolved_alias = resolve_method_alias(entry, receiver_name)
+            resolved_alias if resolved_alias.is_a?(Entry::MethodAlias)
+          end
+        end
+      end
     end
 
     # Resolve a constant to its declaration based on its name and the nesting where the reference was found. Parameter
@@ -284,20 +298,32 @@ module RubyIndexer
 
     # Attempts to find methods for a resolved fully qualified receiver name.
     # Returns `nil` if the method does not exist on that receiver
-    sig { params(method_name: String, receiver_name: String).returns(T.nilable(T::Array[Entry::Member])) }
+    sig do
+      params(
+        method_name: String,
+        receiver_name: String,
+      ).returns(T.nilable(T::Array[T.any(Entry::Member, Entry::MethodAlias)]))
+    end
     def resolve_method(method_name, receiver_name)
       method_entries = self[method_name]
-      ancestors = linearized_ancestors_of(receiver_name.delete_prefix("::"))
       return unless method_entries
 
+      ancestors = linearized_ancestors_of(receiver_name.delete_prefix("::"))
       ancestors.each do |ancestor|
-        found = method_entries.select do |entry|
-          next unless entry.is_a?(Entry::Member)
-
-          entry.owner&.name == ancestor
+        found = method_entries.filter_map do |entry|
+          case entry
+          when Entry::Member, Entry::MethodAlias
+            entry if entry.owner&.name == ancestor
+          when Entry::UnresolvedMethodAlias
+            # Resolve aliases lazily as we find them
+            if entry.owner&.name == ancestor
+              resolved_alias = resolve_method_alias(entry, receiver_name)
+              resolved_alias if resolved_alias.is_a?(Entry::MethodAlias)
+            end
+          end
         end
 
-        return T.cast(found, T::Array[Entry::Member]) if found.any?
+        return found if found.any?
       end
 
       nil
@@ -581,6 +607,27 @@ module RubyIndexer
     sig { params(name: String, seen_names: T::Array[String]).returns(T.nilable(T::Array[Entry])) }
     def search_top_level(name, seen_names)
       @entries[name]&.map { |e| e.is_a?(Entry::UnresolvedAlias) ? resolve_alias(e, seen_names) : e }
+    end
+
+    # Attempt to resolve a given unresolved method alias. This method returns the resolved alias if we managed to
+    # identify the target or the same unresolved alias entry if we couldn't
+    sig do
+      params(
+        entry: Entry::UnresolvedMethodAlias,
+        receiver_name: String,
+      ).returns(T.any(Entry::MethodAlias, Entry::UnresolvedMethodAlias))
+    end
+    def resolve_method_alias(entry, receiver_name)
+      return entry if entry.new_name == entry.old_name
+
+      target_method_entries = resolve_method(entry.old_name, receiver_name)
+      return entry unless target_method_entries
+
+      resolved_alias = Entry::MethodAlias.new(T.must(target_method_entries.first), entry)
+      original_entries = T.must(@entries[entry.new_name])
+      original_entries.delete(entry)
+      original_entries << resolved_alias
+      resolved_alias
     end
   end
 end
