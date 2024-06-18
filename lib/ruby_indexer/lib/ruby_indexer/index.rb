@@ -204,7 +204,7 @@ module RubyIndexer
       return entries if entries
 
       # Finally, as a fallback, Ruby will search for the constant in the top level namespace
-      search_top_level(name, seen_names)
+      direct_or_aliased_constant(name, seen_names)
     rescue UnresolvableAliasError
       nil
     end
@@ -602,11 +602,6 @@ module RubyIndexer
     def direct_or_aliased_constant(full_name, seen_names)
       entries = @entries[full_name] || @entries[follow_aliased_namespace(full_name)]
       entries&.map { |e| e.is_a?(Entry::UnresolvedAlias) ? resolve_alias(e, seen_names) : e }
-    end
-
-    sig { params(name: String, seen_names: T::Array[String]).returns(T.nilable(T::Array[Entry])) }
-    def search_top_level(name, seen_names)
-      @entries[name]&.map { |e| e.is_a?(Entry::UnresolvedAlias) ? resolve_alias(e, seen_names) : e }
     end
 
     # Attempt to resolve a given unresolved method alias. This method returns the resolved alias if we managed to
