@@ -171,7 +171,7 @@ module RubyLsp
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
-        methods = @index.resolve_method(message, type, inherited_only: inherited_only)
+        methods = @index.resolve_method(message, type.name, inherited_only: inherited_only)
         return unless methods
 
         title = "#{message}#{T.must(methods.first).decorated_parameters}"
@@ -190,7 +190,7 @@ module RubyLsp
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
-        entries = @index.resolve_instance_variable(name, type)
+        entries = @index.resolve_instance_variable(name, type.name)
         return unless entries
 
         categorized_markdown_from_index_entries(name, entries).each do |category, content|

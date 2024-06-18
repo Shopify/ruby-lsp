@@ -36,7 +36,7 @@ module RubyLsp
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
-        methods = @index.resolve_method(message, type)
+        methods = @index.resolve_method(message, type.name)
         return unless methods
 
         target_method = methods.first
