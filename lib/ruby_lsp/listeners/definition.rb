@@ -48,6 +48,14 @@ module RubyLsp
         message = node.message
         return unless message
 
+
+        if message == :require || message == :require_relative
+          handle_require_definition(node)
+        elsif message == :autoload
+          handle_autoload_definition(node)
+        else
+          handle_method_definition(message.to_s, self_receiver?(node))
+        end
         handle_method_definition(message, self_receiver?(node))
       end
 
@@ -201,6 +209,16 @@ module RubyLsp
             ),
           )
         end
+      end
+
+      sig { params(node: Prism::CallNode).void }
+      def handle_autoload_definition(node)
+        argument = node.arguments&.arguments&.first
+        return unless argument.is_a?(Prism::SymbolNode)
+
+        value = argument.value
+
+        find_in_index(value)
       end
 
       sig { params(value: String).void }

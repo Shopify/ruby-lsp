@@ -344,6 +344,46 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_jumping_to_autoload_definition_when_declaration_exists
+    source = <<~RUBY
+      # typed: false
+
+      class Foo
+        autoload :Bar, "bar"
+
+        class Bar; end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 3, line: 3 } },
+      )
+      assert_equal(uri.to_s, server.pop_response.response.first.attributes[:uri])
+    end
+  end
+
+  def test_does_nothing_when_autoload_declaration_does_not_exist
+    source = <<~RUBY
+      # typed: false
+
+      class Foo
+        autoload :Bar, "bar"
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 3, line: 3 } },
+      )
+      assert_empty(server.pop_response.response)
+    end
+  end
+
   def test_methods_with_dynamic_namespace_is_also_suggested
     source = <<~RUBY
       # typed: false
