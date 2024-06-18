@@ -175,7 +175,11 @@ module RubyIndexer
         name: String,
         nesting: T::Array[String],
         seen_names: T::Array[String],
-      ).returns(T.nilable(T::Array[Entry]))
+      ).returns(T.nilable(T::Array[T.any(
+        Entry::Namespace,
+        Entry::Alias,
+        Entry::UnresolvedAlias,
+      )]))
     end
     def resolve(name, nesting, seen_names = [])
       # If we have a top level reference, then we just search for it straight away ignoring the nesting
@@ -521,7 +525,11 @@ module RubyIndexer
         name: String,
         nesting: T::Array[String],
         seen_names: T::Array[String],
-      ).returns(T.nilable(T::Array[Entry]))
+      ).returns(T.nilable(T::Array[T.any(
+        Entry::Namespace,
+        Entry::Alias,
+        Entry::UnresolvedAlias,
+      )]))
     end
     def lookup_enclosing_scopes(name, nesting, seen_names)
       nesting.length.downto(1).each do |i|
@@ -546,7 +554,11 @@ module RubyIndexer
         name: String,
         nesting: T::Array[String],
         seen_names: T::Array[String],
-      ).returns(T.nilable(T::Array[Entry]))
+      ).returns(T.nilable(T::Array[T.any(
+        Entry::Namespace,
+        Entry::Alias,
+        Entry::UnresolvedAlias,
+      )]))
     end
     def lookup_ancestor_chain(name, nesting, seen_names)
       *nesting_parts, constant_name = build_non_redundant_full_name(name, nesting).split("::")
@@ -598,10 +610,29 @@ module RubyIndexer
       end
     end
 
-    sig { params(full_name: String, seen_names: T::Array[String]).returns(T.nilable(T::Array[Entry])) }
+    sig do
+      params(
+        full_name: String,
+        seen_names: T::Array[String],
+      ).returns(
+        T.nilable(T::Array[T.any(
+          Entry::Namespace,
+          Entry::Alias,
+          Entry::UnresolvedAlias,
+        )]),
+      )
+    end
     def direct_or_aliased_constant(full_name, seen_names)
       entries = @entries[full_name] || @entries[follow_aliased_namespace(full_name)]
-      entries&.map { |e| e.is_a?(Entry::UnresolvedAlias) ? resolve_alias(e, seen_names) : e }
+
+      T.cast(
+        entries&.map { |e| e.is_a?(Entry::UnresolvedAlias) ? resolve_alias(e, seen_names) : e },
+        T.nilable(T::Array[T.any(
+          Entry::Namespace,
+          Entry::Alias,
+          Entry::UnresolvedAlias,
+        )]),
+      )
     end
 
     # Attempt to resolve a given unresolved method alias. This method returns the resolved alias if we managed to
