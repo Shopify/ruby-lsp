@@ -130,7 +130,7 @@ module RubyLsp
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
-        entries = @index.resolve_instance_variable(name, type)
+        entries = @index.resolve_instance_variable(name, type.name)
         return unless entries
 
         entries.each do |entry|
@@ -148,10 +148,10 @@ module RubyLsp
         # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
-      sig { params(message: String, receiver_type: T.nilable(String)).void }
+      sig { params(message: String, receiver_type: T.nilable(TypeInferrer::Type)).void }
       def handle_method_definition(message, receiver_type)
         methods = if receiver_type
-          @index.resolve_method(message, receiver_type)
+          @index.resolve_method(message, receiver_type.name)
         else
           # If the method doesn't have a receiver, then we provide a few candidates to jump to
           # But we don't want to provide too many candidates, as it can be overwhelming
