@@ -112,7 +112,13 @@ module RubyLsp
         methods = @index.resolve_method(message, type.name)
         return unless methods
 
-        title = "#{message}#{T.must(methods.first).decorated_parameters}"
+        title = +"#{message}#{T.must(methods.first).decorated_parameters}"
+
+        if type.is_a?(TypeInferrer::GuessedType)
+          title << " | guessed receiver: #{type.name}"
+          link = "https://github.com/Shopify/ruby-lsp/blob/main/DESIGN_AND_ROADMAP.md#guessed-types"
+          @response_builder.push("[Learn more about guessed types](#{link})\n", category: :links)
+        end
 
         categorized_markdown_from_index_entries(title, methods).each do |category, content|
           @response_builder.push(content, category: category)
