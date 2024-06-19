@@ -183,7 +183,6 @@ module RubyIndexer
       process_optional_keywords(function, parameters) if function.optional_keywords
       process_trailing_positionals(function, parameters) if function.trailing_positionals.any? # TODO: use any? for all?
       process_rest_keywords(function, parameters) if function.rest_keywords
-      process_block(overload.method_type.block, parameters) if overload.method_type.block&.required
       parameters.each_with_index do |parameter, index|
         case parameter
         when Entry::RequiredParameter
@@ -199,6 +198,7 @@ module RubyIndexer
           end
         end
       end
+      process_block(overload.method_type.block, parameters) if overload.method_type.block&.required
     end
 
     sig { params(block: RBS::Types::Block, parameters: T::Array[Entry::Parameter]).void }
@@ -208,6 +208,8 @@ module RubyIndexer
       function.required_positionals.each do |required_positional|
         name = required_positional.name
         name = :blk unless name
+
+        next if parameters.any? { _1.name == name }
 
         parameters << Entry::BlockParameter.new(name: name)
       end
@@ -273,7 +275,7 @@ module RubyIndexer
           0
         end
         # binding.break if insertion_position == 0
-
+        #
         parameters.insert(insertion_position, Entry::OptionalParameter.new(name: name))
       end
       # TODO: seperate method?
@@ -329,6 +331,8 @@ module RubyIndexer
     def process_optional_keywords(function, parameters)
       function.optional_keywords.each do |param|
         name = param.first.to_s.to_sym # hack
+        next if parameters.any? { _1.name == name }
+
         parameters << Entry::OptionalKeywordParameter.new(name: name)
       end
     end

@@ -11,7 +11,7 @@ module RubyIndexer
       entries = @index["Array"]
       refute_nil(entries)
       # Array is a class but also an instance method on Kernel
-      # assert_equal(2, entries.length)
+      assert_equal(2, entries.length)
       entry = entries.find { |entry| entry.is_a?(RubyIndexer::Entry::Class) }
       assert_match(%r{/gems/rbs-.*/core/array.rbs}, entry.file_path)
       assert_equal("array.rbs", entry.file_name)
@@ -88,7 +88,7 @@ module RubyIndexer
       entry = entries.first
 
       parameters = entry.parameters
-      puts parameters.inspect
+      # puts parameters.inspect
 
       assert_equal(3, parameters.length)
       assert_kind_of(Entry::RequiredParameter, parameters[0])
@@ -115,7 +115,6 @@ module RubyIndexer
 
       parameters = entry.parameters
 
-      # assert_equal(4, parameters.length)
       assert_equal([:file_name, :mode, :perm, :blk], parameters.map(&:name))
       assert_kind_of(Entry::RequiredParameter, parameters[0])
       assert_kind_of(Entry::OptionalParameter, parameters[1])
@@ -161,10 +160,10 @@ module RubyIndexer
       parameters = entry.parameters
 
       assert_equal([:read_array, :write_array, :error_array, :timeout], parameters.map(&:name))
-      # assert_kind_of(Entry::RequiredParameter, parameters[0]) # TODO: is this correct?
-      # assert_kind_of(Entry::OptionalParameter, parameters[1])
-      # assert_kind_of(Entry::OptionalParameter, parameters[2])
-      # assert_kind_of(Entry::OptionalParameter, parameters[3])
+      assert_kind_of(Entry::RequiredParameter, parameters[0])
+      assert_kind_of(Entry::OptionalParameter, parameters[1])
+      assert_kind_of(Entry::OptionalParameter, parameters[2])
+      assert_kind_of(Entry::OptionalParameter, parameters[3])
     end
 
     def test_rbs_method_with_optional_keywords
@@ -173,11 +172,10 @@ module RubyIndexer
 
       parameters = entry.parameters
 
-      assert_equal(5, parameters.length)
-      assert_equal([:limit, :step, :blk, :by, :to], parameters.map(&:name))
+      assert_equal([:limit, :step, :blk, :by, :to], parameters.map(&:name)) # blk should be last?
       assert_kind_of(Entry::OptionalParameter, parameters[0])
       assert_kind_of(Entry::OptionalParameter, parameters[1])
-      assert_kind_of(Entry::OptionalParameter, parameters[2]) # TODO: wrong order?
+      assert_kind_of(Entry::BlockParameter, parameters[2])
       assert_kind_of(Entry::OptionalKeywordParameter, parameters[3])
       assert_kind_of(Entry::OptionalKeywordParameter, parameters[4])
     end
