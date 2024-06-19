@@ -1007,6 +1007,43 @@ module RubyIndexer
       assert_instance_of(Entry::Alias, baz_entry)
     end
 
+    def test_resolving_constants_in_aliased_namespace
+      index(<<~RUBY)
+        module Original
+          module Something
+            CONST = 123
+          end
+        end
+
+        module Other
+          ALIAS = Original::Something
+        end
+
+        module Third
+          Other::ALIAS::CONST
+        end
+      RUBY
+
+      entry = T.must(@index.resolve("Other::ALIAS::CONST", ["Third"])&.first)
+      assert_kind_of(Entry::Constant, entry)
+      assert_equal("Original::Something::CONST", entry.name)
+    end
+
+    def test_resolving_top_level_aliases
+      index(<<~RUBY)
+        class Foo
+          CONST = 123
+        end
+
+        FOO = Foo
+        FOO::CONST
+      RUBY
+
+      entry = T.must(@index.resolve("FOO::CONST", [])&.first)
+      assert_kind_of(Entry::Constant, entry)
+      assert_equal("Foo::CONST", entry.name)
+    end
+
     def test_resolving_top_level_compact_reference
       index(<<~RUBY)
         class Foo::Bar
