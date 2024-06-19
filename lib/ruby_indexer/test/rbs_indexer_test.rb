@@ -1,8 +1,6 @@
 # typed: true
 # frozen_string_literal: true
 
-# TODO: update all rubyapi.org links to https://ruby-doc.org/
-
 require_relative "test_case"
 
 module RubyIndexer
@@ -58,7 +56,7 @@ module RubyIndexer
     end
 
     def test_rbs_method_with_required_positionals
-      entries = @index["crypt"] # https://rubyapi.org/3.3/o/string#method-i-crypt
+      entries = @index["crypt"] # https://www.rubydoc.info/stdlib/core/String#crypt-instance_method
       assert_equal(1, entries.length)
 
       entry = entries.first
@@ -70,7 +68,7 @@ module RubyIndexer
     end
 
     def test_rbs_method_with_optional_parameter
-      entries = @index["chomp"] # https://rubyapi.org/3.3/o/string#method-i-chomp
+      entries = @index["chomp"] # https://www.rubydoc.info/stdlib/core/String#chomp-instance_method
       assert_equal(1, entries.length)
 
       entry = entries.first
@@ -82,7 +80,7 @@ module RubyIndexer
     end
 
     def test_rbs_method_with_required_and_optional_parameters
-      entries = @index["gsub"] # https://rubyapi.org/3.3/o/string#method-i-gsub
+      entries = @index["gsub"] # https://www.rubydoc.info/stdlib/core/String#gsub-instance_method
       assert_equal(1, entries.length)
 
       entry = entries.first
@@ -127,7 +125,7 @@ module RubyIndexer
     end
 
     def test_rbs_method_with_rest_positionals
-      entries = @index["count"] # https://rubyapi.org/3.3/o/string#method-i-count
+      entries = @index["count"] # https://www.rubydoc.info/stdlib/core/String#count-instance_method
       entry = entries.find { |entry| entry.owner.name == "String" }
 
       parameters = entry.parameters
@@ -167,7 +165,7 @@ module RubyIndexer
     end
 
     def test_rbs_method_with_optional_keywords
-      entries = @index["step"] # https://rubyapi.org/3.3/o/numeric#method-i-step
+      entries = @index["step"] # https://www.rubydoc.info/stdlib/core/Numeric#step-instance_method
       entry = entries.find { |entry| entry.owner.name == "Numeric" }
 
       parameters = entry.parameters

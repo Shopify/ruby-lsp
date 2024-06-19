@@ -183,7 +183,6 @@ module RubyIndexer
     class Parameter
       extend T::Helpers
       extend T::Sig
-      # include Comparable
 
       abstract!
 
@@ -198,10 +197,6 @@ module RubyIndexer
       def initialize(name:)
         @name = name
       end
-
-      # def <=>(other)
-      #   name <=> other.name
-      # end
     end
 
     # A required method parameter, e.g. `def foo(a)`

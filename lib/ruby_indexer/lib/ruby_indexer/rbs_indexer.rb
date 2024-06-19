@@ -44,9 +44,7 @@ module RubyIndexer
     sig { params(declaration: RBS::AST::Declarations::Class, pathname: Pathname).void }
     def handle_class_declaration(declaration, pathname)
       nesting = [declaration.name.name.to_s]
-      # return unless nesting == ["String"]
 
-      # puts "Processing class #{nesting}"
       file_path = pathname.to_s
       location = to_ruby_indexer_location(declaration.location)
       comments = Array(declaration.comment&.string)
@@ -112,7 +110,6 @@ module RubyIndexer
     sig { params(member: RBS::AST::Members::MethodDefinition, owner: Entry::Namespace).void }
     def handle_method(member, owner)
       name = member.name.name
-      # return unless name == "count"
 
       file_path = member.location.buffer.name
       location = to_ruby_indexer_location(member.location)
@@ -181,8 +178,10 @@ module RubyIndexer
       process_optional_positionals(function, parameters) if function.optional_positionals
       process_required_keywords(function, parameters, overload_index) if function.required_keywords
       process_optional_keywords(function, parameters) if function.optional_keywords
-      process_trailing_positionals(function, parameters) if function.trailing_positionals.any? # TODO: use any? for all?
+      process_trailing_positionals(function, parameters) if function.trailing_positionals
+      process_rest_positionals(function, parameters) if function.rest_positionals
       process_rest_keywords(function, parameters) if function.rest_keywords
+
       parameters.each_with_index do |parameter, index|
         case parameter
         when Entry::RequiredParameter
@@ -198,6 +197,7 @@ module RubyIndexer
           end
         end
       end
+
       process_block(overload.method_type.block, parameters) if overload.method_type.block&.required
     end
 
@@ -241,7 +241,6 @@ module RubyIndexer
           new_entry = Entry::RequiredParameter.new(name: name)
         end
 
-        # puts "adding #{new_entry.name} at #{insertion_position}"
         parameters.insert(insertion_position, new_entry)
 
         # parameters << if overload_index > 0 && parameters.none? { _1.name == name }
@@ -274,19 +273,17 @@ module RubyIndexer
         else
           0
         end
-        # binding.break if insertion_position == 0
-        #
         parameters.insert(insertion_position, Entry::OptionalParameter.new(name: name))
       end
-      # TODO: seperate method?
+    end
+
+    sig { params(function: RBS::Types::Function, parameters: T::Array[Entry::Parameter]).void }
+    def process_rest_positionals(function, parameters)
       rest = function.rest_positionals
 
-      if rest
-        rest_name = rest.name || Entry::RestParameter::DEFAULT_NAME
+      rest_name = rest.name || Entry::RestParameter::DEFAULT_NAME
 
-        # Always last?
-        parameters << Entry::RestParameter.new(name: rest_name)
-      end
+      parameters << Entry::RestParameter.new(name: rest_name)
     end
 
     sig { params(function: RBS::Types::Function, parameters: T::Array[Entry::Parameter]).void }
