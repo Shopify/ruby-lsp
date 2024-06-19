@@ -84,14 +84,14 @@ module RubyIndexer
       assert_equal(1, entries.length)
 
       # Overload 0
-      # required_positionals: pattern, replacement
+      # - required_positionals: pattern, replacement
 
       # Overload 1
-      # required_positionals: pattern
+      # - required_positionals: pattern
 
       # Overload 2
-      # required_positionals: pattern
-      # block args: match
+      # - required_positionals: pattern
+      # - block args: match
 
       entry = entries.first
 
@@ -108,15 +108,13 @@ module RubyIndexer
 
     def test_rbs_anonymous_block_parameter
       # Overload 0
-      # required_positionals: file_name
-      # optional_positionals: mode, perm
-      # rest_positional(s):
-      # trailing_positionals:
+      # - required_positionals: file_name
+      # - optional_positionals: mode, perm
 
       # Overload 1
-      # required_positionals: file_name
-      # optional_positionals: mode, perm
-      # rest_positional(s):
+      # - required_positionals: file_name
+      # - optional_positionals: mode, perm
+
       entries = @index["open"]
       entry = entries.find { |entry| entry.owner.name == "File::<Class:File>" }
 
@@ -145,13 +143,14 @@ module RubyIndexer
 
     def test_rbs_method_with_trailing_positionals
       # Overload 0
-      #  required_positionals: read_array
-      #  optional_positionals: write_array, error_array
+      # - required_positionals: read_array
+      # - optional_positionals: write_array, error_array
 
       # Overload 1
-      #  required_positionals: read_array
-      #  optional_positionals: write_array, error_array
-      #  trailing_positionals: timeout
+      # - required_positionals: read_array
+      # - optional_positionals: write_array, error_array
+      # - trailing_positionals: timeout
+
       entries = @index["select"] # https://ruby-doc.org/3.3.3/IO.html#method-c-select
       entry = entries.find { |entry| entry.owner.name == "IO::<Class:IO>" }
 
@@ -166,20 +165,21 @@ module RubyIndexer
 
     def test_rbs_method_with_optional_keywords
       # Overload 1
-      # optional_positionals: limit, step
+      # - optional_positionals: limit, step
 
       # Overload 2
-      # optional_keywords: by, to
-      # block args: blk
+      # - optional_keywords: by, to
+      # - block args: blk
 
       # Overload 3
-      # optional_keywords: by, to
+      # - optional_keywords: by, to
+
       entries = @index["step"] # https://www.rubydoc.info/stdlib/core/Numeric#step-instance_method
       entry = entries.find { |entry| entry.owner.name == "Numeric" }
 
       parameters = entry.parameters
 
-      assert_equal([:limit, :step, :blk, :by, :to], parameters.map(&:name)) # blk should be last?
+      assert_equal([:limit, :step, :blk, :by, :to], parameters.map(&:name)) # TODO: blk should be last?
       assert_kind_of(Entry::OptionalParameter, parameters[0])
       assert_kind_of(Entry::OptionalParameter, parameters[1])
       assert_kind_of(Entry::BlockParameter, parameters[2])
