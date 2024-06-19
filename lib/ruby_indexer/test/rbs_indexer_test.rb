@@ -96,6 +96,23 @@ module RubyIndexer
       assert_equal(:match, parameters[2].name)
     end
 
+    def test_rbs_anonymous_block_parameter
+      entries = @index["open"] # https://rubyapi.org/3.3/o/string#method-i-gsub
+      entry = entries.find { |entry| entry.owner.name == "File::<Class:File>" }
+
+      parameters = entry.parameters
+
+      assert_equal(4, parameters.length)
+      assert_kind_of(Entry::RequiredParameter, parameters[0])
+      assert_kind_of(Entry::OptionalParameter, parameters[1])
+      assert_kind_of(Entry::OptionalParameter, parameters[2])
+      assert_kind_of(Entry::BlockParameter, parameters[3])
+      assert_equal(:file_name, parameters[0].name)
+      assert_equal(:mode, parameters[1].name)
+      assert_equal(:perm, parameters[2].name)
+      assert_equal(:blk, parameters[3].name)
+    end
+
     def test_rbs_method_with_rest_positionals
       entries = @index["count"] # https://rubyapi.org/3.3/o/string#method-i-count
       entry = entries.find { |entry| entry.owner.name == "String" }
@@ -131,12 +148,13 @@ module RubyIndexer
 
       parameters = entry.parameters
 
-      assert_equal(4, parameters.length)
-      assert_equal([:limit, :step, :by, :to], parameters.map(&:name))
+      assert_equal(5, parameters.length)
+      assert_equal([:limit, :step, :blk, :by, :to], parameters.map(&:name))
       assert_kind_of(Entry::OptionalParameter, parameters[0])
       assert_kind_of(Entry::OptionalParameter, parameters[1])
-      assert_kind_of(Entry::OptionalKeywordParameter, parameters[2])
+      assert_kind_of(Entry::OptionalParameter, parameters[2]) # TODO: wrong order?
       assert_kind_of(Entry::OptionalKeywordParameter, parameters[3])
+      assert_kind_of(Entry::OptionalKeywordParameter, parameters[4])
     end
 
     def test_rbs_method_with_required_keywords

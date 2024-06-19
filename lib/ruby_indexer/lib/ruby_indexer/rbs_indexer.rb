@@ -186,7 +186,7 @@ module RubyIndexer
       # TODO: other kinds of arguments
       function.required_positionals.each do |required_positional|
         name = required_positional.name
-        next unless name
+        name = :blk unless name
 
         parameters[name] = Entry::BlockParameter.new(name: name)
       end
