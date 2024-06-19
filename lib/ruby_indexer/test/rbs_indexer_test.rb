@@ -1,6 +1,8 @@
 # typed: true
 # frozen_string_literal: true
 
+# TODO: update all rubyapi.org links to https://ruby-doc.org/
+
 require_relative "test_case"
 
 module RubyIndexer
@@ -98,12 +100,23 @@ module RubyIndexer
     end
 
     def test_rbs_anonymous_block_parameter
-      entries = @index["open"] # https://rubyapi.org/3.3/o/string#method-i-gsub
+      # Overload 0
+      # required_positionals: file_name
+      # optional_positionals: mode, perm
+      # rest_positional(s):
+      # trailing_positionals:
+
+      # Overload 1
+      # required_positionals: file_name
+      # optional_positionals: mode, perm
+      # rest_positional(s):
+      entries = @index["open"]
       entry = entries.find { |entry| entry.owner.name == "File::<Class:File>" }
 
       parameters = entry.parameters
 
-      assert_equal(4, parameters.length)
+      # assert_equal(4, parameters.length)
+      assert_equal([:file_name, :mode, :perm, :blk], parameters.map(&:name))
       assert_kind_of(Entry::RequiredParameter, parameters[0])
       assert_kind_of(Entry::OptionalParameter, parameters[1])
       assert_kind_of(Entry::OptionalParameter, parameters[2])
@@ -131,13 +144,24 @@ module RubyIndexer
     end
 
     def test_rbs_method_with_trailing_positionals
-      entries = @index["select"] # https://rubyapi.org/3.3/o/io#method-c-select
+      # Overload 0
+      # required_positionals: read_array
+      # optional_positionals: write_array, error_array
+      # rest_positional(s):
+      # trailing_positionals:
+
+      # Overload 1
+      # required_positionals: read_array
+      # optional_positionals: write_array, error_array
+      # rest_positional(s):
+      # trailing_positionals: timeout
+      entries = @index["select"] # https://ruby-doc.org/3.3.3/IO.html#method-c-select
       entry = entries.find { |entry| entry.owner.name == "IO::<Class:IO>" }
 
       parameters = entry.parameters
 
-      assert_equal([:read_array, :write_array], parameters.map(&:name))
-      # assert_kind_of(Entry::RequiredParameter, parameters[0])
+      assert_equal([:read_array, :write_array, :error_array, :timeout], parameters.map(&:name))
+      # assert_kind_of(Entry::RequiredParameter, parameters[0]) # TODO: is this correct?
       # assert_kind_of(Entry::OptionalParameter, parameters[1])
       # assert_kind_of(Entry::OptionalParameter, parameters[2])
       # assert_kind_of(Entry::OptionalParameter, parameters[3])

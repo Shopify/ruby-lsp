@@ -34,8 +34,8 @@ module RubyIndexer
       case declaration
       when RBS::AST::Declarations::Class
         handle_class_declaration(declaration, pathname)
-      when RBS::AST::Declarations::Module
-        handle_module_declaration(declaration, pathname)
+      # when RBS::AST::Declarations::Module
+      #   handle_module_declaration(declaration, pathname)
       else # rubocop:disable Style/EmptyElse
         # Other kinds not yet handled
       end
@@ -44,6 +44,9 @@ module RubyIndexer
     sig { params(declaration: RBS::AST::Declarations::Class, pathname: Pathname).void }
     def handle_class_declaration(declaration, pathname)
       nesting = [declaration.name.name.to_s]
+      # return unless nesting == ["File"]
+
+      # puts "Processing class #{nesting}"
       file_path = pathname.to_s
       location = to_ruby_indexer_location(declaration.location)
       comments = Array(declaration.comment&.string)
@@ -109,6 +112,8 @@ module RubyIndexer
     sig { params(member: RBS::AST::Members::MethodDefinition, owner: Entry::Namespace).void }
     def handle_method(member, owner)
       name = member.name.name
+      # return unless name == "open"
+
       file_path = member.location.buffer.name
       location = to_ruby_indexer_location(member.location)
       comments = Array(member.comment&.string)
@@ -174,16 +179,16 @@ module RubyIndexer
       function = overload.method_type.type
       process_required_positionals(function, parameters, overload_index) if function.required_positionals
       process_optional_positionals(function, parameters) if function.optional_positionals
-      process_trailing_positionals(function, parameters) if function.trailing_positionals
       process_required_keywords(function, parameters, overload_index) if function.required_keywords
       process_optional_keywords(function, parameters) if function.optional_keywords
+      process_trailing_positionals(function, parameters) if function.trailing_positionals
       process_rest_keywords(function, parameters) if function.rest_keywords
       process_block(overload.method_type.block, parameters) if overload.method_type.block&.required
       parameters.each_with_index do |parameter, index|
         case parameter
         when Entry::RequiredParameter
           if function.required_positionals.none? { _1.name == parameter.name }
-            last_required_index = parameters.rindex { _1.is_a?(Entry::RequiredParameter) } || index
+            last_required_index = parameters.rindex { _1.is_a?(Entry::RequiredParameter) } || index # parameters.length
             parameters.delete_at(index)
             parameters[last_required_index] = Entry::OptionalParameter.new(name: parameter.name)
           end
@@ -234,6 +239,7 @@ module RubyIndexer
           new_entry = Entry::RequiredParameter.new(name: name)
         end
 
+        # puts "adding #{new_entry.name} at #{insertion_position}"
         parameters.insert(insertion_position, new_entry)
 
         # parameters << if overload_index > 0 && parameters.none? { _1.name == name }
@@ -253,31 +259,52 @@ module RubyIndexer
       function.optional_positionals.each do |param|
         name = param.name
         next unless name
+
         next if parameters.any? { _1.name == name }
 
         last_optional_argument = parameters.rindex { _1.is_a?(Entry::OptionalParameter) }
         last_required_argument = parameters.rindex { _1.is_a?(Entry::RequiredParameter) }
-        insertion_position = last_optional_argument || last_required_argument || 0
+        # binding.break
+        insertion_position = if last_optional_argument
+          last_optional_argument + 1
+        elsif last_required_argument
+          last_required_argument + 1
+        else
+          0
+        end
+        # binding.break if insertion_position == 0
 
         parameters.insert(insertion_position, Entry::OptionalParameter.new(name: name))
       end
-      rest = function.rest_positionals
+      # rest = function.rest_positionals
 
-      if rest
-        rest_name = rest.name || Entry::RestParameter::DEFAULT_NAME
-        return if rest_name == :selector_0
+      # if rest
+      #   rest_name = rest.name || Entry::RestParameter::DEFAULT_NAME
+      #   return if rest_name == :selector_0
 
-        parameters << Entry::RestParameter.new(name: rest_name)
-      end
+      #   parameters << Entry::RestParameter.new(name: rest_name)
+      # end
     end
 
     sig { params(function: RBS::Types::Function, parameters: T::Array[Entry::Parameter]).void }
     def process_trailing_positionals(function, parameters)
       function.trailing_positionals.each do |param|
         # name = param.name
-        next if parameters.any? { _1.name == param.name }
+        # binding.break
+        if parameters.any? { _1.name == param.name }
+          next
+        end
 
-        insertion_position = parameters.rindex { _1.is_a?(Entry::RequiredParameter) } || 0
+        last_optional_argument = parameters.rindex { _1.is_a?(Entry::OptionalParameter) }
+        last_required_argument = parameters.rindex { _1.is_a?(Entry::RequiredParameter) }
+        # binding.break
+        insertion_position = if last_optional_argument
+          last_optional_argument + 1
+        elsif last_required_argument
+          last_required_argument + 1
+        else
+          0
+        end
 
         parameters.insert(insertion_position, Entry::OptionalParameter.new(name: param.name))
       end
