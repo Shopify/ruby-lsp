@@ -156,31 +156,47 @@ module RubyIndexer
       params(overloads: T::Array[RBS::AST::Members::MethodDefinition::Overload]).returns(T::Array[Entry::Parameter])
     end
     def build_parameters(overloads)
-      parameters = {}
-      overloads.each do |overload|
-        process_overload(overload, parameters)
+      parameters = []
+      overloads.each_with_index do |overload, i|
+        process_overload(overload, parameters, i)
       end
-      parameters.values
+      parameters
     end
 
     sig do
       params(
         overload: RBS::AST::Members::MethodDefinition::Overload,
-        parameters: T::Hash[Symbol, Entry::Parameter],
+        parameters: T::Array[Entry::Parameter],
+        overload_index: Integer,
       ).void
     end
-    def process_overload(overload, parameters)
+    def process_overload(overload, parameters, overload_index)
       function = overload.method_type.type
-      process_required_positionals(function, parameters) if function.required_positionals
+      process_required_positionals(function, parameters, overload_index) if function.required_positionals
       process_optional_positionals(function, parameters) if function.optional_positionals
       process_trailing_positionals(function, parameters) if function.trailing_positionals
-      process_required_keywords(function, parameters) if function.trailing_positionals
+      process_required_keywords(function, parameters, overload_index) if function.required_keywords
       process_optional_keywords(function, parameters) if function.optional_keywords
       process_rest_keywords(function, parameters) if function.rest_keywords
       process_block(overload.method_type.block, parameters) if overload.method_type.block&.required
+      parameters.each_with_index do |parameter, index|
+        case parameter
+        when Entry::RequiredParameter
+          if function.required_positionals.none? { _1.name == parameter.name }
+            last_required_index = parameters.rindex { _1.is_a?(Entry::RequiredParameter) } || index
+            parameters.delete_at(index)
+            parameters[last_required_index] = Entry::OptionalParameter.new(name: parameter.name)
+          end
+        when Entry::KeywordParameter
+          if function.required_keywords.none? { _1.first == parameter.name }
+            # figure out the positioning needed... may be tricky
+            parameters[index] = Entry::OptionalKeywordParameter.new(name: parameter.name)
+          end
+        end
+      end
     end
 
-    sig { params(block: RBS::Types::Block, parameters: T::Hash[Symbol, Entry::Parameter]).void }
+    sig { params(block: RBS::Types::Block, parameters: T::Array[Entry::Parameter]).void }
     def process_block(block, parameters)
       function = block.type
       # TODO: other kinds of arguments
@@ -188,32 +204,62 @@ module RubyIndexer
         name = required_positional.name
         name = :blk unless name
 
-        parameters[name] = Entry::BlockParameter.new(name: name)
+        parameters << Entry::BlockParameter.new(name: name)
       end
     end
 
-    sig { params(function: RBS::Types::Function, parameters: T::Hash[Symbol, Entry::Parameter]).void }
-    def process_required_positionals(function, parameters)
+    sig do
+      params(
+        function: RBS::Types::Function,
+        parameters: T::Array[Entry::Parameter],
+        overload_index: Integer,
+      ).void
+    end
+    def process_required_positionals(function, parameters, overload_index)
       function.required_positionals.each do |param|
         name = param.name
 
         next unless name
 
-        parameters[name] = Entry::RequiredParameter.new(name: name)
+        index = parameters.index { _1.name == name }
+        next if index && parameters[index].is_a?(Entry::RequiredParameter)
+
+        if overload_index > 0
+          last_optional_argument = parameters.rindex { _1.is_a?(Entry::OptionalParameter) }
+          last_required_argument = parameters.rindex { _1.is_a?(Entry::RequiredParameter) }
+          insertion_position = last_optional_argument || last_required_argument || 0
+          new_entry = Entry::OptionalParameter.new(name: name)
+        else
+          insertion_position = parameters.rindex { _1.is_a?(Entry::RequiredParameter) } || 0
+          new_entry = Entry::RequiredParameter.new(name: name)
+        end
+
+        parameters.insert(insertion_position, new_entry)
+
+        # parameters << if overload_index > 0 && parameters.none? { _1.name == name }
+        #   Entry::OptionalParameter.new(name: name)
+        # else
+        #   Entry::RequiredParameter.new(name: name)
+        # end
       end
-      optional_argument_names = parameters.keys - function.required_positionals.map(&:name)
-      optional_argument_names.each do |optional_argument_name|
-        parameters[optional_argument_name] = Entry::OptionalParameter.new(name: optional_argument_name)
-      end
+      # optional_argument_names = parameters.keys - function.required_positionals.map(&:name)
+      # optional_argument_names.each do |optional_argument_name|
+      #   parameters[optional_argument_name] = Entry::OptionalParameter.new(name: optional_argument_name)
+      # end
     end
 
-    sig { params(function: RBS::Types::Function, parameters: T::Hash[Symbol, Entry::Parameter]).void }
+    sig { params(function: RBS::Types::Function, parameters: T::Array[Entry::Parameter]).void }
     def process_optional_positionals(function, parameters)
       function.optional_positionals.each do |param|
         name = param.name
         next unless name
+        next if parameters.any? { _1.name == name }
 
-        parameters[name] = Entry::OptionalParameter.new(name: name)
+        last_optional_argument = parameters.rindex { _1.is_a?(Entry::OptionalParameter) }
+        last_required_argument = parameters.rindex { _1.is_a?(Entry::RequiredParameter) }
+        insertion_position = last_optional_argument || last_required_argument || 0
+
+        parameters.insert(insertion_position, Entry::OptionalParameter.new(name: name))
       end
       rest = function.rest_positionals
 
@@ -221,40 +267,50 @@ module RubyIndexer
         rest_name = rest.name || Entry::RestParameter::DEFAULT_NAME
         return if rest_name == :selector_0
 
-        parameters[rest_name] = Entry::RestParameter.new(name: rest_name)
+        parameters << Entry::RestParameter.new(name: rest_name)
       end
     end
 
-    sig { params(function: RBS::Types::Function, parameters: T::Hash[Symbol, Entry::Parameter]).void }
+    sig { params(function: RBS::Types::Function, parameters: T::Array[Entry::Parameter]).void }
     def process_trailing_positionals(function, parameters)
       function.trailing_positionals.each do |param|
-        name = param.name
-        parameters[name] = Entry::OptionalParameter.new(name: param.name)
+        # name = param.name
+        next if parameters.any? { _1.name == param.name }
+
+        insertion_position = parameters.rindex { _1.is_a?(Entry::RequiredParameter) } || 0
+
+        parameters.insert(insertion_position, Entry::OptionalParameter.new(name: param.name))
       end
     end
 
-    sig { params(function: RBS::Types::Function, parameters: T::Hash[Symbol, Entry::Parameter]).void }
-    def process_required_keywords(function, parameters)
+    sig do
+      params(
+        function: RBS::Types::Function,
+        parameters: T::Array[Entry::Parameter],
+        overload_index: Integer,
+      ).void
+    end
+    def process_required_keywords(function, parameters, overload_index)
       function.required_keywords.each do |param|
         name = param.first
-        parameters[name] = Entry::KeywordParameter.new(name: name)
+        parameters << Entry::KeywordParameter.new(name: name)
       end
     end
 
-    sig { params(function: RBS::Types::Function, parameters: T::Hash[Symbol, Entry::Parameter]).void }
+    sig { params(function: RBS::Types::Function, parameters: T::Array[Entry::Parameter]).void }
     def process_optional_keywords(function, parameters)
       function.optional_keywords.each do |param|
         name = param.first.to_s.to_sym # hack
-        parameters[name] = Entry::OptionalKeywordParameter.new(name: name)
+        parameters << Entry::OptionalKeywordParameter.new(name: name)
       end
     end
 
-    sig { params(function: RBS::Types::Function, parameters: T::Hash[Symbol, Entry::Parameter]).void }
+    sig { params(function: RBS::Types::Function, parameters: T::Array[Entry::Parameter]).void }
     def process_rest_keywords(function, parameters)
       keyword_rest = function.rest_keywords
 
       keyword_rest_name = keyword_rest.name || Entry::KeywordRestParameter::DEFAULT_NAME
-      parameters[keyword_rest_name] = Entry::KeywordRestParameter.new(name: keyword_rest_name)
+      parameters << Entry::KeywordRestParameter.new(name: keyword_rest_name)
     end
   end
 end
