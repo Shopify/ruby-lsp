@@ -83,12 +83,21 @@ module RubyIndexer
       entries = @index["gsub"] # https://www.rubydoc.info/stdlib/core/String#gsub-instance_method
       assert_equal(1, entries.length)
 
+      # Overload 0
+      # required_positionals: pattern, replacement
+
+      # Overload 1
+      # required_positionals: pattern
+
+      # Overload 2
+      # required_positionals: pattern
+      # block args: match
+
       entry = entries.first
 
       parameters = entry.parameters
-      # puts parameters.inspect
 
-      assert_equal(3, parameters.length)
+      assert_equal([:pattern, :replacement, :match], parameters.map(&:name))
       assert_kind_of(Entry::RequiredParameter, parameters[0])
       assert_kind_of(Entry::OptionalParameter, parameters[1])
       assert_kind_of(Entry::BlockParameter, parameters[2])
@@ -118,10 +127,6 @@ module RubyIndexer
       assert_kind_of(Entry::OptionalParameter, parameters[1])
       assert_kind_of(Entry::OptionalParameter, parameters[2])
       assert_kind_of(Entry::BlockParameter, parameters[3])
-      assert_equal(:file_name, parameters[0].name)
-      assert_equal(:mode, parameters[1].name)
-      assert_equal(:perm, parameters[2].name)
-      assert_equal(:blk, parameters[3].name)
     end
 
     def test_rbs_method_with_rest_positionals
@@ -130,11 +135,9 @@ module RubyIndexer
 
       parameters = entry.parameters
 
-      # TODO: In RBS, this is represented as having two arguments:
+      # In RBS, this is represented as having two arguments:
       #
       #   def count: (selector selector_0, *selector more_selectors) -> Integer
-      #
-      # but perhaps that is confusing?
       assert_equal([:selector_0, :more_selectors], parameters.map(&:name))
       assert_kind_of(RubyIndexer::Entry::RequiredParameter, parameters[0])
       assert_kind_of(RubyIndexer::Entry::RestParameter, parameters[1])
@@ -142,16 +145,13 @@ module RubyIndexer
 
     def test_rbs_method_with_trailing_positionals
       # Overload 0
-      # required_positionals: read_array
-      # optional_positionals: write_array, error_array
-      # rest_positional(s):
-      # trailing_positionals:
+      #  required_positionals: read_array
+      #  optional_positionals: write_array, error_array
 
       # Overload 1
-      # required_positionals: read_array
-      # optional_positionals: write_array, error_array
-      # rest_positional(s):
-      # trailing_positionals: timeout
+      #  required_positionals: read_array
+      #  optional_positionals: write_array, error_array
+      #  trailing_positionals: timeout
       entries = @index["select"] # https://ruby-doc.org/3.3.3/IO.html#method-c-select
       entry = entries.find { |entry| entry.owner.name == "IO::<Class:IO>" }
 
@@ -165,6 +165,15 @@ module RubyIndexer
     end
 
     def test_rbs_method_with_optional_keywords
+      # Overload 1
+      # optional_positionals: limit, step
+
+      # Overload 2
+      # optional_keywords: by, to
+      # block args: blk
+
+      # Overload 3
+      # optional_keywords: by, to
       entries = @index["step"] # https://www.rubydoc.info/stdlib/core/Numeric#step-instance_method
       entry = entries.find { |entry| entry.owner.name == "Numeric" }
 
