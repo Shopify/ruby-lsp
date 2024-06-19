@@ -690,6 +690,28 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hover_for_guessed_receivers
+    source = <<~RUBY
+      class User
+        def name; end
+      end
+
+      user.name
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 5, line: 4 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("guessed receiver: User", contents)
+      assert_match("Learn more about guessed types", contents)
+    end
+  end
+
   private
 
   def create_hover_addon
