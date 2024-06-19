@@ -47,7 +47,7 @@ module RubyLsp
         #
         # For example, forgetting to return the `insertText` included in the original item will make the editor use the
         # `label` for the text edit instead
-        label = @item[:label]
+        label = @item[:label].dup
         entries = @index[label] || []
 
         owner_name = @item.dig(:data, :owner_name)
@@ -62,12 +62,18 @@ module RubyLsp
         first_entry = T.must(entries.first)
 
         if first_entry.is_a?(RubyIndexer::Entry::Member)
-          label = "#{label}#{first_entry.decorated_parameters}"
+          label = +"#{label}#{first_entry.decorated_parameters}"
+        end
+
+        extra_links = if @item.dig(:data, :guessed_type)
+          label << " | guessed receiver: #{owner_name}"
+          link = "https://github.com/Shopify/ruby-lsp/blob/main/DESIGN_AND_ROADMAP.md#guessed-types"
+          "[Learn more about guessed types](#{link})"
         end
 
         @item[:documentation] = Interface::MarkupContent.new(
           kind: "markdown",
-          value: markdown_from_index_entries(label, entries, MAX_DOCUMENTATION_ENTRIES),
+          value: markdown_from_index_entries(label, entries, MAX_DOCUMENTATION_ENTRIES, extra_links: extra_links),
         )
 
         @item

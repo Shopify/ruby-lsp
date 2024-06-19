@@ -366,6 +366,8 @@ module RubyLsp
 
         return unless range
 
+        guessed_type = type.is_a?(TypeInferrer::GuessedType)
+
         @index.method_completion_candidates(method_name, type.name).each do |entry|
           entry_name = entry.name
 
@@ -381,6 +383,7 @@ module RubyLsp
             kind: Constant::CompletionItemKind::METHOD,
             data: {
               owner_name: entry.owner&.name,
+              guessed_type: guessed_type,
             },
           )
         end
