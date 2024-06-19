@@ -44,7 +44,6 @@ module RubyIndexer
     sig { params(declaration: RBS::AST::Declarations::Class, pathname: Pathname).void }
     def handle_class_declaration(declaration, pathname)
       nesting = [declaration.name.name.to_s]
-
       file_path = pathname.to_s
       location = to_ruby_indexer_location(declaration.location)
       comments = Array(declaration.comment&.string)
@@ -110,7 +109,6 @@ module RubyIndexer
     sig { params(member: RBS::AST::Members::MethodDefinition, owner: Entry::Namespace).void }
     def handle_method(member, owner)
       name = member.name.name
-
       file_path = member.location.buffer.name
       location = to_ruby_indexer_location(member.location)
       comments = Array(member.comment&.string)
@@ -173,7 +171,7 @@ module RubyIndexer
       ).void
     end
     def process_overload(overload, parameters, overload_index)
-      function = overload.method_type.type
+      function = T.cast(overload.method_type.type, RBS::Types::Function)
       process_required_positionals(function, parameters, overload_index) if function.required_positionals
       process_optional_positionals(function, parameters) if function.optional_positionals
       process_required_keywords(function, parameters, overload_index) if function.required_keywords
@@ -182,6 +180,13 @@ module RubyIndexer
       process_rest_positionals(function, parameters) if function.rest_positionals
       process_rest_keywords(function, parameters) if function.rest_keywords
 
+      flatten_params(function, parameters)
+
+      process_block(overload.method_type.block, parameters) if overload.method_type.block&.required
+    end
+
+    sig { params(function: RBS::Types::Function, parameters: T::Array[Entry::Parameter]).void }
+    def flatten_params(function, parameters)
       parameters.each_with_index do |parameter, index|
         case parameter
         when Entry::RequiredParameter
@@ -197,8 +202,6 @@ module RubyIndexer
           end
         end
       end
-
-      process_block(overload.method_type.block, parameters) if overload.method_type.block&.required
     end
 
     sig { params(block: RBS::Types::Block, parameters: T::Array[Entry::Parameter]).void }
