@@ -21,7 +21,7 @@ module RubyLsp
     attr_reader :encoding
 
     sig { returns(T::Boolean) }
-    attr_reader :supports_watching_files
+    attr_reader :supports_watching_files, :experimental_features
 
     sig { returns(TypeInferrer) }
     attr_reader :type_inferrer
@@ -39,6 +39,7 @@ module RubyLsp
       @type_inferrer = T.let(TypeInferrer.new(@index), TypeInferrer)
       @supported_formatters = T.let({}, T::Hash[String, Requests::Support::Formatter])
       @supports_watching_files = T.let(false, T::Boolean)
+      @experimental_features = T.let(false, T::Boolean)
     end
 
     sig { params(identifier: String, instance: Requests::Support::Formatter).void }
@@ -87,6 +88,8 @@ module RubyLsp
       if file_watching_caps&.dig(:dynamicRegistration) && file_watching_caps&.dig(:relativePatternSupport)
         @supports_watching_files = true
       end
+
+      @experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled) || false
     end
 
     sig { returns(String) }

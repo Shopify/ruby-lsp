@@ -137,7 +137,6 @@ module RubyLsp
       progress = options.dig(:capabilities, :window, :workDoneProgress)
       @store.supports_progress = progress.nil? ? true : progress
       configured_features = options.dig(:initializationOptions, :enabledFeatures)
-      @store.experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled) || false
 
       configured_hints = options.dig(:initializationOptions, :featuresConfiguration, :inlayHint)
       T.must(@store.features_configuration.dig(:inlayHint)).configuration.merge!(configured_hints) if configured_hints

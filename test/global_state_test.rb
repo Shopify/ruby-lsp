@@ -176,6 +176,17 @@ module RubyLsp
       assert_empty(state.instance_variable_get(:@linters))
     end
 
+    def test_apply_options_sets_experimental_features
+      state = GlobalState.new
+      refute_predicate(state, :experimental_features)
+
+      state.apply_options({
+        initializationOptions: { experimentalFeaturesEnabled: true },
+      })
+
+      assert_predicate(state, :experimental_features)
+    end
+
     private
 
     def stub_direct_dependencies(dependencies)
