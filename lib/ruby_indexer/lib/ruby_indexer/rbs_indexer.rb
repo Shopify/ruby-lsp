@@ -182,21 +182,21 @@ module RubyIndexer
       process_rest_positionals(function, parameters) if function.rest_positionals
       process_rest_keywords(function, parameters) if function.rest_keywords
 
-      # parameters.each_with_index do |parameter, index|
-      #   case parameter
-      #   when Entry::RequiredParameter
-      #     if function.required_positionals.none? { _1.name == parameter.name }
-      #       last_required_index = parameters.rindex { _1.is_a?(Entry::RequiredParameter) } || index # parameters.length
-      #       parameters.delete_at(index)
-      #       parameters[last_required_index] = Entry::OptionalParameter.new(name: parameter.name)
-      #     end
-      #   when Entry::KeywordParameter
-      #     if function.required_keywords.none? { _1.first == parameter.name }
-      #       # figure out the positioning needed... may be tricky
-      #       parameters[index] = Entry::OptionalKeywordParameter.new(name: parameter.name)
-      #     end
-      #   end
-      # end
+      parameters.each_with_index do |parameter, index|
+        case parameter
+        when Entry::RequiredParameter
+          if function.required_positionals.none? { _1.name == parameter.name }
+            last_required_index = parameters.rindex { _1.is_a?(Entry::RequiredParameter) } || index # parameters.length
+            parameters.delete_at(index)
+            parameters[last_required_index] = Entry::OptionalParameter.new(name: parameter.name)
+          end
+        when Entry::KeywordParameter
+          if function.required_keywords.none? { _1.first == parameter.name }
+            # figure out the positioning needed... may be tricky
+            parameters[index] = Entry::OptionalKeywordParameter.new(name: parameter.name)
+          end
+        end
+      end
 
       process_block(overload.method_type.block, parameters) if overload.method_type.block&.required
     end
