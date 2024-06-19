@@ -61,6 +61,14 @@ module RubyLsp
           active_parameter += 1
         end
 
+        title = +""
+
+        extra_links = if type.is_a?(TypeInferrer::GuessedType)
+          title << "guessed receiver: #{type.name}"
+          link = "https://github.com/Shopify/ruby-lsp/blob/main/DESIGN_AND_ROADMAP.md#guessed-types"
+          "[Learn more about guessed types](#{link})"
+        end
+
         signature_help = Interface::SignatureHelp.new(
           signatures: [
             Interface::SignatureInformation.new(
@@ -68,7 +76,7 @@ module RubyLsp
               parameters: parameters.map { |param| Interface::ParameterInformation.new(label: param.name) },
               documentation: Interface::MarkupContent.new(
                 kind: "markdown",
-                value: markdown_from_index_entries("", methods),
+                value: markdown_from_index_entries(title, methods, extra_links: extra_links),
               ),
             ),
           ],
