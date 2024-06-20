@@ -1,8 +1,18 @@
 {
     "result": [
         {
-            "uri": "file:///fixtures/constant_reference_target.rb",
-            "range": {
+            "targetUri": "file:///fixtures/constant_reference_target.rb",
+            "targetSelectionRange": {
+                "start": {
+                    "line": 3,
+                    "character": 7
+                },
+                "end": {
+                    "line": 3,
+                    "character": 10
+                }
+            },
+            "targetRange": {
                 "start": {
                     "line": 3,
                     "character": 0

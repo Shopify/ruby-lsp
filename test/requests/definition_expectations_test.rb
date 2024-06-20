@@ -57,8 +57,15 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       when Array
         response.each do |location|
           attributes = T.let(location.attributes, T.untyped)
-          fake_path = T.let(attributes[:uri].split("/").last(2).join("/"), String)
-          location.instance_variable_set(:@attributes, attributes.merge("uri" => "file:///#{fake_path}"))
+
+          case location
+          when RubyLsp::Interface::LocationLink
+            fake_path = T.let(attributes[:targetUri].split("/").last(2).join("/"), String)
+            location.instance_variable_set(:@attributes, attributes.merge("targetUri" => "file:///#{fake_path}"))
+          else
+            fake_path = T.let(attributes[:uri].split("/").last(2).join("/"), String)
+            location.instance_variable_set(:@attributes, attributes.merge("uri" => "file:///#{fake_path}"))
+          end
         end
       end
 
@@ -103,7 +110,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { line: 7, character: 0 } },
       )
-      range = server.pop_response.response[0].attributes[:range].attributes
+      range = server.pop_response.response[0].attributes[:targetRange].attributes
       range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
       assert_equal({ start: { line: 0, character: 0 }, end: { line: 5, character: 3 } }, range_hash)
 
@@ -113,7 +120,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { line: 7, character: 5 } },
       )
-      range = server.pop_response.response[0].attributes[:range].attributes
+      range = server.pop_response.response[0].attributes[:targetRange].attributes
       range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
       assert_equal({ start: { line: 1, character: 2 }, end: { line: 4, character: 5 } }, range_hash)
 
@@ -123,7 +130,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { line: 7, character: 10 } },
       )
-      range = server.pop_response.response[0].attributes[:range].attributes
+      range = server.pop_response.response[0].attributes[:targetRange].attributes
       range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
       assert_equal({ start: { line: 2, character: 4 }, end: { line: 3, character: 7 } }, range_hash)
     end
@@ -172,7 +179,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       response = server.pop_response
 
       assert_instance_of(RubyLsp::Result, response)
-      assert_equal(uri.to_s, response.response.first.attributes[:uri])
+      assert_equal(uri.to_s, response.response.first.attributes[:targetUri])
     end
   end
 
@@ -222,7 +229,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         response = server.pop_response.response
 
         assert_equal(2, response.size)
-        assert_match("class_reference_target.rb", response[0].uri)
+        assert_match("class_reference_target.rb", response[0].target_uri)
         assert_match("generated_by_addon.rb", response[1].uri)
       end
     ensure
@@ -249,7 +256,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 4, line: 4 } },
       )
-      assert_equal(uri.to_s, server.pop_response.response.first.attributes[:uri])
+      assert_equal(uri.to_s, server.pop_response.response.first.attributes[:targetUri])
     end
   end
 
@@ -295,8 +302,8 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       )
 
       first_definition, second_definition = server.pop_response.response
-      assert_equal(uri.to_s, first_definition.attributes[:uri])
-      assert_equal(second_uri.to_s, second_definition.attributes[:uri])
+      assert_equal(uri.to_s, first_definition.attributes[:targetUri])
+      assert_equal(second_uri.to_s, second_definition.attributes[:targetUri])
     end
   end
 
@@ -319,7 +326,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 9, line: 4 } },
       )
-      assert_equal(uri.to_s, server.pop_response.response.first.attributes[:uri])
+      assert_equal(uri.to_s, server.pop_response.response.first.attributes[:targetUri])
     end
   end
 
@@ -367,7 +374,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
       assert_equal(1, response.size)
 
-      range = response[0].attributes[:range].attributes
+      range = response[0].attributes[:targetRange].attributes
       range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
       assert_equal({ start: { line: 3, character: 2 }, end: { line: 3, character: 14 } }, range_hash)
     end
@@ -398,11 +405,11 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
       assert_equal(2, response.size)
 
-      range = response[0].attributes[:range].attributes
+      range = response[0].attributes[:targetRange].attributes
       range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
       assert_equal({ start: { line: 3, character: 2 }, end: { line: 3, character: 14 } }, range_hash)
 
-      range = response[1].attributes[:range].attributes
+      range = response[1].attributes[:targetRange].attributes
       range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
       assert_equal({ start: { line: 7, character: 2 }, end: { line: 7, character: 14 } }, range_hash)
     end
@@ -450,14 +457,14 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 12, line: 6 } },
       )
-      assert_equal(3, server.pop_response.response.first.range.start.line)
+      assert_equal(3, server.pop_response.response.first.target_range.start.line)
 
       server.process_message(
         id: 1,
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 4, line: 6 } },
       )
-      assert_equal(1, server.pop_response.response.first.range.start.line)
+      assert_equal(1, server.pop_response.response.first.target_range.start.line)
     end
   end
 
@@ -481,8 +488,8 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: uri }, position: { character: 11, line: 6 } },
       )
       response = server.pop_response.response.first
-      assert_equal(1, response.range.start.line)
-      assert_equal(1, response.range.end.line)
+      assert_equal(1, response.target_range.start.line)
+      assert_equal(1, response.target_range.end.line)
     end
   end
 
@@ -551,7 +558,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: uri }, position: { character: 6, line: 13 } },
       )
       response = server.pop_response.response.first
-      assert_equal(2, response.range.start.line)
+      assert_equal(2, response.target_range.start.line)
 
       server.process_message(
         id: 1,
@@ -559,7 +566,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: uri }, position: { character: 6, line: 14 } },
       )
       response = server.pop_response.response.first
-      assert_equal(6, response.range.start.line)
+      assert_equal(6, response.target_range.start.line)
     end
   end
 
@@ -624,7 +631,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       )
 
       response = server.pop_response.response
-      assert_equal(1, response[0].range.start.line)
+      assert_equal(1, response[0].target_range.start.line)
 
       server.process_message(
         id: 1,
@@ -633,7 +640,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       )
 
       response = server.pop_response.response
-      assert_equal(5, response[0].range.start.line)
+      assert_equal(5, response[0].target_range.start.line)
     end
   end
 
@@ -698,7 +705,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       )
       response = server.pop_response.response
 
-      assert_equal(5, response[0].range.start.line)
+      assert_equal(5, response[0].target_range.start.line)
     end
   end
 

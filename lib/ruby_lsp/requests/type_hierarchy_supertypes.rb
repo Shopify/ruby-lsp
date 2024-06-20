@@ -75,14 +75,12 @@ module RubyLsp
 
       sig { params(entry: RubyIndexer::Entry).returns(Interface::TypeHierarchyItem) }
       def hierarchy_item(entry)
-        range = range_from_location(entry.location)
-
         Interface::TypeHierarchyItem.new(
           name: entry.name,
           kind: kind_for_entry(entry),
           uri: URI::Generic.from_path(path: entry.file_path).to_s,
-          range: range,
-          selection_range: range,
+          range: range_from_location(entry.location),
+          selection_range: range_from_location(entry.name_location),
           detail: entry.file_name,
         )
       end

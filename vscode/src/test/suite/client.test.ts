@@ -10,7 +10,6 @@ import {
   DocumentHighlightKind,
   Hover,
   WorkDoneProgress,
-  Location,
   SemanticTokens,
   DocumentLink,
   WorkspaceSymbol,
@@ -22,6 +21,7 @@ import {
   SelectionRange,
   CodeAction,
   TextDocumentFilter,
+  LocationLink,
 } from "vscode-languageclient/node";
 import { after, afterEach, before } from "mocha";
 
@@ -334,7 +334,7 @@ suite("Client", () => {
         text,
       },
     });
-    const response: Location[] = await client.sendRequest(
+    const response: LocationLink[] = await client.sendRequest(
       "textDocument/definition",
       {
         textDocument: {
@@ -345,7 +345,7 @@ suite("Client", () => {
     );
 
     assert.strictEqual(response.length, 1);
-    assert.match(response[0].uri, /server\.rb/);
+    assert.match(response[0].targetUri, /server\.rb/);
   }).timeout(20000);
 
   test("semantic highlighting", async () => {
