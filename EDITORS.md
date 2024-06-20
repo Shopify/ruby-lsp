@@ -10,6 +10,36 @@ Code, use the official [Ruby LSP extension](https://marketplace.visualstudio.com
 If you need to select particular features to enable or disable, see
 [`vscode/package.json`](vscode/package.json) for the full list.
 
+**IMPORTANT NOTE FOR ALL EDITORS**
+
+The command to launch the language server might depend on which editor and version manager combination you are using.
+In order to work properly, the Ruby LSP must be launched with the Ruby version being used by the project you are working
+on and with the correct Bundler environment set.
+
+If you normally launch your editor from the terminal in a shell session where the Ruby environment is already activated,
+then you can probably just use `ruby-lsp` as the command.
+
+If you're seeing issues related to not finding the right gems or not being able to locate the `ruby-lsp` executable,
+then you may need to ensure that the environment is properly configured by the version manager before you try to run the
+`ruby-lsp` executable. How to do this will depend on which version manager you use. Here are some examples:
+
+If your version manager exposes a command to run an executable within the context of the current Ruby, use that:
+
+- `mise x -- ruby-lsp`
+- `shadowenv exec -- ruby-lsp`
+
+If your version manager creates gem executable shims that perform the automatic version switching, then use those:
+
+- `~/.rbenv/shims/ruby-lsp`
+- `~/.asdf/shims/ruby-lsp`
+
+If your version manager doesn't provide either of those, then activate the environment and run the executable:
+
+- `chruby $(cat .ruby-version) && ruby-lsp`
+
+These strategies will ensure that the `ruby-lsp` executable is invoked with the correct Ruby version, `GEM_HOME` and
+`GEM_PATH`, which are necessary for proper integration with your project.
+
 <!-- When adding a new editor to the list, either link directly to a website containing the instructions or link to a
 new H2 header in this file containing the instructions. -->
 
