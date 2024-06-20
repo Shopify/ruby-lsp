@@ -221,7 +221,7 @@ Interested in contributing? Check out the issues tagged with [help-wanted] or [g
 
 ## Guessed types
 
-Guessed types is an experimental features where the Ruby LSP attempts to identify the type of a receiver based on its
+Guessed types is an experimental feature where the Ruby LSP attempts to identify the type of a receiver based on its
 identifier name. For example:
 
 ```ruby
@@ -232,13 +232,13 @@ user.name
 @post.like!
 ```
 
-IMPORTANT: The goal of this experiment is to understand if we can get better accuracy for the code that you already
-have. The hypothesis is that a reasonable amount of code already uses patterns like the ones in the example and, in
-those cases, we can achieve nicer results.
-
-However, identifiers are not the ideal medium for proper type annotations. It would not be possible to express anything
-complex, such as unions, intersections or generics. Additionally, it is very trivial to fool the type guessing by simply
-naming a variable with a type name that doesn't match its actual type.
+> [!IMPORTANT] The goal of this experiment is to understand if we can get better accuracy for the code that you already
+> have. The hypothesis is that a reasonable amount of code already uses patterns like the ones in the example and, in
+> those cases, we can achieve nicer results.
+>
+> However, identifiers are not the ideal medium for proper type annotations. It would not be possible to express anything
+> complex, such as unions, intersections or generics. Additionally, it is very trivial to fool the type guessing by simply
+> naming a variable with a type name that doesn't match its actual type.
 
 ```ruby
 pathname = something_that_returns_an_integer

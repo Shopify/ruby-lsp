@@ -234,7 +234,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo", @type_inferrer.infer_receiver_type(node_context))
+      assert_equal("Foo", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_super_receiver
@@ -246,7 +246,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo", @type_inferrer.infer_receiver_type(node_context))
+      assert_equal("Foo", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     private

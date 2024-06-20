@@ -177,9 +177,8 @@ module RubyLsp
         title = "#{message}#{T.must(methods.first).decorated_parameters}"
 
         if type.is_a?(TypeInferrer::GuessedType)
-          title << " | guessed receiver: #{type.name}"
-          link = "https://github.com/Shopify/ruby-lsp/blob/main/DESIGN_AND_ROADMAP.md#guessed-types"
-          @response_builder.push("[Learn more about guessed types](#{link})\n", category: :links)
+          title << "\n\nGuessed receiver: #{type.name}"
+          @response_builder.push("[Learn more about guessed types](#{GUESSED_TYPES_URL})\n", category: :links)
         end
 
         categorized_markdown_from_index_entries(title, methods).each do |category, content|

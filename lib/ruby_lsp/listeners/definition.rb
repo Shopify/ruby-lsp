@@ -65,7 +65,7 @@ module RubyLsp
 
         # Until we can properly infer the receiver type in erb files (maybe with ruby-lsp-rails),
         # treating method calls' type as `nil` will allow users to get some completion support first
-        if @language_id == Document::LanguageId::ERB && inferrer_receiver_type == "Object"
+        if @language_id == Document::LanguageId::ERB && inferrer_receiver_type&.name == "Object"
           inferrer_receiver_type = nil
         end
 

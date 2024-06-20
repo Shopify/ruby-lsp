@@ -366,10 +366,11 @@ module RubyLsp
 
         return unless range
 
-        guessed_type = type.is_a?(TypeInferrer::GuessedType)
+        guessed_type = type.name
 
         @index.method_completion_candidates(method_name, type.name).each do |entry|
           entry_name = entry.name
+          owner_name = entry.owner&.name
 
           label_details = Interface::CompletionItemLabelDetails.new(
             description: entry.file_name,
@@ -382,7 +383,7 @@ module RubyLsp
             text_edit: Interface::TextEdit.new(range: range, new_text: entry_name),
             kind: Constant::CompletionItemKind::METHOD,
             data: {
-              owner_name: entry.owner&.name,
+              owner_name: owner_name,
               guessed_type: guessed_type,
             },
           )

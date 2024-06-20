@@ -707,7 +707,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
       )
 
       contents = server.pop_response.response.contents.value
-      assert_match("guessed receiver: User", contents)
+      assert_match("Guessed receiver: User", contents)
       assert_match("Learn more about guessed types", contents)
     end
   end

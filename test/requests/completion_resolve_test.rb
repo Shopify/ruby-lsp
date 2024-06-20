@@ -122,13 +122,13 @@ class CompletionResolveTest < Minitest::Test
       existing_item = {
         label: "foo",
         kind: RubyLsp::Constant::CompletionItemKind::METHOD,
-        data: { owner_name: "User", guessed_type: true },
+        data: { owner_name: "User", guessed_type: "User" },
       }
 
       server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
 
       result = server.pop_response.response
-      assert_match("guessed receiver: User", result[:documentation].value)
+      assert_match("Guessed receiver: User", result[:documentation].value)
       assert_match("Learn more about guessed types", result[:documentation].value)
     end
   end

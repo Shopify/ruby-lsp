@@ -392,7 +392,7 @@ class SignatureHelpTest < Minitest::Test
       signature = result.signatures.first
 
       assert_equal("subscribe!(news_letter)", signature.label)
-      assert_match("guessed receiver: User", signature.documentation.value)
+      assert_match("Guessed receiver: User", signature.documentation.value)
     end
   end
 end
