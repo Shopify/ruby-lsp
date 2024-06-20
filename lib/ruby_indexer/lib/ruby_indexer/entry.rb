@@ -334,8 +334,11 @@ module RubyIndexer
     class Method < Member
       extend T::Sig
 
+      # attr_reader :parameters
       sig { override.returns(T::Array[Parameter]) }
-      attr_reader :parameters
+      def parameters
+        T.must(@overloads.first)
+      end
 
       # Returns the location of the method name, excluding parameters or the body
       sig { returns(Location) }
@@ -348,16 +351,15 @@ module RubyIndexer
           location: T.any(Prism::Location, RubyIndexer::Location),
           name_location: T.any(Prism::Location, Location),
           comments: T::Array[String],
-          parameters: T::Array[Parameter],
           overloads: T::Array[T::Array[Parameter]],
           visibility: Visibility,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, name_location, comments, parameters, overloads, visibility, owner) # rubocop:disable Metrics/ParameterLists
+      def initialize(name, file_path, location, name_location, comments, overloads, visibility, owner) # rubocop:disable Metrics/ParameterLists
         super(name, file_path, location, comments, visibility, owner)
-        @parameters = parameters
-        @overloads = parameters
+        @overloads = overloads
+        @parameters = T.let(overloads.first, T.nilable(T::Array[RubyIndexer::Entry::Parameter]))
         @name_location = T.let(
           if name_location.is_a?(Prism::Location)
             Location.new(

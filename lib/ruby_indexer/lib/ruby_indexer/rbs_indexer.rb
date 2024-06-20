@@ -123,7 +123,7 @@ module RubyIndexer
       end
 
       real_owner = member.singleton? ? existing_or_new_singleton_klass(owner) : owner
-      @index.add(Entry::Method.new(name, file_path, location, location, comments, [], [], visibility, real_owner))
+      @index.add(Entry::Method.new(name, file_path, location, location, comments, [], visibility, real_owner))
     end
 
     sig { params(owner: Entry::Namespace).returns(T.nilable(Entry::Class)) }
