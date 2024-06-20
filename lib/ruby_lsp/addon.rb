@@ -72,6 +72,15 @@ module RubyLsp
           addon.add_error(e)
         end
       end
+
+      # Intended for use by tests for addons
+      sig { params(addon_name: String).returns(Addon) }
+      def get(addon_name)
+        addon = addons.find { |addon| addon.name == addon_name }
+        raise "Could not find addon '#{addon_name}'" unless addon
+
+        addon
+      end
     end
 
     sig { void }
