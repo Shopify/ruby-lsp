@@ -144,6 +144,7 @@ module RubyIndexer
       # Overload 1
       # - required_positionals: file_name
       # - optional_positionals: mode, perm
+      # - block args: blk
 
       assert_equal([:file_name, :mode, :perm, :blk], parameters.map(&:name))
       assert_kind_of(Entry::RequiredParameter, parameters[0])
@@ -205,12 +206,12 @@ module RubyIndexer
       # Overload 3
       # - optional_keywords: by, to
 
-      assert_equal([:limit, :step, :blk, :by, :to], parameters.map(&:name)) # TODO: blk should be last?
+      assert_equal([:limit, :step, :by, :to, :blk], parameters.map(&:name))
       assert_kind_of(Entry::OptionalParameter, parameters[0])
       assert_kind_of(Entry::OptionalParameter, parameters[1])
-      assert_kind_of(Entry::BlockParameter, parameters[2])
+      assert_kind_of(Entry::OptionalKeywordParameter, parameters[2])
       assert_kind_of(Entry::OptionalKeywordParameter, parameters[3])
-      assert_kind_of(Entry::OptionalKeywordParameter, parameters[4])
+      assert_kind_of(Entry::BlockParameter, parameters[4])
     end
 
     def test_rbs_method_with_required_keywords

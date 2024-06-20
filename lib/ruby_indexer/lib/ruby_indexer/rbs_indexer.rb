@@ -331,7 +331,24 @@ module RubyIndexer
         name = param.first.to_s.to_sym # hack
         next if parameters.any? { _1.name == name }
 
-        parameters << Entry::OptionalKeywordParameter.new(name: name)
+        last_optional_keyword = parameters.rindex { _1.is_a?(Entry::OptionalKeywordParameter) }
+        last_required_keyword = parameters.rindex { _1.is_a?(Entry::KeywordParameter) }
+        last_optional_argument = parameters.rindex { _1.is_a?(Entry::OptionalParameter) }
+        last_required_argument = parameters.rindex { _1.is_a?(Entry::RequiredParameter) }
+
+        insertion_position = if last_optional_keyword
+          last_optional_keyword + 1
+        elsif last_required_keyword
+          last_required_keyword + 1
+        elsif last_optional_argument
+          last_optional_argument + 1
+        elsif last_required_argument
+          last_required_argument + 1
+        else
+          0
+        end
+
+        parameters.insert(insertion_position, Entry::OptionalKeywordParameter.new(name: name))
       end
     end
 
