@@ -64,7 +64,8 @@ module RubyIndexer
     sig { params(node: Prism::ClassNode).void }
     def on_class_node_enter(node)
       @visibility_stack.push(Entry::Visibility::PUBLIC)
-      name = node.constant_path.location.slice
+      constant_path = node.constant_path
+      name = constant_path.slice
 
       comments = collect_comments(node)
 
@@ -93,6 +94,7 @@ module RubyIndexer
         nesting,
         @file_path,
         node.location,
+        constant_path.location,
         comments,
         parent_class,
       )
@@ -112,12 +114,13 @@ module RubyIndexer
     sig { params(node: Prism::ModuleNode).void }
     def on_module_node_enter(node)
       @visibility_stack.push(Entry::Visibility::PUBLIC)
-      name = node.constant_path.location.slice
+      constant_path = node.constant_path
+      name = constant_path.slice
 
       comments = collect_comments(node)
 
       nesting = name.start_with?("::") ? [name.delete_prefix("::")] : @stack + [name.delete_prefix("::")]
-      entry = Entry::Module.new(nesting, @file_path, node.location, comments)
+      entry = Entry::Module.new(nesting, @file_path, node.location, constant_path.location, comments)
 
       @owner_stack << entry
       @index.add(entry)
@@ -145,9 +148,16 @@ module RubyIndexer
 
         if existing_entries
           entry = T.must(existing_entries.first)
-          entry.update_singleton_information(node.location, collect_comments(node))
+          entry.update_singleton_information(node.location, expression.location, collect_comments(node))
         else
-          entry = Entry::SingletonClass.new(@stack, @file_path, node.location, collect_comments(node), nil)
+          entry = Entry::SingletonClass.new(
+            @stack,
+            @file_path,
+            node.location,
+            expression.location,
+            collect_comments(node),
+            nil,
+          )
           @index.add(entry, skip_prefix_tree: true)
         end
 
@@ -297,6 +307,7 @@ module RubyIndexer
           method_name,
           @file_path,
           node.location,
+          node.name_loc,
           comments,
           list_params(node.parameters),
           current_visibility,
@@ -309,6 +320,7 @@ module RubyIndexer
           method_name,
           @file_path,
           node.location,
+          node.name_loc,
           comments,
           list_params(node.parameters),
           current_visibility,
@@ -704,7 +716,14 @@ module RubyIndexer
 
       # If not available, create the singleton class lazily
       nesting = @stack + ["<Class:#{@stack.last}>"]
-      entry = Entry::SingletonClass.new(nesting, @file_path, attached_class.location, [], nil)
+      entry = Entry::SingletonClass.new(
+        nesting,
+        @file_path,
+        attached_class.location,
+        attached_class.name_location,
+        [],
+        nil,
+      )
       @index.add(entry, skip_prefix_tree: true)
       entry
     end

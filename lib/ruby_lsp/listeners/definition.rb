@@ -11,7 +11,10 @@ module RubyLsp
 
       sig do
         params(
-          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::Location],
+          response_builder: ResponseBuilders::CollectionResponseBuilder[T.any(
+            Interface::Location,
+            Interface::LocationLink,
+          )],
           global_state: GlobalState,
           uri: URI::Generic,
           node_context: NodeContext,
@@ -158,16 +161,13 @@ module RubyLsp
         return unless methods
 
         methods.each do |target_method|
-          location = target_method.location
           file_path = target_method.file_path
           next if @typechecker_enabled && not_in_dependencies?(file_path)
 
-          @response_builder << Interface::Location.new(
-            uri: URI::Generic.from_path(path: file_path).to_s,
-            range: Interface::Range.new(
-              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
-              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
-            ),
+          @response_builder << Interface::LocationLink.new(
+            target_uri: URI::Generic.from_path(path: file_path).to_s,
+            target_range: range_from_location(target_method.location),
+            target_selection_range: range_from_location(target_method.name_location),
           )
         end
       end
@@ -218,19 +218,16 @@ module RubyLsp
         return if first_entry.private? && first_entry.name != "#{@node_context.fully_qualified_name}::#{value}"
 
         entries.each do |entry|
-          location = entry.location
           # If the project has Sorbet, then we only want to handle go to definition for constants defined in gems, as an
           # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
           # in the project, even if the files are typed false
           file_path = entry.file_path
           next if @typechecker_enabled && not_in_dependencies?(file_path)
 
-          @response_builder << Interface::Location.new(
-            uri: URI::Generic.from_path(path: file_path).to_s,
-            range: Interface::Range.new(
-              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
-              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
-            ),
+          @response_builder << Interface::LocationLink.new(
+            target_uri: URI::Generic.from_path(path: file_path).to_s,
+            target_range: range_from_location(entry.location),
+            target_selection_range: range_from_location(entry.name_location),
           )
         end
       end

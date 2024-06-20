@@ -428,5 +428,25 @@ module RubyIndexer
       # the exact same
       assert_same(bar_owner, baz_owner)
     end
+
+    def test_name_location_points_to_method_identifier_location
+      index(<<~RUBY)
+        class Foo
+          def bar
+            a = 123
+            a + 456
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+      refute_equal(entry.location, entry.name_location)
+
+      name_location = entry.name_location
+      assert_equal(2, name_location.start_line)
+      assert_equal(2, name_location.end_line)
+      assert_equal(6, name_location.start_column)
+      assert_equal(9, name_location.end_column)
+    end
   end
 end

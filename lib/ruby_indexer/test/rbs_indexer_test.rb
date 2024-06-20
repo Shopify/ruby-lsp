@@ -64,6 +64,17 @@ module RubyIndexer
       assert_equal("File::<Class:File>", owner.name)
     end
 
+    def test_location_and_name_location_are_the_same
+      # NOTE: RBS does not store the name location for classes, modules or methods. This behaviour is not exactly what
+      # we would like, but for now we assign the same location to both
+
+      entries = @index["Array"]
+      refute_nil(entries)
+      entry = entries.find { |entry| entry.is_a?(Entry::Class) }
+
+      assert_same(entry.location, entry.name_location)
+    end
+
     def test_rbs_method_with_required_positionals
       entries = @index["crypt"] # https://www.rubydoc.info/stdlib/core/String#crypt-instance_method
       assert_equal(1, entries.length)

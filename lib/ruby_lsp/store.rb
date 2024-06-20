@@ -8,9 +8,6 @@ module RubyLsp
     sig { returns(T::Boolean) }
     attr_accessor :supports_progress
 
-    sig { returns(T::Boolean) }
-    attr_accessor :experimental_features
-
     sig { returns(T::Hash[Symbol, RequestConfig]) }
     attr_accessor :features_configuration
 
@@ -21,7 +18,6 @@ module RubyLsp
     def initialize
       @state = T.let({}, T::Hash[String, Document])
       @supports_progress = T.let(true, T::Boolean)
-      @experimental_features = T.let(false, T::Boolean)
       @features_configuration = T.let(
         {
           inlayHint: RequestConfig.new({

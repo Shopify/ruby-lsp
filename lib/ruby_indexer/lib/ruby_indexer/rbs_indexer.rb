@@ -48,7 +48,7 @@ module RubyIndexer
       location = to_ruby_indexer_location(declaration.location)
       comments = Array(declaration.comment&.string)
       parent_class = declaration.super_class&.name&.name&.to_s
-      class_entry = Entry::Class.new(nesting, file_path, location, comments, parent_class)
+      class_entry = Entry::Class.new(nesting, file_path, location, location, comments, parent_class)
       add_declaration_mixins_to_entry(declaration, class_entry)
       @index.add(class_entry)
       declaration.members.each do |member|
@@ -64,7 +64,7 @@ module RubyIndexer
       file_path = pathname.to_s
       location = to_ruby_indexer_location(declaration.location)
       comments = Array(declaration.comment&.string)
-      module_entry = Entry::Module.new(nesting, file_path, location, comments)
+      module_entry = Entry::Module.new(nesting, file_path, location, location, comments)
       add_declaration_mixins_to_entry(declaration, module_entry)
       @index.add(module_entry)
       declaration.members.each do |member|
@@ -127,6 +127,7 @@ module RubyIndexer
         name,
         file_path,
         location,
+        location,
         comments,
         build_parameters(member.overloads),
         visibility,
@@ -147,7 +148,7 @@ module RubyIndexer
 
       # If not available, create the singleton class lazily
       nesting = owner.nesting + ["<Class:#{name}>"]
-      entry = Entry::SingletonClass.new(nesting, owner.file_path, owner.location, [], nil)
+      entry = Entry::SingletonClass.new(nesting, owner.file_path, owner.location, owner.name_location, [], nil)
       @index.add(entry, skip_prefix_tree: true)
       entry
     end
