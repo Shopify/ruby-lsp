@@ -96,7 +96,6 @@ module RubyIndexer
 
     class Include < ModuleOperation; end
     class Prepend < ModuleOperation; end
-    class Extend < ModuleOperation; end
 
     class Namespace < Entry
       extend T::Sig

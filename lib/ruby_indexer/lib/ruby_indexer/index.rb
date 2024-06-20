@@ -374,8 +374,25 @@ module RubyIndexer
       cached_ancestors = @ancestors[fully_qualified_name]
       return cached_ancestors if cached_ancestors
 
+      parts = fully_qualified_name.split("::")
+      singleton_levels = 0
+
+      parts.reverse_each do |part|
+        break unless part.include?("<Class:")
+
+        singleton_levels += 1
+        parts.pop
+      end
+
+      attached_class_name = parts.join("::")
+
       # If we don't have an entry for `name`, raise
       entries = self[fully_qualified_name]
+
+      if singleton_levels > 0 && !entries
+        entries = [existing_or_new_singleton_class(attached_class_name)]
+      end
+
       raise NonExistingNamespaceError, "No entry found for #{fully_qualified_name}" unless entries
 
       ancestors = [fully_qualified_name]
@@ -404,6 +421,12 @@ module RubyIndexer
       # The original nesting where we discovered this namespace, so that we resolve the correct names of the
       # included/prepended/extended modules and parent classes
       nesting = T.must(namespaces.first).nesting
+
+      if nesting.any?
+        singleton_levels.times do
+          nesting << "<Class:#{T.must(nesting.last)}>"
+        end
+      end
 
       mixin_operations.each do |operation|
         resolved_module = resolve(operation.module_name, nesting)
@@ -440,7 +463,14 @@ module RubyIndexer
 
       # Find the first class entry that has a parent class. Notice that if the developer makes a mistake and inherits
       # from two diffent classes in different files, we simply ignore it
-      superclass = T.cast(namespaces.find { |n| n.is_a?(Entry::Class) && n.parent_class }, T.nilable(Entry::Class))
+      superclass = T.cast(
+        if singleton_levels > 0
+          self[attached_class_name]&.find { |n| n.is_a?(Entry::Class) && n.parent_class }
+        else
+          namespaces.find { |n| n.is_a?(Entry::Class) && n.parent_class }
+        end,
+        T.nilable(Entry::Class),
+      )
 
       if superclass
         # If the user makes a mistake and creates a class that inherits from itself, this method would throw a stack
@@ -451,7 +481,39 @@ module RubyIndexer
         parent_class_name = resolved_parent_class&.first&.name
 
         if parent_class_name && fully_qualified_name != parent_class_name
-          ancestors.concat(linearized_ancestors_of(parent_class_name))
+
+          parent_name_parts = [parent_class_name]
+          singleton_levels.times do
+            parent_name_parts << "<Class:#{parent_name_parts.last}>"
+          end
+
+          ancestors.concat(linearized_ancestors_of(parent_name_parts.join("::")))
+        end
+
+        # When computing the linearization for a class's singleton class, it inherits from the linearized ancestors of
+        # the `Class` class
+        if parent_class_name&.start_with?("BasicObject") && singleton_levels > 0
+          class_class_name_parts = ["Class"]
+
+          (singleton_levels - 1).times do
+            class_class_name_parts << "<Class:#{class_class_name_parts.last}>"
+          end
+
+          ancestors.concat(linearized_ancestors_of(class_class_name_parts.join("::")))
+        end
+      elsif singleton_levels > 0
+        # When computing the linearization for a module's singleton class, it inherits from the linearized ancestors of
+        # the `Module` class
+        mod = T.cast(self[attached_class_name]&.find { |n| n.is_a?(Entry::Module) }, T.nilable(Entry::Module))
+
+        if mod
+          module_class_name_parts = ["Module"]
+
+          (singleton_levels - 1).times do
+            module_class_name_parts << "<Class:#{module_class_name_parts.last}>"
+          end
+
+          ancestors.concat(linearized_ancestors_of(module_class_name_parts.join("::")))
         end
       end
 
@@ -531,6 +593,29 @@ module RubyIndexer
     sig { returns(Integer) }
     def length
       @entries.count
+    end
+
+    sig { params(name: String).returns(Entry::SingletonClass) }
+    def existing_or_new_singleton_class(name)
+      *_namespace, unqualified_name = name.split("::")
+      full_singleton_name = "#{name}::<Class:#{unqualified_name}>"
+      singleton = T.cast(self[full_singleton_name]&.first, T.nilable(Entry::SingletonClass))
+
+      unless singleton
+        attached_ancestor = T.must(self[name]&.first)
+
+        singleton = Entry::SingletonClass.new(
+          [full_singleton_name],
+          attached_ancestor.file_path,
+          attached_ancestor.location,
+          attached_ancestor.name_location,
+          [],
+          nil,
+        )
+        add(singleton, skip_prefix_tree: true)
+      end
+
+      singleton
     end
 
     private
