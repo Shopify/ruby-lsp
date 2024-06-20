@@ -65,8 +65,7 @@ module RubyLsp
 
         extra_links = if @item.dig(:data, :guessed_type)
           label << " | guessed receiver: #{owner_name}"
-          link = "https://github.com/Shopify/ruby-lsp/blob/main/DESIGN_AND_ROADMAP.md#guessed-types"
-          "[Learn more about guessed types](#{link})"
+          "[Learn more about guessed types](#{GUESSED_TYPES_URL})"
         end
 
         @item[:labelDetails] = Interface::CompletionItemLabelDetails.new(

@@ -65,8 +65,7 @@ module RubyLsp
 
         extra_links = if type.is_a?(TypeInferrer::GuessedType)
           title << "guessed receiver: #{type.name}"
-          link = "https://github.com/Shopify/ruby-lsp/blob/main/DESIGN_AND_ROADMAP.md#guessed-types"
-          "[Learn more about guessed types](#{link})"
+          "[Learn more about guessed types](#{GUESSED_TYPES_URL})"
         end
 
         signature_help = Interface::SignatureHelp.new(

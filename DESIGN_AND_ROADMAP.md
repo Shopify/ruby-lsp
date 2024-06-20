@@ -221,7 +221,7 @@ Interested in contributing? Check out the issues tagged with [help-wanted] or [g
 
 ## Guessed types
 
-Guessed types is an experimental features where the Ruby LSP attempts to identify the type of a receiver based on its
+Guessed types is an experimental feature where the Ruby LSP attempts to identify the type of a receiver based on its
 identifier name. For example:
 
 ```ruby
