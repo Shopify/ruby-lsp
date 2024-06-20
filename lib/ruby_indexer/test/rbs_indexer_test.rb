@@ -85,6 +85,8 @@ module RubyIndexer
       # Overload 0
       # - required_positionals: salt_str
 
+      # (::string salt_str) -> ::String
+
       assert_equal(1, parameters.length)
       assert_kind_of(Entry::RequiredParameter, parameters[0])
       assert_equal(:salt_str, parameters[0].name)
@@ -99,6 +101,8 @@ module RubyIndexer
 
       # Overload 0
       # - optional_positionals: separator
+
+      # (?::string? separator) -> ::String
 
       assert_equal(1, parameters.length)
       assert_kind_of(Entry::OptionalParameter, parameters[0])
@@ -121,6 +125,10 @@ module RubyIndexer
       # Overload 2
       # - required_positionals: pattern
       # - block args: match
+
+      # (::Regexp | ::string pattern, ::string | ::hash[::String, ::_ToS] replacement) -> ::String
+      # | (::Regexp | ::string pattern) -> ::Enumerator[::String, ::String]
+      # | (::Regexp | ::string pattern) { (::String match) -> ::_ToS } -> ::String
 
       assert_equal([:pattern, :replacement, :match], parameters.map(&:name))
       assert_kind_of(Entry::RequiredParameter, parameters[0])
@@ -146,6 +154,9 @@ module RubyIndexer
       # - optional_positionals: mode, perm
       # - block args: blk
 
+      # (::String name, ?::String mode, ?::Integer perm) -> ::IO?
+      # | [T] (::String name, ?::String mode, ?::Integer perm) { (::IO) -> T } -> T
+
       assert_equal([:file_name, :mode, :perm, :blk], parameters.map(&:name))
       assert_kind_of(Entry::RequiredParameter, parameters[0])
       assert_kind_of(Entry::OptionalParameter, parameters[1])
@@ -162,6 +173,8 @@ module RubyIndexer
       # Overload 0
       # - required_positionals: selector_0
       # - rest_positional(s): more_selectors
+
+      # (::String::selector selector_0, *::String::selector more_selectors) -> ::Integer
 
       assert_equal([:selector_0, :more_selectors], parameters.map(&:name))
       assert_kind_of(RubyIndexer::Entry::RequiredParameter, parameters[0])
@@ -182,6 +195,9 @@ module RubyIndexer
       # - required_positionals: read_array
       # - optional_positionals: write_array, error_array
       # - trailing_positionals: timeout
+
+      # () { (::String) -> ::boolish } -> ::Array[::String]
+      # | () -> ::Enumerator[::String, ::Array[::String]]
 
       assert_equal([:read_array, :write_array, :error_array, :timeout], parameters.map(&:name))
       assert_kind_of(Entry::RequiredParameter, parameters[0])
@@ -205,6 +221,11 @@ module RubyIndexer
 
       # Overload 3
       # - optional_keywords: by, to
+
+      # (?::Numeric limit, ?::Numeric step) { (::Numeric) -> void } -> self
+      # | (?::Numeric limit, ?::Numeric step) -> ::Enumerator[::Numeric, self]
+      # | (?by: ::Numeric, ?to: ::Numeric) { (::Numeric) -> void } -> self
+      # | (?by: ::Numeric, ?to: ::Numeric) -> ::Enumerator[::Numeric, self]
 
       assert_equal([:limit, :step, :by, :to, :blk], parameters.map(&:name))
       assert_kind_of(Entry::OptionalParameter, parameters[0])
