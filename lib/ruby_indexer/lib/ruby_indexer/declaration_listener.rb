@@ -310,6 +310,7 @@ module RubyIndexer
           node.name_loc,
           comments,
           list_params(node.parameters),
+          [],
           current_visibility,
           @owner_stack.last,
         ))
@@ -323,6 +324,7 @@ module RubyIndexer
           node.name_loc,
           comments,
           list_params(node.parameters),
+          [],
           current_visibility,
           singleton,
         ))

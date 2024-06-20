@@ -349,13 +349,15 @@ module RubyIndexer
           name_location: T.any(Prism::Location, Location),
           comments: T::Array[String],
           parameters: T::Array[Parameter],
+          overloads: T::Array[T::Array[Parameter]],
           visibility: Visibility,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, name_location, comments, parameters, visibility, owner) # rubocop:disable Metrics/ParameterLists
+      def initialize(name, file_path, location, name_location, comments, parameters, overloads, visibility, owner) # rubocop:disable Metrics/ParameterLists
         super(name, file_path, location, comments, visibility, owner)
         @parameters = parameters
+        @overloads = parameters
         @name_location = T.let(
           if name_location.is_a?(Prism::Location)
             Location.new(
