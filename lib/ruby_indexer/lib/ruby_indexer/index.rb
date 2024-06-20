@@ -150,17 +150,33 @@ module RubyIndexer
       ancestors = linearized_ancestors_of(receiver_name)
 
       candidates = name ? prefix_search(name).flatten : @entries.values.flatten
-      candidates.filter_map do |entry|
+      completion_items = candidates.each_with_object({}) do |entry, hash|
         case entry
         when Entry::Member, Entry::MethodAlias
-          entry if ancestors.any?(entry.owner&.name)
+          entry_name = entry.name
+          ancestor_index = ancestors.index(entry.owner&.name)
+          existing_entry = hash[entry_name]
+
+          # If this method belongs to an ancestors and either we haven't found it yet or it appears earlier in the
+          # ancestors chain than the previous candidate, then we need to put it in the hash. Otherwise, continue
+          next unless ancestor_index && (!existing_entry || ancestor_index < existing_entry.last)
+
+          hash[entry_name] = [entry, ancestor_index]
         when Entry::UnresolvedMethodAlias
-          if ancestors.any?(entry.owner&.name)
-            resolved_alias = resolve_method_alias(entry, receiver_name)
-            resolved_alias if resolved_alias.is_a?(Entry::MethodAlias)
-          end
+          entry_name = entry.name
+          ancestor_index = ancestors.index(entry.owner&.name)
+          existing_entry = hash[entry_name]
+
+          # If this method belongs to an ancestors and either we haven't found it yet or it appears earlier in the
+          # ancestors chain than the previous candidate, then we need to put it in the hash. Otherwise, continue
+          next unless ancestor_index && (!existing_entry || ancestor_index < existing_entry.last)
+
+          resolved_alias = resolve_method_alias(entry, receiver_name)
+          hash[entry_name] = [resolved_alias, ancestor_index] if resolved_alias.is_a?(Entry::MethodAlias)
         end
       end
+
+      completion_items.values.map!(&:first)
     end
 
     # Resolve a constant to its declaration based on its name and the nesting where the reference was found. Parameter
