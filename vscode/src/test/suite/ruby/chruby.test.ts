@@ -103,9 +103,11 @@ suite("Chruby", () => {
     assert.notStrictEqual(yjit, undefined);
   });
 
-  test("Prefers standard rubies over custom built ones", async () => {
+  test("Considers any version with a suffix to be the latest", async () => {
+    // chruby always considers anything with a suffix to be the latest version, even if that's not accurate. For
+    // example, 3.3.0-rc1 is older than the stable 3.3.0, but running `chruby 3.3.0` will prefer the release candidate
     fs.mkdirSync(
-      path.join(rootPath, "opt", "rubies", `${RUBY_VERSION}-custom`, "bin"),
+      path.join(rootPath, "opt", "rubies", `${RUBY_VERSION}-rc1`, "bin"),
       {
         recursive: true,
       },
@@ -116,7 +118,7 @@ suite("Chruby", () => {
         rootPath,
         "opt",
         "rubies",
-        `${RUBY_VERSION}-custom`,
+        `${RUBY_VERSION}-rc1`,
         "bin",
         "ruby",
       ),
@@ -129,13 +131,59 @@ suite("Chruby", () => {
       vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
     ];
 
-    const { env, version, yjit } = await chruby.activate();
+    const { env, yjit } = await chruby.activate();
 
-    assert.match(env.GEM_PATH!, new RegExp(`ruby/${VERSION_REGEX}`));
-    assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
-    assert.strictEqual(version, RUBY_VERSION);
+    // Since we symlink the stable Ruby as if it were a release candidate, we cannot assert the version of gem paths
+    // because those will match the stable version that is running the activation script. It is enough to verify that we
+    // inserted the correct Ruby path into the PATH
+    assert.match(
+      env.PATH!,
+      new RegExp(`\\/opt\\/rubies\\/${VERSION_REGEX}-rc1`),
+    );
     assert.notStrictEqual(yjit, undefined);
-    fs.rmSync(path.join(rootPath, "opt", "rubies", `${RUBY_VERSION}-custom`), {
+    fs.rmSync(path.join(rootPath, "opt", "rubies", `${RUBY_VERSION}-rc1`), {
+      recursive: true,
+      force: true,
+    });
+  });
+
+  test("Finds right Ruby with explicit release candidate but omitted engine", async () => {
+    fs.mkdirSync(
+      path.join(rootPath, "opt", "rubies", `${RUBY_VERSION}-rc1`, "bin"),
+      {
+        recursive: true,
+      },
+    );
+
+    createRubySymlinks(
+      path.join(
+        rootPath,
+        "opt",
+        "rubies",
+        `${RUBY_VERSION}-rc1`,
+        "bin",
+        "ruby",
+      ),
+    );
+
+    fs.writeFileSync(
+      path.join(rootPath, ".ruby-version"),
+      `${RUBY_VERSION}-rc1`,
+    );
+
+    const chruby = new Chruby(workspaceFolder, outputChannel);
+    chruby.rubyInstallationUris = [
+      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
+    ];
+
+    const { env, yjit } = await chruby.activate();
+
+    assert.match(
+      env.PATH!,
+      new RegExp(`\\/opt\\/rubies\\/${VERSION_REGEX}-rc1`),
+    );
+    assert.notStrictEqual(yjit, undefined);
+    fs.rmSync(path.join(rootPath, "opt", "rubies", `${RUBY_VERSION}-rc1`), {
       recursive: true,
       force: true,
     });
