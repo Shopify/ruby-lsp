@@ -62,6 +62,9 @@ module RubyIndexer
       entry = entries.first
       parameters = entry.parameters
 
+      # Overload 0
+      # - required_positionals: salt_str
+
       assert_equal(1, parameters.length)
       assert_kind_of(Entry::RequiredParameter, parameters[0])
       assert_equal(:salt_str, parameters[0].name)
@@ -74,6 +77,9 @@ module RubyIndexer
       entry = entries.first
       parameters = entry.parameters
 
+      # Overload 0
+      # - optional_positionals: separator
+
       assert_equal(1, parameters.length)
       assert_kind_of(Entry::OptionalParameter, parameters[0])
       assert_equal(:separator, parameters[0].name)
@@ -82,6 +88,9 @@ module RubyIndexer
     def test_rbs_method_with_required_and_optional_parameters
       entries = @index["gsub"] # https://www.rubydoc.info/stdlib/core/String#gsub-instance_method
       assert_equal(1, entries.length)
+
+      entry = entries.first
+      parameters = entry.parameters
 
       # Overload 0
       # - required_positionals: pattern, replacement
@@ -93,10 +102,6 @@ module RubyIndexer
       # - required_positionals: pattern
       # - block args: match
 
-      entry = entries.first
-
-      parameters = entry.parameters
-
       assert_equal([:pattern, :replacement, :match], parameters.map(&:name))
       assert_kind_of(Entry::RequiredParameter, parameters[0])
       assert_kind_of(Entry::OptionalParameter, parameters[1])
@@ -107,6 +112,11 @@ module RubyIndexer
     end
 
     def test_rbs_anonymous_block_parameter
+      entries = @index["open"]
+      entry = entries.find { |entry| entry.owner.name == "File::<Class:File>" }
+
+      parameters = entry.parameters
+
       # Overload 0
       # - required_positionals: file_name
       # - optional_positionals: mode, perm
@@ -114,11 +124,6 @@ module RubyIndexer
       # Overload 1
       # - required_positionals: file_name
       # - optional_positionals: mode, perm
-
-      entries = @index["open"]
-      entry = entries.find { |entry| entry.owner.name == "File::<Class:File>" }
-
-      parameters = entry.parameters
 
       assert_equal([:file_name, :mode, :perm, :blk], parameters.map(&:name))
       assert_kind_of(Entry::RequiredParameter, parameters[0])
@@ -133,15 +138,21 @@ module RubyIndexer
 
       parameters = entry.parameters
 
-      # In RBS, this is represented as having two arguments:
-      #
-      #   def count: (selector selector_0, *selector more_selectors) -> Integer
+      # Overload 0
+      # - required_positionals: selector_0
+      # - rest_positional(s): more_selectors
+
       assert_equal([:selector_0, :more_selectors], parameters.map(&:name))
       assert_kind_of(RubyIndexer::Entry::RequiredParameter, parameters[0])
       assert_kind_of(RubyIndexer::Entry::RestParameter, parameters[1])
     end
 
     def test_rbs_method_with_trailing_positionals
+      entries = @index["select"] # https://ruby-doc.org/3.3.3/IO.html#method-c-select
+      entry = entries.find { |entry| entry.owner.name == "IO::<Class:IO>" }
+
+      parameters = entry.parameters
+
       # Overload 0
       # - required_positionals: read_array
       # - optional_positionals: write_array, error_array
@@ -151,11 +162,6 @@ module RubyIndexer
       # - optional_positionals: write_array, error_array
       # - trailing_positionals: timeout
 
-      entries = @index["select"] # https://ruby-doc.org/3.3.3/IO.html#method-c-select
-      entry = entries.find { |entry| entry.owner.name == "IO::<Class:IO>" }
-
-      parameters = entry.parameters
-
       assert_equal([:read_array, :write_array, :error_array, :timeout], parameters.map(&:name))
       assert_kind_of(Entry::RequiredParameter, parameters[0])
       assert_kind_of(Entry::OptionalParameter, parameters[1])
@@ -164,6 +170,11 @@ module RubyIndexer
     end
 
     def test_rbs_method_with_optional_keywords
+      entries = @index["step"] # https://www.rubydoc.info/stdlib/core/Numeric#step-instance_method
+      entry = entries.find { |entry| entry.owner.name == "Numeric" }
+
+      parameters = entry.parameters
+
       # Overload 1
       # - optional_positionals: limit, step
 
@@ -173,11 +184,6 @@ module RubyIndexer
 
       # Overload 3
       # - optional_keywords: by, to
-
-      entries = @index["step"] # https://www.rubydoc.info/stdlib/core/Numeric#step-instance_method
-      entry = entries.find { |entry| entry.owner.name == "Numeric" }
-
-      parameters = entry.parameters
 
       assert_equal([:limit, :step, :blk, :by, :to], parameters.map(&:name)) # TODO: blk should be last?
       assert_kind_of(Entry::OptionalParameter, parameters[0])
