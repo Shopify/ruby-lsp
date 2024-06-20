@@ -291,16 +291,13 @@ module RubyIndexer
 
     sig { params(function: RBS::Types::Function, parameters: T::Array[Entry::Parameter]).void }
     def process_trailing_positionals(function, parameters)
-      # binding.break
       function.trailing_positionals.each do |param|
-        # name = param.name
         if parameters.any? { _1.name == param.name }
           next
         end
 
         last_optional_argument = parameters.rindex { _1.is_a?(Entry::OptionalParameter) }
         last_required_argument = parameters.rindex { _1.is_a?(Entry::RequiredParameter) }
-        # binding.break
         insertion_position = if last_optional_argument
           last_optional_argument + 1
         elsif last_required_argument
