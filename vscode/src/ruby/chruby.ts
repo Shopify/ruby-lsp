@@ -47,7 +47,7 @@ export class Chruby extends VersionManager {
     );
 
     const { defaultGems, gemHome, yjit, version } =
-      await this.runActivationScript(rubyUri);
+      await this.runActivationScript(rubyUri, versionInfo);
 
     this.outputChannel.info(
       `Activated Ruby environment: defaultGems=${defaultGems} gemHome=${gemHome} yjit=${yjit}`,
@@ -154,7 +154,10 @@ export class Chruby extends VersionManager {
   }
 
   // Run the activation script using the Ruby installation we found so that we can discover gem paths
-  private async runActivationScript(rubyExecutableUri: vscode.Uri): Promise<{
+  private async runActivationScript(
+    rubyExecutableUri: vscode.Uri,
+    rubyVersion: RubyVersion,
+  ): Promise<{
     defaultGems: string;
     gemHome: string;
     yjit: boolean;
@@ -174,7 +177,7 @@ export class Chruby extends VersionManager {
       "    user_dir = paths[0] if Dir.exist?(paths[0])",
       "  end",
       "end",
-      "newer_gem_home = File.join(File.dirname(user_dir), RUBY_VERSION)",
+      `newer_gem_home = File.join(File.dirname(user_dir), "${rubyVersion.version}")`,
       "gems = (Dir.exist?(newer_gem_home) ? newer_gem_home : user_dir)",
       "data = { defaultGems: Gem.default_dir, gemHome: gems, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }",
       "STDERR.print(JSON.dump(data))",
