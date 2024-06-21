@@ -461,13 +461,13 @@ module RubyIndexer
         end
       RUBY
 
-      foo = T.must(@index["Foo"][0])
+      foo = T.must(@index["Foo::<Class:Foo>"][0])
       assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
 
-      qux = T.must(@index["Foo::Qux"][0])
+      qux = T.must(@index["Foo::Qux::<Class:Qux>"][0])
       assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
 
-      constant_path_references = T.must(@index["ConstantPathReferences"][0])
+      constant_path_references = T.must(@index["ConstantPathReferences::<Class:ConstantPathReferences>"][0])
       assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
     end
 
