@@ -1509,5 +1509,20 @@ module RubyIndexer
 
       assert_empty(@index.method_completion_candidates("bar", "Foo"))
     end
+
+    def test_first_unqualified_const
+      index(<<~RUBY)
+        module Foo
+          class Bar; end
+        end
+
+        module Baz
+          class Bar; end
+        end
+      RUBY
+
+      entry = T.must(@index.first_unqualified_const("Bar")&.first)
+      assert_equal("Foo::Bar", entry.name)
+    end
   end
 end

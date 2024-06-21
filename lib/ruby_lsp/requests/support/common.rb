@@ -130,13 +130,17 @@ module RubyLsp
             title: String,
             entries: T.any(T::Array[RubyIndexer::Entry], RubyIndexer::Entry),
             max_entries: T.nilable(Integer),
+            extra_links: T.nilable(String),
           ).returns(String)
         end
-        def markdown_from_index_entries(title, entries, max_entries = nil)
+        def markdown_from_index_entries(title, entries, max_entries = nil, extra_links: nil)
           categorized_markdown = categorized_markdown_from_index_entries(title, entries, max_entries)
 
+          markdown = +(categorized_markdown[:title] || "")
+          markdown << "\n\n#{extra_links}" if extra_links
+
           <<~MARKDOWN.chomp
-            #{categorized_markdown[:title]}
+            #{markdown}
 
             #{categorized_markdown[:links]}
 

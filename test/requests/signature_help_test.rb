@@ -345,4 +345,28 @@ class SignatureHelpTest < Minitest::Test
       assert_equal(0, result.active_parameter)
     end
   end
+
+  def test_guessed_types
+    source = <<~RUBY
+      class User
+        def subscribe!(news_letter)
+        end
+      end
+
+      user.subscribe!()
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
+        position: { line: 5, character: 15 },
+        context: {},
+      })
+      result = server.pop_response.response
+      signature = result.signatures.first
+
+      assert_equal("subscribe!(news_letter)", signature.label)
+      assert_match("guessed receiver: User", signature.documentation.value)
+    end
+  end
 end

@@ -109,10 +109,15 @@ module RubyLsp
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
-        methods = @index.resolve_method(message, type)
+        methods = @index.resolve_method(message, type.name)
         return unless methods
 
-        title = "#{message}#{T.must(methods.first).decorated_parameters}"
+        title = +"#{message}#{T.must(methods.first).decorated_parameters}"
+
+        if type.is_a?(TypeInferrer::GuessedType)
+          title << " | guessed receiver: #{type.name}"
+          @response_builder.push("[Learn more about guessed types](#{GUESSED_TYPES_URL})\n", category: :links)
+        end
 
         categorized_markdown_from_index_entries(title, methods).each do |category, content|
           @response_builder.push(content, category: category)
@@ -156,7 +161,7 @@ module RubyLsp
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
-        entries = @index.resolve_instance_variable(name, type)
+        entries = @index.resolve_instance_variable(name, type.name)
         return unless entries
 
         categorized_markdown_from_index_entries(name, entries).each do |category, content|
