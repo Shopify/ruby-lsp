@@ -294,6 +294,11 @@ module RubyIndexer
       sig { returns(T.nilable(Entry::Namespace)) }
       attr_reader :owner
 
+      sig { returns(T::Array[RubyIndexer::Entry::Parameter]) }
+      def parameters
+        T.must(signatures.first).parameters
+      end
+
       sig do
         params(
           name: String,
@@ -310,32 +315,36 @@ module RubyIndexer
         @owner = owner
       end
 
-      sig { abstract.returns(T::Array[Parameter]) }
-      def parameters; end
+      sig { abstract.returns(T::Array[Entry::Signature]) }
+      def signatures; end
 
-      # Returns a string with the decorated names of the parameters of this member. E.g.: `(a, b = 1, c: 2)`
       sig { returns(String) }
       def decorated_parameters
-        "(#{parameters.map(&:decorated_name).join(", ")})"
+        "(#{T.must(signatures.first).format})"
       end
     end
 
     class Accessor < Member
       extend T::Sig
 
-      sig { override.returns(T::Array[Parameter]) }
-      def parameters
-        params = []
-        params << RequiredParameter.new(name: name.delete_suffix("=").to_sym) if name.end_with?("=")
-        params
+      sig { override.returns(T::Array[Signature]) }
+      def signatures
+        @signatures ||= T.let(
+          begin
+            params = []
+            params << RequiredParameter.new(name: name.delete_suffix("=").to_sym) if name.end_with?("=")
+            [Entry::Signature.new(params)]
+          end,
+          T.nilable(T::Array[Signature]),
+        )
       end
     end
 
     class Method < Member
       extend T::Sig
 
-      sig { override.returns(T::Array[Parameter]) }
-      attr_reader :parameters
+      sig { override.returns(T::Array[Signature]) }
+      attr_reader :signatures
 
       # Returns the location of the method name, excluding parameters or the body
       sig { returns(Location) }
@@ -348,14 +357,14 @@ module RubyIndexer
           location: T.any(Prism::Location, RubyIndexer::Location),
           name_location: T.any(Prism::Location, Location),
           comments: T::Array[String],
-          parameters: T::Array[Parameter],
+          signatures: T::Array[Signature],
           visibility: Visibility,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, name_location, comments, parameters, visibility, owner) # rubocop:disable Metrics/ParameterLists
+      def initialize(name, file_path, location, name_location, comments, signatures, visibility, owner) # rubocop:disable Metrics/ParameterLists
         super(name, file_path, location, comments, visibility, owner)
-        @parameters = parameters
+        @signatures = signatures
         @name_location = T.let(
           if name_location.is_a?(Prism::Location)
             Location.new(
@@ -512,6 +521,27 @@ module RubyIndexer
       sig { returns(String) }
       def decorated_parameters
         @target.decorated_parameters
+      end
+    end
+
+    # Ruby doesn't support method overloading, so a method will have only one signature.
+    # However RBS can represent the concept of method overloading, with different return types based on the arguments
+    # passed, so we need to store all the signatures.
+    class Signature
+      extend T::Sig
+
+      sig { returns(T::Array[Parameter]) }
+      attr_reader :parameters
+
+      sig { params(parameters: T::Array[Parameter]).void }
+      def initialize(parameters)
+        @parameters = parameters
+      end
+
+      # Returns a string with the decorated names of the parameters of this member. E.g.: `(a, b = 1, c: 2)`
+      sig { returns(String) }
+      def format
+        @parameters.map(&:decorated_name).join(", ")
       end
     end
   end
