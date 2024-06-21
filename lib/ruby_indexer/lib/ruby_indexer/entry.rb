@@ -525,6 +525,9 @@ module RubyIndexer
       end
     end
 
+    # Ruby doesn't support method overloading, so a method will have only one signature.
+    # However RBS can represent the concept of method overloading, with different return types based on the arguments
+    # passed, so we need to store all the signatures.
     class Signature
       extend T::Sig
 
