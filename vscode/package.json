@@ -285,7 +285,17 @@
             "auto",
             "rubocop",
             "syntax_tree",
+            "standard",
+            "rubyfmt",
             "none"
+          ],
+          "enumDescriptions": [
+            "Automatically detect formatter",
+            "RuboCop",
+            "Syntax Tree",
+            "Standard (supported by community addon)",
+            "Rubyfmt (supported by community addon)",
+            "Do not use a formatter"
           ],
           "default": "auto"
         },
