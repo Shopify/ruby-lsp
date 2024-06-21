@@ -330,9 +330,14 @@ module RubyIndexer
 
       sig { override.returns(T::Array[Signature]) }
       def signatures
-        params = []
-        params << RequiredParameter.new(name: name.delete_suffix("=").to_sym) if name.end_with?("=")
-        [Entry::Signature.new(params)]
+        @signatures ||= T.let(
+          begin
+            params = []
+            params << RequiredParameter.new(name: name.delete_suffix("=").to_sym) if name.end_with?("=")
+            [Entry::Signature.new(params)]
+          end,
+          T.nilable(T::Array[Signature]),
+        )
       end
     end
 
