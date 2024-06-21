@@ -86,10 +86,8 @@ module RubyLsp
     sig { abstract.returns(Prism::ParseResult) }
     def parse; end
 
-    sig { returns(T::Boolean) }
-    def syntax_error?
-      @parse_result.failure?
-    end
+    sig { abstract.returns(T::Boolean) }
+    def syntax_error?; end
 
     sig { returns(Scanner) }
     def create_scanner
