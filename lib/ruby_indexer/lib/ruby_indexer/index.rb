@@ -151,28 +151,37 @@ module RubyIndexer
 
       candidates = name ? prefix_search(name).flatten : @entries.values.flatten
       completion_items = candidates.each_with_object({}) do |entry, hash|
-        case entry
-        when Entry::Member, Entry::MethodAlias
-          entry_name = entry.name
-          ancestor_index = ancestors.index(entry.owner&.name)
-          existing_entry = hash[entry_name]
+        unless entry.is_a?(Entry::Member) || entry.is_a?(Entry::MethodAlias) ||
+            entry.is_a?(Entry::UnresolvedMethodAlias)
+          next
+        end
 
-          # If this method belongs to an ancestors and either we haven't found it yet or it appears earlier in the
-          # ancestors chain than the previous candidate, then we need to put it in the hash. Otherwise, continue
-          next unless ancestor_index && (!existing_entry || ancestor_index < existing_entry.last)
+        entry_name = entry.name
+        ancestor_index = ancestors.index(entry.owner&.name)
+        existing_entry, existing_entry_index = hash[entry_name]
 
-          hash[entry_name] = [entry, ancestor_index]
-        when Entry::UnresolvedMethodAlias
-          entry_name = entry.name
-          ancestor_index = ancestors.index(entry.owner&.name)
-          existing_entry = hash[entry_name]
+        # Conditions for matching a method completion candidate:
+        # 1. If an ancestor_index was found, it means that this method is owned by the receiver. The exact index is
+        # where in the ancestor chain the method was found. For example, if the ancestors are ["A", "B", "C"] and we
+        # found the method declared in `B`, then the ancestors index is 1
+        #
+        # 2. We already established that this method is owned by the receiver. Now, check if we already added a
+        # completion candidate for this method name. If not, then we just go and add it (the left hand side of the or)
+        #
+        # 3. If we had already found a method entry for the same name, then we need to check if the current entry that
+        # we are comparing appears first in the hierarchy or not. For example, imagine we have the method `open` defined
+        # in both `File` and its parent `IO`. If we first find the method `open` in `IO`, it will be inserted into the
+        # hash. Then, when we find the entry for `open` owned by `File`, we need to replace `IO.open` by `File.open`,
+        # since `File.open` appears first in the hierarchy chain and is therefore the correct method being invoked. The
+        # last part of the conditional checks if the current entry was found earlier in the hierarchy chain, in which
+        # case we must update the existing entry to avoid showing the wrong method declaration for overridden methods
+        next unless ancestor_index && (!existing_entry || ancestor_index < existing_entry_index)
 
-          # If this method belongs to an ancestors and either we haven't found it yet or it appears earlier in the
-          # ancestors chain than the previous candidate, then we need to put it in the hash. Otherwise, continue
-          next unless ancestor_index && (!existing_entry || ancestor_index < existing_entry.last)
-
+        if entry.is_a?(Entry::UnresolvedMethodAlias)
           resolved_alias = resolve_method_alias(entry, receiver_name)
           hash[entry_name] = [resolved_alias, ancestor_index] if resolved_alias.is_a?(Entry::MethodAlias)
+        else
+          hash[entry_name] = [entry, ancestor_index]
         end
       end
 

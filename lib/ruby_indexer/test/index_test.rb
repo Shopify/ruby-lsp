@@ -1525,5 +1525,21 @@ module RubyIndexer
       assert_equal(["bar"], entries.map(&:name))
       assert_equal("Baz", T.must(entries.first.owner).name)
     end
+
+    def test_completion_does_not_duplicate_methods_overridden_by_aliases
+      index(<<~RUBY)
+        class Foo
+          def bar; end
+        end
+
+        class Baz < Foo
+          alias bar to_s
+        end
+      RUBY
+
+      entries = @index.method_completion_candidates("bar", "Baz")
+      assert_equal(["bar"], entries.map(&:name))
+      assert_equal("Baz", T.must(entries.first.owner).name)
+    end
   end
 end
