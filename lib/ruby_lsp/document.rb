@@ -39,11 +39,6 @@ module RubyLsp
       @parse_result.value
     end
 
-    sig { returns(T::Array[Prism::Comment]) }
-    def comments
-      @parse_result.comments
-    end
-
     sig { params(other: Document).returns(T::Boolean) }
     def ==(other)
       @source == other.source

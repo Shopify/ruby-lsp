@@ -347,15 +347,17 @@ module RubyLsp
         return
       end
 
+      parse_result = document.parse_result
+
       # Run requests for the document
       dispatcher = Prism::Dispatcher.new
-      folding_range = Requests::FoldingRanges.new(document.parse_result.comments, dispatcher)
+      folding_range = Requests::FoldingRanges.new(parse_result.comments, dispatcher)
       document_symbol = Requests::DocumentSymbol.new(uri, dispatcher)
-      document_link = Requests::DocumentLink.new(uri, document.comments, dispatcher)
+      document_link = Requests::DocumentLink.new(uri, parse_result.comments, dispatcher)
       code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
 
       semantic_highlighting = Requests::SemanticHighlighting.new(@global_state, dispatcher)
-      dispatcher.dispatch(document.tree)
+      dispatcher.dispatch(parse_result.value)
 
       # Store all responses retrieve in this round of visits in the cache and then return the response for the request
       # we actually received
