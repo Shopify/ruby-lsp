@@ -483,6 +483,9 @@ module RubyIndexer
       sig { returns(T.any(Member, MethodAlias)) }
       attr_reader :target
 
+      sig { returns(T.nilable(Entry::Namespace)) }
+      attr_reader :owner
+
       sig { params(target: T.any(Member, MethodAlias), unresolved_alias: UnresolvedMethodAlias).void }
       def initialize(target, unresolved_alias)
         full_comments = ["Alias for #{target.name}\n"]
@@ -498,12 +501,13 @@ module RubyIndexer
         )
 
         @target = target
+        @owner = T.let(unresolved_alias.owner, T.nilable(Entry::Namespace))
       end
 
-      sig { returns(T.nilable(Entry::Namespace)) }
-      def owner
-        @target.owner
-      end
+      # sig { returns(T.nilable(Entry::Namespace)) }
+      # def owner
+      #   @target.owner
+      # end
 
       sig { returns(T::Array[Parameter]) }
       def parameters
