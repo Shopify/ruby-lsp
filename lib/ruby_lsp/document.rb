@@ -34,11 +34,6 @@ module RubyLsp
       @parse_result = T.let(parse, Prism::ParseResult)
     end
 
-    sig { returns(Prism::ProgramNode) }
-    def tree
-      @parse_result.value
-    end
-
     sig { params(other: Document).returns(T::Boolean) }
     def ==(other)
       @source == other.source

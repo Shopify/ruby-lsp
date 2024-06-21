@@ -34,7 +34,7 @@ module RubyLsp
       sig { override.returns(T.all(T::Array[Support::SelectionRange], Object)) }
       def perform
         # [node, parent]
-        queue = [[@document.tree, nil]]
+        queue = [[@document.parse_result.value, nil]]
 
         until queue.empty?
           node, parent = queue.shift

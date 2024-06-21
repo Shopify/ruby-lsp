@@ -389,7 +389,7 @@ module RubyLsp
 
       dispatcher = Prism::Dispatcher.new
       request = Requests::SemanticHighlighting.new(@global_state, dispatcher, range: start_line..end_line)
-      dispatcher.visit(document.tree)
+      dispatcher.visit(document.parse_result.value)
 
       response = request.perform
       send_message(Result.new(id: message[:id], response: response))
@@ -428,7 +428,7 @@ module RubyLsp
       dispatcher = Prism::Dispatcher.new
       document = @store.get(params.dig(:textDocument, :uri))
       request = Requests::DocumentHighlight.new(document, params[:position], dispatcher)
-      dispatcher.dispatch(document.tree)
+      dispatcher.dispatch(document.parse_result.value)
       send_message(Result.new(id: message[:id], response: request.perform))
     end
 
@@ -481,7 +481,7 @@ module RubyLsp
       dispatcher = Prism::Dispatcher.new
       document = @store.get(params.dig(:textDocument, :uri))
       request = Requests::InlayHints.new(document, params[:range], hints_configurations, dispatcher)
-      dispatcher.visit(document.tree)
+      dispatcher.visit(document.parse_result.value)
       send_message(Result.new(id: message[:id], response: request.perform))
     end
 
