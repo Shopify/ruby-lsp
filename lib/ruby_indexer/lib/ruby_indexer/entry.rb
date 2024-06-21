@@ -504,11 +504,6 @@ module RubyIndexer
         @owner = T.let(unresolved_alias.owner, T.nilable(Entry::Namespace))
       end
 
-      # sig { returns(T.nilable(Entry::Namespace)) }
-      # def owner
-      #   @target.owner
-      # end
-
       sig { returns(T::Array[Parameter]) }
       def parameters
         @target.parameters
