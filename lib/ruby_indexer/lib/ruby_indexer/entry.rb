@@ -318,10 +318,9 @@ module RubyIndexer
       sig { abstract.returns(T::Array[Entry::Signature]) }
       def signatures; end
 
-      # Returns a string with the decorated names of the parameters of this member. E.g.: `(a, b = 1, c: 2)`
       sig { returns(String) }
       def decorated_parameters
-        "(#{T.must(signatures.first).parameters.map(&:decorated_name).join(", ")})"
+        "(#{T.must(signatures.first).format})"
       end
     end
 
@@ -535,6 +534,12 @@ module RubyIndexer
       sig { params(parameters: T::Array[Parameter]).void }
       def initialize(parameters)
         @parameters = parameters
+      end
+
+      # Returns a string with the decorated names of the parameters of this member. E.g.: `(a, b = 1, c: 2)`
+      sig { returns(String) }
+      def format
+        @parameters.map(&:decorated_name).join(", ")
       end
     end
   end
