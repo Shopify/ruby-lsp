@@ -309,7 +309,7 @@ module RubyIndexer
           node.location,
           node.name_loc,
           comments,
-          list_params(node.parameters),
+          [Entry::Signature.new(list_params(node.parameters))],
           current_visibility,
           @owner_stack.last,
         ))
@@ -322,7 +322,7 @@ module RubyIndexer
           node.location,
           node.name_loc,
           comments,
-          list_params(node.parameters),
+          [Entry::Signature.new(list_params(node.parameters))],
           current_visibility,
           singleton,
         ))
