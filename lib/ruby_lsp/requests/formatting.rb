@@ -40,6 +40,8 @@ module RubyLsp
         return unless @active_formatter
         return if @document.syntax_error?
 
+        # We don't format erb documents yet
+
         formatted_text = @active_formatter.run_formatting(@uri, @document)
         return unless formatted_text
 
