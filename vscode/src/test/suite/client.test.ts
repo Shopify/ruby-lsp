@@ -655,11 +655,30 @@ suite("Client", () => {
   }).timeout(20000);
 
   test("document selectors match default gems and bundled gems appropriately", () => {
-    const [workspaceFilter, bundledGemsFilter, defaultGemsFilter] =
-      client.clientOptions.documentSelector!;
+    const [
+      workspaceRubyFilter,
+      workspaceERBFilter,
+      bundledGemsFilter,
+      defaultGemsFilter,
+    ] = client.clientOptions.documentSelector!;
 
     assert.strictEqual(
-      (workspaceFilter as TextDocumentFilter).pattern!,
+      (workspaceRubyFilter as TextDocumentFilter).language!,
+      "ruby",
+    );
+
+    assert.strictEqual(
+      (workspaceRubyFilter as TextDocumentFilter).pattern!,
+      `${workspaceUri.fsPath}/**/*`,
+    );
+
+    assert.strictEqual(
+      (workspaceERBFilter as TextDocumentFilter).language!,
+      "erb",
+    );
+
+    assert.strictEqual(
+      (workspaceERBFilter as TextDocumentFilter).pattern!,
       `${workspaceUri.fsPath}/**/*`,
     );
 

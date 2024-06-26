@@ -37,13 +37,18 @@ module RubyLsp
       return document unless document.nil?
 
       path = T.must(uri.to_standardized_path)
-      set(uri: uri, source: File.binread(path), version: 0)
+      language_id = path.end_with?(".erb") || path.end_with?(".rhtml") ? "erb" : "ruby"
+      set(uri: uri, source: File.binread(path), version: 0, language_id: language_id)
       T.must(@state[uri.to_s])
     end
 
-    sig { params(uri: URI::Generic, source: String, version: Integer, encoding: Encoding).void }
-    def set(uri:, source:, version:, encoding: Encoding::UTF_8)
-      document = RubyDocument.new(source: source, version: version, uri: uri, encoding: encoding)
+    sig { params(uri: URI::Generic, source: String, version: Integer, language_id: String, encoding: Encoding).void }
+    def set(uri:, source:, version:, language_id:, encoding: Encoding::UTF_8)
+      document = if language_id == "erb"
+        ERBDocument.new(source: source, version: version, uri: uri, encoding: encoding)
+      else
+        RubyDocument.new(source: source, version: version, uri: uri, encoding: encoding)
+      end
       @state[uri.to_s] = document
     end
 

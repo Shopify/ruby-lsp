@@ -36,7 +36,7 @@ module RubyLsp
 
     sig { params(other: Document).returns(T::Boolean) }
     def ==(other)
-      @source == other.source
+      self.class == other.class && uri == other.uri && @source == other.source
     end
 
     # TODO: remove this method once all nonpositional requests have been migrated to the listener pattern

@@ -289,6 +289,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
             uri: second_uri,
             text: second_source,
             version: 1,
+            languageId: "ruby",
           },
         },
       })
