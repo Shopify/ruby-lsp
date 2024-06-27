@@ -370,6 +370,30 @@ export class RubyLsp {
         Command.DebugTest,
         this.testController.debugTest.bind(this.testController),
       ),
+      vscode.commands.registerCommand(
+        Command.RunTask,
+        async (command: string) => {
+          let workspace = this.currentActiveWorkspace();
+
+          if (!workspace) {
+            workspace = await this.showWorkspacePick();
+          }
+
+          if (!workspace) {
+            return;
+          }
+
+          workspace.outputChannel.show();
+          workspace.outputChannel.info(`Running task: ${command}`);
+          const { stdout, stderr } = await workspace.execute(command);
+
+          if (stderr.length > 0) {
+            workspace.outputChannel.error(stderr);
+          } else {
+            workspace.outputChannel.info(stdout);
+          }
+        },
+      ),
     );
   }
 
