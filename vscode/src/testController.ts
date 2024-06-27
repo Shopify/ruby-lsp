@@ -274,56 +274,7 @@ export class TestController {
       run.started(test);
 
       if (test.tags.find((tag) => tag.id === "example")) {
-        const start = Date.now();
-        try {
-          if (!workspace) {
-            run.errored(test, new vscode.TestMessage("No workspace found"));
-            continue;
-          }
-
-          const output: string = await this.assertTestPasses(
-            test,
-            workspace.workspaceFolder.uri.fsPath,
-            workspace.ruby.env,
-          );
-
-          run.appendOutput(output.replace(/\r?\n/g, "\r\n"), undefined, test);
-          run.passed(test, Date.now() - start);
-        } catch (err: any) {
-          const duration = Date.now() - start;
-
-          if (err.killed) {
-            run.errored(
-              test,
-              new vscode.TestMessage(
-                `Test timed out after ${this.testTimeout} seconds`,
-              ),
-              duration,
-            );
-            continue;
-          }
-
-          const messageArr = err.message.split("\n");
-
-          // Minitest and test/unit outputs are formatted differently so we need to slice the message
-          // differently to get an output format that only contains essential information
-          // If the first element of the message array is "", we know the output is a Minitest output
-          const summary =
-            messageArr[0] === ""
-              ? messageArr.slice(10, messageArr.length - 2).join("\n")
-              : messageArr.slice(4, messageArr.length - 9).join("\n");
-
-          const messages = [
-            new vscode.TestMessage(err.message),
-            new vscode.TestMessage(summary),
-          ];
-
-          if (messageArr.find((elem: string) => elem === "F")) {
-            run.failed(test, messages, duration);
-          } else {
-            run.errored(test, messages, duration);
-          }
-        }
+        await this.runSingleTest(test, workspace, run);
       }
 
       test.children.forEach(enqueue);
@@ -337,6 +288,63 @@ export class TestController {
         "test",
         workspace.lspClient.serverVersion,
       );
+    }
+  }
+
+  private async runSingleTest(
+    test: vscode.TestItem,
+    workspace: Workspace | undefined,
+    run: vscode.TestRun,
+  ) {
+    const start = Date.now();
+    try {
+      if (!workspace) {
+        run.errored(test, new vscode.TestMessage("No workspace found"));
+        return;
+      }
+
+      const output: string = await this.assertTestPasses(
+        test,
+        workspace.workspaceFolder.uri.fsPath,
+        workspace.ruby.env,
+      );
+
+      run.appendOutput(output.replace(/\r?\n/g, "\r\n"), undefined, test);
+      run.passed(test, Date.now() - start);
+    } catch (err: any) {
+      const duration = Date.now() - start;
+
+      if (err.killed) {
+        run.errored(
+          test,
+          new vscode.TestMessage(
+            `Test timed out after ${this.testTimeout} seconds`,
+          ),
+          duration,
+        );
+        return;
+      }
+
+      const messageArr = err.message.split("\n");
+
+      // Minitest and test/unit outputs are formatted differently so we need to slice the message
+      // differently to get an output format that only contains essential information
+      // If the first element of the message array is "", we know the output is a Minitest output
+      const summary =
+        messageArr[0] === ""
+          ? messageArr.slice(10, messageArr.length - 2).join("\n")
+          : messageArr.slice(4, messageArr.length - 9).join("\n");
+
+      const messages = [
+        new vscode.TestMessage(err.message),
+        new vscode.TestMessage(summary),
+      ];
+
+      if (messageArr.find((elem: string) => elem === "F")) {
+        run.failed(test, messages, duration);
+      } else {
+        run.errored(test, messages, duration);
+      }
     }
   }
 
