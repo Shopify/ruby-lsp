@@ -223,36 +223,51 @@ module RubyLsp
           method_name: T.nilable(String),
         ).returns(String)
       end
+      def build_minitest_name(group_stack: [], spec_name: nil, method_name: nil)
+        last_dynamic_reference_index = group_stack.rindex(DYNAMIC_REFERENCE_MARKER)
+        if last_dynamic_reference_index
+          # In cases where the test path looks like `foo::Bar`
+          # the best we can do is match everything to the right of it.
+          # Tests are classes, dynamic references are only a thing for modules,
+          # so there must be something to the left of the available path.
+          group_stack = T.must(group_stack[last_dynamic_reference_index + 1..])
+          if method_name
+            "/::#{Shellwords.escape(group_stack.join("::")) + "#" + Shellwords.escape(method_name)}$/"
+          else
+            # When clicking on a CodeLens for `Test`, `(#|::)` will match all tests
+            # that are registered on the class itself (matches after `#`) and all tests
+            # that are nested inside of that class in other modules/classes (matches after `::`)
+            "\"/::#{Shellwords.escape(group_stack.join("::"))}(#|::)/\""
+          end
+        elsif method_name
+          # We know the entire path, do an exact match
+          Shellwords.escape(group_stack.join("::")) + "#" + Shellwords.escape(method_name)
+        elsif spec_name
+          "/#{Shellwords.escape(spec_name)}/"
+        else
+          # Execute all tests of the selected class and tests in
+          # modules/classes nested inside of that class
+          "\"/^#{Shellwords.escape(group_stack.join("::"))}(#|::)/\""
+        end
+      end
+
+      sig do
+        params(
+          group_stack: T::Array[String],
+          spec_name: T.nilable(String),
+          method_name: T.nilable(String),
+        ).returns(String)
+      end
       def generate_test_command(group_stack: [], spec_name: nil, method_name: nil)
         command = BASE_COMMAND + T.must(@path)
 
         case @global_state.test_library
         when "minitest"
-          last_dynamic_reference_index = group_stack.rindex(DYNAMIC_REFERENCE_MARKER)
-          command += if last_dynamic_reference_index
-            # In cases where the test path looks like `foo::Bar`
-            # the best we can do is match everything to the right of it.
-            # Tests are classes, dynamic references are only a thing for modules,
-            # so there must be something to the left of the available path.
-            group_stack = T.must(group_stack[last_dynamic_reference_index + 1..])
-            if method_name
-              " --name " + "/::#{Shellwords.escape(group_stack.join("::")) + "#" + Shellwords.escape(method_name)}$/"
-            else
-              # When clicking on a CodeLens for `Test`, `(#|::)` will match all tests
-              # that are registered on the class itself (matches after `#`) and all tests
-              # that are nested inside of that class in other modules/classes (matches after `::`)
-              " --name " + "\"/::#{Shellwords.escape(group_stack.join("::"))}(#|::)/\""
-            end
-          elsif method_name
-            # We know the entire path, do an exact match
-            " --name " + Shellwords.escape(group_stack.join("::")) + "#" + Shellwords.escape(method_name)
-          elsif spec_name
-            " --name " + "/#{Shellwords.escape(spec_name)}/"
-          else
-            # Execute all tests of the selected class and tests in
-            # modules/classes nested inside of that class
-            " --name " + "\"/^#{Shellwords.escape(group_stack.join("::"))}(#|::)/\""
-          end
+          command += " --name " + build_minitest_name(
+            group_stack: group_stack,
+            spec_name: spec_name,
+            method_name: method_name,
+          )
         when "test-unit"
           group_name = T.must(group_stack.last)
           command += " --testcase " + "/#{Shellwords.escape(group_name)}/"
