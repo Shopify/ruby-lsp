@@ -23,6 +23,7 @@ module RubyLsp
       DESCRIBE_KEYWORD = T.let(:describe, Symbol)
       IT_KEYWORD = T.let(:it, Symbol)
       DYNAMIC_REFERENCE_MARKER = T.let("<dynamic_reference>", String)
+      MINITEST_LOAD_PATH = T.let(File.expand_path(File.join(__dir__, "../../minitest/load.rb")), String)
 
       sig do
         params(
@@ -106,6 +107,7 @@ module RubyLsp
               name: method_name,
               command: generate_test_command(method_name: method_name, group_stack: @group_stack),
               kind: :example,
+              combining: build_combining(method_name),
             )
           end
         end
@@ -171,8 +173,20 @@ module RubyLsp
 
       private
 
-      sig { params(node: Prism::Node, name: String, command: String, kind: Symbol).void }
-      def add_test_code_lens(node, name:, command:, kind:)
+      sig do
+        params(
+          node: Prism::Node,
+          name: String,
+          command: String,
+          kind: Symbol,
+          combining: T.nilable({
+            type: String,
+            command: String,
+            id: String,
+          }),
+        ).void
+      end
+      def add_test_code_lens(node, name:, command:, kind:, combining: nil)
         # don't add code lenses if the test library is not supported or unknown
         return unless SUPPORTED_TEST_LIBRARIES.include?(@global_state.test_library) && @path
 
@@ -186,6 +200,7 @@ module RubyLsp
             end_line: node.location.end_line - 1,
             end_column: node.location.end_column,
           },
+          combining,
         ]
 
         grouping_data = { group_id: @group_id_stack.last, kind: kind }
@@ -278,6 +293,24 @@ module RubyLsp
         end
 
         command
+      end
+
+      sig do
+        params(method_name: String).returns(T.nilable({
+          type: String,
+          command: String,
+          id: String,
+        }))
+      end
+      def build_combining(method_name)
+        case @global_state.test_library
+        when "minitest"
+          {
+            type: "regex",
+            command: BASE_COMMAND + "-r#{MINITEST_LOAD_PATH} " + T.must(@path) + " --ruby-lsp --name",
+            id: build_minitest_name(method_name: method_name, group_stack: @group_stack),
+          }
+        end
       end
 
       sig { params(node: Prism::CallNode, kind: Symbol).void }

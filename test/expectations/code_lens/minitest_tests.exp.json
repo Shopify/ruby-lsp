@@ -23,7 +23,8 @@
             "start_column": 0,
             "end_line": 22,
             "end_column": 3
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -56,7 +57,8 @@
             "start_column": 0,
             "end_line": 22,
             "end_column": 3
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -89,7 +91,8 @@
             "start_column": 0,
             "end_line": 22,
             "end_column": 3
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -122,6 +125,11 @@
             "start_column": 2,
             "end_line": 5,
             "end_column": 22
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "Test#test_public"
           }
         ]
       },
@@ -154,6 +162,11 @@
             "start_column": 2,
             "end_line": 5,
             "end_column": 22
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "Test#test_public"
           }
         ]
       },
@@ -186,6 +199,11 @@
             "start_column": 2,
             "end_line": 5,
             "end_column": 22
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "Test#test_public"
           }
         ]
       },
@@ -218,6 +236,11 @@
             "start_column": 9,
             "end_line": 9,
             "end_column": 37
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "Test#test_public_command"
           }
         ]
       },
@@ -250,6 +273,11 @@
             "start_column": 9,
             "end_line": 9,
             "end_column": 37
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "Test#test_public_command"
           }
         ]
       },
@@ -282,6 +310,11 @@
             "start_column": 9,
             "end_line": 9,
             "end_column": 37
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "Test#test_public_command"
           }
         ]
       },
@@ -314,6 +347,11 @@
             "start_column": 9,
             "end_line": 11,
             "end_column": 37
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "Test#test_another_public"
           }
         ]
       },
@@ -346,6 +384,11 @@
             "start_column": 9,
             "end_line": 11,
             "end_column": 37
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "Test#test_another_public"
           }
         ]
       },
@@ -378,6 +421,11 @@
             "start_column": 9,
             "end_line": 11,
             "end_column": 37
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "Test#test_another_public"
           }
         ]
       },
@@ -410,6 +458,11 @@
             "start_column": 2,
             "end_line": 17,
             "end_column": 28
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "Test#test_public_vcall"
           }
         ]
       },
@@ -442,6 +495,11 @@
             "start_column": 2,
             "end_line": 17,
             "end_column": 28
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "Test#test_public_vcall"
           }
         ]
       },
@@ -474,6 +532,11 @@
             "start_column": 2,
             "end_line": 17,
             "end_column": 28
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "Test#test_public_vcall"
           }
         ]
       },
@@ -506,6 +569,11 @@
             "start_column": 2,
             "end_line": 19,
             "end_column": 23
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "Test#test_with_q\\?"
           }
         ]
       },
@@ -538,6 +606,11 @@
             "start_column": 2,
             "end_line": 19,
             "end_column": 23
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "Test#test_with_q\\?"
           }
         ]
       },
@@ -570,6 +643,11 @@
             "start_column": 2,
             "end_line": 19,
             "end_column": 23
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "Test#test_with_q\\?"
           }
         ]
       },
@@ -602,7 +680,8 @@
             "start_column": 0,
             "end_line": 32,
             "end_column": 3
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -635,7 +714,8 @@
             "start_column": 0,
             "end_line": 32,
             "end_column": 3
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -668,7 +748,8 @@
             "start_column": 0,
             "end_line": 32,
             "end_column": 3
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -701,6 +782,11 @@
             "start_column": 2,
             "end_line": 25,
             "end_column": 22
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "AnotherTest#test_public"
           }
         ]
       },
@@ -733,6 +819,11 @@
             "start_column": 2,
             "end_line": 25,
             "end_column": 22
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "AnotherTest#test_public"
           }
         ]
       },
@@ -765,6 +856,11 @@
             "start_column": 2,
             "end_line": 25,
             "end_column": 22
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "AnotherTest#test_public"
           }
         ]
       },
@@ -797,6 +893,11 @@
             "start_column": 2,
             "end_line": 31,
             "end_column": 24
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "AnotherTest#test_public_2"
           }
         ]
       },
@@ -829,6 +930,11 @@
             "start_column": 2,
             "end_line": 31,
             "end_column": 24
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "AnotherTest#test_public_2"
           }
         ]
       },
@@ -861,6 +967,11 @@
             "start_column": 2,
             "end_line": 31,
             "end_column": 24
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_tests.rb --ruby-lsp --name",
+            "id": "AnotherTest#test_public_2"
           }
         ]
       },
@@ -871,5 +982,7 @@
       }
     }
   ],
-  "params": []
+  "params": [
+
+  ]
 }

@@ -1,5 +1,7 @@
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 import { promisify } from "util";
+import readline from "readline";
+import { once } from "events";
 
 import * as vscode from "vscode";
 import { CodeLens } from "vscode-languageclient/node";
@@ -12,6 +14,9 @@ const asyncExec = promisify(exec);
 export class TestController {
   private readonly testController: vscode.TestController;
   private readonly testCommands: WeakMap<vscode.TestItem, string>;
+  private combining: { type: string; command: string } | undefined;
+  private readonly combinedTestIdsToTests: Map<string, vscode.TestItem>;
+  private readonly combinedTestsToTestIds: Map<vscode.TestItem, string>;
   private readonly testRunProfile: vscode.TestRunProfile;
   private readonly testDebugProfile: vscode.TestRunProfile;
   private readonly debugTag: vscode.TestTag = new vscode.TestTag("debug");
@@ -37,6 +42,9 @@ export class TestController {
     );
 
     this.testCommands = new WeakMap<vscode.TestItem, string>();
+
+    this.combinedTestIdsToTests = new Map<string, vscode.TestItem>();
+    this.combinedTestsToTestIds = new Map<vscode.TestItem, string>();
 
     this.testRunProfile = this.testController.createRunProfile(
       "Run",
@@ -74,6 +82,11 @@ export class TestController {
       this.testCommands.delete(test);
     });
 
+    // Reset grouped tests
+    delete this.combining;
+    this.combinedTestIdsToTests.clear();
+    this.combinedTestsToTestIds.clear();
+
     const groupIdMap: Record<string, vscode.TestItem> = {};
     let classTest: vscode.TestItem;
 
@@ -83,7 +96,7 @@ export class TestController {
     });
 
     response.forEach((res) => {
-      const [_, name, command, location] = res.command!.arguments!;
+      const [_, name, command, location, combining] = res.command!.arguments!;
       const testItem: vscode.TestItem = this.testController.createTestItem(
         name,
         name,
@@ -95,6 +108,12 @@ export class TestController {
       } else if (name.startsWith("test_")) {
         // Older Ruby LSP versions may not include 'kind' so we try infer it from the name.
         testItem.tags = [new vscode.TestTag("example")];
+      }
+
+      if (combining) {
+        this.combining ||= { type: combining.type, command: combining.command };
+        this.combinedTestIdsToTests.set(combining.id, testItem);
+        this.combinedTestsToTestIds.set(testItem, combining.id);
       }
 
       this.testCommands.set(testItem, command);
@@ -263,6 +282,7 @@ export class TestController {
       this.testController.items.forEach(enqueue);
     }
     const workspace = this.currentWorkspace();
+    const combineTests = new Array<vscode.TestItem>();
 
     while (queue.length > 0 && !token.isCancellationRequested) {
       const test = queue.pop()!;
@@ -274,10 +294,19 @@ export class TestController {
       run.started(test);
 
       if (test.tags.find((tag) => tag.id === "example")) {
-        await this.runSingleTest(test, workspace, run);
+        if (this.combinedTestsToTestIds.has(test)) {
+          combineTests.push(test);
+        } else {
+          await this.runSingleTest(test, workspace, run);
+        }
       }
 
       test.children.forEach(enqueue);
+    }
+
+    if (combineTests.length > 0) {
+      // Combined tests can be grouped into a single command
+      await this.runCombinedTests(combineTests, workspace, run);
     }
 
     // Make sure to end the run after all tests have been executed
@@ -346,6 +375,77 @@ export class TestController {
         run.errored(test, messages, duration);
       }
     }
+  }
+
+  private async runCombinedTests(
+    tests: vscode.TestItem[],
+    workspace: Workspace | undefined,
+    run: vscode.TestRun,
+  ) {
+    if (!workspace) {
+      this.errorAll(tests, run, "No workspace found");
+      return;
+    }
+
+    const [command, ...args] = this.combining!.command.split(" ");
+
+    if (this.combining!.type === "regex") {
+      const values = tests.map((test) => this.combinedTestsToTestIds.get(test));
+      args.push(`"/${values.join("|")}/"`);
+    } else {
+      this.errorAll(tests, run, "Unable to combine tests");
+    }
+
+    const child = spawn(command, args, {
+      cwd: workspace.workspaceFolder.uri.fsPath,
+      env: workspace.ruby.env,
+    });
+    const rl = readline.createInterface({ input: child.stdout });
+
+    const starts: any = {};
+
+    rl.on("line", (line) => {
+      try {
+        const event = JSON.parse(line);
+
+        switch (event.event) {
+          case "start": {
+            const test = this.combinedTestIdsToTests.get(event.id)!;
+            starts[test.id] = Date.now();
+            run.started(test);
+            break;
+          }
+          case "pass": {
+            const test = this.combinedTestIdsToTests.get(event.id)!;
+            run.passed(test, Date.now() - starts[test.id]);
+            break;
+          }
+          case "fail": {
+            const test = this.combinedTestIdsToTests.get(event.id)!;
+            run.failed(
+              test,
+              [new vscode.TestMessage(event.message)],
+              Date.now() - starts[test.id],
+            );
+            break;
+          }
+        }
+      } catch {
+        this.errorAll(tests, run, "Error running test");
+      }
+    });
+
+    await once(rl, "close");
+  }
+
+  private errorAll(
+    tests: vscode.TestItem[],
+    run: vscode.TestRun,
+    message: string,
+  ) {
+    tests.forEach((test) => {
+      run.errored(test, new vscode.TestMessage(message));
+    });
   }
 
   private async assertTestPasses(

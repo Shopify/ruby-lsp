@@ -23,7 +23,8 @@
             "start_column": 2,
             "end_line": 5,
             "end_column": 5
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -56,7 +57,8 @@
             "start_column": 2,
             "end_line": 5,
             "end_column": 5
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -89,7 +91,8 @@
             "start_column": 2,
             "end_line": 5,
             "end_column": 5
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -122,6 +125,11 @@
             "start_column": 4,
             "end_line": 2,
             "end_column": 21
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::FooTest#test_foo"
           }
         ]
       },
@@ -154,6 +162,11 @@
             "start_column": 4,
             "end_line": 2,
             "end_column": 21
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::FooTest#test_foo"
           }
         ]
       },
@@ -186,6 +199,11 @@
             "start_column": 4,
             "end_line": 2,
             "end_column": 21
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::FooTest#test_foo"
           }
         ]
       },
@@ -218,6 +236,11 @@
             "start_column": 4,
             "end_line": 4,
             "end_column": 23
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::FooTest#test_foo_2"
           }
         ]
       },
@@ -250,6 +273,11 @@
             "start_column": 4,
             "end_line": 4,
             "end_column": 23
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::FooTest#test_foo_2"
           }
         ]
       },
@@ -282,6 +310,11 @@
             "start_column": 4,
             "end_line": 4,
             "end_column": 23
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::FooTest#test_foo_2"
           }
         ]
       },
@@ -314,7 +347,8 @@
             "start_column": 4,
             "end_line": 18,
             "end_column": 7
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -347,7 +381,8 @@
             "start_column": 4,
             "end_line": 18,
             "end_column": 7
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -380,7 +415,8 @@
             "start_column": 4,
             "end_line": 18,
             "end_column": 7
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -413,6 +449,11 @@
             "start_column": 6,
             "end_line": 9,
             "end_column": 23
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::BarTest#test_bar"
           }
         ]
       },
@@ -445,6 +486,11 @@
             "start_column": 6,
             "end_line": 9,
             "end_column": 23
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::BarTest#test_bar"
           }
         ]
       },
@@ -477,6 +523,11 @@
             "start_column": 6,
             "end_line": 9,
             "end_column": 23
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::BarTest#test_bar"
           }
         ]
       },
@@ -509,7 +560,8 @@
             "start_column": 8,
             "end_line": 16,
             "end_column": 11
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -542,7 +594,8 @@
             "start_column": 8,
             "end_line": 16,
             "end_column": 11
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -575,7 +628,8 @@
             "start_column": 8,
             "end_line": 16,
             "end_column": 11
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -608,6 +662,11 @@
             "start_column": 10,
             "end_line": 13,
             "end_column": 27
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::BarTest::Baz::BazTest#test_baz"
           }
         ]
       },
@@ -640,6 +699,11 @@
             "start_column": 10,
             "end_line": 13,
             "end_column": 27
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::BarTest::Baz::BazTest#test_baz"
           }
         ]
       },
@@ -672,6 +736,11 @@
             "start_column": 10,
             "end_line": 13,
             "end_column": 27
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::BarTest::Baz::BazTest#test_baz"
           }
         ]
       },
@@ -704,6 +773,11 @@
             "start_column": 10,
             "end_line": 15,
             "end_column": 29
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::BarTest::Baz::BazTest#test_baz_2"
           }
         ]
       },
@@ -736,6 +810,11 @@
             "start_column": 10,
             "end_line": 15,
             "end_column": 29
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::BarTest::Baz::BazTest#test_baz_2"
           }
         ]
       },
@@ -768,6 +847,11 @@
             "start_column": 10,
             "end_line": 15,
             "end_column": 29
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::BarTest::Baz::BazTest#test_baz_2"
           }
         ]
       },
@@ -800,7 +884,8 @@
             "start_column": 4,
             "end_line": 24,
             "end_column": 7
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -833,7 +918,8 @@
             "start_column": 4,
             "end_line": 24,
             "end_column": 7
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -866,7 +952,8 @@
             "start_column": 4,
             "end_line": 24,
             "end_column": 7
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -899,6 +986,11 @@
             "start_column": 6,
             "end_line": 23,
             "end_column": 23
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Baz::BazTest#test_baz"
           }
         ]
       },
@@ -931,6 +1023,11 @@
             "start_column": 6,
             "end_line": 23,
             "end_column": 23
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Baz::BazTest#test_baz"
           }
         ]
       },
@@ -963,6 +1060,11 @@
             "start_column": 6,
             "end_line": 23,
             "end_column": 23
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Baz::BazTest#test_baz"
           }
         ]
       },
@@ -995,7 +1097,8 @@
             "start_column": 2,
             "end_line": 33,
             "end_column": 5
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -1028,7 +1131,8 @@
             "start_column": 2,
             "end_line": 33,
             "end_column": 5
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -1061,7 +1165,8 @@
             "start_column": 2,
             "end_line": 33,
             "end_column": 5
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -1094,6 +1199,11 @@
             "start_column": 4,
             "end_line": 30,
             "end_column": 25
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::FooBarTest#test_foo_bar"
           }
         ]
       },
@@ -1126,6 +1236,11 @@
             "start_column": 4,
             "end_line": 30,
             "end_column": 25
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::FooBarTest#test_foo_bar"
           }
         ]
       },
@@ -1158,6 +1273,11 @@
             "start_column": 4,
             "end_line": 30,
             "end_column": 25
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::FooBarTest#test_foo_bar"
           }
         ]
       },
@@ -1190,6 +1310,11 @@
             "start_column": 4,
             "end_line": 32,
             "end_column": 27
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::FooBarTest#test_foo_bar_2"
           }
         ]
       },
@@ -1222,6 +1347,11 @@
             "start_column": 4,
             "end_line": 32,
             "end_column": 27
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::FooBarTest#test_foo_bar_2"
           }
         ]
       },
@@ -1254,6 +1384,11 @@
             "start_column": 4,
             "end_line": 32,
             "end_column": 27
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::FooBarTest#test_foo_bar_2"
           }
         ]
       },
@@ -1286,7 +1421,8 @@
             "start_column": 2,
             "end_line": 40,
             "end_column": 5
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -1319,7 +1455,8 @@
             "start_column": 2,
             "end_line": 40,
             "end_column": 5
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -1352,7 +1489,8 @@
             "start_column": 2,
             "end_line": 40,
             "end_column": 5
-          }
+          },
+          null
         ]
       },
       "data": {
@@ -1385,6 +1523,11 @@
             "start_column": 4,
             "end_line": 39,
             "end_column": 29
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::FooBar::Test#test_foo_bar_baz"
           }
         ]
       },
@@ -1417,6 +1560,11 @@
             "start_column": 4,
             "end_line": 39,
             "end_column": 29
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::FooBar::Test#test_foo_bar_baz"
           }
         ]
       },
@@ -1449,6 +1597,11 @@
             "start_column": 4,
             "end_line": 39,
             "end_column": 29
+          },
+          {
+            "type": "regex",
+            "command": "bundle exec ruby -Itest -r/lib/minitest/load.rb /fixtures/minitest_nested_classes_and_modules.rb --ruby-lsp --name",
+            "id": "Foo::Bar::FooBar::Test#test_foo_bar_baz"
           }
         ]
       },
@@ -1459,5 +1612,7 @@
       }
     }
   ],
-  "params": []
+  "params": [
+
+  ]
 }
