@@ -320,7 +320,10 @@ module RubyIndexer
 
       sig { returns(String) }
       def decorated_parameters
-        "(#{T.must(signatures.first).format})"
+        first_signature = signatures.first
+        return "" unless first_signature
+
+        "(#{first_signature.format})"
       end
     end
 
