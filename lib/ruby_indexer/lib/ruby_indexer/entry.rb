@@ -320,7 +320,7 @@ module RubyIndexer
 
       sig { returns(String) }
       def decorated_parameters
-        "(#{T.must(signatures.first).format})"
+        "(#{T.must(signatures.first).formatted})"
       end
     end
 
@@ -538,9 +538,10 @@ module RubyIndexer
         @parameters = parameters
       end
 
-      # Returns a string with the decorated names of the parameters of this member. E.g.: `(a, b = 1, c: 2)`
+      # Returns a string with the decorated names of the parameters of this member.
+      # e.g.: `(a, b = <default>, c: <default>)`
       sig { returns(String) }
-      def format
+      def formatted
         @parameters.map(&:decorated_name).join(", ")
       end
     end
