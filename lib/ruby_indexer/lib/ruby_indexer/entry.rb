@@ -60,6 +60,16 @@ module RubyIndexer
     end
 
     sig { returns(T::Boolean) }
+    def public?
+      visibility == Visibility::PUBLIC
+    end
+
+    sig { returns(T::Boolean) }
+    def protected?
+      visibility == Visibility::PROTECTED
+    end
+
+    sig { returns(T::Boolean) }
     def private?
       visibility == Visibility::PRIVATE
     end
