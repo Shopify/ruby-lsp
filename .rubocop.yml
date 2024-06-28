@@ -15,6 +15,7 @@ AllCops:
   Include:
     - "sorbet/rbi/shims/**/*.rbi"
   Exclude:
+    - "docusaurus/**/*"
     - "vendor/**/*"
     - "vscode/**/*"
     - "features/**/*"
