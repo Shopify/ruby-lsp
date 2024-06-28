@@ -8,6 +8,7 @@ import { Command, STATUS_EMITTER } from "./common";
 import { ManagerIdentifier, ManagerConfiguration } from "./ruby";
 import { StatusItems } from "./status";
 import { TestController } from "./testController";
+import { openFile } from "./openFile";
 import { Debugger } from "./debugger";
 import { DependenciesTree } from "./dependenciesTree";
 
@@ -411,6 +412,17 @@ export class RubyLsp {
 
           terminal.show();
           terminal.sendText("bundle install");
+        },
+      ),
+      vscode.commands.registerCommand(
+        Command.OpenFile,
+        (rubySourceLocation: [string, string]) => {
+          const [file, line] = rubySourceLocation;
+          const workspace = this.currentActiveWorkspace();
+          return openFile(this.telemetry, workspace, {
+            file,
+            line: parseInt(line, 10) - 1,
+          });
         },
       ),
     );
