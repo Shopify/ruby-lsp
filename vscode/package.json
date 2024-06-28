@@ -93,6 +93,11 @@
         "command": "rubyLsp.showSyntaxTree",
         "title": "Show syntax tree",
         "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.openFile",
+        "title": "Opens a local file at a given position",
+        "category": "Ruby LSP"
       }
     ],
     "configuration": {
