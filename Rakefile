@@ -15,7 +15,7 @@ RDoc::Task.new do |rdoc|
   rdoc.main = "README.md"
   rdoc.title = "Ruby LSP documentation"
   rdoc.rdoc_files.include("*.md", "lib/**/*.rb")
-  rdoc.rdoc_dir = "docs"
+  rdoc.rdoc_dir = "rdoc_docs"
   rdoc.markup = "markdown"
   rdoc.generator = "snapper"
   rdoc.options.push("--copy-files", "misc")
