@@ -1,0 +1,23 @@
+{
+    "result": [
+        {
+            "uri": "file:///fixtures/multibyte_characters.rb",
+            "range": {
+                "start": {
+                    "line": 2,
+                    "character": 2
+                },
+                "end": {
+                    "line": 8,
+                    "character": 5
+                }
+            }
+        }
+    ],
+    "params": [
+        {
+            "line": 1,
+            "character": 7
+        }
+    ]
+}

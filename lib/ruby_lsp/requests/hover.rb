@@ -52,9 +52,10 @@ module RubyLsp
             T.must(target),
             T.must(parent),
             position,
+            global_state.encoding,
           )
         elsif target.is_a?(Prism::CallNode) && target.name != :require && target.name != :require_relative &&
-            !covers_position?(target.message_loc, position)
+            !covers_position?(target.message_loc, position, global_state.encoding)
 
           target = nil
         end
