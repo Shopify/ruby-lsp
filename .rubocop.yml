@@ -10,6 +10,7 @@ require:
   - ./lib/rubocop/cop/ruby_lsp/use_register_with_handler_method
 
 AllCops:
+  ParserEngine: parser_prism
   NewCops: disable
   SuggestExtensions: false
   Include:
@@ -42,6 +43,7 @@ Sorbet/TrueSigil:
     - "lib/ruby_indexer/test/**/*.rb"
     - "lib/ruby_indexer/lib/ruby_indexer/prefix_tree.rb"
     - "lib/ruby_lsp/load_sorbet.rb"
+    - "lib/ruby_lsp/requests/support/ast_translation.rb"
   Exclude:
     - "**/*.rake"
     - "lib/**/*.rb"
@@ -57,3 +59,4 @@ Sorbet/StrictSigil:
     - "lib/ruby-lsp.rb"
     - "lib/ruby_indexer/lib/ruby_indexer/prefix_tree.rb"
     - "lib/ruby_lsp/load_sorbet.rb"
+    - "lib/ruby_lsp/requests/support/ast_translation.rb"

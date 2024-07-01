@@ -8,7 +8,7 @@ module RubyLsp
 
     abstract!
 
-    sig { returns(Prism::ParseResult) }
+    sig { returns(Prism::ParseLexResult) }
     attr_reader :parse_result
 
     sig { returns(String) }
@@ -31,12 +31,12 @@ module RubyLsp
       @version = T.let(version, Integer)
       @uri = T.let(uri, URI::Generic)
       @needs_parsing = T.let(true, T::Boolean)
-      @parse_result = T.let(parse, Prism::ParseResult)
+      @parse_result = T.let(parse, Prism::ParseLexResult)
     end
 
     sig { returns(Prism::ProgramNode) }
     def tree
-      @parse_result.value
+      @parse_result.value.first
     end
 
     sig { returns(T::Array[Prism::Comment]) }
@@ -93,7 +93,7 @@ module RubyLsp
       @cache.clear
     end
 
-    sig { abstract.returns(Prism::ParseResult) }
+    sig { abstract.returns(Prism::ParseLexResult) }
     def parse; end
 
     sig { returns(T::Boolean) }
@@ -113,7 +113,7 @@ module RubyLsp
       ).returns(NodeContext)
     end
     def locate_node(position, node_types: [])
-      locate(@parse_result.value, create_scanner.find_char_position(position), node_types: node_types)
+      locate(tree, create_scanner.find_char_position(position), node_types: node_types)
     end
 
     sig do
