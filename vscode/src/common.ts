@@ -20,6 +20,7 @@ export enum Command {
   ShowSyntaxTree = "rubyLsp.showSyntaxTree",
   DisplayAddons = "rubyLsp.displayAddons",
   RunTask = "rubyLsp.runTask",
+  BundleInstall = "rubyLsp.bundleInstall",
 }
 
 export interface RubyInterface {

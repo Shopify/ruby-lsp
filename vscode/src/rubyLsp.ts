@@ -394,6 +394,25 @@ export class RubyLsp {
           }
         },
       ),
+      vscode.commands.registerCommand(
+        Command.BundleInstall,
+        (workspaceUri: string) => {
+          const workspace = this.workspaces.get(workspaceUri);
+
+          if (!workspace) {
+            return;
+          }
+
+          const terminal = vscode.window.createTerminal({
+            name: "Bundle install",
+            cwd: workspace.workspaceFolder.uri.fsPath,
+            env: workspace.ruby.env,
+          });
+
+          terminal.show();
+          terminal.sendText("bundle install");
+        },
+      ),
     );
   }
 

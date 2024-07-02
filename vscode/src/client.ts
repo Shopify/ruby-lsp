@@ -13,6 +13,12 @@ import {
   ServerOptions,
   MessageSignature,
   DocumentSelector,
+  ErrorHandler,
+  CloseHandlerResult,
+  ErrorHandlerResult,
+  Message,
+  ErrorAction,
+  CloseAction,
 } from "vscode-languageclient/node";
 
 import { LSP_NAME, ClientInterface, Addon } from "./common";
@@ -152,6 +158,7 @@ function collectClientOptions(
     outputChannel,
     revealOutputChannelOn: RevealOutputChannelOn.Never,
     diagnosticPullOptions,
+    errorHandler: new ClientErrorHandler(workspaceFolder),
     initializationOptions: {
       enabledFeatures,
       experimentalFeaturesEnabled: configuration.get(
@@ -162,6 +169,41 @@ function collectClientOptions(
       linters: configuration.get("linters"),
     },
   };
+}
+
+class ClientErrorHandler implements ErrorHandler {
+  private readonly workspaceFolder: vscode.WorkspaceFolder;
+
+  constructor(workspaceFolder: vscode.WorkspaceFolder) {
+    this.workspaceFolder = workspaceFolder;
+  }
+
+  error(
+    _error: Error,
+    _message: Message | undefined,
+    _count: number | undefined,
+  ): ErrorHandlerResult | Promise<ErrorHandlerResult> {
+    return { action: ErrorAction.Shutdown, handled: true };
+  }
+
+  async closed(): Promise<CloseHandlerResult> {
+    const answer = await vscode.window.showErrorMessage(
+      `Launching the Ruby LSP failed. This typically happens due to an error with version manager
+      integration or Bundler issues.
+
+      [Logs](command:workbench.action.output.toggleOutput) |
+      [Troubleshooting](https://github.com/Shopify/ruby-lsp/blob/main/TROUBLESHOOTING.md) |
+      [Run bundle install](command:rubyLsp.bundleInstall?"${this.workspaceFolder.uri.toString()}")`,
+      "Retry",
+      "Shutdown",
+    );
+
+    if (answer === "Retry") {
+      return { action: CloseAction.Restart, handled: true };
+    }
+
+    return { action: CloseAction.DoNotRestart, handled: true };
+  }
 }
 
 export default class Client extends LanguageClient implements ClientInterface {
