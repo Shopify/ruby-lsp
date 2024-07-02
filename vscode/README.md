@@ -94,7 +94,7 @@ by clicking `Change version manager` in the language status center or by changin
 ```
 
 To make sure that the Ruby LSP can find the version manager scripts, make sure that they are loaded in the shell's
-configuration script (e.g.: ~/.bashrc, ~/.zshrc) and that the SHELL environment variable is set and pointing to the
+configuration script (e.g.: ~/.bashrc, ~/.zshenv) and that the SHELL environment variable is set and pointing to the
 default shell.
 
 > [!NOTE]

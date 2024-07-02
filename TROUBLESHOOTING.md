@@ -8,18 +8,18 @@ with the same Ruby version as your projects, we need to properly set these envir
 invoking your Ruby version manager.
 
 The extension runs a command using your shell's interactive mode, so that version managers configured in files such as
-`~/.zshrc` are picked up automatically. The command then exports the environment information into JSON, so that we can
+`~/.zshenv` are picked up automatically. The command then exports the environment information into JSON, so that we can
 inject it into the NodeJS process and appropriately set the Ruby version and gem installation paths.
 
 As an example, the activation script for `zsh` using `rbenv` as a version manager will look something like this:
 
 ```shell
-# Invoke zsh using interactive mode (loads ~/.zshrc) to run a single command
+# Invoke zsh using interactive mode (loads ~/.zshenv) to run a single command
 # The command is `rbenv exec ruby`, which automatically sets all relevant environment variables and selects the
 # specified Ruby version
 # We then print the activated environment as JSON. We read that JSON from the NodeJS process to insert the needed
 # environment variables in order to run Ruby correctly
-/bin/zsh -ic 'rbenv exec ruby -rjson -e "puts JSON.dump(ENV.to_h)"'
+/bin/zsh -c 'rbenv exec ruby -rjson -e "puts JSON.dump(ENV.to_h)"'
 ```
 
 After activating the Ruby version, we then proceed to boot the server gem (`ruby-lsp`). To avoid having users include
@@ -40,7 +40,7 @@ There are two main sources of issues users typically face during activation: she
 
 ### Shell issues
 
-When the extension invokes the shell and loads its config file (`~/.zshrc`, `~/.bashrc`, etc), it is susceptible to
+When the extension invokes the shell and loads its config file (`~/.zshenv`, `~/.bashrc`, etc), it is susceptible to
 issues that may be caused by how the shell or its plugins interact with the NodeJS process. For example
 
 - Some plugins completely redirect the stderr pipe to implement their functionality (fixed on the Ruby LSP side by
@@ -57,6 +57,17 @@ this problem, please try to
   icon)
 
 More context about this issue on https://github.com/Shopify/vscode-ruby-lsp/issues/901.
+
+#### ZSH configuration
+
+If you use zsh, then make sure to configure your version in your ZSH env file (`~/.zshenv`).
+
+```shell
+# ~/.zshenv
+if [[ -o rcs ]]; then
+  eval "$(rbenv init - zsh)"
+fi
+```
 
 ### Bundler issues
 
