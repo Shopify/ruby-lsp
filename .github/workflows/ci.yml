@@ -57,7 +57,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20.9"
+          node-version: "20.15"
           cache: "yarn"
           cache-dependency-path: "vscode"
 
@@ -79,7 +79,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20.9"
+          node-version: "20.15"
           cache: "yarn"
           cache-dependency-path: "vscode"
 
