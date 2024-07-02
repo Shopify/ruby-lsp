@@ -18,9 +18,9 @@ export class Workspace implements WorkspaceInterface {
   public readonly ruby: Ruby;
   public readonly createTestItems: (response: CodeLens[]) => void;
   public readonly workspaceFolder: vscode.WorkspaceFolder;
+  public readonly outputChannel: WorkspaceChannel;
   private readonly context: vscode.ExtensionContext;
   private readonly telemetry: Telemetry;
-  private readonly outputChannel: WorkspaceChannel;
   private readonly isMainWorkspace: boolean;
   private needsRestart = false;
   #rebaseInProgress = false;
@@ -261,6 +261,13 @@ export class Workspace implements WorkspaceInterface {
 
   get rebaseInProgress() {
     return this.#rebaseInProgress;
+  }
+
+  async execute(command: string) {
+    return asyncExec(command, {
+      env: this.ruby.env,
+      cwd: this.workspaceFolder.uri.fsPath,
+    });
   }
 
   private registerRestarts(context: vscode.ExtensionContext) {
