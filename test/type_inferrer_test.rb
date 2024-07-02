@@ -172,6 +172,30 @@ module RubyLsp
       assert_equal("Object", @type_inferrer.infer_receiver_type(node_context))
     end
 
+    def test_infer_forwading_super_receiver
+      node_context = index_and_locate(<<~RUBY, { line: 2, character: 4 })
+        class Foo < Bar
+          def initialize
+            super
+          end
+        end
+      RUBY
+
+      assert_equal("Foo", @type_inferrer.infer_receiver_type(node_context))
+    end
+
+    def test_infer_super_receiver
+      node_context = index_and_locate(<<~RUBY, { line: 2, character: 4 })
+        class Foo < Bar
+          def initialize(a, b, c)
+            super()
+          end
+        end
+      RUBY
+
+      assert_equal("Foo", @type_inferrer.infer_receiver_type(node_context))
+    end
+
     private
 
     def index_and_locate(source, position)
