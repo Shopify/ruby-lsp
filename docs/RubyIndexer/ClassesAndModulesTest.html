@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Ruby LSP documentation</title>
+
+  <script type="text/javascript">
+    var rdoc_rel_prefix = "../";
+    var index_rel_prefix = "../";
+  </script>
+
+  <script src="../js/search_index.js" defer></script>
+  <script src="../js/snapper.js" defer></script>
+  <link href="../css/snapper.css" rel="stylesheet">
+</head>
+
+  <body>
+    <div id="main-container">
+  <nav id="nav">
+  <h3 class="title">Ruby LSP documentation</h3>
+
+  <input id="side-search" type="text" placeholder="Search docs (CMD/CTRL + K)"></input>
+
+  <ul id="navigation-list">
+    <li id="getting-started"><a href="../index.html">Getting started</a></li>
+    <p class="separator">PAGES</p>
+    <li class="index-entry">
+  <a href="../ADDONS_md.html">
+    ADDONS
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../CODE_OF_CONDUCT_md.html">
+    CODE_OF_CONDUCT
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../CONTRIBUTING_md.html">
+    CONTRIBUTING
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../DESIGN_AND_ROADMAP_md.html">
+    DESIGN_AND_ROADMAP
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../EDITORS_md.html">
+    EDITORS
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../README_md.html">
+    README
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../SEMANTIC_HIGHLIGHTING_md.html">
+    SEMANTIC_HIGHLIGHTING
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../TROUBLESHOOTING_md.html">
+    TROUBLESHOOTING
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../VERSION_MANAGERS_md.html">
+    VERSION_MANAGERS
+  </a>
+</li>
+
+    <p class="separator">CODE</p>
+    <li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RuboCop.html">RuboCop</a></summary>
+    <ul>
+      <li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RuboCop/Cop.html">Cop</a></summary>
+    <ul>
+      <li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RuboCop/Cop/RubyLsp.html">RubyLsp</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RuboCop/Cop/RubyLsp/UseLanguageServerAliases.html">UseLanguageServerAliases</a></li><li class="index-entry"><a href="../RuboCop/Cop/RubyLsp/UseRegisterWithHandlerMethod.html">UseRegisterWithHandlerMethod</a></li>
+    </ul>
+  </details>
+</li>
+
+    </ul>
+  </details>
+</li>
+
+    </ul>
+  </details>
+</li>
+<li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyIndexer.html">RubyIndexer</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyIndexer/ClassesAndModulesTest.html">ClassesAndModulesTest</a></li><li class="index-entry"><a href="../RubyIndexer/Configuration.html">Configuration</a></li><li class="index-entry"><a href="../RubyIndexer/ConfigurationTest.html">ConfigurationTest</a></li><li class="index-entry"><a href="../RubyIndexer/ConstantTest.html">ConstantTest</a></li><li class="index-entry"><a href="../RubyIndexer/DeclarationListener.html">DeclarationListener</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyIndexer/Entry.html">Entry</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyIndexer/Entry/Accessor.html">Accessor</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Alias.html">Alias</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/BlockParameter.html">BlockParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Class.html">Class</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Constant.html">Constant</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Extend.html">Extend</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Include.html">Include</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/InstanceVariable.html">InstanceVariable</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/KeywordParameter.html">KeywordParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/KeywordRestParameter.html">KeywordRestParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Member.html">Member</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Method.html">Method</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/MethodAlias.html">MethodAlias</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Module.html">Module</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/ModuleOperation.html">ModuleOperation</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Namespace.html">Namespace</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/OptionalKeywordParameter.html">OptionalKeywordParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/OptionalParameter.html">OptionalParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Parameter.html">Parameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Prepend.html">Prepend</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/RequiredParameter.html">RequiredParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/RestParameter.html">RestParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Signature.html">Signature</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/SingletonClass.html">SingletonClass</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/UnresolvedAlias.html">UnresolvedAlias</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/UnresolvedMethodAlias.html">UnresolvedMethodAlias</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Visibility.html">Visibility</a></li>
+    </ul>
+  </details>
+</li>
+<li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyIndexer/Index.html">Index</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyIndexer/Index/NonExistingNamespaceError.html">NonExistingNamespaceError</a></li><li class="index-entry"><a href="../RubyIndexer/Index/UnresolvableAliasError.html">UnresolvableAliasError</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyIndexer/IndexTest.html">IndexTest</a></li><li class="index-entry"><a href="../RubyIndexer/IndexablePath.html">IndexablePath</a></li><li class="index-entry"><a href="../RubyIndexer/InstanceVariableTest.html">InstanceVariableTest</a></li><li class="index-entry"><a href="../RubyIndexer/Location.html">Location</a></li><li class="index-entry"><a href="../RubyIndexer/MethodTest.html">MethodTest</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyIndexer/PrefixTree.html">PrefixTree</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyIndexer/PrefixTree/Node.html">Node</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyIndexer/PrefixTreeTest.html">PrefixTreeTest</a></li><li class="index-entry"><a href="../RubyIndexer/RBSIndexer.html">RBSIndexer</a></li><li class="index-entry"><a href="../RubyIndexer/RBSIndexerTest.html">RBSIndexerTest</a></li><li class="index-entry"><a href="../RubyIndexer/TestCase.html">TestCase</a></li>
+    </ul>
+  </details>
+</li>
+<li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp.html">RubyLsp</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Addon.html">Addon</a></li><li class="index-entry"><a href="../RubyLsp/BaseServer.html">BaseServer</a></li><li class="index-entry"><a href="../RubyLsp/CheckDocs.html">CheckDocs</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Document.html">Document</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Document/Scanner.html">Scanner</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Error.html">Error</a></li><li class="index-entry"><a href="../RubyLsp/GlobalState.html">GlobalState</a></li><li class="index-entry"><a href="../RubyLsp/InlineTypeAssertions.html">InlineTypeAssertions</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Listeners.html">Listeners</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Listeners/CodeLens.html">CodeLens</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/Completion.html">Completion</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/Definition.html">Definition</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/DocumentHighlight.html">DocumentHighlight</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/DocumentLink.html">DocumentLink</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/DocumentSymbol.html">DocumentSymbol</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/FoldingRanges.html">FoldingRanges</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/Hover.html">Hover</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/InlayHints.html">InlayHints</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/SemanticHighlighting.html">SemanticHighlighting</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/SignatureHelp.html">SignatureHelp</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Message.html">Message</a></li><li class="index-entry"><a href="../RubyLsp/NodeContext.html">NodeContext</a></li><li class="index-entry"><a href="../RubyLsp/Notification.html">Notification</a></li><li class="index-entry"><a href="../RubyLsp/ParameterScope.html">ParameterScope</a></li><li class="index-entry"><a href="../RubyLsp/Request.html">Request</a></li><li class="index-entry"><a href="../RubyLsp/RequestConfig.html">RequestConfig</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Requests.html">Requests</a></summary>
+    <ul>
+      <li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Requests/CodeActionResolve.html">CodeActionResolve</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Requests/CodeActionResolve/CodeActionError.html">CodeActionError</a></li><li class="index-entry"><a href="../RubyLsp/Requests/CodeActionResolve/Error.html">Error</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Requests/CodeActions.html">CodeActions</a></li><li class="index-entry"><a href="../RubyLsp/Requests/CodeLens.html">CodeLens</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Completion.html">Completion</a></li><li class="index-entry"><a href="../RubyLsp/Requests/CompletionResolve.html">CompletionResolve</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Definition.html">Definition</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Diagnostics.html">Diagnostics</a></li><li class="index-entry"><a href="../RubyLsp/Requests/DocumentHighlight.html">DocumentHighlight</a></li><li class="index-entry"><a href="../RubyLsp/Requests/DocumentLink.html">DocumentLink</a></li><li class="index-entry"><a href="../RubyLsp/Requests/DocumentSymbol.html">DocumentSymbol</a></li><li class="index-entry"><a href="../RubyLsp/Requests/FoldingRanges.html">FoldingRanges</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Requests/Formatting.html">Formatting</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Requests/Formatting/Error.html">Error</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Requests/Hover.html">Hover</a></li><li class="index-entry"><a href="../RubyLsp/Requests/InlayHints.html">InlayHints</a></li><li class="index-entry"><a href="../RubyLsp/Requests/OnTypeFormatting.html">OnTypeFormatting</a></li><li class="index-entry"><a href="../RubyLsp/Requests/PrepareTypeHierarchy.html">PrepareTypeHierarchy</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Requests/Request.html">Request</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Requests/Request/InvalidFormatter.html">InvalidFormatter</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Requests/SelectionRanges.html">SelectionRanges</a></li><li class="index-entry"><a href="../RubyLsp/Requests/SemanticHighlighting.html">SemanticHighlighting</a></li><li class="index-entry"><a href="../RubyLsp/Requests/ShowSyntaxTree.html">ShowSyntaxTree</a></li><li class="index-entry"><a href="../RubyLsp/Requests/SignatureHelp.html">SignatureHelp</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Requests/Support.html">Support</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Requests/Support/Annotation.html">Annotation</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/Common.html">Common</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/Formatter.html">Formatter</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/InternalRuboCopError.html">InternalRuboCopError</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/RuboCopDiagnostic.html">RuboCopDiagnostic</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/RuboCopFormatter.html">RuboCopFormatter</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Requests/Support/RuboCopRunner.html">RuboCopRunner</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Requests/Support/RuboCopRunner/ConfigurationError.html">ConfigurationError</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Requests/Support/SelectionRange.html">SelectionRange</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/Sorbet.html">Sorbet</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/SyntaxTreeFormatter.html">SyntaxTreeFormatter</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Requests/TypeHierarchySupertypes.html">TypeHierarchySupertypes</a></li><li class="index-entry"><a href="../RubyLsp/Requests/WorkspaceSymbol.html">WorkspaceSymbol</a></li>
+    </ul>
+  </details>
+</li>
+<li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/ResponseBuilders.html">ResponseBuilders</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/ResponseBuilders/CollectionResponseBuilder.html">CollectionResponseBuilder</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/ResponseBuilders/DocumentSymbol.html">DocumentSymbol</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/ResponseBuilders/DocumentSymbol/SymbolHierarchyRoot.html">SymbolHierarchyRoot</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/ResponseBuilders/Hover.html">Hover</a></li><li class="index-entry"><a href="../RubyLsp/ResponseBuilders/ResponseBuilder.html">ResponseBuilder</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/ResponseBuilders/SemanticHighlighting.html">SemanticHighlighting</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/ResponseBuilders/SemanticHighlighting/SemanticToken.html">SemanticToken</a></li><li class="index-entry"><a href="../RubyLsp/ResponseBuilders/SemanticHighlighting/SemanticTokenEncoder.html">SemanticTokenEncoder</a></li><li class="index-entry"><a href="../RubyLsp/ResponseBuilders/SemanticHighlighting/UndefinedTokenType.html">UndefinedTokenType</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/ResponseBuilders/SignatureHelp.html">SignatureHelp</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Result.html">Result</a></li><li class="index-entry"><a href="../RubyLsp/RubyDocument.html">RubyDocument</a></li><li class="index-entry"><a href="../RubyLsp/Server.html">Server</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/SetupBundler.html">SetupBundler</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/SetupBundler/BundleInstallFailure.html">BundleInstallFailure</a></li><li class="index-entry"><a href="../RubyLsp/SetupBundler/BundleNotLocked.html">BundleNotLocked</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Store.html">Store</a></li><li class="index-entry"><a href="../RubyLsp/TestHelper.html">TestHelper</a></li><li class="index-entry"><a href="../RubyLsp/TypeInferrer.html">TypeInferrer</a></li>
+    </ul>
+  </details>
+</li>
+<li class="expandable-index-entry">
+  <details>
+    <summary><a href="../URI.html">URI</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../URI/Generic.html">Generic</a></li><li class="index-entry"><a href="../URI/Source.html">Source</a></li>
+    </ul>
+  </details>
+</li>
+
+  </ul>
+</nav>
+
+
+  <article>
+    <h1>class RubyIndexer::ClassesAndModulesTest</h1>
+    <section class="description"></section>
+
+      <section id="5Buntitled-5D" class="documentation-section">
+
+
+
+        
+
+        
+            
+            
+            
+        
+            
+
+            <section>
+              <h3 class="section-title">Public Instance Methods<hr/></h3>
+
+                <div id="method-i-test_class_with_statements" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_class_with_statements()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 26</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_class_with_statements</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class Foo
+          def something; end
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Class</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:0-0:2-3&quot;</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_colon_colon_class" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_colon_colon_class()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 36</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_colon_colon_class</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class ::Foo
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Class</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:0-0:1-3&quot;</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_colon_colon_class_inside_class" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_colon_colon_class_inside_class()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 45</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_colon_colon_class_inside_class</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class Bar
+          class ::Foo
+          end
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Bar&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Class</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:0-0:3-3&quot;</span>)
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Class</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:1-2:2-5&quot;</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_colon_colon_module" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_colon_colon_module()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 119</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_colon_colon_module</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        module ::Foo
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Module</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:0-0:1-3&quot;</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_comments_can_be_attached_to_a_class" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_comments_can_be_attached_to_a_class()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 198</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_comments_can_be_attached_to_a_class</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        # This is method comment
+        def foo; end
+        # This is a Foo comment
+        # This is another Foo comment
+        class Foo
+          # This should not be attached
+        end
+
+        # Ignore me
+
+        # This Bar comment has 1 line padding
+
+        class Bar; end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">foo_entry</span> = <span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Foo&quot;</span>].<span class="ruby-identifier">first</span>
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-string">&quot;This is a Foo comment\nThis is another Foo comment&quot;</span>, <span class="ruby-identifier">foo_entry</span>.<span class="ruby-identifier">comments</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;\n&quot;</span>))
+
+      <span class="ruby-identifier">bar_entry</span> = <span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Bar&quot;</span>].<span class="ruby-identifier">first</span>
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-string">&quot;This Bar comment has 1 line padding&quot;</span>, <span class="ruby-identifier">bar_entry</span>.<span class="ruby-identifier">comments</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;\n&quot;</span>))
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_comments_can_be_attached_to_a_namespaced_class" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_comments_can_be_attached_to_a_namespaced_class()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 231</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_comments_can_be_attached_to_a_namespaced_class</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        # This is a Foo comment
+        # This is another Foo comment
+        class Foo
+          # This is a Bar comment
+          class Bar; end
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">foo_entry</span> = <span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Foo&quot;</span>].<span class="ruby-identifier">first</span>
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-string">&quot;This is a Foo comment\nThis is another Foo comment&quot;</span>, <span class="ruby-identifier">foo_entry</span>.<span class="ruby-identifier">comments</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;\n&quot;</span>))
+
+      <span class="ruby-identifier">bar_entry</span> = <span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Foo::Bar&quot;</span>].<span class="ruby-identifier">first</span>
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-string">&quot;This is a Bar comment&quot;</span>, <span class="ruby-identifier">bar_entry</span>.<span class="ruby-identifier">comments</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;\n&quot;</span>))
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_comments_can_be_attached_to_a_reopened_class" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_comments_can_be_attached_to_a_reopened_class()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 248</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_comments_can_be_attached_to_a_reopened_class</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        # This is a Foo comment
+        class Foo; end
+
+        # This is another Foo comment
+        class Foo; end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">first_foo_entry</span> = <span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Foo&quot;</span>][<span class="ruby-value">0</span>]
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-string">&quot;This is a Foo comment&quot;</span>, <span class="ruby-identifier">first_foo_entry</span>.<span class="ruby-identifier">comments</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;\n&quot;</span>))
+
+      <span class="ruby-identifier">second_foo_entry</span> = <span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Foo&quot;</span>][<span class="ruby-value">1</span>]
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-string">&quot;This is another Foo comment&quot;</span>, <span class="ruby-identifier">second_foo_entry</span>.<span class="ruby-identifier">comments</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;\n&quot;</span>))
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_comments_removes_the_leading_pound_and_space" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_comments_removes_the_leading_pound_and_space()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 264</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_comments_removes_the_leading_pound_and_space</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        # This is a Foo comment
+        class Foo; end
+
+        #This is a Bar comment
+        class Bar; end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">first_foo_entry</span> = <span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Foo&quot;</span>][<span class="ruby-value">0</span>]
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-string">&quot;This is a Foo comment&quot;</span>, <span class="ruby-identifier">first_foo_entry</span>.<span class="ruby-identifier">comments</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;\n&quot;</span>))
+
+      <span class="ruby-identifier">second_foo_entry</span> = <span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Bar&quot;</span>][<span class="ruby-value">0</span>]
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-string">&quot;This is a Bar comment&quot;</span>, <span class="ruby-identifier">second_foo_entry</span>.<span class="ruby-identifier">comments</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;\n&quot;</span>))
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_conditional_class" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_conditional_class()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 17</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_conditional_class</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class Foo
+        end if condition
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Class</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:0-0:1-3&quot;</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_conditional_module" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_conditional_module()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 100</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_conditional_module</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        module Foo
+        end if condition
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Module</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:0-0:1-3&quot;</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_deleting_from_index_based_on_file_path" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_deleting_from_index_based_on_file_path()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 184</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_deleting_from_index_based_on_file_path</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class Foo
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Class</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:0-0:1-3&quot;</span>)
+
+      <span class="ruby-ivar">@index</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-constant">IndexablePath</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword">nil</span>, <span class="ruby-string">&quot;/fake/path/foo.rb&quot;</span>))
+      <span class="ruby-identifier">refute_entry</span>(<span class="ruby-string">&quot;Foo&quot;</span>)
+
+      <span class="ruby-identifier">assert_no_indexed_entries</span>
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_dynamic_singleton_class_blocks" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_dynamic_singleton_class_blocks()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 489</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_dynamic_singleton_class_blocks</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class Foo
+          # Some extra comments
+          class &lt;&lt; bar
+          end
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">singleton</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Foo::&lt;Class:bar&gt;&quot;</span>].<span class="ruby-identifier">first</span>)
+
+      <span class="ruby-comment"># Even though this is not correct, we consider any dynamic singleton class block as a regular singleton class.</span>
+      <span class="ruby-comment"># That pattern cannot be properly analyzed statically and assuming that it&#39;s always a regular singleton simplifies</span>
+      <span class="ruby-comment"># the implementation considerably.</span>
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-value">3</span>, <span class="ruby-identifier">singleton</span>.<span class="ruby-identifier">location</span>.<span class="ruby-identifier">start_line</span>)
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-string">&quot;Some extra comments&quot;</span>, <span class="ruby-identifier">singleton</span>.<span class="ruby-identifier">comments</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;\n&quot;</span>))
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_dynamically_namespaced_class" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_dynamically_namespaced_class()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 66</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_dynamically_namespaced_class</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class self::Bar
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;self::Bar&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Class</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:0-0:1-3&quot;</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_dynamically_namespaced_class_doesnt_affect_other_classes" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_dynamically_namespaced_class_doesnt_affect_other_classes()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 75</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_dynamically_namespaced_class_doesnt_affect_other_classes</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class Foo
+          class self::Bar
+          end
+
+          class Bar
+          end
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">refute_entry</span>(<span class="ruby-string">&quot;self::Bar&quot;</span>)
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Class</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:0-0:6-3&quot;</span>)
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo::Bar&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Class</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:4-2:5-5&quot;</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_dynamically_namespaced_module" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_dynamically_namespaced_module()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 137</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_dynamically_namespaced_module</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        module self::Bar
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;self::Bar&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Module</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:0-0:1-3&quot;</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_dynamically_namespaced_module_doesnt_affect_other_modules" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_dynamically_namespaced_module_doesnt_affect_other_modules()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 146</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_dynamically_namespaced_module_doesnt_affect_other_modules</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        module Foo
+          class self::Bar
+          end
+
+          module Bar
+          end
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo::self::Bar&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Class</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:1-2:2-5&quot;</span>)
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Module</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:0-0:6-3&quot;</span>)
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo::Bar&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Module</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:4-2:5-5&quot;</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_empty_statements_class" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_empty_statements_class()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 8</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_empty_statements_class</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class Foo
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Class</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:0-0:1-3&quot;</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_empty_statements_module" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_empty_statements_module()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 91</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_empty_statements_module</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        module Foo
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Module</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:0-0:1-3&quot;</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_keeping_track_of_extended_modules" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_keeping_track_of_extended_modules()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 428</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_keeping_track_of_extended_modules</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class Foo
+          # valid syntaxes that we can index
+          extend A1
+          self.extend A2
+          extend A3, A4
+          self.extend A5, A6
+
+          # valid syntaxes that we cannot index because of their dynamic nature
+          extend some_variable_or_method_call
+          self.extend some_variable_or_method_call
+
+          def something
+            extend A7 # We should not index this because of this dynamic nature
+          end
+
+          # Valid inner class syntax definition with its own modules prepended
+          class Qux
+            extend Corge
+            self.extend Corge
+            extend Baz
+
+            extend some_variable_or_method_call
+          end
+        end
+
+        class ConstantPathReferences
+          extend Foo::Bar
+          self.extend Foo::Bar2
+
+          extend dynamic::Bar
+          extend Foo::
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">foo</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Foo&quot;</span>][<span class="ruby-value">0</span>])
+      <span class="ruby-identifier">assert_equal</span>([<span class="ruby-string">&quot;A1&quot;</span>, <span class="ruby-string">&quot;A2&quot;</span>, <span class="ruby-string">&quot;A3&quot;</span>, <span class="ruby-string">&quot;A4&quot;</span>, <span class="ruby-string">&quot;A5&quot;</span>, <span class="ruby-string">&quot;A6&quot;</span>], <span class="ruby-identifier">foo</span>.<span class="ruby-identifier">mixin_operation_module_names</span>)
+
+      <span class="ruby-identifier">qux</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Foo::Qux&quot;</span>][<span class="ruby-value">0</span>])
+      <span class="ruby-identifier">assert_equal</span>([<span class="ruby-string">&quot;Corge&quot;</span>, <span class="ruby-string">&quot;Corge&quot;</span>, <span class="ruby-string">&quot;Baz&quot;</span>], <span class="ruby-identifier">qux</span>.<span class="ruby-identifier">mixin_operation_module_names</span>)
+
+      <span class="ruby-identifier">constant_path_references</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;ConstantPathReferences&quot;</span>][<span class="ruby-value">0</span>])
+      <span class="ruby-identifier">assert_equal</span>([<span class="ruby-string">&quot;Foo::Bar&quot;</span>, <span class="ruby-string">&quot;Foo::Bar2&quot;</span>], <span class="ruby-identifier">constant_path_references</span>.<span class="ruby-identifier">mixin_operation_module_names</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_keeping_track_of_included_modules" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_keeping_track_of_included_modules()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 336</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_keeping_track_of_included_modules</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class Foo
+          # valid syntaxes that we can index
+          include A1
+          self.include A2
+          include A3, A4
+          self.include A5, A6
+
+          # valid syntaxes that we cannot index because of their dynamic nature
+          include some_variable_or_method_call
+          self.include some_variable_or_method_call
+
+          def something
+            include A7 # We should not index this because of this dynamic nature
+          end
+
+          # Valid inner class syntax definition with its own modules included
+          class Qux
+            include Corge
+            self.include Corge
+            include Baz
+
+            include some_variable_or_method_call
+          end
+        end
+
+        class ConstantPathReferences
+          include Foo::Bar
+          self.include Foo::Bar2
+
+          include dynamic::Bar
+          include Foo::
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">foo</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Foo&quot;</span>][<span class="ruby-value">0</span>])
+      <span class="ruby-identifier">assert_equal</span>([<span class="ruby-string">&quot;A1&quot;</span>, <span class="ruby-string">&quot;A2&quot;</span>, <span class="ruby-string">&quot;A3&quot;</span>, <span class="ruby-string">&quot;A4&quot;</span>, <span class="ruby-string">&quot;A5&quot;</span>, <span class="ruby-string">&quot;A6&quot;</span>], <span class="ruby-identifier">foo</span>.<span class="ruby-identifier">mixin_operation_module_names</span>)
+
+      <span class="ruby-identifier">qux</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Foo::Qux&quot;</span>][<span class="ruby-value">0</span>])
+      <span class="ruby-identifier">assert_equal</span>([<span class="ruby-string">&quot;Corge&quot;</span>, <span class="ruby-string">&quot;Corge&quot;</span>, <span class="ruby-string">&quot;Baz&quot;</span>], <span class="ruby-identifier">qux</span>.<span class="ruby-identifier">mixin_operation_module_names</span>)
+
+      <span class="ruby-identifier">constant_path_references</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;ConstantPathReferences&quot;</span>][<span class="ruby-value">0</span>])
+      <span class="ruby-identifier">assert_equal</span>([<span class="ruby-string">&quot;Foo::Bar&quot;</span>, <span class="ruby-string">&quot;Foo::Bar2&quot;</span>], <span class="ruby-identifier">constant_path_references</span>.<span class="ruby-identifier">mixin_operation_module_names</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_keeping_track_of_prepended_modules" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_keeping_track_of_prepended_modules()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 382</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_keeping_track_of_prepended_modules</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class Foo
+          # valid syntaxes that we can index
+          prepend A1
+          self.prepend A2
+          prepend A3, A4
+          self.prepend A5, A6
+
+          # valid syntaxes that we cannot index because of their dynamic nature
+          prepend some_variable_or_method_call
+          self.prepend some_variable_or_method_call
+
+          def something
+            prepend A7 # We should not index this because of this dynamic nature
+          end
+
+          # Valid inner class syntax definition with its own modules prepended
+          class Qux
+            prepend Corge
+            self.prepend Corge
+            prepend Baz
+
+            prepend some_variable_or_method_call
+          end
+        end
+
+        class ConstantPathReferences
+          prepend Foo::Bar
+          self.prepend Foo::Bar2
+
+          prepend dynamic::Bar
+          prepend Foo::
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">foo</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Foo&quot;</span>][<span class="ruby-value">0</span>])
+      <span class="ruby-identifier">assert_equal</span>([<span class="ruby-string">&quot;A1&quot;</span>, <span class="ruby-string">&quot;A2&quot;</span>, <span class="ruby-string">&quot;A3&quot;</span>, <span class="ruby-string">&quot;A4&quot;</span>, <span class="ruby-string">&quot;A5&quot;</span>, <span class="ruby-string">&quot;A6&quot;</span>], <span class="ruby-identifier">foo</span>.<span class="ruby-identifier">mixin_operation_module_names</span>)
+
+      <span class="ruby-identifier">qux</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Foo::Qux&quot;</span>][<span class="ruby-value">0</span>])
+      <span class="ruby-identifier">assert_equal</span>([<span class="ruby-string">&quot;Corge&quot;</span>, <span class="ruby-string">&quot;Corge&quot;</span>, <span class="ruby-string">&quot;Baz&quot;</span>], <span class="ruby-identifier">qux</span>.<span class="ruby-identifier">mixin_operation_module_names</span>)
+
+      <span class="ruby-identifier">constant_path_references</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;ConstantPathReferences&quot;</span>][<span class="ruby-value">0</span>])
+      <span class="ruby-identifier">assert_equal</span>([<span class="ruby-string">&quot;Foo::Bar&quot;</span>, <span class="ruby-string">&quot;Foo::Bar2&quot;</span>], <span class="ruby-identifier">constant_path_references</span>.<span class="ruby-identifier">mixin_operation_module_names</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_keeping_track_of_super_classes" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_keeping_track_of_super_classes()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 303</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_keeping_track_of_super_classes</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class Foo &lt; Bar
+        end
+
+        class Baz
+        end
+
+        module Something
+          class Baz
+          end
+
+          class Qux &lt; ::Baz
+          end
+        end
+
+        class FinalThing &lt; Something::Baz
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">foo</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Foo&quot;</span>].<span class="ruby-identifier">first</span>)
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-string">&quot;Bar&quot;</span>, <span class="ruby-identifier">foo</span>.<span class="ruby-identifier">parent_class</span>)
+
+      <span class="ruby-identifier">baz</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Baz&quot;</span>].<span class="ruby-identifier">first</span>)
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-string">&quot;::Object&quot;</span>, <span class="ruby-identifier">baz</span>.<span class="ruby-identifier">parent_class</span>)
+
+      <span class="ruby-identifier">qux</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Something::Qux&quot;</span>].<span class="ruby-identifier">first</span>)
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-string">&quot;::Baz&quot;</span>, <span class="ruby-identifier">qux</span>.<span class="ruby-identifier">parent_class</span>)
+
+      <span class="ruby-identifier">final_thing</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;FinalThing&quot;</span>].<span class="ruby-identifier">first</span>)
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-string">&quot;Something::Baz&quot;</span>, <span class="ruby-identifier">final_thing</span>.<span class="ruby-identifier">parent_class</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_module_with_statements" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_module_with_statements()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 109</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_module_with_statements</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        module Foo
+          def something; end
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Module</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:0-0:2-3&quot;</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_name_location_points_to_constant_path_location" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_name_location_points_to_constant_path_location()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 520</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_name_location_points_to_constant_path_location</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class Foo
+          def foo; end
+        end
+
+        module Bar
+          def bar; end
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">foo</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Foo&quot;</span>].<span class="ruby-identifier">first</span>)
+      <span class="ruby-identifier">refute_equal</span>(<span class="ruby-identifier">foo</span>.<span class="ruby-identifier">location</span>, <span class="ruby-identifier">foo</span>.<span class="ruby-identifier">name_location</span>)
+
+      <span class="ruby-identifier">name_location</span> = <span class="ruby-identifier">foo</span>.<span class="ruby-identifier">name_location</span>
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-value">1</span>, <span class="ruby-identifier">name_location</span>.<span class="ruby-identifier">start_line</span>)
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-value">1</span>, <span class="ruby-identifier">name_location</span>.<span class="ruby-identifier">end_line</span>)
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-value">6</span>, <span class="ruby-identifier">name_location</span>.<span class="ruby-identifier">start_column</span>)
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-value">9</span>, <span class="ruby-identifier">name_location</span>.<span class="ruby-identifier">end_column</span>)
+
+      <span class="ruby-identifier">bar</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Bar&quot;</span>].<span class="ruby-identifier">first</span>)
+      <span class="ruby-identifier">refute_equal</span>(<span class="ruby-identifier">bar</span>.<span class="ruby-identifier">location</span>, <span class="ruby-identifier">bar</span>.<span class="ruby-identifier">name_location</span>)
+
+      <span class="ruby-identifier">name_location</span> = <span class="ruby-identifier">bar</span>.<span class="ruby-identifier">name_location</span>
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-value">5</span>, <span class="ruby-identifier">name_location</span>.<span class="ruby-identifier">start_line</span>)
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-value">5</span>, <span class="ruby-identifier">name_location</span>.<span class="ruby-identifier">end_line</span>)
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-value">7</span>, <span class="ruby-identifier">name_location</span>.<span class="ruby-identifier">start_column</span>)
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-value">10</span>, <span class="ruby-identifier">name_location</span>.<span class="ruby-identifier">end_column</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_namespaced_class" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_namespaced_class()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 57</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_namespaced_class</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class Foo::Bar
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo::Bar&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Class</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:0-0:1-3&quot;</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_namespaced_module" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_namespaced_module()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 128</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_namespaced_module</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        module Foo::Bar
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo::Bar&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Module</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:0-0:1-3&quot;</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_namespaces_inside_singleton_blocks" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_namespaces_inside_singleton_blocks()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 507</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_namespaces_inside_singleton_blocks</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class Foo
+          class &lt;&lt; self
+            class Bar
+            end
+          end
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo::&lt;Class:Foo&gt;::Bar&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Class</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:2-4:3-7&quot;</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_nested_modules_and_classes" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_nested_modules_and_classes()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 162</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_nested_modules_and_classes</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        module Foo
+          class Bar
+          end
+
+          module Baz
+            class Qux
+              class Something
+              end
+            end
+          end
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Module</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:0-0:10-3&quot;</span>)
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo::Bar&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Class</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:1-2:2-5&quot;</span>)
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo::Baz&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Module</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:4-2:9-5&quot;</span>)
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo::Baz::Qux&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Class</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:5-4:8-7&quot;</span>)
+      <span class="ruby-identifier">assert_entry</span>(<span class="ruby-string">&quot;Foo::Baz::Qux::Something&quot;</span>, <span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Class</span>, <span class="ruby-string">&quot;/fake/path/foo.rb:6-6:7-9&quot;</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_private_class_and_module_indexing" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_private_class_and_module_indexing()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 280</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_private_class_and_module_indexing</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class A
+          class B; end
+          private_constant(:B)
+
+          module C; end
+          private_constant(&quot;C&quot;)
+
+          class D; end
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">b_const</span> = <span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;A::B&quot;</span>].<span class="ruby-identifier">first</span>
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Visibility</span><span class="ruby-operator">::</span><span class="ruby-constant">PRIVATE</span>, <span class="ruby-identifier">b_const</span>.<span class="ruby-identifier">visibility</span>)
+
+      <span class="ruby-identifier">c_const</span> = <span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;A::C&quot;</span>].<span class="ruby-identifier">first</span>
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Visibility</span><span class="ruby-operator">::</span><span class="ruby-constant">PRIVATE</span>, <span class="ruby-identifier">c_const</span>.<span class="ruby-identifier">visibility</span>)
+
+      <span class="ruby-identifier">d_const</span> = <span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;A::D&quot;</span>].<span class="ruby-identifier">first</span>
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-constant">Entry</span><span class="ruby-operator">::</span><span class="ruby-constant">Visibility</span><span class="ruby-operator">::</span><span class="ruby-constant">PUBLIC</span>, <span class="ruby-identifier">d_const</span>.<span class="ruby-identifier">visibility</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_skips_comments_containing_invalid_encodings" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_skips_comments_containing_invalid_encodings()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 222</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_skips_comments_containing_invalid_encodings</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        # comment \xBA
+        class Foo
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+      <span class="ruby-identifier">assert</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Foo&quot;</span>].<span class="ruby-identifier">first</span>)
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-test_tracking_singleton_classes" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      test_tracking_singleton_classes()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_indexer/test/classes_and_modules_test.rb, line 474</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">test_tracking_singleton_classes</span>
+      <span class="ruby-identifier">index</span>(<span class="ruby-identifier">&lt;&lt;~RUBY</span>)
+<span class="ruby-value">        class Foo; end
+        class Foo
+          # Some extra comments
+          class &lt;&lt; self
+          end
+        end
+</span><span class="ruby-identifier">      RUBY</span>
+
+      <span class="ruby-identifier">foo</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">must</span>(<span class="ruby-ivar">@index</span>[<span class="ruby-string">&quot;Foo::&lt;Class:Foo&gt;&quot;</span>].<span class="ruby-identifier">first</span>)
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-value">4</span>, <span class="ruby-identifier">foo</span>.<span class="ruby-identifier">location</span>.<span class="ruby-identifier">start_line</span>)
+      <span class="ruby-identifier">assert_equal</span>(<span class="ruby-string">&quot;Some extra comments&quot;</span>, <span class="ruby-identifier">foo</span>.<span class="ruby-identifier">comments</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;\n&quot;</span>))
+    <span class="ruby-keyword">end</span></pre>
+                </div>
+            </section>
+          
+            
+            
+        
+      </section>
+  </article>
+
+   <div class="right-section">
+  <nav class="right-nav">
+    <span id="right-side-bar-title" class="right-side-bar-title">On this page</span>
+      <ul>
+          <li id="right-side-bar-class-rubyindexer-classesandmodulestest" class="right-side-bar-class">
+            <a href="#" >class RubyIndexer::ClassesAndModulesTest</a>
+
+              <ul>
+
+
+
+
+                    <li>
+                      <details open>
+                        <summary id="right-side-bar-section-public-instance-methods" class="right-side-bar-section">Public Instance Methods</summary>
+                        <ul>
+                            <li id="right-nav-test_class_with_statements" class="right-side-bar-element">
+                              <a href="#method-i-test_class_with_statements">test_class_with_statements</a>
+                            </li>
+                            <li id="right-nav-test_colon_colon_class" class="right-side-bar-element">
+                              <a href="#method-i-test_colon_colon_class">test_colon_colon_class</a>
+                            </li>
+                            <li id="right-nav-test_colon_colon_class_inside_class" class="right-side-bar-element">
+                              <a href="#method-i-test_colon_colon_class_inside_class">test_colon_colon_class_inside_class</a>
+                            </li>
+                            <li id="right-nav-test_colon_colon_module" class="right-side-bar-element">
+                              <a href="#method-i-test_colon_colon_module">test_colon_colon_module</a>
+                            </li>
+                            <li id="right-nav-test_comments_can_be_attached_to_a_class" class="right-side-bar-element">
+                              <a href="#method-i-test_comments_can_be_attached_to_a_class">test_comments_can_be_attached_to_a_class</a>
+                            </li>
+                            <li id="right-nav-test_comments_can_be_attached_to_a_namespaced_class" class="right-side-bar-element">
+                              <a href="#method-i-test_comments_can_be_attached_to_a_namespaced_class">test_comments_can_be_attached_to_a_namespaced_class</a>
+                            </li>
+                            <li id="right-nav-test_comments_can_be_attached_to_a_reopened_class" class="right-side-bar-element">
+                              <a href="#method-i-test_comments_can_be_attached_to_a_reopened_class">test_comments_can_be_attached_to_a_reopened_class</a>
+                            </li>
+                            <li id="right-nav-test_comments_removes_the_leading_pound_and_space" class="right-side-bar-element">
+                              <a href="#method-i-test_comments_removes_the_leading_pound_and_space">test_comments_removes_the_leading_pound_and_space</a>
+                            </li>
+                            <li id="right-nav-test_conditional_class" class="right-side-bar-element">
+                              <a href="#method-i-test_conditional_class">test_conditional_class</a>
+                            </li>
+                            <li id="right-nav-test_conditional_module" class="right-side-bar-element">
+                              <a href="#method-i-test_conditional_module">test_conditional_module</a>
+                            </li>
+                            <li id="right-nav-test_deleting_from_index_based_on_file_path" class="right-side-bar-element">
+                              <a href="#method-i-test_deleting_from_index_based_on_file_path">test_deleting_from_index_based_on_file_path</a>
+                            </li>
+                            <li id="right-nav-test_dynamic_singleton_class_blocks" class="right-side-bar-element">
+                              <a href="#method-i-test_dynamic_singleton_class_blocks">test_dynamic_singleton_class_blocks</a>
+                            </li>
+                            <li id="right-nav-test_dynamically_namespaced_class" class="right-side-bar-element">
+                              <a href="#method-i-test_dynamically_namespaced_class">test_dynamically_namespaced_class</a>
+                            </li>
+                            <li id="right-nav-test_dynamically_namespaced_class_doesnt_affect_other_classes" class="right-side-bar-element">
+                              <a href="#method-i-test_dynamically_namespaced_class_doesnt_affect_other_classes">test_dynamically_namespaced_class_doesnt_affect_other_classes</a>
+                            </li>
+                            <li id="right-nav-test_dynamically_namespaced_module" class="right-side-bar-element">
+                              <a href="#method-i-test_dynamically_namespaced_module">test_dynamically_namespaced_module</a>
+                            </li>
+                            <li id="right-nav-test_dynamically_namespaced_module_doesnt_affect_other_modules" class="right-side-bar-element">
+                              <a href="#method-i-test_dynamically_namespaced_module_doesnt_affect_other_modules">test_dynamically_namespaced_module_doesnt_affect_other_modules</a>
+                            </li>
+                            <li id="right-nav-test_empty_statements_class" class="right-side-bar-element">
+                              <a href="#method-i-test_empty_statements_class">test_empty_statements_class</a>
+                            </li>
+                            <li id="right-nav-test_empty_statements_module" class="right-side-bar-element">
+                              <a href="#method-i-test_empty_statements_module">test_empty_statements_module</a>
+                            </li>
+                            <li id="right-nav-test_keeping_track_of_extended_modules" class="right-side-bar-element">
+                              <a href="#method-i-test_keeping_track_of_extended_modules">test_keeping_track_of_extended_modules</a>
+                            </li>
+                            <li id="right-nav-test_keeping_track_of_included_modules" class="right-side-bar-element">
+                              <a href="#method-i-test_keeping_track_of_included_modules">test_keeping_track_of_included_modules</a>
+                            </li>
+                            <li id="right-nav-test_keeping_track_of_prepended_modules" class="right-side-bar-element">
+                              <a href="#method-i-test_keeping_track_of_prepended_modules">test_keeping_track_of_prepended_modules</a>
+                            </li>
+                            <li id="right-nav-test_keeping_track_of_super_classes" class="right-side-bar-element">
+                              <a href="#method-i-test_keeping_track_of_super_classes">test_keeping_track_of_super_classes</a>
+                            </li>
+                            <li id="right-nav-test_module_with_statements" class="right-side-bar-element">
+                              <a href="#method-i-test_module_with_statements">test_module_with_statements</a>
+                            </li>
+                            <li id="right-nav-test_name_location_points_to_constant_path_location" class="right-side-bar-element">
+                              <a href="#method-i-test_name_location_points_to_constant_path_location">test_name_location_points_to_constant_path_location</a>
+                            </li>
+                            <li id="right-nav-test_namespaced_class" class="right-side-bar-element">
+                              <a href="#method-i-test_namespaced_class">test_namespaced_class</a>
+                            </li>
+                            <li id="right-nav-test_namespaced_module" class="right-side-bar-element">
+                              <a href="#method-i-test_namespaced_module">test_namespaced_module</a>
+                            </li>
+                            <li id="right-nav-test_namespaces_inside_singleton_blocks" class="right-side-bar-element">
+                              <a href="#method-i-test_namespaces_inside_singleton_blocks">test_namespaces_inside_singleton_blocks</a>
+                            </li>
+                            <li id="right-nav-test_nested_modules_and_classes" class="right-side-bar-element">
+                              <a href="#method-i-test_nested_modules_and_classes">test_nested_modules_and_classes</a>
+                            </li>
+                            <li id="right-nav-test_private_class_and_module_indexing" class="right-side-bar-element">
+                              <a href="#method-i-test_private_class_and_module_indexing">test_private_class_and_module_indexing</a>
+                            </li>
+                            <li id="right-nav-test_skips_comments_containing_invalid_encodings" class="right-side-bar-element">
+                              <a href="#method-i-test_skips_comments_containing_invalid_encodings">test_skips_comments_containing_invalid_encodings</a>
+                            </li>
+                            <li id="right-nav-test_tracking_singleton_classes" class="right-side-bar-element">
+                              <a href="#method-i-test_tracking_singleton_classes">test_tracking_singleton_classes</a>
+                            </li>
+                        </ul>
+                      </details>
+                    </li>
+            </li>
+          </ul>
+        </li>
+  </nav>
+</div>
+
+</div>
+
+<div id="search-modal">
+  <div id="search-modal-content">
+    <input id="search-modal-input" type="text" placeholder="Search"></input>
+    <ul id="search-results"></ul>
+  </div>
+</div>
+
+
+    <footer>
+      <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.6.3.1
+    </footer>
+  </body>
+</html>
