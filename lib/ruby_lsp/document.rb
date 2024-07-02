@@ -34,16 +34,6 @@ module RubyLsp
       @parse_result = T.let(parse, Prism::ParseResult)
     end
 
-    sig { returns(Prism::ProgramNode) }
-    def tree
-      @parse_result.value
-    end
-
-    sig { returns(T::Array[Prism::Comment]) }
-    def comments
-      @parse_result.comments
-    end
-
     sig { params(other: Document).returns(T::Boolean) }
     def ==(other)
       @source == other.source
@@ -96,10 +86,8 @@ module RubyLsp
     sig { abstract.returns(Prism::ParseResult) }
     def parse; end
 
-    sig { returns(T::Boolean) }
-    def syntax_error?
-      @parse_result.failure?
-    end
+    sig { abstract.returns(T::Boolean) }
+    def syntax_error?; end
 
     sig { returns(Scanner) }
     def create_scanner

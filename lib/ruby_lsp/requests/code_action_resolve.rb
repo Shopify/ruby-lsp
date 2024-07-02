@@ -69,7 +69,7 @@ module RubyLsp
 
         # Find the closest statements node, so that we place the refactor in a valid position
         node_context = @document
-          .locate(@document.tree, start_index, node_types: [Prism::StatementsNode, Prism::BlockNode])
+          .locate(@document.parse_result.value, start_index, node_types: [Prism::StatementsNode, Prism::BlockNode])
 
         closest_statements = node_context.node
         parent_statements = node_context.parent
@@ -164,7 +164,7 @@ module RubyLsp
         extracted_source = T.must(@document.source[start_index...end_index])
 
         # Find the closest method declaration node, so that we place the refactor in a valid position
-        node_context = @document.locate(@document.tree, start_index, node_types: [Prism::DefNode])
+        node_context = @document.locate(@document.parse_result.value, start_index, node_types: [Prism::DefNode])
         closest_def = T.cast(node_context.node, Prism::DefNode)
         return Error::InvalidTargetRange if closest_def.nil?
 

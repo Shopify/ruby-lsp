@@ -61,7 +61,7 @@ module RubyLsp
         # back by 1, so that we find the right node
         char_position = document.create_scanner.find_char_position(params[:position]) - 1
         node_context = document.locate(
-          document.tree,
+          document.parse_result.value,
           char_position,
           node_types: [
             Prism::CallNode,

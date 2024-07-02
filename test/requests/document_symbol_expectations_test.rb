@@ -17,7 +17,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
-    dispatcher.dispatch(document.tree)
+    dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
     assert_equal(1, response.size)
@@ -62,7 +62,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
-    dispatcher.dispatch(document.tree)
+    dispatcher.dispatch(document.parse_result.value)
     listener.perform
   end
 

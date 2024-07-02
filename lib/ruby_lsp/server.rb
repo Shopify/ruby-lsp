@@ -347,15 +347,17 @@ module RubyLsp
         return
       end
 
+      parse_result = document.parse_result
+
       # Run requests for the document
       dispatcher = Prism::Dispatcher.new
-      folding_range = Requests::FoldingRanges.new(document.parse_result.comments, dispatcher)
+      folding_range = Requests::FoldingRanges.new(parse_result.comments, dispatcher)
       document_symbol = Requests::DocumentSymbol.new(uri, dispatcher)
-      document_link = Requests::DocumentLink.new(uri, document.comments, dispatcher)
+      document_link = Requests::DocumentLink.new(uri, parse_result.comments, dispatcher)
       code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
 
       semantic_highlighting = Requests::SemanticHighlighting.new(@global_state, dispatcher)
-      dispatcher.dispatch(document.tree)
+      dispatcher.dispatch(parse_result.value)
 
       # Store all responses retrieve in this round of visits in the cache and then return the response for the request
       # we actually received
@@ -387,7 +389,7 @@ module RubyLsp
 
       dispatcher = Prism::Dispatcher.new
       request = Requests::SemanticHighlighting.new(@global_state, dispatcher, range: start_line..end_line)
-      dispatcher.visit(document.tree)
+      dispatcher.visit(document.parse_result.value)
 
       response = request.perform
       send_message(Result.new(id: message[:id], response: response))
@@ -426,7 +428,7 @@ module RubyLsp
       dispatcher = Prism::Dispatcher.new
       document = @store.get(params.dig(:textDocument, :uri))
       request = Requests::DocumentHighlight.new(document, params[:position], dispatcher)
-      dispatcher.dispatch(document.tree)
+      dispatcher.dispatch(document.parse_result.value)
       send_message(Result.new(id: message[:id], response: request.perform))
     end
 
@@ -479,7 +481,7 @@ module RubyLsp
       dispatcher = Prism::Dispatcher.new
       document = @store.get(params.dig(:textDocument, :uri))
       request = Requests::InlayHints.new(document, params[:range], hints_configurations, dispatcher)
-      dispatcher.visit(document.tree)
+      dispatcher.visit(document.parse_result.value)
       send_message(Result.new(id: message[:id], response: request.perform))
     end
 

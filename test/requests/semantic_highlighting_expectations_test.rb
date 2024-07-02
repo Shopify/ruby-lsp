@@ -22,7 +22,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
     global_state.apply_options({})
     listener = RubyLsp::Requests::SemanticHighlighting.new(global_state, dispatcher, range: processed_range)
 
-    dispatcher.dispatch(document.tree)
+    dispatcher.dispatch(document.parse_result.value)
     listener.perform
   end
 
