@@ -75,22 +75,33 @@ class SetupBundlerTest < Minitest::Test
   end
 
   def test_creates_custom_bundle_for_a_rails_app
-    Object.any_instance.expects(:system).with(
-      bundle_env(".ruby-lsp/Gemfile"),
-      "(bundle check || bundle install) 1>&2",
-    ).returns(true)
-    Bundler::LockfileParser.any_instance.expects(:dependencies).returns({ "rails" => true }).at_least_once
-    run_script
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        FileUtils.mkdir(File.join(dir, "config"))
+        File.write(File.join(dir, "config", "application.rb"), <<~RUBY)
+          module MyApp
+            class Application < Rails::Application
+            end
+          end
+        RUBY
 
-    assert_path_exists(".ruby-lsp")
-    assert_path_exists(".ruby-lsp/Gemfile")
-    assert_path_exists(".ruby-lsp/Gemfile.lock")
-    assert_path_exists(".ruby-lsp/main_lockfile_hash")
-    assert_match("ruby-lsp", File.read(".ruby-lsp/Gemfile"))
-    assert_match("debug", File.read(".ruby-lsp/Gemfile"))
-    assert_match("ruby-lsp-rails", File.read(".ruby-lsp/Gemfile"))
-  ensure
-    FileUtils.rm_r(".ruby-lsp") if Dir.exist?(".ruby-lsp")
+        Object.any_instance.expects(:system).with(
+          bundle_env(".ruby-lsp/Gemfile"),
+          "(bundle check || bundle install) 1>&2",
+        ).returns(true)
+        Bundler::LockfileParser.any_instance.expects(:dependencies).returns({ "rails" => true }).at_least_once
+        run_script
+
+        assert_path_exists(".ruby-lsp")
+        assert_path_exists(".ruby-lsp/Gemfile")
+        assert_path_exists(".ruby-lsp/Gemfile.lock")
+        assert_path_exists(".ruby-lsp/main_lockfile_hash")
+        gemfile_content = File.read(".ruby-lsp/Gemfile")
+        assert_match("ruby-lsp", gemfile_content)
+        assert_match("debug", gemfile_content)
+        assert_match("ruby-lsp-rails", gemfile_content)
+      end
+    end
   end
 
   def test_changing_lockfile_causes_custom_bundle_to_be_rebuilt
@@ -485,6 +496,14 @@ class SetupBundlerTest < Minitest::Test
           source "https://rubygems.org"
           gem "rails"
         GEMFILE
+
+        FileUtils.mkdir(File.join(dir, "config"))
+        File.write(File.join(dir, "config", "application.rb"), <<~RUBY)
+          module MyApp
+            class Application < Rails::Application
+            end
+          end
+        RUBY
 
         capture_subprocess_io do
           Bundler.with_unbundled_env do
