@@ -62,6 +62,8 @@ module RubyLsp
             Prism::InstanceVariableWriteNode,
             Prism::SymbolNode,
             Prism::StringNode,
+            Prism::SuperNode,
+            Prism::ForwardingSuperNode,
           ],
         )
 

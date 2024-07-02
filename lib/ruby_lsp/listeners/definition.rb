@@ -44,6 +44,8 @@ module RubyLsp
           :on_instance_variable_or_write_node_enter,
           :on_instance_variable_target_node_enter,
           :on_string_node_enter,
+          :on_super_node_enter,
+          :on_forwarding_super_node_enter,
         )
       end
 
@@ -123,7 +125,29 @@ module RubyLsp
         handle_instance_variable_definition(node.name.to_s)
       end
 
+      sig { params(node: Prism::SuperNode).void }
+      def on_super_node_enter(node)
+        handle_super_node_definition
+      end
+
+      sig { params(node: Prism::ForwardingSuperNode).void }
+      def on_forwarding_super_node_enter(node)
+        handle_super_node_definition
+      end
+
       private
+
+      sig { void }
+      def handle_super_node_definition
+        surrounding_method = @node_context.surrounding_method
+        return unless surrounding_method
+
+        handle_method_definition(
+          surrounding_method,
+          @type_inferrer.infer_receiver_type(@node_context),
+          inherited_only: true,
+        )
+      end
 
       sig { params(name: String).void }
       def handle_instance_variable_definition(name)
@@ -148,10 +172,10 @@ module RubyLsp
         # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
-      sig { params(message: String, receiver_type: T.nilable(String)).void }
-      def handle_method_definition(message, receiver_type)
+      sig { params(message: String, receiver_type: T.nilable(String), inherited_only: T::Boolean).void }
+      def handle_method_definition(message, receiver_type, inherited_only: false)
         methods = if receiver_type
-          @index.resolve_method(message, receiver_type)
+          @index.resolve_method(message, receiver_type, inherited_only: inherited_only)
         else
           # If the method doesn't have a receiver, then we provide a few candidates to jump to
           # But we don't want to provide too many candidates, as it can be overwhelming
