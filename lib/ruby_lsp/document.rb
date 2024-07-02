@@ -117,8 +117,18 @@ module RubyLsp
       parent = T.let(nil, T.nilable(Prism::Node))
       nesting_nodes = T.let(
         [],
-        T::Array[T.any(Prism::ClassNode, Prism::ModuleNode, Prism::SingletonClassNode, Prism::DefNode)],
+        T::Array[T.any(
+          Prism::ClassNode,
+          Prism::ModuleNode,
+          Prism::SingletonClassNode,
+          Prism::DefNode,
+          Prism::BlockNode,
+          Prism::LambdaNode,
+          Prism::ProgramNode,
+        )],
       )
+
+      nesting_nodes << node if node.is_a?(Prism::ProgramNode)
       call_node = T.let(nil, T.nilable(Prism::CallNode))
 
       until queue.empty?
@@ -148,11 +158,8 @@ module RubyLsp
         # Keep track of the nesting where we found the target. This is used to determine the fully qualified name of the
         # target when it is a constant
         case candidate
-        when Prism::ClassNode, Prism::ModuleNode
-          nesting_nodes << candidate
-        when Prism::SingletonClassNode
-          nesting_nodes << candidate
-        when Prism::DefNode
+        when Prism::ClassNode, Prism::ModuleNode, Prism::SingletonClassNode, Prism::DefNode, Prism::BlockNode,
+          Prism::LambdaNode
           nesting_nodes << candidate
         end
 
@@ -193,24 +200,7 @@ module RubyLsp
         end
       end
 
-      nesting = []
-      surrounding_method = T.let(nil, T.nilable(String))
-
-      nesting_nodes.each do |node|
-        case node
-        when Prism::ClassNode, Prism::ModuleNode
-          nesting << node.constant_path.slice
-        when Prism::SingletonClassNode
-          nesting << "<Class:#{nesting.last}>"
-        when Prism::DefNode
-          surrounding_method = node.name.to_s
-          next unless node.receiver.is_a?(Prism::SelfNode)
-
-          nesting << "<Class:#{nesting.last}>"
-        end
-      end
-
-      NodeContext.new(closest, parent, nesting, call_node, surrounding_method)
+      NodeContext.new(closest, parent, nesting_nodes, call_node)
     end
 
     sig { returns(T::Boolean) }

@@ -23,22 +23,82 @@ module RubyLsp
       params(
         node: T.nilable(Prism::Node),
         parent: T.nilable(Prism::Node),
-        nesting: T::Array[String],
+        nesting_nodes: T::Array[T.any(
+          Prism::ClassNode,
+          Prism::ModuleNode,
+          Prism::SingletonClassNode,
+          Prism::DefNode,
+          Prism::BlockNode,
+          Prism::LambdaNode,
+          Prism::ProgramNode,
+        )],
         call_node: T.nilable(Prism::CallNode),
-        surrounding_method: T.nilable(String),
       ).void
     end
-    def initialize(node, parent, nesting, call_node, surrounding_method)
+    def initialize(node, parent, nesting_nodes, call_node)
       @node = node
       @parent = parent
-      @nesting = nesting
+      @nesting_nodes = nesting_nodes
       @call_node = call_node
-      @surrounding_method = surrounding_method
+
+      nesting, surrounding_method = handle_nesting_nodes(nesting_nodes)
+      @nesting = T.let(nesting, T::Array[String])
+      @surrounding_method = T.let(surrounding_method, T.nilable(String))
     end
 
     sig { returns(String) }
     def fully_qualified_name
       @fully_qualified_name ||= T.let(@nesting.join("::"), T.nilable(String))
+    end
+
+    sig { returns(T::Array[Symbol]) }
+    def locals_for_scope
+      locals = []
+
+      @nesting_nodes.each do |node|
+        if node.is_a?(Prism::ClassNode) || node.is_a?(Prism::ModuleNode) || node.is_a?(Prism::SingletonClassNode) ||
+            node.is_a?(Prism::DefNode)
+          locals.clear
+        end
+
+        locals.concat(node.locals)
+      end
+
+      locals
+    end
+
+    private
+
+    sig do
+      params(nodes: T::Array[T.any(
+        Prism::ClassNode,
+        Prism::ModuleNode,
+        Prism::SingletonClassNode,
+        Prism::DefNode,
+        Prism::BlockNode,
+        Prism::LambdaNode,
+        Prism::ProgramNode,
+      )]).returns([T::Array[String], T.nilable(String)])
+    end
+    def handle_nesting_nodes(nodes)
+      nesting = []
+      surrounding_method = T.let(nil, T.nilable(String))
+
+      @nesting_nodes.each do |node|
+        case node
+        when Prism::ClassNode, Prism::ModuleNode
+          nesting << node.constant_path.slice
+        when Prism::SingletonClassNode
+          nesting << "<Class:#{nesting.last}>"
+        when Prism::DefNode
+          surrounding_method = node.name.to_s
+          next unless node.receiver.is_a?(Prism::SelfNode)
+
+          nesting << "<Class:#{nesting.last}>"
+        end
+      end
+
+      [nesting, surrounding_method]
     end
   end
 end
