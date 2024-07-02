@@ -83,6 +83,15 @@ module RubyLsp
           else
             push_char(T.must(char))
           end
+        when "\r"
+          @ruby << char
+          @html << char
+
+          if next_char == "\n"
+            @ruby << next_char
+            @html << next_char
+            @current_pos += 1
+          end
         when "\n"
           @ruby << char
           @html << char
