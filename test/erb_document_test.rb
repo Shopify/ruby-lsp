@@ -23,6 +23,14 @@ class ERBDocumentTest < Minitest::Test
     )
   end
 
+  def test_erb_document_handles_windows_newlines
+    document = RubyLsp::ERBDocument.new(source: "<%=\r\nbar %>", version: 1, uri: URI("file:///foo.erb"))
+    document.parse
+
+    refute_predicate(document, :syntax_error?)
+    assert_equal("   \r\nbar   ", document.parse_result.source.source)
+  end
+
   def test_erb_syntax_error_doesnt_cause_crash
     [
       "<%=",
