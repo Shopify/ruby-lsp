@@ -1541,5 +1541,37 @@ module RubyIndexer
       assert_equal(["bar"], entries.map(&:name))
       assert_equal("Baz", T.must(entries.first.owner).name)
     end
+
+    def test_decorated_parameters
+      index(<<~RUBY)
+        class Foo
+          def bar(a, b = 1, c: 2)
+          end
+        end
+      RUBY
+
+      methods = @index.resolve_method("bar", "Foo")
+      refute_nil(methods)
+
+      entry = T.must(methods.first)
+
+      assert_equal("(a, b = <default>, c: <default>)", entry.decorated_parameters)
+    end
+
+    def test_decorated_parameters_when_method_has_no_parameters
+      index(<<~RUBY)
+        class Foo
+          def bar
+          end
+        end
+      RUBY
+
+      methods = @index.resolve_method("bar", "Foo")
+      refute_nil(methods)
+
+      entry = T.must(methods.first)
+
+      assert_equal("()", entry.decorated_parameters)
+    end
   end
 end
