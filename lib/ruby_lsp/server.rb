@@ -284,6 +284,7 @@ module RubyLsp
           source: text_document[:text],
           version: text_document[:version],
           encoding: @global_state.encoding,
+          language_id: text_document[:languageId],
         )
       end
     end
@@ -412,7 +413,11 @@ module RubyLsp
         return
       end
 
-      response = Requests::Formatting.new(@global_state, @store.get(uri)).perform
+      document = @store.get(uri)
+
+      return send_empty_response(message[:id]) if document.is_a?(ERBDocument)
+
+      response = Requests::Formatting.new(@global_state, document).perform
       send_message(Result.new(id: message[:id], response: response))
     rescue Requests::Request::InvalidFormatter => error
       send_message(Notification.window_show_error("Configuration error: #{error.message}"))
@@ -435,12 +440,15 @@ module RubyLsp
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_on_type_formatting(message)
       params = message[:params]
+      document = @store.get(params.dig(:textDocument, :uri))
+
+      return send_empty_response(message[:id]) if document.is_a?(ERBDocument)
 
       send_message(
         Result.new(
           id: message[:id],
           response: Requests::OnTypeFormatting.new(
-            @store.get(params.dig(:textDocument, :uri)),
+            document,
             params[:position],
             params[:ch],
             @store.client_name,
@@ -489,6 +497,8 @@ module RubyLsp
     def text_document_code_action(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
+
+      return send_empty_response(message[:id]) if document.is_a?(ERBDocument)
 
       send_message(
         Result.new(
@@ -543,7 +553,11 @@ module RubyLsp
         return
       end
 
-      response = @store.cache_fetch(uri, "textDocument/diagnostic") do |document|
+      document = @store.get(uri)
+
+      return send_empty_response(message[:id]) if document.is_a?(ERBDocument)
+
+      response = document.cache_fetch("textDocument/diagnostic") do |document|
         Requests::Diagnostics.new(@global_state, document).perform
       end
 

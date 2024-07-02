@@ -664,6 +664,7 @@ class CompletionTest < Minitest::Test
               uri: uri,
               text: source,
               version: 1,
+              languageId: "ruby",
             },
           },
         })
@@ -704,6 +705,7 @@ class CompletionTest < Minitest::Test
               uri: uri,
               text: source,
               version: 1,
+              languageId: "ruby",
             },
           },
         })
@@ -747,6 +749,7 @@ class CompletionTest < Minitest::Test
               uri: uri,
               text: source,
               version: 1,
+              languageId: "ruby",
             },
           },
         })
@@ -786,6 +789,7 @@ class CompletionTest < Minitest::Test
               uri: uri,
               text: source,
               version: 1,
+              languageId: "ruby",
             },
           },
         })
@@ -828,6 +832,7 @@ class CompletionTest < Minitest::Test
               uri: uri,
               text: source,
               version: 1,
+              languageId: "ruby",
             },
           },
         })
