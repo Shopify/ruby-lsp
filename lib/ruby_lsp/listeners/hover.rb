@@ -21,6 +21,8 @@ module RubyLsp
           Prism::InstanceVariableWriteNode,
           Prism::SymbolNode,
           Prism::StringNode,
+          Prism::SuperNode,
+          Prism::ForwardingSuperNode,
         ],
         T::Array[T.class_of(Prism::Node)],
       )
@@ -64,6 +66,8 @@ module RubyLsp
           :on_instance_variable_operator_write_node_enter,
           :on_instance_variable_or_write_node_enter,
           :on_instance_variable_target_node_enter,
+          :on_super_node_enter,
+          :on_forwarding_super_node_enter,
         )
       end
 
@@ -106,17 +110,7 @@ module RubyLsp
         message = node.message
         return unless message
 
-        type = @type_inferrer.infer_receiver_type(@node_context)
-        return unless type
-
-        methods = @index.resolve_method(message, type)
-        return unless methods
-
-        title = "#{message}#{T.must(methods.first).decorated_parameters}"
-
-        categorized_markdown_from_index_entries(title, methods).each do |category, content|
-          @response_builder.push(content, category: category)
-        end
+        handle_method_hover(message)
       end
 
       sig { params(node: Prism::InstanceVariableReadNode).void }
@@ -149,7 +143,40 @@ module RubyLsp
         handle_instance_variable_hover(node.name.to_s)
       end
 
+      sig { params(node: Prism::SuperNode).void }
+      def on_super_node_enter(node)
+        handle_super_node_hover
+      end
+
+      sig { params(node: Prism::ForwardingSuperNode).void }
+      def on_forwarding_super_node_enter(node)
+        handle_super_node_hover
+      end
+
       private
+
+      sig { void }
+      def handle_super_node_hover
+        surrounding_method = @node_context.surrounding_method
+        return unless surrounding_method
+
+        handle_method_hover(surrounding_method, inherited_only: true)
+      end
+
+      sig { params(message: String, inherited_only: T::Boolean).void }
+      def handle_method_hover(message, inherited_only: false)
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
+
+        methods = @index.resolve_method(message, type, inherited_only: inherited_only)
+        return unless methods
+
+        title = "#{message}#{T.must(methods.first).decorated_parameters}"
+
+        categorized_markdown_from_index_entries(title, methods).each do |category, content|
+          @response_builder.push(content, category: category)
+        end
+      end
 
       sig { params(name: String).void }
       def handle_instance_variable_hover(name)
