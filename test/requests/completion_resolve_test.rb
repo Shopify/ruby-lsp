@@ -29,9 +29,6 @@ class CompletionResolveTest < Minitest::Test
       result = server.pop_response.response
 
       expected = existing_item.merge(
-        labelDetails: Interface::CompletionItemLabelDetails.new(
-          description: "fake.rb",
-        ),
         documentation: Interface::MarkupContent.new(
           kind: "markdown",
           value: markdown_from_index_entries("Foo::Bar", T.must(server.global_state.index["Foo::Bar"])),
@@ -39,6 +36,7 @@ class CompletionResolveTest < Minitest::Test
       )
       assert_match(/This is a class that does things/, result[:documentation].value)
       assert_equal(expected.to_json, result.to_json)
+      refute(result.key?(:labelDetails))
     end
   end
 
@@ -106,7 +104,6 @@ class CompletionResolveTest < Minitest::Test
       server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
 
       result = server.pop_response.response
-      assert_equal("(a, b, c)", result[:labelDetails].detail)
       assert_match("(a, b, c)", result[:documentation].value)
     end
   end
