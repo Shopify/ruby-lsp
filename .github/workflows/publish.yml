@@ -115,7 +115,7 @@ jobs:
 
             const changelog = releases
               .filter((release) => release.tag_name.startsWith("vscode-ruby-lsp") && (includePrereleases || !release.prerelease))
-              .map((release) => `# ${release.tag_name}\n${release.body}\n`)
+              .map((release) => `${release.body}\n`)
               .join("\n");
 
             fs.writeFileSync("vscode/CHANGELOG.md", changelog);
