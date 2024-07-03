@@ -167,7 +167,7 @@ class ServerTest < Minitest::Test
       assert_equal("$/progress", @server.pop_response.method)
 
       index = @server.global_state.index
-      refute_empty(index.instance_variable_get(:@entries))
+      refute_empty(index.entries)
     end
   end
 

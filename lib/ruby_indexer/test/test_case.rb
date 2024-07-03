@@ -8,7 +8,7 @@ module RubyIndexer
     def setup
       @index = Index.new
       RBSIndexer.new(@index).index_ruby_core
-      @default_indexed_entries = @index.instance_variable_get(:@entries).dup
+      @default_indexed_entries = @index.entries.dup
     end
 
     private
@@ -41,15 +41,15 @@ module RubyIndexer
     end
 
     def assert_no_entries
-      assert_empty(@index.instance_variable_get(:@entries), "Expected nothing to be indexed")
+      assert_empty(@index.entries, "Expected nothing to be indexed")
     end
 
     def assert_no_indexed_entries
-      assert_equal(@default_indexed_entries, @index.instance_variable_get(:@entries))
+      assert_equal(@default_indexed_entries, @index.entries)
     end
 
     def assert_no_entry(entry)
-      refute(@index.instance_variable_get(:@entries).key?(entry), "Expected '#{entry}' to not be indexed")
+      refute(@index.entries.key?(entry), "Expected '#{entry}' to not be indexed")
     end
   end
 end

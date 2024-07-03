@@ -97,8 +97,7 @@ if options[:time_index]
   index = RubyIndexer::Index.new
 
   result = Benchmark.realtime { index.index_all }
-  entries = index.instance_variable_get(:@entries)
-  entries_by_entry_type = entries.values.flatten.group_by(&:class)
+  entries_by_entry_type = index.entries.values.flatten.group_by(&:class)
 
   puts <<~MSG
     Ruby LSP v#{RubyLsp::VERSION}: Indexing took #{result.round(5)} seconds and generated:

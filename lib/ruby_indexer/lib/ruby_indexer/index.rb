@@ -11,6 +11,10 @@ module RubyIndexer
     # The minimum Jaro-Winkler similarity score for an entry to be considered a match for a given fuzzy search query
     ENTRY_SIMILARITY_THRESHOLD = 0.7
 
+    # Returns a hash of all entries in the index. This is intended only for tests.
+    sig { returns(T::Hash[String, T::Array[Entry]]) }
+    attr_reader :entries
+
     sig { void }
     def initialize
       # Holds all entries in the index using the following format:
