@@ -11,10 +11,6 @@ module RubyIndexer
     # The minimum Jaro-Winkler similarity score for an entry to be considered a match for a given fuzzy search query
     ENTRY_SIMILARITY_THRESHOLD = 0.7
 
-    # Returns a hash of all entries in the index. This is intended only for tests.
-    sig { returns(T::Hash[String, T::Array[Entry]]) }
-    attr_reader :entries
-
     sig { void }
     def initialize
       # Holds all entries in the index using the following format:
@@ -515,6 +511,14 @@ module RubyIndexer
       ).to_h { |e| [e.name, e.ancestor_hash] }
 
       @ancestors.clear if original_map.any? { |name, hash| updated_map[name] != hash }
+    end
+
+    # Returns a hash of all entries in the index. This is only available for tests.
+    sig { returns(T::Hash[String, T::Array[Entry]]) }
+    def entries
+      raise "This method is only available for tests." unless ENV["RUBY_LSP_ENV"] == "test"
+
+      @entries
     end
 
     private
