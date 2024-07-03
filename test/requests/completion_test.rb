@@ -205,6 +205,7 @@ class CompletionTest < Minitest::Test
         })
         result = server.pop_response.response
         assert_equal(["Foo"], result.map(&:label))
+        assert_equal(["fake.rb"], result.map { _1.label_details.description })
       end
     end
   end
@@ -475,6 +476,7 @@ class CompletionTest < Minitest::Test
         assert_equal(["bar", "baz"], result.map(&:label))
         assert_equal(["bar", "baz"], result.map(&:filter_text))
         assert_equal(["bar", "baz"], result.map { |completion| completion.text_edit.new_text })
+        assert_equal(["fake.rb", "fake.rb"], result.map { _1.label_details.description })
       end
     end
   end
@@ -905,6 +907,7 @@ class CompletionTest < Minitest::Test
       })
       result = server.pop_response.response
       assert_equal(["@foo", "@foobar"], result.map(&:label))
+      assert_equal(["fake.rb", "fake.rb"], result.map { _1.label_details.description })
     end
   end
 

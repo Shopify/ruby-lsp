@@ -209,8 +209,13 @@ module RubyLsp
         @index.instance_variable_completion_candidates(name, type).each do |entry|
           variable_name = entry.name
 
+          label_details = Interface::CompletionItemLabelDetails.new(
+            description: entry.file_name,
+          )
+
           @response_builder << Interface::CompletionItem.new(
             label: variable_name,
+            label_details: label_details,
             text_edit: Interface::TextEdit.new(
               range: range_from_location(location),
               new_text: variable_name,
@@ -293,9 +298,14 @@ module RubyLsp
         @index.method_completion_candidates(method_name, type).each do |entry|
           entry_name = entry.name
 
+          label_details = Interface::CompletionItemLabelDetails.new(
+            description: entry.file_name,
+            detail: entry.decorated_parameters,
+          )
           @response_builder << Interface::CompletionItem.new(
             label: entry_name,
             filter_text: entry_name,
+            label_details: label_details,
             text_edit: Interface::TextEdit.new(range: range, new_text: entry_name),
             kind: Constant::CompletionItemKind::METHOD,
             data: {
@@ -305,31 +315,6 @@ module RubyLsp
         end
       rescue RubyIndexer::Index::NonExistingNamespaceError
         # We have not indexed this namespace, so we can't provide any completions
-      end
-
-      sig do
-        params(
-          entry: T.any(RubyIndexer::Entry::Member, RubyIndexer::Entry::MethodAlias),
-          node: Prism::CallNode,
-        ).returns(Interface::CompletionItem)
-      end
-      def build_method_completion(entry, node)
-        name = entry.name
-
-        Interface::CompletionItem.new(
-          label: name,
-          filter_text: name,
-          text_edit: Interface::TextEdit.new(range: range_from_location(T.must(node.message_loc)), new_text: name),
-          kind: Constant::CompletionItemKind::METHOD,
-          label_details: Interface::CompletionItemLabelDetails.new(
-            detail: entry.decorated_parameters,
-            description: entry.file_name,
-          ),
-          documentation: Interface::MarkupContent.new(
-            kind: "markdown",
-            value: markdown_from_index_entries(name, entry),
-          ),
-        )
       end
 
       sig { params(label: String, node: Prism::StringNode).returns(Interface::CompletionItem) }
@@ -413,8 +398,14 @@ module RubyLsp
         # When using a top level constant reference (e.g.: `::Bar`), the editor includes the `::` as part of the filter.
         # For these top level references, we need to include the `::` as part of the filter text or else it won't match
         # the right entries in the index
+
+        label_details = Interface::CompletionItemLabelDetails.new(
+          description: entries.map(&:file_name).join(","),
+        )
+
         Interface::CompletionItem.new(
           label: real_name,
+          label_details: label_details,
           filter_text: filter_text,
           text_edit: Interface::TextEdit.new(
             range: range,
