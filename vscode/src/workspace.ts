@@ -277,20 +277,22 @@ export class Workspace implements WorkspaceInterface {
 
     // If a configuration that affects the Ruby LSP has changed, update the client options using the latest
     // configuration and restart the server
-    vscode.workspace.onDidChangeConfiguration(async (event) => {
-      if (event.affectsConfiguration("rubyLsp")) {
-        // Re-activate Ruby if the version manager changed
-        if (
-          event.affectsConfiguration("rubyLsp.rubyVersionManager") ||
-          event.affectsConfiguration("rubyLsp.bundleGemfile") ||
-          event.affectsConfiguration("rubyLsp.customRubyCommand")
-        ) {
-          await this.ruby.activateRuby();
-        }
+    context.subscriptions.push(
+      vscode.workspace.onDidChangeConfiguration(async (event) => {
+        if (event.affectsConfiguration("rubyLsp")) {
+          // Re-activate Ruby if the version manager changed
+          if (
+            event.affectsConfiguration("rubyLsp.rubyVersionManager") ||
+            event.affectsConfiguration("rubyLsp.bundleGemfile") ||
+            event.affectsConfiguration("rubyLsp.customRubyCommand")
+          ) {
+            await this.ruby.activateRuby();
+          }
 
-        await this.restart();
-      }
-    });
+          await this.restart();
+        }
+      }),
+    );
   }
 
   private createRestartWatcher(

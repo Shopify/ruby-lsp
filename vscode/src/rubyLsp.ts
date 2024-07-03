@@ -4,7 +4,7 @@ import { Range } from "vscode-languageclient/node";
 import { Telemetry } from "./telemetry";
 import DocumentProvider from "./documentProvider";
 import { Workspace } from "./workspace";
-import { Command, STATUS_EMITTER } from "./common";
+import { Command, LOG_CHANNEL, STATUS_EMITTER } from "./common";
 import { ManagerIdentifier, ManagerConfiguration } from "./ruby";
 import { StatusItems } from "./status";
 import { TestController } from "./testController";
@@ -35,45 +35,51 @@ export class RubyLsp {
 
     this.statusItems = new StatusItems();
     const dependenciesTree = new DependenciesTree();
-    context.subscriptions.push(this.statusItems, this.debug, dependenciesTree);
+    context.subscriptions.push(
+      this.statusItems,
+      this.debug,
+      dependenciesTree,
 
-    // Switch the status items based on which workspace is currently active
-    vscode.window.onDidChangeActiveTextEditor((editor) => {
-      STATUS_EMITTER.fire(this.currentActiveWorkspace(editor));
-    });
+      // Switch the status items based on which workspace is currently active
+      vscode.window.onDidChangeActiveTextEditor((editor) => {
+        STATUS_EMITTER.fire(this.currentActiveWorkspace(editor));
+      }),
+      vscode.workspace.onDidChangeWorkspaceFolders(async (event) => {
+        // Stop the language server and dispose all removed workspaces
+        for (const workspaceFolder of event.removed) {
+          const workspace = this.getWorkspace(workspaceFolder.uri);
 
-    vscode.workspace.onDidChangeWorkspaceFolders(async (event) => {
-      // Stop the language server and dispose all removed workspaces
-      for (const workspaceFolder of event.removed) {
+          if (workspace) {
+            await workspace.stop();
+            await workspace.dispose();
+            this.workspaces.delete(workspaceFolder.uri.toString());
+          }
+        }
+      }),
+
+      // Lazily activate workspaces that do not contain a lockfile
+      vscode.workspace.onDidOpenTextDocument(async (document) => {
+        if (document.languageId !== "ruby") {
+          return;
+        }
+
+        const workspaceFolder = vscode.workspace.getWorkspaceFolder(
+          document.uri,
+        );
+
+        if (!workspaceFolder) {
+          return;
+        }
+
         const workspace = this.getWorkspace(workspaceFolder.uri);
 
-        if (workspace) {
-          await workspace.stop();
-          await workspace.dispose();
-          this.workspaces.delete(workspaceFolder.uri.toString());
+        // If the workspace entry doesn't exist, then we haven't activated the workspace yet
+        if (!workspace) {
+          await this.activateWorkspace(workspaceFolder, false);
         }
-      }
-    });
-
-    // Lazily activate workspaces that do not contain a lockfile
-    vscode.workspace.onDidOpenTextDocument(async (document) => {
-      if (document.languageId !== "ruby") {
-        return;
-      }
-
-      const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
-
-      if (!workspaceFolder) {
-        return;
-      }
-
-      const workspace = this.getWorkspace(workspaceFolder.uri);
-
-      // If the workspace entry doesn't exist, then we haven't activated the workspace yet
-      if (!workspace) {
-        await this.activateWorkspace(workspaceFolder, false);
-      }
-    });
+      }),
+      LOG_CHANNEL,
+    );
   }
 
   // Activate the extension. This method should perform all actions necessary to start the extension, such as booting
