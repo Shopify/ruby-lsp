@@ -93,6 +93,16 @@
         "command": "rubyLsp.showSyntaxTree",
         "title": "Show syntax tree",
         "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.railsGenerate",
+        "title": "Rails generate",
+        "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.railsDestroy",
+        "title": "Rails destroy",
+        "category": "Ruby LSP"
       }
     ],
     "configuration": {

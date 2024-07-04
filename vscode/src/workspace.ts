@@ -17,7 +17,7 @@ export class Workspace implements WorkspaceInterface {
   public readonly ruby: Ruby;
   public readonly createTestItems: (response: CodeLens[]) => void;
   public readonly workspaceFolder: vscode.WorkspaceFolder;
-  public readonly outputChannel: WorkspaceChannel;
+  private readonly outputChannel: WorkspaceChannel;
   private readonly context: vscode.ExtensionContext;
   private readonly isMainWorkspace: boolean;
   private readonly telemetry: vscode.TelemetryLogger;
@@ -262,11 +262,26 @@ export class Workspace implements WorkspaceInterface {
     return this.#rebaseInProgress;
   }
 
-  async execute(command: string) {
-    return asyncExec(command, {
+  async execute(command: string, log = false) {
+    if (log) {
+      this.outputChannel.show();
+      this.outputChannel.info(`Running "${command}"`);
+    }
+
+    const result = await asyncExec(command, {
       env: this.ruby.env,
       cwd: this.workspaceFolder.uri.fsPath,
     });
+
+    if (log) {
+      if (result.stderr.length > 0) {
+        this.outputChannel.error(result.stderr);
+      } else {
+        this.outputChannel.info(result.stdout);
+      }
+    }
+
+    return result;
   }
 
   private registerRestarts(context: vscode.ExtensionContext) {

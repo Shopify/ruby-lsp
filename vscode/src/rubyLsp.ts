@@ -15,6 +15,7 @@ import { TestController } from "./testController";
 import { openFile, openUris } from "./commands";
 import { Debugger } from "./debugger";
 import { DependenciesTree } from "./dependenciesTree";
+import { Rails } from "./rails";
 
 // The RubyLsp class represents an instance of the entire extension. This should only be instantiated once at the
 // activation event. One instance of this class controls all of the existing workspaces, telemetry and handles all
@@ -26,6 +27,7 @@ export class RubyLsp {
   private readonly testController: TestController;
   private readonly debug: Debugger;
   private readonly telemetry: vscode.TelemetryLogger;
+  private readonly rails: Rails;
 
   constructor(
     context: vscode.ExtensionContext,
@@ -39,6 +41,7 @@ export class RubyLsp {
       this.currentActiveWorkspace.bind(this),
     );
     this.debug = new Debugger(context, this.workspaceResolver.bind(this));
+    this.rails = new Rails(this.showWorkspacePick.bind(this));
     this.registerCommands(context);
 
     this.statusItems = new StatusItems();
@@ -412,15 +415,7 @@ export class RubyLsp {
             return;
           }
 
-          workspace.outputChannel.show();
-          workspace.outputChannel.info(`Running task: ${command}`);
-          const { stdout, stderr } = await workspace.execute(command);
-
-          if (stderr.length > 0) {
-            workspace.outputChannel.error(stderr);
-          } else {
-            workspace.outputChannel.info(stdout);
-          }
+          await workspace.execute(command, true);
         },
       ),
       vscode.commands.registerCommand(
@@ -457,6 +452,46 @@ export class RubyLsp {
             file,
             line: parseInt(line, 10) - 1,
           });
+        },
+      ),
+      vscode.commands.registerCommand(
+        Command.RailsGenerate,
+        async (generatorWithArguments: string | undefined) => {
+          // If the command was invoked programmatically, then the arguments will already be present. Otherwise, we need
+          // to show a UI so that the user can pick the arguments to generate
+          const command =
+            generatorWithArguments ??
+            (await vscode.window.showInputBox({
+              title: "Rails generate arguments",
+              placeHolder:
+                "model User name:string | scaffold Post title:string",
+            }));
+
+          if (!command) {
+            return;
+          }
+
+          await this.rails.generate(command);
+        },
+      ),
+      vscode.commands.registerCommand(
+        Command.RailsDestroy,
+        async (generatorWithArguments: string | undefined) => {
+          // If the command was invoked programmatically, then the arguments will already be present. Otherwise, we need
+          // to show a UI so that the user can pick the arguments to destroy
+          const command =
+            generatorWithArguments ??
+            (await vscode.window.showInputBox({
+              title: "Rails destroy arguments",
+              placeHolder:
+                "model User name:string | scaffold Post title:string",
+            }));
+
+          if (!command) {
+            return;
+          }
+
+          await this.rails.destroy(command);
         },
       ),
     );
