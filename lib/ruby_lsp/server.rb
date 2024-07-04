@@ -98,7 +98,16 @@ module RubyLsp
     rescue StandardError, LoadError => e
       # If an error occurred in a request, we have to return an error response or else the editor will hang
       if message[:id]
-        send_message(Error.new(id: message[:id], code: Constant::ErrorCodes::INTERNAL_ERROR, message: e.full_message))
+        send_message(Error.new(
+          id: message[:id],
+          code: Constant::ErrorCodes::INTERNAL_ERROR,
+          message: e.full_message,
+          data: {
+            errorClass: e.class.name,
+            errorMessage: e.message,
+            backtrace: e.backtrace&.join("\n"),
+          },
+        ))
       end
 
       $stderr.puts("Error processing #{message[:method]}: #{e.full_message}")
