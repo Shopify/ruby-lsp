@@ -20,6 +20,7 @@ The Ruby LSP features include
 - Showing documentaton on hover for classes, modules and constants
 - Completion for classes, modules, constants and require paths
 - Fuzzy search classes, modules and constants anywhere in the project and its dependencies (workspace symbol)
+- Running Rails generators from the UI
 
 Adding method support for definition, completion, hover and workspace symbol is planned, but not yet completed.
 
