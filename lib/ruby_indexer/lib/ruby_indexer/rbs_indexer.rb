@@ -93,16 +93,15 @@ module RubyIndexer
     def add_declaration_mixins_to_entry(declaration, entry)
       declaration.each_mixin do |mixin|
         name = mixin.name.name.to_s
-        mixin_operation =
-          case mixin
-          when RBS::AST::Members::Include
-            Entry::Include.new(name)
-          when RBS::AST::Members::Extend
-            Entry::Extend.new(name)
-          when RBS::AST::Members::Prepend
-            Entry::Prepend.new(name)
-          end
-        entry.mixin_operations << mixin_operation if mixin_operation
+        case mixin
+        when RBS::AST::Members::Include
+          entry.mixin_operations << Entry::Include.new(name)
+        when RBS::AST::Members::Prepend
+          entry.mixin_operations << Entry::Prepend.new(name)
+        when RBS::AST::Members::Extend
+          singleton = @index.existing_or_new_singleton_class(entry.name)
+          singleton.mixin_operations << Entry::Include.new(name)
+        end
       end
     end
 
@@ -122,26 +121,8 @@ module RubyIndexer
         Entry::Visibility::PUBLIC
       end
 
-      real_owner = member.singleton? ? existing_or_new_singleton_klass(owner) : owner
+      real_owner = member.singleton? ? @index.existing_or_new_singleton_class(owner.name) : owner
       @index.add(Entry::Method.new(name, file_path, location, location, comments, [], visibility, real_owner))
-    end
-
-    sig { params(owner: Entry::Namespace).returns(T.nilable(Entry::Class)) }
-    def existing_or_new_singleton_klass(owner)
-      *_parts, name = owner.name.split("::")
-
-      # Return the existing singleton class if available
-      singleton_entries = T.cast(
-        @index["#{owner.name}::<Class:#{name}>"],
-        T.nilable(T::Array[Entry::SingletonClass]),
-      )
-      return singleton_entries.first if singleton_entries
-
-      # If not available, create the singleton class lazily
-      nesting = owner.nesting + ["<Class:#{name}>"]
-      entry = Entry::SingletonClass.new(nesting, owner.file_path, owner.location, owner.name_location, [], nil)
-      @index.add(entry, skip_prefix_tree: true)
-      entry
     end
   end
 end

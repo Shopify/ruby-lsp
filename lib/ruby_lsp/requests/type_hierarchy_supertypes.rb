@@ -54,8 +54,6 @@ module RubyLsp
           end
 
           entry.mixin_operations.each do |mixin_operation|
-            next if mixin_operation.is_a?(RubyIndexer::Entry::Extend)
-
             mixin_name = mixin_operation.module_name
             resolved_mixin_entries = @index.resolve(mixin_name, entry.nesting)
             next unless resolved_mixin_entries

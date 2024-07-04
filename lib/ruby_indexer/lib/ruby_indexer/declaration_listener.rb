@@ -314,20 +314,22 @@ module RubyIndexer
           @owner_stack.last,
         ))
       when Prism::SelfNode
-        singleton = singleton_klass
+        owner = @owner_stack.last
 
-        @index.add(Entry::Method.new(
-          method_name,
-          @file_path,
-          node.location,
-          node.name_loc,
-          comments,
-          [Entry::Signature.new(list_params(node.parameters))],
-          current_visibility,
-          singleton,
-        ))
+        if owner
+          singleton = @index.existing_or_new_singleton_class(owner.name)
 
-        if singleton
+          @index.add(Entry::Method.new(
+            method_name,
+            @file_path,
+            node.location,
+            node.name_loc,
+            comments,
+            [Entry::Signature.new(list_params(node.parameters))],
+            current_visibility,
+            singleton,
+          ))
+
           @owner_stack << singleton
           @stack << "<Class:#{@stack.last}>"
         end
@@ -405,7 +407,12 @@ module RubyIndexer
 
       # When instance variables are declared inside the class body, they turn into class instance variables rather than
       # regular instance variables
-      owner = @inside_def ? @owner_stack.last : singleton_klass
+      owner = @owner_stack.last
+
+      if owner && !@inside_def
+        owner = @index.existing_or_new_singleton_class(owner.name)
+      end
+
       @index.add(Entry::InstanceVariable.new(name, @file_path, loc, collect_comments(node), owner))
     end
 
@@ -605,7 +612,8 @@ module RubyIndexer
         when :prepend
           owner.mixin_operations << Entry::Prepend.new(node.full_name)
         when :extend
-          owner.mixin_operations << Entry::Extend.new(node.full_name)
+          singleton = @index.existing_or_new_singleton_class(owner.name)
+          singleton.mixin_operations << Entry::Include.new(node.full_name)
         end
       rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
              Prism::ConstantPathNode::MissingNodesInConstantPathError
@@ -700,32 +708,6 @@ module RubyIndexer
         names_with_commas = names.join(", ")
         :"(#{names_with_commas})"
       end
-    end
-
-    sig { returns(T.nilable(Entry::Class)) }
-    def singleton_klass
-      attached_class = @owner_stack.last
-      return unless attached_class
-
-      # Return the existing singleton class if available
-      owner = T.cast(
-        @index["#{attached_class.name}::<Class:#{attached_class.name}>"],
-        T.nilable(T::Array[Entry::SingletonClass]),
-      )
-      return owner.first if owner
-
-      # If not available, create the singleton class lazily
-      nesting = @stack + ["<Class:#{@stack.last}>"]
-      entry = Entry::SingletonClass.new(
-        nesting,
-        @file_path,
-        attached_class.location,
-        attached_class.name_location,
-        [],
-        nil,
-      )
-      @index.add(entry, skip_prefix_tree: true)
-      entry
     end
   end
 end

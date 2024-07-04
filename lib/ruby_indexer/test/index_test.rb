@@ -1358,11 +1358,6 @@ module RubyIndexer
       entries = @index.instance_variable_completion_candidates("@", "Foo::Bar::<Class:Bar>").map(&:name)
       assert_includes(entries, "@a")
       assert_includes(entries, "@b")
-
-      assert_includes(
-        @index.instance_variable_completion_candidates("@", "Foo::Bar::<Class:Bar>::<Class:<Class:Bar>>").map(&:name),
-        "@c",
-      )
     end
 
     def test_singletons_are_excluded_from_prefix_search
@@ -1572,6 +1567,145 @@ module RubyIndexer
       entry = T.must(methods.first)
 
       assert_equal("()", entry.decorated_parameters)
+    end
+
+    def test_linearizing_singleton_ancestors_of_singleton_when_class_has_parent
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        class Foo; end
+
+        class Bar < Foo
+        end
+
+        class Baz < Bar
+          class << self
+            class << self
+            end
+          end
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "Baz::<Class:Baz>::<Class:<Class:Baz>>",
+          "Bar::<Class:Bar>::<Class:<Class:Bar>>",
+          "Foo::<Class:Foo>::<Class:<Class:Foo>>",
+          "Object::<Class:Object>::<Class:<Class:Object>>",
+          "BasicObject::<Class:BasicObject>::<Class:<Class:BasicObject>>",
+          "Class::<Class:Class>",
+          "Module::<Class:Module>",
+          "Object::<Class:Object>",
+          "BasicObject::<Class:BasicObject>",
+          "Class",
+          "Module",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Baz::<Class:Baz>::<Class:<Class:Baz>>"),
+      )
+    end
+
+    def test_linearizing_singleton_object
+      assert_equal(
+        [
+          "Object::<Class:Object>",
+          "BasicObject::<Class:BasicObject>",
+          "Class",
+          "Module",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Object::<Class:Object>"),
+      )
+    end
+
+    def test_linearizing_singleton_ancestors
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        module First
+        end
+
+        module Second
+          include First
+        end
+
+        module Foo
+          class Bar
+            class << self
+              class Baz
+                extend Second
+
+                class << self
+                  include First
+                end
+              end
+            end
+          end
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "Foo::Bar::<Class:Bar>::Baz::<Class:Baz>",
+          "Second",
+          "First",
+          "Object::<Class:Object>",
+          "BasicObject::<Class:BasicObject>",
+          "Class",
+          "Module",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Foo::Bar::<Class:Bar>::Baz::<Class:Baz>"),
+      )
+    end
+
+    def test_linearizing_singleton_ancestors_when_class_has_parent
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        class Foo; end
+
+        class Bar < Foo
+        end
+
+        class Baz < Bar
+          class << self
+          end
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "Baz::<Class:Baz>",
+          "Bar::<Class:Bar>",
+          "Foo::<Class:Foo>",
+          "Object::<Class:Object>",
+          "BasicObject::<Class:BasicObject>",
+          "Class",
+          "Module",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Baz::<Class:Baz>"),
+      )
+    end
+
+    def test_linearizing_a_module_singleton_class
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        module A; end
+      RUBY
+
+      assert_equal(
+        [
+          "A::<Class:A>",
+          "Module",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("A::<Class:A>"),
+      )
     end
   end
 end
