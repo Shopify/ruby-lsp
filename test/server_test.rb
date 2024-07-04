@@ -446,6 +446,22 @@ class ServerTest < Minitest::Test
     RubyLsp::Addon.addon_classes.clear
   end
 
+  def test_errors_include_telemetry_data
+    @server.expects(:workspace_symbol).raises(StandardError, "boom")
+
+    capture_io do
+      @server.process_message(id: 1, method: "workspace/symbol", params: { query: "" })
+    end
+
+    error = @server.pop_response
+    assert_instance_of(RubyLsp::Error, error)
+
+    data = error.to_hash.dig(:error, :data)
+    assert_equal("boom", data[:errorMessage])
+    assert_equal("StandardError", data[:errorClass])
+    assert_match("mocha/exception_raiser.rb", data[:backtrace])
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)
