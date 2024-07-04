@@ -513,6 +513,26 @@ module RubyIndexer
       @ancestors.clear if original_map.any? { |name, hash| updated_map[name] != hash }
     end
 
+    sig { returns(T::Boolean) }
+    def empty?
+      @entries.empty?
+    end
+
+    sig { returns(T::Array[String]) }
+    def names
+      @entries.keys
+    end
+
+    sig { params(name: String).returns(T::Boolean) }
+    def indexed?(name)
+      @entries.key?(name)
+    end
+
+    sig { returns(Integer) }
+    def length
+      @entries.count
+    end
+
     private
 
     # Attempts to resolve an UnresolvedAlias into a resolved Alias. If the unresolved alias is pointing to a constant
