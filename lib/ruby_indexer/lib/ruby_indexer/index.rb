@@ -415,9 +415,6 @@ module RubyIndexer
       raise NonExistingNamespaceError,
         "None of the entries for #{fully_qualified_name} are modules or classes" if namespaces.empty?
 
-      mixin_operations = namespaces.flat_map(&:mixin_operations)
-      main_namespace_index = 0
-
       # The original nesting where we discovered this namespace, so that we resolve the correct names of the
       # included/prepended/extended modules and parent classes
       nesting = T.must(namespaces.first).nesting
@@ -428,94 +425,15 @@ module RubyIndexer
         end
       end
 
-      mixin_operations.each do |operation|
-        resolved_module = resolve(operation.module_name, nesting)
-        next unless resolved_module
-
-        module_fully_qualified_name = T.must(resolved_module.first).name
-
-        case operation
-        when Entry::Prepend
-          # When a module is prepended, Ruby checks if it hasn't been prepended already to prevent adding it in front of
-          # the actual namespace twice. However, it does not check if it has been included because you are allowed to
-          # prepend the same module after it has already been included
-          linearized_prepends = linearized_ancestors_of(module_fully_qualified_name)
-
-          # When there are duplicate prepended modules, we have to insert the new prepends after the existing ones. For
-          # example, if the current ancestors are `["A", "Foo"]` and we try to prepend `["A", "B"]`, then `"B"` has to
-          # be inserted after `"A`
-          uniq_prepends = linearized_prepends - T.must(ancestors[0...main_namespace_index])
-          insert_position = linearized_prepends.length - uniq_prepends.length
-
-          T.unsafe(ancestors).insert(
-            insert_position,
-            *(linearized_prepends - T.must(ancestors[0...main_namespace_index])),
-          )
-
-          main_namespace_index += linearized_prepends.length
-        when Entry::Include
-          # When including a module, Ruby will always prevent duplicate entries in case the module has already been
-          # prepended or included
-          linearized_includes = linearized_ancestors_of(module_fully_qualified_name)
-          T.unsafe(ancestors).insert(main_namespace_index + 1, *(linearized_includes - ancestors))
-        end
-      end
-
-      # Find the first class entry that has a parent class. Notice that if the developer makes a mistake and inherits
-      # from two diffent classes in different files, we simply ignore it
-      superclass = T.cast(
-        if singleton_levels > 0
-          self[attached_class_name]&.find { |n| n.is_a?(Entry::Class) && n.parent_class }
-        else
-          namespaces.find { |n| n.is_a?(Entry::Class) && n.parent_class }
-        end,
-        T.nilable(Entry::Class),
+      linearize_mixins(ancestors, namespaces, nesting)
+      linearize_superclass(
+        ancestors,
+        attached_class_name,
+        fully_qualified_name,
+        namespaces,
+        nesting,
+        singleton_levels,
       )
-
-      if superclass
-        # If the user makes a mistake and creates a class that inherits from itself, this method would throw a stack
-        # error. We need to ensure that this isn't the case
-        parent_class = T.must(superclass.parent_class)
-
-        resolved_parent_class = resolve(parent_class, nesting)
-        parent_class_name = resolved_parent_class&.first&.name
-
-        if parent_class_name && fully_qualified_name != parent_class_name
-
-          parent_name_parts = [parent_class_name]
-          singleton_levels.times do
-            parent_name_parts << "<Class:#{parent_name_parts.last}>"
-          end
-
-          ancestors.concat(linearized_ancestors_of(parent_name_parts.join("::")))
-        end
-
-        # When computing the linearization for a class's singleton class, it inherits from the linearized ancestors of
-        # the `Class` class
-        if parent_class_name&.start_with?("BasicObject") && singleton_levels > 0
-          class_class_name_parts = ["Class"]
-
-          (singleton_levels - 1).times do
-            class_class_name_parts << "<Class:#{class_class_name_parts.last}>"
-          end
-
-          ancestors.concat(linearized_ancestors_of(class_class_name_parts.join("::")))
-        end
-      elsif singleton_levels > 0
-        # When computing the linearization for a module's singleton class, it inherits from the linearized ancestors of
-        # the `Module` class
-        mod = T.cast(self[attached_class_name]&.find { |n| n.is_a?(Entry::Module) }, T.nilable(Entry::Module))
-
-        if mod
-          module_class_name_parts = ["Module"]
-
-          (singleton_levels - 1).times do
-            module_class_name_parts << "<Class:#{module_class_name_parts.last}>"
-          end
-
-          ancestors.concat(linearized_ancestors_of(module_class_name_parts.join("::")))
-        end
-      end
 
       ancestors
     end
@@ -619,6 +537,130 @@ module RubyIndexer
     end
 
     private
+
+    # Linearize mixins for an array of namespace entries. This method will mutate the `ancestors` array with the
+    # linearized ancestors of the mixins
+    sig do
+      params(
+        ancestors: T::Array[String],
+        namespace_entries: T::Array[Entry::Namespace],
+        nesting: T::Array[String],
+      ).void
+    end
+    def linearize_mixins(ancestors, namespace_entries, nesting)
+      mixin_operations = namespace_entries.flat_map(&:mixin_operations)
+      main_namespace_index = 0
+
+      mixin_operations.each do |operation|
+        resolved_module = resolve(operation.module_name, nesting)
+        next unless resolved_module
+
+        module_fully_qualified_name = T.must(resolved_module.first).name
+
+        case operation
+        when Entry::Prepend
+          # When a module is prepended, Ruby checks if it hasn't been prepended already to prevent adding it in front of
+          # the actual namespace twice. However, it does not check if it has been included because you are allowed to
+          # prepend the same module after it has already been included
+          linearized_prepends = linearized_ancestors_of(module_fully_qualified_name)
+
+          # When there are duplicate prepended modules, we have to insert the new prepends after the existing ones. For
+          # example, if the current ancestors are `["A", "Foo"]` and we try to prepend `["A", "B"]`, then `"B"` has to
+          # be inserted after `"A`
+          uniq_prepends = linearized_prepends - T.must(ancestors[0...main_namespace_index])
+          insert_position = linearized_prepends.length - uniq_prepends.length
+
+          T.unsafe(ancestors).insert(
+            insert_position,
+            *(linearized_prepends - T.must(ancestors[0...main_namespace_index])),
+          )
+
+          main_namespace_index += linearized_prepends.length
+        when Entry::Include
+          # When including a module, Ruby will always prevent duplicate entries in case the module has already been
+          # prepended or included
+          linearized_includes = linearized_ancestors_of(module_fully_qualified_name)
+          T.unsafe(ancestors).insert(main_namespace_index + 1, *(linearized_includes - ancestors))
+        end
+      end
+    end
+
+    # Linearize the superclass of a given namespace (including modules with the implicit `Module` superclass). This
+    # method will mutate the `ancestors` array with the linearized ancestors of the superclass
+    sig do
+      params(
+        ancestors: T::Array[String],
+        attached_class_name: String,
+        fully_qualified_name: String,
+        namespace_entries: T::Array[Entry::Namespace],
+        nesting: T::Array[String],
+        singleton_levels: Integer,
+      ).void
+    end
+    def linearize_superclass( # rubocop:disable Metrics/ParameterLists
+      ancestors,
+      attached_class_name,
+      fully_qualified_name,
+      namespace_entries,
+      nesting,
+      singleton_levels
+    )
+      # Find the first class entry that has a parent class. Notice that if the developer makes a mistake and inherits
+      # from two diffent classes in different files, we simply ignore it
+      superclass = T.cast(
+        if singleton_levels > 0
+          self[attached_class_name]&.find { |n| n.is_a?(Entry::Class) && n.parent_class }
+        else
+          namespace_entries.find { |n| n.is_a?(Entry::Class) && n.parent_class }
+        end,
+        T.nilable(Entry::Class),
+      )
+
+      if superclass
+        # If the user makes a mistake and creates a class that inherits from itself, this method would throw a stack
+        # error. We need to ensure that this isn't the case
+        parent_class = T.must(superclass.parent_class)
+
+        resolved_parent_class = resolve(parent_class, nesting)
+        parent_class_name = resolved_parent_class&.first&.name
+
+        if parent_class_name && fully_qualified_name != parent_class_name
+
+          parent_name_parts = [parent_class_name]
+          singleton_levels.times do
+            parent_name_parts << "<Class:#{parent_name_parts.last}>"
+          end
+
+          ancestors.concat(linearized_ancestors_of(parent_name_parts.join("::")))
+        end
+
+        # When computing the linearization for a class's singleton class, it inherits from the linearized ancestors of
+        # the `Class` class
+        if parent_class_name&.start_with?("BasicObject") && singleton_levels > 0
+          class_class_name_parts = ["Class"]
+
+          (singleton_levels - 1).times do
+            class_class_name_parts << "<Class:#{class_class_name_parts.last}>"
+          end
+
+          ancestors.concat(linearized_ancestors_of(class_class_name_parts.join("::")))
+        end
+      elsif singleton_levels > 0
+        # When computing the linearization for a module's singleton class, it inherits from the linearized ancestors of
+        # the `Module` class
+        mod = T.cast(self[attached_class_name]&.find { |n| n.is_a?(Entry::Module) }, T.nilable(Entry::Module))
+
+        if mod
+          module_class_name_parts = ["Module"]
+
+          (singleton_levels - 1).times do
+            module_class_name_parts << "<Class:#{module_class_name_parts.last}>"
+          end
+
+          ancestors.concat(linearized_ancestors_of(module_class_name_parts.join("::")))
+        end
+      end
+    end
 
     # Attempts to resolve an UnresolvedAlias into a resolved Alias. If the unresolved alias is pointing to a constant
     # that doesn't exist, then we return the same UnresolvedAlias

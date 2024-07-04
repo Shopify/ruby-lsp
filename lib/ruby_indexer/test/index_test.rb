@@ -1569,7 +1569,7 @@ module RubyIndexer
       assert_equal("()", entry.decorated_parameters)
     end
 
-    def test_linearizing_singleton_singleton_ancestors_when_class_has_parent
+    def test_linearizing_singleton_ancestors_of_singleton_when_class_has_parent
       @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         class Foo; end
 
