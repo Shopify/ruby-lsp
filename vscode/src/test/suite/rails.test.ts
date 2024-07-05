@@ -1,4 +1,5 @@
 import * as assert from "assert";
+import os from "os";
 import path from "path";
 
 import * as vscode from "vscode";
@@ -6,6 +7,8 @@ import sinon from "sinon";
 
 import { Rails } from "../../rails";
 import { Workspace } from "../../workspace";
+
+const BASE_COMMAND = os.platform() === "win32" ? "ruby bin/rails" : "bin/rails";
 
 suite("Rails", () => {
   const workspacePath = path.dirname(
@@ -36,7 +39,7 @@ suite("Rails", () => {
 
     assert.ok(
       executeStub.calledOnceWithExactly(
-        "bin/rails generate model User name:string",
+        `${BASE_COMMAND} generate model User name:string`,
         true,
       ),
     );
@@ -81,7 +84,7 @@ suite("Rails", () => {
 
     assert.ok(
       executeStub.calledOnceWithExactly(
-        "bin/rails destroy model User name:string",
+        `${BASE_COMMAND} destroy model User name:string`,
         true,
       ),
     );

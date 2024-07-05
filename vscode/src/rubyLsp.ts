@@ -495,20 +495,34 @@ export class RubyLsp {
         },
       ),
       vscode.commands.registerCommand(Command.FileOperation, async () => {
-        const items: ({ command: string } & vscode.QuickPickItem)[] = [
-          {
-            label: "Rails generate",
-            description: "Run Rails generate",
-            iconPath: new vscode.ThemeIcon("new-file"),
-            command: Command.RailsGenerate,
-          },
-          {
-            label: "Rails destroy",
-            description: "Run Rails destroy",
-            iconPath: new vscode.ThemeIcon("trash"),
-            command: Command.RailsDestroy,
-          },
-        ];
+        const workspace = await this.showWorkspacePick();
+
+        if (!workspace) {
+          return;
+        }
+
+        const items: ({ command: string } & vscode.QuickPickItem)[] = [];
+
+        if (
+          workspace.lspClient?.addons?.some(
+            (addon) => addon.name === "Ruby LSP Rails",
+          )
+        ) {
+          items.push(
+            {
+              label: "Rails generate",
+              description: "Run Rails generate",
+              iconPath: new vscode.ThemeIcon("new-file"),
+              command: Command.RailsGenerate,
+            },
+            {
+              label: "Rails destroy",
+              description: "Run Rails destroy",
+              iconPath: new vscode.ThemeIcon("trash"),
+              command: Command.RailsDestroy,
+            },
+          );
+        }
 
         const pick = await vscode.window.showQuickPick(items, {
           title: "Select a Ruby file operation",

@@ -17,7 +17,7 @@ export class Workspace implements WorkspaceInterface {
   public readonly ruby: Ruby;
   public readonly createTestItems: (response: CodeLens[]) => void;
   public readonly workspaceFolder: vscode.WorkspaceFolder;
-  private readonly outputChannel: WorkspaceChannel;
+  public readonly outputChannel: WorkspaceChannel;
   private readonly context: vscode.ExtensionContext;
   private readonly isMainWorkspace: boolean;
   private readonly telemetry: vscode.TelemetryLogger;

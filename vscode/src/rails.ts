@@ -1,6 +1,10 @@
+import os from "os";
+
 import * as vscode from "vscode";
 
 import { Workspace } from "./workspace";
+
+const BASE_COMMAND = os.platform() === "win32" ? "ruby bin/rails" : "bin/rails";
 
 export class Rails {
   private readonly showWorkspacePick: () => Promise<Workspace | undefined>;
@@ -18,7 +22,7 @@ export class Rails {
     }
 
     const createdFiles: string[] = [];
-    const command = `bin/rails generate ${generatorWithArguments}`;
+    const command = `${BASE_COMMAND} generate ${generatorWithArguments}`;
 
     await vscode.window.withProgress(
       {
@@ -30,7 +34,7 @@ export class Rails {
         const { stdout } = await workspace.execute(command, true);
 
         stdout.split("\n").forEach((line) => {
-          const match = /create\s*(.*)/.exec(line);
+          const match = /create\s*(.*\..*)/.exec(line);
 
           if (match) {
             createdFiles.push(match[1]);
@@ -52,7 +56,7 @@ export class Rails {
     }
 
     const deletedFiles: string[] = [];
-    const command = `bin/rails destroy ${generatorWithArguments}`;
+    const command = `${BASE_COMMAND} destroy ${generatorWithArguments}`;
 
     await vscode.window.withProgress(
       {
@@ -64,7 +68,7 @@ export class Rails {
         const { stdout } = await workspace.execute(command, true);
 
         stdout.split("\n").forEach((line) => {
-          const match = /remove\s*(.*)/.exec(line);
+          const match = /remove\s*(.*\..*)/.exec(line);
 
           if (match) {
             deletedFiles.push(match[1]);
