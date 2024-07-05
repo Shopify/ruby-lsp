@@ -329,9 +329,10 @@ export default class Client extends LanguageClient implements ClientInterface {
         await vscode.window.showErrorMessage(
           `Ruby LSP error ${error.data.errorClass}: ${error.data.errorMessage}\n\n${error.data.backtrace}`,
         );
+      } else {
+        this.telemetry.logError(error, { ...error.data });
       }
 
-      this.telemetry.logError(error, { ...error.data });
       throw error;
     }
   }
