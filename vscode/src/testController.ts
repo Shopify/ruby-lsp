@@ -57,14 +57,13 @@ export class TestController {
       this.debugTag,
     );
 
-    vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
-      if (terminal === this.terminal) this.terminal = undefined;
-    });
-
     context.subscriptions.push(
       this.testController,
       this.testDebugProfile,
       this.testRunProfile,
+      vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
+        if (terminal === this.terminal) this.terminal = undefined;
+      }),
     );
   }
 
