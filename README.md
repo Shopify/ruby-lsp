@@ -109,6 +109,10 @@ features. This is the mechanism that powers addons like
 - [Ruby LSP RSpec](https://github.com/st0012/ruby-lsp-rspec)
 - [Ruby LSP rubyfmt](https://github.com/jscharf/ruby-lsp-rubyfmt)
 
+Additionally, some tools may include a Ruby LSP addon directly, like
+
+- [Standard Ruby (from v1.39.1)](https://github.com/standardrb/standard/wiki/IDE:-vscode#using-ruby-lsp)
+
 Other community driven addons can be found in [rubygems](https://rubygems.org/search?query=name%3A+ruby-lsp) by
 searching for the `ruby-lsp` prefix.
 
