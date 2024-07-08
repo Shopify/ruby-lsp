@@ -168,7 +168,7 @@ export class RubyLsp {
       workspaceFolder,
       this.telemetry,
       this.testController.createTestItems.bind(this.testController),
-      eager,
+      this.workspaces.size === 0,
     );
     this.workspaces.set(workspaceFolder.uri.toString(), workspace);
 
