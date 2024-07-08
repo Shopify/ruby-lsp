@@ -20,6 +20,11 @@ module RubyLsp
       @parse_result.failure?
     end
 
+    sig { override.returns(LanguageId) }
+    def language_id
+      LanguageId::ERB
+    end
+
     class ERBScanner
       extend T::Sig
 

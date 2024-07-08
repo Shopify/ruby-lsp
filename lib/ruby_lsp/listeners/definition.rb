@@ -16,19 +16,20 @@ module RubyLsp
             Interface::LocationLink,
           )],
           global_state: GlobalState,
-          document: Document,
+          language_id: Document::LanguageId,
+          uri: URI::Generic,
           node_context: NodeContext,
           dispatcher: Prism::Dispatcher,
           typechecker_enabled: T::Boolean,
         ).void
       end
-      def initialize(response_builder, global_state, document, node_context, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, global_state, language_id, uri, node_context, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
         @type_inferrer = T.let(global_state.type_inferrer, TypeInferrer)
-        @document = document
-        @uri = T.let(document.uri, URI::Generic)
+        @language_id = language_id
+        @uri = uri
         @node_context = node_context
         @typechecker_enabled = typechecker_enabled
 
@@ -57,7 +58,7 @@ module RubyLsp
 
         # Until we can properly infer the receiver type in erb files (maybe with ruby-lsp-rails),
         # treating method calls' type as `nil` will allow users to get some completion support first
-        if @document.is_a?(ERBDocument) && inferrer_receiver_type == "Object"
+        if @language_id == Document::LanguageId::ERB && inferrer_receiver_type == "Object"
           inferrer_receiver_type = nil
         end
 

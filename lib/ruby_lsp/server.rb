@@ -288,12 +288,18 @@ module RubyLsp
     def text_document_did_open(message)
       @mutex.synchronize do
         text_document = message.dig(:params, :textDocument)
+        language_id = case text_document[:languageId]
+        when "erb"
+          Document::LanguageId::ERB
+        else
+          Document::LanguageId::Ruby
+        end
         @store.set(
           uri: text_document[:uri],
           source: text_document[:text],
           version: text_document[:version],
           encoding: @global_state.encoding,
-          language_id: text_document[:languageId],
+          language_id: language_id,
         )
       end
     end
