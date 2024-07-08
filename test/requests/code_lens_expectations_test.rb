@@ -9,6 +9,13 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
   def setup
     @global_state = RubyLsp::GlobalState.new
+
+    @minitest_load_path = RubyLsp::Listeners::CodeLens::MINITEST_LOAD_PATH
+    RubyLsp::Listeners::CodeLens.const_set(:MINITEST_LOAD_PATH, "/lib/minitest/load.rb")
+  end
+
+  def teardown
+    RubyLsp::Listeners::CodeLens.const_set(:MINITEST_LOAD_PATH, @minitest_load_path)
   end
 
   def run_expectations(source)
