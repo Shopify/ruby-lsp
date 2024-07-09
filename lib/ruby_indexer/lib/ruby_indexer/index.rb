@@ -389,7 +389,7 @@ module RubyIndexer
       # If we don't have an entry for `name`, raise
       entries = self[fully_qualified_name]
 
-      if singleton_levels > 0 && !entries
+      if singleton_levels > 0 && !entries && indexed?(attached_class_name)
         entries = [existing_or_new_singleton_class(attached_class_name)]
       end
 

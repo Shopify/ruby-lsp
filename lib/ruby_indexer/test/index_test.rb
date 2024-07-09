@@ -1707,5 +1707,11 @@ module RubyIndexer
         @index.linearized_ancestors_of("A::<Class:A>"),
       )
     end
+
+    def test_linearizing_a_singleton_class_with_no_attached
+      assert_raises(Index::NonExistingNamespaceError) do
+        @index.linearized_ancestors_of("A::<Class:A>")
+      end
+    end
   end
 end
