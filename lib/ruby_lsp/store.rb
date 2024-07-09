@@ -37,7 +37,8 @@ module RubyLsp
       return document unless document.nil?
 
       path = T.must(uri.to_standardized_path)
-      language_id = if path.end_with?(".erb") || path.end_with?(".rhtml")
+      ext = File.extname(path)
+      language_id = if ext == ".erb" || ext == ".rhtml"
         Document::LanguageId::ERB
       else
         Document::LanguageId::Ruby
