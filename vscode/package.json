@@ -538,7 +538,7 @@
         "**/.ruby-lsp": true
       },
       "[ruby]": {
-        "editor.defaultFormatter": "Shopify.ruby-lsp", 
+        "editor.defaultFormatter": "Shopify.ruby-lsp",
         "editor.formatOnSave": true,
         "editor.tabSize": 2,
         "editor.insertSpaces": true,
