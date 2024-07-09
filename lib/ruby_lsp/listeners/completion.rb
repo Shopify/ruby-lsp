@@ -288,12 +288,17 @@ module RubyLsp
         range = if method_name
           range_from_location(T.must(node.message_loc))
         else
-          loc = T.must(node.call_operator_loc)
-          Interface::Range.new(
-            start: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column + 1),
-            end: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column + 1),
-          )
+          loc = node.call_operator_loc
+
+          if loc
+            Interface::Range.new(
+              start: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column + 1),
+              end: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column + 1),
+            )
+          end
         end
+
+        return unless range
 
         @index.method_completion_candidates(method_name, type).each do |entry|
           entry_name = entry.name
