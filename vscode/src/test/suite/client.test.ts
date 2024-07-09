@@ -26,10 +26,11 @@ import {
 import { after, afterEach, before } from "mocha";
 
 import { Ruby, ManagerIdentifier } from "../../ruby";
-import { Telemetry, TelemetryApi, TelemetryEvent } from "../../telemetry";
 import Client from "../../client";
 import { WorkspaceChannel } from "../../workspaceChannel";
 import { RUBY_VERSION } from "../rubyVersion";
+
+import { FAKE_TELEMETRY } from "./fakeTelemetry";
 
 const [major, minor, _patch] = RUBY_VERSION.split(".");
 
@@ -62,19 +63,6 @@ class FakeLogger {
 
   appendLine(value: string): void {
     this.receivedMessages += value;
-  }
-}
-
-class FakeApi implements TelemetryApi {
-  public sentEvents: TelemetryEvent[];
-
-  constructor() {
-    this.sentEvents = [];
-  }
-
-  // eslint-disable-next-line @typescript-eslint/require-await
-  async sendEvent(event: TelemetryEvent): Promise<void> {
-    this.sentEvents.push(event);
   }
 }
 
@@ -153,10 +141,9 @@ async function launchClient(workspaceUri: vscode.Uri) {
   await ruby.activateRuby();
   ruby.env.RUBY_LSP_BYPASS_TYPECHECKER = "true";
 
-  const telemetry = new Telemetry(context, new FakeApi());
   const client = new Client(
     context,
-    telemetry,
+    FAKE_TELEMETRY,
     ruby,
     () => {},
     workspaceFolder,

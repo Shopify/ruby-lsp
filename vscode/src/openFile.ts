@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 
-import { Telemetry } from "./telemetry";
 import { Workspace } from "./workspace";
 
 interface SourceLocation {
@@ -12,7 +11,7 @@ interface SourceLocation {
 }
 
 export async function openFile(
-  telemetry: Telemetry,
+  telemetry: vscode.TelemetryLogger,
   workspace: Workspace | undefined,
   sourceLocation: SourceLocation,
 ) {
@@ -30,9 +29,12 @@ export async function openFile(
   await vscode.window.showTextDocument(doc, { selection });
 
   if (workspace?.lspClient?.serverVersion) {
-    await telemetry.sendCodeLensEvent(
-      "open_file",
-      workspace.lspClient.serverVersion,
-    );
+    telemetry.logUsage("ruby_lsp.code_lens", {
+      type: "counter",
+      attributes: {
+        label: "open_file",
+        vscodemachineid: vscode.env.machineId,
+      },
+    });
   }
 }
