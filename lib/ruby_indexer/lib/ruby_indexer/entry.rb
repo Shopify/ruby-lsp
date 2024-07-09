@@ -288,6 +288,14 @@ module RubyIndexer
     class BlockParameter < Parameter
       DEFAULT_NAME = T.let(:"<anonymous block>", Symbol)
 
+      class << self
+        extend T::Sig
+        sig { returns(BlockParameter) }
+        def anonymous
+          new(name: DEFAULT_NAME)
+        end
+      end
+
       sig { override.returns(Symbol) }
       def decorated_name
         :"&#{@name}"
