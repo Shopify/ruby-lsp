@@ -74,5 +74,253 @@ module RubyIndexer
 
       assert_same(entry.location, entry.name_location)
     end
+
+    def test_rbs_method_with_required_positionals
+      entries = @index["crypt"]
+      assert_equal(1, entries.length)
+
+      entry = entries.first
+      signatures = entry.signatures
+      assert_equal(1, signatures.length)
+
+      first_signature = signatures.first
+
+      # (::string salt_str) -> ::String
+
+      assert_equal(1, first_signature.parameters.length)
+      assert_kind_of(Entry::RequiredParameter, first_signature.parameters[0])
+      assert_equal(:salt_str, first_signature.parameters[0].name)
+    end
+
+    def test_rbs_method_with_unnamed_required_positionals
+      entries = @index["try_convert"]
+      entry = entries.find { |entry| entry.owner.name == "Array::<Class:Array>" }
+
+      parameters = entry.signatures[0].parameters
+
+      assert_equal([:arg0], parameters.map(&:name))
+      assert_kind_of(Entry::RequiredParameter, parameters[0])
+    end
+
+    def test_rbs_method_with_optional_positionals
+      entries = @index["polar"]
+      entry = entries.find { |entry| entry.owner.name == "Complex::<Class:Complex>" }
+
+      # def self.polar: (Numeric, ?Numeric) -> Complex
+
+      parameters = entry.signatures[0].parameters
+
+      assert_equal([:arg0, :arg1], parameters.map(&:name))
+      assert_kind_of(Entry::RequiredParameter, parameters[0])
+      assert_kind_of(Entry::OptionalParameter, parameters[1])
+    end
+
+    def test_rbs_method_with_optional_parameter
+      entries = @index["chomp"]
+      assert_equal(1, entries.length)
+
+      entry = entries.first
+      signatures = entry.signatures
+      assert_equal(1, signatures.length)
+
+      first_signature = signatures.first
+
+      # (?::string? separator) -> ::String
+
+      assert_equal(1, first_signature.parameters.length)
+      assert_kind_of(Entry::OptionalParameter, first_signature.parameters[0])
+      assert_equal(:separator, first_signature.parameters[0].name)
+    end
+
+    def test_rbs_method_with_required_and_optional_parameters
+      entries = @index["gsub"]
+      assert_equal(1, entries.length)
+
+      entry = entries.first
+
+      signatures = entry.signatures
+      assert_equal(3, signatures.length)
+
+      # (::Regexp | ::string pattern, ::string | ::hash[::String, ::_ToS] replacement) -> ::String
+      # | (::Regexp | ::string pattern) -> ::Enumerator[::String, ::String]
+      # | (::Regexp | ::string pattern) { (::String match) -> ::_ToS } -> ::String
+
+      parameters = signatures[0].parameters
+      assert_equal([:pattern, :replacement], parameters.map(&:name))
+      assert_kind_of(Entry::RequiredParameter, parameters[0])
+      assert_kind_of(Entry::RequiredParameter, parameters[1])
+
+      parameters = signatures[1].parameters
+      assert_equal([:pattern], parameters.map(&:name))
+      assert_kind_of(Entry::RequiredParameter, parameters[0])
+
+      parameters = signatures[2].parameters
+      assert_equal([:pattern, :"<anonymous block>"], parameters.map(&:name))
+      assert_kind_of(Entry::RequiredParameter, parameters[0])
+      assert_kind_of(Entry::BlockParameter, parameters[1])
+    end
+
+    def test_rbs_anonymous_block_parameter
+      entries = @index["open"]
+      entry = entries.find { |entry| entry.owner.name == "File::<Class:File>" }
+
+      assert_equal(2, entry.signatures.length)
+
+      # (::String name, ?::String mode, ?::Integer perm) -> ::IO?
+      # | [T] (::String name, ?::String mode, ?::Integer perm) { (::IO) -> T } -> T
+
+      parameters = entry.signatures[0].parameters
+      assert_equal([:file_name, :mode, :perm], parameters.map(&:name))
+      assert_kind_of(Entry::RequiredParameter, parameters[0])
+      assert_kind_of(Entry::OptionalParameter, parameters[1])
+      assert_kind_of(Entry::OptionalParameter, parameters[2])
+
+      parameters = entry.signatures[1].parameters
+      assert_equal([:file_name, :mode, :perm, :"<anonymous block>"], parameters.map(&:name))
+      assert_kind_of(Entry::RequiredParameter, parameters[0])
+      assert_kind_of(Entry::OptionalParameter, parameters[1])
+      assert_kind_of(Entry::OptionalParameter, parameters[2])
+      assert_kind_of(Entry::BlockParameter, parameters[3])
+    end
+
+    def test_rbs_method_with_rest_positionals
+      entries = @index["count"]
+      entry = entries.find { |entry| entry.owner.name == "String" }
+
+      parameters = entry.signatures.first.parameters
+      assert_equal(1, entry.signatures.length)
+
+      # (::String::selector selector_0, *::String::selector more_selectors) -> ::Integer
+
+      assert_equal([:selector_0, :more_selectors], parameters.map(&:name))
+      assert_kind_of(RubyIndexer::Entry::RequiredParameter, parameters[0])
+      assert_kind_of(RubyIndexer::Entry::RestParameter, parameters[1])
+    end
+
+    def test_rbs_method_with_trailing_positionals
+      entries = @index["select"] # https://ruby-doc.org/3.3.3/IO.html#method-c-select
+      entry = entries.find { |entry| entry.owner.name == "IO::<Class:IO>" }
+
+      signatures = entry.signatures
+      assert_equal(2, signatures.length)
+
+      # def self.select: [X, Y, Z] (::Array[X & io]? read_array, ?::Array[Y & io]? write_array, ?::Array[Z & io]? error_array) -> [ Array[X], Array[Y], Array[Z] ] # rubocop:disable Layout/LineLength
+      #   | [X, Y, Z] (::Array[X & io]? read_array, ?::Array[Y & io]? write_array, ?::Array[Z & io]? error_array, Time::_Timeout? timeout) -> [ Array[X], Array[Y], Array[Z] ]? # rubocop:disable Layout/LineLength
+
+      parameters = signatures[0].parameters
+      assert_equal([:read_array, :write_array, :error_array], parameters.map(&:name))
+      assert_kind_of(Entry::RequiredParameter, parameters[0])
+      assert_kind_of(Entry::OptionalParameter, parameters[1])
+      assert_kind_of(Entry::OptionalParameter, parameters[2])
+
+      parameters = signatures[1].parameters
+      assert_equal([:read_array, :write_array, :error_array, :timeout], parameters.map(&:name))
+      assert_kind_of(Entry::RequiredParameter, parameters[0])
+      assert_kind_of(Entry::OptionalParameter, parameters[1])
+      assert_kind_of(Entry::OptionalParameter, parameters[2])
+      assert_kind_of(Entry::OptionalParameter, parameters[3])
+    end
+
+    def test_rbs_method_with_optional_keywords
+      entries = @index["step"]
+      entry = entries.find { |entry| entry.owner.name == "Numeric" }
+
+      signatures = entry.signatures
+      assert_equal(4, signatures.length)
+
+      # (?::Numeric limit, ?::Numeric step) { (::Numeric) -> void } -> self
+      # | (?::Numeric limit, ?::Numeric step) -> ::Enumerator[::Numeric, self]
+      # | (?by: ::Numeric, ?to: ::Numeric) { (::Numeric) -> void } -> self
+      # | (?by: ::Numeric, ?to: ::Numeric) -> ::Enumerator[::Numeric, self]
+
+      parameters = signatures[0].parameters
+      assert_equal([:limit, :step, :"<anonymous block>"], parameters.map(&:name))
+      assert_kind_of(Entry::OptionalParameter, parameters[0])
+      assert_kind_of(Entry::OptionalParameter, parameters[1])
+      assert_kind_of(Entry::BlockParameter, parameters[2])
+
+      parameters = signatures[1].parameters
+      assert_equal([:limit, :step], parameters.map(&:name))
+      assert_kind_of(Entry::OptionalParameter, parameters[0])
+      assert_kind_of(Entry::OptionalParameter, parameters[1])
+
+      parameters = signatures[2].parameters
+      assert_equal([:by, :to, :"<anonymous block>"], parameters.map(&:name))
+      assert_kind_of(Entry::OptionalKeywordParameter, parameters[0])
+      assert_kind_of(Entry::OptionalKeywordParameter, parameters[1])
+      assert_kind_of(Entry::BlockParameter, parameters[2])
+
+      parameters = signatures[3].parameters
+      assert_equal([:by, :to], parameters.map(&:name))
+      assert_kind_of(Entry::OptionalKeywordParameter, parameters[0])
+      assert_kind_of(Entry::OptionalKeywordParameter, parameters[1])
+    end
+
+    def test_rbs_method_with_required_keywords
+      # There are no methods in Core that have required keyword arguments,
+      # so we test against RBS directly
+
+      rbs = <<~RBS
+        class File
+          def foo: (a: ::Numeric sz, b: ::Numeric) -> void
+        end
+      RBS
+      signatures = parse_rbs_methods(rbs, "foo")
+      parameters = signatures[0].parameters
+      assert_equal([:a, :b], parameters.map(&:name))
+      assert_kind_of(Entry::KeywordParameter, parameters[0])
+      assert_kind_of(Entry::KeywordParameter, parameters[1])
+    end
+
+    def test_rbs_method_with_rest_keywords
+      entries = @index["method_missing"]
+      entry = entries.find { |entry| entry.owner.name == "BasicObject" }
+      signatures = entry.signatures
+      assert_equal(1, signatures.length)
+
+      # (Symbol, *untyped, **untyped) ?{ (*untyped, **untyped) -> untyped } -> untyped
+
+      parameters = signatures[0].parameters
+      assert_equal([:arg0, :"<anonymous splat>", :"<anonymous keyword splat>"], parameters.map(&:name))
+      assert_kind_of(Entry::RequiredParameter, parameters[0])
+      assert_kind_of(Entry::RestParameter, parameters[1])
+      assert_kind_of(Entry::KeywordRestParameter, parameters[2])
+    end
+
+    def test_parse_simple_rbs
+      rbs = <<~RBS
+        class File
+          def self?.open: (String name, ?String mode, ?Integer perm) -> IO?
+              | [T] (String name, ?String mode, ?Integer perm) { (IO) -> T } -> T
+        end
+      RBS
+      signatures = parse_rbs_methods(rbs, "open")
+      assert_equal(2, signatures.length)
+      parameters = signatures[0].parameters
+      assert_equal([:name, :mode, :perm], parameters.map(&:name))
+      assert_kind_of(Entry::RequiredParameter, parameters[0])
+      assert_kind_of(Entry::OptionalParameter, parameters[1])
+      assert_kind_of(Entry::OptionalParameter, parameters[2])
+
+      parameters = signatures[1].parameters
+      assert_equal([:name, :mode, :perm, :"<anonymous block>"], parameters.map(&:name))
+      assert_kind_of(Entry::RequiredParameter, parameters[0])
+      assert_kind_of(Entry::OptionalParameter, parameters[1])
+      assert_kind_of(Entry::OptionalParameter, parameters[2])
+      assert_kind_of(Entry::BlockParameter, parameters[3])
+    end
+
+    private
+
+    def parse_rbs_methods(rbs, method_name)
+      buffer = RBS::Buffer.new(content: rbs, name: "")
+      _, _, declarations = RBS::Parser.parse_signature(buffer)
+      index = RubyIndexer::Index.new
+      indexer = RubyIndexer::RBSIndexer.new(index)
+      pathname = Pathname.new("file.rbs")
+      indexer.process_signature(pathname, declarations)
+      entry = T.must(index[method_name]).first
+      T.cast(entry, Entry::Method).signatures
+    end
   end
 end
