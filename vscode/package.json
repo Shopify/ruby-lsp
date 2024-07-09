@@ -543,7 +543,8 @@
         "editor.tabSize": 2,
         "editor.insertSpaces": true,
         "editor.semanticHighlighting.enabled": true,
-        "editor.formatOnType": true
+        "editor.formatOnType": true,
+        "editor.wordSeparators": "`~@#$%^&*()-=+[{]}\\|;:'\",.<>/"
       }
     }
   },
