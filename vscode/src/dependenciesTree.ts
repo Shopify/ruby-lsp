@@ -1,6 +1,7 @@
 import path from "path";
 
 import * as vscode from "vscode";
+import { State } from "vscode-languageclient";
 
 import { STATUS_EMITTER, WorkspaceInterface } from "./common";
 
@@ -148,11 +149,17 @@ export class DependenciesTree
   private async fetchDependencies(): Promise<BundlerTreeNode[]> {
     this.gemRootFolders = {};
 
-    if (!this.currentWorkspace || !this.currentWorkspace.lspClient) {
+    if (!this.currentWorkspace) {
       return [];
     }
 
-    const resp = (await this.currentWorkspace.lspClient.sendRequest(
+    const client = this.currentWorkspace.lspClient;
+
+    if (!client || client.state !== State.Running) {
+      return [];
+    }
+
+    const resp = (await client.sendRequest(
       "rubyLsp/workspace/dependencies",
       {},
     )) as [
