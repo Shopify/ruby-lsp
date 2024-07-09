@@ -90,6 +90,7 @@ module RubyLsp
           Listeners::Definition.new(
             @response_builder,
             global_state,
+            document.language_id,
             document.uri,
             node_context,
             dispatcher,

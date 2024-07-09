@@ -43,6 +43,23 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hovering_on_erb
+    source = <<~ERB
+      <% String %>
+    ERB
+
+    with_server(source, Kernel.URI("file:///fake.erb"), stub_no_typechecker: true) do |server, uri|
+      RubyIndexer::RBSIndexer.new(server.global_state.index).index_ruby_core
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { line: 0, character: 4 } },
+      )
+      response = server.pop_response
+      assert_match(/String\b/, response.response.contents.value)
+    end
+  end
+
   def test_hovering_precision
     source = <<~RUBY
       module Foo

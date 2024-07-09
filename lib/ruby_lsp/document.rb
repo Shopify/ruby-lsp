@@ -3,6 +3,13 @@
 
 module RubyLsp
   class Document
+    class LanguageId < T::Enum
+      enums do
+        Ruby = new("ruby")
+        ERB = new("erb")
+      end
+    end
+
     extend T::Sig
     extend T::Helpers
 
@@ -36,8 +43,11 @@ module RubyLsp
 
     sig { params(other: Document).returns(T::Boolean) }
     def ==(other)
-      @source == other.source
+      self.class == other.class && uri == other.uri && @source == other.source
     end
+
+    sig { abstract.returns(LanguageId) }
+    def language_id; end
 
     # TODO: remove this method once all nonpositional requests have been migrated to the listener pattern
     sig do

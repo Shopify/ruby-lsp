@@ -289,6 +289,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
             uri: second_uri,
             text: second_source,
             version: 1,
+            languageId: "ruby",
           },
         },
       })
@@ -436,6 +437,37 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       response = server.pop_response.response
 
       assert_equal(10, response.size)
+    end
+  end
+
+  def test_definitions_are_listed_in_erb_files_as_unknown_receiver
+    source = <<~ERB
+      <%= foo %>
+    ERB
+
+    with_server(source, URI("/fake.erb")) do |server, uri|
+      server.global_state.index.index_single(
+        RubyIndexer::IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY
+          class Bar
+            def foo; end
+
+            def bar; end
+          end
+        RUBY
+      )
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 0 } },
+      )
+      response = server.pop_response.response
+
+      assert_equal(1, response.size)
+
+      range = response[0].attributes[:targetRange].attributes
+      range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
+      assert_equal({ start: { line: 1, character: 2 }, end: { line: 1, character: 14 } }, range_hash)
     end
   end
 

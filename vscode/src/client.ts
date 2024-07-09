@@ -119,15 +119,25 @@ function collectClientOptions(
       language: "ruby",
       pattern: `${fsPath}/**/*`,
     },
+    {
+      language: "erb",
+      pattern: `${fsPath}/**/*`,
+    },
   ];
 
   // Only the first language server we spawn should handle unsaved files, otherwise requests will be duplicated across
   // all workspaces
   if (isMainWorkspace) {
-    documentSelector.push({
-      language: "ruby",
-      scheme: "untitled",
-    });
+    documentSelector.push(
+      {
+        language: "ruby",
+        scheme: "untitled",
+      },
+      {
+        language: "erb",
+        scheme: "untitled",
+      },
+    );
   }
 
   // For each workspace, the language client is responsible for handling requests for:
