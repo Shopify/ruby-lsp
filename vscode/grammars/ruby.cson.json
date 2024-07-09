@@ -80,7 +80,7 @@
           "name": "punctuation.separator.namespace.ruby"
         }
       },
-      "match": "(module)\\s*(([a-zA-Z0-9_]+)((::)[a-zA-Z0-9_]+)*)",
+      "match": "(module)\\s+(([a-zA-Z0-9_]+)((::)[a-zA-Z0-9_]+)*)",
       "name": "meta.module.ruby"
     },
     {
