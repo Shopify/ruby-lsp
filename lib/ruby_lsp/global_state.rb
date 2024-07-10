@@ -69,7 +69,7 @@ module RubyLsp
       @formatter = detect_formatter(direct_dependencies, all_dependencies) if @formatter == "auto"
 
       specified_linters = options.dig(:initializationOptions, :linters)
-      @linters = specified_linters || detect_linters(direct_dependencies)
+      @linters = specified_linters || detect_linters(direct_dependencies, all_dependencies)
       @test_library = detect_test_library(direct_dependencies)
       @has_type_checker = detect_typechecker(direct_dependencies)
 
@@ -127,10 +127,14 @@ module RubyLsp
 
     # Try to detect if there are linters in the project's dependencies. For auto-detection, we always only consider a
     # single linter. To have multiple linters running, the user must configure them manually
-    sig { params(dependencies: T::Array[String]).returns(T::Array[String]) }
-    def detect_linters(dependencies)
+    sig { params(dependencies: T::Array[String], all_dependencies: T::Array[String]).returns(T::Array[String]) }
+    def detect_linters(dependencies, all_dependencies)
       linters = []
-      linters << "rubocop" if dependencies.any?(/^rubocop/)
+
+      if dependencies.any?(/^rubocop/) || (all_dependencies.include?("rubocop") && dot_rubocop_yml_present)
+        linters << "rubocop"
+      end
+
       linters
     end
 
