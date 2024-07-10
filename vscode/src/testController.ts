@@ -8,6 +8,14 @@ import { Workspace } from "./workspace";
 
 const asyncExec = promisify(exec);
 
+interface CodeLensData {
+  type: string;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  group_id: number;
+  id?: number;
+  kind: string;
+}
+
 export class TestController {
   private readonly testController: vscode.TestController;
   private readonly testCommands: WeakMap<vscode.TestItem, string>;
@@ -72,8 +80,7 @@ export class TestController {
       this.testCommands.delete(test);
     });
 
-    const groupIdMap: Record<string, vscode.TestItem> = {};
-    let classTest: vscode.TestItem;
+    const groupIdMap: Map<number, vscode.TestItem> = new Map();
 
     const uri = vscode.Uri.from({
       scheme: "file",
@@ -88,12 +95,9 @@ export class TestController {
         uri,
       );
 
-      if (res.data?.kind) {
-        testItem.tags = [new vscode.TestTag(res.data.kind)];
-      } else if (name.startsWith("test_")) {
-        // Older Ruby LSP versions may not include 'kind' so we try infer it from the name.
-        testItem.tags = [new vscode.TestTag("example")];
-      }
+      const data: CodeLensData = res.data;
+
+      testItem.tags = [new vscode.TestTag(data.kind)];
 
       this.testCommands.set(testItem, command);
 
@@ -102,40 +106,32 @@ export class TestController {
         new vscode.Position(location.end_line, location.end_column),
       );
 
-      // If the test has a group_id, the server supports code lens hierarchy
-      if ("group_id" in res.data) {
-        // If it has an id, it's a group
-        if (res.data?.id) {
-          // Add group to the map
-          groupIdMap[res.data.id] = testItem;
-          testItem.canResolveChildren = true;
-
-          if (res.data.group_id) {
-            // Add nested group to its parent group
-            groupIdMap[res.data.group_id].children.add(testItem);
-          } else {
-            // Or add it to the top-level
-            this.testController.items.add(testItem);
-          }
-          // Otherwise, it's a test
-        } else {
-          // Add test to its parent group
-          groupIdMap[res.data.group_id].children.add(testItem);
-          testItem.tags = [...testItem.tags, this.debugTag];
-        }
-        // If the server doesn't support code lens hierarchy, all groups are top-level
+      // If it has an id, it's a group. Otherwise, it's a test example
+      if (data.id) {
+        // Add group to the map
+        groupIdMap.set(data.id, testItem);
+        testItem.canResolveChildren = true;
       } else {
-        // Add test methods as children to the test class so it appears nested in Test explorer
-        // and running the test class will run all of the test methods
-        // eslint-disable-next-line no-lonely-if
-        if (testItem.tags.find((tag) => tag.id === "example")) {
-          testItem.tags = [...testItem.tags, this.debugTag];
-          classTest.children.add(testItem);
+        // Set example tags
+        testItem.tags = [...testItem.tags, this.debugTag];
+      }
+
+      // Examples always have a `group_id`. Groups may or may not have it
+      if (data.group_id) {
+        // Add nested group to its parent group
+        const group = groupIdMap.get(data.group_id);
+
+        // If there's a mistake on the server or in an addon, a code lens may be produced for a non-existing group
+        if (group) {
+          group.children.add(testItem);
         } else {
-          classTest = testItem;
-          classTest.canResolveChildren = true;
-          this.testController.items.add(testItem);
+          this.currentWorkspace()?.outputChannel.error(
+            `Test example "${name}" is attached to group_id ${data.group_id}, but that group does not exist`,
+          );
         }
+      } else {
+        // Or add it to the top-level
+        this.testController.items.add(testItem);
       }
     });
   }
