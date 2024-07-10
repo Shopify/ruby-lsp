@@ -98,6 +98,20 @@ export class RubyLsp {
       await this.activateWorkspace(firstWorkspace, true);
     }
 
+    // If the user has the editor already opened on a Ruby file and that file does not belong to the first workspace,
+    // eagerly activate the workspace for that file too
+    const activeDocument = vscode.window.activeTextEditor?.document;
+
+    if (activeDocument && activeDocument.languageId === "ruby") {
+      const workspaceFolder = vscode.workspace.getWorkspaceFolder(
+        activeDocument.uri,
+      );
+
+      if (workspaceFolder && workspaceFolder !== firstWorkspace) {
+        await this.activateWorkspace(workspaceFolder, true);
+      }
+    }
+
     this.context.subscriptions.push(
       vscode.workspace.registerTextDocumentContentProvider(
         "ruby-lsp",
