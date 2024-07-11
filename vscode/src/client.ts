@@ -360,7 +360,7 @@ export default class Client extends LanguageClient implements ClientInterface {
             name: error.data.errorClass,
             stack,
           },
-          { ...error.data },
+          { ...error.data, serverVersion: this.serverVersion },
         );
       }
 
@@ -487,7 +487,6 @@ export default class Client extends LanguageClient implements ClientInterface {
         message: new vscode.TelemetryTrustedValue(label),
         lspVersion: this.serverVersion,
         rubyVersion: this.ruby.rubyVersion,
-        environment: os.platform(),
       },
     });
   }
