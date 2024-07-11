@@ -1136,6 +1136,28 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_locals_only_happens_when_there_is_no_receiver
+    source = +<<~RUBY
+      class Child
+        def do_something
+          abc = 123
+
+          foo.a
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 4, character: 9 },
+      })
+
+      result = server.pop_response.response
+      assert_empty(result.map(&:label))
+    end
+  end
+
   private
 
   def with_file_structure(server, &block)
