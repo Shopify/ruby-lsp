@@ -1,3 +1,5 @@
+import os from "os";
+
 import * as vscode from "vscode";
 
 import { RubyLsp } from "./rubyLsp";
@@ -128,5 +130,9 @@ async function createLogger(context: vscode.ExtensionContext) {
     ignoreUnhandledErrors:
       context.extensionMode === vscode.ExtensionMode.Test ||
       context.extensionMode === vscode.ExtensionMode.Development,
+    additionalCommonProperties: {
+      extensionVersion: context.extension.packageJSON.version,
+      environment: os.platform(),
+    },
   });
 }
