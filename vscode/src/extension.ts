@@ -28,6 +28,8 @@ export async function activate(context: vscode.ExtensionContext) {
   }
 
   const logger = await createLogger(context);
+  context.subscriptions.push(logger);
+
   extension = new RubyLsp(context, logger);
   await extension.activate();
 }
