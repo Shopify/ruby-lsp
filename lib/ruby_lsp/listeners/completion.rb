@@ -328,6 +328,9 @@ module RubyLsp
       def add_local_completions(node, name)
         return if @global_state.has_type_checker
 
+        # If the call node has a receiver, then it cannot possibly be a local variable
+        return if node.receiver
+
         range = range_from_location(T.must(node.message_loc))
 
         @node_context.locals_for_scope.each do |local|
