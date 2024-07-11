@@ -1081,6 +1081,61 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_locals
+    source = +<<~RUBY
+      class Child
+        abc0 = 42
+
+        def do_something(abc1, abc2, abc3)
+          a
+
+          [].each do |abc4, abc5|
+            a
+          end
+        end
+
+        a
+      end
+
+      abc = 12
+      a
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 4, character: 5 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["abc1", "abc2", "abc3"], result.map(&:label))
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 7, character: 7 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["abc1", "abc2", "abc3", "abc4", "abc5"], result.map(&:label))
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 11, character: 3 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["abc0"], result.map(&:label))
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 15, character: 1 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["abc"], result.map(&:label))
+    end
+  end
+
   private
 
   def with_file_structure(server, &block)

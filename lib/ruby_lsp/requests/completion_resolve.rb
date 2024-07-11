@@ -38,6 +38,8 @@ module RubyLsp
 
       sig { override.returns(T::Hash[Symbol, T.untyped]) }
       def perform
+        return @item if @item.dig(:data, :skip_resolve)
+
         # Based on the spec https://microsoft.github.io/language-server-protocol/specification#textDocument_completion,
         # a completion resolve request must always return the original completion item without modifying ANY fields
         # other than detail and documentation (NOT labelDetails). If we modify anything, the completion behaviour might

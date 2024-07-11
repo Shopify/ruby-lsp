@@ -277,6 +277,8 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode, name: String).void }
       def complete_methods(node, name)
+        add_local_completions(node, name)
+
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
@@ -320,6 +322,28 @@ module RubyLsp
         end
       rescue RubyIndexer::Index::NonExistingNamespaceError
         # We have not indexed this namespace, so we can't provide any completions
+      end
+
+      sig { params(node: Prism::CallNode, name: String).void }
+      def add_local_completions(node, name)
+        return if @global_state.has_type_checker
+
+        range = range_from_location(T.must(node.message_loc))
+
+        @node_context.locals_for_scope.each do |local|
+          local_name = local.to_s
+          next unless local_name.start_with?(name)
+
+          @response_builder << Interface::CompletionItem.new(
+            label: local_name,
+            filter_text: local_name,
+            text_edit: Interface::TextEdit.new(range: range, new_text: local_name),
+            kind: Constant::CompletionItemKind::VARIABLE,
+            data: {
+              skip_resolve: true,
+            },
+          )
+        end
       end
 
       sig { params(label: String, node: Prism::StringNode).returns(Interface::CompletionItem) }
