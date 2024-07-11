@@ -23,7 +23,12 @@ import {
   State,
 } from "vscode-languageclient/node";
 
-import { LSP_NAME, ClientInterface, Addon } from "./common";
+import {
+  LSP_NAME,
+  ClientInterface,
+  Addon,
+  SUPPORTED_LANGUAGE_IDS,
+} from "./common";
 import { Ruby } from "./ruby";
 import { WorkspaceChannel } from "./workspaceChannel";
 
@@ -114,30 +119,21 @@ function collectClientOptions(
   const enabledFeatures = Object.keys(features).filter((key) => features[key]);
 
   const fsPath = workspaceFolder.uri.fsPath.replace(/\/$/, "");
-  const documentSelector: DocumentSelector = [
-    {
-      language: "ruby",
-      pattern: `${fsPath}/**/*`,
+  const documentSelector: DocumentSelector = SUPPORTED_LANGUAGE_IDS.map(
+    (language) => {
+      return { language, pattern: `${fsPath}/**/*` };
     },
-    {
-      language: "erb",
-      pattern: `${fsPath}/**/*`,
-    },
-  ];
+  );
 
   // Only the first language server we spawn should handle unsaved files, otherwise requests will be duplicated across
   // all workspaces
   if (isMainWorkspace) {
-    documentSelector.push(
-      {
-        language: "ruby",
+    SUPPORTED_LANGUAGE_IDS.forEach((language) => {
+      documentSelector.push({
+        language,
         scheme: "untitled",
-      },
-      {
-        language: "erb",
-        scheme: "untitled",
-      },
-    );
+      });
+    });
   }
 
   // For each workspace, the language client is responsible for handling requests for:

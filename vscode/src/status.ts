@@ -1,7 +1,12 @@
 import * as vscode from "vscode";
 import { State } from "vscode-languageclient";
 
-import { Command, STATUS_EMITTER, WorkspaceInterface } from "./common";
+import {
+  Command,
+  STATUS_EMITTER,
+  WorkspaceInterface,
+  SUPPORTED_LANGUAGE_IDS,
+} from "./common";
 
 const STOPPED_SERVER_OPTIONS = [
   { label: "Ruby LSP: Start", description: Command.Start },
@@ -17,10 +22,11 @@ export abstract class StatusItem {
   public item: vscode.LanguageStatusItem;
 
   constructor(id: string) {
-    this.item = vscode.languages.createLanguageStatusItem(id, {
-      scheme: "file",
-      language: "ruby",
-    });
+    const documentSelector = SUPPORTED_LANGUAGE_IDS.map((language) => ({
+      language,
+    }));
+
+    this.item = vscode.languages.createLanguageStatusItem(id, documentSelector);
   }
 
   abstract refresh(workspace: WorkspaceInterface): void;
