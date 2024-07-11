@@ -285,6 +285,43 @@ module RubyIndexer
       assert_includes(second_entry.comments, "Hello from second `bar`")
     end
 
+    def test_resolve_method_inherited_only
+      index(<<~RUBY)
+        class Bar
+          def baz; end
+        end
+
+        class Foo < Bar
+          def baz; end
+        end
+      RUBY
+
+      entry = T.must(@index.resolve_method("baz", "Foo", inherited_only: true).first)
+
+      assert_equal("Bar", T.must(entry.owner).name)
+    end
+
+    def test_resolve_method_inherited_only_for_prepended_module
+      index(<<~RUBY)
+        module Bar
+          def baz
+            super
+          end
+        end
+
+        class Foo
+          prepend Bar
+
+          def baz; end
+        end
+      RUBY
+
+      # This test is just to document the fact that we don't yet support resolving inherited methods for modules that
+      # are prepended. The only way to support this is to find all namespaces that have the module a subtype, so that we
+      # can show the results for everywhere the module has been prepended.
+      assert_nil(@index.resolve_method("baz", "Bar", inherited_only: true))
+    end
+
     def test_prefix_search_for_methods
       index(<<~RUBY)
         module Foo

@@ -20,16 +20,9 @@ module RubyLsp
       when Prism::CallNode
         infer_receiver_for_call_node(node, node_context)
       when Prism::InstanceVariableReadNode, Prism::InstanceVariableAndWriteNode, Prism::InstanceVariableWriteNode,
-        Prism::InstanceVariableOperatorWriteNode, Prism::InstanceVariableOrWriteNode, Prism::InstanceVariableTargetNode
-        nesting = node_context.nesting
-        # If we're at the top level, then the invocation is happening on `<main>`, which is a special singleton that
-        # inherits from Object
-        return "Object" if nesting.empty?
-
-        fully_qualified_name = node_context.fully_qualified_name
-        return fully_qualified_name if node_context.surrounding_method
-
-        "#{fully_qualified_name}::<Class:#{nesting.last}>"
+        Prism::InstanceVariableOperatorWriteNode, Prism::InstanceVariableOrWriteNode, Prism::InstanceVariableTargetNode,
+        Prism::SuperNode, Prism::ForwardingSuperNode
+        self_receiver_handling(node_context)
       end
     end
 
@@ -41,15 +34,7 @@ module RubyLsp
 
       case receiver
       when Prism::SelfNode, nil
-        nesting = node_context.nesting
-        # If we're at the top level, then the invocation is happening on `<main>`, which is a special singleton that
-        # inherits from Object
-        return "Object" if nesting.empty?
-        return node_context.fully_qualified_name if node_context.surrounding_method
-
-        # If we're not inside a method, then we're inside the body of a class or module, which is a singleton
-        # context
-        "#{nesting.join("::")}::<Class:#{nesting.last}>"
+        self_receiver_handling(node_context)
       when Prism::ConstantPathNode, Prism::ConstantReadNode
         # When the receiver is a constant reference, we have to try to resolve it to figure out the right
         # receiver. But since the invocation is directly on the constant, that's the singleton context of that
@@ -66,6 +51,19 @@ module RubyLsp
 
         "#{parts.join("::")}::#{last}::<Class:#{last}>"
       end
+    end
+
+    sig { params(node_context: NodeContext).returns(String) }
+    def self_receiver_handling(node_context)
+      nesting = node_context.nesting
+      # If we're at the top level, then the invocation is happening on `<main>`, which is a special singleton that
+      # inherits from Object
+      return "Object" if nesting.empty?
+      return node_context.fully_qualified_name if node_context.surrounding_method
+
+      # If we're not inside a method, then we're inside the body of a class or module, which is a singleton
+      # context
+      "#{nesting.join("::")}::<Class:#{nesting.last}>"
     end
 
     sig do

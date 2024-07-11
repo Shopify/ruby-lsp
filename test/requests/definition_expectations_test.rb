@@ -741,6 +741,45 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definition_for_super_calls
+    source = <<~RUBY
+      class Parent
+        def foo; end
+        def bar; end
+      end
+
+      class Child < Parent
+        def foo(a)
+          super()
+        end
+
+        def bar
+          super
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response[0].target_range.start.line)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 11 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(2, response[0].target_range.start.line)
+    end
+  end
+
   private
 
   def create_definition_addon

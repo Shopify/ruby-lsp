@@ -331,14 +331,17 @@ module RubyIndexer
       params(
         method_name: String,
         receiver_name: String,
+        inherited_only: T::Boolean,
       ).returns(T.nilable(T::Array[T.any(Entry::Member, Entry::MethodAlias)]))
     end
-    def resolve_method(method_name, receiver_name)
+    def resolve_method(method_name, receiver_name, inherited_only: false)
       method_entries = self[method_name]
       return unless method_entries
 
       ancestors = linearized_ancestors_of(receiver_name.delete_prefix("::"))
       ancestors.each do |ancestor|
+        next if inherited_only && ancestor == receiver_name
+
         found = method_entries.filter_map do |entry|
           case entry
           when Entry::Member, Entry::MethodAlias
