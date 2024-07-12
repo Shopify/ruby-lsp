@@ -45,7 +45,7 @@ In some circumstances, the version of Ruby LSP activated may be very outdated. T
 **Prism constraints**
 
 Since v0.12.0, Ruby LSP has had a dependency on the [Prism](https://rubygems.org/gems/prism) parser.
-Prior to that, the Prism parser was named [YARP](https://rubygems.org/gems/yarp). The fact that the gem was renamed leads to some awkward dependency resolutions.
+Prior to that, the Prism parser was named [YARP](https://rubygems.org/gems/yarp). The fact that the gem was renamed leads to some awkward dependency resolutions issues.
 Since Prism is a pre-1.0 release, there may be breaking changes introduced in minor versions.
 For that reason, we constrain the version of Prism up to that which is known to be compatible.
 
@@ -63,7 +63,7 @@ You can add a dependency constraint to your Gemfile limiting the Prism version t
 For example:
 
 ```
-gem "prism", "< 0.28" # example for Ruby LSP v0.16.6
+gem "prism", "< 0.31" # example for Ruby LSP v0.17.7
 ```
 
 Once Prism becomes sufficiently stable, we will relax the version constraint to alleviate this problem.
