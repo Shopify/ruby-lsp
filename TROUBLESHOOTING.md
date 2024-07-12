@@ -40,9 +40,9 @@ There are three main sources of issues users typically face during activation: o
 
 ### Outdated Version
 
-In some circumstances, the version of Ruby LSP activated may be very outdated.
+In some circumstances, the version of Ruby LSP activated may be very outdated. There are two common reasons for this:
 
-**Why this happens**
+**Prism constraints**
 
 Since v0.12.0, Ruby LSP has had a dependency on the [Prism](https://rubygems.org/gems/prism) parser.
 Prior to that, the Prism parser was named [YARP](https://rubygems.org/gems/yarp). The fact that the gem was renamed leads to some awkward dependency resolutions.
@@ -67,6 +67,11 @@ gem "prism", "< 0.28" # example for Ruby LSP v0.16.6
 ```
 
 Once Prism becomes sufficiently stable, we will relax the version constraint to alleviate this problem.
+
+** RBS constrains **
+
+Ruby LSP has a dependency on RBS v3. If another gem constrains the version of RBS to an older release, it will not be possible to use newer
+versions of Ruby LSP.
 
 ### Shell issues
 
