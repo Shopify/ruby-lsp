@@ -129,9 +129,7 @@ async function createLogger(context: vscode.ExtensionContext) {
 
   return vscode.env.createTelemetryLogger(sender, {
     ignoreBuiltInCommonProperties: true,
-    ignoreUnhandledErrors:
-      context.extensionMode === vscode.ExtensionMode.Test ||
-      context.extensionMode === vscode.ExtensionMode.Development,
+    ignoreUnhandledErrors: true,
     additionalCommonProperties: {
       extensionVersion: context.extension.packageJSON.version,
       environment: os.platform(),
