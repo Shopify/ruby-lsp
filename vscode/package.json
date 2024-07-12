@@ -347,6 +347,47 @@
         "rubyLsp.rubyExecutablePath": {
           "description": "Path to the Ruby installation. This is used as a fallback if version manager activation fails",
           "type": "string"
+        },
+        "rubyLsp.indexing": {
+          "description": "Indexing configurations. Modifying these will impact which declarations are available for definition, completion and other features",
+          "type": "object",
+          "properties": {
+            "excludedPatterns": {
+              "type": "array",
+              "description": "List of glob patterns to exclude from indexing. For excluding gems, use excludedGems instead.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "includedPatterns": {
+              "type": "array",
+              "description": "List of glob patterns to include when indexing. For example, Ruby files that do not have the .rb extension.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "includedGems": {
+              "type": "array",
+              "description": "List of gems to include when indexing. You should only use this setting to include development gems in indexing (which are auto excluded).",
+              "items": {
+                "type": "string"
+              }
+            },
+            "excludedGems": {
+              "type": "array",
+              "description": "List of gems to exclude from indexing. For example, gems that are not intended to have their declarations referenced from the application.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "excludedMagicComments": {
+              "type": "array",
+              "description": "List of magic comments that should not be considered as documentation for declarations.",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
         }
       }
     },

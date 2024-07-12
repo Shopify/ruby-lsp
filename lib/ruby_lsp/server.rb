@@ -243,6 +243,8 @@ module RubyLsp
         )
       end
 
+      process_indexing_configuration(options.dig(:initializationOptions, :indexing))
+
       begin_progress("indexing-progress", "Ruby LSP: indexing files")
     end
 
@@ -251,28 +253,6 @@ module RubyLsp
       load_addons
       RubyVM::YJIT.enable if defined?(RubyVM::YJIT.enable)
 
-      indexing_config = {}
-
-      # Need to use the workspace URI, otherwise, this will fail for people working on a project that is a symlink.
-      index_path = File.join(@global_state.workspace_path, ".index.yml")
-
-      if File.exist?(index_path)
-        begin
-          indexing_config = YAML.parse_file(index_path).to_ruby
-        rescue Psych::SyntaxError => e
-          message = "Syntax error while loading configuration: #{e.message}"
-          send_message(
-            Notification.new(
-              method: "window/showMessage",
-              params: Interface::ShowMessageParams.new(
-                type: Constant::MessageType::WARNING,
-                message: message,
-              ),
-            ),
-          )
-        end
-      end
-
       if defined?(Requests::Support::RuboCopFormatter)
         @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.new)
       end
@@ -280,7 +260,7 @@ module RubyLsp
         @global_state.register_formatter("syntax_tree", Requests::Support::SyntaxTreeFormatter.new)
       end
 
-      perform_initial_indexing(indexing_config)
+      perform_initial_indexing
       check_formatter_is_available
     end
 
@@ -766,12 +746,10 @@ module RubyLsp
       Addon.addons.each(&:deactivate)
     end
 
-    sig { params(config_hash: T::Hash[String, T.untyped]).void }
-    def perform_initial_indexing(config_hash)
+    sig { void }
+    def perform_initial_indexing
       # The begin progress invocation happens during `initialize`, so that the notification is sent before we are
       # stuck indexing files
-      RubyIndexer.configuration.apply_config(config_hash)
-
       Thread.new do
         begin
           RubyIndexer::RBSIndexer.new(@global_state.index).index_ruby_core
@@ -871,6 +849,47 @@ module RubyLsp
           ),
         )
       end
+    end
+
+    sig { params(indexing_options: T.nilable(T::Hash[Symbol, T.untyped])).void }
+    def process_indexing_configuration(indexing_options)
+      # Need to use the workspace URI, otherwise, this will fail for people working on a project that is a symlink.
+      index_path = File.join(@global_state.workspace_path, ".index.yml")
+
+      if File.exist?(index_path)
+        begin
+          RubyIndexer.configuration.apply_config(YAML.parse_file(index_path).to_ruby)
+          send_message(
+            Notification.new(
+              method: "window/showMessage",
+              params: Interface::ShowMessageParams.new(
+                type: Constant::MessageType::WARNING,
+                message: "The .index.yml configuration file is deprecated. " \
+                  "Please use editor settings to configure the index",
+              ),
+            ),
+          )
+        rescue Psych::SyntaxError => e
+          message = "Syntax error while loading configuration: #{e.message}"
+          send_message(
+            Notification.new(
+              method: "window/showMessage",
+              params: Interface::ShowMessageParams.new(
+                type: Constant::MessageType::WARNING,
+                message: message,
+              ),
+            ),
+          )
+        end
+        return
+      end
+
+      return unless indexing_options
+
+      # The index expects snake case configurations, but VS Code standardizes on camel case settings
+      RubyIndexer.configuration.apply_config(
+        indexing_options.transform_keys { |key| key.to_s.gsub(/([A-Z])/, "_\\1").downcase },
+      )
     end
   end
 end
