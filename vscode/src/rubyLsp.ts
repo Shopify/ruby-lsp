@@ -3,7 +3,12 @@ import { Range } from "vscode-languageclient/node";
 
 import DocumentProvider from "./documentProvider";
 import { Workspace } from "./workspace";
-import { Command, LOG_CHANNEL, STATUS_EMITTER } from "./common";
+import {
+  Command,
+  LOG_CHANNEL,
+  STATUS_EMITTER,
+  SUPPORTED_LANGUAGE_IDS,
+} from "./common";
 import { ManagerIdentifier, ManagerConfiguration } from "./ruby";
 import { StatusItems } from "./status";
 import { TestController } from "./testController";
@@ -61,7 +66,7 @@ export class RubyLsp {
       }),
       // Lazily activate workspaces that do not contain a lockfile
       vscode.workspace.onDidOpenTextDocument(async (document) => {
-        if (document.languageId !== "ruby") {
+        if (!SUPPORTED_LANGUAGE_IDS.includes(document.languageId)) {
           return;
         }
 
@@ -96,6 +101,23 @@ export class RubyLsp {
     // activated lazily once a Ruby document is opened inside of it through the `onDidOpenTextDocument` event
     if (firstWorkspace) {
       await this.activateWorkspace(firstWorkspace, true);
+    }
+
+    // If the user has the editor already opened on a Ruby file and that file does not belong to the first workspace,
+    // eagerly activate the workspace for that file too
+    const activeDocument = vscode.window.activeTextEditor?.document;
+
+    if (
+      activeDocument &&
+      SUPPORTED_LANGUAGE_IDS.includes(activeDocument.languageId)
+    ) {
+      const workspaceFolder = vscode.workspace.getWorkspaceFolder(
+        activeDocument.uri,
+      );
+
+      if (workspaceFolder && workspaceFolder !== firstWorkspace) {
+        await this.activateWorkspace(workspaceFolder, true);
+      }
     }
 
     this.context.subscriptions.push(
