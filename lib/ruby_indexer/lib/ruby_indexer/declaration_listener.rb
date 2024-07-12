@@ -71,7 +71,7 @@ module RubyIndexer
 
       superclass = node.superclass
 
-      nesting = name.start_with?("::") ? [name.delete_prefix("::")] : @stack + [name.delete_prefix("::")]
+      nesting = actual_nesting(name)
 
       parent_class = case superclass
       when Prism::ConstantReadNode, Prism::ConstantPathNode
@@ -119,8 +119,7 @@ module RubyIndexer
 
       comments = collect_comments(node)
 
-      nesting = name.start_with?("::") ? [name.delete_prefix("::")] : @stack + [name.delete_prefix("::")]
-      entry = Entry::Module.new(nesting, @file_path, node.location, constant_path.location, comments)
+      entry = Entry::Module.new(actual_nesting(name), @file_path, node.location, constant_path.location, comments)
 
       @owner_stack << entry
       @index.add(entry)
@@ -708,6 +707,20 @@ module RubyIndexer
         names_with_commas = names.join(", ")
         :"(#{names_with_commas})"
       end
+    end
+
+    sig { params(name: String).returns(T::Array[String]) }
+    def actual_nesting(name)
+      nesting = @stack + [name]
+      corrected_nesting = []
+
+      nesting.reverse_each do |name|
+        corrected_nesting.prepend(name.delete_prefix("::"))
+
+        break if name.start_with?("::")
+      end
+
+      corrected_nesting
     end
   end
 end
