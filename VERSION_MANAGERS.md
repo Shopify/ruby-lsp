@@ -4,10 +4,14 @@ This document contains information and tips to help Ruby LSP's VS Code extension
 
 ## asdf
 
-If you use `asdf` and the VS Code extension fails to activate the environment (as described in [this issue](https://github.com/Shopify/ruby-lsp/issues/1985)), you may resolve it by updating `asdf` to the latest version with `asdf update`, and then restart VS Code.
+Ensure you on the latest release of asdf: https://asdf-vm.com/manage/commands.html.
 If `asdf` was installed through Homebrew then you may need to first run `brew upgrade asdf`.
 
+If you use `asdf` and the VS Code extension fails to activate the environment (as described in [this issue](https://github.com/Shopify/ruby-lsp/issues/1985)), you may resolve it by updating `asdf` to the latest version with `asdf update`, and then restart VS Code.
+
 ## Chruby
+
+Ensure you are on the latest release of chruby.
 
 If you use `chruby` but don't have a `.ruby-version` file in the project root, you can add `.ruby-version` to its parent folder as a fallback.
 
@@ -15,7 +19,11 @@ For example, if `/projects/my_project` doesn't have `.ruby-version`, `chruby` wo
 
 ## Mise
 
-Ensure mise is up-to-date by running `mise self-update`.
+Ensure Mise is up-to-date: https://mise.jdx.dev/faq.html#mise-is-failing-or-not-working-right
+
+## RVM
+
+Ensure RVM is up-to-date: https://rvm.io/rvm/upgrading
 
 ## Custom activation
 
