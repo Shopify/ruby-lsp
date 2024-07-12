@@ -546,5 +546,43 @@ module RubyIndexer
       assert_equal(7, name_location.start_column)
       assert_equal(10, name_location.end_column)
     end
+
+    def test_indexing_namespaces_inside_top_level_references
+      index(<<~RUBY)
+        module ::Foo
+          class Bar
+          end
+        end
+      RUBY
+
+      # We want to explicitly verify that we didn't introduce the leading `::` by accident, but `Index#[]` deletes the
+      # prefix when we use `refute_entry`
+      entries = @index.instance_variable_get(:@entries)
+      refute(entries.key?("::Foo"))
+      refute(entries.key?("::Foo::Bar"))
+      assert_entry("Foo", Entry::Module, "/fake/path/foo.rb:0-0:3-3")
+      assert_entry("Foo::Bar", Entry::Class, "/fake/path/foo.rb:1-2:2-5")
+    end
+
+    def test_indexing_namespaces_inside_nested_top_level_references
+      index(<<~RUBY)
+        class Baz
+          module ::Foo
+            class Bar
+            end
+
+            class ::Qux
+            end
+          end
+        end
+      RUBY
+
+      refute_entry("Baz::Foo")
+      refute_entry("Baz::Foo::Bar")
+      assert_entry("Baz", Entry::Class, "/fake/path/foo.rb:0-0:8-3")
+      assert_entry("Foo", Entry::Module, "/fake/path/foo.rb:1-2:7-5")
+      assert_entry("Foo::Bar", Entry::Class, "/fake/path/foo.rb:2-4:3-7")
+      assert_entry("Qux", Entry::Class, "/fake/path/foo.rb:5-4:6-7")
+    end
   end
 end
