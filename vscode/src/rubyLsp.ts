@@ -12,7 +12,7 @@ import {
 import { ManagerIdentifier, ManagerConfiguration } from "./ruby";
 import { StatusItems } from "./status";
 import { TestController } from "./testController";
-import { openFile } from "./openFile";
+import { openFile, openUris } from "./commands";
 import { Debugger } from "./debugger";
 import { DependenciesTree } from "./dependenciesTree";
 
@@ -444,7 +444,13 @@ export class RubyLsp {
       ),
       vscode.commands.registerCommand(
         Command.OpenFile,
-        (rubySourceLocation: [string, string]) => {
+        (rubySourceLocation: [string, string] | string[]) => {
+          // New command format: accepts an array of URIs
+          if (typeof rubySourceLocation[0] === "string") {
+            return openUris(rubySourceLocation);
+          }
+
+          // Old format: we can remove after the Rails addon has been using the new format for a while
           const [file, line] = rubySourceLocation;
           const workspace = this.currentActiveWorkspace();
           return openFile(this.telemetry, workspace, {
