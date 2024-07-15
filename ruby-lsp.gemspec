@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
 
   s.files = Dir.glob("lib/**/*.rb") + ["README.md", "VERSION", "LICENSE.txt"]
   s.bindir = "exe"
-  s.executables = ["ruby-lsp", "ruby-lsp-check", "ruby-lsp-doctor"]
+  s.executables = ["ruby-lsp", "ruby-lsp-check"]
   s.require_paths = ["lib"]
 
   s.add_dependency("language_server-protocol", "~> 3.17.0")
