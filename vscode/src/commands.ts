@@ -38,3 +38,30 @@ export async function openFile(
     });
   }
 }
+
+// Open the given URIs in the editor, which should follow this format:
+// `file:///path/to/file.rb#Lstart_line,start_column-end_line,end_column`
+export async function openUris(uris: string[]) {
+  if (uris.length === 1) {
+    await vscode.commands.executeCommand(
+      "vscode.open",
+      vscode.Uri.parse(uris[0]),
+    );
+    return;
+  }
+
+  const items: ({ uri: vscode.Uri } & vscode.QuickPickItem)[] = uris.map(
+    (uri) => ({
+      label: uri,
+      uri: vscode.Uri.parse(uri),
+    }),
+  );
+
+  const pickedFile = await vscode.window.showQuickPick(items);
+
+  if (!pickedFile) {
+    return;
+  }
+
+  await vscode.commands.executeCommand("vscode.open", pickedFile.label);
+}
