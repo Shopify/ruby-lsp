@@ -325,10 +325,13 @@ class ServerTest < Minitest::Test
   end
 
   def test_handles_invalid_configuration
-    FileUtils.mv(".index.yml", ".index.yml.tmp")
     File.write(".index.yml", "} invalid yaml")
 
-    @server.process_message({ method: "initialized" })
+    capture_subprocess_io do
+      @server.process_message(id: 1, method: "initialize", params: {})
+    end
+
+    @server.pop_response
     notification = @server.pop_response
     assert_equal("window/showMessage", notification.method)
     assert_match(
@@ -336,7 +339,7 @@ class ServerTest < Minitest::Test
       T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
     )
   ensure
-    FileUtils.mv(".index.yml.tmp", ".index.yml")
+    FileUtils.rm(".index.yml")
   end
 
   def test_shows_error_if_formatter_set_to_rubocop_but_rubocop_not_available
@@ -460,6 +463,26 @@ class ServerTest < Minitest::Test
     assert_equal("boom", data[:errorMessage])
     assert_equal("StandardError", data[:errorClass])
     assert_match("mocha/exception_raiser.rb", data[:backtrace])
+  end
+
+  def test_handles_editor_indexing_settings
+    capture_io do
+      @server.process_message({
+        id: 1,
+        method: "initialize",
+        params: {
+          initializationOptions: {
+            indexing: {
+              excludedGems: ["foo_gem"],
+              includedGems: ["bar_gem"],
+            },
+          },
+        },
+      })
+    end
+
+    assert_includes(RubyIndexer.configuration.instance_variable_get(:@excluded_gems), "foo_gem")
+    assert_includes(RubyIndexer.configuration.instance_variable_get(:@included_gems), "bar_gem")
   end
 
   private
