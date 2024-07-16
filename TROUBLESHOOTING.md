@@ -28,7 +28,7 @@ project. That directory contains another `Gemfile`, that includes the `ruby-lsp`
 dependencies. This approach allows us to automatically detect which formatter your project uses and which gems we need
 to index for features such as go to definition.
 
-> ![NOTE]
+> [!NOTE]
 > We are working with the RubyGems/Bundler team to have this type of mechanism properly supported from within
 > Bundler itself, which is currently being experimented with in a plugin called `bundler-compose`. Once
 > `bundler-compose`is production ready, the entire custom bundle created under the `.ruby-lsp` directory will go away
@@ -125,7 +125,7 @@ gem: --install-dir /my/preferred/path/for/gem/install
 One scenario where this is useful is if the user doesn't have permissions for the default gem installation directory and
 `gem install` fails. For example, when using the system Ruby on certain Linux distributions.
 
-> ![NOTE]
+> [!NOTE]
 > Using non-default gem installation paths may lead to other integration issues with version managers. For example, for
 > Ruby 3.3.1 the default `GEM_HOME` is `~/.gem/ruby/3.3.0` (without the patch part of the version). However, `chruby`
 > (and potentially other version managers) override `GEM_HOME` to include the version patch resulting in

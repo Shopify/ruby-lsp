@@ -282,7 +282,7 @@ repository is.
 
 #### Example configurations
 
-> ![NOTE]
+> [!NOTE]
 > To make sure Ruby LSP works well with your multi-root workspace project, please
 > read through the instructions below and configure it following the examples.
 > After configuring, do not forget to tell VS Code to open the workspace from the
