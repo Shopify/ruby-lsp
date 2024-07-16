@@ -5,6 +5,8 @@ module RubyLsp
   class Store
     extend T::Sig
 
+    class NonExistingDocumentError < StandardError; end
+
     sig { returns(T::Boolean) }
     attr_accessor :supports_progress
 
@@ -45,6 +47,8 @@ module RubyLsp
       end
       set(uri: uri, source: File.binread(path), version: 0, language_id: language_id)
       T.must(@state[uri.to_s])
+    rescue Errno::ENOENT
+      raise NonExistingDocumentError, uri.to_s
     end
 
     sig do

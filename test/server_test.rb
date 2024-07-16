@@ -485,6 +485,65 @@ class ServerTest < Minitest::Test
     assert_includes(RubyIndexer.configuration.instance_variable_get(:@included_gems), "bar_gem")
   end
 
+  def test_closing_document_before_computing_features_does_not_error
+    uri = URI("file:///foo.rb")
+
+    capture_subprocess_io do
+      @server.process_message({
+        method: "textDocument/didOpen",
+        params: {
+          textDocument: {
+            uri: uri,
+            text: "class Foo\nend",
+            version: 1,
+            languageId: "ruby",
+          },
+        },
+      })
+
+      # Close the file in a thread to increase the chance that it gets closed during the processing of the 10 document
+      # symbol requests below
+      thread = Thread.new do
+        @server.process_message({
+          method: "textDocument/didClose",
+          params: {
+            textDocument: {
+              uri: uri,
+            },
+          },
+        })
+      end
+
+      10.times do |i|
+        @server.process_message({
+          id: i,
+          method: "textDocument/documentSymbol",
+          params: {
+            textDocument: {
+              uri: uri,
+            },
+          },
+        })
+      end
+
+      thread.join
+    end
+
+    # Even if the thread technique, this test is not 100% reliable since it's trying to emulate a concurrency issue. If
+    # we tried to always expect an error back, we would likely get infinite loops
+    error = T.let(nil, T.nilable(T.any(RubyLsp::Error, RubyLsp::Message)))
+
+    10.times do
+      error = @server.pop_response
+      break if error.is_a?(RubyLsp::Error)
+    end
+
+    if error.is_a?(RubyLsp::Error)
+      assert_instance_of(RubyLsp::Error, error)
+      assert_match("file:///foo.rb (RubyLsp::Store::NonExistingDocumentError)", error.message)
+    end
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)
