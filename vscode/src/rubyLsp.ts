@@ -12,7 +12,7 @@ import {
 import { ManagerIdentifier, ManagerConfiguration } from "./ruby";
 import { StatusItems } from "./status";
 import { TestController } from "./testController";
-import { openFile, openUris } from "./commands";
+import { newMinitestFile, openFile, openUris } from "./commands";
 import { Debugger } from "./debugger";
 import { DependenciesTree } from "./dependenciesTree";
 import { Rails } from "./rails";
@@ -456,7 +456,10 @@ export class RubyLsp {
       ),
       vscode.commands.registerCommand(
         Command.RailsGenerate,
-        async (generatorWithArguments: string | undefined) => {
+        async (
+          generatorWithArguments: string | undefined,
+          workspace: Workspace | undefined,
+        ) => {
           // If the command was invoked programmatically, then the arguments will already be present. Otherwise, we need
           // to show a UI so that the user can pick the arguments to generate
           const command =
@@ -471,12 +474,15 @@ export class RubyLsp {
             return;
           }
 
-          await this.rails.generate(command);
+          await this.rails.generate(command, workspace);
         },
       ),
       vscode.commands.registerCommand(
         Command.RailsDestroy,
-        async (generatorWithArguments: string | undefined) => {
+        async (
+          generatorWithArguments: string | undefined,
+          workspace: Workspace | undefined,
+        ) => {
           // If the command was invoked programmatically, then the arguments will already be present. Otherwise, we need
           // to show a UI so that the user can pick the arguments to destroy
           const command =
@@ -491,7 +497,7 @@ export class RubyLsp {
             return;
           }
 
-          await this.rails.destroy(command);
+          await this.rails.destroy(command, workspace);
         },
       ),
       vscode.commands.registerCommand(Command.FileOperation, async () => {
@@ -501,7 +507,18 @@ export class RubyLsp {
           return;
         }
 
-        const items: ({ command: string } & vscode.QuickPickItem)[] = [];
+        const items: ({
+          command: string;
+          args: any[];
+        } & vscode.QuickPickItem)[] = [
+          {
+            label: "Minitest test",
+            description: "Create a new Minitest test",
+            iconPath: new vscode.ThemeIcon("new-file"),
+            command: Command.NewMinitestFile,
+            args: [],
+          },
+        ];
 
         if (
           workspace.lspClient?.addons?.some(
@@ -514,12 +531,14 @@ export class RubyLsp {
               description: "Run Rails generate",
               iconPath: new vscode.ThemeIcon("new-file"),
               command: Command.RailsGenerate,
+              args: [undefined, workspace],
             },
             {
               label: "Rails destroy",
               description: "Run Rails destroy",
               iconPath: new vscode.ThemeIcon("trash"),
               command: Command.RailsDestroy,
+              args: [undefined, workspace],
             },
           );
         }
@@ -532,8 +551,9 @@ export class RubyLsp {
           return;
         }
 
-        await vscode.commands.executeCommand(pick.command);
+        await vscode.commands.executeCommand(pick.command, ...pick.args);
       }),
+      vscode.commands.registerCommand(Command.NewMinitestFile, newMinitestFile),
     );
   }
 

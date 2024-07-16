@@ -14,8 +14,11 @@ export class Rails {
   }
 
   // Runs `bin/rails generate` with the given generator (e.g.: `controller`, `model`, etc.) and the desired arguments
-  async generate(generatorWithArguments: string) {
-    const workspace = await this.showWorkspacePick();
+  async generate(
+    generatorWithArguments: string,
+    selectedWorkspace: Workspace | undefined,
+  ) {
+    const workspace = selectedWorkspace ?? (await this.showWorkspacePick());
 
     if (!workspace) {
       return;
@@ -48,8 +51,11 @@ export class Rails {
   }
 
   // Invokes `bin/rails destroy` to undo the changes made by a `generate` command
-  async destroy(generatorWithArguments: string) {
-    const workspace = await this.showWorkspacePick();
+  async destroy(
+    generatorWithArguments: string,
+    selectedWorkspace: Workspace | undefined,
+  ) {
+    const workspace = selectedWorkspace ?? (await this.showWorkspacePick());
 
     if (!workspace) {
       return;
