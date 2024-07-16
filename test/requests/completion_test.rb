@@ -4,6 +4,27 @@
 require "test_helper"
 
 class CompletionTest < Minitest::Test
+  def test_completion_keyword
+    source = <<~RUBY
+      foo d
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 0, character: 5 },
+        })
+        result = server.pop_response.response
+
+        assert_equal(3, result.count)
+        assert_equal("def", result[0].label)
+        assert_equal("defined?", result[1].label)
+        assert_equal("do", result[2].label)
+      end
+    end
+  end
+
   def test_completion_command
     prefix = "foo/"
     source = <<~RUBY
@@ -1008,7 +1029,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["baz", "bar"], result.map(&:label))
+      assert_equal(["begin", "break", "baz", "bar"], result.map(&:label))
     end
   end
 
@@ -1077,7 +1098,7 @@ class CompletionTest < Minitest::Test
         position: { line: 8, character: 5 },
       })
       result = server.pop_response.response
-      assert_equal(["bar", "baz"], result.map(&:label))
+      assert_equal(["begin", "break", "bar", "baz"], result.map(&:label))
     end
   end
 
@@ -1108,7 +1129,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["abc1", "abc2", "abc3"], result.map(&:label))
+      assert_equal(["abc1", "abc2", "abc3", "alias", "and"], result.map(&:label))
 
       server.process_message(id: 1, method: "textDocument/completion", params: {
         textDocument: { uri: uri },
@@ -1116,7 +1137,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["abc1", "abc2", "abc3", "abc4", "abc5"], result.map(&:label))
+      assert_equal(["abc1", "abc2", "abc3", "abc4", "abc5", "alias", "and"], result.map(&:label))
 
       server.process_message(id: 1, method: "textDocument/completion", params: {
         textDocument: { uri: uri },
@@ -1124,7 +1145,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["abc0"], result.map(&:label))
+      assert_equal(["abc0", "alias", "and"], result.map(&:label))
 
       server.process_message(id: 1, method: "textDocument/completion", params: {
         textDocument: { uri: uri },
@@ -1132,7 +1153,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["abc"], result.map(&:label))
+      assert_equal(["abc", "alias", "and"], result.map(&:label))
     end
   end
 

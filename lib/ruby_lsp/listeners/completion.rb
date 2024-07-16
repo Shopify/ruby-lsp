@@ -7,6 +7,50 @@ module RubyLsp
       extend T::Sig
       include Requests::Support::Common
 
+      KEYWORDS = [
+        "alias",
+        "and",
+        "begin",
+        "BEGIN",
+        "break",
+        "case",
+        "class",
+        "def",
+        "defined?",
+        "do",
+        "else",
+        "elsif",
+        "end",
+        "END",
+        "ensure",
+        "false",
+        "for",
+        "if",
+        "in",
+        "module",
+        "next",
+        "nil",
+        "not",
+        "or",
+        "redo",
+        "rescue",
+        "retry",
+        "return",
+        "self",
+        "super",
+        "then",
+        "true",
+        "undef",
+        "unless",
+        "until",
+        "when",
+        "while",
+        "yield",
+        "__ENCODING__",
+        "__FILE__",
+        "__LINE__",
+      ].freeze
+
       sig do
         params(
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
@@ -277,7 +321,11 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode, name: String).void }
       def complete_methods(node, name)
-        add_local_completions(node, name)
+        # If the node has a receiver, then we don't need to provide local nor keyword completions
+        if !@global_state.has_type_checker && !node.receiver
+          add_local_completions(node, name)
+          add_keyword_completions(node, name)
+        end
 
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
@@ -326,11 +374,6 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode, name: String).void }
       def add_local_completions(node, name)
-        return if @global_state.has_type_checker
-
-        # If the call node has a receiver, then it cannot possibly be a local variable
-        return if node.receiver
-
         range = range_from_location(T.must(node.message_loc))
 
         @node_context.locals_for_scope.each do |local|
@@ -342,6 +385,24 @@ module RubyLsp
             filter_text: local_name,
             text_edit: Interface::TextEdit.new(range: range, new_text: local_name),
             kind: Constant::CompletionItemKind::VARIABLE,
+            data: {
+              skip_resolve: true,
+            },
+          )
+        end
+      end
+
+      sig { params(node: Prism::CallNode, name: String).void }
+      def add_keyword_completions(node, name)
+        range = range_from_location(T.must(node.message_loc))
+
+        KEYWORDS.each do |keyword|
+          next unless keyword.start_with?(name)
+
+          @response_builder << Interface::CompletionItem.new(
+            label: keyword,
+            text_edit: Interface::TextEdit.new(range: range, new_text: keyword),
+            kind: Constant::CompletionItemKind::KEYWORD,
             data: {
               skip_resolve: true,
             },
