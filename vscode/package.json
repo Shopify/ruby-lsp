@@ -33,6 +33,20 @@
           "command": "workbench.action.terminal.runSelectedText",
           "group": "9_cutcopypaste"
         }
+      ],
+      "view/title": [
+        {
+          "command": "rubyLsp.fileOperation",
+          "when": "rubyLsp.activated && view.workbench.explorer.fileView.visible",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "rubyLsp.fileOperation",
+          "when": "rubyLsp.activated && view.workbench.explorer.fileView.visible",
+          "group": "2_workspace"
+        }
       ]
     },
     "commands": [
@@ -93,6 +107,22 @@
         "command": "rubyLsp.showSyntaxTree",
         "title": "Show syntax tree",
         "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.railsGenerate",
+        "title": "Rails generate",
+        "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.railsDestroy",
+        "title": "Rails destroy",
+        "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.fileOperation",
+        "title": "Ruby file operations",
+        "category": "Ruby LSP",
+        "icon": "$(ruby)"
       }
     ],
     "configuration": {

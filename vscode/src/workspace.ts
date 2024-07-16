@@ -262,11 +262,26 @@ export class Workspace implements WorkspaceInterface {
     return this.#rebaseInProgress;
   }
 
-  async execute(command: string) {
-    return asyncExec(command, {
+  async execute(command: string, log = false) {
+    if (log) {
+      this.outputChannel.show();
+      this.outputChannel.info(`Running "${command}"`);
+    }
+
+    const result = await asyncExec(command, {
       env: this.ruby.env,
       cwd: this.workspaceFolder.uri.fsPath,
     });
+
+    if (log) {
+      if (result.stderr.length > 0) {
+        this.outputChannel.error(result.stderr);
+      } else {
+        this.outputChannel.info(result.stdout);
+      }
+    }
+
+    return result;
   }
 
   private registerRestarts(context: vscode.ExtensionContext) {
