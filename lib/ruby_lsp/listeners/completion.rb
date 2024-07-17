@@ -56,7 +56,7 @@ module RubyLsp
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
           global_state: GlobalState,
           node_context: NodeContext,
-          typechecker_enabled: T::Boolean,
+          sorbet_level: Document::SorbetLevel,
           dispatcher: Prism::Dispatcher,
           uri: URI::Generic,
           trigger_character: T.nilable(String),
@@ -66,7 +66,7 @@ module RubyLsp
         response_builder,
         global_state,
         node_context,
-        typechecker_enabled,
+        sorbet_level,
         dispatcher,
         uri,
         trigger_character
@@ -76,7 +76,7 @@ module RubyLsp
         @index = T.let(global_state.index, RubyIndexer::Index)
         @type_inferrer = T.let(global_state.type_inferrer, TypeInferrer)
         @node_context = node_context
-        @typechecker_enabled = typechecker_enabled
+        @sorbet_level = sorbet_level
         @uri = uri
         @trigger_character = trigger_character
 
@@ -97,7 +97,9 @@ module RubyLsp
       # Handle completion on regular constant references (e.g. `Bar`)
       sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read_node_enter(node)
-        return if @global_state.has_type_checker
+        # The only scenario where Sorbet doesn't provide constant completion is on ignored files. Even if the file has
+        # no sigil, Sorbet will still provide completion for constants
+        return if @sorbet_level != Document::SorbetLevel::Ignore
 
         name = constant_name(node)
         return if name.nil?
@@ -118,7 +120,9 @@ module RubyLsp
       # Handle completion on namespaced constant references (e.g. `Foo::Bar`)
       sig { params(node: Prism::ConstantPathNode).void }
       def on_constant_path_node_enter(node)
-        return if @global_state.has_type_checker
+        # The only scenario where Sorbet doesn't provide constant completion is on ignored files. Even if the file has
+        # no sigil, Sorbet will still provide completion for constants
+        return if @sorbet_level != Document::SorbetLevel::Ignore
 
         name = constant_name(node)
         return if name.nil?
@@ -128,28 +132,32 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
-        receiver = node.receiver
+        # The only scenario where Sorbet doesn't provide constant completion is on ignored files. Even if the file has
+        # no sigil, Sorbet will still provide completion for constants
+        if @sorbet_level == Document::SorbetLevel::Ignore
+          receiver = node.receiver
 
-        # When writing `Foo::`, the AST assigns a method call node (because you can use that syntax to invoke singleton
-        # methods). However, in addition to providing method completion, we also need to show possible constant
-        # completions
-        if (receiver.is_a?(Prism::ConstantReadNode) || receiver.is_a?(Prism::ConstantPathNode)) &&
-            node.call_operator == "::"
+          # When writing `Foo::`, the AST assigns a method call node (because you can use that syntax to invoke
+          # singleton methods). However, in addition to providing method completion, we also need to show possible
+          # constant completions
+          if (receiver.is_a?(Prism::ConstantReadNode) || receiver.is_a?(Prism::ConstantPathNode)) &&
+              node.call_operator == "::"
 
-          name = constant_name(receiver)
+            name = constant_name(receiver)
 
-          if name
-            start_loc = node.location
-            end_loc = T.must(node.call_operator_loc)
+            if name
+              start_loc = node.location
+              end_loc = T.must(node.call_operator_loc)
 
-            constant_path_completion(
-              "#{name}::",
-              Interface::Range.new(
-                start: Interface::Position.new(line: start_loc.start_line - 1, character: start_loc.start_column),
-                end: Interface::Position.new(line: end_loc.end_line - 1, character: end_loc.end_column),
-              ),
-            )
-            return
+              constant_path_completion(
+                "#{name}::",
+                Interface::Range.new(
+                  start: Interface::Position.new(line: start_loc.start_line - 1, character: start_loc.start_column),
+                  end: Interface::Position.new(line: end_loc.end_line - 1, character: end_loc.end_column),
+                ),
+              )
+              return
+            end
           end
         end
 
@@ -162,7 +170,7 @@ module RubyLsp
         when "require_relative"
           complete_require_relative(node)
         else
-          complete_methods(node, name) unless @typechecker_enabled
+          complete_methods(node, name)
         end
       end
 
@@ -247,6 +255,10 @@ module RubyLsp
 
       sig { params(name: String, location: Prism::Location).void }
       def handle_instance_variable_completion(name, location)
+        # Sorbet enforces that all instance variables be declared on typed strict or higher, which means it will be able
+        # to provide all features for them
+        return if @sorbet_level == Document::SorbetLevel::Strict
+
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
@@ -321,11 +333,15 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode, name: String).void }
       def complete_methods(node, name)
-        # If the node has a receiver, then we don't need to provide local nor keyword completions
-        if !@global_state.has_type_checker && !node.receiver
+        # If the node has a receiver, then we don't need to provide local nor keyword completions. Sorbet can provide
+        # local and keyword completion for any file with a Sorbet level of true or higher
+        if !sorbet_level_true_or_higher?(@sorbet_level) && !node.receiver
           add_local_completions(node, name)
           add_keyword_completions(node, name)
         end
+
+        # Sorbet can provide completion for methods invoked on self on typed true or higher files
+        return if sorbet_level_true_or_higher?(@sorbet_level) && self_receiver?(node)
 
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type

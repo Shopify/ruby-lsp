@@ -36,10 +36,10 @@ module RubyLsp
           global_state: GlobalState,
           position: T::Hash[Symbol, T.untyped],
           dispatcher: Prism::Dispatcher,
-          typechecker_enabled: T::Boolean,
+          sorbet_level: Document::SorbetLevel,
         ).void
       end
-      def initialize(document, global_state, position, dispatcher, typechecker_enabled)
+      def initialize(document, global_state, position, dispatcher, sorbet_level)
         super()
         @response_builder = T.let(
           ResponseBuilders::CollectionResponseBuilder[T.any(Interface::Location, Interface::LocationLink)].new,
@@ -96,7 +96,7 @@ module RubyLsp
             document.uri,
             node_context,
             dispatcher,
-            typechecker_enabled,
+            sorbet_level,
           )
 
           Addon.addons.each do |addon|

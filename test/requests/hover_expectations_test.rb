@@ -274,7 +274,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
     begin
       create_hover_addon
 
-      with_server(source) do |server, uri|
+      with_server(source, stub_no_typechecker: true) do |server, uri|
         server.process_message(
           id: 1,
           method: "textDocument/hover",
@@ -612,6 +612,81 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
       contents = server.pop_response.response.contents.value
       assert_match("Bar", contents)
+    end
+  end
+
+  def test_hover_is_disabled_for_self_methods_on_typed_true
+    source = <<~RUBY
+      # typed: true
+      class Child
+        def foo
+          bar
+        end
+
+        # Hey!
+        def bar
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 3 } },
+      )
+
+      assert_nil(server.pop_response.response)
+    end
+  end
+
+  def test_hover_is_disabled_for_instance_variables_on_typed_strict
+    source = <<~RUBY
+      # typed: strict
+      class Child
+        def initialize
+          # Hello
+          @something = T.let(123, Integer)
+        end
+
+        def bar
+          @something
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 8 } },
+      )
+
+      assert_nil(server.pop_response.response)
+    end
+  end
+
+  def test_hover_is_disabled_on_super_for_typed_true
+    source = <<~RUBY
+      # typed: true
+      class Parent
+        def foo; end
+      end
+      class Child < Parent
+        def foo
+          super
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 6 } },
+      )
+
+      assert_nil(server.pop_response.response)
     end
   end
 

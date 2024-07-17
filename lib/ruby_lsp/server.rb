@@ -477,15 +477,17 @@ module RubyLsp
             @global_state,
             params[:position],
             dispatcher,
-            typechecker_enabled?(document),
+            sorbet_level(document),
           ).perform,
         ),
       )
     end
 
-    sig { params(document: Document).returns(T::Boolean) }
-    def typechecker_enabled?(document)
-      @global_state.has_type_checker && document.sorbet_sigil_is_true_or_higher
+    sig { params(document: Document).returns(Document::SorbetLevel) }
+    def sorbet_level(document)
+      return Document::SorbetLevel::Ignore unless @global_state.has_type_checker
+
+      document.sorbet_level
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
@@ -594,7 +596,7 @@ module RubyLsp
             document,
             @global_state,
             params,
-            typechecker_enabled?(document),
+            sorbet_level(document),
             dispatcher,
           ).perform,
         ),
@@ -624,7 +626,7 @@ module RubyLsp
             params[:position],
             params[:context],
             dispatcher,
-            typechecker_enabled?(document),
+            sorbet_level(document),
           ).perform,
         ),
       )
@@ -644,7 +646,7 @@ module RubyLsp
             @global_state,
             params[:position],
             dispatcher,
-            typechecker_enabled?(document),
+            sorbet_level(document),
           ).perform,
         ),
       )

@@ -477,11 +477,11 @@ class CompletionTest < Minitest::Test
   def test_completion_for_methods_invoked_on_self
     source = +<<~RUBY
       class Foo
-        def bar(a, b); end
-        def baz(c, d); end
+        def qux1(a, b); end
+        def qux2(c, d); end
 
         def process
-          b
+          q
         end
       end
     RUBY
@@ -494,9 +494,9 @@ class CompletionTest < Minitest::Test
         })
 
         result = server.pop_response.response
-        assert_equal(["bar", "baz"], result.map(&:label))
-        assert_equal(["bar", "baz"], result.map(&:filter_text))
-        assert_equal(["bar", "baz"], result.map { |completion| completion.text_edit.new_text })
+        assert_equal(["qux1", "qux2"], result.map(&:label))
+        assert_equal(["qux1", "qux2"], result.map(&:filter_text))
+        assert_equal(["qux1", "qux2"], result.map { |completion| completion.text_edit.new_text })
         assert_equal(["fake.rb", "fake.rb"], result.map { _1.label_details.description })
       end
     end
@@ -559,10 +559,10 @@ class CompletionTest < Minitest::Test
   def test_completion_for_attributes
     source = +<<~RUBY
       class Foo
-        attr_accessor :bar
+        attr_accessor :qux
 
-        def qux
-          b
+        def bar
+          q
         end
       end
     RUBY
@@ -575,9 +575,9 @@ class CompletionTest < Minitest::Test
         })
 
         result = server.pop_response.response
-        assert_equal(["bar", "bar="], result.map(&:label))
-        assert_equal(["bar", "bar="], result.map(&:filter_text))
-        assert_equal(["bar", "bar="], result.map { |completion| completion.text_edit.new_text })
+        assert_equal(["qux", "qux="], result.map(&:label))
+        assert_equal(["qux", "qux="], result.map(&:filter_text))
+        assert_equal(["qux", "qux="], result.map { |completion| completion.text_edit.new_text })
       end
     end
   end
@@ -663,7 +663,7 @@ class CompletionTest < Minitest::Test
         })
 
         result = server.pop_response.response
-        assert_equal(["method1", "method2"], result.map(&:label))
+        assert_equal(["module", "method1", "method2"], result.map(&:label))
       end
     end
   end
@@ -1176,6 +1176,117 @@ class CompletionTest < Minitest::Test
 
       result = server.pop_response.response
       assert_empty(result.map(&:label))
+    end
+  end
+
+  def test_self_method_completion_is_disabled_on_typed_true
+    source = +<<~RUBY
+      # typed: true
+      class Foo
+        def bar
+          b
+        end
+
+        def baz; end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 3, character: 5 },
+      })
+
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_local_completion_is_disabled_on_typed_true
+    source = +<<~RUBY
+      # typed: true
+      class Foo
+        def bar
+          abc = 123
+          a
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 4, character: 5 },
+      })
+
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_keyword_completion_is_disabled_on_typed_true
+    source = +<<~RUBY
+      # typed: true
+      class Foo
+        def bar
+          yie
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 3, character: 7 },
+      })
+
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_instance_variable_completion_is_disabled_on_typed_strict
+    source = +<<~RUBY
+      # typed: strict
+      class Foo
+        def initialize
+          @hello = 123
+        end
+
+        def bar
+          @
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 7, character: 5 },
+      })
+
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_provides_constant_completion_on_type_ignore
+    source = +<<~RUBY
+      # typed: ignore
+      class Foo
+      end
+
+      F
+    RUBY
+
+    end_position = { line: 4, character: 1 }
+
+    with_server(source) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: end_position,
+        })
+        result = server.pop_response.response
+        assert_equal(["Foo"], result.map(&:label))
+        assert_equal(["fake.rb"], result.map { _1.label_details.description })
+      end
     end
   end
 

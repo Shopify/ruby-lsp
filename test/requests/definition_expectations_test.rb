@@ -103,7 +103,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       Foo::Bar::Baz
     RUBY
 
-    with_server(source) do |server, uri|
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       # Foo
       server.process_message(
         id: 1,
@@ -170,7 +170,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    with_server(source) do |server, uri|
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/definition",
@@ -211,7 +211,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     begin
       create_definition_addon
 
-      with_server(source) do |server, uri|
+      with_server(source, stub_no_typechecker: true) do |server, uri|
         server.global_state.index.index_single(
           RubyIndexer::IndexablePath.new(
             "#{Dir.pwd}/lib",
@@ -777,6 +777,93 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
       response = server.pop_response.response
       assert_equal(2, response[0].target_range.start.line)
+    end
+  end
+
+  def test_definition_for_super_calls_is_disabled_on_typed_true
+    source = <<~RUBY
+      # typed: true
+      class Parent
+        def foo; end
+        def bar; end
+      end
+
+      class Child < Parent
+        def foo(a)
+          super()
+        end
+
+        def bar
+          super
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 8 } },
+      )
+
+      assert_empty(server.pop_response.response)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 12 } },
+      )
+
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_definition_on_self_is_disabled_for_typed_true
+    source = <<~RUBY
+      # typed: true
+      class Foo
+        def bar
+          baz
+        end
+
+        def baz
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 3 } },
+      )
+
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_definition_for_instance_variables_is_disabled_on_typed_strict
+    source = <<~RUBY
+      # typed: strict
+      class Foo
+        def initialize
+          @something = T.let(123, Integer)
+        end
+
+        def baz
+          @something
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+      )
+
+      assert_empty(server.pop_response.response)
     end
   end
 

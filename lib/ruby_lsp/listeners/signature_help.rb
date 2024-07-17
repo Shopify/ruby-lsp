@@ -13,11 +13,11 @@ module RubyLsp
           global_state: GlobalState,
           node_context: NodeContext,
           dispatcher: Prism::Dispatcher,
-          typechecker_enabled: T::Boolean,
+          sorbet_level: Document::SorbetLevel,
         ).void
       end
-      def initialize(response_builder, global_state, node_context, dispatcher, typechecker_enabled)
-        @typechecker_enabled = typechecker_enabled
+      def initialize(response_builder, global_state, node_context, dispatcher, sorbet_level)
+        @sorbet_level = sorbet_level
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
@@ -28,7 +28,7 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
-        return if @typechecker_enabled
+        return if sorbet_level_true_or_higher?(@sorbet_level)
 
         message = node.message
         return unless message

@@ -49,11 +49,11 @@ module RubyLsp
           document: Document,
           global_state: GlobalState,
           params: T::Hash[Symbol, T.untyped],
-          typechecker_enabled: T::Boolean,
+          sorbet_level: Document::SorbetLevel,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(document, global_state, params, typechecker_enabled, dispatcher)
+      def initialize(document, global_state, params, sorbet_level, dispatcher)
         super()
         @target = T.let(nil, T.nilable(Prism::Node))
         @dispatcher = dispatcher
@@ -84,7 +84,7 @@ module RubyLsp
           @response_builder,
           global_state,
           node_context,
-          typechecker_enabled,
+          sorbet_level,
           dispatcher,
           document.uri,
           params.dig(:context, :triggerCharacter),

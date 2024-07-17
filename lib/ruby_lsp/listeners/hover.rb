@@ -42,17 +42,17 @@ module RubyLsp
           uri: URI::Generic,
           node_context: NodeContext,
           dispatcher: Prism::Dispatcher,
-          typechecker_enabled: T::Boolean,
+          sorbet_level: Document::SorbetLevel,
         ).void
       end
-      def initialize(response_builder, global_state, uri, node_context, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, global_state, uri, node_context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
         @type_inferrer = T.let(global_state.type_inferrer, TypeInferrer)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
         @node_context = node_context
-        @typechecker_enabled = typechecker_enabled
+        @sorbet_level = sorbet_level
 
         dispatcher.register(
           self,
@@ -73,7 +73,7 @@ module RubyLsp
 
       sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read_node_enter(node)
-        return if @typechecker_enabled
+        return if @sorbet_level != Document::SorbetLevel::Ignore
 
         name = constant_name(node)
         return if name.nil?
@@ -83,14 +83,14 @@ module RubyLsp
 
       sig { params(node: Prism::ConstantWriteNode).void }
       def on_constant_write_node_enter(node)
-        return if @global_state.has_type_checker
+        return if @sorbet_level != Document::SorbetLevel::Ignore
 
         generate_hover(node.name.to_s, node.name_loc)
       end
 
       sig { params(node: Prism::ConstantPathNode).void }
       def on_constant_path_node_enter(node)
-        return if @global_state.has_type_checker
+        return if @sorbet_level != Document::SorbetLevel::Ignore
 
         name = constant_name(node)
         return if name.nil?
@@ -105,7 +105,7 @@ module RubyLsp
           return
         end
 
-        return if @typechecker_enabled
+        return if sorbet_level_true_or_higher?(@sorbet_level) && self_receiver?(node)
 
         message = node.message
         return unless message
@@ -157,6 +157,9 @@ module RubyLsp
 
       sig { void }
       def handle_super_node_hover
+        # Sorbet can handle super hover on typed true or higher
+        return if sorbet_level_true_or_higher?(@sorbet_level)
+
         surrounding_method = @node_context.surrounding_method
         return unless surrounding_method
 
@@ -180,6 +183,10 @@ module RubyLsp
 
       sig { params(name: String).void }
       def handle_instance_variable_hover(name)
+        # Sorbet enforces that all instance variables be declared on typed strict or higher, which means it will be able
+        # to provide all features for them
+        return if @sorbet_level == Document::SorbetLevel::Strict
+
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
