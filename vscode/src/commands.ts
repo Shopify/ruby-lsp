@@ -1,3 +1,5 @@
+import path from "path";
+
 import * as vscode from "vscode";
 
 import { Workspace } from "./workspace";
@@ -51,17 +53,24 @@ export async function openUris(uris: string[]) {
   }
 
   const items: ({ uri: vscode.Uri } & vscode.QuickPickItem)[] = uris.map(
-    (uri) => ({
-      label: uri,
-      uri: vscode.Uri.parse(uri),
-    }),
+    (uriString) => {
+      const uri = vscode.Uri.parse(uriString);
+
+      return {
+        label: path.basename(uri.fsPath),
+        iconPath: new vscode.ThemeIcon("go-to-file"),
+        uri,
+      };
+    },
   );
 
-  const pickedFile = await vscode.window.showQuickPick(items);
+  const pickedFile = await vscode.window.showQuickPick(items, {
+    title: "Select a file to jump to",
+  });
 
   if (!pickedFile) {
     return;
   }
 
-  await vscode.commands.executeCommand("vscode.open", pickedFile.label);
+  await vscode.commands.executeCommand("vscode.open", pickedFile.uri);
 }
