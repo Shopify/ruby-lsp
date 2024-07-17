@@ -34,8 +34,9 @@ suite("Rails", () => {
     const showDocumentStub = sinon.stub(vscode.window, "showTextDocument");
     const executeCommandStub = sinon.stub(vscode.commands, "executeCommand");
 
+    const selectedWorkspace = undefined;
     const rails = new Rails(() => Promise.resolve(workspace));
-    await rails.generate("model User name:string");
+    await rails.generate("model User name:string", selectedWorkspace);
 
     assert.ok(
       executeStub.calledOnceWithExactly(
@@ -79,8 +80,9 @@ suite("Rails", () => {
 
     const executeCommandStub = sinon.stub(vscode.commands, "executeCommand");
 
+    const selectedWorkspace = undefined;
     const rails = new Rails(() => Promise.resolve(workspace));
-    await rails.destroy("model User name:string");
+    await rails.destroy("model User name:string", selectedWorkspace);
 
     assert.ok(
       executeStub.calledOnceWithExactly(

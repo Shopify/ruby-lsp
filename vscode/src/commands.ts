@@ -74,3 +74,21 @@ export async function openUris(uris: string[]) {
 
   await vscode.commands.executeCommand("vscode.open", pickedFile.uri);
 }
+
+export async function newMinitestFile() {
+  const document = await vscode.workspace.openTextDocument({
+    language: "ruby",
+  });
+  const editor = await vscode.window.showTextDocument(document, {
+    preview: false,
+  });
+
+  const position = new vscode.Position(0, 0);
+
+  await editor.insertSnippet(
+    new vscode.SnippetString(
+      'require "test_helper"\n\nclass $1Test < Minitest::Test\n  def test_$2\n    $3\n  end\nend\n',
+    ),
+    new vscode.Selection(position, position),
+  );
+}
