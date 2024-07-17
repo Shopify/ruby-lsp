@@ -21,6 +21,7 @@ import {
   ErrorAction,
   CloseAction,
   State,
+  DocumentFilter,
 } from "vscode-languageclient/node";
 
 import {
@@ -119,7 +120,7 @@ function collectClientOptions(
   const enabledFeatures = Object.keys(features).filter((key) => features[key]);
 
   const fsPath = workspaceFolder.uri.fsPath.replace(/\/$/, "");
-  const documentSelector: DocumentSelector = SUPPORTED_LANGUAGE_IDS.map(
+  let documentSelector: DocumentSelector = SUPPORTED_LANGUAGE_IDS.map(
     (language) => {
       return { language, pattern: `${fsPath}/**/*` };
     },
@@ -155,6 +156,14 @@ function collectClientOptions(
         language: "ruby",
         pattern: `${gemPath.replace(/lib\/ruby\/gems\/(?=\d)/, "lib/ruby/")}/**/*`,
       });
+    });
+  }
+
+  // This is a temporary solution as an escape hatch for users who cannot upgrade the `ruby-lsp` gem to a version that
+  // supports ERB
+  if (!configuration.get<boolean>("erbSupport")) {
+    documentSelector = documentSelector.filter((selector) => {
+      return (selector as DocumentFilter).language !== "erb";
     });
   }
 
