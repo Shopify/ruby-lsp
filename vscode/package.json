@@ -37,14 +37,14 @@
       "view/title": [
         {
           "command": "rubyLsp.fileOperation",
-          "when": "rubyLsp.activated && view.workbench.explorer.fileView.visible",
+          "when": "rubyLsp.activated && view == 'workbench.explorer.fileView'",
           "group": "navigation"
         }
       ],
       "explorer/context": [
         {
           "command": "rubyLsp.fileOperation",
-          "when": "rubyLsp.activated && view.workbench.explorer.fileView.visible",
+          "when": "rubyLsp.activated",
           "group": "2_workspace"
         }
       ]
