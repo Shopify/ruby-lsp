@@ -338,35 +338,37 @@ export default class Client extends LanguageClient implements ClientInterface {
       this.logResponseTime(bench.duration, request);
       return result;
     } catch (error: any) {
-      if (
-        this.baseFolder === "ruby-lsp" ||
-        this.baseFolder === "ruby-lsp-rails"
-      ) {
-        await vscode.window.showErrorMessage(
-          `Ruby LSP error ${error.data.errorClass}: ${error.data.errorMessage}\n\n${error.data.backtrace}`,
-        );
-      } else if (error.data) {
-        const { errorMessage, errorClass, backtrace } = error.data;
-
-        if (errorMessage && errorClass && backtrace) {
-          // Sanitize the backtrace coming from the server to remove the user's home directory from it, then mark it as
-          // a trusted value. Otherwise the VS Code telemetry logger redacts the entire backtrace and we are unable to
-          // see where in the server the error occurred
-          const stack = new vscode.TelemetryTrustedValue(
-            backtrace
-              .split("\n")
-              .map((line: string) => line.replace(os.homedir(), "~"))
-              .join("\n"),
-          ) as any;
-
-          this.telemetry.logError(
-            {
-              message: errorMessage,
-              name: errorClass,
-              stack,
-            },
-            { ...error.data, serverVersion: this.serverVersion },
+      if (error.data) {
+        if (
+          this.baseFolder === "ruby-lsp" ||
+          this.baseFolder === "ruby-lsp-rails"
+        ) {
+          await vscode.window.showErrorMessage(
+            `Ruby LSP error ${error.data.errorClass}: ${error.data.errorMessage}\n\n${error.data.backtrace}`,
           );
+        } else {
+          const { errorMessage, errorClass, backtrace } = error.data;
+
+          if (errorMessage && errorClass && backtrace) {
+            // Sanitize the backtrace coming from the server to remove the user's home directory from it, then mark it
+            // as a trusted value. Otherwise the VS Code telemetry logger redacts the entire backtrace and we are unable
+            // to see where in the server the error occurred
+            const stack = new vscode.TelemetryTrustedValue(
+              backtrace
+                .split("\n")
+                .map((line: string) => line.replace(os.homedir(), "~"))
+                .join("\n"),
+            ) as any;
+
+            this.telemetry.logError(
+              {
+                message: errorMessage,
+                name: errorClass,
+                stack,
+              },
+              { ...error.data, serverVersion: this.serverVersion },
+            );
+          }
         }
       }
 

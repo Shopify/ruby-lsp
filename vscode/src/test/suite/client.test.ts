@@ -692,4 +692,20 @@ suite("Client", () => {
       /lib\/ruby\/\d\.\d\.\d\/\*\*\/\*/,
     );
   });
+
+  test("requests for non existing documents do not crash the server", async () => {
+    await assert.rejects(
+      async () =>
+        client.sendRequest("textDocument/documentSymbol", {
+          textDocument: {
+            uri: documentUri.toString(),
+          },
+        }),
+      (error: any) => {
+        assert.strictEqual(error.data, null);
+        assert.strictEqual(error.code, -32602);
+        return true;
+      },
+    );
+  }).timeout(20000);
 });
