@@ -53,7 +53,7 @@ module RubyLsp
 
               # We don't want to try to parse documents on text synchronization notifications
               @store.get(parsed_uri).parse unless method.start_with?("textDocument/did")
-            rescue Errno::ENOENT
+            rescue Store::NonExistingDocumentError
               # If we receive a request for a file that no longer exists, we don't want to fail
             end
           end
