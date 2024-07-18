@@ -78,7 +78,12 @@ default gems, except for
 - Gems that only appear under the `:development` group
 - All Ruby files under `test/**/*.rb`
 
-By creating a `.index.yml` file, these configurations can be overridden and tuned. Note that indexing dependent behavior, such as definition, hover, completion or workspace symbol will be impacted by the configurations placed here.
+This behaviour can be overridden and tuned. Learn how to configure it [for VS Code](vscode/README.md#Indexing-Configuration) or [for other editors](EDITORS.md#Indexing-Configuration).
+
+Note that indexing-dependent behavior, such as definition, hover, completion or workspace symbol will be impacted by
+the configuration changes.
+
+The older approach of using a `.index.yml` file has been deprecated and will be removed in a future release.
 
 ```yaml
 # Exclude files based on a given pattern. Often used to exclude test files or fixtures
