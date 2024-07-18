@@ -25,6 +25,8 @@ updates:
       - "Shopify/ruby-dev-exp"
     ignore:
       - dependency-name: "@types/vscode"
+      - dependency-name: "eslint"
+        versions: [">= 0.9.0"] # blocked by https://github.com/Shopify/web-configs/issues/425
     groups:
       minor-and-patch:
         update-types:
