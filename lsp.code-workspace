@@ -18,9 +18,11 @@
             "**/out": true,
         },
         "rubyLsp.bypassTypechecker": true,
-        "rubyLsp.excludedPatterns": [
-            "**/test/fixtures/**/*.rb"
-        ],
+        "rubyLsp.indexing": {
+            "excludedPatterns": [
+                "**/test/fixtures/**/*.rb"
+            ],
+        },
         "typescript.tsc.autoDetect": "off",
     }
 }

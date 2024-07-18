@@ -205,3 +205,19 @@ You can use the Ruby LSP with RubyMine (or IntelliJ IDEA Ultimate) through the f
 Note that there might be overlapping functionality when using it with RubyMine, given that the IDE provides similar features as the ones coming from the Ruby LSP.
 
 [Ruby LSP plugin](https://plugins.jetbrains.com/plugin/24413-ruby-lsp)
+
+# Indexing Configuration
+
+To configure indexing, pass a JSON hash as part of the initialization options for your editor, for example:
+
+```json
+{
+  "indexing": {
+    "excludedPatterns": ["**/test/**.rb"],
+    "includedPatterns": ["**/bin/**"],
+    "excludedGems": ["rubocop", "rubocop-performance"],
+    "includedPatterns": ["rake"],
+    "excludedMagicComments": ["compiled:true"]
+  }
+}
+```
