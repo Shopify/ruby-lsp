@@ -232,4 +232,10 @@ class StoreTest < Minitest::Test
       @store.get(uri),
     )
   end
+
+  def test_raises_non_existing_document_error_on_unknown_unsaved_files
+    assert_raises(RubyLsp::Store::NonExistingDocumentError) do
+      @store.get(URI("untitled:Untitled-1"))
+    end
+  end
 end
