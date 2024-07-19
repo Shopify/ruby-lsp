@@ -38,13 +38,18 @@ module RubyLsp
       document = @state[uri.to_s]
       return document unless document.nil?
 
-      path = T.must(uri.to_standardized_path)
+      # For unsaved files (`untitled:Untitled-1` uris), there's no path to read from. If we don't have the untitled file
+      # already present in the store, then we have to raise non existing document error
+      path = uri.to_standardized_path
+      raise NonExistingDocumentError, uri.to_s unless path
+
       ext = File.extname(path)
       language_id = if ext == ".erb" || ext == ".rhtml"
         Document::LanguageId::ERB
       else
         Document::LanguageId::Ruby
       end
+
       set(uri: uri, source: File.binread(path), version: 0, language_id: language_id)
       T.must(@state[uri.to_s])
     rescue Errno::ENOENT
