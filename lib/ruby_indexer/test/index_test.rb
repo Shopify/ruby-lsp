@@ -346,7 +346,7 @@ module RubyIndexer
       fixtures = Dir.glob("test/fixtures/prism/test/prism/fixtures/**/*.txt")
 
       fixtures.each do |fixture|
-        indexable_path = IndexablePath.new("", fixture)
+        indexable_path = IndexablePath.new("", File.expand_path(fixture))
         @index.index_single(indexable_path)
       end
 

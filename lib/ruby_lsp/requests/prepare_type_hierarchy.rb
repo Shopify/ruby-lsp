@@ -77,7 +77,7 @@ module RubyLsp
           Interface::TypeHierarchyItem.new(
             name: first_entry.name,
             kind: kind_for_entry(first_entry),
-            uri: URI::Generic.from_path(path: first_entry.file_path).to_s,
+            uri: first_entry.uri.to_s,
             range: range,
             selection_range: range,
           ),

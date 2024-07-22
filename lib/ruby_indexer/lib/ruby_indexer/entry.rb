@@ -16,8 +16,8 @@ module RubyIndexer
     sig { returns(String) }
     attr_reader :name
 
-    sig { returns(String) }
-    attr_reader :file_path
+    sig { returns(URI::Generic) }
+    attr_reader :uri
 
     sig { returns(RubyIndexer::Location) }
     attr_reader :location
@@ -33,14 +33,14 @@ module RubyIndexer
     sig do
       params(
         name: String,
-        file_path: String,
+        uri: URI::Generic,
         location: T.any(Prism::Location, RubyIndexer::Location),
         comments: T::Array[String],
       ).void
     end
-    def initialize(name, file_path, location, comments)
+    def initialize(name, uri, location, comments)
       @name = name
-      @file_path = file_path
+      @uri = uri
       @comments = comments
       @visibility = T.let(Visibility::PUBLIC, Visibility)
 
@@ -76,7 +76,24 @@ module RubyIndexer
 
     sig { returns(String) }
     def file_name
-      File.basename(@file_path)
+      path = @uri.to_standardized_path
+      # For unsaved files, the name is a part of the URI's opaque `untitled:Untitled-1`
+      return T.must(@uri.opaque) unless path
+
+      File.basename(path)
+    end
+
+    # Returns the entry's URI including the range of the declaration as part of the URI's fragment
+    sig { returns(URI::Generic) }
+    def declaration_uri
+      # We always handle locations as zero based. However, for file links in Markdown we need them to be one
+      # based, which is why instead of the usual subtraction of 1 to line numbers, we are actually adding 1 to
+      # columns. The format for VS Code file URIs is
+      # `file:///path/to/file.rb#Lstart_line,start_column-end_line,end_column`
+      uri = @uri.dup
+      uri.fragment = "L#{@location.start_line},#{@location.start_column + 1}-" \
+        "#{@location.end_line},#{@location.end_column + 1}"
+      uri
     end
 
     class ModuleOperation
@@ -113,18 +130,18 @@ module RubyIndexer
       sig do
         params(
           nesting: T::Array[String],
-          file_path: String,
+          uri: URI::Generic,
           location: T.any(Prism::Location, RubyIndexer::Location),
           name_location: T.any(Prism::Location, Location),
           comments: T::Array[String],
         ).void
       end
-      def initialize(nesting, file_path, location, name_location, comments)
+      def initialize(nesting, uri, location, name_location, comments)
         @name = T.let(nesting.join("::"), String)
         # The original nesting where this namespace was discovered
         @nesting = nesting
 
-        super(@name, file_path, location, comments)
+        super(@name, uri, location, comments)
 
         @name_location = T.let(
           if name_location.is_a?(Prism::Location)
@@ -174,15 +191,15 @@ module RubyIndexer
       sig do
         params(
           nesting: T::Array[String],
-          file_path: String,
+          uri: URI::Generic,
           location: T.any(Prism::Location, RubyIndexer::Location),
           name_location: T.any(Prism::Location, Location),
           comments: T::Array[String],
           parent_class: T.nilable(String),
         ).void
       end
-      def initialize(nesting, file_path, location, name_location, comments, parent_class) # rubocop:disable Metrics/ParameterLists
-        super(nesting, file_path, location, name_location, comments)
+      def initialize(nesting, uri, location, name_location, comments, parent_class) # rubocop:disable Metrics/ParameterLists
+        super(nesting, uri, location, name_location, comments)
         @parent_class = parent_class
       end
 
@@ -319,15 +336,15 @@ module RubyIndexer
       sig do
         params(
           name: String,
-          file_path: String,
+          uri: URI::Generic,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
           visibility: Visibility,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, visibility, owner) # rubocop:disable Metrics/ParameterLists
-        super(name, file_path, location, comments)
+      def initialize(name, uri, location, comments, visibility, owner) # rubocop:disable Metrics/ParameterLists
+        super(name, uri, location, comments)
         @visibility = visibility
         @owner = owner
       end
@@ -373,7 +390,7 @@ module RubyIndexer
       sig do
         params(
           name: String,
-          file_path: String,
+          uri: URI::Generic,
           location: T.any(Prism::Location, RubyIndexer::Location),
           name_location: T.any(Prism::Location, Location),
           comments: T::Array[String],
@@ -382,8 +399,8 @@ module RubyIndexer
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, name_location, comments, signatures, visibility, owner) # rubocop:disable Metrics/ParameterLists
-        super(name, file_path, location, comments, visibility, owner)
+      def initialize(name, uri, location, name_location, comments, signatures, visibility, owner) # rubocop:disable Metrics/ParameterLists
+        super(name, uri, location, comments, visibility, owner)
         @signatures = signatures
         @name_location = T.let(
           if name_location.is_a?(Prism::Location)
@@ -425,13 +442,13 @@ module RubyIndexer
           target: String,
           nesting: T::Array[String],
           name: String,
-          file_path: String,
+          uri: URI::Generic,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
         ).void
       end
-      def initialize(target, nesting, name, file_path, location, comments) # rubocop:disable Metrics/ParameterLists
-        super(name, file_path, location, comments)
+      def initialize(target, nesting, name, uri, location, comments) # rubocop:disable Metrics/ParameterLists
+        super(name, uri, location, comments)
 
         @target = target
         @nesting = nesting
@@ -447,7 +464,7 @@ module RubyIndexer
 
       sig { params(target: String, unresolved_alias: UnresolvedAlias).void }
       def initialize(target, unresolved_alias)
-        super(unresolved_alias.name, unresolved_alias.file_path, unresolved_alias.location, unresolved_alias.comments)
+        super(unresolved_alias.name, unresolved_alias.uri, unresolved_alias.location, unresolved_alias.comments)
 
         @visibility = unresolved_alias.visibility
         @target = target
@@ -462,14 +479,14 @@ module RubyIndexer
       sig do
         params(
           name: String,
-          file_path: String,
+          uri: URI::Generic,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, owner)
-        super(name, file_path, location, comments)
+      def initialize(name, uri, location, comments, owner)
+        super(name, uri, location, comments)
         @owner = owner
       end
     end
@@ -491,13 +508,13 @@ module RubyIndexer
           new_name: String,
           old_name: String,
           owner: T.nilable(Entry::Namespace),
-          file_path: String,
+          uri: URI::Generic,
           location: Prism::Location,
           comments: T::Array[String],
         ).void
       end
-      def initialize(new_name, old_name, owner, file_path, location, comments) # rubocop:disable Metrics/ParameterLists
-        super(new_name, file_path, location, comments)
+      def initialize(new_name, old_name, owner, uri, location, comments) # rubocop:disable Metrics/ParameterLists
+        super(new_name, uri, location, comments)
 
         @new_name = new_name
         @old_name = old_name
@@ -524,7 +541,7 @@ module RubyIndexer
 
         super(
           unresolved_alias.new_name,
-          unresolved_alias.file_path,
+          unresolved_alias.uri,
           unresolved_alias.location,
           full_comments,
         )

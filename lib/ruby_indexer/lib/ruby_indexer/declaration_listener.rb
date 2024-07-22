@@ -9,11 +9,11 @@ module RubyIndexer
     BASIC_OBJECT_NESTING = T.let(["BasicObject"].freeze, T::Array[String])
 
     sig do
-      params(index: Index, dispatcher: Prism::Dispatcher, parse_result: Prism::ParseResult, file_path: String).void
+      params(index: Index, dispatcher: Prism::Dispatcher, parse_result: Prism::ParseResult, uri: URI::Generic).void
     end
-    def initialize(index, dispatcher, parse_result, file_path)
+    def initialize(index, dispatcher, parse_result, uri)
       @index = index
-      @file_path = file_path
+      @uri = uri
       @visibility_stack = T.let([Entry::Visibility::PUBLIC], T::Array[Entry::Visibility])
       @comments_by_line = T.let(
         parse_result.comments.to_h do |c|
@@ -92,7 +92,7 @@ module RubyIndexer
 
       entry = Entry::Class.new(
         nesting,
-        @file_path,
+        @uri,
         node.location,
         constant_path.location,
         comments,
@@ -119,7 +119,7 @@ module RubyIndexer
 
       comments = collect_comments(node)
 
-      entry = Entry::Module.new(actual_nesting(name), @file_path, node.location, constant_path.location, comments)
+      entry = Entry::Module.new(actual_nesting(name), @uri, node.location, constant_path.location, comments)
 
       @owner_stack << entry
       @index.add(entry)
@@ -151,7 +151,7 @@ module RubyIndexer
         else
           entry = Entry::SingletonClass.new(
             @stack,
-            @file_path,
+            @uri,
             node.location,
             expression.location,
             collect_comments(node),
@@ -304,7 +304,7 @@ module RubyIndexer
       when nil
         @index.add(Entry::Method.new(
           method_name,
-          @file_path,
+          @uri,
           node.location,
           node.name_loc,
           comments,
@@ -320,7 +320,7 @@ module RubyIndexer
 
           @index.add(Entry::Method.new(
             method_name,
-            @file_path,
+            @uri,
             node.location,
             node.name_loc,
             comments,
@@ -379,7 +379,7 @@ module RubyIndexer
           method_name,
           node.old_name.slice,
           @owner_stack.last,
-          @file_path,
+          @uri,
           node.new_name.location,
           comments,
         ),
@@ -412,7 +412,7 @@ module RubyIndexer
         owner = @index.existing_or_new_singleton_class(owner.name)
       end
 
-      @index.add(Entry::InstanceVariable.new(name, @file_path, loc, collect_comments(node), owner))
+      @index.add(Entry::InstanceVariable.new(name, @uri, loc, collect_comments(node), owner))
     end
 
     sig { params(node: Prism::CallNode).void }
@@ -472,7 +472,7 @@ module RubyIndexer
           new_name_value,
           old_name_value,
           @owner_stack.last,
-          @file_path,
+          @uri,
           new_name.location,
           comments,
         ),
@@ -504,19 +504,19 @@ module RubyIndexer
       @index.add(
         case value
         when Prism::ConstantReadNode, Prism::ConstantPathNode
-          Entry::UnresolvedAlias.new(value.slice, @stack.dup, name, @file_path, node.location, comments)
+          Entry::UnresolvedAlias.new(value.slice, @stack.dup, name, @uri, node.location, comments)
         when Prism::ConstantWriteNode, Prism::ConstantAndWriteNode, Prism::ConstantOrWriteNode,
         Prism::ConstantOperatorWriteNode
 
           # If the right hand side is another constant assignment, we need to visit it because that constant has to be
           # indexed too
-          Entry::UnresolvedAlias.new(value.name.to_s, @stack.dup, name, @file_path, node.location, comments)
+          Entry::UnresolvedAlias.new(value.name.to_s, @stack.dup, name, @uri, node.location, comments)
         when Prism::ConstantPathWriteNode, Prism::ConstantPathOrWriteNode, Prism::ConstantPathOperatorWriteNode,
         Prism::ConstantPathAndWriteNode
 
-          Entry::UnresolvedAlias.new(value.target.slice, @stack.dup, name, @file_path, node.location, comments)
+          Entry::UnresolvedAlias.new(value.target.slice, @stack.dup, name, @uri, node.location, comments)
         else
-          Entry::Constant.new(name, @file_path, node.location, comments)
+          Entry::Constant.new(name, @uri, node.location, comments)
         end,
       )
     end
@@ -576,14 +576,14 @@ module RubyIndexer
         next unless name && loc
 
         if reader
-          @index.add(Entry::Accessor.new(name, @file_path, loc, comments, current_visibility, @owner_stack.last))
+          @index.add(Entry::Accessor.new(name, @uri, loc, comments, current_visibility, @owner_stack.last))
         end
 
         next unless writer
 
         @index.add(Entry::Accessor.new(
           "#{name}=",
-          @file_path,
+          @uri,
           loc,
           comments,
           current_visibility,

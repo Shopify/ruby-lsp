@@ -27,7 +27,7 @@ module RubyIndexer
 
       location = entry.location
       location_string =
-        "#{entry.file_path}:#{location.start_line - 1}-#{location.start_column}" \
+        "#{entry.uri.to_standardized_path}:#{location.start_line - 1}-#{location.start_column}" \
           ":#{location.end_line - 1}-#{location.end_column}"
 
       assert_equal(expected_location, location_string)

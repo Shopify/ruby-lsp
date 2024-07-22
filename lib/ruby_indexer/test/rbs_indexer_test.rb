@@ -11,7 +11,7 @@ module RubyIndexer
       # Array is a class but also an instance method on Kernel
       assert_equal(2, entries.length)
       entry = entries.find { |entry| entry.is_a?(RubyIndexer::Entry::Class) }
-      assert_match(%r{/gems/rbs-.*/core/array.rbs}, entry.file_path)
+      assert_match(%r{/gems/rbs-.*/core/array.rbs}, entry.uri.to_standardized_path)
       assert_equal("array.rbs", entry.file_name)
       assert_equal("Object", entry.parent_class)
       assert_equal(1, entry.mixin_operations.length)
@@ -30,7 +30,7 @@ module RubyIndexer
       refute_nil(entries)
       assert_equal(1, entries.length)
       entry = entries.first
-      assert_match(%r{/gems/rbs-.*/core/kernel.rbs}, entry.file_path)
+      assert_match(%r{/gems/rbs-.*/core/kernel.rbs}, entry.uri.to_standardized_path)
       assert_equal("kernel.rbs", entry.file_name)
 
       # Using fixed positions would be fragile, so let's just check some basics.
@@ -44,7 +44,7 @@ module RubyIndexer
       entries = @index["initialize"]
       refute_nil(entries)
       entry = entries.find { |entry| entry.owner.name == "Array" }
-      assert_match(%r{/gems/rbs-.*/core/array.rbs}, entry.file_path)
+      assert_match(%r{/gems/rbs-.*/core/array.rbs}, entry.uri.to_standardized_path)
       assert_equal("array.rbs", entry.file_name)
       assert_equal(Entry::Visibility::PUBLIC, entry.visibility)
 
@@ -317,7 +317,7 @@ module RubyIndexer
       _, _, declarations = RBS::Parser.parse_signature(buffer)
       index = RubyIndexer::Index.new
       indexer = RubyIndexer::RBSIndexer.new(index)
-      pathname = Pathname.new("file.rbs")
+      pathname = Pathname.new("/fake/file.rbs")
       indexer.process_signature(pathname, declarations)
       entry = T.must(index[method_name]).first
       T.cast(entry, Entry::Method).signatures
