@@ -428,6 +428,23 @@ class ServerTest < Minitest::Test
     })
   end
 
+  def test_handles_file_modifications_for_documents_not_managed_by_client
+    @server.global_state.index.expects(:index_single).once.with do |indexable|
+      indexable.full_path == "/foo.rb"
+    end
+    @server.process_message({
+      method: "workspace/didChangeWatchedFiles",
+      params: {
+        changes: [
+          {
+            uri: URI("file:///foo.rb"),
+            type: RubyLsp::Constant::FileChangeType::CHANGED,
+          },
+        ],
+      },
+    })
+  end
+
   def test_workspace_addons
     create_test_addons
     @server.load_addons
@@ -541,6 +558,74 @@ class ServerTest < Minitest::Test
     if error.is_a?(RubyLsp::Error)
       assert_instance_of(RubyLsp::Error, error)
       assert_match("file:///foo.rb (RubyLsp::Store::NonExistingDocumentError)", error.message)
+    end
+  end
+
+  def test_indexing_on_file_changes
+    uri = URI("untitled:Untitled-1")
+    index = @server.global_state.index
+
+    capture_io do
+      @server.process_message({
+        method: "textDocument/didOpen",
+        params: {
+          textDocument: {
+            uri: uri,
+            text: "class Foo\nend",
+            version: 1,
+            languageId: "ruby",
+          },
+        },
+      })
+
+      # Initial indexing for an unsaved file
+      @server.process_message({
+        id: 1,
+        method: "textDocument/documentSymbol",
+        params: {
+          textDocument: {
+            uri: uri,
+          },
+        },
+      })
+
+      assert_equal(1, index["Foo"].length)
+
+      # Changing the file should re-index, but not create duplicates
+      @server.process_message({
+        id: 1,
+        method: "textDocument/didChange",
+        params: {
+          textDocument: {
+            uri: uri,
+            version: 2,
+          },
+          contentChanges: [{ range: { start: { line: 0, character: 9 }, end: { line: 0, character: 9 } }, text: "\n" }],
+        },
+      })
+
+      @server.process_message({
+        id: 1,
+        method: "textDocument/documentSymbol",
+        params: {
+          textDocument: {
+            uri: uri,
+          },
+        },
+      })
+
+      assert_equal(1, index["Foo"].length)
+
+      # Closing the file should clear the related entries
+      @server.process_message({
+        method: "textDocument/didClose",
+        params: {
+          textDocument: {
+            uri: uri,
+          },
+        },
+      })
+      assert_nil(index["Foo"])
     end
   end
 

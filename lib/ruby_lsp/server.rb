@@ -297,8 +297,9 @@ module RubyLsp
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_did_close(message)
+      uri = message.dig(:params, :textDocument, :uri)
+
       @mutex.synchronize do
-        uri = message.dig(:params, :textDocument, :uri)
         @store.delete(uri)
 
         # Clear diagnostics for the closed file, so that they no longer appear in the problems tab
@@ -309,6 +310,12 @@ module RubyLsp
           ),
         )
       end
+
+      # When we receive a didClose notification for an unsaved (which happens when the user saves the file or when it's
+      # simply closed), we need to remove declarations related to it from the index because immediately after we will
+      # receive a didChangeWatchedFiles notification related to the saved file creation. Otherwise, we end up with
+      # duplicate entries
+      @global_state.index.delete(uri) if uri.scheme == "untitled"
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
@@ -362,9 +369,21 @@ module RubyLsp
       document_symbol = Requests::DocumentSymbol.new(uri, dispatcher)
       document_link = Requests::DocumentLink.new(uri, parse_result.comments, dispatcher)
       code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
-
       semantic_highlighting = Requests::SemanticHighlighting.new(@global_state, dispatcher)
-      dispatcher.dispatch(parse_result.value)
+
+      # If we're running the combined requests for a Ruby document and that document's URI is either `file` or
+      # `untitled` (a save vs an unsaved Ruby file), then we run indexing at the same time to capture new declarations.
+      # The reason we have to check for the scheme is because, if we were to accidentally index a URI for a `git` scheme
+      # for example, we would end up with duplicate entries in the index
+      if document.is_a?(RubyDocument) && (uri.scheme == "file" || uri.scheme == "untitled")
+        @global_state.index.handling_ancestor_change(uri) do
+          @global_state.index.delete(uri)
+          RubyIndexer::DeclarationListener.new(@global_state.index, dispatcher, parse_result, uri)
+          dispatcher.dispatch(parse_result.value)
+        end
+      else
+        dispatcher.dispatch(parse_result.value)
+      end
 
       # Store all responses retrieve in this round of visits in the cache and then return the response for the request
       # we actually received
@@ -668,7 +687,9 @@ module RubyLsp
         when Constant::FileChangeType::CREATED
           index.index_single(indexable)
         when Constant::FileChangeType::CHANGED
-          index.handle_change(indexable)
+          # We only want to handle changes if the files being modified are not currently opened in the editor. For files
+          # that are open, the indexing happens when they are modified as part of running the combined requests
+          index.handle_change(uri, indexable) unless @store.has?(uri)
         when Constant::FileChangeType::DELETED
           index.delete(indexable)
         end
