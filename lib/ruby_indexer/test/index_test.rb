@@ -796,7 +796,7 @@ module RubyIndexer
             end
           RUBY
 
-          @index.handle_change(indexable_path)
+          @index.handle_change(indexable_path.to_uri, indexable_path)
           assert_empty(@index.instance_variable_get(:@ancestors))
           assert_equal(["Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end
@@ -833,7 +833,7 @@ module RubyIndexer
             end
           RUBY
 
-          @index.handle_change(indexable_path)
+          @index.handle_change(indexable_path.to_uri, indexable_path)
           refute_empty(@index.instance_variable_get(:@ancestors))
           assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end
@@ -866,7 +866,7 @@ module RubyIndexer
             end
           RUBY
 
-          @index.handle_change(indexable_path)
+          @index.handle_change(indexable_path.to_uri, indexable_path)
           assert_empty(@index.instance_variable_get(:@ancestors))
           assert_equal(["Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end

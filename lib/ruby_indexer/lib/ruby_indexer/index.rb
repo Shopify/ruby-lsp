@@ -469,16 +469,23 @@ module RubyIndexer
 
     # Synchronizes a change made to the given indexable path. This method will ensure that new declarations are indexed,
     # removed declarations removed and that the ancestor linearization cache is cleared if necessary
-    sig { params(indexable: IndexablePath).void }
-    def handle_change(indexable)
-      uri = indexable.to_uri.to_s
+    sig { params(uri: URI::Generic, indexable: IndexablePath).void }
+    def handle_change(uri, indexable)
+      handling_ancestor_change(uri) do
+        delete(indexable)
+        index_single(indexable)
+      end
+    end
+
+    # Handle ancestor changes that may occur when invoking the given block. The goal of this method is to automatically
+    # synchronize ancestors when handling changes in the index
+    sig { params(indexable_or_uri: T.any(IndexablePath, URI::Generic), block: T.proc.void).void }
+    def handling_ancestor_change(indexable_or_uri, &block)
+      uri = (indexable_or_uri.is_a?(IndexablePath) ? indexable_or_uri.to_uri : indexable_or_uri).to_s
+
       original_entries = @uris_to_entries[uri]
-
-      delete(indexable)
-      index_single(indexable)
-
+      block.call
       updated_entries = @uris_to_entries[uri]
-
       return unless original_entries && updated_entries
 
       # A change in one ancestor may impact several different others, which could be including that ancestor through

@@ -95,6 +95,13 @@ module RubyLsp
       @state.delete(uri.to_s)
     end
 
+    # Returns `true` if the store contains the document with the given URI, which means that document is being managed
+    # by the client
+    sig { params(uri: URI::Generic).returns(T::Boolean) }
+    def has?(uri)
+      @state.key?(uri.to_s)
+    end
+
     sig do
       type_parameters(:T)
         .params(
