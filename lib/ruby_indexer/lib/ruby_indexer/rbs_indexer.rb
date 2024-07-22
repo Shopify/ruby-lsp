@@ -37,45 +37,33 @@ module RubyIndexer
     sig { params(declaration: RBS::AST::Declarations::Base, pathname: Pathname).void }
     def process_declaration(declaration, pathname)
       case declaration
-      when RBS::AST::Declarations::Class
-        handle_class_declaration(declaration, pathname)
-      when RBS::AST::Declarations::Module
-        handle_module_declaration(declaration, pathname)
+      when RBS::AST::Declarations::Class, RBS::AST::Declarations::Module
+        handle_class_or_module_declaration(declaration, pathname)
       else # rubocop:disable Style/EmptyElse
         # Other kinds not yet handled
       end
     end
 
-    sig { params(declaration: RBS::AST::Declarations::Class, pathname: Pathname).void }
-    def handle_class_declaration(declaration, pathname)
-      nesting = [declaration.name.name.to_s]
-      file_path = pathname.to_s
-      location = to_ruby_indexer_location(declaration.location)
-      comments = Array(declaration.comment&.string)
-      parent_class = declaration.super_class&.name&.name&.to_s
-      class_entry = Entry::Class.new(nesting, file_path, location, location, comments, parent_class)
-      add_declaration_mixins_to_entry(declaration, class_entry)
-      @index.add(class_entry)
-      declaration.members.each do |member|
-        next unless member.is_a?(RBS::AST::Members::MethodDefinition)
-
-        handle_method(member, class_entry)
-      end
+    sig do
+      params(declaration: T.any(RBS::AST::Declarations::Class, RBS::AST::Declarations::Module), pathname: Pathname).void
     end
-
-    sig { params(declaration: RBS::AST::Declarations::Module, pathname: Pathname).void }
-    def handle_module_declaration(declaration, pathname)
+    def handle_class_or_module_declaration(declaration, pathname)
       nesting = [declaration.name.name.to_s]
       file_path = pathname.to_s
       location = to_ruby_indexer_location(declaration.location)
       comments = Array(declaration.comment&.string)
-      module_entry = Entry::Module.new(nesting, file_path, location, location, comments)
-      add_declaration_mixins_to_entry(declaration, module_entry)
-      @index.add(module_entry)
+      entry = if declaration.is_a?(RBS::AST::Declarations::Class)
+        parent_class = declaration.super_class&.name&.name&.to_s
+        Entry::Class.new(nesting, file_path, location, location, comments, parent_class)
+      else
+        Entry::Module.new(nesting, file_path, location, location, comments)
+      end
+      add_declaration_mixins_to_entry(declaration, entry)
+      @index.add(entry)
       declaration.members.each do |member|
         next unless member.is_a?(RBS::AST::Members::MethodDefinition)
 
-        handle_method(member, module_entry)
+        handle_method(member, entry)
       end
     end
 
