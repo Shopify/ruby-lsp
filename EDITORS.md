@@ -142,29 +142,7 @@ require("lspconfig").ruby_lsp.setup({
 
 ## LazyVim LSP
 
-For LazyVim, you can add the ruby-lsp by creating a file in your plugins folder (`~/.config/nvim/lua/plugins/ruby_lsp.lua`) and adding the following:
-
-```lua
--- ~/.config/nvim/lua/plugins/ruby_lsp.lua
-
-return {
-  {
-    "neovim/nvim-lspconfig",
-    ---@class PluginLspOpts
-    opts = {
-      ---@type lspconfig.options
-      servers = {
-        -- disable solargraph from auto running when you open ruby files
-        solargraph = {
-          autostart = false
-        },
-        -- ruby_lsp will be automatically installed with mason and loaded with lspconfig
-        ruby_lsp = {},
-      },
-    },
-  },
-}
-```
+[As of v12.33.0](https://github.com/LazyVim/LazyVim/pull/3652), Ruby LSP is the default LSP for Ruby and no configuration should be needed.
 
 ## Sublime Text LSP
 
