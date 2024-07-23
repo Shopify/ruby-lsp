@@ -49,14 +49,14 @@ module RubyIndexer
     end
     def handle_class_or_module_declaration(declaration, pathname)
       nesting = [declaration.name.name.to_s]
-      file_path = pathname.to_s
+      uri = URI::Generic.from_path(path: pathname.to_s)
       location = to_ruby_indexer_location(declaration.location)
       comments = Array(declaration.comment&.string)
       entry = if declaration.is_a?(RBS::AST::Declarations::Class)
         parent_class = declaration.super_class&.name&.name&.to_s
-        Entry::Class.new(nesting, file_path, location, location, comments, parent_class)
+        Entry::Class.new(nesting, uri, location, location, comments, parent_class)
       else
-        Entry::Module.new(nesting, file_path, location, location, comments)
+        Entry::Module.new(nesting, uri, location, location, comments)
       end
       add_declaration_mixins_to_entry(declaration, entry)
       @index.add(entry)
@@ -101,7 +101,7 @@ module RubyIndexer
     sig { params(member: RBS::AST::Members::MethodDefinition, owner: Entry::Namespace).void }
     def handle_method(member, owner)
       name = member.name.name
-      file_path = member.location.buffer.name
+      uri = URI::Generic.from_path(path: member.location.buffer.name)
       location = to_ruby_indexer_location(member.location)
       comments = Array(member.comment&.string)
 
@@ -116,7 +116,7 @@ module RubyIndexer
 
       real_owner = member.singleton? ? @index.existing_or_new_singleton_class(owner.name) : owner
       signatures = signatures(member)
-      @index.add(Entry::Method.new(name, file_path, location, location, comments, signatures, visibility, real_owner))
+      @index.add(Entry::Method.new(name, uri, location, location, comments, signatures, visibility, real_owner))
     end
 
     sig { params(member: RBS::AST::Members::MethodDefinition).returns(T::Array[Entry::Signature]) }

@@ -2,6 +2,8 @@
 # frozen_string_literal: true
 
 module RubyIndexer
+  # Represents a file system path that can be indexed. This class should only be used for files in the file system and
+  # not for other URIs that may be indexed, such as unsaved file URIs using the `untitled` scheme
   class IndexablePath
     extend T::Sig
 
@@ -24,6 +26,11 @@ module RubyIndexer
         load_path_entry ? full_path.delete_prefix("#{load_path_entry}/").delete_suffix(".rb") : nil,
         T.nilable(String),
       )
+    end
+
+    sig { returns(URI::Generic) }
+    def to_uri
+      URI::Generic.from_path(path: @full_path)
     end
   end
 end

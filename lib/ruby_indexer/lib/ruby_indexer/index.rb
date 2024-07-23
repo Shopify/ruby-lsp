@@ -25,10 +25,11 @@ module RubyIndexer
 
       # Holds references to where entries where discovered so that we can easily delete them
       # {
-      #  "/my/project/foo.rb" => [#<Entry::Class>, #<Entry::Class>],
-      #  "/my/project/bar.rb" => [#<Entry::Class>],
+      #  "file:///my/project/foo.rb" => [#<Entry::Class>, #<Entry::Class>],
+      #  "file:///my/project/bar.rb" => [#<Entry::Class>],
+      #  "untitled:Untitled-1" => [#<Entry::Class>],
       # }
-      @files_to_entries = T.let({}, T::Hash[String, T::Array[Entry]])
+      @uris_to_entries = T.let({}, T::Hash[String, T::Array[Entry]])
 
       # Holds all require paths for every indexed item so that we can provide autocomplete for requires
       @require_paths_tree = T.let(PrefixTree[IndexablePath].new, PrefixTree[IndexablePath])
@@ -37,11 +38,12 @@ module RubyIndexer
       @ancestors = T.let({}, T::Hash[String, T::Array[String]])
     end
 
-    sig { params(indexable: IndexablePath).void }
-    def delete(indexable)
+    sig { params(indexable_or_uri: T.any(IndexablePath, URI::Generic)).void }
+    def delete(indexable_or_uri)
+      uri = (indexable_or_uri.is_a?(IndexablePath) ? indexable_or_uri.to_uri : indexable_or_uri).to_s
       # For each constant discovered in `path`, delete the associated entry from the index. If there are no entries
       # left, delete the constant from the index.
-      @files_to_entries[indexable.full_path]&.each do |entry|
+      @uris_to_entries[uri]&.each do |entry|
         name = entry.name
         entries = @entries[name]
         next unless entries
@@ -59,9 +61,8 @@ module RubyIndexer
         end
       end
 
-      @files_to_entries.delete(indexable.full_path)
-
-      require_path = indexable.require_path
+      @uris_to_entries.delete(uri)
+      require_path = indexable_or_uri.require_path if indexable_or_uri.is_a?(IndexablePath)
       @require_paths_tree.delete(require_path) if require_path
     end
 
@@ -70,7 +71,7 @@ module RubyIndexer
       name = entry.name
 
       (@entries[name] ||= []) << entry
-      (@files_to_entries[entry.file_path] ||= []) << entry
+      (@uris_to_entries[entry.uri.to_s] ||= []) << entry
       @entries_tree.insert(name, T.must(@entries[name])) unless skip_prefix_tree
     end
 
@@ -267,7 +268,7 @@ module RubyIndexer
       dispatcher = Prism::Dispatcher.new
 
       result = Prism.parse(content)
-      DeclarationListener.new(self, dispatcher, result, indexable_path.full_path)
+      DeclarationListener.new(self, dispatcher, result, URI::Generic.from_path(path: indexable_path.full_path))
       dispatcher.dispatch(result.value)
 
       require_path = indexable_path.require_path
@@ -470,12 +471,13 @@ module RubyIndexer
     # removed declarations removed and that the ancestor linearization cache is cleared if necessary
     sig { params(indexable: IndexablePath).void }
     def handle_change(indexable)
-      original_entries = @files_to_entries[indexable.full_path]
+      uri = indexable.to_uri.to_s
+      original_entries = @uris_to_entries[uri]
 
       delete(indexable)
       index_single(indexable)
 
-      updated_entries = @files_to_entries[indexable.full_path]
+      updated_entries = @uris_to_entries[uri]
 
       return unless original_entries && updated_entries
 
@@ -527,7 +529,7 @@ module RubyIndexer
 
         singleton = Entry::SingletonClass.new(
           [full_singleton_name],
-          attached_ancestor.file_path,
+          attached_ancestor.uri,
           attached_ancestor.location,
           attached_ancestor.name_location,
           [],
