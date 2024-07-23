@@ -20,10 +20,10 @@ module RubyLsp
           uri: URI::Generic,
           node_context: NodeContext,
           dispatcher: Prism::Dispatcher,
-          typechecker_enabled: T::Boolean,
+          sorbet_level: Document::SorbetLevel,
         ).void
       end
-      def initialize(response_builder, global_state, language_id, uri, node_context, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, global_state, language_id, uri, node_context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
@@ -31,7 +31,7 @@ module RubyLsp
         @language_id = language_id
         @uri = uri
         @node_context = node_context
-        @typechecker_enabled = typechecker_enabled
+        @sorbet_level = sorbet_level
 
         dispatcher.register(
           self,
@@ -53,6 +53,11 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
+        # Sorbet can handle go to definition for methods invoked on self on typed true or higher
+        if (@sorbet_level == Document::SorbetLevel::True || @sorbet_level == Document::SorbetLevel::Strict) &&
+            self_receiver?(node)
+        end
+
         message = node.message
         return unless message
 
@@ -149,6 +154,9 @@ module RubyLsp
 
       sig { void }
       def handle_super_node_definition
+        # Sorbet can handle super hover on typed true or higher
+        return if sorbet_level_true_or_higher?(@sorbet_level)
+
         surrounding_method = @node_context.surrounding_method
         return unless surrounding_method
 
@@ -161,6 +169,10 @@ module RubyLsp
 
       sig { params(name: String).void }
       def handle_instance_variable_definition(name)
+        # Sorbet enforces that all instance variables be declared on typed strict or higher, which means it will be able
+        # to provide all features for them
+        return if @sorbet_level == Document::SorbetLevel::Strict
+
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
@@ -196,7 +208,7 @@ module RubyLsp
 
         methods.each do |target_method|
           file_path = target_method.file_path
-          next if @typechecker_enabled && not_in_dependencies?(file_path)
+          next if sorbet_level_true_or_higher?(@sorbet_level) && not_in_dependencies?(file_path)
 
           @response_builder << Interface::LocationLink.new(
             target_uri: URI::Generic.from_path(path: file_path).to_s,
@@ -253,10 +265,10 @@ module RubyLsp
 
         entries.each do |entry|
           # If the project has Sorbet, then we only want to handle go to definition for constants defined in gems, as an
-          # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
-          # in the project, even if the files are typed false
+          # additional behavior on top of jumping to RBIs. The only sigil where Sorbet cannot handle constants is typed
+          # ignore
           file_path = entry.file_path
-          next if @typechecker_enabled && not_in_dependencies?(file_path)
+          next if @sorbet_level != Document::SorbetLevel::Ignore && not_in_dependencies?(file_path)
 
           @response_builder << Interface::LocationLink.new(
             target_uri: URI::Generic.from_path(path: file_path).to_s,

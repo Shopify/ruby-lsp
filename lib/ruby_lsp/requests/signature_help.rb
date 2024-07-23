@@ -46,10 +46,10 @@ module RubyLsp
           position: T::Hash[Symbol, T.untyped],
           context: T.nilable(T::Hash[Symbol, T.untyped]),
           dispatcher: Prism::Dispatcher,
-          typechecker_enabled: T::Boolean,
+          sorbet_level: Document::SorbetLevel,
         ).void
       end
-      def initialize(document, global_state, position, context, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
+      def initialize(document, global_state, position, context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
         super()
         node_context = document.locate_node(
           { line: position[:line], character: position[:character] },
@@ -61,7 +61,7 @@ module RubyLsp
         @target = T.let(target, T.nilable(Prism::Node))
         @dispatcher = dispatcher
         @response_builder = T.let(ResponseBuilders::SignatureHelp.new, ResponseBuilders::SignatureHelp)
-        Listeners::SignatureHelp.new(@response_builder, global_state, node_context, dispatcher, typechecker_enabled)
+        Listeners::SignatureHelp.new(@response_builder, global_state, node_context, dispatcher, sorbet_level)
       end
 
       sig { override.returns(T.nilable(Interface::SignatureHelp)) }

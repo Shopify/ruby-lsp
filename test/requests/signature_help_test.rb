@@ -345,4 +345,30 @@ class SignatureHelpTest < Minitest::Test
       assert_equal(0, result.active_parameter)
     end
   end
+
+  def test_help_is_disabled_on_typed_true
+    source = +<<~RUBY
+      # typed: true
+      class Foo
+        def bar(a, b)
+        end
+
+        def baz
+          bar()
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
+        position: { line: 6, character: 7 },
+        context: {
+          triggerCharacter: "(",
+          activeSignatureHelp: nil,
+        },
+      })
+      assert_nil(server.pop_response.response)
+    end
+  end
 end
