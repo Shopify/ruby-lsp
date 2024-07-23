@@ -21,7 +21,7 @@ module RubyLsp
       &block)
       server = RubyLsp::Server.new(test_mode: true)
       server.global_state.stubs(:has_type_checker).returns(false) if stub_no_typechecker
-      server.global_state.apply_options({})
+      server.global_state.apply_options({ initializationOptions: { experimentalFeaturesEnabled: true } })
       language_id = uri.to_s.end_with?(".erb") ? "erb" : "ruby"
 
       if source

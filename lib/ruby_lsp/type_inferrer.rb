@@ -7,12 +7,16 @@ module RubyLsp
   class TypeInferrer
     extend T::Sig
 
-    sig { params(index: RubyIndexer::Index).void }
-    def initialize(index)
+    sig { params(experimental_features: T::Boolean).returns(T::Boolean) }
+    attr_writer :experimental_features
+
+    sig { params(index: RubyIndexer::Index, experimental_features: T::Boolean).void }
+    def initialize(index, experimental_features = true)
       @index = index
+      @experimental_features = experimental_features
     end
 
-    sig { params(node_context: NodeContext).returns(T.nilable(String)) }
+    sig { params(node_context: NodeContext).returns(T.nilable(Type)) }
     def infer_receiver_type(node_context)
       node = node_context.node
 
@@ -28,7 +32,7 @@ module RubyLsp
 
     private
 
-    sig { params(node: Prism::CallNode, node_context: NodeContext).returns(T.nilable(String)) }
+    sig { params(node: Prism::CallNode, node_context: NodeContext).returns(T.nilable(Type)) }
     def infer_receiver_for_call_node(node, node_context)
       receiver = node.receiver
 
@@ -47,23 +51,40 @@ module RubyLsp
         return unless name
 
         *parts, last = name.split("::")
-        return "#{last}::<Class:#{last}>" if parts.empty?
+        return Type.new("#{last}::<Class:#{last}>") if parts.empty?
 
-        "#{parts.join("::")}::#{last}::<Class:#{last}>"
+        Type.new("#{parts.join("::")}::#{last}::<Class:#{last}>")
+      else
+        return unless @experimental_features
+
+        raw_receiver = node.receiver&.slice
+
+        if raw_receiver
+          guessed_name = raw_receiver
+            .delete_prefix("@")
+            .delete_prefix("@@")
+            .split("_")
+            .map(&:capitalize)
+            .join
+
+          entries = @index.resolve(guessed_name, node_context.nesting) || @index.first_unqualified_const(guessed_name)
+          name = entries&.first&.name
+          GuessedType.new(name) if name
+        end
       end
     end
 
-    sig { params(node_context: NodeContext).returns(String) }
+    sig { params(node_context: NodeContext).returns(Type) }
     def self_receiver_handling(node_context)
       nesting = node_context.nesting
       # If we're at the top level, then the invocation is happening on `<main>`, which is a special singleton that
       # inherits from Object
-      return "Object" if nesting.empty?
-      return node_context.fully_qualified_name if node_context.surrounding_method
+      return Type.new("Object") if nesting.empty?
+      return Type.new(node_context.fully_qualified_name) if node_context.surrounding_method
 
       # If we're not inside a method, then we're inside the body of a class or module, which is a singleton
       # context
-      "#{nesting.join("::")}::<Class:#{nesting.last}>"
+      Type.new("#{nesting.join("::")}::<Class:#{nesting.last}>")
     end
 
     sig do
@@ -79,6 +100,23 @@ module RubyLsp
     rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
            Prism::ConstantPathNode::MissingNodesInConstantPathError
       nil
+    end
+
+    # A known type
+    class Type
+      extend T::Sig
+
+      sig { returns(String) }
+      attr_reader :name
+
+      sig { params(name: String).void }
+      def initialize(name)
+        @name = name
+      end
+    end
+
+    # A type that was guessed based on the receiver raw name
+    class GuessedType < Type
     end
   end
 end

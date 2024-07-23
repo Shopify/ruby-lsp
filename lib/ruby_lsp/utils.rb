@@ -25,6 +25,7 @@ module RubyLsp
     end,
     String,
   )
+  GUESSED_TYPES_URL = "https://github.com/Shopify/ruby-lsp/blob/main/DESIGN_AND_ROADMAP.md#guessed-types"
 
   # A notification to be sent to the client
   class Message

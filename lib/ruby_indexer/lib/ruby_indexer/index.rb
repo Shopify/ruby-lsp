@@ -84,6 +84,34 @@ module RubyIndexer
       @require_paths_tree.search(query)
     end
 
+    # Searches for a constant based on an unqualified name and returns the first possible match regardless of whether
+    # there are more possible matching entries
+    sig do
+      params(
+        name: String,
+      ).returns(T.nilable(T::Array[T.any(
+        Entry::Namespace,
+        Entry::Alias,
+        Entry::UnresolvedAlias,
+        Entry::Constant,
+      )]))
+    end
+    def first_unqualified_const(name)
+      _name, entries = @entries.find do |const_name, _entries|
+        const_name.end_with?(name)
+      end
+
+      T.cast(
+        entries,
+        T.nilable(T::Array[T.any(
+          Entry::Namespace,
+          Entry::Alias,
+          Entry::UnresolvedAlias,
+          Entry::Constant,
+        )]),
+      )
+    end
+
     # Searches entries in the index based on an exact prefix, intended for providing autocomplete. All possible matches
     # to the prefix are returned. The return is an array of arrays, where each entry is the array of entries for a given
     # name match. For example:

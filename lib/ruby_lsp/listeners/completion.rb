@@ -262,7 +262,7 @@ module RubyLsp
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
-        @index.instance_variable_completion_candidates(name, type).each do |entry|
+        @index.instance_variable_completion_candidates(name, type.name).each do |entry|
           variable_name = entry.name
 
           label_details = Interface::CompletionItemLabelDetails.new(
@@ -366,8 +366,11 @@ module RubyLsp
 
         return unless range
 
-        @index.method_completion_candidates(method_name, type).each do |entry|
+        guessed_type = type.name
+
+        @index.method_completion_candidates(method_name, type.name).each do |entry|
           entry_name = entry.name
+          owner_name = entry.owner&.name
 
           label_details = Interface::CompletionItemLabelDetails.new(
             description: entry.file_name,
@@ -380,7 +383,8 @@ module RubyLsp
             text_edit: Interface::TextEdit.new(range: range, new_text: entry_name),
             kind: Constant::CompletionItemKind::METHOD,
             data: {
-              owner_name: entry.owner&.name,
+              owner_name: owner_name,
+              guessed_type: guessed_type,
             },
           )
         end

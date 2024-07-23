@@ -65,7 +65,7 @@ module RubyLsp
 
         # Until we can properly infer the receiver type in erb files (maybe with ruby-lsp-rails),
         # treating method calls' type as `nil` will allow users to get some completion support first
-        if @language_id == Document::LanguageId::ERB && inferrer_receiver_type == "Object"
+        if @language_id == Document::LanguageId::ERB && inferrer_receiver_type&.name == "Object"
           inferrer_receiver_type = nil
         end
 
@@ -176,7 +176,7 @@ module RubyLsp
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
-        entries = @index.resolve_instance_variable(name, type)
+        entries = @index.resolve_instance_variable(name, type.name)
         return unless entries
 
         entries.each do |entry|
@@ -194,10 +194,10 @@ module RubyLsp
         # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
-      sig { params(message: String, receiver_type: T.nilable(String), inherited_only: T::Boolean).void }
+      sig { params(message: String, receiver_type: T.nilable(TypeInferrer::Type), inherited_only: T::Boolean).void }
       def handle_method_definition(message, receiver_type, inherited_only: false)
         methods = if receiver_type
-          @index.resolve_method(message, receiver_type, inherited_only: inherited_only)
+          @index.resolve_method(message, receiver_type.name, inherited_only: inherited_only)
         else
           # If the method doesn't have a receiver, then we provide a few candidates to jump to
           # But we don't want to provide too many candidates, as it can be overwhelming
