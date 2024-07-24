@@ -1789,5 +1789,38 @@ module RubyIndexer
         @index.linearized_ancestors_of("User::<Class:User>"),
       )
     end
+
+    def test_singleton_nesting_is_correctly_split_during_linearization
+      index(<<~RUBY)
+        module Bar; end
+
+        module Foo
+          class Namespace::Parent
+            extend Bar
+          end
+        end
+
+        module Foo
+          class Child < Namespace::Parent
+          end
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "Foo::Child::<Class:Child>",
+          "Foo::Namespace::Parent::<Class:Parent>",
+          "Bar",
+          "Object::<Class:Object>",
+          "BasicObject::<Class:BasicObject>",
+          "Class",
+          "Module",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Foo::Child::<Class:Child>"),
+      )
+    end
   end
 end
