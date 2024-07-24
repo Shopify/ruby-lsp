@@ -448,7 +448,7 @@ module RubyIndexer
 
       # The original nesting where we discovered this namespace, so that we resolve the correct names of the
       # included/prepended/extended modules and parent classes
-      nesting = T.must(namespaces.first).nesting
+      nesting = T.must(namespaces.first).nesting.flat_map { |n| n.split("::") }
 
       if nesting.any?
         singleton_levels.times do
