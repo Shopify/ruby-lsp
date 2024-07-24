@@ -39,6 +39,9 @@ module RubyIndexer
       case declaration
       when RBS::AST::Declarations::Class, RBS::AST::Declarations::Module
         handle_class_or_module_declaration(declaration, pathname)
+      when RBS::AST::Declarations::Constant
+        namespace_nesting = declaration.name.namespace.path.map(&:to_s)
+        handle_constant(declaration, namespace_nesting, pathname.to_s)
       else # rubocop:disable Style/EmptyElse
         # Other kinds not yet handled
       end
@@ -61,9 +64,12 @@ module RubyIndexer
       add_declaration_mixins_to_entry(declaration, entry)
       @index.add(entry)
       declaration.members.each do |member|
-        next unless member.is_a?(RBS::AST::Members::MethodDefinition)
-
-        handle_method(member, entry)
+        case member
+        when RBS::AST::Members::MethodDefinition
+          handle_method(member, entry)
+        when RBS::AST::Declarations::Constant
+          handle_constant(member, nesting, file_path)
+        end
       end
     end
 
@@ -211,6 +217,31 @@ module RubyIndexer
       name = param.name || Entry::KeywordRestParameter::DEFAULT_NAME
 
       Entry::KeywordRestParameter.new(name: name)
+    end
+
+    # RBS treats constant definitions differently depend on where they are defined.
+    # When constants' rbs are defined inside a class/module block, they are treated as
+    # members of the class/module.
+    #
+    # module Encoding
+    #   US_ASCII = ... # US_ASCII is a member of Encoding
+    # end
+    #
+    # When constants' rbs are defined outside a class/module block, they are treated as
+    # top-level constants.
+    #
+    # Complex::I = ... # Complex::I is a top-level constant
+    #
+    # And we need to handle their nesting differently.
+    sig { params(declaration: RBS::AST::Declarations::Constant, nesting: T::Array[String], file_path: String).void }
+    def handle_constant(declaration, nesting, file_path)
+      fully_qualified_name = [*nesting, declaration.name.name.to_s].join("::")
+      @index.add(Entry::Constant.new(
+        fully_qualified_name,
+        file_path,
+        to_ruby_indexer_location(declaration.location),
+        Array(declaration.comment&.string),
+      ))
     end
   end
 end
