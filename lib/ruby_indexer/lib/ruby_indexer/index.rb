@@ -276,6 +276,7 @@ module RubyIndexer
       ).void
     end
     def index_all(indexable_paths: RubyIndexer.configuration.indexables, &block)
+      RBSIndexer.new(self).index_ruby_core
       # Calculate how many paths are worth 1% of progress
       progress_step = (indexable_paths.length / 100.0).ceil
 
