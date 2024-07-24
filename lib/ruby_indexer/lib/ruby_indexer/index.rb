@@ -657,7 +657,7 @@ module RubyIndexer
 
         if parent_class_name && fully_qualified_name != parent_class_name
 
-          parent_name_parts = [parent_class_name]
+          parent_name_parts = parent_class_name.split("::")
           singleton_levels.times do
             parent_name_parts << "<Class:#{parent_name_parts.last}>"
           end
