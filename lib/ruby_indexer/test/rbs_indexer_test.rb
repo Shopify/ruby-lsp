@@ -40,6 +40,27 @@ module RubyIndexer
       assert_operator(entry.location.end_column, :>, 0)
     end
 
+    def test_index_core_constants
+      entries = @index["RUBY_VERSION"]
+      refute_nil(entries)
+      assert_equal(1, entries.length)
+
+      # Complex::I is defined as `Complex::I = ...`
+      entries = @index["Complex::I"]
+      refute_nil(entries)
+      assert_equal(1, entries.length)
+
+      # Encoding::US_ASCII is defined as
+      # ```
+      # module Encoding
+      #   US_ASCII = ...
+      #   ...
+      # ````
+      entries = @index["Encoding::US_ASCII"]
+      refute_nil(entries)
+      assert_equal(1, entries.length)
+    end
+
     def test_index_methods
       entries = @index["initialize"]
       refute_nil(entries)
