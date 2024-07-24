@@ -504,17 +504,17 @@ module RubyIndexer
       @index.add(
         case value
         when Prism::ConstantReadNode, Prism::ConstantPathNode
-          Entry::UnresolvedAlias.new(value.slice, @stack.dup, name, @file_path, node.location, comments)
+          Entry::UnresolvedConstantAlias.new(value.slice, @stack.dup, name, @file_path, node.location, comments)
         when Prism::ConstantWriteNode, Prism::ConstantAndWriteNode, Prism::ConstantOrWriteNode,
         Prism::ConstantOperatorWriteNode
 
           # If the right hand side is another constant assignment, we need to visit it because that constant has to be
           # indexed too
-          Entry::UnresolvedAlias.new(value.name.to_s, @stack.dup, name, @file_path, node.location, comments)
+          Entry::UnresolvedConstantAlias.new(value.name.to_s, @stack.dup, name, @file_path, node.location, comments)
         when Prism::ConstantPathWriteNode, Prism::ConstantPathOrWriteNode, Prism::ConstantPathOperatorWriteNode,
         Prism::ConstantPathAndWriteNode
 
-          Entry::UnresolvedAlias.new(value.target.slice, @stack.dup, name, @file_path, node.location, comments)
+          Entry::UnresolvedConstantAlias.new(value.target.slice, @stack.dup, name, @file_path, node.location, comments)
         else
           Entry::Constant.new(name, @file_path, node.location, comments)
         end,

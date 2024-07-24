@@ -194,7 +194,7 @@ module RubyIndexer
       entry = @index.resolve("BAZ", ["Foo", "Bar"]).first
       refute_nil(entry)
 
-      assert_instance_of(Entry::UnresolvedAlias, entry)
+      assert_instance_of(Entry::UnresolvedConstantAlias, entry)
     end
 
     def test_visitor_does_not_visit_unnecessary_nodes
@@ -1015,11 +1015,11 @@ module RubyIndexer
 
       foo_entry = T.must(@index.resolve("FOO", ["Namespace"])&.first)
       assert_equal(2, foo_entry.location.start_line)
-      assert_instance_of(Entry::Alias, foo_entry)
+      assert_instance_of(Entry::ConstantAlias, foo_entry)
 
       bar_entry = T.must(@index.resolve("BAR", ["Namespace"])&.first)
       assert_equal(3, bar_entry.location.start_line)
-      assert_instance_of(Entry::Alias, bar_entry)
+      assert_instance_of(Entry::ConstantAlias, bar_entry)
     end
 
     def test_resolving_circular_alias_three_levels
@@ -1033,15 +1033,15 @@ module RubyIndexer
 
       foo_entry = T.must(@index.resolve("FOO", ["Namespace"])&.first)
       assert_equal(2, foo_entry.location.start_line)
-      assert_instance_of(Entry::Alias, foo_entry)
+      assert_instance_of(Entry::ConstantAlias, foo_entry)
 
       bar_entry = T.must(@index.resolve("BAR", ["Namespace"])&.first)
       assert_equal(3, bar_entry.location.start_line)
-      assert_instance_of(Entry::Alias, bar_entry)
+      assert_instance_of(Entry::ConstantAlias, bar_entry)
 
       baz_entry = T.must(@index.resolve("BAZ", ["Namespace"])&.first)
       assert_equal(4, baz_entry.location.start_line)
-      assert_instance_of(Entry::Alias, baz_entry)
+      assert_instance_of(Entry::ConstantAlias, baz_entry)
     end
 
     def test_resolving_constants_in_aliased_namespace
