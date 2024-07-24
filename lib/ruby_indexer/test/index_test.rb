@@ -1765,5 +1765,29 @@ module RubyIndexer
         @index.linearized_ancestors_of("A::<Class:A>")
       end
     end
+
+    def test_linearizing_singleton_parent_class_with_namespace
+      index(<<~RUBY)
+        class ActiveRecord::Base; end
+
+        class User < ActiveRecord::Base
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "User::<Class:User>",
+          "ActiveRecord::Base::<Class:Base>",
+          "Object::<Class:Object>",
+          "BasicObject::<Class:BasicObject>",
+          "Class",
+          "Module",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("User::<Class:User>"),
+      )
+    end
   end
 end
