@@ -1321,7 +1321,9 @@ class CompletionTest < Minitest::Test
         RubyIndexer::IndexablePath.new(tmpdir, path)
       end
 
-      index.index_all(indexable_paths: indexables)
+      indexables.each do |indexable|
+        index.index_single(indexable)
+      end
 
       block.call(tmpdir)
     ensure

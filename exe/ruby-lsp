@@ -106,7 +106,7 @@ if options[:time_index]
 
   puts <<~MSG
     Ruby LSP v#{RubyLsp::VERSION}: Indexing took #{result.round(5)} seconds and generated:
-    - #{entries_by_entry_type.map { |k, v| "#{k.name.split("::").last}: #{v.size}" }.join("\n- ")}
+    - #{entries_by_entry_type.sort_by { |k, _| k.to_s }.map { |k, v| "#{k.name.split("::").last}: #{v.size}" }.join("\n- ")}
   MSG
   return
 end
