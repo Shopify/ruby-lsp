@@ -16,7 +16,9 @@
   "categories": [
     "Programming Languages",
     "Snippets",
-    "Testing"
+    "Testing",
+    "AI",
+    "Chat"
   ],
   "activationEvents": [
     "onLanguage:ruby",
@@ -26,6 +28,21 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "chatParticipants": [
+      {
+        "id": "rubyLsp.chatAgent",
+        "fullName": "Ruby",
+        "name": "ruby",
+        "description": "How can I help with your Ruby on Rails application?",
+        "isSticky": true,
+        "commands": [
+          {
+            "name": "design",
+            "description": "Explain what you're trying to build and I will suggest possible ways to model the domain"
+          }
+        ]
+      }
+    ],
     "menus": {
       "editor/context": [
         {
