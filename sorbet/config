@@ -1,6 +1,7 @@
 --dir
 .
 --ignore=vendor/
+--ignore=tmp/
 --ignore=test/fixtures/
 --ignore=test/expectations/
 --enable-experimental-requires-ancestor
