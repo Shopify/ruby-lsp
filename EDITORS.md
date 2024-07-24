@@ -142,7 +142,8 @@ require("lspconfig").ruby_lsp.setup({
 
 ## LazyVim LSP
 
-[As of v12.33.0](https://github.com/LazyVim/LazyVim/pull/3652), Ruby LSP is the default LSP for Ruby and no configuration should be needed.
+[As of v12.33.0](https://github.com/LazyVim/LazyVim/pull/3652), Ruby LSP is the default LSP for Ruby and no configuration should be needed, other
+than ensuring your Ruby version manager is set up as described above.
 
 ## Sublime Text LSP
 
