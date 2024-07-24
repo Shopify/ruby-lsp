@@ -199,6 +199,7 @@ Interested in contributing? Check out the issues tagged with [help-wanted] or [g
 - Explore allowing addons to add support for arbitrary file types
 - Allow the Ruby LSP to connect to a typechecker addon to improve accuracy
 - Make the Ruby LSP’s default functionality act as a fallback for the more accurate typechecker results
+- Introduction a mechanism for addons to be automatically detected with needing user configuration
 
 [Ruby on Rails Community survey]: https://rails-hosting.com/2022/#ruby-rails-version-updates
 [Sorbet]: https://sorbet.org/
