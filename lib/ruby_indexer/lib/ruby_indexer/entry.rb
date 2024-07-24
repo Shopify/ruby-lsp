@@ -492,7 +492,7 @@ module RubyIndexer
           old_name: String,
           owner: T.nilable(Entry::Namespace),
           file_path: String,
-          location: Prism::Location,
+          location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
         ).void
       end

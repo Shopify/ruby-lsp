@@ -331,6 +331,23 @@ module RubyIndexer
       assert_kind_of(Entry::BlockParameter, parameters[3])
     end
 
+    def test_signature_alias
+      # In RBS, an alias means that two methods have the same signature. It does not mean the same thing as a Ruby
+      # alias.
+      any_entries = @index["any?"]
+
+      assert_equal(["Array", "Enumerable", "Hash"], any_entries.map { _1.owner.name })
+
+      entry = any_entries.find { |entry| entry.owner.name == "Array" }
+
+      assert_kind_of(RubyIndexer::Entry::UnresolvedMethodAlias, entry)
+      assert_equal("any?", entry.name)
+      assert_equal("all?", entry.old_name)
+      assert_equal("Array", entry.owner.name)
+      assert(entry.file_path.end_with?("core/array.rbs"))
+      assert_includes(entry.comments[0], "Returns `true` if any element of `self` meets a given criterion.")
+    end
+
     private
 
     def parse_rbs_methods(rbs, method_name)

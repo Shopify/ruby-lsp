@@ -69,6 +69,8 @@ module RubyIndexer
           handle_method(member, entry)
         when RBS::AST::Declarations::Constant
           handle_constant(member, nesting, file_path)
+        when RBS::AST::Members::Alias # NOTE: This is a signature alias, not a Ruby method alias
+          handle_signature_alias(member, entry)
         end
       end
     end
@@ -242,6 +244,23 @@ module RubyIndexer
         to_ruby_indexer_location(declaration.location),
         Array(declaration.comment&.string),
       ))
+    end
+
+    sig { params(member: RBS::AST::Members::Alias, owner_entry: Entry::Namespace).void }
+    def handle_signature_alias(member, owner_entry)
+      file_path = member.location.buffer.name
+      comments = Array(member.comment&.string)
+
+      entry = Entry::UnresolvedMethodAlias.new(
+        member.new_name.to_s,
+        member.old_name.to_s,
+        owner_entry,
+        file_path,
+        to_ruby_indexer_location(member.location),
+        comments,
+      )
+
+      @index.add(entry)
     end
   end
 end
