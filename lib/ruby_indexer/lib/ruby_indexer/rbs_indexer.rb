@@ -220,14 +220,14 @@ module RubyIndexer
     end
 
     # RBS treats constant definitions differently depend on where they are defined.
-    # When constants' rbs defined inside a class/module block, they are treated as
+    # When constants' rbs are defined inside a class/module block, they are treated as
     # members of the class/module.
     #
     # module Encoding
     #   US_ASCII = ... # US_ASCII is a member of Encoding
     # end
     #
-    # When constants' rbs defined outside a class/module block, they are treated as
+    # When constants' rbs are defined outside a class/module block, they are treated as
     # top-level constants.
     #
     # Complex::I = ... # Complex::I is a top-level constant
