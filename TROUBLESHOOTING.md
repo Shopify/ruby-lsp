@@ -71,7 +71,7 @@ Once Prism v1.0 is released, we will relax the version constraint to alleviate t
 
 **Other constraints**
 
-Ruby LSP has a dependency on RBS v3.
+Ruby LSP has a dependency on [RBS](https://github.com/ruby/rbs) v3.
 If another gem constrains the version of RBS to an older release, it will not be possible to use newer versions of Ruby LSP.
 
 There is also dependency on `sorbet-runtime` which is used by a number of other gems.
