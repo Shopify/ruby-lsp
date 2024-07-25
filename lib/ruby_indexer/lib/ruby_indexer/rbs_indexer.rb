@@ -54,7 +54,7 @@ module RubyIndexer
       nesting = [declaration.name.name.to_s]
       file_path = pathname.to_s
       location = to_ruby_indexer_location(declaration.location)
-      comments = Array(declaration.comment&.string)
+      comments = comments_to_string(declaration)
       entry = if declaration.is_a?(RBS::AST::Declarations::Class)
         parent_class = declaration.super_class&.name&.name&.to_s
         Entry::Class.new(nesting, file_path, location, location, comments, parent_class)
@@ -111,7 +111,7 @@ module RubyIndexer
       name = member.name.name
       file_path = member.location.buffer.name
       location = to_ruby_indexer_location(member.location)
-      comments = Array(member.comment&.string)
+      comments = comments_to_string(member)
 
       visibility = case member.visibility
       when :private
@@ -242,14 +242,14 @@ module RubyIndexer
         fully_qualified_name,
         file_path,
         to_ruby_indexer_location(declaration.location),
-        Array(declaration.comment&.string),
+        comments_to_string(declaration),
       ))
     end
 
     sig { params(member: RBS::AST::Members::Alias, owner_entry: Entry::Namespace).void }
     def handle_signature_alias(member, owner_entry)
       file_path = member.location.buffer.name
-      comments = Array(member.comment&.string)
+      comments = comments_to_string(member)
 
       entry = Entry::UnresolvedMethodAlias.new(
         member.new_name.to_s,
@@ -261,6 +261,19 @@ module RubyIndexer
       )
 
       @index.add(entry)
+    end
+
+    sig do
+      params(declaration: T.any(
+        RBS::AST::Declarations::Class,
+        RBS::AST::Declarations::Module,
+        RBS::AST::Declarations::Constant,
+        RBS::AST::Members::MethodDefinition,
+        RBS::AST::Members::Alias,
+      )).returns(T::Array[String])
+    end
+    def comments_to_string(declaration)
+      Array(declaration.comment&.string)
     end
   end
 end
