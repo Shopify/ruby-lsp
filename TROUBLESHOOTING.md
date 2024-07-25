@@ -41,7 +41,7 @@ There are several main sources of issues users typically face during activation:
 ### Outdated Version
 
 > [!NOTE]
-> If using VS Code, the version of the extension is distinct from that of the server (the `ruby-lsp` gem). You can check the server version in the Output panel upon startup.
+> If using VS Code, the version of the extension is distinct from that of the server (the `ruby-lsp` gem). You can check the server version in the [status center](https://github.com/Shopify/ruby-lsp/blob/main/vscode/extras/ruby_lsp_status_center.png).
 
 In most cases, the server gem will be automatically updated. You can also trigger a manual update with the "Update language server gem" command in VS Code.
 
