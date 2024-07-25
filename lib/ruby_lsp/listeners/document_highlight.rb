@@ -180,7 +180,11 @@ module RubyLsp
       def on_call_node_enter(node)
         return unless matches?(node, [Prism::CallNode, Prism::DefNode])
 
-        add_highlight(Constant::DocumentHighlightKind::READ, node.location)
+        loc = node.message_loc
+        # if we have `foo.` it's a call node but there is no message yet.
+        return unless loc
+
+        add_highlight(Constant::DocumentHighlightKind::READ, loc)
       end
 
       sig { params(node: Prism::DefNode).void }
