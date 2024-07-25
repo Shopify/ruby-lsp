@@ -68,8 +68,8 @@ This applies to multiple language server features such as go to definition, hove
 Consider the following examples:
 
 > [!NOTE]
-not all of the examples below are supported at the moment and this is not an exhaustive list. Please check the
-long term roadmap to see what’s planned
+> Not all of the examples below are supported at the moment and this is not an exhaustive list.
+> Please check the long term roadmap to see what’s planned
 
 ```ruby
 # Cases where we can provide a satisfactory experience without a type system
