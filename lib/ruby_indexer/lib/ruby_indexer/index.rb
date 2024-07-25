@@ -91,8 +91,8 @@ module RubyIndexer
         name: String,
       ).returns(T.nilable(T::Array[T.any(
         Entry::Namespace,
-        Entry::Alias,
-        Entry::UnresolvedAlias,
+        Entry::ConstantAlias,
+        Entry::UnresolvedConstantAlias,
         Entry::Constant,
       )]))
     end
@@ -105,8 +105,8 @@ module RubyIndexer
         entries,
         T.nilable(T::Array[T.any(
           Entry::Namespace,
-          Entry::Alias,
-          Entry::UnresolvedAlias,
+          Entry::ConstantAlias,
+          Entry::UnresolvedConstantAlias,
           Entry::Constant,
         )]),
       )
@@ -230,8 +230,8 @@ module RubyIndexer
         seen_names: T::Array[String],
       ).returns(T.nilable(T::Array[T.any(
         Entry::Namespace,
-        Entry::Alias,
-        Entry::UnresolvedAlias,
+        Entry::ConstantAlias,
+        Entry::UnresolvedConstantAlias,
       )]))
     end
     def resolve(name, nesting, seen_names = [])
@@ -334,13 +334,13 @@ module RubyIndexer
         entry = @entries[current_name]&.first
 
         case entry
-        when Entry::Alias
+        when Entry::ConstantAlias
           target = entry.target
           return follow_aliased_namespace("#{target}::#{real_parts.join("::")}", seen_names)
-        when Entry::UnresolvedAlias
+        when Entry::UnresolvedConstantAlias
           resolved = resolve_alias(entry, seen_names)
 
-          if resolved.is_a?(Entry::UnresolvedAlias)
+          if resolved.is_a?(Entry::UnresolvedConstantAlias)
             raise UnresolvableAliasError, "The constant #{resolved.name} is an alias to a non existing constant"
           end
 
@@ -439,7 +439,7 @@ module RubyIndexer
         case entry
         when Entry::Namespace
           entry
-        when Entry::Alias
+        when Entry::ConstantAlias
           self[entry.target]&.grep(Entry::Namespace)
         end
       end.flatten
@@ -698,9 +698,9 @@ module RubyIndexer
     # that doesn't exist, then we return the same UnresolvedAlias
     sig do
       params(
-        entry: Entry::UnresolvedAlias,
+        entry: Entry::UnresolvedConstantAlias,
         seen_names: T::Array[String],
-      ).returns(T.any(Entry::Alias, Entry::UnresolvedAlias))
+      ).returns(T.any(Entry::ConstantAlias, Entry::UnresolvedConstantAlias))
     end
     def resolve_alias(entry, seen_names)
       alias_name = entry.name
@@ -712,7 +712,7 @@ module RubyIndexer
       return entry unless target
 
       target_name = T.must(target.first).name
-      resolved_alias = Entry::Alias.new(target_name, entry)
+      resolved_alias = Entry::ConstantAlias.new(target_name, entry)
 
       # Replace the UnresolvedAlias by a resolved one so that we don't have to do this again later
       original_entries = T.must(@entries[alias_name])
@@ -731,8 +731,8 @@ module RubyIndexer
         seen_names: T::Array[String],
       ).returns(T.nilable(T::Array[T.any(
         Entry::Namespace,
-        Entry::Alias,
-        Entry::UnresolvedAlias,
+        Entry::ConstantAlias,
+        Entry::UnresolvedConstantAlias,
       )]))
     end
     def lookup_enclosing_scopes(name, nesting, seen_names)
@@ -760,8 +760,8 @@ module RubyIndexer
         seen_names: T::Array[String],
       ).returns(T.nilable(T::Array[T.any(
         Entry::Namespace,
-        Entry::Alias,
-        Entry::UnresolvedAlias,
+        Entry::ConstantAlias,
+        Entry::UnresolvedConstantAlias,
       )]))
     end
     def lookup_ancestor_chain(name, nesting, seen_names)
@@ -821,8 +821,8 @@ module RubyIndexer
       ).returns(
         T.nilable(T::Array[T.any(
           Entry::Namespace,
-          Entry::Alias,
-          Entry::UnresolvedAlias,
+          Entry::ConstantAlias,
+          Entry::UnresolvedConstantAlias,
         )]),
       )
     end
@@ -830,11 +830,11 @@ module RubyIndexer
       entries = @entries[full_name] || @entries[follow_aliased_namespace(full_name)]
 
       T.cast(
-        entries&.map { |e| e.is_a?(Entry::UnresolvedAlias) ? resolve_alias(e, seen_names) : e },
+        entries&.map { |e| e.is_a?(Entry::UnresolvedConstantAlias) ? resolve_alias(e, seen_names) : e },
         T.nilable(T::Array[T.any(
           Entry::Namespace,
-          Entry::Alias,
-          Entry::UnresolvedAlias,
+          Entry::ConstantAlias,
+          Entry::UnresolvedConstantAlias,
         )]),
       )
     end

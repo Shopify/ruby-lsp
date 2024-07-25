@@ -411,7 +411,7 @@ module RubyIndexer
     # All aliases are inserted as UnresolvedAlias in the index first and then we lazily resolve them to the correct
     # target in [rdoc-ref:Index#resolve]. If the right hand side contains a constant that doesn't exist, then it's not
     # possible to resolve the alias and it will remain an UnresolvedAlias until the right hand side constant exists
-    class UnresolvedAlias < Entry
+    class UnresolvedConstantAlias < Entry
       extend T::Sig
 
       sig { returns(String) }
@@ -439,13 +439,13 @@ module RubyIndexer
     end
 
     # Alias represents a resolved alias, which points to an existing constant target
-    class Alias < Entry
+    class ConstantAlias < Entry
       extend T::Sig
 
       sig { returns(String) }
       attr_reader :target
 
-      sig { params(target: String, unresolved_alias: UnresolvedAlias).void }
+      sig { params(target: String, unresolved_alias: UnresolvedConstantAlias).void }
       def initialize(target, unresolved_alias)
         super(unresolved_alias.name, unresolved_alias.file_path, unresolved_alias.location, unresolved_alias.comments)
 
