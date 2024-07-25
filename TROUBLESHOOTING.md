@@ -202,6 +202,19 @@ ruby-lsp
 Is there any extra information given from booting the server manually? Or does it only fail when booting through the
 extension?
 
+## Indexing ##
+
+When Ruby LSP starts, it attempts to index your code as well as your dependencies as described in [Configuring code indexing](README.md#configuring-code-indexing).
+
+In rare cases, Ruby LSP will encounter an error which prevents parsing from completing, meaning Ruby LSP cannot start.
+
+Firstly, ensure that you are using the latest release of the `ruby-lsp` gem, as the problem may have been already fixed.
+
+To diagnose the particular file(s) causing a problem, run `ruby-lsp --doctor`. Please log an issue so that we we can address it. If the code is not open source then you can try write a minimal reproduction.
+
+In the meantime, you can [configure Ruby LSP to ignore a particular gem or file for indexing]([README.md#configuring-code-indexing]).
+
+
 ## After troubleshooting
 
 If after troubleshooting the Ruby LSP is still not initializing properly, please report an issue
