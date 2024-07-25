@@ -69,7 +69,9 @@ module RubyIndexer
           handle_method(member, entry)
         when RBS::AST::Declarations::Constant
           handle_constant(member, nesting, file_path)
-        when RBS::AST::Members::Alias # NOTE: This is a signature alias, not a Ruby method alias
+        when RBS::AST::Members::Alias
+          # In RBS, an alias means that two methods have the same signature.
+          # It does not mean the same thing as a Ruby alias.
           handle_signature_alias(member, entry)
         end
       end

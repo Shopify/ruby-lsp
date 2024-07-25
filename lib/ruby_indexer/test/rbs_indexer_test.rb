@@ -332,8 +332,8 @@ module RubyIndexer
     end
 
     def test_signature_alias
-      # In RBS, an alias means that two methods have the same signature. It does not mean the same thing as a Ruby
-      # alias.
+      # In RBS, an alias means that two methods have the same signature.
+      # It does not mean the same thing as a Ruby alias.
       any_entries = @index["any?"]
 
       assert_equal(["Array", "Enumerable", "Hash"], any_entries.map { _1.owner.name })
