@@ -67,7 +67,8 @@ If you require more accuracy in your editor, consider adopting a type system and
 This applies to multiple language server features such as go to definition, hover, completion and automated refactors.
 Consider the following examples:
 
-> [!NOTE] not all of the examples below are supported at the moment and this is not an exhaustive list. Please check the
+> [!NOTE]
+not all of the examples below are supported at the moment and this is not an exhaustive list. Please check the
 long term roadmap to see what’s planned
 
 ```ruby
