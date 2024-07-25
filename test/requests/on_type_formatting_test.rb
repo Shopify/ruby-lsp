@@ -687,4 +687,62 @@ class OnTypeFormattingTest < Minitest::Test
     ]
     assert_equal(expected_edits.to_json, T.must(edits).to_json)
   end
+
+  def test_does_not_confuse_class_parameter_with_keyword
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "link_to :something,\n  class: 'foo',\n  ",
+      }],
+      version: 2,
+    )
+    document.parse
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 2, character: 4 },
+      "\n",
+      "Visual Studio Code - Insiders",
+    ).perform
+
+    assert_empty(edits)
+  end
+
+  def test_allows_end_completion_when_parenthesis_are_present
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///fake.rb"))
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "if(\n  ",
+      }],
+      version: 2,
+    )
+    document.parse
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 1, character: 2 },
+      "\n",
+      "Visual Studio Code - Insiders",
+    ).perform
+
+    expected_edits = [
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: "\n",
+      },
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: "end",
+      },
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: "$0",
+      },
+    ]
+    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+  end
 end
