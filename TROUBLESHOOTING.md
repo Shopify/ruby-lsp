@@ -202,7 +202,7 @@ ruby-lsp
 Is there any extra information given from booting the server manually? Or does it only fail when booting through the
 extension?
 
-## Indexing ##
+## Indexing
 
 When Ruby LSP starts, it attempts to index your code as well as your dependencies as described in [Configuring code indexing](README.md#configuring-code-indexing).
 
