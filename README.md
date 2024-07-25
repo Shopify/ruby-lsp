@@ -33,7 +33,7 @@ The Ruby LSP features include
 - Completion for classes, modules, constants and require paths
 - Fuzzy search classes, modules and constants anywhere in the project and its dependencies (workspace symbol)
 
-Adding method support for definition, completion, hover and workspace symbol is partially supported, but not yet complete. Follow progress in https://github.com/Shopify/ruby-lsp/issues/899
+As of July 2024, Ruby LSP has received significant enhancements to its code navigation features. For an in-depth look at these improvements, including video demonstrations, check out this [article](https://railsatscale.com/2024-07-18-mastering-ruby-code-navigation-major-enhancements-in-ruby-lsp-2024/). Despite these advancements, we plan to continue enhancing its code navigation support even further. You can follow our progress on this [GitHub issue](https://github.com/Shopify/ruby-lsp/issues/899).
 
 See complete information about features [here](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html).
 
