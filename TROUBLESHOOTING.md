@@ -65,7 +65,7 @@ When a new version of Prism is released, it will take a little time for us as Ru
 
 During that time, it's possible for the Prism version in your `Gemfile.lock` to be increased due to being a dependency of another gem in your bundle.
 
-If Prism is locked to a newer version not yet supported by the Ruby LSP, then the only outcome that satisfies Bundler checks is to install the very old versions that depended on the old name YARP.
+If Prism is locked to a newer version not yet supported by the Ruby LSP, then the only outcome that satisfies Bundler's checks is to install the very old versions that depend on the old name YARP.
 
 Once Prism v1.0 is released, we will relax the version constraint to alleviate this problem.
 
