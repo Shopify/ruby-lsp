@@ -67,8 +67,9 @@ If you require more accuracy in your editor, consider adopting a type system and
 This applies to multiple language server features such as go to definition, hover, completion and automated refactors.
 Consider the following examples:
 
-> [!NOTE] not all of the examples below are supported at the moment and this is not an exhaustive list. Please check the
-long term roadmap to see what’s planned
+> [!NOTE]
+> Not all of the examples below are supported at the moment and this is not an exhaustive list.
+> Please check the long term roadmap to see what’s planned
 
 ```ruby
 # Cases where we can provide a satisfactory experience without a type system
@@ -233,7 +234,8 @@ user.name
 @post.like!
 ```
 
-> [!IMPORTANT] The goal of this experiment is to understand if we can get better accuracy for the code that you already
+> [!IMPORTANT]
+> The goal of this experiment is to understand if we can get better accuracy for the code that you already
 > have. The hypothesis is that a reasonable amount of code already uses patterns like the ones in the example and, in
 > those cases, we can achieve nicer results.
 >
