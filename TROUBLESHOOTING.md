@@ -210,7 +210,7 @@ In rare cases, Ruby LSP will encounter an error which prevents parsing from comp
 
 Firstly, ensure that you are using the latest release of the `ruby-lsp` gem, as the problem may have been already fixed.
 
-To diagnose the particular file(s) causing a problem, run `ruby-lsp --doctor`. Please log an issue so that we we can address it. If the code is not open source then you can try write a minimal reproduction.
+To diagnose the particular file(s) causing a problem, run `ruby-lsp --doctor`. Please log an issue so that we can address it. If the code is not open source then please provide a minimal reproduction.
 
 In the meantime, you can [configure Ruby LSP to ignore a particular gem or file for indexing]([README.md#configuring-code-indexing]).
 
