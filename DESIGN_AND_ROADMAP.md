@@ -234,7 +234,8 @@ user.name
 @post.like!
 ```
 
-> [!IMPORTANT] The goal of this experiment is to understand if we can get better accuracy for the code that you already
+> [!IMPORTANT]
+> The goal of this experiment is to understand if we can get better accuracy for the code that you already
 > have. The hypothesis is that a reasonable amount of code already uses patterns like the ones in the example and, in
 > those cases, we can achieve nicer results.
 >
