@@ -9,11 +9,18 @@ module RubyIndexer
     BASIC_OBJECT_NESTING = T.let(["BasicObject"].freeze, T::Array[String])
 
     sig do
-      params(index: Index, dispatcher: Prism::Dispatcher, parse_result: Prism::ParseResult, file_path: String).void
+      params(
+        index: Index,
+        dispatcher: Prism::Dispatcher,
+        parse_result: Prism::ParseResult,
+        file_path: String,
+        enhancements: T::Array[Enhancement],
+      ).void
     end
-    def initialize(index, dispatcher, parse_result, file_path)
+    def initialize(index, dispatcher, parse_result, file_path, enhancements: [])
       @index = index
       @file_path = file_path
+      @enhancements = enhancements
       @visibility_stack = T.let([Entry::Visibility::PUBLIC], T::Array[Entry::Visibility])
       @comments_by_line = T.let(
         parse_result.comments.to_h do |c|
@@ -279,6 +286,8 @@ module RubyIndexer
       when :private
         @visibility_stack.push(Entry::Visibility::PRIVATE)
       end
+
+      @enhancements.each { |aug| aug.on_call_node(@index, @owner_stack.last, node, @file_path) }
     end
 
     sig { params(node: Prism::CallNode).void }

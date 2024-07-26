@@ -35,6 +35,27 @@ module RubyIndexer
 
       # Holds the linearized ancestors list for every namespace
       @ancestors = T.let({}, T::Hash[String, T::Array[String]])
+
+      # List of classes that are enhancing the index
+      @enhancements = T.let([], T::Array[Enhancement])
+
+      # Map of module name to included hooks that have to be executed when we include the given module
+      @included_hooks = T.let(
+        {},
+        T::Hash[String, T::Array[T.proc.params(index: Index, base: Entry::Namespace).void]],
+      )
+    end
+
+    # Register an enhancement to the index. Enhancements must conform to the `Enhancement` interface
+    sig { params(enhancement: Enhancement).void }
+    def register_enhancement(enhancement)
+      @enhancements << enhancement
+    end
+
+    # Register an included `hook` that will be executed when `module_name` is included into any namespace
+    sig { params(module_name: String, hook: T.proc.params(index: Index, base: Entry::Namespace).void).void }
+    def register_included_hook(module_name, &hook)
+      (@included_hooks[module_name] ||= []) << hook
     end
 
     sig { params(indexable: IndexablePath).void }
@@ -296,7 +317,7 @@ module RubyIndexer
       dispatcher = Prism::Dispatcher.new
 
       result = Prism.parse(content)
-      DeclarationListener.new(self, dispatcher, result, indexable_path.full_path)
+      DeclarationListener.new(self, dispatcher, result, indexable_path.full_path, enhancements: @enhancements)
       dispatcher.dispatch(result.value)
 
       require_path = indexable_path.require_path
@@ -457,6 +478,12 @@ module RubyIndexer
         end
       end
 
+      # We only need to run included hooks when linearizing singleton classes. Included hooks are typically used to add
+      # new singleton methods or to extend a module through an include. There's no need to support instance methods, the
+      # inclusion of another module or the prepending of another module, because those features are already a part of
+      # Ruby and can be used directly without any metaprogramming
+      run_included_hooks(attached_class_name, nesting) if singleton_levels > 0
+
       linearize_mixins(ancestors, namespaces, nesting)
       linearize_superclass(
         ancestors,
@@ -569,6 +596,34 @@ module RubyIndexer
     end
 
     private
+
+    # Runs the registered included hooks
+    sig { params(fully_qualified_name: String, nesting: T::Array[String]).void }
+    def run_included_hooks(fully_qualified_name, nesting)
+      return if @included_hooks.empty?
+
+      namespaces = self[fully_qualified_name]&.grep(Entry::Namespace)
+      return unless namespaces
+
+      namespaces.each do |namespace|
+        namespace.mixin_operations.each do |operation|
+          next unless operation.is_a?(Entry::Include)
+
+          # First we resolve the include name, so that we know the actual module being referred to in the include
+          resolved_modules = resolve(operation.module_name, nesting)
+          next unless resolved_modules
+
+          module_name = T.must(resolved_modules.first).name
+
+          # Then we grab any hooks registered for that module
+          hooks = @included_hooks[module_name]
+          next unless hooks
+
+          # We invoke the hooks with the index and the namespace that included the module
+          hooks.each { |hook| hook.call(self, namespace) }
+        end
+      end
+    end
 
     # Linearize mixins for an array of namespace entries. This method will mutate the `ancestors` array with the
     # linearized ancestors of the mixins
