@@ -742,6 +742,20 @@ export class RubyLsp {
           );
         }
       }),
+      vscode.commands.registerCommand(Command.ProfileFile, async () => {
+        const tasks = await vscode.tasks.fetchTasks({
+          type: ProfileTaskProvider.TaskType,
+        });
+
+        if (tasks.length === 0) {
+          await vscode.window.showErrorMessage(
+            "No profile tasks found. Has it been declared in the .vscode/tasks.json file?",
+          );
+          return;
+        }
+
+        await vscode.tasks.executeTask(tasks[0]);
+      }),
     ];
   }
 

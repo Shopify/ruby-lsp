@@ -1,6 +1,46 @@
+import path from "path";
+
 import * as vscode from "vscode";
 
 import { Workspace } from "./workspace";
+
+class ProfileView {
+  private readonly panel: vscode.WebviewPanel;
+
+  constructor(fileName: string, profile: any) {
+    this.panel = vscode.window.createWebviewPanel(
+      ProfileTaskProvider.TaskType,
+      `Profile results ${fileName}`,
+      vscode.ViewColumn.One,
+      {},
+    );
+
+    this.generateHtml(fileName, profile);
+    this.panel.onDidDispose(() => {
+      this.panel.dispose();
+    });
+  }
+
+  reveal() {
+    this.panel.reveal();
+  }
+
+  private generateHtml(file: string, profile: any) {
+    this.panel.webview.html = `
+      <!DOCTYPE html>
+			<html lang="en">
+			<head>
+				<meta charset="UTF-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<title>Profile results ${file}</title>
+			</head>
+			<body>
+				<h1>Results</h1>
+        ${profile.toString()}
+			</body>
+			</html>`;
+  }
+}
 
 class ProfileTaskTerminal implements vscode.Pseudoterminal {
   readonly writeEmitter = new vscode.EventEmitter<string>();
@@ -40,23 +80,21 @@ class ProfileTaskTerminal implements vscode.Pseudoterminal {
     try {
       const profile = await vscode.workspace.fs.readFile(profileUri);
       this.writeEmitter.fire(
-        "Successfully profiled. Generating visualization...",
+        "Successfully profiled. Generating visualization...\r\n",
       );
+
+      const profileView = new ProfileView(path.basename(currentFile), profile);
+      this.closeEmitter.fire(0);
+      profileView.reveal();
     } catch (error) {
       this.writeEmitter.fire(
         `An error occurred while profiling (press any key to close):\r\n ${stderr}\r\n`,
       );
+      this.closeEmitter.fire(1);
     }
-
-    this.closeEmitter.fire(0);
   }
 
   close(): void {}
-
-  // Close the task pseudo terminal if the user presses any keys
-  handleInput(_data: string): void {
-    this.closeEmitter.fire(0);
-  }
 }
 
 export class ProfileTaskProvider implements vscode.TaskProvider {

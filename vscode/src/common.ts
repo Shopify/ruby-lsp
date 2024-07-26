@@ -34,6 +34,7 @@ export enum Command {
   ShowOutput = "rubyLsp.showOutput",
   MigrateLaunchConfiguration = "rubyLsp.migrateLaunchConfiguration",
   GoToRelevantFile = "rubyLsp.goToRelevantFile",
+  ProfileFile = "rubyLsp.profileFile",
 }
 
 export interface RubyInterface {
