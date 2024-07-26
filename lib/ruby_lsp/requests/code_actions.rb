@@ -21,6 +21,7 @@ module RubyLsp
 
       EXTRACT_TO_VARIABLE_TITLE = "Refactor: Extract Variable"
       EXTRACT_TO_METHOD_TITLE = "Refactor: Extract Method"
+      SWITCH_BLOCK_STYLE_TITLE = "Refactor: Switch block style"
 
       class << self
         extend T::Sig
@@ -67,6 +68,11 @@ module RubyLsp
           code_actions << Interface::CodeAction.new(
             title: EXTRACT_TO_METHOD_TITLE,
             kind: Constant::CodeActionKind::REFACTOR_EXTRACT,
+            data: { range: @range, uri: @uri.to_s },
+          )
+          code_actions << Interface::CodeAction.new(
+            title: SWITCH_BLOCK_STYLE_TITLE,
+            kind: Constant::CodeActionKind::REFACTOR_REWRITE,
             data: { range: @range, uri: @uri.to_s },
           )
         end

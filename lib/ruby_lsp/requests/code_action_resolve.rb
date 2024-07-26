@@ -23,6 +23,8 @@ module RubyLsp
     #
     class CodeActionResolve < Request
       extend T::Sig
+      include Support::Common
+
       NEW_VARIABLE_NAME = "new_variable"
       NEW_METHOD_NAME = "new_method"
 
@@ -50,9 +52,68 @@ module RubyLsp
           refactor_variable
         when CodeActions::EXTRACT_TO_METHOD_TITLE
           refactor_method
+        when CodeActions::SWITCH_BLOCK_STYLE_TITLE
+          switch_block_style
         else
           Error::UnknownCodeAction
         end
+      end
+
+      private
+
+      sig { returns(T.any(Interface::CodeAction, Error)) }
+      def switch_block_style
+        return Error::EmptySelection if @document.source.empty?
+
+        source_range = @code_action.dig(:data, :range)
+        return Error::EmptySelection if source_range[:start] == source_range[:end]
+
+        target = @document.locate_first_within_range(
+          @code_action.dig(:data, :range),
+          node_types: [Prism::CallNode],
+        )
+
+        return Error::InvalidTargetRange unless target.is_a?(Prism::CallNode)
+
+        node = target.block
+        return Error::InvalidTargetRange unless node.is_a?(Prism::BlockNode)
+
+        parameters = node.parameters
+        body = node.body
+
+        # If the block is using `do...end` style, we change it to a single line brace block. Newlines are turned into
+        # semi colons, so that the result is valid Ruby code and still a one liner. If the block is using brace style,
+        # we do the opposite and turn it into a `do...end` block, making all semi colons into newlines.
+        new_source = if node.opening_loc.slice == "do"
+          source = +"{ "
+          source << "#{parameters.slice} " if parameters
+          source << "#{body.slice.gsub("\n", ";")} " if body
+          source << "}"
+        else
+          indentation = " " * target.location.start_column
+          source = +"do"
+          source << " #{parameters.slice}" if parameters
+          source << "\n#{indentation}  "
+          source << body.slice.gsub(";", "\n") if body
+          source << "\n#{indentation}end"
+        end
+
+        Interface::CodeAction.new(
+          title: CodeActions::SWITCH_BLOCK_STYLE_TITLE,
+          edit: Interface::WorkspaceEdit.new(
+            document_changes: [
+              Interface::TextDocumentEdit.new(
+                text_document: Interface::OptionalVersionedTextDocumentIdentifier.new(
+                  uri: @code_action.dig(:data, :uri),
+                  version: nil,
+                ),
+                edits: [
+                  Interface::TextEdit.new(range: range_from_location(node.location), new_text: new_source),
+                ],
+              ),
+            ],
+          ),
+        )
       end
 
       sig { returns(T.any(Interface::CodeAction, Error)) }
@@ -205,8 +266,6 @@ module RubyLsp
           ),
         )
       end
-
-      private
 
       sig { params(range: T::Hash[Symbol, T.untyped], new_text: String).returns(Interface::TextEdit) }
       def create_text_edit(range, new_text)
