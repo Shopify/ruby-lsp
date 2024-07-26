@@ -50,6 +50,7 @@ new H2 header in this file containing the instructions. -->
 - [Sublime Text LSP](#sublime-text-lsp)
 - [Zed](#zed)
 - [RubyMine](#RubyMine)
+- [BBEdit](#BBEdit)
 
 ## Emacs Eglot
 
@@ -184,6 +185,10 @@ You can use the Ruby LSP with RubyMine (or IntelliJ IDEA Ultimate) through the f
 Note that there might be overlapping functionality when using it with RubyMine, given that the IDE provides similar features as the ones coming from the Ruby LSP.
 
 [Ruby LSP plugin](https://plugins.jetbrains.com/plugin/24413-ruby-lsp)
+
+## BBEdit
+
+See https://github.com/Shopify/ruby-lsp/issues/2365 for the latest information.
 
 # Indexing Configuration
 
