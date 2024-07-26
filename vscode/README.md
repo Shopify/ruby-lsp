@@ -262,7 +262,7 @@ the frontend and backend directories to be different workspaces.
 
 The advantage of adopting this configuration is that VS Code and all extensions are informed about which directories
 should be considered as possible workspace roots. Instead of having to configure each extension or tool individually so
-that are aware of your project structure, you only have to do that once for the entire repository.
+they are aware of your project structure, you only have to do that once for the entire repository.
 
 Some examples of functionality that benefits from multi-root workspaces:
 
