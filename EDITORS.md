@@ -50,6 +50,7 @@ new H2 header in this file containing the instructions. -->
 - [Sublime Text LSP](#sublime-text-lsp)
 - [Zed](#zed)
 - [RubyMine](#RubyMine)
+- [Kate](#Kate)
 
 ## Emacs Eglot
 
@@ -184,6 +185,26 @@ You can use the Ruby LSP with RubyMine (or IntelliJ IDEA Ultimate) through the f
 Note that there might be overlapping functionality when using it with RubyMine, given that the IDE provides similar features as the ones coming from the Ruby LSP.
 
 [Ruby LSP plugin](https://plugins.jetbrains.com/plugin/24413-ruby-lsp)
+
+## Kate
+
+[The LSP Client Plugin](https://docs.kde.org/stable5/en/kate/kate/kate-application-plugin-lspclient.html) for Kate is configured by default to use Solargraph for Ruby.
+To use it with Ruby LSP, you can override particular configuration items in the "User Server Settings" in the LSP Client plugin as shown below:
+
+```json
+{
+  "servers": {
+    "ruby": {
+      "command": ["ruby-lsp"],
+      "url": "https://github.com/Shopify/ruby-lsp"
+    }
+  }
+}
+```
+
+Kate will start an instance of the Ruby LSP server in the background for any Ruby project matching the `rootIndicationFileNames`.
+If starting Ruby LSP succeeds, the entries in the LSP-Client menu are activated.
+Otherwise the error output can be inspected in the Output window.
 
 # Indexing Configuration
 
