@@ -647,7 +647,7 @@
     "@shopify/prettier-config": "^1.1.2",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.7",
-    "@types/node": "20.x",
+    "@types/node": "22.x",
     "@types/sinon": "^17.0.3",
     "@types/vscode": "^1.68.0",
     "@typescript-eslint/eslint-plugin": "^7.17.0",
