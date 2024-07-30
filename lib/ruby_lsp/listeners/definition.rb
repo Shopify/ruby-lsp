@@ -54,9 +54,7 @@ module RubyLsp
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
         # Sorbet can handle go to definition for methods invoked on self on typed true or higher
-        if (@sorbet_level == Document::SorbetLevel::True || @sorbet_level == Document::SorbetLevel::Strict) &&
-            self_receiver?(node)
-        end
+        return if sorbet_level_true_or_higher?(@sorbet_level) && self_receiver?(node)
 
         message = node.message
         return unless message

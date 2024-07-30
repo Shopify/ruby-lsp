@@ -819,6 +819,10 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
   end
 
   def test_definition_on_self_is_disabled_for_typed_true
+    # We need this stub to make sure the test is testing the early return inside on_call_node_enter
+    # not the one inside handle_method_definition
+    RubyLsp::Listeners::Definition.any_instance.expects(:not_in_dependencies?).never
+
     source = <<~RUBY
       # typed: true
       class Foo
