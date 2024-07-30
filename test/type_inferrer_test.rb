@@ -138,6 +138,19 @@ module RubyLsp
       assert_equal("Foo::<Class:Foo>::<Class:<Class:Foo>>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
+    def test_infer_receiver_type_in_namespaced_singleton_method
+      node_context = index_and_locate(<<~RUBY, { line: 2, character: 4 })
+        class Foo::Bar
+          def self.foo
+            bar
+          end
+        end
+      RUBY
+
+      result = @type_inferrer.infer_receiver_type(node_context).name
+      assert_equal("Foo::Bar::<Class:Bar>", result)
+    end
+
     def test_infer_receiver_type_instance_variables_in_singleton_block_method
       node_context = index_and_locate(<<~RUBY, { line: 3, character: 6 })
         class Foo
