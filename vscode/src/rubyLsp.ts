@@ -1,86 +1,101 @@
 import * as vscode from "vscode";
 import { Range } from "vscode-languageclient/node";
 
-import { Telemetry } from "./telemetry";
 import DocumentProvider from "./documentProvider";
 import { Workspace } from "./workspace";
-import { Command, STATUS_EMITTER } from "./common";
+import {
+  Command,
+  LOG_CHANNEL,
+  STATUS_EMITTER,
+  SUPPORTED_LANGUAGE_IDS,
+} from "./common";
 import { ManagerIdentifier, ManagerConfiguration } from "./ruby";
 import { StatusItems } from "./status";
 import { TestController } from "./testController";
+import { newMinitestFile, openFile, openUris } from "./commands";
 import { Debugger } from "./debugger";
 import { DependenciesTree } from "./dependenciesTree";
+import { Rails } from "./rails";
 
 // The RubyLsp class represents an instance of the entire extension. This should only be instantiated once at the
 // activation event. One instance of this class controls all of the existing workspaces, telemetry and handles all
 // commands
 export class RubyLsp {
   private readonly workspaces: Map<string, Workspace> = new Map();
-  private readonly telemetry: Telemetry;
   private readonly context: vscode.ExtensionContext;
   private readonly statusItems: StatusItems;
   private readonly testController: TestController;
   private readonly debug: Debugger;
+  private readonly telemetry: vscode.TelemetryLogger;
+  private readonly rails: Rails;
 
-  constructor(context: vscode.ExtensionContext) {
+  constructor(
+    context: vscode.ExtensionContext,
+    telemetry: vscode.TelemetryLogger,
+  ) {
     this.context = context;
-    this.telemetry = new Telemetry(context);
+    this.telemetry = telemetry;
     this.testController = new TestController(
       context,
       this.telemetry,
       this.currentActiveWorkspace.bind(this),
     );
     this.debug = new Debugger(context, this.workspaceResolver.bind(this));
+    this.rails = new Rails(this.showWorkspacePick.bind(this));
     this.registerCommands(context);
 
     this.statusItems = new StatusItems();
     const dependenciesTree = new DependenciesTree();
-    context.subscriptions.push(this.statusItems, this.debug, dependenciesTree);
+    context.subscriptions.push(
+      this.statusItems,
+      this.debug,
+      dependenciesTree,
 
-    // Switch the status items based on which workspace is currently active
-    vscode.window.onDidChangeActiveTextEditor((editor) => {
-      STATUS_EMITTER.fire(this.currentActiveWorkspace(editor));
-    });
+      // Switch the status items based on which workspace is currently active
+      vscode.window.onDidChangeActiveTextEditor((editor) => {
+        STATUS_EMITTER.fire(this.currentActiveWorkspace(editor));
+      }),
+      vscode.workspace.onDidChangeWorkspaceFolders(async (event) => {
+        // Stop the language server and dispose all removed workspaces
+        for (const workspaceFolder of event.removed) {
+          const workspace = this.getWorkspace(workspaceFolder.uri);
 
-    vscode.workspace.onDidChangeWorkspaceFolders(async (event) => {
-      // Stop the language server and dispose all removed workspaces
-      for (const workspaceFolder of event.removed) {
+          if (workspace) {
+            await workspace.stop();
+            await workspace.dispose();
+            this.workspaces.delete(workspaceFolder.uri.toString());
+          }
+        }
+      }),
+      // Lazily activate workspaces that do not contain a lockfile
+      vscode.workspace.onDidOpenTextDocument(async (document) => {
+        if (!SUPPORTED_LANGUAGE_IDS.includes(document.languageId)) {
+          return;
+        }
+
+        const workspaceFolder = vscode.workspace.getWorkspaceFolder(
+          document.uri,
+        );
+
+        if (!workspaceFolder) {
+          return;
+        }
+
         const workspace = this.getWorkspace(workspaceFolder.uri);
 
-        if (workspace) {
-          await workspace.stop();
-          await workspace.dispose();
-          this.workspaces.delete(workspaceFolder.uri.toString());
+        // If the workspace entry doesn't exist, then we haven't activated the workspace yet
+        if (!workspace) {
+          await this.activateWorkspace(workspaceFolder, false);
         }
-      }
-    });
-
-    // Lazily activate workspaces that do not contain a lockfile
-    vscode.workspace.onDidOpenTextDocument(async (document) => {
-      if (document.languageId !== "ruby") {
-        return;
-      }
-
-      const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
-
-      if (!workspaceFolder) {
-        return;
-      }
-
-      const workspace = this.getWorkspace(workspaceFolder.uri);
-
-      // If the workspace entry doesn't exist, then we haven't activated the workspace yet
-      if (!workspace) {
-        await this.activateWorkspace(workspaceFolder, false);
-      }
-    });
+      }),
+      LOG_CHANNEL,
+    );
   }
 
   // Activate the extension. This method should perform all actions necessary to start the extension, such as booting
   // all language servers for each existing workspace
   async activate() {
     await vscode.commands.executeCommand("testing.clearTestResults");
-    await this.telemetry.sendConfigurationEvents();
 
     const firstWorkspace = vscode.workspace.workspaceFolders?.[0];
 
@@ -89,6 +104,23 @@ export class RubyLsp {
     // activated lazily once a Ruby document is opened inside of it through the `onDidOpenTextDocument` event
     if (firstWorkspace) {
       await this.activateWorkspace(firstWorkspace, true);
+    }
+
+    // If the user has the editor already opened on a Ruby file and that file does not belong to the first workspace,
+    // eagerly activate the workspace for that file too
+    const activeDocument = vscode.window.activeTextEditor?.document;
+
+    if (
+      activeDocument &&
+      SUPPORTED_LANGUAGE_IDS.includes(activeDocument.languageId)
+    ) {
+      const workspaceFolder = vscode.workspace.getWorkspaceFolder(
+        activeDocument.uri,
+      );
+
+      if (workspaceFolder && workspaceFolder !== firstWorkspace) {
+        await this.activateWorkspace(workspaceFolder, true);
+      }
     }
 
     this.context.subscriptions.push(
@@ -161,7 +193,7 @@ export class RubyLsp {
       workspaceFolder,
       this.telemetry,
       this.testController.createTestItems.bind(this.testController),
-      eager,
+      this.workspaces.size === 0,
     );
     this.workspaces.set(workspaceFolder.uri.toString(), workspace);
 
@@ -213,6 +245,33 @@ export class RubyLsp {
             "https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md#formatting",
           ),
         );
+      }),
+      vscode.commands.registerCommand(Command.DisplayAddons, async () => {
+        const client = this.currentActiveWorkspace()?.lspClient;
+
+        if (!client || !client.addons) {
+          return;
+        }
+
+        const options: vscode.QuickPickItem[] = client.addons
+          .sort((addon) => {
+            // Display errored addons last
+            if (addon.errored) {
+              return 1;
+            }
+
+            return -1;
+          })
+          .map((addon) => {
+            const icon = addon.errored ? "$(error)" : "$(pass)";
+            return {
+              label: `${icon} ${addon.name}`,
+            };
+          });
+
+        await vscode.window.showQuickPick(options, {
+          placeHolder: "Addons (readonly)",
+        });
       }),
       vscode.commands.registerCommand(Command.ToggleFeatures, async () => {
         // Extract feature descriptions from our package.json
@@ -343,6 +402,158 @@ export class RubyLsp {
         Command.DebugTest,
         this.testController.debugTest.bind(this.testController),
       ),
+      vscode.commands.registerCommand(
+        Command.RunTask,
+        async (command: string) => {
+          let workspace = this.currentActiveWorkspace();
+
+          if (!workspace) {
+            workspace = await this.showWorkspacePick();
+          }
+
+          if (!workspace) {
+            return;
+          }
+
+          await workspace.execute(command, true);
+        },
+      ),
+      vscode.commands.registerCommand(
+        Command.BundleInstall,
+        (workspaceUri: string) => {
+          const workspace = this.workspaces.get(workspaceUri);
+
+          if (!workspace) {
+            return;
+          }
+
+          const terminal = vscode.window.createTerminal({
+            name: "Bundle install",
+            cwd: workspace.workspaceFolder.uri.fsPath,
+            env: workspace.ruby.env,
+          });
+
+          terminal.show();
+          terminal.sendText("bundle install");
+        },
+      ),
+      vscode.commands.registerCommand(
+        Command.OpenFile,
+        (rubySourceLocation: [string, string] | string[]) => {
+          // New command format: accepts an array of URIs
+          if (typeof rubySourceLocation[0] === "string") {
+            return openUris(rubySourceLocation);
+          }
+
+          // Old format: we can remove after the Rails addon has been using the new format for a while
+          const [file, line] = rubySourceLocation;
+          const workspace = this.currentActiveWorkspace();
+          return openFile(this.telemetry, workspace, {
+            file,
+            line: parseInt(line, 10) - 1,
+          });
+        },
+      ),
+      vscode.commands.registerCommand(
+        Command.RailsGenerate,
+        async (
+          generatorWithArguments: string | undefined,
+          workspace: Workspace | undefined,
+        ) => {
+          // If the command was invoked programmatically, then the arguments will already be present. Otherwise, we need
+          // to show a UI so that the user can pick the arguments to generate
+          const command =
+            generatorWithArguments ??
+            (await vscode.window.showInputBox({
+              title: "Rails generate arguments",
+              placeHolder:
+                "model User name:string | scaffold Post title:string",
+            }));
+
+          if (!command) {
+            return;
+          }
+
+          await this.rails.generate(command, workspace);
+        },
+      ),
+      vscode.commands.registerCommand(
+        Command.RailsDestroy,
+        async (
+          generatorWithArguments: string | undefined,
+          workspace: Workspace | undefined,
+        ) => {
+          // If the command was invoked programmatically, then the arguments will already be present. Otherwise, we need
+          // to show a UI so that the user can pick the arguments to destroy
+          const command =
+            generatorWithArguments ??
+            (await vscode.window.showInputBox({
+              title: "Rails destroy arguments",
+              placeHolder:
+                "model User name:string | scaffold Post title:string",
+            }));
+
+          if (!command) {
+            return;
+          }
+
+          await this.rails.destroy(command, workspace);
+        },
+      ),
+      vscode.commands.registerCommand(Command.FileOperation, async () => {
+        const workspace = await this.showWorkspacePick();
+
+        if (!workspace) {
+          return;
+        }
+
+        const items: ({
+          command: string;
+          args: any[];
+        } & vscode.QuickPickItem)[] = [
+          {
+            label: "Minitest test",
+            description: "Create a new Minitest test",
+            iconPath: new vscode.ThemeIcon("new-file"),
+            command: Command.NewMinitestFile,
+            args: [],
+          },
+        ];
+
+        if (
+          workspace.lspClient?.addons?.some(
+            (addon) => addon.name === "Ruby LSP Rails",
+          )
+        ) {
+          items.push(
+            {
+              label: "Rails generate",
+              description: "Run Rails generate",
+              iconPath: new vscode.ThemeIcon("new-file"),
+              command: Command.RailsGenerate,
+              args: [undefined, workspace],
+            },
+            {
+              label: "Rails destroy",
+              description: "Run Rails destroy",
+              iconPath: new vscode.ThemeIcon("trash"),
+              command: Command.RailsDestroy,
+              args: [undefined, workspace],
+            },
+          );
+        }
+
+        const pick = await vscode.window.showQuickPick(items, {
+          title: "Select a Ruby file operation",
+        });
+
+        if (!pick) {
+          return;
+        }
+
+        await vscode.commands.executeCommand(pick.command, ...pick.args);
+      }),
+      vscode.commands.registerCommand(Command.NewMinitestFile, newMinitestFile),
     );
   }
 

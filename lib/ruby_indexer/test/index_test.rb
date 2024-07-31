@@ -181,20 +181,20 @@ module RubyIndexer
 
     def test_resolving_aliases_to_non_existing_constants_with_conflicting_names
       @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
-        class Float
+        class Bar
         end
 
         module Foo
-          class Float < self
-            INFINITY = ::Float::INFINITY
+          class Bar < self
+            BAZ = ::Bar::BAZ
           end
         end
       RUBY
 
-      entry = @index.resolve("INFINITY", ["Foo", "Float"]).first
+      entry = @index.resolve("BAZ", ["Foo", "Bar"]).first
       refute_nil(entry)
 
-      assert_instance_of(Entry::UnresolvedAlias, entry)
+      assert_instance_of(Entry::UnresolvedConstantAlias, entry)
     end
 
     def test_visitor_does_not_visit_unnecessary_nodes
@@ -285,6 +285,43 @@ module RubyIndexer
       assert_includes(second_entry.comments, "Hello from second `bar`")
     end
 
+    def test_resolve_method_inherited_only
+      index(<<~RUBY)
+        class Bar
+          def baz; end
+        end
+
+        class Foo < Bar
+          def baz; end
+        end
+      RUBY
+
+      entry = T.must(@index.resolve_method("baz", "Foo", inherited_only: true).first)
+
+      assert_equal("Bar", T.must(entry.owner).name)
+    end
+
+    def test_resolve_method_inherited_only_for_prepended_module
+      index(<<~RUBY)
+        module Bar
+          def baz
+            super
+          end
+        end
+
+        class Foo
+          prepend Bar
+
+          def baz; end
+        end
+      RUBY
+
+      # This test is just to document the fact that we don't yet support resolving inherited methods for modules that
+      # are prepended. The only way to support this is to find all namespaces that have the module a subtype, so that we
+      # can show the results for everywhere the module has been prepended.
+      assert_nil(@index.resolve_method("baz", "Bar", inherited_only: true))
+    end
+
     def test_prefix_search_for_methods
       index(<<~RUBY)
         module Foo
@@ -313,12 +350,12 @@ module RubyIndexer
         @index.index_single(indexable_path)
       end
 
-      refute_empty(@index.instance_variable_get(:@entries))
+      refute_empty(@index)
     end
 
     def test_index_single_does_not_fail_for_non_existing_file
       @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"))
-      entries_after_indexing = @index.instance_variable_get(:@entries).keys
+      entries_after_indexing = @index.names
       assert_equal(@default_indexed_entries.keys, entries_after_indexing)
     end
 
@@ -978,11 +1015,11 @@ module RubyIndexer
 
       foo_entry = T.must(@index.resolve("FOO", ["Namespace"])&.first)
       assert_equal(2, foo_entry.location.start_line)
-      assert_instance_of(Entry::Alias, foo_entry)
+      assert_instance_of(Entry::ConstantAlias, foo_entry)
 
       bar_entry = T.must(@index.resolve("BAR", ["Namespace"])&.first)
       assert_equal(3, bar_entry.location.start_line)
-      assert_instance_of(Entry::Alias, bar_entry)
+      assert_instance_of(Entry::ConstantAlias, bar_entry)
     end
 
     def test_resolving_circular_alias_three_levels
@@ -996,15 +1033,52 @@ module RubyIndexer
 
       foo_entry = T.must(@index.resolve("FOO", ["Namespace"])&.first)
       assert_equal(2, foo_entry.location.start_line)
-      assert_instance_of(Entry::Alias, foo_entry)
+      assert_instance_of(Entry::ConstantAlias, foo_entry)
 
       bar_entry = T.must(@index.resolve("BAR", ["Namespace"])&.first)
       assert_equal(3, bar_entry.location.start_line)
-      assert_instance_of(Entry::Alias, bar_entry)
+      assert_instance_of(Entry::ConstantAlias, bar_entry)
 
       baz_entry = T.must(@index.resolve("BAZ", ["Namespace"])&.first)
       assert_equal(4, baz_entry.location.start_line)
-      assert_instance_of(Entry::Alias, baz_entry)
+      assert_instance_of(Entry::ConstantAlias, baz_entry)
+    end
+
+    def test_resolving_constants_in_aliased_namespace
+      index(<<~RUBY)
+        module Original
+          module Something
+            CONST = 123
+          end
+        end
+
+        module Other
+          ALIAS = Original::Something
+        end
+
+        module Third
+          Other::ALIAS::CONST
+        end
+      RUBY
+
+      entry = T.must(@index.resolve("Other::ALIAS::CONST", ["Third"])&.first)
+      assert_kind_of(Entry::Constant, entry)
+      assert_equal("Original::Something::CONST", entry.name)
+    end
+
+    def test_resolving_top_level_aliases
+      index(<<~RUBY)
+        class Foo
+          CONST = 123
+        end
+
+        FOO = Foo
+        FOO::CONST
+      RUBY
+
+      entry = T.must(@index.resolve("FOO::CONST", [])&.first)
+      assert_kind_of(Entry::Constant, entry)
+      assert_equal("Foo::CONST", entry.name)
     end
 
     def test_resolving_top_level_compact_reference
@@ -1321,11 +1395,6 @@ module RubyIndexer
       entries = @index.instance_variable_completion_candidates("@", "Foo::Bar::<Class:Bar>").map(&:name)
       assert_includes(entries, "@a")
       assert_includes(entries, "@b")
-
-      assert_includes(
-        @index.instance_variable_completion_candidates("@", "Foo::Bar::<Class:Bar>::<Class:<Class:Bar>>").map(&:name),
-        "@c",
-      )
     end
 
     def test_singletons_are_excluded_from_prefix_search
@@ -1350,6 +1419,408 @@ module RubyIndexer
       results = @index.fuzzy_search("Zwq")
       assert_equal(1, results.length)
       assert_equal("Zwq", results.first.name)
+    end
+
+    def test_resolving_method_aliases
+      index(<<~RUBY)
+        class Foo
+          def bar(a, b, c)
+          end
+
+          alias double_alias bar
+        end
+
+        class Bar < Foo
+          def hello(b); end
+
+          alias baz bar
+          alias_method :qux, :hello
+          alias double double_alias
+        end
+      RUBY
+
+      # baz
+      methods = @index.resolve_method("baz", "Bar")
+      refute_nil(methods)
+
+      entry = T.must(methods.first)
+      assert_kind_of(Entry::MethodAlias, entry)
+      assert_equal("bar", entry.target.name)
+      assert_equal("Foo", T.must(entry.target.owner).name)
+
+      # qux
+      methods = @index.resolve_method("qux", "Bar")
+      refute_nil(methods)
+
+      entry = T.must(methods.first)
+      assert_kind_of(Entry::MethodAlias, entry)
+      assert_equal("hello", entry.target.name)
+      assert_equal("Bar", T.must(entry.target.owner).name)
+
+      # double
+      methods = @index.resolve_method("double", "Bar")
+      refute_nil(methods)
+
+      entry = T.must(methods.first)
+      assert_kind_of(Entry::MethodAlias, entry)
+
+      target = entry.target
+      assert_equal("double_alias", target.name)
+      assert_kind_of(Entry::MethodAlias, target)
+      assert_equal("Foo", T.must(target.owner).name)
+
+      final_target = target.target
+      assert_equal("bar", final_target.name)
+      assert_kind_of(Entry::Method, final_target)
+      assert_equal("Foo", T.must(final_target.owner).name)
+    end
+
+    def test_resolving_circular_method_aliases
+      index(<<~RUBY)
+        class Foo
+          alias bar bar
+        end
+      RUBY
+
+      # It's not possible to resolve an alias that points to itself
+      methods = @index.resolve_method("bar", "Foo")
+      assert_nil(methods)
+
+      entry = T.must(@index["bar"].first)
+      assert_kind_of(Entry::UnresolvedMethodAlias, entry)
+    end
+
+    def test_unresolable_method_aliases
+      index(<<~RUBY)
+        class Foo
+          alias bar baz
+        end
+      RUBY
+
+      # `baz` does not exist, so resolving `bar` is not possible
+      methods = @index.resolve_method("bar", "Foo")
+      assert_nil(methods)
+
+      entry = T.must(@index["bar"].first)
+      assert_kind_of(Entry::UnresolvedMethodAlias, entry)
+    end
+
+    def test_only_aliases_for_the_right_owner_are_resolved
+      index(<<~RUBY)
+        class Foo
+          attr_reader :name
+          alias_method :decorated_name, :name
+        end
+
+        class Bar
+          alias_method :decorated_name, :to_s
+        end
+      RUBY
+
+      methods = @index.resolve_method("decorated_name", "Foo")
+      refute_nil(methods)
+
+      entry = T.must(methods.first)
+      assert_kind_of(Entry::MethodAlias, entry)
+
+      target = entry.target
+      assert_equal("name", target.name)
+      assert_kind_of(Entry::Accessor, target)
+      assert_equal("Foo", T.must(target.owner).name)
+
+      other_decorated_name = T.must(@index["decorated_name"].find { |e| e.is_a?(Entry::UnresolvedMethodAlias) })
+      assert_kind_of(Entry::UnresolvedMethodAlias, other_decorated_name)
+    end
+
+    def test_completion_does_not_include_unresolved_aliases
+      index(<<~RUBY)
+        class Foo
+          alias_method :bar, :missing
+        end
+      RUBY
+
+      assert_empty(@index.method_completion_candidates("bar", "Foo"))
+    end
+
+    def test_first_unqualified_const
+      index(<<~RUBY)
+        module Foo
+          class Bar; end
+        end
+
+        module Baz
+          class Bar; end
+        end
+      RUBY
+
+      entry = T.must(@index.first_unqualified_const("Bar")&.first)
+      assert_equal("Foo::Bar", entry.name)
+    end
+
+    def test_completion_does_not_duplicate_overridden_methods
+      index(<<~RUBY)
+        class Foo
+          def bar; end
+        end
+
+        class Baz < Foo
+          def bar; end
+        end
+      RUBY
+
+      entries = @index.method_completion_candidates("bar", "Baz")
+      assert_equal(["bar"], entries.map(&:name))
+      assert_equal("Baz", T.must(entries.first.owner).name)
+    end
+
+    def test_completion_does_not_duplicate_methods_overridden_by_aliases
+      index(<<~RUBY)
+        class Foo
+          def bar; end
+        end
+
+        class Baz < Foo
+          alias bar to_s
+        end
+      RUBY
+
+      entries = @index.method_completion_candidates("bar", "Baz")
+      assert_equal(["bar"], entries.map(&:name))
+      assert_equal("Baz", T.must(entries.first.owner).name)
+    end
+
+    def test_decorated_parameters
+      index(<<~RUBY)
+        class Foo
+          def bar(a, b = 1, c: 2)
+          end
+        end
+      RUBY
+
+      methods = @index.resolve_method("bar", "Foo")
+      refute_nil(methods)
+
+      entry = T.must(methods.first)
+
+      assert_equal("(a, b = <default>, c: <default>)", entry.decorated_parameters)
+    end
+
+    def test_decorated_parameters_when_method_has_no_parameters
+      index(<<~RUBY)
+        class Foo
+          def bar
+          end
+        end
+      RUBY
+
+      methods = @index.resolve_method("bar", "Foo")
+      refute_nil(methods)
+
+      entry = T.must(methods.first)
+
+      assert_equal("()", entry.decorated_parameters)
+    end
+
+    def test_linearizing_singleton_ancestors_of_singleton_when_class_has_parent
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        class Foo; end
+
+        class Bar < Foo
+        end
+
+        class Baz < Bar
+          class << self
+            class << self
+            end
+          end
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "Baz::<Class:Baz>::<Class:<Class:Baz>>",
+          "Bar::<Class:Bar>::<Class:<Class:Bar>>",
+          "Foo::<Class:Foo>::<Class:<Class:Foo>>",
+          "Object::<Class:Object>::<Class:<Class:Object>>",
+          "BasicObject::<Class:BasicObject>::<Class:<Class:BasicObject>>",
+          "Class::<Class:Class>",
+          "Module::<Class:Module>",
+          "Object::<Class:Object>",
+          "BasicObject::<Class:BasicObject>",
+          "Class",
+          "Module",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Baz::<Class:Baz>::<Class:<Class:Baz>>"),
+      )
+    end
+
+    def test_linearizing_singleton_object
+      assert_equal(
+        [
+          "Object::<Class:Object>",
+          "BasicObject::<Class:BasicObject>",
+          "Class",
+          "Module",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Object::<Class:Object>"),
+      )
+    end
+
+    def test_linearizing_singleton_ancestors
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        module First
+        end
+
+        module Second
+          include First
+        end
+
+        module Foo
+          class Bar
+            class << self
+              class Baz
+                extend Second
+
+                class << self
+                  include First
+                end
+              end
+            end
+          end
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "Foo::Bar::<Class:Bar>::Baz::<Class:Baz>",
+          "Second",
+          "First",
+          "Object::<Class:Object>",
+          "BasicObject::<Class:BasicObject>",
+          "Class",
+          "Module",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Foo::Bar::<Class:Bar>::Baz::<Class:Baz>"),
+      )
+    end
+
+    def test_linearizing_singleton_ancestors_when_class_has_parent
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        class Foo; end
+
+        class Bar < Foo
+        end
+
+        class Baz < Bar
+          class << self
+          end
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "Baz::<Class:Baz>",
+          "Bar::<Class:Bar>",
+          "Foo::<Class:Foo>",
+          "Object::<Class:Object>",
+          "BasicObject::<Class:BasicObject>",
+          "Class",
+          "Module",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Baz::<Class:Baz>"),
+      )
+    end
+
+    def test_linearizing_a_module_singleton_class
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        module A; end
+      RUBY
+
+      assert_equal(
+        [
+          "A::<Class:A>",
+          "Module",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("A::<Class:A>"),
+      )
+    end
+
+    def test_linearizing_a_singleton_class_with_no_attached
+      assert_raises(Index::NonExistingNamespaceError) do
+        @index.linearized_ancestors_of("A::<Class:A>")
+      end
+    end
+
+    def test_linearizing_singleton_parent_class_with_namespace
+      index(<<~RUBY)
+        class ActiveRecord::Base; end
+
+        class User < ActiveRecord::Base
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "User::<Class:User>",
+          "ActiveRecord::Base::<Class:Base>",
+          "Object::<Class:Object>",
+          "BasicObject::<Class:BasicObject>",
+          "Class",
+          "Module",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("User::<Class:User>"),
+      )
+    end
+
+    def test_singleton_nesting_is_correctly_split_during_linearization
+      index(<<~RUBY)
+        module Bar; end
+
+        module Foo
+          class Namespace::Parent
+            extend Bar
+          end
+        end
+
+        module Foo
+          class Child < Namespace::Parent
+          end
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "Foo::Child::<Class:Child>",
+          "Foo::Namespace::Parent::<Class:Parent>",
+          "Bar",
+          "Object::<Class:Object>",
+          "BasicObject::<Class:BasicObject>",
+          "Class",
+          "Module",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Foo::Child::<Class:Child>"),
+      )
     end
   end
 end

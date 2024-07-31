@@ -20,6 +20,7 @@ The Ruby LSP features include
 - Showing documentaton on hover for classes, modules and constants
 - Completion for classes, modules, constants and require paths
 - Fuzzy search classes, modules and constants anywhere in the project and its dependencies (workspace symbol)
+- Running Rails generators from the UI
 
 Adding method support for definition, completion, hover and workspace symbol is planned, but not yet completed.
 
@@ -245,7 +246,7 @@ These are the settings that may impact the Ruby LSP's behavior and their explana
     "editor.defaultFormatter": "Shopify.ruby-lsp", // Use the Ruby LSP as the default formatter
     "editor.formatOnSave": true, // Format files automatically when saving
     "editor.tabSize": 2, // Use 2 spaces for indentation
-    "editor.insertSpaces": true, // Use spaces and not tabs for indentantion
+    "editor.insertSpaces": true, // Use spaces and not tabs for indentation
     "editor.semanticHighlighting.enabled": true, // Enable semantic highlighting
     "editor.formatOnType": true, // Enable formatting while typing
   },
@@ -261,7 +262,7 @@ the frontend and backend directories to be different workspaces.
 
 The advantage of adopting this configuration is that VS Code and all extensions are informed about which directories
 should be considered as possible workspace roots. Instead of having to configure each extension or tool individually so
-that are aware of your project structure, you only have to do that once for the entire repository.
+they are aware of your project structure, you only have to do that once for the entire repository.
 
 Some examples of functionality that benefits from multi-root workspaces:
 
@@ -282,7 +283,7 @@ repository is.
 
 #### Example configurations
 
-> ![NOTE]
+> [!NOTE]
 > To make sure Ruby LSP works well with your multi-root workspace project, please
 > read through the instructions below and configure it following the examples.
 > After configuring, do not forget to tell VS Code to open the workspace from the
@@ -389,39 +390,47 @@ Please note that only Docker is officially supported as a backend by the Dev Con
 
 ## Telemetry
 
-On its own, the Ruby LSP does not collect any telemetry by default, but it does support hooking up to a private metrics
-service if desired.
+The Ruby LSP does not collect any telemetry by default, but it supports hooking up to a private metrics service if
+desired. This can be useful if you'd like to understand adoption, performance or catch errors of the Ruby LSP within
+your team or company.
 
-In order to receive metrics requests, a private plugin must export the `ruby-lsp.getPrivateTelemetryApi` command, which
-should return an object that implements the `TelemetryApi` interface defined
-[here](https://github.com/Shopify/ruby-lsp/blob/main/vscode/src/telemetry.ts).
-
-Fields included by default are defined in `TelemetryEvent`
-[here](https://github.com/Shopify/ruby-lsp/blob/main/vscode/src/telemetry.ts). The exported API object can add any
-other data of interest and publish it to a private service.
-
-For example,
+To collect metrics, another VS Code extension (typically a private one) should define the command
+`getTelemetrySenderObject`. This command should return an object that implements the
+[vscode.TelemetrySender](https://code.visualstudio.com/api/references/vscode-api#TelemetrySender) interface, thus
+defining where data and error reports should be sent to. For example:
 
 ```typescript
-// Create the API class in a private plugin
-class MyApi implements TelemetryApi {
-  sendEvent(event: TelemetryEvent): Promise<void> {
-    // Add timestamp to collected metrics
-    const payload = {
-      timestamp: Date.now(),
-      ...event,
-    };
+// Your private VS Code extension
 
-    // Send metrics to a private service
-    myFavouriteHttpClient.post("private-metrics-url", payload);
+class Telemetry implements vscode.TelemetrySender {
+  constructor() {
+    // Initialize some API service or whatever is needed to collect metrics
+  }
+
+  sendEventData(eventName: string, data: EventData): void {
+    // Send events to some API or accumulate them to be sent in batch when `flush` is invoked by VS Code
+  }
+
+  sendErrorData(error: Error, data?: Record<string, any> | undefined): void {
+    // Send errors to some API or accumulate them to be sent in batch when `flush` is invoked by VS Code
+  }
+
+  async flush() {
+    // Optional function to flush accumulated events and errors
   }
 }
 
-// Register the command to return an object of the API
-vscode.commands.registerCommand(
-  "ruby-lsp.getPrivateTelemetryApi",
-  () => new MyApi(),
-);
+export async function activate(context: vscode.ExtensionContext) {
+  const telemetry = new Telemetry();
+  await telemetry.activate();
+
+  // Register the command that the Ruby LSP will search for to hook into
+  context.subscriptions.push(
+    vscode.commands.registerCommand("getTelemetrySenderObject", () => {
+      return telemetry;
+    }),
+  );
+}
 ```
 
 ## Formatting
@@ -431,3 +440,20 @@ When `rubyLsp.formatter` is set to `auto`, Ruby LSP tries to determine which for
 If the bundle has a **direct** dependency on a supported formatter, such as `rubocop` or `syntax_tree`, that will be used.
 Otherwise, formatting will be disabled and you will need add one to the bundle. Using globally installed formatters or
 linters is not supported, they must in your Gemfile or gemspec.
+
+## Indexing Configuration
+
+To configure indexing, pass a JSON hash as part of the Ruby LSP configuration, for example:
+
+```jsonc
+// PROJECT/.vscode/settings.json
+{
+  "rubyLsp.indexing": {
+    "excludedPatterns": ["**/test/**.rb"],
+    "includedPatterns": ["**/bin/**"],
+    "excludedGems": ["rubocop", "rubocop-performance"],
+    "includedPatterns": ["rake"],
+    "excludedMagicComments": ["compiled:true"],
+  },
+}
+```

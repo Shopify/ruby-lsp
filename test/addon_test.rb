@@ -99,5 +99,16 @@ module RubyLsp
         Addon.file_watcher_addons.clear
       end
     end
+
+    def test_get_an_addon_by_name
+      addon = Addon.get("My Addon")
+      assert_equal("My Addon", addon.name)
+    end
+
+    def test_raises_if_an_addon_cannot_be_found
+      assert_raises do
+        Addon.get("Invalid Addon")
+      end
+    end
   end
 end

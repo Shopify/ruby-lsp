@@ -11,21 +11,27 @@ module RubyLsp
 
       sig do
         params(
-          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::Location],
+          response_builder: ResponseBuilders::CollectionResponseBuilder[T.any(
+            Interface::Location,
+            Interface::LocationLink,
+          )],
           global_state: GlobalState,
+          language_id: Document::LanguageId,
           uri: URI::Generic,
           node_context: NodeContext,
           dispatcher: Prism::Dispatcher,
-          typechecker_enabled: T::Boolean,
+          sorbet_level: Document::SorbetLevel,
         ).void
       end
-      def initialize(response_builder, global_state, uri, node_context, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, global_state, language_id, uri, node_context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
+        @type_inferrer = T.let(global_state.type_inferrer, TypeInferrer)
+        @language_id = language_id
         @uri = uri
         @node_context = node_context
-        @typechecker_enabled = typechecker_enabled
+        @sorbet_level = sorbet_level
 
         dispatcher.register(
           self,
@@ -40,23 +46,32 @@ module RubyLsp
           :on_instance_variable_or_write_node_enter,
           :on_instance_variable_target_node_enter,
           :on_string_node_enter,
+          :on_super_node_enter,
+          :on_forwarding_super_node_enter,
         )
       end
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
+        # Sorbet can handle go to definition for methods invoked on self on typed true or higher
+        return if sorbet_level_true_or_higher?(@sorbet_level) && self_receiver?(node)
+
         message = node.message
         return unless message
 
+        inferrer_receiver_type = @type_inferrer.infer_receiver_type(@node_context)
 
-        if message == :require || message == :require_relative
-          handle_require_definition(node)
-        elsif message == :autoload
+        # Until we can properly infer the receiver type in erb files (maybe with ruby-lsp-rails),
+        # treating method calls' type as `nil` will allow users to get some completion support first
+        if @language_id == Document::LanguageId::ERB && inferrer_receiver_type&.name == "Object"
+          inferrer_receiver_type = nil
+        end
+
+        if message == "autoload" && node.receiver.nil?
           handle_autoload_definition(node)
         else
-          handle_method_definition(message.to_s, self_receiver?(node))
+          handle_method_definition(message, inferrer_receiver_type)
         end
-        handle_method_definition(message, self_receiver?(node))
       end
 
       sig { params(node: Prism::StringNode).void }
@@ -78,7 +93,7 @@ module RubyLsp
         value = expression.value
         return unless value
 
-        handle_method_definition(value, false)
+        handle_method_definition(value, nil)
       end
 
       sig { params(node: Prism::ConstantPathNode).void }
@@ -127,11 +142,43 @@ module RubyLsp
         handle_instance_variable_definition(node.name.to_s)
       end
 
+      sig { params(node: Prism::SuperNode).void }
+      def on_super_node_enter(node)
+        handle_super_node_definition
+      end
+
+      sig { params(node: Prism::ForwardingSuperNode).void }
+      def on_forwarding_super_node_enter(node)
+        handle_super_node_definition
+      end
+
       private
+
+      sig { void }
+      def handle_super_node_definition
+        # Sorbet can handle super hover on typed true or higher
+        return if sorbet_level_true_or_higher?(@sorbet_level)
+
+        surrounding_method = @node_context.surrounding_method
+        return unless surrounding_method
+
+        handle_method_definition(
+          surrounding_method,
+          @type_inferrer.infer_receiver_type(@node_context),
+          inherited_only: true,
+        )
+      end
 
       sig { params(name: String).void }
       def handle_instance_variable_definition(name)
-        entries = @index.resolve_instance_variable(name, @node_context.fully_qualified_name)
+        # Sorbet enforces that all instance variables be declared on typed strict or higher, which means it will be able
+        # to provide all features for them
+        return if @sorbet_level == Document::SorbetLevel::Strict
+
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
+
+        entries = @index.resolve_instance_variable(name, type.name)
         return unless entries
 
         entries.each do |entry|
@@ -149,10 +196,10 @@ module RubyLsp
         # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
-      sig { params(message: String, self_receiver: T::Boolean).void }
-      def handle_method_definition(message, self_receiver)
-        methods = if self_receiver
-          @index.resolve_method(message, @node_context.fully_qualified_name)
+      sig { params(message: String, receiver_type: T.nilable(TypeInferrer::Type), inherited_only: T::Boolean).void }
+      def handle_method_definition(message, receiver_type, inherited_only: false)
+        methods = if receiver_type
+          @index.resolve_method(message, receiver_type.name, inherited_only: inherited_only)
         else
           # If the method doesn't have a receiver, then we provide a few candidates to jump to
           # But we don't want to provide too many candidates, as it can be overwhelming
@@ -162,16 +209,13 @@ module RubyLsp
         return unless methods
 
         methods.each do |target_method|
-          location = target_method.location
           file_path = target_method.file_path
-          next if @typechecker_enabled && not_in_dependencies?(file_path)
+          next if sorbet_level_true_or_higher?(@sorbet_level) && not_in_dependencies?(file_path)
 
-          @response_builder << Interface::Location.new(
-            uri: URI::Generic.from_path(path: file_path).to_s,
-            range: Interface::Range.new(
-              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
-              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
-            ),
+          @response_builder << Interface::LocationLink.new(
+            target_uri: URI::Generic.from_path(path: file_path).to_s,
+            target_range: range_from_location(target_method.location),
+            target_selection_range: range_from_location(target_method.name_location),
           )
         end
       end
@@ -217,6 +261,7 @@ module RubyLsp
         return unless argument.is_a?(Prism::SymbolNode)
 
         value = argument.value
+        return unless value
 
         find_in_index(value)
       end
@@ -232,19 +277,16 @@ module RubyLsp
         return if first_entry.private? && first_entry.name != "#{@node_context.fully_qualified_name}::#{value}"
 
         entries.each do |entry|
-          location = entry.location
           # If the project has Sorbet, then we only want to handle go to definition for constants defined in gems, as an
-          # additional behavior on top of jumping to RBIs. Sorbet can already handle go to definition for all constants
-          # in the project, even if the files are typed false
+          # additional behavior on top of jumping to RBIs. The only sigil where Sorbet cannot handle constants is typed
+          # ignore
           file_path = entry.file_path
-          next if @typechecker_enabled && not_in_dependencies?(file_path)
+          next if @sorbet_level != Document::SorbetLevel::Ignore && not_in_dependencies?(file_path)
 
-          @response_builder << Interface::Location.new(
-            uri: URI::Generic.from_path(path: file_path).to_s,
-            range: Interface::Range.new(
-              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
-              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
-            ),
+          @response_builder << Interface::LocationLink.new(
+            target_uri: URI::Generic.from_path(path: file_path).to_s,
+            target_range: range_from_location(entry.location),
+            target_selection_range: range_from_location(entry.name_location),
           )
         end
       end

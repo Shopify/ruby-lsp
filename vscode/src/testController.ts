@@ -4,10 +4,17 @@ import { promisify } from "util";
 import * as vscode from "vscode";
 import { CodeLens } from "vscode-languageclient/node";
 
-import { Telemetry } from "./telemetry";
 import { Workspace } from "./workspace";
 
 const asyncExec = promisify(exec);
+
+interface CodeLensData {
+  type: string;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  group_id: number;
+  id?: number;
+  kind: string;
+}
 
 export class TestController {
   private readonly testController: vscode.TestController;
@@ -16,7 +23,7 @@ export class TestController {
   private readonly testDebugProfile: vscode.TestRunProfile;
   private readonly debugTag: vscode.TestTag = new vscode.TestTag("debug");
   private terminal: vscode.Terminal | undefined;
-  private readonly telemetry: Telemetry;
+  private readonly telemetry: vscode.TelemetryLogger;
   // We allow the timeout to be configured in seconds, but exec expects it in milliseconds
   private readonly testTimeout = vscode.workspace
     .getConfiguration("rubyLsp")
@@ -26,7 +33,7 @@ export class TestController {
 
   constructor(
     context: vscode.ExtensionContext,
-    telemetry: Telemetry,
+    telemetry: vscode.TelemetryLogger,
     currentWorkspace: () => Workspace | undefined,
   ) {
     this.telemetry = telemetry;
@@ -57,14 +64,13 @@ export class TestController {
       this.debugTag,
     );
 
-    vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
-      if (terminal === this.terminal) this.terminal = undefined;
-    });
-
     context.subscriptions.push(
       this.testController,
       this.testDebugProfile,
       this.testRunProfile,
+      vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
+        if (terminal === this.terminal) this.terminal = undefined;
+      }),
     );
   }
 
@@ -74,8 +80,7 @@ export class TestController {
       this.testCommands.delete(test);
     });
 
-    const groupIdMap: Record<string, vscode.TestItem> = {};
-    let classTest: vscode.TestItem;
+    const groupIdMap: Map<number, vscode.TestItem> = new Map();
 
     const uri = vscode.Uri.from({
       scheme: "file",
@@ -90,12 +95,9 @@ export class TestController {
         uri,
       );
 
-      if (res.data?.kind) {
-        testItem.tags = [new vscode.TestTag(res.data.kind)];
-      } else if (name.startsWith("test_")) {
-        // Older Ruby LSP versions may not include 'kind' so we try infer it from the name.
-        testItem.tags = [new vscode.TestTag("example")];
-      }
+      const data: CodeLensData = res.data;
+
+      testItem.tags = [new vscode.TestTag(data.kind)];
 
       this.testCommands.set(testItem, command);
 
@@ -104,45 +106,37 @@ export class TestController {
         new vscode.Position(location.end_line, location.end_column),
       );
 
-      // If the test has a group_id, the server supports code lens hierarchy
-      if ("group_id" in res.data) {
-        // If it has an id, it's a group
-        if (res.data?.id) {
-          // Add group to the map
-          groupIdMap[res.data.id] = testItem;
-          testItem.canResolveChildren = true;
-
-          if (res.data.group_id) {
-            // Add nested group to its parent group
-            groupIdMap[res.data.group_id].children.add(testItem);
-          } else {
-            // Or add it to the top-level
-            this.testController.items.add(testItem);
-          }
-          // Otherwise, it's a test
-        } else {
-          // Add test to its parent group
-          groupIdMap[res.data.group_id].children.add(testItem);
-          testItem.tags = [...testItem.tags, this.debugTag];
-        }
-        // If the server doesn't support code lens hierarchy, all groups are top-level
+      // If it has an id, it's a group. Otherwise, it's a test example
+      if (data.id) {
+        // Add group to the map
+        groupIdMap.set(data.id, testItem);
+        testItem.canResolveChildren = true;
       } else {
-        // Add test methods as children to the test class so it appears nested in Test explorer
-        // and running the test class will run all of the test methods
-        // eslint-disable-next-line no-lonely-if
-        if (testItem.tags.find((tag) => tag.id === "example")) {
-          testItem.tags = [...testItem.tags, this.debugTag];
-          classTest.children.add(testItem);
+        // Set example tags
+        testItem.tags = [...testItem.tags, this.debugTag];
+      }
+
+      // Examples always have a `group_id`. Groups may or may not have it
+      if (data.group_id) {
+        // Add nested group to its parent group
+        const group = groupIdMap.get(data.group_id);
+
+        // If there's a mistake on the server or in an addon, a code lens may be produced for a non-existing group
+        if (group) {
+          group.children.add(testItem);
         } else {
-          classTest = testItem;
-          classTest.canResolveChildren = true;
-          this.testController.items.add(testItem);
+          this.currentWorkspace()?.outputChannel.error(
+            `Test example "${name}" is attached to group_id ${data.group_id}, but that group does not exist`,
+          );
         }
+      } else {
+        // Or add it to the top-level
+        this.testController.items.add(testItem);
       }
     });
   }
 
-  async runTestInTerminal(_path: string, _name: string, command?: string) {
+  runTestInTerminal(_path: string, _name: string, command?: string) {
     // eslint-disable-next-line no-param-reassign
     command ??= this.testCommands.get(this.findTestByActiveLine()!) || "";
 
@@ -153,14 +147,13 @@ export class TestController {
     this.terminal.show();
     this.terminal.sendText(command);
 
-    const workspace = this.currentWorkspace();
-
-    if (workspace?.lspClient?.serverVersion) {
-      await this.telemetry.sendCodeLensEvent(
-        "test_in_terminal",
-        workspace.lspClient.serverVersion,
-      );
-    }
+    this.telemetry.logUsage("ruby_lsp.code_lens", {
+      type: "counter",
+      attributes: {
+        label: "test_in_terminal",
+        vscodemachineid: vscode.env.machineId,
+      },
+    });
   }
 
   async runOnClick(testId: string) {
@@ -236,14 +229,10 @@ export class TestController {
     run.passed(test, Date.now() - start);
     run.end();
 
-    const workspace = this.currentWorkspace();
-
-    if (workspace?.lspClient?.serverVersion) {
-      await this.telemetry.sendCodeLensEvent(
-        "debug",
-        workspace.lspClient.serverVersion,
-      );
-    }
+    this.telemetry.logUsage("ruby_lsp.code_lens", {
+      type: "counter",
+      attributes: { label: "debug", vscodemachineid: vscode.env.machineId },
+    });
   }
 
   private async runHandler(
@@ -332,12 +321,10 @@ export class TestController {
     // Make sure to end the run after all tests have been executed
     run.end();
 
-    if (workspace?.lspClient?.serverVersion) {
-      await this.telemetry.sendCodeLensEvent(
-        "test",
-        workspace.lspClient.serverVersion,
-      );
-    }
+    this.telemetry.logUsage("ruby_lsp.code_lens", {
+      type: "counter",
+      attributes: { label: "test", vscodemachineid: vscode.env.machineId },
+    });
   }
 
   private async assertTestPasses(

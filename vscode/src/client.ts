@@ -1,4 +1,5 @@
 import path from "path";
+import os from "os";
 import { performance as Perf } from "perf_hooks";
 
 import * as vscode from "vscode";
@@ -13,10 +14,22 @@ import {
   ServerOptions,
   MessageSignature,
   DocumentSelector,
+  ErrorHandler,
+  CloseHandlerResult,
+  ErrorHandlerResult,
+  Message,
+  ErrorAction,
+  CloseAction,
+  State,
+  DocumentFilter,
 } from "vscode-languageclient/node";
 
-import { LSP_NAME, ClientInterface, Addon } from "./common";
-import { Telemetry, RequestEvent } from "./telemetry";
+import {
+  LSP_NAME,
+  ClientInterface,
+  Addon,
+  SUPPORTED_LANGUAGE_IDS,
+} from "./common";
 import { Ruby } from "./ruby";
 import { WorkspaceChannel } from "./workspaceChannel";
 
@@ -107,19 +120,20 @@ function collectClientOptions(
   const enabledFeatures = Object.keys(features).filter((key) => features[key]);
 
   const fsPath = workspaceFolder.uri.fsPath.replace(/\/$/, "");
-  const documentSelector: DocumentSelector = [
-    {
-      language: "ruby",
-      pattern: `${fsPath}/**/*`,
+  let documentSelector: DocumentSelector = SUPPORTED_LANGUAGE_IDS.map(
+    (language) => {
+      return { language, pattern: `${fsPath}/**/*` };
     },
-  ];
+  );
 
   // Only the first language server we spawn should handle unsaved files, otherwise requests will be duplicated across
   // all workspaces
   if (isMainWorkspace) {
-    documentSelector.push({
-      language: "ruby",
-      scheme: "untitled",
+    SUPPORTED_LANGUAGE_IDS.forEach((language) => {
+      documentSelector.push({
+        language,
+        scheme: "untitled",
+      });
     });
   }
 
@@ -145,6 +159,14 @@ function collectClientOptions(
     });
   }
 
+  // This is a temporary solution as an escape hatch for users who cannot upgrade the `ruby-lsp` gem to a version that
+  // supports ERB
+  if (!configuration.get<boolean>("erbSupport")) {
+    documentSelector = documentSelector.filter((selector) => {
+      return (selector as DocumentFilter).language !== "erb";
+    });
+  }
+
   return {
     documentSelector,
     workspaceFolder,
@@ -152,6 +174,7 @@ function collectClientOptions(
     outputChannel,
     revealOutputChannelOn: RevealOutputChannelOn.Never,
     diagnosticPullOptions,
+    errorHandler: new ClientErrorHandler(workspaceFolder),
     initializationOptions: {
       enabledFeatures,
       experimentalFeaturesEnabled: configuration.get(
@@ -160,8 +183,44 @@ function collectClientOptions(
       featuresConfiguration: configuration.get("featuresConfiguration"),
       formatter: configuration.get("formatter"),
       linters: configuration.get("linters"),
+      indexing: configuration.get("indexing"),
     },
   };
+}
+
+class ClientErrorHandler implements ErrorHandler {
+  private readonly workspaceFolder: vscode.WorkspaceFolder;
+
+  constructor(workspaceFolder: vscode.WorkspaceFolder) {
+    this.workspaceFolder = workspaceFolder;
+  }
+
+  error(
+    _error: Error,
+    _message: Message | undefined,
+    _count: number | undefined,
+  ): ErrorHandlerResult | Promise<ErrorHandlerResult> {
+    return { action: ErrorAction.Shutdown, handled: true };
+  }
+
+  async closed(): Promise<CloseHandlerResult> {
+    const answer = await vscode.window.showErrorMessage(
+      `Launching the Ruby LSP failed. This typically happens due to an error with version manager
+      integration or Bundler issues.
+
+      [Logs](command:workbench.action.output.toggleOutput) |
+      [Troubleshooting](https://github.com/Shopify/ruby-lsp/blob/main/TROUBLESHOOTING.md) |
+      [Run bundle install](command:rubyLsp.bundleInstall?"${this.workspaceFolder.uri.toString()}")`,
+      "Retry",
+      "Shutdown",
+    );
+
+    if (answer === "Retry") {
+      return { action: CloseAction.Restart, handled: true };
+    }
+
+    return { action: CloseAction.DoNotRestart, handled: true };
+  }
 }
 
 export default class Client extends LanguageClient implements ClientInterface {
@@ -169,10 +228,9 @@ export default class Client extends LanguageClient implements ClientInterface {
   public serverVersion?: string;
   public addons?: Addon[];
   private readonly workingDirectory: string;
-  private readonly telemetry: Telemetry;
+  private readonly telemetry: vscode.TelemetryLogger;
   private readonly createTestItems: (response: CodeLens[]) => void;
   private readonly baseFolder;
-  private requestId = 0;
   private readonly workspaceOutputChannel: WorkspaceChannel;
 
   #context: vscode.ExtensionContext;
@@ -180,7 +238,7 @@ export default class Client extends LanguageClient implements ClientInterface {
 
   constructor(
     context: vscode.ExtensionContext,
-    telemetry: Telemetry,
+    telemetry: vscode.TelemetryLogger,
     ruby: Ruby,
     createTestItems: (response: CodeLens[]) => void,
     workspaceFolder: vscode.WorkspaceFolder,
@@ -256,93 +314,66 @@ export default class Client extends LanguageClient implements ClientInterface {
 
   private async benchmarkMiddleware<T>(
     type: string | MessageSignature,
-    params: any,
+    _params: any,
     runRequest: () => Promise<T>,
   ): Promise<T> {
-    // Because of the custom bundle logic in the server, we can only fetch the server version after launching it. That
-    // means some requests may be received before the computed the version. For those, we cannot send telemetry
-    if (this.serverVersion === undefined) {
+    if (this.state !== State.Running) {
       return runRequest();
     }
 
     const request = typeof type === "string" ? type : type.method;
 
-    // The first few requests are not representative for telemetry. Their response time is much higher than the rest
-    // because they are inflate by the time we spend indexing and by regular "warming up" of the server (like
-    // autoloading constants or running signature blocks).
-    if (this.requestId < 50) {
-      this.requestId++;
-      return runRequest();
-    }
-
-    const telemetryData: RequestEvent = {
-      request,
-      rubyVersion: this.ruby.rubyVersion!,
-      yjitEnabled: this.ruby.yjitEnabled!,
-      lspVersion: this.serverVersion,
-      requestTime: 0,
-    };
-
-    // If there are parameters in the request, include those
-    if (params) {
-      const castParam = { ...params } as { textDocument?: { uri: string } };
-
-      if ("textDocument" in castParam) {
-        const uri = castParam.textDocument?.uri.replace(
-          // eslint-disable-next-line no-process-env
-          process.env.HOME!,
-          "~",
-        );
-
-        delete castParam.textDocument;
-        telemetryData.uri = uri;
-      }
-
-      telemetryData.params = JSON.stringify(castParam);
-    }
-
-    let result: T | undefined;
-    let errorResult;
-    const benchmarkId = this.requestId++;
-
-    // Execute the request measuring the time it takes to receive the response
-    Perf.mark(`${benchmarkId}.start`);
     try {
-      result = await runRequest();
+      // Execute the request measuring the time it takes to receive the response
+      Perf.mark(`${request}.start`);
+      const result = await runRequest();
+      Perf.mark(`${request}.end`);
+
+      const bench = Perf.measure(
+        "benchmarks",
+        `${request}.start`,
+        `${request}.end`,
+      );
+
+      this.logResponseTime(bench.duration, request);
+      return result;
     } catch (error: any) {
-      // If any errors occurred in the request, we'll receive these from the LSP server
-      telemetryData.errorClass = error.data.errorClass;
-      telemetryData.errorMessage = error.data.errorMessage;
-      telemetryData.backtrace = error.data.backtrace;
-      errorResult = error;
-    }
-    Perf.mark(`${benchmarkId}.end`);
+      if (error.data) {
+        if (
+          this.baseFolder === "ruby-lsp" ||
+          this.baseFolder === "ruby-lsp-rails"
+        ) {
+          await vscode.window.showErrorMessage(
+            `Ruby LSP error ${error.data.errorClass}: ${error.data.errorMessage}\n\n${error.data.backtrace}`,
+          );
+        } else {
+          const { errorMessage, errorClass, backtrace } = error.data;
 
-    // Insert benchmarked response time into telemetry data
-    const bench = Perf.measure(
-      "benchmarks",
-      `${benchmarkId}.start`,
-      `${benchmarkId}.end`,
-    );
-    telemetryData.requestTime = bench.duration;
-    await this.telemetry.sendEvent(telemetryData);
+          if (errorMessage && errorClass && backtrace) {
+            // Sanitize the backtrace coming from the server to remove the user's home directory from it, then mark it
+            // as a trusted value. Otherwise the VS Code telemetry logger redacts the entire backtrace and we are unable
+            // to see where in the server the error occurred
+            const stack = new vscode.TelemetryTrustedValue(
+              backtrace
+                .split("\n")
+                .map((line: string) => line.replace(os.homedir(), "~"))
+                .join("\n"),
+            ) as any;
 
-    // If there has been an error, we must throw it again. Otherwise we can return the result
-    if (errorResult) {
-      if (
-        this.baseFolder === "ruby-lsp" ||
-        this.baseFolder === "ruby-lsp-rails"
-      ) {
-        await vscode.window.showErrorMessage(
-          `Ruby LSP error ${errorResult.data.errorClass}: ${errorResult.data.errorMessage}\n\n
-                ${errorResult.data.backtrace}`,
-        );
+            this.telemetry.logError(
+              {
+                message: errorMessage,
+                name: errorClass,
+                stack,
+              },
+              { ...error.data, serverVersion: this.serverVersion },
+            );
+          }
+        }
       }
 
-      throw errorResult;
+      throw error;
     }
-
-    return result!;
   }
 
   // Register the middleware in the client options
@@ -454,5 +485,17 @@ export default class Client extends LanguageClient implements ClientInterface {
         return this.benchmarkMiddleware(type, params, () => next(type, params));
       },
     };
+  }
+
+  private logResponseTime(duration: number, label: string) {
+    this.telemetry.logUsage("ruby_lsp.response_time", {
+      type: "histogram",
+      value: duration,
+      attributes: {
+        message: new vscode.TelemetryTrustedValue(label),
+        lspVersion: this.serverVersion,
+        rubyVersion: this.ruby.rubyVersion,
+      },
+    });
   }
 }

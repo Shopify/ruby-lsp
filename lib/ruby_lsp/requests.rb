@@ -47,6 +47,8 @@ module RubyLsp
     autoload :ShowSyntaxTree, "ruby_lsp/requests/show_syntax_tree"
     autoload :WorkspaceSymbol, "ruby_lsp/requests/workspace_symbol"
     autoload :SignatureHelp, "ruby_lsp/requests/signature_help"
+    autoload :PrepareTypeHierarchy, "ruby_lsp/requests/prepare_type_hierarchy"
+    autoload :TypeHierarchySupertypes, "ruby_lsp/requests/type_hierarchy_supertypes"
 
     # :nodoc:
     module Support

@@ -36,14 +36,14 @@ module RubyLsp
           global_state: GlobalState,
           position: T::Hash[Symbol, T.untyped],
           dispatcher: Prism::Dispatcher,
-          typechecker_enabled: T::Boolean,
+          sorbet_level: Document::SorbetLevel,
         ).void
       end
-      def initialize(document, global_state, position, dispatcher, typechecker_enabled)
+      def initialize(document, global_state, position, dispatcher, sorbet_level)
         super()
         @response_builder = T.let(
-          ResponseBuilders::CollectionResponseBuilder[Interface::Location].new,
-          ResponseBuilders::CollectionResponseBuilder[Interface::Location],
+          ResponseBuilders::CollectionResponseBuilder[T.any(Interface::Location, Interface::LocationLink)].new,
+          ResponseBuilders::CollectionResponseBuilder[T.any(Interface::Location, Interface::LocationLink)],
         )
         @dispatcher = dispatcher
 
@@ -62,6 +62,8 @@ module RubyLsp
             Prism::InstanceVariableWriteNode,
             Prism::SymbolNode,
             Prism::StringNode,
+            Prism::SuperNode,
+            Prism::ForwardingSuperNode,
           ],
         )
 
@@ -90,10 +92,11 @@ module RubyLsp
           Listeners::Definition.new(
             @response_builder,
             global_state,
+            document.language_id,
             document.uri,
             node_context,
             dispatcher,
-            typechecker_enabled,
+            sorbet_level,
           )
 
           Addon.addons.each do |addon|
@@ -104,7 +107,7 @@ module RubyLsp
         @target = T.let(target, T.nilable(Prism::Node))
       end
 
-      sig { override.returns(T::Array[Interface::Location]) }
+      sig { override.returns(T::Array[T.any(Interface::Location, Interface::LocationLink)]) }
       def perform
         @dispatcher.dispatch_once(@target) if @target
         @response_builder.response

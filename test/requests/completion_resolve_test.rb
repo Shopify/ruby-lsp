@@ -29,9 +29,6 @@ class CompletionResolveTest < Minitest::Test
       result = server.pop_response.response
 
       expected = existing_item.merge(
-        labelDetails: Interface::CompletionItemLabelDetails.new(
-          description: "fake.rb",
-        ),
         documentation: Interface::MarkupContent.new(
           kind: "markdown",
           value: markdown_from_index_entries("Foo::Bar", T.must(server.global_state.index["Foo::Bar"])),
@@ -39,6 +36,7 @@ class CompletionResolveTest < Minitest::Test
       )
       assert_match(/This is a class that does things/, result[:documentation].value)
       assert_equal(expected.to_json, result.to_json)
+      refute(result.key?(:labelDetails))
     end
   end
 
@@ -81,6 +79,57 @@ class CompletionResolveTest < Minitest::Test
 
       result = server.pop_response.response
       assert_match(/Bar/, result[:documentation].value)
+    end
+  end
+
+  def test_inserts_method_parameters_in_label_details
+    source = +<<~RUBY
+      class Bar
+        def foo(a, b, c)
+        end
+
+        def bar
+          f
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, _uri|
+      existing_item = {
+        label: "foo",
+        kind: RubyLsp::Constant::CompletionItemKind::METHOD,
+        data: { owner_name: "Bar" },
+      }
+
+      server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
+
+      result = server.pop_response.response
+      assert_match("(a, b, c)", result[:documentation].value)
+    end
+  end
+
+  def test_completion_documentation_for_guessed_types
+    source = +<<~RUBY
+      class User
+        def foo(a, b, c)
+        end
+      end
+
+      user.f
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, _uri|
+      existing_item = {
+        label: "foo",
+        kind: RubyLsp::Constant::CompletionItemKind::METHOD,
+        data: { owner_name: "User", guessed_type: "User" },
+      }
+
+      server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
+
+      result = server.pop_response.response
+      assert_match("Guessed receiver: User", result[:documentation].value)
+      assert_match("Learn more about guessed types", result[:documentation].value)
     end
   end
 end

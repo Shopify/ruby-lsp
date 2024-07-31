@@ -18,6 +18,14 @@ export enum Command {
   RunTestInTerminal = "rubyLsp.runTestInTerminal",
   DebugTest = "rubyLsp.debugTest",
   ShowSyntaxTree = "rubyLsp.showSyntaxTree",
+  DisplayAddons = "rubyLsp.displayAddons",
+  RunTask = "rubyLsp.runTask",
+  BundleInstall = "rubyLsp.bundleInstall",
+  OpenFile = "rubyLsp.openFile",
+  FileOperation = "rubyLsp.fileOperation",
+  RailsGenerate = "rubyLsp.railsGenerate",
+  RailsDestroy = "rubyLsp.railsDestroy",
+  NewMinitestFile = "rubyLsp.newMinitestFile",
 }
 
 export interface RubyInterface {
@@ -59,6 +67,7 @@ export const LSP_NAME = "Ruby LSP";
 export const LOG_CHANNEL = vscode.window.createOutputChannel(LSP_NAME, {
   log: true,
 });
+export const SUPPORTED_LANGUAGE_IDS = ["ruby", "erb"];
 
 // Creates a debounced version of a function with the specified delay. If the function is invoked before the delay runs
 // out, then the previous invocation of the function gets cancelled and a new one is scheduled.

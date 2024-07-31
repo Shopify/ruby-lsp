@@ -1,0 +1,75 @@
+{
+  "result": [
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 0
+        },
+        "end": {
+          "line": 0,
+          "character": 3
+        }
+      },
+      "kind": 2
+    },
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 0
+        },
+        "end": {
+          "line": 2,
+          "character": 3
+        }
+      },
+      "kind": 2
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 0
+        },
+        "end": {
+          "line": 4,
+          "character": 3
+        }
+      },
+      "kind": 2
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 0
+        },
+        "end": {
+          "line": 7,
+          "character": 3
+        }
+      },
+      "kind": 2
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 0
+        },
+        "end": {
+          "line": 9,
+          "character": 3
+        }
+      },
+      "kind": 2
+    }
+  ],
+  "params": [
+    {
+      "line": 0,
+      "character": 2
+    }
+  ]
+}

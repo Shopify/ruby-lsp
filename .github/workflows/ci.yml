@@ -48,16 +48,18 @@ jobs:
         run: bundle exec rake
 
       - name: Run index troubleshooting tool
-        run: bundle exec ruby-lsp-doctor
+        run: bundle exec ruby-lsp --doctor
   lint_node:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Node
+        env:
+          DISABLE_V8_COMPILE_CACHE: "1"
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "20.9"
           cache: "yarn"
           cache-dependency-path: "vscode"
 
@@ -78,8 +80,10 @@ jobs:
 
       - name: Set up Node
         uses: actions/setup-node@v4
+        env:
+          DISABLE_V8_COMPILE_CACHE: 1
         with:
-          node-version: "18"
+          node-version: "20.9"
           cache: "yarn"
           cache-dependency-path: "vscode"
 

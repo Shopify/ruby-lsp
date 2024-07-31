@@ -67,8 +67,9 @@ If you require more accuracy in your editor, consider adopting a type system and
 This applies to multiple language server features such as go to definition, hover, completion and automated refactors.
 Consider the following examples:
 
-> [!NOTE] not all of the examples below are supported at the moment and this is not an exhaustive list. Please check the
-long term roadmap to see what’s planned
+> [!NOTE]
+> Not all of the examples below are supported at the moment and this is not an exhaustive list.
+> Please check the long term roadmap to see what’s planned
 
 ```ruby
 # Cases where we can provide a satisfactory experience without a type system
@@ -199,6 +200,7 @@ Interested in contributing? Check out the issues tagged with [help-wanted] or [g
 - Explore allowing addons to add support for arbitrary file types
 - Allow the Ruby LSP to connect to a typechecker addon to improve accuracy
 - Make the Ruby LSP’s default functionality act as a fallback for the more accurate typechecker results
+- Introduce a mechanism for addons to be automatically detected without needing user configuration
 
 [Ruby on Rails Community survey]: https://rails-hosting.com/2022/#ruby-rails-version-updates
 [Sorbet]: https://sorbet.org/
@@ -218,3 +220,86 @@ Interested in contributing? Check out the issues tagged with [help-wanted] or [g
 [Explore speeding up indexing by caching the index for gems]: https://github.com/Shopify/ruby-lsp/issues/1009
 [Add range formatting support for formatters that do support it]: https://github.com/Shopify/ruby-lsp/issues/203
 [Add ERB support]: https://github.com/Shopify/ruby-lsp/issues/1055
+
+## Guessed types
+
+Guessed types is an experimental feature where the Ruby LSP attempts to identify the type of a receiver based on its
+identifier name. For example:
+
+```ruby
+# The receiver identifier here is `user` and so the Ruby LSP will assign to it the `User` type if that class exists
+user.name
+
+# Similarly, the receiver identifier here is `post` and so the LSP searches for the `Post` class
+@post.like!
+```
+
+> [!IMPORTANT]
+> The goal of this experiment is to understand if we can get better accuracy for the code that you already
+> have. The hypothesis is that a reasonable amount of code already uses patterns like the ones in the example and, in
+> those cases, we can achieve nicer results.
+>
+> However, identifiers are not the ideal medium for proper type annotations. It would not be possible to express anything
+> complex, such as unions, intersections or generics. Additionally, it is very trivial to fool the type guessing by simply
+> naming a variable with a type name that doesn't match its actual type.
+
+```ruby
+pathname = something_that_returns_an_integer
+# This will show methods available in `Pathname`, despite the variable being an Integer
+pathname.a
+```
+
+We do not recommend renaming methods, instance variables or local variables for the sole purpose of getting better
+accuracy - readibility should always come first. For example:
+
+```ruby
+# It would not be a good idea to name every string "string" for the sake of getting better accuracy.
+# Using descriptive names will outweight the benefits of the more accurate editor experience
+
+# don't
+string = something.other_thing
+
+# do
+title = something.other_thing
+name = foo
+```
+
+That said, this feature can also be used for quickly exploring methods available in classes. Simply type the lower case
+name of the class and completion can show the methods available.
+
+```ruby
+# Any class name as an identifier
+pathname.a
+integer.a
+file.a
+```
+
+To guess types, the Ruby LSP will first try to resolve a constant based on the receiver identifier and current nesting.
+If that does not identify any valid types, then it will fallback to matching based on the first match for the
+unqualified type name. For example:
+
+```ruby
+module Admin
+  class User
+  end
+
+  # Will match to `Admin::User` because the `user` reference is inside the `Admin` namespace
+  user.a
+end
+
+module Blog
+  class User
+  end
+
+  # Will match to `Blog::User` because the `user` reference is inside the `Blog` namespace
+  user.a
+end
+
+# Will match to the first class that has the unqualified name of `User`. This may return `Admin::User` or `Blog::User`
+# randomly
+user.a
+```
+
+This is an experimental feature and can only be accessed if `initializationOptions.experimentalFeaturesEnabled` is
+`true` (the `"rubyLsp.enableExperimentalFeatures": true` setting for VS Code users). If you have feedback about this
+experiment, please let us know in a GitHub issue.

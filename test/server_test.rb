@@ -166,8 +166,7 @@ class ServerTest < Minitest::Test
       assert_equal("$/progress", @server.pop_response.method)
       assert_equal("$/progress", @server.pop_response.method)
 
-      index = @server.global_state.index
-      refute_empty(index.instance_variable_get(:@entries))
+      refute_empty(@server.global_state.index)
     end
   end
 
@@ -326,10 +325,13 @@ class ServerTest < Minitest::Test
   end
 
   def test_handles_invalid_configuration
-    FileUtils.mv(".index.yml", ".index.yml.tmp")
     File.write(".index.yml", "} invalid yaml")
 
-    @server.process_message({ method: "initialized" })
+    capture_subprocess_io do
+      @server.process_message(id: 1, method: "initialize", params: {})
+    end
+
+    @server.pop_response
     notification = @server.pop_response
     assert_equal("window/showMessage", notification.method)
     assert_match(
@@ -337,7 +339,7 @@ class ServerTest < Minitest::Test
       T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
     )
   ensure
-    FileUtils.mv(".index.yml.tmp", ".index.yml")
+    FileUtils.rm(".index.yml")
   end
 
   def test_shows_error_if_formatter_set_to_rubocop_but_rubocop_not_available
@@ -445,6 +447,101 @@ class ServerTest < Minitest::Test
   ensure
     RubyLsp::Addon.addons.clear
     RubyLsp::Addon.addon_classes.clear
+  end
+
+  def test_errors_include_telemetry_data
+    @server.expects(:workspace_symbol).raises(StandardError, "boom")
+
+    capture_io do
+      @server.process_message(id: 1, method: "workspace/symbol", params: { query: "" })
+    end
+
+    error = @server.pop_response
+    assert_instance_of(RubyLsp::Error, error)
+
+    data = error.to_hash.dig(:error, :data)
+    assert_equal("boom", data[:errorMessage])
+    assert_equal("StandardError", data[:errorClass])
+    assert_match("mocha/exception_raiser.rb", data[:backtrace])
+  end
+
+  def test_handles_editor_indexing_settings
+    capture_io do
+      @server.process_message({
+        id: 1,
+        method: "initialize",
+        params: {
+          initializationOptions: {
+            indexing: {
+              excludedGems: ["foo_gem"],
+              includedGems: ["bar_gem"],
+            },
+          },
+        },
+      })
+    end
+
+    assert_includes(RubyIndexer.configuration.instance_variable_get(:@excluded_gems), "foo_gem")
+    assert_includes(RubyIndexer.configuration.instance_variable_get(:@included_gems), "bar_gem")
+  end
+
+  def test_closing_document_before_computing_features_does_not_error
+    uri = URI("file:///foo.rb")
+
+    capture_subprocess_io do
+      @server.process_message({
+        method: "textDocument/didOpen",
+        params: {
+          textDocument: {
+            uri: uri,
+            text: "class Foo\nend",
+            version: 1,
+            languageId: "ruby",
+          },
+        },
+      })
+
+      # Close the file in a thread to increase the chance that it gets closed during the processing of the 10 document
+      # symbol requests below
+      thread = Thread.new do
+        @server.process_message({
+          method: "textDocument/didClose",
+          params: {
+            textDocument: {
+              uri: uri,
+            },
+          },
+        })
+      end
+
+      10.times do |i|
+        @server.process_message({
+          id: i,
+          method: "textDocument/documentSymbol",
+          params: {
+            textDocument: {
+              uri: uri,
+            },
+          },
+        })
+      end
+
+      thread.join
+    end
+
+    # Even if the thread technique, this test is not 100% reliable since it's trying to emulate a concurrency issue. If
+    # we tried to always expect an error back, we would likely get infinite loops
+    error = T.let(nil, T.nilable(T.any(RubyLsp::Error, RubyLsp::Message)))
+
+    10.times do
+      error = @server.pop_response
+      break if error.is_a?(RubyLsp::Error)
+    end
+
+    if error.is_a?(RubyLsp::Error)
+      assert_instance_of(RubyLsp::Error, error)
+      assert_match("file:///foo.rb (RubyLsp::Store::NonExistingDocumentError)", error.message)
+    end
   end
 
   private

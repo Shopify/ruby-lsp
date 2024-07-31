@@ -57,8 +57,15 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       when Array
         response.each do |location|
           attributes = T.let(location.attributes, T.untyped)
-          fake_path = T.let(attributes[:uri].split("/").last(2).join("/"), String)
-          location.instance_variable_set(:@attributes, attributes.merge("uri" => "file:///#{fake_path}"))
+
+          case location
+          when RubyLsp::Interface::LocationLink
+            fake_path = T.let(attributes[:targetUri].split("/").last(2).join("/"), String)
+            location.instance_variable_set(:@attributes, attributes.merge("targetUri" => "file:///#{fake_path}"))
+          else
+            fake_path = T.let(attributes[:uri].split("/").last(2).join("/"), String)
+            location.instance_variable_set(:@attributes, attributes.merge("uri" => "file:///#{fake_path}"))
+          end
         end
       end
 
@@ -96,14 +103,14 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       Foo::Bar::Baz
     RUBY
 
-    with_server(source) do |server, uri|
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       # Foo
       server.process_message(
         id: 1,
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { line: 7, character: 0 } },
       )
-      range = server.pop_response.response[0].attributes[:range].attributes
+      range = server.pop_response.response[0].attributes[:targetRange].attributes
       range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
       assert_equal({ start: { line: 0, character: 0 }, end: { line: 5, character: 3 } }, range_hash)
 
@@ -113,7 +120,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { line: 7, character: 5 } },
       )
-      range = server.pop_response.response[0].attributes[:range].attributes
+      range = server.pop_response.response[0].attributes[:targetRange].attributes
       range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
       assert_equal({ start: { line: 1, character: 2 }, end: { line: 4, character: 5 } }, range_hash)
 
@@ -123,7 +130,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { line: 7, character: 10 } },
       )
-      range = server.pop_response.response[0].attributes[:range].attributes
+      range = server.pop_response.response[0].attributes[:targetRange].attributes
       range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
       assert_equal({ start: { line: 2, character: 4 }, end: { line: 3, character: 7 } }, range_hash)
     end
@@ -163,7 +170,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    with_server(source) do |server, uri|
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/definition",
@@ -172,7 +179,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       response = server.pop_response
 
       assert_instance_of(RubyLsp::Result, response)
-      assert_equal(uri.to_s, response.response.first.attributes[:uri])
+      assert_equal(uri.to_s, response.response.first.attributes[:targetUri])
     end
   end
 
@@ -204,7 +211,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     begin
       create_definition_addon
 
-      with_server(source) do |server, uri|
+      with_server(source, stub_no_typechecker: true) do |server, uri|
         server.global_state.index.index_single(
           RubyIndexer::IndexablePath.new(
             "#{Dir.pwd}/lib",
@@ -222,7 +229,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         response = server.pop_response.response
 
         assert_equal(2, response.size)
-        assert_match("class_reference_target.rb", response[0].uri)
+        assert_match("class_reference_target.rb", response[0].target_uri)
         assert_match("generated_by_addon.rb", response[1].uri)
       end
     ensure
@@ -249,7 +256,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 4, line: 4 } },
       )
-      assert_equal(uri.to_s, server.pop_response.response.first.attributes[:uri])
+      assert_equal(uri.to_s, server.pop_response.response.first.attributes[:targetUri])
     end
   end
 
@@ -282,6 +289,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
             uri: second_uri,
             text: second_source,
             version: 1,
+            languageId: "ruby",
           },
         },
       })
@@ -295,8 +303,8 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       )
 
       first_definition, second_definition = server.pop_response.response
-      assert_equal(uri.to_s, first_definition.attributes[:uri])
-      assert_equal(second_uri.to_s, second_definition.attributes[:uri])
+      assert_equal(uri.to_s, first_definition.attributes[:targetUri])
+      assert_equal(second_uri.to_s, second_definition.attributes[:targetUri])
     end
   end
 
@@ -319,7 +327,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 9, line: 4 } },
       )
-      assert_equal(uri.to_s, server.pop_response.response.first.attributes[:uri])
+      assert_equal(uri.to_s, server.pop_response.response.first.attributes[:targetUri])
     end
   end
 
@@ -346,7 +354,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
   def test_jumping_to_autoload_definition_when_declaration_exists
     source = <<~RUBY
-      # typed: false
+      # typed: ignore
 
       class Foo
         autoload :Bar, "bar"
@@ -361,7 +369,10 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 3, line: 3 } },
       )
-      assert_equal(uri.to_s, server.pop_response.response.first.attributes[:uri])
+
+      response = server.pop_response.response
+      assert_equal(1, response.size)
+      assert_equal("file:///fake.rb", response.first.attributes[:targetUri])
     end
   end
 
@@ -407,7 +418,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
       assert_equal(1, response.size)
 
-      range = response[0].attributes[:range].attributes
+      range = response[0].attributes[:targetRange].attributes
       range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
       assert_equal({ start: { line: 3, character: 2 }, end: { line: 3, character: 14 } }, range_hash)
     end
@@ -438,11 +449,11 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
       assert_equal(2, response.size)
 
-      range = response[0].attributes[:range].attributes
+      range = response[0].attributes[:targetRange].attributes
       range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
       assert_equal({ start: { line: 3, character: 2 }, end: { line: 3, character: 14 } }, range_hash)
 
-      range = response[1].attributes[:range].attributes
+      range = response[1].attributes[:targetRange].attributes
       range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
       assert_equal({ start: { line: 7, character: 2 }, end: { line: 7, character: 14 } }, range_hash)
     end
@@ -472,6 +483,37 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definitions_are_listed_in_erb_files_as_unknown_receiver
+    source = <<~ERB
+      <%= foo %>
+    ERB
+
+    with_server(source, URI("/fake.erb")) do |server, uri|
+      server.global_state.index.index_single(
+        RubyIndexer::IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY
+          class Bar
+            def foo; end
+
+            def bar; end
+          end
+        RUBY
+      )
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 0 } },
+      )
+      response = server.pop_response.response
+
+      assert_equal(1, response.size)
+
+      range = response[0].attributes[:targetRange].attributes
+      range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
+      assert_equal({ start: { line: 1, character: 2 }, end: { line: 1, character: 14 } }, range_hash)
+    end
+  end
+
   def test_definition_precision_for_methods_with_block_arguments
     source = <<~RUBY
       class Foo
@@ -490,14 +532,14 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 12, line: 6 } },
       )
-      assert_equal(3, server.pop_response.response.first.range.start.line)
+      assert_equal(3, server.pop_response.response.first.target_range.start.line)
 
       server.process_message(
         id: 1,
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 4, line: 6 } },
       )
-      assert_equal(1, server.pop_response.response.first.range.start.line)
+      assert_equal(1, server.pop_response.response.first.target_range.start.line)
     end
   end
 
@@ -521,8 +563,8 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: uri }, position: { character: 11, line: 6 } },
       )
       response = server.pop_response.response.first
-      assert_equal(1, response.range.start.line)
-      assert_equal(1, response.range.end.line)
+      assert_equal(1, response.target_range.start.line)
+      assert_equal(1, response.target_range.end.line)
     end
   end
 
@@ -591,7 +633,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: uri }, position: { character: 6, line: 13 } },
       )
       response = server.pop_response.response.first
-      assert_equal(2, response.range.start.line)
+      assert_equal(2, response.target_range.start.line)
 
       server.process_message(
         id: 1,
@@ -599,7 +641,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: uri }, position: { character: 6, line: 14 } },
       )
       response = server.pop_response.response.first
-      assert_equal(6, response.range.start.line)
+      assert_equal(6, response.target_range.start.line)
     end
   end
 
@@ -638,6 +680,237 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       assert_equal(2, response[0].range.start.line)
       # Second location is Parent#@a
       assert_equal(8, response[1].range.start.line)
+    end
+  end
+
+  def test_definition_for_singleton_methods
+    source = <<~RUBY
+      class Foo
+        def self.bar
+        end
+
+        class << self
+          def baz; end
+        end
+      end
+
+      Foo.bar
+      Foo.baz
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 9 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response[0].target_range.start.line)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 10 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(5, response[0].target_range.start.line)
+    end
+  end
+
+  def test_definition_for_class_instance_variables
+    source = <<~RUBY
+      class Foo
+        @a = 123
+
+        def self.bar
+          @a
+        end
+
+        class << self
+          def baz
+            @a
+          end
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 4 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response[0].range.start.line)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 9 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response[0].range.start.line)
+    end
+  end
+
+  def test_definition_for_aliased_methods
+    source = <<~RUBY
+      class Parent
+        def bar; end
+      end
+
+      class Child < Parent
+        alias baz bar
+
+        def do_something
+          baz
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 8 } },
+      )
+      response = server.pop_response.response
+
+      assert_equal(5, response[0].target_range.start.line)
+    end
+  end
+
+  def test_definition_for_super_calls
+    source = <<~RUBY
+      class Parent
+        def foo; end
+        def bar; end
+      end
+
+      class Child < Parent
+        def foo(a)
+          super()
+        end
+
+        def bar
+          super
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response[0].target_range.start.line)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 11 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(2, response[0].target_range.start.line)
+    end
+  end
+
+  def test_definition_for_super_calls_is_disabled_on_typed_true
+    source = <<~RUBY
+      # typed: true
+      class Parent
+        def foo; end
+        def bar; end
+      end
+
+      class Child < Parent
+        def foo(a)
+          super()
+        end
+
+        def bar
+          super
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 8 } },
+      )
+
+      assert_empty(server.pop_response.response)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 12 } },
+      )
+
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_definition_on_self_is_disabled_for_typed_true
+    # We need this expectation to make sure the test is testing the early return inside on_call_node_enter
+    # not the one inside handle_method_definition
+    RubyLsp::Listeners::Definition.any_instance.expects(:not_in_dependencies?).never
+
+    source = <<~RUBY
+      # typed: true
+      class Foo
+        def bar
+          baz
+        end
+
+        def baz
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 3 } },
+      )
+
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_definition_for_instance_variables_is_disabled_on_typed_strict
+    source = <<~RUBY
+      # typed: strict
+      class Foo
+        def initialize
+          @something = T.let(123, Integer)
+        end
+
+        def baz
+          @something
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+      )
+
+      assert_empty(server.pop_response.response)
     end
   end
 

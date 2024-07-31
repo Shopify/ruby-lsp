@@ -38,13 +38,16 @@ module RubyLsp
 
       sig { override.returns(T::Hash[Symbol, T.untyped]) }
       def perform
+        return @item if @item.dig(:data, :skip_resolve)
+
         # Based on the spec https://microsoft.github.io/language-server-protocol/specification#textDocument_completion,
         # a completion resolve request must always return the original completion item without modifying ANY fields
-        # other than label details and documentation. If we modify anything, the completion behaviour might be broken.
+        # other than detail and documentation (NOT labelDetails). If we modify anything, the completion behaviour might
+        # be broken.
         #
         # For example, forgetting to return the `insertText` included in the original item will make the editor use the
         # `label` for the text edit instead
-        label = @item[:label]
+        label = @item[:label].dup
         entries = @index[label] || []
 
         owner_name = @item.dig(:data, :owner_name)
@@ -56,13 +59,22 @@ module RubyLsp
           end
         end
 
-        @item[:labelDetails] = Interface::CompletionItemLabelDetails.new(
-          description: entries.take(MAX_DOCUMENTATION_ENTRIES).map(&:file_name).join(","),
-        )
+        first_entry = T.must(entries.first)
+
+        if first_entry.is_a?(RubyIndexer::Entry::Member)
+          label = +"#{label}#{first_entry.decorated_parameters}"
+        end
+
+        guessed_type = @item.dig(:data, :guessed_type)
+
+        extra_links = if guessed_type
+          label << "\n\nGuessed receiver: #{guessed_type}"
+          "[Learn more about guessed types](#{GUESSED_TYPES_URL})"
+        end
 
         @item[:documentation] = Interface::MarkupContent.new(
           kind: "markdown",
-          value: markdown_from_index_entries(label, entries, MAX_DOCUMENTATION_ENTRIES),
+          value: markdown_from_index_entries(label, entries, MAX_DOCUMENTATION_ENTRIES, extra_links: extra_links),
         )
 
         @item

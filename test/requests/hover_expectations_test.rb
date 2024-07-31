@@ -43,6 +43,23 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hovering_on_erb
+    source = <<~ERB
+      <% String %>
+    ERB
+
+    with_server(source, Kernel.URI("file:///fake.erb"), stub_no_typechecker: true) do |server, uri|
+      RubyIndexer::RBSIndexer.new(server.global_state.index).index_ruby_core
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { line: 0, character: 4 } },
+      )
+      response = server.pop_response
+      assert_match(/String\b/, response.response.contents.value)
+    end
+  end
+
   def test_hovering_precision
     source = <<~RUBY
       module Foo
@@ -257,7 +274,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
     begin
       create_hover_addon
 
-      with_server(source) do |server, uri|
+      with_server(source, stub_no_typechecker: true) do |server, uri|
         server.process_message(
           id: 1,
           method: "textDocument/hover",
@@ -447,6 +464,251 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
       contents = server.pop_response.response.contents.value
       assert_match("bar(a, b = <default>, *c, d:, e: <default>, **f, &g)", contents)
+    end
+  end
+
+  def test_hover_for_singleton_methods
+    source = <<~RUBY
+      class Foo
+        # bar
+        def self.bar
+        end
+
+        class << self
+          # baz
+          def baz; end
+        end
+      end
+
+      Foo.bar
+      Foo.baz
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 11 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("bar", contents)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 12 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("baz", contents)
+    end
+  end
+
+  def test_definition_for_class_instance_variables
+    source = <<~RUBY
+      class Foo
+        # Hey!
+        @a = 123
+
+        def self.bar
+          @a
+        end
+
+        class << self
+          def baz
+            @a
+          end
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 5 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("Hey!", contents)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 10 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("Hey!", contents)
+    end
+  end
+
+  def test_hover_for_aliased_methods
+    source = <<~RUBY
+      class Parent
+        # Original
+        def bar; end
+      end
+
+      class Child < Parent
+        # Alias
+        alias baz bar
+
+        def do_something
+          baz
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 10 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("Alias", contents)
+      assert_match("Original", contents)
+    end
+  end
+
+  def test_hover_for_super_calls
+    source = <<~RUBY
+      class Parent
+        # Foo
+        def foo; end
+        # Bar
+        def bar; end
+      end
+
+      class Child < Parent
+        def foo(a)
+          super()
+        end
+
+        def bar
+          super
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 9 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("Foo", contents)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 13 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("Bar", contents)
+    end
+  end
+
+  def test_hover_is_disabled_for_self_methods_on_typed_true
+    source = <<~RUBY
+      # typed: true
+      class Child
+        def foo
+          bar
+        end
+
+        # Hey!
+        def bar
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 3 } },
+      )
+
+      assert_nil(server.pop_response.response)
+    end
+  end
+
+  def test_hover_is_disabled_for_instance_variables_on_typed_strict
+    source = <<~RUBY
+      # typed: strict
+      class Child
+        def initialize
+          # Hello
+          @something = T.let(123, Integer)
+        end
+
+        def bar
+          @something
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 8 } },
+      )
+
+      assert_nil(server.pop_response.response)
+    end
+  end
+
+  def test_hover_is_disabled_on_super_for_typed_true
+    source = <<~RUBY
+      # typed: true
+      class Parent
+        def foo; end
+      end
+      class Child < Parent
+        def foo
+          super
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 6 } },
+      )
+
+      assert_nil(server.pop_response.response)
+    end
+  end
+
+  def test_hover_for_guessed_receivers
+    source = <<~RUBY
+      class User
+        def name; end
+      end
+
+      user.name
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 5, line: 4 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("Guessed receiver: User", contents)
+      assert_match("Learn more about guessed types", contents)
     end
   end
 

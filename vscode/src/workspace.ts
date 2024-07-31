@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 import { CodeLens, State } from "vscode-languageclient/node";
 
 import { Ruby } from "./ruby";
-import { Telemetry } from "./telemetry";
 import Client from "./client";
 import {
   asyncExec,
@@ -18,10 +17,10 @@ export class Workspace implements WorkspaceInterface {
   public readonly ruby: Ruby;
   public readonly createTestItems: (response: CodeLens[]) => void;
   public readonly workspaceFolder: vscode.WorkspaceFolder;
+  public readonly outputChannel: WorkspaceChannel;
   private readonly context: vscode.ExtensionContext;
-  private readonly telemetry: Telemetry;
-  private readonly outputChannel: WorkspaceChannel;
   private readonly isMainWorkspace: boolean;
+  private readonly telemetry: vscode.TelemetryLogger;
   private needsRestart = false;
   #rebaseInProgress = false;
   #error = false;
@@ -29,7 +28,7 @@ export class Workspace implements WorkspaceInterface {
   constructor(
     context: vscode.ExtensionContext,
     workspaceFolder: vscode.WorkspaceFolder,
-    telemetry: Telemetry,
+    telemetry: vscode.TelemetryLogger,
     createTestItems: (response: CodeLens[]) => void,
     isMainWorkspace = false,
   ) {
@@ -263,6 +262,28 @@ export class Workspace implements WorkspaceInterface {
     return this.#rebaseInProgress;
   }
 
+  async execute(command: string, log = false) {
+    if (log) {
+      this.outputChannel.show();
+      this.outputChannel.info(`Running "${command}"`);
+    }
+
+    const result = await asyncExec(command, {
+      env: this.ruby.env,
+      cwd: this.workspaceFolder.uri.fsPath,
+    });
+
+    if (log) {
+      if (result.stderr.length > 0) {
+        this.outputChannel.error(result.stderr);
+      } else {
+        this.outputChannel.info(result.stdout);
+      }
+    }
+
+    return result;
+  }
+
   private registerRestarts(context: vscode.ExtensionContext) {
     this.createRestartWatcher(context, "Gemfile.lock");
     this.createRestartWatcher(context, "gems.locked");
@@ -270,20 +291,22 @@ export class Workspace implements WorkspaceInterface {
 
     // If a configuration that affects the Ruby LSP has changed, update the client options using the latest
     // configuration and restart the server
-    vscode.workspace.onDidChangeConfiguration(async (event) => {
-      if (event.affectsConfiguration("rubyLsp")) {
-        // Re-activate Ruby if the version manager changed
-        if (
-          event.affectsConfiguration("rubyLsp.rubyVersionManager") ||
-          event.affectsConfiguration("rubyLsp.bundleGemfile") ||
-          event.affectsConfiguration("rubyLsp.customRubyCommand")
-        ) {
-          await this.ruby.activateRuby();
-        }
+    context.subscriptions.push(
+      vscode.workspace.onDidChangeConfiguration(async (event) => {
+        if (event.affectsConfiguration("rubyLsp")) {
+          // Re-activate Ruby if the version manager changed
+          if (
+            event.affectsConfiguration("rubyLsp.rubyVersionManager") ||
+            event.affectsConfiguration("rubyLsp.bundleGemfile") ||
+            event.affectsConfiguration("rubyLsp.customRubyCommand")
+          ) {
+            await this.ruby.activateRuby();
+          }
 
-        await this.restart();
-      }
-    });
+          await this.restart();
+        }
+      }),
+    );
   }
 
   private createRestartWatcher(

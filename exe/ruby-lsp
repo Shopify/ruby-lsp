@@ -36,6 +36,10 @@ parser = OptionParser.new do |opts|
     options[:experimental] = true
   end
 
+  opts.on("--doctor", "Run troubleshooting steps") do
+    options[:doctor] = true
+  end
+
   opts.on("-h", "--help", "Print this help") do
     puts opts.help
     puts
@@ -102,8 +106,29 @@ if options[:time_index]
 
   puts <<~MSG
     Ruby LSP v#{RubyLsp::VERSION}: Indexing took #{result.round(5)} seconds and generated:
-    - #{entries_by_entry_type.map { |k, v| "#{k.name.split("::").last}: #{v.size}" }.join("\n- ")}
+    - #{entries_by_entry_type.sort_by { |k, _| k.to_s }.map { |k, v| "#{k.name.split("::").last}: #{v.size}" }.join("\n- ")}
   MSG
+  return
+end
+
+if options[:doctor]
+  if File.exist?(".index.yml")
+    begin
+      config = YAML.parse_file(".index.yml").to_ruby
+    rescue => e
+      abort("Error parsing config: #{e.message}")
+    end
+    RubyIndexer.configuration.apply_config(config)
+  end
+
+  index = RubyIndexer::Index.new
+
+  puts "Globbing for indexable files"
+
+  RubyIndexer.configuration.indexables.each do |indexable|
+    puts "indexing: #{indexable.full_path}"
+    index.index_single(indexable)
+  end
   return
 end
 

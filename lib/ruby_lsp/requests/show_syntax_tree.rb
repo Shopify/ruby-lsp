@@ -25,6 +25,7 @@ module RubyLsp
         super()
         @document = document
         @range = range
+        @tree = T.let(document.parse_result.value, Prism::ProgramNode)
       end
 
       sig { override.returns(String) }
@@ -32,7 +33,7 @@ module RubyLsp
         return ast_for_range if @range
 
         output_string = +""
-        PP.pp(@document.tree, output_string)
+        PP.pp(@tree, output_string)
         output_string
       end
 
@@ -46,7 +47,7 @@ module RubyLsp
         start_char = scanner.find_char_position(range[:start])
         end_char = scanner.find_char_position(range[:end])
 
-        queue = @document.tree.statements.body.dup
+        queue = @tree.statements.body.dup
         found_nodes = []
 
         until queue.empty?

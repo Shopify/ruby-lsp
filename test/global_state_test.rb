@@ -176,6 +176,29 @@ module RubyLsp
       assert_empty(state.instance_variable_get(:@linters))
     end
 
+    def test_linter_auto_detection_with_rubocop_as_transitive_dependency
+      state = GlobalState.new
+
+      stub_direct_dependencies("gem_with_config" => "1.2.3")
+      stub_all_dependencies("gem_with_config", "rubocop")
+      state.stubs(:dot_rubocop_yml_present).returns(true)
+
+      state.apply_options({})
+
+      assert_includes(state.instance_variable_get(:@linters), "rubocop")
+    end
+
+    def test_apply_options_sets_experimental_features
+      state = GlobalState.new
+      refute_predicate(state, :experimental_features)
+
+      state.apply_options({
+        initializationOptions: { experimentalFeaturesEnabled: true },
+      })
+
+      assert_predicate(state, :experimental_features)
+    end
+
     private
 
     def stub_direct_dependencies(dependencies)

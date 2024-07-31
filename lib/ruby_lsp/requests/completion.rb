@@ -36,7 +36,7 @@ module RubyLsp
         def provider
           Interface::CompletionOptions.new(
             resolve_provider: true,
-            trigger_characters: ["/", "\"", "'", ":", "@"],
+            trigger_characters: ["/", "\"", "'", ":", "@", "."],
             completion_item: {
               labelDetailsSupport: true,
             },
@@ -48,20 +48,20 @@ module RubyLsp
         params(
           document: Document,
           global_state: GlobalState,
-          position: T::Hash[Symbol, T.untyped],
-          typechecker_enabled: T::Boolean,
+          params: T::Hash[Symbol, T.untyped],
+          sorbet_level: Document::SorbetLevel,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(document, global_state, position, typechecker_enabled, dispatcher)
+      def initialize(document, global_state, params, sorbet_level, dispatcher)
         super()
         @target = T.let(nil, T.nilable(Prism::Node))
         @dispatcher = dispatcher
         # Completion always receives the position immediately after the character that was just typed. Here we adjust it
         # back by 1, so that we find the right node
-        char_position = document.create_scanner.find_char_position(position) - 1
+        char_position = document.create_scanner.find_char_position(params[:position]) - 1
         node_context = document.locate(
-          document.tree,
+          document.parse_result.value,
           char_position,
           node_types: [
             Prism::CallNode,
@@ -84,9 +84,10 @@ module RubyLsp
           @response_builder,
           global_state,
           node_context,
-          typechecker_enabled,
+          sorbet_level,
           dispatcher,
           document.uri,
+          params.dig(:context, :triggerCharacter),
         )
 
         Addon.addons.each do |addon|

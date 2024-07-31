@@ -7,23 +7,78 @@ module RubyLsp
       extend T::Sig
       include Requests::Support::Common
 
+      KEYWORDS = [
+        "alias",
+        "and",
+        "begin",
+        "BEGIN",
+        "break",
+        "case",
+        "class",
+        "def",
+        "defined?",
+        "do",
+        "else",
+        "elsif",
+        "end",
+        "END",
+        "ensure",
+        "false",
+        "for",
+        "if",
+        "in",
+        "module",
+        "next",
+        "nil",
+        "not",
+        "or",
+        "redo",
+        "rescue",
+        "retry",
+        "return",
+        "self",
+        "super",
+        "then",
+        "true",
+        "undef",
+        "unless",
+        "until",
+        "when",
+        "while",
+        "yield",
+        "__ENCODING__",
+        "__FILE__",
+        "__LINE__",
+      ].freeze
+
       sig do
         params(
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
           global_state: GlobalState,
           node_context: NodeContext,
-          typechecker_enabled: T::Boolean,
+          sorbet_level: Document::SorbetLevel,
           dispatcher: Prism::Dispatcher,
           uri: URI::Generic,
+          trigger_character: T.nilable(String),
         ).void
       end
-      def initialize(response_builder, global_state, node_context, typechecker_enabled, dispatcher, uri) # rubocop:disable Metrics/ParameterLists
+      def initialize( # rubocop:disable Metrics/ParameterLists
+        response_builder,
+        global_state,
+        node_context,
+        sorbet_level,
+        dispatcher,
+        uri,
+        trigger_character
+      )
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
+        @type_inferrer = T.let(global_state.type_inferrer, TypeInferrer)
         @node_context = node_context
-        @typechecker_enabled = typechecker_enabled
+        @sorbet_level = sorbet_level
         @uri = uri
+        @trigger_character = trigger_character
 
         dispatcher.register(
           self,
@@ -42,7 +97,9 @@ module RubyLsp
       # Handle completion on regular constant references (e.g. `Bar`)
       sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read_node_enter(node)
-        return if @global_state.has_type_checker
+        # The only scenario where Sorbet doesn't provide constant completion is on ignored files. Even if the file has
+        # no sigil, Sorbet will still provide completion for constants
+        return if @sorbet_level != Document::SorbetLevel::Ignore
 
         name = constant_name(node)
         return if name.nil?
@@ -63,7 +120,9 @@ module RubyLsp
       # Handle completion on namespaced constant references (e.g. `Foo::Bar`)
       sig { params(node: Prism::ConstantPathNode).void }
       def on_constant_path_node_enter(node)
-        return if @global_state.has_type_checker
+        # The only scenario where Sorbet doesn't provide constant completion is on ignored files. Even if the file has
+        # no sigil, Sorbet will still provide completion for constants
+        return if @sorbet_level != Document::SorbetLevel::Ignore
 
         name = constant_name(node)
         return if name.nil?
@@ -73,28 +132,32 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
-        receiver = node.receiver
+        # The only scenario where Sorbet doesn't provide constant completion is on ignored files. Even if the file has
+        # no sigil, Sorbet will still provide completion for constants
+        if @sorbet_level == Document::SorbetLevel::Ignore
+          receiver = node.receiver
 
-        # When writing `Foo::`, the AST assigns a method call node (because you can use that syntax to invoke singleton
-        # methods). However, in addition to providing method completion, we also need to show possible constant
-        # completions
-        if (receiver.is_a?(Prism::ConstantReadNode) || receiver.is_a?(Prism::ConstantPathNode)) &&
-            node.call_operator == "::"
+          # When writing `Foo::`, the AST assigns a method call node (because you can use that syntax to invoke
+          # singleton methods). However, in addition to providing method completion, we also need to show possible
+          # constant completions
+          if (receiver.is_a?(Prism::ConstantReadNode) || receiver.is_a?(Prism::ConstantPathNode)) &&
+              node.call_operator == "::"
 
-          name = constant_name(receiver)
+            name = constant_name(receiver)
 
-          if name
-            start_loc = node.location
-            end_loc = T.must(node.call_operator_loc)
+            if name
+              start_loc = node.location
+              end_loc = T.must(node.call_operator_loc)
 
-            constant_path_completion(
-              "#{name}::",
-              Interface::Range.new(
-                start: Interface::Position.new(line: start_loc.start_line - 1, character: start_loc.start_column),
-                end: Interface::Position.new(line: end_loc.end_line - 1, character: end_loc.end_column),
-              ),
-            )
-            return
+              constant_path_completion(
+                "#{name}::",
+                Interface::Range.new(
+                  start: Interface::Position.new(line: start_loc.start_line - 1, character: start_loc.start_column),
+                  end: Interface::Position.new(line: end_loc.end_line - 1, character: end_loc.end_column),
+                ),
+              )
+              return
+            end
           end
         end
 
@@ -107,7 +170,7 @@ module RubyLsp
         when "require_relative"
           complete_require_relative(node)
         else
-          complete_self_receiver_method(node, name) if !@typechecker_enabled && self_receiver?(node)
+          complete_methods(node, name)
         end
       end
 
@@ -158,7 +221,7 @@ module RubyLsp
           name.delete_suffix("::")
         else
           *namespace, incomplete_name = name.split("::")
-          T.must(namespace).join("::")
+          namespace.join("::")
         end
 
         nesting = @node_context.nesting
@@ -192,11 +255,23 @@ module RubyLsp
 
       sig { params(name: String, location: Prism::Location).void }
       def handle_instance_variable_completion(name, location)
-        @index.instance_variable_completion_candidates(name, @node_context.fully_qualified_name).each do |entry|
+        # Sorbet enforces that all instance variables be declared on typed strict or higher, which means it will be able
+        # to provide all features for them
+        return if @sorbet_level == Document::SorbetLevel::Strict
+
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
+
+        @index.instance_variable_completion_candidates(name, type.name).each do |entry|
           variable_name = entry.name
+
+          label_details = Interface::CompletionItemLabelDetails.new(
+            description: entry.file_name,
+          )
 
           @response_builder << Interface::CompletionItem.new(
             label: variable_name,
+            label_details: label_details,
             text_edit: Interface::TextEdit.new(
               range: range_from_location(location),
               new_text: variable_name,
@@ -257,40 +332,102 @@ module RubyLsp
       end
 
       sig { params(node: Prism::CallNode, name: String).void }
-      def complete_self_receiver_method(node, name)
-        receiver_entries = @index[@node_context.fully_qualified_name]
-        return unless receiver_entries
+      def complete_methods(node, name)
+        # If the node has a receiver, then we don't need to provide local nor keyword completions. Sorbet can provide
+        # local and keyword completion for any file with a Sorbet level of true or higher
+        if !sorbet_level_true_or_higher?(@sorbet_level) && !node.receiver
+          add_local_completions(node, name)
+          add_keyword_completions(node, name)
+        end
 
-        receiver = T.must(receiver_entries.first)
+        # Sorbet can provide completion for methods invoked on self on typed true or higher files
+        return if sorbet_level_true_or_higher?(@sorbet_level) && self_receiver?(node)
 
-        @index.method_completion_candidates(name, receiver.name).each do |entry|
-          @response_builder << build_method_completion(T.cast(entry, RubyIndexer::Entry::Member), node)
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
+
+        # When the trigger character is a dot, Prism matches the name of the call node to whatever is next in the source
+        # code, leading to us searching for the wrong name. What we want to do instead is show every available method
+        # when dot is pressed
+        method_name = @trigger_character == "." ? nil : name
+
+        range = if method_name
+          range_from_location(T.must(node.message_loc))
+        else
+          loc = node.call_operator_loc
+
+          if loc
+            Interface::Range.new(
+              start: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column + 1),
+              end: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column + 1),
+            )
+          end
+        end
+
+        return unless range
+
+        guessed_type = type.name
+
+        @index.method_completion_candidates(method_name, type.name).each do |entry|
+          entry_name = entry.name
+          owner_name = entry.owner&.name
+
+          label_details = Interface::CompletionItemLabelDetails.new(
+            description: entry.file_name,
+            detail: entry.decorated_parameters,
+          )
+          @response_builder << Interface::CompletionItem.new(
+            label: entry_name,
+            filter_text: entry_name,
+            label_details: label_details,
+            text_edit: Interface::TextEdit.new(range: range, new_text: entry_name),
+            kind: Constant::CompletionItemKind::METHOD,
+            data: {
+              owner_name: owner_name,
+              guessed_type: guessed_type,
+            },
+          )
+        end
+      rescue RubyIndexer::Index::NonExistingNamespaceError
+        # We have not indexed this namespace, so we can't provide any completions
+      end
+
+      sig { params(node: Prism::CallNode, name: String).void }
+      def add_local_completions(node, name)
+        range = range_from_location(T.must(node.message_loc))
+
+        @node_context.locals_for_scope.each do |local|
+          local_name = local.to_s
+          next unless local_name.start_with?(name)
+
+          @response_builder << Interface::CompletionItem.new(
+            label: local_name,
+            filter_text: local_name,
+            text_edit: Interface::TextEdit.new(range: range, new_text: local_name),
+            kind: Constant::CompletionItemKind::VARIABLE,
+            data: {
+              skip_resolve: true,
+            },
+          )
         end
       end
 
-      sig do
-        params(
-          entry: RubyIndexer::Entry::Member,
-          node: Prism::CallNode,
-        ).returns(Interface::CompletionItem)
-      end
-      def build_method_completion(entry, node)
-        name = entry.name
+      sig { params(node: Prism::CallNode, name: String).void }
+      def add_keyword_completions(node, name)
+        range = range_from_location(T.must(node.message_loc))
 
-        Interface::CompletionItem.new(
-          label: name,
-          filter_text: name,
-          text_edit: Interface::TextEdit.new(range: range_from_location(T.must(node.message_loc)), new_text: name),
-          kind: Constant::CompletionItemKind::METHOD,
-          label_details: Interface::CompletionItemLabelDetails.new(
-            detail: "(#{entry.parameters.map(&:decorated_name).join(", ")})",
-            description: entry.file_name,
-          ),
-          documentation: Interface::MarkupContent.new(
-            kind: "markdown",
-            value: markdown_from_index_entries(name, entry),
-          ),
-        )
+        KEYWORDS.each do |keyword|
+          next unless keyword.start_with?(name)
+
+          @response_builder << Interface::CompletionItem.new(
+            label: keyword,
+            text_edit: Interface::TextEdit.new(range: range, new_text: keyword),
+            kind: Constant::CompletionItemKind::KEYWORD,
+            data: {
+              skip_resolve: true,
+            },
+          )
+        end
       end
 
       sig { params(label: String, node: Prism::StringNode).returns(Interface::CompletionItem) }
@@ -374,8 +511,14 @@ module RubyLsp
         # When using a top level constant reference (e.g.: `::Bar`), the editor includes the `::` as part of the filter.
         # For these top level references, we need to include the `::` as part of the filter text or else it won't match
         # the right entries in the index
+
+        label_details = Interface::CompletionItemLabelDetails.new(
+          description: entries.map(&:file_name).join(","),
+        )
+
         Interface::CompletionItem.new(
           label: real_name,
+          label_details: label_details,
           filter_text: filter_text,
           text_edit: Interface::TextEdit.new(
             range: range,

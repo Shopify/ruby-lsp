@@ -10,7 +10,6 @@ import {
   DocumentHighlightKind,
   Hover,
   WorkDoneProgress,
-  Location,
   SemanticTokens,
   DocumentLink,
   WorkspaceSymbol,
@@ -22,14 +21,16 @@ import {
   SelectionRange,
   CodeAction,
   TextDocumentFilter,
+  LocationLink,
 } from "vscode-languageclient/node";
 import { after, afterEach, before } from "mocha";
 
 import { Ruby, ManagerIdentifier } from "../../ruby";
-import { Telemetry, TelemetryApi, TelemetryEvent } from "../../telemetry";
 import Client from "../../client";
 import { WorkspaceChannel } from "../../workspaceChannel";
 import { RUBY_VERSION } from "../rubyVersion";
+
+import { FAKE_TELEMETRY } from "./fakeTelemetry";
 
 const [major, minor, _patch] = RUBY_VERSION.split(".");
 
@@ -62,19 +63,6 @@ class FakeLogger {
 
   appendLine(value: string): void {
     this.receivedMessages += value;
-  }
-}
-
-class FakeApi implements TelemetryApi {
-  public sentEvents: TelemetryEvent[];
-
-  constructor() {
-    this.sentEvents = [];
-  }
-
-  // eslint-disable-next-line @typescript-eslint/require-await
-  async sendEvent(event: TelemetryEvent): Promise<void> {
-    this.sentEvents.push(event);
   }
 }
 
@@ -153,10 +141,9 @@ async function launchClient(workspaceUri: vscode.Uri) {
   await ruby.activateRuby();
   ruby.env.RUBY_LSP_BYPASS_TYPECHECKER = "true";
 
-  const telemetry = new Telemetry(context, new FakeApi());
   const client = new Client(
     context,
-    telemetry,
+    FAKE_TELEMETRY,
     ruby,
     () => {},
     workspaceFolder,
@@ -334,7 +321,7 @@ suite("Client", () => {
         text,
       },
     });
-    const response: Location[] = await client.sendRequest(
+    const response: LocationLink[] = await client.sendRequest(
       "textDocument/definition",
       {
         textDocument: {
@@ -345,7 +332,7 @@ suite("Client", () => {
     );
 
     assert.strictEqual(response.length, 1);
-    assert.match(response[0].uri, /server\.rb/);
+    assert.match(response[0].targetUri, /server\.rb/);
   }).timeout(20000);
 
   test("semantic highlighting", async () => {
@@ -668,11 +655,30 @@ suite("Client", () => {
   }).timeout(20000);
 
   test("document selectors match default gems and bundled gems appropriately", () => {
-    const [workspaceFilter, bundledGemsFilter, defaultGemsFilter] =
-      client.clientOptions.documentSelector!;
+    const [
+      workspaceRubyFilter,
+      workspaceERBFilter,
+      bundledGemsFilter,
+      defaultGemsFilter,
+    ] = client.clientOptions.documentSelector!;
 
     assert.strictEqual(
-      (workspaceFilter as TextDocumentFilter).pattern!,
+      (workspaceRubyFilter as TextDocumentFilter).language!,
+      "ruby",
+    );
+
+    assert.strictEqual(
+      (workspaceRubyFilter as TextDocumentFilter).pattern!,
+      `${workspaceUri.fsPath}/**/*`,
+    );
+
+    assert.strictEqual(
+      (workspaceERBFilter as TextDocumentFilter).language!,
+      "erb",
+    );
+
+    assert.strictEqual(
+      (workspaceERBFilter as TextDocumentFilter).pattern!,
       `${workspaceUri.fsPath}/**/*`,
     );
 
@@ -686,4 +692,20 @@ suite("Client", () => {
       /lib\/ruby\/\d\.\d\.\d\/\*\*\/\*/,
     );
   });
+
+  test("requests for non existing documents do not crash the server", async () => {
+    await assert.rejects(
+      async () =>
+        client.sendRequest("textDocument/documentSymbol", {
+          textDocument: {
+            uri: documentUri.toString(),
+          },
+        }),
+      (error: any) => {
+        assert.strictEqual(error.data, null);
+        assert.strictEqual(error.code, -32602);
+        return true;
+      },
+    );
+  }).timeout(20000);
 });

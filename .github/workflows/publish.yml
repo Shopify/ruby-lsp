@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         name: Use Node.js 18.x
         with:
-          node-version: "18"
+          node-version: "20.9"
           cache: "yarn"
           cache-dependency-path: "vscode"
 
@@ -115,7 +115,7 @@ jobs:
 
             const changelog = releases
               .filter((release) => release.tag_name.startsWith("vscode-ruby-lsp") && (includePrereleases || !release.prerelease))
-              .map((release) => `# ${release.tag_name}\n${release.body}\n`)
+              .map((release) => `${release.body}\n`)
               .join("\n");
 
             fs.writeFileSync("vscode/CHANGELOG.md", changelog);

@@ -289,4 +289,110 @@ class SignatureHelpTest < Minitest::Test
       assert_equal(0, result.active_parameter)
     end
   end
+
+  def test_singleton_methods
+    source = +<<~RUBY
+      class Foo
+        def self.bar(a, b)
+        end
+      end
+
+      Foo.bar()
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
+        position: { line: 5, character: 7 },
+        context: {
+          triggerCharacter: "(",
+          activeSignatureHelp: nil,
+        },
+      })
+      result = server.pop_response.response
+      signature = result.signatures.first
+
+      assert_equal("bar(a, b)", signature.label)
+      assert_equal(0, result.active_parameter)
+    end
+  end
+
+  def test_aliased_methods
+    source = <<~RUBY
+      class Parent
+        def bar(a); end
+      end
+
+      class Child < Parent
+        alias baz bar
+
+        def do_something
+          baz()
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
+        position: { line: 8, character: 8 },
+        context: {},
+      })
+      result = server.pop_response.response
+      signature = result.signatures.first
+
+      assert_equal("baz(a)", signature.label)
+      assert_equal(0, result.active_parameter)
+    end
+  end
+
+  def test_help_is_disabled_on_typed_true
+    source = +<<~RUBY
+      # typed: true
+      class Foo
+        def bar(a, b)
+        end
+
+        def baz
+          bar()
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
+        position: { line: 6, character: 7 },
+        context: {
+          triggerCharacter: "(",
+          activeSignatureHelp: nil,
+        },
+      })
+      assert_nil(server.pop_response.response)
+    end
+  end
+
+  def test_guessed_types
+    source = <<~RUBY
+      class User
+        def subscribe!(news_letter)
+        end
+      end
+
+      user.subscribe!()
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
+        position: { line: 5, character: 15 },
+        context: {},
+      })
+      result = server.pop_response.response
+      signature = result.signatures.first
+
+      assert_equal("subscribe!(news_letter)", signature.label)
+      assert_match("Guessed receiver: User", signature.documentation.value)
+    end
+  end
 end

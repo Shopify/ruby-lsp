@@ -21,6 +21,8 @@ module RubyLsp
           Prism::InstanceVariableWriteNode,
           Prism::SymbolNode,
           Prism::StringNode,
+          Prism::SuperNode,
+          Prism::ForwardingSuperNode,
         ],
         T::Array[T.class_of(Prism::Node)],
       )
@@ -40,16 +42,17 @@ module RubyLsp
           uri: URI::Generic,
           node_context: NodeContext,
           dispatcher: Prism::Dispatcher,
-          typechecker_enabled: T::Boolean,
+          sorbet_level: Document::SorbetLevel,
         ).void
       end
-      def initialize(response_builder, global_state, uri, node_context, dispatcher, typechecker_enabled) # rubocop:disable Metrics/ParameterLists
+      def initialize(response_builder, global_state, uri, node_context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
         @index = T.let(global_state.index, RubyIndexer::Index)
+        @type_inferrer = T.let(global_state.type_inferrer, TypeInferrer)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
         @node_context = node_context
-        @typechecker_enabled = typechecker_enabled
+        @sorbet_level = sorbet_level
 
         dispatcher.register(
           self,
@@ -63,12 +66,14 @@ module RubyLsp
           :on_instance_variable_operator_write_node_enter,
           :on_instance_variable_or_write_node_enter,
           :on_instance_variable_target_node_enter,
+          :on_super_node_enter,
+          :on_forwarding_super_node_enter,
         )
       end
 
       sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read_node_enter(node)
-        return if @typechecker_enabled
+        return if @sorbet_level != Document::SorbetLevel::Ignore
 
         name = constant_name(node)
         return if name.nil?
@@ -78,14 +83,14 @@ module RubyLsp
 
       sig { params(node: Prism::ConstantWriteNode).void }
       def on_constant_write_node_enter(node)
-        return if @global_state.has_type_checker
+        return if @sorbet_level != Document::SorbetLevel::Ignore
 
         generate_hover(node.name.to_s, node.name_loc)
       end
 
       sig { params(node: Prism::ConstantPathNode).void }
       def on_constant_path_node_enter(node)
-        return if @global_state.has_type_checker
+        return if @sorbet_level != Document::SorbetLevel::Ignore
 
         name = constant_name(node)
         return if name.nil?
@@ -95,26 +100,17 @@ module RubyLsp
 
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
-        return unless self_receiver?(node)
-
         if @path && File.basename(@path) == GEMFILE_NAME && node.name == :gem
           generate_gem_hover(node)
           return
         end
 
-        return if @typechecker_enabled
+        return if sorbet_level_true_or_higher?(@sorbet_level) && self_receiver?(node)
 
         message = node.message
         return unless message
 
-        methods = @index.resolve_method(message, @node_context.fully_qualified_name)
-        return unless methods
-
-        title = "#{message}(#{T.must(methods.first).parameters.map(&:decorated_name).join(", ")})"
-
-        categorized_markdown_from_index_entries(title, methods).each do |category, content|
-          @response_builder.push(content, category: category)
-        end
+        handle_method_hover(message)
       end
 
       sig { params(node: Prism::InstanceVariableReadNode).void }
@@ -147,11 +143,59 @@ module RubyLsp
         handle_instance_variable_hover(node.name.to_s)
       end
 
+      sig { params(node: Prism::SuperNode).void }
+      def on_super_node_enter(node)
+        handle_super_node_hover
+      end
+
+      sig { params(node: Prism::ForwardingSuperNode).void }
+      def on_forwarding_super_node_enter(node)
+        handle_super_node_hover
+      end
+
       private
+
+      sig { void }
+      def handle_super_node_hover
+        # Sorbet can handle super hover on typed true or higher
+        return if sorbet_level_true_or_higher?(@sorbet_level)
+
+        surrounding_method = @node_context.surrounding_method
+        return unless surrounding_method
+
+        handle_method_hover(surrounding_method, inherited_only: true)
+      end
+
+      sig { params(message: String, inherited_only: T::Boolean).void }
+      def handle_method_hover(message, inherited_only: false)
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
+
+        methods = @index.resolve_method(message, type.name, inherited_only: inherited_only)
+        return unless methods
+
+        title = "#{message}#{T.must(methods.first).decorated_parameters}"
+
+        if type.is_a?(TypeInferrer::GuessedType)
+          title << "\n\nGuessed receiver: #{type.name}"
+          @response_builder.push("[Learn more about guessed types](#{GUESSED_TYPES_URL})\n", category: :links)
+        end
+
+        categorized_markdown_from_index_entries(title, methods).each do |category, content|
+          @response_builder.push(content, category: category)
+        end
+      end
 
       sig { params(name: String).void }
       def handle_instance_variable_hover(name)
-        entries = @index.resolve_instance_variable(name, @node_context.fully_qualified_name)
+        # Sorbet enforces that all instance variables be declared on typed strict or higher, which means it will be able
+        # to provide all features for them
+        return if @sorbet_level == Document::SorbetLevel::Strict
+
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
+
+        entries = @index.resolve_instance_variable(name, type.name)
         return unless entries
 
         categorized_markdown_from_index_entries(name, entries).each do |category, content|

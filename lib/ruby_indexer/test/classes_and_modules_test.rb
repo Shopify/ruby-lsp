@@ -461,13 +461,13 @@ module RubyIndexer
         end
       RUBY
 
-      foo = T.must(@index["Foo"][0])
+      foo = T.must(@index["Foo::<Class:Foo>"][0])
       assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
 
-      qux = T.must(@index["Foo::Qux"][0])
+      qux = T.must(@index["Foo::Qux::<Class:Qux>"][0])
       assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
 
-      constant_path_references = T.must(@index["ConstantPathReferences"][0])
+      constant_path_references = T.must(@index["ConstantPathReferences::<Class:ConstantPathReferences>"][0])
       assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
     end
 
@@ -515,6 +515,74 @@ module RubyIndexer
       RUBY
 
       assert_entry("Foo::<Class:Foo>::Bar", Entry::Class, "/fake/path/foo.rb:2-4:3-7")
+    end
+
+    def test_name_location_points_to_constant_path_location
+      index(<<~RUBY)
+        class Foo
+          def foo; end
+        end
+
+        module Bar
+          def bar; end
+        end
+      RUBY
+
+      foo = T.must(@index["Foo"].first)
+      refute_equal(foo.location, foo.name_location)
+
+      name_location = foo.name_location
+      assert_equal(1, name_location.start_line)
+      assert_equal(1, name_location.end_line)
+      assert_equal(6, name_location.start_column)
+      assert_equal(9, name_location.end_column)
+
+      bar = T.must(@index["Bar"].first)
+      refute_equal(bar.location, bar.name_location)
+
+      name_location = bar.name_location
+      assert_equal(5, name_location.start_line)
+      assert_equal(5, name_location.end_line)
+      assert_equal(7, name_location.start_column)
+      assert_equal(10, name_location.end_column)
+    end
+
+    def test_indexing_namespaces_inside_top_level_references
+      index(<<~RUBY)
+        module ::Foo
+          class Bar
+          end
+        end
+      RUBY
+
+      # We want to explicitly verify that we didn't introduce the leading `::` by accident, but `Index#[]` deletes the
+      # prefix when we use `refute_entry`
+      entries = @index.instance_variable_get(:@entries)
+      refute(entries.key?("::Foo"))
+      refute(entries.key?("::Foo::Bar"))
+      assert_entry("Foo", Entry::Module, "/fake/path/foo.rb:0-0:3-3")
+      assert_entry("Foo::Bar", Entry::Class, "/fake/path/foo.rb:1-2:2-5")
+    end
+
+    def test_indexing_namespaces_inside_nested_top_level_references
+      index(<<~RUBY)
+        class Baz
+          module ::Foo
+            class Bar
+            end
+
+            class ::Qux
+            end
+          end
+        end
+      RUBY
+
+      refute_entry("Baz::Foo")
+      refute_entry("Baz::Foo::Bar")
+      assert_entry("Baz", Entry::Class, "/fake/path/foo.rb:0-0:8-3")
+      assert_entry("Foo", Entry::Module, "/fake/path/foo.rb:1-2:7-5")
+      assert_entry("Foo::Bar", Entry::Class, "/fake/path/foo.rb:2-4:3-7")
+      assert_entry("Qux", Entry::Class, "/fake/path/foo.rb:5-4:6-7")
     end
   end
 end

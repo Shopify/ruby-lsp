@@ -72,6 +72,15 @@ module RubyLsp
           addon.add_error(e)
         end
       end
+
+      # Intended for use by tests for addons
+      sig { params(addon_name: String).returns(Addon) }
+      def get(addon_name)
+        addon = addons.find { |addon| addon.name == addon_name }
+        raise "Could not find addon '#{addon_name}'" unless addon
+
+        addon
+      end
     end
 
     sig { void }
@@ -157,7 +166,10 @@ module RubyLsp
     # Creates a new Definition listener. This method is invoked on every Definition request
     sig do
       overridable.params(
-        response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::Location],
+        response_builder: ResponseBuilders::CollectionResponseBuilder[T.any(
+          Interface::Location,
+          Interface::LocationLink,
+        )],
         uri: URI::Generic,
         node_context: NodeContext,
         dispatcher: Prism::Dispatcher,

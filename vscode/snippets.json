@@ -62,11 +62,6 @@
     "body": ["module $1", "  def $2", "    $0", "  end", "end", ""],
     "description": "New Ruby module."
   },
-  "Begin block": {
-    "prefix": ["begin"],
-    "body": ["begin", "  $0", "end", ""],
-    "description": "New Ruby begin block."
-  },
   "Begin rescue block": {
     "prefix": ["begin"],
     "body": ["begin", "  $0", "rescue $1", "end", ""],
@@ -76,21 +71,6 @@
     "prefix": ["begin"],
     "body": ["begin", "  $0", "rescue $1", "ensure", "end", ""],
     "description": "New Ruby begin block with rescue and ensure."
-  },
-  "While": {
-    "prefix": ["while"],
-    "body": ["while $1", "  $0", "end", ""],
-    "description": "New Ruby while loop."
-  },
-  "Until": {
-    "prefix": ["until"],
-    "body": ["until $1", "  $0", "end", ""],
-    "description": "New Ruby until loop."
-  },
-  "For": {
-    "prefix": ["for"],
-    "body": ["for $1 in $2", "  $0", "end", ""],
-    "description": "New Ruby for loop."
   },
   "Each inline": {
     "prefix": ["each"],
@@ -142,11 +122,6 @@
     "body": ["find do |$1|", "  $0", "end"],
     "description": "New Ruby find loop."
   },
-  "Define method": {
-    "prefix": ["def"],
-    "body": ["def $1", "  $0", "end"],
-    "description": "New method."
-  },
   "Define singleton method": {
     "prefix": ["def"],
     "body": ["def self.$1", "  $0", "end"],
@@ -167,11 +142,6 @@
     "body": ["attr_writer :$1"],
     "description": "New attribute writer."
   },
-  "If": {
-    "prefix": ["if"],
-    "body": ["if $1", "  $0", "end"],
-    "description": "New if statement."
-  },
   "If else": {
     "prefix": ["if"],
     "body": ["if $1", "  $0", "else", "end"],
@@ -181,24 +151,5 @@
     "prefix": ["if"],
     "body": ["if $1", "  $0", "elsif $2", "  $0", "end"],
     "description": "New if statement with elsif."
-  },
-  "Unless": {
-    "prefix": ["unless"],
-    "body": ["unless $1", "  $0", "end"],
-    "description": "New unless statement."
-  },
-  "Case": {
-    "prefix": ["case"],
-    "body": [
-      "case $0",
-      "when  $1",
-      "  $2",
-      "when  $3",
-      "  $4",
-      "else",
-      "  $5",
-      "end"
-    ],
-    "description": "New case statement."
   }
 }

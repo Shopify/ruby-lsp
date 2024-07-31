@@ -26,7 +26,7 @@ module RubyLsp
           )
         end
 
-        sig { params(location: Prism::Location).returns(Interface::Range) }
+        sig { params(location: T.any(Prism::Location, RubyIndexer::Location)).returns(Interface::Range) }
         def range_from_location(location)
           Interface::Range.new(
             start: Interface::Position.new(
@@ -130,13 +130,17 @@ module RubyLsp
             title: String,
             entries: T.any(T::Array[RubyIndexer::Entry], RubyIndexer::Entry),
             max_entries: T.nilable(Integer),
+            extra_links: T.nilable(String),
           ).returns(String)
         end
-        def markdown_from_index_entries(title, entries, max_entries = nil)
+        def markdown_from_index_entries(title, entries, max_entries = nil, extra_links: nil)
           categorized_markdown = categorized_markdown_from_index_entries(title, entries, max_entries)
 
+          markdown = +(categorized_markdown[:title] || "")
+          markdown << "\n\n#{extra_links}" if extra_links
+
           <<~MARKDOWN.chomp
-            #{categorized_markdown[:title]}
+            #{markdown}
 
             #{categorized_markdown[:links]}
 
@@ -185,6 +189,29 @@ module RubyLsp
             block.call(current)
             current = current.parent
           end
+        end
+
+        sig { params(entry: RubyIndexer::Entry).returns(T.nilable(Integer)) }
+        def kind_for_entry(entry)
+          case entry
+          when RubyIndexer::Entry::Class
+            Constant::SymbolKind::CLASS
+          when RubyIndexer::Entry::Module
+            Constant::SymbolKind::NAMESPACE
+          when RubyIndexer::Entry::Constant
+            Constant::SymbolKind::CONSTANT
+          when RubyIndexer::Entry::Method
+            entry.name == "initialize" ? Constant::SymbolKind::CONSTRUCTOR : Constant::SymbolKind::METHOD
+          when RubyIndexer::Entry::Accessor
+            Constant::SymbolKind::PROPERTY
+          when RubyIndexer::Entry::InstanceVariable
+            Constant::SymbolKind::FIELD
+          end
+        end
+
+        sig { params(sorbet_level: Document::SorbetLevel).returns(T::Boolean) }
+        def sorbet_level_true_or_higher?(sorbet_level)
+          sorbet_level == Document::SorbetLevel::True || sorbet_level == Document::SorbetLevel::Strict
         end
       end
     end
