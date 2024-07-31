@@ -23,9 +23,13 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::FoldingRangeOptions) }
+        sig { returns(Interface::FoldingRangeRegistrationOptions) }
         def provider
-          Interface::FoldingRangeOptions.new
+          Interface::FoldingRangeRegistrationOptions.new(
+            document_selector: [
+              Interface::DocumentFilter.new(language: "ruby"),
+            ],
+          )
         end
       end
 
