@@ -46,6 +46,7 @@ module RubyLsp
           :on_instance_variable_or_write_node_enter,
           :on_instance_variable_target_node_enter,
           :on_string_node_enter,
+          :on_symbol_node_enter,
           :on_super_node_enter,
           :on_forwarding_super_node_enter,
         )
@@ -67,11 +68,7 @@ module RubyLsp
           inferrer_receiver_type = nil
         end
 
-        if message == "autoload" && node.receiver.nil?
-          handle_autoload_definition(node)
-        else
-          handle_method_definition(message, inferrer_receiver_type)
-        end
+        handle_method_definition(message, inferrer_receiver_type)
       end
 
       sig { params(node: Prism::StringNode).void }
@@ -83,6 +80,17 @@ module RubyLsp
         return unless name == :require || name == :require_relative
 
         handle_require_definition(node, name)
+      end
+
+      sig { params(node: Prism::SymbolNode).void }
+      def on_symbol_node_enter(node)
+        enclosing_call = @node_context.call_node
+        return unless enclosing_call
+
+        name = enclosing_call.name
+        return unless name == :autoload
+
+        handle_autoload_definition(enclosing_call)
       end
 
       sig { params(node: Prism::BlockArgumentNode).void }

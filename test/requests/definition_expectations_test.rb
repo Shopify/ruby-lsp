@@ -367,7 +367,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       server.process_message(
         id: 1,
         method: "textDocument/definition",
-        params: { textDocument: { uri: uri }, position: { character: 3, line: 3 } },
+        params: { textDocument: { uri: uri }, position: { character: 12, line: 3 } },
       )
 
       response = server.pop_response.response
