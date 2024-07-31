@@ -129,6 +129,10 @@ if options[:doctor]
     puts "indexing: #{indexable.full_path}"
     index.index_single(indexable)
   end
+
+  # This will fail silently if `code` is not available
+  system("code --list-extensions --show-versions")
+
   return
 end
 
