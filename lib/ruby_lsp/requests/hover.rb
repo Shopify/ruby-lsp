@@ -22,9 +22,9 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::HoverClientCapabilities) }
+        sig { returns(Interface::HoverOptions) }
         def provider
-          Interface::HoverClientCapabilities.new(dynamic_registration: false)
+          Interface::HoverOptions.new
         end
       end
 

@@ -23,9 +23,9 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::FoldingRangeClientCapabilities) }
+        sig { returns(Interface::FoldingRangeOptions) }
         def provider
-          Interface::FoldingRangeClientCapabilities.new(line_folding_only: true)
+          Interface::FoldingRangeOptions.new
         end
       end
 

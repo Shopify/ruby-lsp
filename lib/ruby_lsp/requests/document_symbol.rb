@@ -34,14 +34,9 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::DocumentSymbolClientCapabilities) }
+        sig { returns(Interface::DocumentSymbolOptions) }
         def provider
-          Interface::DocumentSymbolClientCapabilities.new(
-            hierarchical_document_symbol_support: true,
-            symbol_kind: {
-              value_set: (Constant::SymbolKind::FILE..Constant::SymbolKind::TYPE_PARAMETER).to_a,
-            },
-          )
+          Interface::DocumentSymbolOptions.new
         end
       end
 
