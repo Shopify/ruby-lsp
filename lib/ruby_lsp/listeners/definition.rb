@@ -268,10 +268,10 @@ module RubyLsp
         argument = node.arguments&.arguments&.first
         return unless argument.is_a?(Prism::SymbolNode)
 
-        value = argument.value
-        return unless value
+        constant_name = argument.value
+        return unless constant_name
 
-        find_in_index(value)
+        find_in_index(constant_name)
       end
 
       sig { params(value: String).void }
