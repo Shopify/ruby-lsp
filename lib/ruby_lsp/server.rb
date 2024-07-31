@@ -181,6 +181,7 @@ module RubyLsp
       hover_provider = Requests::Hover.provider if enabled_features["hover"]
       folding_ranges_provider = Requests::FoldingRanges.provider if enabled_features["foldingRanges"]
       semantic_tokens_provider = Requests::SemanticHighlighting.provider if enabled_features["semanticHighlighting"]
+      document_formatting_provider = Requests::Formatting.provider if enabled_features["formatting"]
       diagnostics_provider = Requests::Diagnostics.provider if enabled_features["diagnostics"]
       on_type_formatting_provider = Requests::OnTypeFormatting.provider if enabled_features["onTypeFormatting"]
       code_action_provider = Requests::CodeActions.provider if enabled_features["codeActions"]
@@ -202,7 +203,7 @@ module RubyLsp
           document_link_provider: document_link_provider,
           folding_range_provider: folding_ranges_provider,
           semantic_tokens_provider: semantic_tokens_provider,
-          document_formatting_provider: enabled_features["formatting"] && @global_state.formatter != "none",
+          document_formatting_provider: document_formatting_provider && @global_state.formatter != "none",
           document_highlight_provider: enabled_features["documentHighlights"],
           code_action_provider: code_action_provider,
           document_on_type_formatting_provider: on_type_formatting_provider,
@@ -421,8 +422,6 @@ module RubyLsp
 
       document = @store.get(uri)
 
-      return send_empty_response(message[:id]) if document.is_a?(ERBDocument)
-
       response = Requests::Formatting.new(@global_state, document).perform
       send_message(Result.new(id: message[:id], response: response))
     rescue Requests::Request::InvalidFormatter => error
@@ -447,8 +446,6 @@ module RubyLsp
     def text_document_on_type_formatting(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
-
-      return send_empty_response(message[:id]) if document.is_a?(ERBDocument)
 
       send_message(
         Result.new(
@@ -506,8 +503,6 @@ module RubyLsp
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
 
-      return send_empty_response(message[:id]) if document.is_a?(ERBDocument)
-
       send_message(
         Result.new(
           id: message[:id],
@@ -562,8 +557,6 @@ module RubyLsp
       end
 
       document = @store.get(uri)
-
-      return send_empty_response(message[:id]) if document.is_a?(ERBDocument)
 
       response = document.cache_fetch("textDocument/diagnostic") do |document|
         Requests::Diagnostics.new(@global_state, document).perform

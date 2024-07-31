@@ -22,12 +22,13 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(T::Hash[Symbol, T::Boolean]) }
+        sig { returns(Interface::DiagnosticRegistrationOptions) }
         def provider
-          {
-            interFileDependencies: false,
-            workspaceDiagnostics: false,
-          }
+          Interface::DiagnosticRegistrationOptions.new(
+            document_selector: [Interface::DocumentFilter.new(language: "ruby")],
+            inter_file_dependencies: false,
+            workspace_diagnostics: false,
+          )
         end
       end
 
