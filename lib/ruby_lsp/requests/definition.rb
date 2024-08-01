@@ -30,6 +30,12 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
+      SPECIAL_METHOD_CALLS = [
+        :require,
+        :require_relative,
+        :autoload,
+      ].freeze
+
       sig do
         params(
           document: Document,
@@ -78,8 +84,9 @@ module RubyLsp
             parent,
             position,
           )
-        elsif target.is_a?(Prism::CallNode) && target.name != :require && target.name != :require_relative &&
-            !covers_position?(target.message_loc, position)
+        elsif target.is_a?(Prism::CallNode) && !SPECIAL_METHOD_CALLS.include?(target.message) && !covers_position?(
+          target.message_loc, position
+        )
           # If the target is a method call, we need to ensure that the requested position is exactly on top of the
           # method identifier. Otherwise, we risk showing definitions for unrelated things
           target = nil
