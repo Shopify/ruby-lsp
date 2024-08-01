@@ -358,12 +358,20 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
       class Foo
         autoload :Bar, "bar"
-
-        class Bar; end
       end
     RUBY
 
     with_server(source) do |server, uri|
+      server.global_state.index.index_single(
+        RubyIndexer::IndexablePath.new(nil, "/fake/path/bar.rb"), <<~RUBY
+          class Foo::Bar; end
+        RUBY
+      )
+      server.global_state.index.index_single(
+        RubyIndexer::IndexablePath.new(nil, "/fake/path/baz.rb"), <<~RUBY
+          class Foo::Bar; end
+        RUBY
+      )
       server.process_message(
         id: 1,
         method: "textDocument/definition",
@@ -371,14 +379,19 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       )
 
       response = server.pop_response.response
-      assert_equal(1, response.size)
-      assert_equal("file:///fake.rb", response.first.attributes[:targetUri])
+      # This feature simply does a constant lookup on the symbol passed to autoload, instead of jumping into the
+      # autoloaded path
+      # This is because there's no guarantee that the autoloaded file actually defines the constant. But if it does,
+      # then it will be listed in the result anyway
+      assert_equal(2, response.size)
+      assert_equal("file:///fake/path/bar.rb", response.first.attributes[:targetUri])
+      assert_equal("file:///fake/path/baz.rb", response.last.attributes[:targetUri])
     end
   end
 
   def test_does_nothing_when_autoload_declaration_does_not_exist
     source = <<~RUBY
-      # typed: false
+      # typed: ignore
 
       class Foo
         autoload :Bar, "bar"
