@@ -142,6 +142,56 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_changing_gemfile_causes_custom_bundle_to_be_rebuilt
+    Dir.mktmpdir do |dir|
+      Dir.chdir(FileUtils.mkdir(File.join(dir, "subdir")).first) do
+        gemfile = Pathname.new("Gemfile")
+        gemfile.write(<<~GEMFILE)
+          source "https://rubygems.org"
+          gem "rdoc"
+        GEMFILE
+
+        Bundler.with_unbundled_env do
+          capture_subprocess_io do
+            # Run bundle install to generate the lockfile
+            system("bundle install")
+          end
+
+          RubyLsp::SetupBundler.any_instance.expects(:system).with(
+            bundle_env(".ruby-lsp/Gemfile"),
+            "(bundle check || bundle install) 1>&2",
+          ).returns(true).at_least_once
+
+          # Run the script once to generate a custom bundle
+          run_script
+
+          assert_match("ruby-lsp", File.read(".ruby-lsp/Gemfile"))
+
+          # Add a ruby-lsp dependency to the Gemfile
+          gemfile.write(<<~GEMFILE, mode: "a+")
+            source "https://rubygems.org"
+            gem "rdoc"
+            gem "ruby-lsp"
+          GEMFILE
+
+          # Move Gemfile
+          FileUtils.mv(gemfile, "../")
+
+          capture_subprocess_io do
+            # Run bundle install to regenerate the lockfile.
+            system("bundle install")
+          end
+
+          run_script
+
+          custom_gemfile_contents = File.read(".ruby-lsp/Gemfile")
+          refute_match("ruby-lsp", custom_gemfile_contents)
+          assert_match("../../Gemfile", custom_gemfile_contents)
+        end
+      end
+    end
+  end
+
   def test_does_not_copy_gemfile_lock_when_not_modified
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
@@ -399,6 +449,31 @@ class SetupBundlerTest < Minitest::Test
         assert_match("debug", File.read(".ruby-lsp/gems.rb"))
         assert_match("ruby-lsp", File.read(".ruby-lsp/gems.rb"))
         assert_match("eval_gemfile(File.expand_path(\"../gems.rb\", __dir__))", File.read(".ruby-lsp/gems.rb"))
+      end
+    end
+  end
+
+  def test_custom_bundle_points_to_gemfile_in_enclosing_dir
+    Dir.mktmpdir do |dir|
+      FileUtils.touch(File.join(dir, "Gemfile"))
+      FileUtils.touch(File.join(dir, "Gemfile.lock"))
+
+      project_dir = File.join(dir, "proj")
+      Dir.mkdir(project_dir)
+
+      Dir.chdir(project_dir) do
+        Object.any_instance.expects(:system).with(
+          bundle_env(".ruby-lsp/Gemfile"),
+          "(bundle check || bundle install) 1>&2",
+        ).returns(true)
+        Bundler::LockfileParser.any_instance.expects(:dependencies).returns({}).at_least_once
+
+        Bundler.with_unbundled_env do
+          run_script(project_dir)
+        end
+
+        assert_path_exists(".ruby-lsp/Gemfile")
+        assert_match("eval_gemfile(File.expand_path(\"../../Gemfile\", __dir__))", File.read(".ruby-lsp/Gemfile"))
       end
     end
   end

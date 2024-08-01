@@ -42,6 +42,8 @@ module RubyLsp
 
       @gemfile_name = T.let(@gemfile&.basename&.to_s || "Gemfile", String)
 
+      $stderr.puts("Ruby LSP> Gemfile: #{@gemfile}") if @gemfile && @gemfile != Pathname.pwd.join("Gemfile")
+
       # Custom bundle paths
       @custom_dir = T.let(Pathname.new(".ruby-lsp").expand_path(Dir.pwd), Pathname)
       @custom_gemfile = T.let(@custom_dir + @gemfile_name, Pathname)
@@ -133,7 +135,8 @@ module RubyLsp
       # If there's a top level Gemfile, we want to evaluate from the custom bundle. We get the source from the top level
       # Gemfile, so if there isn't one we need to add a default source
       if @gemfile&.exist?
-        parts << "eval_gemfile(File.expand_path(\"../#{@gemfile_name}\", __dir__))"
+        gemfile_path = @gemfile.relative_path_from(@custom_dir)
+        parts << "eval_gemfile(File.expand_path(\"#{gemfile_path}\", __dir__))"
       else
         parts.unshift('source "https://rubygems.org"')
       end
