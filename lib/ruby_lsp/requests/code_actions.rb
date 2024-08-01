@@ -25,9 +25,12 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::CodeActionOptions) }
+        sig { returns(Interface::CodeActionRegistrationOptions) }
         def provider
-          Interface::CodeActionOptions.new(resolve_provider: true)
+          Interface::CodeActionRegistrationOptions.new(
+            document_selector: [Interface::DocumentFilter.new(language: "ruby")],
+            resolve_provider: true,
+          )
         end
       end
 
