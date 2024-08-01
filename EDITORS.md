@@ -142,8 +142,25 @@ require("lspconfig").ruby_lsp.setup({
 
 ## LazyVim LSP
 
-[As of v12.33.0](https://github.com/LazyVim/LazyVim/pull/3652), Ruby LSP is the default LSP for Ruby and no configuration should be needed, other
-than ensuring your Ruby version manager is set up as described above.
+[As of v12.33.0](https://github.com/LazyVim/LazyVim/pull/3652), Ruby LSP is the default LSP for Ruby.
+
+To ensure the correct Ruby version is selected, we recommend disabling the `mason` option and specifying the
+appropriate command for your Ruby version manager as an absolute path. For example:
+
+```lua
+return {
+  {
+    "neovim/nvim-lspconfig",
+      servers = {
+        ruby_lsp = {
+          mason = false,
+          cmd = { "/Users/username/.asdf/shims/ruby-lsp" },
+        },
+      },
+    },
+  },
+}
+```
 
 ## Sublime Text LSP
 
