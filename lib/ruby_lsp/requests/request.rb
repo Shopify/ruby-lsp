@@ -18,19 +18,19 @@ module RubyLsp
       private
 
       # Checks if a location covers a position
-      sig { params(location: Prism::Location, position: T.untyped).returns(T::Boolean) }
-      def cover?(location, position)
+      sig { params(location: Prism::Location, position: T.untyped, encoding: Encoding).returns(T::Boolean) }
+      def cover?(location, position, encoding)
         start_covered =
           location.start_line - 1 < position[:line] ||
           (
             location.start_line - 1 == position[:line] &&
-              location.start_column <= position[:character]
+              location.start_code_units_column(encoding) <= position[:character]
           )
         end_covered =
           location.end_line - 1 > position[:line] ||
           (
             location.end_line - 1 == position[:line] &&
-              location.end_column >= position[:character]
+              location.end_code_units_column(encoding) >= position[:character]
           )
         start_covered && end_covered
       end
@@ -50,15 +50,16 @@ module RubyLsp
           target: Prism::Node,
           parent: Prism::Node,
           position: T::Hash[Symbol, Integer],
+          encoding: Encoding,
         ).returns(Prism::Node)
       end
-      def determine_target(target, parent, position)
+      def determine_target(target, parent, position, encoding)
         return target unless parent.is_a?(Prism::ConstantPathNode)
 
         target = T.let(parent, Prism::Node)
         parent = T.let(T.cast(target, Prism::ConstantPathNode).parent, T.nilable(Prism::Node))
 
-        while parent && cover?(parent.location, position)
+        while parent && cover?(parent.location, position, encoding)
           target = parent
           parent = target.is_a?(Prism::ConstantPathNode) ? target.parent : nil
         end
@@ -67,8 +68,14 @@ module RubyLsp
       end
 
       # Checks if a given location covers the position requested
-      sig { params(location: T.nilable(Prism::Location), position: T::Hash[Symbol, T.untyped]).returns(T::Boolean) }
-      def covers_position?(location, position)
+      sig do
+        params(
+          location: T.nilable(Prism::Location),
+          position: T::Hash[Symbol, T.untyped],
+          encoding: Encoding,
+        ).returns(T::Boolean)
+      end
+      def covers_position?(location, position, encoding)
         return false unless location
 
         start_line = location.start_line - 1
@@ -76,8 +83,8 @@ module RubyLsp
         line = position[:line]
         character = position[:character]
 
-        (start_line < line || (start_line == line && location.start_column <= character)) &&
-          (end_line > line || (end_line == line && location.end_column >= character))
+        (start_line < line || (start_line == line && location.start_code_units_column(encoding) <= character)) &&
+          (end_line > line || (end_line == line && location.end_code_units_column(encoding) >= character))
       end
     end
   end
