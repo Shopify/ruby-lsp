@@ -61,7 +61,7 @@ GEM
     regexp_parser (2.9.2)
     reline (0.5.0)
       io-console (~> 0.5)
-    rexml (3.3.2)
+    rexml (3.3.4)
       strscan
     rubocop (1.64.1)
       json (~> 2.3)
@@ -155,9 +155,6 @@ DEPENDENCIES
   sorbet-static-and-runtime
   syntax_tree (>= 6.1.1, < 7)
   tapioca (~> 0.13)
-
-RUBY VERSION
-   ruby 3.3.4p94
 
 BUNDLED WITH
    2.5.10
