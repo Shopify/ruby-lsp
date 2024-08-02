@@ -156,5 +156,8 @@ DEPENDENCIES
   syntax_tree (>= 6.1.1, < 7)
   tapioca (~> 0.13)
 
+RUBY VERSION
+   ruby 3.3.4p94
+
 BUNDLED WITH
    2.5.10
