@@ -4,8 +4,6 @@ source "https://rubygems.org"
 
 gemspec
 
-ruby ">= 3.1"
-
 gem "bundler", "~> 2.5"
 gem "minitest", "~> 5.23"
 
