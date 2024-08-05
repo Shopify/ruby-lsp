@@ -583,10 +583,10 @@
   resolved "https://registry.yarnpkg.com/@pkgr/core/-/core-0.1.1.tgz#1ec17e2edbec25c8306d424ecfbf13c7de1aaa31"
   integrity sha512-cq8o4cWH0ibXh9VGi5P20Tu9XF/0fFXl9EUinr9QfTM7a7p0oTA4iJRCQWppXR1Pg8dSM0UCItCkPwsk9qWWYA==
 
-"@shopify/eslint-plugin@^45.0.0":
-  version "45.0.0"
-  resolved "https://registry.yarnpkg.com/@shopify/eslint-plugin/-/eslint-plugin-45.0.0.tgz#e4a87e66f89f4a09f1268378bd8caef713661744"
-  integrity sha512-aRgVkl+EovLk6OC4WzT+C6hgAyta5VReEIdetpe+/bJhVovlqbFjYa3yHGvEM4VuWv8sim7XH2VV3ZsDiwpgvQ==
+"@shopify/eslint-plugin@^46.0.0":
+  version "46.0.0"
+  resolved "https://registry.yarnpkg.com/@shopify/eslint-plugin/-/eslint-plugin-46.0.0.tgz#1943e4d5064fd33311047358ddeb3bb41856cc71"
+  integrity sha512-sYUKGaBMXcTEyvMxSECb1H8YPQojgsv6FkUWDN1isLNDrTyk52VETCmRFiS9Aj/hon8W6x8IL5597FyN/SC+qg==
   dependencies:
     "@babel/eslint-parser" "^7.16.3"
     "@babel/eslint-plugin" "^7.14.5"
@@ -608,6 +608,7 @@
     eslint-plugin-react "^7.34.1"
     eslint-plugin-react-hooks "^4.6.2"
     eslint-plugin-sort-class-members "^1.20.0"
+    globals "^15.8.0"
     jsx-ast-utils "^3.2.1"
     pkg-dir "^5.0.0"
     pluralize "^8.0.0"
@@ -2517,6 +2518,11 @@ globals@^13.19.0:
   integrity sha512-AhO5QUcj8llrbG09iWhPU2B204J1xnPeL8kQmVorSsy+Sjj1sk8gIyh6cUocGmH4L0UuhAJy+hJMRA4mgA4mFQ==
   dependencies:
     type-fest "^0.20.2"
+
+globals@^15.8.0:
+  version "15.9.0"
+  resolved "https://registry.yarnpkg.com/globals/-/globals-15.9.0.tgz#e9de01771091ffbc37db5714dab484f9f69ff399"
+  integrity sha512-SmSKyLLKFbSr6rptvP8izbyxJL4ILwqO9Jg23UA0sDlGlu58V59D1//I3vlc0KJphVdUR7vMjHIplYnzBxorQA==
 
 globalthis@^1.0.3:
   version "1.0.3"
