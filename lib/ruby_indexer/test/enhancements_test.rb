@@ -159,5 +159,39 @@ module RubyIndexer
 
       assert_entry("posts", Entry::Method, "/fake/path/foo.rb:23-11:23-17")
     end
+
+    def test_error_handling_in_enhancement
+      enhancement_class = Class.new do
+        include Enhancement
+
+        def on_call_node(index, owner, node, file_path)
+          raise "Error"
+        end
+
+        class << self
+          def name
+            "TestEnhancement"
+          end
+        end
+      end
+
+      @index.register_enhancement(enhancement_class.new)
+
+      _stdout, stderr = capture_io do
+        index(<<~RUBY)
+          module ActiveSupport
+            module Concern
+              def self.extended(base)
+                base.class_eval("def new_method(a); end")
+              end
+            end
+          end
+        RUBY
+      end
+
+      assert_match(%r{Error occurred when indexing /fake/path/foo\.rb with 'TestEnhancement' enhancement}, stderr)
+      # The module should still be indexed
+      assert_entry("ActiveSupport::Concern", Entry::Module, "/fake/path/foo.rb:1-2:5-5")
+    end
   end
 end

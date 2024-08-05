@@ -8,6 +8,8 @@ module RubyIndexer
 
     interface!
 
+    requires_ancestor { Object }
+
     # The `on_extend` indexing enhancement is invoked whenever an extend is encountered in the code. It can be used to
     # register for an included callback, similar to what `ActiveSupport::Concern` does in order to auto-extend the
     # `ClassMethods` modules

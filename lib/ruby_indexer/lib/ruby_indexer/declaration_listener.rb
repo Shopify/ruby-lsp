@@ -8,6 +8,9 @@ module RubyIndexer
     OBJECT_NESTING = T.let(["Object"].freeze, T::Array[String])
     BASIC_OBJECT_NESTING = T.let(["BasicObject"].freeze, T::Array[String])
 
+    sig { returns(T::Array[String]) }
+    attr_reader :indexing_errors
+
     sig do
       params(
         index: Index,
@@ -36,6 +39,7 @@ module RubyIndexer
 
       # A stack of namespace entries that represent where we currently are. Used to properly assign methods to an owner
       @owner_stack = T.let([], T::Array[Entry::Namespace])
+      @indexing_errors = T.let([], T::Array[String])
 
       dispatcher.register(
         self,
@@ -287,7 +291,11 @@ module RubyIndexer
         @visibility_stack.push(Entry::Visibility::PRIVATE)
       end
 
-      @enhancements.each { |aug| aug.on_call_node(@index, @owner_stack.last, node, @file_path) }
+      @enhancements.each do |enhancement|
+        enhancement.on_call_node(@index, @owner_stack.last, node, @file_path)
+      rescue StandardError
+        @indexing_errors << "Error occurred when indexing #{@file_path} with '#{enhancement.class.name}' enhancement"
+      end
     end
 
     sig { params(node: Prism::CallNode).void }

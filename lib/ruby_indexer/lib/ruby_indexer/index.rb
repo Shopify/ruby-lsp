@@ -317,11 +317,25 @@ module RubyIndexer
       dispatcher = Prism::Dispatcher.new
 
       result = Prism.parse(content)
-      DeclarationListener.new(self, dispatcher, result, indexable_path.full_path, enhancements: @enhancements)
+      listener = DeclarationListener.new(
+        self,
+        dispatcher,
+        result,
+        indexable_path.full_path,
+        enhancements: @enhancements,
+      )
       dispatcher.dispatch(result.value)
+
+      indexing_errors = listener.indexing_errors.uniq
 
       require_path = indexable_path.require_path
       @require_paths_tree.insert(require_path, indexable_path) if require_path
+
+      if indexing_errors.any?
+        indexing_errors.each do |error|
+          $stderr.puts error
+        end
+      end
     rescue Errno::EISDIR, Errno::ENOENT
       # If `path` is a directory, just ignore it and continue indexing. If the file doesn't exist, then we also ignore
       # it
