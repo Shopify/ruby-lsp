@@ -643,7 +643,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
-    "@shopify/eslint-plugin": "^45.0.0",
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.8.0",
+    "@shopify/eslint-plugin": "^46.0.0",
     "@shopify/prettier-config": "^1.1.2",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.7",
