@@ -57,6 +57,7 @@ module RubyLsp
 
         arguments_node = node.arguments
         arguments = arguments_node&.arguments || []
+        # TODO: figure this out to select the correct sig
         active_parameter = (arguments.length - 1).clamp(0, first_sig.parameters.length - 1)
 
         # If there are arguments, then we need to check if there's a trailing comma after the end of the last argument
