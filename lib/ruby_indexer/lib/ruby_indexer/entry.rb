@@ -311,10 +311,10 @@ module RubyIndexer
       sig { returns(T.nilable(Entry::Namespace)) }
       attr_reader :owner
 
-      sig { returns(T::Array[RubyIndexer::Entry::Parameter]) }
-      def parameters
-        T.must(signatures.first).parameters
-      end
+      # sig { returns(T::Array[RubyIndexer::Entry::Parameter]) }
+      # def parameters
+      #   T.must(signatures.first).parameters
+      # end
 
       sig do
         params(
@@ -544,11 +544,6 @@ module RubyIndexer
 
         @target = target
         @owner = T.let(unresolved_alias.owner, T.nilable(Entry::Namespace))
-      end
-
-      sig { returns(T::Array[Parameter]) }
-      def parameters
-        @target.parameters
       end
 
       sig { returns(String) }
