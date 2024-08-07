@@ -293,8 +293,8 @@ module RubyIndexer
 
       @enhancements.each do |enhancement|
         enhancement.on_call_node(@index, @owner_stack.last, node, @file_path)
-      rescue StandardError
-        @indexing_errors << "Error occurred when indexing #{@file_path} with '#{enhancement.class.name}' enhancement"
+      rescue StandardError => e
+        @indexing_errors << "Indexing error in #{@file_path} with '#{enhancement.class.name}' enhancement: #{e.message}"
       end
     end
 

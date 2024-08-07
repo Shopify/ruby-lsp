@@ -189,7 +189,7 @@ module RubyIndexer
         RUBY
       end
 
-      assert_match(%r{Error occurred when indexing /fake/path/foo\.rb with 'TestEnhancement' enhancement}, stderr)
+      assert_match(%r{Indexing error in /fake/path/foo\.rb with 'TestEnhancement' enhancement}, stderr)
       # The module should still be indexed
       assert_entry("ActiveSupport::Concern", Entry::Module, "/fake/path/foo.rb:1-2:5-5")
     end
