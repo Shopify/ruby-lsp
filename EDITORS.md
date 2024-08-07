@@ -154,7 +154,7 @@ return {
       servers = {
         ruby_lsp = {
           mason = false,
-          cmd = { "/Users/username/.asdf/shims/ruby-lsp" },
+          cmd = { vim.fn.expand "~/.asdf/shims/ruby-lsp" },
         },
       },
     },
