@@ -542,6 +542,11 @@ module RubyIndexer
       def decorated_parameters
         @target.decorated_parameters
       end
+
+      sig { returns(T::Array[Signature]) }
+      def signatures
+        @target.signatures
+      end
     end
 
     # Ruby doesn't support method overloading, so a method will have only one signature.

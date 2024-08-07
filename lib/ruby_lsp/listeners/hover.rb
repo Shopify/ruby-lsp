@@ -174,7 +174,15 @@ module RubyLsp
         methods = @index.resolve_method(message, type.name, inherited_only: inherited_only)
         return unless methods
 
-        title = "#{message}#{T.must(methods.first).decorated_parameters}"
+        first_method = T.must(methods.first)
+
+        title = "#{message}#{first_method.decorated_parameters}"
+        overloads_count = first_method.signatures.size
+        if overloads_count == 2
+          title << "\n(+1 overload)"
+        elsif overloads_count > 2
+          title << "\n(+#{overloads_count - 1} overloads)"
+        end
 
         if type.is_a?(TypeInferrer::GuessedType)
           title << "\n\nGuessed receiver: #{type.name}"

@@ -108,6 +108,28 @@ class CompletionResolveTest < Minitest::Test
     end
   end
 
+  def test_indicates_signature_count_in_label_details
+    source = +<<~RUBY
+      String.try_convert
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, _uri|
+      index = server.instance_variable_get(:@global_state).index
+      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+      existing_item = {
+        label: "try_convert",
+        kind: RubyLsp::Constant::CompletionItemKind::METHOD,
+        data: { owner_name: "String::<Class:String>" },
+      }
+
+      server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
+
+      result = server.pop_response.response
+      assert_match("try_convert(object)", result[:documentation].value)
+      assert_match("(+2 overloads)", result[:documentation].value)
+    end
+  end
+
   def test_completion_documentation_for_guessed_types
     source = +<<~RUBY
       class User
