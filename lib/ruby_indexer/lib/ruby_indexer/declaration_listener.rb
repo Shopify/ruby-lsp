@@ -8,12 +8,22 @@ module RubyIndexer
     OBJECT_NESTING = T.let(["Object"].freeze, T::Array[String])
     BASIC_OBJECT_NESTING = T.let(["BasicObject"].freeze, T::Array[String])
 
+    sig { returns(T::Array[String]) }
+    attr_reader :indexing_errors
+
     sig do
-      params(index: Index, dispatcher: Prism::Dispatcher, parse_result: Prism::ParseResult, file_path: String).void
+      params(
+        index: Index,
+        dispatcher: Prism::Dispatcher,
+        parse_result: Prism::ParseResult,
+        file_path: String,
+        enhancements: T::Array[Enhancement],
+      ).void
     end
-    def initialize(index, dispatcher, parse_result, file_path)
+    def initialize(index, dispatcher, parse_result, file_path, enhancements: [])
       @index = index
       @file_path = file_path
+      @enhancements = enhancements
       @visibility_stack = T.let([Entry::Visibility::PUBLIC], T::Array[Entry::Visibility])
       @comments_by_line = T.let(
         parse_result.comments.to_h do |c|
@@ -29,6 +39,7 @@ module RubyIndexer
 
       # A stack of namespace entries that represent where we currently are. Used to properly assign methods to an owner
       @owner_stack = T.let([], T::Array[Entry::Namespace])
+      @indexing_errors = T.let([], T::Array[String])
 
       dispatcher.register(
         self,
@@ -278,6 +289,12 @@ module RubyIndexer
         @visibility_stack.push(Entry::Visibility::PROTECTED)
       when :private
         @visibility_stack.push(Entry::Visibility::PRIVATE)
+      end
+
+      @enhancements.each do |enhancement|
+        enhancement.on_call_node(@index, @owner_stack.last, node, @file_path)
+      rescue StandardError => e
+        @indexing_errors << "Indexing error in #{@file_path} with '#{enhancement.class.name}' enhancement: #{e.message}"
       end
     end
 
