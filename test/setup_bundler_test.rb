@@ -484,19 +484,13 @@ class SetupBundlerTest < Minitest::Test
 
   def test_ruby_lsp_rails_is_automatically_included_in_rails_apps
     Dir.mktmpdir do |dir|
+      FileUtils.mkdir("#{dir}/config")
+      FileUtils.cp("test/fixtures/rails_application.rb", "#{dir}/config/application.rb")
       Dir.chdir(dir) do
         File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
           source "https://rubygems.org"
           gem "rails"
         GEMFILE
-
-        FileUtils.mkdir(File.join(dir, "config"))
-        File.write(File.join(dir, "config", "application.rb"), <<~RUBY)
-          module MyApp
-            class Application < Rails::Application
-            end
-          end
-        RUBY
 
         capture_subprocess_io do
           Bundler.with_unbundled_env do
