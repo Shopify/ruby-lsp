@@ -76,7 +76,7 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
   def code_action_for_refactor(refactor)
     LanguageServer::Protocol::Interface::CodeAction.new(
       title: refactor["title"],
-      kind: LanguageServer::Protocol::Constant::CodeActionKind::REFACTOR_EXTRACT,
+      kind: refactor["kind"],
       data: {
         range: refactor.dig("data", "range"),
         uri: refactor.dig("data", "uri"),

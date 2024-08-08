@@ -716,6 +716,29 @@ class RubyDocumentTest < Minitest::Test
     assert_equal("qux", node_context.surrounding_method)
   end
 
+  def test_locate_first_within_range
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      method_call(other_call).each do |a|
+        nested_call(fourth_call).each do |b|
+        end
+      end
+    RUBY
+
+    target = document.locate_first_within_range(
+      { start: { line: 0, character: 0 }, end: { line: 3, character: 3 } },
+      node_types: [Prism::CallNode],
+    )
+
+    assert_equal("each", T.cast(target, Prism::CallNode).message)
+
+    target = document.locate_first_within_range(
+      { start: { line: 1, character: 2 }, end: { line: 2, character: 5 } },
+      node_types: [Prism::CallNode],
+    )
+
+    assert_equal("each", T.cast(target, Prism::CallNode).message)
+  end
+
   private
 
   def assert_error_edit(actual, error_range)

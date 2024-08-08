@@ -1,0 +1,47 @@
+{
+    "params": {
+        "kind": "refactor.rewrite",
+        "title": "Refactor: Switch block style",
+        "data": {
+            "range": {
+                "start": {
+                    "line": 0,
+                    "character": 0
+                },
+                "end": {
+                    "line": 0,
+                    "character": 58
+                }
+            },
+            "uri": "file:///fake"
+        }
+    },
+    "result": {
+        "title": "Refactor: Switch block style",
+        "edit": {
+            "documentChanges": [
+                {
+                    "textDocument": {
+                        "uri": "file:///fake",
+                        "version": null
+                    },
+                    "edits": [
+                        {
+                            "range": {
+                                "start": {
+                                    "line": 0,
+                                    "character": 26
+                                },
+                                "end": {
+                                    "line": 0,
+                                    "character": 58
+                                }
+                            },
+                            "newText": "do |a|\n  a[\"field\"] == \"expected\"\nend"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
