@@ -1,7 +1,10 @@
 # Editors
 
-This file contains community driven instructions on how to set up the Ruby LSP in editors other than VS Code. For VS
-Code, use the official [Ruby LSP extension](https://marketplace.visualstudio.com/items?itemName=Shopify.ruby-lsp).
+This file contains community driven instructions on how to set up the Ruby LSP in some popular editors.
+For VS Code, use the official [Ruby LSP extension](https://marketplace.visualstudio.com/items?itemName=Shopify.ruby-lsp).
+
+Due to reviewing capacity, we aren't able to keep all the available editors documented here.
+For other editors, we encourage the community to the use [public wiki](https://github.com/Shopify/ruby-lsp/wiki).
 
 > [!NOTE]
 > Some Ruby LSP features may be unavailable or limited due to incomplete implementations of the Language Server
