@@ -75,33 +75,33 @@ class SetupBundlerTest < Minitest::Test
   end
 
   def test_creates_custom_bundle_for_a_rails_app
-    Dir.mktmpdir do |dir|
-      Dir.chdir(dir) do
-        FileUtils.mkdir(File.join(dir, "config"))
-        File.write(File.join(dir, "config", "application.rb"), <<~RUBY)
-          module MyApp
-            class Application < Rails::Application
-            end
-          end
-        RUBY
+    Object.any_instance.expects(:system).with(
+      bundle_env(".ruby-lsp/Gemfile"),
+      "(bundle check || bundle install) 1>&2",
+    ).returns(true)
 
-        Object.any_instance.expects(:system).with(
-          bundle_env(".ruby-lsp/Gemfile"),
-          "(bundle check || bundle install) 1>&2",
-        ).returns(true)
-        Bundler::LockfileParser.any_instance.expects(:dependencies).returns({ "rails" => true }).at_least_once
-        run_script
-
-        assert_path_exists(".ruby-lsp")
-        assert_path_exists(".ruby-lsp/Gemfile")
-        assert_path_exists(".ruby-lsp/Gemfile.lock")
-        assert_path_exists(".ruby-lsp/main_lockfile_hash")
-        gemfile_content = File.read(".ruby-lsp/Gemfile")
-        assert_match("ruby-lsp", gemfile_content)
-        assert_match("debug", gemfile_content)
-        assert_match("ruby-lsp-rails", gemfile_content)
+    # There is some unknown state leak with Bundler which prevents us from creating the
+    # folder structure ourselves lest we encounter flaky tests
+    RubyLsp::SetupBundler.any_instance.stubs(:rails_application_content).returns(<<~RUBY)
+      module MyApp
+        class Application < Rails::Application
+        end
       end
-    end
+    RUBY
+
+    Bundler::LockfileParser.any_instance.expects(:dependencies).returns({ "rails" => true }).at_least_once
+
+    run_script
+
+    assert_path_exists(".ruby-lsp")
+    assert_path_exists(".ruby-lsp/Gemfile")
+    assert_path_exists(".ruby-lsp/Gemfile.lock")
+    assert_path_exists(".ruby-lsp/main_lockfile_hash")
+    assert_match("ruby-lsp", File.read(".ruby-lsp/Gemfile"))
+    assert_match("debug", File.read(".ruby-lsp/Gemfile"))
+    assert_match("ruby-lsp-rails", File.read(".ruby-lsp/Gemfile"))
+  ensure
+    FileUtils.rm_r(".ruby-lsp") if Dir.exist?(".ruby-lsp")
   end
 
   def test_changing_lockfile_causes_custom_bundle_to_be_rebuilt
