@@ -63,6 +63,7 @@ module RubyLsp
 
         if first_entry.is_a?(RubyIndexer::Entry::Member)
           label = +"#{label}#{first_entry.decorated_parameters}"
+          label << first_entry.formatted_signatures
         end
 
         guessed_type = @item.dig(:data, :guessed_type)

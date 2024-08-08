@@ -467,6 +467,26 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hover_for_methods_shows_overload_count
+    source = <<~RUBY
+      String.try_convert
+    RUBY
+
+    with_server(source) do |server, uri|
+      index = server.instance_variable_get(:@global_state).index
+      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 8, line: 0 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("try_convert(object)", contents)
+      assert_match("(+2 overloads)", contents)
+    end
+  end
+
   def test_hover_for_singleton_methods
     source = <<~RUBY
       class Foo

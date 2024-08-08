@@ -174,7 +174,10 @@ module RubyLsp
         methods = @index.resolve_method(message, type.name, inherited_only: inherited_only)
         return unless methods
 
-        title = "#{message}#{T.must(methods.first).decorated_parameters}"
+        first_method = T.must(methods.first)
+
+        title = "#{message}#{first_method.decorated_parameters}"
+        title << first_method.formatted_signatures
 
         if type.is_a?(TypeInferrer::GuessedType)
           title << "\n\nGuessed receiver: #{type.name}"
