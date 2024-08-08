@@ -80,17 +80,9 @@ class SetupBundlerTest < Minitest::Test
       "(bundle check || bundle install) 1>&2",
     ).returns(true)
 
-    # There is some unknown state leak with Bundler which prevents us from creating the
-    # folder structure ourselves lest we encounter flaky tests
-    RubyLsp::SetupBundler.any_instance.stubs(:rails_application_content).returns(<<~RUBY)
-      module MyApp
-        class Application < Rails::Application
-        end
-      end
-    RUBY
-
+    FileUtils.mkdir("config")
+    FileUtils.cp("test/fixtures/rails_application.rb", "config/application.rb")
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({ "rails" => true }).at_least_once
-
     run_script
 
     assert_path_exists(".ruby-lsp")
@@ -102,6 +94,7 @@ class SetupBundlerTest < Minitest::Test
     assert_match("ruby-lsp-rails", File.read(".ruby-lsp/Gemfile"))
   ensure
     FileUtils.rm_r(".ruby-lsp") if Dir.exist?(".ruby-lsp")
+    FileUtils.rm_rf("config") if Dir.exist?("config")
   end
 
   def test_changing_lockfile_causes_custom_bundle_to_be_rebuilt

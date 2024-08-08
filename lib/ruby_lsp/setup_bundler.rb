@@ -285,13 +285,11 @@ module RubyLsp
     # Detects if the project is a Rails app by looking if the superclass of the main class is `Rails::Application`
     sig { returns(T::Boolean) }
     def rails_app?
-      /class .* < Rails::Application/.match?(rails_application_content)
-    end
-
-    sig { returns(T.nilable(String)) }
-    def rails_application_content
       config = Pathname.new("config/application.rb").expand_path
-      config.read if config.exist?
+      application_contents = config.read if config.exist?
+      return false unless application_contents
+
+      /class .* < Rails::Application/.match?(application_contents)
     end
   end
 end
