@@ -9,8 +9,8 @@
                     "character": 0
                 },
                 "end": {
-                    "line": 3,
-                    "character": 3
+                    "line": 0,
+                    "character": 74
                 }
             },
             "uri": "file:///fake"
@@ -33,11 +33,11 @@
                                     "character": 29
                                 },
                                 "end": {
-                                    "line": 3,
-                                    "character": 3
+                                    "line": 0,
+                                    "character": 74
                                 }
                             },
-                            "newText": "{ |a| nested_call(fourth_call).each { |b| } }"
+                            "newText": "do |a|\n  nested_call(fourth_call).each do |b|\n    \n  end\nend"
                         }
                     ]
                 }

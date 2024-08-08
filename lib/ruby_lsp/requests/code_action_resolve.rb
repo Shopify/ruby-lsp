@@ -47,6 +47,8 @@ module RubyLsp
 
       sig { override.returns(T.any(Interface::CodeAction, Error)) }
       def perform
+        return Error::EmptySelection if @document.source.empty?
+
         case @code_action[:title]
         when CodeActions::EXTRACT_TO_VARIABLE_TITLE
           refactor_variable
@@ -63,8 +65,6 @@ module RubyLsp
 
       sig { returns(T.any(Interface::CodeAction, Error)) }
       def switch_block_style
-        return Error::EmptySelection if @document.source.empty?
-
         source_range = @code_action.dig(:data, :range)
         return Error::EmptySelection if source_range[:start] == source_range[:end]
 
@@ -78,25 +78,7 @@ module RubyLsp
         node = target.block
         return Error::InvalidTargetRange unless node.is_a?(Prism::BlockNode)
 
-        parameters = node.parameters
-        body = node.body
-
-        # If the block is using `do...end` style, we change it to a single line brace block. Newlines are turned into
-        # semi colons, so that the result is valid Ruby code and still a one liner. If the block is using brace style,
-        # we do the opposite and turn it into a `do...end` block, making all semi colons into newlines.
-        new_source = if node.opening_loc.slice == "do"
-          source = +"{ "
-          source << "#{parameters.slice} " if parameters
-          source << "#{body.slice.gsub("\n", ";")} " if body
-          source << "}"
-        else
-          indentation = " " * target.location.start_column
-          source = +"do"
-          source << " #{parameters.slice}" if parameters
-          source << "\n#{indentation}  "
-          source << body.slice.gsub(";", "\n") if body
-          source << "\n#{indentation}end"
-        end
+        indentation = " " * target.location.start_column unless node.opening_loc.slice == "do"
 
         Interface::CodeAction.new(
           title: CodeActions::SWITCH_BLOCK_STYLE_TITLE,
@@ -108,7 +90,10 @@ module RubyLsp
                   version: nil,
                 ),
                 edits: [
-                  Interface::TextEdit.new(range: range_from_location(node.location), new_text: new_source),
+                  Interface::TextEdit.new(
+                    range: range_from_location(node.location),
+                    new_text: recursively_switch_nested_block_styles(node, indentation),
+                  ),
                 ],
               ),
             ],
@@ -118,8 +103,6 @@ module RubyLsp
 
       sig { returns(T.any(Interface::CodeAction, Error)) }
       def refactor_variable
-        return Error::EmptySelection if @document.source.empty?
-
         source_range = @code_action.dig(:data, :range)
         return Error::EmptySelection if source_range[:start] == source_range[:end]
 
@@ -214,8 +197,6 @@ module RubyLsp
 
       sig { returns(T.any(Interface::CodeAction, Error)) }
       def refactor_method
-        return Error::EmptySelection if @document.source.empty?
-
         source_range = @code_action.dig(:data, :range)
         return Error::EmptySelection if source_range[:start] == source_range[:end]
 
@@ -276,6 +257,64 @@ module RubyLsp
           ),
           new_text: new_text,
         )
+      end
+
+      sig { params(node: Prism::BlockNode, indentation: T.nilable(String)).returns(String) }
+      def recursively_switch_nested_block_styles(node, indentation)
+        parameters = node.parameters
+        body = node.body
+
+        # We use the indentation to differentiate between do...end and brace style blocks because only the do...end
+        # style requires the indentation to build the edit.
+        #
+        # If the block is using `do...end` style, we change it to a single line brace block. Newlines are turned into
+        # semi colons, so that the result is valid Ruby code and still a one liner. If the block is using brace style,
+        # we do the opposite and turn it into a `do...end` block, making all semi colons into newlines.
+        source = +""
+
+        if indentation
+          source << "do"
+          source << " #{parameters.slice}" if parameters
+          source << "\n#{indentation}  "
+          source << switch_block_body(body, indentation) if body
+          source << "\n#{indentation}end"
+        else
+          source << "{ "
+          source << "#{parameters.slice} " if parameters
+          source << switch_block_body(body, nil) if body
+          source << "}"
+        end
+
+        source
+      end
+
+      sig { params(body: Prism::Node, indentation: T.nilable(String)).returns(String) }
+      def switch_block_body(body, indentation)
+        # Check if there are any nested blocks inside of the current block
+        body_loc = body.location
+        nested_block = @document.locate_first_within_range(
+          {
+            start: { line: body_loc.start_line - 1, character: body_loc.start_column },
+            end: { line: body_loc.end_line - 1, character: body_loc.end_column },
+          },
+          node_types: [Prism::BlockNode],
+        )
+
+        body_content = body.slice.dup
+
+        # If there are nested blocks, then we change their style too and we have to mutate the string using the
+        # relative position in respect to the beginning of the body
+        if nested_block.is_a?(Prism::BlockNode)
+          location = nested_block.location
+          correction_start = location.start_offset - body_loc.start_offset
+          correction_end = location.end_offset - body_loc.start_offset
+          next_indentation = indentation ? "#{indentation}  " : nil
+
+          body_content[correction_start...correction_end] =
+            recursively_switch_nested_block_styles(nested_block, next_indentation)
+        end
+
+        indentation ? body_content.gsub(";", "\n") : "#{body_content.gsub("\n", ";")} "
       end
     end
   end
