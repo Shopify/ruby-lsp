@@ -289,7 +289,7 @@ module RubyLsp
       application_contents = config.read if config.exist?
       return false unless application_contents
 
-      /class .* < Rails::Application/.match?(application_contents)
+      /class .* < (::)?Rails::Application/.match?(application_contents)
     end
   end
 end
