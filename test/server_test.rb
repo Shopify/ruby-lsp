@@ -24,7 +24,8 @@ class ServerTest < Minitest::Test
       })
     end
 
-    hash = JSON.parse(@server.pop_response.response.to_json)
+    result = find_message(RubyLsp::Result, id: 1)
+    hash = JSON.parse(result.response.to_json)
     capabilities = hash["capabilities"]
 
     # TextSynchronization + encodings + semanticHighlighting + experimental
@@ -44,7 +45,8 @@ class ServerTest < Minitest::Test
       })
     end
 
-    hash = JSON.parse(@server.pop_response.response.to_json)
+    result = find_message(RubyLsp::Result, id: 1)
+    hash = JSON.parse(result.response.to_json)
     capabilities = hash["capabilities"]
 
     # Only semantic highlighting is turned off because all others default to true when configuring with a hash
@@ -63,7 +65,8 @@ class ServerTest < Minitest::Test
       })
     end
 
-    hash = JSON.parse(@server.pop_response.response.to_json)
+    result = find_message(RubyLsp::Result, id: 1)
+    hash = JSON.parse(result.response.to_json)
     capabilities = hash["capabilities"]
 
     # All features are enabled by default
@@ -82,7 +85,8 @@ class ServerTest < Minitest::Test
       })
     end
 
-    hash = JSON.parse(@server.pop_response.response.to_json)
+    result = find_message(RubyLsp::Result, id: 1)
+    hash = JSON.parse(result.response.to_json)
 
     # All features are enabled by default
     assert_includes("utf-8", hash.dig("capabilities", "positionEncoding"))
@@ -100,7 +104,8 @@ class ServerTest < Minitest::Test
       })
     end
 
-    hash = JSON.parse(@server.pop_response.response.to_json)
+    result = find_message(RubyLsp::Result, id: 1)
+    hash = JSON.parse(result.response.to_json)
 
     # All features are enabled by default
     assert_includes("utf-16", hash.dig("capabilities", "positionEncoding"))
@@ -118,7 +123,8 @@ class ServerTest < Minitest::Test
       })
     end
 
-    hash = JSON.parse(@server.pop_response.response.to_json)
+    result = find_message(RubyLsp::Result, id: 1)
+    hash = JSON.parse(result.response.to_json)
 
     # All features are enabled by default
     assert_includes("utf-16", hash.dig("capabilities", "positionEncoding"))
@@ -136,7 +142,8 @@ class ServerTest < Minitest::Test
       })
     end
 
-    hash = JSON.parse(@server.pop_response.response.to_json)
+    result = find_message(RubyLsp::Result, id: 1)
+    hash = JSON.parse(result.response.to_json)
     assert_equal(RubyLsp::VERSION, hash.dig("serverInfo", "version"))
   end
 
@@ -153,7 +160,8 @@ class ServerTest < Minitest::Test
       })
     end
 
-    hash = JSON.parse(@server.pop_response.response.to_json)
+    result = find_message(RubyLsp::Result, id: 1)
+    hash = JSON.parse(result.response.to_json)
     assert_equal("rubocop", hash.dig("formatter"))
   end
 
@@ -218,11 +226,6 @@ class ServerTest < Minitest::Test
       })
     end
 
-    # File watching, progress notifications and initialize response
-    @server.pop_response
-    @server.pop_response
-    @server.pop_response
-
     @server.process_message({
       id: 2,
       method: "textDocument/formatting",
@@ -231,7 +234,8 @@ class ServerTest < Minitest::Test
       },
     })
 
-    assert_nil(@server.pop_response.response)
+    result = find_message(RubyLsp::Result, id: 2)
+    assert_nil(result.response)
 
     @server.process_message({
       id: 3,
@@ -241,7 +245,8 @@ class ServerTest < Minitest::Test
       },
     })
 
-    assert_nil(@server.pop_response.response)
+    result = find_message(RubyLsp::Result, id: 3)
+    assert_nil(result.response)
   end
 
   def test_did_close_clears_diagnostics
@@ -331,9 +336,7 @@ class ServerTest < Minitest::Test
       @server.process_message(id: 1, method: "initialize", params: {})
     end
 
-    @server.pop_response
-    notification = @server.pop_response
-    assert_equal("window/showMessage", notification.method)
+    notification = find_message(RubyLsp::Notification, "window/showMessage")
     assert_match(
       /Syntax error while loading configuration/,
       T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
@@ -355,14 +358,8 @@ class ServerTest < Minitest::Test
 
       assert_equal("none", @server.global_state.formatter)
 
-      # Remove the initialization notifications
-      @server.pop_response
-      @server.pop_response
-      @server.pop_response
+      notification = find_message(RubyLsp::Notification, "window/showMessage")
 
-      notification = @server.pop_response
-
-      assert_equal("window/showMessage", notification.method)
       assert_equal(
         "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the Gemfile or gemspec.",
         T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
@@ -395,7 +392,7 @@ class ServerTest < Minitest::Test
   def test_backtrace_is_printed_to_stderr_on_exceptions
     @server.expects(:workspace_dependencies).raises(StandardError, "boom")
 
-    _stdout, stderr = capture_io do
+    capture_io do
       @server.process_message({
         id: 1,
         method: "rubyLsp/workspace/dependencies",
@@ -403,8 +400,11 @@ class ServerTest < Minitest::Test
       })
     end
 
-    assert_match(/boom/, stderr)
-    assert_match(%r{ruby-lsp/lib/ruby_lsp/server\.rb:\d+:in `process_message'}, stderr)
+    log = find_message(RubyLsp::Notification, "window/logMessage")
+    content = log.params.message
+
+    assert_match(/boom/, content)
+    assert_match(%r{ruby-lsp/lib/ruby_lsp/server\.rb:\d+:in `process_message'}, content)
   end
 
   def test_changed_file_only_indexes_ruby
@@ -594,5 +594,29 @@ class ServerTest < Minitest::Test
 
       def deactivate; end
     end
+  end
+
+  sig do
+    params(
+      desired_class: Class,
+      desired_method: T.nilable(String),
+      id: T.nilable(Integer),
+    ).returns(T.untyped)
+  end
+  def find_message(desired_class, desired_method = nil, id: nil)
+    message = T.let(
+      @server.pop_response, T.any(
+        RubyLsp::Result,
+        RubyLsp::Message,
+        RubyLsp::Error,
+      )
+    )
+
+    until message.is_a?(desired_class) && (!desired_method || T.unsafe(message).method == desired_method) &&
+        (!id || T.unsafe(message).id == id)
+      message = @server.pop_response
+    end
+
+    message
   end
 end

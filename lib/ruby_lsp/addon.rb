@@ -49,15 +49,18 @@ module RubyLsp
         super
       end
 
-      # Discovers and loads all addons. Returns the list of activated addons
-      sig { params(global_state: GlobalState, outgoing_queue: Thread::Queue).returns(T::Array[Addon]) }
+      # Discovers and loads all addons. Returns a list of errors when trying to require addons
+      sig do
+        params(global_state: GlobalState, outgoing_queue: Thread::Queue).returns(T::Array[StandardError])
+      end
       def load_addons(global_state, outgoing_queue)
         # Require all addons entry points, which should be placed under
         # `some_gem/lib/ruby_lsp/your_gem_name/addon.rb`
-        Gem.find_files("ruby_lsp/**/addon.rb").each do |addon|
+        errors = Gem.find_files("ruby_lsp/**/addon.rb").filter_map do |addon|
           require File.expand_path(addon)
+          nil
         rescue => e
-          $stderr.puts(e.full_message)
+          e
         end
 
         # Instantiate all discovered addon classes
@@ -71,6 +74,8 @@ module RubyLsp
         rescue => e
           addon.add_error(e)
         end
+
+        errors
       end
 
       # Intended for use by tests for addons
