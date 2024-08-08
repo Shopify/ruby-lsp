@@ -63,13 +63,7 @@ module RubyLsp
 
         if first_entry.is_a?(RubyIndexer::Entry::Member)
           label = +"#{label}#{first_entry.decorated_parameters}"
-
-          overloads_count = first_entry.signatures.size
-          if overloads_count == 2
-            label << "\n(+1 overload)"
-          elsif overloads_count > 2
-            label << "\n(+#{overloads_count - 1} overloads)"
-          end
+          label << first_entry.formatted_signatures
         end
 
         guessed_type = @item.dig(:data, :guessed_type)

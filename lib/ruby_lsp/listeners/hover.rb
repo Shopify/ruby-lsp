@@ -177,12 +177,7 @@ module RubyLsp
         first_method = T.must(methods.first)
 
         title = "#{message}#{first_method.decorated_parameters}"
-        overloads_count = first_method.signatures.size
-        if overloads_count == 2
-          title << "\n(+1 overload)"
-        elsif overloads_count > 2
-          title << "\n(+#{overloads_count - 1} overloads)"
-        end
+        title << first_method.formatted_signatures
 
         if type.is_a?(TypeInferrer::GuessedType)
           title << "\n\nGuessed receiver: #{type.name}"

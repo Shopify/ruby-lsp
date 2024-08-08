@@ -342,6 +342,19 @@ module RubyIndexer
 
         "(#{first_signature.format})"
       end
+
+      sig { returns(String) }
+      def formatted_signatures
+        overloads_count = signatures.size
+        case overloads_count
+        when 1
+          ""
+        when 2
+          "\n(+1 overload)"
+        else
+          "\n(+#{overloads_count - 1} overloads)"
+        end
+      end
     end
 
     class Accessor < Member
@@ -541,6 +554,11 @@ module RubyIndexer
       sig { returns(String) }
       def decorated_parameters
         @target.decorated_parameters
+      end
+
+      sig { returns(String) }
+      def formatted_signatures
+        @target.formatted_signatures
       end
 
       sig { returns(T::Array[Signature]) }
