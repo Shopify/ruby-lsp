@@ -11,12 +11,14 @@
   "license": "MIT",
   "icon": "icon.png",
   "engines": {
-    "vscode": "^1.68.0"
+    "vscode": "^1.92.0"
   },
   "categories": [
     "Programming Languages",
     "Snippets",
-    "Testing"
+    "Testing",
+    "AI",
+    "Chat"
   ],
   "activationEvents": [
     "onLanguage:ruby",
@@ -26,6 +28,21 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "chatParticipants": [
+      {
+        "id": "rubyLsp.chatAgent",
+        "fullName": "Ruby",
+        "name": "ruby",
+        "description": "How can I help with your Ruby on Rails application?",
+        "isSticky": true,
+        "commands": [
+          {
+            "name": "design",
+            "description": "Explain what you're trying to build and I will suggest possible ways to model the domain"
+          }
+        ]
+      }
+    ],
     "menus": {
       "editor/context": [
         {
@@ -651,7 +668,7 @@
     "@types/mocha": "^10.0.7",
     "@types/node": "22.x",
     "@types/sinon": "^17.0.3",
-    "@types/vscode": "^1.68.0",
+    "@types/vscode": "^1.92.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "@vscode/test-electron": "^2.4.1",
