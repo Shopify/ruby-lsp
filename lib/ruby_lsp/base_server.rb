@@ -65,7 +65,7 @@ module RubyLsp
         when "initialize", "initialized", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange"
           process_message(message)
         when "shutdown"
-          $stderr.puts("Shutting down Ruby LSP...")
+          send_log_message("Shutting down Ruby LSP...")
 
           shutdown
 
@@ -76,7 +76,7 @@ module RubyLsp
         when "exit"
           @mutex.synchronize do
             status = @incoming_queue.closed? ? 0 : 1
-            $stderr.puts("Shutdown complete with status #{status}")
+            send_log_message("Shutdown complete with status #{status}")
             exit(status)
           end
         else
@@ -144,6 +144,11 @@ module RubyLsp
     sig { params(id: Integer).void }
     def send_empty_response(id)
       send_message(Result.new(id: id, response: nil))
+    end
+
+    sig { params(message: String, type: Integer).void }
+    def send_log_message(message, type: Constant::MessageType::LOG)
+      send_message(Notification.window_log_message(message, type: Constant::MessageType::LOG))
     end
   end
 end

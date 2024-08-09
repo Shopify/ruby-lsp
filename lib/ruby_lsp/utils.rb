@@ -53,6 +53,7 @@ module RubyLsp
   class Notification < Message
     class << self
       extend T::Sig
+
       sig { params(message: String).returns(Notification) }
       def window_show_error(message)
         new(
@@ -61,6 +62,14 @@ module RubyLsp
             type: Constant::MessageType::ERROR,
             message: message,
           ),
+        )
+      end
+
+      sig { params(message: String, type: Integer).returns(Notification) }
+      def window_log_message(message, type: Constant::MessageType::LOG)
+        new(
+          method: "window/logMessage",
+          params: Interface::LogMessageParams.new(type: type, message: message),
         )
       end
     end
@@ -121,6 +130,9 @@ module RubyLsp
 
     sig { returns(T.untyped) }
     attr_reader :response
+
+    sig { returns(Integer) }
+    attr_reader :id
 
     sig { params(id: Integer, response: T.untyped).void }
     def initialize(id:, response:)

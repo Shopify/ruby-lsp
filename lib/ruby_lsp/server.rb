@@ -19,10 +19,10 @@ module RubyLsp
     def process_message(message)
       case message[:method]
       when "initialize"
-        $stderr.puts("Initializing Ruby LSP v#{VERSION}...")
+        send_log_message("Initializing Ruby LSP v#{VERSION}...")
         run_initialize(message)
       when "initialized"
-        $stderr.puts("Finished initializing Ruby LSP!") unless @test_mode
+        send_log_message("Finished initializing Ruby LSP!") unless @test_mode
         run_initialized
       when "textDocument/didOpen"
         text_document_did_open(message)
@@ -121,12 +121,20 @@ module RubyLsp
         end
       end
 
-      $stderr.puts("Error processing #{message[:method]}: #{e.full_message}")
+      send_log_message("Error processing #{message[:method]}: #{e.full_message}", type: Constant::MessageType::ERROR)
     end
 
     sig { void }
     def load_addons
-      Addon.load_addons(@global_state, @outgoing_queue)
+      errors = Addon.load_addons(@global_state, @outgoing_queue)
+
+      if errors.any?
+        send_log_message(
+          "Error loading addons:\n\n#{errors.map(&:full_message).join("\n\n")}",
+          type: Constant::MessageType::WARNING,
+        )
+      end
+
       errored_addons = Addon.addons.select(&:error?)
 
       if errored_addons.any?
@@ -140,7 +148,12 @@ module RubyLsp
           ),
         )
 
-        $stderr.puts(errored_addons.map(&:errors_details).join("\n\n")) unless @test_mode
+        unless @test_mode
+          send_log_message(
+            errored_addons.map(&:errors_details).join("\n\n"),
+            type: Constant::MessageType::WARNING,
+          )
+        end
       end
     end
 
@@ -149,7 +162,7 @@ module RubyLsp
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def run_initialize(message)
       options = message[:params]
-      @global_state.apply_options(options)
+      global_state_notifications = @global_state.apply_options(options)
 
       client_name = options.dig(:clientInfo, :name)
       @store.client_name = client_name if client_name
@@ -258,6 +271,8 @@ module RubyLsp
       process_indexing_configuration(options.dig(:initializationOptions, :indexing))
 
       begin_progress("indexing-progress", "Ruby LSP: indexing files")
+
+      global_state_notifications.each { |notification| send_message(notification) }
     end
 
     sig { void }
