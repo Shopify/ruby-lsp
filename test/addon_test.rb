@@ -110,5 +110,10 @@ module RubyLsp
         Addon.get("Invalid Addon")
       end
     end
+
+    def test_run_in_rails_server_context_defaults_to_false
+      addon = Addon.get("My Addon")
+      refute_predicate(addon, :run_in_rails_server_context?)
+    end
   end
 end

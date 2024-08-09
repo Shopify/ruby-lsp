@@ -126,6 +126,13 @@ module RubyLsp
     sig { abstract.returns(String) }
     def name; end
 
+    # Indicates if the addon should be loaded with the Rails server environment within ruby-lsp-rails.
+    # This is needed for the Tapioca LSP, but it's unlikely many other addons will need this.
+    sig { returns(T::Boolean) }
+    def run_in_rails_server_context?
+      false
+    end
+
     # Creates a new CodeLens listener. This method is invoked on every CodeLens request
     sig do
       overridable.params(
