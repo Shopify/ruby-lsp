@@ -46,10 +46,10 @@ puts "Verifying that indexing executes successfully. This may take a while..."
 index = RubyIndexer::Index.new
 indexables = index.configuration.indexables
 
-indexables.each_with_index do |indexable, i|
-  index.index_single(indexable)
+indexables.each_with_index do |uri, i|
+  index.index_single(uri)
 rescue => e
-  errors[indexable.full_path] = e
+  errors[uri.to_standarized_path] = e
 ensure
   print("\033[M\033[0KIndexed #{i + 1}/#{indexables.length}") unless ENV["CI"]
 end

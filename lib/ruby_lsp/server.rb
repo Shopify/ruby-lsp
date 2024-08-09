@@ -809,7 +809,7 @@ module RubyLsp
         next unless file_path.end_with?(".rb")
 
         load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
-        indexable = RubyIndexer::IndexablePath.new(load_path_entry, file_path)
+        indexable = RubyIndexer::ResourceUri.file(file_path, load_path_entry)
 
         case change[:type]
         when Constant::FileChangeType::CREATED

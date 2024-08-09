@@ -11,7 +11,7 @@ class WorkspaceSymbolTest < Minitest::Test
   end
 
   def test_returns_index_entries_based_on_query
-    @index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake.rb"), <<~RUBY)
+    @index.index_single(RubyIndexer::ResourceUri.new(path: "/fake.rb"), <<~RUBY)
       class Foo; end
       module Bar; end
 
@@ -32,7 +32,7 @@ class WorkspaceSymbolTest < Minitest::Test
   end
 
   def test_fuzzy_matches_symbols
-    @index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake.rb"), <<~RUBY)
+    @index.index_single(RubyIndexer::ResourceUri.new(path: "/fake.rb"), <<~RUBY)
       class Foo; end
       module Bar; end
 
@@ -53,7 +53,7 @@ class WorkspaceSymbolTest < Minitest::Test
   end
 
   def test_symbols_include_container_name
-    @index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake.rb"), <<~RUBY)
+    @index.index_single(RubyIndexer::ResourceUri.new(path: "/fake.rb"), <<~RUBY)
       module Foo
         class Bar; end
       end
@@ -66,14 +66,14 @@ class WorkspaceSymbolTest < Minitest::Test
   end
 
   def test_does_not_include_symbols_from_dependencies
-    @index.index_single(RubyIndexer::IndexablePath.new(nil, "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb"))
+    @index.index_single(RubyIndexer::ResourceUri.new(path: "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb"))
 
     result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Pathname").perform
     assert_empty(result)
   end
 
   def test_does_not_include_private_constants
-    @index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake.rb"), <<~RUBY)
+    @index.index_single(RubyIndexer::ResourceUri.new(path: "/fake.rb"), <<~RUBY)
       class Foo
         CONSTANT = 1
         private_constant(:CONSTANT)
@@ -86,7 +86,7 @@ class WorkspaceSymbolTest < Minitest::Test
   end
 
   def test_returns_method_symbols
-    @index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake.rb"), <<~RUBY)
+    @index.index_single(RubyIndexer::ResourceUri.new(path: "/fake.rb"), <<~RUBY)
       class Foo
         attr_reader :baz
 
