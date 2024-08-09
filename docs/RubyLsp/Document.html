@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Ruby LSP documentation</title>
+
+  <script type="text/javascript">
+    var rdoc_rel_prefix = "../";
+    var index_rel_prefix = "../";
+  </script>
+
+  <script src="../js/search_index.js" defer></script>
+  <script src="../js/snapper.js" defer></script>
+  <link href="../css/snapper.css" rel="stylesheet">
+</head>
+
+  <body>
+    <div id="main-container">
+  <nav id="nav">
+  <h3 class="title">Ruby LSP documentation</h3>
+
+  <input id="side-search" type="text" placeholder="Search docs (CMD/CTRL + K)"></input>
+
+  <ul id="navigation-list">
+    <li id="getting-started"><a href="../index.html">Getting started</a></li>
+    <p class="separator">PAGES</p>
+    <li class="index-entry">
+  <a href="../ADDONS_md.html">
+    ADDONS
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../CODE_OF_CONDUCT_md.html">
+    CODE_OF_CONDUCT
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../CONTRIBUTING_md.html">
+    CONTRIBUTING
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../DESIGN_AND_ROADMAP_md.html">
+    DESIGN_AND_ROADMAP
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../EDITORS_md.html">
+    EDITORS
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../README_md.html">
+    README
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../SEMANTIC_HIGHLIGHTING_md.html">
+    SEMANTIC_HIGHLIGHTING
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../TROUBLESHOOTING_md.html">
+    TROUBLESHOOTING
+  </a>
+</li>
+<li class="index-entry">
+  <a href="../VERSION_MANAGERS_md.html">
+    VERSION_MANAGERS
+  </a>
+</li>
+
+    <p class="separator">CODE</p>
+    <li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RuboCop.html">RuboCop</a></summary>
+    <ul>
+      <li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RuboCop/Cop.html">Cop</a></summary>
+    <ul>
+      <li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RuboCop/Cop/RubyLsp.html">RubyLsp</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RuboCop/Cop/RubyLsp/UseLanguageServerAliases.html">UseLanguageServerAliases</a></li><li class="index-entry"><a href="../RuboCop/Cop/RubyLsp/UseRegisterWithHandlerMethod.html">UseRegisterWithHandlerMethod</a></li>
+    </ul>
+  </details>
+</li>
+
+    </ul>
+  </details>
+</li>
+
+    </ul>
+  </details>
+</li>
+<li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyIndexer.html">RubyIndexer</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyIndexer/ClassesAndModulesTest.html">ClassesAndModulesTest</a></li><li class="index-entry"><a href="../RubyIndexer/Configuration.html">Configuration</a></li><li class="index-entry"><a href="../RubyIndexer/ConfigurationTest.html">ConfigurationTest</a></li><li class="index-entry"><a href="../RubyIndexer/ConstantTest.html">ConstantTest</a></li><li class="index-entry"><a href="../RubyIndexer/DeclarationListener.html">DeclarationListener</a></li><li class="index-entry"><a href="../RubyIndexer/Enhancement.html">Enhancement</a></li><li class="index-entry"><a href="../RubyIndexer/EnhancementTest.html">EnhancementTest</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyIndexer/Entry.html">Entry</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyIndexer/Entry/Accessor.html">Accessor</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/BlockParameter.html">BlockParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Class.html">Class</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Constant.html">Constant</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/ConstantAlias.html">ConstantAlias</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Include.html">Include</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/InstanceVariable.html">InstanceVariable</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/KeywordParameter.html">KeywordParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/KeywordRestParameter.html">KeywordRestParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Member.html">Member</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Method.html">Method</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/MethodAlias.html">MethodAlias</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Module.html">Module</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/ModuleOperation.html">ModuleOperation</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Namespace.html">Namespace</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/OptionalKeywordParameter.html">OptionalKeywordParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/OptionalParameter.html">OptionalParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Parameter.html">Parameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Prepend.html">Prepend</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/RequiredParameter.html">RequiredParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/RestParameter.html">RestParameter</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Signature.html">Signature</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/SingletonClass.html">SingletonClass</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/UnresolvedConstantAlias.html">UnresolvedConstantAlias</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/UnresolvedMethodAlias.html">UnresolvedMethodAlias</a></li><li class="index-entry"><a href="../RubyIndexer/Entry/Visibility.html">Visibility</a></li>
+    </ul>
+  </details>
+</li>
+<li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyIndexer/Index.html">Index</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyIndexer/Index/NonExistingNamespaceError.html">NonExistingNamespaceError</a></li><li class="index-entry"><a href="../RubyIndexer/Index/UnresolvableAliasError.html">UnresolvableAliasError</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyIndexer/IndexTest.html">IndexTest</a></li><li class="index-entry"><a href="../RubyIndexer/IndexablePath.html">IndexablePath</a></li><li class="index-entry"><a href="../RubyIndexer/InstanceVariableTest.html">InstanceVariableTest</a></li><li class="index-entry"><a href="../RubyIndexer/Location.html">Location</a></li><li class="index-entry"><a href="../RubyIndexer/MethodTest.html">MethodTest</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyIndexer/PrefixTree.html">PrefixTree</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyIndexer/PrefixTree/Node.html">Node</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyIndexer/PrefixTreeTest.html">PrefixTreeTest</a></li><li class="index-entry"><a href="../RubyIndexer/RBSIndexer.html">RBSIndexer</a></li><li class="index-entry"><a href="../RubyIndexer/RBSIndexerTest.html">RBSIndexerTest</a></li><li class="index-entry"><a href="../RubyIndexer/TestCase.html">TestCase</a></li>
+    </ul>
+  </details>
+</li>
+<li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp.html">RubyLsp</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Addon.html">Addon</a></li><li class="index-entry"><a href="../RubyLsp/BaseServer.html">BaseServer</a></li><li class="index-entry"><a href="../RubyLsp/CheckDocs.html">CheckDocs</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Document.html">Document</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Document/LanguageId.html">LanguageId</a></li><li class="index-entry"><a href="../RubyLsp/Document/Scanner.html">Scanner</a></li><li class="index-entry"><a href="../RubyLsp/Document/SorbetLevel.html">SorbetLevel</a></li>
+    </ul>
+  </details>
+</li>
+<li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/ERBDocument.html">ERBDocument</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/ERBDocument/ERBScanner.html">ERBScanner</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Error.html">Error</a></li><li class="index-entry"><a href="../RubyLsp/GlobalState.html">GlobalState</a></li><li class="index-entry"><a href="../RubyLsp/InlineTypeAssertions.html">InlineTypeAssertions</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Listeners.html">Listeners</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Listeners/CodeLens.html">CodeLens</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/Completion.html">Completion</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/Definition.html">Definition</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/DocumentHighlight.html">DocumentHighlight</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/DocumentLink.html">DocumentLink</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/DocumentSymbol.html">DocumentSymbol</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/FoldingRanges.html">FoldingRanges</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/Hover.html">Hover</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/InlayHints.html">InlayHints</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/SemanticHighlighting.html">SemanticHighlighting</a></li><li class="index-entry"><a href="../RubyLsp/Listeners/SignatureHelp.html">SignatureHelp</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Message.html">Message</a></li><li class="index-entry"><a href="../RubyLsp/NodeContext.html">NodeContext</a></li><li class="index-entry"><a href="../RubyLsp/Notification.html">Notification</a></li><li class="index-entry"><a href="../RubyLsp/ParameterScope.html">ParameterScope</a></li><li class="index-entry"><a href="../RubyLsp/Request.html">Request</a></li><li class="index-entry"><a href="../RubyLsp/RequestConfig.html">RequestConfig</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Requests.html">Requests</a></summary>
+    <ul>
+      <li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Requests/CodeActionResolve.html">CodeActionResolve</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Requests/CodeActionResolve/CodeActionError.html">CodeActionError</a></li><li class="index-entry"><a href="../RubyLsp/Requests/CodeActionResolve/Error.html">Error</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Requests/CodeActions.html">CodeActions</a></li><li class="index-entry"><a href="../RubyLsp/Requests/CodeLens.html">CodeLens</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Completion.html">Completion</a></li><li class="index-entry"><a href="../RubyLsp/Requests/CompletionResolve.html">CompletionResolve</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Definition.html">Definition</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Diagnostics.html">Diagnostics</a></li><li class="index-entry"><a href="../RubyLsp/Requests/DocumentHighlight.html">DocumentHighlight</a></li><li class="index-entry"><a href="../RubyLsp/Requests/DocumentLink.html">DocumentLink</a></li><li class="index-entry"><a href="../RubyLsp/Requests/DocumentSymbol.html">DocumentSymbol</a></li><li class="index-entry"><a href="../RubyLsp/Requests/FoldingRanges.html">FoldingRanges</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Requests/Formatting.html">Formatting</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Requests/Formatting/Error.html">Error</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Requests/Hover.html">Hover</a></li><li class="index-entry"><a href="../RubyLsp/Requests/InlayHints.html">InlayHints</a></li><li class="index-entry"><a href="../RubyLsp/Requests/OnTypeFormatting.html">OnTypeFormatting</a></li><li class="index-entry"><a href="../RubyLsp/Requests/PrepareTypeHierarchy.html">PrepareTypeHierarchy</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Requests/Request.html">Request</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Requests/Request/InvalidFormatter.html">InvalidFormatter</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Requests/SelectionRanges.html">SelectionRanges</a></li><li class="index-entry"><a href="../RubyLsp/Requests/SemanticHighlighting.html">SemanticHighlighting</a></li><li class="index-entry"><a href="../RubyLsp/Requests/ShowSyntaxTree.html">ShowSyntaxTree</a></li><li class="index-entry"><a href="../RubyLsp/Requests/SignatureHelp.html">SignatureHelp</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Requests/Support.html">Support</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Requests/Support/Annotation.html">Annotation</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/Common.html">Common</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/Formatter.html">Formatter</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/InternalRuboCopError.html">InternalRuboCopError</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/RuboCopDiagnostic.html">RuboCopDiagnostic</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/RuboCopFormatter.html">RuboCopFormatter</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Requests/Support/RuboCopRunner.html">RuboCopRunner</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Requests/Support/RuboCopRunner/ConfigurationError.html">ConfigurationError</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Requests/Support/SelectionRange.html">SelectionRange</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/Sorbet.html">Sorbet</a></li><li class="index-entry"><a href="../RubyLsp/Requests/Support/SyntaxTreeFormatter.html">SyntaxTreeFormatter</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Requests/TypeHierarchySupertypes.html">TypeHierarchySupertypes</a></li><li class="index-entry"><a href="../RubyLsp/Requests/WorkspaceSymbol.html">WorkspaceSymbol</a></li>
+    </ul>
+  </details>
+</li>
+<li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/ResponseBuilders.html">ResponseBuilders</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/ResponseBuilders/CollectionResponseBuilder.html">CollectionResponseBuilder</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/ResponseBuilders/DocumentSymbol.html">DocumentSymbol</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/ResponseBuilders/DocumentSymbol/SymbolHierarchyRoot.html">SymbolHierarchyRoot</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/ResponseBuilders/Hover.html">Hover</a></li><li class="index-entry"><a href="../RubyLsp/ResponseBuilders/ResponseBuilder.html">ResponseBuilder</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/ResponseBuilders/SemanticHighlighting.html">SemanticHighlighting</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/ResponseBuilders/SemanticHighlighting/SemanticToken.html">SemanticToken</a></li><li class="index-entry"><a href="../RubyLsp/ResponseBuilders/SemanticHighlighting/SemanticTokenEncoder.html">SemanticTokenEncoder</a></li><li class="index-entry"><a href="../RubyLsp/ResponseBuilders/SemanticHighlighting/UndefinedTokenType.html">UndefinedTokenType</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/ResponseBuilders/SignatureHelp.html">SignatureHelp</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/Result.html">Result</a></li><li class="index-entry"><a href="../RubyLsp/RubyDocument.html">RubyDocument</a></li><li class="index-entry"><a href="../RubyLsp/Server.html">Server</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/SetupBundler.html">SetupBundler</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/SetupBundler/BundleInstallFailure.html">BundleInstallFailure</a></li><li class="index-entry"><a href="../RubyLsp/SetupBundler/BundleNotLocked.html">BundleNotLocked</a></li>
+    </ul>
+  </details>
+</li>
+<li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/Store.html">Store</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/Store/NonExistingDocumentError.html">NonExistingDocumentError</a></li>
+    </ul>
+  </details>
+</li>
+<li class="index-entry"><a href="../RubyLsp/TestHelper.html">TestHelper</a></li><li class="expandable-index-entry">
+  <details>
+    <summary><a href="../RubyLsp/TypeInferrer.html">TypeInferrer</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../RubyLsp/TypeInferrer/GuessedType.html">GuessedType</a></li><li class="index-entry"><a href="../RubyLsp/TypeInferrer/Type.html">Type</a></li>
+    </ul>
+  </details>
+</li>
+
+    </ul>
+  </details>
+</li>
+<li class="expandable-index-entry">
+  <details>
+    <summary><a href="../URI.html">URI</a></summary>
+    <ul>
+      <li class="index-entry"><a href="../URI/Generic.html">Generic</a></li><li class="index-entry"><a href="../URI/Source.html">Source</a></li>
+    </ul>
+  </details>
+</li>
+
+  </ul>
+</nav>
+
+
+  <article>
+    <h1>class RubyLsp::Document</h1>
+    <section class="description"></section>
+
+      <section id="5Buntitled-5D" class="documentation-section">
+
+
+
+        
+          <section>
+            <h3 class="section-title">Attributes<hr/></h3>
+
+            
+              <div>
+                <h4 id="attribute-i-encoding" class="method-name">
+                  encoding <span class="attribute-type">(attr_reader)</span>
+                </h4>
+
+                <div class="description">
+                  
+                </div>
+              </div>
+            
+              <div>
+                <h4 id="attribute-i-parse_result" class="method-name">
+                  parse_result <span class="attribute-type">(attr_reader)</span>
+                </h4>
+
+                <div class="description">
+                  
+                </div>
+              </div>
+            
+              <div>
+                <h4 id="attribute-i-source" class="method-name">
+                  source <span class="attribute-type">(attr_reader)</span>
+                </h4>
+
+                <div class="description">
+                  
+                </div>
+              </div>
+            
+              <div>
+                <h4 id="attribute-i-uri" class="method-name">
+                  uri <span class="attribute-type">(attr_reader)</span>
+                </h4>
+
+                <div class="description">
+                  
+                </div>
+              </div>
+            
+              <div>
+                <h4 id="attribute-i-version" class="method-name">
+                  version <span class="attribute-type">(attr_reader)</span>
+                </h4>
+
+                <div class="description">
+                  
+                </div>
+              </div>
+            
+          </section>
+        
+
+        
+            
+
+            <section>
+              <h3 class="section-title">Public Class Methods<hr/></h3>
+
+                <div id="method-c-new" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      new(source:, version:, uri:, encoding: Encoding::UTF_8)
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_lsp/document.rb, line 44</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">initialize</span>(<span class="ruby-value">source:</span>, <span class="ruby-value">version:</span>, <span class="ruby-value">uri:</span>, <span class="ruby-value">encoding:</span> <span class="ruby-constant">Encoding</span><span class="ruby-operator">::</span><span class="ruby-constant">UTF_8</span>)
+  <span class="ruby-ivar">@cache</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">let</span>({}, <span class="ruby-constant">T</span><span class="ruby-operator">::</span><span class="ruby-constant">Hash</span>[<span class="ruby-constant">String</span>, <span class="ruby-constant">T</span>.<span class="ruby-identifier">untyped</span>])
+  <span class="ruby-ivar">@encoding</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">let</span>(<span class="ruby-identifier">encoding</span>, <span class="ruby-constant">Encoding</span>)
+  <span class="ruby-ivar">@source</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">let</span>(<span class="ruby-identifier">source</span>, <span class="ruby-constant">String</span>)
+  <span class="ruby-ivar">@version</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">let</span>(<span class="ruby-identifier">version</span>, <span class="ruby-constant">Integer</span>)
+  <span class="ruby-ivar">@uri</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">let</span>(<span class="ruby-identifier">uri</span>, <span class="ruby-constant">URI</span><span class="ruby-operator">::</span><span class="ruby-constant">Generic</span>)
+  <span class="ruby-ivar">@needs_parsing</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">let</span>(<span class="ruby-keyword">true</span>, <span class="ruby-constant">T</span><span class="ruby-operator">::</span><span class="ruby-constant">Boolean</span>)
+  <span class="ruby-ivar">@parse_result</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">let</span>(<span class="ruby-identifier">parse</span>, <span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">ParseResult</span>)
+<span class="ruby-keyword">end</span></pre>
+                </div>
+            </section>
+          
+            
+            
+        
+            
+
+            <section>
+              <h3 class="section-title">Public Instance Methods<hr/></h3>
+
+                <div id="method-i-3D-3D" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      ==(other)
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_lsp/document.rb, line 55</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">==</span>(<span class="ruby-identifier">other</span>)
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">uri</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">uri</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@source</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">source</span>
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-cache_fetch" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      cache_fetch(request_name, &amp;block)
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_lsp/document.rb, line 70</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">cache_fetch</span>(<span class="ruby-identifier">request_name</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
+  <span class="ruby-identifier">cached</span> = <span class="ruby-ivar">@cache</span>[<span class="ruby-identifier">request_name</span>]
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">cached</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">cached</span>
+
+  <span class="ruby-identifier">result</span> = <span class="ruby-identifier">block</span>.<span class="ruby-identifier">call</span>(<span class="ruby-keyword">self</span>)
+  <span class="ruby-ivar">@cache</span>[<span class="ruby-identifier">request_name</span>] = <span class="ruby-identifier">result</span>
+  <span class="ruby-identifier">result</span>
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-cache_get" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      cache_get(request_name)
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_lsp/document.rb, line 85</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">cache_get</span>(<span class="ruby-identifier">request_name</span>)
+  <span class="ruby-ivar">@cache</span>[<span class="ruby-identifier">request_name</span>]
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-cache_set" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      cache_set(request_name, value)
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_lsp/document.rb, line 80</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">cache_set</span>(<span class="ruby-identifier">request_name</span>, <span class="ruby-identifier">value</span>)
+  <span class="ruby-ivar">@cache</span>[<span class="ruby-identifier">request_name</span>] = <span class="ruby-identifier">value</span>
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-create_scanner" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      create_scanner()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_lsp/document.rb, line 113</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">create_scanner</span>
+  <span class="ruby-constant">Scanner</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@source</span>, <span class="ruby-ivar">@encoding</span>)
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-language_id" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      language_id()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_lsp/document.rb, line 60</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">language_id</span>; <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-locate" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      locate(node, char_position, node_types: [])
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_lsp/document.rb, line 134</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">locate</span>(<span class="ruby-identifier">node</span>, <span class="ruby-identifier">char_position</span>, <span class="ruby-value">node_types:</span> [])
+  <span class="ruby-identifier">queue</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">let</span>(<span class="ruby-identifier">node</span>.<span class="ruby-identifier">child_nodes</span>.<span class="ruby-identifier">compact</span>, <span class="ruby-constant">T</span><span class="ruby-operator">::</span><span class="ruby-constant">Array</span>[<span class="ruby-constant">T</span>.<span class="ruby-identifier">nilable</span>(<span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">Node</span>)])
+  <span class="ruby-identifier">closest</span> = <span class="ruby-identifier">node</span>
+  <span class="ruby-identifier">parent</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">let</span>(<span class="ruby-keyword">nil</span>, <span class="ruby-constant">T</span>.<span class="ruby-identifier">nilable</span>(<span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">Node</span>))
+  <span class="ruby-identifier">nesting_nodes</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">let</span>(
+    [],
+    <span class="ruby-constant">T</span><span class="ruby-operator">::</span><span class="ruby-constant">Array</span>[<span class="ruby-constant">T</span>.<span class="ruby-identifier">any</span>(
+      <span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">ClassNode</span>,
+      <span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">ModuleNode</span>,
+      <span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">SingletonClassNode</span>,
+      <span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">DefNode</span>,
+      <span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">BlockNode</span>,
+      <span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">LambdaNode</span>,
+      <span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">ProgramNode</span>,
+    )],
+  )
+
+  <span class="ruby-identifier">nesting_nodes</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">node</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">node</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">ProgramNode</span>)
+  <span class="ruby-identifier">call_node</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">let</span>(<span class="ruby-keyword">nil</span>, <span class="ruby-constant">T</span>.<span class="ruby-identifier">nilable</span>(<span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">CallNode</span>))
+
+  <span class="ruby-keyword">until</span> <span class="ruby-identifier">queue</span>.<span class="ruby-identifier">empty?</span>
+    <span class="ruby-identifier">candidate</span> = <span class="ruby-identifier">queue</span>.<span class="ruby-identifier">shift</span>
+
+    <span class="ruby-comment"># Skip nil child nodes</span>
+    <span class="ruby-keyword">next</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">candidate</span>.<span class="ruby-identifier">nil?</span>
+
+    <span class="ruby-comment"># Add the next child_nodes to the queue to be processed. The order here is important! We want to move in the</span>
+    <span class="ruby-comment"># same order as the visiting mechanism, which means searching the child nodes before moving on to the next</span>
+    <span class="ruby-comment"># sibling</span>
+    <span class="ruby-constant">T</span>.<span class="ruby-identifier">unsafe</span>(<span class="ruby-identifier">queue</span>).<span class="ruby-identifier">unshift</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">candidate</span>.<span class="ruby-identifier">child_nodes</span>)
+
+    <span class="ruby-comment"># Skip if the current node doesn&#39;t cover the desired position</span>
+    <span class="ruby-identifier">loc</span> = <span class="ruby-identifier">candidate</span>.<span class="ruby-identifier">location</span>
+    <span class="ruby-keyword">next</span> <span class="ruby-keyword">unless</span> (<span class="ruby-identifier">loc</span>.<span class="ruby-identifier">start_offset</span><span class="ruby-operator">...</span><span class="ruby-identifier">loc</span>.<span class="ruby-identifier">end_offset</span>).<span class="ruby-identifier">cover?</span>(<span class="ruby-identifier">char_position</span>)
+
+    <span class="ruby-comment"># If the node&#39;s start character is already past the position, then we should&#39;ve found the closest node</span>
+    <span class="ruby-comment"># already</span>
+    <span class="ruby-keyword">break</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">char_position</span> <span class="ruby-operator">&lt;</span> <span class="ruby-identifier">loc</span>.<span class="ruby-identifier">start_offset</span>
+
+    <span class="ruby-comment"># If the candidate starts after the end of the previous nesting level, then we&#39;ve exited that nesting level and</span>
+    <span class="ruby-comment"># need to pop the stack</span>
+    <span class="ruby-identifier">previous_level</span> = <span class="ruby-identifier">nesting_nodes</span>.<span class="ruby-identifier">last</span>
+    <span class="ruby-identifier">nesting_nodes</span>.<span class="ruby-identifier">pop</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">previous_level</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">loc</span>.<span class="ruby-identifier">start_offset</span> <span class="ruby-operator">&gt;</span> <span class="ruby-identifier">previous_level</span>.<span class="ruby-identifier">location</span>.<span class="ruby-identifier">end_offset</span>
+
+    <span class="ruby-comment"># Keep track of the nesting where we found the target. This is used to determine the fully qualified name of the</span>
+    <span class="ruby-comment"># target when it is a constant</span>
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">candidate</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">ClassNode</span>, <span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">ModuleNode</span>, <span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">SingletonClassNode</span>, <span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">DefNode</span>, <span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">BlockNode</span>,
+      <span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">LambdaNode</span>
+      <span class="ruby-identifier">nesting_nodes</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">candidate</span>
+    <span class="ruby-keyword">end</span>
+
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">candidate</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">CallNode</span>)
+      <span class="ruby-identifier">arg_loc</span> = <span class="ruby-identifier">candidate</span>.<span class="ruby-identifier">arguments</span>&amp;.<span class="ruby-identifier">location</span>
+      <span class="ruby-identifier">blk_loc</span> = <span class="ruby-identifier">candidate</span>.<span class="ruby-identifier">block</span>&amp;.<span class="ruby-identifier">location</span>
+      <span class="ruby-keyword">if</span> (<span class="ruby-identifier">arg_loc</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">arg_loc</span>.<span class="ruby-identifier">start_offset</span><span class="ruby-operator">...</span><span class="ruby-identifier">arg_loc</span>.<span class="ruby-identifier">end_offset</span>).<span class="ruby-identifier">cover?</span>(<span class="ruby-identifier">char_position</span>)) <span class="ruby-operator">||</span>
+          (<span class="ruby-identifier">blk_loc</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">blk_loc</span>.<span class="ruby-identifier">start_offset</span><span class="ruby-operator">...</span><span class="ruby-identifier">blk_loc</span>.<span class="ruby-identifier">end_offset</span>).<span class="ruby-identifier">cover?</span>(<span class="ruby-identifier">char_position</span>))
+        <span class="ruby-identifier">call_node</span> = <span class="ruby-identifier">candidate</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+
+    <span class="ruby-comment"># If there are node types to filter by, and the current node is not one of those types, then skip it</span>
+    <span class="ruby-keyword">next</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">node_types</span>.<span class="ruby-identifier">any?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">node_types</span>.<span class="ruby-identifier">none?</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">type</span><span class="ruby-operator">|</span> <span class="ruby-identifier">candidate</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">type</span> }
+
+    <span class="ruby-comment"># If the current node is narrower than or equal to the previous closest node, then it is more precise</span>
+    <span class="ruby-identifier">closest_loc</span> = <span class="ruby-identifier">closest</span>.<span class="ruby-identifier">location</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">loc</span>.<span class="ruby-identifier">end_offset</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">loc</span>.<span class="ruby-identifier">start_offset</span> <span class="ruby-operator">&lt;=</span> <span class="ruby-identifier">closest_loc</span>.<span class="ruby-identifier">end_offset</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">closest_loc</span>.<span class="ruby-identifier">start_offset</span>
+      <span class="ruby-identifier">parent</span> = <span class="ruby-identifier">closest</span>
+      <span class="ruby-identifier">closest</span> = <span class="ruby-identifier">candidate</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-comment"># When targeting the constant part of a class/module definition, we do not want the nesting to be duplicated. That</span>
+  <span class="ruby-comment"># is, when targeting Bar in the following example:</span>
+  <span class="ruby-comment">#</span>
+  <span class="ruby-comment"># ```ruby</span>
+  <span class="ruby-comment">#   class Foo::Bar; end</span>
+  <span class="ruby-comment"># ```</span>
+  <span class="ruby-comment"># The correct target is `Foo::Bar` with an empty nesting. `Foo::Bar` should not appear in the nesting stack, even</span>
+  <span class="ruby-comment"># though the class/module node does indeed enclose the target, because it would lead to incorrect behavior</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">closest</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">ConstantReadNode</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">closest</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">ConstantPathNode</span>)
+    <span class="ruby-identifier">last_level</span> = <span class="ruby-identifier">nesting_nodes</span>.<span class="ruby-identifier">last</span>
+
+    <span class="ruby-keyword">if</span> (<span class="ruby-identifier">last_level</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">ModuleNode</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">last_level</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">ClassNode</span>)) <span class="ruby-operator">&amp;&amp;</span>
+        <span class="ruby-identifier">last_level</span>.<span class="ruby-identifier">constant_path</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">closest</span>
+      <span class="ruby-identifier">nesting_nodes</span>.<span class="ruby-identifier">pop</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-constant">NodeContext</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">closest</span>, <span class="ruby-identifier">parent</span>, <span class="ruby-identifier">nesting_nodes</span>, <span class="ruby-identifier">call_node</span>)
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-locate_first_within_range" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      locate_first_within_range(range, node_types: [])
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_lsp/document.rb, line 232</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">locate_first_within_range</span>(<span class="ruby-identifier">range</span>, <span class="ruby-value">node_types:</span> [])
+  <span class="ruby-identifier">scanner</span> = <span class="ruby-identifier">create_scanner</span>
+  <span class="ruby-identifier">start_position</span> = <span class="ruby-identifier">scanner</span>.<span class="ruby-identifier">find_char_position</span>(<span class="ruby-identifier">range</span>[<span class="ruby-value">:start</span>])
+  <span class="ruby-identifier">end_position</span> = <span class="ruby-identifier">scanner</span>.<span class="ruby-identifier">find_char_position</span>(<span class="ruby-identifier">range</span>[<span class="ruby-value">:end</span>])
+  <span class="ruby-identifier">desired_range</span> = (<span class="ruby-identifier">start_position</span><span class="ruby-operator">...</span><span class="ruby-identifier">end_position</span>)
+  <span class="ruby-identifier">queue</span> = <span class="ruby-constant">T</span>.<span class="ruby-identifier">let</span>(<span class="ruby-ivar">@parse_result</span>.<span class="ruby-identifier">value</span>.<span class="ruby-identifier">child_nodes</span>.<span class="ruby-identifier">compact</span>, <span class="ruby-constant">T</span><span class="ruby-operator">::</span><span class="ruby-constant">Array</span>[<span class="ruby-constant">T</span>.<span class="ruby-identifier">nilable</span>(<span class="ruby-constant">Prism</span><span class="ruby-operator">::</span><span class="ruby-constant">Node</span>)])
+
+  <span class="ruby-keyword">until</span> <span class="ruby-identifier">queue</span>.<span class="ruby-identifier">empty?</span>
+    <span class="ruby-identifier">candidate</span> = <span class="ruby-identifier">queue</span>.<span class="ruby-identifier">shift</span>
+
+    <span class="ruby-comment"># Skip nil child nodes</span>
+    <span class="ruby-keyword">next</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">candidate</span>.<span class="ruby-identifier">nil?</span>
+
+    <span class="ruby-comment"># Add the next child_nodes to the queue to be processed. The order here is important! We want to move in the</span>
+    <span class="ruby-comment"># same order as the visiting mechanism, which means searching the child nodes before moving on to the next</span>
+    <span class="ruby-comment"># sibling</span>
+    <span class="ruby-constant">T</span>.<span class="ruby-identifier">unsafe</span>(<span class="ruby-identifier">queue</span>).<span class="ruby-identifier">unshift</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">candidate</span>.<span class="ruby-identifier">child_nodes</span>)
+
+    <span class="ruby-comment"># Skip if the current node doesn&#39;t cover the desired position</span>
+    <span class="ruby-identifier">loc</span> = <span class="ruby-identifier">candidate</span>.<span class="ruby-identifier">location</span>
+
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">desired_range</span>.<span class="ruby-identifier">cover?</span>(<span class="ruby-identifier">loc</span>.<span class="ruby-identifier">start_offset</span><span class="ruby-operator">...</span><span class="ruby-identifier">loc</span>.<span class="ruby-identifier">end_offset</span>) <span class="ruby-operator">&amp;&amp;</span>
+        (<span class="ruby-identifier">node_types</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">node_types</span>.<span class="ruby-identifier">any?</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">type</span><span class="ruby-operator">|</span> <span class="ruby-identifier">candidate</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">type</span> })
+      <span class="ruby-keyword">return</span> <span class="ruby-identifier">candidate</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-locate_node" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      locate_node(position, node_types: [])
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_lsp/document.rb, line 123</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">locate_node</span>(<span class="ruby-identifier">position</span>, <span class="ruby-value">node_types:</span> [])
+  <span class="ruby-identifier">locate</span>(<span class="ruby-ivar">@parse_result</span>.<span class="ruby-identifier">value</span>, <span class="ruby-identifier">create_scanner</span>.<span class="ruby-identifier">find_char_position</span>(<span class="ruby-identifier">position</span>), <span class="ruby-value">node_types:</span> <span class="ruby-identifier">node_types</span>)
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-parse" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      parse()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_lsp/document.rb, line 107</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">parse</span>; <span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-push_edits" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      push_edits(edits, version:)
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_lsp/document.rb, line 90</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">push_edits</span>(<span class="ruby-identifier">edits</span>, <span class="ruby-value">version:</span>)
+  <span class="ruby-identifier">edits</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">edit</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">range</span> = <span class="ruby-identifier">edit</span>[<span class="ruby-value">:range</span>]
+    <span class="ruby-identifier">scanner</span> = <span class="ruby-identifier">create_scanner</span>
+
+    <span class="ruby-identifier">start_position</span> = <span class="ruby-identifier">scanner</span>.<span class="ruby-identifier">find_char_position</span>(<span class="ruby-identifier">range</span>[<span class="ruby-value">:start</span>])
+    <span class="ruby-identifier">end_position</span> = <span class="ruby-identifier">scanner</span>.<span class="ruby-identifier">find_char_position</span>(<span class="ruby-identifier">range</span>[<span class="ruby-value">:end</span>])
+
+    <span class="ruby-ivar">@source</span>[<span class="ruby-identifier">start_position</span><span class="ruby-operator">...</span><span class="ruby-identifier">end_position</span>] = <span class="ruby-identifier">edit</span>[<span class="ruby-value">:text</span>]
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-ivar">@version</span> = <span class="ruby-identifier">version</span>
+  <span class="ruby-ivar">@needs_parsing</span> = <span class="ruby-keyword">true</span>
+  <span class="ruby-ivar">@cache</span>.<span class="ruby-identifier">clear</span>
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-sorbet_level" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      sorbet_level()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_lsp/document.rb, line 261</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">sorbet_level</span>
+  <span class="ruby-identifier">sigil</span> = <span class="ruby-identifier">parse_result</span>.<span class="ruby-identifier">magic_comments</span>.<span class="ruby-identifier">find</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">comment</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">comment</span>.<span class="ruby-identifier">key</span> <span class="ruby-operator">==</span> <span class="ruby-string">&quot;typed&quot;</span>
+  <span class="ruby-keyword">end</span>&amp;.<span class="ruby-identifier">value</span>
+
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">sigil</span>
+  <span class="ruby-keyword">when</span> <span class="ruby-string">&quot;ignore&quot;</span>
+    <span class="ruby-constant">SorbetLevel</span><span class="ruby-operator">::</span><span class="ruby-constant">Ignore</span>
+  <span class="ruby-keyword">when</span> <span class="ruby-string">&quot;false&quot;</span>
+    <span class="ruby-constant">SorbetLevel</span><span class="ruby-operator">::</span><span class="ruby-constant">False</span>
+  <span class="ruby-keyword">when</span> <span class="ruby-string">&quot;true&quot;</span>
+    <span class="ruby-constant">SorbetLevel</span><span class="ruby-operator">::</span><span class="ruby-constant">True</span>
+  <span class="ruby-keyword">when</span> <span class="ruby-string">&quot;strict&quot;</span>, <span class="ruby-string">&quot;strong&quot;</span>
+    <span class="ruby-constant">SorbetLevel</span><span class="ruby-operator">::</span><span class="ruby-constant">Strict</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-constant">SorbetLevel</span><span class="ruby-operator">::</span><span class="ruby-constant">None</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+                </div>
+                <div id="method-i-syntax_error-3F" class="method-entry">
+                  <div class="method-info">
+                    <h4 class="method-name">
+                      syntax_error?()
+
+                        <button type="button" class="show-source">Show source</button>
+                    </h4>
+
+                    
+
+
+
+                  </div>
+
+                    <pre class="method-source hidden"><span class="ruby-comment"># File lib/ruby_lsp/document.rb, line 110</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">syntax_error?</span>; <span class="ruby-keyword">end</span></pre>
+                </div>
+            </section>
+          
+            
+            
+        
+      </section>
+  </article>
+
+   <div class="right-section">
+  <nav class="right-nav">
+    <span id="right-side-bar-title" class="right-side-bar-title">On this page</span>
+      <ul>
+          <li id="right-side-bar-class-rubylsp-document" class="right-side-bar-class">
+            <a href="#" >class RubyLsp::Document</a>
+
+              <ul>
+
+                    <li>
+                      <details open>
+                        <summary id="right-side-bar-section-attributes" class="right-side-bar-section">Attributes</summary>
+                        <ul>
+                            <li id="right-nav-encoding" class="right-side-bar-element">
+                              <a href="#attribute-i-encoding">
+                                encoding
+                                </a>
+                            </li>
+                            <li id="right-nav-parse_result" class="right-side-bar-element">
+                              <a href="#attribute-i-parse_result">
+                                parse_result
+                                </a>
+                            </li>
+                            <li id="right-nav-source" class="right-side-bar-element">
+                              <a href="#attribute-i-source">
+                                source
+                                </a>
+                            </li>
+                            <li id="right-nav-uri" class="right-side-bar-element">
+                              <a href="#attribute-i-uri">
+                                uri
+                                </a>
+                            </li>
+                            <li id="right-nav-version" class="right-side-bar-element">
+                              <a href="#attribute-i-version">
+                                version
+                                </a>
+                            </li>
+                        </ul>
+                      </details>
+                    </li>
+
+
+
+                    <li>
+                      <details open>
+                        <summary id="right-side-bar-section-public-class-methods" class="right-side-bar-section">Public Class Methods</summary>
+                        <ul>
+                            <li id="right-nav-new" class="right-side-bar-element">
+                              <a href="#method-c-new">new</a>
+                            </li>
+                        </ul>
+                      </details>
+                    </li>
+
+
+                    <li>
+                      <details open>
+                        <summary id="right-side-bar-section-public-instance-methods" class="right-side-bar-section">Public Instance Methods</summary>
+                        <ul>
+                            <li id="right-nav-==" class="right-side-bar-element">
+                              <a href="#method-i-3D-3D">==</a>
+                            </li>
+                            <li id="right-nav-cache_fetch" class="right-side-bar-element">
+                              <a href="#method-i-cache_fetch">cache_fetch</a>
+                            </li>
+                            <li id="right-nav-cache_get" class="right-side-bar-element">
+                              <a href="#method-i-cache_get">cache_get</a>
+                            </li>
+                            <li id="right-nav-cache_set" class="right-side-bar-element">
+                              <a href="#method-i-cache_set">cache_set</a>
+                            </li>
+                            <li id="right-nav-create_scanner" class="right-side-bar-element">
+                              <a href="#method-i-create_scanner">create_scanner</a>
+                            </li>
+                            <li id="right-nav-language_id" class="right-side-bar-element">
+                              <a href="#method-i-language_id">language_id</a>
+                            </li>
+                            <li id="right-nav-locate" class="right-side-bar-element">
+                              <a href="#method-i-locate">locate</a>
+                            </li>
+                            <li id="right-nav-locate_first_within_range" class="right-side-bar-element">
+                              <a href="#method-i-locate_first_within_range">locate_first_within_range</a>
+                            </li>
+                            <li id="right-nav-locate_node" class="right-side-bar-element">
+                              <a href="#method-i-locate_node">locate_node</a>
+                            </li>
+                            <li id="right-nav-parse" class="right-side-bar-element">
+                              <a href="#method-i-parse">parse</a>
+                            </li>
+                            <li id="right-nav-push_edits" class="right-side-bar-element">
+                              <a href="#method-i-push_edits">push_edits</a>
+                            </li>
+                            <li id="right-nav-sorbet_level" class="right-side-bar-element">
+                              <a href="#method-i-sorbet_level">sorbet_level</a>
+                            </li>
+                            <li id="right-nav-syntax_error?" class="right-side-bar-element">
+                              <a href="#method-i-syntax_error-3F">syntax_error?</a>
+                            </li>
+                        </ul>
+                      </details>
+                    </li>
+            </li>
+          </ul>
+        </li>
+  </nav>
+</div>
+
+</div>
+
+<div id="search-modal">
+  <div id="search-modal-content">
+    <input id="search-modal-input" type="text" placeholder="Search"></input>
+    <ul id="search-results"></ul>
+  </div>
+</div>
+
+
+    <footer>
+      <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.6.3.1
+    </footer>
+  </body>
+</html>
