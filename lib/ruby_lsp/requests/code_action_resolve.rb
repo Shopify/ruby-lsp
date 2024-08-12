@@ -54,7 +54,7 @@ module RubyLsp
           refactor_variable
         when CodeActions::EXTRACT_TO_METHOD_TITLE
           refactor_method
-        when CodeActions::SWITCH_BLOCK_STYLE_TITLE
+        when CodeActions::TOGGLE_BLOCK_STYLE_TITLE
           switch_block_style
         else
           Error::UnknownCodeAction
@@ -81,7 +81,7 @@ module RubyLsp
         indentation = " " * target.location.start_column unless node.opening_loc.slice == "do"
 
         Interface::CodeAction.new(
-          title: CodeActions::SWITCH_BLOCK_STYLE_TITLE,
+          title: CodeActions::TOGGLE_BLOCK_STYLE_TITLE,
           edit: Interface::WorkspaceEdit.new(
             document_changes: [
               Interface::TextDocumentEdit.new(
