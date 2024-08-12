@@ -1,7 +1,7 @@
 {
     "params": {
         "kind": "refactor.rewrite",
-        "title": "Refactor: Switch block style",
+        "title": "Refactor: Toggle block style",
         "data": {
             "range": {
                 "start": {
@@ -17,7 +17,7 @@
         }
     },
     "result": {
-        "title": "Refactor: Switch block style",
+        "title": "Refactor: Toggle block style",
         "edit": {
             "documentChanges": [
                 {

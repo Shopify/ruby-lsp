@@ -54,7 +54,7 @@
       }
     },
     {
-      "title": "Refactor: Switch block style",
+      "title": "Refactor: Toggle block style",
       "kind": "refactor.rewrite",
       "data": {
         "range": {
