@@ -7636,7 +7636,7 @@ class YARD::Logger < ::Logger
   # source://yard//lib/yard/logging.rb#201
   def format_log(sev, _time, _prog, msg); end
 
-  # source://logger/1.6.0/logger.rb#684
+  # source://logger/1.6.0/lib/logger.rb#684
   def print_no_newline(msg); end
 
   class << self
