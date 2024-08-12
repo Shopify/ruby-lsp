@@ -469,7 +469,14 @@
               }
             }
           },
-          "attach": {}
+          "attach": {
+            "properties": {
+              "debugSocketPath": {
+                "type": "string",
+                "description": "The path to the debug socket. This is used to connect to the debugger"
+              }
+            }
+          }
         },
         "configurationSnippets": [
           {

@@ -161,6 +161,13 @@ export class Debugger
 
   private async getSockets(session: vscode.DebugSession) {
     const configuration = session.configuration;
+
+    const debugSocketPath = session.configuration.debugSocketPath;
+
+    if (debugSocketPath) {
+      return [debugSocketPath];
+    }
+
     let sockets: string[] = [];
 
     try {
