@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "expectations/expectations_test_runner"
+require_relative "support/expectations_test_runner"
 
 # Tests RuboCop disable directives - before/after on whole file
 class CodeActionsFormattingTest < Minitest::Test
@@ -72,15 +72,26 @@ class CodeActionsFormattingTest < Minitest::Test
       source: source.dup,
       version: 1,
       uri: URI::Generic.from_path(path: __FILE__),
-      encoding: LanguageServer::Protocol::Constant::PositionEncodingKind::UTF16,
+      encoding: Encoding::UTF_16LE,
     )
 
-    diagnostics = RubyLsp::Requests::Diagnostics.new(document).run
-    diagnostic = T.must(T.must(diagnostics).find { |d| d.code == diagnostic_code })
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      initializationOptions: { linters: ["rubocop"] },
+    })
+    global_state.register_formatter(
+      "rubocop",
+      RubyLsp::Requests::Support::RuboCopFormatter.new,
+    )
+
+    diagnostics = RubyLsp::Requests::Diagnostics.new(global_state, document).perform
+    # The source of the returned attributes may be RuboCop or Prism. Prism diagnostics don't have a code.
+    rubocop_diagnostics = T.must(diagnostics).select { _1.attributes[:source] == "RuboCop" }
+    diagnostic = T.must(T.must(rubocop_diagnostics).find { |d| d.attributes[:code] && (d.code == diagnostic_code) })
     range = diagnostic.range.to_hash.transform_values(&:to_hash)
     result = RubyLsp::Requests::CodeActions.new(document, range, {
       diagnostics: [JSON.parse(T.must(diagnostic).to_json, symbolize_names: true)],
-    }).run
+    }).perform
 
     # CodeActions#run returns Array<CodeAction, Hash>. We're interested in the
     # hashes here, so cast to untyped and only look at those.

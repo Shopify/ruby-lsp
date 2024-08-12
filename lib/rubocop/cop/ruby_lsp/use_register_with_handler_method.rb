@@ -13,9 +13,8 @@ module RuboCop
       # # Register without handler method.
       #
       # # bad
-      # class MyListener < Listener
+      # class MyListener
       #   def initialize(dispatcher)
-      #     super()
       #     dispatcher.register(
       #       self,
       #       :on_string_node_enter,
@@ -24,9 +23,8 @@ module RuboCop
       # end
       #
       # # good
-      # class MyListener < Listener
+      # class MyListener
       #   def initialize(dispatcher)
-      #     super()
       #     dispatcher.register(
       #       self,
       #       :on_string_node_enter,
@@ -41,9 +39,8 @@ module RuboCop
       # # Handler method without register.
       #
       # # bad
-      # class MyListener < Listener
+      # class MyListener
       #   def initialize(dispatcher)
-      #     super()
       #     dispatcher.register(
       #       self,
       #     )
@@ -54,9 +51,8 @@ module RuboCop
       # end
       #
       # # good
-      # class MyListener < Listener
+      # class MyListener
       #   def initialize(dispatcher)
-      #     super()
       #     dispatcher.register(
       #       self,
       #       :on_string_node_enter,

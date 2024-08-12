@@ -1,0 +1,28 @@
+{
+    "folders": [
+        {
+            "name": "server",
+            "path": "."
+        },
+        {
+            "path": "vscode",
+            "name": "extension"
+        }
+    ],
+    "settings": {
+        "files.exclude": {
+            "vscode": true,
+            "**/out": true,
+        },
+        "search.exclude": {
+            "**/out": true,
+        },
+        "rubyLsp.bypassTypechecker": true,
+        "rubyLsp.indexing": {
+            "excludedPatterns": [
+                "**/test/fixtures/**/*.rb"
+            ],
+        },
+        "typescript.tsc.autoDetect": "off",
+    }
+}

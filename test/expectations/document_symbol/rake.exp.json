@@ -1,0 +1,156 @@
+{
+  "result": [
+    {
+      "name": "foo",
+      "kind": 2,
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 10
+        },
+        "end": {
+          "line": 0,
+          "character": 14
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 0,
+          "character": 10
+        },
+        "end": {
+          "line": 0,
+          "character": 14
+        }
+      },
+      "children": [
+        {
+          "name": "bar",
+          "kind": 2,
+          "range": {
+            "start": {
+              "line": 1,
+              "character": 12
+            },
+            "end": {
+              "line": 1,
+              "character": 17
+            }
+          },
+          "selectionRange": {
+            "start": {
+              "line": 1,
+              "character": 12
+            },
+            "end": {
+              "line": 1,
+              "character": 17
+            }
+          },
+          "children": [
+            {
+              "name": "one",
+              "kind": 6,
+              "range": {
+                "start": {
+                  "line": 2,
+                  "character": 9
+                },
+                "end": {
+                  "line": 2,
+                  "character": 13
+                }
+              },
+              "selectionRange": {
+                "start": {
+                  "line": 2,
+                  "character": 9
+                },
+                "end": {
+                  "line": 2,
+                  "character": 13
+                }
+              },
+              "children": []
+            },
+            {
+              "name": "two",
+              "kind": 6,
+              "range": {
+                "start": {
+                  "line": 3,
+                  "character": 9
+                },
+                "end": {
+                  "line": 3,
+                  "character": 14
+                }
+              },
+              "selectionRange": {
+                "start": {
+                  "line": 3,
+                  "character": 9
+                },
+                "end": {
+                  "line": 3,
+                  "character": 14
+                }
+              },
+              "children": []
+            },
+            {
+              "name": "three",
+              "kind": 6,
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 9
+                },
+                "end": {
+                  "line": 4,
+                  "character": 18
+                }
+              },
+              "selectionRange": {
+                "start": {
+                  "line": 4,
+                  "character": 9
+                },
+                "end": {
+                  "line": 4,
+                  "character": 18
+                }
+              },
+              "children": []
+            },
+            {
+              "name": "four",
+              "kind": 6,
+              "range": {
+                "start": {
+                  "line": 5,
+                  "character": 9
+                },
+                "end": {
+                  "line": 5,
+                  "character": 21
+                }
+              },
+              "selectionRange": {
+                "start": {
+                  "line": 5,
+                  "character": 9
+                },
+                "end": {
+                  "line": 5,
+                  "character": 21
+                }
+              },
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

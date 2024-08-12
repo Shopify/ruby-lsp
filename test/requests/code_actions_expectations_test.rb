@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "expectations/expectations_test_runner"
+require_relative "support/expectations_test_runner"
 
 class CodeActionsExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::CodeActions, "code_actions"
@@ -17,7 +17,7 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
         document,
         params[:range],
         params[:context],
-      ).run
+      ).perform
     end
 
     assert_empty(stdout)
@@ -76,7 +76,7 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
   def code_action_for_refactor(refactor)
     LanguageServer::Protocol::Interface::CodeAction.new(
       title: refactor["title"],
-      kind: LanguageServer::Protocol::Constant::CodeActionKind::REFACTOR_EXTRACT,
+      kind: refactor["kind"],
       data: {
         range: refactor.dig("data", "range"),
         uri: refactor.dig("data", "uri"),

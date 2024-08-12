@@ -3,6 +3,23 @@
 
 module RubyLsp
   class Document
+    class LanguageId < T::Enum
+      enums do
+        Ruby = new("ruby")
+        ERB = new("erb")
+      end
+    end
+
+    class SorbetLevel < T::Enum
+      enums do
+        None = new("none")
+        Ignore = new("ignore")
+        False = new("false")
+        True = new("true")
+        Strict = new("strict")
+      end
+    end
+
     extend T::Sig
     extend T::Helpers
 
@@ -20,13 +37,13 @@ module RubyLsp
     sig { returns(URI::Generic) }
     attr_reader :uri
 
-    sig { returns(String) }
+    sig { returns(Encoding) }
     attr_reader :encoding
 
-    sig { params(source: String, version: Integer, uri: URI::Generic, encoding: String).void }
-    def initialize(source:, version:, uri:, encoding: Constant::PositionEncodingKind::UTF8)
+    sig { params(source: String, version: Integer, uri: URI::Generic, encoding: Encoding).void }
+    def initialize(source:, version:, uri:, encoding: Encoding::UTF_8)
       @cache = T.let({}, T::Hash[String, T.untyped])
-      @encoding = T.let(encoding, String)
+      @encoding = T.let(encoding, Encoding)
       @source = T.let(source, String)
       @version = T.let(version, Integer)
       @uri = T.let(uri, URI::Generic)
@@ -34,20 +51,13 @@ module RubyLsp
       @parse_result = T.let(parse, Prism::ParseResult)
     end
 
-    sig { returns(Prism::ProgramNode) }
-    def tree
-      @parse_result.value
-    end
-
-    sig { returns(T::Array[Prism::Comment]) }
-    def comments
-      @parse_result.comments
-    end
-
     sig { params(other: Document).returns(T::Boolean) }
     def ==(other)
-      @source == other.source
+      self.class == other.class && uri == other.uri && @source == other.source
     end
+
+    sig { abstract.returns(LanguageId) }
+    def language_id; end
 
     # TODO: remove this method once all nonpositional requests have been migrated to the listener pattern
     sig do
@@ -96,10 +106,8 @@ module RubyLsp
     sig { abstract.returns(Prism::ParseResult) }
     def parse; end
 
-    sig { returns(T::Boolean) }
-    def syntax_error?
-      @parse_result.failure?
-    end
+    sig { abstract.returns(T::Boolean) }
+    def syntax_error?; end
 
     sig { returns(Scanner) }
     def create_scanner
@@ -110,7 +118,7 @@ module RubyLsp
       params(
         position: T::Hash[Symbol, T.untyped],
         node_types: T::Array[T.class_of(Prism::Node)],
-      ).returns([T.nilable(Prism::Node), T.nilable(Prism::Node), T::Array[String]])
+      ).returns(NodeContext)
     end
     def locate_node(position, node_types: [])
       locate(@parse_result.value, create_scanner.find_char_position(position), node_types: node_types)
@@ -121,13 +129,27 @@ module RubyLsp
         node: Prism::Node,
         char_position: Integer,
         node_types: T::Array[T.class_of(Prism::Node)],
-      ).returns([T.nilable(Prism::Node), T.nilable(Prism::Node), T::Array[String]])
+      ).returns(NodeContext)
     end
     def locate(node, char_position, node_types: [])
       queue = T.let(node.child_nodes.compact, T::Array[T.nilable(Prism::Node)])
       closest = node
       parent = T.let(nil, T.nilable(Prism::Node))
-      nesting = T.let([], T::Array[T.any(Prism::ClassNode, Prism::ModuleNode)])
+      nesting_nodes = T.let(
+        [],
+        T::Array[T.any(
+          Prism::ClassNode,
+          Prism::ModuleNode,
+          Prism::SingletonClassNode,
+          Prism::DefNode,
+          Prism::BlockNode,
+          Prism::LambdaNode,
+          Prism::ProgramNode,
+        )],
+      )
+
+      nesting_nodes << node if node.is_a?(Prism::ProgramNode)
+      call_node = T.let(nil, T.nilable(Prism::CallNode))
 
       until queue.empty?
         candidate = queue.shift
@@ -150,13 +172,24 @@ module RubyLsp
 
         # If the candidate starts after the end of the previous nesting level, then we've exited that nesting level and
         # need to pop the stack
-        previous_level = nesting.last
-        nesting.pop if previous_level && loc.start_offset > previous_level.location.end_offset
+        previous_level = nesting_nodes.last
+        nesting_nodes.pop if previous_level && loc.start_offset > previous_level.location.end_offset
 
         # Keep track of the nesting where we found the target. This is used to determine the fully qualified name of the
         # target when it is a constant
-        if candidate.is_a?(Prism::ClassNode) || candidate.is_a?(Prism::ModuleNode)
-          nesting << candidate
+        case candidate
+        when Prism::ClassNode, Prism::ModuleNode, Prism::SingletonClassNode, Prism::DefNode, Prism::BlockNode,
+          Prism::LambdaNode
+          nesting_nodes << candidate
+        end
+
+        if candidate.is_a?(Prism::CallNode)
+          arg_loc = candidate.arguments&.location
+          blk_loc = candidate.block&.location
+          if (arg_loc && (arg_loc.start_offset...arg_loc.end_offset).cover?(char_position)) ||
+              (blk_loc && (blk_loc.start_offset...blk_loc.end_offset).cover?(char_position))
+            call_node = candidate
+          end
         end
 
         # If there are node types to filter by, and the current node is not one of those types, then skip it
@@ -170,19 +203,78 @@ module RubyLsp
         end
       end
 
-      [closest, parent, nesting.map { |n| n.constant_path.location.slice }]
+      # When targeting the constant part of a class/module definition, we do not want the nesting to be duplicated. That
+      # is, when targeting Bar in the following example:
+      #
+      # ```ruby
+      #   class Foo::Bar; end
+      # ```
+      # The correct target is `Foo::Bar` with an empty nesting. `Foo::Bar` should not appear in the nesting stack, even
+      # though the class/module node does indeed enclose the target, because it would lead to incorrect behavior
+      if closest.is_a?(Prism::ConstantReadNode) || closest.is_a?(Prism::ConstantPathNode)
+        last_level = nesting_nodes.last
+
+        if (last_level.is_a?(Prism::ModuleNode) || last_level.is_a?(Prism::ClassNode)) &&
+            last_level.constant_path == closest
+          nesting_nodes.pop
+        end
+      end
+
+      NodeContext.new(closest, parent, nesting_nodes, call_node)
     end
 
-    sig { returns(T::Boolean) }
-    def sorbet_sigil_is_true_or_higher
-      parse_result.magic_comments.any? do |comment|
-        comment.key == "typed" && ["true", "strict", "strong"].include?(comment.value)
+    sig do
+      params(
+        range: T::Hash[Symbol, T.untyped],
+        node_types: T::Array[T.class_of(Prism::Node)],
+      ).returns(T.nilable(Prism::Node))
+    end
+    def locate_first_within_range(range, node_types: [])
+      scanner = create_scanner
+      start_position = scanner.find_char_position(range[:start])
+      end_position = scanner.find_char_position(range[:end])
+      desired_range = (start_position...end_position)
+      queue = T.let(@parse_result.value.child_nodes.compact, T::Array[T.nilable(Prism::Node)])
+
+      until queue.empty?
+        candidate = queue.shift
+
+        # Skip nil child nodes
+        next if candidate.nil?
+
+        # Add the next child_nodes to the queue to be processed. The order here is important! We want to move in the
+        # same order as the visiting mechanism, which means searching the child nodes before moving on to the next
+        # sibling
+        T.unsafe(queue).unshift(*candidate.child_nodes)
+
+        # Skip if the current node doesn't cover the desired position
+        loc = candidate.location
+
+        if desired_range.cover?(loc.start_offset...loc.end_offset) &&
+            (node_types.empty? || node_types.any? { |type| candidate.class == type })
+          return candidate
+        end
       end
     end
 
-    sig { returns(T::Boolean) }
-    def typechecker_enabled?
-      DependencyDetector.instance.typechecker && sorbet_sigil_is_true_or_higher
+    sig { returns(SorbetLevel) }
+    def sorbet_level
+      sigil = parse_result.magic_comments.find do |comment|
+        comment.key == "typed"
+      end&.value
+
+      case sigil
+      when "ignore"
+        SorbetLevel::Ignore
+      when "false"
+        SorbetLevel::False
+      when "true"
+        SorbetLevel::True
+      when "strict", "strong"
+        SorbetLevel::Strict
+      else
+        SorbetLevel::None
+      end
     end
 
     class Scanner
@@ -192,7 +284,7 @@ module RubyLsp
       # After character 0xFFFF, UTF-16 considers characters to have length 2 and we have to account for that
       SURROGATE_PAIR_START = T.let(0xFFFF, Integer)
 
-      sig { params(source: String, encoding: String).void }
+      sig { params(source: String, encoding: Encoding).void }
       def initialize(source, encoding)
         @current_line = T.let(0, Integer)
         @pos = T.let(0, Integer)
@@ -214,7 +306,7 @@ module RubyLsp
         # need to adjust for surrogate pairs
         requested_position = @pos + position[:character]
 
-        if @encoding == Constant::PositionEncodingKind::UTF16
+        if @encoding == Encoding::UTF_16LE
           requested_position -= utf_16_character_position_correction(@pos, requested_position)
         end
 

@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "json"
+
+label_info = ARGV.first
+
+unless label_info
+  warn("Missing argument for label information")
+  exit(1)
+end
+
+pr_labels = JSON.parse(label_info, symbolize_names: true)[:labels].map { |label| label[:name] }
+
+# If the PR includes at least one of the labels ignored for release notes, then exit successfully
+ignored_labels = ["documentation", "chore", "dependencies"]
+exit(0) if (pr_labels & ignored_labels).any?
+
+# Otherwise, the PR must indicate what type of change it is
+type_labels = ["bugfix", "enhancement", "breaking-change", "other"]
+
+if (pr_labels & type_labels).empty?
+  warn("PR must be labeled with one of the following change types: #{type_labels.join(", ")}")
+  exit(1)
+end
+
+# And it should label the category to which we need to include the notes
+category_labels = ["server", "vscode"]
+
+if (pr_labels & category_labels).empty?
+  warn("PR must be labeled with the category to be included in the right release notes: #{category_labels.join(", ")}")
+  exit(1)
+end

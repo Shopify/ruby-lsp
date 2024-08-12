@@ -17,22 +17,23 @@ module RubyLsp
     # # (program (statements ((binary (int "1") + (int "1")))))
     # ```
     #
-    class ShowSyntaxTree < BaseRequest
+    class ShowSyntaxTree < Request
       extend T::Sig
 
       sig { params(document: Document, range: T.nilable(T::Hash[Symbol, T.untyped])).void }
       def initialize(document, range)
-        super(document)
-
+        super()
+        @document = document
         @range = range
+        @tree = T.let(document.parse_result.value, Prism::ProgramNode)
       end
 
       sig { override.returns(String) }
-      def run
+      def perform
         return ast_for_range if @range
 
         output_string = +""
-        PP.pp(@document.tree, output_string)
+        PP.pp(@tree, output_string)
         output_string
       end
 
@@ -46,7 +47,7 @@ module RubyLsp
         start_char = scanner.find_char_position(range[:start])
         end_char = scanner.find_char_position(range[:end])
 
-        queue = @document.tree.statements.body.dup
+        queue = @tree.statements.body.dup
         found_nodes = []
 
         until queue.empty?

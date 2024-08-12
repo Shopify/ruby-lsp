@@ -15,9 +15,8 @@ class UseRegisterWithHandlerMethodTest < Minitest::Test
 
   def test_registers_offense_when_use_listener_without_handler
     assert_offense(<<~RUBY)
-       class MyListener < Listener
+       class MyListener
         def initialize(dispatcher)
-          super()
           dispatcher.register(
             self,
             :on_string_node_enter,
@@ -31,9 +30,8 @@ class UseRegisterWithHandlerMethodTest < Minitest::Test
 
   def test_registers_offense_when_use_handler_without_listener
     assert_offense(<<~RUBY)
-       class MyListener < Listener
+       class MyListener
         def initialize(dispatcher)
-          super()
           dispatcher.register(
             self,
           )
@@ -48,9 +46,8 @@ class UseRegisterWithHandlerMethodTest < Minitest::Test
 
   def test_registers_offense_when_both_are_mismatching
     assert_offense(<<~RUBY)
-       class MyListener < Listener
+       class MyListener
         def initialize(dispatcher)
-          super()
           dispatcher.register(
             self,
             :on_string_node_enter,
@@ -67,9 +64,8 @@ class UseRegisterWithHandlerMethodTest < Minitest::Test
 
   def test_registers_multiple_offenses_for_listeners
     assert_offense(<<~RUBY)
-       class MyListener < Listener
+       class MyListener
         def initialize(dispatcher)
-          super()
           dispatcher.register(
             self,
             :on_string_node_enter,
@@ -86,9 +82,8 @@ class UseRegisterWithHandlerMethodTest < Minitest::Test
 
   def test_registers_multiple_offenses_for_handlers
     assert_offense(<<~RUBY)
-       class MyListener < Listener
+       class MyListener
         def initialize(dispatcher)
-          super()
           dispatcher.register(
             self,
           )
@@ -108,9 +103,8 @@ class UseRegisterWithHandlerMethodTest < Minitest::Test
 
   def test_does_not_register_offense_when_using_listener_with_handler
     assert_no_offenses(<<~RUBY)
-       class MyListener < Listener
+       class MyListener
         def initialize(dispatcher)
-          super()
           dispatcher.register(
             self,
             :on_string_node_enter

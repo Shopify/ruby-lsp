@@ -1,11 +1,19 @@
 {
-  // Set this value to `verbose` to see the full JSON content of LSP requests and responses
+  // Set this value to `messages` to see names of LSP requests and responses,
+  // or to `verbose` to see the full JSON content of LSP requests and responses
   "ruby lsp.trace.server": "off",
   "[ruby]": {
-    "editor.defaultFormatter": "Shopify.ruby-lsp",
+    "editor.defaultFormatter": "Shopify.ruby-lsp"
   },
+  // So features like completion can still be displayed with Sorbet in the dependencies
   "search.exclude": {
-    "**/test/fixtures/prism": true
+    "**/test/fixtures/prism": true,
+  },
+  // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
+  "[typescript]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
   },
   "cSpell.languageSettings": [
     {
@@ -35,6 +43,6 @@
       "dictionaries": [
         "ruby"
       ]
-    },
-  ]
+    }
+  ],
 }

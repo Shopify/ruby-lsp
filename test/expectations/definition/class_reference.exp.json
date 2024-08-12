@@ -1,8 +1,18 @@
 {
     "result": [
         {
-            "uri": "file:///fixtures/class_reference_target.rb",
-            "range": {
+            "targetUri": "file:///fixtures/class_reference_target.rb",
+            "targetSelectionRange": {
+                "start": {
+                    "line": 4,
+                    "character": 8
+                },
+                "end": {
+                    "line": 4,
+                    "character": 20
+                }
+            },
+            "targetRange": {
                 "start": {
                     "line": 4,
                     "character": 2

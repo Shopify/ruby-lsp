@@ -4,6 +4,7 @@
 require "test_helper"
 
 class SemanticTokenEncoderTest < Minitest::Test
+  SemanticTokenEncoder = RubyLsp::ResponseBuilders::SemanticHighlighting::SemanticTokenEncoder
   def test_tokens_encoded_to_relative_positioning
     tokens = [
       stub_token(1, 2, 1, 0, [0]),
@@ -37,7 +38,7 @@ class SemanticTokenEncoderTest < Minitest::Test
 
     assert_equal(
       expected_encoding,
-      RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode(tokens).data,
+      SemanticTokenEncoder.new.encode(tokens).data,
     )
   end
 
@@ -72,36 +73,30 @@ class SemanticTokenEncoderTest < Minitest::Test
       16,
     ]
 
-    assert_equal(
-      expected_encoding,
-      RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode(tokens).data,
-    )
+    assert_equal(expected_encoding, SemanticTokenEncoder.new.encode(tokens).data)
   end
 
   def test_encoded_modifiers_with_no_modifiers
-    bit_flag = RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode_modifiers([])
+    bit_flag = SemanticTokenEncoder.new.encode_modifiers([])
     assert_equal(0b0000000000, bit_flag)
   end
 
   def test_encoded_modifiers_with_one_modifier
-    bit_flag = RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode_modifiers([9])
+    bit_flag = SemanticTokenEncoder.new.encode_modifiers([9])
     assert_equal(0b1000000000, bit_flag)
   end
 
   def test_encoded_modifiers_with_some_modifiers
-    bit_flag = RubyLsp::Requests::Support::SemanticTokenEncoder.new.encode_modifiers([1, 3, 9, 7, 5])
+    bit_flag = SemanticTokenEncoder.new.encode_modifiers([1, 3, 9, 7, 5])
     assert_equal(0b1010101010, bit_flag)
   end
 
   private
 
   def stub_token(start_line, start_column, length, type, modifier)
-    location = Prism::Location.new(Prism::Source.new(""), 123, 123)
-    location.expects(:start_line).returns(start_line).at_least_once
-    location.expects(:start_column).returns(start_column).at_least_once
-
-    RubyLsp::Requests::SemanticHighlighting::SemanticToken.new(
-      location: location,
+    RubyLsp::ResponseBuilders::SemanticHighlighting::SemanticToken.new(
+      start_line: start_line,
+      start_code_unit_column: start_column,
       length: length,
       type: type,
       modifier: modifier,

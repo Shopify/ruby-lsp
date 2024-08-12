@@ -1,0 +1,47 @@
+name: Auto assign
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  auto_assign:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+
+      - name: Randomly assign reviewers to community issues
+        uses: actions/github-script@v7
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          script: |
+            const fullTeam = [
+              "andyw8",
+              "dirceu",
+              "paracycle",
+              "vinistock",
+              "rafaelfranca",
+              "Morriar",
+              "st0012",
+              "egiurleo",
+              "KaanOzkan"
+            ];
+            const author = "${{ github.event.issue.user.login }}";
+
+            if (!fullTeam.includes(author)) {
+              const dxReviewers = [
+                "andyw8",
+                "vinistock",
+                "st0012",
+              ];
+              const assignee = dxReviewers[Math.floor(Math.random() * dxReviewers.length)];
+
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: ${{ github.event.issue.number }},
+                assignees: [assignee]
+              });
+            }

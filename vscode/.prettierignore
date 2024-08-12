@@ -1,0 +1,5 @@
+.vscode/
+.vscode-test/
+.spin/
+node_modules/
+out/

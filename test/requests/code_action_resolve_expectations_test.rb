@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "expectations/expectations_test_runner"
+require_relative "support/expectations_test_runner"
 
 class CodeActionResolveExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::CodeActionResolve, "code_action_resolve"
@@ -11,7 +11,7 @@ class CodeActionResolveExpectationsTest < ExpectationsTestRunner
     params = @__params&.any? ? @__params : default_args
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI("file:///fake.rb"))
 
-    RubyLsp::Requests::CodeActionResolve.new(document, params).run
+    RubyLsp::Requests::CodeActionResolve.new(document, params).perform
   end
 
   def assert_expectations(source, expected)

@@ -1,6 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "ruby_lsp/listeners/signature_help"
+
 module RubyLsp
   module Requests
     # ![Signature help demo](../../signature_help.gif)
@@ -22,73 +24,99 @@ module RubyLsp
     #    bar( # -> Signature help will show the parameters of `bar`
     #  end
     # ```
-    class SignatureHelp < Listener
+    class SignatureHelp < Request
       extend T::Sig
-      extend T::Generic
 
-      ResponseType = type_member { { fixed: T.nilable(T.any(Interface::SignatureHelp, T::Hash[Symbol, T.untyped])) } }
+      class << self
+        extend T::Sig
 
-      sig { override.returns(ResponseType) }
-      attr_reader :_response
+        sig { returns(Interface::SignatureHelpOptions) }
+        def provider
+          # Identifier characters are automatically included, such as A-Z, a-z, 0-9, _, * or :
+          Interface::SignatureHelpOptions.new(
+            trigger_characters: ["(", " ", ","],
+          )
+        end
+      end
 
       sig do
         params(
-          context: T::Hash[Symbol, T.untyped],
-          nesting: T::Array[String],
-          index: RubyIndexer::Index,
+          document: Document,
+          global_state: GlobalState,
+          position: T::Hash[Symbol, T.untyped],
+          context: T.nilable(T::Hash[Symbol, T.untyped]),
           dispatcher: Prism::Dispatcher,
+          sorbet_level: Document::SorbetLevel,
         ).void
       end
-      def initialize(context, nesting, index, dispatcher)
-        @context = context
-        @nesting = nesting
-        @index = index
-        @_response = T.let(nil, ResponseType)
+      def initialize(document, global_state, position, context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
+        super()
+        node_context = document.locate_node(
+          { line: position[:line], character: position[:character] },
+          node_types: [Prism::CallNode],
+        )
 
-        super(dispatcher)
-        dispatcher.register(self, :on_call_node_enter)
+        target = adjust_for_nested_target(node_context.node, node_context.parent, position)
+
+        @target = T.let(target, T.nilable(Prism::Node))
+        @dispatcher = dispatcher
+        @response_builder = T.let(ResponseBuilders::SignatureHelp.new, ResponseBuilders::SignatureHelp)
+        Listeners::SignatureHelp.new(@response_builder, global_state, node_context, dispatcher, sorbet_level)
       end
 
-      sig { params(node: Prism::CallNode).void }
-      def on_call_node_enter(node)
-        return if DependencyDetector.instance.typechecker
-        return unless self_receiver?(node)
+      sig { override.returns(T.nilable(Interface::SignatureHelp)) }
+      def perform
+        return unless @target
 
-        message = node.message
-        return unless message
+        @dispatcher.dispatch_once(@target)
+        @response_builder.response
+      end
 
-        target_method = @index.resolve_method(message, @nesting.join("::"))
-        return unless target_method
+      private
 
-        parameters = target_method.parameters
-        name = target_method.name
+      # Adjust the target of signature help in the case where we have nested method calls. This is necessary so that we
+      # select the right target in a situation like this:
+      #
+      # foo(another_method_call)
+      #
+      # In that case, we want to provide signature help for `foo` and not `another_method_call`.
+      sig do
+        params(
+          target: T.nilable(Prism::Node),
+          parent: T.nilable(Prism::Node),
+          position: T::Hash[Symbol, T.untyped],
+        ).returns(T.nilable(Prism::Node))
+      end
+      def adjust_for_nested_target(target, parent, position)
+        # If the parent node is not a method call, then make no adjustments
+        return target unless parent.is_a?(Prism::CallNode)
+        # If the parent is a method call, but the target isn't, then return the parent
+        return parent unless target.is_a?(Prism::CallNode)
 
-        # If the method doesn't have any parameters, there's no need to show signature help
-        return if parameters.empty?
+        # If both are method calls, we check the arguments of the inner method call. If there are no arguments, then
+        # we're providing signature help for the outer method call.
+        #
+        # If there are arguments, then we check if the arguments node covers the requested position. If it doesn't
+        # cover, then we're providing signature help for the outer method call.
+        arguments = target.arguments
+        arguments.nil? || !node_covers?(arguments, position) ? parent : target
+      end
 
-        label = "#{name}(#{parameters.map(&:decorated_name).join(", ")})"
+      sig { params(node: Prism::Node, position: T::Hash[Symbol, T.untyped]).returns(T::Boolean) }
+      def node_covers?(node, position)
+        location = node.location
+        start_line = location.start_line - 1
+        start_character = location.start_column
+        end_line = location.end_line - 1
+        end_character = location.end_column
 
-        arguments_node = node.arguments
-        arguments = arguments_node&.arguments || []
-        active_parameter = (arguments.length - 1).clamp(0, parameters.length - 1)
+        start_covered = start_line < position[:line] ||
+          (start_line == position[:line] && start_character <= position[:character])
 
-        # If there are arguments, then we need to check if there's a trailing comma after the end of the last argument
-        # to advance the active parameter to the next one
-        if arguments_node &&
-            node.slice.byteslice(arguments_node.location.end_offset - node.location.start_offset) == ","
-          active_parameter += 1
-        end
+        end_covered = end_line > position[:line] ||
+          (end_line == position[:line] && end_character >= position[:character])
 
-        @_response = Interface::SignatureHelp.new(
-          signatures: [
-            Interface::SignatureInformation.new(
-              label: label,
-              parameters: parameters.map { |param| Interface::ParameterInformation.new(label: param.name) },
-              documentation: markdown_from_index_entries("", target_method),
-            ),
-          ],
-          active_parameter: active_parameter,
-        )
+        start_covered && end_covered
       end
     end
   end

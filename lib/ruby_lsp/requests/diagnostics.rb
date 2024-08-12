@@ -1,8 +1,6 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "ruby_lsp/requests/support/rubocop_diagnostics_runner"
-
 module RubyLsp
   module Requests
     # ![Diagnostics demo](../../diagnostics.gif)
@@ -18,39 +16,85 @@ module RubyLsp
     # puts "Hello" # --> diagnostics: incorrect indentation
     # end
     # ```
-    class Diagnostics < BaseRequest
+    class Diagnostics < Request
       extend T::Sig
 
-      sig { params(document: Document).void }
-      def initialize(document)
-        super(document)
+      class << self
+        extend T::Sig
 
+        sig { returns(Interface::DiagnosticRegistrationOptions) }
+        def provider
+          Interface::DiagnosticRegistrationOptions.new(
+            document_selector: [Interface::DocumentFilter.new(language: "ruby")],
+            inter_file_dependencies: false,
+            workspace_diagnostics: false,
+          )
+        end
+      end
+
+      sig { params(global_state: GlobalState, document: Document).void }
+      def initialize(global_state, document)
+        super()
+        @active_linters = T.let(global_state.active_linters, T::Array[Support::Formatter])
+        @document = document
         @uri = T.let(document.uri, URI::Generic)
       end
 
       sig { override.returns(T.nilable(T.all(T::Array[Interface::Diagnostic], Object))) }
-      def run
-        # Running RuboCop is slow, so to avoid excessive runs we only do so if the file is syntactically valid
-        return syntax_error_diagnostics if @document.syntax_error?
-        return unless defined?(Support::RuboCopDiagnosticsRunner)
+      def perform
+        diagnostics = []
+        diagnostics.concat(syntax_error_diagnostics, syntax_warning_diagnostics)
 
-        Support::RuboCopDiagnosticsRunner.instance.run(@uri, @document).map!(&:to_lsp_diagnostic)
+        # Running RuboCop is slow, so to avoid excessive runs we only do so if the file is syntactically valid
+        return diagnostics if @document.syntax_error? || @active_linters.empty?
+
+        @active_linters.each do |linter|
+          linter_diagnostics = linter.run_diagnostic(@uri, @document)
+          diagnostics.concat(linter_diagnostics) if linter_diagnostics
+        end
+
+        diagnostics
       end
 
       private
 
-      sig { returns(T.nilable(T::Array[Interface::Diagnostic])) }
+      sig { returns(T::Array[Interface::Diagnostic]) }
+      def syntax_warning_diagnostics
+        @document.parse_result.warnings.map do |warning|
+          location = warning.location
+
+          Interface::Diagnostic.new(
+            source: "Prism",
+            message: warning.message,
+            severity: Constant::DiagnosticSeverity::WARNING,
+            range: Interface::Range.new(
+              start: Interface::Position.new(
+                line: location.start_line - 1,
+                character: location.start_column,
+              ),
+              end: Interface::Position.new(
+                line: location.end_line - 1,
+                character: location.end_column,
+              ),
+            ),
+          )
+        end
+      end
+
+      sig { returns(T::Array[Interface::Diagnostic]) }
       def syntax_error_diagnostics
         @document.parse_result.errors.map do |error|
+          location = error.location
+
           Interface::Diagnostic.new(
             range: Interface::Range.new(
               start: Interface::Position.new(
-                line: error.location.start_line - 1,
-                character: error.location.start_column,
+                line: location.start_line - 1,
+                character: location.start_column,
               ),
               end: Interface::Position.new(
-                line: error.location.end_line - 1,
-                character: error.location.end_column,
+                line: location.end_line - 1,
+                character: location.end_column,
               ),
             ),
             message: error.message,

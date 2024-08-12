@@ -18,6 +18,10 @@ parser = OptionParser.new do |opts|
     options[:debug] = true
   end
 
+  opts.on("--time-index", "Measure the time it takes to index the project") do
+    options[:time_index] = true
+  end
+
   opts.on(
     "--branch [BRANCH]",
     "Launch the Ruby LSP using the specified branch rather than the release version",
@@ -30,6 +34,10 @@ parser = OptionParser.new do |opts|
     "Run pre-release versions of the Ruby LSP",
   ) do
     options[:experimental] = true
+  end
+
+  opts.on("--doctor", "Run troubleshooting steps") do
+    options[:doctor] = true
   end
 
   opts.on("-h", "--help", "Print this help") do
@@ -68,44 +76,60 @@ if ENV["BUNDLE_GEMFILE"].nil?
   exit exec(env, "bundle exec ruby-lsp #{original_args.join(" ")}")
 end
 
-require "sorbet-runtime"
-
-begin
-  T::Configuration.default_checked_level = :never
-  # Suppresses call validation errors
-  T::Configuration.call_validation_error_handler = ->(*) {}
-  # Suppresses errors caused by T.cast, T.let, T.must, etc.
-  T::Configuration.inline_type_error_handler = ->(*) {}
-  # Suppresses errors caused by incorrect parameter ordering
-  T::Configuration.sig_validation_error_handler = ->(*) {}
-rescue
-  # Need this rescue so that if another gem has
-  # already set the checked level by the time we
-  # get to it, we don't fail outright.
-  nil
-end
+require "ruby_lsp/load_sorbet"
 
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 require "ruby_lsp/internal"
 
 if options[:debug]
   if ["x64-mingw-ucrt", "x64-mingw32"].include?(RUBY_PLATFORM)
-    puts "Debugging is not supported on Windows"
+    $stderr.puts "Debugging is not supported on Windows"
     exit 1
   end
 
-  sockets_dir = "/tmp/ruby-lsp-debug-sockets"
-  Dir.mkdir(sockets_dir) unless Dir.exist?(sockets_dir)
-  # ruby-debug-ENV["USER"] is an implicit naming pattern in ruby/debug
-  # if it's not present, rdbg will not find the socket
-  socket_identifier = "ruby-debug-#{ENV["USER"]}-#{File.basename(Dir.pwd)}.sock"
-  ENV["RUBY_DEBUG_SOCK_PATH"] = "#{sockets_dir}/#{socket_identifier}"
-
   begin
+    ENV.delete("RUBY_DEBUG_IRB_CONSOLE")
     require "debug/open_nonstop"
   rescue LoadError
-    warn("You need to install the debug gem to use the --debug flag")
+    $stderr.puts("You need to install the debug gem to use the --debug flag")
   end
+end
+
+if options[:time_index]
+  require "benchmark"
+
+  index = RubyIndexer::Index.new
+
+  result = Benchmark.realtime { index.index_all }
+  entries = index.instance_variable_get(:@entries)
+  entries_by_entry_type = entries.values.flatten.group_by(&:class)
+
+  puts <<~MSG
+    Ruby LSP v#{RubyLsp::VERSION}: Indexing took #{result.round(5)} seconds and generated:
+    - #{entries_by_entry_type.sort_by { |k, _| k.to_s }.map { |k, v| "#{k.name.split("::").last}: #{v.size}" }.join("\n- ")}
+  MSG
+  return
+end
+
+if options[:doctor]
+  if File.exist?(".index.yml")
+    begin
+      config = YAML.parse_file(".index.yml").to_ruby
+    rescue => e
+      abort("Error parsing config: #{e.message}")
+    end
+    RubyIndexer.configuration.apply_config(config)
+  end
+
+  index = RubyIndexer::Index.new
+
+  puts "Globbing for indexable files"
+
+  RubyIndexer.configuration.indexables.each do |indexable|
+    puts "indexing: #{indexable.full_path}"
+    index.index_single(indexable)
+  end
+  return
 end
 
 RubyLsp::Server.new.start

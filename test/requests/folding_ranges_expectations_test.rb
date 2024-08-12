@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "expectations/expectations_test_runner"
+require_relative "support/expectations_test_runner"
 
 class FoldingRangesExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::FoldingRanges, "folding_ranges"
@@ -12,8 +12,9 @@ class FoldingRangesExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::FoldingRanges.new(document.parse_result.comments, dispatcher)
-    dispatcher.dispatch(document.tree)
-    listener.response
+    parse_result = document.parse_result
+    listener = RubyLsp::Requests::FoldingRanges.new(parse_result.comments, dispatcher)
+    dispatcher.dispatch(parse_result.value)
+    listener.perform
   end
 end

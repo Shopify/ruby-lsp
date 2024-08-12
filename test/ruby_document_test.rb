@@ -320,11 +320,17 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_document_handle_4_byte_unicode_characters
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"), encoding: "utf-16")
+    source = +<<~RUBY
       class Foo
         a = "👋"
       end
     RUBY
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI("file:///foo.rb"),
+      encoding: Encoding::UTF_16LE,
+    )
 
     document.push_edits(
       [
@@ -427,34 +433,25 @@ class RubyDocumentTest < Minitest::Test
     RUBY
 
     # Locate the `ActiveRecord` module
-    found, parent = document.locate_node({ line: 0, character: 19 })
-    assert_instance_of(Prism::ConstantReadNode, found)
-    assert_equal("ActiveRecord", T.cast(found, Prism::ConstantReadNode).location.slice)
+    node_context = document.locate_node({ line: 0, character: 19 })
+    assert_instance_of(Prism::ConstantReadNode, node_context.node)
+    assert_equal("ActiveRecord", T.cast(node_context.node, Prism::ConstantReadNode).location.slice)
 
-    assert_instance_of(Prism::ConstantPathNode, parent)
-    assert_equal("ActiveRecord", T.must(T.cast(parent, Prism::ConstantPathNode).child_nodes.first).location.slice)
+    assert_instance_of(Prism::ConstantPathNode, node_context.parent)
+    assert_equal(
+      "ActiveRecord",
+      T.must(T.cast(node_context.parent, Prism::ConstantPathNode).child_nodes.first).location.slice,
+    )
 
     # Locate the `Base` class
-    found, parent = T.cast(
-      document.locate_node({ line: 0, character: 27 }),
-      [Prism::ConstantReadNode, Prism::ConstantPathNode, T::Array[String]],
-    )
-    assert_instance_of(Prism::ConstantReadNode, found)
-    assert_equal("Base", found.location.slice)
-
-    assert_instance_of(Prism::ConstantPathNode, parent)
-    assert_equal("Base", T.must(parent.child_nodes[1]).location.slice)
-    assert_equal("ActiveRecord", T.must(parent.child_nodes[0]).location.slice)
+    node_context = document.locate_node({ line: 0, character: 27 })
+    found = T.cast(node_context.node, Prism::ConstantPathNode)
+    assert_equal(:ActiveRecord, T.cast(found.parent, Prism::ConstantReadNode).name)
+    assert_equal(:Base, found.name)
 
     # Locate the `where` invocation
-    found, parent = T.cast(
-      document.locate_node({ line: 3, character: 4 }),
-      [Prism::CallNode, Prism::StatementsNode, T::Array[String]],
-    )
-    assert_instance_of(Prism::CallNode, found)
-    assert_equal("where", T.must(found.message_loc).slice)
-
-    assert_instance_of(Prism::StatementsNode, parent)
+    node_context = document.locate_node({ line: 3, character: 4 })
+    assert_equal("where", T.cast(node_context.node, Prism::CallNode).message)
   end
 
   def test_locate_returns_nesting
@@ -474,13 +471,74 @@ class RubyDocumentTest < Minitest::Test
       end
     RUBY
 
-    found, _parent, nesting = document.locate_node({ line: 9, character: 6 })
-    assert_equal("Qux", T.cast(found, Prism::ConstantReadNode).location.slice)
-    assert_equal(["Foo", "Bar"], nesting)
+    node_context = document.locate_node({ line: 9, character: 6 })
+    assert_equal("Qux", T.cast(node_context.node, Prism::ConstantReadNode).location.slice)
+    assert_equal(["Foo", "Bar"], node_context.nesting)
 
-    found, _parent, nesting = document.locate_node({ line: 3, character: 6 })
-    assert_equal("Hello", T.cast(found, Prism::ConstantReadNode).location.slice)
-    assert_equal(["Foo", "Other"], nesting)
+    node_context = document.locate_node({ line: 3, character: 6 })
+    assert_equal("Hello", T.cast(node_context.node, Prism::ConstantReadNode).location.slice)
+    assert_equal(["Foo", "Other"], node_context.nesting)
+  end
+
+  def test_locate_returns_call_node
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      module Foo
+        class Other
+          def do_it
+            hello :foo
+            :bar
+          end
+        end
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 3, character: 14 })
+    assert_equal(":foo", T.must(node_context.node).slice)
+    assert_equal(:hello, T.must(node_context.call_node).name)
+
+    node_context = document.locate_node({ line: 4, character: 8 })
+    assert_equal(":bar", T.must(node_context.node).slice)
+    assert_nil(node_context.call_node)
+  end
+
+  def test_locate_returns_call_node_nested
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      module Foo
+        class Other
+          def do_it
+            goodbye(hello(:foo))
+          end
+        end
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 3, character: 22 })
+    assert_equal(":foo", T.must(node_context.node).slice)
+    assert_equal(:hello, T.must(node_context.call_node).name)
+  end
+
+  def test_locate_returns_call_node_for_blocks
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      foo do
+        "hello"
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 1, character: 4 })
+    assert_equal(:foo, T.must(node_context.call_node).name)
+  end
+
+  def test_locate_returns_call_node_ZZZ
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      foo(
+        if bar(1, 2, 3)
+          "hello" # this is the target
+        end
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 2, character: 6 })
+    assert_equal(:foo, T.must(node_context.call_node).name)
   end
 
   def test_locate_returns_correct_nesting_when_specifying_target_classes
@@ -494,9 +552,10 @@ class RubyDocumentTest < Minitest::Test
       end
     RUBY
 
-    found, _parent, nesting = document.locate_node({ line: 3, character: 6 }, node_types: [Prism::ConstantReadNode])
+    node_context = document.locate_node({ line: 3, character: 6 }, node_types: [Prism::ConstantReadNode])
+    found = node_context.node
     assert_equal("Qux", T.cast(found, Prism::ConstantReadNode).location.slice)
-    assert_equal(["Foo", "Bar"], nesting)
+    assert_equal(["Foo", "Bar"], node_context.nesting)
   end
 
   def test_reparsing_without_new_edits_does_nothing
@@ -542,32 +601,32 @@ class RubyDocumentTest < Minitest::Test
       version: 1,
       uri: URI("file:///foo/bar.rb"),
     )
-    refute_predicate(document, :sorbet_sigil_is_true_or_higher)
+    assert_equal(RubyLsp::Document::SorbetLevel::None, document.sorbet_level)
   end
 
   def test_sigil_ignore
-    document = RubyLsp::RubyDocument.new(source: +"# typed: ignored", version: 1, uri: URI("file:///foo/bar.rb"))
-    refute_predicate(document, :sorbet_sigil_is_true_or_higher)
+    document = RubyLsp::RubyDocument.new(source: +"# typed: ignore", version: 1, uri: URI("file:///foo/bar.rb"))
+    assert_equal(RubyLsp::Document::SorbetLevel::Ignore, document.sorbet_level)
   end
 
   def test_sigil_false
     document = RubyLsp::RubyDocument.new(source: +"# typed: false", version: 1, uri: URI("file:///foo/bar.rb"))
-    refute_predicate(document, :sorbet_sigil_is_true_or_higher)
+    assert_equal(RubyLsp::Document::SorbetLevel::False, document.sorbet_level)
   end
 
   def test_sigil_true
     document = RubyLsp::RubyDocument.new(source: +"# typed: true", version: 1, uri: URI("file:///foo/bar.rb"))
-    assert_predicate(document, :sorbet_sigil_is_true_or_higher)
+    assert_equal(RubyLsp::Document::SorbetLevel::True, document.sorbet_level)
   end
 
   def test_sigil_strict
     document = RubyLsp::RubyDocument.new(source: +"# typed: strict", version: 1, uri: URI("file:///foo/bar.rb"))
-    assert_predicate(document, :sorbet_sigil_is_true_or_higher)
+    assert_equal(RubyLsp::Document::SorbetLevel::Strict, document.sorbet_level)
   end
 
   def test_sigil_strong
     document = RubyLsp::RubyDocument.new(source: +"# typed: strong", version: 1, uri: URI("file:///foo/bar.rb"))
-    assert_predicate(document, :sorbet_sigil_is_true_or_higher)
+    assert_equal(RubyLsp::Document::SorbetLevel::Strict, document.sorbet_level)
   end
 
   def test_sorbet_sigil_only_in_magic_comment
@@ -592,7 +651,92 @@ class RubyDocumentTest < Minitest::Test
         CODE
       end
     RUBY
-    refute_predicate(document, :sorbet_sigil_is_true_or_higher)
+    assert_equal(RubyLsp::Document::SorbetLevel::False, document.sorbet_level)
+  end
+
+  def test_locating_compact_namespace_declaration
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      class Foo::Bar
+      end
+
+      class Baz
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 0, character: 11 })
+    assert_empty(node_context.nesting)
+    assert_equal("Foo::Bar", T.must(node_context.node).slice)
+
+    node_context = document.locate_node({ line: 3, character: 6 })
+    assert_empty(node_context.nesting)
+    assert_equal("Baz", T.must(node_context.node).slice)
+  end
+
+  def test_locating_singleton_contexts
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      class Foo
+        hello1
+
+        def self.bar
+          hello2
+        end
+
+        class << self
+          hello3
+
+          def baz
+            hello4
+          end
+        end
+
+        def qux
+          hello5
+        end
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 1, character: 2 })
+    assert_equal(["Foo"], node_context.nesting)
+    assert_nil(node_context.surrounding_method)
+
+    node_context = document.locate_node({ line: 4, character: 4 })
+    assert_equal(["Foo", "<Class:Foo>"], node_context.nesting)
+    assert_equal("bar", node_context.surrounding_method)
+
+    node_context = document.locate_node({ line: 8, character: 4 })
+    assert_equal(["Foo", "<Class:Foo>"], node_context.nesting)
+    assert_nil(node_context.surrounding_method)
+
+    node_context = document.locate_node({ line: 11, character: 6 })
+    assert_equal(["Foo", "<Class:Foo>"], node_context.nesting)
+    assert_equal("baz", node_context.surrounding_method)
+
+    node_context = document.locate_node({ line: 16, character: 6 })
+    assert_equal(["Foo"], node_context.nesting)
+    assert_equal("qux", node_context.surrounding_method)
+  end
+
+  def test_locate_first_within_range
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      method_call(other_call).each do |a|
+        nested_call(fourth_call).each do |b|
+        end
+      end
+    RUBY
+
+    target = document.locate_first_within_range(
+      { start: { line: 0, character: 0 }, end: { line: 3, character: 3 } },
+      node_types: [Prism::CallNode],
+    )
+
+    assert_equal("each", T.cast(target, Prism::CallNode).message)
+
+    target = document.locate_first_within_range(
+      { start: { line: 1, character: 2 }, end: { line: 2, character: 5 } },
+      node_types: [Prism::CallNode],
+    )
+
+    assert_equal("each", T.cast(target, Prism::CallNode).message)
   end
 
   private

@@ -1,6 +1,7 @@
 {
     "params": {
         "kind": "refactor.extract",
+        "title": "Refactor: Extract Variable",
         "data": {
             "range": {
                 "start": {

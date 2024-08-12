@@ -9,16 +9,6 @@
         "contents": {
             "kind": "markdown",
             "value": "```ruby\nBar\n```\n\n**Definitions**: [fake.rb](file:///fake.rb#L2,1-3,4) | [fake.rb](file:///fake.rb#L6,1-7,4)\n\n\n\nThis is the documentation for Bar\n\nThis is more documentation for Bar"
-        },
-        "range": {
-            "start": {
-                "line": 1,
-                "character": 6
-            },
-            "end": {
-                "line": 1,
-                "character": 9
-            }
         }
     }
 }

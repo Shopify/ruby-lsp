@@ -20,20 +20,21 @@ module RubyLsp
     #   puts "Hello, world!" # --> Cursor is on this line
     # end
     # ```
-    class SelectionRanges
+    class SelectionRanges < Request
       extend T::Sig
       include Support::Common
       sig { params(document: Document).void }
       def initialize(document)
+        super()
         @document = document
         @ranges = T.let([], T::Array[Support::SelectionRange])
         @stack = T.let([], T::Array[Support::SelectionRange])
       end
 
-      sig { returns(T.all(T::Array[Support::SelectionRange], Object)) }
-      def run
+      sig { override.returns(T.all(T::Array[Support::SelectionRange], Object)) }
+      def perform
         # [node, parent]
-        queue = [[@document.tree, nil]]
+        queue = [[@document.parse_result.value, nil]]
 
         until queue.empty?
           node, parent = queue.shift

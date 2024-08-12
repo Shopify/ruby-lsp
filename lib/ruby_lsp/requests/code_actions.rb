@@ -16,8 +16,24 @@ module RubyLsp
     # puts "Hello" # --> code action: quick fix indentation
     # end
     # ```
-    class CodeActions < BaseRequest
+    class CodeActions < Request
       extend T::Sig
+
+      EXTRACT_TO_VARIABLE_TITLE = "Refactor: Extract Variable"
+      EXTRACT_TO_METHOD_TITLE = "Refactor: Extract Method"
+      SWITCH_BLOCK_STYLE_TITLE = "Refactor: Switch block style"
+
+      class << self
+        extend T::Sig
+
+        sig { returns(Interface::CodeActionRegistrationOptions) }
+        def provider
+          Interface::CodeActionRegistrationOptions.new(
+            document_selector: [Interface::DocumentFilter.new(language: "ruby")],
+            resolve_provider: true,
+          )
+        end
+      end
 
       sig do
         params(
@@ -27,15 +43,15 @@ module RubyLsp
         ).void
       end
       def initialize(document, range, context)
-        super(document)
-
+        super()
+        @document = document
         @uri = T.let(document.uri, URI::Generic)
         @range = range
         @context = context
       end
 
       sig { override.returns(T.nilable(T.all(T::Array[Interface::CodeAction], Object))) }
-      def run
+      def perform
         diagnostics = @context[:diagnostics]
 
         code_actions = diagnostics.flat_map do |diagnostic|
@@ -43,22 +59,25 @@ module RubyLsp
         end
 
         # Only add refactor actions if there's a non empty selection in the editor
-        code_actions << refactor_code_action(@range, @uri) unless @range.dig(:start) == @range.dig(:end)
+        unless @range.dig(:start) == @range.dig(:end)
+          code_actions << Interface::CodeAction.new(
+            title: EXTRACT_TO_VARIABLE_TITLE,
+            kind: Constant::CodeActionKind::REFACTOR_EXTRACT,
+            data: { range: @range, uri: @uri.to_s },
+          )
+          code_actions << Interface::CodeAction.new(
+            title: EXTRACT_TO_METHOD_TITLE,
+            kind: Constant::CodeActionKind::REFACTOR_EXTRACT,
+            data: { range: @range, uri: @uri.to_s },
+          )
+          code_actions << Interface::CodeAction.new(
+            title: SWITCH_BLOCK_STYLE_TITLE,
+            kind: Constant::CodeActionKind::REFACTOR_REWRITE,
+            data: { range: @range, uri: @uri.to_s },
+          )
+        end
+
         code_actions
-      end
-
-      private
-
-      sig { params(range: T::Hash[Symbol, T.untyped], uri: URI::Generic).returns(Interface::CodeAction) }
-      def refactor_code_action(range, uri)
-        Interface::CodeAction.new(
-          title: "Refactor: Extract Variable",
-          kind: Constant::CodeActionKind::REFACTOR_EXTRACT,
-          data: {
-            range: range,
-            uri: uri.to_s,
-          },
-        )
       end
     end
   end

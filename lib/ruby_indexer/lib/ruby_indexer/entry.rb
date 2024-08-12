@@ -3,6 +3,14 @@
 
 module RubyIndexer
   class Entry
+    class Visibility < T::Enum
+      enums do
+        PUBLIC = new(:public)
+        PROTECTED = new(:protected)
+        PRIVATE = new(:private)
+      end
+    end
+
     extend T::Sig
 
     sig { returns(String) }
@@ -11,22 +19,59 @@ module RubyIndexer
     sig { returns(String) }
     attr_reader :file_path
 
-    sig { returns(Prism::Location) }
+    sig { returns(RubyIndexer::Location) }
     attr_reader :location
+
+    alias_method :name_location, :location
 
     sig { returns(T::Array[String]) }
     attr_reader :comments
 
-    sig { returns(Symbol) }
+    sig { returns(Visibility) }
     attr_accessor :visibility
 
-    sig { params(name: String, file_path: String, location: Prism::Location, comments: T::Array[String]).void }
+    sig do
+      params(
+        name: String,
+        file_path: String,
+        location: T.any(Prism::Location, RubyIndexer::Location),
+        comments: T::Array[String],
+      ).void
+    end
     def initialize(name, file_path, location, comments)
       @name = name
       @file_path = file_path
-      @location = location
       @comments = comments
-      @visibility = T.let(:public, Symbol)
+      @visibility = T.let(Visibility::PUBLIC, Visibility)
+
+      @location = T.let(
+        if location.is_a?(Prism::Location)
+          Location.new(
+            location.start_line,
+            location.end_line,
+            location.start_column,
+            location.end_column,
+          )
+        else
+          location
+        end,
+        RubyIndexer::Location,
+      )
+    end
+
+    sig { returns(T::Boolean) }
+    def public?
+      visibility == Visibility::PUBLIC
+    end
+
+    sig { returns(T::Boolean) }
+    def protected?
+      visibility == Visibility::PROTECTED
+    end
+
+    sig { returns(T::Boolean) }
+    def private?
+      visibility == Visibility::PRIVATE
     end
 
     sig { returns(String) }
@@ -34,15 +79,84 @@ module RubyIndexer
       File.basename(@file_path)
     end
 
-    class Namespace < Entry
+    class ModuleOperation
       extend T::Sig
       extend T::Helpers
 
       abstract!
 
       sig { returns(String) }
-      def short_name
-        T.must(@name.split("::").last)
+      attr_reader :module_name
+
+      sig { params(module_name: String).void }
+      def initialize(module_name)
+        @module_name = module_name
+      end
+    end
+
+    class Include < ModuleOperation; end
+    class Prepend < ModuleOperation; end
+
+    class Namespace < Entry
+      extend T::Sig
+      extend T::Helpers
+
+      abstract!
+
+      sig { returns(T::Array[String]) }
+      attr_reader :nesting
+
+      # Returns the location of the constant name, excluding the parent class or the body
+      sig { returns(Location) }
+      attr_reader :name_location
+
+      sig do
+        params(
+          nesting: T::Array[String],
+          file_path: String,
+          location: T.any(Prism::Location, RubyIndexer::Location),
+          name_location: T.any(Prism::Location, Location),
+          comments: T::Array[String],
+        ).void
+      end
+      def initialize(nesting, file_path, location, name_location, comments)
+        @name = T.let(nesting.join("::"), String)
+        # The original nesting where this namespace was discovered
+        @nesting = nesting
+
+        super(@name, file_path, location, comments)
+
+        @name_location = T.let(
+          if name_location.is_a?(Prism::Location)
+            Location.new(
+              name_location.start_line,
+              name_location.end_line,
+              name_location.start_column,
+              name_location.end_column,
+            )
+          else
+            name_location
+          end,
+          RubyIndexer::Location,
+        )
+      end
+
+      sig { returns(T::Array[String]) }
+      def mixin_operation_module_names
+        mixin_operations.map(&:module_name)
+      end
+
+      # Stores all explicit prepend, include and extend operations in the exact order they were discovered in the source
+      # code. Maintaining the order is essential to linearize ancestors the right way when a module is both included
+      # and prepended
+      sig { returns(T::Array[ModuleOperation]) }
+      def mixin_operations
+        @mixin_operations ||= T.let([], T.nilable(T::Array[ModuleOperation]))
+      end
+
+      sig { returns(Integer) }
+      def ancestor_hash
+        mixin_operation_module_names.hash
       end
     end
 
@@ -59,16 +173,44 @@ module RubyIndexer
 
       sig do
         params(
-          name: String,
+          nesting: T::Array[String],
           file_path: String,
-          location: Prism::Location,
+          location: T.any(Prism::Location, RubyIndexer::Location),
+          name_location: T.any(Prism::Location, Location),
           comments: T::Array[String],
           parent_class: T.nilable(String),
         ).void
       end
-      def initialize(name, file_path, location, comments, parent_class)
-        super(name, file_path, location, comments)
-        @parent_class = T.let(parent_class, T.nilable(String))
+      def initialize(nesting, file_path, location, name_location, comments, parent_class) # rubocop:disable Metrics/ParameterLists
+        super(nesting, file_path, location, name_location, comments)
+        @parent_class = parent_class
+      end
+
+      sig { override.returns(Integer) }
+      def ancestor_hash
+        [mixin_operation_module_names, @parent_class].hash
+      end
+    end
+
+    class SingletonClass < Class
+      extend T::Sig
+
+      sig { params(location: Prism::Location, name_location: Prism::Location, comments: T::Array[String]).void }
+      def update_singleton_information(location, name_location, comments)
+        # Create a new RubyIndexer::Location object from the Prism location
+        @location = Location.new(
+          location.start_line,
+          location.end_line,
+          location.start_column,
+          location.end_column,
+        )
+        @name_location = Location.new(
+          name_location.start_line,
+          name_location.end_line,
+          name_location.start_column,
+          name_location.end_column,
+        )
+        @comments.concat(comments)
       end
     end
 
@@ -100,6 +242,10 @@ module RubyIndexer
 
     # An optional method parameter, e.g. `def foo(a = 123)`
     class OptionalParameter < Parameter
+      sig { override.returns(Symbol) }
+      def decorated_name
+        :"#{@name} = <default>"
+      end
     end
 
     # An required keyword method parameter, e.g. `def foo(a:)`
@@ -114,7 +260,7 @@ module RubyIndexer
     class OptionalKeywordParameter < Parameter
       sig { override.returns(Symbol) }
       def decorated_name
-        :"#{@name}:"
+        :"#{@name}: <default>"
       end
     end
 
@@ -142,6 +288,14 @@ module RubyIndexer
     class BlockParameter < Parameter
       DEFAULT_NAME = T.let(:"<anonymous block>", Symbol)
 
+      class << self
+        extend T::Sig
+        sig { returns(BlockParameter) }
+        def anonymous
+          new(name: DEFAULT_NAME)
+        end
+      end
+
       sig { override.returns(Symbol) }
       def decorated_name
         :"&#{@name}"
@@ -157,151 +311,107 @@ module RubyIndexer
       sig { returns(T.nilable(Entry::Namespace)) }
       attr_reader :owner
 
+      sig { returns(T::Array[RubyIndexer::Entry::Parameter]) }
+      def parameters
+        T.must(signatures.first).parameters
+      end
+
       sig do
         params(
           name: String,
           file_path: String,
-          location: Prism::Location,
+          location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
+          visibility: Visibility,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, owner)
+      def initialize(name, file_path, location, comments, visibility, owner) # rubocop:disable Metrics/ParameterLists
         super(name, file_path, location, comments)
+        @visibility = visibility
         @owner = owner
       end
 
-      sig { abstract.returns(T::Array[Parameter]) }
-      def parameters; end
+      sig { abstract.returns(T::Array[Entry::Signature]) }
+      def signatures; end
+
+      sig { returns(String) }
+      def decorated_parameters
+        first_signature = signatures.first
+        return "()" unless first_signature
+
+        "(#{first_signature.format})"
+      end
+
+      sig { returns(String) }
+      def formatted_signatures
+        overloads_count = signatures.size
+        case overloads_count
+        when 1
+          ""
+        when 2
+          "\n(+1 overload)"
+        else
+          "\n(+#{overloads_count - 1} overloads)"
+        end
+      end
     end
 
     class Accessor < Member
       extend T::Sig
 
-      sig { override.returns(T::Array[Parameter]) }
-      def parameters
-        params = []
-        params << RequiredParameter.new(name: name.delete_suffix("=").to_sym) if name.end_with?("=")
-        params
+      sig { override.returns(T::Array[Signature]) }
+      def signatures
+        @signatures ||= T.let(
+          begin
+            params = []
+            params << RequiredParameter.new(name: name.delete_suffix("=").to_sym) if name.end_with?("=")
+            [Entry::Signature.new(params)]
+          end,
+          T.nilable(T::Array[Signature]),
+        )
       end
     end
 
     class Method < Member
       extend T::Sig
-      extend T::Helpers
 
-      abstract!
+      sig { override.returns(T::Array[Signature]) }
+      attr_reader :signatures
 
-      sig { override.returns(T::Array[Parameter]) }
-      attr_reader :parameters
+      # Returns the location of the method name, excluding parameters or the body
+      sig { returns(Location) }
+      attr_reader :name_location
 
       sig do
         params(
           name: String,
           file_path: String,
-          location: Prism::Location,
+          location: T.any(Prism::Location, RubyIndexer::Location),
+          name_location: T.any(Prism::Location, Location),
           comments: T::Array[String],
-          parameters_node: T.nilable(Prism::ParametersNode),
+          signatures: T::Array[Signature],
+          visibility: Visibility,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, parameters_node, owner) # rubocop:disable Metrics/ParameterLists
-        super(name, file_path, location, comments, owner)
-
-        @parameters = T.let(list_params(parameters_node), T::Array[Parameter])
+      def initialize(name, file_path, location, name_location, comments, signatures, visibility, owner) # rubocop:disable Metrics/ParameterLists
+        super(name, file_path, location, comments, visibility, owner)
+        @signatures = signatures
+        @name_location = T.let(
+          if name_location.is_a?(Prism::Location)
+            Location.new(
+              name_location.start_line,
+              name_location.end_line,
+              name_location.start_column,
+              name_location.end_column,
+            )
+          else
+            name_location
+          end,
+          RubyIndexer::Location,
+        )
       end
-
-      private
-
-      sig { params(parameters_node: T.nilable(Prism::ParametersNode)).returns(T::Array[Parameter]) }
-      def list_params(parameters_node)
-        return [] unless parameters_node
-
-        parameters = []
-
-        parameters_node.requireds.each do |required|
-          name = parameter_name(required)
-          next unless name
-
-          parameters << RequiredParameter.new(name: name)
-        end
-
-        parameters_node.optionals.each do |optional|
-          name = parameter_name(optional)
-          next unless name
-
-          parameters << OptionalParameter.new(name: name)
-        end
-
-        parameters_node.keywords.each do |keyword|
-          name = parameter_name(keyword)
-          next unless name
-
-          case keyword
-          when Prism::RequiredKeywordParameterNode
-            parameters << KeywordParameter.new(name: name)
-          when Prism::OptionalKeywordParameterNode
-            parameters << OptionalKeywordParameter.new(name: name)
-          end
-        end
-
-        rest = parameters_node.rest
-
-        if rest.is_a?(Prism::RestParameterNode)
-          rest_name = rest.name || RestParameter::DEFAULT_NAME
-          parameters << RestParameter.new(name: rest_name)
-        end
-
-        keyword_rest = parameters_node.keyword_rest
-
-        if keyword_rest.is_a?(Prism::KeywordRestParameterNode)
-          keyword_rest_name = parameter_name(keyword_rest) || KeywordRestParameter::DEFAULT_NAME
-          parameters << KeywordRestParameter.new(name: keyword_rest_name)
-        end
-
-        parameters_node.posts.each do |post|
-          name = parameter_name(post)
-          next unless name
-
-          parameters << RequiredParameter.new(name: name)
-        end
-
-        block = parameters_node.block
-        parameters << BlockParameter.new(name: block.name || BlockParameter::DEFAULT_NAME) if block
-
-        parameters
-      end
-
-      sig { params(node: T.nilable(Prism::Node)).returns(T.nilable(Symbol)) }
-      def parameter_name(node)
-        case node
-        when Prism::RequiredParameterNode, Prism::OptionalParameterNode,
-          Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode,
-          Prism::RestParameterNode, Prism::KeywordRestParameterNode
-          node.name
-        when Prism::MultiTargetNode
-          names = node.lefts.map { |parameter_node| parameter_name(parameter_node) }
-
-          rest = node.rest
-          if rest.is_a?(Prism::SplatNode)
-            name = rest.expression&.slice
-            names << (rest.operator == "*" ? "*#{name}".to_sym : name&.to_sym)
-          end
-
-          names << nil if rest.is_a?(Prism::ImplicitRestNode)
-
-          names.concat(node.rights.map { |parameter_node| parameter_name(parameter_node) })
-
-          names_with_commas = names.join(", ")
-          :"(#{names_with_commas})"
-        end
-      end
-    end
-
-    class SingletonMethod < Method
-    end
-
-    class InstanceMethod < Method
     end
 
     # An UnresolvedAlias points to a constant alias with a right hand side that has not yet been resolved. For
@@ -314,7 +424,7 @@ module RubyIndexer
     # All aliases are inserted as UnresolvedAlias in the index first and then we lazily resolve them to the correct
     # target in [rdoc-ref:Index#resolve]. If the right hand side contains a constant that doesn't exist, then it's not
     # possible to resolve the alias and it will remain an UnresolvedAlias until the right hand side constant exists
-    class UnresolvedAlias < Entry
+    class UnresolvedConstantAlias < Entry
       extend T::Sig
 
       sig { returns(String) }
@@ -329,7 +439,7 @@ module RubyIndexer
           nesting: T::Array[String],
           name: String,
           file_path: String,
-          location: Prism::Location,
+          location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T::Array[String],
         ).void
       end
@@ -342,17 +452,139 @@ module RubyIndexer
     end
 
     # Alias represents a resolved alias, which points to an existing constant target
-    class Alias < Entry
+    class ConstantAlias < Entry
       extend T::Sig
 
       sig { returns(String) }
       attr_reader :target
 
-      sig { params(target: String, unresolved_alias: UnresolvedAlias).void }
+      sig { params(target: String, unresolved_alias: UnresolvedConstantAlias).void }
       def initialize(target, unresolved_alias)
         super(unresolved_alias.name, unresolved_alias.file_path, unresolved_alias.location, unresolved_alias.comments)
 
+        @visibility = unresolved_alias.visibility
         @target = target
+      end
+    end
+
+    # Represents an instance variable e.g.: @a = 1
+    class InstanceVariable < Entry
+      sig { returns(T.nilable(Entry::Namespace)) }
+      attr_reader :owner
+
+      sig do
+        params(
+          name: String,
+          file_path: String,
+          location: T.any(Prism::Location, RubyIndexer::Location),
+          comments: T::Array[String],
+          owner: T.nilable(Entry::Namespace),
+        ).void
+      end
+      def initialize(name, file_path, location, comments, owner)
+        super(name, file_path, location, comments)
+        @owner = owner
+      end
+    end
+
+    # An unresolved method alias is an alias entry for which we aren't sure what the right hand side points to yet. For
+    # example, if we have `alias a b`, we create an unresolved alias for `a` because we aren't sure immediate what `b`
+    # is referring to
+    class UnresolvedMethodAlias < Entry
+      extend T::Sig
+
+      sig { returns(String) }
+      attr_reader :new_name, :old_name
+
+      sig { returns(T.nilable(Entry::Namespace)) }
+      attr_reader :owner
+
+      sig do
+        params(
+          new_name: String,
+          old_name: String,
+          owner: T.nilable(Entry::Namespace),
+          file_path: String,
+          location: T.any(Prism::Location, RubyIndexer::Location),
+          comments: T::Array[String],
+        ).void
+      end
+      def initialize(new_name, old_name, owner, file_path, location, comments) # rubocop:disable Metrics/ParameterLists
+        super(new_name, file_path, location, comments)
+
+        @new_name = new_name
+        @old_name = old_name
+        @owner = owner
+      end
+    end
+
+    # A method alias is a resolved alias entry that points to the exact method target it refers to
+    class MethodAlias < Entry
+      extend T::Sig
+
+      sig { returns(T.any(Member, MethodAlias)) }
+      attr_reader :target
+
+      sig { returns(T.nilable(Entry::Namespace)) }
+      attr_reader :owner
+
+      sig { params(target: T.any(Member, MethodAlias), unresolved_alias: UnresolvedMethodAlias).void }
+      def initialize(target, unresolved_alias)
+        full_comments = ["Alias for #{target.name}\n"]
+        full_comments.concat(unresolved_alias.comments)
+        full_comments << "\n"
+        full_comments.concat(target.comments)
+
+        super(
+          unresolved_alias.new_name,
+          unresolved_alias.file_path,
+          unresolved_alias.location,
+          full_comments,
+        )
+
+        @target = target
+        @owner = T.let(unresolved_alias.owner, T.nilable(Entry::Namespace))
+      end
+
+      sig { returns(T::Array[Parameter]) }
+      def parameters
+        @target.parameters
+      end
+
+      sig { returns(String) }
+      def decorated_parameters
+        @target.decorated_parameters
+      end
+
+      sig { returns(String) }
+      def formatted_signatures
+        @target.formatted_signatures
+      end
+
+      sig { returns(T::Array[Signature]) }
+      def signatures
+        @target.signatures
+      end
+    end
+
+    # Ruby doesn't support method overloading, so a method will have only one signature.
+    # However RBS can represent the concept of method overloading, with different return types based on the arguments
+    # passed, so we need to store all the signatures.
+    class Signature
+      extend T::Sig
+
+      sig { returns(T::Array[Parameter]) }
+      attr_reader :parameters
+
+      sig { params(parameters: T::Array[Parameter]).void }
+      def initialize(parameters)
+        @parameters = parameters
+      end
+
+      # Returns a string with the decorated names of the parameters of this member. E.g.: `(a, b = 1, c: 2)`
+      sig { returns(String) }
+      def format
+        @parameters.map(&:decorated_name).join(", ")
       end
     end
   end

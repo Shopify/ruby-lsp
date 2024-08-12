@@ -1,0 +1,25 @@
+name: CI (indexing)
+
+on:
+  push:
+    paths:
+      - 'Gemfile.lock'
+      - 'lib/ruby_indexer/**'
+  pull_request:
+    paths:
+      - 'Gemfile.lock'
+      - 'lib/ruby_indexer/**'
+
+jobs:
+  indexing_sanity_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Index Top 100 Ruby gems
+        run: bundle exec rake index:topgems

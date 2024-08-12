@@ -1,0 +1,57 @@
+{
+  "result": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 0
+        },
+        "end": {
+          "line": 5,
+          "character": 23
+        }
+      },
+      "severity": 3,
+      "code": "Metrics/MethodLength",
+      "codeDescription": {
+        "href": "https://docs.rubocop.org/rubocop/cops_metrics.html#metricsmethodlength"
+      },
+      "source": "RuboCop",
+      "message": "Metrics/MethodLength: Method has too many lines. [11/10]\n\nThis offense is not auto-correctable.\n",
+      "data": {
+        "correctable": false,
+        "code_actions": [
+          {
+            "title": "Disable Metrics/MethodLength for this line",
+            "kind": "quickfix",
+            "edit": {
+              "documentChanges": [
+                {
+                  "textDocument": {
+                    "uri": "file:///fake",
+                    "version": null
+                  },
+                  "edits": [
+                    {
+                      "range": {
+                        "start": {
+                          "line": 5,
+                          "character": 23
+                        },
+                        "end": {
+                          "line": 5,
+                          "character": 23
+                        }
+                      },
+                      "newText": " # rubocop:disable Metrics/MethodLength"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

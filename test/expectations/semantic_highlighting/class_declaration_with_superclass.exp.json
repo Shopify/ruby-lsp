@@ -9,9 +9,23 @@
     },
     {
       "delta_line": 0,
+      "delta_start_char": 0,
+      "length": 3,
+      "token_type": 0,
+      "token_modifiers": 0
+    },
+    {
+      "delta_line": 0,
       "delta_start_char": 6,
       "length": 10,
       "token_type": 2,
+      "token_modifiers": 0
+    },
+    {
+      "delta_line": 0,
+      "delta_start_char": 0,
+      "length": 10,
+      "token_type": 0,
       "token_modifiers": 0
     }
   ]

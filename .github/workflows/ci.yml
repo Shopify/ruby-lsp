@@ -3,47 +3,37 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  lint:
+  lint_ruby:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: "recursive"
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.2"
           bundler-cache: true
 
       - name: Check if documentation is up to date
         run: bundle exec rake ruby_lsp:check_docs
 
-      - name: Check if all requests are using valid visits
-        run: bundle exec rake check_visit_overrides
-
       - name: Typecheck
         run: bundle exec srb tc
 
-      - name: Lint Ruby files
+      - name: Lint Ruby files and RBI shims
         run: bundle exec rubocop
-
-      - name: Lint RBI shims
-        run: bundle exec rubocop sorbet/rbi/shims
-  build:
+  build_ruby:
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        ruby: ["3.0", "3.1", "3.2", "head", "jruby-head"]
-        include:
-          - ruby: "head"
-            experimental: true
+        ruby: ["3.1", "3.2", "3.3", "jruby-head"]
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ !!matrix.experimental }}
+    timeout-minutes: 30
     name: Ruby ${{ matrix.ruby }} on ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: "recursive"
 
@@ -58,4 +48,72 @@ jobs:
         run: bundle exec rake
 
       - name: Run index troubleshooting tool
-        run: bundle exec ruby-lsp-doctor
+        run: bundle exec ruby-lsp --doctor
+  lint_node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        env:
+          DISABLE_V8_COMPILE_CACHE: "1"
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.9"
+          cache: "yarn"
+          cache-dependency-path: "vscode"
+
+      - name: Lint
+        working-directory: ./vscode
+        run: |
+          yarn --frozen-lockfile
+          yarn run lint
+  build_node:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        env:
+          DISABLE_V8_COMPILE_CACHE: 1
+        with:
+          node-version: "20.9"
+          cache: "yarn"
+          cache-dependency-path: "vscode"
+
+      # We need some Ruby installed for the environment activation tests
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Download shadowenv
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            pattern="shadowenv-x86_64-unknown-linux-gnu"
+          else
+            pattern="shadowenv-x86_64-apple-darwin"
+          fi
+
+          gh release download --pattern $pattern --repo=Shopify/shadowenv --output shadowenv
+          chmod +x shadowenv
+          sudo mv shadowenv /usr/local/bin/shadowenv
+
+      - name: Run tests
+        working-directory: ./vscode
+        env:
+          DISPLAY: ":99.0"
+        run: |
+          gem install ruby-lsp debug
+          yarn --frozen-lockfile
+          /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          yarn run test

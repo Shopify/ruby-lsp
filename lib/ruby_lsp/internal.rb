@@ -7,27 +7,37 @@ yarp_require_paths = Gem.loaded_specs["yarp"]&.full_require_paths
 $LOAD_PATH.delete_if { |path| yarp_require_paths.include?(path) } if yarp_require_paths
 
 require "sorbet-runtime"
-require "prism"
-require "prism/visitor"
-require "language_server-protocol"
+
+# Set Bundler's UI level to silent as soon as possible to prevent any prints to STDOUT
 require "bundler"
+Bundler.ui.level = :silent
+
 require "uri"
 require "cgi"
 require "set"
+require "strscan"
+require "prism"
+require "prism/visitor"
+require "language_server-protocol"
+require "rbs"
 
 require "ruby-lsp"
+require "ruby_lsp/base_server"
 require "ruby_indexer/ruby_indexer"
 require "core_ext/uri"
 require "ruby_lsp/utils"
 require "ruby_lsp/parameter_scope"
+require "ruby_lsp/global_state"
 require "ruby_lsp/server"
-require "ruby_lsp/executor"
+require "ruby_lsp/type_inferrer"
 require "ruby_lsp/requests"
-require "ruby_lsp/listener"
+require "ruby_lsp/response_builders"
+require "ruby_lsp/node_context"
 require "ruby_lsp/document"
 require "ruby_lsp/ruby_document"
+require "ruby_lsp/erb_document"
 require "ruby_lsp/store"
 require "ruby_lsp/addon"
 require "ruby_lsp/requests/support/rubocop_runner"
-
-Bundler.ui.level = :silent
+require "ruby_lsp/requests/support/rubocop_formatter"
+require "ruby_lsp/requests/support/syntax_tree_formatter"

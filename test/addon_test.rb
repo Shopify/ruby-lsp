@@ -7,9 +7,14 @@ module RubyLsp
   class AddonTest < Minitest::Test
     def setup
       @addon = Class.new(Addon) do
-        attr_reader :activated
+        attr_reader :activated, :field
 
-        def activate(message_queue)
+        def initialize
+          @field = 123
+          super
+        end
+
+        def activate(global_state, outgoing_queue)
           @activated = true
         end
 
@@ -17,23 +22,36 @@ module RubyLsp
           "My Addon"
         end
       end
+      @global_state = GlobalState.new
+
+      @outgoing_queue = Thread::Queue.new
+      Addon.load_addons(@global_state, @outgoing_queue)
     end
 
     def teardown
-      Addon.addons.clear
+      RubyLsp::Addon.addon_classes.clear
+      RubyLsp::Addon.addons.clear
+      @outgoing_queue.close
     end
 
     def test_registering_an_addon_invokes_activate_on_initialized
-      message_queue = Thread::Queue.new
-      Executor.new(RubyLsp::Store.new, message_queue).execute({ method: "initialized" })
+      server = RubyLsp::Server.new
+
+      capture_subprocess_io do
+        server.process_message({ method: "initialized" })
+      end
 
       addon_instance = T.must(Addon.addons.find { |addon| addon.is_a?(@addon) })
       assert_predicate(addon_instance, :activated)
     ensure
-      T.must(message_queue).close
+      T.must(server).run_shutdown
     end
 
     def test_addons_are_automatically_tracked
+      assert_equal(123, T.unsafe(Addon.addons.first).field)
+    end
+
+    def test_loading_addons_initializes_them
       assert(
         Addon.addons.any? { |addon| addon.is_a?(@addon) },
         "Expected addon to be automatically tracked",
@@ -42,7 +60,7 @@ module RubyLsp
 
     def test_load_addons_returns_errors
       Class.new(Addon) do
-        def activate(message_queue)
+        def activate(global_state, outgoing_queue)
           raise StandardError, "Failed to activate"
         end
 
@@ -52,7 +70,7 @@ module RubyLsp
       end
 
       queue = Thread::Queue.new
-      Addon.load_addons(queue)
+      Addon.load_addons(GlobalState.new, queue)
       error_addon = T.must(Addon.addons.find(&:error?))
       queue.close
 
@@ -61,6 +79,36 @@ module RubyLsp
         My addon:
           Failed to activate
       MESSAGE
+    end
+
+    def test_automatically_identifies_file_watcher_addons
+      klass = Class.new(::RubyLsp::Addon) do
+        def activate(global_state, outgoing_queue); end
+        def deactivate; end
+
+        def workspace_did_change_watched_files(changes); end
+      end
+
+      begin
+        queue = Thread::Queue.new
+        Addon.load_addons(GlobalState.new, queue)
+        assert_equal(1, Addon.file_watcher_addons.length)
+        assert_instance_of(klass, Addon.file_watcher_addons.first)
+      ensure
+        T.must(queue).close
+        Addon.file_watcher_addons.clear
+      end
+    end
+
+    def test_get_an_addon_by_name
+      addon = Addon.get("My Addon")
+      assert_equal("My Addon", addon.name)
+    end
+
+    def test_raises_if_an_addon_cannot_be_found
+      assert_raises do
+        Addon.get("Invalid Addon")
+      end
     end
   end
 end

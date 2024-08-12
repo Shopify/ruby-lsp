@@ -18,26 +18,29 @@ module RubyLsp
     # end
     # ```
     #
-    class WorkspaceSymbol
+    class WorkspaceSymbol < Request
       extend T::Sig
       include Support::Common
 
-      sig { params(query: T.nilable(String), index: RubyIndexer::Index).void }
-      def initialize(query, index)
+      sig { params(global_state: GlobalState, query: T.nilable(String)).void }
+      def initialize(global_state, query)
+        super()
+        @global_state = global_state
         @query = query
-        @index = index
+        @index = T.let(global_state.index, RubyIndexer::Index)
       end
 
-      sig { returns(T::Array[Interface::WorkspaceSymbol]) }
-      def run
+      sig { override.returns(T::Array[Interface::WorkspaceSymbol]) }
+      def perform
         @index.fuzzy_search(@query).filter_map do |entry|
-          # If the project is using Sorbet, we let Sorbet handle symbols defined inside the project itself and RBIs, but
-          # we still return entries defined in gems to allow developers to jump directly to the source
           file_path = entry.file_path
-          next if defined_in_gem?(file_path)
+
+          # We only show symbols declared in the workspace
+          in_dependencies = !not_in_dependencies?(file_path)
+          next if in_dependencies
 
           # We should never show private symbols when searching the entire workspace
-          next if entry.visibility == :private
+          next if entry.private?
 
           kind = kind_for_entry(entry)
           loc = entry.location
@@ -49,7 +52,7 @@ module RubyLsp
 
           Interface::WorkspaceSymbol.new(
             name: entry.name,
-            container_name: T.must(container).join("::"),
+            container_name: container.join("::"),
             kind: kind,
             location: Interface::Location.new(
               uri: URI::Generic.from_path(path: file_path).to_s,
@@ -59,24 +62,6 @@ module RubyLsp
               ),
             ),
           )
-        end
-      end
-
-      private
-
-      sig { params(entry: RubyIndexer::Entry).returns(T.nilable(Integer)) }
-      def kind_for_entry(entry)
-        case entry
-        when RubyIndexer::Entry::Class
-          Constant::SymbolKind::CLASS
-        when RubyIndexer::Entry::Module
-          Constant::SymbolKind::NAMESPACE
-        when RubyIndexer::Entry::Constant
-          Constant::SymbolKind::CONSTANT
-        when RubyIndexer::Entry::Method
-          entry.name == "initialize" ? Constant::SymbolKind::CONSTRUCTOR : Constant::SymbolKind::METHOD
-        when RubyIndexer::Entry::Accessor
-          Constant::SymbolKind::PROPERTY
         end
       end
     end

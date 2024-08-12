@@ -15,21 +15,42 @@ module RubyLsp
     #   # <-- cursor ends up here
     # end # <-- end is automatically added
     # ```
-    class OnTypeFormatting < BaseRequest
+    class OnTypeFormatting < Request
       extend T::Sig
+
+      class << self
+        extend T::Sig
+
+        sig { returns(Interface::DocumentOnTypeFormattingRegistrationOptions) }
+        def provider
+          Interface::DocumentOnTypeFormattingRegistrationOptions.new(
+            document_selector: [Interface::DocumentFilter.new(language: "ruby")],
+            first_trigger_character: "{",
+            more_trigger_character: ["\n", "|", "d"],
+          )
+        end
+      end
 
       END_REGEXES = T.let(
         [
-          /\b(if|unless|for|while|class|module|until|def|case)\b.*/,
-          /.*\s\bdo\b/,
+          /\b(if|unless|for|while|until)\b($|\s|\()/,
+          /\b(class|module|def|case)\b($|\s)/,
+          /.*\s\bdo\b($|\s)/,
         ],
         T::Array[Regexp],
       )
 
-      sig { params(document: Document, position: T::Hash[Symbol, T.untyped], trigger_character: String).void }
-      def initialize(document, position, trigger_character)
-        super(document)
-
+      sig do
+        params(
+          document: Document,
+          position: T::Hash[Symbol, T.untyped],
+          trigger_character: String,
+          client_name: String,
+        ).void
+      end
+      def initialize(document, position, trigger_character, client_name)
+        super()
+        @document = document
         @lines = T.let(@document.source.lines, T::Array[String])
         line = @lines[[position[:line] - 1, 0].max]
 
@@ -38,10 +59,11 @@ module RubyLsp
         @position = position
         @edits = T.let([], T::Array[Interface::TextEdit])
         @trigger_character = trigger_character
+        @client_name = client_name
       end
 
       sig { override.returns(T.all(T::Array[Interface::TextEdit], Object)) }
-      def run
+      def perform
         case @trigger_character
         when "{"
           handle_curly_brace if @document.syntax_error?
@@ -158,6 +180,8 @@ module RubyLsp
 
       sig { params(line: Integer, character: Integer).void }
       def move_cursor_to(line, character)
+        return unless @client_name.start_with?("Visual Studio Code")
+
         position = Interface::Position.new(
           line: line,
           character: character,
@@ -191,12 +215,13 @@ module RubyLsp
       sig { void }
       def auto_indent_after_end_keyword
         current_line = @lines[@position[:line]]
-        return unless current_line&.strip == "end"
+        return unless current_line && current_line.strip == "end"
 
-        target, _parent, _nesting = @document.locate_node({
+        node_context = @document.locate_node({
           line: @position[:line],
           character: @position[:character] - 1,
         })
+        target = node_context.node
 
         statements = case target
         when Prism::IfNode, Prism::UnlessNode, Prism::ForNode, Prism::WhileNode, Prism::UntilNode
@@ -204,11 +229,14 @@ module RubyLsp
         end
         return unless statements
 
+        current_indentation = find_indentation(current_line)
         statements.body.each do |node|
           loc = node.location
-          next unless loc.start_column == @indentation
+          next unless loc.start_column == current_indentation
 
-          add_edit_with_text("  ", { line: loc.start_line - 1, character: 0 })
+          (loc.start_line..loc.end_line).each do |line|
+            add_edit_with_text("  ", { line: line - 1, character: 0 })
+          end
         end
 
         move_cursor_to(@position[:line], @position[:character])

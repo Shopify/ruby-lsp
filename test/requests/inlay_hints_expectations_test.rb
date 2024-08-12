@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "expectations/expectations_test_runner"
+require_relative "support/expectations_test_runner"
 
 class InlayHintsExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::InlayHints, "inlay_hints"
@@ -14,13 +14,13 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: true, implicitHashValue: true })
-    listener = RubyLsp::Requests::InlayHints.new(params.first, hints_configuration, dispatcher)
-    dispatcher.dispatch(document.tree)
-    listener.response
+    request = RubyLsp::Requests::InlayHints.new(document, params.first, hints_configuration, dispatcher)
+    dispatcher.dispatch(document.parse_result.value)
+    request.perform
   end
 
   def default_args
-    [0..20]
+    [{ start: { line: 0, character: 0 }, end: { line: 20, character: 20 } }]
   end
 
   def test_skip_implicit_hash_value
@@ -31,9 +31,9 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: true, implicitHashValue: false })
-    listener = RubyLsp::Requests::InlayHints.new(default_args.first, hints_configuration, dispatcher)
-    dispatcher.dispatch(document.tree)
-    assert_empty(listener.response)
+    request = RubyLsp::Requests::InlayHints.new(document, default_args.first, hints_configuration, dispatcher)
+    dispatcher.dispatch(document.parse_result.value)
+    request.perform
   end
 
   def test_skip_implicit_rescue
@@ -46,8 +46,8 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: false, implicitHashValue: true })
-    listener = RubyLsp::Requests::InlayHints.new(default_args.first, hints_configuration, dispatcher)
-    dispatcher.dispatch(document.tree)
-    assert_empty(listener.response)
+    request = RubyLsp::Requests::InlayHints.new(document, default_args.first, hints_configuration, dispatcher)
+    dispatcher.dispatch(document.parse_result.value)
+    assert_empty(request.perform)
   end
 end

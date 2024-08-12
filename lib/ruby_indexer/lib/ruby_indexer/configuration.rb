@@ -20,7 +20,7 @@ module RubyIndexer
     def initialize
       @excluded_gems = T.let(initial_excluded_gems, T::Array[String])
       @included_gems = T.let([], T::Array[String])
-      @excluded_patterns = T.let([File.join("**", "*_test.rb")], T::Array[String])
+      @excluded_patterns = T.let([File.join("**", "*_test.rb"), File.join("**", "tmp", "**", "*")], T::Array[String])
       path = Bundler.settings["path"]
       @excluded_patterns << File.join(File.expand_path(path, Dir.pwd), "**", "*.rb") if path
 
@@ -43,20 +43,6 @@ module RubyIndexer
       )
     end
 
-    sig { void }
-    def load_config
-      return unless File.exist?(".index.yml")
-
-      config = YAML.parse_file(".index.yml")
-      return unless config
-
-      config_hash = config.to_ruby
-      validate_config!(config_hash)
-      apply_config(config_hash)
-    rescue Psych::SyntaxError => e
-      raise e, "Syntax error while loading .index.yml configuration: #{e.message}"
-    end
-
     sig { returns(T::Array[IndexablePath]) }
     def indexables
       excluded_gems = @excluded_gems - @included_gems
@@ -70,6 +56,7 @@ module RubyIndexer
         load_path_entry = T.let(nil, T.nilable(String))
 
         Dir.glob(pattern, File::FNM_PATHNAME | File::FNM_EXTGLOB).map! do |path|
+          path = File.expand_path(path)
           # All entries for the same pattern match the same $LOAD_PATH entry. Since searching the $LOAD_PATH for every
           # entry is expensive, we memoize it until we find a path that doesn't belong to that $LOAD_PATH. This happens
           # on repositories that define multiple gems, like Rails. All frameworks are defined inside the Dir.pwd, but
@@ -158,6 +145,17 @@ module RubyIndexer
       @magic_comment_regex ||= T.let(/^#\s*#{@excluded_magic_comments.join("|")}/, T.nilable(Regexp))
     end
 
+    sig { params(config: T::Hash[String, T.untyped]).void }
+    def apply_config(config)
+      validate_config!(config)
+
+      @excluded_gems.concat(config["excluded_gems"]) if config["excluded_gems"]
+      @included_gems.concat(config["included_gems"]) if config["included_gems"]
+      @excluded_patterns.concat(config["excluded_patterns"]) if config["excluded_patterns"]
+      @included_patterns.concat(config["included_patterns"]) if config["included_patterns"]
+      @excluded_magic_comments.concat(config["excluded_magic_comments"]) if config["excluded_magic_comments"]
+    end
+
     private
 
     sig { params(config: T::Hash[String, T.untyped]).void }
@@ -175,15 +173,6 @@ module RubyIndexer
       raise ArgumentError, errors.join("\n") if errors.any?
     end
 
-    sig { params(config: T::Hash[String, T.untyped]).void }
-    def apply_config(config)
-      @excluded_gems.concat(config["excluded_gems"]) if config["excluded_gems"]
-      @included_gems.concat(config["included_gems"]) if config["included_gems"]
-      @excluded_patterns.concat(config["excluded_patterns"]) if config["excluded_patterns"]
-      @included_patterns.concat(config["included_patterns"]) if config["included_patterns"]
-      @excluded_magic_comments.concat(config["excluded_magic_comments"]) if config["excluded_magic_comments"]
-    end
-
     sig { returns(T::Array[String]) }
     def initial_excluded_gems
       excluded, others = Bundler.definition.dependencies.partition do |dependency|
@@ -192,6 +181,9 @@ module RubyIndexer
 
       # When working on a gem, we need to make sure that its gemspec dependencies can't be excluded. This is necessary
       # because Bundler doesn't assign groups to gemspec dependencies
+      #
+      # If the dependency is prerelease, `to_spec` may return `nil` due to a bug in older version of Bundler/RubyGems:
+      # https://github.com/Shopify/ruby-lsp/issues/1246
       this_gem = Bundler.definition.dependencies.find do |d|
         d.to_spec&.full_gem_path == Dir.pwd
       rescue Gem::MissingSpecError
@@ -203,7 +195,6 @@ module RubyIndexer
       excluded.each do |dependency|
         next unless dependency.runtime?
 
-        # If the dependency is prerelease, to_spec may return `nil`
         spec = dependency.to_spec
         next unless spec
 
@@ -213,7 +204,7 @@ module RubyIndexer
 
           # If the transitive dependency is included as a transitive dependency of a gem outside of the development
           # group, skip it
-          next if others.any? { |d| d.to_spec.dependencies.include?(transitive_dependency) }
+          next if others.any? { |d| d.to_spec&.dependencies&.include?(transitive_dependency) }
 
           excluded << transitive_dependency
         end

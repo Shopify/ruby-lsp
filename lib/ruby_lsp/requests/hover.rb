@@ -1,6 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "ruby_lsp/listeners/hover"
+
 module RubyLsp
   module Requests
     # ![Hover demo](../../hover.gif)
@@ -13,122 +15,77 @@ module RubyLsp
     # ```ruby
     # String # -> Hovering over the class reference will show all declaration locations and the documentation
     # ```
-    class Hover < ExtensibleListener
+    class Hover < Request
       extend T::Sig
       extend T::Generic
 
+      class << self
+        extend T::Sig
+
+        sig { returns(Interface::HoverOptions) }
+        def provider
+          Interface::HoverOptions.new
+        end
+      end
+
       ResponseType = type_member { { fixed: T.nilable(Interface::Hover) } }
-
-      ALLOWED_TARGETS = T.let(
-        [
-          Prism::CallNode,
-          Prism::ConstantReadNode,
-          Prism::ConstantWriteNode,
-          Prism::ConstantPathNode,
-        ],
-        T::Array[T.class_of(Prism::Node)],
-      )
-
-      sig { override.returns(ResponseType) }
-      attr_reader :_response
 
       sig do
         params(
-          index: RubyIndexer::Index,
-          nesting: T::Array[String],
+          document: Document,
+          global_state: GlobalState,
+          position: T::Hash[Symbol, T.untyped],
           dispatcher: Prism::Dispatcher,
+          sorbet_level: Document::SorbetLevel,
         ).void
       end
-      def initialize(index, nesting, dispatcher)
-        @index = index
-        @nesting = nesting
-        @_response = T.let(nil, ResponseType)
+      def initialize(document, global_state, position, dispatcher, sorbet_level)
+        super()
+        node_context = document.locate_node(position, node_types: Listeners::Hover::ALLOWED_TARGETS)
+        target = node_context.node
+        parent = node_context.parent
 
-        super(dispatcher)
-        dispatcher.register(
-          self,
-          :on_constant_read_node_enter,
-          :on_constant_write_node_enter,
-          :on_constant_path_node_enter,
-          :on_call_node_enter,
-        )
-      end
+        if (Listeners::Hover::ALLOWED_TARGETS.include?(parent.class) &&
+            !Listeners::Hover::ALLOWED_TARGETS.include?(target.class)) ||
+            (parent.is_a?(Prism::ConstantPathNode) && target.is_a?(Prism::ConstantReadNode))
+          target = determine_target(
+            T.must(target),
+            T.must(parent),
+            position,
+          )
+        elsif target.is_a?(Prism::CallNode) && target.name != :require && target.name != :require_relative &&
+            !covers_position?(target.message_loc, position)
 
-      sig { override.params(addon: Addon).returns(T.nilable(Listener[ResponseType])) }
-      def initialize_external_listener(addon)
-        addon.create_hover_listener(@nesting, @index, @dispatcher)
-      end
-
-      # Merges responses from other hover listeners
-      sig { override.params(other: Listener[ResponseType]).returns(T.self_type) }
-      def merge_response!(other)
-        other_response = other.response
-        return self unless other_response
-
-        if @_response.nil?
-          @_response = other.response
-        else
-          @_response.contents.value << "\n\n" << other_response.contents.value
+          target = nil
         end
 
-        self
+        # Don't need to instantiate any listeners if there's no target
+        return unless target
+
+        @target = T.let(target, T.nilable(Prism::Node))
+        uri = document.uri
+        @response_builder = T.let(ResponseBuilders::Hover.new, ResponseBuilders::Hover)
+        Listeners::Hover.new(@response_builder, global_state, uri, node_context, dispatcher, sorbet_level)
+        Addon.addons.each do |addon|
+          addon.create_hover_listener(@response_builder, node_context, dispatcher)
+        end
+
+        @dispatcher = dispatcher
       end
 
-      sig { params(node: Prism::ConstantReadNode).void }
-      def on_constant_read_node_enter(node)
-        return if DependencyDetector.instance.typechecker
+      sig { override.returns(ResponseType) }
+      def perform
+        return unless @target
 
-        generate_hover(node.slice, node.location)
-      end
+        @dispatcher.dispatch_once(@target)
 
-      sig { params(node: Prism::ConstantWriteNode).void }
-      def on_constant_write_node_enter(node)
-        return if DependencyDetector.instance.typechecker
+        return if @response_builder.empty?
 
-        generate_hover(node.name.to_s, node.name_loc)
-      end
-
-      sig { params(node: Prism::ConstantPathNode).void }
-      def on_constant_path_node_enter(node)
-        return if DependencyDetector.instance.typechecker
-
-        generate_hover(node.slice, node.location)
-      end
-
-      sig { params(node: Prism::CallNode).void }
-      def on_call_node_enter(node)
-        return if DependencyDetector.instance.typechecker
-        return unless self_receiver?(node)
-
-        message = node.message
-        return unless message
-
-        target_method = @index.resolve_method(message, @nesting.join("::"))
-        return unless target_method
-
-        location = target_method.location
-
-        @_response = Interface::Hover.new(
-          range: range_from_location(location),
-          contents: markdown_from_index_entries(message, target_method),
-        )
-      end
-
-      private
-
-      sig { params(name: String, location: Prism::Location).void }
-      def generate_hover(name, location)
-        entries = @index.resolve(name, @nesting)
-        return unless entries
-
-        # We should only show hover for private constants if the constant is defined in the same namespace as the
-        # reference
-        first_entry = T.must(entries.first)
-        return if first_entry.visibility == :private && first_entry.name != "#{@nesting.join("::")}::#{name}"
-
-        @_response = Interface::Hover.new(
-          range: range_from_location(location),
-          contents: markdown_from_index_entries(name, entries),
+        Interface::Hover.new(
+          contents: Interface::MarkupContent.new(
+            kind: "markdown",
+            value: @response_builder.response,
+          ),
         )
       end
     end
