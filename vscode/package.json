@@ -474,6 +474,14 @@
               "debugSocketPath": {
                 "type": "string",
                 "description": "The path to the debug socket. This is used to connect to the debugger"
+              },
+              "debugPort": {
+                "type": "number",
+                "description": "The port to use to connect to the debugger"
+              },
+              "debugHost": {
+                "type": "string",
+                "description": "The host to use to connect to the debugger"
               }
             }
           }

@@ -189,6 +189,18 @@ export class Debugger
   private async attachDebuggee(
     session: vscode.DebugSession,
   ): Promise<vscode.DebugAdapterDescriptor> {
+    const debugPort = session.configuration.debugPort;
+
+    if (debugPort) {
+      const debugHost = session.configuration.debugHost;
+
+      if (debugHost) {
+        return new vscode.DebugAdapterServer(debugPort, debugHost);
+      }
+
+      return new vscode.DebugAdapterServer(debugPort);
+    }
+
     // When using attach, a process will be launched using Ruby debug and it will create a socket automatically. We have
     // to find the available sockets and ask the user which one they want to attach to
     const sockets = await this.getSockets(session);
