@@ -209,9 +209,9 @@ module RubyLsp
           end
         end
 
-        sig { params(sorbet_level: Document::SorbetLevel).returns(T::Boolean) }
+        sig { params(sorbet_level: RubyDocument::SorbetLevel).returns(T::Boolean) }
         def sorbet_level_true_or_higher?(sorbet_level)
-          sorbet_level == Document::SorbetLevel::True || sorbet_level == Document::SorbetLevel::Strict
+          sorbet_level == RubyDocument::SorbetLevel::True || sorbet_level == RubyDocument::SorbetLevel::Strict
         end
       end
     end

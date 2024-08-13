@@ -20,7 +20,7 @@ module RubyLsp
           uri: URI::Generic,
           node_context: NodeContext,
           dispatcher: Prism::Dispatcher,
-          sorbet_level: Document::SorbetLevel,
+          sorbet_level: RubyDocument::SorbetLevel,
         ).void
       end
       def initialize(response_builder, global_state, language_id, uri, node_context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
@@ -181,7 +181,7 @@ module RubyLsp
       def handle_instance_variable_definition(name)
         # Sorbet enforces that all instance variables be declared on typed strict or higher, which means it will be able
         # to provide all features for them
-        return if @sorbet_level == Document::SorbetLevel::Strict
+        return if @sorbet_level == RubyDocument::SorbetLevel::Strict
 
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
@@ -289,7 +289,7 @@ module RubyLsp
           # additional behavior on top of jumping to RBIs. The only sigil where Sorbet cannot handle constants is typed
           # ignore
           file_path = entry.file_path
-          next if @sorbet_level != Document::SorbetLevel::Ignore && not_in_dependencies?(file_path)
+          next if @sorbet_level != RubyDocument::SorbetLevel::Ignore && not_in_dependencies?(file_path)
 
           @response_builder << Interface::LocationLink.new(
             target_uri: URI::Generic.from_path(path: file_path).to_s,

@@ -601,32 +601,32 @@ class RubyDocumentTest < Minitest::Test
       version: 1,
       uri: URI("file:///foo/bar.rb"),
     )
-    assert_equal(RubyLsp::Document::SorbetLevel::None, document.sorbet_level)
+    assert_equal(RubyLsp::RubyDocument::SorbetLevel::None, document.sorbet_level)
   end
 
   def test_sigil_ignore
     document = RubyLsp::RubyDocument.new(source: +"# typed: ignore", version: 1, uri: URI("file:///foo/bar.rb"))
-    assert_equal(RubyLsp::Document::SorbetLevel::Ignore, document.sorbet_level)
+    assert_equal(RubyLsp::RubyDocument::SorbetLevel::Ignore, document.sorbet_level)
   end
 
   def test_sigil_false
     document = RubyLsp::RubyDocument.new(source: +"# typed: false", version: 1, uri: URI("file:///foo/bar.rb"))
-    assert_equal(RubyLsp::Document::SorbetLevel::False, document.sorbet_level)
+    assert_equal(RubyLsp::RubyDocument::SorbetLevel::False, document.sorbet_level)
   end
 
   def test_sigil_true
     document = RubyLsp::RubyDocument.new(source: +"# typed: true", version: 1, uri: URI("file:///foo/bar.rb"))
-    assert_equal(RubyLsp::Document::SorbetLevel::True, document.sorbet_level)
+    assert_equal(RubyLsp::RubyDocument::SorbetLevel::True, document.sorbet_level)
   end
 
   def test_sigil_strict
     document = RubyLsp::RubyDocument.new(source: +"# typed: strict", version: 1, uri: URI("file:///foo/bar.rb"))
-    assert_equal(RubyLsp::Document::SorbetLevel::Strict, document.sorbet_level)
+    assert_equal(RubyLsp::RubyDocument::SorbetLevel::Strict, document.sorbet_level)
   end
 
   def test_sigil_strong
     document = RubyLsp::RubyDocument.new(source: +"# typed: strong", version: 1, uri: URI("file:///foo/bar.rb"))
-    assert_equal(RubyLsp::Document::SorbetLevel::Strict, document.sorbet_level)
+    assert_equal(RubyLsp::RubyDocument::SorbetLevel::Strict, document.sorbet_level)
   end
 
   def test_sorbet_sigil_only_in_magic_comment
@@ -651,7 +651,7 @@ class RubyDocumentTest < Minitest::Test
         CODE
       end
     RUBY
-    assert_equal(RubyLsp::Document::SorbetLevel::False, document.sorbet_level)
+    assert_equal(RubyLsp::RubyDocument::SorbetLevel::False, document.sorbet_level)
   end
 
   def test_locating_compact_namespace_declaration

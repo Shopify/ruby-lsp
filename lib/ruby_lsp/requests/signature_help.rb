@@ -46,7 +46,7 @@ module RubyLsp
           position: T::Hash[Symbol, T.untyped],
           context: T.nilable(T::Hash[Symbol, T.untyped]),
           dispatcher: Prism::Dispatcher,
-          sorbet_level: Document::SorbetLevel,
+          sorbet_level: RubyDocument::SorbetLevel,
         ).void
       end
       def initialize(document, global_state, position, context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists

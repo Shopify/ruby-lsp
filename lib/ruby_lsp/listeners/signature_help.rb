@@ -13,7 +13,7 @@ module RubyLsp
           global_state: GlobalState,
           node_context: NodeContext,
           dispatcher: Prism::Dispatcher,
-          sorbet_level: Document::SorbetLevel,
+          sorbet_level: RubyDocument::SorbetLevel,
         ).void
       end
       def initialize(response_builder, global_state, node_context, dispatcher, sorbet_level)

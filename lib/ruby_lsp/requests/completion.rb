@@ -49,7 +49,7 @@ module RubyLsp
           document: Document,
           global_state: GlobalState,
           params: T::Hash[Symbol, T.untyped],
-          sorbet_level: Document::SorbetLevel,
+          sorbet_level: RubyDocument::SorbetLevel,
           dispatcher: Prism::Dispatcher,
         ).void
       end

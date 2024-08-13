@@ -56,7 +56,7 @@ module RubyLsp
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
           global_state: GlobalState,
           node_context: NodeContext,
-          sorbet_level: Document::SorbetLevel,
+          sorbet_level: RubyDocument::SorbetLevel,
           dispatcher: Prism::Dispatcher,
           uri: URI::Generic,
           trigger_character: T.nilable(String),
@@ -99,7 +99,7 @@ module RubyLsp
       def on_constant_read_node_enter(node)
         # The only scenario where Sorbet doesn't provide constant completion is on ignored files. Even if the file has
         # no sigil, Sorbet will still provide completion for constants
-        return if @sorbet_level != Document::SorbetLevel::Ignore
+        return if @sorbet_level != RubyDocument::SorbetLevel::Ignore
 
         name = constant_name(node)
         return if name.nil?
@@ -122,7 +122,7 @@ module RubyLsp
       def on_constant_path_node_enter(node)
         # The only scenario where Sorbet doesn't provide constant completion is on ignored files. Even if the file has
         # no sigil, Sorbet will still provide completion for constants
-        return if @sorbet_level != Document::SorbetLevel::Ignore
+        return if @sorbet_level != RubyDocument::SorbetLevel::Ignore
 
         name = constant_name(node)
         return if name.nil?
@@ -134,7 +134,7 @@ module RubyLsp
       def on_call_node_enter(node)
         # The only scenario where Sorbet doesn't provide constant completion is on ignored files. Even if the file has
         # no sigil, Sorbet will still provide completion for constants
-        if @sorbet_level == Document::SorbetLevel::Ignore
+        if @sorbet_level == RubyDocument::SorbetLevel::Ignore
           receiver = node.receiver
 
           # When writing `Foo::`, the AST assigns a method call node (because you can use that syntax to invoke
@@ -257,7 +257,7 @@ module RubyLsp
       def handle_instance_variable_completion(name, location)
         # Sorbet enforces that all instance variables be declared on typed strict or higher, which means it will be able
         # to provide all features for them
-        return if @sorbet_level == Document::SorbetLevel::Strict
+        return if @sorbet_level == RubyDocument::SorbetLevel::Strict
 
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type

@@ -495,9 +495,10 @@ module RubyLsp
       )
     end
 
-    sig { params(document: Document).returns(Document::SorbetLevel) }
+    sig { params(document: Document).returns(RubyDocument::SorbetLevel) }
     def sorbet_level(document)
-      return Document::SorbetLevel::Ignore unless @global_state.has_type_checker
+      return RubyDocument::SorbetLevel::Ignore unless @global_state.has_type_checker
+      return RubyDocument::SorbetLevel::Ignore unless document.is_a?(RubyDocument)
 
       document.sorbet_level
     end
@@ -535,6 +536,12 @@ module RubyLsp
       params = message[:params]
       uri = URI(params.dig(:data, :uri))
       document = @store.get(uri)
+
+      unless document.is_a?(RubyDocument)
+        send_message(Notification.window_show_error("Code actions are currently only available for Ruby documents"))
+        raise Requests::CodeActionResolve::CodeActionError
+      end
+
       result = Requests::CodeActionResolve.new(document, params).perform
 
       case result

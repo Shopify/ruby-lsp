@@ -42,7 +42,7 @@ module RubyLsp
           uri: URI::Generic,
           node_context: NodeContext,
           dispatcher: Prism::Dispatcher,
-          sorbet_level: Document::SorbetLevel,
+          sorbet_level: RubyDocument::SorbetLevel,
         ).void
       end
       def initialize(response_builder, global_state, uri, node_context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
@@ -73,7 +73,7 @@ module RubyLsp
 
       sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read_node_enter(node)
-        return if @sorbet_level != Document::SorbetLevel::Ignore
+        return if @sorbet_level != RubyDocument::SorbetLevel::Ignore
 
         name = constant_name(node)
         return if name.nil?
@@ -83,14 +83,14 @@ module RubyLsp
 
       sig { params(node: Prism::ConstantWriteNode).void }
       def on_constant_write_node_enter(node)
-        return if @sorbet_level != Document::SorbetLevel::Ignore
+        return if @sorbet_level != RubyDocument::SorbetLevel::Ignore
 
         generate_hover(node.name.to_s, node.name_loc)
       end
 
       sig { params(node: Prism::ConstantPathNode).void }
       def on_constant_path_node_enter(node)
-        return if @sorbet_level != Document::SorbetLevel::Ignore
+        return if @sorbet_level != RubyDocument::SorbetLevel::Ignore
 
         name = constant_name(node)
         return if name.nil?
@@ -193,7 +193,7 @@ module RubyLsp
       def handle_instance_variable_hover(name)
         # Sorbet enforces that all instance variables be declared on typed strict or higher, which means it will be able
         # to provide all features for them
-        return if @sorbet_level == Document::SorbetLevel::Strict
+        return if @sorbet_level == RubyDocument::SorbetLevel::Strict
 
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type

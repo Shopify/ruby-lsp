@@ -38,7 +38,7 @@ module RubyLsp
         end
       end
 
-      sig { params(document: Document, code_action: T::Hash[Symbol, T.untyped]).void }
+      sig { params(document: RubyDocument, code_action: T::Hash[Symbol, T.untyped]).void }
       def initialize(document, code_action)
         super()
         @document = document
