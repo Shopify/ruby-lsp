@@ -58,14 +58,16 @@ module RubyLsp
         formatted_text = @active_formatter.run_formatting(@uri, @document)
         return unless formatted_text
 
+        lines = @document.source.lines
         size = @document.source.size
+
         return if formatted_text.size == size && formatted_text == @document.source
 
         [
           Interface::TextEdit.new(
             range: Interface::Range.new(
               start: Interface::Position.new(line: 0, character: 0),
-              end: Interface::Position.new(line: size, character: size),
+              end: Interface::Position.new(line: lines.size, character: 0),
             ),
             new_text: formatted_text,
           ),
