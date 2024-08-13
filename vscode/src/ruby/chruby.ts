@@ -13,6 +13,8 @@ interface RubyVersion {
   version: string;
 }
 
+const ACTIVATION_SEPARATOR = "ACTIVATION_SEPARATOR";
+
 // A tool to change the current Ruby version
 // Learn more: https://github.com/postmodern/chruby
 export class Chruby extends VersionManager {
@@ -179,14 +181,16 @@ export class Chruby extends VersionManager {
       "end",
       `newer_gem_home = File.join(File.dirname(user_dir), "${rubyVersion.version}")`,
       "gems = (Dir.exist?(newer_gem_home) ? newer_gem_home : user_dir)",
-      "data = { defaultGems: Gem.default_dir, gemHome: gems, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }",
-      "STDERR.print(JSON.dump(data))",
+      `STDERR.print([Gem.default_dir, gems, !!defined?(RubyVM::YJIT), RUBY_VERSION].join("${ACTIVATION_SEPARATOR}"))`,
     ].join(";");
 
     const result = await this.runScript(
-      `${rubyExecutableUri.fsPath} -W0 -rjson -e '${script}'`,
+      `${rubyExecutableUri.fsPath} -W0 -e '${script}'`,
     );
 
-    return this.parseWithErrorHandling(result.stderr);
+    const [defaultGems, gemHome, yjit, version] =
+      result.stderr.split(ACTIVATION_SEPARATOR);
+
+    return { defaultGems, gemHome, yjit: yjit === "true", version };
   }
 }
