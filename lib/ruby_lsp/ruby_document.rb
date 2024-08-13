@@ -3,6 +3,11 @@
 
 module RubyLsp
   class RubyDocument < Document
+    extend T::Sig
+    extend T::Generic
+
+    ParseResultType = type_member { { fixed: Prism::ParseResult } }
+
     class SorbetLevel < T::Enum
       enums do
         None = new("none")
@@ -13,7 +18,7 @@ module RubyLsp
       end
     end
 
-    sig { override.returns(Prism::ParseResult) }
+    sig { override.returns(ParseResultType) }
     def parse
       return @parse_result unless @needs_parsing
 

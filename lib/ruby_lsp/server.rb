@@ -341,7 +341,12 @@ module RubyLsp
     def text_document_selection_range(message)
       uri = message.dig(:params, :textDocument, :uri)
       ranges = @store.cache_fetch(uri, "textDocument/selectionRange") do |document|
-        Requests::SelectionRanges.new(document).perform
+        case document
+        when RubyDocument, ERBDocument
+          Requests::SelectionRanges.new(document).perform
+        else
+          []
+        end
       end
 
       # Per the selection range request spec (https://microsoft.github.io/language-server-protocol/specification#textDocument_selectionRange),
@@ -362,6 +367,11 @@ module RubyLsp
     def run_combined_requests(message)
       uri = URI(message.dig(:params, :textDocument, :uri))
       document = @store.get(uri)
+
+      unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
+        send_empty_response(message[:id])
+        return
+      end
 
       # If the response has already been cached by another request, return it
       cached_response = document.cache_get(message[:method])
@@ -407,6 +417,12 @@ module RubyLsp
       range = params[:range]
       uri = params.dig(:textDocument, :uri)
       document = @store.get(uri)
+
+      unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
+        send_empty_response(message[:id])
+        return
+      end
+
       start_line = range.dig(:start, :line)
       end_line = range.dig(:end, :line)
 
@@ -436,6 +452,10 @@ module RubyLsp
       end
 
       document = @store.get(uri)
+      unless document.is_a?(RubyDocument)
+        send_empty_response(message[:id])
+        return
+      end
 
       response = Requests::Formatting.new(@global_state, document).perform
       send_message(Result.new(id: message[:id], response: response))
@@ -452,6 +472,12 @@ module RubyLsp
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
       document = @store.get(params.dig(:textDocument, :uri))
+
+      unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
+        send_empty_response(message[:id])
+        return
+      end
+
       request = Requests::DocumentHighlight.new(document, params[:position], dispatcher)
       dispatcher.dispatch(document.parse_result.value)
       send_message(Result.new(id: message[:id], response: request.perform))
@@ -461,6 +487,11 @@ module RubyLsp
     def text_document_on_type_formatting(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
+
+      unless document.is_a?(RubyDocument)
+        send_empty_response(message[:id])
+        return
+      end
 
       send_message(
         Result.new(
@@ -481,6 +512,11 @@ module RubyLsp
       dispatcher = Prism::Dispatcher.new
       document = @store.get(params.dig(:textDocument, :uri))
 
+      unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
+        send_empty_response(message[:id])
+        return
+      end
+
       send_message(
         Result.new(
           id: message[:id],
@@ -495,7 +531,7 @@ module RubyLsp
       )
     end
 
-    sig { params(document: Document).returns(RubyDocument::SorbetLevel) }
+    sig { params(document: Document[T.untyped]).returns(RubyDocument::SorbetLevel) }
     def sorbet_level(document)
       return RubyDocument::SorbetLevel::Ignore unless @global_state.has_type_checker
       return RubyDocument::SorbetLevel::Ignore unless document.is_a?(RubyDocument)
@@ -509,6 +545,12 @@ module RubyLsp
       hints_configurations = T.must(@store.features_configuration.dig(:inlayHint))
       dispatcher = Prism::Dispatcher.new
       document = @store.get(params.dig(:textDocument, :uri))
+
+      unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
+        send_empty_response(message[:id])
+        return
+      end
+
       request = Requests::InlayHints.new(document, params[:range], hints_configurations, dispatcher)
       dispatcher.visit(document.parse_result.value)
       send_message(Result.new(id: message[:id], response: request.perform))
@@ -518,6 +560,11 @@ module RubyLsp
     def text_document_code_action(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
+
+      unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
+        send_empty_response(message[:id])
+        return
+      end
 
       send_message(
         Result.new(
@@ -581,7 +628,10 @@ module RubyLsp
       document = @store.get(uri)
 
       response = document.cache_fetch("textDocument/diagnostic") do |document|
-        Requests::Diagnostics.new(@global_state, document).perform
+        case document
+        when RubyDocument
+          Requests::Diagnostics.new(@global_state, document).perform
+        end
       end
 
       send_message(
@@ -603,6 +653,11 @@ module RubyLsp
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
       document = @store.get(params.dig(:textDocument, :uri))
+
+      unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
+        send_empty_response(message[:id])
+        return
+      end
 
       send_message(
         Result.new(
@@ -632,6 +687,11 @@ module RubyLsp
       dispatcher = Prism::Dispatcher.new
       document = @store.get(params.dig(:textDocument, :uri))
 
+      unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
+        send_empty_response(message[:id])
+        return
+      end
+
       send_message(
         Result.new(
           id: message[:id],
@@ -652,6 +712,11 @@ module RubyLsp
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
       document = @store.get(params.dig(:textDocument, :uri))
+
+      unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
+        send_empty_response(message[:id])
+        return
+      end
 
       send_message(
         Result.new(
@@ -710,9 +775,16 @@ module RubyLsp
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_show_syntax_tree(message)
       params = message[:params]
+      document = @store.get(params.dig(:textDocument, :uri))
+
+      unless document.is_a?(RubyDocument)
+        send_empty_response(message[:id])
+        return
+      end
+
       response = {
         ast: Requests::ShowSyntaxTree.new(
-          @store.get(params.dig(:textDocument, :uri)),
+          document,
           params[:range],
         ).perform,
       }
@@ -722,11 +794,19 @@ module RubyLsp
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_prepare_type_hierarchy(message)
       params = message[:params]
+      document = @store.get(params.dig(:textDocument, :uri))
+
+      unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
+        send_empty_response(message[:id])
+        return
+      end
+
       response = Requests::PrepareTypeHierarchy.new(
-        @store.get(params.dig(:textDocument, :uri)),
+        document,
         @global_state.index,
         params[:position],
       ).perform
+
       send_message(Result.new(id: message[:id], response: response))
     end
 

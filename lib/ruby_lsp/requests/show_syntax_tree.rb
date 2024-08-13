@@ -20,7 +20,7 @@ module RubyLsp
     class ShowSyntaxTree < Request
       extend T::Sig
 
-      sig { params(document: Document, range: T.nilable(T::Hash[Symbol, T.untyped])).void }
+      sig { params(document: RubyDocument, range: T.nilable(T::Hash[Symbol, T.untyped])).void }
       def initialize(document, range)
         super()
         @document = document

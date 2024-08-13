@@ -12,10 +12,13 @@ module RubyLsp
 
     extend T::Sig
     extend T::Helpers
+    extend T::Generic
+
+    ParseResultType = type_member
 
     abstract!
 
-    sig { returns(Prism::ParseResult) }
+    sig { returns(ParseResultType) }
     attr_reader :parse_result
 
     sig { returns(String) }
@@ -38,10 +41,10 @@ module RubyLsp
       @version = T.let(version, Integer)
       @uri = T.let(uri, URI::Generic)
       @needs_parsing = T.let(true, T::Boolean)
-      @parse_result = T.let(parse, Prism::ParseResult)
+      @parse_result = T.let(parse, ParseResultType)
     end
 
-    sig { params(other: Document).returns(T::Boolean) }
+    sig { params(other: Document[T.untyped]).returns(T::Boolean) }
     def ==(other)
       self.class == other.class && uri == other.uri && @source == other.source
     end
@@ -54,7 +57,7 @@ module RubyLsp
       type_parameters(:T)
         .params(
           request_name: String,
-          block: T.proc.params(document: Document).returns(T.type_parameter(:T)),
+          block: T.proc.params(document: Document[ParseResultType]).returns(T.type_parameter(:T)),
         ).returns(T.type_parameter(:T))
     end
     def cache_fetch(request_name, &block)
@@ -93,7 +96,7 @@ module RubyLsp
       @cache.clear
     end
 
-    sig { abstract.returns(Prism::ParseResult) }
+    sig { abstract.returns(ParseResultType) }
     def parse; end
 
     sig { abstract.returns(T::Boolean) }

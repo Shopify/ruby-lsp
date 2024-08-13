@@ -4,8 +4,11 @@
 module RubyLsp
   class ERBDocument < Document
     extend T::Sig
+    extend T::Generic
 
-    sig { override.returns(Prism::ParseResult) }
+    ParseResultType = type_member { { fixed: Prism::ParseResult } }
+
+    sig { override.returns(ParseResultType) }
     def parse
       return @parse_result unless @needs_parsing
 

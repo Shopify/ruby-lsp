@@ -46,7 +46,7 @@ module RubyLsp
 
       sig do
         params(
-          document: Document,
+          document: T.any(RubyDocument, ERBDocument),
           global_state: GlobalState,
           params: T::Hash[Symbol, T.untyped],
           sorbet_level: RubyDocument::SorbetLevel,

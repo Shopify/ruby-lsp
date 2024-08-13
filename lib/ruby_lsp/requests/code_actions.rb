@@ -37,7 +37,7 @@ module RubyLsp
 
       sig do
         params(
-          document: Document,
+          document: T.any(RubyDocument, ERBDocument),
           range: T::Hash[Symbol, T.untyped],
           context: T::Hash[Symbol, T.untyped],
         ).void

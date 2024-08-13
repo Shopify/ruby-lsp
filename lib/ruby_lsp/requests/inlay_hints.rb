@@ -52,7 +52,7 @@ module RubyLsp
 
       sig do
         params(
-          document: Document,
+          document: T.any(RubyDocument, ERBDocument),
           range: T::Hash[Symbol, T.untyped],
           hints_configuration: RequestConfig,
           dispatcher: Prism::Dispatcher,

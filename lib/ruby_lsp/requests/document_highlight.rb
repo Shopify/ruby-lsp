@@ -29,7 +29,7 @@ module RubyLsp
 
       sig do
         params(
-          document: Document,
+          document: T.any(RubyDocument, ERBDocument),
           position: T::Hash[Symbol, T.untyped],
           dispatcher: Prism::Dispatcher,
         ).void

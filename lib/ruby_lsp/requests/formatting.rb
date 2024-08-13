@@ -40,7 +40,7 @@ module RubyLsp
         end
       end
 
-      sig { params(global_state: GlobalState, document: Document).void }
+      sig { params(global_state: GlobalState, document: RubyDocument).void }
       def initialize(global_state, document)
         super()
         @document = document
