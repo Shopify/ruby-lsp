@@ -296,7 +296,7 @@ module RubyLsp
       @mutex.synchronize do
         text_document = message.dig(:params, :textDocument)
         language_id = case text_document[:languageId]
-        when "erb"
+        when "erb", "eruby"
           Document::LanguageId::ERB
         else
           Document::LanguageId::Ruby
