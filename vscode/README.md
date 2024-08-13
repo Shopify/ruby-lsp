@@ -29,7 +29,7 @@ See complete information about features [here](https://shopify.github.io/ruby-ls
 If you experience issues, please see the [troubleshooting
 guide](https://github.com/Shopify/ruby-lsp/blob/main/TROUBLESHOOTING.md).
 
-### Copilot chat agent
+### [Experimental] GitHub Copilot chat agent
 
 For users of Copilot, the Ruby LSP contributes a Ruby agent for AI assisted development of Ruby applications. Below you
 can find the documentation of each command for the Ruby agent. For information about how to interact with Copilot Chat,
@@ -37,7 +37,7 @@ check [VS Code's official documentation](https://code.visualstudio.com/docs/copi
 
 #### Design command
 
-The `@ruby /design` command is intended to be a domain driven design expert to help users model concepts for their
+The `@ruby /design` command is intended to be a domain driven design expert to help users model concepts for their Rails
 applications. Users should describe what type of application they are building and which concept they are trying to
 model. The command will read their Rails application's schema and use their prompt, previous interactions and the schema
 information to provide suggestions of how to design the application. For example,
@@ -51,6 +51,8 @@ The output is a suggested schema for courses including relationships with users.
 As with most LLM chat functionality, suggestions may not be fully accurate, especially in the first iteration. Users can
 continue chatting with the `@ruby` agent to fine tune the suggestions given, before deciding to move forward with
 generation.
+
+If you have feedback about this feature, you can let us know in the [DX Slack](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q) or by [creating an issue](https://github.com/Shopify/ruby-lsp/issues/new).
 
 ## Usage
 
