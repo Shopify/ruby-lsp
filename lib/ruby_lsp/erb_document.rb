@@ -28,6 +28,16 @@ module RubyLsp
       LanguageId::ERB
     end
 
+    sig do
+      params(
+        position: T::Hash[Symbol, T.untyped],
+        node_types: T::Array[T.class_of(Prism::Node)],
+      ).returns(NodeContext)
+    end
+    def locate_node(position, node_types: [])
+      RubyDocument.locate(@parse_result.value, create_scanner.find_char_position(position), node_types: node_types)
+    end
+
     class ERBScanner
       extend T::Sig
 

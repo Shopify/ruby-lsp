@@ -60,7 +60,7 @@ module RubyLsp
         # Completion always receives the position immediately after the character that was just typed. Here we adjust it
         # back by 1, so that we find the right node
         char_position = document.create_scanner.find_char_position(params[:position]) - 1
-        node_context = document.locate(
+        node_context = RubyDocument.locate(
           document.parse_result.value,
           char_position,
           node_types: [
