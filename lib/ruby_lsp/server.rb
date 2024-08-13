@@ -495,9 +495,10 @@ module RubyLsp
       )
     end
 
-    sig { params(document: Document).returns(Document::SorbetLevel) }
+    sig { params(document: Document).returns(RubyDocument::SorbetLevel) }
     def sorbet_level(document)
-      return Document::SorbetLevel::Ignore unless @global_state.has_type_checker
+      return RubyDocument::SorbetLevel::Ignore unless @global_state.has_type_checker
+      return RubyDocument::SorbetLevel::Ignore unless document.is_a?(RubyDocument)
 
       document.sorbet_level
     end

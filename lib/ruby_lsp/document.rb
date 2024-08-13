@@ -10,16 +10,6 @@ module RubyLsp
       end
     end
 
-    class SorbetLevel < T::Enum
-      enums do
-        None = new("none")
-        Ignore = new("ignore")
-        False = new("false")
-        True = new("true")
-        Strict = new("strict")
-      end
-    end
-
     extend T::Sig
     extend T::Helpers
 
@@ -254,26 +244,6 @@ module RubyLsp
             (node_types.empty? || node_types.any? { |type| candidate.class == type })
           return candidate
         end
-      end
-    end
-
-    sig { returns(SorbetLevel) }
-    def sorbet_level
-      sigil = parse_result.magic_comments.find do |comment|
-        comment.key == "typed"
-      end&.value
-
-      case sigil
-      when "ignore"
-        SorbetLevel::Ignore
-      when "false"
-        SorbetLevel::False
-      when "true"
-        SorbetLevel::True
-      when "strict", "strong"
-        SorbetLevel::Strict
-      else
-        SorbetLevel::None
       end
     end
 
