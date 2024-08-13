@@ -11,6 +11,9 @@ module RubyIndexer
     # The minimum Jaro-Winkler similarity score for an entry to be considered a match for a given fuzzy search query
     ENTRY_SIMILARITY_THRESHOLD = 0.7
 
+    sig { returns(Configuration) }
+    attr_reader :configuration
+
     sig { void }
     def initialize
       # Holds all entries in the index using the following format:
@@ -44,6 +47,8 @@ module RubyIndexer
         {},
         T::Hash[String, T::Array[T.proc.params(index: Index, base: Entry::Namespace).void]],
       )
+
+      @configuration = T.let(RubyIndexer::Configuration.new, Configuration)
     end
 
     # Register an enhancement to the index. Enhancements must conform to the `Enhancement` interface
@@ -296,7 +301,7 @@ module RubyIndexer
         block: T.nilable(T.proc.params(progress: Integer).returns(T::Boolean)),
       ).void
     end
-    def index_all(indexable_paths: RubyIndexer.configuration.indexables, &block)
+    def index_all(indexable_paths: @configuration.indexables, &block)
       RBSIndexer.new(self).index_ruby_core
       # Calculate how many paths are worth 1% of progress
       progress_step = (indexable_paths.length / 100.0).ceil

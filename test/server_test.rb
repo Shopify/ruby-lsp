@@ -481,8 +481,8 @@ class ServerTest < Minitest::Test
       })
     end
 
-    assert_includes(RubyIndexer.configuration.instance_variable_get(:@excluded_gems), "foo_gem")
-    assert_includes(RubyIndexer.configuration.instance_variable_get(:@included_gems), "bar_gem")
+    assert_includes(@server.global_state.index.configuration.instance_variable_get(:@excluded_gems), "foo_gem")
+    assert_includes(@server.global_state.index.configuration.instance_variable_get(:@included_gems), "bar_gem")
   end
 
   def test_closing_document_before_computing_features_does_not_error

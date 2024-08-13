@@ -877,7 +877,7 @@ module RubyLsp
 
       if File.exist?(index_path)
         begin
-          RubyIndexer.configuration.apply_config(YAML.parse_file(index_path).to_ruby)
+          @global_state.index.configuration.apply_config(YAML.parse_file(index_path).to_ruby)
           send_message(
             Notification.new(
               method: "window/showMessage",
@@ -906,7 +906,7 @@ module RubyLsp
       return unless indexing_options
 
       # The index expects snake case configurations, but VS Code standardizes on camel case settings
-      RubyIndexer.configuration.apply_config(
+      @global_state.index.configuration.apply_config(
         indexing_options.transform_keys { |key| key.to_s.gsub(/([A-Z])/, "_\\1").downcase },
       )
     end

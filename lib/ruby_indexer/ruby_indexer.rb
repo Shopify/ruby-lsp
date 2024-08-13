@@ -15,12 +15,4 @@ require "ruby_indexer/lib/ruby_indexer/location"
 require "ruby_indexer/lib/ruby_indexer/rbs_indexer"
 
 module RubyIndexer
-  @configuration = T.let(Configuration.new, Configuration)
-
-  class << self
-    extend T::Sig
-
-    sig { returns(Configuration) }
-    attr_reader :configuration
-  end
 end
