@@ -552,7 +552,7 @@ module RubyIndexer
         comment_content = comment.location.slice.chomp
 
         # invalid encodings would raise an "invalid byte sequence" exception
-        if !comment_content.valid_encoding? || comment_content.match?(RubyIndexer.configuration.magic_comment_regex)
+        if !comment_content.valid_encoding? || comment_content.match?(@index.configuration.magic_comment_regex)
           next
         end
 

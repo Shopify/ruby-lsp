@@ -44,7 +44,7 @@ puts "\n"
 puts "Verifying that indexing executes successfully. This may take a while..."
 
 index = RubyIndexer::Index.new
-indexables = RubyIndexer.configuration.indexables
+indexables = index.configuration.indexables
 
 indexables.each_with_index do |indexable, i|
   index.index_single(indexable)

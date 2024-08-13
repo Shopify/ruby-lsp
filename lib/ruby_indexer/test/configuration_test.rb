@@ -108,7 +108,7 @@ module RubyIndexer
     end
 
     def test_magic_comments_regex
-      regex = RubyIndexer.configuration.magic_comment_regex
+      regex = @config.magic_comment_regex
 
       [
         "# frozen_string_literal:",
