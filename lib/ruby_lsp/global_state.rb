@@ -93,7 +93,7 @@ module RubyLsp
       @test_library = detect_test_library(direct_dependencies)
       notifications << Notification.window_log_message("Detected test library: #{@test_library}")
 
-      @has_type_checker = detect_typechecker(direct_dependencies)
+      @has_type_checker = detect_typechecker(all_dependencies)
       if @has_type_checker
         notifications << Notification.window_log_message(
           "Ruby LSP detected this is a Sorbet project and will defer to the Sorbet LSP for some functionality",
