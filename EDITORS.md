@@ -72,6 +72,22 @@ When you run `eglot` command it will run `ruby-lsp` process for you.
 The [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/ruby_lsp.lua)
 plugin has support for Ruby LSP.
 
+The Ruby LSP can be configured using the `init_options` key when setting up the LSP.
+
+A great example of this configuration style is enabling the Standard add-on for
+the Ruby LSP to enable formatting and pull-style diagnostics. The following snippet
+enables `standard` for both formatting and pull-diagnostic linting.
+
+```lua
+local lspconfig = require('lspconfig')
+lspconfig.ruby_lsp.setup({
+  init_options = {
+    formatter = 'standard',
+    linters = { 'standard' },
+  },
+})
+```
+
 ### Mason
 
 You can use [mason.nvim](https://github.com/williamboman/mason.nvim),
