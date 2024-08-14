@@ -23,6 +23,27 @@ class ERBDocumentTest < Minitest::Test
     )
   end
 
+  def test_erb_file_parses_in_eval_context
+    document = RubyLsp::ERBDocument.new(source: +<<~ERB, version: 1, uri: URI("file:///foo.erb"))
+      <html>
+        <head>
+          <%= yield :head %>
+        </head>
+        <body>
+          <%= yield %>
+        </body>
+      </html>
+    ERB
+
+    document.parse
+
+    refute_predicate(document, :syntax_error?)
+    assert_equal(
+      "      \n        \n        yield :head   \n         \n        \n        yield   \n         \n       \n",
+      document.parse_result.source.source,
+    )
+  end
+
   def test_erb_document_handles_windows_newlines
     document = RubyLsp::ERBDocument.new(source: "<%=\r\nbar %>", version: 1, uri: URI("file:///foo.erb"))
     document.parse

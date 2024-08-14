@@ -12,7 +12,8 @@ module RubyLsp
       @needs_parsing = false
       scanner = ERBScanner.new(@source)
       scanner.scan
-      @parse_result = Prism.parse(scanner.ruby)
+      # assigning empty scopes to turn Prism into eval mode
+      @parse_result = Prism.parse(scanner.ruby, scopes: [[]])
     end
 
     sig { override.returns(T::Boolean) }
