@@ -199,6 +199,16 @@ module RubyLsp
       assert_predicate(state, :experimental_features)
     end
 
+    def test_type_checker_is_detected_based_on_transitive_sorbet_static
+      state = GlobalState.new
+
+      Bundler.locked_gems.stubs(dependencies: {})
+      stub_all_dependencies("sorbet-static")
+      state.apply_options({ initializationOptions: {} })
+
+      assert_predicate(state, :has_type_checker)
+    end
+
     private
 
     def stub_direct_dependencies(dependencies)
