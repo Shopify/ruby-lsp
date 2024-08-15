@@ -50,6 +50,7 @@ module RubyLsp
       @last_updated_path = T.let(@custom_dir + "last_updated", Pathname)
 
       @dependencies = T.let(load_dependencies, T::Hash[String, T.untyped])
+      @rails_app = T.let(rails_app?, T::Boolean)
       @retry = T.let(false, T::Boolean)
     end
 
@@ -62,7 +63,7 @@ module RubyLsp
       # Do not set up a custom bundle if LSP dependencies are already in the Gemfile
       if @dependencies["ruby-lsp"] &&
           @dependencies["debug"] &&
-          (@dependencies["rails"] ? @dependencies["ruby-lsp-rails"] : true)
+          (@rails_app ? @dependencies["ruby-lsp-rails"] : true)
         $stderr.puts(
           "Ruby LSP> Skipping custom bundle setup since LSP dependencies are already in #{@gemfile}",
         )
@@ -148,7 +149,7 @@ module RubyLsp
         parts << 'gem "debug", require: false, group: :development, platforms: :mri'
       end
 
-      if @dependencies["rails"] && !@dependencies["ruby-lsp-rails"]
+      if @rails_app && !@dependencies["ruby-lsp-rails"]
         parts << 'gem "ruby-lsp-rails", require: false, group: :development'
       end
 
@@ -209,7 +210,7 @@ module RubyLsp
         command << " && bundle update "
         command << "ruby-lsp " unless @dependencies["ruby-lsp"]
         command << "debug " unless @dependencies["debug"]
-        command << "ruby-lsp-rails " if @dependencies["rails"] && !@dependencies["ruby-lsp-rails"]
+        command << "ruby-lsp-rails " if @rails_app && !@dependencies["ruby-lsp-rails"]
         command << "--pre" if @experimental
         command.delete_suffix!(" ")
         command << ")"
@@ -244,7 +245,7 @@ module RubyLsp
     def should_bundle_update?
       # If `ruby-lsp`, `ruby-lsp-rails` and `debug` are in the Gemfile, then we shouldn't try to upgrade them or else it
       # will produce version control changes
-      if @dependencies["rails"]
+      if @rails_app
         return false if @dependencies.values_at("ruby-lsp", "ruby-lsp-rails", "debug").all?
 
         # If the custom lockfile doesn't include `ruby-lsp`, `ruby-lsp-rails` or `debug`, we need to run bundle install
@@ -279,6 +280,16 @@ module RubyLsp
       end
 
       @custom_lockfile.write(content)
+    end
+
+    # Detects if the project is a Rails app by looking if the superclass of the main class is `Rails::Application`
+    sig { returns(T::Boolean) }
+    def rails_app?
+      config = Pathname.new("config/application.rb").expand_path
+      application_contents = config.read if config.exist?
+      return false unless application_contents
+
+      /class .* < (::)?Rails::Application/.match?(application_contents)
     end
   end
 end
