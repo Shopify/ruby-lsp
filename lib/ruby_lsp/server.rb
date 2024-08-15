@@ -298,9 +298,12 @@ module RubyLsp
         language_id = case text_document[:languageId]
         when "erb", "eruby"
           Document::LanguageId::ERB
+        when "rbs"
+          Document::LanguageId::RBS
         else
           Document::LanguageId::Ruby
         end
+
         @store.set(
           uri: text_document[:uri],
           source: text_document[:text],

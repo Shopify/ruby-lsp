@@ -7,6 +7,7 @@ module RubyLsp
       enums do
         Ruby = new("ruby")
         ERB = new("erb")
+        RBS = new("rbs")
       end
     end
 

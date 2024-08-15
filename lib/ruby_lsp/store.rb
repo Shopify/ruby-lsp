@@ -44,8 +44,11 @@ module RubyLsp
       raise NonExistingDocumentError, uri.to_s unless path
 
       ext = File.extname(path)
-      language_id = if ext == ".erb" || ext == ".rhtml"
+      language_id = case ext
+      when ".erb", ".rhtml"
         Document::LanguageId::ERB
+      when ".rbs"
+        Document::LanguageId::RBS
       else
         Document::LanguageId::Ruby
       end
@@ -66,13 +69,14 @@ module RubyLsp
       ).void
     end
     def set(uri:, source:, version:, language_id:, encoding: Encoding::UTF_8)
-      document = case language_id
+      @state[uri.to_s] = case language_id
       when Document::LanguageId::ERB
         ERBDocument.new(source: source, version: version, uri: uri, encoding: encoding)
+      when Document::LanguageId::RBS
+        RBSDocument.new(source: source, version: version, uri: uri, encoding: encoding)
       else
         RubyDocument.new(source: source, version: version, uri: uri, encoding: encoding)
       end
-      @state[uri.to_s] = document
     end
 
     sig { params(uri: URI::Generic, edits: T::Array[T::Hash[Symbol, T.untyped]], version: Integer).void }
