@@ -1,18 +1,15 @@
 ---
-name: Ruby LSP bug
-description: File a bug report about the Ruby LSP
+name: Ruby LSP bug (VS Code)
+description: File a bug report about the Ruby LSP with VS Code
 labels:
   - bug
+  - vscode
 body:
   - type: markdown
     attributes:
-      value: >
-        Thank you for filing a bug report! Please answer the following questions to help us understand the issue.
-  - type: textarea
-    attributes:
-      label: Description
-      description: Reproduction steps
       value: |
+        Thank you for filing a bug report! Please answer the following questions to help us understand the issue.
+
         ### Before submitting
 
         Please follow the instructions on
@@ -21,9 +18,11 @@ body:
         1. On the latest version of the Ruby LSP VS Code extension
         2. On the latest version of the Ruby LSP server gem
         3. On the latest version of VS Code
-
-        If the issue persist, please deleted this section and submit the report.
-
+  - type: textarea
+    attributes:
+      label: Description
+      description: Reproduction steps
+      value: |
         ### Reproduction steps
 
         <!--
