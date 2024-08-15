@@ -42,7 +42,7 @@ module RubyLsp
 
       sig do
         params(
-          document: Document,
+          document: RubyDocument,
           position: T::Hash[Symbol, T.untyped],
           trigger_character: String,
           client_name: String,

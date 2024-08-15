@@ -18,7 +18,7 @@ module RubyLsp
 
     sig { void }
     def initialize
-      @state = T.let({}, T::Hash[String, Document])
+      @state = T.let({}, T::Hash[String, Document[T.untyped]])
       @supports_progress = T.let(true, T::Boolean)
       @features_configuration = T.let(
         {
@@ -33,7 +33,7 @@ module RubyLsp
       @client_name = T.let("Unknown", String)
     end
 
-    sig { params(uri: URI::Generic).returns(Document) }
+    sig { params(uri: URI::Generic).returns(Document[T.untyped]) }
     def get(uri)
       document = @state[uri.to_s]
       return document unless document.nil?
@@ -100,7 +100,7 @@ module RubyLsp
         .params(
           uri: URI::Generic,
           request_name: String,
-          block: T.proc.params(document: Document).returns(T.type_parameter(:T)),
+          block: T.proc.params(document: Document[T.untyped]).returns(T.type_parameter(:T)),
         ).returns(T.type_parameter(:T))
     end
     def cache_fetch(uri, request_name, &block)

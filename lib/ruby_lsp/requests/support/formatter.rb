@@ -10,13 +10,13 @@ module RubyLsp
 
         interface!
 
-        sig { abstract.params(uri: URI::Generic, document: Document).returns(T.nilable(String)) }
+        sig { abstract.params(uri: URI::Generic, document: RubyDocument).returns(T.nilable(String)) }
         def run_formatting(uri, document); end
 
         sig do
           abstract.params(
             uri: URI::Generic,
-            document: Document,
+            document: RubyDocument,
           ).returns(T.nilable(T::Array[Interface::Diagnostic]))
         end
         def run_diagnostic(uri, document); end

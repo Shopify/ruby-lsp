@@ -31,7 +31,7 @@ module RubyLsp
 
         # TODO: avoid passing document once we have alternative ways to get at
         # encoding and file source
-        sig { params(document: Document, offense: RuboCop::Cop::Offense, uri: URI::Generic).void }
+        sig { params(document: RubyDocument, offense: RuboCop::Cop::Offense, uri: URI::Generic).void }
         def initialize(document, offense, uri)
           @document = document
           @offense = offense

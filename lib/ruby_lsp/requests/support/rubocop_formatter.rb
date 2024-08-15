@@ -17,7 +17,7 @@ module RubyLsp
           @format_runner = T.let(RuboCopRunner.new("-a"), RuboCopRunner)
         end
 
-        sig { override.params(uri: URI::Generic, document: Document).returns(T.nilable(String)) }
+        sig { override.params(uri: URI::Generic, document: RubyDocument).returns(T.nilable(String)) }
         def run_formatting(uri, document)
           filename = T.must(uri.to_standardized_path || uri.opaque)
 
@@ -29,7 +29,7 @@ module RubyLsp
         sig do
           override.params(
             uri: URI::Generic,
-            document: Document,
+            document: RubyDocument,
           ).returns(T.nilable(T::Array[Interface::Diagnostic]))
         end
         def run_diagnostic(uri, document)

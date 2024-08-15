@@ -29,7 +29,7 @@ module RubyLsp
             )
         end
 
-        sig { override.params(uri: URI::Generic, document: Document).returns(T.nilable(String)) }
+        sig { override.params(uri: URI::Generic, document: RubyDocument).returns(T.nilable(String)) }
         def run_formatting(uri, document)
           path = uri.to_standardized_path
           return if path && @options.ignore_files.any? { |pattern| File.fnmatch?("*/#{pattern}", path) }
@@ -40,7 +40,7 @@ module RubyLsp
         sig do
           override.params(
             uri: URI::Generic,
-            document: Document,
+            document: RubyDocument,
           ).returns(T.nilable(T::Array[Interface::Diagnostic]))
         end
         def run_diagnostic(uri, document)

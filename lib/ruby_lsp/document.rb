@@ -12,10 +12,13 @@ module RubyLsp
 
     extend T::Sig
     extend T::Helpers
+    extend T::Generic
+
+    ParseResultType = type_member
 
     abstract!
 
-    sig { returns(Prism::ParseResult) }
+    sig { returns(ParseResultType) }
     attr_reader :parse_result
 
     sig { returns(String) }
@@ -38,10 +41,10 @@ module RubyLsp
       @version = T.let(version, Integer)
       @uri = T.let(uri, URI::Generic)
       @needs_parsing = T.let(true, T::Boolean)
-      @parse_result = T.let(parse, Prism::ParseResult)
+      @parse_result = T.let(parse, ParseResultType)
     end
 
-    sig { params(other: Document).returns(T::Boolean) }
+    sig { params(other: Document[T.untyped]).returns(T::Boolean) }
     def ==(other)
       self.class == other.class && uri == other.uri && @source == other.source
     end
@@ -54,7 +57,7 @@ module RubyLsp
       type_parameters(:T)
         .params(
           request_name: String,
-          block: T.proc.params(document: Document).returns(T.type_parameter(:T)),
+          block: T.proc.params(document: Document[ParseResultType]).returns(T.type_parameter(:T)),
         ).returns(T.type_parameter(:T))
     end
     def cache_fetch(request_name, &block)
@@ -93,7 +96,7 @@ module RubyLsp
       @cache.clear
     end
 
-    sig { abstract.returns(Prism::ParseResult) }
+    sig { abstract.returns(ParseResultType) }
     def parse; end
 
     sig { abstract.returns(T::Boolean) }
@@ -102,115 +105,6 @@ module RubyLsp
     sig { returns(Scanner) }
     def create_scanner
       Scanner.new(@source, @encoding)
-    end
-
-    sig do
-      params(
-        position: T::Hash[Symbol, T.untyped],
-        node_types: T::Array[T.class_of(Prism::Node)],
-      ).returns(NodeContext)
-    end
-    def locate_node(position, node_types: [])
-      locate(@parse_result.value, create_scanner.find_char_position(position), node_types: node_types)
-    end
-
-    sig do
-      params(
-        node: Prism::Node,
-        char_position: Integer,
-        node_types: T::Array[T.class_of(Prism::Node)],
-      ).returns(NodeContext)
-    end
-    def locate(node, char_position, node_types: [])
-      queue = T.let(node.child_nodes.compact, T::Array[T.nilable(Prism::Node)])
-      closest = node
-      parent = T.let(nil, T.nilable(Prism::Node))
-      nesting_nodes = T.let(
-        [],
-        T::Array[T.any(
-          Prism::ClassNode,
-          Prism::ModuleNode,
-          Prism::SingletonClassNode,
-          Prism::DefNode,
-          Prism::BlockNode,
-          Prism::LambdaNode,
-          Prism::ProgramNode,
-        )],
-      )
-
-      nesting_nodes << node if node.is_a?(Prism::ProgramNode)
-      call_node = T.let(nil, T.nilable(Prism::CallNode))
-
-      until queue.empty?
-        candidate = queue.shift
-
-        # Skip nil child nodes
-        next if candidate.nil?
-
-        # Add the next child_nodes to the queue to be processed. The order here is important! We want to move in the
-        # same order as the visiting mechanism, which means searching the child nodes before moving on to the next
-        # sibling
-        T.unsafe(queue).unshift(*candidate.child_nodes)
-
-        # Skip if the current node doesn't cover the desired position
-        loc = candidate.location
-        next unless (loc.start_offset...loc.end_offset).cover?(char_position)
-
-        # If the node's start character is already past the position, then we should've found the closest node
-        # already
-        break if char_position < loc.start_offset
-
-        # If the candidate starts after the end of the previous nesting level, then we've exited that nesting level and
-        # need to pop the stack
-        previous_level = nesting_nodes.last
-        nesting_nodes.pop if previous_level && loc.start_offset > previous_level.location.end_offset
-
-        # Keep track of the nesting where we found the target. This is used to determine the fully qualified name of the
-        # target when it is a constant
-        case candidate
-        when Prism::ClassNode, Prism::ModuleNode, Prism::SingletonClassNode, Prism::DefNode, Prism::BlockNode,
-          Prism::LambdaNode
-          nesting_nodes << candidate
-        end
-
-        if candidate.is_a?(Prism::CallNode)
-          arg_loc = candidate.arguments&.location
-          blk_loc = candidate.block&.location
-          if (arg_loc && (arg_loc.start_offset...arg_loc.end_offset).cover?(char_position)) ||
-              (blk_loc && (blk_loc.start_offset...blk_loc.end_offset).cover?(char_position))
-            call_node = candidate
-          end
-        end
-
-        # If there are node types to filter by, and the current node is not one of those types, then skip it
-        next if node_types.any? && node_types.none? { |type| candidate.class == type }
-
-        # If the current node is narrower than or equal to the previous closest node, then it is more precise
-        closest_loc = closest.location
-        if loc.end_offset - loc.start_offset <= closest_loc.end_offset - closest_loc.start_offset
-          parent = closest
-          closest = candidate
-        end
-      end
-
-      # When targeting the constant part of a class/module definition, we do not want the nesting to be duplicated. That
-      # is, when targeting Bar in the following example:
-      #
-      # ```ruby
-      #   class Foo::Bar; end
-      # ```
-      # The correct target is `Foo::Bar` with an empty nesting. `Foo::Bar` should not appear in the nesting stack, even
-      # though the class/module node does indeed enclose the target, because it would lead to incorrect behavior
-      if closest.is_a?(Prism::ConstantReadNode) || closest.is_a?(Prism::ConstantPathNode)
-        last_level = nesting_nodes.last
-
-        if (last_level.is_a?(Prism::ModuleNode) || last_level.is_a?(Prism::ClassNode)) &&
-            last_level.constant_path == closest
-          nesting_nodes.pop
-        end
-      end
-
-      NodeContext.new(closest, parent, nesting_nodes, call_node)
     end
 
     class Scanner

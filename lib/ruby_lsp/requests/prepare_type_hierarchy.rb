@@ -35,7 +35,7 @@ module RubyLsp
 
       sig do
         params(
-          document: Document,
+          document: T.any(RubyDocument, ERBDocument),
           index: RubyIndexer::Index,
           position: T::Hash[Symbol, T.untyped],
         ).void
