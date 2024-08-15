@@ -94,7 +94,7 @@ class SetupBundlerTest < Minitest::Test
     assert_match("ruby-lsp-rails", File.read(".ruby-lsp/Gemfile"))
   ensure
     FileUtils.rm_r(".ruby-lsp") if Dir.exist?(".ruby-lsp")
-    FileUtils.rm_rf("config") if Dir.exist?("config")
+    FileUtils.rm_r("config") if Dir.exist?("config")
   end
 
   def test_changing_lockfile_causes_custom_bundle_to_be_rebuilt
