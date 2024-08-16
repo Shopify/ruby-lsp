@@ -29,8 +29,14 @@ jobs:
               "KaanOzkan"
             ];
             const author = "${{ github.event.issue.user.login }}";
+            const issue = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ github.event.issue.number }}
+            });
+            const hasNonVSCodeLabel = issue.data.labels.some(label => label.name === 'non-vscode');
 
-            if (!fullTeam.includes(author)) {
+            if (!fullTeam.includes(author) && !hasNonVSCodeLabel) {
               const dxReviewers = [
                 "andyw8",
                 "vinistock",
