@@ -17,6 +17,7 @@ import { Debugger } from "./debugger";
 import { DependenciesTree } from "./dependenciesTree";
 import { Rails } from "./rails";
 import { ChatAgent } from "./chatAgent";
+import { collectRubyLspInfo } from "./infoCollector";
 
 // The RubyLsp class represents an instance of the entire extension. This should only be instantiated once at the
 // activation event. One instance of this class controls all of the existing workspaces, telemetry and handles all
@@ -570,6 +571,10 @@ export class RubyLsp {
         await vscode.commands.executeCommand(pick.command, ...pick.args);
       }),
       vscode.commands.registerCommand(Command.NewMinitestFile, newMinitestFile),
+      vscode.commands.registerCommand(Command.CollectRubyLspInfo, async () => {
+        const workspace = await this.showWorkspacePick();
+        await collectRubyLspInfo(workspace);
+      }),
     );
   }
 

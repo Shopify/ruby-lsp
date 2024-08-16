@@ -140,6 +140,11 @@
         "title": "Ruby file operations",
         "category": "Ruby LSP",
         "icon": "$(ruby)"
+      },
+      {
+        "command": "rubyLsp.collectRubyLspInfo",
+        "title": "Collect Ruby LSP Information for Issue Reporting",
+        "category": "Ruby LSP"
       }
     ],
     "configuration": {
