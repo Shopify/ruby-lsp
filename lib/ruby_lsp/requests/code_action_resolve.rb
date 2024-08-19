@@ -207,27 +207,43 @@ module RubyLsp
 
         # Find the closest method declaration node, so that we place the refactor in a valid position
         node_context = RubyDocument.locate(@document.parse_result.value, start_index, node_types: [Prism::DefNode])
-        closest_def = T.cast(node_context.node, Prism::DefNode)
-        return Error::InvalidTargetRange if closest_def.nil?
+        closest_node = node_context.node
+        return Error::InvalidTargetRange unless closest_node
 
-        end_keyword_loc = closest_def.end_keyword_loc
-        return Error::InvalidTargetRange if end_keyword_loc.nil?
+        target_range = if closest_node.is_a?(Prism::DefNode)
+          end_keyword_loc = closest_node.end_keyword_loc
+          return Error::InvalidTargetRange unless end_keyword_loc
 
-        end_line = end_keyword_loc.end_line - 1
-        character = end_keyword_loc.end_column
-        indentation = " " * end_keyword_loc.start_column
-        target_range = {
-          start: { line: end_line, character: character },
-          end: { line: end_line, character: character },
-        }
+          end_line = end_keyword_loc.end_line - 1
+          character = end_keyword_loc.end_column
+          indentation = " " * end_keyword_loc.start_column
 
-        new_method_source = <<~RUBY.chomp
+          new_method_source = <<~RUBY.chomp
 
 
-          #{indentation}def #{NEW_METHOD_NAME}
-          #{indentation}  #{extracted_source}
-          #{indentation}end
-        RUBY
+            #{indentation}def #{NEW_METHOD_NAME}
+            #{indentation}  #{extracted_source}
+            #{indentation}end
+          RUBY
+
+          {
+            start: { line: end_line, character: character },
+            end: { line: end_line, character: character },
+          }
+        else
+          new_method_source = <<~RUBY
+            #{indentation}def #{NEW_METHOD_NAME}
+            #{indentation}  #{extracted_source.gsub("\n", "\n  ")}
+            #{indentation}end
+
+          RUBY
+
+          line = [0, source_range.dig(:start, :line) - 1].max
+          {
+            start: { line: line, character: source_range.dig(:start, :character) },
+            end: { line: line, character: source_range.dig(:start, :character) },
+          }
+        end
 
         Interface::CodeAction.new(
           title: CodeActions::EXTRACT_TO_METHOD_TITLE,
