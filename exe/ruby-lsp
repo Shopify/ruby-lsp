@@ -81,6 +81,8 @@ require "ruby_lsp/load_sorbet"
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 require "ruby_lsp/internal"
 
+T::Utils.run_all_sig_blocks
+
 if options[:debug]
   if ["x64-mingw-ucrt", "x64-mingw32"].include?(RUBY_PLATFORM)
     $stderr.puts "Debugging is not supported on Windows"
