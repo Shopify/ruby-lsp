@@ -16,15 +16,24 @@ module RubyIndexer
       T::Hash[String, T.untyped],
     )
 
+    sig { params(workspace_path: String).void }
+    attr_writer :workspace_path
+
     sig { void }
     def initialize
+      @workspace_path = T.let(Dir.pwd, String)
       @excluded_gems = T.let(initial_excluded_gems, T::Array[String])
       @included_gems = T.let([], T::Array[String])
-      @excluded_patterns = T.let([File.join("**", "*_test.rb"), File.join("**", "tmp", "**", "*")], T::Array[String])
-      path = Bundler.settings["path"]
-      @excluded_patterns << File.join(File.expand_path(path, Dir.pwd), "**", "*.rb") if path
+      @excluded_patterns = T.let([File.join("**", "*_test.rb"), File.join("tmp", "**", "*")], T::Array[String])
 
-      @included_patterns = T.let([File.join(Dir.pwd, "**", "*.rb")], T::Array[String])
+      path = Bundler.settings["path"]
+      if path
+        # Substitute Windows backslashes into forward slashes, which are used in glob patterns
+        glob = path.gsub(/[\\]+/, "/")
+        @excluded_patterns << File.join(glob, "**", "*.rb")
+      end
+
+      @included_patterns = T.let([File.join("**", "*.rb")], T::Array[String])
       @excluded_magic_comments = T.let(
         [
           "frozen_string_literal:",
@@ -55,12 +64,12 @@ module RubyIndexer
       indexables = @included_patterns.flat_map do |pattern|
         load_path_entry = T.let(nil, T.nilable(String))
 
-        Dir.glob(pattern, File::FNM_PATHNAME | File::FNM_EXTGLOB).map! do |path|
+        Dir.glob(File.join(@workspace_path, pattern), File::FNM_PATHNAME | File::FNM_EXTGLOB).map! do |path|
           path = File.expand_path(path)
           # All entries for the same pattern match the same $LOAD_PATH entry. Since searching the $LOAD_PATH for every
           # entry is expensive, we memoize it until we find a path that doesn't belong to that $LOAD_PATH. This happens
-          # on repositories that define multiple gems, like Rails. All frameworks are defined inside the Dir.pwd, but
-          # each one of them belongs to a different $LOAD_PATH entry
+          # on repositories that define multiple gems, like Rails. All frameworks are defined inside the current
+          # workspace directory, but each one of them belongs to a different $LOAD_PATH entry
           if load_path_entry.nil? || !path.start_with?(load_path_entry)
             load_path_entry = $LOAD_PATH.find { |load_path| path.start_with?(load_path) }
           end
@@ -69,9 +78,19 @@ module RubyIndexer
         end
       end
 
+      # If the patterns are relative, we make it relative to the workspace path. If they are absolute, then we shouldn't
+      # concatenate anything
+      excluded_patterns = @excluded_patterns.map do |pattern|
+        if File.absolute_path?(pattern)
+          pattern
+        else
+          File.join(@workspace_path, pattern)
+        end
+      end
+
       # Remove user specified patterns
       indexables.reject! do |indexable|
-        @excluded_patterns.any? do |pattern|
+        excluded_patterns.any? do |pattern|
           File.fnmatch?(pattern, indexable.full_path, File::FNM_PATHNAME | File::FNM_EXTGLOB)
         end
       end
@@ -122,7 +141,7 @@ module RubyIndexer
         # When working on a gem, it will be included in the locked_gems list. Since these are the project's own files,
         # we have already included and handled exclude patterns for it and should not re-include or it'll lead to
         # duplicates or accidentally ignoring exclude patterns
-        next if spec.full_gem_path == Dir.pwd
+        next if spec.full_gem_path == @workspace_path
 
         indexables.concat(
           spec.require_paths.flat_map do |require_path|
@@ -185,7 +204,7 @@ module RubyIndexer
       # If the dependency is prerelease, `to_spec` may return `nil` due to a bug in older version of Bundler/RubyGems:
       # https://github.com/Shopify/ruby-lsp/issues/1246
       this_gem = Bundler.definition.dependencies.find do |d|
-        d.to_spec&.full_gem_path == Dir.pwd
+        d.to_spec&.full_gem_path == @workspace_path
       rescue Gem::MissingSpecError
         false
       end

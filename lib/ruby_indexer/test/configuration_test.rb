@@ -7,10 +7,12 @@ module RubyIndexer
   class ConfigurationTest < Minitest::Test
     def setup
       @config = Configuration.new
+      @workspace_path = File.expand_path(File.join("..", "..", ".."), __dir__)
+      @config.workspace_path = @workspace_path
     end
 
     def test_load_configuration_executes_configure_block
-      @config.apply_config({ "excluded_patterns" => ["**/test/fixtures/**/*.rb"] })
+      @config.apply_config({ "excluded_patterns" => ["**/fixtures/**/*.rb"] })
       indexables = @config.indexables
 
       assert(indexables.none? { |indexable| indexable.full_path.include?("test/fixtures") })
@@ -25,7 +27,7 @@ module RubyIndexer
       indexables = @config.indexables
 
       # All paths should be expanded
-      assert(indexables.none? { |indexable| indexable.full_path.start_with?("lib/") })
+      assert(indexables.all? { |indexable| File.absolute_path?(indexable.full_path) })
     end
 
     def test_indexables_only_includes_gem_require_paths
@@ -71,17 +73,20 @@ module RubyIndexer
       Bundler.settings.temporary(path: "vendor/bundle") do
         config = Configuration.new
 
-        assert_includes(config.instance_variable_get(:@excluded_patterns), "#{Dir.pwd}/vendor/bundle/**/*.rb")
+        assert_includes(config.instance_variable_get(:@excluded_patterns), "vendor/bundle/**/*.rb")
       end
     end
 
     def test_indexables_does_not_include_gems_own_installed_files
       indexables = @config.indexables
+      indexables_inside_bundled_lsp = indexables.select do |indexable|
+        indexable.full_path.start_with?(Bundler.bundle_path.join("gems", "ruby-lsp").to_s)
+      end
 
-      assert(
-        indexables.none? do |indexable|
-          indexable.full_path.start_with?(Bundler.bundle_path.join("gems", "ruby-lsp").to_s)
-        end,
+      assert_empty(
+        indexables_inside_bundled_lsp,
+        "Indexables should not include files from the gem currently being worked on. " \
+          "Included: #{indexables_inside_bundled_lsp.map(&:full_path)}",
       )
     end
 
@@ -124,6 +129,35 @@ module RubyIndexer
         "# warn_past_scope:",
       ].each do |comment|
         assert_match(regex, comment)
+      end
+    end
+
+    def test_indexables_respect_given_workspace_path
+      Dir.mktmpdir do |dir|
+        FileUtils.mkdir(File.join(dir, "ignore"))
+        FileUtils.touch(File.join(dir, "ignore", "file0.rb"))
+        FileUtils.touch(File.join(dir, "file1.rb"))
+        FileUtils.touch(File.join(dir, "file2.rb"))
+
+        @config.apply_config({ "excluded_patterns" => ["ignore/**/*.rb"] })
+        @config.workspace_path = dir
+        indexables = @config.indexables
+
+        assert(indexables.none? { |indexable| indexable.full_path.start_with?(File.join(dir, "ignore")) })
+
+        # After switching the workspace path, all indexables will be found in one of these places:
+        # - The new workspace path
+        # - The Ruby LSP's own code (because Bundler is requiring the dependency from source)
+        # - Bundled gems
+        # - Default gems
+        assert(
+          indexables.all? do |i|
+            i.full_path.start_with?(dir) ||
+            i.full_path.start_with?(File.join(Dir.pwd, "lib")) ||
+            i.full_path.start_with?(Bundler.bundle_path.to_s) ||
+            i.full_path.start_with?(RbConfig::CONFIG["rubylibdir"])
+          end,
+        )
       end
     end
   end
