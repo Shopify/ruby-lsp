@@ -877,10 +877,42 @@
     "@vscode/vsce-sign-win32-arm64" "2.0.2"
     "@vscode/vsce-sign-win32-x64" "2.0.2"
 
-"@vscode/vsce@^2.25.0", "@vscode/vsce@^2.31.1":
+"@vscode/vsce@^2.25.0":
   version "2.31.1"
   resolved "https://registry.yarnpkg.com/@vscode/vsce/-/vsce-2.31.1.tgz#2420167e5b5ac49ff8fd1aeebfadde43711fbe55"
   integrity sha512-LwEQFKXV21C4/brvGPH/9+7ZOUM5cbK7oJ4fVmy0YG75NIy1HV8eMSoBZrl+u23NxpAhor62Cu1aI+JFtCtjSg==
+  dependencies:
+    "@azure/identity" "^4.1.0"
+    "@vscode/vsce-sign" "^2.0.0"
+    azure-devops-node-api "^12.5.0"
+    chalk "^2.4.2"
+    cheerio "^1.0.0-rc.9"
+    cockatiel "^3.1.2"
+    commander "^6.2.1"
+    form-data "^4.0.0"
+    glob "^11.0.0"
+    hosted-git-info "^4.0.2"
+    jsonc-parser "^3.2.0"
+    leven "^3.1.0"
+    markdown-it "^12.3.2"
+    mime "^1.3.4"
+    minimatch "^3.0.3"
+    parse-semver "^1.1.1"
+    read "^1.0.7"
+    semver "^7.5.2"
+    tmp "^0.2.3"
+    typed-rest-client "^1.8.4"
+    url-join "^4.0.1"
+    xml2js "^0.5.0"
+    yauzl "^2.3.1"
+    yazl "^2.2.2"
+  optionalDependencies:
+    keytar "^7.7.0"
+
+"@vscode/vsce@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@vscode/vsce/-/vsce-3.0.0.tgz#79fa4a263eb9477d49efb2931d45204e3efbcb78"
+  integrity sha512-UKYcC7fcSw6AUK6nlfm8A8WSOA41H3DRAwafCMp9CQpg3K9COAQKkrgQ+dKPhwkFTP7SPZNEiulDpPLwvr5QQQ==
   dependencies:
     "@azure/identity" "^4.1.0"
     "@vscode/vsce-sign" "^2.0.0"
