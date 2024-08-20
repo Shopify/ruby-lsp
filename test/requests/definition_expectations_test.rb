@@ -472,6 +472,71 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definition_for_guessed_receiver_is_listed
+    source = <<~RUBY
+      # typed: false
+
+      class Cheetah
+        def meow; end
+      end
+
+      class Cat
+        def meow; end
+      end
+
+      cat = Cat.new
+      cat.meow
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 11 } },
+      )
+      response = server.pop_response.response
+
+      # Only Cat#meow is listed
+      assert_equal(1, response.size)
+      assert_equal(7, response.first.target_range.start.line)
+      assert_equal(7, response.first.target_range.end.line)
+      assert_equal(2, response.first.target_range.start.character)
+      assert_equal(15, response.first.target_range.end.character)
+    end
+  end
+
+  def test_guessed_receiver_is_treated_as_unknown_when_no_declaration_exists
+    source = <<~RUBY
+      # typed: false
+
+      class Animal
+        def eat; end
+      end
+
+      class Cheetah
+        def meow; end
+      end
+
+      class Cat
+        def meow; end
+      end
+
+      animal = Cat.new
+      animal.meow
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 7, line: 15 } },
+      )
+      response = server.pop_response.response
+
+      assert_equal(2, response.size)
+    end
+  end
+
   def test_definitions_for_unknown_receiver_is_capped
     source = +"# typed: false\n"
 
