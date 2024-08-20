@@ -564,6 +564,27 @@ module RubyIndexer
       assert_entry("Foo::Bar", Entry::Class, "/fake/path/foo.rb:1-2:2-5")
     end
 
+    def test_indexing_singletons_inside_top_level_references
+      index(<<~RUBY)
+        module ::Foo
+          class Bar
+            class << self
+            end
+          end
+        end
+      RUBY
+
+      # We want to explicitly verify that we didn't introduce the leading `::` by accident, but `Index#[]` deletes the
+      # prefix when we use `refute_entry`
+      entries = @index.instance_variable_get(:@entries)
+      refute(entries.key?("::Foo"))
+      refute(entries.key?("::Foo::Bar"))
+      refute(entries.key?("::Foo::Bar::<Class:Bar>"))
+      assert_entry("Foo", Entry::Module, "/fake/path/foo.rb:0-0:5-3")
+      assert_entry("Foo::Bar", Entry::Class, "/fake/path/foo.rb:1-2:4-5")
+      assert_entry("Foo::Bar::<Class:Bar>", Entry::SingletonClass, "/fake/path/foo.rb:2-4:3-7")
+    end
+
     def test_indexing_namespaces_inside_nested_top_level_references
       index(<<~RUBY)
         class Baz
