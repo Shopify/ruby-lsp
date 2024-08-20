@@ -262,6 +262,102 @@ module RubyLsp
       assert_equal("Foo", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
+    def test_infer_string_literal
+      node_context = index_and_locate(<<~RUBY, { line: 0, character: 3 })
+        "".upcase
+      RUBY
+
+      assert_equal("String", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_symbol_literal
+      node_context = index_and_locate(<<~RUBY, { line: 0, character: 5 })
+        :foo.to_s
+      RUBY
+
+      assert_equal("Symbol", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_array_literal
+      node_context = index_and_locate(<<~RUBY, { line: 0, character: 3 })
+        [].first
+      RUBY
+
+      assert_equal("Array", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_hash_literal
+      node_context = index_and_locate(<<~RUBY, { line: 0, character: 3 })
+        {}.keys
+      RUBY
+
+      assert_equal("Hash", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_integer_literal
+      node_context = index_and_locate(<<~RUBY, { line: 0, character: 3 })
+        10.to_s
+      RUBY
+
+      assert_equal("Integer", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_float_literal
+      node_context = index_and_locate(<<~RUBY, { line: 0, character: 4 })
+        1.5.to_s
+      RUBY
+
+      assert_equal("Float", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_regexp_literal
+      node_context = index_and_locate(<<~RUBY, { line: 0, character: 5 })
+        /abc/.match("abc")
+      RUBY
+
+      assert_equal("Regexp", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_nil_literal
+      node_context = index_and_locate(<<~RUBY, { line: 0, character: 4 })
+        nil.to_s
+      RUBY
+
+      assert_equal("NilClass", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_true_literal
+      node_context = index_and_locate(<<~RUBY, { line: 0, character: 5 })
+        true.to_s
+      RUBY
+
+      assert_equal("TrueClass", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_false_literal
+      node_context = index_and_locate(<<~RUBY, { line: 0, character: 6 })
+        false.to_s
+      RUBY
+
+      assert_equal("FalseClass", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_range_literal
+      node_context = index_and_locate(<<~RUBY, { line: 0, character: 8 })
+        (5..10).to_a
+      RUBY
+
+      assert_equal("Range", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_lambda_literal
+      node_context = index_and_locate(<<~RUBY, { line: 0, character: 5 })
+        ->{}.call
+      RUBY
+
+      assert_equal("Proc", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
     private
 
     def index_and_locate(source, position)
