@@ -506,6 +506,39 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_ruby_lsp_rails_detection_handles_lang_from_environment
+    with_default_external_encoding("us-ascii") do
+      Dir.mktmpdir do |dir|
+        FileUtils.mkdir("#{dir}/config")
+        FileUtils.cp("test/fixtures/rails_application.rb", "#{dir}/config/application.rb")
+        Dir.chdir(dir) do
+          File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+            source "https://rubygems.org"
+            gem "rails"
+          GEMFILE
+
+          capture_subprocess_io do
+            Bundler.with_unbundled_env do
+              # Run bundle install to generate the lockfile
+              system("bundle install")
+            end
+          end
+
+          Object.any_instance.expects(:system).with(
+            bundle_env(dir, ".ruby-lsp/Gemfile"),
+            "(bundle check || bundle install) 1>&2",
+          ).returns(true)
+          Bundler.with_unbundled_env do
+            run_script(dir)
+          end
+
+          assert_path_exists(".ruby-lsp/Gemfile")
+          assert_match('gem "ruby-lsp-rails"', File.read(".ruby-lsp/Gemfile"))
+        end
+      end
+    end
+  end
+
   def test_recovers_from_stale_lockfiles
     Dir.mktmpdir do |dir|
       custom_dir = File.join(dir, ".ruby-lsp")
@@ -574,6 +607,30 @@ class SetupBundlerTest < Minitest::Test
   end
 
   private
+
+  def with_default_external_encoding(encoding, &block)
+    ignore_warnings do
+      original_encoding = Encoding.default_external
+      begin
+        Encoding.default_external = encoding
+        block.call
+      ensure
+        Encoding.default_external = original_encoding
+      end
+    end
+  end
+
+  def ignore_warnings(&block)
+    # Since overwriting the encoding emits a warning
+    previous = $VERBOSE
+    $VERBOSE = nil
+
+    begin
+      block.call
+    ensure
+      $VERBOSE = previous
+    end
+  end
 
   # This method runs the script and then immediately unloads it. This allows us to make assertions against the effects
   # of running the script multiple times
