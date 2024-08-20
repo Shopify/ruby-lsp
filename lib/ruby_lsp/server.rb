@@ -879,7 +879,7 @@ module RubyLsp
         # Indexing produces a high number of short lived object allocations. That might lead to some fragmentation and
         # an unnecessarily expanded heap. Compacting ensures that the heap is as small as possible and that future
         # allocations and garbage collections are faster
-        GC.compact
+        GC.compact unless @test_mode
 
         # Always end the progress notification even if indexing failed or else it never goes away and the user has no
         # way of dismissing it
