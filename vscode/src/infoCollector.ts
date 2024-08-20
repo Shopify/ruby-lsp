@@ -21,7 +21,7 @@ export async function collectRubyLspInfo(workspace: Workspace | undefined) {
 
 async function gatherLspInfo(
   workspace: Workspace,
-): Promise<Record<string, string | string[]>> {
+): Promise<Record<string, string | string[] | Record<string, unknown>>> {
   const vscodeVersion = vscode.version;
   const rubyLspExtension = vscode.extensions.getExtension("Shopify.ruby-lsp")!;
   const rubyLspExtensionVersion = rubyLspExtension.packageJSON.version;
@@ -29,6 +29,21 @@ async function gatherLspInfo(
   const rubyLspAddons =
     workspace.lspClient?.addons?.map((addon) => addon.name) ?? [];
   const extensions = await getPublicExtensions();
+
+  // Fetch rubyLsp settings
+  const workspaceSettings = vscode.workspace.getConfiguration(
+    "rubyLsp",
+    workspace.workspaceFolder,
+  );
+  const userSettings = vscode.workspace.getConfiguration("rubyLsp");
+
+  // Get only the workspace-specific settings
+  const workspaceSpecificSettings: Record<string, unknown> = {};
+  for (const key of Object.keys(workspaceSettings)) {
+    if (workspaceSettings.inspect(key)?.workspaceValue !== undefined) {
+      workspaceSpecificSettings[key] = workspaceSettings.get(key);
+    }
+  }
 
   return {
     /* eslint-disable @typescript-eslint/naming-convention */
@@ -39,6 +54,10 @@ async function gatherLspInfo(
     "Ruby Version": workspace.ruby.rubyVersion ?? "Unknown",
     "Ruby Version Manager": workspace.ruby.versionManager.identifier,
     "Installed Extensions": extensions,
+    "Ruby LSP Settings": {
+      Workspace: workspaceSpecificSettings,
+      User: userSettings,
+    },
     /* eslint-enable @typescript-eslint/naming-convention */
   };
 }
@@ -65,7 +84,7 @@ async function getPublicExtensions(): Promise<string[]> {
 }
 
 function generateRubyLspInfoReport(
-  info: Record<string, string | string[]>,
+  info: Record<string, string | string[] | Record<string, unknown>>,
 ): string {
   let markdown = "\n### Ruby LSP Information\n\n";
 
@@ -80,6 +99,14 @@ function generateRubyLspInfoReport(
       } else {
         markdown += `${value.map((val) => `- ${val}`).join("\n")}\n`;
       }
+    } else if (typeof value === "object" && value !== null) {
+      markdown +=
+        "&lt;details&gt;\n&lt;summary&gt;Click to expand&lt;/summary&gt;\n\n";
+      for (const [subKey, subValue] of Object.entries(value)) {
+        markdown += `##### ${subKey}\n\n`;
+        markdown += `\`\`\`json\n${JSON.stringify(subValue, null, 2)}\n\`\`\`\n\n`;
+      }
+      markdown += "&lt;/details&gt;\n";
     } else {
       markdown += `${value}\n`;
     }
