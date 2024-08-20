@@ -286,7 +286,7 @@ module RubyLsp
     sig { returns(T::Boolean) }
     def rails_app?
       config = Pathname.new("config/application.rb").expand_path
-      application_contents = config.read if config.exist?
+      application_contents = config.read(external_encoding: Encoding::UTF_8) if config.exist?
       return false unless application_contents
 
       /class .* < (::)?Rails::Application/.match?(application_contents)
