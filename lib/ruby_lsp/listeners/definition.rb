@@ -250,7 +250,7 @@ module RubyLsp
         when :require_relative
           required_file = "#{node.content}.rb"
           path = @uri.to_standardized_path
-          current_folder = path ? Pathname.new(CGI.unescape(path)).dirname : Dir.pwd
+          current_folder = path ? Pathname.new(CGI.unescape(path)).dirname : @global_state.workspace_path
           candidate = File.expand_path(File.join(current_folder, required_file))
 
           @response_builder << Interface::Location.new(
