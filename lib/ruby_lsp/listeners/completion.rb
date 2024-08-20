@@ -366,7 +366,7 @@ module RubyLsp
 
         return unless range
 
-        guessed_type = type.name
+        guessed_type = type.is_a?(TypeInferrer::GuessedType) && type.name
 
         @index.method_completion_candidates(method_name, type.name).each do |entry|
           entry_name = entry.name

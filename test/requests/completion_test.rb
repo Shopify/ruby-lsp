@@ -1290,6 +1290,27 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_guessed_type_name_is_only_included_for_guessed_types
+    source = +<<~RUBY
+      [].e
+    RUBY
+
+    with_server(source) do |server, uri|
+      index = server.instance_variable_get(:@global_state).index
+      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 0, character: 4 },
+      })
+
+      items = server.pop_response.response
+      items.each do |item|
+        refute(item.data[:guessed_type])
+      end
+    end
+  end
+
   private
 
   def with_file_structure(server, &block)
