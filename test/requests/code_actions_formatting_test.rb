@@ -9,8 +9,9 @@ class CodeActionsFormattingTest < Minitest::Test
   TEST_EXP_DIR = File.join(ExpectationsTestRunner::TEST_EXP_DIR, "code_actions_formatting")
   TEST_FIXTURES_DIR = ExpectationsTestRunner::TEST_FIXTURES_DIR
 
-  def test_disable_line__emoji
-    assert_disable_line("emoji", "Lint/UselessAssignment")
+  def test_disable_line__multibyte
+    skip("Running with non-utf8 encoding") if Encoding.default_external != Encoding::UTF_8
+    assert_disable_line("multibyte", "Lint/UselessAssignment")
   end
 
   def test_disable_line__lambda_indentation

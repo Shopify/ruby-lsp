@@ -29,9 +29,14 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         ruby: ["3.1", "3.2", "3.3"]
+        rubyopt: [""]
+        include:
+          - os: ubuntu-latest
+            ruby: "3.3"
+            rubyopt: "--encoding US-ASCII"
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
-    name: Ruby ${{ matrix.ruby }} on ${{ matrix.os }}
+    name: Ruby ${{ matrix.ruby }} on ${{ matrix.os }} ${{ matrix.rubyopt }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,6 +50,8 @@ jobs:
           cache-version: 1
 
       - name: Run tests
+        env:
+          RUBYOPT: ${{ matrix.rubyopt }}
         run: bundle exec rake
 
       - name: Run index troubleshooting tool

@@ -289,6 +289,7 @@ module RubyLsp
       application_contents = config.read if config.exist?
       return false unless application_contents
 
+      application_contents = application_contents.encode(Encoding::UTF_8, Encoding::UTF_8, invalid: :replace)
       /class .* < (::)?Rails::Application/.match?(application_contents)
     end
   end

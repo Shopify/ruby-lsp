@@ -45,15 +45,25 @@ class ExpectationsTestRunner < Minitest::Test
         end
 
         if expectation_path && File.file?(expectation_path)
-          class_eval(<<~RB, __FILE__, __LINE__ + 1)
-            def test_#{expectation_suffix}__#{test_name}
-              @_path = "#{path}"
-              source = File.read(@_path)
-              expected = File.read("#{expectation_path}")
-              initialize_params(expected)
-              assert_expectations(source, expected)
-            end
-          RB
+          # We run tests on CI with US_ASCII encoding, which would differ in expectations
+          # for UTF8 characters. Just skip these.
+          if Encoding.default_external != Encoding::UTF_8 && expectation_path.include?("multibyte")
+            class_eval(<<~RB, __FILE__, __LINE__ + 1)
+              def test_#{expectation_suffix}__#{test_name}
+                skip "Running with non-utf8 encoding"
+              end
+            RB
+          else
+            class_eval(<<~RB, __FILE__, __LINE__ + 1)
+              def test_#{expectation_suffix}__#{test_name}
+                @_path = "#{path}"
+                source = File.read(@_path)
+                expected = File.read("#{expectation_path}")
+                initialize_params(expected)
+                assert_expectations(source, expected)
+              end
+            RB
+          end
         else
           class_eval(<<~RB, __FILE__, __LINE__ + 1)
             def test_#{expectation_suffix}__#{test_name}__does_not_raise

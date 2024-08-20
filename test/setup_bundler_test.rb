@@ -513,6 +513,37 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_ruby_lsp_rails_is_automatically_included_in_rails_apps_utf8
+    Dir.mktmpdir do |dir|
+      FileUtils.mkdir("#{dir}/config")
+      FileUtils.cp("test/fixtures/rails_application_utf8_comment.rb", "#{dir}/config/application.rb")
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "rails"
+        GEMFILE
+
+        capture_subprocess_io do
+          Bundler.with_unbundled_env do
+            # Run bundle install to generate the lockfile
+            system("bundle install")
+          end
+        end
+
+        Object.any_instance.expects(:system).with(
+          bundle_env(".ruby-lsp/Gemfile"),
+          "(bundle check || bundle install) 1>&2",
+        ).returns(true)
+        Bundler.with_unbundled_env do
+          run_script
+        end
+
+        assert_path_exists(".ruby-lsp/Gemfile")
+        assert_match('gem "ruby-lsp-rails"', File.read(".ruby-lsp/Gemfile"))
+      end
+    end
+  end
+
   def test_recovers_from_stale_lockfiles
     Dir.mktmpdir do |dir|
       custom_dir = File.join(dir, ".ruby-lsp")
