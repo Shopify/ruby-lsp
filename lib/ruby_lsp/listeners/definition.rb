@@ -208,10 +208,13 @@ module RubyLsp
       def handle_method_definition(message, receiver_type, inherited_only: false)
         methods = if receiver_type
           @index.resolve_method(message, receiver_type.name, inherited_only: inherited_only)
-        else
-          # If the method doesn't have a receiver, then we provide a few candidates to jump to
-          # But we don't want to provide too many candidates, as it can be overwhelming
-          @index[message]&.take(MAX_NUMBER_OF_DEFINITION_CANDIDATES_WITHOUT_RECEIVER)
+        end
+
+        # If the method doesn't have a receiver, or the guessed receiver doesn't have any matched candidates,
+        # then we provide a few candidates to jump to
+        # But we don't want to provide too many candidates, as it can be overwhelming
+        if receiver_type.nil? || (receiver_type.is_a?(TypeInferrer::GuessedType) && methods.nil?)
+          methods = @index[message]&.take(MAX_NUMBER_OF_DEFINITION_CANDIDATES_WITHOUT_RECEIVER)
         end
 
         return unless methods
