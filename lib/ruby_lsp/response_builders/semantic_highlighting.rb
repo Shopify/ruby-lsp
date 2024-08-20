@@ -91,9 +91,9 @@ module RubyLsp
         @stack.last
       end
 
-      sig { override.returns(Interface::SemanticTokens) }
+      sig { override.returns(T::Array[SemanticToken]) }
       def response
-        SemanticTokenEncoder.new.encode(@stack)
+        @stack
       end
 
       class SemanticToken
@@ -162,7 +162,7 @@ module RubyLsp
         sig do
           params(
             tokens: T::Array[SemanticToken],
-          ).returns(Interface::SemanticTokens)
+          ).returns(T::Array[Integer])
         end
         def encode(tokens)
           sorted_tokens = tokens.sort_by.with_index do |token, index|
@@ -176,7 +176,7 @@ module RubyLsp
             compute_delta(token)
           end
 
-          Interface::SemanticTokens.new(data: delta)
+          delta
         end
 
         # The delta array is computed according to the LSP specification:

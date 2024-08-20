@@ -22,12 +22,10 @@ module RubyLsp
         params(
           dispatcher: Prism::Dispatcher,
           response_builder: ResponseBuilders::SemanticHighlighting,
-          range: T.nilable(T::Range[Integer]),
         ).void
       end
-      def initialize(dispatcher, response_builder, range: nil)
+      def initialize(dispatcher, response_builder)
         @response_builder = response_builder
-        @range = range
         @special_methods = T.let(nil, T.nilable(T::Array[String]))
         @current_scope = T.let(ParameterScope.new, ParameterScope)
         @inside_regex_capture = T.let(false, T::Boolean)
@@ -74,7 +72,6 @@ module RubyLsp
       sig { params(node: Prism::CallNode).void }
       def on_call_node_enter(node)
         return if @inside_implicit_node
-        return unless visible?(node, @range)
 
         message = node.message
         return unless message
@@ -107,51 +104,38 @@ module RubyLsp
       sig { params(node: Prism::ConstantReadNode).void }
       def on_constant_read_node_enter(node)
         return if @inside_implicit_node
-        return unless visible?(node, @range)
 
         @response_builder.add_token(node.location, :namespace)
       end
 
       sig { params(node: Prism::ConstantWriteNode).void }
       def on_constant_write_node_enter(node)
-        return unless visible?(node, @range)
-
         @response_builder.add_token(node.name_loc, :namespace)
       end
 
       sig { params(node: Prism::ConstantAndWriteNode).void }
       def on_constant_and_write_node_enter(node)
-        return unless visible?(node, @range)
-
         @response_builder.add_token(node.name_loc, :namespace)
       end
 
       sig { params(node: Prism::ConstantOperatorWriteNode).void }
       def on_constant_operator_write_node_enter(node)
-        return unless visible?(node, @range)
-
         @response_builder.add_token(node.name_loc, :namespace)
       end
 
       sig { params(node: Prism::ConstantOrWriteNode).void }
       def on_constant_or_write_node_enter(node)
-        return unless visible?(node, @range)
-
         @response_builder.add_token(node.name_loc, :namespace)
       end
 
       sig { params(node: Prism::ConstantTargetNode).void }
       def on_constant_target_node_enter(node)
-        return unless visible?(node, @range)
-
         @response_builder.add_token(node.location, :namespace)
       end
 
       sig { params(node: Prism::DefNode).void }
       def on_def_node_enter(node)
         @current_scope = ParameterScope.new(@current_scope)
-        return unless visible?(node, @range)
-
         @response_builder.add_token(node.name_loc, :method, [:declaration])
       end
 
@@ -184,7 +168,6 @@ module RubyLsp
       sig { params(node: Prism::RequiredKeywordParameterNode).void }
       def on_required_keyword_parameter_node_enter(node)
         @current_scope << node.name
-        return unless visible?(node, @range)
 
         location = node.name_loc
         @response_builder.add_token(location.copy(length: location.length - 1), :parameter)
@@ -193,7 +176,6 @@ module RubyLsp
       sig { params(node: Prism::OptionalKeywordParameterNode).void }
       def on_optional_keyword_parameter_node_enter(node)
         @current_scope << node.name
-        return unless visible?(node, @range)
 
         location = node.name_loc
         @response_builder.add_token(location.copy(length: location.length - 1), :parameter)
@@ -205,24 +187,19 @@ module RubyLsp
 
         if name
           @current_scope << name.to_sym
-
-          @response_builder.add_token(T.must(node.name_loc), :parameter) if visible?(node, @range)
+          @response_builder.add_token(T.must(node.name_loc), :parameter)
         end
       end
 
       sig { params(node: Prism::OptionalParameterNode).void }
       def on_optional_parameter_node_enter(node)
         @current_scope << node.name
-        return unless visible?(node, @range)
-
         @response_builder.add_token(node.name_loc, :parameter)
       end
 
       sig { params(node: Prism::RequiredParameterNode).void }
       def on_required_parameter_node_enter(node)
         @current_scope << node.name
-        return unless visible?(node, @range)
-
         @response_builder.add_token(node.location, :parameter)
       end
 
@@ -232,29 +209,23 @@ module RubyLsp
 
         if name
           @current_scope << name.to_sym
-
-          @response_builder.add_token(T.must(node.name_loc), :parameter) if visible?(node, @range)
+          @response_builder.add_token(T.must(node.name_loc), :parameter)
         end
       end
 
       sig { params(node: Prism::SelfNode).void }
       def on_self_node_enter(node)
-        return unless visible?(node, @range)
-
         @response_builder.add_token(node.location, :variable, [:default_library])
       end
 
       sig { params(node: Prism::LocalVariableWriteNode).void }
       def on_local_variable_write_node_enter(node)
-        return unless visible?(node, @range)
-
         @response_builder.add_token(node.name_loc, @current_scope.type_for(node.name))
       end
 
       sig { params(node: Prism::LocalVariableReadNode).void }
       def on_local_variable_read_node_enter(node)
         return if @inside_implicit_node
-        return unless visible?(node, @range)
 
         # Numbered parameters
         if /_\d+/.match?(node.name)
@@ -267,22 +238,16 @@ module RubyLsp
 
       sig { params(node: Prism::LocalVariableAndWriteNode).void }
       def on_local_variable_and_write_node_enter(node)
-        return unless visible?(node, @range)
-
         @response_builder.add_token(node.name_loc, @current_scope.type_for(node.name))
       end
 
       sig { params(node: Prism::LocalVariableOperatorWriteNode).void }
       def on_local_variable_operator_write_node_enter(node)
-        return unless visible?(node, @range)
-
         @response_builder.add_token(node.name_loc, @current_scope.type_for(node.name))
       end
 
       sig { params(node: Prism::LocalVariableOrWriteNode).void }
       def on_local_variable_or_write_node_enter(node)
-        return unless visible?(node, @range)
-
         @response_builder.add_token(node.name_loc, @current_scope.type_for(node.name))
       end
 
@@ -294,15 +259,11 @@ module RubyLsp
         # prevent pushing local variable target tokens. See https://github.com/ruby/prism/issues/1912
         return if @inside_regex_capture
 
-        return unless visible?(node, @range)
-
         @response_builder.add_token(node.location, @current_scope.type_for(node.name))
       end
 
       sig { params(node: Prism::ClassNode).void }
       def on_class_node_enter(node)
-        return unless visible?(node, @range)
-
         constant_path = node.constant_path
 
         if constant_path.is_a?(Prism::ConstantReadNode)
@@ -342,8 +303,6 @@ module RubyLsp
 
       sig { params(node: Prism::ModuleNode).void }
       def on_module_node_enter(node)
-        return unless visible?(node, @range)
-
         constant_path = node.constant_path
 
         if constant_path.is_a?(Prism::ConstantReadNode)
@@ -365,8 +324,6 @@ module RubyLsp
 
       sig { params(node: Prism::ImplicitNode).void }
       def on_implicit_node_enter(node)
-        return unless visible?(node, @range)
-
         @inside_implicit_node = true
       end
 
@@ -378,7 +335,6 @@ module RubyLsp
       sig { params(node: Prism::ConstantPathNode).void }
       def on_constant_path_node_enter(node)
         return if @inside_implicit_node
-        return unless visible?(node, @range)
 
         @response_builder.add_token(node.name_loc, :namespace)
       end
