@@ -330,6 +330,20 @@ module RubyIndexer
       assert_empty(parameters)
     end
 
+    def test_method_with_argument_forwarding
+      index(<<~RUBY)
+        class Foo
+          def bar(...)
+          end
+        end
+      RUBY
+
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
+      entry = T.must(@index["bar"].first)
+      parameters = entry.signatures.first.parameters
+      # binding.break
+    end
+
     def test_keeps_track_of_method_owner
       index(<<~RUBY)
         class Foo
@@ -572,6 +586,21 @@ module RubyIndexer
 
       arguments = parse_prism_args("bar() { }")
       refute(sig.matches?(arguments))
+    end
+
+    def test_signature_matches_the_for_a_method_with_argument_forwarding
+      index(<<~RUBY)
+        class Foo
+          def bar(...)
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+      sig = entry.signatures.first
+
+      arguments = parse_prism_args("bar(1, b: 2)")
+      assert(sig.matches?(arguments))
     end
 
     private

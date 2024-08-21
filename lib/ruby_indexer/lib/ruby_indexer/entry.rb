@@ -302,6 +302,22 @@ module RubyIndexer
       end
     end
 
+    # A forwarding method parameter, e.g. `def foo(...)`
+    class ForwardingParameter < Parameter
+      class << self
+        extend T::Sig
+        sig { returns(BlockParameter) }
+        def anonymous
+          new(name: "???") # TODO
+        end
+      end
+
+      sig { override.returns(Symbol) }
+      def decorated_name
+        :"!!!" # TODO
+      end
+    end
+
     class Member < Entry
       extend T::Sig
       extend T::Helpers
@@ -582,18 +598,12 @@ module RubyIndexer
         @parameters.map(&:decorated_name).join(", ")
       end
 
-      # TODO: fix untyped
-      sig { params(arguments: T.untyped).returns(T::Boolean) }
+      sig { params(arguments: T::Array[Prism::Node]).returns(T::Boolean) }
       def matches?(arguments)
-        # RequiredParameter
-        # OptionalParameter
-        # KeywordParameter
-        # OptionalKeywordParameter
-        # RestParameter
-        # KeywordRestParameter
-        # BlockParameter
+        return true if parameters.any? { |arg| arg.is_a?(ForwardingParameter) }
 
-        return true if arguments.any? { |arg| arg.is_a?(Prism::ForwardingArgumentsNode) }
+        # WRONG?
+        # return true if arguments.any? { |arg| arg.is_a?(Prism::ForwardingArgumentsNode) }
 
         min_pos = 0
         max_pos = T.let(0, T.any(Float, Integer))
@@ -607,8 +617,8 @@ module RubyIndexer
             max_pos += 1
           when OptionalParameter
             max_pos += 1
-          # when RestParameter
-          #   max_pos = Float::INFINITY
+          when RestParameter
+            max_pos = Float::INFINITY
           when KeywordParameter, OptionalKeywordParameter
             names << param.name
           when KeywordRestParameter
@@ -617,7 +627,7 @@ module RubyIndexer
         end
 
         keyword_hash_node, positional_args = arguments.partition { |arg| arg.is_a?(Prism::KeywordHashNode) }
-        # TODO: block args
+        # TODO: BlockParameter ?
         has_splat = positional_args.any? { _1.is_a?(Prism::SplatNode) }
         # has_keyword_splat = positional_args.any? { _1.is_a?(Prism::KeywordHashNode) }
         keyword_args = keyword_hash_node.first&.elements # these are AssocNode
