@@ -481,7 +481,8 @@ module RubyIndexer
       arguments = parse_prism_args("bar(1, 2)")
       assert(sig.matches?(arguments))
 
-      refute(sig.matches?([]))
+      arguments = parse_prism_args("bar()")
+      refute(sig.matches?(arguments))
 
       arguments = parse_prism_args("bar(1, b: 2)")
       refute(sig.matches?(arguments))
@@ -552,8 +553,31 @@ module RubyIndexer
       assert(sig.matches?(arguments))
     end
 
+    def test_signature_matches_the_for_a_method_with_a_block_param
+      index(<<~RUBY)
+        class Foo
+          def bar(a, &block)
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+      sig = entry.signatures.first
+
+      arguments = parse_prism_args("bar(1) { }")
+      assert(sig.matches?(arguments))
+
+      arguments = parse_prism_args("bar(1)")
+      assert(sig.matches?(arguments))
+
+      arguments = parse_prism_args("bar() { }")
+      refute(sig.matches?(arguments))
+    end
+
+    private
+
     def parse_prism_args(s)
-      Prism.parse(s).value.statements.body.first.arguments.arguments
+      Array(Prism.parse(s).value.statements.body.first.arguments&.arguments)
     end
   end
 end
