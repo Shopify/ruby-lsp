@@ -575,6 +575,15 @@ export class RubyLsp {
         const workspace = await this.showWorkspacePick();
         await collectRubyLspInfo(workspace);
       }),
+      vscode.commands.registerCommand(Command.ReportIssue, async () => {
+        const workspace = await this.showWorkspacePick();
+        await collectRubyLspInfo(workspace);
+        await vscode.env.openExternal(
+          vscode.Uri.parse(
+            "https://github.com/Shopify/ruby-lsp/issues/new?template=bug_template_vscode.yml",
+          ),
+        );
+      }),
     );
   }
 

@@ -27,6 +27,7 @@ export enum Command {
   RailsDestroy = "rubyLsp.railsDestroy",
   NewMinitestFile = "rubyLsp.newMinitestFile",
   CollectRubyLspInfo = "rubyLsp.collectRubyLspInfo",
+  ReportIssue = "rubyLsp.reportIssue",
 }
 
 export interface RubyInterface {

@@ -211,6 +211,23 @@ export class AddonsStatus extends StatusItem {
   }
 }
 
+export class ReportIssueStatus extends StatusItem {
+  constructor() {
+    super("reportIssue");
+
+    this.item.name = "Report Ruby LSP Issue";
+    this.item.text = "Report an issue on GitHub";
+    this.item.command = {
+      title: "Report",
+      command: Command.ReportIssue,
+    };
+  }
+
+  refresh(_workspace: WorkspaceInterface): void {
+    // This status doesn't need to be refreshed
+  }
+}
+
 export class StatusItems {
   private readonly items: StatusItem[] = [];
 
@@ -222,6 +239,7 @@ export class StatusItems {
       new FeaturesStatus(),
       new FormatterStatus(),
       new AddonsStatus(),
+      new ReportIssueStatus(),
     ];
 
     STATUS_EMITTER.event((workspace) => {
