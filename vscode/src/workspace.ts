@@ -10,7 +10,8 @@ import {
   STATUS_EMITTER,
   debounce,
 } from "./common";
-import { WorkspaceChannel } from "./workspaceChannel";
+import { SorbetWorkspaceChannel, WorkspaceChannel } from "./workspaceChannel";
+import SorbetClient from "./sorbet";
 
 export class Workspace implements WorkspaceInterface {
   public lspClient?: Client;
@@ -22,6 +23,7 @@ export class Workspace implements WorkspaceInterface {
   private readonly isMainWorkspace: boolean;
   private readonly telemetry: vscode.TelemetryLogger;
   private needsRestart = false;
+  private sorbetClient?: SorbetClient;
   #rebaseInProgress = false;
   #error = false;
 
@@ -96,6 +98,10 @@ export class Workspace implements WorkspaceInterface {
       await this.lspClient.stop();
       await this.lspClient.dispose();
     }
+    if (this.sorbetClient) {
+      await this.sorbetClient.stop();
+      await this.sorbetClient.dispose();
+    }
 
     this.lspClient = new Client(
       this.context,
@@ -107,10 +113,31 @@ export class Workspace implements WorkspaceInterface {
       this.isMainWorkspace,
     );
 
+    let shouldLaunchSorbetClient;
+
+    try {
+      shouldLaunchSorbetClient =
+        !vscode.extensions.getExtension("sorbet.sorbet-vscode-extension") &&
+        (await vscode.workspace.fs.readFile(
+          vscode.Uri.joinPath(this.workspaceFolder.uri, "sorbet/config"),
+        ));
+    } catch (error: any) {
+      shouldLaunchSorbetClient = false;
+    }
+
+    if (shouldLaunchSorbetClient) {
+      this.sorbetClient = new SorbetClient(
+        this.ruby,
+        this.workspaceFolder,
+        new SorbetWorkspaceChannel(this.workspaceFolder.name, LOG_CHANNEL),
+      );
+    }
+
     try {
       STATUS_EMITTER.fire(this);
       await this.lspClient.start();
       await this.lspClient.afterStart();
+      await this.sorbetClient?.start();
       STATUS_EMITTER.fire(this);
 
       // If something triggered a restart while we were still booting, then now we need to perform the restart since the
@@ -126,7 +153,19 @@ export class Workspace implements WorkspaceInterface {
   }
 
   async stop() {
-    await this.lspClient?.stop();
+    try {
+      await this.lspClient?.stop();
+    } catch (error: any) {
+      this.outputChannel.error(`Error stopping the Ruby LSP: ${error.message}`);
+    }
+
+    try {
+      await this.sorbetClient?.stop();
+    } catch (error: any) {
+      this.outputChannel.error(
+        `Error stopping the Sorbet server: ${error.message}`,
+      );
+    }
   }
 
   async restart() {
@@ -138,28 +177,30 @@ export class Workspace implements WorkspaceInterface {
       this.error = false;
 
       // If there's no client, then we can just start a new one
-      if (!this.lspClient) {
+      if (!this.lspClient && !this.sorbetClient) {
         return this.start();
       }
 
-      switch (this.lspClient.state) {
+      switch (this.lspClient!.state) {
         // If the server is still starting, then it may not be ready to handle a shutdown request yet. Trying to send
-        // one could lead to a hanging process. Instead we set a flag and only restart once the server finished booting
-        // in `start`
+        // one could lead to a hanging process. Instead we set a flag and only restart once the server finished
+        // booting in `start`
         case State.Starting:
           this.needsRestart = true;
           break;
         // If the server is running, we want to stop it, dispose of the client and start a new one
         case State.Running:
           await this.stop();
-          await this.lspClient.dispose();
+          await this.dispose();
           this.lspClient = undefined;
+          this.sorbetClient = undefined;
           await this.start();
           break;
         // If the server is already stopped, then we need to dispose it and start a new one
         case State.Stopped:
-          await this.lspClient.dispose();
+          await this.dispose();
           this.lspClient = undefined;
+          this.sorbetClient = undefined;
           await this.start();
           break;
       }
@@ -171,6 +212,7 @@ export class Workspace implements WorkspaceInterface {
 
   async dispose() {
     await this.lspClient?.dispose();
+    await this.sorbetClient?.dispose();
   }
 
   // Install or update the `ruby-lsp` gem globally with `gem install ruby-lsp` or `gem update ruby-lsp`. We only try to
