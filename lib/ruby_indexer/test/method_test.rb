@@ -462,6 +462,8 @@ module RubyIndexer
       assert_equal(9, name_location.end_column)
     end
 
+    # TODO: more tests
+
     def test_returns_true_if_signature_matches_the_given_parameters
       index(<<~RUBY)
         class Foo
