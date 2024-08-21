@@ -581,6 +581,70 @@ module RubyIndexer
       def format
         @parameters.map(&:decorated_name).join(", ")
       end
+
+      def matches?(arguments)
+        # RequiredParameter
+        # OptionalParameter
+        # KeywordParameter
+        # OptionalKeywordParameter
+        # RestParameter
+        # KeywordRestParameter
+        # BlockParameter
+
+        return true if arguments.any? { |arg| arg.is_a?(Prism::ForwardingArgumentsNode) }
+
+        min_pos = 0
+        max_pos = 0
+        names = []
+        keyword_rest = false
+
+        parameters.each do |param|
+          case param
+          when RequiredParameter
+            min_pos += 1
+            max_pos += 1
+          when OptionalParameter
+            max_pos += 1
+          when RestParameterNode
+            max_pos = Float::INFINITY
+          when KeywordParameter, OptionalKeywordParameter
+            names << param.name
+          when KeywordRestParameter
+            keyword_rest = true
+          end
+        end
+
+        keyword_hash_node, positional_args = arguments.partition { |arg| arg.is_a?(Prism::KeywordHashNode) }
+        # TODO: block args
+        has_splat = positional_args.any? { _1.is_a?(Prism::SplatNode) }
+        # has_keyword_splat = positional_args.any? { _1.is_a?(Prism::KeywordHashNode) }
+        keyword_args = keyword_hash_node.first&.elements # these are AssocNode
+        # keywords.args.each do |keyword_arg|
+        # end
+
+        (has_splat || (min_pos..max_pos).cover?(positional_args.length)) &&
+          (keyword_rest || keyword_names_match?(keyword_args, names))
+      end
+
+      private
+
+      sig do
+        params(
+          keyword_args: T.nilable(T::Array[T.any(Prism::AssocNode, Prism::AssocSplatNode)]),
+          names: T::Array[Symbol],
+        ).returns(T::Boolean)
+      end
+      def keyword_names_match?(keyword_args, names)
+        return true unless keyword_args
+        return true if keyword_args.any? { _1.is_a?(Prism::AssocSplatNode) }
+
+        (keyword_args.map { _1.key.value } - names).empty?
+
+        # keyword_args.all? do |keyword_arg|
+        #   keyword_name = keyword_arg.key.name
+        #   required_names.delete(keyword_name) || optional_names.delete(keyword_name)
+        # end
+      end
     end
   end
 end

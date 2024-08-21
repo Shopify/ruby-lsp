@@ -461,5 +461,49 @@ module RubyIndexer
       assert_equal(6, name_location.start_column)
       assert_equal(9, name_location.end_column)
     end
+
+    def test_returns_true_if_signature_matches_the_given_parameters
+      index(<<~RUBY)
+        class Foo
+          def bar(a, b = 123)
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+      sig = entry.signatures.first
+
+      arguments = Prism.parse("bar(1)").value.statements.body.first.arguments.arguments
+      assert(sig.matches?(arguments))
+
+      arguments = Prism.parse("bar(1, 2)").value.statements.body.first.arguments.arguments
+      assert(sig.matches?(arguments))
+
+      refute(sig.matches?([]))
+
+      arguments = Prism.parse("bar(1, 2, c: 3)").value.statements.body.first.arguments.arguments
+      refute(sig.matches?(arguments))
+
+      arguments = Prism.parse("bar(1, c: 3)").value.statements.body.first.arguments.arguments
+      refute(sig.matches?(arguments))
+
+      arguments = Prism.parse("bar(1, 2, 3)").value.statements.body.first.arguments.arguments
+      refute(sig.matches?(arguments))
+
+      arguments = Prism.parse("bar(...)").value.statements.body.first.arguments.arguments
+      assert(sig.matches?(arguments))
+
+      arguments = Prism.parse("bar(1, ...)").value.statements.body.first.arguments.arguments
+      assert(sig.matches?(arguments))
+
+      arguments = Prism.parse("bar(*a)").value.statements.body.first.arguments.arguments
+      assert(sig.matches?(arguments))
+
+      arguments = Prism.parse("bar(1, **a)").value.statements.body.first.arguments.arguments
+      assert(sig.matches?(arguments))
+
+      arguments = Prism.parse("bar(1) { }").value.statements.body.first.arguments.arguments
+      assert(sig.matches?(arguments))
+    end
   end
 end
