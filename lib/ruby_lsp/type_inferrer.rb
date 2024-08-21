@@ -77,6 +77,30 @@ module RubyLsp
         Type.new("Range")
       when Prism::LambdaNode
         Type.new("Proc")
+      when Prism::CallNode
+        method_name = receiver.message
+        return unless method_name
+
+        inferred_receiver_type = infer_receiver_for_call_node(receiver, node_context)
+
+        if inferred_receiver_type
+          methods = @index.resolve_method(method_name, inferred_receiver_type.name, inherited_only: false)
+
+          if methods
+            method = methods.first
+            return unless method
+
+            first_signature = method.signatures.first
+            return unless first_signature
+
+            return_type = first_signature.return_types.first
+            return unless return_type
+
+            Type.new(return_type)
+          else
+            infer_with_guessed_types(node, node_context)
+          end
+        end
       when Prism::ConstantPathNode, Prism::ConstantReadNode
         # When the receiver is a constant reference, we have to try to resolve it to figure out the right
         # receiver. But since the invocation is directly on the constant, that's the singleton context of that
@@ -93,22 +117,27 @@ module RubyLsp
 
         Type.new("#{parts.join("::")}::#{last}::<Class:#{last}>")
       else
-        return unless @experimental_features
+        infer_with_guessed_types(node, node_context)
+      end
+    end
 
-        raw_receiver = node.receiver&.slice
+    sig { params(node: Prism::CallNode, node_context: NodeContext).returns(T.nilable(Type)) }
+    def infer_with_guessed_types(node, node_context)
+      return unless @experimental_features
 
-        if raw_receiver
-          guessed_name = raw_receiver
-            .delete_prefix("@")
-            .delete_prefix("@@")
-            .split("_")
-            .map(&:capitalize)
-            .join
+      raw_receiver = node.receiver&.slice
 
-          entries = @index.resolve(guessed_name, node_context.nesting) || @index.first_unqualified_const(guessed_name)
-          name = entries&.first&.name
-          GuessedType.new(name) if name
-        end
+      if raw_receiver
+        guessed_name = raw_receiver
+          .delete_prefix("@")
+          .delete_prefix("@@")
+          .split("_")
+          .map(&:capitalize)
+          .join
+
+        entries = @index.resolve(guessed_name, node_context.nesting) || @index.first_unqualified_const(guessed_name)
+        name = entries&.first&.name
+        GuessedType.new(name) if name
       end
     end
 

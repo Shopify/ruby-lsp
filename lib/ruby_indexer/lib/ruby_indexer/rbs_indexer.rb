@@ -132,20 +132,42 @@ module RubyIndexer
     sig { params(member: RBS::AST::Members::MethodDefinition).returns(T::Array[Entry::Signature]) }
     def signatures(member)
       member.overloads.map do |overload|
-        parameters = process_overload(overload)
-        Entry::Signature.new(parameters)
+        function = T.cast(overload.method_type.type, RBS::Types::Function)
+        parameters = parse_arguments(function)
+
+        block = overload.method_type.block
+        parameters << Entry::BlockParameter.anonymous if block&.required
+
+        rbs_return_type = function.return_type
+
+        return_types = rbs_type_to_ruby_types(rbs_return_type)
+
+        Entry::Signature.new(parameters, return_types)
       end
     end
 
-    sig { params(overload: RBS::AST::Members::MethodDefinition::Overload).returns(T::Array[Entry::Parameter]) }
-    def process_overload(overload)
-      function = T.cast(overload.method_type.type, RBS::Types::Function)
-      parameters = parse_arguments(function)
-
-      block = overload.method_type.block
-      parameters << Entry::BlockParameter.anonymous if block&.required
-
-      parameters
+    sig do
+      params(rbs_type: T.untyped).returns(T::Array[String])
+    end
+    def rbs_type_to_ruby_types(rbs_type)
+      case rbs_type
+      when RBS::Types::Bases::Void, RBS::Types::Bases::Nil
+        ["NilClass"]
+      when RBS::Types::Bases::Self
+        ["self"]
+      when RBS::Types::Bases::Bool
+        ["TrueClass", "FalseClass"]
+      when RBS::Types::Optional
+        rbs_type_to_ruby_types(rbs_type.type)
+      when RBS::Types::Union, RBS::Types::Tuple, RBS::Types::Intersection
+        rbs_type.types.map { |type| rbs_type_to_ruby_types(type) }.flatten
+      else
+        if rbs_type.respond_to?(:name)
+          [rbs_type.name.name.to_s]
+        else
+          ["Object"]
+        end
+      end
     end
 
     sig { params(function: RBS::Types::Function).returns(T::Array[Entry::Parameter]) }

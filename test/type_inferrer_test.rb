@@ -270,6 +270,21 @@ module RubyLsp
       assert_equal("String", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
+    def test_infer_chained_call_with_literal_receiver
+      RubyIndexer::RBSIndexer.new(@index).index_ruby_core
+      node_context = index_and_locate(<<~RUBY, { line: 0, character: 10 })
+        "".upcase.downcase
+      RUBY
+
+      assert_equal("String", @type_inferrer.infer_receiver_type(node_context).name)
+
+      node_context = index_and_locate(<<~RUBY, { line: 0, character: 10 })
+        "".count.to_s
+      RUBY
+
+      assert_equal("Integer", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
     def test_infer_symbol_literal
       node_context = index_and_locate(<<~RUBY, { line: 0, character: 5 })
         :foo.to_s

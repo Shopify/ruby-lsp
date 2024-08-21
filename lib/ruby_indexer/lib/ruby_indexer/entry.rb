@@ -366,7 +366,7 @@ module RubyIndexer
           begin
             params = []
             params << RequiredParameter.new(name: name.delete_suffix("=").to_sym) if name.end_with?("=")
-            [Entry::Signature.new(params)]
+            [Entry::Signature.new(params, ["Object"])]
           end,
           T.nilable(T::Array[Signature]),
         )
@@ -576,9 +576,14 @@ module RubyIndexer
       sig { returns(T::Array[Parameter]) }
       attr_reader :parameters
 
-      sig { params(parameters: T::Array[Parameter]).void }
-      def initialize(parameters)
+      sig { returns(T::Array[String]) }
+      attr_reader :return_types
+
+      sig { params(parameters: T::Array[Parameter], return_types: T::Array[String]).void }
+      def initialize(parameters, return_types)
         @parameters = parameters
+        # Return types should only be used to assist type inference, so we don't want to display them in signature help
+        @return_types = return_types
       end
 
       # Returns a string with the decorated names of the parameters of this member. E.g.: `(a, b = 1, c: 2)`

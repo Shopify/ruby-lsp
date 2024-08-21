@@ -39,7 +39,7 @@ module RubyIndexer
               location,
               location,
               [],
-              [Entry::Signature.new([Entry::RequiredParameter.new(name: :a)])],
+              [Entry::Signature.new([Entry::RequiredParameter.new(name: :a)], ["Object"])],
               Entry::Visibility::PUBLIC,
               owner,
             ))
