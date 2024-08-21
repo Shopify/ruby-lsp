@@ -128,6 +128,7 @@ async function launchClient(workspaceUri: vscode.Uri) {
     ruby,
     workspaceFolder,
     new SorbetWorkspaceChannel("fake", fakeLogger as any),
+    ["exec", "srb", "tc", "--lsp", "--disable-watchman"],
   );
 
   client.clientOptions.initializationFailedHandler = (error) => {

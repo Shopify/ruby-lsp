@@ -24,10 +24,11 @@ export default class SorbetClient extends LanguageClient {
     ruby: Ruby,
     workspaceFolder: vscode.WorkspaceFolder,
     outputChannel: WorkspaceChannel,
+    bundleArgs: string[] = ["exec", "srb", "tc", "--lsp"],
   ) {
     const serverOptions: ServerOptions = {
       command: "bundle",
-      args: ["exec", "srb", "tc", "--lsp"],
+      args: bundleArgs,
       options: {
         cwd: workspaceFolder.uri.fsPath,
         env: ruby.env,
