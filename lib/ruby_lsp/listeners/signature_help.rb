@@ -7,8 +7,6 @@ module RubyLsp
       extend T::Sig
       include Requests::Support::Common
 
-      IO.open
-
       sig do
         params(
           response_builder: ResponseBuilders::SignatureHelp,
