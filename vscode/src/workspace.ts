@@ -1,3 +1,5 @@
+import os from "os";
+
 import * as vscode from "vscode";
 import { CodeLens, State } from "vscode-languageclient/node";
 
@@ -118,6 +120,7 @@ export class Workspace implements WorkspaceInterface {
     try {
       shouldLaunchSorbetClient =
         !vscode.extensions.getExtension("sorbet.sorbet-vscode-extension") &&
+        os.platform() !== "win32" &&
         (await vscode.workspace.fs.readFile(
           vscode.Uri.joinPath(this.workspaceFolder.uri, "sorbet/config"),
         ));

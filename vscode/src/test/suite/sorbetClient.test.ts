@@ -149,6 +149,12 @@ async function launchClient(workspaceUri: vscode.Uri) {
 }
 
 suite("SorbetClient", () => {
+  if (os.platform() === "win32") {
+    // eslint-disable-next-line no-console
+    console.log("Skipping SorbetClient tests on Windows");
+    return;
+  }
+
   const workspacePath = path.dirname(
     path.dirname(path.dirname(path.dirname(__dirname))),
   );
