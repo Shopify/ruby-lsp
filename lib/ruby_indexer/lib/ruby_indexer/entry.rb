@@ -582,6 +582,8 @@ module RubyIndexer
         @parameters.map(&:decorated_name).join(", ")
       end
 
+      # TODO: fix untyped
+      sig { params(arguments: T.untyped).returns(T::Boolean) }
       def matches?(arguments)
         # RequiredParameter
         # OptionalParameter
@@ -594,9 +596,9 @@ module RubyIndexer
         return true if arguments.any? { |arg| arg.is_a?(Prism::ForwardingArgumentsNode) }
 
         min_pos = 0
-        max_pos = 0
+        max_pos = T.let(0, T.any(Float, Integer))
         names = []
-        keyword_rest = false
+        keyword_rest = T.let(false, T::Boolean)
 
         parameters.each do |param|
           case param
@@ -639,7 +641,7 @@ module RubyIndexer
         return true unless keyword_args
         return true if keyword_args.any? { _1.is_a?(Prism::AssocSplatNode) }
 
-        (keyword_args.map { _1.key.value.to_sym } - names).empty?
+        (keyword_args.map { T.cast(_1, Prism::AssocNode).key.value.to_sym } - names).empty?
 
         # keyword_args.all? do |keyword_arg|
         #   keyword_name = keyword_arg.key.name
