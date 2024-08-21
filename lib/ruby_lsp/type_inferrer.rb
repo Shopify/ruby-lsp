@@ -36,9 +36,47 @@ module RubyLsp
     def infer_receiver_for_call_node(node, node_context)
       receiver = node.receiver
 
+      # For receivers inside parenthesis, such as ranges like (0...2), we need to unwrap the parenthesis to get the
+      # actual node
+      if receiver.is_a?(Prism::ParenthesesNode)
+        statements = receiver.body
+
+        if statements.is_a?(Prism::StatementsNode)
+          body = statements.body
+
+          if body.length == 1
+            receiver = body.first
+          end
+        end
+      end
+
       case receiver
       when Prism::SelfNode, nil
         self_receiver_handling(node_context)
+      when Prism::StringNode
+        Type.new("String")
+      when Prism::SymbolNode
+        Type.new("Symbol")
+      when Prism::ArrayNode
+        Type.new("Array")
+      when Prism::HashNode
+        Type.new("Hash")
+      when Prism::IntegerNode
+        Type.new("Integer")
+      when Prism::FloatNode
+        Type.new("Float")
+      when Prism::RegularExpressionNode
+        Type.new("Regexp")
+      when Prism::NilNode
+        Type.new("NilClass")
+      when Prism::TrueNode
+        Type.new("TrueClass")
+      when Prism::FalseNode
+        Type.new("FalseClass")
+      when Prism::RangeNode
+        Type.new("Range")
+      when Prism::LambdaNode
+        Type.new("Proc")
       when Prism::ConstantPathNode, Prism::ConstantReadNode
         # When the receiver is a constant reference, we have to try to resolve it to figure out the right
         # receiver. But since the invocation is directly on the constant, that's the singleton context of that
