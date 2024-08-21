@@ -20,8 +20,8 @@ module RubyLsp
     def with_server(source = nil, uri = Kernel.URI("file:///fake.rb"), stub_no_typechecker: false, load_addons: true,
       &block)
       server = RubyLsp::Server.new(test_mode: true)
-      server.global_state.stubs(:has_type_checker).returns(false) if stub_no_typechecker
       server.global_state.apply_options({ initializationOptions: { experimentalFeaturesEnabled: true } })
+      server.global_state.instance_variable_set(:@has_type_checker, false) if stub_no_typechecker
       language_id = uri.to_s.end_with?(".erb") ? "erb" : "ruby"
 
       if source
