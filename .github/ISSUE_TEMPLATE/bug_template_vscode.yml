@@ -18,19 +18,22 @@ body:
         1. On the latest version of the Ruby LSP VS Code extension
         2. On the latest version of the Ruby LSP server gem
         3. On the latest version of VS Code
+
+        ### When submitting
+
+        Please run the `Collect Ruby LSP Information for Issue Reporting` command through VS Code's command
+        palette and paste the result below.
+        
   - type: textarea
     attributes:
       label: Description
       description: Reproduction steps
       value: |
-        ### Reproduction steps
+        ### Ruby LSP Information
 
-        <!--
-        **IMPORTANT NOTE**
-        Please provide as much detail about your development setup as possible. Often issues with the Ruby LSP are
-        specific to a combination of operating system, Ruby version, Ruby version manager, the editor being used and
-        project setup. The easier it is to reproduce the problem, the quicker it will likely take to fix it.
-        -->
+        <!-- Please run `Collect Ruby LSP Information for Issue Reporting` from VS Code's command palette and paste the result here -->
+        
+        ### Reproduction steps
 
         <!-- Suggested structure -->
         1. Start the Ruby LSP using a certain editor
