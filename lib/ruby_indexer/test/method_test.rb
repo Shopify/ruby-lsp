@@ -475,37 +475,41 @@ module RubyIndexer
       entry = T.must(@index["bar"].first)
       sig = entry.signatures.first
 
-      arguments = Prism.parse("bar(1)").value.statements.body.first.arguments.arguments
+      arguments = parse_prism_args("bar(1)")
       assert(sig.matches?(arguments))
 
-      arguments = Prism.parse("bar(1, 2)").value.statements.body.first.arguments.arguments
+      arguments = parse_prism_args("bar(1, 2)")
       assert(sig.matches?(arguments))
 
       refute(sig.matches?([]))
 
-      arguments = Prism.parse("bar(1, 2, c: 3)").value.statements.body.first.arguments.arguments
+      arguments = parse_prism_args("bar(1, 2, c: 3)")
       refute(sig.matches?(arguments))
 
-      arguments = Prism.parse("bar(1, c: 3)").value.statements.body.first.arguments.arguments
+      arguments = parse_prism_args("bar(1, c: 3)")
       refute(sig.matches?(arguments))
 
-      arguments = Prism.parse("bar(1, 2, 3)").value.statements.body.first.arguments.arguments
+      arguments = parse_prism_args("bar(1, 2, 3)")
       refute(sig.matches?(arguments))
 
-      arguments = Prism.parse("bar(...)").value.statements.body.first.arguments.arguments
+      arguments = parse_prism_args("bar(...)")
       assert(sig.matches?(arguments))
 
-      arguments = Prism.parse("bar(1, ...)").value.statements.body.first.arguments.arguments
+      arguments = parse_prism_args("bar(1, ...)")
       assert(sig.matches?(arguments))
 
-      arguments = Prism.parse("bar(*a)").value.statements.body.first.arguments.arguments
+      arguments = parse_prism_args("bar(*a)")
       assert(sig.matches?(arguments))
 
-      arguments = Prism.parse("bar(1, **a)").value.statements.body.first.arguments.arguments
+      arguments = parse_prism_args("bar(1, **a)")
       assert(sig.matches?(arguments))
 
-      arguments = Prism.parse("bar(1) { }").value.statements.body.first.arguments.arguments
+      arguments = parse_prism_args("bar(1) { }")
       assert(sig.matches?(arguments))
+    end
+
+    def parse_prism_args(s)
+      Prism.parse(s).value.statements.body.first.arguments.arguments
     end
   end
 end
