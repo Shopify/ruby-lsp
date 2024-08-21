@@ -464,7 +464,7 @@ module RubyIndexer
 
     # TODO: more tests
 
-    def test_returns_true_if_signature_matches_the_given_parameters
+    def test_signature_matches_the_for_a_method_with_positional_params
       index(<<~RUBY)
         class Foo
           def bar(a, b = 123)
@@ -483,13 +483,57 @@ module RubyIndexer
 
       refute(sig.matches?([]))
 
+      arguments = parse_prism_args("bar(1, b: 2)")
+      refute(sig.matches?(arguments))
+
       arguments = parse_prism_args("bar(1, 2, c: 3)")
       refute(sig.matches?(arguments))
 
-      arguments = parse_prism_args("bar(1, c: 3)")
+      arguments = parse_prism_args("bar(1, 2, 3)")
       refute(sig.matches?(arguments))
 
-      arguments = parse_prism_args("bar(1, 2, 3)")
+      arguments = parse_prism_args("bar(...)")
+      assert(sig.matches?(arguments))
+
+      arguments = parse_prism_args("bar(1, ...)")
+      assert(sig.matches?(arguments))
+
+      arguments = parse_prism_args("bar(*a)")
+      assert(sig.matches?(arguments))
+
+      arguments = parse_prism_args("bar(1, **a)")
+      assert(sig.matches?(arguments))
+
+      arguments = parse_prism_args("bar(1) { }")
+      assert(sig.matches?(arguments))
+    end
+
+    def test_signature_matches_the_for_a_method_with_keyword_params
+      index(<<~RUBY)
+        class Foo
+          def bar(a, b: 123)
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+      sig = entry.signatures.first
+
+      arguments = parse_prism_args("bar(1)")
+      assert(sig.matches?(arguments))
+
+      arguments = parse_prism_args("bar(1, 2)")
+      refute(sig.matches?(arguments))
+
+      refute(sig.matches?([]))
+
+      arguments = parse_prism_args("bar(1, b: 2)")
+      assert(sig.matches?(arguments))
+
+      arguments = parse_prism_args("bar(1, 2, b: 3)")
+      refute(sig.matches?(arguments))
+
+      arguments = parse_prism_args("bar(1, b: 2, c: 3)")
       refute(sig.matches?(arguments))
 
       arguments = parse_prism_args("bar(...)")

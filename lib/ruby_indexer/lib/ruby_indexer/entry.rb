@@ -605,8 +605,8 @@ module RubyIndexer
             max_pos += 1
           when OptionalParameter
             max_pos += 1
-          when RestParameterNode
-            max_pos = Float::INFINITY
+          # when RestParameter
+          #   max_pos = Float::INFINITY
           when KeywordParameter, OptionalKeywordParameter
             names << param.name
           when KeywordRestParameter
@@ -635,10 +635,11 @@ module RubyIndexer
         ).returns(T::Boolean)
       end
       def keyword_names_match?(keyword_args, names)
+        # binding.break
         return true unless keyword_args
         return true if keyword_args.any? { _1.is_a?(Prism::AssocSplatNode) }
 
-        (keyword_args.map { _1.key.value } - names).empty?
+        (keyword_args.map { _1.key.value.to_sym } - names).empty?
 
         # keyword_args.all? do |keyword_arg|
         #   keyword_name = keyword_arg.key.name
