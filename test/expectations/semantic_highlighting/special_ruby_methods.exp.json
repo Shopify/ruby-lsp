@@ -8,49 +8,7 @@
       "token_modifiers": 1
     },
     {
-      "delta_line": 0,
-      "delta_start_char": 0,
-      "length": 3,
-      "token_type": 0,
-      "token_modifiers": 0
-    },
-    {
-      "delta_line": 1,
-      "delta_start_char": 10,
-      "length": 3,
-      "token_type": 0,
-      "token_modifiers": 0
-    },
-    {
-      "delta_line": 4,
-      "delta_start_char": 9,
-      "length": 3,
-      "token_type": 0,
-      "token_modifiers": 0
-    },
-    {
-      "delta_line": 4,
-      "delta_start_char": 6,
-      "length": 3,
-      "token_type": 13,
-      "token_modifiers": 1
-    },
-    {
-      "delta_line": 1,
-      "delta_start_char": 4,
-      "length": 3,
-      "token_type": 0,
-      "token_modifiers": 0
-    },
-    {
-      "delta_line": 0,
-      "delta_start_char": 4,
-      "length": 3,
-      "token_type": 13,
-      "token_modifiers": 0
-    },
-    {
-      "delta_line": 1,
+      "delta_line": 11,
       "delta_start_char": 4,
       "length": 11,
       "token_type": 13,
