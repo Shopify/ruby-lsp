@@ -40,7 +40,7 @@ export class RubyVersionStatus extends StatusItem {
   constructor() {
     super("rubyVersion");
 
-    this.item.name = "Ruby LSP Status";
+    this.item.name = "Ruby Version";
     this.item.command = {
       title: "Configure",
       command: Command.SelectVersionManager,
@@ -65,7 +65,7 @@ export class ServerStatus extends StatusItem {
   constructor() {
     super("server");
 
-    this.item.name = "Ruby LSP Status";
+    this.item.name = "Ruby LSP Server Status";
     this.item.text = "Ruby LSP: Starting";
     this.item.severity = vscode.LanguageStatusSeverity.Information;
     this.item.command = {
@@ -124,7 +124,7 @@ export class ExperimentalFeaturesStatus extends StatusItem {
       ? "Experimental features enabled"
       : "Experimental features disabled";
 
-    this.item.name = "Experimental features";
+    this.item.name = "Ruby LSP Experimental Features";
     this.item.text = message;
     this.item.command = {
       title: experimentalFeaturesEnabled ? "Disable" : "Enable",
@@ -164,7 +164,7 @@ export class FormatterStatus extends StatusItem {
   constructor() {
     super("formatter");
 
-    this.item.name = "Formatter";
+    this.item.name = "Ruby LSP Formatter";
     this.item.command = {
       title: "Help",
       command: Command.FormatterHelp,
