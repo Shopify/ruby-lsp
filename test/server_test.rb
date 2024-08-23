@@ -544,6 +544,55 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_semantic_highlighting_support_is_disabled_at_100k_characters
+    path_to_large_file = Gem.find_files("prism/**/node.rb").first
+    uri = URI::Generic.from_path(path: path_to_large_file)
+
+    capture_io do
+      @server.process_message({
+        method: "textDocument/didOpen",
+        params: {
+          textDocument: {
+            uri: uri,
+            text: File.read(path_to_large_file),
+            version: 1,
+            languageId: "ruby",
+          },
+        },
+      })
+
+      @server.process_message({
+        id: 1,
+        method: "textDocument/semanticTokens/full",
+        params: { textDocument: { uri: uri } },
+      })
+
+      result = find_message(RubyLsp::Result, id: 1)
+      assert_nil(result.response)
+
+      @server.process_message({
+        id: 2,
+        method: "textDocument/semanticTokens/full/delta",
+        params: { textDocument: { uri: uri } },
+      })
+
+      result = find_message(RubyLsp::Result, id: 2)
+      assert_nil(result.response)
+
+      @server.process_message({
+        id: 3,
+        method: "textDocument/semanticTokens/range",
+        params: {
+          textDocument: { uri: uri },
+          range: { start: { line: 0, character: 0 }, end: { line: 15, character: 0 } },
+        },
+      })
+
+      result = find_message(RubyLsp::Result, id: 3)
+      assert_nil(result.response)
+    end
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)

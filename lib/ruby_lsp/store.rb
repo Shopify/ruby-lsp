@@ -66,7 +66,7 @@ module RubyLsp
         version: Integer,
         language_id: Document::LanguageId,
         encoding: Encoding,
-      ).void
+      ).returns(Document[T.untyped])
     end
     def set(uri:, source:, version:, language_id:, encoding: Encoding::UTF_8)
       @state[uri.to_s] = case language_id
