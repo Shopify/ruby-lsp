@@ -1,16 +1,8 @@
 {
-    "params": [],
     "result": [
         {
             "delta_line": 0,
-            "delta_start_char": 3,
-            "length": 1,
-            "token_type": 7,
-            "token_modifiers": 0
-        },
-        {
-            "delta_line": 0,
-            "delta_start_char": 3,
+            "delta_start_char": 6,
             "length": 12,
             "token_type": 8,
             "token_modifiers": 0

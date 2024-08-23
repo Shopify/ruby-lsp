@@ -19,6 +19,16 @@ module RubyLsp
     #   some_invocation # --> semantic highlighting: method invocation
     #   var # --> semantic highlighting: local variable
     # end
+    #
+    # # Strategy
+    #
+    # To maximize editor performance, the Ruby LSP will return the minimum number of semantic tokens, since applying
+    # them is an expensive operation for the client. This means that the server only returns tokens for ambiguous pieces
+    # of syntax, such as method invocations with no receivers or parenthesis (which can be confused with local
+    # variables).
+    #
+    # Offloading as much handling as possible to Text Mate grammars or equivalent will guarantee responsiveness in the
+    # editor and allow for a much smoother experience.
     # ```
     class SemanticHighlighting < Request
       extend T::Sig

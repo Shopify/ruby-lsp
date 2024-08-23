@@ -1,13 +1,6 @@
 {
   "result": [
     {
-      "delta_line": 0,
-      "delta_start_char": 4,
-      "length": 9,
-      "token_type": 13,
-      "token_modifiers": 1
-    },
-    {
       "delta_line": 1,
       "delta_start_char": 2,
       "length": 1,
