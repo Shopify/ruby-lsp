@@ -41,7 +41,6 @@ module RubyLsp
           :on_block_node_leave,
           :on_self_node_enter,
           :on_module_node_enter,
-          :on_local_variable_write_node_enter,
           :on_local_variable_read_node_enter,
           :on_block_parameter_node_enter,
           :on_required_keyword_parameter_node_enter,
@@ -50,9 +49,6 @@ module RubyLsp
           :on_optional_parameter_node_enter,
           :on_required_parameter_node_enter,
           :on_rest_parameter_node_enter,
-          :on_local_variable_and_write_node_enter,
-          :on_local_variable_operator_write_node_enter,
-          :on_local_variable_or_write_node_enter,
           :on_local_variable_target_node_enter,
           :on_block_local_variable_node_enter,
           :on_match_write_node_enter,
@@ -168,11 +164,6 @@ module RubyLsp
         @response_builder.add_token(node.location, :variable, [:default_library])
       end
 
-      sig { params(node: Prism::LocalVariableWriteNode).void }
-      def on_local_variable_write_node_enter(node)
-        @response_builder.add_token(node.name_loc, @current_scope.type_for(node.name))
-      end
-
       sig { params(node: Prism::LocalVariableReadNode).void }
       def on_local_variable_read_node_enter(node)
         return if @inside_implicit_node
@@ -184,21 +175,6 @@ module RubyLsp
         end
 
         @response_builder.add_token(node.location, @current_scope.type_for(node.name))
-      end
-
-      sig { params(node: Prism::LocalVariableAndWriteNode).void }
-      def on_local_variable_and_write_node_enter(node)
-        @response_builder.add_token(node.name_loc, @current_scope.type_for(node.name))
-      end
-
-      sig { params(node: Prism::LocalVariableOperatorWriteNode).void }
-      def on_local_variable_operator_write_node_enter(node)
-        @response_builder.add_token(node.name_loc, @current_scope.type_for(node.name))
-      end
-
-      sig { params(node: Prism::LocalVariableOrWriteNode).void }
-      def on_local_variable_or_write_node_enter(node)
-        @response_builder.add_token(node.name_loc, @current_scope.type_for(node.name))
       end
 
       sig { params(node: Prism::LocalVariableTargetNode).void }
