@@ -38,7 +38,7 @@ class SemanticTokenEncoderTest < Minitest::Test
 
     assert_equal(
       expected_encoding,
-      SemanticTokenEncoder.new.encode(tokens).data,
+      SemanticTokenEncoder.new.encode(tokens),
     )
   end
 
@@ -73,7 +73,7 @@ class SemanticTokenEncoderTest < Minitest::Test
       16,
     ]
 
-    assert_equal(expected_encoding, SemanticTokenEncoder.new.encode(tokens).data)
+    assert_equal(expected_encoding, SemanticTokenEncoder.new.encode(tokens))
   end
 
   def test_encoded_modifiers_with_no_modifiers

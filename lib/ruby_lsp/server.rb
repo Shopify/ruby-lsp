@@ -23,6 +23,7 @@ module RubyLsp
         run_initialize(message)
       when "initialized"
         send_log_message("Finished initializing Ruby LSP!") unless @test_mode
+
         run_initialized
       when "textDocument/didOpen"
         text_document_did_open(message)
@@ -40,6 +41,8 @@ module RubyLsp
         text_document_code_lens(message)
       when "textDocument/semanticTokens/full"
         text_document_semantic_tokens_full(message)
+      when "textDocument/semanticTokens/full/delta"
+        text_document_semantic_tokens_delta(message)
       when "textDocument/foldingRange"
         text_document_folding_range(message)
       when "textDocument/semanticTokens/range"
@@ -378,7 +381,7 @@ module RubyLsp
 
       # If the response has already been cached by another request, return it
       cached_response = document.cache_get(message[:method])
-      if cached_response
+      if cached_response != Document::EMPTY_CACHE
         send_message(Result.new(id: message[:id], response: cached_response))
         return
       end
@@ -391,8 +394,6 @@ module RubyLsp
       document_symbol = Requests::DocumentSymbol.new(uri, dispatcher)
       document_link = Requests::DocumentLink.new(uri, parse_result.comments, dispatcher)
       code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
-
-      semantic_highlighting = Requests::SemanticHighlighting.new(@global_state, dispatcher)
       dispatcher.dispatch(parse_result.value)
 
       # Store all responses retrieve in this round of visits in the cache and then return the response for the request
@@ -401,18 +402,50 @@ module RubyLsp
       document.cache_set("textDocument/documentSymbol", document_symbol.perform)
       document.cache_set("textDocument/documentLink", document_link.perform)
       document.cache_set("textDocument/codeLens", code_lens.perform)
-      document.cache_set(
-        "textDocument/semanticTokens/full",
-        semantic_highlighting.perform,
-      )
+
       send_message(Result.new(id: message[:id], response: document.cache_get(message[:method])))
     end
 
     alias_method :text_document_document_symbol, :run_combined_requests
     alias_method :text_document_document_link, :run_combined_requests
     alias_method :text_document_code_lens, :run_combined_requests
-    alias_method :text_document_semantic_tokens_full, :run_combined_requests
     alias_method :text_document_folding_range, :run_combined_requests
+
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def text_document_semantic_tokens_full(message)
+      document = @store.get(message.dig(:params, :textDocument, :uri))
+
+      unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
+        send_empty_response(message[:id])
+        return
+      end
+
+      dispatcher = Prism::Dispatcher.new
+      semantic_highlighting = Requests::SemanticHighlighting.new(@global_state, dispatcher, document, nil)
+      dispatcher.visit(document.parse_result.value)
+
+      send_message(Result.new(id: message[:id], response: semantic_highlighting.perform))
+    end
+
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def text_document_semantic_tokens_delta(message)
+      document = @store.get(message.dig(:params, :textDocument, :uri))
+
+      unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
+        send_empty_response(message[:id])
+        return
+      end
+
+      dispatcher = Prism::Dispatcher.new
+      request = Requests::SemanticHighlighting.new(
+        @global_state,
+        dispatcher,
+        document,
+        message.dig(:params, :previousResultId),
+      )
+      dispatcher.visit(document.parse_result.value)
+      send_message(Result.new(id: message[:id], response: request.perform))
+    end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_semantic_tokens_range(message)
@@ -426,15 +459,16 @@ module RubyLsp
         return
       end
 
-      start_line = range.dig(:start, :line)
-      end_line = range.dig(:end, :line)
-
       dispatcher = Prism::Dispatcher.new
-      request = Requests::SemanticHighlighting.new(@global_state, dispatcher, range: start_line..end_line)
+      request = Requests::SemanticHighlighting.new(
+        @global_state,
+        dispatcher,
+        document,
+        nil,
+        range: range.dig(:start, :line)..range.dig(:end, :line),
+      )
       dispatcher.visit(document.parse_result.value)
-
-      response = request.perform
-      send_message(Result.new(id: message[:id], response: response))
+      send_message(Result.new(id: message[:id], response: request.perform))
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }

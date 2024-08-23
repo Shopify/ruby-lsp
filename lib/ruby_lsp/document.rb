@@ -16,6 +16,7 @@ module RubyLsp
     extend T::Generic
 
     ParseResultType = type_member
+    EMPTY_CACHE = T.let(Object.new.freeze, Object)
 
     abstract!
 
@@ -34,9 +35,13 @@ module RubyLsp
     sig { returns(Encoding) }
     attr_reader :encoding
 
+    sig { returns(T.any(Interface::SemanticTokens, Object)) }
+    attr_accessor :semantic_tokens
+
     sig { params(source: String, version: Integer, uri: URI::Generic, encoding: Encoding).void }
     def initialize(source:, version:, uri:, encoding: Encoding::UTF_8)
-      @cache = T.let({}, T::Hash[String, T.untyped])
+      @cache = T.let(Hash.new(EMPTY_CACHE), T::Hash[String, T.untyped])
+      @semantic_tokens = T.let(EMPTY_CACHE, T.any(Interface::SemanticTokens, Object))
       @encoding = T.let(encoding, Encoding)
       @source = T.let(source, String)
       @version = T.let(version, Integer)
@@ -63,7 +68,7 @@ module RubyLsp
     end
     def cache_fetch(request_name, &block)
       cached = @cache[request_name]
-      return cached if cached
+      return cached if cached != EMPTY_CACHE
 
       result = block.call(self)
       @cache[request_name] = result

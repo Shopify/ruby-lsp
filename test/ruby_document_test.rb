@@ -739,6 +739,17 @@ class RubyDocumentTest < Minitest::Test
     assert_equal("each", T.cast(target, Prism::CallNode).message)
   end
 
+  def test_uncached_requests_return_empty_cache_object
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      class Foo
+      end
+    RUBY
+
+    assert_same(document.cache_get("textDocument/codeLens"), RubyLsp::Document::EMPTY_CACHE)
+    document.cache_set("textDocument/codeLens", nil)
+    assert_nil(document.cache_get("textDocument/codeLens"))
+  end
+
   private
 
   def assert_error_edit(actual, error_range)
