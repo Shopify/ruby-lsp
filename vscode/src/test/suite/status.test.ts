@@ -50,7 +50,7 @@ suite("StatusItems", () => {
 
     test("Status is initialized with the right values", () => {
       assert.strictEqual(status.item.text, "Using Ruby 3.2.0 with shadowenv");
-      assert.strictEqual(status.item.name, "Ruby LSP Status");
+      assert.strictEqual(status.item.name, "Ruby Version");
       assert.strictEqual(status.item.command?.title, "Configure");
       assert.strictEqual(
         status.item.command.command,
@@ -93,6 +93,7 @@ suite("StatusItems", () => {
         status.item.severity,
         vscode.LanguageStatusSeverity.Information,
       );
+      assert.strictEqual(status.item.name, "Ruby LSP Server Status");
     });
 
     test("Refresh when server is running", () => {
@@ -103,6 +104,7 @@ suite("StatusItems", () => {
         status.item.severity,
         vscode.LanguageStatusSeverity.Information,
       );
+      assert.strictEqual(status.item.name, "Ruby LSP Server Status");
     });
 
     test("Refresh when server is stopping", () => {
@@ -113,6 +115,7 @@ suite("StatusItems", () => {
         status.item.severity,
         vscode.LanguageStatusSeverity.Information,
       );
+      assert.strictEqual(status.item.name, "Ruby LSP Server Status");
     });
 
     test("Refresh when server has errored", () => {
@@ -123,6 +126,7 @@ suite("StatusItems", () => {
         status.item.severity,
         vscode.LanguageStatusSeverity.Error,
       );
+      assert.strictEqual(status.item.name, "Ruby LSP Server Status");
     });
   });
 
@@ -146,7 +150,7 @@ suite("StatusItems", () => {
 
     test("Status is initialized with the right values", () => {
       assert.match(status.item.text, /Experimental features (dis|en)abled/);
-      assert.strictEqual(status.item.name, "Experimental features");
+      assert.strictEqual(status.item.name, "Ruby LSP Experimental Features");
       assert.match(status.item.command?.title!, /Enable|Disable/);
       assert.strictEqual(
         status.item.command!.command,
@@ -264,7 +268,7 @@ suite("StatusItems", () => {
 
     test("Status is initialized with the right values", () => {
       assert.strictEqual(status.item.text, "Formatter: auto");
-      assert.strictEqual(status.item.name, "Formatter");
+      assert.strictEqual(status.item.name, "Ruby LSP Formatter");
       assert.strictEqual(status.item.command?.title, "Help");
       assert.strictEqual(status.item.command.command, Command.FormatterHelp);
     });
@@ -296,6 +300,7 @@ suite("StatusItems", () => {
         status.item.text,
         "Addons: requires server to be v0.17.4 or higher to display this field",
       );
+      assert.strictEqual(status.item.name, "Ruby LSP Addons");
     });
 
     test("Status displays no addons when addons is an empty array", () => {
@@ -303,6 +308,7 @@ suite("StatusItems", () => {
       status.refresh(workspace);
 
       assert.strictEqual(status.item.text, "Addons: none");
+      assert.strictEqual(status.item.name, "Ruby LSP Addons");
     });
 
     test("Status displays addon count and command to list commands", () => {
@@ -314,6 +320,7 @@ suite("StatusItems", () => {
       status.refresh(workspace);
 
       assert.strictEqual(status.item.text, "Addons: 2");
+      assert.strictEqual(status.item.name, "Ruby LSP Addons");
       assert.strictEqual(status.item.command?.title, "Details");
       assert.strictEqual(status.item.command.command, Command.DisplayAddons);
     });
