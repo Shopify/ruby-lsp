@@ -26,6 +26,9 @@ module RubyLsp
     sig { returns(TypeInferrer) }
     attr_reader :type_inferrer
 
+    sig { returns(T.nilable(IO)) }
+    attr_accessor :rails_runner_stdin
+
     sig { void }
     def initialize
       @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
@@ -40,6 +43,7 @@ module RubyLsp
       @supports_watching_files = T.let(false, T::Boolean)
       @experimental_features = T.let(false, T::Boolean)
       @type_inferrer = T.let(TypeInferrer.new(@index, @experimental_features), TypeInferrer)
+      @rails_runner_stdin = T.let(nil, T.nilable(IO))
     end
 
     sig { params(identifier: String, instance: Requests::Support::Formatter).void }
