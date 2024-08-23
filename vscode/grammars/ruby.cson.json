@@ -103,6 +103,51 @@
     {
       "captures": {
         "1": {
+          "name": "variable.ruby"
+        },
+        "3": {
+          "name": "keyword.operator.assignment.augmented.ruby"
+        }
+      },
+      "match": "^\\s*([a-z]([A-Za-z0-9_])*)\\s*(&&=)",
+      "comment": "A local variable and assignment"
+    },
+    {
+      "captures": {
+        "1": {
+          "name": "variable.ruby"
+        },
+        "3": {
+          "name": "keyword.operator.assignment.augmented.ruby"
+        }
+      },
+      "match": "^\\s*([a-z]([A-Za-z0-9_])*)\\s*(\\|\\|=)",
+      "comment": "A local variable or assignment"
+    },
+    {
+      "captures": {
+        "1": {
+          "name": "variable.ruby"
+        },
+        "3": {
+          "name": "keyword.operator.assignment.augmented.ruby"
+        }
+      },
+      "match": "^\\s*([a-z]([A-Za-z0-9_])*)\\s*((\\+|\\*|-|\\/)=)",
+      "comment": "A local variable operation assignment (+=, -=, *=, /=)"
+    },
+    {
+      "captures": {
+        "1": {
+          "name": "variable.ruby"
+        }
+      },
+      "match": "^\\s*([a-z]([A-Za-z0-9_])*)\\s*=[^=]",
+      "comment": "A local variable assignment"
+    },
+    {
+      "captures": {
+        "1": {
           "name": "punctuation.definition.constant.hashkey.ruby"
         }
       },
@@ -237,6 +282,30 @@
     {
       "match": "\\b[_A-Z]\\w*\\b",
       "name": "variable.other.constant.ruby"
+    },
+    {
+      "begin": "(->)\\(",
+      "beginCaptures": {
+        "1": {
+          "name": "support.function.kernel.ruby"
+        }
+      },
+      "comment": "Lambda parameters.",
+      "end": "\\)",
+      "patterns": [
+        {
+          "begin": "(?=[&*_a-zA-Z])",
+          "end": "(?=[,)])",
+          "patterns": [
+            {
+              "include": "#method_parameters"
+            }
+          ]
+        },
+        {
+          "include": "#method_parameters"
+        }
+      ]
     },
     {
       "begin": "(?x)\n(?=def\\b)                          # optimization to help Oniguruma fail fast\n(?<=^|\\s)(def)\\s+\n(\n  (?>[a-zA-Z_]\\w*(?>\\.|::))?      # method prefix\n  (?>                               # method name\n    [a-zA-Z_]\\w*(?>[?!]|=(?!>))?\n    |\n    ===?|!=|>[>=]?|<=>|<[<=]?|[%&`/\\|]|\\*\\*?|=?~|[-+]@?|\\[]=?\n  )\n)\n\\s*(\\()",
