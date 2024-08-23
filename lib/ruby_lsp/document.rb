@@ -16,6 +16,10 @@ module RubyLsp
     extend T::Generic
 
     ParseResultType = type_member
+
+    # This maximum number of characters for providing expensive features, like semantic highlighting and diagnostics.
+    # This is the same number used by the TypeScript extension in VS Code
+    MAXIMUM_CHARACTERS_FOR_EXPENSIVE_FEATURES = 100_000
     EMPTY_CACHE = T.let(Object.new.freeze, Object)
 
     abstract!
@@ -111,6 +115,11 @@ module RubyLsp
     sig { returns(Scanner) }
     def create_scanner
       Scanner.new(@source, @encoding)
+    end
+
+    sig { returns(T::Boolean) }
+    def past_expensive_limit?
+      @source.length > MAXIMUM_CHARACTERS_FOR_EXPENSIVE_FEATURES
     end
 
     class Scanner

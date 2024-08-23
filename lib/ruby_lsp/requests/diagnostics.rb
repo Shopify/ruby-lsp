@@ -46,7 +46,9 @@ module RubyLsp
         diagnostics.concat(syntax_error_diagnostics, syntax_warning_diagnostics)
 
         # Running RuboCop is slow, so to avoid excessive runs we only do so if the file is syntactically valid
-        return diagnostics if @document.syntax_error? || @active_linters.empty?
+        if @document.syntax_error? || @active_linters.empty? || @document.past_expensive_limit?
+          return diagnostics
+        end
 
         @active_linters.each do |linter|
           linter_diagnostics = linter.run_diagnostic(@uri, @document)
