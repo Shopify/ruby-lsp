@@ -14,7 +14,7 @@ module RubyLsp
           Kernel.methods(false),
           Bundler::Dsl.instance_methods(false),
           Module.private_instance_methods(false),
-        ].flatten.map(&:to_s),
+        ].flatten.map(&:to_s).freeze,
         T::Array[String],
       )
 
@@ -50,13 +50,6 @@ module RubyLsp
           :on_optional_parameter_node_enter,
           :on_required_parameter_node_enter,
           :on_rest_parameter_node_enter,
-          :on_constant_read_node_enter,
-          :on_constant_write_node_enter,
-          :on_constant_and_write_node_enter,
-          :on_constant_operator_write_node_enter,
-          :on_constant_or_write_node_enter,
-          :on_constant_target_node_enter,
-          :on_constant_path_node_enter,
           :on_local_variable_and_write_node_enter,
           :on_local_variable_operator_write_node_enter,
           :on_local_variable_or_write_node_enter,
@@ -82,8 +75,14 @@ module RubyLsp
         return if message == "=~"
         return if special_method?(message)
 
-        type = Requests::Support::Sorbet.annotation?(node) ? :type : :method
-        @response_builder.add_token(T.must(node.message_loc), type)
+        if Requests::Support::Sorbet.annotation?(node)
+          @response_builder.add_token(T.must(node.message_loc), :type)
+        elsif !node.receiver && !node.opening_loc
+          # If the node has a receiver, then the syntax is not ambiguous and semantic highlighting is not necessary to
+          # determine that the token is a method call. The only ambiguous case is method calls with implicit self
+          # receiver and no parenthesis, which may be confused with local variables
+          @response_builder.add_token(T.must(node.message_loc), :method)
+        end
       end
 
       sig { params(node: Prism::MatchWriteNode).void }
@@ -101,42 +100,9 @@ module RubyLsp
         @inside_regex_capture = true if node.call.message == "=~"
       end
 
-      sig { params(node: Prism::ConstantReadNode).void }
-      def on_constant_read_node_enter(node)
-        return if @inside_implicit_node
-
-        @response_builder.add_token(node.location, :namespace)
-      end
-
-      sig { params(node: Prism::ConstantWriteNode).void }
-      def on_constant_write_node_enter(node)
-        @response_builder.add_token(node.name_loc, :namespace)
-      end
-
-      sig { params(node: Prism::ConstantAndWriteNode).void }
-      def on_constant_and_write_node_enter(node)
-        @response_builder.add_token(node.name_loc, :namespace)
-      end
-
-      sig { params(node: Prism::ConstantOperatorWriteNode).void }
-      def on_constant_operator_write_node_enter(node)
-        @response_builder.add_token(node.name_loc, :namespace)
-      end
-
-      sig { params(node: Prism::ConstantOrWriteNode).void }
-      def on_constant_or_write_node_enter(node)
-        @response_builder.add_token(node.name_loc, :namespace)
-      end
-
-      sig { params(node: Prism::ConstantTargetNode).void }
-      def on_constant_target_node_enter(node)
-        @response_builder.add_token(node.location, :namespace)
-      end
-
       sig { params(node: Prism::DefNode).void }
       def on_def_node_enter(node)
         @current_scope = ParameterScope.new(@current_scope)
-        @response_builder.add_token(node.name_loc, :method, [:declaration])
       end
 
       sig { params(node: Prism::DefNode).void }
@@ -168,49 +134,33 @@ module RubyLsp
       sig { params(node: Prism::RequiredKeywordParameterNode).void }
       def on_required_keyword_parameter_node_enter(node)
         @current_scope << node.name
-
-        location = node.name_loc
-        @response_builder.add_token(location.copy(length: location.length - 1), :parameter)
       end
 
       sig { params(node: Prism::OptionalKeywordParameterNode).void }
       def on_optional_keyword_parameter_node_enter(node)
         @current_scope << node.name
-
-        location = node.name_loc
-        @response_builder.add_token(location.copy(length: location.length - 1), :parameter)
       end
 
       sig { params(node: Prism::KeywordRestParameterNode).void }
       def on_keyword_rest_parameter_node_enter(node)
         name = node.name
-
-        if name
-          @current_scope << name.to_sym
-          @response_builder.add_token(T.must(node.name_loc), :parameter)
-        end
+        @current_scope << name.to_sym if name
       end
 
       sig { params(node: Prism::OptionalParameterNode).void }
       def on_optional_parameter_node_enter(node)
         @current_scope << node.name
-        @response_builder.add_token(node.name_loc, :parameter)
       end
 
       sig { params(node: Prism::RequiredParameterNode).void }
       def on_required_parameter_node_enter(node)
         @current_scope << node.name
-        @response_builder.add_token(node.location, :parameter)
       end
 
       sig { params(node: Prism::RestParameterNode).void }
       def on_rest_parameter_node_enter(node)
         name = node.name
-
-        if name
-          @current_scope << name.to_sym
-          @response_builder.add_token(T.must(node.name_loc), :parameter)
-        end
+        @current_scope << name.to_sym if name
       end
 
       sig { params(node: Prism::SelfNode).void }
@@ -218,6 +168,7 @@ module RubyLsp
         @response_builder.add_token(node.location, :variable, [:default_library])
       end
 
+      # Review
       sig { params(node: Prism::LocalVariableWriteNode).void }
       def on_local_variable_write_node_enter(node)
         @response_builder.add_token(node.name_loc, @current_scope.type_for(node.name))
@@ -330,13 +281,6 @@ module RubyLsp
       sig { params(node: Prism::ImplicitNode).void }
       def on_implicit_node_leave(node)
         @inside_implicit_node = false
-      end
-
-      sig { params(node: Prism::ConstantPathNode).void }
-      def on_constant_path_node_enter(node)
-        return if @inside_implicit_node
-
-        @response_builder.add_token(node.name_loc, :namespace)
       end
 
       private
