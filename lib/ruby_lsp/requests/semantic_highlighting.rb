@@ -33,10 +33,6 @@ module RubyLsp
     class SemanticHighlighting < Request
       extend T::Sig
 
-      # This maximum number of characters for providing highlighting is the same limit imposed by the VS Code TypeScript
-      # extension. Even with delta requests, anything above this number lags the editor significantly
-      MAXIMUM_CHARACTERS_FOR_HIGHLIGHT = 100_000
-
       class << self
         extend T::Sig
 

@@ -315,13 +315,14 @@ module RubyLsp
           language_id: language_id,
         )
 
-        if document.source.length > Requests::SemanticHighlighting::MAXIMUM_CHARACTERS_FOR_HIGHLIGHT
+        if document.past_expensive_limit?
           send_message(
             Notification.new(
               method: "window/showMessage",
               params: Interface::ShowMessageParams.new(
                 type: Constant::MessageType::WARNING,
-                message: "This file is too long. For performance reasons, semantic highlighting will be disabled",
+                message: "This file is too long. For performance reasons, semantic highlighting and " \
+                  "diagnostics will be disabled",
               ),
             ),
           )
@@ -427,7 +428,7 @@ module RubyLsp
     def text_document_semantic_tokens_full(message)
       document = @store.get(message.dig(:params, :textDocument, :uri))
 
-      if document.source.length > Requests::SemanticHighlighting::MAXIMUM_CHARACTERS_FOR_HIGHLIGHT
+      if document.past_expensive_limit?
         send_empty_response(message[:id])
         return
       end
@@ -448,7 +449,7 @@ module RubyLsp
     def text_document_semantic_tokens_delta(message)
       document = @store.get(message.dig(:params, :textDocument, :uri))
 
-      if document.source.length > Requests::SemanticHighlighting::MAXIMUM_CHARACTERS_FOR_HIGHLIGHT
+      if document.past_expensive_limit?
         send_empty_response(message[:id])
         return
       end
@@ -476,7 +477,7 @@ module RubyLsp
       uri = params.dig(:textDocument, :uri)
       document = @store.get(uri)
 
-      if document.source.length > Requests::SemanticHighlighting::MAXIMUM_CHARACTERS_FOR_HIGHLIGHT
+      if document.past_expensive_limit?
         send_empty_response(message[:id])
         return
       end
