@@ -168,7 +168,6 @@ module RubyLsp
         @response_builder.add_token(node.location, :variable, [:default_library])
       end
 
-      # Review
       sig { params(node: Prism::LocalVariableWriteNode).void }
       def on_local_variable_write_node_enter(node)
         @response_builder.add_token(node.name_loc, @current_scope.type_for(node.name))
