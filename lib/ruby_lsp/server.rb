@@ -307,13 +307,25 @@ module RubyLsp
           Document::LanguageId::Ruby
         end
 
-        @store.set(
+        document = @store.set(
           uri: text_document[:uri],
           source: text_document[:text],
           version: text_document[:version],
           encoding: @global_state.encoding,
           language_id: language_id,
         )
+
+        if document.source.length > Requests::SemanticHighlighting::MAXIMUM_CHARACTERS_FOR_HIGHLIGHT
+          send_message(
+            Notification.new(
+              method: "window/showMessage",
+              params: Interface::ShowMessageParams.new(
+                type: Constant::MessageType::WARNING,
+                message: "This file is too long. For performance reasons, semantic highlighting will be disabled",
+              ),
+            ),
+          )
+        end
       end
     end
 
@@ -415,6 +427,11 @@ module RubyLsp
     def text_document_semantic_tokens_full(message)
       document = @store.get(message.dig(:params, :textDocument, :uri))
 
+      if document.source.length > Requests::SemanticHighlighting::MAXIMUM_CHARACTERS_FOR_HIGHLIGHT
+        send_empty_response(message[:id])
+        return
+      end
+
       unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
         send_empty_response(message[:id])
         return
@@ -430,6 +447,11 @@ module RubyLsp
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_semantic_tokens_delta(message)
       document = @store.get(message.dig(:params, :textDocument, :uri))
+
+      if document.source.length > Requests::SemanticHighlighting::MAXIMUM_CHARACTERS_FOR_HIGHLIGHT
+        send_empty_response(message[:id])
+        return
+      end
 
       unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
         send_empty_response(message[:id])
@@ -453,6 +475,11 @@ module RubyLsp
       range = params[:range]
       uri = params.dig(:textDocument, :uri)
       document = @store.get(uri)
+
+      if document.source.length > Requests::SemanticHighlighting::MAXIMUM_CHARACTERS_FOR_HIGHLIGHT
+        send_empty_response(message[:id])
+        return
+      end
 
       unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
         send_empty_response(message[:id])
