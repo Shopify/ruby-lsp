@@ -40,6 +40,54 @@ If your version manager doesn't provide either of those, then activate the envir
 These strategies will ensure that the `ruby-lsp` executable is invoked with the correct Ruby version, `GEM_HOME` and
 `GEM_PATH`, which are necessary for proper integration with your project.
 
+## All initialization options
+
+Each LSP client can control various abilities of the LSP at startup. The following JSON dictionary contains all of the
+available initialization options. Generally, editor LSP clients will configure LSP servers using a dictionary in their
+configuration languages (JSON, Lua, ELisp, etc.).
+
+```json
+{
+  "initializationOptions": {
+    "enabledFeatures": {
+      "codeActions": true,
+      "codeLens": true,
+      "completion": true,
+      "definition": true,
+      "diagnostics": true,
+      "documentHighlights": true,
+      "documentLink": true,
+      "documentSymbols": true,
+      "foldingRanges": true,
+      "formatting": true,
+      "hover": true,
+      "inlayHint": true,
+      "onTypeFormatting": true,
+      "selectionRanges": true,
+      "semanticHighlighting": true,
+      "signatureHelp": true,
+      "typeHierarchy": true,
+      "workspaceSymbol": true
+    },
+    "featuresConfiguration": {
+      "inlayHint": {
+        "implicitHashValue": true,
+        "implicitRescue": true
+      }
+    },
+    "indexing": {
+      "excludedPatterns": ["path/to/excluded/file.rb"],
+      "includedPatterns": ["path/to/included/file.rb"],
+      "excludedGems": ["gem1", "gem2", "etc."],
+      "excludedMagicComments": ["compiled:true"]
+    },
+    "formatter": "auto",
+    "linters": [],
+    "experimentalFeaturesEnabled": false
+  }
+}
+```
+
 <!-- When adding a new editor to the list, either link directly to a website containing the instructions or link to a
 new H2 header in this file containing the instructions. -->
 
@@ -238,19 +286,3 @@ To use it with Ruby LSP, you can override particular configuration items in the 
 Kate will start an instance of the Ruby LSP server in the background for any Ruby project matching the `rootIndicationFileNames`.
 If starting Ruby LSP succeeds, the entries in the LSP-Client menu are activated.
 Otherwise the error output can be inspected in the Output window.
-
-# Indexing Configuration
-
-To configure indexing, pass a JSON hash as part of the initialization options for your editor, for example:
-
-```json
-{
-  "indexing": {
-    "excludedPatterns": ["**/test/**.rb"],
-    "includedPatterns": ["**/bin/**"],
-    "excludedGems": ["rubocop", "rubocop-performance"],
-    "includedPatterns": ["rake"],
-    "excludedMagicComments": ["compiled:true"]
-  }
-}
-```
