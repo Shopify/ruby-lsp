@@ -3,9 +3,11 @@ import assert from "assert";
 import path from "path";
 import os from "os";
 
+import sinon from "sinon";
 import { before, after } from "mocha";
 import * as vscode from "vscode";
 
+import * as common from "../../../common";
 import { RubyInstaller } from "../../../ruby/rubyInstaller";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL } from "../../../common";
@@ -94,6 +96,44 @@ suite("RubyInstaller", () => {
     assert.match(env.GEM_PATH!, /lib\/ruby\/gems\/3\.3\.0/);
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
+
+    fs.rmSync(path.join(os.homedir(), `Ruby${major}${minor}-${os.arch()}`), {
+      recursive: true,
+      force: true,
+    });
+  });
+
+  test("Doesn't set the shell when invoking activation script", async () => {
+    const [major, minor, _patch] = RUBY_VERSION.split(".").map(Number);
+    fs.symlinkSync(
+      path.join(
+        "C:",
+        "hostedtoolcache",
+        "windows",
+        "Ruby",
+        RUBY_VERSION,
+        "x64",
+      ),
+      path.join(os.homedir(), `Ruby${major}${minor}-${os.arch()}`),
+    );
+
+    fs.writeFileSync(path.join(workspacePath, ".ruby-version"), RUBY_VERSION);
+
+    const windows = new RubyInstaller(workspaceFolder, outputChannel);
+    const result = ["/fake/dir", "/other/fake/dir", true, RUBY_VERSION].join(
+      "ACTIVATION_SEPARATOR",
+    );
+    const execStub = sinon.stub(common, "asyncExec").resolves({
+      stdout: "",
+      stderr: result,
+    });
+
+    await windows.activate();
+    execStub.restore();
+
+    assert.strictEqual(execStub.callCount, 1);
+    const callArgs = execStub.getCall(0).args;
+    assert.strictEqual(callArgs[1]?.shell, undefined);
 
     fs.rmSync(path.join(os.homedir(), `Ruby${major}${minor}-${os.arch()}`), {
       recursive: true,
