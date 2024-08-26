@@ -1,8 +1,6 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "ruby_lsp/global_state"
-
 module RubyLsp
   # To register an addon, inherit from this class and implement both `name` and `activate`
   #
@@ -93,7 +91,6 @@ module RubyLsp
     sig { void }
     def initialize
       @errors = T.let([], T::Array[StandardError])
-      @global_state = T.let(nil, T.nilable(GlobalState))
     end
 
     sig { params(error: StandardError).returns(T.self_type) }
