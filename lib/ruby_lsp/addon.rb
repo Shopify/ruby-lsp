@@ -96,11 +96,6 @@ module RubyLsp
       @global_state = T.let(nil, T.nilable(GlobalState))
     end
 
-    sig { returns(IO) }
-    def rails_runner_stdin
-      @global_state.instance_variable_get(:@rails_runner_stdin)
-    end
-
     sig { params(error: StandardError).returns(T.self_type) }
     def add_error(error)
       @errors << error
