@@ -1822,5 +1822,21 @@ module RubyIndexer
         @index.linearized_ancestors_of("Foo::Child::<Class:Child>"),
       )
     end
+
+    def test_entries_for
+      index(<<~RUBY)
+        class Foo; end
+
+        module Bar
+          def my_def; end
+        end
+      RUBY
+
+      entries = @index.entries_for("/fake/path/foo.rb")
+      assert_equal(["Foo", "Bar", "my_def"], entries.map(&:name))
+
+      entries = @index.entries_for("/fake/path/foo.rb", RubyIndexer::Entry::Namespace)
+      assert_equal(["Foo", "Bar"], entries.map(&:name))
+    end
   end
 end

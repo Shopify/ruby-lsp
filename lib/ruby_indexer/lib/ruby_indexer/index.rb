@@ -614,6 +614,26 @@ module RubyIndexer
       singleton
     end
 
+    # TODO: fix typing
+    # sig do
+    #   type_parameters(:T).params(
+    #     path: String,
+    #     type: T.nilable(T::Class[T.all(T.type_parameter(:T), Entry)]),
+    #   ).returns(T.nilable(T::Array[T.type_parameter(:T)]))
+    # end
+    def entries_for(path, type = nil)
+      type = Entry if type.nil?
+
+      # TODO: Make this work
+      # return @files_to_entries[path]&.grep(type)
+
+      # old way:
+      @files_to_entries[path].select do |entry|
+        # entry.ancestors.include?(RubyIndexer::Entry::Namespace) # FAILS
+        entry.class == RubyIndexer::Entry::Class || entry.class == RubyIndexer::Entry::Module
+      end
+    end
+
     private
 
     # Runs the registered included hooks
