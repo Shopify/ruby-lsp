@@ -270,6 +270,61 @@ suite("Grammars", () => {
       });
     });
 
+    suite("Backtick String Literals", () => {
+      test("Standard backtick string", () => {
+        const ruby = "`ruby`";
+        const expectedTokens = [
+          [
+            "`",
+            [
+              "source.ruby",
+              "string.interpolated.ruby",
+              "punctuation.definition.string.begin.ruby",
+            ],
+          ],
+          ["ruby", ["source.ruby", "string.interpolated.ruby"]],
+          [
+            "`",
+            [
+              "source.ruby",
+              "string.interpolated.ruby",
+              "punctuation.definition.string.end.ruby",
+            ],
+          ],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
+      test("Kernel backtick method", () => {
+        const ruby = 'Kernel.`"ls"';
+        const expectedTokens = [
+          ["Kernel", ["source.ruby", "variable.other.constant.ruby"]],
+          [".", ["source.ruby", "punctuation.separator.method.ruby"]],
+          ["`", ["source.ruby"]],
+          [
+            '"',
+            [
+              "source.ruby",
+              "string.quoted.double.interpolated.ruby",
+              "punctuation.definition.string.begin.ruby",
+            ],
+          ],
+          ["ls", ["source.ruby", "string.quoted.double.interpolated.ruby"]],
+          [
+            '"',
+            [
+              "source.ruby",
+              "string.quoted.double.interpolated.ruby",
+              "punctuation.definition.string.end.ruby",
+            ],
+          ],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+    });
+
     function tokenizeRuby(ruby: string): [string, string[]][] {
       if (!rubyGrammar) {
         throw new Error("Ruby grammar not loaded");
