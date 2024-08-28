@@ -1859,5 +1859,9 @@ module RubyIndexer
       entries = @index.entries_for("/fake/path/foo.rb", RubyIndexer::Entry::Namespace)
       assert_equal(["Foo", "Bar"], entries.map(&:name))
     end
+
+    def test_entries_for_returns__nil_if_no_matches
+      assert_empty(@index.entries_for("non_existing_file.rb"))
+    end
   end
 end
