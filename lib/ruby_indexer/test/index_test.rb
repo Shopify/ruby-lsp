@@ -1822,5 +1822,25 @@ module RubyIndexer
         @index.linearized_ancestors_of("Foo::Child::<Class:Child>"),
       )
     end
+
+    def test_resolving_circular_method_aliases_on_class_reopen
+      index(<<~RUBY)
+        class Foo
+          alias bar ==
+          def ==(other) = true
+        end
+
+        class Foo
+          alias == bar
+        end
+      RUBY
+
+      method = @index.resolve_method("==", "Foo").first
+      assert_kind_of(Entry::Method, method)
+      assert_equal("==", method.name)
+
+      candidates = @index.method_completion_candidates("=", "Foo")
+      assert_equal(["==", "==="], candidates.map(&:name))
+    end
   end
 end
