@@ -232,7 +232,7 @@ module RubyIndexer
         next unless ancestor_index && (!existing_entry || ancestor_index < existing_entry_index)
 
         if entry.is_a?(Entry::UnresolvedMethodAlias)
-          resolved_alias = resolve_method_alias(entry, receiver_name)
+          resolved_alias = resolve_method_alias(entry, receiver_name, [])
           hash[entry_name] = [resolved_alias, ancestor_index] if resolved_alias.is_a?(Entry::MethodAlias)
         else
           hash[entry_name] = [entry, ancestor_index]
@@ -394,16 +394,18 @@ module RubyIndexer
       real_parts.join("::")
     end
 
-    # Attempts to find methods for a resolved fully qualified receiver name.
+    # Attempts to find methods for a resolved fully qualified receiver name. Do not provide the `seen_names` parameter
+    # as it is used only internally to prevent infinite loops when resolving circular aliases
     # Returns `nil` if the method does not exist on that receiver
     sig do
       params(
         method_name: String,
         receiver_name: String,
+        seen_names: T::Array[String],
         inherited_only: T::Boolean,
       ).returns(T.nilable(T::Array[T.any(Entry::Member, Entry::MethodAlias)]))
     end
-    def resolve_method(method_name, receiver_name, inherited_only: false)
+    def resolve_method(method_name, receiver_name, seen_names = [], inherited_only: false)
       method_entries = self[method_name]
       return unless method_entries
 
@@ -418,7 +420,7 @@ module RubyIndexer
           when Entry::UnresolvedMethodAlias
             # Resolve aliases lazily as we find them
             if entry.owner&.name == ancestor
-              resolved_alias = resolve_method_alias(entry, receiver_name)
+              resolved_alias = resolve_method_alias(entry, receiver_name, seen_names)
               resolved_alias if resolved_alias.is_a?(Entry::MethodAlias)
             end
           end
@@ -919,16 +921,21 @@ module RubyIndexer
       params(
         entry: Entry::UnresolvedMethodAlias,
         receiver_name: String,
+        seen_names: T::Array[String],
       ).returns(T.any(Entry::MethodAlias, Entry::UnresolvedMethodAlias))
     end
-    def resolve_method_alias(entry, receiver_name)
-      return entry if entry.new_name == entry.old_name
+    def resolve_method_alias(entry, receiver_name, seen_names)
+      new_name = entry.new_name
+      return entry if new_name == entry.old_name
+      return entry if seen_names.include?(new_name)
 
-      target_method_entries = resolve_method(entry.old_name, receiver_name)
+      seen_names << new_name
+
+      target_method_entries = resolve_method(entry.old_name, receiver_name, seen_names)
       return entry unless target_method_entries
 
       resolved_alias = Entry::MethodAlias.new(T.must(target_method_entries.first), entry)
-      original_entries = T.must(@entries[entry.new_name])
+      original_entries = T.must(@entries[new_name])
       original_entries.delete(entry)
       original_entries << resolved_alias
       resolved_alias
