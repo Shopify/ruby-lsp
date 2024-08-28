@@ -619,7 +619,7 @@ module RubyIndexer
     sig do
       type_parameters(:T).params(
         path: String,
-        type: T::Class[T.all(T.type_parameter(:T), Entry)],
+        type: T.nilable(T::Class[T.all(T.type_parameter(:T), Entry)]),
       ).returns(T::Array[T.type_parameter(:T)])
     end
     def entries_for(path, type = nil)
