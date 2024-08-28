@@ -1853,7 +1853,7 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index.entries_for("/fake/path/foo.rb")
+      entries = @index.entries_for("/fake/path/foo.rb", Entry)
       assert_equal(["Foo", "Bar", "my_def", "Bar::<Class:Bar>", "my_singleton_def"], entries.map(&:name))
 
       entries = @index.entries_for("/fake/path/foo.rb", RubyIndexer::Entry::Namespace)
@@ -1861,7 +1861,7 @@ module RubyIndexer
     end
 
     def test_entries_for_returns_nil_if_no_matches
-      assert_empty(@index.entries_for("non_existing_file.rb"))
+      assert_nil(@index.entries_for("non_existing_file.rb", Entry::Namespace))
     end
   end
 end
