@@ -1842,5 +1842,26 @@ module RubyIndexer
       candidates = @index.method_completion_candidates("=", "Foo")
       assert_equal(["==", "==="], candidates.map(&:name))
     end
+
+    def test_entries_for
+      index(<<~RUBY)
+        class Foo; end
+
+        module Bar
+          def my_def; end
+          def self.my_singleton_def; end
+        end
+      RUBY
+
+      entries = @index.entries_for("/fake/path/foo.rb", Entry)
+      assert_equal(["Foo", "Bar", "my_def", "Bar::<Class:Bar>", "my_singleton_def"], entries.map(&:name))
+
+      entries = @index.entries_for("/fake/path/foo.rb", RubyIndexer::Entry::Namespace)
+      assert_equal(["Foo", "Bar", "Bar::<Class:Bar>"], entries.map(&:name))
+    end
+
+    def test_entries_for_returns_nil_if_no_matches
+      assert_nil(@index.entries_for("non_existing_file.rb", Entry::Namespace))
+    end
   end
 end

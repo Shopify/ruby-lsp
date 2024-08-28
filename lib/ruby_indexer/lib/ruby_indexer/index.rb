@@ -616,6 +616,17 @@ module RubyIndexer
       singleton
     end
 
+    sig do
+      type_parameters(:T).params(
+        path: String,
+        type: T::Class[T.all(T.type_parameter(:T), Entry)],
+      ).returns(T.nilable(T::Array[T.type_parameter(:T)]))
+    end
+    def entries_for(path, type)
+      entries = @files_to_entries[path]
+      entries&.grep(type)
+    end
+
     private
 
     # Runs the registered included hooks
