@@ -625,7 +625,7 @@ module RubyIndexer
     def entries_for(path, type = nil)
       type = Entry if type.nil?
 
-      Array(@files_to_entries[path]).grep(type).grep_v(RubyIndexer::Entry::SingletonClass)
+      Array(@files_to_entries[path]).grep(type)
     end
 
     private
