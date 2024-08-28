@@ -73,3 +73,9 @@ export class WorkspaceChannel implements vscode.LogOutputChannel {
     this.actualChannel.dispose();
   }
 }
+
+export class SorbetWorkspaceChannel extends WorkspaceChannel {
+  constructor(workspaceName: string, actualChannel: vscode.LogOutputChannel) {
+    super(`${workspaceName} [Sorbet]`, actualChannel);
+  }
+}
