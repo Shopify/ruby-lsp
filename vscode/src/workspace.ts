@@ -287,7 +287,6 @@ export class Workspace implements WorkspaceInterface {
   private registerRestarts(context: vscode.ExtensionContext) {
     this.createRestartWatcher(context, "Gemfile.lock");
     this.createRestartWatcher(context, "gems.locked");
-    this.createRestartWatcher(context, "**/.rubocop.yml");
 
     // If a configuration that affects the Ruby LSP has changed, update the client options using the latest
     // configuration and restart the server
