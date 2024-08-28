@@ -37,18 +37,34 @@ export class Shadowenv extends VersionManager {
         version: parsedResult.version,
       };
     } catch (error: any) {
-      // If running `shadowev exec` fails, it's typically because the workspace has not been trusted yet. Here we offer
-      // to trust it and fail it the user decides to not the trust the workspace (since in that case, we are unable to
-      // activate the Ruby environment).
-      const answer = await vscode.window.showErrorMessage(
-        `Failed to run shadowenv exec. Is ${this.bundleUri.fsPath} trusted? Run 'shadowenv trust --help' to know more`,
-        "Trust workspace",
-        "Cancel",
-      );
+      const { stdout } = await this.runScript("command -v shadowenv");
 
-      if (answer === "Trust workspace") {
-        await asyncExec("shadowenv trust", { cwd: this.bundleUri.fsPath });
-        return this.activate();
+      if (stdout.trim().length === 0) {
+        const answer = await vscode.window.showErrorMessage(
+          `Couldn't find shadowenv executable. Double-check that it's installed and that it's in your PATH.`,
+          "Reload window",
+          "Cancel",
+        );
+
+        if (answer === "Reload window") {
+          return vscode.commands.executeCommand(
+            "workbench.action.reloadWindow",
+          );
+        }
+      } else {
+        // If running `shadowev exec` fails, it's typically because the workspace has not been trusted yet. Here we
+        // offer to trust it and fail it the user decides to not the trust the workspace (since in that case, we are
+        // unable to activate the Ruby environment).
+        const answer = await vscode.window.showErrorMessage(
+          `Failed to run shadowenv. Is ${this.bundleUri.fsPath} trusted? Run 'shadowenv trust --help' to know more`,
+          "Trust workspace",
+          "Cancel",
+        );
+
+        if (answer === "Trust workspace") {
+          await asyncExec("shadowenv trust", { cwd: this.bundleUri.fsPath });
+          return this.activate();
+        }
       }
 
       throw new Error(
