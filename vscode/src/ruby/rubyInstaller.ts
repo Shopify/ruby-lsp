@@ -3,6 +3,8 @@ import os from "os";
 
 import * as vscode from "vscode";
 
+import { asyncExec } from "../common";
+
 import { Chruby } from "./chruby";
 
 interface RubyVersion {
@@ -51,5 +53,22 @@ export class RubyInstaller extends Chruby {
       `Cannot find installation directory for Ruby version ${rubyVersion.version}.\
          Searched in ${possibleInstallationUris.map((uri) => uri.fsPath).join(", ")}`,
     );
+  }
+
+  // Override the `runScript` method to ensure that we do not pass any `shell` to `asyncExec`. The activation script is
+  // only compatible with `cmd.exe`, and not Powershell, due to escaping of quotes. We need to ensure to always run the
+  // script on `cmd.exe`.
+  protected runScript(command: string) {
+    this.outputChannel.info(
+      `Running command: \`${command}\` in ${this.bundleUri.fsPath}`,
+    );
+    this.outputChannel.debug(
+      `Environment used for command: ${JSON.stringify(process.env)}`,
+    );
+
+    return asyncExec(command, {
+      cwd: this.bundleUri.fsPath,
+      env: process.env,
+    });
   }
 }
