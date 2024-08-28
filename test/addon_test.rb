@@ -106,7 +106,7 @@ module RubyLsp
     end
 
     def test_raises_if_an_addon_cannot_be_found
-      assert_raises do
+      assert_raises(Addon::AddonNotFoundError) do
         Addon.get("Invalid Addon")
       end
     end

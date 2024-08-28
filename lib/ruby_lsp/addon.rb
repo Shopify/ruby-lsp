@@ -30,6 +30,8 @@ module RubyLsp
     # Addon instances that have declared a handler to accept file watcher events
     @file_watcher_addons = T.let([], T::Array[Addon])
 
+    AddonNotFoundError = Class.new(StandardError)
+
     class << self
       extend T::Sig
 
@@ -78,11 +80,10 @@ module RubyLsp
         errors
       end
 
-      # Intended for use by tests for addons
       sig { params(addon_name: String).returns(Addon) }
       def get(addon_name)
         addon = addons.find { |addon| addon.name == addon_name }
-        raise "Could not find addon '#{addon_name}'" unless addon
+        raise AddonNotFoundError, "Could not find addon '#{addon_name}'" unless addon
 
         addon
       end
