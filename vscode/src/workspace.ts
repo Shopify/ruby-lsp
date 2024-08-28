@@ -109,8 +109,16 @@ export class Workspace implements WorkspaceInterface {
 
     try {
       STATUS_EMITTER.fire(this);
-      await this.lspClient.start();
-      await this.lspClient.afterStart();
+      await vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Window,
+          title: "Initializing Ruby LSP",
+        },
+        async () => {
+          await this.lspClient!.start();
+          await this.lspClient!.afterStart();
+        },
+      );
       STATUS_EMITTER.fire(this);
 
       // If something triggered a restart while we were still booting, then now we need to perform the restart since the
