@@ -443,12 +443,10 @@ suite("Client", () => {
       },
     );
 
-    const expectedMessage =
-      os.platform() === "win32"
-        ? /Layout\/EndOfLine: Carriage return character missing/
-        : /Style\/FrozenStringLiteralComment: Missing magic comment/;
-
-    assert.match(response.items[0].message, expectedMessage);
+    assert.strictEqual(
+      response.items[0].message,
+      "mismatched indentations at 'end' with 'def' at 1",
+    );
   }).timeout(20000);
 
   test("folding range", async () => {
