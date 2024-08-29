@@ -50,31 +50,13 @@ You can also attempt an update from the command line with `BUNDLE_GEMFILE=.ruby-
 > [!NOTE]
 > If you're using any addon gem, such as `ruby-lsp-rspec`, then `ruby-lsp` will also be present in your `Gemfile.lock` and it's possible that an outdated addon could prevent `ruby-lsp` from updating.
 
-A common problem is that the `ruby-lsp` gem cannot be updated due to another dependency's constraints:
+Another possible scenario where the `ruby-lsp` gem cannot be updated is when one of its runtime dependencies are
+constrained by another gem in the application. For example, Ruby LSP has a dependency on
+[RBS](https://github.com/ruby/rbs) v3. If another gem constrains the version of RBS to an older release, it will not be
+possible to use newer versions of Ruby LSP.
 
-**Prism constraints**
-
-Since v0.12.0, Ruby LSP has had a dependency on the [Prism](https://rubygems.org/gems/prism) parser.
-Prior to that, the Prism parser was named [YARP](https://rubygems.org/gems/yarp). The fact that the gem was renamed leads to some awkward dependency resolutions issues.
-Since Prism is a pre-1.0 release, there may be breaking changes introduced in minor versions.
-For that reason, we constrain the version of Prism up to that which is known to be compatible.
-
-With the custom bundle approach described earlier, Bundler resolves a version of Ruby LSP which is compatible the dependencies already in your `Gemfile.lock.`
-
-When a new version of Prism is released, it will take a little time for us as Ruby LSP maintainers to verify the compatibility, and make any necessary updates.
-
-During that time, it's possible for the Prism version in your `Gemfile.lock` to be increased due to being a dependency of another gem in your bundle.
-
-If Prism is locked to a newer version not yet supported by the Ruby LSP, then the only outcome that satisfies Bundler's checks is to install the very old versions that depend on the old name YARP.
-
-Once Prism v1.0 is released, we will relax the version constraint to alleviate this problem.
-
-**Other constraints**
-
-Ruby LSP has a dependency on [RBS](https://github.com/ruby/rbs) v3.
-If another gem constrains the version of RBS to an older release, it will not be possible to use newer versions of Ruby LSP.
-
-There is also dependency on `sorbet-runtime` which is used by a number of other gems.
+The 3 runtime dependencies of the Ruby LSP are `rbs`, `prism` and `sorbet-runtime`. If any of them are being constrained
+by the application, the Ruby LSP may fail to update.
 
 Running `BUNDLE_GEMFILE=.ruby-lsp/Gemfile bundle outdated` may help with understanding what is being constrained.
 
