@@ -265,6 +265,19 @@ module RubyLsp
                     ],
                   ),
                 ),
+                # Register watching .rubocop.yml
+                Interface::Registration.new(
+                  id: "workspace/didChangeWatchedFiles-rubocop",
+                  method: "workspace/didChangeWatchedFiles",
+                  register_options: Interface::DidChangeWatchedFilesRegistrationOptions.new(
+                    watchers: [
+                      Interface::FileSystemWatcher.new(
+                        glob_pattern: "**/.rubocop.yml",
+                        kind: Constant::WatchKind::CREATE | Constant::WatchKind::CHANGE | Constant::WatchKind::DELETE,
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -806,18 +819,26 @@ module RubyLsp
         uri = URI(change[:uri])
         file_path = uri.to_standardized_path
         next if file_path.nil? || File.directory?(file_path)
-        next unless file_path.end_with?(".rb")
 
-        load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
-        indexable = RubyIndexer::IndexablePath.new(load_path_entry, file_path)
+        if file_path.end_with?(".rb")
+          load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
+          indexable = RubyIndexer::IndexablePath.new(load_path_entry, file_path)
 
-        case change[:type]
-        when Constant::FileChangeType::CREATED
-          index.index_single(indexable)
-        when Constant::FileChangeType::CHANGED
-          index.handle_change(indexable)
-        when Constant::FileChangeType::DELETED
-          index.delete(indexable)
+          case change[:type]
+          when Constant::FileChangeType::CREATED
+            index.index_single(indexable)
+          when Constant::FileChangeType::CHANGED
+            index.handle_change(indexable)
+          when Constant::FileChangeType::DELETED
+            index.delete(indexable)
+          end
+        end
+
+        next unless file_path.end_with?(".rubocop.yml")
+
+        if defined?(Requests::Support::RuboCopFormatter)
+          @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.new)
+          send_log_message("RuboCop configuration changed. RuboCop configuration reloaded.")
         end
       end
 
