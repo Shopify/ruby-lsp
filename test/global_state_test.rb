@@ -209,6 +209,20 @@ module RubyLsp
       assert_predicate(state, :has_type_checker)
     end
 
+    def test_addon_settings_are_stored
+      global_state = GlobalState.new
+
+      global_state.apply_options({
+        initializationOptions: {
+          addonSettings: {
+            "Ruby LSP Rails" => { runtimeServerEnabled: false },
+          },
+        },
+      })
+
+      assert_equal({ runtimeServerEnabled: false }, global_state.settings_for_addon("Ruby LSP Rails"))
+    end
+
     private
 
     def stub_direct_dependencies(dependencies)
