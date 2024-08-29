@@ -98,16 +98,17 @@ if options[:debug]
 end
 
 if options[:time_index]
-  require "benchmark"
-
   index = RubyIndexer::Index.new
 
-  result = Benchmark.realtime { index.index_all }
+  time_start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+  index.index_all
+  elapsed_time = Process.clock_gettime(Process::CLOCK_MONOTONIC) - time_start
+
   entries = index.instance_variable_get(:@entries)
   entries_by_entry_type = entries.values.flatten.group_by(&:class)
 
   puts <<~MSG
-    Ruby LSP v#{RubyLsp::VERSION}: Indexing took #{result.round(5)} seconds and generated:
+    Ruby LSP v#{RubyLsp::VERSION}: Indexing took #{elapsed_time.round(5)} seconds and generated:
     - #{entries_by_entry_type.sort_by { |k, _| k.to_s }.map { |k, v| "#{k.name.split("::").last}: #{v.size}" }.join("\n- ")}
   MSG
   return
