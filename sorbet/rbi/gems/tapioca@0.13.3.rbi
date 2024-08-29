@@ -225,7 +225,7 @@ class RBI::TypedParam < ::T::Struct
   const :type, ::String
 
   class << self
-    # source://sorbet-runtime/0.5.11481/lib/types/struct.rb#13
+    # source://sorbet-runtime/0.5.11551/lib/types/struct.rb#13
     def inherited(s); end
   end
 end
@@ -1142,7 +1142,7 @@ class Tapioca::ConfigHelper::ConfigError < ::T::Struct
   const :message_parts, T::Array[::Tapioca::ConfigHelper::ConfigErrorMessagePart]
 
   class << self
-    # source://sorbet-runtime/0.5.11481/lib/types/struct.rb#13
+    # source://sorbet-runtime/0.5.11551/lib/types/struct.rb#13
     def inherited(s); end
   end
 end
@@ -1153,7 +1153,7 @@ class Tapioca::ConfigHelper::ConfigErrorMessagePart < ::T::Struct
   const :colors, T::Array[::Symbol]
 
   class << self
-    # source://sorbet-runtime/0.5.11481/lib/types/struct.rb#13
+    # source://sorbet-runtime/0.5.11551/lib/types/struct.rb#13
     def inherited(s); end
   end
 end
@@ -2453,7 +2453,7 @@ class Tapioca::Loaders::Loader
   # @param engine [T.class_of(Rails::Engine)]
   # @return [Array<String>]
   #
-  # source://sorbet-runtime/0.5.11481/lib/types/private/methods/_methods.rb#257
+  # source://sorbet-runtime/0.5.11551/lib/types/private/methods/_methods.rb#257
   def eager_load_paths(*args, **_arg1, &blk); end
 
   # source://tapioca//lib/tapioca/loaders/loader.rb#198
@@ -3361,7 +3361,7 @@ module Tapioca::Static::SymbolLoader
 
     # @return [Array<T.class_of(Rails::Engine)>]
     #
-    # source://sorbet-runtime/0.5.11481/lib/types/private/methods/_methods.rb#257
+    # source://sorbet-runtime/0.5.11551/lib/types/private/methods/_methods.rb#257
     def engines(*args, **_arg1, &blk); end
 
     # source://tapioca//lib/tapioca/static/symbol_loader.rb#82

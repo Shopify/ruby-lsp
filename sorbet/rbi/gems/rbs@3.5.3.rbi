@@ -6343,8 +6343,10 @@ class RBS::Types::UntypedFunction
   # source://rbs//lib/rbs/types.rb#1254
   def update(return_type: T.unsafe(nil)); end
 
+  # @return [Boolean]
+  #
   # source://rbs//lib/rbs/types.rb#1270
-  def with_nonreturn_void; end
+  def with_nonreturn_void?; end
 
   # source://rbs//lib/rbs/types.rb#1250
   def with_return_type(ty); end
