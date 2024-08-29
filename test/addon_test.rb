@@ -7,7 +7,7 @@ module RubyLsp
   class AddonTest < Minitest::Test
     def setup
       @addon = Class.new(Addon) do
-        attr_reader :activated, :field
+        attr_reader :activated, :field, :settings
 
         def initialize
           @field = 123
@@ -16,6 +16,7 @@ module RubyLsp
 
         def activate(global_state, outgoing_queue)
           @activated = true
+          @settings = global_state.settings_for_addon(name)
         end
 
         def name
@@ -109,6 +110,26 @@ module RubyLsp
       assert_raises(Addon::AddonNotFoundError) do
         Addon.get("Invalid Addon")
       end
+    end
+
+    def test_addons_receive_settings
+      global_state = GlobalState.new
+      global_state.apply_options({
+        initializationOptions: {
+          addonSettings: {
+            "My Addon" => { something: false },
+          },
+        },
+      })
+
+      outgoing_queue = Thread::Queue.new
+      Addon.load_addons(global_state, outgoing_queue)
+
+      addon = Addon.get("My Addon")
+
+      assert_equal({ something: false }, T.unsafe(addon).settings)
+    ensure
+      T.must(outgoing_queue).close
     end
   end
 end

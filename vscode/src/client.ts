@@ -184,6 +184,7 @@ function collectClientOptions(
       formatter: configuration.get("formatter"),
       linters: configuration.get("linters"),
       indexing: configuration.get("indexing"),
+      addonSettings: configuration.get("addonSettings"),
     },
   };
 }

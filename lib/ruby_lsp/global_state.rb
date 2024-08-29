@@ -40,6 +40,12 @@ module RubyLsp
       @supports_watching_files = T.let(false, T::Boolean)
       @experimental_features = T.let(false, T::Boolean)
       @type_inferrer = T.let(TypeInferrer.new(@index, @experimental_features), TypeInferrer)
+      @addon_settings = T.let({}, T::Hash[String, T.untyped])
+    end
+
+    sig { params(addon_name: String).returns(T.nilable(T::Hash[Symbol, T.untyped])) }
+    def settings_for_addon(addon_name)
+      @addon_settings[addon_name]
     end
 
     sig { params(identifier: String, instance: Requests::Support::Formatter).void }
@@ -118,6 +124,12 @@ module RubyLsp
 
       @experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled) || false
       @type_inferrer.experimental_features = @experimental_features
+
+      addon_settings = options.dig(:initializationOptions, :addonSettings)
+      if addon_settings
+        addon_settings.transform_keys!(&:to_s)
+        @addon_settings.merge!(addon_settings)
+      end
 
       notifications
     end

@@ -294,6 +294,22 @@
             }
           }
         },
+        "rubyLsp.addonSettings": {
+          "description": "Settings that will be forwarded to configure the behavior of Ruby LSP addons. Keys are addon names, values are objects of settings",
+          "type": "object",
+          "examples": [
+            {
+              "Ruby LSP Rails": {
+                "something": true
+              }
+            },
+            {
+              "Standard Ruby": {
+                "something": true
+              }
+            }
+          ]
+        },
         "rubyLsp.rubyVersionManager": {
           "type": "object",
           "properties": {
