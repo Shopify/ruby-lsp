@@ -7,82 +7,85 @@
 # source://minitest-reporters//lib/minitest/reporters.rb#3
 module Minitest
   class << self
-    # source://minitest/5.23.1/lib/minitest.rb#197
+    # source://minitest/5.25.1/lib/minitest.rb#322
     def __run(reporter, options); end
 
-    # source://minitest/5.23.1/lib/minitest.rb#97
+    # source://minitest/5.25.1/lib/minitest.rb#96
     def after_run(&block); end
 
-    # source://minitest/5.23.1/lib/minitest.rb#19
+    # source://minitest/5.25.1/lib/minitest.rb#19
     def allow_fork; end
 
-    # source://minitest/5.23.1/lib/minitest.rb#19
+    # source://minitest/5.25.1/lib/minitest.rb#19
     def allow_fork=(_arg0); end
 
-    # source://minitest/5.23.1/lib/minitest.rb#69
+    # source://minitest/5.25.1/lib/minitest.rb#69
     def autorun; end
 
-    # source://minitest/5.23.1/lib/minitest.rb#19
+    # source://minitest/5.25.1/lib/minitest.rb#19
     def backtrace_filter; end
 
-    # source://minitest/5.23.1/lib/minitest.rb#19
+    # source://minitest/5.25.1/lib/minitest.rb#19
     def backtrace_filter=(_arg0); end
 
-    # source://minitest/5.23.1/lib/minitest.rb#18
+    # source://minitest/5.25.1/lib/minitest.rb#18
     def cattr_accessor(name); end
 
-    # source://minitest/5.23.1/lib/minitest.rb#1178
+    # source://minitest/5.25.1/lib/minitest.rb#1215
     def clock_time; end
 
-    # source://minitest/5.23.1/lib/minitest.rb#177
+    # source://minitest/5.25.1/lib/minitest.rb#302
     def empty_run!(options); end
 
-    # source://minitest/5.23.1/lib/minitest.rb#19
+    # source://minitest/5.25.1/lib/minitest.rb#19
     def extensions; end
 
-    # source://minitest/5.23.1/lib/minitest.rb#19
+    # source://minitest/5.25.1/lib/minitest.rb#19
     def extensions=(_arg0); end
 
-    # source://minitest/5.23.1/lib/minitest.rb#306
+    # source://minitest/5.25.1/lib/minitest.rb#335
     def filter_backtrace(bt); end
 
-    # source://minitest/5.23.1/lib/minitest.rb#19
+    # source://minitest/5.25.1/lib/minitest.rb#19
     def info_signal; end
 
-    # source://minitest/5.23.1/lib/minitest.rb#19
+    # source://minitest/5.25.1/lib/minitest.rb#19
     def info_signal=(_arg0); end
 
-    # source://minitest/5.23.1/lib/minitest.rb#101
+    # source://minitest/5.25.1/lib/minitest.rb#124
     def init_plugins(options); end
 
-    # source://minitest/5.23.1/lib/minitest.rb#108
+    # source://minitest/5.25.1/lib/minitest.rb#108
     def load_plugins; end
 
-    # source://minitest/5.23.1/lib/minitest.rb#19
+    # source://minitest/5.25.1/lib/minitest.rb#19
     def parallel_executor; end
 
-    # source://minitest/5.23.1/lib/minitest.rb#19
+    # source://minitest/5.25.1/lib/minitest.rb#19
     def parallel_executor=(_arg0); end
 
-    # source://minitest/5.23.1/lib/minitest.rb#210
+    # source://minitest/5.25.1/lib/minitest.rb#142
     def process_args(args = T.unsafe(nil)); end
 
-    # source://minitest/5.23.1/lib/minitest.rb#19
+    # source://minitest/5.25.1/lib/minitest.rb#103
+    def register_plugin(name_or_mod); end
+
+    # source://minitest/5.25.1/lib/minitest.rb#19
     def reporter; end
 
-    # source://minitest/5.23.1/lib/minitest.rb#19
+    # source://minitest/5.25.1/lib/minitest.rb#19
     def reporter=(_arg0); end
 
-    # source://minitest/5.23.1/lib/minitest.rb#143
+    # source://minitest/5.25.1/lib/minitest.rb#268
     def run(args = T.unsafe(nil)); end
 
-    # source://minitest/5.23.1/lib/minitest.rb#1169
+    # source://minitest/5.25.1/lib/minitest.rb#1206
     def run_one_method(klass, method_name); end
 
-    # source://minitest/5.23.1/lib/minitest.rb#19
+    # source://minitest/5.25.1/lib/minitest.rb#19
     def seed; end
 
-    # source://minitest/5.23.1/lib/minitest.rb#19
+    # source://minitest/5.25.1/lib/minitest.rb#19
     def seed=(_arg0); end
   end
 end
@@ -544,25 +547,28 @@ class Minitest::Reporters::JUnitReporter < ::Minitest::Reporters::BaseReporter
 
   private
 
-  # source://minitest-reporters//lib/minitest/reporters/junit_reporter.rb#168
+  # source://minitest-reporters//lib/minitest/reporters/junit_reporter.rb#166
   def analyze_suite(tests); end
 
-  # source://minitest-reporters//lib/minitest/reporters/junit_reporter.rb#181
+  # source://minitest-reporters//lib/minitest/reporters/junit_reporter.rb#179
   def filename_for(suite); end
 
   # source://minitest-reporters//lib/minitest/reporters/junit_reporter.rb#77
   def get_source_location(result); end
 
-  # source://minitest-reporters//lib/minitest/reporters/junit_reporter.rb#158
+  # source://minitest-reporters//lib/minitest/reporters/junit_reporter.rb#156
   def location(exception); end
 
-  # source://minitest-reporters//lib/minitest/reporters/junit_reporter.rb#142
+  # source://minitest-reporters//lib/minitest/reporters/junit_reporter.rb#134
   def message_for(test); end
 
   # source://minitest-reporters//lib/minitest/reporters/junit_reporter.rb#85
   def parse_xml_for(xml, suite, tests); end
 
-  # source://minitest-reporters//lib/minitest/reporters/junit_reporter.rb#119
+  # source://minitest-reporters//lib/minitest/reporters/junit_reporter.rb#150
+  def xml_attachment_for(test); end
+
+  # source://minitest-reporters//lib/minitest/reporters/junit_reporter.rb#111
   def xml_message_for(test); end
 end
 
@@ -946,36 +952,37 @@ class Minitest::Reporters::SpecReporter < ::Minitest::Reporters::BaseReporter
   # The constructor takes an `options` hash
   #
   # @option options
+  # @option options
   # @param options [Hash]
   # @return [SpecReporter] a new instance of SpecReporter
   #
-  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#18
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#20
   def initialize(options = T.unsafe(nil)); end
 
-  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#50
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#53
   def record(test); end
 
-  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#29
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#32
   def report; end
 
-  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#23
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#26
   def start; end
 
   protected
 
-  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#62
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#65
   def after_suite(_suite); end
 
-  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#58
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#61
   def before_suite(suite); end
 
-  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#66
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#69
   def print_failure(name, tests); end
 
-  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#76
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#79
   def record_print_failures_if_any(test); end
 
-  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#83
+  # source://minitest-reporters//lib/minitest/reporters/spec_reporter.rb#86
   def record_print_status(test); end
 end
 

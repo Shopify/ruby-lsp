@@ -1266,33 +1266,35 @@ RuboCop::Cop::Minitest::LiteralAsActualArgument::RESTRICT_ON_SEND = T.let(T.unsa
 #
 # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#30
 class RuboCop::Cop::Minitest::MultipleAssertions < ::RuboCop::Cop::Base
-  include ::RuboCop::Cop::ConfigurableMax
   include ::RuboCop::Cop::VisibilityHelp
   include ::RuboCop::Cop::DefNode
   include ::RuboCop::Cop::MinitestExplorationHelpers
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#36
+  # source://rubocop/1.65.1/lib/rubocop/cop/exclude_limit.rb#11
+  def max=(value); end
+
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#37
   def on_class(class_node); end
 
   private
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#53
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#54
   def assertions_count(node); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#61
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#62
   def assertions_count_based_on_type(node); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#76
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#77
   def assertions_count_in_assignment(node); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#94
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#95
   def assertions_count_in_branches(branches); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#98
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#99
   def max_assertions; end
 end
 
-# source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#34
+# source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#33
 RuboCop::Cop::Minitest::MultipleAssertions::MSG = T.let(T.unsafe(nil), String)
 
 # Common functionality for `AssertNil` and `RefuteNil` cops.
@@ -2650,40 +2652,45 @@ module RuboCop::Minitest::AssertOffense
   # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#133
   def assert_correction(correction, loop: T.unsafe(nil)); end
 
+  # @raise [RuboCop::Runner::InfiniteCorrectionLoop]
+  #
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#158
+  def assert_no_corrections; end
+
   # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#95
   def assert_no_offenses(source, file = T.unsafe(nil)); end
 
   # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#106
   def assert_offense(source, file = T.unsafe(nil), **replacements); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#195
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#209
   def configuration; end
 
   # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#85
   def format_offense(source, **replacements); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#163
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#177
   def inspect_source(source, cop, file = T.unsafe(nil)); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#170
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#184
   def investigate(cop, processed_source); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#182
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#196
   def parse_source!(source, file = T.unsafe(nil)); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#217
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#231
   def parser_engine; end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#203
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#217
   def registry; end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#212
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#226
   def ruby_version; end
 
   # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#78
   def setup; end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#158
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#172
   def setup_assertion; end
 end
 

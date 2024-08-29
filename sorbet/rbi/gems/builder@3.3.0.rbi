@@ -7,7 +7,7 @@
 # If the Builder::XChar module is not currently defined, fail on any
 # name clashes in standard library classes.
 #
-# source://builder//lib/builder/blankslate.rb#17
+# source://builder//lib/builder/xmlbase.rb#4
 module Builder
   class << self
     # source://builder//lib/builder/xchar.rb#13
@@ -15,12 +15,9 @@ module Builder
   end
 end
 
-# source://builder//lib/builder/blankslate.rb#19
-Builder::BlankSlate = BasicObject
-
 # Generic error for builder
 #
-# source://builder//lib/builder/xmlbase.rb#9
+# source://builder//lib/builder/xmlbase.rb#7
 class Builder::IllegalBlockError < ::RuntimeError; end
 
 # source://builder//lib/builder/xchar.rb#33
@@ -85,7 +82,7 @@ Builder::XChar::XML_PREDEFINED = T.let(T.unsafe(nil), Regexp)
 # XmlBase is a base class for building XML builders.  See
 # Builder::XmlMarkup and Builder::XmlEvents for examples.
 #
-# source://builder//lib/builder/xmlbase.rb#13
+# source://builder//lib/builder/xmlbase.rb#11
 class Builder::XmlBase < ::BasicObject
   # Create an XML markup builder.
   #
@@ -100,7 +97,7 @@ class Builder::XmlBase < ::BasicObject
   #
   # @return [XmlBase] a new instance of XmlBase
   #
-  # source://builder//lib/builder/xmlbase.rb#29
+  # source://builder//lib/builder/xmlbase.rb#27
   def initialize(indent = T.unsafe(nil), initial = T.unsafe(nil), encoding = T.unsafe(nil)); end
 
   # Append text to the output target without escaping any markup.
@@ -117,19 +114,19 @@ class Builder::XmlBase < ::BasicObject
   # method/operation builders can use other builders as their
   # targets.
   #
-  # source://builder//lib/builder/xmlbase.rb#118
+  # source://builder//lib/builder/xmlbase.rb#116
   def <<(text); end
 
   # @return [Boolean]
   #
-  # source://builder//lib/builder/xmlbase.rb#35
+  # source://builder//lib/builder/xmlbase.rb#33
   def explicit_nil_handling?; end
 
   # Create XML markup based on the name of the method.  This method
   # is never invoked directly, but is called for each markup method
   # in the markup block that isn't cached.
   #
-  # source://builder//lib/builder/xmlbase.rb#92
+  # source://builder//lib/builder/xmlbase.rb#90
   def method_missing(sym, *args, &block); end
 
   # For some reason, nil? is sent to the XmlMarkup object.  If nil?
@@ -141,14 +138,14 @@ class Builder::XmlBase < ::BasicObject
   #
   # @return [Boolean]
   #
-  # source://builder//lib/builder/xmlbase.rb#128
+  # source://builder//lib/builder/xmlbase.rb#126
   def nil?; end
 
   # Create a tag named +sym+.  Other than the first argument which
   # is the tag name, the arguments are the same as the tags
   # implemented via <tt>method_missing</tt>.
   #
-  # source://builder//lib/builder/xmlbase.rb#42
+  # source://builder//lib/builder/xmlbase.rb#40
   def tag!(sym, *args, &block); end
 
   # Append text to the output target.  Escape any markup.  May be
@@ -156,24 +153,24 @@ class Builder::XmlBase < ::BasicObject
   #
   #   builder.p { |b| b.br; b.text! "HI" }   #=>  <p><br/>HI</p>
   #
-  # source://builder//lib/builder/xmlbase.rb#101
+  # source://builder//lib/builder/xmlbase.rb#99
   def text!(text); end
 
   private
 
-  # source://builder//lib/builder/xmlbase.rb#136
+  # source://builder//lib/builder/xmlbase.rb#134
   def _escape(text); end
 
-  # source://builder//lib/builder/xmlbase.rb#159
+  # source://builder//lib/builder/xmlbase.rb#157
   def _escape_attribute(text); end
 
-  # source://builder//lib/builder/xmlbase.rb#169
+  # source://builder//lib/builder/xmlbase.rb#167
   def _indent; end
 
-  # source://builder//lib/builder/xmlbase.rb#174
+  # source://builder//lib/builder/xmlbase.rb#172
   def _nested_structures(block); end
 
-  # source://builder//lib/builder/xmlbase.rb#164
+  # source://builder//lib/builder/xmlbase.rb#162
   def _newline; end
 
   # If XmlBase.cache_method_calls = true, we dynamicly create the method
@@ -183,20 +180,20 @@ class Builder::XmlBase < ::BasicObject
   # method_missing is very slow, this speeds up document generation
   # significantly.
   #
-  # source://builder//lib/builder/xmlbase.rb#187
+  # source://builder//lib/builder/xmlbase.rb#185
   def cache_method_call(sym); end
 
   class << self
     # Returns the value of attribute cache_method_calls.
     #
-    # source://builder//lib/builder/xmlbase.rb#16
+    # source://builder//lib/builder/xmlbase.rb#14
     def cache_method_calls; end
 
     # Sets the attribute cache_method_calls
     #
     # @param value the value to set the attribute cache_method_calls to.
     #
-    # source://builder//lib/builder/xmlbase.rb#16
+    # source://builder//lib/builder/xmlbase.rb#14
     def cache_method_calls=(_arg0); end
   end
 end
@@ -347,15 +344,15 @@ end
 #
 #   Example:
 #
-#     xm = Builder.new(:indent=>2)
+#     xm = Builder::XmlMarkup.new(:indent=>2)
 #     # xm will produce nicely formatted and indented XML.
 #
-#     xm = Builder.new(:indent=>2, :margin=>4)
+#     xm = Builder::XmlMarkup.new(:indent=>2, :margin=>4)
 #     # xm will produce nicely formatted and indented XML with 2
 #     # spaces per indent and an over all indentation level of 4.
 #
 #     builder = Builder::XmlMarkup.new(:target=>$stdout, :indent=>2)
-#     builder.name { |b| b.first("Jim"); b.last("Weirich) }
+#     builder.name { |b| b.first("Jim"); b.last("Weirich") }
 #     # prints:
 #     #     <name>
 #     #       <first>Jim</first>
@@ -384,7 +381,7 @@ end
 #
 #     xml_builder = Builder::XmlMarkup.new
 #     xml_builder.div { |xml|
-#       xml.stong("text")
+#       xml.strong("text")
 #     }
 #
 # source://builder//lib/builder/xmlmarkup.rb#161
