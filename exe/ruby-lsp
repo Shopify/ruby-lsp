@@ -135,4 +135,8 @@ if options[:doctor]
   return
 end
 
+# Ensure all output goes out stderr by default to allow puts/p/pp to work
+# without specifying output device.
+$> = $stderr
+
 RubyLsp::Server.new.start
