@@ -23,7 +23,8 @@
             "start_column": 0,
             "end_line": 20,
             "end_column": 3
-          }
+          },
+          "ParentTest"
         ]
       },
       "data": {
@@ -56,7 +57,8 @@
             "start_column": 0,
             "end_line": 20,
             "end_column": 3
-          }
+          },
+          "ParentTest"
         ]
       },
       "data": {
@@ -89,7 +91,8 @@
             "start_column": 0,
             "end_line": 20,
             "end_column": 3
-          }
+          },
+          "ParentTest"
         ]
       },
       "data": {
@@ -115,14 +118,15 @@
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "test_public",
+          "ParentTest#test_public",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name ParentTest#test_public",
           {
             "start_line": 1,
             "start_column": 2,
             "end_line": 1,
             "end_column": 22
-          }
+          },
+          "test_public"
         ]
       },
       "data": {
@@ -147,14 +151,15 @@
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "test_public",
+          "ParentTest#test_public",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name ParentTest#test_public",
           {
             "start_line": 1,
             "start_column": 2,
             "end_line": 1,
             "end_column": 22
-          }
+          },
+          "test_public"
         ]
       },
       "data": {
@@ -179,14 +184,15 @@
         "command": "rubyLsp.debugTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "test_public",
+          "ParentTest#test_public",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name ParentTest#test_public",
           {
             "start_line": 1,
             "start_column": 2,
             "end_line": 1,
             "end_column": 22
-          }
+          },
+          "test_public"
         ]
       },
       "data": {
@@ -211,14 +217,15 @@
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "FirstChildTest",
+          "ParentTest::FirstChildTest",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name \"/^ParentTest::FirstChildTest(#|::)/\"",
           {
             "start_line": 5,
             "start_column": 2,
             "end_line": 9,
             "end_column": 5
-          }
+          },
+          "FirstChildTest"
         ]
       },
       "data": {
@@ -244,14 +251,15 @@
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "FirstChildTest",
+          "ParentTest::FirstChildTest",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name \"/^ParentTest::FirstChildTest(#|::)/\"",
           {
             "start_line": 5,
             "start_column": 2,
             "end_line": 9,
             "end_column": 5
-          }
+          },
+          "FirstChildTest"
         ]
       },
       "data": {
@@ -277,14 +285,15 @@
         "command": "rubyLsp.debugTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "FirstChildTest",
+          "ParentTest::FirstChildTest",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name \"/^ParentTest::FirstChildTest(#|::)/\"",
           {
             "start_line": 5,
             "start_column": 2,
             "end_line": 9,
             "end_column": 5
-          }
+          },
+          "FirstChildTest"
         ]
       },
       "data": {
@@ -310,14 +319,15 @@
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "test_public",
+          "ParentTest::FirstChildTest#test_public",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name ParentTest::FirstChildTest#test_public",
           {
             "start_line": 6,
             "start_column": 4,
             "end_line": 6,
             "end_column": 24
-          }
+          },
+          "test_public"
         ]
       },
       "data": {
@@ -342,14 +352,15 @@
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "test_public",
+          "ParentTest::FirstChildTest#test_public",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name ParentTest::FirstChildTest#test_public",
           {
             "start_line": 6,
             "start_column": 4,
             "end_line": 6,
             "end_column": 24
-          }
+          },
+          "test_public"
         ]
       },
       "data": {
@@ -374,14 +385,15 @@
         "command": "rubyLsp.debugTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "test_public",
+          "ParentTest::FirstChildTest#test_public",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name ParentTest::FirstChildTest#test_public",
           {
             "start_line": 6,
             "start_column": 4,
             "end_line": 6,
             "end_column": 24
-          }
+          },
+          "test_public"
         ]
       },
       "data": {
@@ -406,14 +418,15 @@
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "SecondChildTest",
+          "ParentTest::SecondChildTest",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name \"/^ParentTest::SecondChildTest(#|::)/\"",
           {
             "start_line": 13,
             "start_column": 2,
             "end_line": 15,
             "end_column": 5
-          }
+          },
+          "SecondChildTest"
         ]
       },
       "data": {
@@ -439,14 +452,15 @@
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "SecondChildTest",
+          "ParentTest::SecondChildTest",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name \"/^ParentTest::SecondChildTest(#|::)/\"",
           {
             "start_line": 13,
             "start_column": 2,
             "end_line": 15,
             "end_column": 5
-          }
+          },
+          "SecondChildTest"
         ]
       },
       "data": {
@@ -472,14 +486,15 @@
         "command": "rubyLsp.debugTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "SecondChildTest",
+          "ParentTest::SecondChildTest",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name \"/^ParentTest::SecondChildTest(#|::)/\"",
           {
             "start_line": 13,
             "start_column": 2,
             "end_line": 15,
             "end_column": 5
-          }
+          },
+          "SecondChildTest"
         ]
       },
       "data": {
@@ -505,14 +520,15 @@
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "test_public",
+          "ParentTest::SecondChildTest#test_public",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name ParentTest::SecondChildTest#test_public",
           {
             "start_line": 14,
             "start_column": 4,
             "end_line": 14,
             "end_column": 24
-          }
+          },
+          "test_public"
         ]
       },
       "data": {
@@ -537,14 +553,15 @@
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "test_public",
+          "ParentTest::SecondChildTest#test_public",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name ParentTest::SecondChildTest#test_public",
           {
             "start_line": 14,
             "start_column": 4,
             "end_line": 14,
             "end_column": 24
-          }
+          },
+          "test_public"
         ]
       },
       "data": {
@@ -569,14 +586,15 @@
         "command": "rubyLsp.debugTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "test_public",
+          "ParentTest::SecondChildTest#test_public",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name ParentTest::SecondChildTest#test_public",
           {
             "start_line": 14,
             "start_column": 4,
             "end_line": 14,
             "end_column": 24
-          }
+          },
+          "test_public"
         ]
       },
       "data": {
@@ -601,14 +619,15 @@
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "test_public_again",
+          "ParentTest#test_public_again",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name ParentTest#test_public_again",
           {
             "start_line": 19,
             "start_column": 2,
             "end_line": 19,
             "end_column": 28
-          }
+          },
+          "test_public_again"
         ]
       },
       "data": {
@@ -633,14 +652,15 @@
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "test_public_again",
+          "ParentTest#test_public_again",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name ParentTest#test_public_again",
           {
             "start_line": 19,
             "start_column": 2,
             "end_line": 19,
             "end_column": 28
-          }
+          },
+          "test_public_again"
         ]
       },
       "data": {
@@ -665,14 +685,15 @@
         "command": "rubyLsp.debugTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
-          "test_public_again",
+          "ParentTest#test_public_again",
           "bundle exec ruby -Itest /fixtures/nested_minitest_tests.rb --name ParentTest#test_public_again",
           {
             "start_line": 19,
             "start_column": 2,
             "end_line": 19,
             "end_column": 28
-          }
+          },
+          "test_public_again"
         ]
       },
       "data": {
@@ -682,5 +703,7 @@
       }
     }
   ],
-  "params": []
+  "params": [
+
+  ]
 }

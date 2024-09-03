@@ -23,7 +23,8 @@
             "start_column": 0,
             "end_line": 22,
             "end_column": 3
-          }
+          },
+          "Test"
         ]
       },
       "data": {
@@ -56,7 +57,8 @@
             "start_column": 0,
             "end_line": 22,
             "end_column": 3
-          }
+          },
+          "Test"
         ]
       },
       "data": {
@@ -89,7 +91,8 @@
             "start_column": 0,
             "end_line": 22,
             "end_column": 3
-          }
+          },
+          "Test"
         ]
       },
       "data": {
@@ -115,14 +118,15 @@
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_public",
+          "Test#test_public",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public",
           {
             "start_line": 5,
             "start_column": 2,
             "end_line": 5,
             "end_column": 22
-          }
+          },
+          "test_public"
         ]
       },
       "data": {
@@ -147,14 +151,15 @@
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_public",
+          "Test#test_public",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public",
           {
             "start_line": 5,
             "start_column": 2,
             "end_line": 5,
             "end_column": 22
-          }
+          },
+          "test_public"
         ]
       },
       "data": {
@@ -179,14 +184,15 @@
         "command": "rubyLsp.debugTest",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_public",
+          "Test#test_public",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public",
           {
             "start_line": 5,
             "start_column": 2,
             "end_line": 5,
             "end_column": 22
-          }
+          },
+          "test_public"
         ]
       },
       "data": {
@@ -211,14 +217,15 @@
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_public_command",
+          "Test#test_public_command",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public_command",
           {
             "start_line": 9,
             "start_column": 9,
             "end_line": 9,
             "end_column": 37
-          }
+          },
+          "test_public_command"
         ]
       },
       "data": {
@@ -243,14 +250,15 @@
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_public_command",
+          "Test#test_public_command",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public_command",
           {
             "start_line": 9,
             "start_column": 9,
             "end_line": 9,
             "end_column": 37
-          }
+          },
+          "test_public_command"
         ]
       },
       "data": {
@@ -275,14 +283,15 @@
         "command": "rubyLsp.debugTest",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_public_command",
+          "Test#test_public_command",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public_command",
           {
             "start_line": 9,
             "start_column": 9,
             "end_line": 9,
             "end_column": 37
-          }
+          },
+          "test_public_command"
         ]
       },
       "data": {
@@ -307,14 +316,15 @@
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_another_public",
+          "Test#test_another_public",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_another_public",
           {
             "start_line": 11,
             "start_column": 9,
             "end_line": 11,
             "end_column": 37
-          }
+          },
+          "test_another_public"
         ]
       },
       "data": {
@@ -339,14 +349,15 @@
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_another_public",
+          "Test#test_another_public",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_another_public",
           {
             "start_line": 11,
             "start_column": 9,
             "end_line": 11,
             "end_column": 37
-          }
+          },
+          "test_another_public"
         ]
       },
       "data": {
@@ -371,14 +382,15 @@
         "command": "rubyLsp.debugTest",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_another_public",
+          "Test#test_another_public",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_another_public",
           {
             "start_line": 11,
             "start_column": 9,
             "end_line": 11,
             "end_column": 37
-          }
+          },
+          "test_another_public"
         ]
       },
       "data": {
@@ -403,14 +415,15 @@
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_public_vcall",
+          "Test#test_public_vcall",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public_vcall",
           {
             "start_line": 17,
             "start_column": 2,
             "end_line": 17,
             "end_column": 28
-          }
+          },
+          "test_public_vcall"
         ]
       },
       "data": {
@@ -435,14 +448,15 @@
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_public_vcall",
+          "Test#test_public_vcall",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public_vcall",
           {
             "start_line": 17,
             "start_column": 2,
             "end_line": 17,
             "end_column": 28
-          }
+          },
+          "test_public_vcall"
         ]
       },
       "data": {
@@ -467,14 +481,15 @@
         "command": "rubyLsp.debugTest",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_public_vcall",
+          "Test#test_public_vcall",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public_vcall",
           {
             "start_line": 17,
             "start_column": 2,
             "end_line": 17,
             "end_column": 28
-          }
+          },
+          "test_public_vcall"
         ]
       },
       "data": {
@@ -499,14 +514,15 @@
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_with_q?",
+          "Test#test_with_q?",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_with_q\\?",
           {
             "start_line": 19,
             "start_column": 2,
             "end_line": 19,
             "end_column": 23
-          }
+          },
+          "test_with_q?"
         ]
       },
       "data": {
@@ -531,14 +547,15 @@
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_with_q?",
+          "Test#test_with_q?",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_with_q\\?",
           {
             "start_line": 19,
             "start_column": 2,
             "end_line": 19,
             "end_column": 23
-          }
+          },
+          "test_with_q?"
         ]
       },
       "data": {
@@ -563,14 +580,15 @@
         "command": "rubyLsp.debugTest",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_with_q?",
+          "Test#test_with_q?",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_with_q\\?",
           {
             "start_line": 19,
             "start_column": 2,
             "end_line": 19,
             "end_column": 23
-          }
+          },
+          "test_with_q?"
         ]
       },
       "data": {
@@ -602,7 +620,8 @@
             "start_column": 0,
             "end_line": 32,
             "end_column": 3
-          }
+          },
+          "AnotherTest"
         ]
       },
       "data": {
@@ -635,7 +654,8 @@
             "start_column": 0,
             "end_line": 32,
             "end_column": 3
-          }
+          },
+          "AnotherTest"
         ]
       },
       "data": {
@@ -668,7 +688,8 @@
             "start_column": 0,
             "end_line": 32,
             "end_column": 3
-          }
+          },
+          "AnotherTest"
         ]
       },
       "data": {
@@ -694,14 +715,15 @@
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_public",
+          "AnotherTest#test_public",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name AnotherTest#test_public",
           {
             "start_line": 25,
             "start_column": 2,
             "end_line": 25,
             "end_column": 22
-          }
+          },
+          "test_public"
         ]
       },
       "data": {
@@ -726,14 +748,15 @@
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_public",
+          "AnotherTest#test_public",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name AnotherTest#test_public",
           {
             "start_line": 25,
             "start_column": 2,
             "end_line": 25,
             "end_column": 22
-          }
+          },
+          "test_public"
         ]
       },
       "data": {
@@ -758,14 +781,15 @@
         "command": "rubyLsp.debugTest",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_public",
+          "AnotherTest#test_public",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name AnotherTest#test_public",
           {
             "start_line": 25,
             "start_column": 2,
             "end_line": 25,
             "end_column": 22
-          }
+          },
+          "test_public"
         ]
       },
       "data": {
@@ -790,14 +814,15 @@
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_public_2",
+          "AnotherTest#test_public_2",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name AnotherTest#test_public_2",
           {
             "start_line": 31,
             "start_column": 2,
             "end_line": 31,
             "end_column": 24
-          }
+          },
+          "test_public_2"
         ]
       },
       "data": {
@@ -822,14 +847,15 @@
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_public_2",
+          "AnotherTest#test_public_2",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name AnotherTest#test_public_2",
           {
             "start_line": 31,
             "start_column": 2,
             "end_line": 31,
             "end_column": 24
-          }
+          },
+          "test_public_2"
         ]
       },
       "data": {
@@ -854,14 +880,15 @@
         "command": "rubyLsp.debugTest",
         "arguments": [
           "/fixtures/minitest_tests.rb",
-          "test_public_2",
+          "AnotherTest#test_public_2",
           "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name AnotherTest#test_public_2",
           {
             "start_line": 31,
             "start_column": 2,
             "end_line": 31,
             "end_column": 24
-          }
+          },
+          "test_public_2"
         ]
       },
       "data": {
@@ -871,5 +898,7 @@
       }
     }
   ],
-  "params": []
+  "params": [
+
+  ]
 }

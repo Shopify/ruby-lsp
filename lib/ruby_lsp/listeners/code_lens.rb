@@ -71,6 +71,7 @@ module RubyLsp
             name: class_name,
             command: generate_test_command(group_stack: @group_stack),
             kind: :group,
+            id: generate_fully_qualified_id(group_stack: @group_stack),
           )
 
           @group_id_stack.push(@group_id)
@@ -107,6 +108,7 @@ module RubyLsp
               name: method_name,
               command: generate_test_command(method_name: method_name, group_stack: @group_stack),
               kind: :example,
+              id: generate_fully_qualified_id(group_stack: @group_stack, method_name: method_name),
             )
           end
         end
@@ -173,14 +175,14 @@ module RubyLsp
 
       private
 
-      sig { params(node: Prism::Node, name: String, command: String, kind: Symbol).void }
-      def add_test_code_lens(node, name:, command:, kind:)
+      sig { params(node: Prism::Node, name: String, command: String, kind: Symbol, id: String).void }
+      def add_test_code_lens(node, name:, command:, kind:, id: name)
         # don't add code lenses if the test library is not supported or unknown
         return unless SUPPORTED_TEST_LIBRARIES.include?(@global_state.test_library) && @path
 
         arguments = [
           @path,
-          name,
+          id,
           command,
           {
             start_line: node.location.start_line - 1,
@@ -188,6 +190,7 @@ module RubyLsp
             end_line: node.location.end_line - 1,
             end_column: node.location.end_column,
           },
+          name,
         ]
 
         grouping_data = { group_id: @group_id_stack.last, kind: kind }
@@ -300,7 +303,21 @@ module RubyLsp
             name: name,
             command: generate_test_command(group_stack: @group_stack, spec_name: method_name),
             kind: kind,
+            id: generate_fully_qualified_id(group_stack: @group_stack, method_name: method_name),
           )
+        end
+      end
+
+      sig { params(group_stack: T::Array[String], method_name: T.nilable(String)).returns(String) }
+      def generate_fully_qualified_id(group_stack:, method_name: nil)
+        if method_name
+          # For tests, this will be the test class and method name: `Foo::BarTest#test_baz`.
+          # For specs, this will be the nested descriptions and formatted test name: `a::b::c#test_001_foo`.
+          group_stack.join("::") + "#" + method_name
+        else
+          # For tests, this will be the test class: `Foo::BarTest`.
+          # For specs, this will be the nested descriptions: `a::b::c`.
+          group_stack.join("::")
         end
       end
     end
