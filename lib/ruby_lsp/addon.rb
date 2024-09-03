@@ -193,5 +193,15 @@ module RubyLsp
       ).void
     end
     def create_completion_listener(response_builder, node_context, dispatcher, uri); end
+
+    sig do
+      overridable.params(
+        response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint],
+        dispatcher: Prism::Dispatcher,
+        document: T.any(RubyDocument, ERBDocument),
+        range: T::Hash[Symbol, T.untyped],
+      ).void
+    end
+    def create_inlay_hint_listener(response_builder, dispatcher, document, range); end
   end
 end

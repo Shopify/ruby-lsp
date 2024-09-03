@@ -68,6 +68,10 @@ module RubyLsp
           ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint],
         )
         Listeners::InlayHints.new(@response_builder, start_line..end_line, hints_configuration, dispatcher)
+
+        Addon.addons.each do |addon|
+          addon.create_inlay_hint_listener(@response_builder, dispatcher, document, range)
+        end
       end
 
       sig { override.returns(T::Array[Interface::InlayHint]) }

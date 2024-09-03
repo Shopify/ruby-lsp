@@ -50,4 +50,66 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
     dispatcher.dispatch(document.parse_result.value)
     assert_empty(request.perform)
   end
+
+  def test_inlay_hint_addons
+    source = <<~RUBY
+      Foo
+    RUBY
+
+    begin
+      create_inlay_hint_addon
+
+      with_server(source) do |server, uri|
+        server.process_message(
+          id: 1,
+          method: "textDocument/inlayHint",
+          params: {
+            textDocument: {
+              uri: uri,
+            },
+            range: {
+              start: { line: 0, character: 0 },
+            },
+          },
+        )
+
+        response = server.pop_response.response
+
+        assert_equal(1, response.size)
+        assert_match("MyInlayHint", response[0].label)
+      end
+    end
+  end
+
+  private
+
+  def create_inlay_hint_addon
+    Class.new(RubyLsp::Addon) do
+      def activate(global_state, outgoing_queue); end
+
+      def name
+        "InlayHintAddon"
+      end
+
+      def deactivate; end
+
+      def create_inlay_hint_listener(response_builder, dispatcher, document, range)
+        klass = Class.new do
+          def initialize(response_builder, dispatcher)
+            @response_builder = response_builder
+            dispatcher.register(self, :on_constant_read_node_enter)
+
+            def on_constant_read_node_enter(node)
+              @response_builder << RubyLsp::Interface::InlayHint.new(
+                position: { line: node.location.start_line - 1, character: node.location.end_column },
+                label: "MyInlayHint",
+              )
+            end
+          end
+        end
+
+        T.unsafe(klass).new(response_builder, dispatcher)
+      end
+    end
+  end
 end
