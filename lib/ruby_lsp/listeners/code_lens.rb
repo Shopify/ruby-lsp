@@ -44,6 +44,7 @@ module RubyLsp
         @group_id_stack = T.let([], T::Array[Integer])
         # We want to avoid adding code lenses for nested definitions
         @def_depth = T.let(0, Integer)
+        @spec_id = T.let(0, Integer)
 
         dispatcher.register(
           self,
@@ -166,6 +167,7 @@ module RubyLsp
         @visibility_stack.push([prev_visibility, prev_visibility])
         if node.name == DESCRIBE_KEYWORD
           @group_id_stack.pop
+          @group_stack.pop
         end
       end
 
@@ -247,7 +249,7 @@ module RubyLsp
             # We know the entire path, do an exact match
             " --name " + Shellwords.escape(group_stack.join("::")) + "#" + Shellwords.escape(method_name)
           elsif spec_name
-            " --name " + "/#{Shellwords.escape(spec_name)}/"
+            " --name " + "\"/^#{Shellwords.escape(group_stack.join("::"))}##{Shellwords.escape(spec_name)}$/\""
           else
             # Execute all tests of the selected class and tests in
             # modules/classes nested inside of that class
@@ -282,11 +284,21 @@ module RubyLsp
 
         return unless name
 
+        if kind == :example
+          # Increment spec_id for each example
+          @spec_id += 1
+        else
+          # Reset spec_id when entering a new group
+          @spec_id = 0
+          @group_stack.push(name)
+        end
+
         if @path
+          method_name = format("test_%04d_%s", @spec_id, name) if kind == :example
           add_test_code_lens(
             node,
             name: name,
-            command: generate_test_command(spec_name: name),
+            command: generate_test_command(group_stack: @group_stack, spec_name: method_name),
             kind: kind,
           )
         end
