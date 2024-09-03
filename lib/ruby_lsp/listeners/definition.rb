@@ -235,15 +235,11 @@ module RubyLsp
       def handle_require_definition(node, message)
         case message
         when :require
-          entry = @index.search_require_paths(node.content).find do |indexable_path|
-            indexable_path.require_path == node.content
-          end
+          uri = @index.search_require_paths(node.content).find { |uri| uri.require_path == node.content }
 
-          if entry
-            candidate = entry.full_path
-
+          if uri
             @response_builder << Interface::Location.new(
-              uri: URI::Generic.from_path(path: candidate).to_s,
+              uri: uri.to_s,
               range: Interface::Range.new(
                 start: Interface::Position.new(line: 0, character: 0),
                 end: Interface::Position.new(line: 0, character: 0),

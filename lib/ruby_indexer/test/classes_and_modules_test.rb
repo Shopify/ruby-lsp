@@ -189,7 +189,7 @@ module RubyIndexer
 
       assert_entry("Foo", Entry::Class, "/fake/path/foo.rb:0-0:1-3")
 
-      @index.delete(IndexablePath.new(nil, "/fake/path/foo.rb"))
+      @index.delete(ResourceUri.new(path: "/fake/path/foo.rb"))
       refute_entry("Foo")
 
       assert_no_indexed_entries
