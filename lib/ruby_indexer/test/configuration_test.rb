@@ -15,11 +15,11 @@ module RubyIndexer
       @config.apply_config({ "excluded_patterns" => ["**/fixtures/**/*.rb"] })
       indexables = @config.indexables
 
-      assert(indexables.none? { |indexable| indexable.to_s.include?("test/fixtures") })
-      assert(indexables.none? { |indexable| indexable.to_s.include?("minitest-reporters") })
-      assert(indexables.none? { |indexable| indexable.to_s.include?("ansi") })
-      assert(indexables.any? { |indexable| indexable.to_s.include?("sorbet-runtime") })
-      assert(indexables.none? { |indexable| indexable.to_s == __FILE__ })
+      assert(indexables.none? { |indexable| indexable.full_path.include?("test/fixtures") })
+      assert(indexables.none? { |indexable| indexable.full_path.include?("minitest-reporters") })
+      assert(indexables.none? { |indexable| indexable.full_path.include?("ansi") })
+      assert(indexables.any? { |indexable| indexable.full_path.include?("sorbet-runtime") })
+      assert(indexables.none? { |indexable| indexable.full_path == __FILE__ })
     end
 
     def test_indexables_have_expanded_full_paths
@@ -27,7 +27,7 @@ module RubyIndexer
       indexables = @config.indexables
 
       # All paths should be expanded
-      assert(indexables.all? { |indexable| File.absolute_path?(T.must(indexable.to_standardized_path)) })
+      assert(indexables.all? { |indexable| File.absolute_path?(indexable.full_path) })
     end
 
     def test_indexables_only_includes_gem_require_paths
@@ -37,9 +37,7 @@ module RubyIndexer
         next if lazy_spec.name == "ruby-lsp"
 
         spec = Gem::Specification.find_by_name(lazy_spec.name)
-        assert(indexables.none? do |indexable|
-                 indexable.to_standardized_path.start_with?("#{spec.full_gem_path}/test/")
-               end)
+        assert(indexables.none? { |indexable| indexable.full_path.start_with?("#{spec.full_gem_path}/test/") })
       rescue Gem::MissingSpecError
         # Transitive dependencies might be missing when running tests on Windows
       end
@@ -49,14 +47,12 @@ module RubyIndexer
       indexables = @config.indexables
 
       assert(
-        indexables.none? do |indexable|
-          indexable.to_standardized_path.start_with?("#{RbConfig::CONFIG["rubylibdir"]}/psych")
-        end,
+        indexables.none? { |indexable| indexable.full_path.start_with?("#{RbConfig::CONFIG["rubylibdir"]}/psych") },
       )
     end
 
     def test_indexables_includes_default_gems
-      indexables = @config.indexables.map(&:to_standardized_path)
+      indexables = @config.indexables.map(&:full_path)
 
       assert_includes(indexables, "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb")
       assert_includes(indexables, "#{RbConfig::CONFIG["rubylibdir"]}/ipaddr.rb")
@@ -64,7 +60,7 @@ module RubyIndexer
     end
 
     def test_indexables_includes_project_files
-      indexables = @config.indexables.map(&:to_standardized_path)
+      indexables = @config.indexables.map(&:full_path)
 
       Dir.glob("#{Dir.pwd}/lib/**/*.rb").each do |path|
         next if path.end_with?("_test.rb")
@@ -84,13 +80,13 @@ module RubyIndexer
     def test_indexables_does_not_include_gems_own_installed_files
       indexables = @config.indexables
       indexables_inside_bundled_lsp = indexables.select do |indexable|
-        indexable.to_standardized_path.start_with?(Bundler.bundle_path.join("gems", "ruby-lsp").to_s)
+        indexable.full_path.start_with?(Bundler.bundle_path.join("gems", "ruby-lsp").to_s)
       end
 
       assert_empty(
         indexables_inside_bundled_lsp,
         "Indexables should not include files from the gem currently being worked on. " \
-          "Included: #{indexables_inside_bundled_lsp.map(&:to_standardized_path)}",
+          "Included: #{indexables_inside_bundled_lsp.map(&:full_path)}",
       )
     end
 
@@ -99,7 +95,7 @@ module RubyIndexer
       FileUtils.touch(path)
       indexables = @config.indexables
 
-      assert(indexables.none? { |indexable| indexable.to_standardized_path == path })
+      assert(indexables.none? { |indexable| indexable.full_path == path })
     ensure
       FileUtils.rm(T.must(path))
     end
@@ -147,7 +143,7 @@ module RubyIndexer
         @config.workspace_path = dir
         indexables = @config.indexables
 
-        assert(indexables.none? { |indexable| indexable.to_standardized_path.start_with?(File.join(dir, "ignore")) })
+        assert(indexables.none? { |indexable| indexable.full_path.start_with?(File.join(dir, "ignore")) })
 
         # After switching the workspace path, all indexables will be found in one of these places:
         # - The new workspace path
@@ -156,10 +152,10 @@ module RubyIndexer
         # - Default gems
         assert(
           indexables.all? do |i|
-            i.to_standardized_path.start_with?(dir) ||
-            i.to_standardized_path.start_with?(File.join(Dir.pwd, "lib")) ||
-            i.to_standardized_path.start_with?(Bundler.bundle_path.to_s) ||
-            i.to_standardized_path.start_with?(RbConfig::CONFIG["rubylibdir"])
+            i.full_path.start_with?(dir) ||
+            i.full_path.start_with?(File.join(Dir.pwd, "lib")) ||
+            i.full_path.start_with?(Bundler.bundle_path.to_s) ||
+            i.full_path.start_with?(RbConfig::CONFIG["rubylibdir"])
           end,
         )
       end

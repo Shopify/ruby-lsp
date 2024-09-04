@@ -15,16 +15,17 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       index = server.global_state.index
 
       index.index_single(
-        RubyIndexer::ResourceUri.file(
+        RubyIndexer::IndexablePath.new(
+          "#{Dir.pwd}/lib",
           File.expand_path(
             "../../test/fixtures/class_reference_target.rb",
             __dir__,
           ),
-          "#{Dir.pwd}/lib",
         ),
       )
       index.index_single(
-        RubyIndexer::ResourceUri.file(
+        RubyIndexer::IndexablePath.new(
+          nil,
           File.expand_path(
             "../../test/fixtures/constant_reference_target.rb",
             __dir__,
@@ -32,12 +33,12 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         ),
       )
       index.index_single(
-        RubyIndexer::ResourceUri.file(
+        RubyIndexer::IndexablePath.new(
+          "#{Dir.pwd}/lib",
           File.expand_path(
             "../../lib/ruby_lsp/server.rb",
             __dir__,
           ),
-          "#{Dir.pwd}/lib",
         ),
       )
 
@@ -76,7 +77,10 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     with_server("Pathname") do |server, uri|
       index = server.global_state.index
       index.index_single(
-        RubyIndexer::ResourceUri.new(path: "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb"),
+        RubyIndexer::IndexablePath.new(
+          nil,
+          "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb",
+        ),
       )
       server.process_message(
         id: 1,
@@ -138,12 +142,12 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
       bundler_uri = URI::Generic.from_path(path: "#{RbConfig::CONFIG["rubylibdir"]}/bundler.rb")
       index.index_single(
-        RubyIndexer::ResourceUri.file(T.must(bundler_uri.to_standardized_path), RbConfig::CONFIG["rubylibdir"]),
+        RubyIndexer::IndexablePath.new(RbConfig::CONFIG["rubylibdir"], T.must(bundler_uri.to_standardized_path)),
       )
 
       Dir.glob("#{RbConfig::CONFIG["rubylibdir"]}/bundler/*.rb").each do |path|
         index.index_single(
-          RubyIndexer::ResourceUri.file(path, RbConfig::CONFIG["rubylibdir"]),
+          RubyIndexer::IndexablePath.new(RbConfig::CONFIG["rubylibdir"], path),
         )
       end
 
@@ -209,12 +213,12 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
       with_server(source, stub_no_typechecker: true) do |server, uri|
         server.global_state.index.index_single(
-          RubyIndexer::ResourceUri.new(
-            path: File.expand_path(
+          RubyIndexer::IndexablePath.new(
+            "#{Dir.pwd}/lib",
+            File.expand_path(
               "../../test/fixtures/class_reference_target.rb",
               __dir__,
             ),
-            require_path: "#{Dir.pwd}/lib",
           ),
         )
         server.process_message(
@@ -290,7 +294,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         },
       })
       index = server.global_state.index
-      index.index_single(RubyIndexer::ResourceUri.new(path: T.must(second_uri.to_standardized_path)), second_source)
+      index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(second_uri.to_standardized_path)), second_source)
 
       server.process_message(
         id: 1,
@@ -359,12 +363,12 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
     with_server(source) do |server, uri|
       server.global_state.index.index_single(
-        RubyIndexer::ResourceUri.new(path: "/fake/path/bar.rb"), <<~RUBY
+        RubyIndexer::IndexablePath.new(nil, "/fake/path/bar.rb"), <<~RUBY
           class Foo::Bar; end
         RUBY
       )
       server.global_state.index.index_single(
-        RubyIndexer::ResourceUri.new(path: "/fake/path/baz.rb"), <<~RUBY
+        RubyIndexer::IndexablePath.new(nil, "/fake/path/baz.rb"), <<~RUBY
           class Foo::Bar; end
         RUBY
       )
@@ -564,7 +568,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
     with_server(source, URI("/fake.erb")) do |server, uri|
       server.global_state.index.index_single(
-        RubyIndexer::ResourceUri.new(path: "/fake/path/foo.rb"), <<~RUBY
+        RubyIndexer::IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY
           class Bar
             def foo; end
 

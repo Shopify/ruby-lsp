@@ -6,11 +6,11 @@ require_relative "test_case"
 module RubyIndexer
   class IndexTest < TestCase
     def test_deleting_one_entry_for_a_class
-      @index.index_single(ResourceUri.new(path: "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         class Foo
         end
       RUBY
-      @index.index_single(ResourceUri.new(path: "/fake/path/other_foo.rb"), <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/other_foo.rb"), <<~RUBY)
         class Foo
         end
       RUBY
@@ -18,13 +18,13 @@ module RubyIndexer
       entries = @index["Foo"]
       assert_equal(2, entries.length)
 
-      @index.delete(ResourceUri.new(path: "/fake/path/other_foo.rb"))
+      @index.delete(IndexablePath.new(nil, "/fake/path/other_foo.rb"))
       entries = @index["Foo"]
       assert_equal(1, entries.length)
     end
 
     def test_deleting_all_entries_for_a_class
-      @index.index_single(ResourceUri.new(path: "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         class Foo
         end
       RUBY
@@ -32,13 +32,13 @@ module RubyIndexer
       entries = @index["Foo"]
       assert_equal(1, entries.length)
 
-      @index.delete(ResourceUri.new(path: "/fake/path/foo.rb"))
+      @index.delete(IndexablePath.new(nil, "/fake/path/foo.rb"))
       entries = @index["Foo"]
       assert_nil(entries)
     end
 
     def test_index_resolve
-      @index.index_single(ResourceUri.new(path: "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         class Bar; end
 
         module Foo
@@ -72,7 +72,7 @@ module RubyIndexer
     end
 
     def test_accessing_with_colon_colon_prefix
-      @index.index_single(ResourceUri.new(path: "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         class Bar; end
 
         module Foo
@@ -92,7 +92,7 @@ module RubyIndexer
     end
 
     def test_fuzzy_search
-      @index.index_single(ResourceUri.new(path: "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         class Zws; end
 
         module Qtl
@@ -121,17 +121,17 @@ module RubyIndexer
 
     def test_index_single_ignores_directories
       FileUtils.mkdir("lib/this_is_a_dir.rb")
-      @index.index_single(ResourceUri.new(path: File.expand_path("lib/this_is_a_dir.rb")))
+      @index.index_single(IndexablePath.new(nil, "lib/this_is_a_dir.rb"))
     ensure
       FileUtils.rm_r("lib/this_is_a_dir.rb")
     end
 
     def test_searching_for_require_paths
-      @index.index_single(ResourceUri.new(path: "/fake/path/foo.rb", require_path: "path/foo"), <<~RUBY)
+      @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
         class Foo
         end
       RUBY
-      @index.index_single(ResourceUri.new(path: "/fake/path/other_foo.rb", require_path: "path/other_foo"), <<~RUBY)
+      @index.index_single(IndexablePath.new("/fake", "/fake/path/other_foo.rb"), <<~RUBY)
         class Foo
         end
       RUBY
@@ -140,11 +140,11 @@ module RubyIndexer
     end
 
     def test_searching_for_entries_based_on_prefix
-      @index.index_single(ResourceUri.new(path: "/fake/path/foo.rb", require_path: "path/foo"), <<~RUBY)
+      @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
         class Foo::Bizw
         end
       RUBY
-      @index.index_single(ResourceUri.new(path: "/fake/path/other_foo.rb", require_path: "path/other_foo"), <<~RUBY)
+      @index.index_single(IndexablePath.new("/fake", "/fake/path/other_foo.rb"), <<~RUBY)
         class Foo::Bizw
         end
 
@@ -160,7 +160,7 @@ module RubyIndexer
     end
 
     def test_resolve_normalizes_top_level_names
-      @index.index_single(ResourceUri.new(path: "/fake/path/foo.rb", require_path: "path/foo"), <<~RUBY)
+      @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
         class Bar; end
 
         module Foo
@@ -180,7 +180,7 @@ module RubyIndexer
     end
 
     def test_resolving_aliases_to_non_existing_constants_with_conflicting_names
-      @index.index_single(ResourceUri.new(require_path: "path/foo", path: "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
         class Bar
         end
 
@@ -346,15 +346,15 @@ module RubyIndexer
       fixtures = Dir.glob("test/fixtures/prism/test/prism/fixtures/**/*.txt")
 
       fixtures.each do |fixture|
-        uri = ResourceUri.new(path: File.expand_path(fixture))
-        @index.index_single(uri)
+        indexable_path = IndexablePath.new("", fixture)
+        @index.index_single(indexable_path)
       end
 
       refute_empty(@index)
     end
 
     def test_index_single_does_not_fail_for_non_existing_file
-      @index.index_single(ResourceUri.new(path: "/fake/path/foo.rb"))
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"))
       entries_after_indexing = @index.names
       assert_equal(@default_indexed_entries.keys, entries_after_indexing)
     end
@@ -782,8 +782,8 @@ module RubyIndexer
             end
           RUBY
 
-          uri = ResourceUri.new(path: File.join(dir, "foo.rb"))
-          @index.index_single(uri)
+          indexable_path = IndexablePath.new(nil, File.join(dir, "foo.rb"))
+          @index.index_single(indexable_path)
 
           assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
 
@@ -796,7 +796,7 @@ module RubyIndexer
             end
           RUBY
 
-          @index.handle_change(uri)
+          @index.handle_change(indexable_path)
           assert_empty(@index.instance_variable_get(:@ancestors))
           assert_equal(["Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end
@@ -816,8 +816,8 @@ module RubyIndexer
             end
           RUBY
 
-          uri = ResourceUri.new(path: File.join(dir, "foo.rb"))
-          @index.index_single(uri)
+          indexable_path = IndexablePath.new(nil, File.join(dir, "foo.rb"))
+          @index.index_single(indexable_path)
 
           assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
 
@@ -833,7 +833,7 @@ module RubyIndexer
             end
           RUBY
 
-          @index.handle_change(uri)
+          @index.handle_change(indexable_path)
           refute_empty(@index.instance_variable_get(:@ancestors))
           assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end
@@ -852,8 +852,8 @@ module RubyIndexer
             end
           RUBY
 
-          uri = ResourceUri.new(path: File.join(dir, "foo.rb"))
-          @index.index_single(uri)
+          indexable_path = IndexablePath.new(nil, File.join(dir, "foo.rb"))
+          @index.index_single(indexable_path)
 
           assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
 
@@ -866,7 +866,7 @@ module RubyIndexer
             end
           RUBY
 
-          @index.handle_change(uri)
+          @index.handle_change(indexable_path)
           assert_empty(@index.instance_variable_get(:@ancestors))
           assert_equal(["Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end
@@ -1300,7 +1300,7 @@ module RubyIndexer
     end
 
     def test_resolving_method_inside_singleton_context
-      @index.index_single(ResourceUri.new(path: "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         module Foo
           class Bar
             class << self
@@ -1321,7 +1321,7 @@ module RubyIndexer
     end
 
     def test_resolving_constants_in_singleton_contexts
-      @index.index_single(ResourceUri.new(path: "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         module Foo
           class Bar
             CONST = 3
@@ -1346,7 +1346,7 @@ module RubyIndexer
     end
 
     def test_resolving_instance_variables_in_singleton_contexts
-      @index.index_single(ResourceUri.new(path: "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         module Foo
           class Bar
             @a = 123
@@ -1376,7 +1376,7 @@ module RubyIndexer
     end
 
     def test_instance_variable_completion_in_singleton_contexts
-      @index.index_single(ResourceUri.new(path: "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         module Foo
           class Bar
             @a = 123
@@ -1622,7 +1622,7 @@ module RubyIndexer
     end
 
     def test_linearizing_singleton_ancestors_of_singleton_when_class_has_parent
-      @index.index_single(ResourceUri.new(path: "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         class Foo; end
 
         class Bar < Foo
@@ -1673,7 +1673,7 @@ module RubyIndexer
     end
 
     def test_linearizing_singleton_ancestors
-      @index.index_single(ResourceUri.new(path: "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         module First
         end
 
@@ -1714,7 +1714,7 @@ module RubyIndexer
     end
 
     def test_linearizing_singleton_ancestors_when_class_has_parent
-      @index.index_single(ResourceUri.new(path: "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         class Foo; end
 
         class Bar < Foo
@@ -1744,7 +1744,7 @@ module RubyIndexer
     end
 
     def test_linearizing_a_module_singleton_class
-      @index.index_single(ResourceUri.new(path: "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         module A; end
       RUBY
 
