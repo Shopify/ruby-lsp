@@ -38,7 +38,10 @@ module RubyLsp
         })
       end
 
-      server.global_state.index.index_single(RubyIndexer::ResourceUri.new(path: uri.to_standardized_path), source)
+      server.global_state.index.index_single(
+        RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)),
+        source,
+      )
       server.load_addons if load_addons
       block.call(server, uri)
     ensure

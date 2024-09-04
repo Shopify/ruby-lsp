@@ -34,7 +34,7 @@ module RubyIndexer
       @files_to_entries = T.let({}, T::Hash[String, T::Array[Entry]])
 
       # Holds all require paths for every indexed item so that we can provide autocomplete for requires
-      @require_paths_tree = T.let(PrefixTree[ResourceUri].new, PrefixTree[ResourceUri])
+      @require_paths_tree = T.let(PrefixTree[IndexablePath].new, PrefixTree[IndexablePath])
 
       # Holds the linearized ancestors list for every namespace
       @ancestors = T.let({}, T::Hash[String, T::Array[String]])
@@ -63,35 +63,31 @@ module RubyIndexer
       (@included_hooks[module_name] ||= []) << hook
     end
 
-    sig { params(uri: ResourceUri).void }
-    def delete(uri)
-      path = uri.to_standardized_path
+    sig { params(indexable: IndexablePath).void }
+    def delete(indexable)
+      # For each constant discovered in `path`, delete the associated entry from the index. If there are no entries
+      # left, delete the constant from the index.
+      @files_to_entries[indexable.full_path]&.each do |entry|
+        name = entry.name
+        entries = @entries[name]
+        next unless entries
 
-      if path
-        # For each constant discovered in `path`, delete the associated entry from the index. If there are no entries
-        # left, delete the constant from the index.
-        @files_to_entries[path]&.each do |entry|
-          name = entry.name
-          entries = @entries[name]
-          next unless entries
+        # Delete the specific entry from the list for this name
+        entries.delete(entry)
 
-          # Delete the specific entry from the list for this name
-          entries.delete(entry)
-
-          # If all entries were deleted, then remove the name from the hash and from the prefix tree. Otherwise, update
-          # the prefix tree with the current entries
-          if entries.empty?
-            @entries.delete(name)
-            @entries_tree.delete(name)
-          else
-            @entries_tree.insert(name, entries)
-          end
+        # If all entries were deleted, then remove the name from the hash and from the prefix tree. Otherwise, update
+        # the prefix tree with the current entries
+        if entries.empty?
+          @entries.delete(name)
+          @entries_tree.delete(name)
+        else
+          @entries_tree.insert(name, entries)
         end
-
-        @files_to_entries.delete(path)
       end
 
-      require_path = uri.require_path
+      @files_to_entries.delete(indexable.full_path)
+
+      require_path = indexable.require_path
       @require_paths_tree.delete(require_path) if require_path
     end
 
@@ -109,7 +105,7 @@ module RubyIndexer
       @entries[fully_qualified_name.delete_prefix("::")]
     end
 
-    sig { params(query: String).returns(T::Array[ResourceUri]) }
+    sig { params(query: String).returns(T::Array[IndexablePath]) }
     def search_require_paths(query)
       @require_paths_tree.search(query)
     end
@@ -296,37 +292,33 @@ module RubyIndexer
       nil
     end
 
-    # Index all files for the given uris, which defaults to what is configured. A block can be used to track and control
-    # indexing progress. That block is invoked with the current progress percentage and should return `true` to continue
-    # indexing or `false` to stop indexing.
+    # Index all files for the given indexable paths, which defaults to what is configured. A block can be used to track
+    # and control indexing progress. That block is invoked with the current progress percentage and should return `true`
+    # to continue indexing or `false` to stop indexing.
     sig do
       params(
-        uris: T::Array[ResourceUri],
+        indexable_paths: T::Array[IndexablePath],
         block: T.nilable(T.proc.params(progress: Integer).returns(T::Boolean)),
       ).void
     end
-    def index_all(uris: @configuration.indexables, &block)
+    def index_all(indexable_paths: @configuration.indexables, &block)
       RBSIndexer.new(self).index_ruby_core
       # Calculate how many paths are worth 1% of progress
-      progress_step = (uris.length / 100.0).ceil
+      progress_step = (indexable_paths.length / 100.0).ceil
 
-      uris.each_with_index do |uri, index|
+      indexable_paths.each_with_index do |path, index|
         if block && index % progress_step == 0
           progress = (index / progress_step) + 1
           break unless block.call(progress)
         end
 
-        index_single(uri)
+        index_single(path)
       end
     end
 
-    sig { params(uri: ResourceUri, source: T.nilable(String)).void }
-    def index_single(uri, source = nil)
-      path = uri.to_standardized_path
-      # Remove once we support indexing non file URIs
-      return unless path
-
-      content = source || File.read(path)
+    sig { params(indexable_path: IndexablePath, source: T.nilable(String)).void }
+    def index_single(indexable_path, source = nil)
+      content = source || File.read(indexable_path.full_path)
       dispatcher = Prism::Dispatcher.new
 
       result = Prism.parse(content)
@@ -334,15 +326,15 @@ module RubyIndexer
         self,
         dispatcher,
         result,
-        path,
+        indexable_path.full_path,
         enhancements: @enhancements,
       )
       dispatcher.dispatch(result.value)
 
       indexing_errors = listener.indexing_errors.uniq
 
-      require_path = uri.require_path
-      @require_paths_tree.insert(require_path, uri) if require_path
+      require_path = indexable_path.require_path
+      @require_paths_tree.insert(require_path, indexable_path) if require_path
 
       if indexing_errors.any?
         indexing_errors.each do |error|
@@ -354,7 +346,7 @@ module RubyIndexer
       # it
     rescue SystemStackError => e
       if e.backtrace&.first&.include?("prism")
-        $stderr.puts "Prism error indexing #{uri}: #{e.message}"
+        $stderr.puts "Prism error indexing #{indexable_path.full_path}: #{e.message}"
       else
         raise
       end
@@ -551,17 +543,16 @@ module RubyIndexer
       variables
     end
 
-    # Synchronizes a change made to the given uri. This method will ensure that new declarations are indexed, removed
-    # declarations removed and that the ancestor linearization cache is cleared if necessary
-    sig { params(uri: ResourceUri).void }
-    def handle_change(uri)
-      path = T.must(uri.to_standardized_path)
-      original_entries = @files_to_entries[path]
+    # Synchronizes a change made to the given indexable path. This method will ensure that new declarations are indexed,
+    # removed declarations removed and that the ancestor linearization cache is cleared if necessary
+    sig { params(indexable: IndexablePath).void }
+    def handle_change(indexable)
+      original_entries = @files_to_entries[indexable.full_path]
 
-      delete(uri)
-      index_single(uri)
+      delete(indexable)
+      index_single(indexable)
 
-      updated_entries = @files_to_entries[path]
+      updated_entries = @files_to_entries[indexable.full_path]
 
       return unless original_entries && updated_entries
 

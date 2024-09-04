@@ -1339,7 +1339,7 @@ class CompletionTest < Minitest::Test
 
       index = server.global_state.index
       indexables = Dir.glob(File.join(tmpdir, "**", "*.rb")).map! do |path|
-        RubyIndexer::ResourceUri.file(path, tmpdir)
+        RubyIndexer::IndexablePath.new(tmpdir, path)
       end
 
       indexables.each do |indexable|

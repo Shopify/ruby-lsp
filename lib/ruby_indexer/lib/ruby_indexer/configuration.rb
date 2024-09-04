@@ -52,7 +52,7 @@ module RubyIndexer
       )
     end
 
-    sig { returns(T::Array[FileUri]) }
+    sig { returns(T::Array[IndexablePath]) }
     def indexables
       excluded_gems = @excluded_gems - @included_gems
       locked_gems = Bundler.locked_gems&.specs
@@ -74,7 +74,7 @@ module RubyIndexer
             load_path_entry = $LOAD_PATH.find { |load_path| path.start_with?(load_path) }
           end
 
-          ResourceUri.file(path, load_path_entry)
+          IndexablePath.new(load_path_entry, path)
         end
       end
 
@@ -91,7 +91,7 @@ module RubyIndexer
       # Remove user specified patterns
       indexables.reject! do |indexable|
         excluded_patterns.any? do |pattern|
-          File.fnmatch?(pattern, indexable.to_standardized_path, File::FNM_PATHNAME | File::FNM_EXTGLOB)
+          File.fnmatch?(pattern, indexable.full_path, File::FNM_PATHNAME | File::FNM_EXTGLOB)
         end
       end
 
@@ -123,12 +123,12 @@ module RubyIndexer
           # If the default_path is a directory, we index all the Ruby files in it
           indexables.concat(
             Dir.glob(File.join(default_path, "**", "*.rb"), File::FNM_PATHNAME | File::FNM_EXTGLOB).map! do |path|
-              ResourceUri.file(path, RbConfig::CONFIG["rubylibdir"])
+              IndexablePath.new(RbConfig::CONFIG["rubylibdir"], path)
             end,
           )
         elsif pathname.extname == ".rb"
           # If the default_path is a Ruby file, we index it
-          indexables << ResourceUri.file(default_path, RbConfig::CONFIG["rubylibdir"])
+          indexables << IndexablePath.new(RbConfig::CONFIG["rubylibdir"], default_path)
         end
       end
 
@@ -146,7 +146,7 @@ module RubyIndexer
         indexables.concat(
           spec.require_paths.flat_map do |require_path|
             load_path_entry = File.join(spec.full_gem_path, require_path)
-            Dir.glob(File.join(load_path_entry, "**", "*.rb")).map! { |path| ResourceUri.file(path, load_path_entry) }
+            Dir.glob(File.join(load_path_entry, "**", "*.rb")).map! { |path| IndexablePath.new(load_path_entry, path) }
           end,
         )
       rescue Gem::MissingSpecError
@@ -155,7 +155,7 @@ module RubyIndexer
         # just ignore if they're missing
       end
 
-      indexables.uniq!(&:to_s)
+      indexables.uniq!(&:full_path)
       indexables
     end
 
