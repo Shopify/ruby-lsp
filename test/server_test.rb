@@ -428,6 +428,65 @@ class ServerTest < Minitest::Test
     })
   end
 
+  def test_registers_rubocop_yml_watcher
+    @server.process_message({
+      id: 1,
+      method: "initialize",
+      params: {
+        capabilities: {
+          workspace: {
+            didChangeWatchedFiles: {
+              dynamicRegistration: true,
+              relativePatternSupport: true,
+            },
+          },
+        },
+      },
+    })
+
+    registration = find_message(RubyLsp::Request, "client/registerCapability")
+    rubocop_registration =
+      registration.params.registrations.any? { |reg| reg.id == "workspace/didChangeWatchedFiles-rubocop" }
+
+    assert(rubocop_registration, "Expected RuboCop .rubocop.yml watcher to be registered")
+  end
+
+  def test_handles_rubocop_yml_changes
+    @server.global_state.expects(:register_formatter).with(
+      "rubocop",
+      instance_of(RubyLsp::Requests::Support::RuboCopFormatter),
+    ).once
+    @server.process_message({
+      method: "workspace/didChangeWatchedFiles",
+      params: {
+        changes: [
+          {
+            uri: URI("file:///.rubocop.yml"),
+            type: RubyLsp::Constant::FileChangeType::CHANGED,
+          },
+        ],
+      },
+    })
+
+    log_message = find_message(RubyLsp::Notification, "window/logMessage")
+    assert_equal("RuboCop configuration changed. RuboCop configuration reloaded.", log_message.params.message)
+  end
+
+  def test_only_rubocop_yml_triggers_configuration_reload
+    @server.global_state.expects(:register_formatter).never
+    @server.process_message({
+      method: "workspace/didChangeWatchedFiles",
+      params: {
+        changes: [
+          {
+            uri: URI("file:///some_other_config.yml"),
+            type: RubyLsp::Constant::FileChangeType::CHANGED,
+          },
+        ],
+      },
+    })
+  end
+
   def test_workspace_addons
     create_test_addons
     @server.load_addons
