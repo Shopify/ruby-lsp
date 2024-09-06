@@ -367,6 +367,21 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_shows_error_if_formatter_set_to_rubocop_with_unavailable_config
+    File.write(".rubocop", "-c .i_dont_exist.yml")
+    capture_subprocess_io do
+      @server.process_message({ method: "initialized" })
+
+      notification = find_message(RubyLsp::Notification, "window/showMessage")
+      assert_match(
+        "RuboCop configuration error: Configuration file not found: #{Dir.pwd}/.i_dont_exist.yml",
+        T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
+      )
+    end
+  ensure
+    FileUtils.rm(".rubocop")
+  end
+
   def test_initialize_sets_client_name
     capture_subprocess_io do
       @server.process_message(id: 1, method: "initialize", params: {

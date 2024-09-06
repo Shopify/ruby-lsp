@@ -296,6 +296,7 @@ export class Workspace implements WorkspaceInterface {
     this.createRestartWatcher(context, "Gemfile.lock");
     this.createRestartWatcher(context, "gems.locked");
     this.createRestartWatcher(context, "**/.rubocop.yml");
+    this.createRestartWatcher(context, ".rubocop");
 
     // If a configuration that affects the Ruby LSP has changed, update the client options using the latest
     // configuration and restart the server

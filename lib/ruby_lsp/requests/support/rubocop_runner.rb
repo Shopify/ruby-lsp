@@ -80,7 +80,9 @@ module RubyLsp
 
           args += DEFAULT_ARGS
           rubocop_options = ::RuboCop::Options.new.parse(args).first
+
           config_store = ::RuboCop::ConfigStore.new
+          config_store.options_config = rubocop_options[:config] if rubocop_options[:config]
           @config_for_working_directory = T.let(config_store.for_pwd, ::RuboCop::Config)
 
           super(rubocop_options, config_store)
