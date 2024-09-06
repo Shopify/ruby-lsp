@@ -284,7 +284,15 @@ module RubyLsp
       RubyVM::YJIT.enable if defined?(RubyVM::YJIT.enable)
 
       if defined?(Requests::Support::RuboCopFormatter)
-        @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.new)
+        begin
+          @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.new)
+        rescue RuboCop::Error => e
+          # The user may have provided unknown config switches in .rubocop or
+          # is trying to load a non-existant config file.
+          send_message(Notification.window_show_error(
+            "RuboCop configuration error: #{e.message}. Formatting will not be available.",
+          ))
+        end
       end
       if defined?(Requests::Support::SyntaxTreeFormatter)
         @global_state.register_formatter("syntax_tree", Requests::Support::SyntaxTreeFormatter.new)
