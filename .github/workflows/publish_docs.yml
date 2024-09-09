@@ -3,6 +3,8 @@ name: Publish docs
 on:
   push:
     branches: [main]
+    paths:
+      - 'jekyll/**'
 
 jobs:
   build:
@@ -16,6 +18,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
+          working-directory: ./jekyll
 
       - name: Configure git
         run: |
@@ -23,13 +26,8 @@ jobs:
           git config user.email github-actions@github.com
 
       - name: Generate documentation
-        run: bundle exec rake rdoc
-
-      - name: Copy README images to the docs folder
-        run: |
-          mkdir docs/vscode
-          cp vscode/icon.png docs/vscode/icon.png
-          cp -R vscode/extras docs/vscode/
+        working-directory: ./jekyll
+        run: bundle exec jekyll build
 
       - name: Commit to gh-pages
         run: |

@@ -20,6 +20,7 @@ AllCops:
     - "features/**/*"
     - "test/fixtures/**/*"
     - "test/expectations/**/*"
+    - "jekyll/**/*"
 
 Minitest/AssertPredicate:
   Enabled: true
