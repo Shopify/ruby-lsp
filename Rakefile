@@ -8,7 +8,15 @@ require "ruby_lsp/check_docs"
 Rake::TestTask.new(:test) do |t|
   t.libs << "test"
   t.libs << "lib"
-  t.test_files = FileList["test/**/*_test.rb", "lib/ruby_indexer/test/**/*_test.rb"].exclude("test/fixtures/prism/**/*")
+  t.test_files = FileList["test/**/*_test.rb"].exclude("test/fixtures/prism/**/*")
+end
+
+namespace :test do
+  Rake::TestTask.new(:indexer) do |t|
+    t.libs << "test"
+    t.libs << "lib"
+    t.test_files = FileList["lib/ruby_indexer/test/**/*_test.rb"]
+  end
 end
 
 RDoc::Task.new do |rdoc|
@@ -28,4 +36,4 @@ RuboCop::RakeTask.new
 
 RubyLsp::CheckDocs.new(FileList["#{__dir__}/lib/ruby_lsp/**/*.rb"], FileList["#{__dir__}/misc/**/*.gif"])
 
-task default: [:test]
+task default: ["test:indexer", :test]
