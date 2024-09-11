@@ -245,6 +245,7 @@ export default class Client extends LanguageClient implements ClientInterface {
     workspaceFolder: vscode.WorkspaceFolder,
     outputChannel: WorkspaceChannel,
     isMainWorkspace = false,
+    debugMode?: boolean,
   ) {
     super(
       LSP_NAME,
@@ -256,6 +257,7 @@ export default class Client extends LanguageClient implements ClientInterface {
         ruby,
         isMainWorkspace,
       ),
+      debugMode,
     );
 
     this.workspaceOutputChannel = outputChannel;

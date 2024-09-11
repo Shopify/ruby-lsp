@@ -83,6 +83,11 @@
         "category": "Ruby LSP"
       },
       {
+        "command": "rubyLsp.startServerInDebugMode",
+        "title": "Debug the Ruby LSP server",
+        "category": "Ruby LSP"
+      },
+      {
         "command": "rubyLsp.update",
         "title": "Update language server gem",
         "category": "Ruby LSP"

@@ -47,7 +47,7 @@ export class Workspace implements WorkspaceInterface {
     this.registerRebaseWatcher(context);
   }
 
-  async start() {
+  async start(debugMode?: boolean) {
     await this.ruby.activateRuby();
 
     if (this.ruby.error) {
@@ -105,6 +105,7 @@ export class Workspace implements WorkspaceInterface {
       this.workspaceFolder,
       this.outputChannel,
       this.isMainWorkspace,
+      debugMode,
     );
 
     try {
