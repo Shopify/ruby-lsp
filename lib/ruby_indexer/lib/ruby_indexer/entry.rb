@@ -302,6 +302,17 @@ module RubyIndexer
       end
     end
 
+    # A forwarding method parameter, e.g. `def foo(...)`
+    class ForwardingParameter < Parameter
+      extend T::Sig
+
+      sig { void }
+      def initialize
+        # You can't name a forwarding parameter, it's always called `...`
+        super(name: :"...")
+      end
+    end
+
     class Member < Entry
       extend T::Sig
       extend T::Helpers
