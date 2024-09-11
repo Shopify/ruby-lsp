@@ -99,7 +99,7 @@ module RubyLsp
             )
 
             definitions << "[#{entry.file_name}](#{uri})"
-            content << "\n\n#{entry.comments.join("\n")}" unless entry.comments.empty?
+            content << "\n\n#{entry.comments}" unless entry.comments.empty?
           end
 
           additional_entries_text = if max_entries && entries.length > max_entries

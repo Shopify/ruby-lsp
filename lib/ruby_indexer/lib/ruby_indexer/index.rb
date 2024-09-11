@@ -312,12 +312,12 @@ module RubyIndexer
           break unless block.call(progress)
         end
 
-        index_single(path)
+        index_single(path, collect_comments: false)
       end
     end
 
-    sig { params(indexable_path: IndexablePath, source: T.nilable(String)).void }
-    def index_single(indexable_path, source = nil)
+    sig { params(indexable_path: IndexablePath, source: T.nilable(String), collect_comments: T::Boolean).void }
+    def index_single(indexable_path, source = nil, collect_comments: true)
       content = source || File.read(indexable_path.full_path)
       dispatcher = Prism::Dispatcher.new
 
@@ -327,6 +327,7 @@ module RubyIndexer
         dispatcher,
         result,
         indexable_path.full_path,
+        collect_comments: collect_comments,
         enhancements: @enhancements,
       )
       dispatcher.dispatch(result.value)
@@ -607,7 +608,7 @@ module RubyIndexer
           attached_ancestor.file_path,
           attached_ancestor.location,
           attached_ancestor.name_location,
-          [],
+          nil,
           nil,
         )
         add(singleton, skip_prefix_tree: true)

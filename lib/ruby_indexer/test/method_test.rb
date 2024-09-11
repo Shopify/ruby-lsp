@@ -382,9 +382,9 @@ module RubyIndexer
       RUBY
 
       assert_entry("bar", Entry::Accessor, "/fake/path/foo.rb:2-15:2-18")
-      assert_equal("Hello there", @index["bar"].first.comments.join("\n"))
+      assert_equal("Hello there", @index["bar"].first.comments)
       assert_entry("other", Entry::Accessor, "/fake/path/foo.rb:2-21:2-26")
-      assert_equal("Hello there", @index["other"].first.comments.join("\n"))
+      assert_equal("Hello there", @index["other"].first.comments)
       assert_entry("baz=", Entry::Accessor, "/fake/path/foo.rb:3-15:3-18")
       assert_entry("qux", Entry::Accessor, "/fake/path/foo.rb:4-17:4-20")
       assert_entry("qux=", Entry::Accessor, "/fake/path/foo.rb:4-17:4-20")
