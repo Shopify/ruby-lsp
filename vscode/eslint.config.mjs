@@ -46,6 +46,11 @@ const config = [
         }
       ]
     }
+  },
+  {
+    ignores: [
+      ".vscode-test/*",
+    ],
   }
 ]
 
