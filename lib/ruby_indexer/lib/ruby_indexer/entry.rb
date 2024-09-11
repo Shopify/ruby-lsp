@@ -597,6 +597,36 @@ module RubyIndexer
       def format
         @parameters.map(&:decorated_name).join(", ")
       end
+
+      # Returns `true` if the given call node arguments array matches this method signature. This method will prefer
+      # returning `true` for situations that cannot be analyzed statically, like the presence of splats, keyword splats
+      # or forwarding arguments
+      sig { params(arguments: T::Array[Prism::Node]).returns(T::Boolean) }
+      def matches?(arguments)
+        min_pos = 0
+        max_pos = T.let(0, Numeric)
+
+        @parameters.each do |param|
+          case param
+          when RequiredParameter
+            min_pos += 1
+            max_pos += 1
+          when OptionalParameter
+            max_pos += 1
+          when RestParameter
+            max_pos = Float::INFINITY
+          when ForwardingParameter
+            max_pos = Float::INFINITY
+          end
+        end
+
+        _keyword_hash_node, positional_args = arguments.partition { |arg| arg.is_a?(Prism::KeywordHashNode) }
+        argument_length_is_unknown = positional_args.any? do |arg|
+          arg.is_a?(Prism::SplatNode) || arg.is_a?(Prism::ForwardingArgumentsNode)
+        end
+
+        argument_length_is_unknown || (min_pos..max_pos).cover?(positional_args.length)
+      end
     end
   end
 end
