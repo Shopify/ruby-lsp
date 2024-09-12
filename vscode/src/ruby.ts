@@ -1,5 +1,4 @@
 /* eslint-disable no-process-env */
-import path from "path";
 import os from "os";
 
 import * as vscode from "vscode";
@@ -16,6 +15,7 @@ import { Rvm } from "./ruby/rvm";
 import { None } from "./ruby/none";
 import { Custom } from "./ruby/custom";
 import { Asdf } from "./ruby/asdf";
+import { getCustomBundleGemfile } from "./bundleGemfileHelper";
 
 export enum ManagerIdentifier {
   Asdf = "asdf",
@@ -59,18 +59,7 @@ export class Ruby implements RubyInterface {
     this.context = context;
     this.workspaceFolder = workspaceFolder;
     this.outputChannel = outputChannel;
-
-    const customBundleGemfile: string = vscode.workspace
-      .getConfiguration("rubyLsp")
-      .get("bundleGemfile")!;
-
-    if (customBundleGemfile.length > 0) {
-      this.customBundleGemfile = path.isAbsolute(customBundleGemfile)
-        ? customBundleGemfile
-        : path.resolve(
-            path.join(this.workspaceFolder.uri.fsPath, customBundleGemfile),
-          );
-    }
+    this.customBundleGemfile = getCustomBundleGemfile(this.workspaceFolder);
   }
 
   get versionManager(): ManagerConfiguration {
