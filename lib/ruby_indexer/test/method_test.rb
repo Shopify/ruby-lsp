@@ -488,5 +488,169 @@ module RubyIndexer
       assert_equal(6, name_location.start_column)
       assert_equal(9, name_location.end_column)
     end
+
+    def test_signature_matches_for_a_method_with_positional_params
+      index(<<~RUBY)
+        class Foo
+          def bar(a, b = 123)
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+
+      # Matching calls
+      assert_signature_matches(entry, "bar(1)")
+      assert_signature_matches(entry, "bar(1, 2)")
+      assert_signature_matches(entry, "bar(...)")
+      assert_signature_matches(entry, "bar(1, ...)")
+      assert_signature_matches(entry, "bar(*a)")
+      assert_signature_matches(entry, "bar(1, *a)")
+      assert_signature_matches(entry, "bar(1, *a, 2)")
+      assert_signature_matches(entry, "bar(*a, 2)")
+      assert_signature_matches(entry, "bar(1, **a)")
+      assert_signature_matches(entry, "bar(1) {}")
+
+      # Non matching calls
+
+      refute_signature_matches(entry, "bar()")
+      refute_signature_matches(entry, "bar(1, 2, 3)")
+
+      # TODO: uncomment after keyword support
+      # refute_signature_matches(entry, "bar(1, b: 2)")
+      # refute_signature_matches(entry, "bar(1, 2, c: 3)")
+    end
+
+    def test_signature_matches_for_a_method_with_argument_forwarding
+      index(<<~RUBY)
+        class Foo
+          def bar(...)
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+
+      # All calls match a forwarding parameter
+      assert_signature_matches(entry, "bar(1)")
+      assert_signature_matches(entry, "bar(1, 2)")
+      assert_signature_matches(entry, "bar(...)")
+      assert_signature_matches(entry, "bar(1, ...)")
+      assert_signature_matches(entry, "bar(*a)")
+      assert_signature_matches(entry, "bar(1, *a)")
+      assert_signature_matches(entry, "bar(1, *a, 2)")
+      assert_signature_matches(entry, "bar(*a, 2)")
+      assert_signature_matches(entry, "bar(1, **a)")
+      assert_signature_matches(entry, "bar(1) {}")
+      assert_signature_matches(entry, "bar()")
+      assert_signature_matches(entry, "bar(1, 2, 3)")
+      assert_signature_matches(entry, "bar(1, 2, a: 1, b: 5) {}")
+    end
+
+    def test_signature_matches_for_post_forwarding_parameter
+      index(<<~RUBY)
+        class Foo
+          def bar(a, ...)
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+
+      # All calls with at least one positional argument match
+      assert_signature_matches(entry, "bar(1)")
+      assert_signature_matches(entry, "bar(1, 2)")
+      assert_signature_matches(entry, "bar(...)")
+      assert_signature_matches(entry, "bar(1, ...)")
+      assert_signature_matches(entry, "bar(*a)")
+      assert_signature_matches(entry, "bar(1, *a)")
+      assert_signature_matches(entry, "bar(1, *a, 2)")
+      assert_signature_matches(entry, "bar(*a, 2)")
+      assert_signature_matches(entry, "bar(1, **a)")
+      assert_signature_matches(entry, "bar(1) {}")
+      assert_signature_matches(entry, "bar(1, 2, 3)")
+      assert_signature_matches(entry, "bar(1, 2, a: 1, b: 5) {}")
+
+      refute_signature_matches(entry, "bar()")
+    end
+
+    def test_signature_matches_for_destructured_parameters
+      index(<<~RUBY)
+        class Foo
+          def bar(a, (b, c))
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+
+      # All calls with at least one positional argument match
+      assert_signature_matches(entry, "bar(1, 2)")
+      assert_signature_matches(entry, "bar(...)")
+      assert_signature_matches(entry, "bar(1, ...)")
+      assert_signature_matches(entry, "bar(*a)")
+      assert_signature_matches(entry, "bar(1, *a)")
+      assert_signature_matches(entry, "bar(*a, 2)")
+      # This matches because `bar(1, *[], 2)` would result in `bar(1, 2)`, which is a valid call
+      assert_signature_matches(entry, "bar(1, *a, 2)")
+
+      refute_signature_matches(entry, "bar()")
+      refute_signature_matches(entry, "bar(1)")
+      refute_signature_matches(entry, "bar(1, **a)")
+      refute_signature_matches(entry, "bar(1, 2, 3)")
+      refute_signature_matches(entry, "bar(1) {}")
+
+      # TODO: uncomment after keyword support
+      # refute_signature_matches(entry, "bar(1, 2, a: 1, b: 5) {}")
+    end
+
+    def test_signature_matches_for_post_parameters
+      index(<<~RUBY)
+        class Foo
+          def bar(*splat, a)
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+
+      # All calls with at least one positional argument match
+      assert_signature_matches(entry, "bar(1)")
+      assert_signature_matches(entry, "bar(1, 2)")
+      assert_signature_matches(entry, "bar(...)")
+      assert_signature_matches(entry, "bar(1, ...)")
+      assert_signature_matches(entry, "bar(*a)")
+      assert_signature_matches(entry, "bar(1, *a)")
+      assert_signature_matches(entry, "bar(*a, 2)")
+      assert_signature_matches(entry, "bar(1, *a, 2)")
+      assert_signature_matches(entry, "bar(1, **a)")
+      assert_signature_matches(entry, "bar(1, 2, 3)")
+      assert_signature_matches(entry, "bar(1) {}")
+
+      refute_signature_matches(entry, "bar()")
+
+      # TODO: uncomment after keyword support
+      # refute_signature_matches(entry, "bar(1, 2, a: 1, b: 5) {}")
+    end
+
+    private
+
+    sig { params(entry: Entry::Method, call_string: String).void }
+    def assert_signature_matches(entry, call_string)
+      sig = T.must(entry.signatures.first)
+      arguments = parse_prism_args(call_string)
+      assert(sig.matches?(arguments), "Expected #{call_string} to match #{entry.name}#{entry.decorated_parameters}")
+    end
+
+    sig { params(entry: Entry::Method, call_string: String).void }
+    def refute_signature_matches(entry, call_string)
+      sig = T.must(entry.signatures.first)
+      arguments = parse_prism_args(call_string)
+      refute(sig.matches?(arguments), "Expected #{call_string} to not match #{entry.name}#{entry.decorated_parameters}")
+    end
+
+    def parse_prism_args(s)
+      Array(Prism.parse(s).value.statements.body.first.arguments&.arguments)
+    end
   end
 end
