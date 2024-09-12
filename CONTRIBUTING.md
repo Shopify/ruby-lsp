@@ -98,6 +98,12 @@ class MyRequestExpectationsTest < ExpectationsTestRunner
 end
 ```
 
+To automatically create or update `.exp.json` files, you can use the `WRITE_EXPECTATIONS` environment variable. For example:
+
+```sh
+WRITE_EXPECTATIONS=1 bin/test test/requests/code_lens_expectations_test.rb
+```
+
 ## Debugging with VS Code
 
 ## Debugging Tests

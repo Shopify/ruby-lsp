@@ -88,10 +88,10 @@ export class TestController {
     });
 
     response.forEach((res) => {
-      const [_, name, command, location] = res.command!.arguments!;
+      const [_, name, command, location, label] = res.command!.arguments!;
       const testItem: vscode.TestItem = this.testController.createTestItem(
         name,
-        name,
+        label || name,
         uri,
       );
 

@@ -18,7 +18,12 @@ class ExpectationsTestRunner < Minitest::Test
           def assert_expectations(source, expected)
             parsed_expected = JSON.parse(expected)
             actual = run_expectations(source)
-            assert_equal(parsed_expected["result"], JSON.parse(actual.to_json))
+
+            if ENV['WRITE_EXPECTATIONS'] && parsed_expected["result"] != JSON.parse(actual.to_json)
+              File.write(@_expectation_path, JSON.pretty_generate(result: actual, params: @__params) + "\\n")
+            else
+              assert_equal(parsed_expected["result"], JSON.parse(actual.to_json))
+            end
           end
 
           def default_args
@@ -48,8 +53,9 @@ class ExpectationsTestRunner < Minitest::Test
           class_eval(<<~RB, __FILE__, __LINE__ + 1)
             def test_#{expectation_suffix}__#{test_name}
               @_path = "#{path}"
+              @_expectation_path = "#{expectation_path}"
               source = File.read(@_path)
-              expected = File.read("#{expectation_path}")
+              expected = File.read(@_expectation_path)
               initialize_params(expected)
               assert_expectations(source, expected)
             end

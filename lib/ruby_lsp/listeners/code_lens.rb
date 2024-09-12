@@ -44,6 +44,7 @@ module RubyLsp
         @group_id_stack = T.let([], T::Array[Integer])
         # We want to avoid adding code lenses for nested definitions
         @def_depth = T.let(0, Integer)
+        @spec_id = T.let(0, Integer)
 
         dispatcher.register(
           self,
@@ -70,6 +71,7 @@ module RubyLsp
             name: class_name,
             command: generate_test_command(group_stack: @group_stack),
             kind: :group,
+            id: generate_fully_qualified_id(group_stack: @group_stack),
           )
 
           @group_id_stack.push(@group_id)
@@ -106,6 +108,7 @@ module RubyLsp
               name: method_name,
               command: generate_test_command(method_name: method_name, group_stack: @group_stack),
               kind: :example,
+              id: generate_fully_qualified_id(group_stack: @group_stack, method_name: method_name),
             )
           end
         end
@@ -166,19 +169,20 @@ module RubyLsp
         @visibility_stack.push([prev_visibility, prev_visibility])
         if node.name == DESCRIBE_KEYWORD
           @group_id_stack.pop
+          @group_stack.pop
         end
       end
 
       private
 
-      sig { params(node: Prism::Node, name: String, command: String, kind: Symbol).void }
-      def add_test_code_lens(node, name:, command:, kind:)
+      sig { params(node: Prism::Node, name: String, command: String, kind: Symbol, id: String).void }
+      def add_test_code_lens(node, name:, command:, kind:, id: name)
         # don't add code lenses if the test library is not supported or unknown
         return unless SUPPORTED_TEST_LIBRARIES.include?(@global_state.test_library) && @path
 
         arguments = [
           @path,
-          name,
+          id,
           command,
           {
             start_line: node.location.start_line - 1,
@@ -186,6 +190,7 @@ module RubyLsp
             end_line: node.location.end_line - 1,
             end_column: node.location.end_column,
           },
+          name,
         ]
 
         grouping_data = { group_id: @group_id_stack.last, kind: kind }
@@ -247,7 +252,7 @@ module RubyLsp
             # We know the entire path, do an exact match
             " --name " + Shellwords.escape(group_stack.join("::")) + "#" + Shellwords.escape(method_name)
           elsif spec_name
-            " --name " + "/#{Shellwords.escape(spec_name)}/"
+            " --name " + "\"/^#{Shellwords.escape(group_stack.join("::"))}##{Shellwords.escape(spec_name)}$/\""
           else
             # Execute all tests of the selected class and tests in
             # modules/classes nested inside of that class
@@ -282,13 +287,37 @@ module RubyLsp
 
         return unless name
 
+        if kind == :example
+          # Increment spec_id for each example
+          @spec_id += 1
+        else
+          # Reset spec_id when entering a new group
+          @spec_id = 0
+          @group_stack.push(name)
+        end
+
         if @path
+          method_name = format("test_%04d_%s", @spec_id, name) if kind == :example
           add_test_code_lens(
             node,
             name: name,
-            command: generate_test_command(spec_name: name),
+            command: generate_test_command(group_stack: @group_stack, spec_name: method_name),
             kind: kind,
+            id: generate_fully_qualified_id(group_stack: @group_stack, method_name: method_name),
           )
+        end
+      end
+
+      sig { params(group_stack: T::Array[String], method_name: T.nilable(String)).returns(String) }
+      def generate_fully_qualified_id(group_stack:, method_name: nil)
+        if method_name
+          # For tests, this will be the test class and method name: `Foo::BarTest#test_baz`.
+          # For specs, this will be the nested descriptions and formatted test name: `a::b::c#test_001_foo`.
+          group_stack.join("::") + "#" + method_name
+        else
+          # For tests, this will be the test class: `Foo::BarTest`.
+          # For specs, this will be the nested descriptions: `a::b::c`.
+          group_stack.join("::")
         end
       end
     end

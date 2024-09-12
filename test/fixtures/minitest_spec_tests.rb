@@ -17,3 +17,13 @@ end
 describe Foo::Bar do
   it 'it_class_constant_path'
 end
+
+describe Baz do
+  describe "#foo" do
+    it "works"
+  end
+
+  describe "#bar" do
+    it "works"
+  end
+end
