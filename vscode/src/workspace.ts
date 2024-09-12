@@ -22,7 +22,7 @@ export class Workspace implements WorkspaceInterface {
   private readonly isMainWorkspace: boolean;
   private readonly telemetry: vscode.TelemetryLogger;
   private needsRestart = false;
-  #rebaseInProgress = false;
+  #inhibitRestart = false;
   #error = false;
 
   constructor(
@@ -44,7 +44,12 @@ export class Workspace implements WorkspaceInterface {
     this.isMainWorkspace = isMainWorkspace;
 
     this.registerRestarts(context);
-    this.registerRebaseWatcher(context);
+    this.registerCreateDeleteWatcher(
+      context,
+      ".git/{rebase-merge,rebase-apply}",
+    );
+    this.registerCreateDeleteWatcher(context, ".git/BISECT_START");
+    this.registerCreateDeleteWatcher(context, ".git/CHERRY_PICK_HEAD");
   }
 
   async start() {
@@ -139,7 +144,7 @@ export class Workspace implements WorkspaceInterface {
 
   async restart() {
     try {
-      if (this.#rebaseInProgress) {
+      if (this.#inhibitRestart) {
         return;
       }
 
@@ -266,8 +271,8 @@ export class Workspace implements WorkspaceInterface {
     this.#error = value;
   }
 
-  get rebaseInProgress() {
-    return this.#rebaseInProgress;
+  get inhibitRestart() {
+    return this.#inhibitRestart;
   }
 
   async execute(command: string, log = false) {
@@ -336,35 +341,32 @@ export class Workspace implements WorkspaceInterface {
     );
   }
 
-  private registerRebaseWatcher(context: vscode.ExtensionContext) {
+  private registerCreateDeleteWatcher(
+    context: vscode.ExtensionContext,
+    glob: string,
+  ) {
     const parentWatcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(
-        this.workspaceFolder,
-        "../.git/{rebase-merge,rebase-apply}",
-      ),
+      new vscode.RelativePattern(this.workspaceFolder, `../${glob}`),
     );
     const workspaceWatcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(
-        this.workspaceFolder,
-        ".git/{rebase-merge,rebase-apply}",
-      ),
+      new vscode.RelativePattern(this.workspaceFolder, glob),
     );
 
-    const startRebase = () => {
-      this.#rebaseInProgress = true;
+    const start = () => {
+      this.#inhibitRestart = true;
     };
-    const stopRebase = async () => {
-      this.#rebaseInProgress = false;
+    const stop = async () => {
+      this.#inhibitRestart = false;
       await this.restart();
     };
 
     context.subscriptions.push(
       workspaceWatcher,
       parentWatcher,
-      // When one of the rebase files are created, we set this flag to prevent restarting during the rebase
-      workspaceWatcher.onDidCreate(startRebase),
-      // Once they are deleted and the rebase is complete, then we restart
-      workspaceWatcher.onDidDelete(stopRebase),
+      // When one of the 'inhibit restart' files are created, we set this flag to prevent restarting during that action
+      workspaceWatcher.onDidCreate(start),
+      // Once they are deleted and the action is complete, then we restart
+      workspaceWatcher.onDidDelete(stop),
     );
   }
 }
