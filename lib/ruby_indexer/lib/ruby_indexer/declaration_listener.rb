@@ -685,9 +685,12 @@ module RubyIndexer
 
       keyword_rest = parameters_node.keyword_rest
 
-      if keyword_rest.is_a?(Prism::KeywordRestParameterNode)
+      case keyword_rest
+      when Prism::KeywordRestParameterNode
         keyword_rest_name = parameter_name(keyword_rest) || Entry::KeywordRestParameter::DEFAULT_NAME
         parameters << Entry::KeywordRestParameter.new(name: keyword_rest_name)
+      when Prism::ForwardingParameterNode
+        parameters << Entry::ForwardingParameter.new
       end
 
       parameters_node.posts.each do |post|

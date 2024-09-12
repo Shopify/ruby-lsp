@@ -330,6 +330,33 @@ module RubyIndexer
       assert_empty(parameters)
     end
 
+    def test_methods_with_argument_forwarding
+      index(<<~RUBY)
+        class Foo
+          def bar(...)
+          end
+
+          def baz(a, ...)
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+      assert_instance_of(Entry::Method, entry, "Expected `bar` to be indexed")
+
+      parameters = entry.signatures.first.parameters
+      assert_equal(1, parameters.length)
+      assert_instance_of(Entry::ForwardingParameter, parameters.first)
+
+      entry = T.must(@index["baz"].first)
+      assert_instance_of(Entry::Method, entry, "Expected `baz` to be indexed")
+
+      parameters = entry.signatures.first.parameters
+      assert_equal(2, parameters.length)
+      assert_instance_of(Entry::RequiredParameter, parameters[0])
+      assert_instance_of(Entry::ForwardingParameter, parameters[1])
+    end
+
     def test_keeps_track_of_method_owner
       index(<<~RUBY)
         class Foo
