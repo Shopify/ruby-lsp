@@ -575,6 +575,13 @@ export class RubyLsp {
         const workspace = await this.showWorkspacePick();
         await collectRubyLspInfo(workspace);
       }),
+      vscode.commands.registerCommand(
+        Command.StartServerInDebugMode,
+        async () => {
+          const workspace = await this.showWorkspacePick();
+          await workspace?.start(true);
+        },
+      ),
     );
   }
 
