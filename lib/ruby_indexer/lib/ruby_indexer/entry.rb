@@ -322,11 +322,6 @@ module RubyIndexer
       sig { returns(T.nilable(Entry::Namespace)) }
       attr_reader :owner
 
-      sig { returns(T::Array[RubyIndexer::Entry::Parameter]) }
-      def parameters
-        T.must(signatures.first).parameters
-      end
-
       sig do
         params(
           name: String,
@@ -557,11 +552,6 @@ module RubyIndexer
         @owner = T.let(unresolved_alias.owner, T.nilable(Entry::Namespace))
       end
 
-      sig { returns(T::Array[Parameter]) }
-      def parameters
-        @target.parameters
-      end
-
       sig { returns(String) }
       def decorated_parameters
         @target.decorated_parameters
@@ -690,7 +680,13 @@ module RubyIndexer
         return true unless args
         return true if args.any? { |arg| arg.is_a?(Prism::AssocSplatNode) }
 
-        arg_names = args.filter_map { |arg| arg.key.value.to_sym if arg.is_a?(Prism::AssocNode) }
+        arg_names = args.filter_map do |arg|
+          next unless arg.is_a?(Prism::AssocNode)
+
+          key = arg.key
+          key.value&.to_sym if key.is_a?(Prism::SymbolNode)
+        end
+
         (arg_names - names).empty?
       end
     end
