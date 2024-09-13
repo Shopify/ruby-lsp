@@ -395,4 +395,66 @@ class SignatureHelpTest < Minitest::Test
       assert_match("Guessed receiver: User", signature.documentation.value)
     end
   end
+
+  def test_automatically_detects_active_overload
+    # First step overload: just a block
+    source = <<~RUBY
+      5.step()
+    RUBY
+
+    with_server(source) do |server, uri|
+      index = server.instance_variable_get(:@global_state).index
+      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+
+      server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
+        position: { line: 0, character: 7 },
+        context: {},
+      })
+
+      result = server.pop_response.response
+      signature = result.signatures[result.active_signature]
+      assert_equal("step(&<anonymous block>)", signature.label)
+    end
+
+    # Second step overload: with positional arguments
+    source = <<~RUBY
+      5.step(1)
+    RUBY
+
+    with_server(source) do |server, uri|
+      index = server.instance_variable_get(:@global_state).index
+      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+
+      server.process_message(id: 2, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
+        position: { line: 0, character: 8 },
+        context: {},
+      })
+
+      result = server.pop_response.response
+      signature = result.signatures[result.active_signature]
+      assert_equal("step(limit, step = <default>, &<anonymous block>)", signature.label)
+    end
+
+    # Third step overload: with keyword arguments
+    source = <<~RUBY
+      5.step(to: 5)
+    RUBY
+
+    with_server(source) do |server, uri|
+      index = server.instance_variable_get(:@global_state).index
+      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+
+      server.process_message(id: 2, method: "textDocument/signatureHelp", params: {
+        textDocument: { uri: uri },
+        position: { line: 0, character: 8 },
+        context: {},
+      })
+
+      result = server.pop_response.response
+      signature = result.signatures[result.active_signature]
+      assert_equal("step(to:, by: <default>, &<anonymous block>)", signature.label)
+    end
+  end
 end
