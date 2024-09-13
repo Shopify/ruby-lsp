@@ -4,6 +4,7 @@ import path from "path";
 import os from "os";
 import fs from "fs";
 
+import sinon from "sinon";
 import * as vscode from "vscode";
 import {
   State,
@@ -141,6 +142,21 @@ async function launchClient(workspaceUri: vscode.Uri) {
   await ruby.activateRuby();
   ruby.env.RUBY_LSP_BYPASS_TYPECHECKER = "true";
 
+  const virtualDocuments = new Map<string, string>();
+
+  vscode.workspace.registerTextDocumentContentProvider("embedded-content", {
+    provideTextDocumentContent: (uri) => {
+      const originalUri = /^\/(.*)\.[^.]+$/.exec(uri.path)?.[1];
+
+      if (!originalUri) {
+        return "";
+      }
+
+      const decodedUri = decodeURIComponent(originalUri);
+      return virtualDocuments.get(decodedUri);
+    },
+  });
+
   const client = new Client(
     context,
     FAKE_TELEMETRY,
@@ -148,6 +164,7 @@ async function launchClient(workspaceUri: vscode.Uri) {
     () => {},
     workspaceFolder,
     outputChannel,
+    virtualDocuments,
   );
 
   client.clientOptions.initializationFailedHandler = (error) => {
@@ -704,6 +721,71 @@ suite("Client", () => {
         assert.strictEqual(error.code, -32602);
         return true;
       },
+    );
+  }).timeout(20000);
+
+  test("delegate completion", async () => {
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text: "",
+      },
+    });
+
+    const text = ["<% @users.each do |user| %>", "  <di", "<% end %>"].join(
+      "\n",
+    );
+    const uri = vscode.Uri.joinPath(
+      workspaceUri,
+      "lib",
+      "ruby_lsp",
+      "index.html.erb",
+    ).toString();
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri,
+        version: 1,
+        text,
+        languageId: "erb",
+      },
+    });
+
+    const stub = sinon
+      .stub(vscode.commands, "executeCommand")
+      .resolves({ items: [{ label: "div" }] });
+
+    const response: vscode.CompletionList = await client.sendRequest(
+      "textDocument/completion",
+      {
+        textDocument: {
+          uri,
+        },
+        position: { line: 1, character: 5 },
+        context: {},
+      },
+    );
+    stub.restore();
+
+    await client.sendNotification("textDocument/didClose", {
+      textDocument: { uri },
+    });
+
+    assert.deepStrictEqual(
+      response.items.map((item) => item.label),
+      ["div"],
+    );
+
+    assert.ok(
+      stub.calledWithExactly(
+        "vscode.executeCompletionItemProvider",
+        vscode.Uri.parse(
+          `embedded-content://html/${encodeURIComponent(uri)}.html`,
+        ),
+        { line: 1, character: 5 },
+        undefined,
+      ),
     );
   }).timeout(20000);
 });

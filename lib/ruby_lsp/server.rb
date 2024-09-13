@@ -9,12 +9,6 @@ module RubyLsp
     sig { returns(GlobalState) }
     attr_reader :global_state
 
-    sig { params(test_mode: T::Boolean).void }
-    def initialize(test_mode: false)
-      super
-      @global_state = T.let(GlobalState.new, GlobalState)
-    end
-
     sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
     def process_message(message)
       case message[:method]
@@ -98,6 +92,8 @@ module RubyLsp
       when "$/cancelRequest"
         @mutex.synchronize { @cancelled_requests << message[:params][:id] }
       end
+    rescue DelegateRequestError
+      send_message(Error.new(id: message[:id], code: DelegateRequestError::CODE, message: "DELEGATE_REQUEST"))
     rescue StandardError, LoadError => e
       # If an error occurred in a request, we have to return an error response or else the editor will hang
       if message[:id]
@@ -748,6 +744,17 @@ module RubyLsp
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_completion_item_resolve(message)
+      # When responding to a delegated completion request, it means we're handling a completion item that isn't related
+      # to Ruby (probably related to an ERB host language like HTML). We need to return the original completion item
+      # back to the editor so that it's displayed correctly
+      if message.dig(:params, :data, :delegateCompletion)
+        send_message(Result.new(
+          id: message[:id],
+          response: message[:params],
+        ))
+        return
+      end
+
       send_message(Result.new(
         id: message[:id],
         response: Requests::CompletionResolve.new(@global_state, message[:params]).perform,

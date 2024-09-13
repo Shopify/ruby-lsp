@@ -31,6 +31,9 @@ export class RubyLsp {
   private readonly telemetry: vscode.TelemetryLogger;
   private readonly rails: Rails;
 
+  // A URI => content map of virtual documents for delegate requests
+  private readonly virtualDocuments = new Map<string, string>();
+
   constructor(
     context: vscode.ExtensionContext,
     telemetry: vscode.TelemetryLogger,
@@ -90,6 +93,20 @@ export class RubyLsp {
         if (!workspace) {
           await this.activateWorkspace(workspaceFolder, false);
         }
+      }),
+      vscode.workspace.registerTextDocumentContentProvider("embedded-content", {
+        provideTextDocumentContent: (uri) => {
+          // For embedded content, we store it as a virtual file using the original URI as the key. We need to extract
+          // some parts of the custom URI to get the original URI
+          const originalUri = /^\/(.*)\.[^.]+$/.exec(uri.path)?.[1];
+
+          if (!originalUri) {
+            return "";
+          }
+
+          const decodedUri = decodeURIComponent(originalUri);
+          return this.virtualDocuments.get(decodedUri);
+        },
       }),
       LOG_CHANNEL,
     );
@@ -196,6 +213,7 @@ export class RubyLsp {
       workspaceFolder,
       this.telemetry,
       this.testController.createTestItems.bind(this.testController),
+      this.virtualDocuments,
       this.workspaces.size === 0,
     );
     this.workspaces.set(workspaceFolder.uri.toString(), workspace);

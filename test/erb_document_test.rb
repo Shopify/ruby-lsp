@@ -106,4 +106,20 @@ class ERBDocumentTest < Minitest::Test
     assert_equal(value, document.cache_set("textDocument/semanticHighlighting", value))
     assert_equal(value, document.cache_get("textDocument/semanticHighlighting"))
   end
+
+  def test_keeps_track_of_virtual_host_language_source
+    document = RubyLsp::ERBDocument.new(source: +<<~ERB, version: 1, uri: URI("file:///foo.erb"))
+      <ul>
+        <li><%= foo %><li>
+        <li><%= end %><li>
+      </ul>
+    ERB
+
+    assert_equal(<<~HTML, document.host_language_source)
+      <ul>
+        <li>          <li>
+        <li>          <li>
+      </ul>
+    HTML
+  end
 end
