@@ -12,10 +12,19 @@ export interface ActivationResult {
   version: string;
 }
 
+export const ACTIVATION_SEPARATOR = "RUBY_LSP_ACTIVATION_SEPARATOR";
+
 export abstract class VersionManager {
+  public activationScript = [
+    `STDERR.print("${ACTIVATION_SEPARATOR}" + `,
+    "{ env: ENV.to_h, yjit: !!defined?(RubyVM:: YJIT), version: RUBY_VERSION }.to_json + ",
+    `"${ACTIVATION_SEPARATOR}")`,
+  ].join("");
+
   protected readonly outputChannel: WorkspaceChannel;
   protected readonly workspaceFolder: vscode.WorkspaceFolder;
   protected readonly bundleUri: vscode.Uri;
+
   private readonly customBundleGemfile?: string;
 
   constructor(
@@ -44,6 +53,18 @@ export abstract class VersionManager {
   // Activate the Ruby environment for the version manager, returning all of the necessary information to boot the
   // language server
   abstract activate(): Promise<ActivationResult>;
+
+  protected async runEnvActivationScript(activatedRuby: string) {
+    const result = await this.runScript(
+      `${activatedRuby} -W0 -rjson -e '${this.activationScript}'`,
+    );
+
+    const activationContent = new RegExp(
+      `${ACTIVATION_SEPARATOR}(.*)${ACTIVATION_SEPARATOR}`,
+    ).exec(result.stderr);
+
+    return this.parseWithErrorHandling(activationContent![1]);
+  }
 
   protected parseWithErrorHandling(json: string) {
     try {

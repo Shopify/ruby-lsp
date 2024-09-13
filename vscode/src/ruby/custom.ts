@@ -10,14 +10,10 @@ import { VersionManager, ActivationResult } from "./versionManager";
 // GEM_HOME and GEM_PATH as needed to find the correct Ruby runtime.
 export class Custom extends VersionManager {
   async activate(): Promise<ActivationResult> {
-    const activationScript =
-      "STDERR.print({ env: ENV.to_h, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }.to_json)";
-
-    const result = await this.runScript(
-      `${this.customCommand()} && ruby -W0 -rjson -e '${activationScript}'`,
+    const parsedResult = await this.runEnvActivationScript(
+      `${this.customCommand()} && ruby`,
     );
 
-    const parsedResult = this.parseWithErrorHandling(result.stderr);
     return {
       env: { ...process.env, ...parsedResult.env },
       yjit: parsedResult.yjit,

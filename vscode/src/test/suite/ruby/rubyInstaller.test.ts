@@ -12,6 +12,7 @@ import { RubyInstaller } from "../../../ruby/rubyInstaller";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL } from "../../../common";
 import { RUBY_VERSION } from "../../rubyVersion";
+import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
 
 suite("RubyInstaller", () => {
   if (os.platform() !== "win32") {
@@ -121,7 +122,7 @@ suite("RubyInstaller", () => {
 
     const windows = new RubyInstaller(workspaceFolder, outputChannel);
     const result = ["/fake/dir", "/other/fake/dir", true, RUBY_VERSION].join(
-      "ACTIVATION_SEPARATOR",
+      ACTIVATION_SEPARATOR,
     );
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",

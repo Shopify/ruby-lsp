@@ -9,6 +9,7 @@ import sinon from "sinon";
 import { Mise } from "../../../ruby/mise";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import * as common from "../../../common";
+import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
 
 suite("Mise", () => {
   if (os.platform() === "win32") {
@@ -28,16 +29,15 @@ suite("Mise", () => {
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
     const mise = new Mise(workspaceFolder, outputChannel);
 
-    const activationScript =
-      "STDERR.print({ env: ENV.to_h, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }.to_json)";
+    const envStub = {
+      env: { ANY: "true" },
+      yjit: true,
+      version: "3.0.0",
+    };
 
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
-      stderr: JSON.stringify({
-        env: { ANY: "true" },
-        yjit: true,
-        version: "3.0.0",
-      }),
+      stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
     });
     const findStub = sinon
       .stub(mise, "findMiseUri")
@@ -54,7 +54,7 @@ suite("Mise", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${os.homedir()}/.local/bin/mise x -- ruby -W0 -rjson -e '${activationScript}'`,
+        `${os.homedir()}/.local/bin/mise x -- ruby -W0 -rjson -e '${mise.activationScript}'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,
@@ -84,17 +84,17 @@ suite("Mise", () => {
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
     const mise = new Mise(workspaceFolder, outputChannel);
 
-    const activationScript =
-      "STDERR.print({ env: ENV.to_h, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }.to_json)";
+    const envStub = {
+      env: { ANY: "true" },
+      yjit: true,
+      version: "3.0.0",
+    };
 
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
-      stderr: JSON.stringify({
-        env: { ANY: "true" },
-        yjit: true,
-        version: "3.0.0",
-      }),
+      stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
     });
+
     const misePath = path.join(workspacePath, "mise");
     fs.writeFileSync(misePath, "fakeMiseBinary");
 
@@ -113,7 +113,7 @@ suite("Mise", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${misePath} x -- ruby -W0 -rjson -e '${activationScript}'`,
+        `${misePath} x -- ruby -W0 -rjson -e '${mise.activationScript}'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,

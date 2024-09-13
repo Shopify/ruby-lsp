@@ -12,15 +12,11 @@ export class Mise extends VersionManager {
   async activate(): Promise<ActivationResult> {
     const miseUri = await this.findMiseUri();
 
-    const activationScript =
-      "STDERR.print({ env: ENV.to_h, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }.to_json)";
-
     // The exec command in Mise is called `x`
-    const result = await this.runScript(
-      `${miseUri.fsPath} x -- ruby -W0 -rjson -e '${activationScript}'`,
+    const parsedResult = await this.runEnvActivationScript(
+      `${miseUri.fsPath} x -- ruby`,
     );
 
-    const parsedResult = this.parseWithErrorHandling(result.stderr);
     return {
       env: { ...process.env, ...parsedResult.env },
       yjit: parsedResult.yjit,

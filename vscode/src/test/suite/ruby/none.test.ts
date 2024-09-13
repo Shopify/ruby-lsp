@@ -9,6 +9,7 @@ import sinon from "sinon";
 import { None } from "../../../ruby/none";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import * as common from "../../../common";
+import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
 
 suite("None", () => {
   test("Invokes Ruby directly", async () => {
@@ -24,22 +25,22 @@ suite("None", () => {
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
     const none = new None(workspaceFolder, outputChannel);
 
-    const activationScript =
-      "STDERR.print({ env: ENV.to_h, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }.to_json)";
+    const envStub = {
+      env: { ANY: "true" },
+      yjit: true,
+      version: "3.0.0",
+    };
 
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
-      stderr: JSON.stringify({
-        env: { ANY: "true" },
-        yjit: true,
-        version: "3.0.0",
-      }),
+      stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
     });
+
     const { env, version, yjit } = await none.activate();
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `ruby -W0 -rjson -e '${activationScript}'`,
+        `ruby -W0 -rjson -e '${none.activationScript}'`,
         {
           cwd: uri.fsPath,
           shell: vscode.env.shell,

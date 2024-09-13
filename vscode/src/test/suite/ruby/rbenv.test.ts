@@ -8,6 +8,7 @@ import sinon from "sinon";
 import { Rbenv } from "../../../ruby/rbenv";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import * as common from "../../../common";
+import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
 
 suite("Rbenv", () => {
   if (os.platform() === "win32") {
@@ -27,23 +28,22 @@ suite("Rbenv", () => {
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
     const rbenv = new Rbenv(workspaceFolder, outputChannel);
 
-    const activationScript =
-      "STDERR.print({env: ENV.to_h,yjit:!!defined?(RubyVM::YJIT),version:RUBY_VERSION}.to_json)";
+    const envStub = {
+      env: { ANY: "true" },
+      yjit: true,
+      version: "3.0.0",
+    };
 
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
-      stderr: JSON.stringify({
-        env: { ANY: "true" },
-        yjit: true,
-        version: "3.0.0",
-      }),
+      stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
     });
 
     const { env, version, yjit } = await rbenv.activate();
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `rbenv exec ruby -W0 -rjson -e '${activationScript}'`,
+        `rbenv exec ruby -W0 -rjson -e '${rbenv.activationScript}'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,
@@ -70,12 +70,9 @@ suite("Rbenv", () => {
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
     const rbenv = new Rbenv(workspaceFolder, outputChannel);
 
-    const activationScript =
-      "STDERR.print({env: ENV.to_h,yjit:!!defined?(RubyVM::YJIT),version:RUBY_VERSION}.to_json)";
-
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
-      stderr: "not a json",
+      stderr: `${ACTIVATION_SEPARATOR}not a json${ACTIVATION_SEPARATOR}`,
     });
 
     const errorStub = sinon.stub(outputChannel, "error");
@@ -87,7 +84,7 @@ suite("Rbenv", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `rbenv exec ruby -W0 -rjson -e '${activationScript}'`,
+        `rbenv exec ruby -W0 -rjson -e '${rbenv.activationScript}'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,

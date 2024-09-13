@@ -6,14 +6,16 @@ import * as vscode from "vscode";
 
 import { WorkspaceChannel } from "../workspaceChannel";
 
-import { ActivationResult, VersionManager } from "./versionManager";
+import {
+  ActivationResult,
+  VersionManager,
+  ACTIVATION_SEPARATOR,
+} from "./versionManager";
 
 interface RubyVersion {
   engine?: string;
   version: string;
 }
-
-const ACTIVATION_SEPARATOR = "ACTIVATION_SEPARATOR";
 
 // A tool to change the current Ruby version
 // Learn more: https://github.com/postmodern/chruby
