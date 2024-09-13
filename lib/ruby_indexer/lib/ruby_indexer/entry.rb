@@ -600,11 +600,26 @@ module RubyIndexer
 
       # Returns `true` if the given call node arguments array matches this method signature. This method will prefer
       # returning `true` for situations that cannot be analyzed statically, like the presence of splats, keyword splats
-      # or forwarding arguments
+      # or forwarding arguments.
+      #
+      # Since this method is used to detect which overload should be displayed in signature help, it will also return
+      # `true` if there are missing arguments since the user may not be done typing yet. For example:
+      #
+      # ```ruby
+      # def foo(a, b); end
+      # # All of the following are considered matches because the user might be in the middle of typing and we have to
+      # # show them the signature
+      # foo
+      # foo(1)
+      # foo(1, 2)
+      # ```
       sig { params(arguments: T::Array[Prism::Node]).returns(T::Boolean) }
       def matches?(arguments)
         min_pos = 0
-        max_pos = T.let(0, Numeric)
+        max_pos = T.let(0, T.any(Integer, Float))
+        names = []
+        has_forward = T.let(false, T::Boolean)
+        has_keyword_rest = T.let(false, T::Boolean)
 
         @parameters.each do |param|
           case param
@@ -617,15 +632,66 @@ module RubyIndexer
             max_pos = Float::INFINITY
           when ForwardingParameter
             max_pos = Float::INFINITY
+            has_forward = true
+          when KeywordParameter, OptionalKeywordParameter
+            names << param.name
+          when KeywordRestParameter
+            has_keyword_rest = true
           end
         end
 
-        _keyword_hash_node, positional_args = arguments.partition { |arg| arg.is_a?(Prism::KeywordHashNode) }
-        argument_length_is_unknown = positional_args.any? do |arg|
-          arg.is_a?(Prism::SplatNode) || arg.is_a?(Prism::ForwardingArgumentsNode)
+        keyword_hash_nodes, positional_args = arguments.partition { |arg| arg.is_a?(Prism::KeywordHashNode) }
+        keyword_args = T.cast(keyword_hash_nodes.first, T.nilable(Prism::KeywordHashNode))&.elements
+        forwarding_arguments, positionals = positional_args.partition do |arg|
+          arg.is_a?(Prism::ForwardingArgumentsNode)
         end
 
-        argument_length_is_unknown || (min_pos..max_pos).cover?(positional_args.length)
+        return true if has_forward && min_pos == 0
+
+        # If the only argument passed is a forwarding argument, then anything will match
+        (positionals.empty? && forwarding_arguments.any?) ||
+          (
+            # Check if positional arguments match. This includes required, optional, rest arguments. We also need to
+            # verify if there's a trailing forwading argument, like `def foo(a, ...); end`
+            positional_arguments_match?(positionals, forwarding_arguments, keyword_args, min_pos, max_pos) &&
+            # If the positional arguments match, we move on to checking keyword, optional keyword and keyword rest
+            # arguments. If there's a forward argument, then it will always match. If the method accepts a keyword rest
+            # (**kwargs), then we can't analyze statically because the user could be passing a hash and we don't know
+            # what the runtime values inside the hash are.
+            #
+            # If none of those match, then we verify if the user is passing the expect names for the keyword arguments
+            (has_forward || has_keyword_rest || keyword_arguments_match?(keyword_args, names))
+          )
+      end
+
+      sig do
+        params(
+          positional_args: T::Array[Prism::Node],
+          forwarding_arguments: T::Array[Prism::Node],
+          keyword_args: T.nilable(T::Array[Prism::Node]),
+          min_pos: Integer,
+          max_pos: T.any(Integer, Float),
+        ).returns(T::Boolean)
+      end
+      def positional_arguments_match?(positional_args, forwarding_arguments, keyword_args, min_pos, max_pos)
+        # If the method accepts at least one positional argument and a splat has been passed
+        (min_pos > 0 && positional_args.any? { |arg| arg.is_a?(Prism::SplatNode) }) ||
+          # If there's at least one positional argument unaccounted for and a keyword splat has been passed
+          (min_pos - positional_args.length > 0 && keyword_args&.any? { |arg| arg.is_a?(Prism::AssocSplatNode) }) ||
+          # If there's at least one positional argument unaccounted for and a forwarding argument has been passed
+          (min_pos - positional_args.length > 0 && forwarding_arguments.any?) ||
+          # If the number of positional arguments is within the expected range
+          (min_pos > 0 && positional_args.length <= max_pos) ||
+          (min_pos == 0 && positional_args.empty?)
+      end
+
+      sig { params(args: T.nilable(T::Array[Prism::Node]), names: T::Array[Symbol]).returns(T::Boolean) }
+      def keyword_arguments_match?(args, names)
+        return true unless args
+        return true if args.any? { |arg| arg.is_a?(Prism::AssocSplatNode) }
+
+        arg_names = args.filter_map { |arg| arg.key.value.to_sym if arg.is_a?(Prism::AssocNode) }
+        (arg_names - names).empty?
       end
     end
   end

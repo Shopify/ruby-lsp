@@ -500,6 +500,7 @@ module RubyIndexer
       entry = T.must(@index["bar"].first)
 
       # Matching calls
+      assert_signature_matches(entry, "bar()")
       assert_signature_matches(entry, "bar(1)")
       assert_signature_matches(entry, "bar(1, 2)")
       assert_signature_matches(entry, "bar(...)")
@@ -510,15 +511,16 @@ module RubyIndexer
       assert_signature_matches(entry, "bar(*a, 2)")
       assert_signature_matches(entry, "bar(1, **a)")
       assert_signature_matches(entry, "bar(1) {}")
+      # This call is impossible to analyze statically because it depends on whether there are elements inside `a` or
+      # not. If there's nothing, the call will fail. But if there's anything inside, the hash will become the first
+      # positional argument
+      assert_signature_matches(entry, "bar(**a)")
 
       # Non matching calls
 
-      refute_signature_matches(entry, "bar()")
       refute_signature_matches(entry, "bar(1, 2, 3)")
-
-      # TODO: uncomment after keyword support
-      # refute_signature_matches(entry, "bar(1, b: 2)")
-      # refute_signature_matches(entry, "bar(1, 2, c: 3)")
+      refute_signature_matches(entry, "bar(1, b: 2)")
+      refute_signature_matches(entry, "bar(1, 2, c: 3)")
     end
 
     def test_signature_matches_for_a_method_with_argument_forwarding
@@ -570,8 +572,7 @@ module RubyIndexer
       assert_signature_matches(entry, "bar(1) {}")
       assert_signature_matches(entry, "bar(1, 2, 3)")
       assert_signature_matches(entry, "bar(1, 2, a: 1, b: 5) {}")
-
-      refute_signature_matches(entry, "bar()")
+      assert_signature_matches(entry, "bar()")
     end
 
     def test_signature_matches_for_destructured_parameters
@@ -585,6 +586,8 @@ module RubyIndexer
       entry = T.must(@index["bar"].first)
 
       # All calls with at least one positional argument match
+      assert_signature_matches(entry, "bar()")
+      assert_signature_matches(entry, "bar(1)")
       assert_signature_matches(entry, "bar(1, 2)")
       assert_signature_matches(entry, "bar(...)")
       assert_signature_matches(entry, "bar(1, ...)")
@@ -593,15 +596,11 @@ module RubyIndexer
       assert_signature_matches(entry, "bar(*a, 2)")
       # This matches because `bar(1, *[], 2)` would result in `bar(1, 2)`, which is a valid call
       assert_signature_matches(entry, "bar(1, *a, 2)")
+      assert_signature_matches(entry, "bar(1, **a)")
+      assert_signature_matches(entry, "bar(1) {}")
 
-      refute_signature_matches(entry, "bar()")
-      refute_signature_matches(entry, "bar(1)")
-      refute_signature_matches(entry, "bar(1, **a)")
       refute_signature_matches(entry, "bar(1, 2, 3)")
-      refute_signature_matches(entry, "bar(1) {}")
-
-      # TODO: uncomment after keyword support
-      # refute_signature_matches(entry, "bar(1, 2, a: 1, b: 5) {}")
+      refute_signature_matches(entry, "bar(1, 2, a: 1, b: 5) {}")
     end
 
     def test_signature_matches_for_post_parameters
@@ -626,11 +625,76 @@ module RubyIndexer
       assert_signature_matches(entry, "bar(1, **a)")
       assert_signature_matches(entry, "bar(1, 2, 3)")
       assert_signature_matches(entry, "bar(1) {}")
+      assert_signature_matches(entry, "bar()")
 
-      refute_signature_matches(entry, "bar()")
+      refute_signature_matches(entry, "bar(1, 2, a: 1, b: 5) {}")
+    end
 
-      # TODO: uncomment after keyword support
-      # refute_signature_matches(entry, "bar(1, 2, a: 1, b: 5) {}")
+    def test_signature_matches_for_keyword_parameters
+      index(<<~RUBY)
+        class Foo
+          def bar(a:, b: 123)
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+
+      assert_signature_matches(entry, "bar(...)")
+      assert_signature_matches(entry, "bar()")
+      assert_signature_matches(entry, "bar(a: 1)")
+      assert_signature_matches(entry, "bar(a: 1, b: 32)")
+
+      refute_signature_matches(entry, "bar(a: 1, c: 2)")
+      refute_signature_matches(entry, "bar(1, ...)")
+      refute_signature_matches(entry, "bar(1) {}")
+      refute_signature_matches(entry, "bar(1, *a)")
+      refute_signature_matches(entry, "bar(*a, 2)")
+      refute_signature_matches(entry, "bar(1, *a, 2)")
+      refute_signature_matches(entry, "bar(1, **a)")
+      refute_signature_matches(entry, "bar(*a)")
+      refute_signature_matches(entry, "bar(1)")
+      refute_signature_matches(entry, "bar(1, 2)")
+      refute_signature_matches(entry, "bar(1, 2, a: 1, b: 5) {}")
+    end
+
+    def test_signature_matches_for_keyword_splats
+      index(<<~RUBY)
+        class Foo
+          def bar(a, b:, **kwargs)
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+
+      assert_signature_matches(entry, "bar(...)")
+      assert_signature_matches(entry, "bar()")
+      assert_signature_matches(entry, "bar(1)")
+      assert_signature_matches(entry, "bar(1, b: 2)")
+      assert_signature_matches(entry, "bar(1, b: 2, c: 3, d: 4)")
+
+      refute_signature_matches(entry, "bar(1, 2, b: 2)")
+    end
+
+    def test_partial_signature_matches
+      # It's important to match signatures partially, because we want to figure out which signature we should show while
+      # the user is in the middle of typing
+      index(<<~RUBY)
+        class Foo
+          def bar(a:, b:)
+          end
+
+          def baz(a, b)
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+      assert_signature_matches(entry, "bar(a: 1)")
+
+      entry = T.must(@index["baz"].first)
+      assert_signature_matches(entry, "baz(1)")
     end
 
     private
