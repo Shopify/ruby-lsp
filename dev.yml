@@ -12,11 +12,6 @@ up:
         - vscode
 
 commands:
-  docs:
-    run: bundle exec rake rdoc
-    subcommands:
-      check:
-        run: bundle exec rake ruby_lsp:check_docs
   server: exe/ruby-lsp
   style: bin/rubocop
   typecheck:

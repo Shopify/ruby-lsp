@@ -15,9 +15,6 @@ jobs:
         with:
           bundler-cache: true
 
-      - name: Check if documentation is up to date
-        run: bundle exec rake ruby_lsp:check_docs
-
       - name: Typecheck
         run: bundle exec srb tc
 
