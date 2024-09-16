@@ -13,7 +13,23 @@ aux_links:
     - "https://github.com/Shopify/ruby-lsp/issues/new/choose"
 
 theme: just-the-docs
-layout: minimal
 plugins:
   - jekyll-feed
 destination: ../docs
+
+# Copied from just-the-docs's _config.yml
+callouts:
+  highlight:
+    color: yellow
+  important:
+    title: Important
+    color: blue
+  new:
+    title: New
+    color: green
+  note:
+    title: Note
+    color: purple
+  warning:
+    title: Warning
+    color: red
