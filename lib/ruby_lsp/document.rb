@@ -52,7 +52,7 @@ module RubyLsp
       @uri = T.let(uri, URI::Generic)
       @needs_parsing = T.let(true, T::Boolean)
       @parse_result = T.let(T.unsafe(nil), ParseResultType)
-      parse
+      parse!
     end
 
     sig { params(other: Document[T.untyped]).returns(T::Boolean) }
@@ -109,7 +109,7 @@ module RubyLsp
 
     # Returns `true` if the document was parsed and `false` if nothing needed parsing
     sig { abstract.returns(T::Boolean) }
-    def parse; end
+    def parse!; end
 
     sig { abstract.returns(T::Boolean) }
     def syntax_error?; end

@@ -14,7 +14,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(
       document,
@@ -49,7 +49,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(
       document,
@@ -80,7 +80,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(
       document,
@@ -111,7 +111,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(
       document,
@@ -132,7 +132,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     document.push_edits(
       [{
@@ -198,7 +198,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     document.push_edits(
       [{
@@ -236,7 +236,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(
       document,
@@ -263,7 +263,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(
       document,
@@ -286,7 +286,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(
       document,
@@ -316,7 +316,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(
       document,
@@ -343,7 +343,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(
       document,
@@ -379,7 +379,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(
       document,
@@ -400,7 +400,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(
       document,
@@ -545,7 +545,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(
       document,
@@ -632,7 +632,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(
       document,
@@ -663,7 +663,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(
       document,
@@ -698,7 +698,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(
       document,
@@ -720,7 +720,7 @@ class OnTypeFormattingTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     edits = RubyLsp::Requests::OnTypeFormatting.new(
       document,

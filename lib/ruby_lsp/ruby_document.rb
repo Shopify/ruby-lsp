@@ -122,7 +122,7 @@ module RubyLsp
     end
 
     sig { override.returns(T::Boolean) }
-    def parse
+    def parse!
       return false unless @needs_parsing
 
       @needs_parsing = false

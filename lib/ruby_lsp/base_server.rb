@@ -59,7 +59,7 @@ module RubyLsp
                 # If the client supports request delegation and we're working with an ERB document and there was
                 # something to parse, then we have to maintain the client updated about the virtual state of the host
                 # language source
-                if document.parse && @global_state.supports_request_delegation && document.is_a?(ERBDocument)
+                if document.parse! && @global_state.supports_request_delegation && document.is_a?(ERBDocument)
                   send_message(
                     Notification.new(
                       method: "delegate/textDocument/virtualState",

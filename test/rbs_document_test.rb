@@ -29,7 +29,7 @@ class RBSDocumentTest < Minitest::Test
       [{ range: { start: { line: 1, character: 15 }, end: { line: 1, character: 15 } }, text: ">" }],
       version: 2,
     )
-    document.parse
+    document.parse!
     refute_predicate(document, :syntax_error?)
   end
 end
