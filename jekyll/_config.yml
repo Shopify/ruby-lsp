@@ -5,13 +5,17 @@ baseurl: "/ruby-lsp"
 url: "https://shopify.github.io"
 github_username: shopify
 aux_links:
-  "Ruby LSP on GitHub":
-    - "https://github.com/Shopify/ruby-lsp"
   "Ruby DX Slack":
     - "https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q"
   "Report an Issue":
     - "https://github.com/Shopify/ruby-lsp/issues/new/choose"
-
+nav_external_links:
+  - title: "Ruby LSP on GitHub"
+    url: "https://github.com/Shopify/ruby-lsp"
+    opens_in_new_tab: true
+  - title: "Ruby LSP Rails on GitHub"
+    url: "https://github.com/Shopify/ruby-lsp-rails"
+    opens_in_new_tab: true
 theme: just-the-docs
 plugins:
   - jekyll-feed
