@@ -96,7 +96,7 @@ Sorry, your browser doesn't support embedded videos. This video demonstrates the
 Go-to-definition allows users to navigate to the target constant or method's definition,
 whether they're defined in your project or its dependencies.
 
-This feature can be triggered by one of the following methods:
+In VS Code this feature can be triggered by one of the following methods:
 
 - `Right click` on the target, and then select `Go to Definition`
 - Placing the cursor on the target, and then hit `F12`
