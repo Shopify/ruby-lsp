@@ -345,7 +345,7 @@ module RubyIndexer
       assert_equal("all?", entry.old_name)
       assert_equal("Array", entry.owner.name)
       assert(entry.file_path.end_with?("core/array.rbs"))
-      assert_includes(entry.comments[0], "Returns `true` if any element of `self` meets a given criterion.")
+      assert_includes(entry.comments, "Returns `true` if any element of `self` meets a given criterion.")
     end
 
     private

@@ -17,10 +17,11 @@ module RubyIndexer
         dispatcher: Prism::Dispatcher,
         parse_result: Prism::ParseResult,
         file_path: String,
+        collect_comments: T::Boolean,
         enhancements: T::Array[Enhancement],
       ).void
     end
-    def initialize(index, dispatcher, parse_result, file_path, enhancements: [])
+    def initialize(index, dispatcher, parse_result, file_path, collect_comments: false, enhancements: [])
       @index = index
       @file_path = file_path
       @enhancements = enhancements
@@ -40,6 +41,7 @@ module RubyIndexer
       # A stack of namespace entries that represent where we currently are. Used to properly assign methods to an owner
       @owner_stack = T.let([], T::Array[Entry::Namespace])
       @indexing_errors = T.let([], T::Array[String])
+      @collect_comments = collect_comments
 
       dispatcher.register(
         self,
@@ -540,9 +542,11 @@ module RubyIndexer
       )
     end
 
-    sig { params(node: Prism::Node).returns(T::Array[String]) }
+    sig { params(node: Prism::Node).returns(T.nilable(String)) }
     def collect_comments(node)
-      comments = []
+      return unless @collect_comments
+
+      comments = +""
 
       start_line = node.location.start_line - 1
       start_line -= 1 unless @comments_by_line.key?(start_line)
@@ -551,7 +555,7 @@ module RubyIndexer
         comment = @comments_by_line[line]
         break unless comment
 
-        comment_content = comment.location.slice.chomp
+        comment_content = comment.location.slice
 
         # invalid encodings would raise an "invalid byte sequence" exception
         if !comment_content.valid_encoding? || comment_content.match?(@index.configuration.magic_comment_regex)
@@ -560,9 +564,10 @@ module RubyIndexer
 
         comment_content.delete_prefix!("#")
         comment_content.delete_prefix!(" ")
-        comments.prepend(comment_content)
+        comments.prepend("#{comment_content}\n")
       end
 
+      comments.chomp!
       comments
     end
 

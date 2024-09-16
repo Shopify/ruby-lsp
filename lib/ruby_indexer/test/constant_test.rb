@@ -86,16 +86,16 @@ module RubyIndexer
         A::BAZ = 1
       RUBY
 
-      foo_comment = @index["FOO"].first.comments.join("\n")
+      foo_comment = @index["FOO"].first.comments
       assert_equal("FOO comment", foo_comment)
 
-      a_foo_comment = @index["A::FOO"].first.comments.join("\n")
+      a_foo_comment = @index["A::FOO"].first.comments
       assert_equal("A::FOO comment", a_foo_comment)
 
-      bar_comment = @index["BAR"].first.comments.join("\n")
+      bar_comment = @index["BAR"].first.comments
       assert_equal("::BAR comment", bar_comment)
 
-      a_baz_comment = @index["A::BAZ"].first.comments.join("\n")
+      a_baz_comment = @index["A::BAZ"].first.comments
       assert_equal("A::BAZ comment", a_baz_comment)
     end
 

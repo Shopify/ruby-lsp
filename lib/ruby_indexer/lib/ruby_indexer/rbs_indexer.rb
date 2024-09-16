@@ -272,10 +272,10 @@ module RubyIndexer
         RBS::AST::Declarations::Constant,
         RBS::AST::Members::MethodDefinition,
         RBS::AST::Members::Alias,
-      )).returns(T::Array[String])
+      )).returns(T.nilable(String))
     end
     def comments_to_string(declaration)
-      Array(declaration.comment&.string)
+      declaration.comment&.string
     end
   end
 end
