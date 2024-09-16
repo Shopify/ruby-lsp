@@ -1,10 +1,10 @@
 ---
 layout: default
-title: Addon for Rails
+title: Rails addon
 nav_order: 10
 ---
 
-# Ruby LSP Rails
+# Rails addon
 
 [Ruby LSP Rails](https://github.com/Shopify/ruby-lsp-rails) is a Ruby LSP addon that enhances the base Ruby LSP functionality
 with Rails-specific features. It provides improved code navigation, document symbols for Rails-specific elements,
