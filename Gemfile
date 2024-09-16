@@ -27,18 +27,5 @@ group :development do
     # sorbet-static is not available on Windows. We also skip Tapioca since it depends on sorbet-static-and-runtime
     gem "sorbet-static-and-runtime"
     gem "tapioca", "~> 0.16", require: false
-
-    # sass-embedded, a dependency of just-the-docs, doesn't builde with Ruby 3.1 and we only need it for Jekyll
-    # so we only install it for Ruby 3.3 and above
-    if RUBY_VERSION >= "3.3"
-      group :jekyll do
-        # We only need to use Jekyll with CRuby
-        gem "jekyll", "~> 4.3.3"
-        gem "jekyll-feed", "~> 0.12"
-
-        # Theme
-        gem "just-the-docs", "~> 0.10.0"
-      end
-    end
   end
 end
