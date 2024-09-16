@@ -229,6 +229,8 @@ class ClientErrorHandler implements ErrorHandler {
   }
 }
 
+// This class is used to populate custom client capabilities, so that they are sent as part of the initialize request to
+// the server. This can be used to ensure that custom functionality is properly synchronized with the server
 class ExperimentalCapabilities implements StaticFeature {
   fillClientCapabilities(capabilities: ClientCapabilities): void {
     capabilities.experimental = {
@@ -302,6 +304,8 @@ export default class Client extends LanguageClient implements ClientInterface {
     this.ruby = ruby;
     this.#formatter = "";
 
+    // When the server processes changes to an ERB document, it will send this custom notification to update the state
+    // of the virtual documents
     this.onNotification("delegate/textDocument/virtualState", (params) => {
       this.virtualDocuments.set(
         params.textDocument.uri,
@@ -432,11 +436,14 @@ export default class Client extends LanguageClient implements ClientInterface {
       return null;
     }
 
+    // To delegate requests, we use a special URI scheme so that VS Code can delegate to the correct provider. For an
+    // `index.html.erb` file, the URI would look like `embedded-content://html/file:///index.html.erb.html`
     const hostLanguage = /\.([^.]+)\.erb$/.exec(originalUri)?.[1] || "html";
     const vdocUriString = `embedded-content://${hostLanguage}/${encodeURIComponent(
       originalUri,
     )}.${hostLanguage}`;
 
+    // Call the appropriate language service for the request, so that VS Code delegates the work accordingly
     if (request === "textDocument/completion") {
       return vscode.commands
         .executeCommand<CompletionList>(
@@ -579,6 +586,12 @@ export default class Client extends LanguageClient implements ClientInterface {
         params: TR,
       ) => {
         return this.benchmarkMiddleware(type, params, () => next(type, params));
+      },
+      didClose: (textDocument, next) => {
+        // Delete virtual ERB host language documents if they exist and then proceed to the next middleware to fire the
+        // request to the server
+        this.virtualDocuments.delete(textDocument.uri.toString(true));
+        return next(textDocument);
       },
     };
   }
