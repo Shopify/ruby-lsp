@@ -640,6 +640,7 @@ class SetupBundlerTest < Minitest::Test
 
   def stub_bundle_with_env(env, command = "(bundle check || bundle install) 1>&2")
     Object.any_instance.expects(:system).with do |actual_env, actual_command|
+      actual_env.delete_if { |k, _v| k.start_with?("BUNDLE_PKGS") }
       actual_env.all? { |k, v| env[k] == v } && actual_command == command
     end.returns(true)
   end
