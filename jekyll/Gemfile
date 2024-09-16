@@ -1,0 +1,11 @@
+
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+# We only need to use Jekyll with CRuby
+gem "jekyll", "~> 4.3.3"
+gem "jekyll-feed", "~> 0.12"
+
+# Theme
+gem "just-the-docs", "~> 0.10.0"

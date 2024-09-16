@@ -1,0 +1,19 @@
+title: Ruby LSP
+description: >-
+  An opinionated language server for Ruby. Batteries included!
+baseurl: "/ruby-lsp"
+url: "https://shopify.github.io"
+github_username: shopify
+aux_links:
+  "Ruby LSP on GitHub":
+    - "https://github.com/Shopify/ruby-lsp"
+  "Ruby DX Slack":
+    - "https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q"
+  "Report an Issue":
+    - "https://github.com/Shopify/ruby-lsp/issues/new/choose"
+
+theme: just-the-docs
+layout: minimal
+plugins:
+  - jekyll-feed
+destination: ../docs

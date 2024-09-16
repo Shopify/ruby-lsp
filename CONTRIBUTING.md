@@ -1,5 +1,15 @@
 # CONTRIBUTING
 
+## Contributing to documentation
+
+Ruby LSP uses [Jekyll](https://jekyllrb.com/) to generate the documentation, whose source lives under the `/jekyll` folder.
+
+```shell
+cd jekyll
+bundle install
+bundle exec jekyll serve # Builds the site and serves it at http://localhost:4000/ruby-lsp
+```
+
 ## Testing changes
 
 ### Tracing LSP requests and responses
