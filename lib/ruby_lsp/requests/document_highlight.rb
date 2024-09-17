@@ -17,14 +17,19 @@ module RubyLsp
 
       sig do
         params(
+          global_state: GlobalState,
           document: T.any(RubyDocument, ERBDocument),
           position: T::Hash[Symbol, T.untyped],
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(document, position, dispatcher)
+      def initialize(global_state, document, position, dispatcher)
         super()
-        node_context = document.locate_node(position)
+        char_position = document.create_scanner.find_char_position(position)
+        delegate_request_if_needed!(global_state, document, char_position)
+
+        node_context = RubyDocument.locate(document.parse_result.value, char_position)
+
         @response_builder = T.let(
           ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight].new,
           ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight],

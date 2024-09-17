@@ -35,10 +35,11 @@ module RubyLsp
       end
       def initialize(document, global_state, position, context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
         super()
-        node_context = document.locate_node(
-          { line: position[:line], character: position[:character] },
-          node_types: [Prism::CallNode],
-        )
+
+        char_position = document.create_scanner.find_char_position(position)
+        delegate_request_if_needed!(global_state, document, char_position)
+
+        node_context = RubyDocument.locate(document.parse_result.value, char_position, node_types: [Prism::CallNode])
 
         target = adjust_for_nested_target(node_context.node, node_context.parent, position)
 

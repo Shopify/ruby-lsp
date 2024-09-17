@@ -424,6 +424,9 @@ export default class Client extends LanguageClient implements ClientInterface {
     }
   }
 
+  // Delegate a request to the appropriate language service. Note that only position based requests are delegated here.
+  // Full file requests, such as folding range, have their own separate middleware to merge the embedded Ruby + host
+  // language responses
   private async executeDelegateRequest(
     type: string | MessageSignature,
     params: any,
@@ -438,44 +441,67 @@ export default class Client extends LanguageClient implements ClientInterface {
 
     // To delegate requests, we use a special URI scheme so that VS Code can delegate to the correct provider. For an
     // `index.html.erb` file, the URI would look like `embedded-content://html/file:///index.html.erb.html`
-    const hostLanguage = /\.([^.]+)\.erb$/.exec(originalUri)?.[1] || "html";
-    const vdocUriString = `embedded-content://${hostLanguage}/${encodeURIComponent(
-      originalUri,
-    )}.${hostLanguage}`;
+    const virtualDocumentUri = this.virtualDocumentUri(originalUri);
 
     // Call the appropriate language service for the request, so that VS Code delegates the work accordingly
-    if (request === "textDocument/completion") {
-      return vscode.commands
-        .executeCommand<CompletionList>(
-          "vscode.executeCompletionItemProvider",
-          vscode.Uri.parse(vdocUriString),
-          params.position,
-          params.context.triggerCharacter,
-        )
-        .then((response) => {
-          // We need to tell the server that the completion item is being delegated, so that when it receives the
-          // `completionItem/resolve`, we can delegate that too
-          response.items.forEach((item) => {
-            // For whatever reason, HTML completion items don't include the `kind` and that causes a failure in the
-            // editor. It might be a mistake in the delegation
-            if (
-              item.documentation &&
-              typeof item.documentation !== "string" &&
-              "value" in item.documentation
-            ) {
-              item.documentation.kind = "markdown";
-            }
+    switch (request) {
+      case "textDocument/completion":
+        return vscode.commands
+          .executeCommand<CompletionList>(
+            "vscode.executeCompletionItemProvider",
+            vscode.Uri.parse(virtualDocumentUri),
+            params.position,
+            params.context.triggerCharacter,
+          )
+          .then((response) => {
+            // We need to tell the server that the completion item is being delegated, so that when it receives the
+            // `completionItem/resolve`, we can delegate that too
+            response.items.forEach((item) => {
+              // For whatever reason, HTML completion items don't include the `kind` and that causes a failure in the
+              // editor. It might be a mistake in the delegation
+              if (
+                item.documentation &&
+                typeof item.documentation !== "string" &&
+                "value" in item.documentation
+              ) {
+                item.documentation.kind = "markdown";
+              }
 
-            item.data = { ...item.data, delegateCompletion: true };
+              item.data = { ...item.data, delegateCompletion: true };
+            });
+
+            return response;
           });
-
-          return response;
-        });
-    } else {
-      this.workspaceOutputChannel.warn(
-        `Attempted to delegate unsupported request ${request}`,
-      );
-      return null;
+      case "textDocument/hover":
+        return vscode.commands.executeCommand(
+          "vscode.executeHoverProvider",
+          vscode.Uri.parse(virtualDocumentUri),
+          params.position,
+        );
+      case "textDocument/definition":
+        return vscode.commands.executeCommand(
+          "vscode.executeDefinitionProvider",
+          vscode.Uri.parse(virtualDocumentUri),
+          params.position,
+        );
+      case "textDocument/signatureHelp":
+        return vscode.commands.executeCommand(
+          "vscode.executeSignatureHelpProvider",
+          vscode.Uri.parse(virtualDocumentUri),
+          params.position,
+          params.context?.triggerCharacter,
+        );
+      case "textDocument/documentHighlight":
+        return vscode.commands.executeCommand(
+          "vscode.executeDocumentHighlights",
+          vscode.Uri.parse(virtualDocumentUri),
+          params.position,
+        );
+      default:
+        this.workspaceOutputChannel.warn(
+          `Attempted to delegate unsupported request ${request}`,
+        );
+        return null;
     }
   }
 
@@ -593,7 +619,54 @@ export default class Client extends LanguageClient implements ClientInterface {
         this.virtualDocuments.delete(textDocument.uri.toString(true));
         return next(textDocument);
       },
+      // **** Full document request delegation middleware below ****
+      provideFoldingRanges: async (document, context, token, next) => {
+        if (document.languageId === "erb") {
+          const virtualDocumentUri = this.virtualDocumentUri(
+            document.uri.toString(true),
+          );
+
+          // Execute folding range for the host language
+          const hostResponse = await vscode.commands.executeCommand<
+            vscode.FoldingRange[]
+          >(
+            "vscode.executeFoldingRangeProvider",
+            vscode.Uri.parse(virtualDocumentUri),
+          );
+
+          // Execute folding range for the embedded Ruby
+          const rubyResponse = await next(document, context, token);
+          return hostResponse.concat(rubyResponse ?? []);
+        }
+
+        return next(document, context, token);
+      },
+      provideDocumentLinks: async (document, token, next) => {
+        if (document.languageId === "erb") {
+          const virtualDocumentUri = this.virtualDocumentUri(
+            document.uri.toString(true),
+          );
+
+          // Execute document links for the host language
+          const hostResponse = await vscode.commands.executeCommand<
+            vscode.DocumentLink[]
+          >("vscode.executeLinkProvider", vscode.Uri.parse(virtualDocumentUri));
+
+          // Execute document links for the embedded Ruby
+          const rubyResponse = await next(document, token);
+          return hostResponse.concat(rubyResponse ?? []);
+        }
+
+        return next(document, token);
+      },
     };
+  }
+
+  private virtualDocumentUri(originalUri: string) {
+    const hostLanguage = /\.([^.]+)\.erb$/.exec(originalUri)?.[1] || "html";
+    return `embedded-content://${hostLanguage}/${encodeURIComponent(
+      originalUri,
+    )}.${hostLanguage}`;
   }
 
   private logResponseTime(duration: number, label: string) {

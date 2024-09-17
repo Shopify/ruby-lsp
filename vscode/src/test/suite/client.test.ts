@@ -788,4 +788,225 @@ suite("Client", () => {
       ),
     );
   }).timeout(20000);
+
+  test("delegate hover", async () => {
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text: "",
+      },
+    });
+
+    const text = ["<% @users.each do |user| %>", "  <di", "<% end %>"].join(
+      "\n",
+    );
+    const uri = vscode.Uri.joinPath(
+      workspaceUri,
+      "lib",
+      "ruby_lsp",
+      "index.html.erb",
+    ).toString();
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri,
+        version: 1,
+        text,
+        languageId: "erb",
+      },
+    });
+
+    const stub = sinon
+      .stub(vscode.commands, "executeCommand")
+      .resolves({ contents: { kind: "markdown", value: "Hello!" } });
+
+    await client.sendRequest("textDocument/hover", {
+      textDocument: {
+        uri,
+      },
+      position: { line: 1, character: 5 },
+    });
+    stub.restore();
+
+    await client.sendNotification("textDocument/didClose", {
+      textDocument: { uri },
+    });
+
+    assert.ok(
+      stub.calledWithExactly(
+        "vscode.executeHoverProvider",
+        vscode.Uri.parse(
+          `embedded-content://html/${encodeURIComponent(uri)}.html`,
+        ),
+        { line: 1, character: 5 },
+      ),
+    );
+  }).timeout(20000);
+
+  test("delegate definition", async () => {
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text: "",
+      },
+    });
+
+    const text = ["<% @users.each do |user| %>", "  <di", "<% end %>"].join(
+      "\n",
+    );
+    const uri = vscode.Uri.joinPath(
+      workspaceUri,
+      "lib",
+      "ruby_lsp",
+      "index.html.erb",
+    ).toString();
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri,
+        version: 1,
+        text,
+        languageId: "erb",
+      },
+    });
+
+    const stub = sinon.stub(vscode.commands, "executeCommand").resolves(null);
+
+    await client.sendRequest("textDocument/definition", {
+      textDocument: {
+        uri,
+      },
+      position: { line: 1, character: 5 },
+    });
+    stub.restore();
+
+    await client.sendNotification("textDocument/didClose", {
+      textDocument: { uri },
+    });
+
+    assert.ok(
+      stub.calledWithExactly(
+        "vscode.executeDefinitionProvider",
+        vscode.Uri.parse(
+          `embedded-content://html/${encodeURIComponent(uri)}.html`,
+        ),
+        { line: 1, character: 5 },
+      ),
+    );
+  }).timeout(20000);
+
+  test("delegate signature help", async () => {
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text: "",
+      },
+    });
+
+    const text = [
+      "<% @users.each do |user| %>",
+      "  <div onclick='alert(;'>",
+      "<% end %>",
+    ].join("\n");
+    const uri = vscode.Uri.joinPath(
+      workspaceUri,
+      "lib",
+      "ruby_lsp",
+      "index.html.erb",
+    ).toString();
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri,
+        version: 1,
+        text,
+        languageId: "erb",
+      },
+    });
+
+    const stub = sinon.stub(vscode.commands, "executeCommand").resolves(null);
+
+    await client.sendRequest("textDocument/signatureHelp", {
+      textDocument: {
+        uri,
+      },
+      position: { line: 1, character: 23 },
+      context: {},
+    });
+    stub.restore();
+
+    await client.sendNotification("textDocument/didClose", {
+      textDocument: { uri },
+    });
+
+    assert.ok(
+      stub.calledWithExactly(
+        "vscode.executeSignatureHelpProvider",
+        vscode.Uri.parse(
+          `embedded-content://html/${encodeURIComponent(uri)}.html`,
+        ),
+        { line: 1, character: 23 },
+        undefined,
+      ),
+    );
+  }).timeout(20000);
+
+  test("delegate document highlight", async () => {
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri: documentUri.toString(),
+        version: 1,
+        text: "",
+      },
+    });
+
+    const text = [
+      "<% @users.each do |user| %>",
+      "  <div></div>",
+      "<% end %>",
+    ].join("\n");
+    const uri = vscode.Uri.joinPath(
+      workspaceUri,
+      "lib",
+      "ruby_lsp",
+      "index.html.erb",
+    ).toString();
+
+    await client.sendNotification("textDocument/didOpen", {
+      textDocument: {
+        uri,
+        version: 1,
+        text,
+        languageId: "erb",
+      },
+    });
+
+    const stub = sinon.stub(vscode.commands, "executeCommand").resolves(null);
+
+    await client.sendRequest("textDocument/documentHighlight", {
+      textDocument: {
+        uri,
+      },
+      position: { line: 1, character: 4 },
+      context: {},
+    });
+    stub.restore();
+
+    await client.sendNotification("textDocument/didClose", {
+      textDocument: { uri },
+    });
+
+    assert.ok(
+      stub.calledWithExactly(
+        "vscode.executeDocumentHighlights",
+        vscode.Uri.parse(
+          `embedded-content://html/${encodeURIComponent(uri)}.html`,
+        ),
+        { line: 1, character: 4 },
+      ),
+    );
+  }).timeout(20000);
 });
