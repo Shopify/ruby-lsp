@@ -1,3 +1,9 @@
+---
+layout: default
+title: Version Managers
+parent: Troubleshooting
+---
+
 # Version Managers
 
 This document contains information and tips to help Ruby LSP's VS Code extension work with your Ruby version manager.

@@ -13,7 +13,7 @@ body:
         Please note that the maintainers only have bandwidth to prioritize VS Code support and lean on the community to assist with supporting other editors.
         If you are using a non-VS Code editor, please follow these steps **before submitting a bug report**:
 
-        1. Follow the instructions on [troubleshooting](https://github.com/Shopify/ruby-lsp/blob/main/TROUBLESHOOTING.md)
+        1. Follow the instructions on [troubleshooting](https://shopify.github.io/ruby-lsp/troubleshooting.html)
         2. Check if the editor and LSP plugin you use are up to date, and if they support the latest [Language Server Protocol Specification](https://microsoft.github.io/language-server-protocol).
         3. Seek help in the [Ruby DX Slack](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q).
         4. Seek help in the related editor/plugin's issue tracker.

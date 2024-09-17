@@ -13,7 +13,7 @@ body:
         ### Before submitting
 
         Please follow the instructions on
-        [troubleshooting](https://github.com/Shopify/ruby-lsp/blob/main/TROUBLESHOOTING.md) and make sure you
+        [troubleshooting](https://shopify.github.io/ruby-lsp/troubleshooting.html) and make sure you
         are:
         1. On the latest version of the Ruby LSP VS Code extension
         2. On the latest version of the Ruby LSP server gem
@@ -23,7 +23,7 @@ body:
 
         Please run the `Collect Ruby LSP Information for Issue Reporting` command through VS Code's command
         palette and paste the result below.
-        
+
   - type: textarea
     attributes:
       label: Description
@@ -32,7 +32,7 @@ body:
         ### Ruby LSP Information
 
         <!-- Please run `Collect Ruby LSP Information for Issue Reporting` from VS Code's command palette and paste the result here -->
-        
+
         ### Reproduction steps
 
         <!-- Suggested structure -->

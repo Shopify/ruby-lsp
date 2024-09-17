@@ -215,7 +215,7 @@ class ClientErrorHandler implements ErrorHandler {
       integration or Bundler issues.
 
       [Logs](command:workbench.action.output.toggleOutput) |
-      [Troubleshooting](https://github.com/Shopify/ruby-lsp/blob/main/TROUBLESHOOTING.md) |
+      [Troubleshooting](https://shopify.github.io/ruby-lsp/troubleshooting.html) |
       [Run bundle install](command:rubyLsp.bundleInstall?"${this.workspaceFolder.uri.toString()}")`,
       "Retry",
       "Shutdown",

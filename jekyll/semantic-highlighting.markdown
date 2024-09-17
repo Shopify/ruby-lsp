@@ -1,13 +1,25 @@
-# Semantic highlighting
+---
+layout: default
+title: Semantic Highlighting for Themes
+parent: Ruby LSP
+nav_order: 30
+---
 
-The Ruby LSP supports semantic highlighting. This feature informs editors about the right token types for each part of
-the code to allow for rich and accurate highlighting. The strategy taken by the Ruby LSP is to only return tokens for
-syntax that is ambiguous in Ruby (as opposed to all existing tokens) to optimize for performance.
+# Semantic Highlighting for Themes
+
+Ruby LSP supports semantic highlighting, which informs editors about the right token types for each part of the code to
+the code to allow for rich and accurate highlighting. If you're a theme developer or want to enhance the Ruby syntax
+highlighting in your editor, this guide provides a brief overview of the semantic tokens available and how to use them.
+
+The strategy taken by Ruby LSP is to only return tokens for syntax that is ambiguous in Ruby (as opposed to all existing
+tokens) to optimize for performance.
 
 An example of ambiguous syntax in Ruby are local variables and method calls. If you look at this line in isolation:
+
 ```ruby
 foo
 ```
+
 it is not possible to tell if `foo` is a local variable or a method call. It depends on whether `foo` was assigned to
 something before or not. This is one scenario where semantic highlighting removes the ambiguity for themes, returning
 the correct token type by statically analyzing the code.

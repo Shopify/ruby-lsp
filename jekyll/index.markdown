@@ -48,7 +48,7 @@ For more information on using and configuring the extension, see the extension's
 
 ### With other editors
 
-See [editors](https://github.com/Shopify/ruby-lsp/blob/main/EDITORS.md) for community instructions on setting up the Ruby LSP, which current includes Emacs, Neovim, Sublime Text, and Zed.
+See [editors](editors) for community instructions on setting up the Ruby LSP, which current includes Emacs, Neovim, Sublime Text, and Zed.
 
 The gem can be installed by doing
 
@@ -75,7 +75,7 @@ Additionally, some tools may include a Ruby LSP addon directly, like
 Other community driven addons can be found in [rubygems](https://rubygems.org/search?query=name%3A+ruby-lsp) by
 searching for the `ruby-lsp` prefix.
 
-For instructions on how to create addons, see the [addons documentation](https://github.com/Shopify/ruby-lsp/blob/main/ADDONS.md).
+For instructions on how to create addons, see the [addons documentation](addons).
 
 ## Features
 
@@ -189,7 +189,7 @@ By guessing the types of variables, Ruby LSP can expand the code navigation feat
 - Identifiers are not ideal for complex type annotations and can be easily misled by non-matching names.
 - We do NOT recommend renaming identifiers just to make this feature work.
 
-For more information, please refer to the [documentation](https://github.com/Shopify/ruby-lsp/blob/main/DESIGN_AND_ROADMAP.md#guessed-types).
+For more information, please refer to the [documentation](https://shopify.github.io/ruby-lsp/design-and-roadmap.html#guessed-types).
 
 ## Configuration
 

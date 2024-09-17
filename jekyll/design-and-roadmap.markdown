@@ -1,3 +1,10 @@
+---
+layout: default
+title: Design and roadmap
+nav_order: 20
+parent: Ruby LSP
+---
+
 # Ruby LSP design and roadmap
 
 - [Design principles](#design-principles)
@@ -67,7 +74,7 @@ If you require more accuracy in your editor, consider adopting a type system and
 This applies to multiple language server features such as go to definition, hover, completion and automated refactors.
 Consider the following examples:
 
-> [!NOTE]
+{: .note }
 > Not all of the examples below are supported at the moment and this is not an exhaustive list.
 > Please check the long term roadmap to see what’s planned
 
@@ -143,7 +150,7 @@ We believe that a less fragmented tooling ecosystem leads to a better user exper
 and consolidates efforts from the community.
 
 Our goal is to allow the Ruby LSP to connect to different formatters, linters, type checkers or even extract runtime
-information from running applications like Rails servers. You can learn more in the [addons documentation](ADDONS.md).
+information from running applications like Rails servers. You can learn more in the [addons documentation](addons).
 
 ### Relying on Bundler
 
@@ -234,7 +241,7 @@ user.name
 @post.like!
 ```
 
-> [!IMPORTANT]
+{: .important }
 > The goal of this experiment is to understand if we can get better accuracy for the code that you already
 > have. The hypothesis is that a reasonable amount of code already uses patterns like the ones in the example and, in
 > those cases, we can achieve nicer results.
