@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Version Managers
-nav_order: 40
+parent: Troubleshooting
 ---
 
 # Version Managers

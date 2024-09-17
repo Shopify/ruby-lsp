@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Editors
-nav_order: 60
+nav_order: 0
+parent: Ruby LSP
 ---
 
 # Editors

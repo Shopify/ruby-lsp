@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Addons
-nav_order: 20
+nav_order: 10
+parent: Ruby LSP
 ---
 
 # Addons

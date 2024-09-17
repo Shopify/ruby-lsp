@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Design and roadmap
-nav_order: 50
+nav_order: 20
+parent: Ruby LSP
 ---
 
 # Ruby LSP design and roadmap
