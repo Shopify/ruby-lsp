@@ -1,3 +1,9 @@
+---
+layout: default
+title: Troubleshooting
+nav_order: 30
+---
+
 # Troubleshooting
 
 ## How the Ruby LSP activation works
@@ -28,9 +34,9 @@ project. That directory contains another `Gemfile`, that includes the `ruby-lsp`
 dependencies. This approach allows us to automatically detect which formatter your project uses and which gems we need
 to index for features such as go to definition.
 
-> [!NOTE]
-> We are working with the RubyGems/Bundler team to have this type of mechanism properly supported from within
-> Bundler itself, which is currently being experimented with in a plugin called `bundler-compose`. Once
+{: .note }
+We are working with the RubyGems/Bundler team to have this type of mechanism properly supported from within
+Bundler itself, which is currently being experimented with in a plugin called `bundler-compose`. Once
 > `bundler-compose`is production ready, the entire custom bundle created under the `.ruby-lsp` directory will go away
 > and we'll rely on Bundler to compose the LOAD_PATH including the `ruby-lsp` gem.
 
@@ -40,15 +46,15 @@ There are several main sources of issues users typically face during activation:
 
 ### Outdated Version
 
-> [!NOTE]
+{: .note }
 > If using VS Code, the version of the extension is distinct from that of the server (the `ruby-lsp` gem). You can check the server version in the [status center](https://github.com/Shopify/ruby-lsp/blob/main/vscode/extras/ruby_lsp_status_center.png).
 
 In most cases, the server gem will be automatically updated. You can also trigger a manual update with the "Update language server gem" command in VS Code.
 
 You can also attempt an update from the command line with `BUNDLE_GEMFILE=.ruby-lsp/Gemfile bundle update ruby-lsp`
 
-> [!NOTE]
-> If you're using any addon gem, such as `ruby-lsp-rspec`, then `ruby-lsp` will also be present in your `Gemfile.lock` and it's possible that an outdated addon could prevent `ruby-lsp` from updating.
+{: .note }
+If you're using any addon gem, such as `ruby-lsp-rspec`, then `ruby-lsp` will also be present in your `Gemfile.lock` and it's possible that an outdated addon could prevent `ruby-lsp` from updating.
 
 Another possible scenario where the `ruby-lsp` gem cannot be updated is when one of its runtime dependencies are
 constrained by another gem in the application. For example, Ruby LSP has a dependency on
@@ -147,9 +153,9 @@ gem: --install-dir /my/preferred/path/for/gem/install
 One scenario where this is useful is if the user doesn't have permissions for the default gem installation directory and
 `gem install` fails. For example, when using the system Ruby on certain Linux distributions.
 
-> [!NOTE]
-> Using non-default gem installation paths may lead to other integration issues with version managers. For example, for
-> Ruby 3.3.1 the default `GEM_HOME` is `~/.gem/ruby/3.3.0` (without the patch part of the version). However, `chruby`
+{: .note }
+Using non-default gem installation paths may lead to other integration issues with version managers. For example, for
+Ruby 3.3.1 the default `GEM_HOME` is `~/.gem/ruby/3.3.0` (without the patch part of the version). However, `chruby`
 > (and potentially other version managers) override `GEM_HOME` to include the version patch resulting in
 > `~/.gem/ruby/3.3.1`. When you install a gem using `gem install --user-install`, RubyGems ignores the `GEM_HOME`
 > override and installs the gem inside `~/.gem/ruby/3.3.0`. This results in executables not being found because `chruby`
@@ -164,7 +170,7 @@ One scenario where this is useful is if the user doesn't have permissions for th
 
 ### Developing on containers
 
-See the [documentation](vscode/README.md#developing-on-containers).
+See the [documentation](https://github.com/Shopify/ruby-lsp/tree/main/vscode#developing-on-containers).
 
 ## Diagnosing the problem
 
@@ -193,17 +199,17 @@ Did it select your preferred version manager? You can define which version manag
 ### Enable logging
 
 You can enable logging to the VS Code output tab,
-[as described in the CONTRIBUTING](CONTRIBUTING.md#tracing-lsp-requests-and-responses) docs.
+[as described in the CONTRIBUTING](https://github.com/Shopify/ruby-lsp/blob/main/CONTRIBUTING.md#tracing-lsp-requests-and-responses) docs.
 
 ### Environment activation failed
 
-We listed version manager related information and tips in this [documentation](VERSION_MANAGERS.md).
+We listed version manager related information and tips in this [documentation](version-managers).
 
 ### My preferred version manager is not supported
 
 We default to supporting the most common version managers, but that may not cover every single tool available. For these
 cases, we offer custom activation support. More context in the version manager
-[documentation](VERSION_MANAGERS.md#custom-activation).
+[documentation](version-managers#custom-activation).
 
 ### Try to run the Ruby activation manually
 

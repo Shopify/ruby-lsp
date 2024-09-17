@@ -33,7 +33,7 @@ export class Custom extends VersionManager {
     if (customCommand === undefined) {
       throw new Error(
         "The customRubyCommand configuration must be set when 'custom' is selected as the version manager. \
-        See the [README](https://github.com/Shopify/ruby-lsp/blob/main/VERSION_MANAGERS.md) for instructions.",
+        See the [README](https://shopify.github.io/ruby-lsp/version-managers.html) for instructions.",
       );
     }
 

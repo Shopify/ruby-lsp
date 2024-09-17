@@ -27,7 +27,7 @@ Adding method support for definition, completion, hover and workspace symbol is 
 See complete information about features [here](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html).
 
 If you experience issues, please see the [troubleshooting
-guide](https://github.com/Shopify/ruby-lsp/blob/main/TROUBLESHOOTING.md).
+guide](https://shopify.github.io/ruby-lsp/troubleshooting.html).
 
 ### [Experimental] GitHub Copilot chat agent
 
@@ -126,7 +126,7 @@ default shell.
 > [!NOTE]
 >
 > For manager-specific notes, setting up custom activation for managers not listed above and community-contributed
-> examples, please see [version managers](https://github.com/Shopify/ruby-lsp/blob/main/VERSION_MANAGERS.md).
+> examples, please see [version managers](https://shopify.github.io/ruby-lsp/version-managers.html).
 
 #### Configuring a formatter
 

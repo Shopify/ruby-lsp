@@ -1,3 +1,9 @@
+---
+layout: default
+title: Version Managers
+nav_order: 40
+---
+
 # Version Managers
 
 This document contains information and tips to help Ruby LSP's VS Code extension work with your Ruby version manager.
