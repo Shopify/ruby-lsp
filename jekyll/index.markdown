@@ -189,7 +189,7 @@ By guessing the types of variables, Ruby LSP can expand the code navigation feat
 - Identifiers are not ideal for complex type annotations and can be easily misled by non-matching names.
 - We do NOT recommend renaming identifiers just to make this feature work.
 
-For more information, please refer to the [documentation](https://github.com/Shopify/ruby-lsp/blob/main/DESIGN_AND_ROADMAP.md#guessed-types).
+For more information, please refer to the [documentation](https://shopify.github.io/ruby-lsp/design-and-roadmap.html#guessed-types).
 
 ## Configuration
 
