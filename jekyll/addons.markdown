@@ -1,9 +1,15 @@
-# Ruby LSP addons
+---
+layout: default
+title: Addons
+nav_order: 20
+---
 
-> [!WARNING]
+# Addons
+
+{: .warning }
 > The Ruby LSP addon system is currently experimental and subject to changes in the API
 
-Need help writing addons? Consider joining the #ruby-lsp-addons channel in the [Ruby DX Slack
+Need help writing addons? Consider joining the `#ruby-lsp-addons` channel in the [Ruby DX Slack
 workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q).
 
 ## Motivation and goals

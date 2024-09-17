@@ -75,7 +75,7 @@ Additionally, some tools may include a Ruby LSP addon directly, like
 Other community driven addons can be found in [rubygems](https://rubygems.org/search?query=name%3A+ruby-lsp) by
 searching for the `ruby-lsp` prefix.
 
-For instructions on how to create addons, see the [addons documentation](https://github.com/Shopify/ruby-lsp/blob/main/ADDONS.md).
+For instructions on how to create addons, see the [addons documentation](addons).
 
 ## Features
 
