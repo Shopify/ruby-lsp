@@ -48,7 +48,7 @@ For more information on using and configuring the extension, see the extension's
 
 ### With other editors
 
-See [editors](https://github.com/Shopify/ruby-lsp/blob/main/EDITORS.md) for community instructions on setting up the Ruby LSP, which current includes Emacs, Neovim, Sublime Text, and Zed.
+See [editors](editors) for community instructions on setting up the Ruby LSP, which current includes Emacs, Neovim, Sublime Text, and Zed.
 
 The gem can be installed by doing
 

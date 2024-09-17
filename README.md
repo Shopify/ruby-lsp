@@ -19,7 +19,7 @@ Want to discuss Ruby developer experience? Consider joining the public
 
 For VS Code users, you can start by installing the [Ruby LSP extension](https://marketplace.visualstudio.com/items?itemName=Shopify.ruby-lsp) from the VS Code marketplace.
 
-For other editors, please refer to the [EDITORS](https://github.com/Shopify/ruby-lsp/blob/main/EDITORS.md) guide.
+For other editors, please refer to the [EDITORS](https://shopify.github.io/ruby-lsp/editors.html) guide.
 
 To learn more about Ruby LSP, please refer to the official [documentation](https://shopify.github.io/ruby-lsp) for [supported features](https://shopify.github.io/ruby-lsp#features).
 

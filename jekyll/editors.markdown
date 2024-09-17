@@ -1,20 +1,25 @@
+---
+layout: default
+title: Editors
+nav_order: 60
+---
+
 # Editors
 
 This file contains community driven instructions on how to set up the Ruby LSP in editors other than VS Code. For VS
 Code, use the official [Ruby LSP extension](https://marketplace.visualstudio.com/items?itemName=Shopify.ruby-lsp).
 
-> [!NOTE]
+{: .note }
 > Some Ruby LSP features may be unavailable or limited due to incomplete implementations of the Language Server
 > Protocol, such as dynamic feature registration, or [file watching](https://github.com/Shopify/ruby-lsp/issues/1456).
 
 If you need to select particular features to enable or disable, see
 [`vscode/package.json`](vscode/package.json) for the full list.
 
-**IMPORTANT NOTE FOR ALL EDITORS**
-
-The command to launch the language server might depend on which editor and version manager combination you are using.
-In order to work properly, the Ruby LSP must be launched with the Ruby version being used by the project you are working
-on and with the correct Bundler environment set.
+{: .important }
+> The command to launch the language server might depend on which editor and version manager combination you are using.
+> In order to work properly, the Ruby LSP must be launched with the Ruby version being used by the project you are working
+> on and with the correct Bundler environment set.
 
 If you normally launch your editor from the terminal in a shell session where the Ruby environment is already activated,
 then you can probably just use `ruby-lsp` as the command.
