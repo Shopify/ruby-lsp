@@ -27,6 +27,16 @@ module RubyLsp
   )
   GUESSED_TYPES_URL = "https://github.com/Shopify/ruby-lsp/blob/main/DESIGN_AND_ROADMAP.md#guessed-types"
 
+  # Request delegation for embedded languages is not yet standardized into the language server specification. Here we
+  # use this custom error class as a way to return a signal to the client that the request should be delegated to the
+  # language server for the host language. The support for delegation is custom built on the client side, so each editor
+  # needs to implement their own until this becomes a part of the spec
+  class DelegateRequestError < StandardError
+    # A custom error code that clients can use to handle delegate requests. This is past the range of error codes listed
+    # by the specification to avoid conflicting with other error types
+    CODE = -32900
+  end
+
   # A notification to be sent to the client
   class Message
     extend T::Sig

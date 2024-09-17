@@ -21,7 +21,7 @@ module RubyLsp
     attr_reader :encoding
 
     sig { returns(T::Boolean) }
-    attr_reader :supports_watching_files, :experimental_features
+    attr_reader :supports_watching_files, :experimental_features, :supports_request_delegation
 
     sig { returns(TypeInferrer) }
     attr_reader :type_inferrer
@@ -41,6 +41,7 @@ module RubyLsp
       @experimental_features = T.let(false, T::Boolean)
       @type_inferrer = T.let(TypeInferrer.new(@index, @experimental_features), TypeInferrer)
       @addon_settings = T.let({}, T::Hash[String, T.untyped])
+      @supports_request_delegation = T.let(false, T::Boolean)
     end
 
     sig { params(addon_name: String).returns(T.nilable(T::Hash[Symbol, T.untyped])) }
@@ -131,6 +132,7 @@ module RubyLsp
         @addon_settings.merge!(addon_settings)
       end
 
+      @supports_request_delegation = options.dig(:capabilities, :experimental, :requestDelegation) || false
       notifications
     end
 

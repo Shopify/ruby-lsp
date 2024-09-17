@@ -21,6 +21,7 @@ export class Workspace implements WorkspaceInterface {
   private readonly context: vscode.ExtensionContext;
   private readonly isMainWorkspace: boolean;
   private readonly telemetry: vscode.TelemetryLogger;
+  private readonly virtualDocuments = new Map<string, string>();
   private needsRestart = false;
   #inhibitRestart = false;
   #error = false;
@@ -30,6 +31,7 @@ export class Workspace implements WorkspaceInterface {
     workspaceFolder: vscode.WorkspaceFolder,
     telemetry: vscode.TelemetryLogger,
     createTestItems: (response: CodeLens[]) => void,
+    virtualDocuments: Map<string, string>,
     isMainWorkspace = false,
   ) {
     this.context = context;
@@ -42,6 +44,7 @@ export class Workspace implements WorkspaceInterface {
     this.ruby = new Ruby(context, workspaceFolder, this.outputChannel);
     this.createTestItems = createTestItems;
     this.isMainWorkspace = isMainWorkspace;
+    this.virtualDocuments = virtualDocuments;
 
     this.registerRestarts(context);
     this.registerCreateDeleteWatcher(
@@ -109,6 +112,7 @@ export class Workspace implements WorkspaceInterface {
       this.createTestItems,
       this.workspaceFolder,
       this.outputChannel,
+      this.virtualDocuments,
       this.isMainWorkspace,
       debugMode,
     );

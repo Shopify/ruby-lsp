@@ -17,6 +17,23 @@ module RubyLsp
 
       private
 
+      # Signals to the client that the request should be delegated to the language server server for the host language
+      # in ERB files
+      sig do
+        params(
+          global_state: GlobalState,
+          document: Document[T.untyped],
+          char_position: Integer,
+        ).void
+      end
+      def delegate_request_if_needed!(global_state, document, char_position)
+        if global_state.supports_request_delegation &&
+            document.is_a?(ERBDocument) &&
+            document.inside_host_language?(char_position)
+          raise DelegateRequestError
+        end
+      end
+
       # Checks if a location covers a position
       sig { params(location: Prism::Location, position: T.untyped).returns(T::Boolean) }
       def cover?(location, position)

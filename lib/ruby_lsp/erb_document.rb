@@ -6,17 +6,30 @@ module RubyLsp
     extend T::Sig
     extend T::Generic
 
+    sig { returns(String) }
+    attr_reader :host_language_source
+
     ParseResultType = type_member { { fixed: Prism::ParseResult } }
 
-    sig { override.returns(ParseResultType) }
-    def parse
-      return @parse_result unless @needs_parsing
+    sig { params(source: String, version: Integer, uri: URI::Generic, encoding: Encoding).void }
+    def initialize(source:, version:, uri:, encoding: Encoding::UTF_8)
+      # This has to be initialized before calling super because we call `parse` in the parent constructor, which
+      # overrides this with the proper virtual host language source
+      @host_language_source = T.let("", String)
+      super
+    end
+
+    sig { override.returns(T::Boolean) }
+    def parse!
+      return false unless @needs_parsing
 
       @needs_parsing = false
       scanner = ERBScanner.new(@source)
       scanner.scan
+      @host_language_source = scanner.host_language
       # assigning empty scopes to turn Prism into eval mode
       @parse_result = Prism.parse(scanner.ruby, scopes: [[]])
+      true
     end
 
     sig { override.returns(T::Boolean) }
@@ -39,16 +52,22 @@ module RubyLsp
       RubyDocument.locate(@parse_result.value, create_scanner.find_char_position(position), node_types: node_types)
     end
 
+    sig { params(char_position: Integer).returns(T.nilable(T::Boolean)) }
+    def inside_host_language?(char_position)
+      char = @host_language_source[char_position]
+      char && char != " "
+    end
+
     class ERBScanner
       extend T::Sig
 
       sig { returns(String) }
-      attr_reader :ruby, :html
+      attr_reader :ruby, :host_language
 
       sig { params(source: String).void }
       def initialize(source)
         @source = source
-        @html = T.let(+"", String)
+        @host_language = T.let(+"", String)
         @ruby = T.let(+"", String)
         @current_pos = T.let(0, Integer)
         @inside_ruby = T.let(false, T::Boolean)
@@ -104,16 +123,16 @@ module RubyLsp
           end
         when "\r"
           @ruby << char
-          @html << char
+          @host_language << char
 
           if next_char == "\n"
             @ruby << next_char
-            @html << next_char
+            @host_language << next_char
             @current_pos += 1
           end
         when "\n"
           @ruby << char
-          @html << char
+          @host_language << char
         else
           push_char(T.must(char))
         end
@@ -123,10 +142,10 @@ module RubyLsp
       def push_char(char)
         if @inside_ruby
           @ruby << char
-          @html << " " * char.length
+          @host_language << " " * char.length
         else
           @ruby << " " * char.length
-          @html << char
+          @host_language << char
         end
       end
 

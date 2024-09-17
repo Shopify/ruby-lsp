@@ -51,7 +51,8 @@ module RubyLsp
       @version = T.let(version, Integer)
       @uri = T.let(uri, URI::Generic)
       @needs_parsing = T.let(true, T::Boolean)
-      @parse_result = T.let(parse, ParseResultType)
+      @parse_result = T.let(T.unsafe(nil), ParseResultType)
+      parse!
     end
 
     sig { params(other: Document[T.untyped]).returns(T::Boolean) }
@@ -106,8 +107,9 @@ module RubyLsp
       @cache.clear
     end
 
-    sig { abstract.returns(ParseResultType) }
-    def parse; end
+    # Returns `true` if the document was parsed and `false` if nothing needed parsing
+    sig { abstract.returns(T::Boolean) }
+    def parse!; end
 
     sig { abstract.returns(T::Boolean) }
     def syntax_error?; end

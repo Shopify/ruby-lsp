@@ -14,7 +14,7 @@ class ERBDocumentTest < Minitest::Test
       </ul>
     ERB
 
-    document.parse
+    document.parse!
 
     refute_predicate(document, :syntax_error?)
     assert_equal(
@@ -35,7 +35,7 @@ class ERBDocumentTest < Minitest::Test
       </html>
     ERB
 
-    document.parse
+    document.parse!
 
     refute_predicate(document, :syntax_error?)
     assert_equal(
@@ -46,7 +46,7 @@ class ERBDocumentTest < Minitest::Test
 
   def test_erb_document_handles_windows_newlines
     document = RubyLsp::ERBDocument.new(source: "<%=\r\nbar %>", version: 1, uri: URI("file:///foo.erb"))
-    document.parse
+    document.parse!
 
     refute_predicate(document, :syntax_error?)
     assert_equal("   \r\nbar   ", document.parse_result.source.source)
@@ -62,7 +62,7 @@ class ERBDocumentTest < Minitest::Test
       "<%= foo %\n<%= bar %>",
     ].each do |source|
       document = RubyLsp::ERBDocument.new(source: source, version: 1, uri: URI("file:///foo.erb"))
-      document.parse
+      document.parse!
     end
   end
 
@@ -105,5 +105,21 @@ class ERBDocumentTest < Minitest::Test
 
     assert_equal(value, document.cache_set("textDocument/semanticHighlighting", value))
     assert_equal(value, document.cache_get("textDocument/semanticHighlighting"))
+  end
+
+  def test_keeps_track_of_virtual_host_language_source
+    document = RubyLsp::ERBDocument.new(source: +<<~ERB, version: 1, uri: URI("file:///foo.erb"))
+      <ul>
+        <li><%= foo %><li>
+        <li><%= end %><li>
+      </ul>
+    ERB
+
+    assert_equal(<<~HTML, document.host_language_source)
+      <ul>
+        <li>          <li>
+        <li>          <li>
+      </ul>
+    HTML
   end
 end

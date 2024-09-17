@@ -339,7 +339,7 @@ class RubyDocumentTest < Minitest::Test
       version: 2,
     )
 
-    document.parse
+    document.parse!
 
     assert_equal(<<~RUBY, document.source)
       class Foo
@@ -384,7 +384,7 @@ class RubyDocumentTest < Minitest::Test
       version: 11,
     )
 
-    document.parse
+    document.parse!
 
     assert_equal(<<~RUBY, document.source)
       class Foo
@@ -409,7 +409,7 @@ class RubyDocumentTest < Minitest::Test
       }],
       version: 2,
     )
-    document.parse
+    document.parse!
 
     assert_predicate(document, :syntax_error?)
   end
@@ -571,11 +571,11 @@ class RubyDocumentTest < Minitest::Test
 
     # When there's a new edit, we parse it the first `parse` invocation
     Prism.expects(:parse).with(document.source).once.returns(parse_result)
-    document.parse
+    document.parse!
 
     # If there are no new edits, we don't do anything
     Prism.expects(:parse).never
-    document.parse
+    document.parse!
 
     document.push_edits(
       [{ range: { start: { line: 0, character: 12 }, end: { line: 0, character: 12 } }, text: "\ndef bar; end" }],
@@ -584,7 +584,7 @@ class RubyDocumentTest < Minitest::Test
 
     # If there's another edit, we parse it once again
     Prism.expects(:parse).with(document.source).once.returns(parse_result)
-    document.parse
+    document.parse!
   end
 
   def test_cache_set_and_get

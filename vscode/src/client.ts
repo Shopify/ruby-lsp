@@ -22,6 +22,11 @@ import {
   CloseAction,
   State,
   DocumentFilter,
+  CompletionList,
+  StaticFeature,
+  ClientCapabilities,
+  FeatureState,
+  ServerCapabilities,
 } from "vscode-languageclient/node";
 
 import {
@@ -224,6 +229,27 @@ class ClientErrorHandler implements ErrorHandler {
   }
 }
 
+// This class is used to populate custom client capabilities, so that they are sent as part of the initialize request to
+// the server. This can be used to ensure that custom functionality is properly synchronized with the server
+class ExperimentalCapabilities implements StaticFeature {
+  fillClientCapabilities(capabilities: ClientCapabilities): void {
+    capabilities.experimental = {
+      requestDelegation: true,
+    };
+  }
+
+  initialize(
+    _capabilities: ServerCapabilities,
+    _documentSelector: DocumentSelector | undefined,
+  ): void {}
+
+  getState(): FeatureState {
+    return { kind: "static" };
+  }
+
+  clear(): void {}
+}
+
 export default class Client extends LanguageClient implements ClientInterface {
   public readonly ruby: Ruby;
   public serverVersion?: string;
@@ -233,6 +259,7 @@ export default class Client extends LanguageClient implements ClientInterface {
   private readonly createTestItems: (response: CodeLens[]) => void;
   private readonly baseFolder;
   private readonly workspaceOutputChannel: WorkspaceChannel;
+  private readonly virtualDocuments = new Map<string, string>();
 
   #context: vscode.ExtensionContext;
   #formatter: string;
@@ -244,6 +271,7 @@ export default class Client extends LanguageClient implements ClientInterface {
     createTestItems: (response: CodeLens[]) => void,
     workspaceFolder: vscode.WorkspaceFolder,
     outputChannel: WorkspaceChannel,
+    virtualDocuments: Map<string, string>,
     isMainWorkspace = false,
     debugMode?: boolean,
   ) {
@@ -260,7 +288,9 @@ export default class Client extends LanguageClient implements ClientInterface {
       debugMode,
     );
 
+    this.registerFeature(new ExperimentalCapabilities());
     this.workspaceOutputChannel = outputChannel;
+    this.virtualDocuments = virtualDocuments;
 
     // Middleware are part of client options, but because they must reference `this`, we cannot make it a part of the
     // `super` call (TypeScript does not allow accessing `this` before invoking `super`)
@@ -273,6 +303,15 @@ export default class Client extends LanguageClient implements ClientInterface {
     this.#context = context;
     this.ruby = ruby;
     this.#formatter = "";
+
+    // When the server processes changes to an ERB document, it will send this custom notification to update the state
+    // of the virtual documents
+    this.onNotification("delegate/textDocument/virtualState", (params) => {
+      this.virtualDocuments.set(
+        params.textDocument.uri,
+        params.textDocument.text,
+      );
+    });
   }
 
   async afterStart() {
@@ -317,7 +356,7 @@ export default class Client extends LanguageClient implements ClientInterface {
 
   private async benchmarkMiddleware<T>(
     type: string | MessageSignature,
-    _params: any,
+    params: any,
     runRequest: () => Promise<T>,
   ): Promise<T> {
     if (this.state !== State.Running) {
@@ -341,6 +380,12 @@ export default class Client extends LanguageClient implements ClientInterface {
       this.logResponseTime(bench.duration, request);
       return result;
     } catch (error: any) {
+      // We use a special error code to indicate delegated requests. This is not actually an error, it's a signal that
+      // the client needs to invoke the appropriate language service for this request
+      if (error.code === -32900) {
+        return this.executeDelegateRequest(type, params);
+      }
+
       if (error.data) {
         if (
           this.baseFolder === "ruby-lsp" ||
@@ -376,6 +421,61 @@ export default class Client extends LanguageClient implements ClientInterface {
       }
 
       throw error;
+    }
+  }
+
+  private async executeDelegateRequest(
+    type: string | MessageSignature,
+    params: any,
+  ): Promise<any> {
+    const request = typeof type === "string" ? type : type.method;
+    const originalUri = params.textDocument.uri;
+
+    // Delegating requests only makes sense for text document requests, where a URI is available
+    if (!originalUri) {
+      return null;
+    }
+
+    // To delegate requests, we use a special URI scheme so that VS Code can delegate to the correct provider. For an
+    // `index.html.erb` file, the URI would look like `embedded-content://html/file:///index.html.erb.html`
+    const hostLanguage = /\.([^.]+)\.erb$/.exec(originalUri)?.[1] || "html";
+    const vdocUriString = `embedded-content://${hostLanguage}/${encodeURIComponent(
+      originalUri,
+    )}.${hostLanguage}`;
+
+    // Call the appropriate language service for the request, so that VS Code delegates the work accordingly
+    if (request === "textDocument/completion") {
+      return vscode.commands
+        .executeCommand<CompletionList>(
+          "vscode.executeCompletionItemProvider",
+          vscode.Uri.parse(vdocUriString),
+          params.position,
+          params.context.triggerCharacter,
+        )
+        .then((response) => {
+          // We need to tell the server that the completion item is being delegated, so that when it receives the
+          // `completionItem/resolve`, we can delegate that too
+          response.items.forEach((item) => {
+            // For whatever reason, HTML completion items don't include the `kind` and that causes a failure in the
+            // editor. It might be a mistake in the delegation
+            if (
+              item.documentation &&
+              typeof item.documentation !== "string" &&
+              "value" in item.documentation
+            ) {
+              item.documentation.kind = "markdown";
+            }
+
+            item.data = { ...item.data, delegateCompletion: true };
+          });
+
+          return response;
+        });
+    } else {
+      this.workspaceOutputChannel.warn(
+        `Attempted to delegate unsupported request ${request}`,
+      );
+      return null;
     }
   }
 
@@ -486,6 +586,12 @@ export default class Client extends LanguageClient implements ClientInterface {
         params: TR,
       ) => {
         return this.benchmarkMiddleware(type, params, () => next(type, params));
+      },
+      didClose: (textDocument, next) => {
+        // Delete virtual ERB host language documents if they exist and then proceed to the next middleware to fire the
+        // request to the server
+        this.virtualDocuments.delete(textDocument.uri.toString(true));
+        return next(textDocument);
       },
     };
   }

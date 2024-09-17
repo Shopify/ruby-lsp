@@ -14,18 +14,19 @@ module RubyLsp
       super
     end
 
-    sig { override.returns(ParseResultType) }
-    def parse
-      return @parse_result unless @needs_parsing
+    sig { override.returns(T::Boolean) }
+    def parse!
+      return false unless @needs_parsing
 
       @needs_parsing = false
 
       _, _, declarations = RBS::Parser.parse_signature(@source)
       @syntax_error = false
       @parse_result = declarations
+      true
     rescue RBS::ParsingError
       @syntax_error = true
-      @parse_result
+      true
     end
 
     sig { override.returns(T::Boolean) }

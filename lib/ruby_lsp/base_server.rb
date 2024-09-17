@@ -31,6 +31,7 @@ module RubyLsp
         Thread,
       )
 
+      @global_state = T.let(GlobalState.new, GlobalState)
       Thread.main.priority = 1
     end
 
@@ -52,7 +53,26 @@ module RubyLsp
               message[:params][:textDocument][:uri] = parsed_uri
 
               # We don't want to try to parse documents on text synchronization notifications
-              @store.get(parsed_uri).parse unless method.start_with?("textDocument/did")
+              unless method.start_with?("textDocument/did")
+                document = @store.get(parsed_uri)
+
+                # If the client supports request delegation and we're working with an ERB document and there was
+                # something to parse, then we have to maintain the client updated about the virtual state of the host
+                # language source
+                if document.parse! && @global_state.supports_request_delegation && document.is_a?(ERBDocument)
+                  send_message(
+                    Notification.new(
+                      method: "delegate/textDocument/virtualState",
+                      params: {
+                        textDocument: {
+                          uri: uri,
+                          text: document.host_language_source,
+                        },
+                      },
+                    ),
+                  )
+                end
+              end
             rescue Store::NonExistingDocumentError
               # If we receive a request for a file that no longer exists, we don't want to fail
             end

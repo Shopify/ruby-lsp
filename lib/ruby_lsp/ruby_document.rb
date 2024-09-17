@@ -121,12 +121,13 @@ module RubyLsp
       end
     end
 
-    sig { override.returns(ParseResultType) }
-    def parse
-      return @parse_result unless @needs_parsing
+    sig { override.returns(T::Boolean) }
+    def parse!
+      return false unless @needs_parsing
 
       @needs_parsing = false
       @parse_result = Prism.parse(@source)
+      true
     end
 
     sig { override.returns(T::Boolean) }
