@@ -5,27 +5,8 @@ require "ruby_lsp/listeners/completion"
 
 module RubyLsp
   module Requests
-    # ![Completion demo](../../completion.gif)
-    #
     # The [completion](https://microsoft.github.io/language-server-protocol/specification#textDocument_completion)
     # suggests possible completions according to what the developer is typing.
-    #
-    # Currently supported targets:
-    #
-    # - Classes
-    # - Modules
-    # - Constants
-    # - Require paths
-    # - Methods invoked on self only
-    # - Instance variables
-    #
-    # # Example
-    #
-    # ```ruby
-    # require "ruby_lsp/requests" # --> completion: suggests `base_request`, `code_actions`, ...
-    #
-    # RubyLsp::Requests:: # --> completion: suggests `Completion`, `Hover`, ...
-    # ```
     class Completion < Request
       extend T::Sig
 

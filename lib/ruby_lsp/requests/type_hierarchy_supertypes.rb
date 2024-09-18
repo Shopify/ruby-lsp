@@ -3,20 +3,9 @@
 
 module RubyLsp
   module Requests
-    # ![Type hierarchy supertypes demo](../../type_hierarchy_supertypes.gif)
-    #
     # The [type hierarchy supertypes
     # request](https://microsoft.github.io/language-server-protocol/specification#typeHierarchy_supertypes)
     # displays the list of ancestors (supertypes) for the selected type.
-    #
-    # # Example
-    #
-    # ```ruby
-    # class Foo; end
-    # class Bar < Foo; end
-    #
-    # puts Bar # <-- right click on `Bar` and select "Show Type Hierarchy"
-    # ```
     class TypeHierarchySupertypes < Request
       extend T::Sig
 

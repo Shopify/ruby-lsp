@@ -3,24 +3,9 @@
 
 module RubyLsp
   module Requests
-    # ![Code action resolve demo](../../code_action_resolve.gif)
-    #
     # The [code action resolve](https://microsoft.github.io/language-server-protocol/specification#codeAction_resolve)
     # request is used to to resolve the edit field for a given code action, if it is not already provided in the
     # textDocument/codeAction response. We can use it for scenarios that require more computation such as refactoring.
-    #
-    # # Example: Extract to variable
-    #
-    # ```ruby
-    # # Before:
-    # 1 + 1 # Select the text and use Refactor: Extract Variable
-    #
-    # # After:
-    # new_variable = 1 + 1
-    # new_variable
-    #
-    # ```
-    #
     class CodeActionResolve < Request
       extend T::Sig
       include Support::Common

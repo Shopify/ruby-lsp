@@ -5,39 +5,9 @@ require "ruby_lsp/listeners/inlay_hints"
 
 module RubyLsp
   module Requests
-    # ![Inlay hint demo](../../inlay_hints.gif)
-    #
     # [Inlay hints](https://microsoft.github.io/language-server-protocol/specification#textDocument_inlayHint)
     # are labels added directly in the code that explicitly show the user something that might
     # otherwise just be implied.
-    #
-    # # Configuration
-    #
-    # To enable rescue hints, set `rubyLsp.featuresConfiguration.inlayHint.implicitRescue` to `true`.
-    #
-    # To enable hash value hints, set `rubyLsp.featuresConfiguration.inlayHint.implicitHashValue` to `true`.
-    #
-    # To enable all hints, set `rubyLsp.featuresConfiguration.inlayHint.enableAll` to `true`.
-    #
-    # # Example
-    #
-    # ```ruby
-    # begin
-    #   puts "do something that might raise"
-    # rescue # Label "StandardError" goes here as a bare rescue implies rescuing StandardError
-    #   puts "handle some rescue"
-    # end
-    # ```
-    #
-    # # Example
-    #
-    # ```ruby
-    # var = "foo"
-    # {
-    #   var: var, # Label "var" goes here in cases where the value is omitted
-    #   a: "hello",
-    # }
-    # ```
     class InlayHints < Request
       extend T::Sig
 

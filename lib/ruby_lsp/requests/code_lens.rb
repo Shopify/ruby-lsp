@@ -7,19 +7,9 @@ require "ruby_lsp/listeners/code_lens"
 
 module RubyLsp
   module Requests
-    # ![Code lens demo](../../code_lens.gif)
-    #
     # The
     # [code lens](https://microsoft.github.io/language-server-protocol/specification#textDocument_codeLens)
-    # request informs the editor of runnable commands such as testing and debugging
-    #
-    # # Example
-    #
-    # ```ruby
-    # # Run | Run in Terminal | Debug
-    # class Test < Minitest::Test
-    # end
-    # ```
+    # request informs the editor of runnable commands such as testing and debugging.
     class CodeLens < Request
       extend T::Sig
 

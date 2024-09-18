@@ -14,8 +14,7 @@ Code, use the official [Ruby LSP extension](https://marketplace.visualstudio.com
 > Some Ruby LSP features may be unavailable or limited due to incomplete implementations of the Language Server
 > Protocol, such as dynamic feature registration, or [file watching](https://github.com/Shopify/ruby-lsp/issues/1456).
 
-If you need to select particular features to enable or disable, see
-[`vscode/package.json`](vscode/package.json) for the full list.
+If you wish to enable or disable features or configure other aspects of the language server, see [initialization options](#all-initialization-options).
 
 {: .important }
 > The command to launch the language server might depend on which editor and version manager combination you are using.
