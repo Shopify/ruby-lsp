@@ -9,6 +9,7 @@ import sinon from "sinon";
 import { Custom } from "../../../ruby/custom";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import * as common from "../../../common";
+import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
 
 suite("Custom", () => {
   test("Invokes custom script and then Ruby", async () => {
@@ -24,17 +25,17 @@ suite("Custom", () => {
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
     const custom = new Custom(workspaceFolder, outputChannel);
 
-    const activationScript =
-      "STDERR.print({ env: ENV.to_h, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }.to_json)";
+    const envStub = {
+      env: { ANY: "true" },
+      yjit: true,
+      version: "3.0.0",
+    };
 
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
-      stderr: JSON.stringify({
-        env: { ANY: "true" },
-        yjit: true,
-        version: "3.0.0",
-      }),
+      stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
     });
+
     const commandStub = sinon
       .stub(custom, "customCommand")
       .returns("my_version_manager activate_env");
@@ -42,7 +43,7 @@ suite("Custom", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `my_version_manager activate_env && ruby -W0 -rjson -e '${activationScript}'`,
+        `my_version_manager activate_env && ruby -W0 -rjson -e '${custom.activationScript}'`,
         {
           cwd: uri.fsPath,
           shell: vscode.env.shell,

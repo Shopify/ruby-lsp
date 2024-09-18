@@ -9,6 +9,7 @@ import sinon from "sinon";
 import { Rvm } from "../../../ruby/rvm";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import * as common from "../../../common";
+import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
 
 suite("RVM", () => {
   if (os.platform() === "win32") {
@@ -27,9 +28,6 @@ suite("RVM", () => {
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
     const rvm = new Rvm(workspaceFolder, outputChannel);
 
-    const activationScript =
-      "STDERR.print({ env: ENV.to_h, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }.to_json)";
-
     const installationPathStub = sinon
       .stub(rvm, "findRvmInstallation")
       .resolves(
@@ -41,22 +39,24 @@ suite("RVM", () => {
         ),
       );
 
+    const envStub = {
+      env: {
+        ANY: "true",
+      },
+      yjit: true,
+      version: "3.0.0",
+    };
+
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
-      stderr: JSON.stringify({
-        env: {
-          ANY: "true",
-        },
-        yjit: true,
-        version: "3.0.0",
-      }),
+      stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
     });
 
     const { env, version, yjit } = await rvm.activate();
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${path.join(os.homedir(), ".rvm", "bin", "rvm-auto-ruby")} -W0 -rjson -e '${activationScript}'`,
+        `${path.join(os.homedir(), ".rvm", "bin", "rvm-auto-ruby")} -W0 -rjson -e '${rvm.activationScript}'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,

@@ -11,15 +11,11 @@ import { ActivationResult, VersionManager } from "./versionManager";
 // - https://rvm.io
 export class Rvm extends VersionManager {
   async activate(): Promise<ActivationResult> {
-    const activationScript =
-      "STDERR.print({ env: ENV.to_h, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION }.to_json)";
-
     const installationPath = await this.findRvmInstallation();
-    const result = await this.runScript(
-      `${installationPath.fsPath} -W0 -rjson -e '${activationScript}'`,
+    const parsedResult = await this.runEnvActivationScript(
+      installationPath.fsPath,
     );
 
-    const parsedResult = this.parseWithErrorHandling(result.stderr);
     const activatedKeys = Object.entries(parsedResult.env)
       .map(([key, value]) => `${key}=${value}`)
       .join(" ");
