@@ -1,13 +1,6 @@
 name: CI
 
-on:
-  push:
-    paths-ignore:
-      - 'jekyll/**'
-
-  pull_request:
-    paths-ignore:
-      - 'jekyll/**'
+on: [push, pull_request]
 
 jobs:
   lint_ruby:
@@ -121,3 +114,18 @@ jobs:
           yarn --frozen-lockfile
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           yarn run test
+  verify_docs:
+    runs-on: ubuntu-latest
+    name: Verify Jekyll website builds
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          working-directory: ./jekyll
+
+      - name: Generate documentation
+        working-directory: ./jekyll
+        run: bundle exec jekyll build
