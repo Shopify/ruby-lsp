@@ -438,7 +438,7 @@ module RubyLsp
             text_edit: Interface::TextEdit.new(range: range, new_text: keyword),
             kind: Constant::CompletionItemKind::KEYWORD,
             data: {
-              skip_resolve: true,
+              keyword: true,
             },
           )
         end

@@ -732,6 +732,27 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hover_for_keywords
+    source = <<~RUBY
+      def foo
+        yield
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 2, line: 1 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("```ruby\nyield\n```", contents)
+      assert_match(T.must(RubyLsp::KEYWORD_DOCS["yield"]), contents)
+      assert_match("[Read more](#{RubyLsp::STATIC_DOCS_PATH}/yield.md)", contents)
+    end
+  end
+
   private
 
   def create_hover_addon

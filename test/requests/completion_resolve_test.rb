@@ -176,4 +176,29 @@ class CompletionResolveTest < Minitest::Test
       assert_match("Learn more about guessed types", result[:documentation].value)
     end
   end
+
+  def test_resolve_for_keywords
+    source = +<<~RUBY
+      def foo
+        yield
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, _uri|
+      existing_item = {
+        label: "yield",
+        kind: RubyLsp::Constant::CompletionItemKind::KEYWORD,
+        data: { keyword: true },
+      }
+
+      server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
+
+      result = server.pop_response.response
+      contents = result[:documentation].value
+
+      assert_match("```ruby\nyield\n```", contents)
+      assert_match(T.must(RubyLsp::KEYWORD_DOCS["yield"]), contents)
+      assert_match("[Read more](#{RubyLsp::STATIC_DOCS_PATH}/yield.md)", contents)
+    end
+  end
 end
