@@ -221,15 +221,17 @@ appropriate command for your Ruby version manager as an absolute path. For examp
 return {
   {
     "neovim/nvim-lspconfig",
+    opts = {
       servers = {
         ruby_lsp = {
           mason = false,
-          cmd = { vim.fn.expand "~/.asdf/shims/ruby-lsp" },
+          cmd = { vim.fn.expand("~/.asdf/shims/ruby-lsp") },
         },
       },
     },
   },
 }
+
 ```
 
 ## Sublime Text LSP
