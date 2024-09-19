@@ -69,7 +69,7 @@ For more information on using and configuring the extension, see the extension's
 
 ### With other editors
 
-See [editors](editors) for community instructions on setting up the Ruby LSP, which current includes Emacs, Neovim, Sublime Text, and Zed.
+See [editors](editors) for community instructions on setting up the Ruby LSP, which currently includes Emacs, Neovim, Sublime Text, and Zed.
 
 The gem can be installed by doing
 
@@ -103,7 +103,7 @@ For instructions on how to create addons, see the [addons documentation](addons)
 {: .note }
 Note that none of the features in this section are specific to Ruby; they are general to all programming languages.
 Becoming familiar with them will enhance your ability to use the editor effectively.<br><br>
-If you're using VS Code, we recommened their excellent [guides and documentation](https://code.visualstudio.com/docs) to
+If you're using VS Code, we recommend their excellent [guides and documentation](https://code.visualstudio.com/docs) to
 learn more about the editor's philosophy and feature set.
 
 ### Hover
@@ -169,7 +169,7 @@ terminal or launch the debugger.
 {: .note }
 The [code
 lens](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_codeLens)
-request requires specific commands to the implemented in the editor in order to work. For VS Code, this is included with the Ruby LSP extension. If you are using a different editor, please check the editor's documentation on how to
+request requires specific commands to be implemented in the editor in order to work. For VS Code, this is included with the Ruby LSP extension. If you are using a different editor, please check the editor's documentation on how to
 define the required commands.
 
 ![Code lens demo](images/code_lens.gif)
@@ -320,7 +320,7 @@ will need to implement the same to support these features
 {: .important }
 The delegation of certain JavaScript features works partially. For example, completion inside an `onclick` attribute
 will sometimes display incorrect candidates. We believe this might be a limitation of request delegation in general
-and we've opened a [dicussion with VS Code](https://github.com/microsoft/vscode-discussions/discussions/1628) to better
+and we've opened a [discussion with VS Code](https://github.com/microsoft/vscode-discussions/discussions/1628) to better
 understand it.
 
 ![ERB features demo](images/erb.gif)
@@ -463,7 +463,7 @@ default gems, except for
 - Gems that only appear under the `:development` group
 - All Ruby files under `test/**/*.rb`
 
-This behaviour can be overridden and tuned. Learn how to configure it [for VS Code](https://github.com/Shopify/ruby-lsp/tree/main/vscode#indexing-configuration).
+This behavior can be overridden and tuned. Learn how to configure it [for VS Code](https://github.com/Shopify/ruby-lsp/tree/main/vscode#indexing-configuration).
 
 Note that indexing-dependent behavior, such as definition, hover, completion or workspace symbol will be impacted by
 the configuration changes.
