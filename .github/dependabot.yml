@@ -52,3 +52,18 @@ updates:
       - "chore"
       - "dependencies"
       - "gh-actions"
+  - package-ecosystem: "bundler"
+    directory: "jekyll"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "Shopify/ruby-dev-exp"
+    labels:
+      - "dependencies"
+      - "ruby"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    open-pull-requests-limit: 100

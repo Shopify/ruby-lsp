@@ -1,6 +1,13 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+      - 'jekyll/**'
+
+  pull_request:
+    paths-ignore:
+      - 'jekyll/**'
 
 jobs:
   lint_ruby:

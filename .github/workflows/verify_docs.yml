@@ -1,0 +1,29 @@
+name: Verify docs
+
+on:
+  push:
+    paths:
+      - 'jekyll/**'
+      - '.github/workflows/publish_docs.yml'
+
+  pull_request:
+    paths:
+      - 'jekyll/**'
+      - '.github/workflows/publish_docs.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Verify Jekyll website builds
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          working-directory: ./jekyll
+
+      - name: Generate documentation
+        working-directory: ./jekyll
+        run: bundle exec jekyll build
