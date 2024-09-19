@@ -325,6 +325,20 @@ suite("Grammars", () => {
       });
     });
 
+    suite("Local variables", () => {
+      test("rescue is not confused", () => {
+        const ruby = "rescue => e";
+        const expectedTokens = [
+          ["rescue", ["source.ruby", "keyword.control.ruby"]],
+          [" ", ["source.ruby"]],
+          ["=>", ["source.ruby", "punctuation.separator.key-value"]],
+          [" e", ["source.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+    });
+
     function tokenizeRuby(ruby: string): [string, string[]][] {
       if (!rubyGrammar) {
         throw new Error("Ruby grammar not loaded");

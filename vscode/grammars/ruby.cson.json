@@ -142,7 +142,7 @@
           "name": "variable.ruby"
         }
       },
-      "match": "^\\s*([a-z]([A-Za-z0-9_])*)\\s*=[^=]",
+      "match": "^\\s*([a-z]([A-Za-z0-9_])*)\\s*=[^=>]",
       "comment": "A local variable assignment"
     },
     {
