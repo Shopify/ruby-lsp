@@ -186,26 +186,26 @@ breadcrumbs and the outline.
 Workspace symbol is the project-wide version of document symbol. It allows users to fuzzy search any declaration in the
 entire project.
 
-![Workspace symbol demo](images/document_symbol.gif)
+![Workspace symbol demo](images/workspace_symbol.gif)
 
 ### Document link
 
 Document link makes magic `source` links clickable. This is used to connect two declarations for convenience. Note that
 the links are only processed if they are immediately above a declaration and not anywhere in the code.
 
-![Document link demo](images/document_symbol.gif)
+![Document link demo](images/document_link.gif)
 
 ### Document highlight
 
 Document highlight reveals occurrences and declarations of the entity under the cursor.
 
-![Document highlight demo](images/document_symbol.gif)
+![Document highlight demo](images/document_highlight.gif)
 
 ### Folding range
 
 Folding range allows users to fold code at relevant ranges of the source.
 
-![Folding range demo](images/document_symbol.gif)
+![Folding range demo](images/folding_range.gif)
 
 ### Semantic highlighting
 
