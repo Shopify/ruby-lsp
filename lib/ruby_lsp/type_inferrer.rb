@@ -121,8 +121,12 @@ module RubyLsp
       return Type.new(node_context.fully_qualified_name) if node_context.surrounding_method
 
       # If we're not inside a method, then we're inside the body of a class or module, which is a singleton
-      # context
-      Type.new("#{nesting.join("::")}::<Class:#{nesting.last}>")
+      # context.
+      #
+      # If the class/module definition is using compact style (e.g.: `class Foo::Bar`), then we need to split the name
+      # into its individual parts to build the correct singleton name
+      parts = nesting.flat_map { |part| part.split("::") }
+      Type.new("#{parts.join("::")}::<Class:#{parts.last}>")
     end
 
     sig do
