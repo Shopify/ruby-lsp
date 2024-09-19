@@ -358,6 +358,40 @@ module RubyLsp
       assert_equal("Proc", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
+    def test_infer_self_type_for_compact_namespace
+      node_context = index_and_locate(<<~RUBY, { line: 1, character: 3 })
+        class Admin::User
+          validates
+        end
+      RUBY
+
+      assert_equal("Admin::User::<Class:User>", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_self_type_for_compact_namespace_inside_method
+      node_context = index_and_locate(<<~RUBY, { line: 2, character: 4 })
+        class Admin::User
+          def foo
+            hello
+          end
+        end
+      RUBY
+
+      assert_equal("Admin::User", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_self_type_for_compact_namespace_inside_singleton_method
+      node_context = index_and_locate(<<~RUBY, { line: 2, character: 4 })
+        class Admin::User
+          def self.foo
+            hello
+          end
+        end
+      RUBY
+
+      assert_equal("Admin::User::<Class:User>", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
     private
 
     def index_and_locate(source, position)
