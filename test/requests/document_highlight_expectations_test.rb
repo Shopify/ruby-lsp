@@ -12,8 +12,9 @@ class DocumentHighlightExpectationsTest < ExpectationsTestRunner
     params = @__params&.any? ? @__params : default_args
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
 
+    global_state = RubyLsp::GlobalState.new
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::DocumentHighlight.new(document, params.first, dispatcher)
+    listener = RubyLsp::Requests::DocumentHighlight.new(global_state, document, params.first, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     listener.perform
   end

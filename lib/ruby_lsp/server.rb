@@ -547,7 +547,7 @@ module RubyLsp
         return
       end
 
-      request = Requests::DocumentHighlight.new(document, params[:position], dispatcher)
+      request = Requests::DocumentHighlight.new(@global_state, document, params[:position], dispatcher)
       dispatcher.dispatch(document.parse_result.value)
       send_message(Result.new(id: message[:id], response: request.perform))
     end
