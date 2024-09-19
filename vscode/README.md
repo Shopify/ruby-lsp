@@ -16,15 +16,13 @@ The Ruby LSP features include
 - Format on type
 - Debugging support
 - Running and debugging tests through VS Code's UI
-- Go to definition for classes, modules, constants and required files
-- Showing documentaton on hover for classes, modules and constants
-- Completion for classes, modules, constants and require paths
-- Fuzzy search classes, modules and constants anywhere in the project and its dependencies (workspace symbol)
+- Go to definition
+- Showing documentation on hover
+- Completion
+- Fuzzy search declarations anywhere in the project (workspace symbol)
 - Running Rails generators from the UI
 
-Adding method support for definition, completion, hover and workspace symbol is planned, but not yet completed.
-
-See complete information about features [here](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html).
+See complete information about features [here](https://shopify.github.io/ruby-lsp).
 
 If you experience issues, please see the [troubleshooting
 guide](https://shopify.github.io/ruby-lsp/troubleshooting.html).
@@ -87,9 +85,6 @@ The Ruby LSP allows disabling specific features. To do so, open the
 language status center right next to the language mode Ruby and select `Manage` right next to enabled features.
 
 ![Ruby LSP status center](extras/ruby_lsp_status_center.png)
-
-It's also possible to configure with more granularity code lens and inlay hint features, see the [features
-documentation](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html).
 
 #### Ruby version managers
 

@@ -5,27 +5,9 @@ require "ruby_lsp/listeners/definition"
 
 module RubyLsp
   module Requests
-    # ![Definition demo](../../definition.gif)
-    #
     # The [definition
     # request](https://microsoft.github.io/language-server-protocol/specification#textDocument_definition) jumps to the
     # definition of the symbol under the cursor.
-    #
-    # Currently supported targets:
-    #
-    # - Classes
-    # - Modules
-    # - Constants
-    # - Require paths
-    # - Methods invoked on self only and on receivers where the type is unknown
-    # - Instance variables
-    #
-    # # Example
-    #
-    # ```ruby
-    # require "some_gem/file" # <- Request go to definition on this string will take you to the file
-    # Product.new # <- Request go to definition on this class name will take you to its declaration.
-    # ```
     class Definition < Request
       extend T::Sig
       extend T::Generic

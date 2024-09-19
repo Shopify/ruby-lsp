@@ -3,8 +3,6 @@
 
 module RubyLsp
   module Requests
-    # ![Selection ranges demo](../../selection_ranges.gif)
-    #
     # The [selection ranges](https://microsoft.github.io/language-server-protocol/specification#textDocument_selectionRange)
     # request informs the editor of ranges that the user may want to select based on the location(s)
     # of their cursor(s).
@@ -12,14 +10,6 @@ module RubyLsp
     # Trigger this request with: Ctrl + Shift + -> or Ctrl + Shift + <-
     #
     # Note that if using VSCode Neovim, you will need to be in Insert mode for this to work correctly.
-    #
-    # # Example
-    #
-    # ```ruby
-    # def foo # --> The next selection range encompasses the entire method definition.
-    #   puts "Hello, world!" # --> Cursor is on this line
-    # end
-    # ```
     class SelectionRanges < Request
       extend T::Sig
       include Support::Common

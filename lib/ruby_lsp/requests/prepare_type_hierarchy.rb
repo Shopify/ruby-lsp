@@ -3,22 +3,11 @@
 
 module RubyLsp
   module Requests
-    # ![Prepare type hierarchy demo](../../prepare_type_hierarchy.gif)
-    #
     # The [prepare type hierarchy
     # request](https://microsoft.github.io/language-server-protocol/specification#textDocument_prepareTypeHierarchy)
     # displays the list of ancestors (supertypes) and descendants (subtypes) for the selected type.
     #
     # Currently only supports supertypes due to a limitation of the index.
-    #
-    # # Example
-    #
-    # ```ruby
-    # class Foo; end
-    # class Bar < Foo; end
-    #
-    # puts Bar # <-- right click on `Bar` and select "Show Type Hierarchy"
-    # ```
     class PrepareTypeHierarchy < Request
       extend T::Sig
 

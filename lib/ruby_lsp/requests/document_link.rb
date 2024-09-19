@@ -5,19 +5,9 @@ require "ruby_lsp/listeners/document_link"
 
 module RubyLsp
   module Requests
-    # ![Document link demo](../../document_link.gif)
-    #
     # The [document link](https://microsoft.github.io/language-server-protocol/specification#textDocument_documentLink)
     # makes `# source://PATH_TO_FILE#line` comments in a Ruby/RBI file clickable if the file exists.
     # When the user clicks the link, it'll open that location.
-    #
-    # # Example
-    #
-    # ```ruby
-    # # source://syntax_tree/3.2.1/lib/syntax_tree.rb#51 <- it will be clickable and will take the user to that location
-    # def format(source, maxwidth = T.unsafe(nil))
-    # end
-    # ```
     class DocumentLink < Request
       extend T::Sig
 

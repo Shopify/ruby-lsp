@@ -31,6 +31,7 @@ with tool specific functionality, aimed at
 - Allowing LSP features to be enhanced by addons present in the application the developer is currently working on
 - Not requiring extra configuration from the user
 - Seamlessly integrating with the base features of the Ruby LSP
+- Providing addon authors with the entire static analysis toolkit that the Ruby LSP uses
 
 ## Guidelines
 
@@ -43,6 +44,8 @@ The performance of automatic requests is critical for responsiveness as they are
 - Do not mutate LSP state directly. Addons sometimes have access to important state such as document objects, which
 should never be mutated directly, but instead through the mechanisms provided by the LSP specification - like text edits
 - Do not overnotify users. It's generally annoying and diverts attention from the current task
+- Show the right context at the right time. When adding visual features, think about **when** the information is
+relevant for users to avoid polluting the editor
 
 ## Building a Ruby LSP addon
 
@@ -121,7 +124,6 @@ dispatcher.dispatch(parse_result.value)
 In this example, the listener is registered to the dispatcher to listen for the `:on_class_node_enter` event. When a class node is encountered during the parsing of the code, a greeting message is outputted with the class name.
 
 This approach enables all addon responses to be captured in a single round of AST visits, greatly improving performance.
-
 
 ### Enhancing features
 
@@ -343,23 +345,6 @@ module RubyLsp
 end
 ```
 
-### Ensuring consistent documentation
-
-The Ruby LSP exports a Rake task to help authors make sure all of their listeners are documented and include demos and
-examples of the feature in action. Configure the Rake task and run `bundle exec rake ruby_lsp:check_docs` on CI to
-ensure documentation is always up to date and consistent.
-
-```ruby
-require "ruby_lsp/check_docs"
-
-# The first argument is the file list including all of the listeners declared by the addon
-# The second argument is the file list of GIF files with the demos of all listeners
-RubyLsp::CheckDocs.new(
-  FileList["#{__dir__}/lib/ruby_lsp/ruby_lsp_rails/**/*.rb"],
-  FileList.new("#{__dir__}/misc/**/*.gif"),
-)
-```
-
 ### Dependency constraints
 
 While we figure out a good design for the addons API, breaking changes are bound to happen. To avoid having your addon
@@ -388,4 +373,49 @@ require ""
 
 # Using uncommon, but valid syntax, such as invoking require directly on Kernel using parenthesis
 Kernel.require("library")
+```
+
+The Ruby LSP exports a test helper which creates a server instance with a document already initialized with the desired
+content. This is useful to test the integration of your addon with the language server.
+
+Addons are automatically loaded, so simply executing the desired language server request should already include your
+addon's contributions.
+
+```ruby
+require "test_helper"
+require "ruby_lsp/test_helper"
+
+class MyAddonTest < Minitest::Test
+  def test_my_addon_works
+    source =  <<~RUBY
+      # Some test code that allows you to trigger your addon's contribution
+      class Foo
+        def something
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      # Tell the server to execute the definition request
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: {
+          textDocument: {
+            uri: uri.to_s,
+          },
+          position: {
+            line: 3,
+            character: 5
+          }
+        }
+      )
+
+      # Pop the server's response to the definition request
+      result = server.pop_response.response
+      # Assert that the response includes your addon's contribution
+      assert_equal(123, result.response.location)
+    end
+  end
+end
 ```

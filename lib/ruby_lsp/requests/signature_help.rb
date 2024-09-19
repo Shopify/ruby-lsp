@@ -5,25 +5,9 @@ require "ruby_lsp/listeners/signature_help"
 
 module RubyLsp
   module Requests
-    # ![Signature help demo](../../signature_help.gif)
-    #
     # The [signature help
     # request](https://microsoft.github.io/language-server-protocol/specification#textDocument_signatureHelp) displays
     # information about the parameters of a method as you type an invocation.
-    #
-    # Currently only supports methods invoked directly on `self` without taking inheritance into account.
-    #
-    # # Example
-    #
-    # ```ruby
-    # class Foo
-    #  def bar(a, b, c)
-    #  end
-    #
-    #  def baz
-    #    bar( # -> Signature help will show the parameters of `bar`
-    #  end
-    # ```
     class SignatureHelp < Request
       extend T::Sig
 

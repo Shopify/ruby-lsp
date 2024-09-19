@@ -3,25 +3,9 @@
 
 module RubyLsp
   module Requests
-    # ![Formatting symbol demo](../../formatting.gif)
-    #
     # The [formatting](https://microsoft.github.io/language-server-protocol/specification#textDocument_formatting)
     # request uses RuboCop to fix auto-correctable offenses in the document. This requires enabling format on save and
     # registering the ruby-lsp as the Ruby formatter.
-    #
-    # The `rubyLsp.formatter` setting specifies which formatter to use.
-    # If set to `auto` then it behaves as follows:
-    # * It will use RuboCop if it is part of the bundle.
-    # * If RuboCop is not available, and `syntax_tree` is a direct dependency, it will use that.
-    # * Otherwise, no formatting will be applied.
-    #
-    # # Example
-    #
-    # ```ruby
-    # def say_hello
-    # puts "Hello" # --> formatting: fixes the indentation on save
-    # end
-    # ```
     class Formatting < Request
       extend T::Sig
 

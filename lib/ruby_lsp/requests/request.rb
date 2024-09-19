@@ -3,7 +3,6 @@
 
 module RubyLsp
   module Requests
-    # :nodoc:
     class Request
       extend T::Sig
       extend T::Generic

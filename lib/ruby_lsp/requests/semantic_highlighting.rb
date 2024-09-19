@@ -5,31 +5,9 @@ require "ruby_lsp/listeners/semantic_highlighting"
 
 module RubyLsp
   module Requests
-    # ![Semantic highlighting demo](../../semantic_highlighting.gif)
-    #
     # The [semantic
     # highlighting](https://microsoft.github.io/language-server-protocol/specification#textDocument_semanticTokens)
     # request informs the editor of the correct token types to provide consistent and accurate highlighting for themes.
-    #
-    # # Example
-    #
-    # ```ruby
-    # def foo
-    #   var = 1 # --> semantic highlighting: local variable
-    #   some_invocation # --> semantic highlighting: method invocation
-    #   var # --> semantic highlighting: local variable
-    # end
-    #
-    # # Strategy
-    #
-    # To maximize editor performance, the Ruby LSP will return the minimum number of semantic tokens, since applying
-    # them is an expensive operation for the client. This means that the server only returns tokens for ambiguous pieces
-    # of syntax, such as method invocations with no receivers or parenthesis (which can be confused with local
-    # variables).
-    #
-    # Offloading as much handling as possible to Text Mate grammars or equivalent will guarantee responsiveness in the
-    # editor and allow for a much smoother experience.
-    # ```
     class SemanticHighlighting < Request
       extend T::Sig
 

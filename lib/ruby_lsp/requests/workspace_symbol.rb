@@ -3,21 +3,9 @@
 
 module RubyLsp
   module Requests
-    # ![Workspace symbol demo](../../workspace_symbol.gif)
-    #
     # The [workspace symbol](https://microsoft.github.io/language-server-protocol/specification#workspace_symbol)
     # request allows fuzzy searching declarations in the entire project. On VS Code, use CTRL/CMD + T to search for
     # symbols.
-    #
-    # # Example
-    #
-    # ```ruby
-    # # Searching for `Floo` will fuzzy match and return all declarations according to the query, including this `Foo`
-    # class
-    # class Foo
-    # end
-    # ```
-    #
     class WorkspaceSymbol < Request
       extend T::Sig
       include Support::Common
