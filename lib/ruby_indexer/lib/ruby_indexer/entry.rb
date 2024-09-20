@@ -98,8 +98,13 @@ module RubyIndexer
         # object is dropped, so this will not prevent updates
         if correct_group
           correct_group.filter_map do |comment|
-            content = comment.slice
-            content if content.valid_encoding?
+            content = comment.slice.chomp
+
+            if content.valid_encoding?
+              content.delete_prefix!("#")
+              content.delete_prefix!(" ")
+              content
+            end
           end.join("\n")
         else
           ""
