@@ -1899,33 +1899,37 @@ module RubyIndexer
       assert_equal(["XQRK"], result.map { |entries| entries.first.name })
     end
 
-    def test_constant_completion_candidates_for_no_name_returns_all_constants
+    def test_constant_completion_candidates_for_empty_name
       index(<<~RUBY)
-        XQRK = 3
-
-        module Bar
-          XQRK = 2
-        end
-
         module Foo
-          XQRK = 1
+          Bar = 1
         end
 
-        module Namespace
-          XQRK = 0
-
-          class Baz
-            include Foo
-            include Bar
-          end
+        class Baz
+          include Foo
         end
       RUBY
 
-      result = @index.constant_completion_candidates(nil, ["Namespace", "Baz"])
-      names = result.map { |entries| entries.first.name }
-      assert_includes(names, "Namespace::XQRK")
-      assert_includes(names, "Bar::XQRK")
-      assert_includes(names, "XQRK")
+      result = @index.constant_completion_candidates("Baz::", [])
+      assert_includes(result.map { |entries| entries.first.name }, "Foo::Bar")
+    end
+
+    def test_follow_alias_namespace
+      index(<<~RUBY)
+        module First
+          module Second
+            class Foo
+            end
+          end
+        end
+
+        module Namespace
+          Second = First::Second
+        end
+      RUBY
+
+      real_namespace = @index.follow_aliased_namespace("Namespace::Second")
+      assert_equal("First::Second", real_namespace)
     end
   end
 end
