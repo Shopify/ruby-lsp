@@ -84,7 +84,7 @@ class FormattingTest < Minitest::Test
   end
 
   def test_syntax_tree_formatting_ignores_syntax_invalid_documents
-    require "ruby_lsp/requests"
+    require "ruby_lsp/requests/formatting"
     @global_state.formatter = "syntax_tree"
     document = RubyLsp::RubyDocument.new(source: "def foo", version: 1, uri: URI::Generic.from_path(path: __FILE__))
     assert_nil(RubyLsp::Requests::Formatting.new(@global_state, document).perform)
@@ -160,7 +160,7 @@ class FormattingTest < Minitest::Test
   private
 
   def formatted_document(formatter)
-    require "ruby_lsp/requests"
+    require "ruby_lsp/requests/formatting"
     @global_state.formatter = formatter
     RubyLsp::Requests::Formatting.new(@global_state, @document).perform&.first&.new_text
   end
