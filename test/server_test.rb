@@ -608,6 +608,59 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_inlay_hints_are_cached
+    uri = URI::Generic.from_path(path: "/fake.rb")
+    text = <<~RUBY
+      def foo
+      rescue
+      end
+    RUBY
+
+    capture_io do
+      @server.process_message(id: 1, method: "initialize", params: {
+        initializationOptions: {
+          featuresConfiguration: {
+            inlayHint: {
+              enableAll: true,
+            },
+          },
+        },
+      })
+
+      @server.process_message({
+        method: "textDocument/didOpen",
+        params: {
+          textDocument: {
+            uri: uri,
+            text: text,
+            version: 1,
+            languageId: "ruby",
+          },
+        },
+      })
+
+      @server.process_message({
+        id: 2,
+        method: "textDocument/documentSymbol",
+        params: { textDocument: { uri: uri } },
+      })
+
+      result = find_message(RubyLsp::Result, id: 2)
+      refute_nil(result.response)
+
+      RubyLsp::Requests::InlayHints.any_instance.expects(:perform).never
+
+      @server.process_message({
+        id: 3,
+        method: "textDocument/inlayHint",
+        params: { textDocument: { uri: uri } },
+      })
+
+      result = find_message(RubyLsp::Result, id: 3)
+      assert_equal(1, result.response.length)
+    end
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)

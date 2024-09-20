@@ -12,14 +12,12 @@ module RubyLsp
       sig do
         params(
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint],
-          range: T::Range[Integer],
           hints_configuration: RequestConfig,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(response_builder, range, hints_configuration, dispatcher)
+      def initialize(response_builder, hints_configuration, dispatcher)
         @response_builder = response_builder
-        @range = range
         @hints_configuration = hints_configuration
 
         dispatcher.register(self, :on_rescue_node_enter, :on_implicit_node_enter)
@@ -31,7 +29,6 @@ module RubyLsp
         return unless node.exceptions.empty?
 
         loc = node.location
-        return unless visible?(node, @range)
 
         @response_builder << Interface::InlayHint.new(
           position: { line: loc.start_line - 1, character: loc.start_column + RESCUE_STRING_LENGTH },
@@ -44,7 +41,6 @@ module RubyLsp
       sig { params(node: Prism::ImplicitNode).void }
       def on_implicit_node_enter(node)
         return unless @hints_configuration.enabled?(:implicitHashValue)
-        return unless visible?(node, @range)
 
         node_value = node.value
         loc = node.location
@@ -68,17 +64,6 @@ module RubyLsp
           padding_left: true,
           tooltip: tooltip,
         )
-      end
-
-      private
-
-      sig { params(node: T.nilable(Prism::Node), range: T.nilable(T::Range[Integer])).returns(T::Boolean) }
-      def visible?(node, range)
-        return true if range.nil?
-        return false if node.nil?
-
-        loc = node.location
-        range.cover?(loc.start_line - 1) && range.cover?(loc.end_line - 1)
       end
     end
   end
