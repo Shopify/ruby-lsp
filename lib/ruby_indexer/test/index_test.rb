@@ -1863,5 +1863,73 @@ module RubyIndexer
     def test_entries_for_returns_nil_if_no_matches
       assert_nil(@index.entries_for("non_existing_file.rb", Entry::Namespace))
     end
+
+    def test_constant_completion_candidates_all_possible_constants
+      index(<<~RUBY)
+        XQRK = 3
+
+        module Bar
+          XQRK = 2
+        end
+
+        module Foo
+          XQRK = 1
+        end
+
+        module Namespace
+          XQRK = 0
+
+          class Baz
+            include Foo
+            include Bar
+          end
+        end
+      RUBY
+
+      result = @index.constant_completion_candidates("X", ["Namespace", "Baz"])
+
+      result.each do |entries|
+        name = entries.first.name
+        assert(entries.all? { |e| e.name == name })
+      end
+
+      assert_equal(["Namespace::XQRK", "Bar::XQRK", "XQRK"], result.map { |entries| entries.first.name })
+
+      result = @index.constant_completion_candidates("::X", ["Namespace", "Baz"])
+      assert_equal(["XQRK"], result.map { |entries| entries.first.name })
+    end
+
+    def test_constant_completion_candidates_for_empty_name
+      index(<<~RUBY)
+        module Foo
+          Bar = 1
+        end
+
+        class Baz
+          include Foo
+        end
+      RUBY
+
+      result = @index.constant_completion_candidates("Baz::", [])
+      assert_includes(result.map { |entries| entries.first.name }, "Foo::Bar")
+    end
+
+    def test_follow_alias_namespace
+      index(<<~RUBY)
+        module First
+          module Second
+            class Foo
+            end
+          end
+        end
+
+        module Namespace
+          Second = First::Second
+        end
+      RUBY
+
+      real_namespace = @index.follow_aliased_namespace("Namespace::Second")
+      assert_equal("First::Second", real_namespace)
+    end
   end
 end

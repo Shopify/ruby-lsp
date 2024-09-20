@@ -242,6 +242,64 @@ module RubyIndexer
       completion_items.values.map!(&:first)
     end
 
+    sig do
+      params(
+        name: String,
+        nesting: T::Array[String],
+      ).returns(T::Array[T::Array[T.any(
+        Entry::Constant,
+        Entry::ConstantAlias,
+        Entry::Namespace,
+        Entry::UnresolvedConstantAlias,
+      )]])
+    end
+    def constant_completion_candidates(name, nesting)
+      # If we have a top level reference, then we don't need to include completions inside the current nesting
+      if name.start_with?("::")
+        return T.cast(
+          @entries_tree.search(name.delete_prefix("::")),
+          T::Array[T::Array[T.any(
+            Entry::Constant,
+            Entry::ConstantAlias,
+            Entry::Namespace,
+            Entry::UnresolvedConstantAlias,
+          )]],
+        )
+      end
+
+      # Otherwise, we have to include every possible constant the user might be referring to. This is essentially the
+      # same algorithm as resolve, but instead of returning early we concatenate all unique results
+
+      # Direct constants inside this namespace
+      entries = @entries_tree.search(nesting.any? ? "#{nesting.join("::")}::#{name}" : name)
+
+      # Constants defined in enclosing scopes
+      nesting.length.downto(1) do |i|
+        namespace = T.must(nesting[0...i]).join("::")
+        entries.concat(@entries_tree.search("#{namespace}::#{name}"))
+      end
+
+      # Inherited constants
+      if name.end_with?("::")
+        entries.concat(inherited_constant_completion_candidates(nil, nesting + [name]))
+      else
+        entries.concat(inherited_constant_completion_candidates(name, nesting))
+      end
+
+      # Top level constants
+      entries.concat(@entries_tree.search(name))
+      entries.uniq!
+      T.cast(
+        entries,
+        T::Array[T::Array[T.any(
+          Entry::Constant,
+          Entry::ConstantAlias,
+          Entry::Namespace,
+          Entry::UnresolvedConstantAlias,
+        )]],
+      )
+    end
+
     # Resolve a constant to its declaration based on its name and the nesting where the reference was found. Parameter
     # documentation:
     #
@@ -365,12 +423,10 @@ module RubyIndexer
     # aliases, so we have to invoke `follow_aliased_namespace` again to check until we only return a real name
     sig { params(name: String, seen_names: T::Array[String]).returns(String) }
     def follow_aliased_namespace(name, seen_names = [])
-      return name if @entries[name]
-
       parts = name.split("::")
       real_parts = []
 
-      (parts.length - 1).downto(0).each do |i|
+      (parts.length - 1).downto(0) do |i|
         current_name = T.must(parts[0..i]).join("::")
         entry = @entries[current_name]&.first
 
@@ -824,7 +880,7 @@ module RubyIndexer
       )]))
     end
     def lookup_enclosing_scopes(name, nesting, seen_names)
-      nesting.length.downto(1).each do |i|
+      nesting.length.downto(1) do |i|
         namespace = T.must(nesting[0...i]).join("::")
 
         # If we find an entry with `full_name` directly, then we can already return it, even if it contains aliases -
@@ -869,6 +925,51 @@ module RubyIndexer
       nil
     rescue NonExistingNamespaceError
       nil
+    end
+
+    sig do
+      params(
+        name: T.nilable(String),
+        nesting: T::Array[String],
+      ).returns(T::Array[T::Array[T.any(
+        Entry::Namespace,
+        Entry::ConstantAlias,
+        Entry::UnresolvedConstantAlias,
+        Entry::Constant,
+      )]])
+    end
+    def inherited_constant_completion_candidates(name, nesting)
+      namespace_entries = if name
+        *nesting_parts, constant_name = build_non_redundant_full_name(name, nesting).split("::")
+        return [] if nesting_parts.empty?
+
+        resolve(nesting_parts.join("::"), [])
+      else
+        resolve(nesting.join("::"), [])
+      end
+      return [] unless namespace_entries
+
+      ancestors = linearized_ancestors_of(T.must(namespace_entries.first).name)
+      candidates = ancestors.flat_map do |ancestor_name|
+        @entries_tree.search("#{ancestor_name}::#{constant_name}")
+      end
+
+      # For candidates with the same name, we must only show the first entry in the inheritance chain, since that's the
+      # one the user will be referring to in completion
+      completion_items = candidates.each_with_object({}) do |entries, hash|
+        *parts, short_name = T.must(entries.first).name.split("::")
+        namespace_name = parts.join("::")
+        ancestor_index = ancestors.index(namespace_name)
+        existing_entry, existing_entry_index = hash[short_name]
+
+        next unless ancestor_index && (!existing_entry || ancestor_index < existing_entry_index)
+
+        hash[short_name] = [entries, ancestor_index]
+      end
+
+      completion_items.values.map!(&:first)
+    rescue NonExistingNamespaceError
+      []
     end
 
     # Removes redudancy from a constant reference's full name. For example, if we find a reference to `A::B::Foo` inside
