@@ -130,6 +130,28 @@ class CompletionResolveTest < Minitest::Test
     end
   end
 
+  def test_resolve_handles_method_aliases
+    with_server("", stub_no_typechecker: true) do |server, _uri|
+      index = server.instance_variable_get(:@global_state).index
+      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+
+      # This is initially an unresolved method alias. In regular operations, completion runs first, resolves the alias
+      # and then completionResolve doesn't have to do it. For the test, we need to do it manually
+      index.resolve_method("kind_of?", "Kernel")
+
+      existing_item = {
+        label: "kind_of?",
+        kind: RubyLsp::Constant::CompletionItemKind::METHOD,
+        data: { owner_name: "Kernel" },
+      }
+
+      server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
+
+      result = server.pop_response.response
+      assert_match("**Definitions**: [kernel.rbs]", result[:documentation].value)
+    end
+  end
+
   def test_completion_documentation_for_guessed_types
     source = +<<~RUBY
       class User
