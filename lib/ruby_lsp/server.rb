@@ -411,6 +411,7 @@ module RubyLsp
       document_symbol = Requests::DocumentSymbol.new(uri, dispatcher)
       document_link = Requests::DocumentLink.new(uri, parse_result.comments, dispatcher)
       code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
+      inlay_hint = Requests::InlayHints.new(document, T.must(@store.features_configuration.dig(:inlayHint)), dispatcher)
       dispatcher.dispatch(parse_result.value)
 
       # Store all responses retrieve in this round of visits in the cache and then return the response for the request
@@ -419,6 +420,7 @@ module RubyLsp
       document.cache_set("textDocument/documentSymbol", document_symbol.perform)
       document.cache_set("textDocument/documentLink", document_link.perform)
       document.cache_set("textDocument/codeLens", code_lens.perform)
+      document.cache_set("textDocument/inlayHint", inlay_hint.perform)
 
       send_message(Result.new(id: message[:id], response: document.cache_get(message[:method])))
     end
@@ -611,18 +613,35 @@ module RubyLsp
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_inlay_hint(message)
       params = message[:params]
+      document = @store.get(params.dig(:textDocument, :uri))
+      range = params.dig(:range, :start, :line)..params.dig(:range, :end, :line)
+
+      cached_response = document.cache_get("textDocument/inlayHint")
+      if cached_response != Document::EMPTY_CACHE
+
+        send_message(
+          Result.new(
+            id: message[:id],
+            response: cached_response.select { |hint| range.cover?(hint.position[:line]) },
+          ),
+        )
+        return
+      end
+
       hints_configurations = T.must(@store.features_configuration.dig(:inlayHint))
       dispatcher = Prism::Dispatcher.new
-      document = @store.get(params.dig(:textDocument, :uri))
 
       unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
         send_empty_response(message[:id])
         return
       end
 
-      request = Requests::InlayHints.new(document, params[:range], hints_configurations, dispatcher)
+      request = Requests::InlayHints.new(document, hints_configurations, dispatcher)
       dispatcher.visit(document.parse_result.value)
-      send_message(Result.new(id: message[:id], response: request.perform))
+      result = request.perform
+      document.cache_set("textDocument/inlayHint", result)
+
+      send_message(Result.new(id: message[:id], response: result.select { |hint| range.cover?(hint.position[:line]) }))
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }

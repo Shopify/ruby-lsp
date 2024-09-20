@@ -23,21 +23,18 @@ module RubyLsp
       sig do
         params(
           document: T.any(RubyDocument, ERBDocument),
-          range: T::Hash[Symbol, T.untyped],
           hints_configuration: RequestConfig,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(document, range, hints_configuration, dispatcher)
+      def initialize(document, hints_configuration, dispatcher)
         super()
-        start_line = range.dig(:start, :line)
-        end_line = range.dig(:end, :line)
 
         @response_builder = T.let(
           ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint].new,
           ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint],
         )
-        Listeners::InlayHints.new(@response_builder, start_line..end_line, hints_configuration, dispatcher)
+        Listeners::InlayHints.new(@response_builder, hints_configuration, dispatcher)
       end
 
       sig { override.returns(T::Array[Interface::InlayHint]) }

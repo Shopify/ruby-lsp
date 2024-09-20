@@ -14,9 +14,14 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: true, implicitHashValue: true })
-    request = RubyLsp::Requests::InlayHints.new(document, params.first, hints_configuration, dispatcher)
+    request = RubyLsp::Requests::InlayHints.new(document, hints_configuration, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
-    request.perform
+    range = params.first
+    ruby_range = range.dig(:start, :line)..range.dig(:end, :line)
+
+    request.perform.select do |hint|
+      ruby_range.cover?(hint.position[:line])
+    end
   end
 
   def default_args
@@ -31,9 +36,9 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: true, implicitHashValue: false })
-    request = RubyLsp::Requests::InlayHints.new(document, default_args.first, hints_configuration, dispatcher)
+    request = RubyLsp::Requests::InlayHints.new(document, hints_configuration, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
-    request.perform
+    assert_empty(request.perform)
   end
 
   def test_skip_implicit_rescue
@@ -46,7 +51,7 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: false, implicitHashValue: true })
-    request = RubyLsp::Requests::InlayHints.new(document, default_args.first, hints_configuration, dispatcher)
+    request = RubyLsp::Requests::InlayHints.new(document, hints_configuration, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     assert_empty(request.perform)
   end
