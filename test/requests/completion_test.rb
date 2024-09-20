@@ -474,6 +474,126 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_inherited_constants
+    source = +<<~RUBY
+      module Foo
+        Bar = 1
+      end
+
+      class Baz
+        include Foo
+
+        # Not inherited: direct reference
+        Foo::B
+
+        # Inherited through include
+        B
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 8, character: 8 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["Foo::Bar"], result.map(&:label))
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 11, character: 3 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["Foo::Bar", "Baz"], result.map(&:label))
+    end
+  end
+
+  def test_completion_for_inherited_constants_with_constant_path
+    source = +<<~RUBY
+      module Foo
+        Bar = 1
+      end
+
+      class Baz
+        include Foo
+      end
+
+      Baz::B
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 8, character: 6 },
+      })
+
+      result = server.pop_response
+
+      item = result.response.first
+      assert_equal("Baz::Bar", item.label)
+      assert_equal("Baz::Bar", item.text_edit.new_text)
+      assert_equal(
+        { start: { line: 8, character: 0 }, end: { line: 8, character: 6 } },
+        item.text_edit.range.to_hash.transform_values(&:to_hash),
+      )
+    end
+  end
+
+  def test_completion_for_inherited_constants_with_constant_path_but_no_name
+    source = +<<~RUBY
+      module Foo
+        Bar = 1
+      end
+
+      class Baz
+        include Foo
+      end
+
+      Baz::
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 8, character: 5 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["Baz::Bar"], result.map(&:label))
+      assert_equal(["Baz::Bar"], result.map { |completion| completion.text_edit.new_text })
+    end
+  end
+
+  def test_completion_for_constants_inside_aliased_namespaces
+    source = +<<~RUBY
+      module First
+        module Second
+          class Foo
+          end
+        end
+      end
+
+      module Namespace
+        Second = First::Second
+
+        Second::
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 10, character: 10 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["Second::Foo"], result.map(&:label))
+      assert_equal(["Second::Foo"], result.map { |completion| completion.text_edit.new_text })
+    end
+  end
+
   def test_completion_for_methods_invoked_on_self
     source = +<<~RUBY
       class Foo

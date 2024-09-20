@@ -268,13 +268,13 @@ module RubyIndexer
       end
 
       # Otherwise, we have to include every possible constant the user might be referring to. This is essentially the
-      # same algorithm as resolve, but instead of returning early we concatenate all uniq results
+      # same algorithm as resolve, but instead of returning early we concatenate all unique results
 
       # Direct constants inside this namespace
       entries = @entries_tree.search(nesting.any? ? "#{nesting.join("::")}::#{name}" : name)
 
       # Constants defined in enclosing scopes
-      nesting.length.downto(1).each do |i|
+      nesting.length.downto(1) do |i|
         namespace = T.must(nesting[0...i]).join("::")
         entries.concat(@entries_tree.search("#{namespace}::#{name}"))
       end
@@ -426,7 +426,7 @@ module RubyIndexer
       parts = name.split("::")
       real_parts = []
 
-      (parts.length - 1).downto(0).each do |i|
+      (parts.length - 1).downto(0) do |i|
         current_name = T.must(parts[0..i]).join("::")
         entry = @entries[current_name]&.first
 
@@ -880,7 +880,7 @@ module RubyIndexer
       )]))
     end
     def lookup_enclosing_scopes(name, nesting, seen_names)
-      nesting.length.downto(1).each do |i|
+      nesting.length.downto(1) do |i|
         namespace = T.must(nesting[0...i]).join("::")
 
         # If we find an entry with `full_name` directly, then we can already return it, even if it contains aliases -

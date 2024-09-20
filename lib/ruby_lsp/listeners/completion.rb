@@ -104,7 +104,7 @@ module RubyLsp
         name = constant_name(node)
         return if name.nil?
 
-        candidates = @index.prefix_search(name, @node_context.nesting)
+        candidates = @index.constant_completion_candidates(name, @node_context.nesting)
         candidates.each do |entries|
           complete_name = T.must(entries.first).name
           @response_builder << build_entry_completion(
@@ -124,7 +124,13 @@ module RubyLsp
         # no sigil, Sorbet will still provide completion for constants
         return if @sorbet_level != RubyDocument::SorbetLevel::Ignore
 
-        name = constant_name(node)
+        name = begin
+          node.full_name
+        rescue Prism::ConstantPathNode::MissingNodesInConstantPathError
+          node.slice
+        rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError
+          nil
+        end
         return if name.nil?
 
         constant_path_completion(name, range_from_location(node.location))
@@ -230,7 +236,7 @@ module RubyLsp
 
         real_namespace = @index.follow_aliased_namespace(T.must(namespace_entries.first).name)
 
-        candidates = @index.prefix_search(
+        candidates = @index.constant_completion_candidates(
           "#{real_namespace}::#{incomplete_name}",
           top_level_reference ? [] : nesting,
         )
@@ -240,8 +246,16 @@ module RubyLsp
           first_entry = T.must(entries.first)
           next if first_entry.private? && !first_entry.name.start_with?("#{nesting}::")
 
-          constant_name = first_entry.name.delete_prefix("#{real_namespace}::")
-          full_name = aliased_namespace.empty? ? constant_name : "#{aliased_namespace}::#{constant_name}"
+          entry_name = first_entry.name
+          full_name = if aliased_namespace != real_namespace
+            constant_name = entry_name.delete_prefix("#{real_namespace}::")
+            aliased_namespace.empty? ? constant_name : "#{aliased_namespace}::#{constant_name}"
+          elsif !entry_name.start_with?(aliased_namespace)
+            *_, short_name = entry_name.split("::")
+            "#{aliased_namespace}::#{short_name}"
+          else
+            entry_name
+          end
 
           @response_builder << build_entry_completion(
             full_name,
@@ -545,7 +559,7 @@ module RubyLsp
       sig { params(entry_name: String).returns(T::Boolean) }
       def top_level?(entry_name)
         nesting = @node_context.nesting
-        nesting.length.downto(0).each do |i|
+        nesting.length.downto(0) do |i|
           prefix = T.must(nesting[0...i]).join("::")
           full_name = prefix.empty? ? entry_name : "#{prefix}::#{entry_name}"
           next if full_name == entry_name
