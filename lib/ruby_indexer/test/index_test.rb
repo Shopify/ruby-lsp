@@ -1863,5 +1863,69 @@ module RubyIndexer
     def test_entries_for_returns_nil_if_no_matches
       assert_nil(@index.entries_for("non_existing_file.rb", Entry::Namespace))
     end
+
+    def test_constant_completion_candidates_all_possible_constants
+      index(<<~RUBY)
+        XQRK = 3
+
+        module Bar
+          XQRK = 2
+        end
+
+        module Foo
+          XQRK = 1
+        end
+
+        module Namespace
+          XQRK = 0
+
+          class Baz
+            include Foo
+            include Bar
+          end
+        end
+      RUBY
+
+      result = @index.constant_completion_candidates("X", ["Namespace", "Baz"])
+
+      result.each do |entries|
+        name = entries.first.name
+        assert(entries.all? { |e| e.name == name })
+      end
+
+      assert_equal(["Namespace::XQRK", "Bar::XQRK", "XQRK"], result.map { |entries| entries.first.name })
+
+      result = @index.constant_completion_candidates("::X", ["Namespace", "Baz"])
+      assert_equal(["XQRK"], result.map { |entries| entries.first.name })
+    end
+
+    def test_constant_completion_candidates_for_no_name_returns_all_constants
+      index(<<~RUBY)
+        XQRK = 3
+
+        module Bar
+          XQRK = 2
+        end
+
+        module Foo
+          XQRK = 1
+        end
+
+        module Namespace
+          XQRK = 0
+
+          class Baz
+            include Foo
+            include Bar
+          end
+        end
+      RUBY
+
+      result = @index.constant_completion_candidates(nil, ["Namespace", "Baz"])
+      names = result.map { |entries| entries.first.name }
+      assert_includes(names, "Namespace::XQRK")
+      assert_includes(names, "Bar::XQRK")
+      assert_includes(names, "XQRK")
+    end
   end
 end
