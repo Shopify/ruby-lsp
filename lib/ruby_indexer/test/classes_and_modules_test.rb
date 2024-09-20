@@ -605,5 +605,19 @@ module RubyIndexer
       assert_entry("Foo::Bar", Entry::Class, "/fake/path/foo.rb:2-4:3-7")
       assert_entry("Qux", Entry::Class, "/fake/path/foo.rb:5-4:6-7")
     end
+
+    def test_lazy_comment_fetching_uses_correct_line_breaks_for_rendering
+      path = "lib/ruby_lsp/node_context.rb"
+      indexable = IndexablePath.new("#{Dir.pwd}/lib", path)
+
+      @index.index_single(indexable, collect_comments: false)
+
+      entry = @index["RubyLsp::NodeContext"].first
+
+      assert_equal(<<~COMMENTS.chomp, entry.comments)
+        This class allows listeners to access contextual information about a node in the AST, such as its parent,
+        its namespace nesting, and the surrounding CallNode (e.g. a method call).
+      COMMENTS
+    end
   end
 end
