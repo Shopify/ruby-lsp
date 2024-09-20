@@ -29,13 +29,6 @@ parser = OptionParser.new do |opts|
     options[:branch] = branch
   end
 
-  opts.on(
-    "--experimental",
-    "Run pre-release versions of the Ruby LSP",
-  ) do
-    options[:experimental] = true
-  end
-
   opts.on("--doctor", "Run troubleshooting steps") do
     options[:doctor] = true
   end
