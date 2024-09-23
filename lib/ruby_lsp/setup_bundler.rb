@@ -27,7 +27,6 @@ module RubyLsp
     def initialize(project_path, **options)
       @project_path = project_path
       @branch = T.let(options[:branch], T.nilable(String))
-      @experimental = T.let(options[:experimental], T.nilable(T::Boolean))
 
       # Regular bundle paths
       @gemfile = T.let(
@@ -207,7 +206,6 @@ module RubyLsp
         command << "ruby-lsp " unless @dependencies["ruby-lsp"]
         command << "debug " unless @dependencies["debug"]
         command << "ruby-lsp-rails " if @rails_app && !@dependencies["ruby-lsp-rails"]
-        command << "--pre" if @experimental
         command.delete_suffix!(" ")
         command << ")"
 
