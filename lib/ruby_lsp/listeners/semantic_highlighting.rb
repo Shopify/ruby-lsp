@@ -27,7 +27,7 @@ module RubyLsp
       def initialize(dispatcher, response_builder)
         @response_builder = response_builder
         @special_methods = T.let(nil, T.nilable(T::Array[String]))
-        @current_scope = T.let(ParameterScope.new, ParameterScope)
+        @current_scope = T.let(Scope.new, Scope)
         @inside_regex_capture = T.let(false, T::Boolean)
         @inside_implicit_node = T.let(false, T::Boolean)
 
@@ -102,7 +102,7 @@ module RubyLsp
 
       sig { params(node: Prism::DefNode).void }
       def on_def_node_enter(node)
-        @current_scope = ParameterScope.new(@current_scope)
+        @current_scope = Scope.new(@current_scope)
       end
 
       sig { params(node: Prism::DefNode).void }
@@ -112,7 +112,7 @@ module RubyLsp
 
       sig { params(node: Prism::BlockNode).void }
       def on_block_node_enter(node)
-        @current_scope = ParameterScope.new(@current_scope)
+        @current_scope = Scope.new(@current_scope)
       end
 
       sig { params(node: Prism::BlockNode).void }

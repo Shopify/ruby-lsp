@@ -2,13 +2,13 @@
 # frozen_string_literal: true
 
 module RubyLsp
-  class ParameterScope
+  class Scope
     extend T::Sig
 
-    sig { returns(T.nilable(ParameterScope)) }
+    sig { returns(T.nilable(Scope)) }
     attr_reader :parent
 
-    sig { params(parent: T.nilable(ParameterScope)).void }
+    sig { params(parent: T.nilable(Scope)).void }
     def initialize(parent = nil)
       @parent = parent
       @parameters = T.let(Set.new, T::Set[Symbol])
