@@ -39,7 +39,7 @@ module RubyLsp
       @supported_formatters = T.let({}, T::Hash[String, Requests::Support::Formatter])
       @supports_watching_files = T.let(false, T::Boolean)
       @experimental_features = T.let(false, T::Boolean)
-      @type_inferrer = T.let(TypeInferrer.new(@index, @experimental_features), TypeInferrer)
+      @type_inferrer = T.let(TypeInferrer.new(@index), TypeInferrer)
       @addon_settings = T.let({}, T::Hash[String, T.untyped])
       @supports_request_delegation = T.let(false, T::Boolean)
     end
@@ -124,7 +124,6 @@ module RubyLsp
       end
 
       @experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled) || false
-      @type_inferrer.experimental_features = @experimental_features
 
       addon_settings = options.dig(:initializationOptions, :addonSettings)
       if addon_settings
