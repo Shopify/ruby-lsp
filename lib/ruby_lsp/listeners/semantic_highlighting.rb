@@ -128,39 +128,39 @@ module RubyLsp
       sig { params(node: Prism::BlockParameterNode).void }
       def on_block_parameter_node_enter(node)
         name = node.name
-        @current_scope.add(name.to_sym) if name
+        @current_scope.add(name.to_sym, :parameter) if name
       end
 
       sig { params(node: Prism::RequiredKeywordParameterNode).void }
       def on_required_keyword_parameter_node_enter(node)
-        @current_scope.add(node.name)
+        @current_scope.add(node.name, :parameter)
       end
 
       sig { params(node: Prism::OptionalKeywordParameterNode).void }
       def on_optional_keyword_parameter_node_enter(node)
-        @current_scope.add(node.name)
+        @current_scope.add(node.name, :parameter)
       end
 
       sig { params(node: Prism::KeywordRestParameterNode).void }
       def on_keyword_rest_parameter_node_enter(node)
         name = node.name
-        @current_scope.add(name.to_sym) if name
+        @current_scope.add(name.to_sym, :parameter) if name
       end
 
       sig { params(node: Prism::OptionalParameterNode).void }
       def on_optional_parameter_node_enter(node)
-        @current_scope.add(node.name)
+        @current_scope.add(node.name, :parameter)
       end
 
       sig { params(node: Prism::RequiredParameterNode).void }
       def on_required_parameter_node_enter(node)
-        @current_scope.add(node.name)
+        @current_scope.add(node.name, :parameter)
       end
 
       sig { params(node: Prism::RestParameterNode).void }
       def on_rest_parameter_node_enter(node)
         name = node.name
-        @current_scope.add(name.to_sym) if name
+        @current_scope.add(name.to_sym, :parameter) if name
       end
 
       sig { params(node: Prism::SelfNode).void }
@@ -170,8 +170,8 @@ module RubyLsp
 
       sig { params(node: Prism::LocalVariableWriteNode).void }
       def on_local_variable_write_node_enter(node)
-        type = @current_scope.type_for(node.name)
-        @response_builder.add_token(node.name_loc, type) if type == :parameter
+        local = @current_scope.lookup(node.name)
+        @response_builder.add_token(node.name_loc, :parameter) if local&.type == :parameter
       end
 
       sig { params(node: Prism::LocalVariableReadNode).void }
@@ -184,25 +184,26 @@ module RubyLsp
           return
         end
 
-        @response_builder.add_token(node.location, @current_scope.type_for(node.name))
+        local = @current_scope.lookup(node.name)
+        @response_builder.add_token(node.location, local&.type || :variable)
       end
 
       sig { params(node: Prism::LocalVariableAndWriteNode).void }
       def on_local_variable_and_write_node_enter(node)
-        type = @current_scope.type_for(node.name)
-        @response_builder.add_token(node.name_loc, type) if type == :parameter
+        local = @current_scope.lookup(node.name)
+        @response_builder.add_token(node.name_loc, :parameter) if local&.type == :parameter
       end
 
       sig { params(node: Prism::LocalVariableOperatorWriteNode).void }
       def on_local_variable_operator_write_node_enter(node)
-        type = @current_scope.type_for(node.name)
-        @response_builder.add_token(node.name_loc, type) if type == :parameter
+        local = @current_scope.lookup(node.name)
+        @response_builder.add_token(node.name_loc, :parameter) if local&.type == :parameter
       end
 
       sig { params(node: Prism::LocalVariableOrWriteNode).void }
       def on_local_variable_or_write_node_enter(node)
-        type = @current_scope.type_for(node.name)
-        @response_builder.add_token(node.name_loc, type) if type == :parameter
+        local = @current_scope.lookup(node.name)
+        @response_builder.add_token(node.name_loc, :parameter) if local&.type == :parameter
       end
 
       sig { params(node: Prism::LocalVariableTargetNode).void }
@@ -213,7 +214,8 @@ module RubyLsp
         # prevent pushing local variable target tokens. See https://github.com/ruby/prism/issues/1912
         return if @inside_regex_capture
 
-        @response_builder.add_token(node.location, @current_scope.type_for(node.name))
+        local = @current_scope.lookup(node.name)
+        @response_builder.add_token(node.location, local&.type || :variable)
       end
 
       sig { params(node: Prism::ClassNode).void }
@@ -311,7 +313,8 @@ module RubyLsp
           capture_name_offset = T.must(content.index("(?<#{name}>")) + 3
           local_var_loc = loc.copy(start_offset: loc.start_offset + capture_name_offset, length: name.length)
 
-          @response_builder.add_token(local_var_loc, @current_scope.type_for(name))
+          local = @current_scope.lookup(name)
+          @response_builder.add_token(local_var_loc, local&.type || :variable)
         end
       end
     end
