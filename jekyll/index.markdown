@@ -43,6 +43,7 @@ Want to discuss Ruby developer experience? Consider joining the public
     - [Selection range](#selection-range)
     - [Show syntax tree](#show-syntax-tree)
     - [ERB support](#erb-support)
+    - [Guessed types](#guessed-types)
 - [VS Code only features](#vs-code-features)
     - [Dependencies view](#dependencies-view)
     - [Rails generator integrations](#rails-generator-integrations)
@@ -51,7 +52,6 @@ Want to discuss Ruby developer experience? Consider joining the public
     - [Test explorer](#test-explorer)
 - [Experimental Features](#experimental-features)
     - [Ancestors Hierarchy Request](#ancestors-hierarchy-request)
-    - [Guessed Types](#guessed-types)
     - [Copilot chat participant](#copilot-chat-participant)
 - [Configuration](#configuration)
     - [Configuring code indexing](#configuring-code-indexing)
@@ -325,6 +325,84 @@ understand it.
 
 ![ERB features demo](images/erb.gif)
 
+### Guessed types
+
+Guessed types is a feature where the Ruby LSP attempts to identify the type of a receiver based on its identifier.
+For example:
+
+```ruby
+# The receiver identifier here is `user` and so the Ruby LSP will assign to it the `User` type if that class exists
+user.name
+
+# Similarly, the receiver identifier here is `post` and so the LSP searches for the `Post` class
+@post.like!
+```
+
+{: .important }
+> The goal of this experiment is to understand if we can get better accuracy for the code that you already
+> have. The hypothesis is that a reasonable amount of code already uses patterns like the ones in the example and, in
+> those cases, we can achieve nicer results.
+>
+> However, identifiers are not the ideal medium for proper type annotations. It would not be possible to express anything
+> complex, such as unions, intersections or generics. Additionally, it is very trivial to fool the type guessing by simply
+> naming a variable with a type name that doesn't match its actual type.
+
+```ruby
+pathname = something_that_returns_an_integer
+# This will show methods available in `Pathname`, despite the variable being an Integer
+pathname.a
+```
+
+We do not recommend renaming methods, instance variables or local variables for the sole purpose of getting better
+accuracy - readibility should always come first. For example:
+
+```ruby
+# It would not be a good idea to name every string "string" for the sake of getting better accuracy.
+# Using descriptive names will outweight the benefits of the more accurate editor experience
+
+# don't
+string = something.other_thing
+
+# do
+title = something.other_thing
+name = foo
+```
+
+That said, this feature can also be used for quickly exploring methods available in classes. Simply type the lower case
+name of the class and completion can show the methods available.
+
+```ruby
+# Any class name as an identifier
+pathname.a
+integer.a
+file.a
+```
+
+To guess types, the Ruby LSP will first try to resolve a constant based on the receiver identifier and current nesting.
+If that does not identify any valid types, then it will fallback to matching based on the first match for the
+unqualified type name. For example:
+
+```ruby
+module Admin
+  class User
+  end
+
+  # Will match to `Admin::User` because the `user` reference is inside the `Admin` namespace
+  user.a
+end
+
+module Blog
+  class User
+  end
+
+  # Will match to `Blog::User` because the `user` reference is inside the `Blog` namespace
+  user.a
+end
+
+# Will match to the first class that has the unqualified name of `User`. This may return `Admin::User` or `Blog::User`
+# randomly
+user.a
+```
 ## VS Code features
 
 The following features are all custom made for VS Code.
@@ -421,30 +499,6 @@ This feature is supported by the [Type Hierarchy Supertypes LSP request](https:/
 - If a class or module is reopened multiple times, it will appear multiple times in the list. In real-world applications, this can make the list very long.
 
 We created [an issue](https://github.com/microsoft/language-server-protocol/issues/1984) to seek clarification from the LSP maintainers. We will adjust this feature's design and behavior based on their response and your feedback.
-
-### Guessed Types
-
-The guessed types feature is an experimental addition to Ruby LSP that attempts to identify the type of a receiver based on its identifier name. This helps improve code completion and navigation by providing type information.
-
-This feature is disabled by default but can be enabled with the `rubyLsp.enableExperimentalFeatures` setting in VS Code.
-
-#### How It Works
-
-Ruby LSP guesses the type of a variable by matching its identifier name to a class. For example, a variable named `user` would be assigned the `User` type if such a class exists:
-
-```ruby
-user.name  # Guessed to be of type `User`
-@post.like!  # Guessed to be of type `Post`
-```
-
-By guessing the types of variables, Ruby LSP can expand the code navigation features to even more cases.
-
-#### Important Notes
-
-- Identifiers are not ideal for complex type annotations and can be easily misled by non-matching names.
-- We do NOT recommend renaming identifiers just to make this feature work.
-
-For more information, please refer to the [documentation](https://shopify.github.io/ruby-lsp/design-and-roadmap.html#guessed-types).
 
 ### Copilot chat participant
 

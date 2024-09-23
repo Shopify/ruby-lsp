@@ -7,13 +7,9 @@ module RubyLsp
   class TypeInferrer
     extend T::Sig
 
-    sig { params(experimental_features: T::Boolean).returns(T::Boolean) }
-    attr_writer :experimental_features
-
-    sig { params(index: RubyIndexer::Index, experimental_features: T::Boolean).void }
-    def initialize(index, experimental_features = true)
+    sig { params(index: RubyIndexer::Index).void }
+    def initialize(index)
       @index = index
-      @experimental_features = experimental_features
     end
 
     sig { params(node_context: NodeContext).returns(T.nilable(Type)) }
@@ -93,8 +89,6 @@ module RubyLsp
 
         Type.new("#{parts.join("::")}::#{last}::<Class:#{last}>")
       else
-        return unless @experimental_features
-
         raw_receiver = node.receiver&.slice
 
         if raw_receiver
