@@ -6,14 +6,14 @@ require "test_helper"
 class ScopeTest < Minitest::Test
   def test_finding_parameter_in_immediate_scope
     scope = RubyLsp::Scope.new
-    scope << "foo"
+    scope.add("foo")
 
     assert(scope.parameter?("foo"))
   end
 
   def test_finding_parameter_in_parent_scope
     parent = RubyLsp::Scope.new
-    parent << "foo"
+    parent.add("foo")
 
     scope = RubyLsp::Scope.new(parent)
 

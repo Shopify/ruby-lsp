@@ -128,39 +128,39 @@ module RubyLsp
       sig { params(node: Prism::BlockParameterNode).void }
       def on_block_parameter_node_enter(node)
         name = node.name
-        @current_scope << name.to_sym if name
+        @current_scope.add(name.to_sym) if name
       end
 
       sig { params(node: Prism::RequiredKeywordParameterNode).void }
       def on_required_keyword_parameter_node_enter(node)
-        @current_scope << node.name
+        @current_scope.add(node.name)
       end
 
       sig { params(node: Prism::OptionalKeywordParameterNode).void }
       def on_optional_keyword_parameter_node_enter(node)
-        @current_scope << node.name
+        @current_scope.add(node.name)
       end
 
       sig { params(node: Prism::KeywordRestParameterNode).void }
       def on_keyword_rest_parameter_node_enter(node)
         name = node.name
-        @current_scope << name.to_sym if name
+        @current_scope.add(name.to_sym) if name
       end
 
       sig { params(node: Prism::OptionalParameterNode).void }
       def on_optional_parameter_node_enter(node)
-        @current_scope << node.name
+        @current_scope.add(node.name)
       end
 
       sig { params(node: Prism::RequiredParameterNode).void }
       def on_required_parameter_node_enter(node)
-        @current_scope << node.name
+        @current_scope.add(node.name)
       end
 
       sig { params(node: Prism::RestParameterNode).void }
       def on_rest_parameter_node_enter(node)
         name = node.name
-        @current_scope << name.to_sym if name
+        @current_scope.add(name.to_sym) if name
       end
 
       sig { params(node: Prism::SelfNode).void }

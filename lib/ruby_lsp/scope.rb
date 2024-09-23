@@ -15,7 +15,7 @@ module RubyLsp
     end
 
     sig { params(name: T.any(String, Symbol)).void }
-    def <<(name)
+    def add(name)
       @parameters << name.to_sym
     end
 
