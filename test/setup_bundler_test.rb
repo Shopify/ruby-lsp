@@ -568,6 +568,31 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_uses_correct_bundler_env_when_there_is_bundle_config
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "irb"
+        GEMFILE
+
+        Bundler.with_unbundled_env do
+          system("bundle config set --local with production staging")
+
+          assert_path_exists(File.join(dir, ".bundle", "config"))
+
+          capture_subprocess_io do
+            system("bundle install")
+
+            env = run_script(dir)
+
+            assert_equal("production:staging", env["BUNDLE_WITH"])
+          end
+        end
+      end
+    end
+  end
+
   private
 
   def with_default_external_encoding(encoding, &block)
@@ -597,12 +622,15 @@ class SetupBundlerTest < Minitest::Test
   # This method runs the script and then immediately unloads it. This allows us to make assertions against the effects
   # of running the script multiple times
   def run_script(path = Dir.pwd, expected_path: nil, **options)
+    env = T.let({}, T::Hash[String, String])
+
     stdout, _stderr = capture_subprocess_io do
       env = RubyLsp::SetupBundler.new(path, **options).setup!
       assert_equal(expected_path, env["BUNDLE_PATH"]) if expected_path
     end
 
     assert_empty(stdout)
+    env
   end
 
   # This method needs to be called inside the `Bundler.with_unbundled_env` block IF the command you want to test is
@@ -626,7 +654,9 @@ class SetupBundlerTest < Minitest::Test
 
     env = settings.all.to_h do |e|
       key = Bundler::Settings.key_for(e)
-      [key, settings[e].to_s]
+      value = Array(settings[e]).join(":").tr(" ", ":")
+
+      [key, value]
     end
 
     if env["BUNDLE_PATH"]

@@ -253,7 +253,9 @@ module RubyLsp
       # "vendor/bundle"`
       settings.all.to_h do |e|
         key = Bundler::Settings.key_for(e)
-        [key, settings[e].to_s]
+        value = Array(settings[e]).join(":").tr(" ", ":")
+
+        [key, value]
       end
     end
 
