@@ -1,5 +1,6 @@
 /* eslint-disable no-process-env */
 import path from "path";
+import os from "os";
 
 import * as vscode from "vscode";
 
@@ -81,7 +82,14 @@ export abstract class VersionManager {
   // Runs the given command in the directory for the Bundle, using the user's preferred shell and inheriting the current
   // process environment
   protected runScript(command: string) {
-    const shell = vscode.env.shell.length > 0 ? vscode.env.shell : undefined;
+    let shell: string | undefined;
+
+    // If the user has configured a default shell, we use that one since they are probably sourcing their version
+    // manager scripts in that shell's configuration files. On Windows, we never set the shell no matter what to ensure
+    // that activation runs on `cmd.exe` and not PowerShell, which avoids complex quoting and escaping issues.
+    if (vscode.env.shell.length > 0 && os.platform() !== "win32") {
+      shell = vscode.env.shell;
+    }
 
     this.outputChannel.info(
       `Running command: \`${command}\` in ${this.bundleUri.fsPath} using shell: ${shell}`,

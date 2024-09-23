@@ -38,12 +38,15 @@ suite("None", () => {
 
     const { env, version, yjit } = await none.activate();
 
+    // We must not set the shell on Windows
+    const shell = os.platform() === "win32" ? undefined : vscode.env.shell;
+
     assert.ok(
       execStub.calledOnceWithExactly(
         `ruby -W0 -rjson -e '${none.activationScript}'`,
         {
           cwd: uri.fsPath,
-          shell: vscode.env.shell,
+          shell,
           // eslint-disable-next-line no-process-env
           env: process.env,
         },

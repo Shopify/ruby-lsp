@@ -41,12 +41,15 @@ suite("Custom", () => {
       .returns("my_version_manager activate_env");
     const { env, version, yjit } = await custom.activate();
 
+    // We must not set the shell on Windows
+    const shell = os.platform() === "win32" ? undefined : vscode.env.shell;
+
     assert.ok(
       execStub.calledOnceWithExactly(
         `my_version_manager activate_env && ruby -W0 -rjson -e '${custom.activationScript}'`,
         {
           cwd: uri.fsPath,
-          shell: vscode.env.shell,
+          shell,
           // eslint-disable-next-line no-process-env
           env: process.env,
         },
