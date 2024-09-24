@@ -5,8 +5,8 @@ module RubyLsp
   module Requests
     module Support
       module Common
-        # WARNING: Methods in this class may be used by Ruby LSP addons such as
-        # https://github.com/Shopify/ruby-lsp-rails, or addons by created by developers outside of Shopify, so be
+        # WARNING: Methods in this class may be used by Ruby LSP add-ons such as
+        # https://github.com/Shopify/ruby-lsp-rails, or add-ons by created by developers outside of Shopify, so be
         # cautious of changing anything.
         extend T::Sig
         extend T::Helpers

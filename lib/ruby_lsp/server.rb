@@ -142,7 +142,7 @@ module RubyLsp
             method: "window/showMessage",
             params: Interface::ShowMessageParams.new(
               type: Constant::MessageType::WARNING,
-              message: "Error loading addons:\n\n#{errored_addons.map(&:formatted_errors).join("\n\n")}",
+              message: "Error loading add-ons:\n\n#{errored_addons.map(&:formatted_errors).join("\n\n")}",
             ),
           ),
         )

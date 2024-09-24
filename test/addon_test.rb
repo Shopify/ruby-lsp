@@ -20,7 +20,7 @@ module RubyLsp
         end
 
         def name
-          "My Addon"
+          "My Add-on"
         end
       end
       @global_state = GlobalState.new
@@ -55,7 +55,7 @@ module RubyLsp
     def test_loading_addons_initializes_them
       assert(
         Addon.addons.any? { |addon| addon.is_a?(@addon) },
-        "Expected addon to be automatically tracked",
+        "Expected add-on to be automatically tracked",
       )
     end
 
@@ -66,7 +66,7 @@ module RubyLsp
         end
 
         def name
-          "My addon"
+          "My Add-on"
         end
       end
 
@@ -77,7 +77,7 @@ module RubyLsp
 
       assert_predicate(error_addon, :error?)
       assert_equal(<<~MESSAGE, error_addon.formatted_errors)
-        My addon:
+        My Add-on:
           Failed to activate
       MESSAGE
     end
@@ -102,8 +102,8 @@ module RubyLsp
     end
 
     def test_get_an_addon_by_name
-      addon = Addon.get("My Addon")
-      assert_equal("My Addon", addon.name)
+      addon = Addon.get("My Add-on")
+      assert_equal("My Add-on", addon.name)
     end
 
     def test_raises_if_an_addon_cannot_be_found
@@ -117,7 +117,7 @@ module RubyLsp
       global_state.apply_options({
         initializationOptions: {
           addonSettings: {
-            "My Addon" => { something: false },
+            "My Add-on" => { something: false },
           },
         },
       })
@@ -125,7 +125,7 @@ module RubyLsp
       outgoing_queue = Thread::Queue.new
       Addon.load_addons(global_state, outgoing_queue)
 
-      addon = Addon.get("My Addon")
+      addon = Addon.get("My Add-on")
 
       assert_equal({ something: false }, T.unsafe(addon).settings)
     ensure

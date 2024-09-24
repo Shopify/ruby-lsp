@@ -141,7 +141,7 @@ user.do_something
 
 ### Extensibility
 
-In an effort to reduce tooling fragmentation in the Ruby ecosystem, we are experimenting with an addon system for the
+In an effort to reduce tooling fragmentation in the Ruby ecosystem, we are experimenting with an add-on system for the
 Ruby LSP server. This allows other gems to enhance the Ruby LSP’s functionality without having to write a complete
 language server of their own, avoiding handling text synchronization, implementing features that depend exclusively on
 syntax (such as folding range) or caring about the editor’s encoding.
@@ -150,7 +150,7 @@ We believe that a less fragmented tooling ecosystem leads to a better user exper
 and consolidates efforts from the community.
 
 Our goal is to allow the Ruby LSP to connect to different formatters, linters, type checkers or even extract runtime
-information from running applications like Rails servers. You can learn more in the [addons documentation](addons).
+information from running applications like Rails servers. You can learn more in the [add-ons documentation](add-ons).
 
 ### Relying on Bundler
 
@@ -188,7 +188,7 @@ implemented at all given that we may uncover blockers along the way.
 Interested in contributing? Check out the issues tagged with [help-wanted] or [good-first-issue].
 
 - [Make Ruby environment activation more flexible and less coupled with shells]
-- Stabilize APIs for Ruby LSP addons to allow other gems to enhance the base features
+- Stabilize APIs for Ruby LSP add-ons to allow other gems to enhance the base features
 - [Full method support for definition, hover and completion]
 - [Improve accuracy of method features by handling class/module hierarchies]
 - [Improve accuracy of test code lens by checking which class a method inherits from]
@@ -204,10 +204,10 @@ Interested in contributing? Check out the issues tagged with [help-wanted] or [g
 - Explore speeding up indexing by making Prism AST allocations lazy
 - [Add range formatting support for formatters that do support it]
 - [Add ERB support]
-- Explore allowing addons to add support for arbitrary file types
-- Allow the Ruby LSP to connect to a typechecker addon to improve accuracy
+- Explore allowing add-ons to add support for arbitrary file types
+- Allow the Ruby LSP to connect to a typechecker add-on to improve accuracy
 - Make the Ruby LSP’s default functionality act as a fallback for the more accurate typechecker results
-- Introduce a mechanism for addons to be automatically detected without needing user configuration
+- Introduce a mechanism for add-ons to be automatically detected without needing user configuration
 
 [Ruby on Rails Community survey]: https://rails-hosting.com/2022/#ruby-rails-version-updates
 [Sorbet]: https://sorbet.org/
