@@ -22,6 +22,7 @@ Want to discuss Ruby developer experience? Consider joining the public
 - [Usage](#usage)
     - [With VS Code](#with-vs-code)
     - [With other editors](#with-other-editors)
+    - [Custom Ruby LSP bundle](#custom-ruby-lsp-bundle)
 - [Add-ons](#add-ons)
 - [General features](#general-features)
     - [Hover](#hover)
@@ -79,6 +80,11 @@ gem install ruby-lsp
 
 and the language server can be launched running `ruby-lsp` (without bundle exec in order to properly hook into your
 project's dependencies).
+
+### Custom Ruby LSP bundle
+
+The Ruby LSP executable generates a custom bundle with the goal of not requiring users to add the `ruby-lsp` gem to
+their Gemfiles and at the same time being able to hook into project dependencies. [Learn more](custom-bundle).
 
 ## Add-ons
 
