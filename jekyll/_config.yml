@@ -4,6 +4,13 @@ description: >-
 baseurl: "/ruby-lsp"
 url: "https://shopify.github.io"
 github_username: shopify
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      image: /icon.png
+
 aux_links:
   "Ruby DX Slack":
     - "https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q"
@@ -19,6 +26,7 @@ nav_external_links:
 theme: just-the-docs
 plugins:
   - jekyll-feed
+  - jekyll-seo-tag
 destination: ../docs
 
 # Copied from just-the-docs's _config.yml
