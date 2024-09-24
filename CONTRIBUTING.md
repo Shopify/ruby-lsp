@@ -1,10 +1,10 @@
 # CONTRIBUTING
 
-The Ruby LSP repository has three sub projects inside:
+This repository contains three sub-projects:
 
-- The `ruby-lsp` gem, which is the language server implementation. This is the top level of the repository. Most features are implemented here since everything implemented in the server is available to all editors
-- The VS Code extension, which exists under the `vscode` directory. Any custom VS Code features are implemented here
-- Its documentation website, which exists under the `jekyll` directory. All user facing documentation for both the Ruby LSP and the Rails addon is contained here
+- the **language server** (`ruby-lsp`), which exists at the top level of the repository. Most features are implemented here since everything implemented in the server is available to all editors
+- the **VS Code extension**, which exists under the `vscode` directory. Any custom VS Code features are implemented here
+- the **documentation** website, which exists under the `jekyll` directory. All user facing documentation for both the Ruby LSP and the Rails addon is contained here
 
 This contributing guide is split by each component.
 
@@ -14,7 +14,7 @@ To start contributing to the Ruby LSP, ensure that all dependencies are installe
 
 - `bundle install` on the top level will install Ruby dependencies
 - `bundle install` in the `jekyll` directory will install documentation dependencies
-- `yarn install` in the `vscode` directory will install NodeJS dependencies for the VS Code extension
+- `yarn install` in the `vscode` directory will install Node.js dependencies for the VS Code extension
 
 ## Contributing to the server
 
