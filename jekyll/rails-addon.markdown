@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Rails addon
+title: Rails add-on
 nav_order: 10
 ---
 
-# Rails addon
+# Rails add-on
 
-[Ruby LSP Rails](https://github.com/Shopify/ruby-lsp-rails) is a Ruby LSP addon that enhances the base Ruby LSP functionality
+[Ruby LSP Rails](https://github.com/Shopify/ruby-lsp-rails) is a Ruby LSP add-on that enhances the base Ruby LSP functionality
 with Rails-specific features. It provides improved code navigation, document symbols for Rails-specific elements,
 and runtime inspection capabilities.
 
@@ -37,9 +37,9 @@ enabling more accurate and context-aware language server features.
 ## Installation
 
 {: .important }
-> The Rails addon is installed automatically.
+> The Rails add-on is installed automatically.
 
-Ruby LSP detects Rails projects and installs the [Rails addon](https://github.com/Shopify/ruby-lsp-rails) for you.
+Ruby LSP detects Rails projects and installs the [Rails add-on](https://github.com/Shopify/ruby-lsp-rails) for you.
 
 ## Runtime Inspection
 
@@ -48,7 +48,7 @@ some features.
 
 When Ruby LSP Rails starts, it spawns a `rails runner` instance which runs
 [`server.rb`](https://github.com/Shopify/ruby-lsp-rails/blob/main/lib/ruby_lsp/ruby_lsp_rails/server.rb).
-The addon communicates with this process over a pipe (i.e. `stdin` and `stdout`) to fetch runtime information about the application.
+The add-on communicates with this process over a pipe (i.e. `stdin` and `stdout`) to fetch runtime information about the application.
 
 When extension is stopped (e.g. by quitting the editor), the server instance is shut down.
 
@@ -59,7 +59,7 @@ When extension is stopped (e.g. by quitting the editor), the server instance is 
 Document Symbol is a way to represent the structure of a document. They are used to provide a quick overview of the
 document and to allow for quick navigation.
 
-Ruby LSP already provides document symbols for Ruby files, such as classes, modules, methods, etc. But the Rails addon
+Ruby LSP already provides document symbols for Ruby files, such as classes, modules, methods, etc. But the Rails add-on
 provides additional document symbols for Rails specific features.
 
 In VS Code, you can open the document symbols view by pressing `Ctrl + Shift + O`.
@@ -137,7 +137,7 @@ These commands are also available in the Command Palette.
 
 ### **Run and Debug**
 
-The Rails addon provides 3 ways to run and debug `ActiveSupport` tests using the `Code Lens` feature.
+The Rails add-on provides 3 ways to run and debug `ActiveSupport` tests using the `Code Lens` feature.
 
 ### Run Tests With Test Explorer
 

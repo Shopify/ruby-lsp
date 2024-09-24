@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 module RubyLsp
-  # To register an addon, inherit from this class and implement both `name` and `activate`
+  # To register an add-on, inherit from this class and implement both `name` and `activate`
   #
   # # Example
   #
@@ -27,7 +27,7 @@ module RubyLsp
 
     @addons = T.let([], T::Array[Addon])
     @addon_classes = T.let([], T::Array[T.class_of(Addon)])
-    # Addon instances that have declared a handler to accept file watcher events
+    # Add-on instances that have declared a handler to accept file watcher events
     @file_watcher_addons = T.let([], T::Array[Addon])
 
     AddonNotFoundError = Class.new(StandardError)
@@ -51,12 +51,12 @@ module RubyLsp
         super
       end
 
-      # Discovers and loads all addons. Returns a list of errors when trying to require addons
+      # Discovers and loads all add-ons. Returns a list of errors when trying to require add-ons
       sig do
         params(global_state: GlobalState, outgoing_queue: Thread::Queue).returns(T::Array[StandardError])
       end
       def load_addons(global_state, outgoing_queue)
-        # Require all addons entry points, which should be placed under
+        # Require all add-ons entry points, which should be placed under
         # `some_gem/lib/ruby_lsp/your_gem_name/addon.rb`
         errors = Gem.find_files("ruby_lsp/**/addon.rb").filter_map do |addon|
           require File.expand_path(addon)
@@ -118,17 +118,17 @@ module RubyLsp
       @errors.map(&:full_message).join("\n\n")
     end
 
-    # Each addon should implement `MyAddon#activate` and use to perform any sort of initialization, such as
+    # Each add-on should implement `MyAddon#activate` and use to perform any sort of initialization, such as
     # reading information into memory or even spawning a separate process
     sig { abstract.params(global_state: GlobalState, outgoing_queue: Thread::Queue).void }
     def activate(global_state, outgoing_queue); end
 
-    # Each addon should implement `MyAddon#deactivate` and use to perform any clean up, like shutting down a
+    # Each add-on should implement `MyAddon#deactivate` and use to perform any clean up, like shutting down a
     # child process
     sig { abstract.void }
     def deactivate; end
 
-    # Addons should override the `name` method to return the addon name
+    # Add-ons should override the `name` method to return the add-on name
     sig { abstract.returns(String) }
     def name; end
 

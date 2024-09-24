@@ -451,7 +451,7 @@ class ServerTest < Minitest::Test
 
     addon_error_notification = @server.pop_response
     assert_equal("window/showMessage", addon_error_notification.method)
-    assert_equal("Error loading addons:\n\nBar:\n  boom\n", addon_error_notification.params.message)
+    assert_equal("Error loading add-ons:\n\nBar:\n  boom\n", addon_error_notification.params.message)
     addons_info = @server.pop_response.response
 
     assert_equal("Foo", addons_info[0][:name])

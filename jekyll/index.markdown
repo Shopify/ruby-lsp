@@ -22,7 +22,7 @@ Want to discuss Ruby developer experience? Consider joining the public
 - [Usage](#usage)
     - [With VS Code](#with-vs-code)
     - [With other editors](#with-other-editors)
-- [Addons](#addons)
+- [Add-ons](#add-ons)
 - [General features](#general-features)
     - [Hover](#hover)
     - [Go-to-Definition](#go-to-definition)
@@ -80,23 +80,23 @@ gem install ruby-lsp
 and the language server can be launched running `ruby-lsp` (without bundle exec in order to properly hook into your
 project's dependencies).
 
-## Addons
+## Add-ons
 
-The Ruby LSP provides an addon system that allows other gems to enhance the base functionality with more editor
-features. This is the mechanism that powers addons like
+The Ruby LSP provides an add-on system that allows other gems to enhance the base functionality with more editor
+features. This is the mechanism that powers add-ons like
 
 - [Ruby LSP Rails](https://github.com/Shopify/ruby-lsp-rails)
 - [Ruby LSP RSpec](https://github.com/st0012/ruby-lsp-rspec)
 - [Ruby LSP rubyfmt](https://github.com/jscharf/ruby-lsp-rubyfmt)
 
-Additionally, some tools may include a Ruby LSP addon directly, like
+Additionally, some tools may include a Ruby LSP add-on directly, like
 
 - [Standard Ruby (from v1.39.1)](https://github.com/standardrb/standard/wiki/IDE:-vscode#using-ruby-lsp)
 
-Other community driven addons can be found in [rubygems](https://rubygems.org/search?query=name%3A+ruby-lsp) by
+Other community driven add-ons can be found in [rubygems](https://rubygems.org/search?query=name%3A+ruby-lsp) by
 searching for the `ruby-lsp` prefix.
 
-For instructions on how to create addons, see the [addons documentation](addons).
+For instructions on how to create add-ons, see the [add-ons documentation](add-ons).
 
 ## General features
 

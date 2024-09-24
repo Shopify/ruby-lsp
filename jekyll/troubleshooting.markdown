@@ -54,7 +54,7 @@ In most cases, the server gem will be automatically updated. You can also trigge
 You can also attempt an update from the command line with `BUNDLE_GEMFILE=.ruby-lsp/Gemfile bundle update ruby-lsp`
 
 {: .note }
-If you're using any addon gem, such as `ruby-lsp-rspec`, then `ruby-lsp` will also be present in your `Gemfile.lock` and it's possible that an outdated addon could prevent `ruby-lsp` from updating.
+If you're using any add-on gem, such as `ruby-lsp-rspec`, then `ruby-lsp` will also be present in your `Gemfile.lock` and it's possible that an outdated add-on could prevent `ruby-lsp` from updating.
 
 Another possible scenario where the `ruby-lsp` gem cannot be updated is when one of its runtime dependencies are
 constrained by another gem in the application. For example, Ruby LSP has a dependency on

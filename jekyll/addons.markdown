@@ -1,16 +1,16 @@
 ---
 layout: default
-title: Addons
+title: Add-ons
 nav_order: 10
 parent: Ruby LSP
 ---
 
-# Addons
+# Add-ons
 
 {: .warning }
-> The Ruby LSP addon system is currently experimental and subject to changes in the API
+> The Ruby LSP add-on system is currently experimental and subject to changes in the API
 
-Need help writing addons? Consider joining the `#ruby-lsp-addons` channel in the [Ruby DX Slack
+Need help writing add-ons? Consider joining the `#ruby-lsp-addons` channel in the [Ruby DX Slack
 workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q).
 
 ## Motivation and goals
@@ -24,41 +24,41 @@ ecosystem. It would also create a bottleneck for authors to push new features. B
 hand, increases fragmentation which tends to increase the effort required by users to configure their development
 environments.
 
-For these reasons, the Ruby LSP ships with an addon system that authors can use to enhance the behavior of the base LSP
+For these reasons, the Ruby LSP ships with an add-on system that authors can use to enhance the behavior of the base LSP
 with tool specific functionality, aimed at
 
-- Allowing gem authors to export Ruby LSP addons from their own gems
-- Allowing LSP features to be enhanced by addons present in the application the developer is currently working on
+- Allowing gem authors to export Ruby LSP add-ons from their own gems
+- Allowing LSP features to be enhanced by add-ons present in the application the developer is currently working on
 - Not requiring extra configuration from the user
 - Seamlessly integrating with the base features of the Ruby LSP
-- Providing addon authors with the entire static analysis toolkit that the Ruby LSP uses
+- Providing add-on authors with the entire static analysis toolkit that the Ruby LSP uses
 
 ## Guidelines
 
-When building a Ruby LSP addon, refer to these guidelines to ensure a good developer experience.
+When building a Ruby LSP add-on, refer to these guidelines to ensure a good developer experience.
 
 - Performance over features. A single slow request may result in lack of responsiveness in the editor
 - There are two types of LSP requests: automatic (e.g.: semantic highlighting) and user initiated (go to definition).
 The performance of automatic requests is critical for responsiveness as they are executed every time the user types
 - Avoid duplicate work where possible. If something can be computed once and memoized, like configurations, do it
-- Do not mutate LSP state directly. Addons sometimes have access to important state such as document objects, which
+- Do not mutate LSP state directly. Add-ons sometimes have access to important state such as document objects, which
 should never be mutated directly, but instead through the mechanisms provided by the LSP specification - like text edits
 - Do not overnotify users. It's generally annoying and diverts attention from the current task
 - Show the right context at the right time. When adding visual features, think about **when** the information is
 relevant for users to avoid polluting the editor
 
-## Building a Ruby LSP addon
+## Building a Ruby LSP add-on
 
-**Note**: the Ruby LSP uses [Sorbet](https://sorbet.org/). We recommend using Sorbet in addons as well, which allows
+**Note**: the Ruby LSP uses [Sorbet](https://sorbet.org/). We recommend using Sorbet in add-ons as well, which allows
 authors to benefit from types declared by the Ruby LSP.
 
-As an example, check out [Ruby LSP Rails](https://github.com/Shopify/ruby-lsp-rails), which is a Ruby LSP addon to
+As an example, check out [Ruby LSP Rails](https://github.com/Shopify/ruby-lsp-rails), which is a Ruby LSP add-on to
 provide Rails related features.
 
-### Activating the addon
+### Activating the add-on
 
-The Ruby LSP discovers addons based on the existence of an `addon.rb` file placed inside a `ruby_lsp` folder.  For
-example, `my_gem/lib/ruby_lsp/my_gem/addon.rb`. This file must declare the addon class, which can be used to perform any
+The Ruby LSP discovers add-ons based on the existence of an `addon.rb` file placed inside a `ruby_lsp` folder.  For
+example, `my_gem/lib/ruby_lsp/my_gem/addon.rb`. This file must declare the add-on class, which can be used to perform any
 necessary activation when the server starts.
 
 
@@ -78,7 +78,7 @@ module RubyLsp
       def deactivate
       end
 
-      # Returns the name of the addon
+      # Returns the name of the add-on
       def name
         "Ruby LSP My Gem"
       end
@@ -89,7 +89,7 @@ end
 
 ### Listeners
 
-An essential component to addons are listeners. All Ruby LSP requests are listeners that handle specific node types.
+An essential component to add-ons are listeners. All Ruby LSP requests are listeners that handle specific node types.
 
 Listeners work in conjunction with a `Prism::Dispatcher`, which is responsible for dispatching events during the parsing of Ruby code. Each event corresponds to a specific node in the Abstract Syntax Tree (AST) of the code being parsed.
 
@@ -123,11 +123,11 @@ dispatcher.dispatch(parse_result.value)
 
 In this example, the listener is registered to the dispatcher to listen for the `:on_class_node_enter` event. When a class node is encountered during the parsing of the code, a greeting message is outputted with the class name.
 
-This approach enables all addon responses to be captured in a single round of AST visits, greatly improving performance.
+This approach enables all add-on responses to be captured in a single round of AST visits, greatly improving performance.
 
 ### Enhancing features
 
-To enhance a request, the addon must create a listener that will collect extra results that will be automatically appended to the
+To enhance a request, the add-on must create a listener that will collect extra results that will be automatically appended to the
 base language server response. Additionally, `Addon` has to implement a factory method that instantiates the listener. When instantiating the
 listener, also note that a `ResponseBuilders` object is passed in. This object should be used to return responses back to the Ruby LSP.
 
@@ -154,7 +154,7 @@ module RubyLsp
 
       def create_hover_listener(response_builder, node_context, index, dispatcher)
         # Use the listener factory methods to instantiate listeners with parameters sent by the LSP combined with any
-        # pre-computed information in the addon. These factory methods are invoked on every request
+        # pre-computed information in the add-on. These factory methods are invoked on every request
         Hover.new(client, response_builder, @config, dispatcher)
       end
     end
@@ -198,7 +198,7 @@ end
 
 ### Registering formatters
 
-Gems may also provide a formatter to be used by the Ruby LSP. To do that, the addon must create a formatter runner and
+Gems may also provide a formatter to be used by the Ruby LSP. To do that, the add-on must create a formatter runner and
 register it. The formatter is used if the `rubyLsp.formatter` option configured by the user matches the identifier
 registered.
 
@@ -218,7 +218,7 @@ end
 
 # Custom formatter
 class MyFormatter
-  # If using Sorbet to develop the addon, then include this interface to make sure the class is properly implemented
+  # If using Sorbet to develop the add-on, then include this interface to make sure the class is properly implemented
   include RubyLsp::Requests::Support::Formatter
 
   # Use the initialize method to perform any sort of ahead of time work. For example, reading configurations for your
@@ -245,11 +245,11 @@ end
 
 ### Sending notifications to the client
 
-Sometimes, addons may need to send asynchronous information to the client. For example, a slow request might want to
+Sometimes, add-ons may need to send asynchronous information to the client. For example, a slow request might want to
 indicate progress or diagnostics may be computed in the background without blocking the language server.
 
-For this purpose, all addons receive the message queue when activated, which is a thread queue that can receive
-notifications for the client. The addon should keep a reference to this message queue and pass it to listeners that are
+For this purpose, all add-ons receive the message queue when activated, which is a thread queue that can receive
+notifications for the client. The add-on should keep a reference to this message queue and pass it to listeners that are
 interested in using it.
 
 **Note**: do not close the message queue anywhere. The Ruby LSP will handle closing the message queue when appropriate.
@@ -293,10 +293,10 @@ end
 ### Registering for file update events
 
 By default, the Ruby LSP listens for changes to files ending in `.rb` to continuously update its index when Ruby source
-code is modified. If your addon uses a tool that is configured through a file (like RuboCop and its `.rubocop.yml`)
+code is modified. If your add-on uses a tool that is configured through a file (like RuboCop and its `.rubocop.yml`)
 you can register for changes to these files and react when the configuration changes.
 
-**Note**: you will receive events from `ruby-lsp` and other addons as well, in addition to your own registered ones.
+**Note**: you will receive events from `ruby-lsp` and other add-ons as well, in addition to your own registered ones.
 
 
 ```ruby
@@ -347,7 +347,7 @@ end
 
 ### Dependency constraints
 
-While we figure out a good design for the addons API, breaking changes are bound to happen. To avoid having your addon
+While we figure out a good design for the add-ons API, breaking changes are bound to happen. To avoid having your add-on
 accidentally break editor functionality, always restrict the dependency on the `ruby-lsp` gem based on minor versions
 (breaking changes may land on minor versions until we reach v1.0.0).
 
@@ -355,9 +355,9 @@ accidentally break editor functionality, always restrict the dependency on the `
 spec.add_dependency("ruby-lsp", "~> 0.6.0")
 ```
 
-### Testing addons
+### Testing add-ons
 
-When writing unit tests for addons, it's essential to keep in mind that code is rarely in its final state while the
+When writing unit tests for add-ons, it's essential to keep in mind that code is rarely in its final state while the
 developer is coding. Therefore, be sure to test valid scenarios where the code is still incomplete.
 
 For example, if you are writing a feature related to `require`, do not test `require "library"` exclusively. Consider
@@ -376,10 +376,10 @@ Kernel.require("library")
 ```
 
 The Ruby LSP exports a test helper which creates a server instance with a document already initialized with the desired
-content. This is useful to test the integration of your addon with the language server.
+content. This is useful to test the integration of your add-on with the language server.
 
-Addons are automatically loaded, so simply executing the desired language server request should already include your
-addon's contributions.
+Add-ons are automatically loaded, so simply executing the desired language server request should already include your
+add-on's contributions.
 
 ```ruby
 require "test_helper"
@@ -388,7 +388,7 @@ require "ruby_lsp/test_helper"
 class MyAddonTest < Minitest::Test
   def test_my_addon_works
     source =  <<~RUBY
-      # Some test code that allows you to trigger your addon's contribution
+      # Some test code that allows you to trigger your add-on's contribution
       class Foo
         def something
         end
@@ -413,7 +413,7 @@ class MyAddonTest < Minitest::Test
 
       # Pop the server's response to the definition request
       result = server.pop_response.response
-      # Assert that the response includes your addon's contribution
+      # Assert that the response includes your add-on's contribution
       assert_equal(123, result.response.location)
     end
   end
