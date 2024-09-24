@@ -106,7 +106,7 @@ class MyListener
 
   # Define the handler method for the `on_class_node_enter` event
   def on_class_node_enter(node)
-    puts "Hello, #{node.constant_path.slice}!"
+    $stderr.puts "Hello, #{node.constant_path.slice}!"
   end
 end
 
@@ -118,7 +118,6 @@ dispatcher.dispatch(parse_result.value)
 
 # Prints
 # => Hello, Foo!
-
 ```
 
 In this example, the listener is registered to the dispatcher to listen for the `:on_class_node_enter` event. When a class node is encountered during the parsing of the code, a greeting message is outputted with the class name.
