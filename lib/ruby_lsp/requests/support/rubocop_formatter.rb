@@ -3,6 +3,8 @@
 
 return unless defined?(RubyLsp::Requests::Support::RuboCopRunner)
 
+require "ruby_lsp/requests/support/rubocop_diagnostic"
+
 module RubyLsp
   module Requests
     module Support

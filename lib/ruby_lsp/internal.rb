@@ -47,7 +47,6 @@ require "ruby_lsp/response_builders/semantic_highlighting"
 require "ruby_lsp/response_builders/signature_help"
 
 # Request support
-require "ruby_lsp/requests/support/rubocop_diagnostic"
 require "ruby_lsp/requests/support/selection_range"
 require "ruby_lsp/requests/support/annotation"
 require "ruby_lsp/requests/support/sorbet"
