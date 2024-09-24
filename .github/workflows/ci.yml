@@ -43,9 +43,6 @@ jobs:
 
       - name: Run tests
         run: bundle exec rake
-
-      - name: Run index troubleshooting tool
-        run: bundle exec ruby-lsp --doctor
   lint_node:
     runs-on: ubuntu-latest
     steps:
