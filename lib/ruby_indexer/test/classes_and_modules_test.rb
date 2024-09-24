@@ -159,6 +159,17 @@ module RubyIndexer
       assert_entry("Foo::Bar", Entry::Module, "/fake/path/foo.rb:4-2:5-5")
     end
 
+    def test_nested_modules_and_classes_with_multibyte_characters
+      index(<<~RUBY)
+        module A動物
+          class Bねこ; end
+        end
+      RUBY
+
+      assert_entry("A動物", Entry::Module, "/fake/path/foo.rb:0-0:2-3")
+      assert_entry("A動物::Bねこ", Entry::Class, "/fake/path/foo.rb:1-2:1-16")
+    end
+
     def test_nested_modules_and_classes
       index(<<~RUBY)
         module Foo

@@ -25,6 +25,18 @@ module RubyIndexer
       assert_equal("Foo::Bar", owner.name)
     end
 
+    def test_instance_variable_with_multibyte_characters
+      index(<<~RUBY)
+        class Foo
+          def initialize
+            @あ = 1
+          end
+        end
+      RUBY
+
+      assert_entry("@あ", Entry::InstanceVariable, "/fake/path/foo.rb:2-4:2-6")
+    end
+
     def test_instance_variable_and_write
       index(<<~RUBY)
         module Foo

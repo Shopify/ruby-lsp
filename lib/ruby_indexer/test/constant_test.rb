@@ -21,6 +21,14 @@ module RubyIndexer
       assert_entry("BAR", Entry::Constant, "/fake/path/foo.rb:6-0:6-7")
     end
 
+    def test_constant_with_multibyte_characters
+      index(<<~RUBY)
+        CONST_💎 = "Ruby"
+      RUBY
+
+      assert_entry("CONST_💎", Entry::Constant, "/fake/path/foo.rb:0-0:0-16")
+    end
+
     def test_constant_or_writes
       index(<<~RUBY)
         FOO ||= 1

@@ -27,6 +27,16 @@ module RubyIndexer
       assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
     end
 
+    def test_method_with_multibyte_characters
+      index(<<~RUBY)
+        class Foo
+          def こんにちは; end
+        end
+      RUBY
+
+      assert_entry("こんにちは", Entry::Method, "/fake/path/foo.rb:1-2:1-16")
+    end
+
     def test_singleton_method_using_self_receiver
       index(<<~RUBY)
         class Foo
