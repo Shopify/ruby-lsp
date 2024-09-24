@@ -19,9 +19,13 @@ module RubyIndexer
     sig { params(workspace_path: String).void }
     attr_writer :workspace_path
 
+    sig { returns(Encoding) }
+    attr_accessor :encoding
+
     sig { void }
     def initialize
       @workspace_path = T.let(Dir.pwd, String)
+      @encoding = T.let(Encoding::UTF_8, Encoding)
       @excluded_gems = T.let(initial_excluded_gems, T::Array[String])
       @included_gems = T.let([], T::Array[String])
       @excluded_patterns = T.let([File.join("**", "*_test.rb"), File.join("tmp", "**", "*")], T::Array[String])
