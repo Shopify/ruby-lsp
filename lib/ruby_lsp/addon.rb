@@ -14,7 +14,7 @@ module RubyLsp
   #     end
   #
   #     def name
-  #       "My addon name"
+  #       "My add-on name"
   #     end
   #   end
   # end
@@ -69,7 +69,7 @@ module RubyLsp
         self.addons = addon_classes.map(&:new)
         self.file_watcher_addons = addons.select { |addon| addon.respond_to?(:workspace_did_change_watched_files) }
 
-        # Activate each one of the discovered addons. If any problems occur in the addons, we don't want to
+        # Activate each one of the discovered add-ons. If any problems occur in the add-ons, we don't want to
         # fail to boot the server
         addons.each do |addon|
           addon.activate(global_state, outgoing_queue)
@@ -83,7 +83,7 @@ module RubyLsp
       sig { params(addon_name: String).returns(Addon) }
       def get(addon_name)
         addon = addons.find { |addon| addon.name == addon_name }
-        raise AddonNotFoundError, "Could not find addon '#{addon_name}'" unless addon
+        raise AddonNotFoundError, "Could not find add-on '#{addon_name}'" unless addon
 
         addon
       end
