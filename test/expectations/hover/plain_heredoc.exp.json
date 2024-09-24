@@ -1,0 +1,14 @@
+{
+    "params": [
+        {
+            "line": 0,
+            "character": 2
+        }
+    ],
+    "result": {
+        "contents": {
+            "kind": "markdown",
+            "value": "This is a heredoc definition using the `HEREDOC` delimiter. Indentation will be considered part of the string."
+        }
+    }
+}

@@ -21,6 +21,7 @@ module RubyLsp
           Prism::InstanceVariableWriteNode,
           Prism::SymbolNode,
           Prism::StringNode,
+          Prism::InterpolatedStringNode,
           Prism::SuperNode,
           Prism::ForwardingSuperNode,
         ],
@@ -68,7 +69,19 @@ module RubyLsp
           :on_instance_variable_target_node_enter,
           :on_super_node_enter,
           :on_forwarding_super_node_enter,
+          :on_string_node_enter,
+          :on_interpolated_string_node_enter,
         )
+      end
+
+      sig { params(node: Prism::StringNode).void }
+      def on_string_node_enter(node)
+        generate_heredoc_hover(node)
+      end
+
+      sig { params(node: Prism::InterpolatedStringNode).void }
+      def on_interpolated_string_node_enter(node)
+        generate_heredoc_hover(node)
       end
 
       sig { params(node: Prism::ConstantReadNode).void }
@@ -154,6 +167,31 @@ module RubyLsp
       end
 
       private
+
+      sig { params(node: T.any(Prism::InterpolatedStringNode, Prism::StringNode)).void }
+      def generate_heredoc_hover(node)
+        return unless node.heredoc?
+
+        opening_content = node.opening_loc&.slice
+        return unless opening_content
+
+        match = /(<<(?<type>(-|~)?))(?<quote>['"`]?)(?<delimiter>\w+)\k<quote>/.match(opening_content)
+        return unless match
+
+        heredoc_delimiter = match.named_captures["delimiter"]
+
+        if heredoc_delimiter
+          message = if match["type"] == "~"
+            "This is a squiggly heredoc definition using the `#{heredoc_delimiter}` delimiter. " \
+              "Indentation will be ignored in the resulting string."
+          else
+            "This is a heredoc definition using the `#{heredoc_delimiter}` delimiter. " \
+              "Indentation will be considered part of the string."
+          end
+
+          @response_builder.push(message, category: :documentation)
+        end
+      end
 
       sig { void }
       def handle_super_node_hover

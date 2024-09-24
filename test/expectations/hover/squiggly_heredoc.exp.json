@@ -1,0 +1,14 @@
+{
+    "params": [
+        {
+            "line": 0,
+            "character": 2
+        }
+    ],
+    "result": {
+        "contents": {
+            "kind": "markdown",
+            "value": "This is a squiggly heredoc definition using the `HEREDOC` delimiter. Indentation will be ignored in the resulting string."
+        }
+    }
+}
