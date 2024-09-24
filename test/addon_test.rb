@@ -77,7 +77,7 @@ module RubyLsp
 
       assert_predicate(error_addon, :error?)
       assert_equal(<<~MESSAGE, error_addon.formatted_errors)
-        My add-on:
+        My Add-on:
           Failed to activate
       MESSAGE
     end
