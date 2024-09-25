@@ -17,7 +17,9 @@ jobs:
           # cache: "yarn"
 
       - name: Run cspell
-        run: yarn run cspell
+        run: |
+          yarn --frozen-lockfile
+          yarn run cspell
   lint_ruby:
     runs-on: ubuntu-latest
     steps:
