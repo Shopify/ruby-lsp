@@ -687,7 +687,7 @@
     "package": "vsce package --out vscode-ruby-lsp.vsix --baseImagesUrl https://github.com/Shopify/ruby-lsp/raw/HEAD/vscode",
     "package_prerelease": "vsce package --pre-release --out vscode-ruby-lsp.vsix --baseImagesUrl https://github.com/Shopify/ruby-lsp/raw/HEAD/vscode",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
-    "compile": "tsc --skipLibCheck -p ./",
+    "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run compile",
     "format": "eslint '**/*.ts' --fix && prettier '**/*.{json,md,yaml,yml}' --write",
