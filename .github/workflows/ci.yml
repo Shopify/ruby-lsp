@@ -14,7 +14,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20.9"
-          # cache: "yarn"
 
       - name: Run cspell
         run: |
