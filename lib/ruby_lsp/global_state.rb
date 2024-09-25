@@ -23,6 +23,9 @@ module RubyLsp
     sig { returns(T::Boolean) }
     attr_reader :supports_watching_files, :experimental_features, :supports_request_delegation
 
+    sig { returns(T::Array[String]) }
+    attr_reader :supported_resource_operations
+
     sig { returns(TypeInferrer) }
     attr_reader :type_inferrer
 
@@ -42,6 +45,7 @@ module RubyLsp
       @type_inferrer = T.let(TypeInferrer.new(@index), TypeInferrer)
       @addon_settings = T.let({}, T::Hash[String, T.untyped])
       @supports_request_delegation = T.let(false, T::Boolean)
+      @supported_resource_operations = T.let([], T::Array[String])
     end
 
     sig { params(addon_name: String).returns(T.nilable(T::Hash[Symbol, T.untyped])) }
@@ -133,6 +137,9 @@ module RubyLsp
       end
 
       @supports_request_delegation = options.dig(:capabilities, :experimental, :requestDelegation) || false
+      supported_resource_operations = options.dig(:capabilities, :workspace, :workspaceEdit, :resourceOperations)
+      @supported_resource_operations = supported_resource_operations if supported_resource_operations
+
       notifications
     end
 

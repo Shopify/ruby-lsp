@@ -1,0 +1,4 @@
+class RenameMe
+end
+
+RenameMe
