@@ -18,7 +18,7 @@ jobs:
 
       - name: Run cspell
         run: |
-          yarn --frozen-lockfile
+          yarn
           yarn run cspell
   lint_ruby:
     runs-on: ubuntu-latest
