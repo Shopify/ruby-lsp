@@ -17,7 +17,7 @@ jobs:
           cache: "yarn"
 
       - name: Run cspell
-        run: yarn global add cspell && cspell
+        run: yarn run cspell
   lint_ruby:
     runs-on: ubuntu-latest
     steps:
