@@ -4,7 +4,7 @@ This repository contains three sub-projects:
 
 - the **language server** (`ruby-lsp`), which exists at the top level of the repository. Most features are implemented here since everything implemented in the server is available to all editors
 - the **VS Code extension**, which exists under the `vscode` directory. Any custom VS Code features are implemented here
-- the **documentation** website, which exists under the `jekyll` directory. All user facing documentation for both the Ruby LSP and the Rails addon is contained here
+- the **documentation** website, which exists under the `jekyll` directory. All user facing documentation for both the Ruby LSP and the Rails add-on is contained here
 
 This contributing guide is split by each component.
 
@@ -232,4 +232,141 @@ After that, follow these steps to make and verify your changes:
 ```shell
 bundle exec jekyll serve
 ```
-3. Verify your changes locally by visiting http://localhost:4000/ruby-lsp
+
+## Testing changes
+
+### Tracing LSP requests and responses
+
+LSP server tracing (logging) can be controlled through the `ruby lsp.trace.server` config key in the
+`.vscode/settings.json` config file.
+
+Possible values are:
+
+- `off`: no tracing
+- `messages`: display requests and responses notifications
+- `verbose`: display each request and response as JSON
+
+### Manually testing a change
+
+There are a few options for manually testing changes to Ruby LSP:
+
+You can test against Ruby LSP's own code if using VS Code, and you have the `ruby-lsp` project open. Choose 'Ruby LSP: Restart' from the command menu and the VS Code extension will detect that you are working on `ruby-lsp`, and use the locally checked out code instead of the installed extension.
+
+The other way is to use a separate project, and add a Gemfile entry pointing to your local checkout of `ruby-lsp`, e.g.:
+
+```
+gem "ruby-lsp", path: "../../Shopify/ruby-lsp"
+```
+
+With both approaches, there is a risk of 'breaking' your local development experience, so keep an eye on the Ruby LSP output panel for exceptions as your make changes.
+
+### Running the test suite
+
+The test suite can be executed by running
+```shell
+# The default runner
+bin/test
+# or the spec reporter
+SPEC_REPORTER=1 bin/test
+# Warnings are turned off by default. If you wish to see warnings use
+VERBOSE=1 bin/test
+# Run a single test like this: "bin/test my_test.rb test_name_regex", e.g.
+bin/test test/requests/diagnostics_expectations_test.rb test_diagnostics__def_bad_formatting
+```
+
+### Expectation testing
+
+To simplify the way we run tests over different pieces of Ruby code, we use a custom expectations test framework against
+a set of Ruby fixtures.
+
+All fixtures are defined under `test/fixtures`. By default, every request will be executed against every fixture
+and the test framework will assert that nothing was raised to verify if all requests succeed in processing all fixtures.
+
+Expectations can be added on a per request and per fixture basis. For example, we can have expectations for semantic
+highlighting for a fixture called `foo.rb`, but no expectations for the same fixture for any other requests.
+
+We define expectations as `.exp` files, of which there are two variants:
+- `.exp.rb`, to indicate the resulting code after an operation
+- `.exp.json`, consisting of a `result`, and an optional set of input `params`
+
+To add a new test scenario
+
+1. Add a new fixture `my_fixture.rb` file under `test/fixtures`
+2. For applicable requests, add expectation files related to this fixture. For example,
+`test/expectations/semantic_highlighting/my_fixture.exp.json`
+
+To add a new expectations test runner for a new request handler:
+
+- Add a new file under `test/requests/MY_REQUEST_expectations_test.rb`
+
+```ruby
+require "test_helper"
+require_relative "support/expectations_test_runner"
+
+class MyRequestExpectationsTest < ExpectationsTestRunner
+  # The first argument is the fully qualified name of the request class
+  # The second argument is the folder name where the expectation files are
+  expectations_tests RubyLsp::Requests::MyRequest, "my_request"
+end
+```
+
+- (optional) The default behavior of running tests is not always enough for every request. You may need to override
+the base run and assert method to achieve the right behavior. See `diagnostics_expectations_test.rb` for an
+example
+
+```ruby
+require "test_helper"
+require_relative "support/expectations_test_runner"
+
+class MyRequestExpectationsTest < ExpectationsTestRunner
+  expectations_tests RubyLsp::Requests::MyRequest, "my_request"
+
+  def run_expectations(source)
+    # Run your request for the given source
+  end
+
+  def assert_expectations(source, expected)
+    # Invoke run_expectations and then customize how to assert the correct responses
+  end
+end
+```
+
+To automatically create or update `.exp.json` files, you can use the `WRITE_EXPECTATIONS` environment variable. For example:
+
+```sh
+WRITE_EXPECTATIONS=1 bin/test test/requests/code_lens_expectations_test.rb
+```
+
+## Debugging with VS Code
+
+## Debugging Tests
+
+1. Open the test file
+2. Set breakpoints in the code as desired
+3. Click the debug button on top of test examples
+
+## Live debugging
+
+1. Under `Run and Debug`, select `Run extension` and click the start button (or press F5)
+2. The extension host window opened will be running the development version of the VS Code extension. Putting break
+points in the extension code will allow debugging
+3. If you wish to debug the server process, go under `Run and Debug` in the extension host window,
+select `Attach to existing server` and click the start button (or press F5)
+3. Add breakpoints and perform the actions necessary for triggering the requests you wish to debug
+
+## Screen Captures
+
+We include animated screen captures to illustrate Ruby LSP features.
+For recording new captures, use [LICEcap](https://www.cockos.com/licecap/).
+For consistency, install the Ruby LSP profile included with this repo.
+Configure LICEcap to record at 24fps, at 640 x 480.
+If appropriate, you can adjust the height of the capture, but keep the width at 640.
+
+## Spell Checking
+
+VS Code users will be prompted to enable the [Code Spell
+Checker](https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker) extension. By
+default this will be enabled for all workspaces, but you can choose to selectively enable or disable it per workspace.
+
+If you introduce a word which the spell checker does not recognize, you can add it to the `cspell.json` configuration
+alongside your PR.

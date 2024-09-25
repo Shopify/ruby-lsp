@@ -34,7 +34,7 @@ module RubyLsp
 
         # Based on the spec https://microsoft.github.io/language-server-protocol/specification#textDocument_completion,
         # a completion resolve request must always return the original completion item without modifying ANY fields
-        # other than detail and documentation (NOT labelDetails). If we modify anything, the completion behaviour might
+        # other than detail and documentation (NOT labelDetails). If we modify anything, the completion behavior might
         # be broken.
         #
         # For example, forgetting to return the `insertText` included in the original item will make the editor use the

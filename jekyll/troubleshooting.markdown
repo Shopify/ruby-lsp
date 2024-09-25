@@ -141,7 +141,7 @@ For example, if you configure `BUNDLE_PATH` to point to `vendor/bundle` so that 
 directory as your project, `bundle install` will automatically pick that up and install them in the right place. But
 `gem install` will not as it requires a different setting to achieve it.
 
-You can apply your prefered installed locations for RubyGems by using the `~/.gemrc` file. In that file, you can decide
+You can apply your preferred installed locations for RubyGems by using the `~/.gemrc` file. In that file, you can decide
 to either install it with `--user-install` or select a specific installation directory with `--install-dir`.
 
 ```yaml

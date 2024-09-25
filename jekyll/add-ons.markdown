@@ -43,7 +43,7 @@ The performance of automatic requests is critical for responsiveness as they are
 - Avoid duplicate work where possible. If something can be computed once and memoized, like configurations, do it
 - Do not mutate LSP state directly. Add-ons sometimes have access to important state such as document objects, which
 should never be mutated directly, but instead through the mechanisms provided by the LSP specification - like text edits
-- Do not overnotify users. It's generally annoying and diverts attention from the current task
+- Do not over-notify users. It's generally annoying and diverts attention from the current task
 - Show the right context at the right time. When adding visual features, think about **when** the information is
 relevant for users to avoid polluting the editor
 

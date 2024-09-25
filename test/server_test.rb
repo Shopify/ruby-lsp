@@ -701,7 +701,7 @@ class ServerTest < Minitest::Test
 
     Class.new(RubyLsp::Addon) do
       def activate(global_state, outgoing_queue)
-        # simulates failed addon activation
+        # simulates failed add-on activation
         raise "boom"
       end
 

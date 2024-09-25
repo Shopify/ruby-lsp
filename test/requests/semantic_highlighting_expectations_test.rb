@@ -67,7 +67,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
           { delta_line: 1, delta_start_char: 2, length: 13, token_type: 13, token_modifiers: 0 },
           decoded_response[1],
         )
-        # This is the token modified by the addon
+        # This is the token modified by the add-on
         assert_equal(
           { delta_line: 1, delta_start_char: 2, length: 13, token_type: 15, token_modifiers: 1 },
           decoded_response[2],
