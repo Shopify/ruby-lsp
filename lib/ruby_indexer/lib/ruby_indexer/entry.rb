@@ -512,7 +512,13 @@ module RubyIndexer
 
       sig { params(target: String, unresolved_alias: UnresolvedConstantAlias, encoding: Encoding).void }
       def initialize(target, unresolved_alias, encoding)
-        super(unresolved_alias.name, unresolved_alias.file_path, unresolved_alias.location, unresolved_alias.comments, encoding)
+        super(
+          unresolved_alias.name,
+          unresolved_alias.file_path,
+          unresolved_alias.location,
+          unresolved_alias.comments,
+          encoding
+        )
 
         @visibility = unresolved_alias.visibility
         @target = target
@@ -534,7 +540,7 @@ module RubyIndexer
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, encoding, owner)
+      def initialize(name, file_path, location, comments, encoding, owner) # rubocop:disable Metrics/ParameterLists
         super(name, file_path, location, comments, encoding)
         @owner = owner
       end
@@ -582,7 +588,9 @@ module RubyIndexer
       sig { returns(T.nilable(Entry::Namespace)) }
       attr_reader :owner
 
-      sig { params(target: T.any(Member, MethodAlias), unresolved_alias: UnresolvedMethodAlias, encoding: Encoding).void }
+      sig do
+        params(target: T.any(Member, MethodAlias), unresolved_alias: UnresolvedMethodAlias, encoding: Encoding).void
+      end
       def initialize(target, unresolved_alias, encoding)
         full_comments = +"Alias for #{target.name}\n"
         full_comments << "#{unresolved_alias.comments}\n"
