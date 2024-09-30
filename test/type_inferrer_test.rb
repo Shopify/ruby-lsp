@@ -197,6 +197,17 @@ module RubyLsp
       assert_equal("User", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
+    def test_infer_guessed_types_for_chained_method_calls
+      node_context = index_and_locate(<<~RUBY, { line: 3, character: 15 })
+        class User
+        end
+
+        something.user.name
+      RUBY
+
+      assert_equal("User", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
     def test_infer_guessed_types_for_instance_variable_receiver
       node_context = index_and_locate(<<~RUBY, { line: 4, character: 6 })
         class User

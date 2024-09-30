@@ -89,7 +89,12 @@ module RubyLsp
 
         Type.new("#{parts.join("::")}::#{last}::<Class:#{last}>")
       else
-        raw_receiver = node.receiver&.slice
+
+        raw_receiver = if receiver.is_a?(Prism::CallNode)
+          receiver.message
+        else
+          receiver&.slice
+        end
 
         if raw_receiver
           guessed_name = raw_receiver
