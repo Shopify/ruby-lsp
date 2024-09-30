@@ -1,11 +1,11 @@
 ---
 layout: default
-title: Custom Ruby LSP bundle
+title: Composed Ruby LSP bundle
 nav_order: 40
 parent: Ruby LSP
 ---
 
-# Custom Ruby LSP bundle
+# Composed Ruby LSP bundle
 
 In language ecosystems other than Ruby, it is not super common to have to add editor tooling as part of your project
 dependencies. Usually, a language server is an executable that gets downloaded and then run independently from your
@@ -25,19 +25,19 @@ the project's dependencies limits integrations that the language server can auto
 test frameworks and so on
 
 To overcome these limitations, while at the same time not requiring users to add `ruby-lsp` as a dependency of their projects,
-the Ruby LSP uses a custom bundle strategy. The flow of execution is as follows:
+the Ruby LSP uses a composed bundle strategy. The flow of execution is as follows:
 
-1. The executable is run as `ruby-lsp` without `bundle exec` to indicate that the custom bundle must first be configured
-2. The executable sets up a custom bundle under `your_project/.ruby-lsp`. The generated Gemfile includes the `ruby-lsp` gem
+1. The executable is run as `ruby-lsp` without `bundle exec` to indicate that the composed bundle must first be configured
+2. The executable sets up a composed bundle under `your_project/.ruby-lsp`. The generated Gemfile includes the `ruby-lsp` gem
 and everything in the project's Gemfile as well. It may also include `debug` and `ruby-lsp-rails`
-3. After the custom bundle is fully set up, then the original `ruby-lsp` Ruby process is fully replaced by
+3. After the composed bundle is fully set up, then the original `ruby-lsp` Ruby process is fully replaced by
 `BUNDLE_GEMFILE=.ruby-lsp/Gemfile bundle exec ruby-lsp`, thus launching the real language server with access to the project's
 dependencies, but without requiring adding the gem to the project's own Gemfile
 
-In addition to performing this setup, the custom bundle logic will also `bundle install` and attempt to auto-update the
-`ruby-lsp` language server gem to ensure fast distribution of bug fixes and new features.
+In addition to performing this setup, the composed bundle logic will also `bundle install` and attempt to auto-update
+the `ruby-lsp` language server gem to ensure fast distribution of bug fixes and new features.
 
 {: .note }
-Setting up the custom bundle requires several integrations with Bundler and there are many edge cases to consider, like
-how to handle configurations or installing private dependencies. If you encounter a problem with the custom bundle
-setup, please let us know by [reporting an issue](https://github.com/Shopify/ruby-lsp/issues/new).
+Setting up the composed bundle requires several integrations with Bundler and there are many edge cases to consider,
+like how to handle configurations or installing private dependencies. If you encounter a problem with the composed
+bundle setup, please let us know by [reporting an issue](https://github.com/Shopify/ruby-lsp/issues/new).
