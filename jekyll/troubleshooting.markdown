@@ -141,7 +141,7 @@ For example, if you configure `BUNDLE_PATH` to point to `vendor/bundle` so that 
 directory as your project, `bundle install` will automatically pick that up and install them in the right place. But
 `gem install` will not as it requires a different setting to achieve it.
 
-You can apply your prefered installed locations for RubyGems by using the `~/.gemrc` file. In that file, you can decide
+You can apply your preferred installed locations for RubyGems by using the `~/.gemrc` file. In that file, you can decide
 to either install it with `--user-install` or select a specific installation directory with `--install-dir`.
 
 ```yaml
@@ -229,6 +229,18 @@ ruby-lsp
 
 Is there any extra information given from booting the server manually? Or does it only fail when booting through the
 extension?
+
+## Indexing
+
+When Ruby LSP starts, it attempts to index your code as well as your dependencies as described in [Configuring code indexing](index#configuring-code-indexing).
+
+In rare cases, Ruby LSP will encounter an error which prevents indexing from completing, which will result in incomplete information in the editor.
+
+Firstly, ensure that you are using the latest release of the `ruby-lsp` gem, as the problem may have been already fixed.
+
+To diagnose the particular file(s) causing a problem, run `ruby-lsp-check`. Please log an issue so that we can address it. If the code is not open source then please provide a minimal reproduction.
+
+In the meantime, you can [configure Ruby LSP to ignore a particular gem or file for indexing](index#configuring-code-indexing).
 
 ## After troubleshooting
 

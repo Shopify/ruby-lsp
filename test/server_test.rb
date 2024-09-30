@@ -186,8 +186,10 @@ class ServerTest < Minitest::Test
 
     notification = @server.pop_response
     assert_equal("window/showMessage", notification.method)
+    expected_message = "Error while indexing (see [troubleshooting steps]" \
+      "(https://shopify.github.io/ruby-lsp/troubleshooting#indexing)): boom!"
     assert_equal(
-      "Error while indexing: boom!",
+      expected_message,
       T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
     )
   end
