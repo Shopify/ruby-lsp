@@ -33,9 +33,10 @@ module RubyIndexer
         file_path: String,
         location: T.any(Prism::Location, RubyIndexer::Location),
         comments: T.nilable(String),
+        encoding: Encoding,
       ).void
     end
-    def initialize(name, file_path, location, comments)
+    def initialize(name, file_path, location, comments, encoding)
       @name = name
       @file_path = file_path
       @comments = comments
@@ -46,8 +47,8 @@ module RubyIndexer
           Location.new(
             location.start_line,
             location.end_line,
-            location.start_column,
-            location.end_column,
+            location.start_code_units_column(encoding),
+            location.end_code_units_column(encoding),
           )
         else
           location
@@ -150,22 +151,23 @@ module RubyIndexer
           location: T.any(Prism::Location, RubyIndexer::Location),
           name_location: T.any(Prism::Location, Location),
           comments: T.nilable(String),
+          encoding: Encoding,
         ).void
       end
-      def initialize(nesting, file_path, location, name_location, comments)
+      def initialize(nesting, file_path, location, name_location, comments, encoding) # rubocop:disable Metrics/ParameterLists
         @name = T.let(nesting.join("::"), String)
         # The original nesting where this namespace was discovered
         @nesting = nesting
 
-        super(@name, file_path, location, comments)
+        super(@name, file_path, location, comments, encoding)
 
         @name_location = T.let(
           if name_location.is_a?(Prism::Location)
             Location.new(
               name_location.start_line,
               name_location.end_line,
-              name_location.start_column,
-              name_location.end_column,
+              name_location.start_code_units_column(encoding),
+              name_location.end_code_units_column(encoding),
             )
           else
             name_location
@@ -211,11 +213,12 @@ module RubyIndexer
           location: T.any(Prism::Location, RubyIndexer::Location),
           name_location: T.any(Prism::Location, Location),
           comments: T.nilable(String),
+          encoding: Encoding,
           parent_class: T.nilable(String),
         ).void
       end
-      def initialize(nesting, file_path, location, name_location, comments, parent_class) # rubocop:disable Metrics/ParameterLists
-        super(nesting, file_path, location, name_location, comments)
+      def initialize(nesting, file_path, location, name_location, comments, encoding, parent_class) # rubocop:disable Metrics/ParameterLists
+        super(nesting, file_path, location, name_location, comments, encoding)
         @parent_class = parent_class
       end
 
@@ -228,20 +231,27 @@ module RubyIndexer
     class SingletonClass < Class
       extend T::Sig
 
-      sig { params(location: Prism::Location, name_location: Prism::Location, comments: T.nilable(String)).void }
-      def update_singleton_information(location, name_location, comments)
+      sig do
+        params(
+          location: Prism::Location,
+          name_location: Prism::Location,
+          comments: T.nilable(String),
+          encoding: Encoding,
+        ).void
+      end
+      def update_singleton_information(location, name_location, comments, encoding)
         # Create a new RubyIndexer::Location object from the Prism location
         @location = Location.new(
           location.start_line,
           location.end_line,
-          location.start_column,
-          location.end_column,
+          location.start_code_units_column(encoding),
+          location.end_code_units_column(encoding),
         )
         @name_location = Location.new(
           name_location.start_line,
           name_location.end_line,
-          name_location.start_column,
-          name_location.end_column,
+          name_location.start_code_units_column(encoding),
+          name_location.end_code_units_column(encoding),
         )
         (@comments ||= +"") << comments if comments
       end
@@ -361,12 +371,13 @@ module RubyIndexer
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T.nilable(String),
+          encoding: Encoding,
           visibility: Visibility,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, visibility, owner) # rubocop:disable Metrics/ParameterLists
-        super(name, file_path, location, comments)
+      def initialize(name, file_path, location, comments, encoding, visibility, owner) # rubocop:disable Metrics/ParameterLists
+        super(name, file_path, location, comments, encoding)
         @visibility = visibility
         @owner = owner
       end
@@ -429,21 +440,22 @@ module RubyIndexer
           location: T.any(Prism::Location, RubyIndexer::Location),
           name_location: T.any(Prism::Location, Location),
           comments: T.nilable(String),
+          encoding: Encoding,
           signatures: T::Array[Signature],
           visibility: Visibility,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, name_location, comments, signatures, visibility, owner) # rubocop:disable Metrics/ParameterLists
-        super(name, file_path, location, comments, visibility, owner)
+      def initialize(name, file_path, location, name_location, comments, encoding, signatures, visibility, owner) # rubocop:disable Metrics/ParameterLists
+        super(name, file_path, location, comments, encoding, visibility, owner)
         @signatures = signatures
         @name_location = T.let(
           if name_location.is_a?(Prism::Location)
             Location.new(
               name_location.start_line,
               name_location.end_line,
-              name_location.start_column,
-              name_location.end_column,
+              name_location.start_code_units_column(encoding),
+              name_location.end_code_units_column(encoding),
             )
           else
             name_location
@@ -480,10 +492,11 @@ module RubyIndexer
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T.nilable(String),
+          encoding: Encoding,
         ).void
       end
-      def initialize(target, nesting, name, file_path, location, comments) # rubocop:disable Metrics/ParameterLists
-        super(name, file_path, location, comments)
+      def initialize(target, nesting, name, file_path, location, comments, encoding) # rubocop:disable Metrics/ParameterLists
+        super(name, file_path, location, comments, encoding)
 
         @target = target
         @nesting = nesting
@@ -497,9 +510,15 @@ module RubyIndexer
       sig { returns(String) }
       attr_reader :target
 
-      sig { params(target: String, unresolved_alias: UnresolvedConstantAlias).void }
-      def initialize(target, unresolved_alias)
-        super(unresolved_alias.name, unresolved_alias.file_path, unresolved_alias.location, unresolved_alias.comments)
+      sig { params(target: String, unresolved_alias: UnresolvedConstantAlias, encoding: Encoding).void }
+      def initialize(target, unresolved_alias, encoding)
+        super(
+          unresolved_alias.name,
+          unresolved_alias.file_path,
+          unresolved_alias.location,
+          unresolved_alias.comments,
+          encoding
+        )
 
         @visibility = unresolved_alias.visibility
         @target = target
@@ -517,11 +536,12 @@ module RubyIndexer
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T.nilable(String),
+          encoding: Encoding,
           owner: T.nilable(Entry::Namespace),
         ).void
       end
-      def initialize(name, file_path, location, comments, owner)
-        super(name, file_path, location, comments)
+      def initialize(name, file_path, location, comments, encoding, owner) # rubocop:disable Metrics/ParameterLists
+        super(name, file_path, location, comments, encoding)
         @owner = owner
       end
     end
@@ -546,10 +566,11 @@ module RubyIndexer
           file_path: String,
           location: T.any(Prism::Location, RubyIndexer::Location),
           comments: T.nilable(String),
+          encoding: Encoding,
         ).void
       end
-      def initialize(new_name, old_name, owner, file_path, location, comments) # rubocop:disable Metrics/ParameterLists
-        super(new_name, file_path, location, comments)
+      def initialize(new_name, old_name, owner, file_path, location, comments, encoding) # rubocop:disable Metrics/ParameterLists
+        super(new_name, file_path, location, comments, encoding)
 
         @new_name = new_name
         @old_name = old_name
@@ -567,8 +588,10 @@ module RubyIndexer
       sig { returns(T.nilable(Entry::Namespace)) }
       attr_reader :owner
 
-      sig { params(target: T.any(Member, MethodAlias), unresolved_alias: UnresolvedMethodAlias).void }
-      def initialize(target, unresolved_alias)
+      sig do
+        params(target: T.any(Member, MethodAlias), unresolved_alias: UnresolvedMethodAlias, encoding: Encoding).void
+      end
+      def initialize(target, unresolved_alias, encoding)
         full_comments = +"Alias for #{target.name}\n"
         full_comments << "#{unresolved_alias.comments}\n"
         full_comments << target.comments
@@ -578,6 +601,7 @@ module RubyIndexer
           unresolved_alias.file_path,
           unresolved_alias.location,
           full_comments,
+          encoding
         )
 
         @target = target

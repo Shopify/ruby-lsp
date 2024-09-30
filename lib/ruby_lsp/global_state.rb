@@ -117,6 +117,7 @@ module RubyLsp
       else
         Encoding::UTF_32
       end
+      @index.configuration.encoding = @encoding
 
       file_watching_caps = options.dig(:capabilities, :workspace, :didChangeWatchedFiles)
       if file_watching_caps&.dig(:dynamicRegistration) && file_watching_caps&.dig(:relativePatternSupport)
