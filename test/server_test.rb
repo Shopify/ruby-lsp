@@ -699,6 +699,10 @@ class ServerTest < Minitest::Test
       end
 
       def deactivate; end
+
+      def version
+        "0.1.0"
+      end
     end
 
     Class.new(RubyLsp::Addon) do
@@ -712,6 +716,10 @@ class ServerTest < Minitest::Test
       end
 
       def deactivate; end
+
+      def version
+        "0.1.0"
+      end
     end
   end
 

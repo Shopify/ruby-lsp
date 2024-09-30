@@ -1520,6 +1520,10 @@ class CompletionTest < Minitest::Test
       def name
         "Foo"
       end
+
+      def version
+        "0.1.0"
+      end
     end
   end
 end

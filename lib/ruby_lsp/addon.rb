@@ -32,6 +32,8 @@ module RubyLsp
 
     AddonNotFoundError = Class.new(StandardError)
 
+    class IncompatibleApiError < StandardError; end
+
     class << self
       extend T::Sig
 
@@ -80,12 +82,48 @@ module RubyLsp
         errors
       end
 
-      sig { params(addon_name: String).returns(Addon) }
-      def get(addon_name)
+      # Get a reference to another add-on object by name and version. If an add-on exports an API that can be used by
+      # other add-ons, this is the way to get access to that API.
+      #
+      # Important: if the add-on is not found, AddonNotFoundError will be raised. If the add-on is found, but its
+      # current version does not satisfy the given version constraint, then IncompatibleApiError will be raised. It is
+      # the responsibility of the add-ons using this API to handle these errors appropriately.
+      sig { params(addon_name: String, version_constraints: String).returns(Addon) }
+      def get(addon_name, *version_constraints)
         addon = addons.find { |addon| addon.name == addon_name }
         raise AddonNotFoundError, "Could not find add-on '#{addon_name}'" unless addon
 
+        version_object = Gem::Version.new(addon.version)
+
+        unless version_constraints.all? { |constraint| Gem::Requirement.new(constraint).satisfied_by?(version_object) }
+          raise IncompatibleApiError,
+            "Constraints #{version_constraints.inspect} is incompatible with #{addon_name} version #{addon.version}"
+        end
+
         addon
+      end
+
+      # Depend on a specific version of the Ruby LSP. This method should only be used if the add-on is distributed in a
+      # gem that does not have a runtime dependency on the ruby-lsp gem. This method should be invoked at the top of the
+      # `addon.rb` file before defining any classes or requiring any files. For example:
+      #
+      # ```ruby
+      # RubyLsp::Addon.depend_on_ruby_lsp!(">= 0.18.0")
+      #
+      # module MyGem
+      #   class MyAddon < RubyLsp::Addon
+      #     # ...
+      #   end
+      # end
+      # ```
+      sig { params(version_constraints: String).void }
+      def depend_on_ruby_lsp!(*version_constraints)
+        version_object = Gem::Version.new(RubyLsp::VERSION)
+
+        unless version_constraints.all? { |constraint| Gem::Requirement.new(constraint).satisfied_by?(version_object) }
+          raise IncompatibleApiError,
+            "Add-on is not compatible with this version of the Ruby LSP. Skipping its activation"
+        end
       end
     end
 
@@ -131,6 +169,11 @@ module RubyLsp
     # Add-ons should override the `name` method to return the add-on name
     sig { abstract.returns(String) }
     def name; end
+
+    # Add-ons should override the `version` method to return a semantic version string representing the add-on's
+    # version. This is used for compatibility checks
+    sig { abstract.returns(String) }
+    def version; end
 
     # Creates a new CodeLens listener. This method is invoked on every CodeLens request
     sig do
