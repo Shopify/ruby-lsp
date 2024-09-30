@@ -232,7 +232,7 @@ extension?
 
 ## Indexing
 
-When Ruby LSP starts, it attempts to index your code as well as your dependencies as described in [Configuring code indexing](index.html#configuring-code-indexing).
+When Ruby LSP starts, it attempts to index your code as well as your dependencies as described in [Configuring code indexing](index#configuring-code-indexing).
 
 In rare cases, Ruby LSP will encounter an error which prevents indexing from completing, which will result in incomplete information in the editor.
 
@@ -240,7 +240,7 @@ Firstly, ensure that you are using the latest release of the `ruby-lsp` gem, as 
 
 To diagnose the particular file(s) causing a problem, run `ruby-lsp-check`. Please log an issue so that we can address it. If the code is not open source then please provide a minimal reproduction.
 
-In the meantime, you can [configure Ruby LSP to ignore a particular gem or file for indexing](index.html#configuring-code-indexing).
+In the meantime, you can [configure Ruby LSP to ignore a particular gem or file for indexing](index#configuring-code-indexing).
 
 ## After troubleshooting
 
