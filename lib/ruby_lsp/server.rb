@@ -969,7 +969,7 @@ module RubyLsp
             false
           end
         rescue StandardError => error
-          send_message(Notification.window_show_error("Error while indexing: #{error.message}"))
+          send_message(Notification.window_show_error("Error while indexing (see [troubleshooting steps](https://shopify.github.io/ruby-lsp/troubleshooting#indexing)): #{error.message}"))
         end
 
         # Indexing produces a high number of short lived object allocations. That might lead to some fragmentation and
