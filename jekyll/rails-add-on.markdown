@@ -8,15 +8,15 @@ nav_order: 10
 
 [Ruby LSP Rails](https://github.com/Shopify/ruby-lsp-rails) is a Ruby LSP add-on that enhances the base Ruby LSP functionality
 with Rails-specific features. It provides improved code navigation, document symbols for Rails-specific elements,
-and runtime inspection capabilities.
+and runtime introspection capabilities.
 
-It [communicates with a running Rails instance](#runtime-inspection) to provide dynamic information about the application,
+It [communicates with a running Rails instance](#runtime-introspection) to provide dynamic information about the application,
 enabling more accurate and context-aware language server features.
 
 ## Table of Contents
 
 - [Installation](#installation)
-- [Runtime Inspection](#runtime-inspection)
+- [Runtime Introspection](#runtime-introspection)
 - [Features](#features)
     - [**Document Symbol**](#document-symbol)
         - [Active Record Callbacks, Validations, and Associations](#active-record-callbacks-validations-and-associations)
@@ -41,7 +41,7 @@ enabling more accurate and context-aware language server features.
 
 Ruby LSP detects Rails projects and installs the [Rails add-on](https://github.com/Shopify/ruby-lsp-rails) for you.
 
-## Runtime Inspection
+## Runtime Introspection
 
 LSP tooling is typically based on static analysis, but `ruby-lsp-rails` actually communicates with your Rails app for
 some features.

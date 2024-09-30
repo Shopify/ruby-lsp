@@ -27,6 +27,7 @@ import {
   ClientCapabilities,
   FeatureState,
   ServerCapabilities,
+  ErrorCodes,
 } from "vscode-languageclient/node";
 
 import {
@@ -397,7 +398,15 @@ export default class Client extends LanguageClient implements ClientInterface {
         } else {
           const { errorMessage, errorClass, backtrace } = error.data;
 
-          if (errorMessage && errorClass && backtrace) {
+          // We only want to produce telemetry events for errors that have all the data we need and that are internal
+          // server errors. Other errors do not necessarily indicate bugs in the server. You can check LSP error codes
+          // here https://microsoft.github.io/language-server-protocol/specification/#errorCodes
+          if (
+            errorMessage &&
+            errorClass &&
+            backtrace &&
+            error.code === ErrorCodes.InternalError
+          ) {
             // Sanitize the backtrace coming from the server to remove the user's home directory from it, then mark it
             // as a trusted value. Otherwise the VS Code telemetry logger redacts the entire backtrace and we are unable
             // to see where in the server the error occurred
