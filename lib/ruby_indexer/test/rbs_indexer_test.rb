@@ -348,6 +348,14 @@ module RubyIndexer
       assert_includes(entry.comments, "Returns `true` if any element of `self` meets a given criterion.")
     end
 
+    def test_indexing_untyped_functions
+      entries = @index.resolve_method("call", "Method")
+
+      parameters = entries.first.signatures.first.parameters
+      assert_equal(1, parameters.length)
+      assert_instance_of(Entry::ForwardingParameter, parameters.first)
+    end
+
     private
 
     def parse_rbs_methods(rbs, method_name)

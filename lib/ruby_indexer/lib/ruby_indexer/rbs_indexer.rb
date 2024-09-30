@@ -139,13 +139,23 @@ module RubyIndexer
 
     sig { params(overload: RBS::AST::Members::MethodDefinition::Overload).returns(T::Array[Entry::Parameter]) }
     def process_overload(overload)
-      function = T.cast(overload.method_type.type, RBS::Types::Function)
-      parameters = parse_arguments(function)
+      function = overload.method_type.type
 
-      block = overload.method_type.block
-      parameters << Entry::BlockParameter.anonymous if block&.required
+      if function.is_a?(RBS::Types::Function)
+        parameters = parse_arguments(function)
 
-      parameters
+        block = overload.method_type.block
+        parameters << Entry::BlockParameter.anonymous if block&.required
+        return parameters
+      end
+
+      # Untyped functions are a new RBS feature (since v3.6.0) to declare methods that accept any parameters. For our
+      # purposes, accepting any argument is equivalent to `...`
+      if defined?(RBS::Types::UntypedFunction) && function.is_a?(RBS::Types::UntypedFunction)
+        [Entry::ForwardingParameter.new]
+      else
+        []
+      end
     end
 
     sig { params(function: RBS::Types::Function).returns(T::Array[Entry::Parameter]) }
