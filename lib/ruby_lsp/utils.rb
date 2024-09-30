@@ -64,14 +64,11 @@ module RubyLsp
     class << self
       extend T::Sig
 
-      sig { params(message: String).returns(Notification) }
-      def window_show_error(message)
+      sig { params(message: String, type: Integer).returns(Notification) }
+      def window_show_message(message, type: Constant::MessageType::INFO)
         new(
           method: "window/showMessage",
-          params: Interface::ShowMessageParams.new(
-            type: Constant::MessageType::ERROR,
-            message: message,
-          ),
+          params: Interface::ShowMessageParams.new(type: type, message: message),
         )
       end
 

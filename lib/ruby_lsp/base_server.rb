@@ -130,6 +130,12 @@ module RubyLsp
     sig { abstract.void }
     def shutdown; end
 
+    sig { params(id: Integer, message: String, type: Integer).void }
+    def fail_request_and_notify(id, message, type: Constant::MessageType::INFO)
+      send_message(Error.new(id: id, code: Constant::ErrorCodes::REQUEST_FAILED, message: message))
+      send_message(Notification.window_show_message(message, type: type))
+    end
+
     sig { returns(Thread) }
     def new_worker
       Thread.new do
