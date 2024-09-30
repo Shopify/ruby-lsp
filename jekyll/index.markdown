@@ -46,6 +46,7 @@ Want to discuss Ruby developer experience? Consider joining the public
     - [ERB support](#erb-support)
     - [Guessed types](#guessed-types)
     - [Rename symbol](#rename-symbol)
+    - [Find references](#find-references)
 - [VS Code only features](#vs-code-features)
     - [Dependencies view](#dependencies-view)
     - [Rails generator integrations](#rails-generator-integrations)
@@ -417,6 +418,13 @@ renaming can be triggered by right clicking the entity to rename or by pressing 
 edits that will be applied by pressing CTRL/CMD + Enter after typing the desired new name.
 
 ![Rename demo](images/rename.gif)
+
+### Find references
+
+The find references request allows users to both see a list of references or jump to reference locations. Note that
+only constants are currently supported, but support for methods, instance variables and local variables is planned.
+
+![References demo](images/references.gif)
 
 ## VS Code features
 

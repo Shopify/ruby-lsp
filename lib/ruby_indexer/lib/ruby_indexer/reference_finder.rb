@@ -14,26 +14,29 @@ module RubyIndexer
       sig { returns(Prism::Location) }
       attr_reader :location
 
-      sig { params(name: String, location: Prism::Location).void }
-      def initialize(name, location)
+      sig { returns(T::Boolean) }
+      attr_reader :declaration
+
+      sig { params(name: String, location: Prism::Location, declaration: T::Boolean).void }
+      def initialize(name, location, declaration:)
         @name = name
         @location = location
+        @declaration = declaration
       end
     end
-
-    sig { returns(T::Array[Reference]) }
-    attr_reader :references
 
     sig do
       params(
         fully_qualified_name: String,
         index: RubyIndexer::Index,
         dispatcher: Prism::Dispatcher,
+        include_declarations: T::Boolean,
       ).void
     end
-    def initialize(fully_qualified_name, index, dispatcher)
+    def initialize(fully_qualified_name, index, dispatcher, include_declarations: true)
       @fully_qualified_name = fully_qualified_name
       @index = index
+      @include_declarations = include_declarations
       @stack = T.let([], T::Array[String])
       @references = T.let([], T::Array[Reference])
 
@@ -62,6 +65,13 @@ module RubyIndexer
       )
     end
 
+    sig { returns(T::Array[Reference]) }
+    def references
+      return @references if @include_declarations
+
+      @references.reject(&:declaration)
+    end
+
     sig { params(node: Prism::ClassNode).void }
     def on_class_node_enter(node)
       constant_path = node.constant_path
@@ -69,7 +79,7 @@ module RubyIndexer
       nesting = actual_nesting(name)
 
       if nesting.join("::") == @fully_qualified_name
-        @references << Reference.new(name, constant_path.location)
+        @references << Reference.new(name, constant_path.location, declaration: true)
       end
 
       @stack << name
@@ -87,7 +97,7 @@ module RubyIndexer
       nesting = actual_nesting(name)
 
       if nesting.join("::") == @fully_qualified_name
-        @references << Reference.new(name, constant_path.location)
+        @references << Reference.new(name, constant_path.location, declaration: true)
       end
 
       @stack << name
@@ -236,10 +246,16 @@ module RubyIndexer
       entries = @index.resolve(name, @stack)
       return unless entries
 
+      previous_reference = @references.last
+
       entries.each do |entry|
         next unless entry.name == @fully_qualified_name
 
-        @references << Reference.new(name, location)
+        # When processing a class/module declaration, we eagerly handle the constant reference. To avoid duplicates,
+        # when we find the constant node defining the namespace, then we have to check if it wasn't already added
+        next if previous_reference&.location == location
+
+        @references << Reference.new(name, location, declaration: false)
       end
     end
 

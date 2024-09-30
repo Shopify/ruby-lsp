@@ -195,6 +195,9 @@ Interested in contributing? Check out the issues tagged with [help-wanted] or [g
 - Explore using variable/method call names as a type hint
 - [Develop strategy to index declarations made in native extensions or C code. For example, Ruby’s own Core classes]
 - [Add find references support]
+    - [References method support](https://github.com/Shopify/ruby-lsp/issues/2640)
+    - [References instance variable support](https://github.com/Shopify/ruby-lsp/issues/2641)
+    - [References local variable support](https://github.com/Shopify/ruby-lsp/issues/2642)
 - [Add rename support]
 - [Add show type hierarchy support]
 - [Show index view on the VS Code extension allowing users to browse indexed gems]

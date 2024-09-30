@@ -163,7 +163,7 @@ module RubyLsp
         finder = RubyIndexer::ReferenceFinder.new(fully_qualified_name, @global_state.index, dispatcher)
         dispatcher.visit(parse_result.value)
 
-        finder.references.uniq(&:location).map do |reference|
+        finder.references.map do |reference|
           adjust_reference_for_edit(name, reference)
         end
       end
