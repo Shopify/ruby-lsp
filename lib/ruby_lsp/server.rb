@@ -285,8 +285,9 @@ module RubyLsp
         rescue RuboCop::Error => e
           # The user may have provided unknown config switches in .rubocop or
           # is trying to load a non-existant config file.
-          send_message(Notification.window_show_error(
+          send_message(Notification.window_show_message(
             "RuboCop configuration error: #{e.message}. Formatting will not be available.",
+            type: Constant::MessageType::ERROR,
           ))
         end
       end
@@ -531,10 +532,16 @@ module RubyLsp
       response = Requests::Formatting.new(@global_state, document).perform
       send_message(Result.new(id: message[:id], response: response))
     rescue Requests::Request::InvalidFormatter => error
-      send_message(Notification.window_show_error("Configuration error: #{error.message}"))
+      send_message(Notification.window_show_message(
+        "Configuration error: #{error.message}",
+        type: Constant::MessageType::ERROR,
+      ))
       send_empty_response(message[:id])
     rescue StandardError, LoadError => error
-      send_message(Notification.window_show_error("Formatting error: #{error.message}"))
+      send_message(Notification.window_show_message(
+        "Formatting error: #{error.message}",
+        type: Constant::MessageType::ERROR,
+      ))
       send_empty_response(message[:id])
     end
 
@@ -673,30 +680,19 @@ module RubyLsp
       document = @store.get(uri)
 
       unless document.is_a?(RubyDocument)
-        send_message(Notification.window_show_error("Code actions are currently only available for Ruby documents"))
-        raise Requests::CodeActionResolve::CodeActionError
+        fail_request_and_notify(message[:id], "Code actions are currently only available for Ruby documents")
+        return
       end
 
       result = Requests::CodeActionResolve.new(document, params).perform
 
       case result
       when Requests::CodeActionResolve::Error::EmptySelection
-        send_message(Notification.window_show_error("Invalid selection for Extract Variable refactor"))
-        raise Requests::CodeActionResolve::CodeActionError
+        fail_request_and_notify(message[:id], "Invalid selection for extract variable refactor")
       when Requests::CodeActionResolve::Error::InvalidTargetRange
-        send_message(
-          Notification.window_show_error(
-            "Couldn't find an appropriate location to place extracted refactor",
-          ),
-        )
-        raise Requests::CodeActionResolve::CodeActionError
+        fail_request_and_notify(message[:id], "Couldn't find an appropriate location to place extracted refactor")
       when Requests::CodeActionResolve::Error::UnknownCodeAction
-        send_message(
-          Notification.window_show_error(
-            "Unknown code action",
-          ),
-        )
-        raise Requests::CodeActionResolve::CodeActionError
+        fail_request_and_notify(message[:id], "Unknown code action")
       else
         send_message(Result.new(id: message[:id], response: result))
       end
@@ -729,10 +725,16 @@ module RubyLsp
         ),
       )
     rescue Requests::Request::InvalidFormatter => error
-      send_message(Notification.window_show_error("Configuration error: #{error.message}"))
+      send_message(Notification.window_show_message(
+        "Configuration error: #{error.message}",
+        type: Constant::MessageType::ERROR,
+      ))
       send_empty_response(message[:id])
     rescue StandardError, LoadError => error
-      send_message(Notification.window_show_error("Error running diagnostics: #{error.message}"))
+      send_message(Notification.window_show_message(
+        "Error running diagnostics: #{error.message}",
+        type: Constant::MessageType::ERROR,
+      ))
       send_empty_response(message[:id])
     end
 
@@ -971,7 +973,7 @@ module RubyLsp
         rescue StandardError => error
           message = "Error while indexing (see [troubleshooting steps]" \
             "(https://shopify.github.io/ruby-lsp/troubleshooting#indexing)): #{error.message}"
-          send_message(Notification.window_show_error(message))
+          send_message(Notification.window_show_message(message, type: Constant::MessageType::ERROR))
         end
 
         # Indexing produces a high number of short lived object allocations. That might lead to some fragmentation and
@@ -1056,8 +1058,9 @@ module RubyLsp
         @global_state.formatter = "none"
 
         send_message(
-          Notification.window_show_error(
+          Notification.window_show_message(
             "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the Gemfile or gemspec.",
+            type: Constant::MessageType::ERROR,
           ),
         )
       end
