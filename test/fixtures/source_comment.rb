@@ -2,7 +2,7 @@
 def foo
 end
 
-# source://mutex_m//mutex_m.rb#1
+# source://erb//erb.rb#1
 def bar
 end
 

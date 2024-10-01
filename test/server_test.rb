@@ -421,7 +421,11 @@ class ServerTest < Minitest::Test
     content = log.params.message
 
     assert_match(/boom/, content)
-    assert_match(%r{ruby-lsp/lib/ruby_lsp/server\.rb:\d+:in `process_message'}, content)
+    if RUBY_VERSION >= "3.4"
+      assert_match(%r{ruby-lsp/lib/ruby_lsp/server\.rb:\d+:in 'RubyLsp::Server#process_message'}, content)
+    else
+      assert_match(%r{ruby-lsp/lib/ruby_lsp/server\.rb:\d+:in `process_message'}, content)
+    end
   end
 
   def test_changed_file_only_indexes_ruby
