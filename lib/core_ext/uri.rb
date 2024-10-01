@@ -3,6 +3,11 @@
 
 module URI
   class Generic
+    # Avoid a deprecation warning with Ruby 3.4 where the default parser was changed to RFC3986.
+    # This condition must remain even after support for 3.4 has been dropped for users that have
+    # `uri` in their lockfile, decoupling it from the ruby version.
+    PARSER = T.let(const_defined?(:RFC2396_PARSER) ? RFC2396_PARSER : DEFAULT_PARSER, RFC2396_Parser)
+
     class << self
       extend T::Sig
 
@@ -10,12 +15,12 @@ module URI
       def from_path(path:, fragment: nil, scheme: "file")
         # On Windows, if the path begins with the disk name, we need to add a leading slash to make it a valid URI
         escaped_path = if /^[A-Z]:/i.match?(path)
-          DEFAULT_PARSER.escape("/#{path}")
+          PARSER.escape("/#{path}")
         elsif path.start_with?("//?/")
           # Some paths on Windows start with "//?/". This is a special prefix that allows for long file paths
-          DEFAULT_PARSER.escape(path.delete_prefix("//?"))
+          PARSER.escape(path.delete_prefix("//?"))
         else
-          DEFAULT_PARSER.escape(path)
+          PARSER.escape(path)
         end
 
         build(scheme: scheme, path: escaped_path, fragment: fragment)
@@ -29,7 +34,7 @@ module URI
       parsed_path = path
       return unless parsed_path
 
-      unescaped_path = DEFAULT_PARSER.unescape(parsed_path)
+      unescaped_path = PARSER.unescape(parsed_path)
 
       # On Windows, when we're getting the file system path back from the URI, we need to remove the leading forward
       # slash
