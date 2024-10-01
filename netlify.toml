@@ -7,3 +7,6 @@
   printf "url: \"$DEPLOY_PRIME_URL\"\nbaseurl: \"/\"" > _config_netlify.yml; \
   bundle exec jekyll build --config _config.yml,_config_netlify.yml \
   """
+
+  # Only build if netlify.toml or jekyll files have changed
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF netlify.toml jekyll"
