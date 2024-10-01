@@ -5,6 +5,8 @@ module RubyIndexer
   class RBSIndexer
     extend T::Sig
 
+    HAS_UNTYPED_FUNCTION = T.let(!!defined?(RBS::Types::UntypedFunction), T::Boolean)
+
     sig { params(index: Index).void }
     def initialize(index)
       @index = index
@@ -161,7 +163,7 @@ module RubyIndexer
 
       # Untyped functions are a new RBS feature (since v3.6.0) to declare methods that accept any parameters. For our
       # purposes, accepting any argument is equivalent to `...`
-      if defined?(RBS::Types::UntypedFunction) && function.is_a?(RBS::Types::UntypedFunction)
+      if HAS_UNTYPED_FUNCTION && function.is_a?(RBS::Types::UntypedFunction)
         [Entry::ForwardingParameter.new]
       else
         []
