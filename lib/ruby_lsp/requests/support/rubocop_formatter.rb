@@ -28,6 +28,12 @@ module RubyLsp
           @format_runner.formatted_source
         end
 
+        # RuboCop does not support range formatting
+        sig { override.params(uri: URI::Generic, source: String, base_indentation: Integer).returns(T.nilable(String)) }
+        def run_range_formatting(uri, source, base_indentation)
+          nil
+        end
+
         sig do
           override.params(
             uri: URI::Generic,

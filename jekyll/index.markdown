@@ -295,6 +295,22 @@ In VS Code, format on type is disabled by default. You can enable it with `"edit
 
 ![On type formatting demo](images/on_type_formatting.gif)
 
+### Range formatting
+
+Range formatting allows users to format a selection in the editor, without formatting the entire file. It is also the
+feature that enables format on paste to work.
+
+{: .note }
+In VS Code, format on paste is disabled by default. You can enable it with `"editor.formatOnPaste": true`
+
+{: .note }
+Currently, only the [Syntax Tree](https://github.com/ruby-syntax-tree/syntax_tree) formatter has support for partially
+formatting a file. Supporting range formatting for RuboCop or Standard requires new APIs to be exposed so that the
+Ruby LSP can inform the formatter of the base indentation at the place of the selection. Additionally, the formatter
+can only apply corrections that make sense for the portion of the document.
+
+![Range formatting demo](images/range_formatting.gif)
+
 ### Selection range
 
 Selection range (or smart ranges) expands or shrinks a selection based on the code's constructs. In VS Code, this can

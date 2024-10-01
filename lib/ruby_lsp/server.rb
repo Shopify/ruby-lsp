@@ -43,6 +43,8 @@ module RubyLsp
         text_document_semantic_tokens_range(message)
       when "textDocument/formatting"
         text_document_formatting(message)
+      when "textDocument/rangeFormatting"
+        text_document_range_formatting(message)
       when "textDocument/documentHighlight"
         text_document_document_highlight(message)
       when "textDocument/onTypeFormatting"
@@ -233,6 +235,7 @@ module RubyLsp
           type_hierarchy_provider: type_hierarchy_provider,
           rename_provider: !@global_state.has_type_checker,
           references_provider: !@global_state.has_type_checker,
+          document_range_formatting_provider: true,
           experimental: {
             addon_detection: true,
           },
@@ -514,6 +517,34 @@ module RubyLsp
       )
       dispatcher.visit(document.parse_result.value)
       send_message(Result.new(id: message[:id], response: request.perform))
+    end
+
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def text_document_range_formatting(message)
+      # If formatter is set to `auto` but no supported formatting gem is found, don't attempt to format
+      if @global_state.formatter == "none"
+        send_empty_response(message[:id])
+        return
+      end
+
+      params = message[:params]
+      uri = params.dig(:textDocument, :uri)
+      # Do not format files outside of the workspace. For example, if someone is looking at a gem's source code, we
+      # don't want to format it
+      path = uri.to_standardized_path
+      unless path.nil? || path.start_with?(@global_state.workspace_path)
+        send_empty_response(message[:id])
+        return
+      end
+
+      document = @store.get(uri)
+      unless document.is_a?(RubyDocument)
+        send_empty_response(message[:id])
+        return
+      end
+
+      response = Requests::RangeFormatting.new(@global_state, document, params).perform
+      send_message(Result.new(id: message[:id], response: response))
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }

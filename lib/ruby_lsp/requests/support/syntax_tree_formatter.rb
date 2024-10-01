@@ -37,6 +37,14 @@ module RubyLsp
           SyntaxTree.format(document.source, @options.print_width, options: @options.formatter_options)
         end
 
+        sig { override.params(uri: URI::Generic, source: String, base_indentation: Integer).returns(T.nilable(String)) }
+        def run_range_formatting(uri, source, base_indentation)
+          path = uri.to_standardized_path
+          return if path && @options.ignore_files.any? { |pattern| File.fnmatch?("*/#{pattern}", path) }
+
+          SyntaxTree.format(source, @options.print_width, base_indentation, options: @options.formatter_options)
+        end
+
         sig do
           override.params(
             uri: URI::Generic,

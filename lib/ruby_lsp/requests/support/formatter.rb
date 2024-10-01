@@ -13,6 +13,9 @@ module RubyLsp
         sig { abstract.params(uri: URI::Generic, document: RubyDocument).returns(T.nilable(String)) }
         def run_formatting(uri, document); end
 
+        sig { abstract.params(uri: URI::Generic, source: String, base_indentation: Integer).returns(T.nilable(String)) }
+        def run_range_formatting(uri, source, base_indentation); end
+
         sig do
           abstract.params(
             uri: URI::Generic,

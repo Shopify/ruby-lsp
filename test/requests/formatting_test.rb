@@ -160,7 +160,6 @@ class FormattingTest < Minitest::Test
   private
 
   def formatted_document(formatter)
-    require "ruby_lsp/requests/formatting"
     @global_state.formatter = formatter
     RubyLsp::Requests::Formatting.new(@global_state, @document).perform&.first&.new_text
   end
@@ -168,20 +167,11 @@ class FormattingTest < Minitest::Test
   def with_syntax_tree_config_file(contents)
     filepath = File.join(Dir.pwd, ".streerc")
     File.write(filepath, contents)
-    clear_syntax_tree_runner_singleton_instance
+    formatter_with_options = RubyLsp::Requests::Support::SyntaxTreeFormatter.new
+    @global_state.stubs(:active_formatter).returns(formatter_with_options)
 
     yield
   ensure
     FileUtils.rm(filepath) if filepath
-    clear_syntax_tree_runner_singleton_instance
-  end
-
-  def clear_syntax_tree_runner_singleton_instance
-    return unless defined?(RubyLsp::Requests::Support::SyntaxTreeFormatter)
-
-    @global_state.register_formatter(
-      "syntax_tree",
-      RubyLsp::Requests::Support::SyntaxTreeFormatter.new,
-    )
   end
 end
