@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/Shopify/ruby-lsp"
   s.license = "MIT"
 
-  s.files = Dir.glob("lib/**/*.rb") + ["README.md", "VERSION", "LICENSE.txt"]
+  s.files = Dir.glob("lib/**/*.rb") + ["README.md", "VERSION", "LICENSE.txt"] + Dir.glob("static_docs/**/*.md")
   s.bindir = "exe"
   s.executables = ["ruby-lsp", "ruby-lsp-check"]
   s.require_paths = ["lib"]

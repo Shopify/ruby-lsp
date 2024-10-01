@@ -40,6 +40,8 @@ module RubyLsp
         # For example, forgetting to return the `insertText` included in the original item will make the editor use the
         # `label` for the text edit instead
         label = @item[:label].dup
+        return keyword_resolve(@item) if @item.dig(:data, :keyword)
+
         entries = @index[label] || []
 
         owner_name = @item.dig(:data, :owner_name)
@@ -71,6 +73,33 @@ module RubyLsp
         )
 
         @item
+      end
+
+      private
+
+      sig { params(item: T::Hash[Symbol, T.untyped]).returns(T::Hash[Symbol, T.untyped]) }
+      def keyword_resolve(item)
+        keyword = item[:label]
+        content = KEYWORD_DOCS[keyword]
+
+        if content
+          doc_path = File.join(STATIC_DOCS_PATH, "#{keyword}.md")
+
+          @item[:documentation] = Interface::MarkupContent.new(
+            kind: "markdown",
+            value: <<~MARKDOWN.chomp,
+              ```ruby
+              #{keyword}
+              ```
+
+              [Read more](#{doc_path})
+
+              #{content}
+            MARKDOWN
+          )
+        end
+
+        item
       end
     end
   end

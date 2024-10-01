@@ -24,6 +24,7 @@ module RubyLsp
           Prism::InterpolatedStringNode,
           Prism::SuperNode,
           Prism::ForwardingSuperNode,
+          Prism::YieldNode,
         ],
         T::Array[T.class_of(Prism::Node)],
       )
@@ -71,6 +72,7 @@ module RubyLsp
           :on_forwarding_super_node_enter,
           :on_string_node_enter,
           :on_interpolated_string_node_enter,
+          :on_yield_node_enter,
         )
       end
 
@@ -166,6 +168,11 @@ module RubyLsp
         handle_super_node_hover
       end
 
+      sig { params(node: Prism::YieldNode).void }
+      def on_yield_node_enter(node)
+        handle_keyword_documentation(node.keyword)
+      end
+
       private
 
       sig { params(node: T.any(Prism::InterpolatedStringNode, Prism::StringNode)).void }
@@ -191,6 +198,18 @@ module RubyLsp
 
           @response_builder.push(message, category: :documentation)
         end
+      end
+
+      sig { params(keyword: String).void }
+      def handle_keyword_documentation(keyword)
+        content = KEYWORD_DOCS[keyword]
+        return unless content
+
+        doc_path = File.join(STATIC_DOCS_PATH, "#{keyword}.md")
+
+        @response_builder.push("```ruby\n#{keyword}\n```", category: :title)
+        @response_builder.push("[Read more](#{doc_path})", category: :links)
+        @response_builder.push(content, category: :documentation)
       end
 
       sig { void }
