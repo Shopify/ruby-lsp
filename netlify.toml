@@ -5,6 +5,5 @@
   # Set the baseurl to "/" and url to "$DEPLOY_PRIME_URL" so that the built site is served from the root
   command = """
   printf "url: \"$DEPLOY_PRIME_URL\"\nbaseurl: \"/\"" > _config_netlify.yml; \
-  bundle install; \
   bundle exec jekyll build --config _config.yml,_config_netlify.yml \
   """
