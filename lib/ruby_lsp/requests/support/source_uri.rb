@@ -19,6 +19,13 @@ module URI
       T::Array[Symbol],
     )
 
+    # `uri` for Ruby 3.4 switched the default parser from RFC2396 to RFC3986. The new parser emits a deprecation
+    # warning on a few methods and delegates them to RFC2396, namely `extract`/`make_regexp`/`escape`/`unescape`.
+    # On earlier versions of the uri gem, the RFC2396_PARSER constant doesn't exist, so it needs some special
+    # handling to select a parser that doesn't emit deprecations. While it was backported to Ruby 3.1, users may
+    # have the uri gem in their own bundle and thus not use a compatible version.
+    PARSER = T.let(const_defined?(:RFC2396_PARSER) ? RFC2396_PARSER : DEFAULT_PARSER, RFC2396_Parser)
+
     T.unsafe(self).alias_method(:gem_name, :host)
     T.unsafe(self).alias_method(:line_number, :fragment)
 
@@ -41,7 +48,7 @@ module URI
           {
             scheme: "source",
             host: gem_name,
-            path: DEFAULT_PARSER.escape("/#{gem_version}/#{path}"),
+            path: PARSER.escape("/#{gem_version}/#{path}"),
             fragment: line_number,
           }
         )
