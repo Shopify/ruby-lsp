@@ -320,14 +320,18 @@ module RubyLsp
           language_id: language_id,
         )
 
-        if document.past_expensive_limit?
+        if document.past_expensive_limit? && text_document[:uri].scheme == "file"
+          log_message = <<~MESSAGE
+            The file #{text_document[:uri].path} is too long. For performance reasons, semantic highlighting and
+            diagnostics will be disabled.
+          MESSAGE
+
           send_message(
             Notification.new(
-              method: "window/showMessage",
-              params: Interface::ShowMessageParams.new(
+              method: "window/logMessage",
+              params: Interface::LogMessageParams.new(
                 type: Constant::MessageType::WARNING,
-                message: "This file is too long. For performance reasons, semantic highlighting and " \
-                  "diagnostics will be disabled",
+                message: log_message,
               ),
             ),
           )
