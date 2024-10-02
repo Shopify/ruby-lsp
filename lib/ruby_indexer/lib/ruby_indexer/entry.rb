@@ -525,6 +525,22 @@ module RubyIndexer
       end
     end
 
+    # Represents a global variable e.g.: $DEBUG
+    class GlobalVariable < Entry
+      sig do
+        params(
+          name: String,
+          file_path: String,
+          location: RubyIndexer::Location,
+          comments: T.nilable(String),
+          encoding: Encoding,
+        ).void
+      end
+      def initialize(name, file_path, location, comments, encoding)
+        super(name, file_path, location, comments, encoding)
+      end
+    end
+
     # Represents an instance variable e.g.: @a = 1
     class InstanceVariable < Entry
       sig { returns(T.nilable(Entry::Namespace)) }

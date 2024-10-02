@@ -76,6 +76,20 @@ module RubyIndexer
       assert_operator(entry.location.end_column, :>, 0)
     end
 
+    def test_index_global_declaration
+      entries = @index["$DEBUG"]
+      refute_nil(entries)
+      assert_equal(1, entries.length)
+
+      entry = entries.first
+
+      assert_instance_of(Entry::GlobalVariable, entry)
+      assert_equal("$DEBUG", entry.name)
+      assert_match(%r{/gems/rbs-.*/core/global_variables.rbs}, entry.file_path)
+      assert_operator(entry.location.start_column, :<, entry.location.end_column)
+      assert_equal(entry.location.start_line, entry.location.end_line)
+    end
+
     def test_attaches_correct_owner_to_singleton_methods
       entries = @index["basename"]
       refute_nil(entries)
