@@ -99,6 +99,18 @@ module RubyLsp
       @state.delete(uri.to_s)
     end
 
+    sig { params(uri: URI::Generic).returns(T::Boolean) }
+    def key?(uri)
+      @state.key?(uri.to_s)
+    end
+
+    sig { params(block: T.proc.params(uri: String, document: Document[T.untyped]).void).void }
+    def each(&block)
+      @state.each do |uri, document|
+        block.call(uri, document)
+      end
+    end
+
     sig do
       type_parameters(:T)
         .params(

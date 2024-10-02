@@ -67,6 +67,8 @@ module RubyLsp
         text_document_definition(message)
       when "textDocument/prepareTypeHierarchy"
         text_document_prepare_type_hierarchy(message)
+      when "textDocument/rename"
+        text_document_rename(message)
       when "typeHierarchy/supertypes"
         type_hierarchy_supertypes(message)
       when "typeHierarchy/subtypes"
@@ -227,6 +229,7 @@ module RubyLsp
           workspace_symbol_provider: enabled_features["workspaceSymbol"] && !@global_state.has_type_checker,
           signature_help_provider: signature_help_provider,
           type_hierarchy_provider: type_hierarchy_provider,
+          rename_provider: !@global_state.has_type_checker,
           experimental: {
             addon_detection: true,
           },
@@ -611,6 +614,26 @@ module RubyLsp
           ).perform,
         ),
       )
+    end
+
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def text_document_rename(message)
+      params = message[:params]
+      document = @store.get(params.dig(:textDocument, :uri))
+
+      unless document.is_a?(RubyDocument)
+        send_empty_response(message[:id])
+        return
+      end
+
+      send_message(
+        Result.new(
+          id: message[:id],
+          response: Requests::Rename.new(@global_state, @store, document, params).perform,
+        ),
+      )
+    rescue Requests::Rename::InvalidNameError => e
+      send_message(Error.new(id: message[:id], code: Constant::ErrorCodes::REQUEST_FAILED, message: e.message))
     end
 
     sig { params(document: Document[T.untyped]).returns(RubyDocument::SorbetLevel) }

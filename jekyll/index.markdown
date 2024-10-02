@@ -45,6 +45,7 @@ Want to discuss Ruby developer experience? Consider joining the public
     - [Show syntax tree](#show-syntax-tree)
     - [ERB support](#erb-support)
     - [Guessed types](#guessed-types)
+    - [Rename symbol](#rename-symbol)
 - [VS Code only features](#vs-code-features)
     - [Dependencies view](#dependencies-view)
     - [Rails generator integrations](#rails-generator-integrations)
@@ -409,6 +410,14 @@ end
 # randomly
 user.a
 ```
+### Rename symbol
+
+Rename allows developers to rename all occurrences of the entity under the cursor across the entire project. In VS Code
+renaming can be triggered by right clicking the entity to rename or by pressing F2 on it. You can also preview the
+edits that will be applied by pressing CTRL/CMD + Enter after typing the desired new name.
+
+![Rename demo](images/rename.gif)
+
 ## VS Code features
 
 The following features are all custom made for VS Code.
