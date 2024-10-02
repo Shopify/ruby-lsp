@@ -55,13 +55,28 @@ module RubyLsp
 
       # Discovers and loads all add-ons. Returns a list of errors when trying to require add-ons
       sig do
-        params(global_state: GlobalState, outgoing_queue: Thread::Queue).returns(T::Array[StandardError])
+        params(
+          global_state: GlobalState,
+          outgoing_queue: Thread::Queue,
+          include_project_addons: T::Boolean,
+        ).returns(T::Array[StandardError])
       end
-      def load_addons(global_state, outgoing_queue)
+      def load_addons(global_state, outgoing_queue, include_project_addons: true)
         # Require all add-ons entry points, which should be placed under
-        # `some_gem/lib/ruby_lsp/your_gem_name/addon.rb`
-        errors = Gem.find_files("ruby_lsp/**/addon.rb").filter_map do |addon|
-          require File.expand_path(addon)
+        # `some_gem/lib/ruby_lsp/your_gem_name/addon.rb` or in the workspace under
+        # `your_project/ruby_lsp/project_name/addon.rb`
+        addon_files = Gem.find_files("ruby_lsp/**/addon.rb")
+
+        if include_project_addons
+          addon_files.concat(Dir.glob(File.join(global_state.workspace_path, "**", "ruby_lsp/**/addon.rb")))
+        end
+
+        errors = addon_files.filter_map do |addon_path|
+          # Avoid requiring this file twice. This may happen if you're working on the Ruby LSP itself and at the same
+          # time have `ruby-lsp` installed as a vendored gem
+          next if File.basename(File.dirname(addon_path)) == "ruby_lsp"
+
+          require File.expand_path(addon_path)
           nil
         rescue => e
           e
@@ -90,6 +105,10 @@ module RubyLsp
       # the responsibility of the add-ons using this API to handle these errors appropriately.
       sig { params(addon_name: String, version_constraints: String).returns(Addon) }
       def get(addon_name, *version_constraints)
+        if version_constraints.empty?
+          raise IncompatibleApiError, "Must specify version constraints when accessing other add-ons"
+        end
+
         addon = addons.find { |addon| addon.name == addon_name }
         raise AddonNotFoundError, "Could not find add-on '#{addon_name}'" unless addon
 
