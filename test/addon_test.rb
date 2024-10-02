@@ -28,18 +28,18 @@ module RubyLsp
         end
       end
       @global_state = GlobalState.new
-
       @outgoing_queue = Thread::Queue.new
-      Addon.load_addons(@global_state, @outgoing_queue)
     end
 
     def teardown
+      RubyLsp::Addon.file_watcher_addons.clear
       RubyLsp::Addon.addon_classes.clear
       RubyLsp::Addon.addons.clear
       @outgoing_queue.close
     end
 
     def test_registering_an_addon_invokes_activate_on_initialized
+      Addon.load_addons(@global_state, @outgoing_queue)
       server = RubyLsp::Server.new
 
       capture_subprocess_io do
@@ -53,10 +53,12 @@ module RubyLsp
     end
 
     def test_addons_are_automatically_tracked
+      Addon.load_addons(@global_state, @outgoing_queue)
       assert_equal(123, T.unsafe(Addon.addons.first).field)
     end
 
     def test_loading_addons_initializes_them
+      Addon.load_addons(@global_state, @outgoing_queue)
       assert(
         Addon.addons.any? { |addon| addon.is_a?(@addon) },
         "Expected add-on to be automatically tracked",
@@ -78,10 +80,8 @@ module RubyLsp
         end
       end
 
-      queue = Thread::Queue.new
-      Addon.load_addons(GlobalState.new, queue)
+      Addon.load_addons(@global_state, @outgoing_queue)
       error_addon = T.must(Addon.addons.find(&:error?))
-      queue.close
 
       assert_predicate(error_addon, :error?)
       assert_equal(<<~MESSAGE, error_addon.formatted_errors)
@@ -98,37 +98,40 @@ module RubyLsp
         def workspace_did_change_watched_files(changes); end
       end
 
-      begin
-        queue = Thread::Queue.new
-        Addon.load_addons(GlobalState.new, queue)
-        assert_equal(1, Addon.file_watcher_addons.length)
-        assert_instance_of(klass, Addon.file_watcher_addons.first)
-      ensure
-        T.must(queue).close
-        Addon.file_watcher_addons.clear
-      end
+      Addon.load_addons(@global_state, @outgoing_queue)
+      assert_equal(1, Addon.file_watcher_addons.length)
+      assert_instance_of(klass, Addon.file_watcher_addons.first)
     end
 
     def test_get_an_addon_by_name
+      Addon.load_addons(@global_state, @outgoing_queue)
       addon = Addon.get("My Add-on", "0.1.0")
       assert_equal("My Add-on", addon.name)
     end
 
     def test_raises_if_an_addon_cannot_be_found
+      Addon.load_addons(@global_state, @outgoing_queue)
       assert_raises(Addon::AddonNotFoundError) do
         Addon.get("Invalid Addon", "0.1.0")
       end
     end
 
     def test_raises_if_an_addon_version_does_not_match
+      Addon.load_addons(@global_state, @outgoing_queue)
       assert_raises(Addon::IncompatibleApiError) do
         Addon.get("My Add-on", "> 15.0.0")
       end
     end
 
+    def test_raises_if_no_version_constraints_are_passed
+      Addon.load_addons(@global_state, @outgoing_queue)
+      assert_raises(Addon::IncompatibleApiError) do
+        Addon.get("My Add-on")
+      end
+    end
+
     def test_addons_receive_settings
-      global_state = GlobalState.new
-      global_state.apply_options({
+      @global_state.apply_options({
         initializationOptions: {
           addonSettings: {
             "My Add-on" => { something: false },
@@ -136,22 +139,52 @@ module RubyLsp
         },
       })
 
-      outgoing_queue = Thread::Queue.new
-      Addon.load_addons(global_state, outgoing_queue)
+      Addon.load_addons(@global_state, @outgoing_queue)
 
       addon = Addon.get("My Add-on", "0.1.0")
-
       assert_equal({ something: false }, T.unsafe(addon).settings)
-    ensure
-      T.must(outgoing_queue).close
     end
 
     def test_depend_on_constraints
+      Addon.load_addons(@global_state, @outgoing_queue)
       assert_raises(Addon::IncompatibleApiError) do
         Addon.depend_on_ruby_lsp!(">= 10.0.0")
       end
 
       Addon.depend_on_ruby_lsp!(">= 0.18.0", "< 0.30.0")
+    end
+
+    def test_project_specific_addons
+      Dir.mktmpdir do |dir|
+        addon_dir = File.join(dir, "lib", "ruby_lsp", "test_addon")
+        FileUtils.mkdir_p(addon_dir)
+        File.write(File.join(addon_dir, "addon.rb"), <<~RUBY)
+          class ProjectAddon < RubyLsp::Addon
+            attr_reader :hello
+
+            def activate(global_state, outgoing_queue)
+              @hello = true
+            end
+
+            def name
+              "Project Addon"
+            end
+
+            def version
+              "0.1.0"
+            end
+          end
+        RUBY
+
+        @global_state.apply_options({
+          workspaceFolders: [{ uri: URI::Generic.from_path(path: dir).to_s }],
+        })
+        Addon.load_addons(@global_state, @outgoing_queue)
+
+        addon = Addon.get("Project Addon", "0.1.0")
+        assert_equal("Project Addon", addon.name)
+        assert_predicate(T.unsafe(addon), :hello)
+      end
     end
   end
 end

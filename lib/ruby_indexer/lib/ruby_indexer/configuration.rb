@@ -239,6 +239,8 @@ module RubyIndexer
 
       excluded.uniq!
       excluded.map(&:name)
+    rescue Bundler::GemfileNotFound
+      []
     end
   end
 end

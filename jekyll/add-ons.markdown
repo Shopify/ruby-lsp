@@ -61,6 +61,10 @@ The Ruby LSP discovers add-ons based on the existence of an `addon.rb` file plac
 example, `my_gem/lib/ruby_lsp/my_gem/addon.rb`. This file must declare the add-on class, which can be used to perform any
 necessary activation when the server starts.
 
+{: .note }
+Projects can also define their own private add-ons for functionality that only applies to a particular application. As
+long as a file matching `ruby_lsp/**/addon.rb` exists inside of the workspace (not necessarily at the root), it will be
+loaded by the Ruby LSP.
 
 ```ruby
 # frozen_string_literal: true
