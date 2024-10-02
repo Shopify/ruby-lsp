@@ -5,6 +5,37 @@ module RubyIndexer
   class ReferenceFinder
     extend T::Sig
 
+    class Target
+      # def initialize
+      # end
+    end
+
+    class ConstTarget < Target
+      extend T::Sig
+
+      sig { params(fully_qualified_name: String).void }
+      def initialize(fully_qualified_name)
+        super()
+        @fully_qualified_name = fully_qualified_name
+      end
+
+      sig { returns(String) }
+      attr_reader :fully_qualified_name
+    end
+
+    class MethodTarget < Target
+      extend T::Sig
+
+      sig { params(method_name: String).void }
+      def initialize(method_name)
+        super()
+        @method_name = method_name
+      end
+
+      sig { returns(String) }
+      attr_reader :method_name
+    end
+
     class Reference
       extend T::Sig
 
@@ -27,14 +58,14 @@ module RubyIndexer
 
     sig do
       params(
-        fully_qualified_name: String,
+        target: Target,
         index: RubyIndexer::Index,
         dispatcher: Prism::Dispatcher,
         include_declarations: T::Boolean,
       ).void
     end
-    def initialize(fully_qualified_name, index, dispatcher, include_declarations: true)
-      @fully_qualified_name = fully_qualified_name
+    def initialize(target, index, dispatcher, include_declarations: true)
+      @target = target
       @index = index
       @include_declarations = include_declarations
       @stack = T.let([], T::Array[String])
@@ -62,6 +93,7 @@ module RubyIndexer
         :on_constant_or_write_node_enter,
         :on_constant_and_write_node_enter,
         :on_constant_operator_write_node_enter,
+        :on_call_node_enter,
       )
     end
 
@@ -78,7 +110,7 @@ module RubyIndexer
       name = constant_path.slice
       nesting = actual_nesting(name)
 
-      if nesting.join("::") == @fully_qualified_name
+      if @target.is_a?(ConstTarget) && nesting.join("::") == @target.fully_qualified_name
         @references << Reference.new(name, constant_path.location, declaration: true)
       end
 
@@ -96,7 +128,7 @@ module RubyIndexer
       name = constant_path.slice
       nesting = actual_nesting(name)
 
-      if nesting.join("::") == @fully_qualified_name
+      if @target.is_a?(ConstTarget) && nesting.join("::") == @target.fully_qualified_name
         @references << Reference.new(name, constant_path.location, declaration: true)
       end
 
@@ -213,6 +245,10 @@ module RubyIndexer
 
     sig { params(node: Prism::DefNode).void }
     def on_def_node_enter(node)
+      if @target.is_a?(MethodTarget) && (name = node.name.to_s) == @target.method_name
+        @references << Reference.new(name, node.name_loc, declaration: true)
+      end
+
       if node.receiver.is_a?(Prism::SelfNode)
         @stack << "<Class:#{@stack.last}>"
       end
@@ -222,6 +258,13 @@ module RubyIndexer
     def on_def_node_leave(node)
       if node.receiver.is_a?(Prism::SelfNode)
         @stack.pop
+      end
+    end
+
+    sig { params(node: Prism::CallNode).void }
+    def on_call_node_enter(node)
+      if @target.is_a?(MethodTarget) && (name = node.name.to_s) == @target.method_name
+        @references << Reference.new(name, T.must(node.message_loc), declaration: false)
       end
     end
 
@@ -243,13 +286,15 @@ module RubyIndexer
 
     sig { params(name: String, location: Prism::Location).void }
     def collect_constant_references(name, location)
+      return unless @target.is_a?(ConstTarget)
+
       entries = @index.resolve(name, @stack)
       return unless entries
 
       previous_reference = @references.last
 
       entries.each do |entry|
-        next unless entry.name == @fully_qualified_name
+        next unless entry.name == @target.fully_qualified_name
 
         # When processing a class/module declaration, we eagerly handle the constant reference. To avoid duplicates,
         # when we find the constant node defining the namespace, then we have to check if it wasn't already added
