@@ -80,7 +80,7 @@ module RubyIndexer
       dispatcher = Prism::Dispatcher.new
       finder = ReferenceFinder.new(fully_qualified_name, index, dispatcher)
       dispatcher.visit(parse_result.value)
-      finder.references.uniq(&:location)
+      finder.references
     end
   end
 end
