@@ -42,7 +42,7 @@ module RubyLsp
         RubyIndexer::IndexablePath.new(nil, T.must(uri.to_standardized_path)),
         source,
       )
-      server.load_addons if load_addons
+      server.load_addons(include_project_addons: false) if load_addons
       block.call(server, uri)
     ensure
       if load_addons

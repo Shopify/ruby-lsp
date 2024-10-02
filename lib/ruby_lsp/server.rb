@@ -123,9 +123,9 @@ module RubyLsp
       send_log_message("Error processing #{message[:method]}: #{e.full_message}", type: Constant::MessageType::ERROR)
     end
 
-    sig { void }
-    def load_addons
-      errors = Addon.load_addons(@global_state, @outgoing_queue)
+    sig { params(include_project_addons: T::Boolean).void }
+    def load_addons(include_project_addons: true)
+      errors = Addon.load_addons(@global_state, @outgoing_queue, include_project_addons: include_project_addons)
 
       if errors.any?
         send_log_message(
