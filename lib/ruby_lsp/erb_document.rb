@@ -27,8 +27,9 @@ module RubyLsp
       scanner = ERBScanner.new(@source)
       scanner.scan
       @host_language_source = scanner.host_language
-      # assigning empty scopes to turn Prism into eval mode
-      @parse_result = Prism.parse(scanner.ruby, scopes: [[]])
+      # Use partial script to avoid syntax errors in ERB files where keywords may be used without the full context in
+      # which they will be evaluated
+      @parse_result = Prism.parse(scanner.ruby, partial_script: true)
       true
     end
 

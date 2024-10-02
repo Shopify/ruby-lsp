@@ -122,4 +122,16 @@ class ERBDocumentTest < Minitest::Test
       </ul>
     HTML
   end
+
+  def test_erb_is_parsed_as_a_partial_script
+    document = RubyLsp::ERBDocument.new(source: +<<~ERB, version: 1, uri: URI("file:///foo.erb"))
+      <ul>
+        <li><%= redo %><li>
+      </ul>
+    ERB
+
+    document.parse!
+
+    refute_predicate(document, :syntax_error?)
+  end
 end
