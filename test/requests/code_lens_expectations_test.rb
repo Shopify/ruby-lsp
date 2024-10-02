@@ -244,6 +244,10 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
       def deactivate; end
 
       def name; end
+
+      def version
+        "0.1.0"
+      end
     end
   end
 

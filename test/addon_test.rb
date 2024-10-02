@@ -22,6 +22,10 @@ module RubyLsp
         def name
           "My Add-on"
         end
+
+        def version
+          "0.1.0"
+        end
       end
       @global_state = GlobalState.new
 
@@ -68,6 +72,10 @@ module RubyLsp
         def name
           "My Add-on"
         end
+
+        def version
+          "0.1.0"
+        end
       end
 
       queue = Thread::Queue.new
@@ -102,13 +110,19 @@ module RubyLsp
     end
 
     def test_get_an_addon_by_name
-      addon = Addon.get("My Add-on")
+      addon = Addon.get("My Add-on", "0.1.0")
       assert_equal("My Add-on", addon.name)
     end
 
     def test_raises_if_an_addon_cannot_be_found
       assert_raises(Addon::AddonNotFoundError) do
-        Addon.get("Invalid Addon")
+        Addon.get("Invalid Addon", "0.1.0")
+      end
+    end
+
+    def test_raises_if_an_addon_version_does_not_match
+      assert_raises(Addon::IncompatibleApiError) do
+        Addon.get("My Add-on", "> 15.0.0")
       end
     end
 
@@ -125,11 +139,19 @@ module RubyLsp
       outgoing_queue = Thread::Queue.new
       Addon.load_addons(global_state, outgoing_queue)
 
-      addon = Addon.get("My Add-on")
+      addon = Addon.get("My Add-on", "0.1.0")
 
       assert_equal({ something: false }, T.unsafe(addon).settings)
     ensure
       T.must(outgoing_queue).close
+    end
+
+    def test_depend_on_constraints
+      assert_raises(Addon::IncompatibleApiError) do
+        Addon.depend_on_ruby_lsp!(">= 10.0.0")
+      end
+
+      Addon.depend_on_ruby_lsp!(">= 0.18.0", "< 0.30.0")
     end
   end
 end

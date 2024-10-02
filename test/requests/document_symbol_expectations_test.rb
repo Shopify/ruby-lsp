@@ -78,6 +78,10 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
 
       def deactivate; end
 
+      def version
+        "0.1.0"
+      end
+
       def create_document_symbol_listener(response_builder, dispatcher)
         klass = Class.new do
           include RubyLsp::Requests::Support::Common
