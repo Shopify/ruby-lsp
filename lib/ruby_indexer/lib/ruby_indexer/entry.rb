@@ -110,6 +110,10 @@ module RubyIndexer
         else
           ""
         end
+      rescue Errno::ENOENT
+        # If the file was deleted, but the entry hasn't been removed yet (could happen due to concurrency), then we do
+        # not want to fail. Just set the comments to an empty string
+        ""
       end
     end
 
