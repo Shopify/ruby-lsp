@@ -537,7 +537,7 @@ module RubyIndexer
         ).void
       end
       def initialize(name, file_path, location, comments, encoding)
-        super(name, file_path, location, comments, encoding)
+        super
       end
     end
 

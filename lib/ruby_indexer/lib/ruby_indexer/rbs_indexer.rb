@@ -273,9 +273,7 @@ module RubyIndexer
       ))
     end
 
-    sig do
-      params(declaration: RBS::AST::Declarations::Global, pathname: Pathname).void
-    end
+    sig { params(declaration: RBS::AST::Declarations::Global, pathname: Pathname).void }
     def handle_global_variable(declaration, pathname)
       name = declaration.name.to_s
       file_path = pathname.to_s
