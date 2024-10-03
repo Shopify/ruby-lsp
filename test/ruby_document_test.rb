@@ -750,6 +750,17 @@ class RubyDocumentTest < Minitest::Test
     assert_nil(document.cache_get("textDocument/codeLens"))
   end
 
+  def test_searching_for_non_existing_line
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      class Foo
+      end
+    RUBY
+
+    assert_raises(RubyLsp::Document::Scanner::PositionNotFoundError) do
+      document.create_scanner.find_char_position({ line: 3, character: 0 })
+    end
+  end
+
   private
 
   def assert_error_edit(actual, error_range)
