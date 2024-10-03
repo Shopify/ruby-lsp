@@ -89,7 +89,16 @@ module RubyLsp
             id: message[:id],
             response:
               Addon.addons.map do |addon|
-                { name: addon.name, version: addon.version, errored: addon.error? }
+                version_method = addon.method(:version)
+
+                # If the add-on doesn't define a `version` method, we'd be calling the abstract method defined by
+                # Sorbet, which would raise an error.
+                # Therefore, we only call the method if it's defined by the add-on itself
+                if version_method.owner != Addon
+                  version = addon.version
+                end
+
+                { name: addon.name, version: version, errored: addon.error? }
               end,
           ),
         )
