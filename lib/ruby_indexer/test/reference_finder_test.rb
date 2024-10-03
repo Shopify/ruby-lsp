@@ -29,7 +29,8 @@ module RubyIndexer
     end
 
     def test_finds_constant_references_inside_singleton_contexts
-      refs = find_references("Foo::<Class:Foo>::Bar", <<~RUBY)
+      target = ReferenceFinder::ConstTarget.new("Foo::<Class:Foo>::Bar")
+      refs = find_references(target, <<~RUBY)
         class Foo
           class << self
             class Bar
@@ -48,7 +49,8 @@ module RubyIndexer
     end
 
     def test_finds_top_level_constant_references
-      refs = find_references("Bar", <<~RUBY)
+      target = ReferenceFinder::ConstTarget.new("Bar")
+      refs = find_references(target, <<~RUBY)
         class Bar
         end
 
@@ -126,7 +128,7 @@ module RubyIndexer
       index.index_single(IndexablePath.new(nil, file_path), source)
       parse_result = Prism.parse(source)
       dispatcher = Prism::Dispatcher.new
-      finder = ReferenceFinder.new(target, index, dispatcher, parse_result) # parse_result used?
+      finder = ReferenceFinder.new(target, index, dispatcher)
       dispatcher.visit(parse_result.value)
       finder.references
     end
