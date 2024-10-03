@@ -465,7 +465,8 @@ class ServerTest < Minitest::Test
     refute(addons_info[0][:errored])
 
     assert_equal("Bar", addons_info[1][:name])
-    assert_equal("0.2.0", addons_info[1][:version])
+    # It doesn't define a `version` method
+    assert_nil(addons_info[1][:version])
     assert(addons_info[1][:errored])
   ensure
     RubyLsp::Addon.addons.clear
@@ -722,10 +723,6 @@ class ServerTest < Minitest::Test
       end
 
       def deactivate; end
-
-      def version
-        "0.2.0"
-      end
     end
   end
 
