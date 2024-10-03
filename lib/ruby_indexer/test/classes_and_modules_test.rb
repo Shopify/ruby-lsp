@@ -630,5 +630,17 @@ module RubyIndexer
         its namespace nesting, and the surrounding CallNode (e.g. a method call).
       COMMENTS
     end
+
+    def test_lazy_comment_fetching_does_not_fail_if_file_gets_deleted
+      indexable = IndexablePath.new("#{Dir.pwd}/lib", "lib/ruby_lsp/does_not_exist.rb")
+
+      @index.index_single(indexable, <<~RUBY, collect_comments: false)
+        class Foo
+        end
+      RUBY
+
+      entry = @index["Foo"].first
+      assert_empty(entry.comments)
+    end
   end
 end
