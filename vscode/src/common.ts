@@ -39,6 +39,8 @@ export interface RubyInterface {
 export interface Addon {
   name: string;
   errored: boolean;
+  // Older versions of ruby-lsp don't return version for add-ons requests
+  version?: string;
 }
 
 export interface ClientInterface {

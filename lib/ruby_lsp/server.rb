@@ -89,7 +89,7 @@ module RubyLsp
             id: message[:id],
             response:
               Addon.addons.map do |addon|
-                { name: addon.name, errored: addon.error? }
+                { name: addon.name, version: addon.version, errored: addon.error? }
               end,
           ),
         )

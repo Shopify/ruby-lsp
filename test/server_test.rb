@@ -461,9 +461,11 @@ class ServerTest < Minitest::Test
     addons_info = @server.pop_response.response
 
     assert_equal("Foo", addons_info[0][:name])
+    assert_equal("0.1.0", addons_info[0][:version])
     refute(addons_info[0][:errored])
 
     assert_equal("Bar", addons_info[1][:name])
+    assert_equal("0.2.0", addons_info[1][:version])
     assert(addons_info[1][:errored])
   ensure
     RubyLsp::Addon.addons.clear
@@ -722,7 +724,7 @@ class ServerTest < Minitest::Test
       def deactivate; end
 
       def version
-        "0.1.0"
+        "0.2.0"
       end
     end
   end
