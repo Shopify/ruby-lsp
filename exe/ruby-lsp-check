@@ -32,7 +32,7 @@ files.each_with_index do |file, index|
   })
 
   result = server.pop_response
-  errors[file] = result.message if result.is_a?(RubyLsp::Error)
+  errors[file] = result if result.is_a?(RubyLsp::Error)
 ensure
   server.process_message({ method: "textDocument/didClose", params: { textDocument: { uri: uri } } })
   server.pop_response
