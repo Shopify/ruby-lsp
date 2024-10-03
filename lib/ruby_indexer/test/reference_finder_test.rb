@@ -91,7 +91,7 @@ module RubyIndexer
       assert_equal(6, refs[1].location.start_line)
     end
 
-    def test_does_not_mismatch_on_attrs_readers_and_writers
+    def test_does_not_mismatch_on_readers_and_writers
       refs = find_method_references("foo", <<~RUBY)
         class Bar
           def foo
@@ -115,6 +115,32 @@ module RubyIndexer
 
       assert_equal("foo", refs[1].name)
       assert_equal(10, refs[1].location.start_line)
+    end
+
+    def test_matches_writers
+      refs = find_method_references("foo=", <<~RUBY)
+        class Bar
+          def foo
+          end
+
+          def foo=(value)
+          end
+
+          def baz
+            self.foo = 1
+            self.foo
+          end
+        end
+      RUBY
+
+      # We want to match `foo=` but not `foo`
+      assert_equal(2, refs.size)
+
+      assert_equal("foo=", refs[0].name)
+      assert_equal(5, refs[0].location.start_line)
+
+      assert_equal("foo=", refs[1].name)
+      assert_equal(9, refs[1].location.start_line)
     end
 
     private
