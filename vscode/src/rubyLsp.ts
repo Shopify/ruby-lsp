@@ -286,7 +286,7 @@ export class RubyLsp {
           .map((addon) => {
             const icon = addon.errored ? "$(error)" : "$(pass)";
             return {
-              label: `${icon} ${addon.name}`,
+              label: `${icon} ${addon.name} ${addon.version ? `v${addon.version}` : ""}`,
             };
           });
 
