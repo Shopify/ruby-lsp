@@ -86,6 +86,12 @@ module RubyLsp
       def name
         "Ruby LSP My Gem"
       end
+
+      # Defining a version for the add-on is mandatory. This version doesn't necessarily need to match the version of
+      # the gem it belongs to
+      def version
+        "0.1.0"
+      end
     end
   end
 end
@@ -130,6 +136,45 @@ This approach enables all add-on responses to be captured in a single round of A
 
 ### Enhancing features
 
+There are two ways to enhance Ruby LSP features. One is handling DSLs that occur at a call site and that do not change
+which declarations exist in the project. A great example of this is the Rails `validate` method, which accepts a symbol
+that represents a method that gets dynamically invoked. That style of DSL is what we refer to as a [call site
+DSL](#dealing-with-call-site-dsls).
+
+```ruby
+class User < ApplicationRecord
+  # From Ruby's perspective, `:something` is just a regular symbol. It's Rails that defines this as a DSL and specifies
+  # that the argument represents a method name.
+  #
+  # If an add-on wanted to handle go to definition or completion for these symbols, then it would need to enhance the
+  # handling for call site DSLs
+  validate :something
+
+  private
+
+  def something
+  end
+end
+```
+
+The second way to augment the Ruby LSP is to handle declaration DSLs. These are DSLs that create declarations via
+meta-programming. To use another Rails example, `belongs_to` is a DSL that mutates the current class and adds extra
+methods based on the arguments passed to it.
+
+DSLs that add extra declarations should be handled through an [indexing enhancement](#dealing-with-declaration-dsls).
+
+```ruby
+class User < ApplicationRecord
+  # When this method is invoked, a bunch of new methods will be defined in the `User` class, such as `company` and
+  # `company=`. By informing the Ruby LSP about the new methods through an indexing enhancement, features such as
+  # go to definition, completion, hover, signature help and workspace symbol will automatically pick up the new
+  # declaration
+  belongs_to :company
+end
+```
+
+#### Dealing with call site DSLs
+
 To enhance a request, the add-on must create a listener that will collect extra results that will be automatically appended to the
 base language server response. Additionally, `Addon` has to implement a factory method that instantiates the listener. When instantiating the
 listener, also note that a `ResponseBuilders` object is passed in. This object should be used to return responses back to the Ruby LSP.
@@ -153,6 +198,10 @@ module RubyLsp
 
       def name
         "Ruby LSP My Gem"
+      end
+
+      def version
+        "0.1.0"
       end
 
       def create_hover_listener(response_builder, node_context, index, dispatcher)
@@ -198,6 +247,103 @@ module RubyLsp
   end
 end
 ```
+
+#### Dealing with declaration DSLs
+
+Add-ons can inform the Ruby LSP about declarations that are made via meta-programming. By ensuring that the index is
+populated with all declarations, features like go to definition, hover, completion, signature help and workspace symbol
+will all automatically work.
+
+To achieve this the add-on must create an indexing enhancement class and register it. Here's an example of how to do
+it. Consider that a gem defines this DSL:
+
+```ruby
+class MyThing < MyLibrary::ParentClass
+  # After invoking this method from the `MyLibrary::ParentClass`, a method called `new_method` will be created,
+  # accepting a single required parameter named `a`
+  my_dsl_that_creates_methods
+
+  # Produces this with meta-programming
+  # def my_method(a); end
+end
+```
+
+This is how you could write an enhancement to teach the Ruby LSP to understand that DSL:
+
+```ruby
+class MyIndexingEnhancement
+  include RubyLsp::Enhancement
+
+  # This on call node handler is invoked any time during indexing when we find a method call. It can be used to insert
+  # more entries into the index depending on the conditions
+  def on_call_node(index, owner, node, file_path)
+    return unless owner
+
+    # Get the ancestors of the current class
+    ancestors = index.linearized_ancestors_of(owner.name)
+
+    # Return early unless the method call is the one we want to handle and the class invoking the DSL inherits from
+    # our library's parent class
+    return unless node.name == :my_dsl_that_creates_methods && ancestors.include?("MyLibrary::ParentClass")
+
+    # Create a new entry to be inserted in the index. This entry will represent the declaration that is created via
+    # meta-programming. All entries are defined in the `entry.rb` file.
+    #
+    # In this example, we will add a new method to the index
+    location = node.location
+
+    # Create the array of signatures that this method will accept. Every signatures is composed of a list of
+    # parameters. The parameter classes represent each type of parameter
+    signatures = [
+      Entry::Signature.new([Entry::RequiredParameter.new(name: :a)])
+    ]
+
+    new_entry = Entry::Method.new(
+      "new_method", # The name of the method that gets created via meta-programming
+      file_path,    # The file_path where the DSL call was found. This should always just be the file_path received
+      location,     # The Prism node location where the DSL call was found
+      location,     # The Prism node location for the DSL name location. May or not be the same
+      nil,          # The documentation for this DSL call. This should always be `nil` to ensure lazy fetching of docs
+      index.configuration.encoding, # The negotiated encoding. This should always be `indexing.configuration.encoding`
+      signatures,   # All signatures for this method (every way it can be invoked)
+      Entry::Visibility::PUBLIC, # The method's visibility
+      owner,        # The method's owner. This is almost always going to be the same owner received
+    )
+
+    # Push the new entry to the index
+    index.add(new_entry)
+  end
+end
+```
+
+Finally, we need to register our enhancement in the index once during the add-on's activation.
+
+```ruby
+module RubyLsp
+  module MyLibrary
+    class Addon < ::RubyLsp::Addon
+      def activate(global_state, message_queue)
+        # Register the enhancement as part of the indexing process
+        @index.register_enhancement(MyIndexingEnhancement.new)
+      end
+
+      def deactivate
+      end
+
+      def name
+        "MyLibrary"
+      end
+
+      def version
+        "0.1.0"
+      end
+    end
+  end
+end
+```
+
+Done! With this the Ruby LSP should automatically handle calls to `my_dsl_that_creates_methods` and create an accurate
+representation of the declarations that will be available in the runtime.
 
 ### Registering formatters
 
@@ -271,6 +417,10 @@ module RubyLsp
         "Ruby LSP My Gem"
       end
 
+      def version
+        "0.1.0"
+      end
+
       def create_hover_listener(response_builder, node_context, index, dispatcher)
         MyHoverListener.new(@message_queue, response_builder, node_context, index, dispatcher)
       end
@@ -312,6 +462,14 @@ module RubyLsp
 
       def deactivate; end
 
+      def version
+        "0.1.0"
+      end
+
+      def name
+        "My Addon"
+      end
+
       def register_additional_file_watchers(global_state, message_queue)
         # Clients are not required to implement this capability
         return unless global_state.supports_watching_files
@@ -350,12 +508,54 @@ end
 
 ### Dependency constraints
 
-While we figure out a good design for the add-ons API, breaking changes are bound to happen. To avoid having your add-on
-accidentally break editor functionality, always restrict the dependency on the `ruby-lsp` gem based on minor versions
-(breaking changes may land on minor versions until we reach v1.0.0).
+While we figure out a good design for the add-ons API, breaking changes are bound to happen. To avoid having your
+add-on accidentally break editor functionality, you should define the version that your add-on depends on. There are
+two ways of achieving this.
+
+#### Add-ons that have a runtime dependency on the ruby-lsp
+
+For add-ons that have a runtime dependency on the `ruby-lsp` gem, you can simply use regular gemspec constraints to
+define which version is supported.
 
 ```ruby
 spec.add_dependency("ruby-lsp", "~> 0.6.0")
+```
+
+#### Add-ons that do not have a runtime dependency on the ruby-lsp
+
+For add-ons that are defined inside other gems that do not wish to have a runtime dependency on `ruby-lsp`, please use
+the following API to ensure compatibility.
+
+{: .note }
+If the Ruby LSP is automatically upgraded to a version not supported by an add-on using this approach, the add-on will
+simply not be activated with a warning and the functionality will not be available. The author must update to ensure
+compatibility with the current state of the API.
+
+```ruby
+
+# Declare that this add-on supports the base Ruby LSP version v0.18.0, but not v0.19 or above
+#
+# If the Ruby LSP is upgraded to v0.19.0, this add-on will fail gracefully to activate and a warning will be printed
+RubyLsp::Addon.depend_on_ruby_lsp!("~> 0.18.0")
+
+module RubyLsp
+  module MyGem
+    class Addon < ::RubyLsp::Addon
+      def activate(global_state, message_queue)
+      end
+
+      def deactivate; end
+
+      def version
+        "0.1.0"
+      end
+
+      def name
+        "My Addon"
+      end
+    end
+  end
+end
 ```
 
 ### Testing add-ons
