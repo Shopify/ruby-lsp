@@ -28,8 +28,8 @@ class ServerTest < Minitest::Test
     hash = JSON.parse(result.response.to_json)
     capabilities = hash["capabilities"]
 
-    # TextSynchronization + encodings + semanticHighlighting + experimental
-    assert_equal(4, capabilities.length)
+    # TextSynchronization + encodings + semanticHighlighting + range formatting + experimental
+    assert_equal(5, capabilities.length)
     assert_includes(capabilities, "semanticTokensProvider")
   end
 
