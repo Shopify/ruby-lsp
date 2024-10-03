@@ -6,8 +6,7 @@ require "test_helper"
 module RubyIndexer
   class ReferenceFinderTest < Minitest::Test
     def test_finds_constant_references
-      target = ReferenceFinder::ConstTarget.new("Foo::Bar")
-      refs = find_references(target, <<~RUBY)
+      refs = find_const_references("Foo::Bar", <<~RUBY)
         module Foo
           class Bar
           end
@@ -29,8 +28,7 @@ module RubyIndexer
     end
 
     def test_finds_constant_references_inside_singleton_contexts
-      target = ReferenceFinder::ConstTarget.new("Foo::<Class:Foo>::Bar")
-      refs = find_references(target, <<~RUBY)
+      refs = find_const_references("Foo::<Class:Foo>::Bar", <<~RUBY)
         class Foo
           class << self
             class Bar
@@ -49,8 +47,7 @@ module RubyIndexer
     end
 
     def test_finds_top_level_constant_references
-      target = ReferenceFinder::ConstTarget.new("Bar")
-      refs = find_references(target, <<~RUBY)
+      refs = find_const_references("Bar", <<~RUBY)
         class Bar
         end
 
@@ -74,8 +71,7 @@ module RubyIndexer
     end
 
     def test_finds_method_references
-      target = ReferenceFinder::MethodTarget.new("foo")
-      refs = find_references(target, <<~RUBY)
+      refs = find_method_references("foo", <<~RUBY)
         class Bar
           def foo
           end
@@ -86,6 +82,8 @@ module RubyIndexer
         end
       RUBY
 
+      assert_equal(2, refs.size)
+
       assert_equal("foo", refs[0].name)
       assert_equal(2, refs[0].location.start_line)
 
@@ -94,8 +92,7 @@ module RubyIndexer
     end
 
     def test_does_not_mismatch_on_attrs_readers_and_writers
-      target = ReferenceFinder::MethodTarget.new("foo")
-      refs = find_references(target, <<~RUBY)
+      refs = find_method_references("foo", <<~RUBY)
         class Bar
           def foo
           end
@@ -121,6 +118,16 @@ module RubyIndexer
     end
 
     private
+
+    def find_const_references(const_name, source)
+      target = ReferenceFinder::ConstTarget.new(const_name)
+      find_references(target, source)
+    end
+
+    def find_method_references(method_name, source)
+      target = ReferenceFinder::MethodTarget.new(method_name)
+      find_references(target, source)
+    end
 
     def find_references(target, source)
       file_path = "/fake.rb"
