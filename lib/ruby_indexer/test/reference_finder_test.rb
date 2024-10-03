@@ -108,6 +108,7 @@ module RubyIndexer
         end
       RUBY
 
+      # We want to match `foo` but not `foo=`
       assert_equal(2, refs.size)
 
       assert_equal("foo", refs[0].name)
