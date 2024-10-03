@@ -6,8 +6,6 @@ module RubyIndexer
     extend T::Sig
 
     class Target
-      # def initialize
-      # end
     end
 
     class ConstTarget < Target
