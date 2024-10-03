@@ -166,11 +166,7 @@ module RubyLsp
       end
       def collect_changes(target, parse_result, name, uri)
         dispatcher = Prism::Dispatcher.new
-        finder = RubyIndexer::ReferenceFinder.new(
-          target,
-          @global_state.index,
-          dispatcher,
-        )
+        finder = RubyIndexer::ReferenceFinder.new(target, @global_state.index, dispatcher)
         dispatcher.visit(parse_result.value)
 
         finder.references.map do |reference|
