@@ -28,7 +28,7 @@ module RubyLsp
         char_position = document.create_scanner.find_char_position(position)
         delegate_request_if_needed!(global_state, document, char_position)
 
-        node_context = RubyDocument.locate(document.parse_result.value, char_position)
+        node_context = RubyDocument.locate(document.parse_result.value, char_position, encoding: global_state.encoding)
 
         @response_builder = T.let(
           ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight].new,

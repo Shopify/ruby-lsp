@@ -57,6 +57,7 @@ module RubyLsp
             Prism::SuperNode,
             Prism::ForwardingSuperNode,
           ],
+          encoding: global_state.encoding,
         )
 
         target = node_context.node

@@ -558,6 +558,26 @@ class RubyDocumentTest < Minitest::Test
     assert_equal(["Foo", "Bar"], node_context.nesting)
   end
 
+  def test_locate_returns_correct_nesting_when_contains_multibyte_characters
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+      module A動物
+        class Bねこ
+          def C鳴く
+            "にゃー"
+          end
+        end
+      end
+    RUBY
+
+    node_context = document.locate_node(
+      { line: 2, character: 8 },
+      node_types: [Prism::DefNode],
+    )
+    found = node_context.node
+    assert_equal(:C鳴く, T.cast(found, Prism::DefNode).name)
+    assert_equal(["A動物", "Bねこ"], node_context.nesting)
+  end
+
   def test_reparsing_without_new_edits_does_nothing
     text = "def foo; end"
 

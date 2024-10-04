@@ -26,9 +26,10 @@ module RubyLsp
           node: Prism::Node,
           char_position: Integer,
           node_types: T::Array[T.class_of(Prism::Node)],
+          encoding: Encoding,
         ).returns(NodeContext)
       end
-      def locate(node, char_position, node_types: [])
+      def locate(node, char_position, node_types: [], encoding: Encoding::UTF_8)
         queue = T.let(node.child_nodes.compact, T::Array[T.nilable(Prism::Node)])
         closest = node
         parent = T.let(nil, T.nilable(Prism::Node))
@@ -61,16 +62,21 @@ module RubyLsp
 
           # Skip if the current node doesn't cover the desired position
           loc = candidate.location
-          next unless (loc.start_offset...loc.end_offset).cover?(char_position)
+          loc_start_offset = loc.start_code_units_offset(encoding)
+          loc_end_offset = loc.end_code_units_offset(encoding)
+          next unless (loc_start_offset...loc_end_offset).cover?(char_position)
 
           # If the node's start character is already past the position, then we should've found the closest node
           # already
-          break if char_position < loc.start_offset
+          break if char_position < loc_start_offset
 
           # If the candidate starts after the end of the previous nesting level, then we've exited that nesting level
           # and need to pop the stack
           previous_level = nesting_nodes.last
-          nesting_nodes.pop if previous_level && loc.start_offset > previous_level.location.end_offset
+          if previous_level &&
+              (loc_start_offset > previous_level.location.end_code_units_offset(encoding))
+            nesting_nodes.pop
+          end
 
           # Keep track of the nesting where we found the target. This is used to determine the fully qualified name of
           # the target when it is a constant
@@ -83,8 +89,10 @@ module RubyLsp
           if candidate.is_a?(Prism::CallNode)
             arg_loc = candidate.arguments&.location
             blk_loc = candidate.block&.location
-            if (arg_loc && (arg_loc.start_offset...arg_loc.end_offset).cover?(char_position)) ||
-                (blk_loc && (blk_loc.start_offset...blk_loc.end_offset).cover?(char_position))
+            if (arg_loc && (arg_loc.start_code_units_offset(encoding)...
+                            arg_loc.end_code_units_offset(encoding)).cover?(char_position)) ||
+                (blk_loc && (blk_loc.start_code_units_offset(encoding)...
+                            blk_loc.end_code_units_offset(encoding)).cover?(char_position))
               call_node = candidate
             end
           end
@@ -94,7 +102,9 @@ module RubyLsp
 
           # If the current node is narrower than or equal to the previous closest node, then it is more precise
           closest_loc = closest.location
-          if loc.end_offset - loc.start_offset <= closest_loc.end_offset - closest_loc.start_offset
+          closest_node_start_offset = closest_loc.start_code_units_offset(encoding)
+          closest_node_end_offset = closest_loc.end_code_units_offset(encoding)
+          if loc_end_offset - loc_start_offset <= closest_node_end_offset - closest_node_start_offset
             parent = closest
             closest = candidate
           end
@@ -201,7 +211,12 @@ module RubyLsp
       ).returns(NodeContext)
     end
     def locate_node(position, node_types: [])
-      RubyDocument.locate(@parse_result.value, create_scanner.find_char_position(position), node_types: node_types)
+      RubyDocument.locate(
+        @parse_result.value,
+        create_scanner.find_char_position(position),
+        node_types: node_types,
+        encoding: @encoding,
+      )
     end
   end
 end

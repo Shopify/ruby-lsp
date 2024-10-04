@@ -50,7 +50,12 @@ module RubyLsp
       ).returns(NodeContext)
     end
     def locate_node(position, node_types: [])
-      RubyDocument.locate(@parse_result.value, create_scanner.find_char_position(position), node_types: node_types)
+      RubyDocument.locate(
+        @parse_result.value,
+        create_scanner.find_char_position(position),
+        node_types: node_types,
+        encoding: @encoding,
+      )
     end
 
     sig { params(char_position: Integer).returns(T.nilable(T::Boolean)) }

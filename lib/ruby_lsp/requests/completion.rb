@@ -57,6 +57,7 @@ module RubyLsp
             Prism::InstanceVariableTargetNode,
             Prism::InstanceVariableWriteNode,
           ],
+          encoding: global_state.encoding,
         )
         @response_builder = T.let(
           ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem].new,

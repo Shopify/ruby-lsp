@@ -37,6 +37,7 @@ module RubyLsp
           @document.parse_result.value,
           char_position,
           node_types: [Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode],
+          encoding: @global_state.encoding,
         )
         target = node_context.node
         parent = node_context.parent
