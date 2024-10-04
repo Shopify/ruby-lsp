@@ -143,6 +143,79 @@ module RubyIndexer
       assert_equal(9, refs[1].location.start_line)
     end
 
+    def test_find_inherited_methods
+      refs = find_method_references("foo", <<~RUBY)
+        class Bar
+          def foo
+          end
+        end
+
+        class Baz < Bar
+          super.foo
+        end
+      RUBY
+
+      assert_equal(2, refs.size)
+
+      assert_equal("foo", refs[0].name)
+      assert_equal(2, refs[0].location.start_line)
+
+      assert_equal("foo", refs[1].name)
+      assert_equal(7, refs[1].location.start_line)
+    end
+
+    def test_finds_methods_created_in_mixins
+      refs = find_method_references("foo", <<~RUBY)
+        module Mixin
+          def foo
+          end
+        end
+
+        class Bar
+          include Mixin
+        end
+
+        Bar.foo
+      RUBY
+
+      assert_equal(2, refs.size)
+
+      assert_equal("foo", refs[0].name)
+      assert_equal(2, refs[0].location.start_line)
+
+      assert_equal("foo", refs[1].name)
+      assert_equal(10, refs[1].location.start_line)
+    end
+
+    def test_finds_singleton_methods
+      # The current implementation matches on both `Bar.foo` and `Bar#foo` even though they are different
+
+      refs = find_method_references("foo", <<~RUBY)
+        class Bar
+          class << self
+            def foo
+            end
+          end
+
+          def foo
+          end
+        end
+
+        Bar.foo
+      RUBY
+
+      assert_equal(3, refs.size)
+
+      assert_equal("foo", refs[0].name)
+      assert_equal(3, refs[0].location.start_line)
+
+      assert_equal("foo", refs[1].name)
+      assert_equal(7, refs[1].location.start_line)
+
+      assert_equal("foo", refs[2].name)
+      assert_equal(11, refs[2].location.start_line)
+    end
+
     private
 
     def find_const_references(const_name, source)
