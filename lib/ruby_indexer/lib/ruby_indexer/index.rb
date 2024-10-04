@@ -677,11 +677,13 @@ module RubyIndexer
     sig do
       type_parameters(:T).params(
         path: String,
-        type: T::Class[T.all(T.type_parameter(:T), Entry)],
-      ).returns(T.nilable(T::Array[T.type_parameter(:T)]))
+        type: T.nilable(T::Class[T.all(T.type_parameter(:T), Entry)]),
+      ).returns(T.nilable(T.any(T::Array[Entry], T::Array[T.type_parameter(:T)])))
     end
-    def entries_for(path, type)
+    def entries_for(path, type = nil)
       entries = @files_to_entries[path]
+      return entries unless type
+
       entries&.grep(type)
     end
 
