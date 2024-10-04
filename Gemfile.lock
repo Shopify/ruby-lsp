@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruby-lsp (0.19.1)
+    ruby-lsp (0.19.2)
       language_server-protocol (~> 3.17.0)
       prism (>= 1.1, < 2.0)
       rbs (>= 3, < 4)
