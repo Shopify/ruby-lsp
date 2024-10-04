@@ -39,7 +39,12 @@ module RubyLsp
         char_position = document.create_scanner.find_char_position(position)
         delegate_request_if_needed!(global_state, document, char_position)
 
-        node_context = RubyDocument.locate(document.parse_result.value, char_position, node_types: [Prism::CallNode])
+        node_context = RubyDocument.locate(
+          document.parse_result.value,
+          char_position,
+          node_types: [Prism::CallNode],
+          encoding: global_state.encoding,
+        )
 
         target = adjust_for_nested_target(node_context.node, node_context.parent, position)
 

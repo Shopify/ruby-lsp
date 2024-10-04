@@ -136,6 +136,31 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_multibyte_character_precision
+    source = <<~RUBY
+      module Fほげ
+        module Bar
+          class Baz
+          end
+        end
+      end
+
+      Fほげ::Bar::Baz
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # Foo
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { line: 7, character: 0 } },
+      )
+      range = server.pop_response.response[0].attributes[:targetRange].attributes
+      range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
+      assert_equal({ start: { line: 0, character: 0 }, end: { line: 5, character: 3 } }, range_hash)
+    end
+  end
+
   def test_jumping_to_default_require_of_a_gem
     with_server("require \"bundler\"") do |server, uri|
       index = server.global_state.index

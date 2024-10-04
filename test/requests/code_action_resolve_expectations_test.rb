@@ -7,11 +7,15 @@ require_relative "support/expectations_test_runner"
 class CodeActionResolveExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::CodeActionResolve, "code_action_resolve"
 
+  def setup
+    @global_state = RubyLsp::GlobalState.new
+  end
+
   def run_expectations(source)
     params = @__params&.any? ? @__params : default_args
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI("file:///fake.rb"))
 
-    RubyLsp::Requests::CodeActionResolve.new(document, params).perform
+    RubyLsp::Requests::CodeActionResolve.new(document, @global_state, params).perform
   end
 
   def assert_expectations(source, expected)

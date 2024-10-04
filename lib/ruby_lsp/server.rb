@@ -772,7 +772,7 @@ module RubyLsp
         return
       end
 
-      result = Requests::CodeActionResolve.new(document, params).perform
+      result = Requests::CodeActionResolve.new(document, @global_state, params).perform
 
       case result
       when Requests::CodeActionResolve::Error::EmptySelection
