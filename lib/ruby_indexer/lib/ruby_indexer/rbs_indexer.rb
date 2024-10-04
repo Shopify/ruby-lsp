@@ -44,6 +44,8 @@ module RubyIndexer
       when RBS::AST::Declarations::Constant
         namespace_nesting = declaration.name.namespace.path.map(&:to_s)
         handle_constant(declaration, namespace_nesting, pathname.to_s)
+      when RBS::AST::Declarations::Global
+        handle_global_variable(declaration, pathname)
       else # rubocop:disable Style/EmptyElse
         # Other kinds not yet handled
       end
@@ -271,6 +273,23 @@ module RubyIndexer
       ))
     end
 
+    sig { params(declaration: RBS::AST::Declarations::Global, pathname: Pathname).void }
+    def handle_global_variable(declaration, pathname)
+      name = declaration.name.to_s
+      file_path = pathname.to_s
+      location = to_ruby_indexer_location(declaration.location)
+      comments = comments_to_string(declaration)
+      encoding = @index.configuration.encoding
+
+      @index.add(Entry::GlobalVariable.new(
+        name,
+        file_path,
+        location,
+        comments,
+        encoding,
+      ))
+    end
+
     sig { params(member: RBS::AST::Members::Alias, owner_entry: Entry::Namespace).void }
     def handle_signature_alias(member, owner_entry)
       file_path = member.location.buffer.name
@@ -294,6 +313,7 @@ module RubyIndexer
         RBS::AST::Declarations::Class,
         RBS::AST::Declarations::Module,
         RBS::AST::Declarations::Constant,
+        RBS::AST::Declarations::Global,
         RBS::AST::Members::MethodDefinition,
         RBS::AST::Members::Alias,
       )).returns(T.nilable(String))

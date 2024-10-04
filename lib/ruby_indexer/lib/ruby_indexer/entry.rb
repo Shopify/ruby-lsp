@@ -529,6 +529,9 @@ module RubyIndexer
       end
     end
 
+    # Represents a global variable e.g.: $DEBUG
+    class GlobalVariable < Entry; end
+
     # Represents an instance variable e.g.: @a = 1
     class InstanceVariable < Entry
       sig { returns(T.nilable(Entry::Namespace)) }
