@@ -66,7 +66,8 @@ module RubyLsp
         end
 
         fully_qualified_name = T.must(entries.first).name
-        changes = collect_text_edits(fully_qualified_name, name)
+        reference_target = RubyIndexer::ReferenceFinder::ConstTarget.new(fully_qualified_name)
+        changes = collect_text_edits(reference_target, name)
 
         # If the client doesn't support resource operations, such as renaming files, then we can only return the basic
         # text changes
@@ -127,8 +128,13 @@ module RubyLsp
         end
       end
 
-      sig { params(fully_qualified_name: String, name: String).returns(T::Hash[String, T::Array[Interface::TextEdit]]) }
-      def collect_text_edits(fully_qualified_name, name)
+      sig do
+        params(
+          target: RubyIndexer::ReferenceFinder::Target,
+          name: String,
+        ).returns(T::Hash[String, T::Array[Interface::TextEdit]])
+      end
+      def collect_text_edits(target, name)
         changes = {}
 
         Dir.glob(File.join(@global_state.workspace_path, "**/*.rb")).each do |path|
@@ -138,12 +144,12 @@ module RubyLsp
           next if @store.key?(uri)
 
           parse_result = Prism.parse_file(path)
-          edits = collect_changes(fully_qualified_name, parse_result, name, uri)
+          edits = collect_changes(target, parse_result, name, uri)
           changes[uri.to_s] = edits unless edits.empty?
         end
 
         @store.each do |uri, document|
-          edits = collect_changes(fully_qualified_name, document.parse_result, name, document.uri)
+          edits = collect_changes(target, document.parse_result, name, document.uri)
           changes[uri] = edits unless edits.empty?
         end
 
@@ -152,15 +158,15 @@ module RubyLsp
 
       sig do
         params(
-          fully_qualified_name: String,
+          target: RubyIndexer::ReferenceFinder::Target,
           parse_result: Prism::ParseResult,
           name: String,
           uri: URI::Generic,
         ).returns(T::Array[Interface::TextEdit])
       end
-      def collect_changes(fully_qualified_name, parse_result, name, uri)
+      def collect_changes(target, parse_result, name, uri)
         dispatcher = Prism::Dispatcher.new
-        finder = RubyIndexer::ReferenceFinder.new(fully_qualified_name, @global_state.index, dispatcher)
+        finder = RubyIndexer::ReferenceFinder.new(target, @global_state.index, dispatcher)
         dispatcher.visit(parse_result.value)
 
         finder.references.map do |reference|
