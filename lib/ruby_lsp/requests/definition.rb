@@ -46,6 +46,7 @@ module RubyLsp
             Prism::ConstantReadNode,
             Prism::ConstantPathNode,
             Prism::BlockArgumentNode,
+            Prism::GlobalVariableReadNode,
             Prism::InstanceVariableReadNode,
             Prism::InstanceVariableAndWriteNode,
             Prism::InstanceVariableOperatorWriteNode,
