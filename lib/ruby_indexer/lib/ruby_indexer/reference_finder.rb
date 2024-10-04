@@ -6,6 +6,9 @@ module RubyIndexer
     extend T::Sig
 
     class Target
+      extend T::Helpers
+
+      abstract!
     end
 
     class ConstTarget < Target
