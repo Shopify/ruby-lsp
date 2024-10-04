@@ -35,7 +35,13 @@ module RubyLsp
         node_context = RubyDocument.locate(
           @document.parse_result.value,
           char_position,
-          node_types: [Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode],
+          node_types: [
+            Prism::ConstantReadNode,
+            Prism::ConstantPathNode,
+            Prism::ConstantPathTargetNode,
+            Prism::CallNode,
+            Prism::DefNode,
+          ],
           encoding: @global_state.encoding,
         )
         target = node_context.node
@@ -52,16 +58,17 @@ module RubyLsp
 
         target = T.cast(
           target,
-          T.any(Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode),
+          T.any(
+            Prism::ConstantReadNode,
+            Prism::ConstantPathNode,
+            Prism::ConstantPathTargetNode,
+            Prism::CallNode,
+            Prism::DefNode,
+          ),
         )
 
-        name = constant_name(target)
-        return @locations unless name
-
-        entries = @global_state.index.resolve(name, node_context.nesting)
-        return @locations unless entries
-
-        fully_qualified_name = T.must(entries.first).name
+        reference_target = create_reference_target(target, node_context)
+        return @locations unless reference_target
 
         Dir.glob(File.join(@global_state.workspace_path, "**/*.rb")).each do |path|
           uri = URI::Generic.from_path(path: path)
@@ -70,11 +77,11 @@ module RubyLsp
           next if @store.key?(uri)
 
           parse_result = Prism.parse_file(path)
-          collect_references(fully_qualified_name, parse_result, uri)
+          collect_references(reference_target, parse_result, uri)
         end
 
         @store.each do |_uri, document|
-          collect_references(fully_qualified_name, document.parse_result, document.uri)
+          collect_references(reference_target, document.parse_result, document.uri)
         end
 
         @locations
@@ -84,15 +91,43 @@ module RubyLsp
 
       sig do
         params(
-          fully_qualified_name: String,
+          target_node: T.any(
+            Prism::ConstantReadNode,
+            Prism::ConstantPathNode,
+            Prism::ConstantPathTargetNode,
+            Prism::CallNode,
+            Prism::DefNode,
+          ),
+          node_context: NodeContext,
+        ).returns(T.nilable(RubyIndexer::ReferenceFinder::Target))
+      end
+      def create_reference_target(target_node, node_context)
+        case target_node
+        when Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode
+          name = constant_name(target_node)
+          return unless name
+
+          entries = @global_state.index.resolve(name, node_context.nesting)
+          return unless entries
+
+          fully_qualified_name = T.must(entries.first).name
+          RubyIndexer::ReferenceFinder::ConstTarget.new(fully_qualified_name)
+        when Prism::CallNode, Prism::DefNode
+          RubyIndexer::ReferenceFinder::MethodTarget.new(target_node.name.to_s)
+        end
+      end
+
+      sig do
+        params(
+          target: RubyIndexer::ReferenceFinder::Target,
           parse_result: Prism::ParseResult,
           uri: URI::Generic,
         ).void
       end
-      def collect_references(fully_qualified_name, parse_result, uri)
+      def collect_references(target, parse_result, uri)
         dispatcher = Prism::Dispatcher.new
         finder = RubyIndexer::ReferenceFinder.new(
-          fully_qualified_name,
+          target,
           @global_state.index,
           dispatcher,
           include_declarations: @params.dig(:context, :includeDeclaration) || true,

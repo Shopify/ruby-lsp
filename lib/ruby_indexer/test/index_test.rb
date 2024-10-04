@@ -1858,6 +1858,9 @@ module RubyIndexer
 
       entries = @index.entries_for("/fake/path/foo.rb", RubyIndexer::Entry::Namespace)
       assert_equal(["Foo", "Bar", "Bar::<Class:Bar>"], entries.map(&:name))
+
+      entries = @index.entries_for("/fake/path/foo.rb")
+      assert_equal(["Foo", "Bar", "my_def", "Bar::<Class:Bar>", "my_singleton_def"], entries.map(&:name))
     end
 
     def test_entries_for_returns_nil_if_no_matches
