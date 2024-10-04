@@ -11,7 +11,7 @@ body:
   - type: checkboxes
     attributes:
       label: I have checked that this feature is not already implemented
-      description: Supported features can be found [here](https://shopify.github.io/ruby-lsp/RubyLsp/Requests.html)
+      description: Supported features can be found [here](https://shopify.github.io/ruby-lsp/#general-features)
       options:
         - label: This feature does not exist
           required: true
