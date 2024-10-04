@@ -11,27 +11,27 @@ module RubyIndexer
     class ConstTarget < Target
       extend T::Sig
 
+      sig { returns(String) }
+      attr_reader :fully_qualified_name
+
       sig { params(fully_qualified_name: String).void }
       def initialize(fully_qualified_name)
         super()
         @fully_qualified_name = fully_qualified_name
       end
-
-      sig { returns(String) }
-      attr_reader :fully_qualified_name
     end
 
     class MethodTarget < Target
       extend T::Sig
+
+      sig { returns(String) }
+      attr_reader :method_name
 
       sig { params(method_name: String).void }
       def initialize(method_name)
         super()
         @method_name = method_name
       end
-
-      sig { returns(String) }
-      attr_reader :method_name
     end
 
     class Reference

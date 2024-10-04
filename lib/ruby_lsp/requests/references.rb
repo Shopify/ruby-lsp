@@ -90,7 +90,7 @@ module RubyLsp
 
       sig do
         params(
-          target: T.any(
+          target_node: T.any(
             Prism::ConstantReadNode,
             Prism::ConstantPathNode,
             Prism::ConstantPathTargetNode,
@@ -100,10 +100,10 @@ module RubyLsp
           node_context: NodeContext,
         ).returns(T.nilable(RubyIndexer::ReferenceFinder::Target))
       end
-      def create_reference_target(target, node_context)
-        case target
+      def create_reference_target(target_node, node_context)
+        case target_node
         when Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode
-          name = constant_name(target)
+          name = constant_name(target_node)
           return unless name
 
           entries = @global_state.index.resolve(name, node_context.nesting)
@@ -112,7 +112,7 @@ module RubyLsp
           fully_qualified_name = T.must(entries.first).name
           RubyIndexer::ReferenceFinder::ConstTarget.new(fully_qualified_name)
         when Prism::CallNode, Prism::DefNode
-          RubyIndexer::ReferenceFinder::MethodTarget.new(target.name.to_s)
+          RubyIndexer::ReferenceFinder::MethodTarget.new(target_node.name.to_s)
         end
       end
 
