@@ -13,6 +13,7 @@ module RubyLsp
           Prism::ConstantReadNode,
           Prism::ConstantWriteNode,
           Prism::ConstantPathNode,
+          Prism::GlobalVariableReadNode,
           Prism::InstanceVariableReadNode,
           Prism::InstanceVariableAndWriteNode,
           Prism::InstanceVariableOperatorWriteNode,
@@ -62,6 +63,7 @@ module RubyLsp
           :on_constant_write_node_enter,
           :on_constant_path_node_enter,
           :on_call_node_enter,
+          :on_global_variable_read_node_enter,
           :on_instance_variable_read_node_enter,
           :on_instance_variable_write_node_enter,
           :on_instance_variable_and_write_node_enter,
@@ -126,6 +128,18 @@ module RubyLsp
         return unless message
 
         handle_method_hover(message)
+      end
+
+      sig { params(node: Prism::GlobalVariableReadNode).void }
+      def on_global_variable_read_node_enter(node)
+        global_variable = node.name.to_s
+        entries = @index[global_variable]
+
+        return unless entries
+
+        categorized_markdown_from_index_entries(global_variable, entries).each do |category, content|
+          @response_builder.push(content, category: category)
+        end
       end
 
       sig { params(node: Prism::InstanceVariableReadNode).void }
