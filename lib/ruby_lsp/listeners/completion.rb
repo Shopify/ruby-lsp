@@ -85,6 +85,7 @@ module RubyLsp
           :on_constant_path_node_enter,
           :on_constant_read_node_enter,
           :on_call_node_enter,
+          :on_global_variable_read_node_enter,
           :on_instance_variable_read_node_enter,
           :on_instance_variable_write_node_enter,
           :on_instance_variable_and_write_node_enter,
@@ -177,6 +178,29 @@ module RubyLsp
           complete_require_relative(node)
         else
           complete_methods(node, name)
+        end
+      end
+
+      sig { params(node: Prism::GlobalVariableReadNode).void }
+      def on_global_variable_read_node_enter(node)
+        candidates = @index.prefix_search(node.name.to_s)
+
+        return if candidates.none?
+
+        range = range_from_location(node.location)
+
+        candidates.flatten.each do |entry|
+          entry_name = entry.name
+
+          @response_builder << Interface::CompletionItem.new(
+            label: entry_name,
+            filter_text: entry_name,
+            label_details: Interface::CompletionItemLabelDetails.new(
+              description: entry.file_name,
+            ),
+            text_edit: Interface::TextEdit.new(range: range, new_text: entry_name),
+            kind: Constant::CompletionItemKind::VARIABLE,
+          )
         end
       end
 

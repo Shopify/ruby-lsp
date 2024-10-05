@@ -1431,6 +1431,34 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_global_variables
+    source = <<~RUBY
+      $
+      $LOAD
+    RUBY
+
+    with_server(source) do |server, uri|
+      index = server.instance_variable_get(:@global_state).index
+      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 0, character: 1 },
+      })
+      items = server.pop_response.response
+      assert_operator(items.size, :>, 40)
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 1, character: 1 },
+      })
+      items = server.pop_response.response
+      assert_operator(items.size, :>=, 2)
+      assert_includes(items.map(&:label), "$LOADED_FEATURES")
+      assert_includes(items.map(&:label), "$LOAD_PATH")
+    end
+  end
+
   private
 
   def with_file_structure(server, &block)

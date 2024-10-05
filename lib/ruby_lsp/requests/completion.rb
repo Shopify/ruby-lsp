@@ -17,7 +17,7 @@ module RubyLsp
         def provider
           Interface::CompletionOptions.new(
             resolve_provider: true,
-            trigger_characters: ["/", "\"", "'", ":", "@", ".", "=", "<"],
+            trigger_characters: ["/", "\"", "'", ":", "@", ".", "=", "<", "$"],
             completion_item: {
               labelDetailsSupport: true,
             },
@@ -50,6 +50,7 @@ module RubyLsp
             Prism::CallNode,
             Prism::ConstantReadNode,
             Prism::ConstantPathNode,
+            Prism::GlobalVariableReadNode,
             Prism::InstanceVariableReadNode,
             Prism::InstanceVariableAndWriteNode,
             Prism::InstanceVariableOperatorWriteNode,
