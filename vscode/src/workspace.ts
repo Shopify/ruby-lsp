@@ -47,12 +47,25 @@ export class Workspace implements WorkspaceInterface {
     this.virtualDocuments = virtualDocuments;
 
     this.registerRestarts(context);
+  }
+
+  // Activate this workspace. This method is intended to be invoked only once, unlikely `start` which may be invoked
+  // multiple times due to restarts
+  async activate() {
+    const gitExtension = vscode.extensions.getExtension("vscode.git");
+    let rootGitUri = this.workspaceFolder.uri;
+
+    // If the git extension is available, use that to find the root of the git repository
+    if (gitExtension) {
+      const api = gitExtension.exports.getAPI(1);
+      const repository = await api.openRepository(this.workspaceFolder.uri);
+      rootGitUri = repository.rootUri;
+    }
+
     this.registerCreateDeleteWatcher(
-      context,
-      ".git/{rebase-merge,rebase-apply}",
+      rootGitUri,
+      ".git/{rebase-merge,rebase-apply,BISECT_START,CHERRY_PICK_HEAD}",
     );
-    this.registerCreateDeleteWatcher(context, ".git/BISECT_START");
-    this.registerCreateDeleteWatcher(context, ".git/CHERRY_PICK_HEAD");
   }
 
   async start(debugMode?: boolean) {
@@ -346,15 +359,9 @@ export class Workspace implements WorkspaceInterface {
     );
   }
 
-  private registerCreateDeleteWatcher(
-    context: vscode.ExtensionContext,
-    glob: string,
-  ) {
-    const parentWatcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(this.workspaceFolder, `../${glob}`),
-    );
+  private registerCreateDeleteWatcher(base: vscode.Uri, glob: string) {
     const workspaceWatcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(this.workspaceFolder, glob),
+      new vscode.RelativePattern(base, glob),
     );
 
     const start = () => {
@@ -365,9 +372,8 @@ export class Workspace implements WorkspaceInterface {
       await this.restart();
     };
 
-    context.subscriptions.push(
+    this.context.subscriptions.push(
       workspaceWatcher,
-      parentWatcher,
       // When one of the 'inhibit restart' files are created, we set this flag to prevent restarting during that action
       workspaceWatcher.onDidCreate(start),
       // Once they are deleted and the action is complete, then we restart
