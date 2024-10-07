@@ -71,8 +71,11 @@ module RubyIndexer
       #
       # Returns "/path/to/workspace/{tmp,node_modules}/**/*"
       @excluded_patterns
-        .reject { |pattern| File.absolute_path?(pattern) }
-        .filter_map { |pattern| pattern.match(%r{\A([^/]+)/\*\*/\*\z})&.captures&.first }
+        .filter_map do |pattern|
+          next if File.absolute_path?(pattern)
+
+          pattern.match(%r{\A([^/]+)/\*\*/\*\z})&.captures&.first
+        end
         .then { |dirs| File.join(@workspace_path, "{#{dirs.join(",")}}/**/*") }
     end
 
@@ -91,8 +94,9 @@ module RubyIndexer
       # "vendor/bundle/**/*" is excluded, we will traverse all of "vendor" and `reject!` out all "vendor/bundle" entries
       # later.
       included_paths = Dir.glob(File.join(@workspace_path, "*/"), flags)
-        .reject { |dir| File.fnmatch?(merged_excluded_file_pattern, dir, flags) }
-        .map do |included_path|
+        .filter_map do |included_path|
+          next if File.fnmatch?(merged_excluded_file_pattern, included_path, flags)
+
           relative_path = included_path
             .delete_prefix(@workspace_path)
             .tap { |path| path.delete_prefix!("/") }
