@@ -3,6 +3,8 @@
 
 module URI
   class Generic
+    extend T::Sig
+
     # Avoid a deprecation warning with Ruby 3.4 where the default parser was changed to RFC3986.
     # This condition must remain even after support for 3.4 has been dropped for users that have
     # `uri` in their lockfile, decoupling it from the ruby version.
@@ -26,8 +28,6 @@ module URI
         build(scheme: scheme, path: escaped_path, fragment: fragment)
       end
     end
-
-    extend T::Sig
 
     sig { returns(T.nilable(String)) }
     def to_standardized_path

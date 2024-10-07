@@ -6,10 +6,10 @@ module RubyLsp
     extend T::Sig
     extend T::Generic
 
+    ParseResultType = type_member { { fixed: Prism::ParseResult } }
+
     sig { returns(String) }
     attr_reader :host_language_source
-
-    ParseResultType = type_member { { fixed: Prism::ParseResult } }
 
     sig { params(source: String, version: Integer, uri: URI::Generic, encoding: Encoding).void }
     def initialize(source:, version:, uri:, encoding: Encoding::UTF_8)

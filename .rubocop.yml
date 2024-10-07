@@ -58,3 +58,29 @@ Sorbet/StrictSigil:
     - "lib/ruby-lsp.rb"
     - "lib/ruby_indexer/lib/ruby_indexer/prefix_tree.rb"
     - "lib/ruby_lsp/load_sorbet.rb"
+
+Layout/ClassStructure:
+  Enabled: true
+  Exclude:
+    - "test/**/*"
+  ExpectedOrder:
+    - module_inclusion
+    - constants
+    - public_attribute_macros
+    - public_class_methods # does not recognize `class << self`
+    - initializer
+    - public_methods
+    - protected_attribute_macros
+    - protected_methods
+    - private_attribute_macros
+    - private_delegate
+    - private_methods
+  Categories:
+    attribute_macros:
+      - attr_accessor
+      - attr_reader
+      - attr_writer
+    module_inclusion:
+      - include
+      - prepend
+      - extend
