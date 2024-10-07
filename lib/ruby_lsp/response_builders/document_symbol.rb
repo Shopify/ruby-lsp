@@ -4,6 +4,8 @@
 module RubyLsp
   module ResponseBuilders
     class DocumentSymbol < ResponseBuilder
+      extend T::Sig
+
       ResponseType = type_member { { fixed: T::Array[Interface::DocumentSymbol] } }
 
       class SymbolHierarchyRoot
@@ -17,8 +19,6 @@ module RubyLsp
           @children = T.let([], T::Array[Interface::DocumentSymbol])
         end
       end
-
-      extend T::Sig
 
       sig { void }
       def initialize

@@ -47,12 +47,6 @@ module RubyLsp
 
         class ConfigurationError < StandardError; end
 
-        sig { returns(T::Array[RuboCop::Cop::Offense]) }
-        attr_reader :offenses
-
-        sig { returns(::RuboCop::Config) }
-        attr_reader :config_for_working_directory
-
         DEFAULT_ARGS = T.let(
           [
             "--stderr", # Print any output to stderr so that our stdout does not get polluted
@@ -62,6 +56,12 @@ module RubyLsp
           ],
           T::Array[String],
         )
+
+        sig { returns(T::Array[RuboCop::Cop::Offense]) }
+        attr_reader :offenses
+
+        sig { returns(::RuboCop::Config) }
+        attr_reader :config_for_working_directory
 
         begin
           RuboCop::Options.new.parse(["--raise-cop-error"])

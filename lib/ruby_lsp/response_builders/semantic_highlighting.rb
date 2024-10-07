@@ -6,6 +6,8 @@ module RubyLsp
     class SemanticHighlighting < ResponseBuilder
       class UndefinedTokenType < StandardError; end
 
+      extend T::Sig
+
       TOKEN_TYPES = T.let(
         {
           namespace: 0,
@@ -50,8 +52,6 @@ module RubyLsp
         }.freeze,
         T::Hash[Symbol, Integer],
       )
-
-      extend T::Sig
 
       ResponseType = type_member { { fixed: Interface::SemanticTokens } }
 
