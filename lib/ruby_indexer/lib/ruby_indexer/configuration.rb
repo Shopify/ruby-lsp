@@ -31,6 +31,7 @@ module RubyIndexer
 
       @excluded_patterns = T.let(
         [
+          File.join("**", "*_test.rb"),
           File.join("node_modules", "**", "*"),
           File.join("spec", "**", "*"),
           File.join("test", "**", "*"),
