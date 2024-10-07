@@ -102,7 +102,6 @@ module RubyIndexer
           relative_path = included_path
             .delete_prefix(@workspace_path)
             .tap { |path| path.delete_prefix!("/") }
-            .tap { |path| path.delete_suffix!("/") }
 
           [included_path, relative_path]
         end
