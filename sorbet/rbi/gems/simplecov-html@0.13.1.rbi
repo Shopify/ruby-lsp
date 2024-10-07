@@ -147,71 +147,79 @@ class SimpleCov::Formatter::HTMLFormatter
   # source://simplecov-html//lib/simplecov-html.rb#19
   def initialize; end
 
-  # @return [Boolean]
-  #
-  # source://simplecov-html//lib/simplecov-html.rb#38
-  def branchable_result?; end
-
-  # source://simplecov-html//lib/simplecov-html.rb#23
+  # source://simplecov-html//lib/simplecov-html.rb#26
   def format(result); end
-
-  # @return [Boolean]
-  #
-  # source://simplecov-html//lib/simplecov-html.rb#45
-  def line_status?(source_file, line); end
-
-  # source://simplecov-html//lib/simplecov-html.rb#34
-  def output_message(result); end
 
   private
 
-  # source://simplecov-html//lib/simplecov-html.rb#64
-  def asset_output_path; end
+  # source://simplecov-html//lib/simplecov-html.rb#94
+  def asset_inline(name); end
 
   # source://simplecov-html//lib/simplecov-html.rb#72
+  def asset_output_path; end
+
+  # source://simplecov-html//lib/simplecov-html.rb#80
   def assets_path(name); end
 
-  # source://simplecov-html//lib/simplecov-html.rb#97
+  # @return [Boolean]
+  #
+  # source://simplecov-html//lib/simplecov-html.rb#41
+  def branchable_result?; end
+
+  # source://simplecov-html//lib/simplecov-html.rb#125
   def coverage_css_class(covered_percent); end
 
-  # source://simplecov-html//lib/simplecov-html.rb#93
+  # source://simplecov-html//lib/simplecov-html.rb#121
   def covered_percent(percent); end
 
   # Returns a table containing the given source files
   #
-  # source://simplecov-html//lib/simplecov-html.rb#84
+  # source://simplecov-html//lib/simplecov-html.rb#112
   def formatted_file_list(title, source_files); end
 
   # Returns the html for the given source_file
   #
-  # source://simplecov-html//lib/simplecov-html.rb#77
+  # source://simplecov-html//lib/simplecov-html.rb#105
   def formatted_source_file(source_file); end
 
   # Return a (kind of) unique id for the source file given. Uses SHA1 on path for the id
   #
-  # source://simplecov-html//lib/simplecov-html.rb#118
+  # source://simplecov-html//lib/simplecov-html.rb#146
   def id(source_file); end
 
-  # source://simplecov-html//lib/simplecov-html.rb#130
+  # @return [Boolean]
+  #
+  # source://simplecov-html//lib/simplecov-html.rb#48
+  def line_status?(source_file, line); end
+
+  # source://simplecov-html//lib/simplecov-html.rb#158
   def link_to_source_file(source_file); end
 
-  # source://simplecov-html//lib/simplecov-html.rb#60
+  # source://simplecov-html//lib/simplecov-html.rb#56
+  def output_message(result); end
+
+  # source://simplecov-html//lib/simplecov-html.rb#68
   def output_path; end
 
-  # source://simplecov-html//lib/simplecov-html.rb#126
+  # source://simplecov-html//lib/simplecov-html.rb#154
   def shortened_filename(source_file); end
 
-  # source://simplecov-html//lib/simplecov-html.rb#107
+  # source://simplecov-html//lib/simplecov-html.rb#135
   def strength_css_class(covered_strength); end
 
   # Returns the an erb instance for the template of given name
   #
-  # source://simplecov-html//lib/simplecov-html.rb#56
+  # source://simplecov-html//lib/simplecov-html.rb#64
   def template(name); end
 
-  # source://simplecov-html//lib/simplecov-html.rb#122
+  # source://simplecov-html//lib/simplecov-html.rb#150
   def timeago(time); end
 end
+
+# Only have a few content types, just hardcode them
+#
+# source://simplecov-html//lib/simplecov-html.rb#87
+SimpleCov::Formatter::HTMLFormatter::CONTENT_TYPES = T.let(T.unsafe(nil), Hash)
 
 # source://simplecov-html//lib/simplecov-html/version.rb#6
 SimpleCov::Formatter::HTMLFormatter::VERSION = T.let(T.unsafe(nil), String)
