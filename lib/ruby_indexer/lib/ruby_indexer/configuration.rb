@@ -94,9 +94,10 @@ module RubyIndexer
       # For example, if "tmp/**/*" is excluded, we don't need to traverse into "tmp" at all. However, if
       # "vendor/bundle/**/*" is excluded, we will traverse all of "vendor" and `reject!` out all "vendor/bundle" entries
       # later.
+      excluded_pattern = merged_excluded_file_pattern
       included_paths = Dir.glob(File.join(@workspace_path, "*/"), flags)
         .filter_map do |included_path|
-          next if File.fnmatch?(merged_excluded_file_pattern, included_path, flags)
+          next if File.fnmatch?(excluded_pattern, included_path, flags)
 
           relative_path = included_path
             .delete_prefix(@workspace_path)
