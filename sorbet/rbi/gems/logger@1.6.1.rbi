@@ -400,11 +400,14 @@ class Logger
   # - +shift_period_suffix+: sets the format for the filename suffix
   #   for periodic log file rotation; default is <tt>'%Y%m%d'</tt>.
   #   See {Periodic Rotation}[rdoc-ref:Logger@Periodic+Rotation].
+  # - +reraise_write_errors+: An array of exception classes, which will
+  #   be reraised if there is an error when writing to the log device.
+  #   The default is to swallow all exceptions raised.
   #
   # @return [Logger] a new instance of Logger
   #
-  # source://logger//lib/logger.rb#578
-  def initialize(logdev, shift_age = T.unsafe(nil), shift_size = T.unsafe(nil), level: T.unsafe(nil), progname: T.unsafe(nil), formatter: T.unsafe(nil), datetime_format: T.unsafe(nil), binmode: T.unsafe(nil), shift_period_suffix: T.unsafe(nil)); end
+  # source://logger//lib/logger.rb#581
+  def initialize(logdev, shift_age = T.unsafe(nil), shift_size = T.unsafe(nil), level: T.unsafe(nil), progname: T.unsafe(nil), formatter: T.unsafe(nil), datetime_format: T.unsafe(nil), binmode: T.unsafe(nil), shift_period_suffix: T.unsafe(nil), reraise_write_errors: T.unsafe(nil)); end
 
   # Writes the given +msg+ to the log with no formatting;
   # returns the number of characters written,
@@ -417,7 +420,7 @@ class Logger
   #
   #   My message.
   #
-  # source://logger//lib/logger.rb#684
+  # source://logger//lib/logger.rb#689
   def <<(msg); end
 
   # Creates a log entry, which may or may not be written to the log,
@@ -447,7 +450,7 @@ class Logger
   # - #fatal.
   # - #unknown.
   #
-  # source://logger//lib/logger.rb#651
+  # source://logger//lib/logger.rb#656
   def add(severity, message = T.unsafe(nil), progname = T.unsafe(nil)); end
 
   # Closes the logger; returns +nil+:
@@ -458,7 +461,7 @@ class Logger
   #
   # Related: Logger#reopen.
   #
-  # source://logger//lib/logger.rb#731
+  # source://logger//lib/logger.rb#736
   def close; end
 
   # Returns the date-time format; see #datetime_format=.
@@ -479,7 +482,7 @@ class Logger
 
   # Equivalent to calling #add with severity <tt>Logger::DEBUG</tt>.
   #
-  # source://logger//lib/logger.rb#690
+  # source://logger//lib/logger.rb#695
   def debug(progname = T.unsafe(nil), &block); end
 
   # Sets the log level to Logger::DEBUG.
@@ -499,7 +502,7 @@ class Logger
 
   # Equivalent to calling #add with severity <tt>Logger::ERROR</tt>.
   #
-  # source://logger//lib/logger.rb#708
+  # source://logger//lib/logger.rb#713
   def error(progname = T.unsafe(nil), &block); end
 
   # Sets the log level to Logger::ERROR.
@@ -519,7 +522,7 @@ class Logger
 
   # Equivalent to calling #add with severity <tt>Logger::FATAL</tt>.
   #
-  # source://logger//lib/logger.rb#714
+  # source://logger//lib/logger.rb#719
   def fatal(progname = T.unsafe(nil), &block); end
 
   # Sets the log level to Logger::FATAL.
@@ -607,7 +610,7 @@ class Logger
 
   # Equivalent to calling #add with severity <tt>Logger::INFO</tt>.
   #
-  # source://logger//lib/logger.rb#696
+  # source://logger//lib/logger.rb#701
   def info(progname = T.unsafe(nil), &block); end
 
   # Sets the log level to Logger::INFO.
@@ -672,7 +675,7 @@ class Logger
   # - #fatal.
   # - #unknown.
   #
-  # source://logger//lib/logger.rb#651
+  # source://logger//lib/logger.rb#656
   def log(severity, message = T.unsafe(nil), progname = T.unsafe(nil)); end
 
   # Program name to include in log messages.
@@ -708,7 +711,7 @@ class Logger
   #   #  "E, [2022-05-12T14:21:27.596726 #22428] ERROR -- : one\n",
   #   #  "E, [2022-05-12T14:23:05.847241 #22428] ERROR -- : three\n"]
   #
-  # source://logger//lib/logger.rb#619
+  # source://logger//lib/logger.rb#624
   def reopen(logdev = T.unsafe(nil)); end
 
   # Logging severity threshold (e.g. <tt>Logger::INFO</tt>).
@@ -733,12 +736,12 @@ class Logger
 
   # Equivalent to calling #add with severity <tt>Logger::UNKNOWN</tt>.
   #
-  # source://logger//lib/logger.rb#720
+  # source://logger//lib/logger.rb#725
   def unknown(progname = T.unsafe(nil), &block); end
 
   # Equivalent to calling #add with severity <tt>Logger::WARN</tt>.
   #
-  # source://logger//lib/logger.rb#702
+  # source://logger//lib/logger.rb#707
   def warn(progname = T.unsafe(nil), &block); end
 
   # Sets the log level to Logger::WARN.
@@ -767,11 +770,16 @@ class Logger
 
   private
 
-  # source://logger//lib/logger.rb#744
+  # source://logger//lib/logger.rb#754
   def format_message(severity, datetime, progname, msg); end
 
-  # source://logger//lib/logger.rb#740
+  # source://logger//lib/logger.rb#745
   def format_severity(severity); end
+
+  # Guarantee the existence of this ivar even when subclasses don't call the superclass constructor.
+  #
+  # source://logger//lib/logger.rb#750
+  def level_override; end
 end
 
 # Default formatter for log messages.
@@ -823,9 +831,9 @@ class Logger::LogDevice
   # @return [LogDevice] a new instance of LogDevice
   #
   # source://logger//lib/logger/log_device.rb#14
-  def initialize(log = T.unsafe(nil), shift_age: T.unsafe(nil), shift_size: T.unsafe(nil), shift_period_suffix: T.unsafe(nil), binmode: T.unsafe(nil)); end
+  def initialize(log = T.unsafe(nil), shift_age: T.unsafe(nil), shift_size: T.unsafe(nil), shift_period_suffix: T.unsafe(nil), binmode: T.unsafe(nil), reraise_write_errors: T.unsafe(nil)); end
 
-  # source://logger//lib/logger/log_device.rb#52
+  # source://logger//lib/logger/log_device.rb#59
   def close; end
 
   # Returns the value of attribute dev.
@@ -838,36 +846,36 @@ class Logger::LogDevice
   # source://logger//lib/logger/log_device.rb#11
   def filename; end
 
-  # source://logger//lib/logger/log_device.rb#62
+  # source://logger//lib/logger/log_device.rb#69
   def reopen(log = T.unsafe(nil)); end
 
-  # source://logger//lib/logger/log_device.rb#31
+  # source://logger//lib/logger/log_device.rb#32
   def write(message); end
 
   private
 
-  # source://logger//lib/logger/log_device.rb#119
+  # source://logger//lib/logger/log_device.rb#126
   def add_log_header(file); end
 
-  # source://logger//lib/logger/log_device.rb#125
+  # source://logger//lib/logger/log_device.rb#132
   def check_shift_log; end
 
-  # source://logger//lib/logger/log_device.rb#103
+  # source://logger//lib/logger/log_device.rb#110
   def create_logfile(filename); end
 
-  # source://logger//lib/logger/log_device.rb#145
+  # source://logger//lib/logger/log_device.rb#152
   def lock_shift_log; end
 
-  # source://logger//lib/logger/log_device.rb#95
+  # source://logger//lib/logger/log_device.rb#102
   def open_logfile(filename); end
 
-  # source://logger//lib/logger/log_device.rb#79
+  # source://logger//lib/logger/log_device.rb#86
   def set_dev(log); end
 
-  # source://logger//lib/logger/log_device.rb#176
+  # source://logger//lib/logger/log_device.rb#183
   def shift_log_age; end
 
-  # source://logger//lib/logger/log_device.rb#188
+  # source://logger//lib/logger/log_device.rb#195
   def shift_log_period(period_end); end
 end
 
@@ -895,7 +903,7 @@ Logger::Period::SiD = T.let(T.unsafe(nil), Integer)
 
 # \Severity label for logging (max 5 chars).
 #
-# source://logger//lib/logger.rb#738
+# source://logger//lib/logger.rb#743
 Logger::SEV_LABEL = T.let(T.unsafe(nil), Array)
 
 # Logging severity.

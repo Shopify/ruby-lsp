@@ -3265,11 +3265,11 @@ YARD::CodeObjects::METHODNAMEMATCH = T.let(T.unsafe(nil), Regexp)
 #   # Extra data added to docstring
 #   property :bar
 #
-# source://yard//lib/yard/code_objects/macro_object.rb#30
+# source://yard//lib/yard/code_objects/macro_object.rb#29
 class YARD::CodeObjects::MacroObject < ::YARD::CodeObjects::Base
   # @return [Boolean] whether this macro is attached to a method
   #
-  # source://yard//lib/yard/code_objects/macro_object.rb#149
+  # source://yard//lib/yard/code_objects/macro_object.rb#148
   def attached?; end
 
   # Expands the macro using
@@ -3284,39 +3284,39 @@ class YARD::CodeObjects::MacroObject < ::YARD::CodeObjects::Base
   #   call, if there is a block.
   # @see expand
   #
-  # source://yard//lib/yard/code_objects/macro_object.rb#167
+  # source://yard//lib/yard/code_objects/macro_object.rb#166
   def expand(call_params = T.unsafe(nil), full_source = T.unsafe(nil), block_source = T.unsafe(nil)); end
 
   # @return [String] the macro data stored on the object
   #
-  # source://yard//lib/yard/code_objects/macro_object.rb#142
+  # source://yard//lib/yard/code_objects/macro_object.rb#141
   def macro_data; end
 
   # @return [String] the macro data stored on the object
   #
-  # source://yard//lib/yard/code_objects/macro_object.rb#142
+  # source://yard//lib/yard/code_objects/macro_object.rb#141
   def macro_data=(_arg0); end
 
   # @return [CodeObjects::Base] the method object that this macro is
   #   attached to.
   #
-  # source://yard//lib/yard/code_objects/macro_object.rb#146
+  # source://yard//lib/yard/code_objects/macro_object.rb#145
   def method_object; end
 
   # @return [CodeObjects::Base] the method object that this macro is
   #   attached to.
   #
-  # source://yard//lib/yard/code_objects/macro_object.rb#146
+  # source://yard//lib/yard/code_objects/macro_object.rb#145
   def method_object=(_arg0); end
 
   # Overrides {Base#path} so the macro path is ".macro.MACRONAME"
   #
-  # source://yard//lib/yard/code_objects/macro_object.rb#152
+  # source://yard//lib/yard/code_objects/macro_object.rb#151
   def path; end
 
   # Overrides the separator to be '.'
   #
-  # source://yard//lib/yard/code_objects/macro_object.rb#155
+  # source://yard//lib/yard/code_objects/macro_object.rb#154
   def sep; end
 
   class << self
@@ -3334,7 +3334,7 @@ class YARD::CodeObjects::MacroObject < ::YARD::CodeObjects::Base
     # @return [String] the expanded macro data
     # @see find_or_create
     #
-    # source://yard//lib/yard/code_objects/macro_object.rb#120
+    # source://yard//lib/yard/code_objects/macro_object.rb#119
     def apply(docstring, call_params = T.unsafe(nil), full_source = T.unsafe(nil), block_source = T.unsafe(nil), _method_object = T.unsafe(nil)); end
 
     # Applies a macro to a docstring, interpolating the macro's data on the
@@ -3350,7 +3350,7 @@ class YARD::CodeObjects::MacroObject < ::YARD::CodeObjects::Base
     #   interpolating the block data as a variable.
     # @return [String] the expanded macro data
     #
-    # source://yard//lib/yard/code_objects/macro_object.rb#136
+    # source://yard//lib/yard/code_objects/macro_object.rb#135
     def apply_macro(macro, docstring, call_params = T.unsafe(nil), full_source = T.unsafe(nil), block_source = T.unsafe(nil)); end
 
     # Creates a new macro and fills in the relevant properties.
@@ -3361,7 +3361,7 @@ class YARD::CodeObjects::MacroObject < ::YARD::CodeObjects::Base
     #   macro to. If supplied, {#attached?} will be true
     # @return [MacroObject] the newly created object
     #
-    # source://yard//lib/yard/code_objects/macro_object.rb#40
+    # source://yard//lib/yard/code_objects/macro_object.rb#39
     def create(macro_name, data, method_object = T.unsafe(nil)); end
 
     # Parses a given docstring and determines if the macro is "new" or
@@ -3381,7 +3381,7 @@ class YARD::CodeObjects::MacroObject < ::YARD::CodeObjects::Base
     # @return [nil] if the +data+ has no macro tag or if the macro is
     #   not new and no macro by the macro name is found.
     #
-    # source://yard//lib/yard/code_objects/macro_object.rb#71
+    # source://yard//lib/yard/code_objects/macro_object.rb#70
     def create_docstring(macro_name, data, method_object = T.unsafe(nil)); end
 
     # Expands +macro_data+ using the interpolation parameters.
@@ -3394,7 +3394,7 @@ class YARD::CodeObjects::MacroObject < ::YARD::CodeObjects::Base
     #
     # @param macro_data [String] the macro data to expand (taken from {#macro_data})
     #
-    # source://yard//lib/yard/code_objects/macro_object.rb#93
+    # source://yard//lib/yard/code_objects/macro_object.rb#92
     def expand(macro_data, call_params = T.unsafe(nil), full_source = T.unsafe(nil), block_source = T.unsafe(nil)); end
 
     # Finds a macro using +macro_name+
@@ -3403,7 +3403,7 @@ class YARD::CodeObjects::MacroObject < ::YARD::CodeObjects::Base
     # @return [MacroObject] if a macro is found
     # @return [nil] if there is no registered macro by that name
     #
-    # source://yard//lib/yard/code_objects/macro_object.rb#51
+    # source://yard//lib/yard/code_objects/macro_object.rb#50
     def find(macro_name); end
 
     # Parses a given docstring and determines if the macro is "new" or
@@ -3423,12 +3423,12 @@ class YARD::CodeObjects::MacroObject < ::YARD::CodeObjects::Base
     # @return [nil] if the +data+ has no macro tag or if the macro is
     #   not new and no macro by the macro name is found.
     #
-    # source://yard//lib/yard/code_objects/macro_object.rb#71
+    # source://yard//lib/yard/code_objects/macro_object.rb#70
     def find_or_create(macro_name, data, method_object = T.unsafe(nil)); end
   end
 end
 
-# source://yard//lib/yard/code_objects/macro_object.rb#31
+# source://yard//lib/yard/code_objects/macro_object.rb#30
 YARD::CodeObjects::MacroObject::MACRO_MATCH = T.let(T.unsafe(nil), Regexp)
 
 # Represents a Ruby method in source
@@ -4763,7 +4763,7 @@ YARD::Docstring::META_MATCH = T.let(T.unsafe(nil), Regexp)
 # @see #parse_content
 # @since 0.8.0
 #
-# source://yard//lib/yard/docstring_parser.rb#30
+# source://yard//lib/yard/docstring_parser.rb#29
 class YARD::DocstringParser
   # Creates a new parser to parse docstring data
   #
@@ -4772,7 +4772,7 @@ class YARD::DocstringParser
   # @return [DocstringParser] a new instance of DocstringParser
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#81
+  # source://yard//lib/yard/docstring_parser.rb#80
   def initialize(library = T.unsafe(nil)); end
 
   # Creates a new directive using the registered {#library}
@@ -4780,14 +4780,14 @@ class YARD::DocstringParser
   # @return [Tags::Directive] the directive object that is created
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#232
+  # source://yard//lib/yard/docstring_parser.rb#231
   def create_directive(tag_name, tag_buf); end
 
   # Creates a {Tags::RefTag}
   #
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#226
+  # source://yard//lib/yard/docstring_parser.rb#225
   def create_ref_tag(tag_name, name, object_name); end
 
   # Creates a tag from the {Tags::DefaultFactory tag factory}.
@@ -4799,7 +4799,7 @@ class YARD::DocstringParser
   # @return [Tags::Tag, Tags::RefTag] a tag
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#209
+  # source://yard//lib/yard/docstring_parser.rb#208
   def create_tag(tag_name, tag_buf = T.unsafe(nil)); end
 
   # @return [Array<Tags::Directive>] a list of directives identified
@@ -4807,7 +4807,7 @@ class YARD::DocstringParser
   #   Docstring object.
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#45
+  # source://yard//lib/yard/docstring_parser.rb#44
   def directives; end
 
   # @return [Array<Tags::Directive>] a list of directives identified
@@ -4815,7 +4815,7 @@ class YARD::DocstringParser
   #   Docstring object.
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#45
+  # source://yard//lib/yard/docstring_parser.rb#44
   def directives=(_arg0); end
 
   # @return [Handlers::Base, nil] the handler parsing this
@@ -4823,7 +4823,7 @@ class YARD::DocstringParser
   #   initialized through
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#66
+  # source://yard//lib/yard/docstring_parser.rb#65
   def handler; end
 
   # @return [Handlers::Base, nil] the handler parsing this
@@ -4831,21 +4831,21 @@ class YARD::DocstringParser
   #   initialized through
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#66
+  # source://yard//lib/yard/docstring_parser.rb#65
   def handler=(_arg0); end
 
   # @return [Tags::Library] the tag library being used to
   #   identify registered tags in the docstring.
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#70
+  # source://yard//lib/yard/docstring_parser.rb#69
   def library; end
 
   # @return [Tags::Library] the tag library being used to
   #   identify registered tags in the docstring.
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#70
+  # source://yard//lib/yard/docstring_parser.rb#69
   def library=(_arg0); end
 
   # @return [CodeObjects::Base, nil] the object associated with
@@ -4853,7 +4853,7 @@ class YARD::DocstringParser
   #   not attached to any object.
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#56
+  # source://yard//lib/yard/docstring_parser.rb#55
   def object; end
 
   # @return [CodeObjects::Base, nil] the object associated with
@@ -4861,7 +4861,7 @@ class YARD::DocstringParser
   #   not attached to any object.
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#56
+  # source://yard//lib/yard/docstring_parser.rb#55
   def object=(_arg0); end
 
   # Parses all content and returns itself.
@@ -4878,7 +4878,7 @@ class YARD::DocstringParser
   # @see #to_docstring
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#113
+  # source://yard//lib/yard/docstring_parser.rb#112
   def parse(content, object = T.unsafe(nil), handler = T.unsafe(nil)); end
 
   # Parses a given block of text.
@@ -4888,7 +4888,7 @@ class YARD::DocstringParser
   # @param content [String] the content to parse
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#129
+  # source://yard//lib/yard/docstring_parser.rb#128
   def parse_content(content); end
 
   # Call post processing callbacks on parser.
@@ -4898,19 +4898,19 @@ class YARD::DocstringParser
   # @return [void]
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#196
+  # source://yard//lib/yard/docstring_parser.rb#195
   def post_process; end
 
   # @return [String] the complete input string to the parser.
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#36
+  # source://yard//lib/yard/docstring_parser.rb#35
   def raw_text; end
 
   # @return [String] the complete input string to the parser.
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#36
+  # source://yard//lib/yard/docstring_parser.rb#35
   def raw_text=(_arg0); end
 
   # @return [CodeObjects::Base, nil] the object referenced by
@@ -4918,7 +4918,7 @@ class YARD::DocstringParser
   #   refer to any object.
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#61
+  # source://yard//lib/yard/docstring_parser.rb#60
   def reference; end
 
   # @return [CodeObjects::Base, nil] the object referenced by
@@ -4926,7 +4926,7 @@ class YARD::DocstringParser
   #   refer to any object.
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#61
+  # source://yard//lib/yard/docstring_parser.rb#60
   def reference=(_arg0); end
 
   # @return [OpenStruct] any arbitrary state to be passed between
@@ -4935,7 +4935,7 @@ class YARD::DocstringParser
   #   used in a docstring).
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#51
+  # source://yard//lib/yard/docstring_parser.rb#50
   def state; end
 
   # @return [OpenStruct] any arbitrary state to be passed between
@@ -4944,7 +4944,7 @@ class YARD::DocstringParser
   #   used in a docstring).
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#51
+  # source://yard//lib/yard/docstring_parser.rb#50
   def state=(_arg0); end
 
   # Backward compatibility to detect old tags that should be specified
@@ -4953,42 +4953,42 @@ class YARD::DocstringParser
   # @return [Boolean]
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#252
+  # source://yard//lib/yard/docstring_parser.rb#251
   def tag_is_directive?(tag_name); end
 
   # @return [Array<Tags::Tag>] the list of meta-data tags identified
   #   by the parser
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#40
+  # source://yard//lib/yard/docstring_parser.rb#39
   def tags; end
 
   # @return [Array<Tags::Tag>] the list of meta-data tags identified
   #   by the parser
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#40
+  # source://yard//lib/yard/docstring_parser.rb#39
   def tags=(_arg0); end
 
   # @return [String] the parsed text portion of the docstring,
   #   with tags removed.
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#33
+  # source://yard//lib/yard/docstring_parser.rb#32
   def text; end
 
   # @return [String] the parsed text portion of the docstring,
   #   with tags removed.
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#33
+  # source://yard//lib/yard/docstring_parser.rb#32
   def text=(_arg0); end
 
   # @return [Docstring] translates parsed text into
   #   a Docstring object.
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#95
+  # source://yard//lib/yard/docstring_parser.rb#94
   def to_docstring; end
 
   private
@@ -4997,7 +4997,7 @@ class YARD::DocstringParser
   #
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#324
+  # source://yard//lib/yard/docstring_parser.rb#323
   def call_after_parse_callbacks; end
 
   # Calls the {Tags::Directive#after_parse} callback on all the
@@ -5005,17 +5005,17 @@ class YARD::DocstringParser
   #
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#319
+  # source://yard//lib/yard/docstring_parser.rb#318
   def call_directives_after_parse; end
 
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#305
+  # source://yard//lib/yard/docstring_parser.rb#304
   def detect_reference(content); end
 
   # @since 0.8.0
   #
-  # source://yard//lib/yard/docstring_parser.rb#301
+  # source://yard//lib/yard/docstring_parser.rb#300
   def namespace; end
 
   class << self
@@ -5030,13 +5030,13 @@ class YARD::DocstringParser
     #   with all directives and tags created.
     # @yieldreturn [void]
     #
-    # source://yard//lib/yard/docstring_parser.rb#266
+    # source://yard//lib/yard/docstring_parser.rb#265
     def after_parse(&block); end
 
     # @return [Array<Proc>] the {after_parse} callback proc objects
     # @since 0.8.0
     #
-    # source://yard//lib/yard/docstring_parser.rb#271
+    # source://yard//lib/yard/docstring_parser.rb#270
     def after_parse_callbacks; end
   end
 end
@@ -5045,7 +5045,7 @@ end
 #
 # @since 0.8.0
 #
-# source://yard//lib/yard/docstring_parser.rb#73
+# source://yard//lib/yard/docstring_parser.rb#72
 YARD::DocstringParser::META_MATCH = T.let(T.unsafe(nil), Regexp)
 
 # source://yard//lib/yard/gem_index.rb#6
@@ -5954,14 +5954,14 @@ end
 #
 # @see Handlers::Base
 #
-# source://yard//lib/yard/handlers/processor.rb#20
+# source://yard//lib/yard/handlers/processor.rb#19
 class YARD::Handlers::Processor
   # Creates a new Processor for a +file+.
   #
   # @param parser [Parser::SourceParser] the parser used to initialize the processor
   # @return [Processor] a new instance of Processor
   #
-  # source://yard//lib/yard/handlers/processor.rb#92
+  # source://yard//lib/yard/handlers/processor.rb#91
   def initialize(parser); end
 
   # Share state across different handlers inside of a file.
@@ -5974,7 +5974,7 @@ class YARD::Handlers::Processor
   # @return [OpenStruct] an open structure that can store arbitrary data
   # @see #globals
   #
-  # source://yard//lib/yard/handlers/processor.rb#88
+  # source://yard//lib/yard/handlers/processor.rb#87
   def extra_state; end
 
   # Share state across different handlers inside of a file.
@@ -5987,17 +5987,17 @@ class YARD::Handlers::Processor
   # @return [OpenStruct] an open structure that can store arbitrary data
   # @see #globals
   #
-  # source://yard//lib/yard/handlers/processor.rb#88
+  # source://yard//lib/yard/handlers/processor.rb#87
   def extra_state=(_arg0); end
 
   # @return [String] the filename
   #
-  # source://yard//lib/yard/handlers/processor.rb#41
+  # source://yard//lib/yard/handlers/processor.rb#40
   def file; end
 
   # @return [String] the filename
   #
-  # source://yard//lib/yard/handlers/processor.rb#41
+  # source://yard//lib/yard/handlers/processor.rb#40
   def file=(_arg0); end
 
   # Searches for all handlers in {Base.subclasses} that match the +statement+
@@ -6005,7 +6005,7 @@ class YARD::Handlers::Processor
   # @param statement the statement object to match.
   # @return [Array<Base>] a list of handlers to process the statement with.
   #
-  # source://yard//lib/yard/handlers/processor.rb#151
+  # source://yard//lib/yard/handlers/processor.rb#150
   def find_handlers(statement); end
 
   # Handlers can share state for the entire post processing stage through
@@ -6025,7 +6025,7 @@ class YARD::Handlers::Processor
   # @return [OpenStruct] global shared state for post-processing stage
   # @see #extra_state
   #
-  # source://yard//lib/yard/handlers/processor.rb#77
+  # source://yard//lib/yard/handlers/processor.rb#76
   def globals; end
 
   # Handlers can share state for the entire post processing stage through
@@ -6045,17 +6045,17 @@ class YARD::Handlers::Processor
   # @return [OpenStruct] global shared state for post-processing stage
   # @see #extra_state
   #
-  # source://yard//lib/yard/handlers/processor.rb#77
+  # source://yard//lib/yard/handlers/processor.rb#76
   def globals=(_arg0); end
 
   # @return [CodeObjects::NamespaceObject] the current namespace
   #
-  # source://yard//lib/yard/handlers/processor.rb#44
+  # source://yard//lib/yard/handlers/processor.rb#43
   def namespace; end
 
   # @return [CodeObjects::NamespaceObject] the current namespace
   #
-  # source://yard//lib/yard/handlers/processor.rb#44
+  # source://yard//lib/yard/handlers/processor.rb#43
   def namespace=(_arg0); end
 
   # @return [CodeObjects::Base, nil] unlike the namespace, the owner
@@ -6063,7 +6063,7 @@ class YARD::Handlers::Processor
   #   For instance, when parsing a method body, the {CodeObjects::MethodObject}
   #   is set as the owner, in case any extra method information is processed.
   #
-  # source://yard//lib/yard/handlers/processor.rb#56
+  # source://yard//lib/yard/handlers/processor.rb#55
   def owner; end
 
   # @return [CodeObjects::Base, nil] unlike the namespace, the owner
@@ -6071,7 +6071,7 @@ class YARD::Handlers::Processor
   #   For instance, when parsing a method body, the {CodeObjects::MethodObject}
   #   is set as the owner, in case any extra method information is processed.
   #
-  # source://yard//lib/yard/handlers/processor.rb#56
+  # source://yard//lib/yard/handlers/processor.rb#55
   def owner=(_arg0); end
 
   # Continue parsing the remainder of the files in the +globals.ordered_parser+
@@ -6081,17 +6081,17 @@ class YARD::Handlers::Processor
   # @return [void]
   # @see Parser::OrderedParser
   #
-  # source://yard//lib/yard/handlers/processor.rb#140
+  # source://yard//lib/yard/handlers/processor.rb#139
   def parse_remaining_files; end
 
   # @return [Symbol] the parser type (:ruby, :ruby18, :c)
   #
-  # source://yard//lib/yard/handlers/processor.rb#59
+  # source://yard//lib/yard/handlers/processor.rb#58
   def parser_type; end
 
   # @return [Symbol] the parser type (:ruby, :ruby18, :c)
   #
-  # source://yard//lib/yard/handlers/processor.rb#59
+  # source://yard//lib/yard/handlers/processor.rb#58
   def parser_type=(_arg0); end
 
   # Processes a list of statements by finding handlers to process each
@@ -6100,27 +6100,27 @@ class YARD::Handlers::Processor
   # @param statements [Array] a list of statements
   # @return [void]
   #
-  # source://yard//lib/yard/handlers/processor.rb#110
+  # source://yard//lib/yard/handlers/processor.rb#109
   def process(statements); end
 
   # @return [Symbol] the current scope (class, instance)
   #
-  # source://yard//lib/yard/handlers/processor.rb#50
+  # source://yard//lib/yard/handlers/processor.rb#49
   def scope; end
 
   # @return [Symbol] the current scope (class, instance)
   #
-  # source://yard//lib/yard/handlers/processor.rb#50
+  # source://yard//lib/yard/handlers/processor.rb#49
   def scope=(_arg0); end
 
   # @return [Symbol] the current visibility (public, private, protected)
   #
-  # source://yard//lib/yard/handlers/processor.rb#47
+  # source://yard//lib/yard/handlers/processor.rb#46
   def visibility; end
 
   # @return [Symbol] the current visibility (public, private, protected)
   #
-  # source://yard//lib/yard/handlers/processor.rb#47
+  # source://yard//lib/yard/handlers/processor.rb#46
   def visibility=(_arg0); end
 
   private
@@ -6129,7 +6129,7 @@ class YARD::Handlers::Processor
   #
   # @return [Base] the base class
   #
-  # source://yard//lib/yard/handlers/processor.rb#172
+  # source://yard//lib/yard/handlers/processor.rb#171
   def handler_base_class; end
 
   # The module holding the handlers to be loaded
@@ -6137,12 +6137,12 @@ class YARD::Handlers::Processor
   # @return [Module] the module containing the handlers depending on
   #   {#parser_type}.
   #
-  # source://yard//lib/yard/handlers/processor.rb#180
+  # source://yard//lib/yard/handlers/processor.rb#179
   def handler_base_namespace; end
 
   # @return [Boolean]
   #
-  # source://yard//lib/yard/handlers/processor.rb#161
+  # source://yard//lib/yard/handlers/processor.rb#160
   def handles?(handler, statement); end
 
   # Loads handlers from {#handler_base_namespace}. This ensures that
@@ -6151,7 +6151,7 @@ class YARD::Handlers::Processor
   #
   # @return [void]
   #
-  # source://yard//lib/yard/handlers/processor.rb#188
+  # source://yard//lib/yard/handlers/processor.rb#187
   def load_handlers; end
 
   class << self
@@ -6159,14 +6159,14 @@ class YARD::Handlers::Processor
     # @return [Hash] a list of registered parser type extensions
     # @since 0.6.0
     #
-    # source://yard//lib/yard/handlers/processor.rb#33
+    # source://yard//lib/yard/handlers/processor.rb#32
     def namespace_for_handler; end
 
     # Registers a new namespace for handlers of the given type.
     #
     # @since 0.6.0
     #
-    # source://yard//lib/yard/handlers/processor.rb#24
+    # source://yard//lib/yard/handlers/processor.rb#23
     def register_handler_namespace(type, ns); end
   end
 end
@@ -6999,6 +6999,11 @@ end
 # source://yard//lib/yard/handlers/ruby/visibility_handler.rb#3
 class YARD::Handlers::Ruby::VisibilityHandler < ::YARD::Handlers::Ruby::Base
   include ::YARD::Handlers::Ruby::DecoratorHandlerMethods
+
+  # @return [Boolean]
+  #
+  # source://yard//lib/yard/handlers/ruby/visibility_handler.rb#31
+  def is_attribute_method?(node); end
 end
 
 # Handles 'yield' calls
@@ -7461,13 +7466,16 @@ end
 # Handles console logging for info, warnings and errors.
 # Uses the stdlib Logger class in Ruby for all the backend logic.
 #
-# source://yard//lib/yard/logging.rb#9
-class YARD::Logger < ::Logger
+# source://yard//lib/yard/logging.rb#8
+class YARD::Logger
+  include ::YARD::Logger::Severity
+
   # Creates a new logger
   #
+  # @private
   # @return [Logger] a new instance of Logger
   #
-  # source://yard//lib/yard/logging.rb#43
+  # source://yard//lib/yard/logging.rb#82
   def initialize(pipe, *args); end
 
   # Displays an unformatted line to the logger output stream.
@@ -7476,7 +7484,7 @@ class YARD::Logger < ::Logger
   # @return [void]
   # @since 0.8.2
   #
-  # source://yard//lib/yard/logging.rb#143
+  # source://yard//lib/yard/logging.rb#205
   def <<(msg = T.unsafe(nil)); end
 
   # Prints the backtrace +exc+ to the logger as error data.
@@ -7485,7 +7493,7 @@ class YARD::Logger < ::Logger
   # @param level_meth [Symbol] the level to log backtrace at
   # @return [void]
   #
-  # source://yard//lib/yard/logging.rb#154
+  # source://yard//lib/yard/logging.rb#216
   def backtrace(exc, level_meth = T.unsafe(nil)); end
 
   # Captures the duration of a block of code for benchmark analysis. Also
@@ -7498,7 +7506,7 @@ class YARD::Logger < ::Logger
   # @todo Implement capture storage for reporting of benchmarks
   # @yield a block of arbitrary code to benchmark
   #
-  # source://yard//lib/yard/logging.rb#80
+  # source://yard//lib/yard/logging.rb#234
   def capture(msg, nontty_log = T.unsafe(nil)); end
 
   # Clears the progress indicator in the TTY display.
@@ -7506,14 +7514,18 @@ class YARD::Logger < ::Logger
   # @return [void]
   # @since 0.8.2
   #
-  # source://yard//lib/yard/logging.rb#121
+  # source://yard//lib/yard/logging.rb#186
   def clear_progress; end
 
-  # Changes the debug level to DEBUG if $DEBUG is set
-  # and writes a debugging message.
+  # Changes the debug level to DEBUG if $DEBUG is set and writes a debugging message.
+  # Logs a message with the debug severity level.
   #
-  # source://yard//lib/yard/logging.rb#59
-  def debug(*args); end
+  # @param message [String] the message to log
+  # @return [void]
+  # @see #log
+  #
+  # source://yard//lib/yard/logging.rb#103
+  def debug(message); end
 
   # Sets the logger level for the duration of the block
   #
@@ -7525,17 +7537,65 @@ class YARD::Logger < ::Logger
   #   values can be found in Ruby's Logger class.
   # @yield the block with the logger temporarily set to +new_level+
   #
-  # source://yard//lib/yard/logging.rb#179
+  # source://yard//lib/yard/logging.rb#142
   def enter_level(new_level = T.unsafe(nil)); end
+
+  # Logs a message with the error severity level.
+  #
+  # @param message [String] the message to log
+  # @return [void]
+  # @see #log
+  #
+  # source://yard//lib/yard/logging.rb#103
+  def error(message); end
+
+  # Logs a message with the fatal severity level.
+  #
+  # @param message [String] the message to log
+  # @return [void]
+  # @see #log
+  #
+  # source://yard//lib/yard/logging.rb#103
+  def fatal(message); end
+
+  # Logs a message with the info severity level.
+  #
+  # @param message [String] the message to log
+  # @return [void]
+  # @see #log
+  #
+  # source://yard//lib/yard/logging.rb#103
+  def info(message); end
 
   # @return [IO] the IO object being logged to
   # @since 0.8.2
   #
-  # source://yard//lib/yard/logging.rb#17
+  # source://yard//lib/yard/logging.rb#49
   def io; end
 
-  # source://yard//lib/yard/logging.rb#18
-  def io=(pipe); end
+  # @return [IO] the IO object being logged to
+  # @since 0.8.2
+  #
+  # source://yard//lib/yard/logging.rb#49
+  def io=(_arg0); end
+
+  # @return [DEBUG, INFO, WARN, ERROR, FATAL, UNKNOWN] the logging level
+  #
+  # source://yard//lib/yard/logging.rb#57
+  def level; end
+
+  # @return [DEBUG, INFO, WARN, ERROR, FATAL, UNKNOWN] the logging level
+  #
+  # source://yard//lib/yard/logging.rb#57
+  def level=(_arg0); end
+
+  # Logs a message with a given severity
+  #
+  # @param severity [DEBUG, INFO, WARN, ERROR, FATAL, UNKNOWN] the severity level
+  # @param message [String] the message to log
+  #
+  # source://yard//lib/yard/logging.rb#122
+  def log(severity, message); end
 
   # Displays an unformatted line to the logger output stream.
   #
@@ -7543,7 +7603,7 @@ class YARD::Logger < ::Logger
   # @return [void]
   # @since 0.8.2
   #
-  # source://yard//lib/yard/logging.rb#143
+  # source://yard//lib/yard/logging.rb#205
   def print(msg = T.unsafe(nil)); end
 
   # Displays a progress indicator for a given message. This progress report
@@ -7556,7 +7616,7 @@ class YARD::Logger < ::Logger
   # @return [void]
   # @since 0.8.2
   #
-  # source://yard//lib/yard/logging.rb#96
+  # source://yard//lib/yard/logging.rb#161
   def progress(msg, nontty_log = T.unsafe(nil)); end
 
   # Displays an unformatted line to the logger output stream, adding
@@ -7566,86 +7626,91 @@ class YARD::Logger < ::Logger
   # @return [void]
   # @since 0.8.2
   #
-  # source://yard//lib/yard/logging.rb#132
+  # source://yard//lib/yard/logging.rb#197
   def puts(msg = T.unsafe(nil)); end
 
   # @return [Boolean] whether backtraces should be shown (by default
   #   this is on).
   #
-  # source://yard//lib/yard/logging.rb#22
+  # source://yard//lib/yard/logging.rb#53
   def show_backtraces; end
 
   # Sets the attribute show_backtraces
   #
   # @param value the value to set the attribute show_backtraces to.
   #
-  # source://yard//lib/yard/logging.rb#23
+  # source://yard//lib/yard/logging.rb#54
   def show_backtraces=(_arg0); end
 
   # @return [Boolean] whether progress indicators should be shown when
   #   logging CLIs (by default this is off).
   #
-  # source://yard//lib/yard/logging.rb#27
+  # source://yard//lib/yard/logging.rb#64
   def show_progress; end
 
   # Sets the attribute show_progress
   #
   # @param value the value to set the attribute show_progress to.
   #
-  # source://yard//lib/yard/logging.rb#34
+  # source://yard//lib/yard/logging.rb#70
   def show_progress=(_arg0); end
 
-  # Remembers when a warning occurs and writes a warning message.
+  # Logs a message with the unknown severity level.
   #
-  # source://yard//lib/yard/logging.rb#65
-  def warn(*args); end
+  # @param message [String] the message to log
+  # @return [void]
+  # @see #log
+  #
+  # source://yard//lib/yard/logging.rb#103
+  def unknown(message); end
+
+  # Remembers when a warning occurs and writes a warning message.
+  # Logs a message with the warn severity level.
+  #
+  # @param message [String] the message to log
+  # @return [void]
+  # @see #log
+  #
+  # source://yard//lib/yard/logging.rb#103
+  def warn(message); end
 
   # Warns that the Ruby environment does not support continuations. Applies
   # to JRuby, Rubinius and MacRuby. This warning will only display once
   # per Ruby process.
   #
   # @deprecated Continuations are no longer needed by YARD 0.8.0+.
+  # @private
   # @return [void]
   #
-  # source://yard//lib/yard/logging.rb#167
+  # source://yard//lib/yard/logging.rb#250
   def warn_no_continuations; end
 
-  # Returns the value of attribute warned.
+  # @return [Boolean] whether a warn message has been emitted. Used for status tracking.
   #
-  # source://yard//lib/yard/logging.rb#69
+  # source://yard//lib/yard/logging.rb#60
   def warned; end
 
-  # Sets the attribute warned
+  # @return [Boolean] whether a warn message has been emitted. Used for status tracking.
   #
-  # @param value the value to set the attribute warned to.
-  #
-  # source://yard//lib/yard/logging.rb#69
+  # source://yard//lib/yard/logging.rb#60
   def warned=(_arg0); end
 
   private
 
-  # Override this internal Logger method to clear line
-  #
-  # source://yard//lib/yard/logging.rb#190
-  def add(*args); end
-
-  # source://yard//lib/yard/logging.rb#195
+  # source://yard//lib/yard/logging.rb#255
   def clear_line; end
 
-  # Log format (from Logger implementation). Used by Logger internally
-  #
-  # source://yard//lib/yard/logging.rb#201
-  def format_log(sev, _time, _prog, msg); end
-
-  # source://logger/1.6.0/lib/logger.rb#684
-  def print_no_newline(msg); end
-
   class << self
+    # @private
+    #
+    # source://yard//lib/yard/logging.rb#101
+    def create_log_method(name); end
+
     # The logger instance
     #
     # @return [Logger] the logger instance
     #
-    # source://yard//lib/yard/logging.rb#38
+    # source://yard//lib/yard/logging.rb#76
     def instance(pipe = T.unsafe(nil)); end
   end
 end
@@ -7655,8 +7720,96 @@ end
 #
 # @since 0.8.2
 #
-# source://yard//lib/yard/logging.rb#13
+# source://yard//lib/yard/logging.rb#45
 YARD::Logger::PROGRESS_INDICATORS = T.let(T.unsafe(nil), Array)
+
+# Log severity levels
+#
+# source://yard//lib/yard/logging.rb#10
+module YARD::Logger::Severity; end
+
+# Debugging log level
+#
+# source://yard//lib/yard/logging.rb#12
+YARD::Logger::Severity::DEBUG = T.let(T.unsafe(nil), Integer)
+
+# Error log level
+#
+# source://yard//lib/yard/logging.rb#21
+YARD::Logger::Severity::ERROR = T.let(T.unsafe(nil), Integer)
+
+# Fatal log level
+#
+# source://yard//lib/yard/logging.rb#24
+YARD::Logger::Severity::FATAL = T.let(T.unsafe(nil), Integer)
+
+# Information log level
+#
+# source://yard//lib/yard/logging.rb#15
+YARD::Logger::Severity::INFO = T.let(T.unsafe(nil), Integer)
+
+# @private
+#
+# source://yard//lib/yard/logging.rb#30
+YARD::Logger::Severity::SEVERITIES = T.let(T.unsafe(nil), Hash)
+
+# Unknown log level
+#
+# source://yard//lib/yard/logging.rb#27
+YARD::Logger::Severity::UNKNOWN = T.let(T.unsafe(nil), Integer)
+
+# Warning log level
+#
+# source://yard//lib/yard/logging.rb#18
+YARD::Logger::Severity::WARN = T.let(T.unsafe(nil), Integer)
+
+# An OpenStruct compatible struct class that allows for basic access of attributes
+# via +struct.attr_name+ and +struct.attr_name = value+.
+#
+# source://yard//lib/yard/open_struct.rb#4
+class YARD::OpenStruct
+  # @return [OpenStruct] a new instance of OpenStruct
+  #
+  # source://yard//lib/yard/open_struct.rb#5
+  def initialize(hash = T.unsafe(nil)); end
+
+  # source://yard//lib/yard/open_struct.rb#25
+  def ==(other); end
+
+  # source://yard//lib/yard/open_struct.rb#41
+  def [](key); end
+
+  # source://yard//lib/yard/open_struct.rb#37
+  def []=(key, value); end
+
+  # source://yard//lib/yard/open_struct.rb#33
+  def dig(*keys); end
+
+  # source://yard//lib/yard/open_struct.rb#45
+  def each_pair(&block); end
+
+  # source://yard//lib/yard/open_struct.rb#29
+  def hash; end
+
+  # source://yard//lib/yard/open_struct.rb#49
+  def marshal_dump; end
+
+  # source://yard//lib/yard/open_struct.rb#53
+  def marshal_load(data); end
+
+  # @private
+  #
+  # source://yard//lib/yard/open_struct.rb#10
+  def method_missing(name, *args); end
+
+  # source://yard//lib/yard/open_struct.rb#21
+  def to_h; end
+
+  private
+
+  # source://yard//lib/yard/open_struct.rb#59
+  def __cache_lookup__(name); end
+end
 
 # Generalized options class for passing around large amounts of options between objects.
 #
@@ -8209,7 +8362,7 @@ end
 #
 # @see Processor#parse_remaining_files
 #
-# source://yard//lib/yard/parser/source_parser.rb#21
+# source://yard//lib/yard/parser/source_parser.rb#20
 class YARD::Parser::OrderedParser
   # Creates a new OrderedParser with the global state and a list
   # of files to parse.
@@ -8221,30 +8374,30 @@ class YARD::Parser::OrderedParser
   # @param files [Array<String>] the list of files to parse
   # @return [OrderedParser] a new instance of OrderedParser
   #
-  # source://yard//lib/yard/parser/source_parser.rb#33
+  # source://yard//lib/yard/parser/source_parser.rb#32
   def initialize(global_state, files); end
 
   # @return [Array<String>] the list of remaining files to parse
   #
-  # source://yard//lib/yard/parser/source_parser.rb#23
+  # source://yard//lib/yard/parser/source_parser.rb#22
   def files; end
 
   # @return [Array<String>] the list of remaining files to parse
   #
-  # source://yard//lib/yard/parser/source_parser.rb#23
+  # source://yard//lib/yard/parser/source_parser.rb#22
   def files=(_arg0); end
 
   # Parses the remainder of the {#files} list.
   #
   # @see Processor#parse_remaining_files
   #
-  # source://yard//lib/yard/parser/source_parser.rb#42
+  # source://yard//lib/yard/parser/source_parser.rb#41
   def parse; end
 end
 
 # Raised when the parser sees a Ruby syntax error
 #
-# source://yard//lib/yard/parser/source_parser.rb#13
+# source://yard//lib/yard/parser/source_parser.rb#12
 class YARD::Parser::ParserSyntaxError < ::YARD::Parser::UndocumentableError; end
 
 # Ruby parsing components.
@@ -8689,6 +8842,9 @@ class YARD::Parser::Ruby::Legacy::RubyLex
   # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#430
   def continue; end
 
+  # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#1116
+  def dedent(str); end
+
   # Returns the value of attribute exception_on_syntax_error.
   #
   # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#463
@@ -8713,7 +8869,7 @@ class YARD::Parser::Ruby::Legacy::RubyLex
   # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#488
   def gets; end
 
-  # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#1257
+  # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#1272
   def identify_comment; end
 
   # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#945
@@ -8725,13 +8881,13 @@ class YARD::Parser::Ruby::Legacy::RubyLex
   # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#980
   def identify_identifier; end
 
-  # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#1130
+  # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#1145
   def identify_number(start); end
 
-  # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#1111
+  # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#1126
   def identify_quotation(initial_char); end
 
-  # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#1192
+  # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#1207
   def identify_string(ltype, quoted = T.unsafe(nil), opener = T.unsafe(nil), initial_char = T.unsafe(nil)); end
 
   # Returns the value of attribute indent.
@@ -8778,10 +8934,10 @@ class YARD::Parser::Ruby::Legacy::RubyLex
   # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#462
   def read_auto_clean_up=(_arg0); end
 
-  # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#1280
+  # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#1295
   def read_escape; end
 
-  # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#1242
+  # source://yard//lib/yard/parser/ruby/legacy/ruby_lex.rb#1257
   def skip_inner_expression; end
 
   # Returns the value of attribute skip_space.
@@ -10970,7 +11126,7 @@ end
 # @see Handlers::Base
 # @see CodeObjects::Base
 #
-# source://yard//lib/yard/parser/source_parser.rb#64
+# source://yard//lib/yard/parser/source_parser.rb#63
 class YARD::Parser::SourceParser
   # @overload initialize
   # @return [SourceParser] a new instance of SourceParser
@@ -11226,7 +11382,7 @@ class YARD::Parser::SourceParser
     #   {YARD::Logger}
     # @return [void]
     #
-    # source://yard//lib/yard/parser/source_parser.rb#100
+    # source://yard//lib/yard/parser/source_parser.rb#99
     def parse(paths = T.unsafe(nil), excluded = T.unsafe(nil), level = T.unsafe(nil)); end
 
     # Parses a string +content+
@@ -11240,10 +11396,10 @@ class YARD::Parser::SourceParser
 
     # @return [Symbol] the default parser type (defaults to :ruby)
     #
-    # source://yard//lib/yard/parser/source_parser.rb#86
+    # source://yard//lib/yard/parser/source_parser.rb#85
     def parser_type; end
 
-    # source://yard//lib/yard/parser/source_parser.rb#88
+    # source://yard//lib/yard/parser/source_parser.rb#87
     def parser_type=(value); end
 
     # @private
@@ -11324,30 +11480,30 @@ end
 #
 # @since 0.9.0
 #
-# source://yard//lib/yard/parser/source_parser.rb#71
+# source://yard//lib/yard/parser/source_parser.rb#70
 YARD::Parser::SourceParser::DEFAULT_PATH_GLOB = T.let(T.unsafe(nil), Array)
 
 # Byte order marks for various encodings
 #
 # @since 0.7.0
 #
-# source://yard//lib/yard/parser/source_parser.rb#75
+# source://yard//lib/yard/parser/source_parser.rb#74
 YARD::Parser::SourceParser::ENCODING_BYTE_ORDER_MARKS = T.let(T.unsafe(nil), Hash)
 
-# source://yard//lib/yard/parser/source_parser.rb#66
+# source://yard//lib/yard/parser/source_parser.rb#65
 YARD::Parser::SourceParser::ENCODING_LINE = T.let(T.unsafe(nil), Regexp)
 
-# source://yard//lib/yard/parser/source_parser.rb#67
+# source://yard//lib/yard/parser/source_parser.rb#66
 YARD::Parser::SourceParser::FROZEN_STRING_LINE = T.let(T.unsafe(nil), Regexp)
 
-# source://yard//lib/yard/parser/source_parser.rb#65
+# source://yard//lib/yard/parser/source_parser.rb#64
 YARD::Parser::SourceParser::SHEBANG_LINE = T.let(T.unsafe(nil), Regexp)
 
 # Raised when an object is recognized but cannot be documented. This
 # generally occurs when the Ruby syntax used to declare an object is
 # too dynamic in nature.
 #
-# source://yard//lib/yard/parser/source_parser.rb#10
+# source://yard//lib/yard/parser/source_parser.rb#9
 class YARD::Parser::UndocumentableError < ::RuntimeError; end
 
 # The root path for YARD source libraries
@@ -14622,42 +14778,42 @@ module YARD::Tags; end
 # @see tag:!method
 # @since 0.7.0
 #
-# source://yard//lib/yard/tags/directives.rb#461
+# source://yard//lib/yard/tags/directives.rb#460
 class YARD::Tags::AttributeDirective < ::YARD::Tags::MethodDirective
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#462
+  # source://yard//lib/yard/tags/directives.rb#461
   def after_parse; end
 
   protected
 
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#470
+  # source://yard//lib/yard/tags/directives.rb#469
   def method_name; end
 
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#476
+  # source://yard//lib/yard/tags/directives.rb#475
   def method_signature; end
 
   private
 
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#486
+  # source://yard//lib/yard/tags/directives.rb#485
   def create_attribute_data(object); end
 
   # @return [Boolean]
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#516
+  # source://yard//lib/yard/tags/directives.rb#515
   def readable?; end
 
   # @return [Boolean]
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#512
+  # source://yard//lib/yard/tags/directives.rb#511
   def writable?; end
 end
 
@@ -14791,14 +14947,14 @@ end
 # @see Library.define_directive
 # @since 0.8.0
 #
-# source://yard//lib/yard/tags/directives.rb#23
+# source://yard//lib/yard/tags/directives.rb#22
 class YARD::Tags::Directive
   # @param tag [Tag] the meta-data tag containing all input to the docstring
   # @param parser [DocstringParser] the docstring parser object
   # @return [Directive] a new instance of Directive
   # @since 0.8.0
   #
-  # source://yard//lib/yard/tags/directives.rb#55
+  # source://yard//lib/yard/tags/directives.rb#54
   def initialize(tag, parser); end
 
   # Called after parsing all directives and tags in the docstring. Used
@@ -14807,7 +14963,7 @@ class YARD::Tags::Directive
   # @return [void]
   # @since 0.8.0
   #
-  # source://yard//lib/yard/tags/directives.rb#74
+  # source://yard//lib/yard/tags/directives.rb#73
   def after_parse; end
 
   # Called when processing the directive. Subclasses should implement
@@ -14819,7 +14975,7 @@ class YARD::Tags::Directive
   # @return [void]
   # @since 0.8.0
   #
-  # source://yard//lib/yard/tags/directives.rb#69
+  # source://yard//lib/yard/tags/directives.rb#68
   def call; end
 
   # Set this field to replace the directive definition inside of a docstring
@@ -14831,7 +14987,7 @@ class YARD::Tags::Directive
   # @return [nil] if no expansion should take place for this directive
   # @since 0.8.0
   #
-  # source://yard//lib/yard/tags/directives.rb#34
+  # source://yard//lib/yard/tags/directives.rb#33
   def expanded_text; end
 
   # Set this field to replace the directive definition inside of a docstring
@@ -14843,7 +14999,7 @@ class YARD::Tags::Directive
   # @return [nil] if no expansion should take place for this directive
   # @since 0.8.0
   #
-  # source://yard//lib/yard/tags/directives.rb#34
+  # source://yard//lib/yard/tags/directives.rb#33
   def expanded_text=(_arg0); end
 
   # @return [Handlers::Base, nil] the handler object the docstring parser
@@ -14851,33 +15007,33 @@ class YARD::Tags::Directive
   #   through {Parser::SourceParser}.
   # @since 0.8.0
   #
-  # source://yard//lib/yard/tags/directives.rb#49
+  # source://yard//lib/yard/tags/directives.rb#48
   def handler; end
 
   # @return [CodeObjects::Base, nil] the object the parent docstring is
   #   attached to. May be nil.
   # @since 0.8.0
   #
-  # source://yard//lib/yard/tags/directives.rb#43
+  # source://yard//lib/yard/tags/directives.rb#42
   def object; end
 
   # @return [DocstringParser] the parser that is parsing all tag
   #   information out of the docstring
   # @since 0.8.0
   #
-  # source://yard//lib/yard/tags/directives.rb#38
+  # source://yard//lib/yard/tags/directives.rb#37
   def parser=(_arg0); end
 
   # @return [Tag] the meta-data tag containing data input to the directive
   # @since 0.8.0
   #
-  # source://yard//lib/yard/tags/directives.rb#25
+  # source://yard//lib/yard/tags/directives.rb#24
   def tag; end
 
   # @return [Tag] the meta-data tag containing data input to the directive
   # @since 0.8.0
   #
-  # source://yard//lib/yard/tags/directives.rb#25
+  # source://yard//lib/yard/tags/directives.rb#24
   def tag=(_arg0); end
 
   protected
@@ -14885,14 +15041,14 @@ class YARD::Tags::Directive
   # @return [Boolean]
   # @since 0.8.0
   #
-  # source://yard//lib/yard/tags/directives.rb#80
+  # source://yard//lib/yard/tags/directives.rb#79
   def inside_directive?; end
 
   # @return [DocstringParser] the parser that is parsing all tag
   #   information out of the docstring
   # @since 0.8.0
   #
-  # source://yard//lib/yard/tags/directives.rb#38
+  # source://yard//lib/yard/tags/directives.rb#37
   def parser; end
 end
 
@@ -14916,11 +15072,11 @@ end
 # @see tag:!group
 # @since 0.6.0
 #
-# source://yard//lib/yard/tags/directives.rb#105
+# source://yard//lib/yard/tags/directives.rb#104
 class YARD::Tags::EndGroupDirective < ::YARD::Tags::Directive
   # @since 0.6.0
   #
-  # source://yard//lib/yard/tags/directives.rb#106
+  # source://yard//lib/yard/tags/directives.rb#105
   def call; end
 end
 
@@ -14941,11 +15097,11 @@ end
 # @see tag:!endgroup
 # @since 0.6.0
 #
-# source://yard//lib/yard/tags/directives.rb#128
+# source://yard//lib/yard/tags/directives.rb#127
 class YARD::Tags::GroupDirective < ::YARD::Tags::Directive
   # @since 0.6.0
   #
-  # source://yard//lib/yard/tags/directives.rb#129
+  # source://yard//lib/yard/tags/directives.rb#128
   def call; end
 end
 
@@ -15710,12 +15866,12 @@ end
 #   end
 # @since 0.7.0
 #
-# source://yard//lib/yard/tags/directives.rb#258
+# source://yard//lib/yard/tags/directives.rb#257
 class YARD::Tags::MacroDirective < ::YARD::Tags::Directive
   # @raise [TagFormatError]
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#259
+  # source://yard//lib/yard/tags/directives.rb#258
   def call; end
 
   private
@@ -15723,40 +15879,40 @@ class YARD::Tags::MacroDirective < ::YARD::Tags::Directive
   # @return [Boolean]
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#288
+  # source://yard//lib/yard/tags/directives.rb#287
   def anonymous?; end
 
   # @return [Boolean]
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#277
+  # source://yard//lib/yard/tags/directives.rb#276
   def attach?; end
 
   # @return [Boolean]
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#283
+  # source://yard//lib/yard/tags/directives.rb#282
   def class_method?; end
 
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#292
+  # source://yard//lib/yard/tags/directives.rb#291
   def expand(macro_data); end
 
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#308
+  # source://yard//lib/yard/tags/directives.rb#307
   def find_or_create; end
 
   # @return [Boolean]
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#272
+  # source://yard//lib/yard/tags/directives.rb#271
   def new?; end
 
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#332
+  # source://yard//lib/yard/tags/directives.rb#331
   def warn; end
 end
 
@@ -15789,49 +15945,49 @@ end
 # @see tag:!attribute
 # @since 0.7.0
 #
-# source://yard//lib/yard/tags/directives.rb#368
+# source://yard//lib/yard/tags/directives.rb#367
 class YARD::Tags::MethodDirective < ::YARD::Tags::Directive
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#373
+  # source://yard//lib/yard/tags/directives.rb#372
   def after_parse; end
 
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#371
+  # source://yard//lib/yard/tags/directives.rb#370
   def call; end
 
   protected
 
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#413
+  # source://yard//lib/yard/tags/directives.rb#412
   def create_object; end
 
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#381
+  # source://yard//lib/yard/tags/directives.rb#380
   def method_name; end
 
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#390
+  # source://yard//lib/yard/tags/directives.rb#389
   def method_signature; end
 
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#394
+  # source://yard//lib/yard/tags/directives.rb#393
   def sanitized_tag_signature; end
 
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#403
+  # source://yard//lib/yard/tags/directives.rb#402
   def use_indented_text; end
 end
 
 # @since 0.7.0
 #
-# source://yard//lib/yard/tags/directives.rb#369
+# source://yard//lib/yard/tags/directives.rb#368
 YARD::Tags::MethodDirective::SCOPE_MATCH = T.let(T.unsafe(nil), Regexp)
 
 # source://yard//lib/yard/tags/option_tag.rb#4
@@ -15943,11 +16099,11 @@ end
 #   #   }
 # @since 0.8.0
 #
-# source://yard//lib/yard/tags/directives.rb#545
+# source://yard//lib/yard/tags/directives.rb#544
 class YARD::Tags::ParseDirective < ::YARD::Tags::Directive
   # @since 0.8.0
   #
-  # source://yard//lib/yard/tags/directives.rb#546
+  # source://yard//lib/yard/tags/directives.rb#545
   def call; end
 end
 
@@ -16031,11 +16187,11 @@ end
 #   def method2; end
 # @since 0.7.0
 #
-# source://yard//lib/yard/tags/directives.rb#579
+# source://yard//lib/yard/tags/directives.rb#578
 class YARD::Tags::ScopeDirective < ::YARD::Tags::Directive
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#580
+  # source://yard//lib/yard/tags/directives.rb#579
   def call; end
 end
 
@@ -16066,7 +16222,7 @@ class YARD::Tags::Tag
   # @param name [String] optional key name which the tag refers to
   # @return [Tag] a new instance of Tag
   #
-  # source://yard//lib/yard/tags/tag.rb#44
+  # source://yard//lib/yard/tags/tag.rb#45
   def initialize(tag_name, text, types = T.unsafe(nil), name = T.unsafe(nil)); end
 
   # Provides a plain English summary of the type specification, or nil
@@ -16075,27 +16231,29 @@ class YARD::Tags::Tag
   # @return [String] a plain English description of the associated types
   # @return [nil] if no types are provided or not parsable
   #
-  # source://yard//lib/yard/tags/tag.rb#65
+  # source://yard//lib/yard/tags/tag.rb#66
   def explain_types; end
 
   # @return [String] a name associated with the tag
+  # @return [nil] if no tag name is supplied
   #
-  # source://yard//lib/yard/tags/tag.rb#26
+  # source://yard//lib/yard/tags/tag.rb#27
   def name; end
 
   # @return [String] a name associated with the tag
+  # @return [nil] if no tag name is supplied
   #
-  # source://yard//lib/yard/tags/tag.rb#26
+  # source://yard//lib/yard/tags/tag.rb#27
   def name=(_arg0); end
 
   # @return [CodeObjects::Base] the associated object
   #
-  # source://yard//lib/yard/tags/tag.rb#29
+  # source://yard//lib/yard/tags/tag.rb#30
   def object; end
 
   # @return [CodeObjects::Base] the associated object
   #
-  # source://yard//lib/yard/tags/tag.rb#29
+  # source://yard//lib/yard/tags/tag.rb#30
   def object=(_arg0); end
 
   # @return [String] the name of the tag
@@ -16126,7 +16284,7 @@ class YARD::Tags::Tag
   # @return [String] the first of the list of specified types
   # @see #types
   #
-  # source://yard//lib/yard/tags/tag.rb#56
+  # source://yard//lib/yard/tags/tag.rb#57
   def type; end
 
   # @return [Array<String>] a list of types associated with the tag
@@ -16317,11 +16475,11 @@ end
 #   def method2; end
 # @since 0.7.0
 #
-# source://yard//lib/yard/tags/directives.rb#611
+# source://yard//lib/yard/tags/directives.rb#610
 class YARD::Tags::VisibilityDirective < ::YARD::Tags::Directive
   # @since 0.7.0
   #
-  # source://yard//lib/yard/tags/directives.rb#612
+  # source://yard//lib/yard/tags/directives.rb#611
   def call; end
 end
 
@@ -16337,7 +16495,7 @@ module YARD::Templates; end
 # * To render a template, call {render}.
 # * To register a template path in the lookup paths, call {register_template_path}.
 #
-# source://yard//lib/yard/templates/engine.rb#12
+# source://yard//lib/yard/templates/engine.rb#11
 module YARD::Templates::Engine
   class << self
     # Passes a set of objects to the +:fulldoc+ template for full documentation generation.
@@ -16349,7 +16507,7 @@ module YARD::Templates::Engine
     # @param options [Hash] (see {render})
     # @return [void]
     #
-    # source://yard//lib/yard/templates/engine.rb#101
+    # source://yard//lib/yard/templates/engine.rb#100
     def generate(objects, options = T.unsafe(nil)); end
 
     # Registers a new template path in {template_paths}
@@ -16357,7 +16515,7 @@ module YARD::Templates::Engine
     # @param path [String] a new template path
     # @return [void]
     #
-    # source://yard//lib/yard/templates/engine.rb#21
+    # source://yard//lib/yard/templates/engine.rb#20
     def register_template_path(path); end
 
     # Renders a template on a {CodeObjects::Base code object} using
@@ -16378,7 +16536,7 @@ module YARD::Templates::Engine
     # @param options [Hash] the options hash
     # @return [String] the rendered template
     #
-    # source://yard//lib/yard/templates/engine.rb#82
+    # source://yard//lib/yard/templates/engine.rb#81
     def render(options = T.unsafe(nil)); end
 
     # Creates a template module representing the path. Searches on disk
@@ -16392,7 +16550,7 @@ module YARD::Templates::Engine
     #   {template_paths} on disk.
     # @return [Template] the module representing the template
     #
-    # source://yard//lib/yard/templates/engine.rb#35
+    # source://yard//lib/yard/templates/engine.rb#34
     def template(*path); end
 
     # Forces creation of a template at +path+ within a +full_path+.
@@ -16401,17 +16559,17 @@ module YARD::Templates::Engine
     # @param full_paths [Array<String>] the full path on disk of the template
     # @return [Template] the template module representing the +path+
     #
-    # source://yard//lib/yard/templates/engine.rb#53
+    # source://yard//lib/yard/templates/engine.rb#52
     def template!(path, full_paths = T.unsafe(nil)); end
 
     # @return [Array<String>] the list of registered template paths
     #
-    # source://yard//lib/yard/templates/engine.rb#15
+    # source://yard//lib/yard/templates/engine.rb#14
     def template_paths; end
 
     # @return [Array<String>] the list of registered template paths
     #
-    # source://yard//lib/yard/templates/engine.rb#15
+    # source://yard//lib/yard/templates/engine.rb#14
     def template_paths=(_arg0); end
 
     # Serializes the results of a block with a +serializer+ object.
@@ -16422,7 +16580,7 @@ module YARD::Templates::Engine
     # @yield a block whose result will be serialize
     # @yieldreturn [String] the contents to serialize
     #
-    # source://yard//lib/yard/templates/engine.rb#115
+    # source://yard//lib/yard/templates/engine.rb#114
     def with_serializer(object, serializer); end
 
     private
@@ -16437,7 +16595,7 @@ module YARD::Templates::Engine
     # @return [Array<String>] a list of full paths that are existing
     #   candidates for a template module
     #
-    # source://yard//lib/yard/templates/engine.rb#161
+    # source://yard//lib/yard/templates/engine.rb#160
     def find_template_paths(from_template, path); end
 
     # Sets default options on the options hash
@@ -16448,7 +16606,7 @@ module YARD::Templates::Engine
     # @param options [Hash] the options hash
     # @return [void]
     #
-    # source://yard//lib/yard/templates/engine.rb#141
+    # source://yard//lib/yard/templates/engine.rb#140
     def set_default_options(options = T.unsafe(nil)); end
 
     # The name of the module that represents a +path+
@@ -16456,7 +16614,7 @@ module YARD::Templates::Engine
     # @param path [String] the path to generate a module name for
     # @return [String] the module name
     #
-    # source://yard//lib/yard/templates/engine.rb#176
+    # source://yard//lib/yard/templates/engine.rb#175
     def template_module_name(path); end
   end
 end
@@ -17867,7 +18025,7 @@ end
 #
 # @see CLI::YardocOptions
 #
-# source://yard//lib/yard/templates/template_options.rb#10
+# source://yard//lib/yard/templates/template_options.rb#9
 class YARD::Templates::TemplateOptions < ::YARD::Options
   # @return [OpenStruct] an open struct containing any global state across all
   #   generated objects in a template.
@@ -17910,7 +18068,7 @@ class YARD::Templates::TemplateOptions < ::YARD::Options
   # @return [Boolean] whether a mixin matches the embed_mixins list
   # @return [nil] if the mixin is not a module object
   #
-  # source://yard//lib/yard/templates/template_options.rb#78
+  # source://yard//lib/yard/templates/template_options.rb#77
   def embed_mixins_match?(mixin); end
 
   # @return [Symbol] the template output format
@@ -17957,12 +18115,12 @@ class YARD::Templates::TemplateOptions < ::YARD::Options
 
   # @return [Boolean] whether the page is the "index"
   #
-  # source://yard//lib/yard/templates/template_options.rb#64
+  # source://yard//lib/yard/templates/template_options.rb#63
   def index; end
 
   # @return [Boolean] whether the page is the "index"
   #
-  # source://yard//lib/yard/templates/template_options.rb#64
+  # source://yard//lib/yard/templates/template_options.rb#63
   def index=(_arg0); end
 
   # @return [Symbol] the markup format to use when parsing docstrings
@@ -17977,51 +18135,51 @@ class YARD::Templates::TemplateOptions < ::YARD::Options
 
   # @return [Class] the markup provider class for the markup format
   #
-  # source://yard//lib/yard/templates/template_options.rb#30
+  # source://yard//lib/yard/templates/template_options.rb#29
   def markup_provider; end
 
   # @return [Class] the markup provider class for the markup format
   #
-  # source://yard//lib/yard/templates/template_options.rb#30
+  # source://yard//lib/yard/templates/template_options.rb#29
   def markup_provider=(_arg0); end
 
   # @deprecated use {#highlight} instead.
   # @return [Boolean] whether highlighting should be ignored
   #
-  # source://yard//lib/yard/templates/template_options.rb#57
+  # source://yard//lib/yard/templates/template_options.rb#56
   def no_highlight; end
 
-  # source://yard//lib/yard/templates/template_options.rb#58
+  # source://yard//lib/yard/templates/template_options.rb#57
   def no_highlight=(value); end
 
   # @return [CodeObjects::Base] the main object being generated in the template
   #
-  # source://yard//lib/yard/templates/template_options.rb#38
+  # source://yard//lib/yard/templates/template_options.rb#37
   def object; end
 
   # @return [CodeObjects::Base] the main object being generated in the template
   #
-  # source://yard//lib/yard/templates/template_options.rb#38
+  # source://yard//lib/yard/templates/template_options.rb#37
   def object=(_arg0); end
 
   # @return [CodeObjects::Base] the owner of the generated object
   #
-  # source://yard//lib/yard/templates/template_options.rb#41
+  # source://yard//lib/yard/templates/template_options.rb#40
   def owner; end
 
   # @return [CodeObjects::Base] the owner of the generated object
   #
-  # source://yard//lib/yard/templates/template_options.rb#41
+  # source://yard//lib/yard/templates/template_options.rb#40
   def owner=(_arg0); end
 
   # @return [String] the title of a given page
   #
-  # source://yard//lib/yard/templates/template_options.rb#61
+  # source://yard//lib/yard/templates/template_options.rb#60
   def page_title; end
 
   # @return [String] the title of a given page
   #
-  # source://yard//lib/yard/templates/template_options.rb#61
+  # source://yard//lib/yard/templates/template_options.rb#60
   def page_title=(_arg0); end
 
   # @return [Boolean] whether serialization should be performed
@@ -18037,13 +18195,13 @@ class YARD::Templates::TemplateOptions < ::YARD::Options
   # @return [Serializers::Base] the serializer used to generate links and serialize
   #   output. Serialization output only occurs if {#serialize} is +true+.
   #
-  # source://yard//lib/yard/templates/template_options.rb#51
+  # source://yard//lib/yard/templates/template_options.rb#50
   def serializer; end
 
   # @return [Serializers::Base] the serializer used to generate links and serialize
   #   output. Serialization output only occurs if {#serialize} is +true+.
   #
-  # source://yard//lib/yard/templates/template_options.rb#51
+  # source://yard//lib/yard/templates/template_options.rb#50
   def serializer=(_arg0); end
 
   # @return [Symbol] the template name used to render output
@@ -18058,22 +18216,22 @@ class YARD::Templates::TemplateOptions < ::YARD::Options
 
   # @return [Symbol] the template type used to generate output
   #
-  # source://yard//lib/yard/templates/template_options.rb#44
+  # source://yard//lib/yard/templates/template_options.rb#43
   def type; end
 
   # @return [Symbol] the template type used to generate output
   #
-  # source://yard//lib/yard/templates/template_options.rb#44
+  # source://yard//lib/yard/templates/template_options.rb#43
   def type=(_arg0); end
 
   # @return [Verifier] the verifier object
   #
-  # source://yard//lib/yard/templates/template_options.rb#89
+  # source://yard//lib/yard/templates/template_options.rb#88
   def verifier; end
 
   # @return [Verifier] the verifier object
   #
-  # source://yard//lib/yard/templates/template_options.rb#89
+  # source://yard//lib/yard/templates/template_options.rb#88
   def verifier=(_arg0); end
 end
 

@@ -5,7 +5,7 @@
 # Please instead update this file by running `bin/tapioca gem mocha`.
 
 
-# source://mocha//lib/mocha/inspect.rb#45
+# source://mocha//lib/mocha/inspect.rb#56
 class Array
   include ::Enumerable
   include ::Mocha::Inspect::ArrayMethods
@@ -15,23 +15,16 @@ class Class < ::Module
   include ::Mocha::ClassMethods
 end
 
-# source://mocha//lib/mocha/inspect.rb#57
+# source://mocha//lib/mocha/inspect.rb#68
 class Date
   include ::Comparable
   include ::Mocha::Inspect::DateMethods
 end
 
-# @private
-#
-# source://mocha//lib/mocha/parameter_matchers/instance_methods.rb#22
+# source://mocha//lib/mocha/inspect.rb#60
 class Hash
   include ::Enumerable
   include ::Mocha::Inspect::HashMethods
-
-  # @private
-  #
-  # source://mocha//lib/mocha/parameter_matchers/instance_methods.rb#24
-  def to_matcher(expectation = T.unsafe(nil)); end
 end
 
 class Minitest::Test < ::Minitest::Runnable
@@ -1726,9 +1719,9 @@ module Mocha::Inspect::ArrayMethods
   def mocha_inspect(wrapped = T.unsafe(nil)); end
 end
 
-# source://mocha//lib/mocha/inspect.rb#33
+# source://mocha//lib/mocha/inspect.rb#44
 module Mocha::Inspect::DateMethods
-  # source://mocha//lib/mocha/inspect.rb#34
+  # source://mocha//lib/mocha/inspect.rb#45
   def mocha_inspect; end
 end
 
@@ -1744,9 +1737,9 @@ module Mocha::Inspect::ObjectMethods
   def mocha_inspect; end
 end
 
-# source://mocha//lib/mocha/inspect.rb#27
+# source://mocha//lib/mocha/inspect.rb#38
 module Mocha::Inspect::TimeMethods
-  # source://mocha//lib/mocha/inspect.rb#28
+  # source://mocha//lib/mocha/inspect.rb#39
   def mocha_inspect; end
 end
 
@@ -3168,13 +3161,8 @@ class Mocha::ParameterMatchers::Base
   # @return [AllOf] parameter matcher.
   # @see Expectation#with
   #
-  # source://mocha//lib/mocha/parameter_matchers/base.rb#30
+  # source://mocha//lib/mocha/parameter_matchers/base.rb#25
   def &(other); end
-
-  # @private
-  #
-  # source://mocha//lib/mocha/parameter_matchers/base.rb#6
-  def to_matcher(_expectation = T.unsafe(nil)); end
 
   # A shorthand way of combining two matchers when at least one must match.
   #
@@ -3200,7 +3188,7 @@ class Mocha::ParameterMatchers::Base
   # @return [AnyOf] parameter matcher.
   # @see Expectation#with
   #
-  # source://mocha//lib/mocha/parameter_matchers/base.rb#60
+  # source://mocha//lib/mocha/parameter_matchers/base.rb#55
   def |(other); end
 end
 
@@ -3263,17 +3251,17 @@ class Mocha::ParameterMatchers::HasEntries < ::Mocha::ParameterMatchers::Base
   # @return [HasEntries] a new instance of HasEntries
   #
   # source://mocha//lib/mocha/parameter_matchers/has_entries.rb#33
-  def initialize(entries); end
+  def initialize(entries, exact: T.unsafe(nil)); end
 
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/parameter_matchers/has_entries.rb#38
+  # source://mocha//lib/mocha/parameter_matchers/has_entries.rb#39
   def matches?(available_parameters); end
 
   # @private
   #
-  # source://mocha//lib/mocha/parameter_matchers/has_entries.rb#45
+  # source://mocha//lib/mocha/parameter_matchers/has_entries.rb#50
   def mocha_inspect; end
 end
 
@@ -3390,12 +3378,12 @@ end
 
 # @private
 #
-# source://mocha//lib/mocha/parameter_matchers/instance_methods.rb#7
+# source://mocha//lib/mocha/parameter_matchers/instance_methods.rb#8
 module Mocha::ParameterMatchers::InstanceMethods
   # @private
   #
-  # source://mocha//lib/mocha/parameter_matchers/instance_methods.rb#9
-  def to_matcher(_expectation = T.unsafe(nil)); end
+  # source://mocha//lib/mocha/parameter_matchers/instance_methods.rb#10
+  def to_matcher(expectation: T.unsafe(nil), top_level: T.unsafe(nil)); end
 end
 
 # Parameter matcher which matches when actual parameter is an instance of the specified class.
@@ -3510,43 +3498,43 @@ end
 
 # @private
 #
-# source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#8
+# source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#9
 class Mocha::ParameterMatchers::PositionalOrKeywordHash < ::Mocha::ParameterMatchers::Base
   # @return [PositionalOrKeywordHash] a new instance of PositionalOrKeywordHash
   #
-  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#9
+  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#10
   def initialize(value, expectation); end
 
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#14
+  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#15
   def matches?(available_parameters); end
 
-  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#28
+  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#29
   def mocha_inspect; end
 
   private
 
-  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#42
+  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#43
   def deprecation_warning(actual, expected); end
 
-  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#58
+  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#59
   def expectation_definition; end
 
-  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#34
+  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#35
   def extract_parameter(available_parameters); end
 
-  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#50
+  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#51
   def hash_type(hash); end
 
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#54
+  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#55
   def ruby2_keywords_hash?(hash); end
 
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#38
+  # source://mocha//lib/mocha/parameter_matchers/positional_or_keyword_hash.rb#39
   def same_type_of_hash?(actual, expected); end
 end
 
@@ -3955,7 +3943,7 @@ end
 
 # @private
 #
-# source://mocha//lib/mocha/parameter_matchers/instance_methods.rb#17
+# source://mocha//lib/mocha/parameter_matchers/instance_methods.rb#24
 class Object < ::BasicObject
   include ::Kernel
   include ::PP::ObjectMixin
@@ -3964,7 +3952,7 @@ class Object < ::BasicObject
   include ::Mocha::ObjectMethods
 end
 
-# source://mocha//lib/mocha/inspect.rb#53
+# source://mocha//lib/mocha/inspect.rb#64
 class Time
   include ::Comparable
   include ::Mocha::Inspect::TimeMethods

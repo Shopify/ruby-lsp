@@ -26,15 +26,15 @@ RuboCop::Markdown::PROJECT_ROOT = T.let(T.unsafe(nil), Pathname)
 class RuboCop::Markdown::Preprocess
   # @return [Preprocess] a new instance of Preprocess
   #
-  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#51
+  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#55
   def initialize(file); end
 
-  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#56
+  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#60
   def call(src); end
 
   # Returns the value of attribute config.
   #
-  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#49
+  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#53
   def config; end
 
   private
@@ -44,10 +44,10 @@ class RuboCop::Markdown::Preprocess
   #
   # @return [Boolean]
   #
-  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#112
+  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#116
   def autodetect?; end
 
-  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#116
+  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#120
   def comment_lines(src); end
 
   # Check codeblock attribute to prevent from parsing
@@ -55,19 +55,19 @@ class RuboCop::Markdown::Preprocess
   #
   # @return [Boolean]
   #
-  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#87
+  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#91
   def maybe_ruby?(syntax); end
 
   # Check codeblack attribute if it's defined and of Ruby type
   #
   # @return [Boolean]
   #
-  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#92
+  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#96
   def ruby?(syntax); end
 
   # @return [Boolean]
   #
-  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#81
+  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#85
   def ruby_codeblock?(syntax, src); end
 
   # Try to parse with Ripper
@@ -76,17 +76,20 @@ class RuboCop::Markdown::Preprocess
   #
   # @return [Boolean]
   #
-  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#99
+  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#103
   def valid_syntax?(syntax, src); end
 
   # Whether to show warning when snippet is not a valid Ruby
   #
   # @return [Boolean]
   #
-  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#106
+  # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#110
   def warn_invalid?; end
 
   class << self
+    # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#48
+    def restore!(src); end
+
     # Revert preprocess changes.
     #
     # When autocorrect is applied, RuboCop re-writes the file
@@ -95,7 +98,7 @@ class RuboCop::Markdown::Preprocess
     # We have to restore it.
     #
     # source://rubocop-md//lib/rubocop/markdown/preprocess.rb#42
-    def restore!(file); end
+    def restore_and_save!(file); end
   end
 end
 
