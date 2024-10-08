@@ -671,6 +671,27 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definition_for_global_variables
+    source = <<~RUBY
+      $DEBUG
+    RUBY
+
+    with_server(source) do |server, uri|
+      index = server.instance_variable_get(:@global_state).index
+      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 1, line: 0 } },
+      )
+      response = server.pop_response.response.first
+      assert_match(%r{/gems/rbs-.*/core/global_variables.rbs}, response.uri)
+      assert_equal(response.range.start.line, response.range.end.line)
+      assert_operator(response.range.start.character, :<, response.range.end.character)
+    end
+  end
+
   def test_definition_for_instance_variables
     source = <<~RUBY
       class Foo

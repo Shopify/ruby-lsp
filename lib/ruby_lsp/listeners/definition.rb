@@ -39,6 +39,7 @@ module RubyLsp
           :on_block_argument_node_enter,
           :on_constant_read_node_enter,
           :on_constant_path_node_enter,
+          :on_global_variable_read_node_enter,
           :on_instance_variable_read_node_enter,
           :on_instance_variable_write_node_enter,
           :on_instance_variable_and_write_node_enter,
@@ -118,6 +119,25 @@ module RubyLsp
         return if name.nil?
 
         find_in_index(name)
+      end
+
+      sig { params(node: Prism::GlobalVariableReadNode).void }
+      def on_global_variable_read_node_enter(node)
+        entries = @index[node.name.to_s]
+
+        return unless entries
+
+        entries.each do |entry|
+          location = entry.location
+
+          @response_builder << Interface::Location.new(
+            uri: URI::Generic.from_path(path: entry.file_path).to_s,
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
+              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
+            ),
+          )
+        end
       end
 
       sig { params(node: Prism::InstanceVariableReadNode).void }
