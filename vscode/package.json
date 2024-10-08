@@ -26,6 +26,9 @@
     "workspaceContains:gems.locked",
     "onView:dependencies"
   ],
+  "extensionDependencies": [
+    "vscode.git"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "chatParticipants": [

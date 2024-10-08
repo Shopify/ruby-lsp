@@ -218,6 +218,7 @@ export class RubyLsp {
     );
     this.workspaces.set(workspaceFolder.uri.toString(), workspace);
 
+    await workspace.activate();
     await workspace.start();
     this.context.subscriptions.push(workspace);
 
