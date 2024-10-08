@@ -33,6 +33,7 @@ export class RubyLsp {
 
   // A URI => content map of virtual documents for delegate requests
   private readonly virtualDocuments = new Map<string, string>();
+  private readonly workspacesBeingLaunched: Set<number> = new Set();
 
   constructor(
     context: vscode.ExtensionContext,
@@ -83,7 +84,10 @@ export class RubyLsp {
           document.uri,
         );
 
-        if (!workspaceFolder) {
+        if (
+          !workspaceFolder ||
+          this.workspacesBeingLaunched.has(workspaceFolder.index)
+        ) {
           return;
         }
 
@@ -91,6 +95,7 @@ export class RubyLsp {
 
         // If the workspace entry doesn't exist, then we haven't activated the workspace yet
         if (!workspace) {
+          this.workspacesBeingLaunched.add(workspaceFolder.index);
           await this.activateWorkspace(workspaceFolder, false);
         }
       }),
@@ -230,6 +235,7 @@ export class RubyLsp {
       true,
     );
     await this.showFormatOnSaveModeWarning(workspace);
+    this.workspacesBeingLaunched.delete(workspaceFolder.index);
   }
 
   // Registers all extension commands. Commands can only be registered once, so this happens in the constructor. For
