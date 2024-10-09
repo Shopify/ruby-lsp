@@ -30,10 +30,13 @@ export class Asdf extends VersionManager {
     const scriptName =
       path.basename(vscode.env.shell) === "fish" ? "asdf.fish" : "asdf.sh";
 
-    if (process.env['ASDF_DIR']) {
+    if (process.env.ASDF_DIR) {
       // Follow the ASDF_DIR if it was set up.
-      const possiblePath = vscode.Uri.joinPath(vscode.Uri.parse(process.env["ASDF_DIR"]), scriptName)
-      
+      const possiblePath = vscode.Uri.joinPath(
+        vscode.Uri.parse(process.env.ASDF_DIR),
+        scriptName,
+      );
+
       try {
         await vscode.workspace.fs.stat(possiblePath);
         return possiblePath;
@@ -41,7 +44,7 @@ export class Asdf extends VersionManager {
         // Continue looking
       }
     }
-    
+
     // Possible ASDF installation paths as described in https://asdf-vm.com/guide/getting-started.html#_3-install-asdf.
     // In order, the methods of installation are:
     // 1. Git
