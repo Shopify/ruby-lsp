@@ -249,7 +249,7 @@ module RubyLsp
       assert_equal("Admin::User", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
-    def test_infer_forwading_super_receiver
+    def test_infer_forwarding_super_receiver
       node_context = index_and_locate(<<~RUBY, { line: 2, character: 4 })
         class Foo < Bar
           def initialize

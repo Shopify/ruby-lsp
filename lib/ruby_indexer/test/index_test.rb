@@ -904,7 +904,7 @@ module RubyIndexer
       assert_equal(14, entry.location.start_line)
     end
 
-    def test_resolving_inherited_alised_namespace
+    def test_resolving_inherited_aliased_namespace
       index(<<~RUBY)
         module Bar
           TARGET = 123
@@ -1490,7 +1490,7 @@ module RubyIndexer
       assert_kind_of(Entry::UnresolvedMethodAlias, entry)
     end
 
-    def test_unresolable_method_aliases
+    def test_unresolvable_method_aliases
       index(<<~RUBY)
         class Foo
           alias bar baz

@@ -302,7 +302,7 @@ module RubyLsp
           @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.new)
         rescue RuboCop::Error => e
           # The user may have provided unknown config switches in .rubocop or
-          # is trying to load a non-existant config file.
+          # is trying to load a non-existent config file.
           send_message(Notification.window_show_message(
             "RuboCop configuration error: #{e.message}. Formatting will not be available.",
             type: Constant::MessageType::ERROR,
