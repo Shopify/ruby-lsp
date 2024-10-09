@@ -16,7 +16,7 @@ module RubyIndexer
           arguments = node.arguments&.arguments
           return unless arguments
 
-          location = node.location
+          location = Location.from_prism_location(node.location, index.configuration.encoding)
 
           arguments.each do |node|
             next unless node.is_a?(Prism::ConstantReadNode) || node.is_a?(Prism::ConstantPathNode)
@@ -39,7 +39,6 @@ module RubyIndexer
               location,
               location,
               nil,
-              index.configuration.encoding,
               [Entry::Signature.new([Entry::RequiredParameter.new(name: :a)])],
               Entry::Visibility::PUBLIC,
               owner,
@@ -114,7 +113,7 @@ module RubyIndexer
           association_name = arguments.first
           return unless association_name.is_a?(Prism::SymbolNode)
 
-          location = association_name.location
+          location = Location.from_prism_location(association_name.location, index.configuration.encoding)
 
           index.add(Entry::Method.new(
             T.must(association_name.value),
@@ -122,7 +121,6 @@ module RubyIndexer
             location,
             location,
             nil,
-            index.configuration.encoding,
             [],
             Entry::Visibility::PUBLIC,
             owner,

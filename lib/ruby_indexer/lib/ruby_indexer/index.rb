@@ -665,7 +665,6 @@ module RubyIndexer
           attached_ancestor.location,
           attached_ancestor.name_location,
           nil,
-          @configuration.encoding,
           nil,
         )
         add(singleton, skip_prefix_tree: true)
@@ -859,7 +858,7 @@ module RubyIndexer
       return entry unless target
 
       target_name = T.must(target.first).name
-      resolved_alias = Entry::ConstantAlias.new(target_name, entry, @configuration.encoding)
+      resolved_alias = Entry::ConstantAlias.new(target_name, entry)
 
       # Replace the UnresolvedAlias by a resolved one so that we don't have to do this again later
       original_entries = T.must(@entries[alias_name])
@@ -1050,7 +1049,7 @@ module RubyIndexer
       target_method_entries = resolve_method(entry.old_name, receiver_name, seen_names)
       return entry unless target_method_entries
 
-      resolved_alias = Entry::MethodAlias.new(T.must(target_method_entries.first), entry, @configuration.encoding)
+      resolved_alias = Entry::MethodAlias.new(T.must(target_method_entries.first), entry)
       original_entries = T.must(@entries[new_name])
       original_entries.delete(entry)
       original_entries << resolved_alias
