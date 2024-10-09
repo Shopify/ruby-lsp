@@ -63,7 +63,13 @@ if ENV["BUNDLE_GEMFILE"].nil?
     exit(78)
   end
 
-  exit exec(env, "bundle exec ruby-lsp #{original_args.join(" ")}")
+  base_bundle = if env["BUNDLER_VERSION"]
+    "bundle _#{env["BUNDLER_VERSION"]}_"
+  else
+    "bundle"
+  end
+
+  exit exec(env, "#{base_bundle} exec ruby-lsp #{original_args.join(" ")}")
 end
 
 require "ruby_lsp/load_sorbet"
