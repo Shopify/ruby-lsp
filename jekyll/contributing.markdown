@@ -1,6 +1,12 @@
-# CONTRIBUTING
+---
+layout: default
+title: Contributing
+nav_order: 50
+---
 
-This repository contains three sub-projects:
+# Contributing
+
+The [ruby-lsp repository](https://github.com/Shopify/ruby-lsp) contains three sub-projects:
 
 - the **language server** (`ruby-lsp`), which exists at the top level of the repository. Most features are implemented here since everything implemented in the server is available to all editors
 - the **VS Code extension**, which exists under the `vscode` directory. Any custom VS Code features are implemented here
@@ -29,10 +35,9 @@ When adding or changing an existing feature, first identify which request is res
 [specification](https://microsoft.github.io/language-server-protocol/specification). Then identify which file in the
 server implements that request and start thinking about the implementation.
 
-> [!NOTE]
->
-> When using VS Code, open the `lsp.code-workspace` file instead of just opening the regular folder. It contains
-> configurations for working with the sub projects side by side effectively
+{: .note }
+When using VS Code, open the `lsp.code-workspace` file instead of just opening the regular folder. It contains
+configurations for working with the sub projects side by side effectively
 
 ### Debugging
 
@@ -232,4 +237,4 @@ After that, follow these steps to make and verify your changes:
 ```shell
 bundle exec jekyll serve
 ```
-3. Verify your changes locally by visiting http://localhost:4000/ruby-lsp
+3. Verify your changes locally by visiting [http://localhost:4000/ruby-lsp](http://localhost:4000/ruby-lsp)
