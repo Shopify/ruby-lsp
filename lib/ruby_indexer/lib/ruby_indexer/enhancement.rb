@@ -19,8 +19,12 @@ module RubyIndexer
         owner: T.nilable(Entry::Namespace),
         node: Prism::CallNode,
         file_path: String,
+        code_units_cache: T.any(
+          T.proc.params(arg0: Integer).returns(Integer),
+          Prism::CodeUnitsCache,
+        ),
       ).void
     end
-    def on_call_node(index, owner, node, file_path); end
+    def on_call_node(index, owner, node, file_path, code_units_cache); end
   end
 end
